@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import type { CityBean, HeroBean } from '@evony/api-client';
@@ -5,6 +6,7 @@ import { BALANCE, BuildingType, HeroStatus, heroManagement, heroPower, heroStrat
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { HeroPointsDialog } from '@/components/hero-points-dialog';
 import { qk, useCommand } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
 import { fmt, signed } from '@/lib/format';
@@ -39,6 +41,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   const mayorPct = (h: HeroBean) => Math.round(heroManagement(h) * BALANCE.mayorManagementProductionFactor * 100);
   const mayorGain = (h: HeroBean) => Math.round(fieldOutput * heroManagement(h) * BALANCE.mayorManagementProductionFactor);
   const currentMayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
+  const [pointsFor, setPointsFor] = useState<number | null>(null);
   const currentGain = currentMayor ? mayorGain(currentMayor) : 0;
   const mayorNote = (h: HeroBean) => {
     if (h.seized) return null;
@@ -71,6 +74,11 @@ export function HeroesPanel({ city }: { city: CityBean }) {
           {city.heros.map((h) => (
             <HeroRow key={h.id} hero={h} note={mayorNote(h)}>
               <Badge variant={h.status === HeroStatus.MAYOR ? 'default' : 'secondary'}>{h.seized ? 'Captive' : (STATUS[h.status] ?? h.status)}</Badge>
+              {!h.seized && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR) && (
+                <Button size="xs" variant={h.remainPoint > 0 ? 'default' : 'outline'} onClick={() => setPointsFor(h.id)}>
+                  Points{h.remainPoint > 0 ? ` (${h.remainPoint})` : ''}
+                </Button>
+              )}
               {h.experience >= h.upgradeExp && (
                 <Button size="xs" onClick={() => levelUp.mutate(h.id)}>
                   Level up
@@ -125,6 +133,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
           </CardContent>
         )}
       </Card>
+      <HeroPointsDialog hero={city.heros.find((h) => h.id === pointsFor) ?? null} cityId={city.id} fieldOutput={fieldOutput} onClose={() => setPointsFor(null)} />
     </div>
   );
 }

@@ -197,11 +197,28 @@ export async function resetPoints(ctx: Ctx, playerId: number, heroId: number) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   if (itemCount(p, 'hero.reset.1') > 0) addItem(ctx, p, 'hero.reset.1', -1);
   else spendCents(ctx, p, 20);
+  const city = await openMayorCity(ctx, h);
   Object.assign(h, { power: h.basePower, management: h.baseManagement, stratagem: h.baseStratagem, remainPoint: h.level });
   await saveHero(ctx, h);
   await savePlayer(ctx, p);
   pushHero(ctx, playerId, h, 2);
+  await closeMayorCity(ctx, city, h);
   return heroBean(h);
+}
+
+/**
+ * A mayor's politics drives the city's production, so before changing a mayor's stats the city is
+ * settled at the old rate (openOwnCity), and afterwards the new rates are pushed and saved.
+ */
+async function openMayorCity(ctx: Ctx, h: HeroRow) {
+  if (h.status !== HeroStatus.MAYOR || h.playerId == null) return null;
+  return openOwnCity(ctx, h.playerId, h.cityId);
+}
+async function closeMayorCity(ctx: Ctx, b: CityBundle | null, h: HeroRow) {
+  if (!b) return;
+  b.heroes = b.heroes.map((x) => (x.id === h.id ? h : x));
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
 }
 
 /** hero.addPoint: new absolute totals, never lower than current. */
@@ -212,9 +229,11 @@ export async function assignPoints(ctx: Ctx, playerId: number, heroId: number, v
   if (!ints || v.power + v.management + v.stratagem > cap || v.power < h.power || v.management < h.management || v.stratagem < h.stratagem) {
     throw new GameError('Invalid action.', -99);
   }
+  const city = await openMayorCity(ctx, h);
   Object.assign(h, { power: v.power, management: v.management, stratagem: v.stratagem, remainPoint: cap - (v.power + v.management + v.stratagem) });
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
+  await closeMayorCity(ctx, city, h);
   return heroBean(h);
 }
 
@@ -250,6 +269,7 @@ export async function reward(ctx: Ctx, playerId: number, heroId: number) {
 export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, itemId: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   const h = await ownHero(ctx, playerId, heroId);
+  const city = HERO_ATTRIBUTE_ITEMS[itemId] === 'management' ? await openMayorCity(ctx, h) : null;
   if (itemId.startsWith('player.experience.1.')) {
     const gain = experienceItemGain(itemId, h.upgradeExp);
     if (!gain) throw new GameError('Invalid Item.', -99);
@@ -275,6 +295,7 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
   await saveHero(ctx, h);
   await savePlayer(ctx, p);
   pushHero(ctx, playerId, h, 2);
+  await closeMayorCity(ctx, city, h);
   return heroBean(h);
 }
 
@@ -283,12 +304,14 @@ export async function expireHeroBuff(ctx: Ctx, heroId: number, attr: string) {
   if (!h) return;
   const b = h.buffs.find((x) => x.id === attr);
   if (!b || b.endTime > ctx.now) return;
+  const city = attr === 'management' ? await openMayorCity(ctx, h) : null;
   h.buffs = h.buffs.filter((x) => x.id !== attr);
   if (attr === 'power') h.powerBuffAdded = 0;
   if (attr === 'management') h.managementBuffAdded = 0;
   if (attr === 'stratagem') h.stratagemBuffAdded = 0;
   await saveHero(ctx, h);
   if (h.playerId) pushHero(ctx, h.playerId, h, 2);
+  await closeMayorCity(ctx, city, h);
 }
 
 /** hero.changeName */
