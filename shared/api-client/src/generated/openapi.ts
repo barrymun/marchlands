@@ -11945,6 +11945,7 @@ export interface components {
             injuredShare: number;
             medicinePerLevel: number;
             heroExpPerKill: number;
+            heroExpPerTrain: number;
             /** @description milliseconds */
             beginnerProtectionMs: number;
             beginnerTownHallLevel: number;
@@ -13896,6 +13897,7 @@ export interface components {
             injuredShare: number;
             medicinePerLevel: number;
             heroExpPerKill: number;
+            heroExpPerTrain: number;
             /** @description milliseconds */
             beginnerProtectionMs: number;
             beginnerTownHallLevel: number;

@@ -2,8 +2,9 @@
 // Port of Map.cpp / NpcCity.cpp / Valley.cpp.
 
 import { BALANCE, scaled } from './balance.ts';
-import { STATE_NAMES, TileType, VALLEY_TYPES } from './constants.ts';
+import { STATE_NAMES, TileType, TROOP_ID_BY_KEY, VALLEY_TYPES } from './constants.ts';
 import { randInt, seededRng, type Rng } from './rng.ts';
+import { unitExp } from './troops.ts';
 import type { FortCounts, ResourceSet, TroopCounts } from './types.ts';
 
 export const TILE_NAMES: Record<number, string> = {
@@ -199,22 +200,6 @@ export function npcBuildings(level: number): { typeId: number; levels: number[] 
 // Valley garrisons (orig ValleyData::Reset)
 // ---------------------------------------------------------------------------------------------
 
-/** "Experience" weight per troop used to size garrisons (orig Utils::TROOP_EXPS). */
-const TROOP_EXPS: Record<string, number> = {
-  peasants: 225,
-  militia: 305,
-  scouter: 695,
-  pikemen: 900,
-  swordsmen: 1350,
-  archer: 1350,
-  carriage: 2975,
-  lightCavalry: 2850,
-  heavyCavalry: 8750,
-  ballista: 10000,
-  batteringRam: 13750,
-  catapult: 29000,
-};
-
 export function valleyGarrison(level: number, rng: Rng): TroopCounts {
   const candidates: (keyof TroopCounts)[] = [];
   const consider = (k: keyof TroopCounts, allowed: boolean) => {
@@ -229,6 +214,6 @@ export function valleyGarrison(level: number, rng: Rng): TroopCounts {
   const x = Math.pow(2, level - 1) * 10_000;
   const total = Math.floor((x + randInt(rng, 0, x - 1)) / candidates.length);
   const troops: TroopCounts = {};
-  for (const k of candidates) troops[k] = Math.ceil(total / TROOP_EXPS[k]);
+  for (const k of candidates) troops[k] = Math.ceil(total / unitExp(TROOP_ID_BY_KEY[k]));
   return troops;
 }

@@ -1,7 +1,17 @@
 // Troop count helpers and march maths (orig spitfire::CalcTroopSpeed).
 
 import { BALANCE, scaled } from './balance.ts';
-import { BuildingType, FORT_KEY_LIST, TechType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, TROOP_KEYS, type FortKey, type TroopKey } from './constants.ts';
+import {
+  BuildingType,
+  FORT_ID_BY_KEY,
+  FORT_KEY_LIST,
+  TechType,
+  TROOP_ID_BY_KEY,
+  TROOP_KEY_LIST,
+  TROOP_KEYS,
+  type FortKey,
+  type TroopKey,
+} from './constants.ts';
 import { troopConfig } from './data/index.ts';
 import { buildingLevel, researchLevel } from './economy.ts';
 import { GameError } from './errors.ts';
@@ -117,9 +127,7 @@ export function armySpeed(troops: TroopCounts, research: ResearchState, building
   for (const k of TROOP_KEY_LIST) {
     if ((troops[k] ?? 0) <= 0) continue;
     const base = MARCH_SPEED[k];
-    const s = MECH_OR_MOUNTED.includes(k)
-      ? base * (1 + BALANCE.horsebackSpeedPerLevel * hbr)
-      : base * (1 + BALANCE.compassSpeedPerLevel * compass);
+    const s = MECH_OR_MOUNTED.includes(k) ? base * (1 + BALANCE.horsebackSpeedPerLevel * hbr) : base * (1 + BALANCE.compassSpeedPerLevel * compass);
     slowest = Math.min(slowest, s);
   }
   return Number.isFinite(slowest) ? slowest : 10_000;
@@ -154,4 +162,38 @@ export function reliefMultiplier(buildings: BuildingState[]): number {
   if (l <= 7) return 4;
   if (l <= 9) return 5;
   return 6;
+}
+
+/**
+ * "Experience" weight per unit, by troop / fortification id (orig Utils::TROOP_EXPS). The original
+ * has no values for fortifications; they get ~1.35 × their resource cost, the same ratio as troops.
+ */
+const UNIT_EXP: Record<number, number> = {
+  2: 225,
+  3: 305,
+  4: 695,
+  5: 900,
+  6: 1350,
+  7: 1350,
+  8: 2975,
+  9: 2850,
+  10: 8750,
+  11: 10000,
+  12: 13750,
+  13: 29000,
+  14: 950,
+  15: 1950,
+  16: 5000,
+  17: 8500,
+  18: 11600,
+};
+
+export const unitExp = (troopId: number): number => UNIT_EXP[troopId] ?? 0;
+
+/** Total experience weight of a set of troops and fortifications. */
+export function unitsExp(troops: TroopCounts, forts: FortCounts = {}): number {
+  let exp = 0;
+  for (const k of TROOP_KEY_LIST) exp += (troops[k] ?? 0) * unitExp(TROOP_ID_BY_KEY[k]);
+  for (const k of FORT_KEY_LIST) exp += (forts[k] ?? 0) * unitExp(FORT_ID_BY_KEY[k]);
+  return exp;
 }

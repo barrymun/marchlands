@@ -7722,6 +7722,9 @@
           "heroExpPerKill": {
             "type": "number"
           },
+          "heroExpPerTrain": {
+            "type": "number"
+          },
           "beginnerProtectionMs": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -7934,6 +7937,7 @@
           "injuredShare",
           "medicinePerLevel",
           "heroExpPerKill",
+          "heroExpPerTrain",
           "beginnerProtectionMs",
           "beginnerTownHallLevel",
           "startingCents",
@@ -17021,6 +17025,9 @@
           "heroExpPerKill": {
             "type": "number"
           },
+          "heroExpPerTrain": {
+            "type": "number"
+          },
           "beginnerProtectionMs": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -17236,6 +17243,7 @@
           "injuredShare",
           "medicinePerLevel",
           "heroExpPerKill",
+          "heroExpPerTrain",
           "beginnerProtectionMs",
           "beginnerTownHallLevel",
           "startingCents",

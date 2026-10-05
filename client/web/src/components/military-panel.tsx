@@ -1,7 +1,23 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
-import { BuildingType, FORT_KEYS, getGameSpeed, troopDescription, heroManagement, heroPower, HeroStatus, itemConfig, splitTraining, TROOP_KEYS } from '@evony/core';
+import {
+  BALANCE,
+  buildingLevel,
+  BuildingType,
+  FORT_KEYS,
+  getGameSpeed,
+  troopDescription,
+  heroManagement,
+  heroPower,
+  HeroStatus,
+  itemConfig,
+  prestigeOf,
+  PrestigeAction,
+  splitTraining,
+  TROOP_KEYS,
+  unitExp,
+} from '@evony/core';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -87,7 +103,8 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
     queryFn: () => unwrap(api.GET(`/api/v1/cities/{cityId}/${kind}/queues`, { params: { path } })),
   });
   const train = useCommand(
-    (b: { troopId: number; count: number }) => unwrap(api.POST(`/api/v1/cities/{cityId}/${kind}/train`, { params: { path }, body: { ...b, positionId: fort ? undefined : pos } })),
+    (b: { troopId: number; count: number }) =>
+      unwrap(api.POST(`/api/v1/cities/{cityId}/${kind}/train`, { params: { path }, body: { ...b, positionId: fort ? undefined : pos } })),
     () => [qk.city(city.id), qk.queues(city.id, fort)],
     'Added to the queue',
   );
@@ -121,7 +138,13 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
       </Card>
     );
   }
-  const have = { gold: city.resource.gold, food: city.resource.food.amount, wood: city.resource.wood.amount, stone: city.resource.stone.amount, iron: city.resource.iron.amount };
+  const have = {
+    gold: city.resource.gold,
+    food: city.resource.food.amount,
+    wood: city.resource.wood.amount,
+    stone: city.resource.stone.amount,
+    iron: city.resource.iron.amount,
+  };
   const queueList = queues.data?.queues ?? [];
 
   return (
@@ -225,7 +248,16 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
             </div>
             <p className="text-sm text-muted-foreground">{u.description}</p>
             <CostList cost={u} have={have} />
-            <TrainEstimate unitSeconds={u.time} count={Number(counts[u.typeId] ?? 0)} queues={queueList} barracks={barracks} pos={pos} splitting={splitting} fort={fort} />
+            <TrainEstimate
+              unitSeconds={u.time}
+              count={Number(counts[u.typeId] ?? 0)}
+              queues={queueList}
+              barracks={barracks}
+              pos={pos}
+              splitting={splitting}
+              fort={fort}
+            />
+            <MayorExpHint city={city} typeId={u.typeId} count={Number(counts[u.typeId] ?? 0)} />
             {!u.permission && <Requirements list={u.requirements.filter((r) => !r.ok)} />}
           </div>
         ))}
@@ -238,13 +270,38 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
 function MayorTrainingHint({ city, fort }: { city: CityBean; fort: boolean }) {
   const stat = fort ? 'Politics' : 'Attack';
   const mayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
-  if (!mayor) return <p className="text-xs text-muted-foreground">No mayor: appoint one with high {stat} in the Heroes tab to {fort ? 'build fortifications' : 'train'} faster.</p>;
+  if (!mayor)
+    return (
+      <p className="text-xs text-muted-foreground">
+        No mayor: appoint one with high {stat} in the Heroes tab to {fort ? 'build fortifications' : 'train'} faster.
+      </p>
+    );
   const value = fort ? heroManagement(mayor) : heroPower(mayor);
   const cut = Math.round((1 - Math.pow(0.995, value)) * 1000) / 10;
   return (
     <p className="text-xs text-muted-foreground">
       Times include mayor {mayor.name}'s {stat} {value}: −{cut}% (new batches). A mayor with higher {stat} {fort ? 'builds them' : 'trains'} faster.
     </p>
+  );
+}
+
+/** Experience the mayor earns when the units finish: their experience weight plus the training prestige. */
+function MayorExpHint({ city, typeId, count }: { city: CityBean; typeId: number; count: number }) {
+  const mayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
+  if (!mayor) return null;
+  const th = buildingLevel(city.buildings, BuildingType.TOWN_HALL);
+  const each = unitExp(typeId) * BALANCE.heroExpPerTrain + prestigeOf(PrestigeAction.TRAIN, typeId, 1, th);
+  const n = (x: number) => x.toLocaleString('en', { maximumFractionDigits: 2 });
+  return (
+    <span className="text-xs text-muted-foreground">
+      Mayor {mayor.name} gains {n(each)} exp per unit
+      {count > 0 && (
+        <>
+          {' '}
+          · <span className="font-medium text-foreground">+{n(Math.floor(each * count))} exp</span> for {fmtExact(count)}
+        </>
+      )}
+    </span>
   );
 }
 
@@ -304,7 +361,9 @@ function TrainEstimate({
 function UnitName({ id }: { id: number }) {
   return (
     <Tooltip>
-      <TooltipTrigger className="cursor-help text-left underline decoration-dotted decoration-muted-foreground/50 underline-offset-2">{troopName(id)}</TooltipTrigger>
+      <TooltipTrigger className="cursor-help text-left underline decoration-dotted decoration-muted-foreground/50 underline-offset-2">
+        {troopName(id)}
+      </TooltipTrigger>
       <TooltipContent className="max-w-72">{troopDescription(id)}</TooltipContent>
     </Tooltip>
   );

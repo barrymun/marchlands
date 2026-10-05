@@ -31,6 +31,7 @@ import {
   getGameSpeed,
   splitTraining,
   type SplitLane,
+  unitExp,
 } from '@evony/core';
 import { cityStats, mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -282,6 +283,7 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
   const { nextQueueId } = queueOf(b, positionId);
   const th = buildingLevel(b.city.buildings, BuildingType.TOWN_HALL);
   let gain = 0;
+  let exp = 0;
   let changed = false;
   while (queue[0] && queue[0].endTime > 0 && queue[0].endTime <= ctx.now) {
     const head = queue[0];
@@ -293,6 +295,7 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
       if (key) b.city.troops = addTroops(b.city.troops, { [key]: head.count });
     }
     gain += head.count * prestigeOf(PrestigeAction.TRAIN, head.troopId, 1, th);
+    exp += head.count * unitExp(head.troopId) * BALANCE.heroExpPerTrain;
     queue = queue.slice(1);
     if (queue[0]) queue[0] = { ...queue[0], startTime: head.endTime, endTime: head.endTime + queue[0].costTime };
     changed = true;
@@ -305,8 +308,8 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
   scheduleHead(ctx, b, positionId, queue);
   addPrestige(b.player, gain);
   const mayor = mayorOf(b.heroes);
-  if (mayor && gain > 0) {
-    mayor.experience += gain;
+  if (mayor && gain + exp > 0) {
+    mayor.experience += gain + exp;
     await saveHero(ctx, mayor);
     ctx.push(b.player.id, 'server.HeroUpdate', { castleId: cityId, hero: heroBean(mayor), updateType: 2 });
   }

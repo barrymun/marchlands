@@ -2,12 +2,13 @@
 // losses, hero experience, honor and plunder. The original never wired attacks up (spec
 // battle.md §7.3); this follows its recommended mapping.
 
+import { BALANCE } from '../balance.ts';
 import { TechType, TROOP_ID_BY_KEY, TROOP_KEY_LIST } from '../constants.ts';
 import { troopConfig } from '../data/index.ts';
 import { researchLevel } from '../economy.ts';
 import { heroPower, heroStratagem, type HeroStats } from '../heroes.ts';
 import type { Rng } from '../rng.ts';
-import { arrayToForts, arrayToTroops, fortsToArray, troopsToArray } from '../troops.ts';
+import { arrayToForts, arrayToTroops, fortsToArray, troopsToArray, unitsExp } from '../troops.ts';
 import type { FortCounts, ResearchState, ResourceSet, TroopCounts } from '../types.ts';
 import { simulateBattle, type BattleOutcome, type ResearchStats } from './simulator.ts';
 
@@ -71,11 +72,9 @@ const sub = (a: TroopCounts, b: TroopCounts): TroopCounts => {
   return out;
 };
 
-/** Experience a hero earns for the enemy troops its army killed. */
-function killExp(killed: TroopCounts): number {
-  let exp = 0;
-  for (const k of TROOP_KEY_LIST) exp += (killed[k] ?? 0) * ((troopConfig(TROOP_ID_BY_KEY[k])?.life ?? 0) / 1000);
-  return Math.floor(exp);
+/** Experience a hero earns for the enemy troops (and fortifications) its army killed. */
+function killExp(killed: TroopCounts, forts: FortCounts = {}): number {
+  return Math.floor(unitsExp(killed, forts) * BALANCE.heroExpPerKill);
 }
 /** Honor for killed enemy troops: their food upkeep, a proxy for unit value. */
 function killHonor(killed: TroopCounts): number {
@@ -124,7 +123,7 @@ export function resolveCombat(attacker: CombatantInput, defender: DefenderInput,
     defender: { before: { ...defender.troops }, after: defAfter, lost: defLost },
     forts: { before: { ...fortsBefore }, after: fortsAfter, lost: fortsLost },
     wallHitPoints: raw.wallHitPoints,
-    attackerHeroExp: attacker.hero ? killExp(defLost) : 0,
+    attackerHeroExp: attacker.hero ? killExp(defLost, fortsLost) : 0,
     defenderHeroExp: defender.hero ? killExp(atkLost) : 0,
     attackerHonor: killHonor(defLost),
     defenderHonor: killHonor(atkLost),

@@ -99,7 +99,10 @@ export const BALANCE = {
   injuredShare: 0.2,
   /** (evony) Medicine: +5% of lost defenders recover as injured per level */
   medicinePerLevel: 0.05,
-  heroExpPerKill: 1, // (evony) hero exp per attack point killed / 100 (see battle)
+  /** (evony) hero exp per point of experience weight (orig TROOP_EXPS, troops.ts unitExp) of enemy units killed */
+  heroExpPerKill: 0.1,
+  /** (evony) mayor exp per point of experience weight of troops and fortifications trained in the city */
+  heroExpPerTrain: 0.02,
 
   // ---- player ----
   beginnerProtectionMs: 7 * 24 * HOUR, // (orig)

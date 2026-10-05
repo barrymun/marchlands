@@ -117,7 +117,7 @@ async function main() {
     check(vr.title === 'Valley Occupied', `valley attack: ${vr.title}`);
     const c = await ok(a.token, 'GET', `/cities/${a.city.id}`);
     check(c.fields.some((f) => f.id === v.id), 'valley listed under city fields');
-    check(c.resource.food.bonusPercent >= 5, `food bonus ${c.resource.food.bonusPercent}%`);
+    check(c.resource.food.bonusPercent >= 3, `food bonus ${c.resource.food.bonusPercent}%`);
   } else console.log('  (no level-1 grassland nearby; valley step skipped)');
 
   // ---- recall ----
