@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import type { CityBean, HeroBean } from '@evony/api-client';
-import { BuildingType, HeroStatus } from '@evony/core';
+import { BALANCE, BuildingType, HeroStatus, heroManagement, heroPower, heroStratagem } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { qk, useCommand } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
-import { fmt } from '@/lib/format';
+import { fmt, signed } from '@/lib/format';
 
 const STATUS: Record<number, string> = { [HeroStatus.IDLE]: 'Idle', [HeroStatus.MAYOR]: 'Mayor', [HeroStatus.ATTACK]: 'Marching', [HeroStatus.SEIZED]: 'Captive', [HeroStatus.RETURN]: 'Returning' };
 
@@ -34,6 +34,31 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   const levelUp = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/level-up', { params: { path: { heroId } } })), refresh, 'Level up!');
   const fire = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/fire', { params: { path: { heroId } } })), refresh, 'Hero dismissed');
 
+  // the mayor's politics adds a percentage of (efficiency-adjusted) field output to every basic resource
+  const fieldOutput = (['food', 'wood', 'stone', 'iron'] as const).reduce((sum, r) => sum + city.resource[r].breakdown.fields, 0);
+  const mayorPct = (h: HeroBean) => Math.round(heroManagement(h) * BALANCE.mayorManagementProductionFactor * 100);
+  const mayorGain = (h: HeroBean) => Math.round(fieldOutput * heroManagement(h) * BALANCE.mayorManagementProductionFactor);
+  const currentMayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
+  const currentGain = currentMayor ? mayorGain(currentMayor) : 0;
+  const mayorNote = (h: HeroBean) => {
+    if (h.seized) return null;
+    if (h.status === HeroStatus.MAYOR) {
+      return (
+        <span className="text-emerald-600 dark:text-emerald-400">
+          Mayor bonus +{mayorPct(h)}% production · {signed(mayorGain(h))}/h
+        </span>
+      );
+    }
+    if (h.status !== HeroStatus.IDLE) return null;
+    const diff = mayorGain(h) - currentGain;
+    return (
+      <span>
+        As mayor: +{mayorPct(h)}% production · {signed(mayorGain(h))}/h
+        {currentMayor && <span className={diff > 0 ? 'text-emerald-600 dark:text-emerald-400' : diff < 0 ? 'text-destructive' : ''}> ({signed(diff)}/h vs {currentMayor.name})</span>}
+      </span>
+    );
+  };
+
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card>
@@ -44,7 +69,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
         <CardContent className="grid gap-2">
           {city.heros.length === 0 && <p className="text-sm text-muted-foreground">No heroes yet. Hire one at the Inn.</p>}
           {city.heros.map((h) => (
-            <HeroRow key={h.id} hero={h}>
+            <HeroRow key={h.id} hero={h} note={mayorNote(h)}>
               <Badge variant={h.status === HeroStatus.MAYOR ? 'default' : 'secondary'}>{h.seized ? 'Captive' : (STATUS[h.status] ?? h.status)}</Badge>
               {h.experience >= h.upgradeExp && (
                 <Button size="xs" onClick={() => levelUp.mutate(h.id)}>
@@ -90,7 +115,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
               </div>
             )}
             {tavern.data?.heros.map((h) => (
-              <HeroRow key={h.id} hero={h}>
+              <HeroRow key={h.id} hero={h} note={mayorNote(h)}>
                 <span className="text-xs text-muted-foreground tabular-nums">{fmt(h.level * 1000)} gold</span>
                 <Button size="xs" disabled={hire.isPending} onClick={() => hire.mutate(h.id)}>
                   Hire
@@ -104,7 +129,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   );
 }
 
-function HeroRow({ hero, children }: { hero: HeroBean; children: React.ReactNode }) {
+function HeroRow({ hero, note, children }: { hero: HeroBean; note?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2">
       <div>
@@ -112,9 +137,10 @@ function HeroRow({ hero, children }: { hero: HeroBean; children: React.ReactNode
           {hero.name} <span className="font-normal text-muted-foreground">Lv {hero.level}</span>
         </div>
         <div className="text-xs text-muted-foreground tabular-nums">
-          pol {hero.management} · att {hero.power} · int {hero.stratagem} · loyalty {hero.loyalty}
+          pol {heroManagement(hero)} · att {heroPower(hero)} · int {heroStratagem(hero)} · loyalty {hero.loyalty}
           {hero.remainPoint > 0 && ` · ${hero.remainPoint} points`}
         </div>
+        {note && <div className="text-xs tabular-nums">{note}</div>}
       </div>
       <div className="flex items-center gap-2">{children}</div>
     </div>
