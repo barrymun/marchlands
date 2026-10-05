@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
-import { BuildingType, FORT_KEYS, itemConfig, TROOP_KEYS } from '@evony/core';
+import { BuildingType, FORT_KEYS, heroManagement, heroPower, HeroStatus, itemConfig, TROOP_KEYS } from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -129,6 +129,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
         )}
       </CardHeader>
       <CardContent className="grid gap-3">
+        <MayorTrainingHint city={city} fort={fort} />
         {queueList
           .filter((q) => fort || q.positionId === pos)
           .flatMap((q) => q.allProduceQueue.map((b) => ({ ...b, positionId: q.positionId })))
@@ -192,5 +193,19 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
         ))}
       </CardContent>
     </Card>
+  );
+}
+
+/** The mayor's Attack (troops) or Politics (fortifications) shortens training: ×0.995 per point. */
+function MayorTrainingHint({ city, fort }: { city: CityBean; fort: boolean }) {
+  const stat = fort ? 'Politics' : 'Attack';
+  const mayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
+  if (!mayor) return <p className="text-xs text-muted-foreground">No mayor: appoint one with high {stat} in the Heroes tab to {fort ? 'build fortifications' : 'train'} faster.</p>;
+  const value = fort ? heroManagement(mayor) : heroPower(mayor);
+  const cut = Math.round((1 - Math.pow(0.995, value)) * 1000) / 10;
+  return (
+    <p className="text-xs text-muted-foreground">
+      Times include mayor {mayor.name}'s {stat} {value}: −{cut}% (new batches). A mayor with higher {stat} {fort ? 'builds them' : 'trains'} faster.
+    </p>
   );
 }
