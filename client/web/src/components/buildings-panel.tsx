@@ -27,9 +27,33 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
   const townHall = byPos.get(-1)?.level ?? 0;
   const outerSlots = 10 + 3 * townHall;
   const busy = city.buildings.filter((b) => b.status !== 0);
+  // tag filter: one tag per building type present; with tags selected only those buildings show
+  const [tags, setTags] = useState<number[]>([]);
+  const typeCounts = new Map<number, number>();
+  for (const b of city.buildings) if (b.typeId) typeCounts.set(b.typeId, (typeCounts.get(b.typeId) ?? 0) + 1);
+  const typeList = [...typeCounts.entries()].sort((a, b) => buildingName(a[0]).localeCompare(buildingName(b[0])));
+  const active = tags.filter((t) => typeCounts.has(t));
+  const toggle = (t: number) => setTags((cur) => (cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t]));
+  const filtered = city.buildings
+    .filter((b) => active.includes(b.typeId))
+    .sort((a, b) => buildingName(a.typeId).localeCompare(buildingName(b.typeId)) || b.level - a.level || a.positionId - b.positionId);
 
   return (
     <div className="grid gap-4">
+      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter buildings by type">
+        <Button size="xs" variant={active.length === 0 ? 'default' : 'outline'} onClick={() => setTags([])}>
+          Show all
+        </Button>
+        {typeList.map(([typeId, n]) => {
+          const on = active.includes(typeId);
+          return (
+            <Button key={typeId} size="xs" variant={on ? 'default' : 'outline'} aria-pressed={on} onClick={() => toggle(typeId)} className="gap-1">
+              {buildingName(typeId)}
+              <span className={cn('tabular-nums', on ? 'opacity-80' : 'text-muted-foreground')}>{n}</span>
+            </Button>
+          );
+        })}
+      </div>
       {busy.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
@@ -47,37 +71,74 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
           </CardContent>
         </Card>
       )}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Inside the walls</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-          {[-1, -2].map((pos) => (
-            <Slot key={pos} pos={pos} building={byPos.get(pos)} onClick={() => setSelected(pos)} fixedName={pos === -1 ? 'Town Hall' : 'Walls'} />
-          ))}
-          {INSIDE.map((pos) => (
-            <Slot key={pos} pos={pos} building={byPos.get(pos)} onClick={() => setSelected(pos)} />
-          ))}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">
-            Fields <span className="font-normal text-muted-foreground">({outerSlots} of 40 unlocked by Town Hall Lv {townHall})</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-8">
-          {OUTSIDE.map((pos, i) => (
-            <Slot key={pos} pos={pos} building={byPos.get(pos)} locked={i >= outerSlots} onClick={() => setSelected(pos)} />
-          ))}
-        </CardContent>
-      </Card>
+      {active.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">
+              {active.map(buildingName).join(', ')}{' '}
+              <span className="font-normal text-muted-foreground">
+                ({filtered.length} building{filtered.length === 1 ? '' : 's'} · levels {Math.min(...filtered.map((b) => b.level))}–
+                {Math.max(...filtered.map((b) => b.level))})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+            {filtered.map((b) => (
+              <Slot key={b.positionId} pos={b.positionId} building={b} onClick={() => setSelected(b.positionId)} />
+            ))}
+          </CardContent>
+        </Card>
+      )}
+      {active.length === 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Inside the walls</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+            {[-1, -2].map((pos) => (
+              <Slot key={pos} pos={pos} building={byPos.get(pos)} onClick={() => setSelected(pos)} fixedName={pos === -1 ? 'Town Hall' : 'Walls'} />
+            ))}
+            {INSIDE.map((pos) => (
+              <Slot key={pos} pos={pos} building={byPos.get(pos)} onClick={() => setSelected(pos)} />
+            ))}
+          </CardContent>
+        </Card>
+      )}
+      {active.length === 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">
+              Fields{' '}
+              <span className="font-normal text-muted-foreground">
+                ({outerSlots} of 40 unlocked by Town Hall Lv {townHall})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-8">
+            {OUTSIDE.map((pos, i) => (
+              <Slot key={pos} pos={pos} building={byPos.get(pos)} locked={i >= outerSlots} onClick={() => setSelected(pos)} />
+            ))}
+          </CardContent>
+        </Card>
+      )}
       <BuildingDialog city={city} positionId={selected} building={selected != null ? byPos.get(selected) : undefined} onClose={() => setSelected(null)} />
     </div>
   );
 }
 
-function Slot({ pos, building, locked, fixedName, onClick }: { pos: number; building?: BuildingBean; locked?: boolean; fixedName?: string; onClick: () => void }) {
+function Slot({
+  pos,
+  building,
+  locked,
+  fixedName,
+  onClick,
+}: {
+  pos: number;
+  building?: BuildingBean;
+  locked?: boolean;
+  fixedName?: string;
+  onClick: () => void;
+}) {
   if (locked) return <div className="h-16 rounded-md border border-dashed opacity-40" />;
   if (!building || building.typeId === 0) {
     return (
@@ -93,7 +154,10 @@ function Slot({ pos, building, locked, fixedName, onClick }: { pos: number; buil
   return (
     <button
       onClick={onClick}
-      className={cn('flex h-16 flex-col items-start justify-between rounded-md border p-2 text-left transition hover:bg-muted', building.status !== 0 && 'border-amber-500')}
+      className={cn(
+        'flex h-16 flex-col items-start justify-between rounded-md border p-2 text-left transition hover:bg-muted',
+        building.status !== 0 && 'border-amber-500',
+      )}
     >
       <span className="line-clamp-1 text-xs font-medium">{building.name}</span>
       <span className="flex w-full items-center justify-between text-xs text-muted-foreground">
@@ -116,7 +180,12 @@ function BuildingDialog({ city, positionId, building, onClose }: { city: CityBea
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg">
-        {pos != null && (empty ? <BuildList city={city} positionId={pos} onDone={onClose} /> : <BuildingDetail city={city} building={bld as BuildingBean} onDone={onClose} />)}
+        {pos != null &&
+          (empty ? (
+            <BuildList city={city} positionId={pos} onDone={onClose} />
+          ) : (
+            <BuildingDetail city={city} building={bld as BuildingBean} onDone={onClose} />
+          ))}
       </DialogContent>
     </Dialog>
   );
@@ -131,15 +200,32 @@ function BuildList({ city, positionId, onDone }: { city: CityBean; positionId: n
   const area = areaOf(positionId);
   const list = useQuery({
     queryKey: qk.available(city.id, area),
-    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/buildings/available', { params: { path: { cityId: city.id }, query: { area } } })),
+    queryFn: () =>
+      unwrap(
+        api.GET('/api/v1/cities/{cityId}/buildings/available', {
+          params: { path: { cityId: city.id }, query: { area } },
+        }),
+      ),
   });
   const build = useCommand(
-    (typeId: number) => unwrap(api.POST('/api/v1/cities/{cityId}/buildings', { params: { path: { cityId: city.id } }, body: { typeId, positionId } })),
+    (typeId: number) =>
+      unwrap(
+        api.POST('/api/v1/cities/{cityId}/buildings', {
+          params: { path: { cityId: city.id } },
+          body: { typeId, positionId },
+        }),
+      ),
     () => [qk.city(city.id)],
     'Construction started',
   );
   const options = (list.data?.buildings ?? []).filter((b) => b != null).filter((b) => (positionId === -1 ? b.typeId === BuildingType.TOWN_HALL : true));
-  const have = { gold: city.resource.gold, food: city.resource.food.amount, wood: city.resource.wood.amount, stone: city.resource.stone.amount, iron: city.resource.iron.amount };
+  const have = {
+    gold: city.resource.gold,
+    food: city.resource.food.amount,
+    wood: city.resource.wood.amount,
+    stone: city.resource.stone.amount,
+    iron: city.resource.iron.amount,
+  };
   return (
     <>
       <DialogHeader>
@@ -179,14 +265,52 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
   const path = { cityId: city.id, positionId: pos };
   const info = useQuery({
     queryKey: qk.upgrade(city.id, pos),
-    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/buildings/{positionId}', { params: { path } })),
+    queryFn: () =>
+      unwrap(
+        api.GET('/api/v1/cities/{cityId}/buildings/{positionId}', {
+          params: { path },
+        }),
+      ),
   });
   const refresh = () => [qk.city(city.id), qk.upgrade(city.id, pos)];
-  const upgrade = useCommand(() => unwrap(api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/upgrade', { params: { path } })), refresh, 'Upgrade started');
-  const demolish = useCommand(() => unwrap(api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/demolish', { params: { path } })), refresh, 'Demolition started');
-  const cancel = useCommand(() => unwrap(api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/cancel', { params: { path } })), refresh, 'Cancelled');
+  const upgrade = useCommand(
+    () =>
+      unwrap(
+        api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/upgrade', {
+          params: { path },
+        }),
+      ),
+    refresh,
+    'Upgrade started',
+  );
+  const demolish = useCommand(
+    () =>
+      unwrap(
+        api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/demolish', {
+          params: { path },
+        }),
+      ),
+    refresh,
+    'Demolition started',
+  );
+  const cancel = useCommand(
+    () =>
+      unwrap(
+        api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/cancel', {
+          params: { path },
+        }),
+      ),
+    refresh,
+    'Cancelled',
+  );
   const speedup = useCommand(
-    (itemId: string) => unwrap(api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/speedup', { params: { path }, body: { itemId } })),
+    (itemId: string) =>
+      unwrap(
+        api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/speedup', {
+          params: { path },
+          body: { itemId },
+        }),
+      ),
     () => [...refresh(), qk.player],
   );
   const working = building.status !== 0;
@@ -194,9 +318,20 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
     queryKey: ['speedup-cost', city.id, pos, building.endTime],
     enabled: working,
     refetchInterval: 15_000,
-    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/buildings/{positionId}/speedup', { params: { path } })),
+    queryFn: () =>
+      unwrap(
+        api.GET('/api/v1/cities/{cityId}/buildings/{positionId}/speedup', {
+          params: { path },
+        }),
+      ),
   });
-  const have = { gold: city.resource.gold, food: city.resource.food.amount, wood: city.resource.wood.amount, stone: city.resource.stone.amount, iron: city.resource.iron.amount };
+  const have = {
+    gold: city.resource.gold,
+    food: city.resource.food.amount,
+    wood: city.resource.wood.amount,
+    stone: city.resource.stone.amount,
+    iron: city.resource.iron.amount,
+  };
   const next = info.data?.next;
 
   return (
@@ -218,7 +353,13 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
             pending={speedup.isPending}
             onUse={(itemId) => speedup.mutate(itemId)}
           />
-          <Button size="sm" variant="outline" className="justify-self-start" disabled={cancel.isPending} onClick={() => cancel.mutate(undefined, { onSuccess: onDone })}>
+          <Button
+            size="sm"
+            variant="outline"
+            className="justify-self-start"
+            disabled={cancel.isPending}
+            onClick={() => cancel.mutate(undefined, { onSuccess: onDone })}
+          >
             Cancel
           </Button>
         </div>
@@ -261,7 +402,10 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
             <>
               <Separator />
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">Demolish one level{info.data ? ` (${Math.round(info.data.demolishTime / 60)} min)` : ''}</span>
+                <span className="text-xs text-muted-foreground">
+                  Demolish one level
+                  {info.data ? ` (${Math.round(info.data.demolishTime / 60)} min)` : ''}
+                </span>
                 <Button size="sm" variant="destructive" disabled={demolish.isPending} onClick={() => demolish.mutate(undefined, { onSuccess: onDone })}>
                   Demolish
                 </Button>
