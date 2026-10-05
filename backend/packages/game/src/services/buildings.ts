@@ -1,6 +1,8 @@
 // castle.* — construction, upgrades, demolition, speed-ups, cancellation and completion.
 
 import {
+  buildingEffect,
+  buildingInfo,
   BALANCE,
   BuildingStatus,
   BuildingType,
@@ -89,6 +91,7 @@ function requirementsView(b: CityBundle, typeId: number, level: number) {
     ...cfg.cost,
     requirements: checks,
     ok: requirementsMet(checks),
+    effect: buildingEffect(typeId, level),
   };
 }
 
@@ -107,7 +110,8 @@ export async function availableBuildings(ctx: Ctx, playerId: number, cityId: num
     const cfg = buildingConfig(t, 1)!;
     const count = b.city.buildings.filter((x) => x.typeId === t).length;
     if (cfg.limit > 0 && count >= cfg.limit) continue;
-    list.push(requirementsView(b, t, 1));
+    const view = requirementsView(b, t, 1);
+    list.push(view ? { ...view, info: buildingInfo(t) } : null);
   }
   const th = buildingLevel(b.city.buildings, BuildingType.TOWN_HALL);
   return { buildings: list, unlockedOuterSlots: unlockedOuterSlots(th) };
@@ -121,6 +125,8 @@ export async function upgradeInfo(ctx: Ctx, playerId: number, cityId: number, po
   const max = buildingMaxLevel(bld.typeId);
   return {
     building: buildingBean(bld),
+    info: buildingInfo(bld.typeId),
+    effect: buildingEffect(bld.typeId, bld.level),
     maxLevel: max,
     next: bld.level < max ? requirementsView(b, bld.typeId, bld.level + 1) : null,
     demolishTime: bld.level > 0 ? Math.ceil(demolishTimeMs(bld.typeId, bld.level, mayorStats(b.heroes), b.player.research) / 1000) : 0,

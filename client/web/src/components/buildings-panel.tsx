@@ -157,6 +157,13 @@ function BuildList({ city, positionId, onDone }: { city: CityBean; positionId: n
                 Build
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground">{b.info.summary}</p>
+            {b.effect && (
+              <p className="text-xs">
+                <span className="text-muted-foreground">Lv 1:</span> <span className="text-emerald-600 dark:text-emerald-400">{b.effect}</span>
+              </p>
+            )}
+            <Unlocks list={b.info.unlocks} />
             <CostList cost={b} seconds={b.time} have={have} />
             <Requirements list={b.requirements.filter((r) => !r.ok)} />
           </div>
@@ -218,6 +225,18 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
       ) : (
         <div className="grid gap-3">
           {info.isPending && <Skeleton className="h-20" />}
+          {info.data && (
+            <div className="grid gap-1">
+              <p className="text-sm text-muted-foreground">{info.data.info.summary}</p>
+              {info.data.effect && (
+                <p className="text-xs">
+                  <span className="text-muted-foreground">Now:</span> {info.data.effect}
+                </p>
+              )}
+              <Unlocks list={info.data.info.unlocks} />
+              <p className="text-xs text-muted-foreground">{info.data.info.placement}</p>
+            </div>
+          )}
           {next && <MayorBuildHint city={city} />}
           {next ? (
             <div className="grid gap-2 rounded-md border p-3">
@@ -227,6 +246,11 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
                   Upgrade
                 </Button>
               </div>
+              {next.effect && (
+                <p className="text-xs">
+                  <span className="text-muted-foreground">Lv {next.level}:</span> <span className="text-emerald-600 dark:text-emerald-400">{next.effect}</span>
+                </p>
+              )}
               <CostList cost={next} seconds={next.time} have={have} />
               <Requirements list={next.requirements} />
             </div>
@@ -261,4 +285,9 @@ function MayorBuildHint({ city }: { city: CityBean }) {
       Times include mayor {mayor.name}'s Politics {politics}: −{cut}%. A mayor with higher Politics builds faster.
     </p>
   );
+}
+
+function Unlocks({ list }: { list: { name: string; level: number }[] }) {
+  if (!list.length) return null;
+  return <p className="text-xs text-muted-foreground">Unlocks: {list.map((u) => `${u.name} (Lv ${u.level})`).join(', ')}</p>;
 }

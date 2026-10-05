@@ -19,6 +19,8 @@ import {
   SPEEDUP_ITEMS,
   TECH_IDS,
   TECH_NAMES,
+  techEffect,
+  techInfo,
   assertCanResearch,
   type ResearchState,
 } from '@evony/core';
@@ -61,6 +63,10 @@ export async function researchList(ctx: Ctx, playerId: number, cityId: number) {
         startTime: r.startTime ?? 0,
         endTime: r.endTime ?? 0,
         permission: !busy && !r.endTime && !!next && requirementsMet(checks),
+        description: techInfo(techId).summary,
+        effect: techEffect(techId, Math.min(academy, r.level)),
+        nextEffect: next ? techEffect(techId, r.level + 1) : '',
+        unlocks: techInfo(techId).unlocks,
         next: next
           ? { ...next.cost, time: Math.ceil(researchTimeMs(techId, r.level + 1, mayorStats(b.heroes)) / 1000), requirements: checks }
           : null,

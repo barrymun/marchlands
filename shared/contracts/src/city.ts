@@ -93,18 +93,34 @@ export const BuildingLevelInfo = z
     ...costShape,
     requirements: z.array(RequirementCheck),
     ok: z.boolean().describe('all requirements met'),
+    effect: z.string().describe('what the building gives at this level ("" when nothing measurable)'),
   })
   .meta({ id: 'BuildingLevelInfo' });
+
+export const BuildingDescription = z
+  .object({
+    typeId: int(),
+    name: z.string(),
+    summary: z.string().describe('what the building does'),
+    placement: z.string().describe('where it can be built and how many'),
+    unlocks: z
+      .array(z.object({ kind: z.enum(['building', 'troop', 'tech']), name: z.string(), level: int().describe('level of this building required') }))
+      .describe('buildings, troops and technologies that need this building'),
+  })
+  .meta({ id: 'BuildingDescription' });
+export type BuildingDescription = z.infer<typeof BuildingDescription>;
 export type BuildingLevelInfo = z.infer<typeof BuildingLevelInfo>;
 
 export const AvailableBuildings = z
-  .object({ buildings: z.array(BuildingLevelInfo.nullable()), unlockedOuterSlots: int() })
+  .object({ buildings: z.array(BuildingLevelInfo.extend({ info: BuildingDescription }).nullable()), unlockedOuterSlots: int() })
   .meta({ id: 'AvailableBuildings' });
 export type AvailableBuildings = z.infer<typeof AvailableBuildings>;
 
 export const BuildingUpgradeInfo = z
   .object({
     building: BuildingBean,
+    info: BuildingDescription,
+    effect: z.string().describe('what the building gives at its current level'),
     maxLevel: int(),
     next: BuildingLevelInfo.nullable().describe('null at max level'),
     demolishTime: int().describe('seconds'),
@@ -127,6 +143,12 @@ export const TechBean = z
     startTime: Ms.describe('0 when idle'),
     endTime: Ms.describe('0 when idle'),
     permission: z.boolean().describe('can be researched here now'),
+    description: z.string().describe('what the technology does'),
+    effect: z.string().describe('total effect at the effective level ("" at 0 or when it has no measurable effect)'),
+    nextEffect: z.string().describe('total effect after the next level ("" at max level)'),
+    unlocks: z
+      .array(z.object({ kind: z.enum(['building', 'troop', 'tech']), name: z.string(), level: int().describe('level of this technology required') }))
+      .describe('buildings, troops and technologies that need this technology'),
     next: z
       .object({ time: int().describe('seconds'), requirements: z.array(RequirementCheck), ...costShape })
       .nullable()

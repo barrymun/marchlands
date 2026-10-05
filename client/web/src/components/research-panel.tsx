@@ -90,6 +90,28 @@ export function ResearchPanel({ city }: { city: CityBean }) {
                 </Button>
               )}
             </div>
+            <p className="text-sm text-muted-foreground">{t.description}</p>
+            {(t.effect || t.nextEffect) && (
+              <div className="grid gap-0.5 text-xs">
+                {t.effect && (
+                  <span>
+                    <span className="text-muted-foreground">Now:</span> {t.effect}
+                    {t.effectiveLevel < t.level && <span className="text-muted-foreground"> (capped by Academy Lv {list.data!.academyLevel})</span>}
+                  </span>
+                )}
+                {t.nextEffect && (
+                  <span>
+                    <span className="text-muted-foreground">Lv {t.level + 1}:</span> <span className="text-emerald-600 dark:text-emerald-400">{t.nextEffect}</span>
+                    {t.level + 1 > list.data!.academyLevel && <span className="text-muted-foreground"> (needs Academy Lv {t.level + 1} to take effect)</span>}
+                  </span>
+                )}
+              </div>
+            )}
+            {t.unlocks.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Unlocks: {t.unlocks.map((u) => `${u.name} (Lv ${u.level})`).join(', ')}
+              </p>
+            )}
             {t.next && (
               <>
                 <CostList cost={t.next} seconds={t.next.time} have={have} />

@@ -150,10 +150,12 @@ function research(r: Partial<ResearchStats>): ResearchStats {
 
 const cdiv = (a: number, b: number) => Math.trunc(a / b); // C integer division
 
-function modifyStats(base: TroopStat[], r: ResearchStats, intel: number, atkMod: number, defMod: number, lifeMod: number) {
+function modifyStats(base: TroopStat[], r: ResearchStats, intel: number, atkMod: number, defMod: number, lifeMod: number, fixes: boolean) {
   for (let i = 0; i < 12; i++) {
     // max((float)(1000 - ((iw*5+100)/100)*((100+intel)/100)*defense*defMod)/1000, 0.5)
-    const iwFactor = cdiv(r.ironWorking * 5 + 100, 100);
+    // the original truncates (integer division), so Iron Working has no effect below level 20;
+    // with `fixes` it gives the intended +5% per level
+    const iwFactor = fixes ? f((r.ironWorking * 5 + 100) / 100) : cdiv(r.ironWorking * 5 + 100, 100);
     const intelFactor = f(f(100 + intel) / 100);
     let v = f(iwFactor * intelFactor);
     v = f(v * base[i].defense);
@@ -198,8 +200,8 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
   const defResearch = research(def.research);
   const atkIntel = f(atk.hero?.intel ?? 0);
   const defIntel = f(def.hero?.intel ?? 0);
-  modifyStats(atkStats, atkResearch, atkIntel, atkModA, atkModD, atkModL);
-  modifyStats(defStats, defResearch, defIntel, defModA, defModD, defModL);
+  modifyStats(atkStats, atkResearch, atkIntel, atkModA, atkModD, atkModL, fixes);
+  modifyStats(defStats, defResearch, defIntel, defModA, defModD, defModL, fixes);
 
   const wallLevel = def.wallLevel ?? 0;
   const forts = [0, 1, 2, 3, 4].map((i) => Math.max(0, Math.floor(def.fortifications?.[i] ?? 0)));

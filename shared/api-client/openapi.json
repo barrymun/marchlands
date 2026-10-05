@@ -2206,6 +2206,10 @@
           "ok": {
             "type": "boolean",
             "description": "all requirements met"
+          },
+          "effect": {
+            "type": "string",
+            "description": "what the building gives at this level (\"\" when nothing measurable)"
           }
         },
         "required": [
@@ -2219,7 +2223,67 @@
           "stone",
           "iron",
           "requirements",
-          "ok"
+          "ok",
+          "effect"
+        ]
+      },
+      "BuildingDescriptionInput": {
+        "type": "object",
+        "properties": {
+          "typeId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "name": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string",
+            "description": "what the building does"
+          },
+          "placement": {
+            "type": "string",
+            "description": "where it can be built and how many"
+          },
+          "unlocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "building",
+                    "troop",
+                    "tech"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "level of this building required"
+                }
+              },
+              "required": [
+                "kind",
+                "name",
+                "level"
+              ]
+            },
+            "description": "buildings, troops and technologies that need this building"
+          }
+        },
+        "required": [
+          "typeId",
+          "name",
+          "summary",
+          "placement",
+          "unlocks"
         ]
       },
       "AvailableBuildingsInput": {
@@ -2230,7 +2294,89 @@
             "items": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/BuildingLevelInfoInput"
+                  "type": "object",
+                  "properties": {
+                    "typeId": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "level being built"
+                    },
+                    "time": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "build time, seconds"
+                    },
+                    "destructTime": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "seconds to demolish back from this level (0 for level 1)"
+                    },
+                    "gold": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "food": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "wood": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "stone": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "iron": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "requirements": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RequirementCheckInput"
+                      }
+                    },
+                    "ok": {
+                      "type": "boolean",
+                      "description": "all requirements met"
+                    },
+                    "effect": {
+                      "type": "string",
+                      "description": "what the building gives at this level (\"\" when nothing measurable)"
+                    },
+                    "info": {
+                      "$ref": "#/components/schemas/BuildingDescriptionInput"
+                    }
+                  },
+                  "required": [
+                    "typeId",
+                    "level",
+                    "time",
+                    "destructTime",
+                    "gold",
+                    "food",
+                    "wood",
+                    "stone",
+                    "iron",
+                    "requirements",
+                    "ok",
+                    "effect",
+                    "info"
+                  ]
                 },
                 {
                   "type": "null"
@@ -2254,6 +2400,13 @@
         "properties": {
           "building": {
             "$ref": "#/components/schemas/BuildingBeanInput"
+          },
+          "info": {
+            "$ref": "#/components/schemas/BuildingDescriptionInput"
+          },
+          "effect": {
+            "type": "string",
+            "description": "what the building gives at its current level"
           },
           "maxLevel": {
             "type": "integer",
@@ -2291,6 +2444,8 @@
         },
         "required": [
           "building",
+          "info",
+          "effect",
           "maxLevel",
           "next",
           "demolishTime",
@@ -2351,6 +2506,49 @@
           "permission": {
             "type": "boolean",
             "description": "can be researched here now"
+          },
+          "description": {
+            "type": "string",
+            "description": "what the technology does"
+          },
+          "effect": {
+            "type": "string",
+            "description": "total effect at the effective level (\"\" at 0 or when it has no measurable effect)"
+          },
+          "nextEffect": {
+            "type": "string",
+            "description": "total effect after the next level (\"\" at max level)"
+          },
+          "unlocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "building",
+                    "troop",
+                    "tech"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "level of this technology required"
+                }
+              },
+              "required": [
+                "kind",
+                "name",
+                "level"
+              ]
+            },
+            "description": "buildings, troops and technologies that need this technology"
           },
           "next": {
             "anyOf": [
@@ -2423,6 +2621,10 @@
           "startTime",
           "endTime",
           "permission",
+          "description",
+          "effect",
+          "nextEffect",
+          "unlocks",
           "next"
         ]
       },
@@ -11089,6 +11291,10 @@
           "ok": {
             "type": "boolean",
             "description": "all requirements met"
+          },
+          "effect": {
+            "type": "string",
+            "description": "what the building gives at this level (\"\" when nothing measurable)"
           }
         },
         "required": [
@@ -11102,7 +11308,69 @@
           "stone",
           "iron",
           "requirements",
-          "ok"
+          "ok",
+          "effect"
+        ],
+        "additionalProperties": false
+      },
+      "BuildingDescription": {
+        "type": "object",
+        "properties": {
+          "typeId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "name": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string",
+            "description": "what the building does"
+          },
+          "placement": {
+            "type": "string",
+            "description": "where it can be built and how many"
+          },
+          "unlocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "building",
+                    "troop",
+                    "tech"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "level of this building required"
+                }
+              },
+              "required": [
+                "kind",
+                "name",
+                "level"
+              ],
+              "additionalProperties": false
+            },
+            "description": "buildings, troops and technologies that need this building"
+          }
+        },
+        "required": [
+          "typeId",
+          "name",
+          "summary",
+          "placement",
+          "unlocks"
         ],
         "additionalProperties": false
       },
@@ -11114,7 +11382,90 @@
             "items": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/BuildingLevelInfo"
+                  "type": "object",
+                  "properties": {
+                    "typeId": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "level being built"
+                    },
+                    "time": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "build time, seconds"
+                    },
+                    "destructTime": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991,
+                      "description": "seconds to demolish back from this level (0 for level 1)"
+                    },
+                    "gold": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "food": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "wood": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "stone": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "iron": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "requirements": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RequirementCheck"
+                      }
+                    },
+                    "ok": {
+                      "type": "boolean",
+                      "description": "all requirements met"
+                    },
+                    "effect": {
+                      "type": "string",
+                      "description": "what the building gives at this level (\"\" when nothing measurable)"
+                    },
+                    "info": {
+                      "$ref": "#/components/schemas/BuildingDescription"
+                    }
+                  },
+                  "required": [
+                    "typeId",
+                    "level",
+                    "time",
+                    "destructTime",
+                    "gold",
+                    "food",
+                    "wood",
+                    "stone",
+                    "iron",
+                    "requirements",
+                    "ok",
+                    "effect",
+                    "info"
+                  ],
+                  "additionalProperties": false
                 },
                 {
                   "type": "null"
@@ -11139,6 +11490,13 @@
         "properties": {
           "building": {
             "$ref": "#/components/schemas/BuildingBean"
+          },
+          "info": {
+            "$ref": "#/components/schemas/BuildingDescription"
+          },
+          "effect": {
+            "type": "string",
+            "description": "what the building gives at its current level"
           },
           "maxLevel": {
             "type": "integer",
@@ -11176,6 +11534,8 @@
         },
         "required": [
           "building",
+          "info",
+          "effect",
           "maxLevel",
           "next",
           "demolishTime",
@@ -11237,6 +11597,50 @@
           "permission": {
             "type": "boolean",
             "description": "can be researched here now"
+          },
+          "description": {
+            "type": "string",
+            "description": "what the technology does"
+          },
+          "effect": {
+            "type": "string",
+            "description": "total effect at the effective level (\"\" at 0 or when it has no measurable effect)"
+          },
+          "nextEffect": {
+            "type": "string",
+            "description": "total effect after the next level (\"\" at max level)"
+          },
+          "unlocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "building",
+                    "troop",
+                    "tech"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "level of this technology required"
+                }
+              },
+              "required": [
+                "kind",
+                "name",
+                "level"
+              ],
+              "additionalProperties": false
+            },
+            "description": "buildings, troops and technologies that need this technology"
           },
           "next": {
             "anyOf": [
@@ -11310,6 +11714,10 @@
           "startTime",
           "endTime",
           "permission",
+          "description",
+          "effect",
+          "nextEffect",
+          "unlocks",
           "next"
         ],
         "additionalProperties": false

@@ -10804,13 +10804,53 @@ export interface components {
             requirements: components["schemas"]["RequirementCheckInput"][];
             /** @description all requirements met */
             ok: boolean;
+            /** @description what the building gives at this level ("" when nothing measurable) */
+            effect: string;
+        };
+        BuildingDescriptionInput: {
+            typeId: number;
+            name: string;
+            /** @description what the building does */
+            summary: string;
+            /** @description where it can be built and how many */
+            placement: string;
+            /** @description buildings, troops and technologies that need this building */
+            unlocks: {
+                /** @enum {string} */
+                kind: "building" | "troop" | "tech";
+                name: string;
+                /** @description level of this building required */
+                level: number;
+            }[];
         };
         AvailableBuildingsInput: {
-            buildings: (components["schemas"]["BuildingLevelInfoInput"] | null)[];
+            buildings: ({
+                typeId: number;
+                /** @description level being built */
+                level: number;
+                /** @description build time, seconds */
+                time: number;
+                /** @description seconds to demolish back from this level (0 for level 1) */
+                destructTime: number;
+                gold: number;
+                food: number;
+                wood: number;
+                stone: number;
+                iron: number;
+                requirements: components["schemas"]["RequirementCheckInput"][];
+                /** @description all requirements met */
+                ok: boolean;
+                /** @description what the building gives at this level ("" when nothing measurable) */
+                effect: string;
+                info: components["schemas"]["BuildingDescriptionInput"];
+            } | null)[];
             unlockedOuterSlots: number;
         };
         BuildingUpgradeInfoInput: {
             building: components["schemas"]["BuildingBeanInput"];
+            info: components["schemas"]["BuildingDescriptionInput"];
+            /** @description what the building gives at its current level */
+            effect: string;
             maxLevel: number;
             /** @description null at max level */
             next: components["schemas"]["BuildingLevelInfoInput"] | null;
@@ -10835,6 +10875,20 @@ export interface components {
             endTime: number;
             /** @description can be researched here now */
             permission: boolean;
+            /** @description what the technology does */
+            description: string;
+            /** @description total effect at the effective level ("" at 0 or when it has no measurable effect) */
+            effect: string;
+            /** @description total effect after the next level ("" at max level) */
+            nextEffect: string;
+            /** @description buildings, troops and technologies that need this technology */
+            unlocks: {
+                /** @enum {string} */
+                kind: "building" | "troop" | "tech";
+                name: string;
+                /** @description level of this technology required */
+                level: number;
+            }[];
             /** @description null at max level */
             next: {
                 /** @description seconds */
@@ -12682,13 +12736,53 @@ export interface components {
             requirements: components["schemas"]["RequirementCheck"][];
             /** @description all requirements met */
             ok: boolean;
+            /** @description what the building gives at this level ("" when nothing measurable) */
+            effect: string;
+        };
+        BuildingDescription: {
+            typeId: number;
+            name: string;
+            /** @description what the building does */
+            summary: string;
+            /** @description where it can be built and how many */
+            placement: string;
+            /** @description buildings, troops and technologies that need this building */
+            unlocks: {
+                /** @enum {string} */
+                kind: "building" | "troop" | "tech";
+                name: string;
+                /** @description level of this building required */
+                level: number;
+            }[];
         };
         AvailableBuildings: {
-            buildings: (components["schemas"]["BuildingLevelInfo"] | null)[];
+            buildings: ({
+                typeId: number;
+                /** @description level being built */
+                level: number;
+                /** @description build time, seconds */
+                time: number;
+                /** @description seconds to demolish back from this level (0 for level 1) */
+                destructTime: number;
+                gold: number;
+                food: number;
+                wood: number;
+                stone: number;
+                iron: number;
+                requirements: components["schemas"]["RequirementCheck"][];
+                /** @description all requirements met */
+                ok: boolean;
+                /** @description what the building gives at this level ("" when nothing measurable) */
+                effect: string;
+                info: components["schemas"]["BuildingDescription"];
+            } | null)[];
             unlockedOuterSlots: number;
         };
         BuildingUpgradeInfo: {
             building: components["schemas"]["BuildingBean"];
+            info: components["schemas"]["BuildingDescription"];
+            /** @description what the building gives at its current level */
+            effect: string;
             maxLevel: number;
             /** @description null at max level */
             next: components["schemas"]["BuildingLevelInfo"] | null;
@@ -12713,6 +12807,20 @@ export interface components {
             endTime: number;
             /** @description can be researched here now */
             permission: boolean;
+            /** @description what the technology does */
+            description: string;
+            /** @description total effect at the effective level ("" at 0 or when it has no measurable effect) */
+            effect: string;
+            /** @description total effect after the next level ("" at max level) */
+            nextEffect: string;
+            /** @description buildings, troops and technologies that need this technology */
+            unlocks: {
+                /** @enum {string} */
+                kind: "building" | "troop" | "tech";
+                name: string;
+                /** @description level of this technology required */
+                level: number;
+            }[];
             /** @description null at max level */
             next: {
                 /** @description seconds */
@@ -14121,6 +14229,7 @@ export type ResourceProductionLineInput = components['schemas']['ResourceProduct
 export type ProductionBreakdownInput = components['schemas']['ProductionBreakdownInput'];
 export type CityMoveResultInput = components['schemas']['CityMoveResultInput'];
 export type BuildingLevelInfoInput = components['schemas']['BuildingLevelInfoInput'];
+export type BuildingDescriptionInput = components['schemas']['BuildingDescriptionInput'];
 export type AvailableBuildingsInput = components['schemas']['AvailableBuildingsInput'];
 export type BuildingUpgradeInfoInput = components['schemas']['BuildingUpgradeInfoInput'];
 export type TechBeanInput = components['schemas']['TechBeanInput'];
@@ -14246,6 +14355,7 @@ export type ResourceProductionLine = components['schemas']['ResourceProductionLi
 export type ProductionBreakdown = components['schemas']['ProductionBreakdown'];
 export type CityMoveResult = components['schemas']['CityMoveResult'];
 export type BuildingLevelInfo = components['schemas']['BuildingLevelInfo'];
+export type BuildingDescription = components['schemas']['BuildingDescription'];
 export type AvailableBuildings = components['schemas']['AvailableBuildings'];
 export type BuildingUpgradeInfo = components['schemas']['BuildingUpgradeInfo'];
 export type TechBean = components['schemas']['TechBean'];

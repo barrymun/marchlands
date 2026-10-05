@@ -8,6 +8,8 @@ export * from './heroes.ts';
 export * from './items.ts';
 export * from './item-info.ts';
 export * from './merchant.ts';
+export * from './tech-info.ts';
+export * from './building-info.ts';
 export * from './quests.ts';
 export * from './resources.ts';
 export * from './rng.ts';
