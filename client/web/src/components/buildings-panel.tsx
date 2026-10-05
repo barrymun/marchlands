@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import type { BuildingBean, CityBean } from '@evony/api-client';
-import { BALANCE, BuildingType, scaled } from '@evony/core';
+import { BuildingType } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useSticky } from '@/hooks/use-sticky';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Countdown, TimerBar } from '@/components/countdown';
 import { CostList, Requirements } from '@/components/cost-list';
+import { SpeedupOptions } from '@/components/speedup-options';
 import { qk, useCommand } from '@/hooks/use-game';
-import { useNow } from '@/hooks/use-now';
 import { api, unwrap } from '@/lib/api';
 import { buildingName } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -109,11 +110,13 @@ function Slot({ pos, building, locked, fixedName, onClick }: { pos: number; buil
 
 function BuildingDialog({ city, positionId, building, onClose }: { city: CityBean; positionId: number | null; building?: BuildingBean; onClose: () => void }) {
   const open = positionId != null;
-  const empty = !building || building.typeId === 0;
+  const pos = useSticky(positionId);
+  const bld = useSticky(open ? (building ?? { typeId: 0 }) : null);
+  const empty = !bld || bld.typeId === 0;
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg">
-        {open && (empty ? <BuildList city={city} positionId={positionId} onDone={onClose} /> : <BuildingDetail city={city} building={building} onDone={onClose} />)}
+        {pos != null && (empty ? <BuildList city={city} positionId={pos} onDone={onClose} /> : <BuildingDetail city={city} building={bld as BuildingBean} onDone={onClose} />)}
       </DialogContent>
     </Dialog>
   );
@@ -164,7 +167,6 @@ function BuildList({ city, positionId, onDone }: { city: CityBean; positionId: n
 }
 
 function BuildingDetail({ city, building, onDone }: { city: CityBean; building: BuildingBean; onDone: () => void }) {
-  const now = useNow();
   const pos = building.positionId;
   const path = { cityId: city.id, positionId: pos };
   const info = useQuery({
@@ -177,10 +179,15 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
   const cancel = useCommand(() => unwrap(api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/cancel', { params: { path } })), refresh, 'Cancelled');
   const speedup = useCommand(
     (itemId: string) => unwrap(api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/speedup', { params: { path }, body: { itemId } })),
-    refresh,
+    () => [...refresh(), qk.player],
   );
   const working = building.status !== 0;
-  const freeNow = working && building.endTime - now <= scaled(BALANCE.freeSpeedupMs);
+  const coins = useQuery({
+    queryKey: ['speedup-cost', city.id, pos, building.endTime],
+    enabled: working,
+    refetchInterval: 15_000,
+    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/buildings/{positionId}/speedup', { params: { path } })),
+  });
   const have = { gold: city.resource.gold, food: city.resource.food.amount, wood: city.resource.wood.amount, stone: city.resource.stone.amount, iron: city.resource.iron.amount };
   const next = info.data?.next;
 
@@ -196,15 +203,16 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
         <div className="grid gap-3">
           <p className="text-sm">{building.status === 2 ? `Demolishing to level ${building.level - 1}` : `Upgrading to level ${building.level + 1}`}</p>
           <TimerBar startTime={building.startTime} endTime={building.endTime} />
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" disabled={!freeNow || speedup.isPending} onClick={() => speedup.mutate('free.speed')}>
-              Finish now (free)
-            </Button>
-            <Button size="sm" variant="outline" disabled={cancel.isPending} onClick={() => cancel.mutate(undefined, { onSuccess: onDone })}>
-              Cancel
-            </Button>
-          </div>
-          {!freeNow && <p className="text-xs text-muted-foreground">Free speed-up unlocks in the last 5 minutes (game time).</p>}
+          <SpeedupOptions
+            endTime={building.endTime}
+            demolishing={building.status === 2}
+            coinsNeed={coins.data?.coinsNeed}
+            pending={speedup.isPending}
+            onUse={(itemId) => speedup.mutate(itemId)}
+          />
+          <Button size="sm" variant="outline" className="justify-self-start" disabled={cancel.isPending} onClick={() => cancel.mutate(undefined, { onSuccess: onDone })}>
+            Cancel
+          </Button>
         </div>
       ) : (
         <div className="grid gap-3">

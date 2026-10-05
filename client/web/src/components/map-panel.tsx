@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SendArmyDialog, type SendTarget } from '@/components/send-army-dialog';
+import { CityDialog } from '@/components/city-dialog';
 import { qk } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
 import { fmt } from '@/lib/format';
@@ -29,6 +30,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const [center, setCenter] = useState({ x: city.x, y: city.y });
   const [selected, setSelected] = useState<number | null>(null);
   const [target, setTarget] = useState<SendTarget | null>(null);
+  const [moveTo, setMoveTo] = useState<{ x: number; y: number } | null>(null);
   const wrap = (v: number) => ((v % mapSize) + mapSize) % mapSize;
   const view = useQuery({
     queryKey: qk.map(center.x, center.y),
@@ -138,6 +140,11 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                   Held by {info.data.owner.cityName} ({info.data.owner.userName})
                 </p>
               )}
+              {info.data.type === TileType.FLAT && 'owner' in info.data && !info.data.owner && (
+                <Button size="sm" variant="outline" className="justify-self-start" onClick={() => setMoveTo({ x: info.data!.x, y: info.data!.y })}>
+                  Move city here…
+                </Button>
+              )}
               {missionsFor(info.data).length > 0 && (
                 <Button
                   size="sm"
@@ -159,6 +166,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
         </CardContent>
       </Card>
       <SendArmyDialog city={city} target={target} onClose={() => setTarget(null)} />
+      <CityDialog key={moveTo ? `${moveTo.x},${moveTo.y}` : 'none'} city={city} open={moveTo != null} target={moveTo ?? undefined} onClose={() => setMoveTo(null)} />
     </div>
   );
 }

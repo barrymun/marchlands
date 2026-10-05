@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Coins, Crown, LogOut } from 'lucide-react';
+import { ChevronDown, Coins, Crown, UserRound } from 'lucide-react';
 import { HeroStatus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArmiesPanel } from '@/components/armies-panel';
 import { BuildingsPanel } from '@/components/buildings-panel';
+import { CityDialog } from '@/components/city-dialog';
+import { LordDialog } from '@/components/lord-dialog';
 import { HeroesPanel } from '@/components/heroes-panel';
 import { ItemsPanel } from '@/components/items-panel';
 import { MapPanel } from '@/components/map-panel';
@@ -42,6 +45,7 @@ export function GamePage() {
   const status = usePushSync(true);
   const info = player.data?.playerInfo;
   const cities = player.data?.castles ?? [];
+  const [dialog, setDialog] = useState<'lord' | 'city' | null>(null);
 
   function logout() {
     tokenStore.set(null);
@@ -68,6 +72,8 @@ export function GamePage() {
                   {c.name} ({c.x},{c.y})
                 </DropdownMenuItem>
               ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => setDialog('city')}>City settings…</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <div className="ml-auto flex items-center gap-3 text-sm">
@@ -103,10 +109,11 @@ export function GamePage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="icon-sm" variant="ghost" aria-label="Account">
-                  <LogOut className="size-4" />
+                  <UserRound className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => setDialog('lord')}>Lord settings…</DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href="/docs" target="_blank" rel="noreferrer">
                     API docs
@@ -158,6 +165,8 @@ export function GamePage() {
           )}
         </Tabs>
       </main>
+      <LordDialog open={dialog === 'lord'} onClose={() => setDialog(null)} />
+      {city.data && <CityDialog city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />}
     </div>
   );
 }

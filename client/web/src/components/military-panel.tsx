@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
-import { BuildingType, FORT_KEYS, TROOP_KEYS } from '@evony/core';
+import { BuildingType, FORT_KEYS, itemConfig, TROOP_KEYS } from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { TimerBar } from '@/components/countdown';
 import { CostList, Requirements } from '@/components/cost-list';
 import { qk, useCommand } from '@/hooks/use-game';
+import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
 import { fmtExact, troopName } from '@/lib/format';
 
@@ -79,6 +80,15 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
     () => [qk.city(city.id), qk.queues(city.id, fort)],
     'Added to the queue',
   );
+  const inv = useInventory();
+  const boostItem = fort ? 'player.fort.1.c' : 'player.troop.1.b';
+  const boostCents = fort ? 35 : 30;
+  const boost = useCommand(
+    (b: { positionId: number; queueId: number }) =>
+      unwrap(api.POST(`/api/v1/cities/{cityId}/${kind}/queues/{positionId}/{queueId}/speedup`, { params: { path: { ...path, ...b } } })),
+    () => [qk.city(city.id), qk.queues(city.id, fort), qk.player],
+    `${itemConfig(fort ? 'player.fort.1.c' : 'player.troop.1.b')?.name}: −30%`,
+  );
   const cancel = useCommand(
     (b: { positionId: number; queueId: number }) =>
       unwrap(api.DELETE(`/api/v1/cities/{cityId}/${kind}/queues/{positionId}/{queueId}`, { params: { path: { ...path, ...b } } })),
@@ -128,9 +138,21 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                 <span>
                   {fmtExact(b.num)} × {troopName(b.type)}
                 </span>
-                <Button size="xs" variant="ghost" onClick={() => cancel.mutate({ positionId: b.positionId, queueId: b.queueId })}>
-                  Cancel
-                </Button>
+                <div className="flex gap-1">
+                  {b.endTime > 0 && (
+                    <Button
+                      size="xs"
+                      variant="secondary"
+                      disabled={boost.isPending || (inv.count(boostItem) === 0 && inv.cents < boostCents)}
+                      onClick={() => boost.mutate({ positionId: b.positionId, queueId: b.queueId })}
+                    >
+                      {itemConfig(boostItem)?.name} −30% · {inv.count(boostItem) > 0 ? `×${inv.count(boostItem)}` : `${boostCents} cents`}
+                    </Button>
+                  )}
+                  <Button size="xs" variant="ghost" onClick={() => cancel.mutate({ positionId: b.positionId, queueId: b.queueId })}>
+                    Cancel
+                  </Button>
+                </div>
               </div>
               {b.endTime > 0 ? <TimerBar startTime={b.startTime} endTime={b.endTime} /> : <span className="text-xs text-muted-foreground">Waiting</span>}
             </div>

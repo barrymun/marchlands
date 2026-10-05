@@ -76,17 +76,17 @@ const SPEEDUPS: Record<string, string> = {
 };
 
 const HOW_TO: Record<string, string> = {
-  speedup: 'Use from a building or research in progress.',
+  speedup: 'Use from a construction (City tab) or research (Research tab) in progress.',
   'troops.speedup': 'Use on a batch in the Military tab training queue.',
   'fortifications.speedup': 'Use on a batch in the Military tab fortification queue.',
-  'city.move': 'Use from the city settings (move city).',
-  'player.flag': 'Use from your lord profile (change flag).',
-  'player.rename': 'Use from your lord profile (rename).',
+  'city.move': 'Use from City settings (city name menu), or "Move city here" on a free flat in the Map tab.',
+  'player.flag': 'Use from Lord settings (top-right menu).',
+  'player.rename': 'Use from Lord settings (top-right menu).',
   'heroes.tavern.refresh': 'Use from the Inn in the Heroes tab.',
   'heroes.reset': "Use from a hero's Points dialog in the Heroes tab.",
-  'heroes.useItem': 'Use on a hero in the Heroes tab.',
-  'alliance.useItem': 'Used by the alliance leader on the alliance.',
-  'city.truce': 'Use from your lord profile (truce).',
+  'heroes.useItem': "Use from a hero's Items button in the Heroes tab.",
+  'alliance.useItem': 'Used by the alliance leader on the alliance (API only for now: POST /api/v1/alliance/items).',
+  'city.truce': 'Use from Lord settings (top-right menu).',
 };
 
 const ATTRIBUTE_NAMES = { power: 'Attack', management: 'Politics', stratagem: 'Intelligence' };

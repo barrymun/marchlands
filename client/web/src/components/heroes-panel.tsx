@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { HeroPointsDialog } from '@/components/hero-points-dialog';
+import { HeroItemsDialog } from '@/components/hero-items-dialog';
 import { qk, useCommand } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
 import { fmt, signed } from '@/lib/format';
@@ -42,6 +43,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   const mayorGain = (h: HeroBean) => Math.round(fieldOutput * heroManagement(h) * BALANCE.mayorManagementProductionFactor);
   const currentMayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
   const [pointsFor, setPointsFor] = useState<number | null>(null);
+  const [itemsFor, setItemsFor] = useState<number | null>(null);
   const currentGain = currentMayor ? mayorGain(currentMayor) : 0;
   const mayorNote = (h: HeroBean) => {
     if (h.seized) return null;
@@ -77,6 +79,11 @@ export function HeroesPanel({ city }: { city: CityBean }) {
               {!h.seized && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR) && (
                 <Button size="xs" variant={h.remainPoint > 0 ? 'default' : 'outline'} onClick={() => setPointsFor(h.id)}>
                   Points{h.remainPoint > 0 ? ` (${h.remainPoint})` : ''}
+                </Button>
+              )}
+              {!h.seized && (
+                <Button size="xs" variant="outline" onClick={() => setItemsFor(h.id)}>
+                  Items
                 </Button>
               )}
               {h.experience >= h.upgradeExp && (
@@ -133,6 +140,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
           </CardContent>
         )}
       </Card>
+      <HeroItemsDialog hero={city.heros.find((h) => h.id === itemsFor) ?? null} cityId={city.id} onClose={() => setItemsFor(null)} />
       <HeroPointsDialog hero={city.heros.find((h) => h.id === pointsFor) ?? null} cityId={city.id} fieldOutput={fieldOutput} onClose={() => setPointsFor(null)} />
     </div>
   );

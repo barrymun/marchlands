@@ -1,24 +1,32 @@
 import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
-import { BALANCE, scaled } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TimerBar } from '@/components/countdown';
 import { CostList, Requirements } from '@/components/cost-list';
+import { SpeedupOptions } from '@/components/speedup-options';
 import { qk, useCommand } from '@/hooks/use-game';
-import { useNow } from '@/hooks/use-now';
 import { api, unwrap } from '@/lib/api';
 
 export function ResearchPanel({ city }: { city: CityBean }) {
-  const now = useNow();
   const path = { cityId: city.id };
   const list = useQuery({ queryKey: qk.research(city.id), queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/research', { params: { path } })) });
   const refresh = () => [qk.research(city.id), qk.city(city.id)];
   const start = useCommand((techId: number) => unwrap(api.POST('/api/v1/cities/{cityId}/research', { params: { path }, body: { techId } })), refresh, 'Research started');
   const cancel = useCommand(() => unwrap(api.DELETE('/api/v1/cities/{cityId}/research', { params: { path } })), refresh, 'Research cancelled');
-  const speedup = useCommand(() => unwrap(api.POST('/api/v1/cities/{cityId}/research/speedup', { params: { path }, body: { itemId: 'free.speed' } })), refresh);
+  const speedup = useCommand(
+    (itemId: string) => unwrap(api.POST('/api/v1/cities/{cityId}/research/speedup', { params: { path }, body: { itemId } })),
+    () => [...refresh(), qk.player],
+  );
+  const researching = list.data?.techs.find((t) => t.upgrading && t.castleId === city.id);
+  const coins = useQuery({
+    queryKey: ['research-speedup-cost', city.id, researching?.endTime],
+    enabled: !!researching,
+    refetchInterval: 15_000,
+    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/research/speedup', { params: { path } })),
+  });
 
   if (list.isPending) return <Skeleton className="h-64" />;
   if (!list.data) return null;
@@ -47,14 +55,12 @@ export function ResearchPanel({ city }: { city: CityBean }) {
           <CardContent className="grid gap-2">
             <TimerBar startTime={busy.startTime} endTime={busy.endTime} />
             {busy.castleId === city.id && (
-              <div className="flex gap-2">
-                <Button size="sm" disabled={busy.endTime - now > scaled(BALANCE.freeSpeedupMs)} onClick={() => speedup.mutate(undefined)}>
-                  Finish now (free)
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => cancel.mutate(undefined)}>
+              <>
+                <SpeedupOptions endTime={busy.endTime} coinsNeed={coins.data?.coinsNeed} pending={speedup.isPending} onUse={(itemId) => speedup.mutate(itemId)} />
+                <Button size="sm" variant="outline" className="justify-self-start" onClick={() => cancel.mutate(undefined)}>
                   Cancel
                 </Button>
-              </div>
+              </>
             )}
           </CardContent>
         </Card>

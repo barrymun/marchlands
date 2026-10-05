@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
 import { HeroStatus, Mission, TROOP_KEYS, type TroopKey } from '@evony/core';
 import { Button } from '@/components/ui/button';
+import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,9 +20,10 @@ export interface SendTarget {
 }
 
 export function SendArmyDialog({ city, target, onClose }: { city: CityBean; target: SendTarget | null; onClose: () => void }) {
+  const shown = useSticky(target);
   return (
     <Dialog open={target != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg">{target && <SendForm key={target.tileId} city={city} target={target} onDone={onClose} />}</DialogContent>
+      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg">{shown && <SendForm key={shown.tileId} city={city} target={shown} onDone={onClose} />}</DialogContent>
     </Dialog>
   );
 }
