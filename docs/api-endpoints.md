@@ -98,7 +98,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | DELETE | `/api/v1/cities/{cityId}/mayor` | Dismiss the mayor (hero.dischargeChief) |
 | GET | `/api/v1/cities/{cityId}/tavern` | Inn offers (hero.getHerosListFromTavern) |
 | POST | `/api/v1/cities/{cityId}/tavern/{heroId}/hire` | Hire (hero.hireHero) |
-| POST | `/api/v1/cities/{cityId}/tavern/refresh` | New offers with Hero Hunting (hero.refreshHerosListFromTavern) |
+| POST | `/api/v1/cities/{cityId}/tavern/refresh` | New offers for gold or a Hero Hunting item (hero.refreshHerosListFromTavern) |
 | PATCH | `/api/v1/heroes/{heroId}` | Rename (hero.changeName) |
 | POST | `/api/v1/heroes/{heroId}/fire` | Fire (hero.fireHero) |
 | POST | `/api/v1/heroes/{heroId}/items` | Use a hero item (hero.useItem) |

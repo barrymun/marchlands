@@ -3667,7 +3667,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** New offers with Hero Hunting (hero.refreshHerosListFromTavern) */
+        /** New offers for gold or a Hero Hunting item (hero.refreshHerosListFromTavern) */
         post: {
             parameters: {
                 query?: never;
@@ -3677,7 +3677,18 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * @description gold, or one Hero Hunting item
+                         * @default gold
+                         * @enum {string}
+                         */
+                        payWith?: "gold" | "item";
+                    };
+                };
+            };
             responses: {
                 /** @description Default Response */
                 200: {
@@ -10695,6 +10706,10 @@ export interface components {
             /** @description free hero slots */
             posCount: number;
             heros: components["schemas"]["HeroBeanInput"][];
+            /** @description gold to re-roll the offers */
+            refreshCost: number;
+            /** @description Hero Hunting items owned (free re-roll each) */
+            huntingItems: number;
         };
         VisibleArmiesInput: {
             self: components["schemas"]["ArmyBeanInput"][];
@@ -12441,6 +12456,10 @@ export interface components {
             /** @description free hero slots */
             posCount: number;
             heros: components["schemas"]["HeroBean"][];
+            /** @description gold to re-roll the offers */
+            refreshCost: number;
+            /** @description Hero Hunting items owned (free re-roll each) */
+            huntingItems: number;
         };
         VisibleArmies: {
             self: components["schemas"]["ArmyBean"][];

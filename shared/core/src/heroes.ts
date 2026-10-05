@@ -130,6 +130,7 @@ export function createGuardHero(maxLevel: number, rng: Rng): GeneratedHero {
 }
 
 export const heroHireCost = (level: number) => level * BALANCE.heroHireCostPerLevel;
+export const tavernRefreshCost = (innLevel: number) => Math.max(1, innLevel) * BALANCE.tavernRefreshGoldPerInnLevel;
 export const heroAwardCost = (level: number) => level * BALANCE.heroAwardCostPerLevel;
 
 /** Attribute cap: base stats + one point per level (invariant enforced by hero.addPoint). */

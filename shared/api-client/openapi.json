@@ -2728,11 +2728,25 @@
             "items": {
               "$ref": "#/components/schemas/HeroBeanInput"
             }
+          },
+          "refreshCost": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold to re-roll the offers"
+          },
+          "huntingItems": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Hero Hunting items owned (free re-roll each)"
           }
         },
         "required": [
           "posCount",
-          "heros"
+          "heros",
+          "refreshCost",
+          "huntingItems"
         ]
       },
       "VisibleArmiesInput": {
@@ -11139,11 +11153,25 @@
             "items": {
               "$ref": "#/components/schemas/HeroBean"
             }
+          },
+          "refreshCost": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold to re-roll the offers"
+          },
+          "huntingItems": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Hero Hunting items owned (free re-roll each)"
           }
         },
         "required": [
           "posCount",
-          "heros"
+          "heros",
+          "refreshCost",
+          "huntingItems"
         ],
         "additionalProperties": false
       },
@@ -21896,10 +21924,31 @@
     },
     "/api/v1/cities/{cityId}/tavern/refresh": {
       "post": {
-        "summary": "New offers with Hero Hunting (hero.refreshHerosListFromTavern)",
+        "summary": "New offers for gold or a Hero Hunting item (hero.refreshHerosListFromTavern)",
         "tags": [
           "heroes"
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "payWith": {
+                    "default": "gold",
+                    "description": "gold, or one Hero Hunting item",
+                    "type": "string",
+                    "enum": [
+                      "gold",
+                      "item"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "schema": {

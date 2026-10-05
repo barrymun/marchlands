@@ -49,6 +49,8 @@ export const BALANCE = {
 
   heroSalaryPerLevel: 20, // (orig) gold per hour per hero level
   heroHireCostPerLevel: 1000, // (orig)
+  /** (evony-re) gold to re-roll the Inn's offers, per Inn level (the Hero Hunting item does it for free) */
+  tavernRefreshGoldPerInnLevel: 1000,
   heroAwardCostPerLevel: 100, // (orig)
 
   // comfort / levy (orig)
