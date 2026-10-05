@@ -6,6 +6,7 @@ import {
   BUILDINGS,
   BUILDING_NAMES,
   ITEMS,
+  itemInfo,
   QUESTS,
   RESEARCH,
   STATE_NAMES,
@@ -87,7 +88,10 @@ export default async function economyRoutes(app: ZApp) {
         buildings: BUILDINGS,
         research: RESEARCH,
         troops: TROOPS,
-        items: ITEMS,
+        items: ITEMS.map((i) => {
+          const { category, description, use, howTo } = itemInfo(i.id)!;
+          return { ...i, category, description, use, howTo };
+        }),
         questGroups: QUESTS,
         titles: TITLES,
         balance: BALANCE,

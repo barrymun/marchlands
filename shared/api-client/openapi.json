@@ -6920,6 +6920,24 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "use": {
+            "type": "string",
+            "enum": [
+              "direct",
+              "elsewhere",
+              "none"
+            ],
+            "description": "direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect"
+          },
+          "howTo": {
+            "type": "string"
           }
         },
         "required": [
@@ -6931,7 +6949,10 @@
           "canGamble",
           "type",
           "dayLimit",
-          "rarity"
+          "rarity",
+          "category",
+          "description",
+          "use"
         ]
       },
       "ConfigQuestGroupInput": {
@@ -15535,6 +15556,24 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "use": {
+            "type": "string",
+            "enum": [
+              "direct",
+              "elsewhere",
+              "none"
+            ],
+            "description": "direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect"
+          },
+          "howTo": {
+            "type": "string"
           }
         },
         "required": [
@@ -15546,7 +15585,10 @@
           "canGamble",
           "type",
           "dayLimit",
-          "rarity"
+          "rarity",
+          "category",
+          "description",
+          "use"
         ],
         "additionalProperties": false
       },

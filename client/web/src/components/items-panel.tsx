@@ -1,0 +1,141 @@
+import { useMemo, useState } from 'react';
+import type { CityBean } from '@evony/api-client';
+import { ITEM_CATEGORIES, ITEM_INFO, itemConfig, TROOP_ID_BY_KEY, TROOP_NAMES, type ItemInfo, type TroopKey } from '@evony/core';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Countdown } from '@/components/countdown';
+import { qk, useCommand, usePlayer } from '@/hooks/use-game';
+import { api, unwrap } from '@/lib/api';
+import { fmtExact } from '@/lib/format';
+import { cn } from '@/lib/utils';
+
+/** Items with the same name and effect (e.g. the twelve Amulet ids) are shown as one entry. */
+interface Entry {
+  info: ItemInfo;
+  ids: string[];
+  owned: number;
+}
+
+const ALL = 'All';
+
+export function ItemsPanel({ city }: { city: CityBean }) {
+  const player = usePlayer();
+  const [category, setCategory] = useState(ALL);
+  const [query, setQuery] = useState('');
+  const [ownedOnly, setOwnedOnly] = useState(false);
+  const counts = useMemo(() => new Map((player.data?.items ?? []).map((i) => [i.id, i.count])), [player.data?.items]);
+
+  const entries = useMemo(() => {
+    const byKey = new Map<string, Entry>();
+    for (const info of ITEM_INFO) {
+      const key = `${info.name}|${info.description}`;
+      const e = byKey.get(key) ?? { info, ids: [], owned: 0 };
+      e.ids.push(info.id);
+      e.owned += counts.get(info.id) ?? 0;
+      byKey.set(key, e);
+    }
+    return [...byKey.values()];
+  }, [counts]);
+
+  const q = query.trim().toLowerCase();
+  const shown = entries
+    .filter((e) => category === ALL || e.info.category === category)
+    .filter((e) => !ownedOnly || e.owned > 0)
+    .filter((e) => !q || e.info.name.toLowerCase().includes(q) || e.info.description.toLowerCase().includes(q))
+    .sort((a, b) => Number(b.owned > 0) - Number(a.owned > 0) || a.info.name.localeCompare(b.info.name));
+  const ownedTotal = entries.filter((e) => e.owned > 0).length;
+  const buffs = (player.data?.buffs ?? []).filter((b) => b.endTime > Date.now());
+
+  const use = useCommand(
+    (itemId: string) => unwrap(api.POST('/api/v1/player/items/{itemId}/use', { params: { path: { itemId } }, body: { cityId: city.id } })),
+    () => [qk.player, qk.city(city.id)],
+  );
+  function useEntry(e: Entry) {
+    const id = e.ids.find((x) => (counts.get(x) ?? 0) > 0);
+    if (!id) return;
+    use.mutate(id, {
+      onSuccess: (r) => {
+        if (r.amulet) toast.success(`Amulet: ${r.amulet.prize.count > 1 ? `${fmtExact(r.amulet.prize.count)} × ` : ''}${itemConfig(r.amulet.prize.id)?.name ?? r.amulet.prize.id}`);
+        else if (r.granted) toast.success(`${e.info.name}: received ${describeGrant(r.granted)}`);
+        else if (r.hero) toast.success(`${r.hero.name} (Lv ${r.hero.level}) joined your city`);
+        else toast.success(`${e.info.name} used`);
+      },
+    });
+  }
+
+  return (
+    <div className="grid gap-4">
+      {buffs.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Active effects</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            {buffs.map((b) => (
+              <Badge key={b.id} variant="secondary" className="gap-1 font-normal">
+                {b.desc} · <Countdown endTime={b.endTime} />
+              </Badge>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+      <div className="flex flex-wrap items-center gap-3">
+        <Tabs value={category} onValueChange={setCategory}>
+          <TabsList className="flex-wrap">
+            {[ALL, ...Object.values(ITEM_CATEGORIES)].map((c) => (
+              <TabsTrigger key={c} value={c}>
+                {c}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+        <Input className="h-8 w-48" placeholder="Search items" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <div className="flex items-center gap-2">
+          <Switch id="owned-only" checked={ownedOnly} onCheckedChange={setOwnedOnly} />
+          <Label htmlFor="owned-only" className="text-sm font-normal">
+            Owned only ({ownedTotal})
+          </Label>
+        </div>
+      </div>
+      <div className="grid gap-2 md:grid-cols-2">
+        {shown.map((e) => (
+          <div key={e.ids[0]} className={cn('grid gap-1.5 rounded-md border bg-card p-3', e.owned === 0 && 'opacity-60')}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium">{e.info.name}</span>
+                <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
+                  ×{fmtExact(e.owned)}
+                </Badge>
+                {category === ALL && <span className="text-xs text-muted-foreground">{e.info.category}</span>}
+              </div>
+              {e.info.use === 'direct' && (
+                <Button size="xs" disabled={e.owned === 0 || use.isPending} onClick={() => useEntry(e)}>
+                  Use
+                </Button>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">{e.info.description}</p>
+            {e.info.howTo && <p className="text-xs text-muted-foreground italic">{e.info.howTo}</p>}
+            {e.info.price > 0 && <p className="text-xs text-muted-foreground">Shop price: {fmtExact(e.info.price)} cents</p>}
+          </div>
+        ))}
+        {shown.length === 0 && <p className="text-sm text-muted-foreground">No items match.</p>}
+      </div>
+    </div>
+  );
+}
+
+function describeGrant(g: { items?: Record<string, number>; resources?: Record<string, number | undefined>; troops?: Record<string, number | undefined>; cents?: number }) {
+  const parts: string[] = [];
+  for (const [id, n] of Object.entries(g.items ?? {})) parts.push(`${n} × ${itemConfig(id)?.name.trim() ?? id}`);
+  for (const [r, n] of Object.entries(g.resources ?? {})) if (n) parts.push(`${fmtExact(n)} ${r === 'wood' ? 'lumber' : r}`);
+  for (const [k, n] of Object.entries(g.troops ?? {})) if (n) parts.push(`${fmtExact(n)} ${TROOP_NAMES[TROOP_ID_BY_KEY[k as TroopKey]] ?? k}`);
+  if (g.cents) parts.push(`${fmtExact(g.cents)} cents`);
+  return parts.join(', ') || 'nothing';
+}

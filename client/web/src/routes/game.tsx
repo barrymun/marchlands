@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { ArmiesPanel } from '@/components/armies-panel';
 import { BuildingsPanel } from '@/components/buildings-panel';
 import { HeroesPanel } from '@/components/heroes-panel';
+import { ItemsPanel } from '@/components/items-panel';
 import { MapPanel } from '@/components/map-panel';
 import { MilitaryPanel } from '@/components/military-panel';
 import { ResearchPanel } from '@/components/research-panel';
@@ -25,6 +26,7 @@ const TABS = [
   { id: 'military', label: 'Military' },
   { id: 'heroes', label: 'Heroes' },
   { id: 'research', label: 'Research' },
+  { id: 'items', label: 'Items' },
   { id: 'armies', label: 'Armies' },
   { id: 'map', label: 'Map' },
 ] as const;
@@ -142,6 +144,9 @@ export function GamePage() {
               </TabsContent>
               <TabsContent value="research">
                 <ResearchPanel city={city.data} />
+              </TabsContent>
+              <TabsContent value="items">
+                <ItemsPanel city={city.data} />
               </TabsContent>
               <TabsContent value="armies">
                 <ArmiesPanel />

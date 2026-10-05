@@ -75,6 +75,10 @@ const itemConfig = z.object({
   type: int(),
   dayLimit: int(),
   rarity: int(),
+  category: z.string(),
+  description: z.string(),
+  use: z.enum(['direct', 'elsewhere', 'none']).describe('direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect'),
+  howTo: z.string().optional(),
 });
 
 export const ConfigItem = itemConfig.meta({ id: 'ConfigItem' });

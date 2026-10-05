@@ -11548,6 +11548,14 @@ export interface components {
             type: number;
             dayLimit: number;
             rarity: number;
+            category: string;
+            description: string;
+            /**
+             * @description direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect
+             * @enum {string}
+             */
+            use: "direct" | "elsewhere" | "none";
+            howTo?: string;
         };
         ConfigQuestGroupInput: {
             id: number;
@@ -13320,6 +13328,14 @@ export interface components {
             type: number;
             dayLimit: number;
             rarity: number;
+            category: string;
+            description: string;
+            /**
+             * @description direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect
+             * @enum {string}
+             */
+            use: "direct" | "elsewhere" | "none";
+            howTo?: string;
         };
         ConfigQuestGroup: {
             id: number;
