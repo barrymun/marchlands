@@ -85,8 +85,10 @@ export function usePushSync(enabled: boolean): PushStatus {
           const rest = c.heros.filter((h) => h.id !== hero.id);
           return { ...c, heros: updateType === 1 ? rest : c.heros.some((h) => h.id === hero.id) ? c.heros.map((h) => (h.id === hero.id ? hero : h)) : [...rest, hero] };
         });
-        // a mayor change moves production rates; refresh the city (resources) in the background
-        void qc.invalidateQueries({ queryKey: qk.city(castleId) });
+        // the mayor's stats set production rates and build / research / training times: refresh them
+        for (const key of [qk.city(castleId), qk.research(castleId), ['upgrade', castleId], ['available', castleId], ['trainable', castleId]]) {
+          void qc.invalidateQueries({ queryKey: key });
+        }
       }),
       push.on('server.TroopQueueUpdate', () => void qc.invalidateQueries({ queryKey: ['queues'] })),
       push.on('server.FortificationsQueueUpdate', () => void qc.invalidateQueries({ queryKey: ['queues'] })),

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCw } from 'lucide-react';
+import { Check, Pencil, RefreshCw, X } from 'lucide-react';
 import type { CityBean, HeroBean } from '@evony/api-client';
 import { BALANCE, BuildingType, HeroStatus, heroManagement, heroPower, heroStratagem } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { HeroPointsDialog } from '@/components/hero-points-dialog';
 import { HeroItemsDialog } from '@/components/hero-items-dialog';
 import { qk, useCommand } from '@/hooks/use-game';
@@ -36,6 +37,11 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   );
   const mayor = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/mayor', { params: { path: { heroId } } })), refresh, 'Mayor appointed');
   const levelUp = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/level-up', { params: { path: { heroId } } })), refresh, 'Level up!');
+  const rename = useCommand(
+    (v: { heroId: number; name: string }) => unwrap(api.PATCH('/api/v1/heroes/{heroId}', { params: { path: { heroId: v.heroId } }, body: { name: v.name } })),
+    refresh,
+    'Hero renamed',
+  );
   const fire = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/fire', { params: { path: { heroId } } })), refresh, 'Hero dismissed');
 
   // the mayor's politics adds a percentage of (efficiency-adjusted) field output to every basic resource
@@ -75,7 +81,13 @@ export function HeroesPanel({ city }: { city: CityBean }) {
         <CardContent className="grid gap-2">
           {city.heros.length === 0 && <p className="text-sm text-muted-foreground">No heroes yet. Hire one at the Inn.</p>}
           {city.heros.map((h) => (
-            <HeroRow key={h.id} hero={h} note={mayorNote(h)} showExp>
+            <HeroRow
+              key={h.id}
+              hero={h}
+              note={mayorNote(h)}
+              showExp
+              onRename={h.seized ? undefined : (name) => rename.mutateAsync({ heroId: h.id, name }).then(() => undefined)}
+            >
               <Badge variant={h.status === HeroStatus.MAYOR ? 'default' : 'secondary'}>{h.seized ? 'Captive' : (STATUS[h.status] ?? h.status)}</Badge>
               {!h.seized && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR) && (
                 <Button size="xs" variant={h.remainPoint > 0 ? 'default' : 'outline'} onClick={() => setPointsFor(h.id)}>
@@ -147,13 +159,78 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   );
 }
 
-function HeroRow({ hero, note, showExp = false, children }: { hero: HeroBean; note?: React.ReactNode; showExp?: boolean; children: React.ReactNode }) {
+function HeroRow({
+  hero,
+  note,
+  showExp = false,
+  onRename,
+  children,
+}: {
+  hero: HeroBean;
+  note?: React.ReactNode;
+  showExp?: boolean;
+  onRename?: (name: string) => Promise<void>;
+  children: React.ReactNode;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(hero.name);
+  const save = async () => {
+    const name = draft.trim();
+    if (!name || name === hero.name) return setEditing(false);
+    try {
+      await onRename!(name);
+      setEditing(false);
+    } catch {
+      /* the error is toasted; keep editing */
+    }
+  };
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2">
       <div>
-        <div className="text-sm font-medium">
-          {hero.name} <span className="font-normal text-muted-foreground">Lv {hero.level}</span>
-        </div>
+        {editing ? (
+          <form
+            className="flex items-center gap-1"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void save();
+            }}
+          >
+            <Input
+              autoFocus
+              className="h-7 w-40"
+              maxLength={20}
+              value={draft}
+              aria-label="Hero name"
+              onFocus={(e) => e.currentTarget.select()}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => e.key === 'Escape' && setEditing(false)}
+            />
+            <Button type="submit" size="icon-xs" aria-label="Save name">
+              <Check />
+            </Button>
+            <Button type="button" size="icon-xs" variant="ghost" aria-label="Cancel" onClick={() => setEditing(false)}>
+              <X />
+            </Button>
+          </form>
+        ) : (
+          <div className="flex items-center gap-1 text-sm font-medium">
+            {hero.name} <span className="font-normal text-muted-foreground">Lv {hero.level}</span>
+            {onRename && (
+              <Button
+                size="icon-xs"
+                variant="ghost"
+                className="text-muted-foreground"
+                aria-label={`Rename ${hero.name}`}
+                onClick={() => {
+                  setDraft(hero.name);
+                  setEditing(true);
+                }}
+              >
+                <Pencil />
+              </Button>
+            )}
+          </div>
+        )}
         <div className="text-xs text-muted-foreground tabular-nums">
           pol {heroManagement(hero)} · att {heroPower(hero)} · int {heroStratagem(hero)} · loyalty {hero.loyalty}
           {hero.remainPoint > 0 && ` · ${hero.remainPoint} points`}

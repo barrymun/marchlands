@@ -22,7 +22,7 @@ import { heroes } from '@evony/db';
 import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';
-import { addItem, cleanName, itemCount, pushResources, spendCents, spendResources } from '../helpers.ts';
+import { addItem, assertClean, cleanName, itemCount, pushResources, spendCents, spendResources } from '../helpers.ts';
 import { findCity, getHero, getPlayer, heroesOfCity, saveCity, saveHero, savePlayer, type HeroRow } from '../repo.ts';
 
 export const pushHero = (ctx: Ctx, playerId: number, h: HeroRow, updateType: 0 | 1 | 2) =>
@@ -317,7 +317,9 @@ export async function expireHeroBuff(ctx: Ctx, heroId: number, attr: string) {
 /** hero.changeName */
 export async function renameHero(ctx: Ctx, playerId: number, heroId: number, name: string) {
   const h = await ownHero(ctx, playerId, heroId);
-  h.name = cleanName(name, 1, 20, 'Hero name');
+  const n = cleanName(name, 1, 20, 'Hero name');
+  assertClean(n);
+  h.name = n;
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
   return heroBean(h);

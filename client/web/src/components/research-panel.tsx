@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
+import { heroStratagem, HeroStatus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,6 +41,8 @@ export function ResearchPanel({ city }: { city: CityBean }) {
       </Card>
     );
   }
+  const mayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
+  const mayorCut = mayor ? Math.round((1 - Math.pow(0.995, heroStratagem(mayor))) * 1000) / 10 : 0;
   const have = { gold: city.resource.gold, food: city.resource.food.amount, wood: city.resource.wood.amount, stone: city.resource.stone.amount, iron: city.resource.iron.amount };
   const busy = list.data.techs.find((t) => t.upgrading);
 
@@ -65,6 +68,11 @@ export function ResearchPanel({ city }: { city: CityBean }) {
           </CardContent>
         </Card>
       )}
+      <p className="text-xs text-muted-foreground">
+        {mayor
+          ? `Research times include mayor ${mayor.name}'s Intelligence ${heroStratagem(mayor)}: −${mayorCut}%. A mayor with higher Intelligence researches faster.`
+          : 'No mayor: appoint one with high Intelligence in the Heroes tab to research faster.'}
+      </p>
       <div className="grid gap-2 md:grid-cols-2">
         {list.data.techs.map((t) => (
           <div key={t.typeId} className="grid gap-2 rounded-md border p-3">
