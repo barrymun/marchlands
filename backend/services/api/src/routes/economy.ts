@@ -36,7 +36,10 @@ import {
   Empty,
   ErrorResponse,
   MarketOrder,
+  MarketHistory,
   MarketOrderBook,
+  MarketQuote,
+  MarketQuoteQuery,
   MarketPlaceOrderResult,
   MarketResTypeParams,
   MarketShipment,
@@ -106,10 +109,18 @@ export default async function economyRoutes(app: ZApp) {
     secure.get('/market/:resType', s(tags.market, 'Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades)', MarketOrderBook, { params: MarketResTypeParams }), (req) =>
       anon(req, (ctx) => market.orderBook(ctx, req.params.resType)),
     );
+    secure.get(
+      '/market/:resType/quote',
+      s(tags.market, 'Preview an order: what would trade now, at what average price, and what would rest', MarketQuote, { params: MarketResTypeParams, querystring: MarketQuoteQuery }),
+      (req) => game(req, (ctx, pid) => market.quote(ctx, pid, { resType: req.params.resType, ...req.query })),
+    );
+    secure.get('/market/:resType/history', s(tags.market, 'Recent trades and hourly (game time) price candles', MarketHistory, { params: MarketResTypeParams }), (req) =>
+      anon(req, (ctx) => market.history(ctx, req.params.resType)),
+    );
     secure.get('/market/orders/mine', s(tags.market, 'My open orders (trade.getMyTradeList)', z.array(MarketOrder)), (req) => game(req, (ctx, pid) => market.myOrders(ctx, pid)));
     secure.post(
       '/cities/:cityId/market/orders',
-      s(tags.market, 'Place an order: side 0 buy, 1 sell (trade.newTrade)', MarketPlaceOrderResult, { params: zCityParams, body: PlaceOrderBody }),
+      s(tags.market, 'Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade)', MarketPlaceOrderResult, { params: zCityParams, body: PlaceOrderBody }),
       (req) => game(req, (ctx, pid) => market.placeOrder(ctx, pid, req.params.cityId, req.body)),
     );
     secure.delete('/market/orders/:orderId', s(tags.market, 'Cancel (trade.cancelTrade)', Empty, { params: OrderIdParams }), (req) =>

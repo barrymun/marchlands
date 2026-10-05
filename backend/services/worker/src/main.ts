@@ -1,12 +1,12 @@
 // Game clock. Seeds the world on first boot, then:
 //  - claims due timed events (FOR UPDATE SKIP LOCKED, so several workers can run side by side)
 //    and processes each in its own transaction;
-//  - runs periodic jobs (rankings, zone stats, beginner expiry, cleanup).
+//  - runs periodic jobs (rankings, zone stats, beginner expiry, merchant sweep, cleanup).
 
 import { sql } from 'drizzle-orm';
 import { setGameSpeed } from '@evony/core';
 import { connect, timedEvents } from '@evony/db';
-import { beginnerJob, cleanupJob, dispatchEvent, rankingsJob, runGame, world, zonesJob, type EventRow } from '@evony/game';
+import { beginnerJob, cleanupJob, dispatchEvent, merchantJob, rankingsJob, runGame, world, zonesJob, type EventRow } from '@evony/game';
 
 const log = (level: string, msg: string, extra: Record<string, unknown> = {}) =>
   console.log(JSON.stringify({ time: new Date().toISOString(), level, service: 'worker', msg, ...extra }));
@@ -99,6 +99,7 @@ async function main() {
   every('rankings', 60_000, () => rankingsJob(db));
   every('zones', 60_000, () => zonesJob(db));
   every('beginner', 60_000, () => beginnerJob(db));
+  every('merchant', 10_000, () => merchantJob(db));
   every('cleanup', 10 * 60_000, () => cleanupJob(db));
   await eventLoop();
 }

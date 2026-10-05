@@ -6,6 +6,7 @@ import { players, type Db } from '@evony/db';
 import { runGame } from './context.ts';
 import { getPlayer, savePlayer } from './repo.ts';
 import { checkBeginner } from './services/player.ts';
+import { merchantSweep } from './services/market.ts';
 import { refreshRankings } from './services/rankings.ts';
 import { refreshZoneStats } from './services/world.ts';
 
@@ -28,6 +29,11 @@ export async function beginnerJob(db: Db) {
       await savePlayer(ctx, p);
     });
   }
+}
+
+/** The computer merchant fills resting market orders its price has crossed. */
+export async function merchantJob(db: Db) {
+  await runGame(db, (ctx) => merchantSweep(ctx));
 }
 
 /** Drop delivered pushes and old chat/reports. */

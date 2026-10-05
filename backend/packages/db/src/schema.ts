@@ -525,6 +525,26 @@ export const marketShipments = pgTable(
   (t) => [index('market_shipments_city_idx').on(t.cityId)],
 );
 
+/** Completed market trades (price history). A null buyer/seller is the computer merchant. */
+export const marketTrades = pgTable(
+  'market_trades',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    resType: smallint('res_type').notNull(),
+    /** average gold per unit of this fill */
+    price: doublePrecision('price').notNull(),
+    amount: bigint('amount', { mode: 'number' }).notNull(),
+    /** gold that changed hands, before the buyer's fee */
+    gold: bigint('gold', { mode: 'number' }).notNull(),
+    /** side of the order that triggered the trade: 0 buy, 1 sell */
+    takerSide: smallint('taker_side').notNull(),
+    buyerPlayerId: integer('buyer_player_id'),
+    sellerPlayerId: integer('seller_player_id'),
+    createdAt: ms('created_at').notNull(),
+  },
+  (t) => [index('market_trades_res_time_idx').on(t.resType, t.createdAt), index('market_trades_buyer_idx').on(t.buyerPlayerId), index('market_trades_seller_idx').on(t.sellerPlayerId)],
+);
+
 export const questProgress = pgTable(
   'quest_progress',
   {

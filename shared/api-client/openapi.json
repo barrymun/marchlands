@@ -7464,12 +7464,64 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "milliseconds"
+            "description": "0 = market trades are instant"
           },
           "marketMaxOrdersPerLevel": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "merchant": {
+            "type": "object",
+            "properties": {
+              "basePrice": {
+                "type": "object",
+                "properties": {
+                  "food": {
+                    "type": "number"
+                  },
+                  "wood": {
+                    "type": "number"
+                  },
+                  "stone": {
+                    "type": "number"
+                  },
+                  "iron": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "food",
+                  "wood",
+                  "stone",
+                  "iron"
+                ]
+              },
+              "spread": {
+                "type": "number"
+              },
+              "depth": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "recoveryHalfLifeMs": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "milliseconds"
+              },
+              "band": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "basePrice",
+              "spread",
+              "depth",
+              "recoveryHalfLifeMs",
+              "band"
+            ]
           },
           "shopResourcePerCent": {
             "type": "object",
@@ -7571,6 +7623,7 @@
           "marketFee",
           "marketShipmentBaseMs",
           "marketMaxOrdersPerLevel",
+          "merchant",
           "shopResourcePerCent"
         ]
       },
@@ -7691,6 +7744,34 @@
           "amount"
         ]
       },
+      "MarketMerchantInput": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "number",
+            "description": "current reference price"
+          },
+          "base": {
+            "type": "number",
+            "description": "price the reference drifts back to"
+          },
+          "bid": {
+            "type": "number",
+            "description": "the merchant buys at this price (marginal; falls as it buys)"
+          },
+          "ask": {
+            "type": "number",
+            "description": "the merchant sells at this price (marginal; rises as it sells)"
+          }
+        },
+        "required": [
+          "reference",
+          "base",
+          "bid",
+          "ask"
+        ],
+        "description": "computer merchant: always buys and sells, in unlimited amounts"
+      },
       "MarketOrderBookInput": {
         "type": "object",
         "properties": {
@@ -7712,12 +7793,16 @@
               "$ref": "#/components/schemas/MarketPriceLevelInput"
             },
             "description": "offers, best (lowest) price first"
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/MarketMerchantInput"
           }
         },
         "required": [
           "resType",
           "buyers",
-          "sellers"
+          "sellers",
+          "merchant"
         ]
       },
       "MarketOrderInput": {
@@ -7792,22 +7877,262 @@
           "dealedTotal"
         ]
       },
-      "MarketPlaceOrderResultInput": {
+      "MarketQuoteInput": {
         "type": "object",
         "properties": {
-          "order": {
-            "$ref": "#/components/schemas/MarketOrderInput"
-          },
           "filled": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "amount matched immediately"
+            "description": "units traded now"
+          },
+          "avgPrice": {
+            "description": "average gold per unit of the units traded now",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold paid (buy, incl. fee) or received (sell) for the units traded now"
+          },
+          "fee": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "merchantFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with the computer merchant"
+          },
+          "playerFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with other lords"
+          },
+          "rest": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units left resting on the book (limit orders)"
+          },
+          "escrow": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold (buy) or goods (sell) held for the resting part"
           }
         },
         "required": [
-          "order",
-          "filled"
+          "filled",
+          "avgPrice",
+          "gold",
+          "fee",
+          "merchantFilled",
+          "playerFilled",
+          "rest",
+          "escrow"
+        ]
+      },
+      "MarketPlaceOrderResultInput": {
+        "type": "object",
+        "properties": {
+          "filled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded now"
+          },
+          "avgPrice": {
+            "description": "average gold per unit of the units traded now",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold paid (buy, incl. fee) or received (sell) for the units traded now"
+          },
+          "fee": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "merchantFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with the computer merchant"
+          },
+          "playerFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with other lords"
+          },
+          "rest": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units left resting on the book (limit orders)"
+          },
+          "escrow": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold (buy) or goods (sell) held for the resting part"
+          },
+          "order": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MarketOrderInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the resting order, or null when nothing rests"
+          }
+        },
+        "required": [
+          "filled",
+          "avgPrice",
+          "gold",
+          "fee",
+          "merchantFilled",
+          "playerFilled",
+          "rest",
+          "escrow",
+          "order"
+        ]
+      },
+      "MarketTradeInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "price": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "takerSide": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "side of the order that triggered the trade: 0 buy, 1 sell"
+          },
+          "merchant": {
+            "type": "boolean",
+            "description": "traded with the computer merchant"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "epoch milliseconds"
+          }
+        },
+        "required": [
+          "id",
+          "price",
+          "amount",
+          "gold",
+          "takerSide",
+          "merchant",
+          "createdAt"
+        ]
+      },
+      "MarketCandleInput": {
+        "type": "object",
+        "properties": {
+          "t": {
+            "type": "number",
+            "description": "bucket start"
+          },
+          "open": {
+            "type": "number"
+          },
+          "high": {
+            "type": "number"
+          },
+          "low": {
+            "type": "number"
+          },
+          "close": {
+            "type": "number"
+          },
+          "volume": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "t",
+          "open",
+          "high",
+          "low",
+          "close",
+          "volume"
+        ]
+      },
+      "MarketHistoryInput": {
+        "type": "object",
+        "properties": {
+          "resType": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "bucketMs": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "candle length: one game hour"
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/MarketMerchantInput"
+          },
+          "candles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketCandleInput"
+            },
+            "description": "oldest first; buckets without trades are omitted"
+          },
+          "trades": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketTradeInput"
+            },
+            "description": "most recent first"
+          }
+        },
+        "required": [
+          "resType",
+          "bucketMs",
+          "merchant",
+          "candles",
+          "trades"
         ]
       },
       "MarketShipmentInput": {
@@ -16106,12 +16431,66 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "milliseconds"
+            "description": "0 = market trades are instant"
           },
           "marketMaxOrdersPerLevel": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "merchant": {
+            "type": "object",
+            "properties": {
+              "basePrice": {
+                "type": "object",
+                "properties": {
+                  "food": {
+                    "type": "number"
+                  },
+                  "wood": {
+                    "type": "number"
+                  },
+                  "stone": {
+                    "type": "number"
+                  },
+                  "iron": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "food",
+                  "wood",
+                  "stone",
+                  "iron"
+                ],
+                "additionalProperties": false
+              },
+              "spread": {
+                "type": "number"
+              },
+              "depth": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "recoveryHalfLifeMs": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "milliseconds"
+              },
+              "band": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "basePrice",
+              "spread",
+              "depth",
+              "recoveryHalfLifeMs",
+              "band"
+            ],
+            "additionalProperties": false
           },
           "shopResourcePerCent": {
             "type": "object",
@@ -16214,6 +16593,7 @@
           "marketFee",
           "marketShipmentBaseMs",
           "marketMaxOrdersPerLevel",
+          "merchant",
           "shopResourcePerCent"
         ],
         "additionalProperties": false
@@ -16337,6 +16717,35 @@
         ],
         "additionalProperties": false
       },
+      "MarketMerchant": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "number",
+            "description": "current reference price"
+          },
+          "base": {
+            "type": "number",
+            "description": "price the reference drifts back to"
+          },
+          "bid": {
+            "type": "number",
+            "description": "the merchant buys at this price (marginal; falls as it buys)"
+          },
+          "ask": {
+            "type": "number",
+            "description": "the merchant sells at this price (marginal; rises as it sells)"
+          }
+        },
+        "required": [
+          "reference",
+          "base",
+          "bid",
+          "ask"
+        ],
+        "additionalProperties": false,
+        "description": "computer merchant: always buys and sells, in unlimited amounts"
+      },
       "MarketOrderBook": {
         "type": "object",
         "properties": {
@@ -16358,12 +16767,16 @@
               "$ref": "#/components/schemas/MarketPriceLevel"
             },
             "description": "offers, best (lowest) price first"
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/MarketMerchant"
           }
         },
         "required": [
           "resType",
           "buyers",
-          "sellers"
+          "sellers",
+          "merchant"
         ],
         "additionalProperties": false
       },
@@ -16440,22 +16853,266 @@
         ],
         "additionalProperties": false
       },
-      "MarketPlaceOrderResult": {
+      "MarketQuote": {
         "type": "object",
         "properties": {
-          "order": {
-            "$ref": "#/components/schemas/MarketOrder"
-          },
           "filled": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "amount matched immediately"
+            "description": "units traded now"
+          },
+          "avgPrice": {
+            "description": "average gold per unit of the units traded now",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold paid (buy, incl. fee) or received (sell) for the units traded now"
+          },
+          "fee": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "merchantFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with the computer merchant"
+          },
+          "playerFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with other lords"
+          },
+          "rest": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units left resting on the book (limit orders)"
+          },
+          "escrow": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold (buy) or goods (sell) held for the resting part"
           }
         },
         "required": [
-          "order",
-          "filled"
+          "filled",
+          "avgPrice",
+          "gold",
+          "fee",
+          "merchantFilled",
+          "playerFilled",
+          "rest",
+          "escrow"
+        ],
+        "additionalProperties": false
+      },
+      "MarketPlaceOrderResult": {
+        "type": "object",
+        "properties": {
+          "filled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded now"
+          },
+          "avgPrice": {
+            "description": "average gold per unit of the units traded now",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold paid (buy, incl. fee) or received (sell) for the units traded now"
+          },
+          "fee": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "merchantFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with the computer merchant"
+          },
+          "playerFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with other lords"
+          },
+          "rest": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units left resting on the book (limit orders)"
+          },
+          "escrow": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold (buy) or goods (sell) held for the resting part"
+          },
+          "order": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MarketOrder"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the resting order, or null when nothing rests"
+          }
+        },
+        "required": [
+          "filled",
+          "avgPrice",
+          "gold",
+          "fee",
+          "merchantFilled",
+          "playerFilled",
+          "rest",
+          "escrow",
+          "order"
+        ],
+        "additionalProperties": false
+      },
+      "MarketTrade": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "price": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "takerSide": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "side of the order that triggered the trade: 0 buy, 1 sell"
+          },
+          "merchant": {
+            "type": "boolean",
+            "description": "traded with the computer merchant"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "epoch milliseconds"
+          }
+        },
+        "required": [
+          "id",
+          "price",
+          "amount",
+          "gold",
+          "takerSide",
+          "merchant",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "MarketCandle": {
+        "type": "object",
+        "properties": {
+          "t": {
+            "type": "number",
+            "description": "bucket start"
+          },
+          "open": {
+            "type": "number"
+          },
+          "high": {
+            "type": "number"
+          },
+          "low": {
+            "type": "number"
+          },
+          "close": {
+            "type": "number"
+          },
+          "volume": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "t",
+          "open",
+          "high",
+          "low",
+          "close",
+          "volume"
+        ],
+        "additionalProperties": false
+      },
+      "MarketHistory": {
+        "type": "object",
+        "properties": {
+          "resType": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "bucketMs": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "candle length: one game hour"
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/MarketMerchant"
+          },
+          "candles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketCandle"
+            },
+            "description": "oldest first; buckets without trades are omitted"
+          },
+          "trades": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketTrade"
+            },
+            "description": "most recent first"
+          }
+        },
+        "required": [
+          "resType",
+          "bucketMs",
+          "merchant",
+          "candles",
+          "trades"
         ],
         "additionalProperties": false
       },
@@ -27997,6 +28654,193 @@
         }
       }
     },
+    "/api/v1/market/{resType}/quote": {
+      "get": {
+        "summary": "Preview an order: what would trade now, at what average price, and what would rest",
+        "tags": [
+          "market"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "in": "query",
+            "name": "side",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "in": "query",
+            "name": "amount",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "price",
+            "required": false
+          },
+          {
+            "schema": {
+              "default": "limit",
+              "type": "string",
+              "enum": [
+                "limit",
+                "market"
+              ]
+            },
+            "in": "query",
+            "name": "type",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "in": "path",
+            "name": "resType",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MarketQuote"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/market/{resType}/history": {
+      "get": {
+        "summary": "Recent trades and hourly (game time) price candles",
+        "tags": [
+          "market"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "in": "path",
+            "name": "resType",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/MarketHistory"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/market/orders/mine": {
       "get": {
         "summary": "My open orders (trade.getMyTradeList)",
@@ -28063,7 +28907,7 @@
     },
     "/api/v1/cities/{cityId}/market/orders": {
       "post": {
-        "summary": "Place an order: side 0 buy, 1 sell (trade.newTrade)",
+        "summary": "Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade)",
         "tags": [
           "market"
         ],
@@ -28082,7 +28926,8 @@
                   "side": {
                     "type": "integer",
                     "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
+                    "maximum": 9007199254740991,
+                    "description": "0 buy, 1 sell"
                   },
                   "amount": {
                     "type": "integer",
@@ -28090,14 +28935,23 @@
                     "maximum": 9007199254740991
                   },
                   "price": {
+                    "description": "gold per unit; required for limit orders",
                     "type": "number"
+                  },
+                  "type": {
+                    "default": "limit",
+                    "description": "limit: unfilled part rests on the book; market: fill now at the best prices, nothing rests",
+                    "type": "string",
+                    "enum": [
+                      "limit",
+                      "market"
+                    ]
                   }
                 },
                 "required": [
                   "resType",
                   "side",
-                  "amount",
-                  "price"
+                  "amount"
                 ]
               }
             }

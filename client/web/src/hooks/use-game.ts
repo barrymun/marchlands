@@ -108,6 +108,14 @@ export function usePushSync(enabled: boolean): PushStatus {
         void qc.invalidateQueries({ queryKey: qk.armies });
         if (armys.length) toast.warning(`${armys.length} hostile ${armys.length === 1 ? 'army' : 'armies'} approaching`);
       }),
+      push.on('server.TradesUpdate', ({ resType, amount, price }) => {
+        void qc.invalidateQueries({ queryKey: ['market'] });
+        toast.success(`Trade: ${amount.toLocaleString('en')} ${['food', 'lumber', 'stone', 'iron'][resType] ?? 'goods'} at ${price} gold`);
+      }),
+      push.on('server.TransingTradeUpdate', ({ resType, amount }) => {
+        void qc.invalidateQueries({ queryKey: ['market', 'shipments'] });
+        if (resType !== 4) toast(`Market delivery: ${amount.toLocaleString('en')} ${['food', 'lumber', 'stone', 'iron'][resType] ?? 'goods'} arrived`);
+      }),
       push.on('server.NewReport', ({ count }) => count && toast(`${count} unread report${count === 1 ? '' : 's'}`)),
       push.on('server.SystemInfoMsg', ({ msg }) => toast.info(msg)),
     ];

@@ -69,8 +69,11 @@ async function main() {
   // ---- construction ----
   const cid = a.city.id;
   await ok(a.token, 'POST', `/cities/${cid}/buildings`, { typeId: 1, positionId: 0 });
-  const r2 = await call(a.token, 'POST', `/cities/${cid}/buildings`, { typeId: 29, positionId: 1 });
-  check(r2.ok === -48, 'second concurrent build rejected (-48)');
+  // two construction queues (BALANCE.buildQueues): the second build starts, a third is refused
+  const r2 = await call(a.token, 'POST', `/cities/${cid}/buildings`, { typeId: 1, positionId: 10 });
+  check(r2.ok === 1, 'second concurrent build accepted');
+  const r3 = await call(a.token, 'POST', `/cities/${cid}/buildings`, { typeId: 1, positionId: 11 });
+  check(r3.ok === -48, 'third concurrent build rejected (-48)');
   await until(async () => (await ok(a.token, 'GET', `/cities/${cid}`)).buildings.some((x) => x.typeId === 1 && x.level === 1), 'cottage completes');
   check(true, 'cottage level 1 completed by worker');
   check(sock.has('server.BuildComplate'), 'BuildComplate push received');

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Two-lord scenario: scouting, attacking a city (plunder + loyalty), valley occupation,
-// recall, alliance transport and a market fill. Needs an operator account (SMOKE_ADMIN listed
+// recall, alliance transport and a market fill (see market.mjs for the merchant). Needs an operator account (SMOKE_ADMIN listed
 // in ADMIN_USERNAMES) and a fast GAME_SPEED (>= 200 recommended).
 //   API=http://localhost:3100 node tools/smoke/war.mjs
 
@@ -143,13 +143,16 @@ async function main() {
   check(blocked.ok === -13, 'cannot attack an alliance member');
 
   // ---- market ----
-  await ok(b.token, 'POST', `/cities/${b.city.id}/market/orders`, { resType: 1, side: 1, amount: 5000, price: 0.4 });
-  const fill = await ok(a.token, 'POST', `/cities/${a.city.id}/market/orders`, { resType: 1, side: 0, amount: 5000, price: 0.5 });
-  check(fill.filled === 5000, 'buy order filled against the offer');
-  const ships = await ok(a.token, 'GET', '/market/shipments');
-  check(ships.length >= 1, 'lumber shipment in transit');
-  await until(async () => (await ok(a.token, 'GET', '/market/shipments')).length === 0, 'shipment delivered');
-  check(true, 'shipment delivered');
+  // an offer inside the computer merchant's spread beats the merchant, so the bid fills against it
+  const ref = Math.round((await ok(a.token, 'GET', '/market/1')).merchant.reference * 1000) / 1000;
+  await ok(b.token, 'POST', `/cities/${b.city.id}/market/orders`, { resType: 1, side: 1, amount: 5000, price: ref });
+  const fill = await ok(a.token, 'POST', `/cities/${a.city.id}/market/orders`, { resType: 1, side: 0, amount: 5000, price: ref });
+  check(fill.filled === 5000 && fill.playerFilled === 5000, 'buy order filled against the offer');
+  const left = await ok(a.token, 'GET', '/market/orders/mine');
+  check(fill.order === null && left.length === 0, 'fully filled order not left on the book (no refundable escrow left behind)');
+  check(!(await ok(b.token, 'GET', '/market/orders/mine')).length, "seller's filled offer removed too");
+  // trades settle instantly (BALANCE.marketShipmentBaseMs = 0): the buyer already has the lumber
+  check((await ok(a.token, 'GET', '/market/shipments')).length === 0, 'purchase settled instantly (no shipment)');
 
   console.log(failures ? `\n${failures} check(s) FAILED` : '\nall checks passed');
   process.exit(failures ? 1 : 0);

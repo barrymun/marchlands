@@ -19,7 +19,7 @@
     "db:generate": "npm run generate -w @evony/db",
     "db:migrate": "npm run migrate -w @evony/db",
     "legacy:convert": "node tools/legacy-import/convert.mjs",
-    "smoke": "node tools/smoke/smoke.mjs && node tools/smoke/war.mjs",
+    "smoke": "node tools/smoke/smoke.mjs && node tools/smoke/war.mjs && node tools/smoke/market.mjs",
     "docs:api": "node tools/docs/gen-api-md.mjs",
     "gen:api": "node backend/services/api/src/openapi.ts && npm run generate -w @evony/api-client && npm run docs:api",
     "dev:web": "npm run dev -w @evony/web",

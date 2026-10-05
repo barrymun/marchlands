@@ -72,10 +72,11 @@ The original either stubbed these or never answered them.
   - Production buffs: +25%.
 - **Troop food upkeep** from `config_troops.movecost`; troops desert at 10% per hour while food is at 0.
 - **Market.**
-  - Escrow when an order is placed; price-time priority matching at the resting order's price.
-  - A 0.5% fee paid by the buyer.
-  - Bought goods travel for 60 min divided by the Marketplace level (halved by Merchant Fleet).
-  - Order cap of 2 per Marketplace level; cancellation refunds.
+  - Escrow when an order is placed; price-time priority matching at the resting order's price; a 0.5% fee paid by the buyer.
+  - *(design change)* **Instant settlement**: the lord placing an order is paid in the same transaction; lords whose resting orders are hit are paid within a moment (zero-time shipments). `BALANCE.marketShipmentBaseMs > 0` restores Evony's travel time (60 min ÷ Marketplace level). Merchant Fleet therefore has no effect.
+  - *(design change)* **Computer merchant** (`core/src/merchant.ts`, `BALANCE.merchant`): always buys and sells every resource in any amount. It quotes around a reference price (±5%); its trades move the price along an exponential curve (fills are priced along the curve, so splitting orders or round-tripping gains nothing) and the price drifts back to its base with a 6-game-hour half-life. Lords' orders at a better or equal price are filled first. A worker job lets the merchant fill resting orders its drifting price has crossed.
+  - **Market and limit orders**, a quote endpoint, and a trade log (`market_trades`) with recent trades and hourly (game time) price candles.
+  - Order cap of 2 resting orders per Marketplace level; cancellation refunds.
 - **Walls.** Fortifications take wall space (by Walls level).
 - **Items.** A declarative effect for every item in `config_items`: production, attack, defence and upkeep buffs; boxes, chests and keys, troop boxes, hero helms; the chat icon; Ritual of Pact; Bernini's Hammer (one extra build queue); War Ensign; Speech Text; Civil Code; Penicillin.
 - **Nobility titles** (Knight … Prince) bought with prestige and medals. A title limits how many cities a lord may own.

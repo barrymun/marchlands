@@ -211,8 +211,10 @@ All paths are relative to the server root. Names in parentheses are the original
 
 | Method | Path | Description |
 |---|---|---|
-| POST | `/api/v1/cities/{cityId}/market/orders` | Place an order: side 0 buy, 1 sell (trade.newTrade) |
+| POST | `/api/v1/cities/{cityId}/market/orders` | Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade) |
 | GET | `/api/v1/market/{resType}` | Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades) |
+| GET | `/api/v1/market/{resType}/history` | Recent trades and hourly (game time) price candles |
+| GET | `/api/v1/market/{resType}/quote` | Preview an order: what would trade now, at what average price, and what would rest |
 | DELETE | `/api/v1/market/orders/{orderId}` | Cancel (trade.cancelTrade) |
 | GET | `/api/v1/market/orders/mine` | My open orders (trade.getMyTradeList) |
 | GET | `/api/v1/market/shipments` | Goods in transit (trade.getTransingTradeList) |

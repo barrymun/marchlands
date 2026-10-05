@@ -120,9 +120,22 @@ export const BALANCE = {
 
   // ---- market ----
   marketFee: 0.005, // (evony) 0.5% of gold paid
-  /** (evony) shipments travel this long divided by marketplace level */
-  marketShipmentBaseMs: 60 * MINUTE,
+  /** (evony-re) market trades are instant (orig Evony: goods travel 60 min / Marketplace level); > 0 restores travel */
+  marketShipmentBaseMs: 0 * MINUTE,
   marketMaxOrdersPerLevel: 2,
+  /**
+   * (evony-re) computer merchant: always buys and sells every resource. Its reference price moves
+   * with its trades (x e^(qty/depth)) and drifts back to `basePrice` with a half-life of
+   * `recoveryHalfLifeMs` (game time). It sells at reference x (1 + spread/2), buys at x (1 - spread/2).
+   */
+  merchant: {
+    basePrice: { food: 0.2, wood: 0.3, stone: 0.4, iron: 0.5 },
+    spread: 0.1,
+    depth: 1_000_000,
+    recoveryHalfLifeMs: 6 * HOUR,
+    /** the reference never leaves [base / band, base x band] */
+    band: 5,
+  },
   /** (orig) units of resource per cent in shop.buyResource */
   shopResourcePerCent: { food: 100_000, wood: 100_000, stone: 50_000, iron: 40_000 },
 } as const;

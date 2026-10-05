@@ -8204,6 +8204,131 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/market/{resType}/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview an order: what would trade now, at what average price, and what would rest */
+        get: {
+            parameters: {
+                query: {
+                    side: number;
+                    amount: number;
+                    price?: number;
+                    type?: "limit" | "market";
+                };
+                header?: never;
+                path: {
+                    resType: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["MarketQuote"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/market/{resType}/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recent trades and hourly (game time) price candles */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    resType: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["MarketHistory"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/market/orders/mine": {
         parameters: {
             query?: never;
@@ -8271,7 +8396,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Place an order: side 0 buy, 1 sell (trade.newTrade) */
+        /** Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade) */
         post: {
             parameters: {
                 query?: never;
@@ -8285,9 +8410,17 @@ export interface paths {
                 content: {
                     "application/json": {
                         resType: number;
+                        /** @description 0 buy, 1 sell */
                         side: number;
                         amount: number;
-                        price: number;
+                        /** @description gold per unit; required for limit orders */
+                        price?: number;
+                        /**
+                         * @description limit: unfilled part rests on the book; market: fill now at the best prices, nothing rests
+                         * @default limit
+                         * @enum {string}
+                         */
+                        type?: "limit" | "market";
                     };
                 };
             };
@@ -11678,9 +11811,22 @@ export interface components {
             /** @description milliseconds */
             allianceWarCooldownMs: number;
             marketFee: number;
-            /** @description milliseconds */
+            /** @description 0 = market trades are instant */
             marketShipmentBaseMs: number;
             marketMaxOrdersPerLevel: number;
+            merchant: {
+                basePrice: {
+                    food: number;
+                    wood: number;
+                    stone: number;
+                    iron: number;
+                };
+                spread: number;
+                depth: number;
+                /** @description milliseconds */
+                recoveryHalfLifeMs: number;
+                band: number;
+            };
             shopResourcePerCent: {
                 food: number;
                 wood: number;
@@ -11717,12 +11863,24 @@ export interface components {
             /** @description open amount at this price */
             amount: number;
         };
+        /** @description computer merchant: always buys and sells, in unlimited amounts */
+        MarketMerchantInput: {
+            /** @description current reference price */
+            reference: number;
+            /** @description price the reference drifts back to */
+            base: number;
+            /** @description the merchant buys at this price (marginal; falls as it buys) */
+            bid: number;
+            /** @description the merchant sells at this price (marginal; rises as it sells) */
+            ask: number;
+        };
         MarketOrderBookInput: {
             resType: number;
             /** @description bids, best (highest) price first */
             buyers: components["schemas"]["MarketPriceLevelInput"][];
             /** @description offers, best (lowest) price first */
             sellers: components["schemas"]["MarketPriceLevelInput"][];
+            merchant: components["schemas"]["MarketMerchantInput"];
         };
         MarketOrderInput: {
             id: number;
@@ -11740,10 +11898,72 @@ export interface components {
             /** @description amount filled so far */
             dealedTotal: number;
         };
-        MarketPlaceOrderResultInput: {
-            order: components["schemas"]["MarketOrderInput"];
-            /** @description amount matched immediately */
+        MarketQuoteInput: {
+            /** @description units traded now */
             filled: number;
+            /** @description average gold per unit of the units traded now */
+            avgPrice: number | null;
+            /** @description gold paid (buy, incl. fee) or received (sell) for the units traded now */
+            gold: number;
+            fee: number;
+            /** @description units traded with the computer merchant */
+            merchantFilled: number;
+            /** @description units traded with other lords */
+            playerFilled: number;
+            /** @description units left resting on the book (limit orders) */
+            rest: number;
+            /** @description gold (buy) or goods (sell) held for the resting part */
+            escrow: number;
+        };
+        MarketPlaceOrderResultInput: {
+            /** @description units traded now */
+            filled: number;
+            /** @description average gold per unit of the units traded now */
+            avgPrice: number | null;
+            /** @description gold paid (buy, incl. fee) or received (sell) for the units traded now */
+            gold: number;
+            fee: number;
+            /** @description units traded with the computer merchant */
+            merchantFilled: number;
+            /** @description units traded with other lords */
+            playerFilled: number;
+            /** @description units left resting on the book (limit orders) */
+            rest: number;
+            /** @description gold (buy) or goods (sell) held for the resting part */
+            escrow: number;
+            /** @description the resting order, or null when nothing rests */
+            order: components["schemas"]["MarketOrderInput"] | null;
+        };
+        MarketTradeInput: {
+            id: number;
+            price: number;
+            amount: number;
+            gold: number;
+            /** @description side of the order that triggered the trade: 0 buy, 1 sell */
+            takerSide: number;
+            /** @description traded with the computer merchant */
+            merchant: boolean;
+            /** @description epoch milliseconds */
+            createdAt: number;
+        };
+        MarketCandleInput: {
+            /** @description bucket start */
+            t: number;
+            open: number;
+            high: number;
+            low: number;
+            close: number;
+            volume: number;
+        };
+        MarketHistoryInput: {
+            resType: number;
+            /** @description candle length: one game hour */
+            bucketMs: number;
+            merchant: components["schemas"]["MarketMerchantInput"];
+            /** @description oldest first; buckets without trades are omitted */
+            candles: components["schemas"]["MarketCandleInput"][];
+            /** @description most recent first */
+            trades: components["schemas"]["MarketTradeInput"][];
         };
         MarketShipmentInput: {
             id: number;
@@ -13458,9 +13678,22 @@ export interface components {
             /** @description milliseconds */
             allianceWarCooldownMs: number;
             marketFee: number;
-            /** @description milliseconds */
+            /** @description 0 = market trades are instant */
             marketShipmentBaseMs: number;
             marketMaxOrdersPerLevel: number;
+            merchant: {
+                basePrice: {
+                    food: number;
+                    wood: number;
+                    stone: number;
+                    iron: number;
+                };
+                spread: number;
+                depth: number;
+                /** @description milliseconds */
+                recoveryHalfLifeMs: number;
+                band: number;
+            };
             shopResourcePerCent: {
                 food: number;
                 wood: number;
@@ -13497,12 +13730,24 @@ export interface components {
             /** @description open amount at this price */
             amount: number;
         };
+        /** @description computer merchant: always buys and sells, in unlimited amounts */
+        MarketMerchant: {
+            /** @description current reference price */
+            reference: number;
+            /** @description price the reference drifts back to */
+            base: number;
+            /** @description the merchant buys at this price (marginal; falls as it buys) */
+            bid: number;
+            /** @description the merchant sells at this price (marginal; rises as it sells) */
+            ask: number;
+        };
         MarketOrderBook: {
             resType: number;
             /** @description bids, best (highest) price first */
             buyers: components["schemas"]["MarketPriceLevel"][];
             /** @description offers, best (lowest) price first */
             sellers: components["schemas"]["MarketPriceLevel"][];
+            merchant: components["schemas"]["MarketMerchant"];
         };
         MarketOrder: {
             id: number;
@@ -13520,10 +13765,72 @@ export interface components {
             /** @description amount filled so far */
             dealedTotal: number;
         };
-        MarketPlaceOrderResult: {
-            order: components["schemas"]["MarketOrder"];
-            /** @description amount matched immediately */
+        MarketQuote: {
+            /** @description units traded now */
             filled: number;
+            /** @description average gold per unit of the units traded now */
+            avgPrice: number | null;
+            /** @description gold paid (buy, incl. fee) or received (sell) for the units traded now */
+            gold: number;
+            fee: number;
+            /** @description units traded with the computer merchant */
+            merchantFilled: number;
+            /** @description units traded with other lords */
+            playerFilled: number;
+            /** @description units left resting on the book (limit orders) */
+            rest: number;
+            /** @description gold (buy) or goods (sell) held for the resting part */
+            escrow: number;
+        };
+        MarketPlaceOrderResult: {
+            /** @description units traded now */
+            filled: number;
+            /** @description average gold per unit of the units traded now */
+            avgPrice: number | null;
+            /** @description gold paid (buy, incl. fee) or received (sell) for the units traded now */
+            gold: number;
+            fee: number;
+            /** @description units traded with the computer merchant */
+            merchantFilled: number;
+            /** @description units traded with other lords */
+            playerFilled: number;
+            /** @description units left resting on the book (limit orders) */
+            rest: number;
+            /** @description gold (buy) or goods (sell) held for the resting part */
+            escrow: number;
+            /** @description the resting order, or null when nothing rests */
+            order: components["schemas"]["MarketOrder"] | null;
+        };
+        MarketTrade: {
+            id: number;
+            price: number;
+            amount: number;
+            gold: number;
+            /** @description side of the order that triggered the trade: 0 buy, 1 sell */
+            takerSide: number;
+            /** @description traded with the computer merchant */
+            merchant: boolean;
+            /** @description epoch milliseconds */
+            createdAt: number;
+        };
+        MarketCandle: {
+            /** @description bucket start */
+            t: number;
+            open: number;
+            high: number;
+            low: number;
+            close: number;
+            volume: number;
+        };
+        MarketHistory: {
+            resType: number;
+            /** @description candle length: one game hour */
+            bucketMs: number;
+            merchant: components["schemas"]["MarketMerchant"];
+            /** @description oldest first; buckets without trades are omitted */
+            candles: components["schemas"]["MarketCandle"][];
+            /** @description most recent first */
+            trades: components["schemas"]["MarketTrade"][];
         };
         MarketShipment: {
             id: number;
@@ -13788,9 +14095,14 @@ export type ConfigTitleInput = components['schemas']['ConfigTitleInput'];
 export type ConfigBalanceInput = components['schemas']['ConfigBalanceInput'];
 export type StaticConfigInput = components['schemas']['StaticConfigInput'];
 export type MarketPriceLevelInput = components['schemas']['MarketPriceLevelInput'];
+export type MarketMerchantInput = components['schemas']['MarketMerchantInput'];
 export type MarketOrderBookInput = components['schemas']['MarketOrderBookInput'];
 export type MarketOrderInput = components['schemas']['MarketOrderInput'];
+export type MarketQuoteInput = components['schemas']['MarketQuoteInput'];
 export type MarketPlaceOrderResultInput = components['schemas']['MarketPlaceOrderResultInput'];
+export type MarketTradeInput = components['schemas']['MarketTradeInput'];
+export type MarketCandleInput = components['schemas']['MarketCandleInput'];
+export type MarketHistoryInput = components['schemas']['MarketHistoryInput'];
 export type MarketShipmentInput = components['schemas']['MarketShipmentInput'];
 export type ShopItemInput = components['schemas']['ShopItemInput'];
 export type ShopCategoryInput = components['schemas']['ShopCategoryInput'];
@@ -13907,9 +14219,14 @@ export type ConfigTitle = components['schemas']['ConfigTitle'];
 export type ConfigBalance = components['schemas']['ConfigBalance'];
 export type StaticConfig = components['schemas']['StaticConfig'];
 export type MarketPriceLevel = components['schemas']['MarketPriceLevel'];
+export type MarketMerchant = components['schemas']['MarketMerchant'];
 export type MarketOrderBook = components['schemas']['MarketOrderBook'];
 export type MarketOrder = components['schemas']['MarketOrder'];
+export type MarketQuote = components['schemas']['MarketQuote'];
 export type MarketPlaceOrderResult = components['schemas']['MarketPlaceOrderResult'];
+export type MarketTrade = components['schemas']['MarketTrade'];
+export type MarketCandle = components['schemas']['MarketCandle'];
+export type MarketHistory = components['schemas']['MarketHistory'];
 export type MarketShipment = components['schemas']['MarketShipment'];
 export type ShopItem = components['schemas']['ShopItem'];
 export type ShopCategory = components['schemas']['ShopCategory'];

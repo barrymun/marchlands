@@ -16,6 +16,7 @@ import { LordDialog } from '@/components/lord-dialog';
 import { HeroesPanel } from '@/components/heroes-panel';
 import { ItemsPanel } from '@/components/items-panel';
 import { MapPanel } from '@/components/map-panel';
+import { MarketPanel } from '@/components/market-panel';
 import { MilitaryPanel } from '@/components/military-panel';
 import { ResearchPanel } from '@/components/research-panel';
 import { ResourceBar } from '@/components/resource-bar';
@@ -30,6 +31,7 @@ const TABS = [
   { id: 'heroes', label: 'Heroes' },
   { id: 'research', label: 'Research' },
   { id: 'items', label: 'Items' },
+  { id: 'market', label: 'Market' },
   { id: 'armies', label: 'Armies' },
   { id: 'map', label: 'Map' },
 ] as const;
@@ -154,6 +156,9 @@ export function GamePage() {
               </TabsContent>
               <TabsContent value="items">
                 <ItemsPanel city={city.data} />
+              </TabsContent>
+              <TabsContent value="market">
+                <MarketPanel city={city.data} />
               </TabsContent>
               <TabsContent value="armies">
                 <ArmiesPanel />

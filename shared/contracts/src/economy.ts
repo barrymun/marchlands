@@ -2,7 +2,7 @@
 // /config/static, /market*, /shop*, /quests*, /rankings/*, /admin/*.
 
 import { z } from 'zod';
-import { zId, zPaging, zResources } from './common.ts';
+import { Ms, zId, zPaging, zResources } from './common.ts';
 import { AllianceRow, CityRow, HeroRow, MarketOrderRow, MarketShipmentRow, PlayerRow, QuestProgressRow } from './rows.ts';
 
 const int = () => z.number().int();
@@ -175,8 +175,15 @@ export const ConfigBalance = z
     allianceMaxMembers: int(),
     allianceWarCooldownMs: ms(),
     marketFee: z.number(),
-    marketShipmentBaseMs: ms(),
+    marketShipmentBaseMs: ms().describe('0 = market trades are instant'),
     marketMaxOrdersPerLevel: int(),
+    merchant: z.object({
+      basePrice: z.object({ food: z.number(), wood: z.number(), stone: z.number(), iron: z.number() }),
+      spread: z.number(),
+      depth: int(),
+      recoveryHalfLifeMs: ms(),
+      band: z.number(),
+    }),
     shopResourcePerCent: z.object({ food: int(), wood: int(), stone: int(), iron: int() }),
   })
   .meta({ id: 'ConfigBalance' });
@@ -203,7 +210,19 @@ export type StaticConfig = z.infer<typeof StaticConfig>;
 // ---- market ----
 
 export const MarketResTypeParams = z.object({ resType: z.coerce.number().int() });
-export const PlaceOrderBody = z.object({ resType: z.number().int(), side: z.number().int(), amount: z.number().int(), price: z.number() });
+export const PlaceOrderBody = z.object({
+  resType: z.number().int(),
+  side: z.number().int().describe('0 buy, 1 sell'),
+  amount: z.number().int(),
+  price: z.number().optional().describe('gold per unit; required for limit orders'),
+  type: z.enum(['limit', 'market']).default('limit').describe('limit: unfilled part rests on the book; market: fill now at the best prices, nothing rests'),
+});
+export const MarketQuoteQuery = z.object({
+  side: z.coerce.number().int(),
+  amount: z.coerce.number().int(),
+  price: z.coerce.number().optional(),
+  type: z.enum(['limit', 'market']).default('limit'),
+});
 export const OrderIdParams = z.object({ orderId: zId });
 export const ShipmentIdParams = z.object({ shipmentId: zId });
 
@@ -212,11 +231,22 @@ const resourceName = z.enum(['food', 'wood', 'stone', 'iron']);
 export const MarketPriceLevel = z.object({ price: z.number(), amount: int().describe('open amount at this price') }).meta({ id: 'MarketPriceLevel' });
 export type MarketPriceLevel = z.infer<typeof MarketPriceLevel>;
 
+export const MarketMerchant = z
+  .object({
+    reference: z.number().describe('current reference price'),
+    base: z.number().describe('price the reference drifts back to'),
+    bid: z.number().describe('the merchant buys at this price (marginal; falls as it buys)'),
+    ask: z.number().describe('the merchant sells at this price (marginal; rises as it sells)'),
+  })
+  .meta({ id: 'MarketMerchant', description: 'computer merchant: always buys and sells, in unlimited amounts' });
+export type MarketMerchant = z.infer<typeof MarketMerchant>;
+
 export const MarketOrderBook = z
   .object({
     resType: int(),
     buyers: z.array(MarketPriceLevel).describe('bids, best (highest) price first'),
     sellers: z.array(MarketPriceLevel).describe('offers, best (lowest) price first'),
+    merchant: MarketMerchant,
   })
   .meta({ id: 'MarketOrderBook' });
 export type MarketOrderBook = z.infer<typeof MarketOrderBook>;
@@ -231,8 +261,48 @@ export const MarketOrder = MarketOrderRow.pick({ id: true, resType: true, price:
   .meta({ id: 'MarketOrder' });
 export type MarketOrder = z.infer<typeof MarketOrder>;
 
-export const MarketPlaceOrderResult = z.object({ order: MarketOrder, filled: int().describe('amount matched immediately') }).meta({ id: 'MarketPlaceOrderResult' });
+const tradeSummary = {
+  filled: int().describe('units traded now'),
+  avgPrice: z.number().nullable().describe('average gold per unit of the units traded now'),
+  gold: int().describe('gold paid (buy, incl. fee) or received (sell) for the units traded now'),
+  fee: int(),
+  merchantFilled: int().describe('units traded with the computer merchant'),
+  playerFilled: int().describe('units traded with other lords'),
+  rest: int().describe('units left resting on the book (limit orders)'),
+  escrow: int().describe('gold (buy) or goods (sell) held for the resting part'),
+};
+export const MarketQuote = z.object(tradeSummary).meta({ id: 'MarketQuote' });
+export type MarketQuote = z.infer<typeof MarketQuote>;
+
+export const MarketPlaceOrderResult = z
+  .object({ ...tradeSummary, order: MarketOrder.nullable().describe('the resting order, or null when nothing rests') })
+  .meta({ id: 'MarketPlaceOrderResult' });
 export type MarketPlaceOrderResult = z.infer<typeof MarketPlaceOrderResult>;
+
+export const MarketTrade = z
+  .object({
+    id: int(),
+    price: z.number(),
+    amount: int(),
+    gold: int(),
+    takerSide: int().describe('side of the order that triggered the trade: 0 buy, 1 sell'),
+    merchant: z.boolean().describe('traded with the computer merchant'),
+    createdAt: Ms,
+  })
+  .meta({ id: 'MarketTrade' });
+export const MarketCandle = z
+  .object({ t: Ms.describe('bucket start'), open: z.number(), high: z.number(), low: z.number(), close: z.number(), volume: int() })
+  .meta({ id: 'MarketCandle' });
+export const MarketHistory = z
+  .object({
+    resType: int(),
+    bucketMs: int().describe('candle length: one game hour'),
+    merchant: MarketMerchant,
+    candles: z.array(MarketCandle).describe('oldest first; buckets without trades are omitted'),
+    trades: z.array(MarketTrade).describe('most recent first'),
+  })
+  .meta({ id: 'MarketHistory' });
+export type MarketHistory = z.infer<typeof MarketHistory>;
 
 export const MarketShipment = MarketShipmentRow.pick({ id: true, cityId: true, resType: true, amount: true, price: true, startTime: true, endTime: true })
   .extend({ resourceName: z.string().describe('food | wood | stone | iron | gold (resType 4: sale proceeds or escrow refund)') })
