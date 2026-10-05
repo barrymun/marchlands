@@ -45,6 +45,21 @@ export const ResourceLine = z
     workPeople: z.number(),
     increaseRate: z.number().int().describe('net change per hour (food is after troop upkeep)'),
     bonusPercent: z.number().int(),
+    breakdown: z
+      .object({
+        base: z.number().int().describe('flat output per hour, regardless of fields'),
+        fields: z.number().int().describe('field output per hour after work rate and labour efficiency'),
+        tech: z.number().int().describe('from Agriculture / Lumbering / Masonry / Mining'),
+        mayor: z.number().int().describe("from the mayor's politics"),
+        valley: z.number().int().describe('from occupied valleys'),
+        buff: z.number().int().describe('from production items'),
+        upkeep: z.number().int().describe('troop food upkeep (negative; 0 for other resources)'),
+        techPercent: z.number().int(),
+        mayorPercent: z.number().int(),
+        valleyPercent: z.number().int(),
+        buffPercent: z.number().int(),
+      })
+      .meta({ id: 'ProductionSources', description: 'per-hour amounts by source; they sum to increaseRate (up to rounding)' }),
   })
   .meta({ id: 'ResourceLine' });
 export type ResourceLine = z.infer<typeof ResourceLine>;

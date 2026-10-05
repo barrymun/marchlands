@@ -10182,6 +10182,27 @@ export interface components {
             /** @description held captive by another lord */
             seized: boolean;
         };
+        /** @description per-hour amounts by source; they sum to increaseRate (up to rounding) */
+        ProductionSourcesInput: {
+            /** @description flat output per hour, regardless of fields */
+            base: number;
+            /** @description field output per hour after work rate and labour efficiency */
+            fields: number;
+            /** @description from Agriculture / Lumbering / Masonry / Mining */
+            tech: number;
+            /** @description from the mayor's politics */
+            mayor: number;
+            /** @description from occupied valleys */
+            valley: number;
+            /** @description from production items */
+            buff: number;
+            /** @description troop food upkeep (negative; 0 for other resources) */
+            upkeep: number;
+            techPercent: number;
+            mayorPercent: number;
+            valleyPercent: number;
+            buffPercent: number;
+        };
         ResourceLineInput: {
             amount: number;
             max: number;
@@ -10191,6 +10212,7 @@ export interface components {
             /** @description net change per hour (food is after troop upkeep) */
             increaseRate: number;
             bonusPercent: number;
+            breakdown: components["schemas"]["ProductionSourcesInput"];
         };
         ResourceBeanInput: {
             gold: number;
@@ -11932,6 +11954,27 @@ export interface components {
             /** @description held captive by another lord */
             seized: boolean;
         };
+        /** @description per-hour amounts by source; they sum to increaseRate (up to rounding) */
+        ProductionSources: {
+            /** @description flat output per hour, regardless of fields */
+            base: number;
+            /** @description field output per hour after work rate and labour efficiency */
+            fields: number;
+            /** @description from Agriculture / Lumbering / Masonry / Mining */
+            tech: number;
+            /** @description from the mayor's politics */
+            mayor: number;
+            /** @description from occupied valleys */
+            valley: number;
+            /** @description from production items */
+            buff: number;
+            /** @description troop food upkeep (negative; 0 for other resources) */
+            upkeep: number;
+            techPercent: number;
+            mayorPercent: number;
+            valleyPercent: number;
+            buffPercent: number;
+        };
         ResourceLine: {
             amount: number;
             max: number;
@@ -11941,6 +11984,7 @@ export interface components {
             /** @description net change per hour (food is after troop upkeep) */
             increaseRate: number;
             bonusPercent: number;
+            breakdown: components["schemas"]["ProductionSources"];
         };
         ResourceBean: {
             gold: number;
@@ -13637,6 +13681,7 @@ export type TroopBeanInput = components['schemas']['TroopBeanInput'];
 export type FortBeanInput = components['schemas']['FortBeanInput'];
 export type BuildingBeanInput = components['schemas']['BuildingBeanInput'];
 export type HeroBeanInput = components['schemas']['HeroBeanInput'];
+export type ProductionSourcesInput = components['schemas']['ProductionSourcesInput'];
 export type ResourceLineInput = components['schemas']['ResourceLineInput'];
 export type ResourceBeanInput = components['schemas']['ResourceBeanInput'];
 export type ValleyBeanInput = components['schemas']['ValleyBeanInput'];
@@ -13755,6 +13800,7 @@ export type TroopBean = components['schemas']['TroopBean'];
 export type FortBean = components['schemas']['FortBean'];
 export type BuildingBean = components['schemas']['BuildingBean'];
 export type HeroBean = components['schemas']['HeroBean'];
+export type ProductionSources = components['schemas']['ProductionSources'];
 export type ResourceLine = components['schemas']['ResourceLine'];
 export type ResourceBean = components['schemas']['ResourceBean'];
 export type ValleyBean = components['schemas']['ValleyBean'];

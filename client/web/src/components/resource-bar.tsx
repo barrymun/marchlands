@@ -1,5 +1,5 @@
 import { Coins, Hammer, Heart, Mountain, Trees, Users, Wheat } from 'lucide-react';
-import type { ResourceBean } from '@evony/api-client';
+import type { HeroBean, ResourceBean, ResourceLine } from '@evony/api-client';
 import { scaled } from '@evony/core';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNow } from '@/hooks/use-now';
@@ -14,22 +14,23 @@ function live(amount: number, ratePerHour: number, max: number, since: number, n
   return Math.max(0, grown);
 }
 
-export function ResourceBar({ resource }: { resource: ResourceBean }) {
+export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor?: HeroBean }) {
   const now = useNow();
   const r = resource;
   const items = [
-    { key: 'gold' as const, label: 'Gold', amount: live(r.gold, r.goldRate, Infinity, r.updatedAt, now), rate: r.goldRate, max: null },
+    { key: 'gold' as const, label: 'Gold', amount: live(r.gold, r.goldRate, Infinity, r.updatedAt, now), rate: r.goldRate, max: null, line: null },
     ...(['food', 'wood', 'stone', 'iron'] as const).map((k) => ({
       key: k,
       label: k === 'wood' ? 'Lumber' : k[0].toUpperCase() + k.slice(1),
       amount: live(r[k].amount, r[k].increaseRate, r[k].max, r.updatedAt, now),
       rate: r[k].increaseRate,
       max: r[k].max,
+      line: r[k],
     })),
   ];
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-      {items.map(({ key, label, amount, rate, max }) => {
+      {items.map(({ key, label, amount, rate, max, line }) => {
         const Icon = icons[key];
         const full = max != null && amount >= max;
         return (
@@ -41,9 +42,23 @@ export function ResourceBar({ resource }: { resource: ResourceBean }) {
                 <span className={rate < 0 ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}>{signed(rate)}/h</span>
               </div>
             </TooltipTrigger>
-            <TooltipContent>
-              {label}: {fmtExact(amount)}
-              {max != null && ` / ${fmtExact(max)}`}
+            <TooltipContent className="grid gap-1.5">
+              <div className="font-medium">
+                {label}: {fmtExact(amount)}
+                {max != null && ` / ${fmtExact(max)}`}
+                {full && ' (storage full: production paused)'}
+              </div>
+              {line ? (
+                <Breakdown line={line} mayor={mayor} />
+              ) : (
+                <Rows
+                  rows={[
+                    ['Tax income', r.taxIncome],
+                    ['Hero salaries', -r.herosSalary],
+                  ]}
+                  total={r.goldRate}
+                />
+              )}
             </TooltipContent>
           </Tooltip>
         );
@@ -72,5 +87,38 @@ export function ResourceBar({ resource }: { resource: ResourceBean }) {
         </TooltipContent>
       </Tooltip>
     </div>
+  );
+}
+
+function Breakdown({ line, mayor }: { line: ResourceLine; mayor?: HeroBean }) {
+  const b = line.breakdown;
+  const rows: [string, number][] = [
+    ['Base', b.base],
+    [`Fields${line.workRate !== 100 ? ` (${line.workRate}% work rate)` : ''}`, b.fields],
+  ];
+  if (b.tech) rows.push([`Technology +${b.techPercent}%`, b.tech]);
+  rows.push([mayor ? `Mayor ${mayor.name} +${b.mayorPercent}%` : 'No mayor', b.mayor]);
+  if (b.valley) rows.push([`Valleys +${b.valleyPercent}%`, b.valley]);
+  if (b.buff) rows.push([`Items +${b.buffPercent}%`, b.buff]);
+  if (b.upkeep) rows.push(['Troop upkeep', b.upkeep]);
+  return <Rows rows={rows} total={line.increaseRate} />;
+}
+
+function Rows({ rows, total }: { rows: [string, number][]; total: number }) {
+  return (
+    <table className="text-xs tabular-nums">
+      <tbody>
+        {rows.map(([label, v]) => (
+          <tr key={label}>
+            <td className="pr-4">{label}</td>
+            <td className="text-right">{signed(v)}/h</td>
+          </tr>
+        ))}
+        <tr className="border-t font-medium">
+          <td className="pr-4 pt-1">Total</td>
+          <td className="pt-1 text-right">{signed(total)}/h</td>
+        </tr>
+      </tbody>
+    </table>
   );
 }

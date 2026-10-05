@@ -3,6 +3,7 @@
 // (storeRercent -> storePercent, texRate -> taxRate, caslteId -> castleId, ...).
 
 import {
+  BALANCE,
   BUILDING_NAMES,
   BASIC_RESOURCES,
   FORT_KEY_LIST,
@@ -63,6 +64,25 @@ export function heroBean(h: HeroRow): HeroBean {
   };
 }
 
+/** Per-hour contribution of each source to a resource's net rate (they sum to increaseRate, up to rounding). */
+function productionBreakdownOf(stats: CityStats, r: (typeof BASIC_RESOURCES)[number]) {
+  const fields = stats.fieldProduction[r] * stats.efficiency;
+  const p = stats.bonusParts[r];
+  return {
+    base: BALANCE.baseProductionPerHour,
+    fields: Math.round(fields),
+    tech: Math.round(fields * p.tech),
+    mayor: Math.round(fields * p.mayor),
+    valley: Math.round(fields * p.valley),
+    buff: Math.round(fields * p.buff),
+    upkeep: r === 'food' ? -Math.round(stats.upkeep) : 0,
+    techPercent: Math.round(p.tech * 100),
+    mayorPercent: Math.round(p.mayor * 100),
+    valleyPercent: Math.round(p.valley * 100),
+    buffPercent: Math.round(p.buff * 100),
+  };
+}
+
 export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
   const c = b.city;
   const res = (r: (typeof BASIC_RESOURCES)[number]) => ({
@@ -74,6 +94,7 @@ export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
     /** net change per hour (food is after troop upkeep) */
     increaseRate: Math.round(stats.rates[r]),
     bonusPercent: Math.round(stats.bonus[r] * 100),
+    breakdown: productionBreakdownOf(stats, r),
   });
   return {
     gold: Math.floor(c.gold),

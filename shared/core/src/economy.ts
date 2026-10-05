@@ -84,6 +84,13 @@ export interface EconomyContext {
   awayTroops: TroopCounts;
 }
 
+export interface BonusParts {
+  tech: number;
+  mayor: number;
+  valley: number;
+  buff: number;
+}
+
 export interface CityStats {
   maxPopulation: number;
   storage: Record<BasicResource, number>;
@@ -98,6 +105,8 @@ export interface CityStats {
   fieldProduction: Record<BasicResource, number>;
   /** fractional bonus per resource (tech + mayor + valleys + buffs) */
   bonus: Record<BasicResource, number>;
+  /** the bonus split by source (fractions; they sum to `bonus`) */
+  bonusParts: Record<BasicResource, BonusParts>;
   /** net per-hour change of each resource (food includes upkeep, gold includes salaries) */
   rates: ResourceSet;
   taxIncome: number;
@@ -179,18 +188,24 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   const idlePopulation = Math.max(0, population - workersNeeded);
 
   const mayorBonus = ctx.mayor ? ctx.mayor.management * BALANCE.mayorManagementProductionFactor : 0;
-  const bonus = { food: 0, wood: 0, stone: 0, iron: 0 };
+  const parts = (): BonusParts => ({ tech: 0, mayor: mayorBonus, valley: 0, buff: 0 });
+  const bonusParts = { food: parts(), wood: parts(), stone: parts(), iron: parts() };
   for (const r of BASIC_RESOURCES) {
-    bonus[r] = effectiveTechLevel(ctx.research, city.buildings, TECH_FOR_RESOURCE[r]) * BALANCE.resourceTechBonusPerLevel + mayorBonus;
+    bonusParts[r].tech = effectiveTechLevel(ctx.research, city.buildings, TECH_FOR_RESOURCE[r]) * BALANCE.resourceTechBonusPerLevel;
   }
-  for (const v of ctx.valleys) for (const r of VALLEY_RESOURCE[v.type] ?? []) bonus[r] += valleyBonus(v.type, v.level);
+  for (const v of ctx.valleys) for (const r of VALLEY_RESOURCE[v.type] ?? []) bonusParts[r].valley += valleyBonus(v.type, v.level);
   const resBuffs: Record<BasicResource, string> = {
     food: 'FoodProductionBuff',
     wood: 'WoodProductionBuff',
     stone: 'StoneProductionBuff',
     iron: 'IronProductionBuff',
   };
-  for (const r of BASIC_RESOURCES) if (hasBuff(ctx.buffs, resBuffs[r], now)) bonus[r] += BALANCE.resourceBuffBonus;
+  for (const r of BASIC_RESOURCES) if (hasBuff(ctx.buffs, resBuffs[r], now)) bonusParts[r].buff = BALANCE.resourceBuffBonus;
+  const bonus = { food: 0, wood: 0, stone: 0, iron: 0 };
+  for (const r of BASIC_RESOURCES) {
+    const b = bonusParts[r];
+    bonus[r] = b.tech + b.mayor + b.valley + b.buff;
+  }
 
   let upkeep = troopUpkeep(city.troops) + troopUpkeep(ctx.awayTroops);
   if (hasBuff(ctx.buffs, 'UpkeepReduceBuff', now)) upkeep *= 0.5;
@@ -213,6 +228,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
     efficiency,
     fieldProduction,
     bonus,
+    bonusParts,
     rates,
     taxIncome,
     heroSalary,

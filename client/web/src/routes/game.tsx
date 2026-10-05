@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, Coins, Crown, LogOut } from 'lucide-react';
+import { HeroStatus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -115,7 +116,7 @@ export function GamePage() {
             </DropdownMenu>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-4 pb-2">{city.data ? <ResourceBar resource={city.data.resource} /> : <Skeleton className="h-5 w-2/3" />}</div>
+        <div className="mx-auto max-w-6xl px-4 pb-2">{city.data ? <ResourceBar resource={city.data.resource} mayor={city.data.heros.find((h) => h.status === HeroStatus.MAYOR)} /> : <Skeleton className="h-5 w-2/3" />}</div>
       </header>
       <main className="mx-auto max-w-6xl p-4">
         <Tabs value={tab} onValueChange={(t) => navigate(`/cities/${cityId}/${t}`)}>

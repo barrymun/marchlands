@@ -326,6 +326,87 @@
           "seized"
         ]
       },
+      "ProductionSourcesInput": {
+        "type": "object",
+        "properties": {
+          "base": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "flat output per hour, regardless of fields"
+          },
+          "fields": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "field output per hour after work rate and labour efficiency"
+          },
+          "tech": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "from Agriculture / Lumbering / Masonry / Mining"
+          },
+          "mayor": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "from the mayor's politics"
+          },
+          "valley": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "from occupied valleys"
+          },
+          "buff": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "from production items"
+          },
+          "upkeep": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "troop food upkeep (negative; 0 for other resources)"
+          },
+          "techPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "mayorPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "valleyPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "buffPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "base",
+          "fields",
+          "tech",
+          "mayor",
+          "valley",
+          "buff",
+          "upkeep",
+          "techPercent",
+          "mayorPercent",
+          "valleyPercent",
+          "buffPercent"
+        ],
+        "description": "per-hour amounts by source; they sum to increaseRate (up to rounding)"
+      },
       "ResourceLineInput": {
         "type": "object",
         "properties": {
@@ -356,6 +437,9 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/ProductionSourcesInput"
           }
         },
         "required": [
@@ -365,7 +449,8 @@
           "workRate",
           "workPeople",
           "increaseRate",
-          "bonusPercent"
+          "bonusPercent",
+          "breakdown"
         ]
       },
       "ResourceBeanInput": {
@@ -8702,6 +8787,88 @@
         ],
         "additionalProperties": false
       },
+      "ProductionSources": {
+        "type": "object",
+        "properties": {
+          "base": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "flat output per hour, regardless of fields"
+          },
+          "fields": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "field output per hour after work rate and labour efficiency"
+          },
+          "tech": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "from Agriculture / Lumbering / Masonry / Mining"
+          },
+          "mayor": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "from the mayor's politics"
+          },
+          "valley": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "from occupied valleys"
+          },
+          "buff": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "from production items"
+          },
+          "upkeep": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "troop food upkeep (negative; 0 for other resources)"
+          },
+          "techPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "mayorPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "valleyPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "buffPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "base",
+          "fields",
+          "tech",
+          "mayor",
+          "valley",
+          "buff",
+          "upkeep",
+          "techPercent",
+          "mayorPercent",
+          "valleyPercent",
+          "buffPercent"
+        ],
+        "additionalProperties": false,
+        "description": "per-hour amounts by source; they sum to increaseRate (up to rounding)"
+      },
       "ResourceLine": {
         "type": "object",
         "properties": {
@@ -8732,6 +8899,9 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/ProductionSources"
           }
         },
         "required": [
@@ -8741,7 +8911,8 @@
           "workRate",
           "workPeople",
           "increaseRate",
-          "bonusPercent"
+          "bonusPercent",
+          "breakdown"
         ],
         "additionalProperties": false
       },
