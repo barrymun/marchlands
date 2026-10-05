@@ -10,7 +10,8 @@ import { HeroPointsDialog } from '@/components/hero-points-dialog';
 import { HeroItemsDialog } from '@/components/hero-items-dialog';
 import { qk, useCommand } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
-import { fmt, signed } from '@/lib/format';
+import { fmt, fmtExact, signed } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 const STATUS: Record<number, string> = { [HeroStatus.IDLE]: 'Idle', [HeroStatus.MAYOR]: 'Mayor', [HeroStatus.ATTACK]: 'Marching', [HeroStatus.SEIZED]: 'Captive', [HeroStatus.RETURN]: 'Returning' };
 
@@ -74,7 +75,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
         <CardContent className="grid gap-2">
           {city.heros.length === 0 && <p className="text-sm text-muted-foreground">No heroes yet. Hire one at the Inn.</p>}
           {city.heros.map((h) => (
-            <HeroRow key={h.id} hero={h} note={mayorNote(h)}>
+            <HeroRow key={h.id} hero={h} note={mayorNote(h)} showExp>
               <Badge variant={h.status === HeroStatus.MAYOR ? 'default' : 'secondary'}>{h.seized ? 'Captive' : (STATUS[h.status] ?? h.status)}</Badge>
               {!h.seized && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR) && (
                 <Button size="xs" variant={h.remainPoint > 0 ? 'default' : 'outline'} onClick={() => setPointsFor(h.id)}>
@@ -146,7 +147,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   );
 }
 
-function HeroRow({ hero, note, children }: { hero: HeroBean; note?: React.ReactNode; children: React.ReactNode }) {
+function HeroRow({ hero, note, showExp = false, children }: { hero: HeroBean; note?: React.ReactNode; showExp?: boolean; children: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2">
       <div>
@@ -158,8 +159,31 @@ function HeroRow({ hero, note, children }: { hero: HeroBean; note?: React.ReactN
           {hero.remainPoint > 0 && ` · ${hero.remainPoint} points`}
         </div>
         {note && <div className="text-xs tabular-nums">{note}</div>}
+        {showExp && <ExpBar hero={hero} />}
       </div>
       <div className="flex items-center gap-2">{children}</div>
+    </div>
+  );
+}
+
+/** Experience towards the next level; animates when a push updates the hero. */
+function ExpBar({ hero }: { hero: HeroBean }) {
+  const pct = Math.min(100, (hero.experience / Math.max(1, hero.upgradeExp)) * 100);
+  const ready = hero.experience >= hero.upgradeExp;
+  return (
+    <div className="mt-1.5 grid w-56 max-w-full gap-1">
+      <div className="h-1.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={hero.upgradeExp} aria-valuenow={hero.experience} aria-label="Experience">
+        <div className={cn('h-full rounded-full transition-[width] duration-700 ease-out', ready ? 'bg-amber-500' : 'bg-primary')} style={{ width: `${pct}%` }} />
+      </div>
+      <div className="text-[11px] text-muted-foreground tabular-nums">
+        {ready ? (
+          <span className="font-medium text-amber-600 dark:text-amber-400">Ready to level up</span>
+        ) : (
+          <>
+            XP {fmtExact(hero.experience)} / {fmtExact(hero.upgradeExp)} · {fmtExact(hero.upgradeExp - hero.experience)} to Lv {hero.level + 1}
+          </>
+        )}
+      </div>
     </div>
   );
 }

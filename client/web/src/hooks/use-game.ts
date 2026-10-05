@@ -78,7 +78,16 @@ export function usePushSync(enabled: boolean): PushStatus {
         if (d.updateType === 2) qc.setQueryData(qk.city(d.castleBean.id), d.castleBean);
         void qc.invalidateQueries({ queryKey: qk.player });
       }),
-      push.on('server.HeroUpdate', ({ castleId }) => city(castleId)),
+      // patch the hero in place (experience, stats, status) so hero cards update instantly
+      push.on('server.HeroUpdate', ({ castleId, hero, updateType }) => {
+        qc.setQueryData<CityBean>(qk.city(castleId), (c) => {
+          if (!c) return c;
+          const rest = c.heros.filter((h) => h.id !== hero.id);
+          return { ...c, heros: updateType === 1 ? rest : c.heros.some((h) => h.id === hero.id) ? c.heros.map((h) => (h.id === hero.id ? hero : h)) : [...rest, hero] };
+        });
+        // a mayor change moves production rates; refresh the city (resources) in the background
+        void qc.invalidateQueries({ queryKey: qk.city(castleId) });
+      }),
       push.on('server.TroopQueueUpdate', () => void qc.invalidateQueries({ queryKey: ['queues'] })),
       push.on('server.FortificationsQueueUpdate', () => void qc.invalidateQueries({ queryKey: ['queues'] })),
       push.on('server.ResearchUpdate', ({ castleId }) => void qc.invalidateQueries({ queryKey: qk.research(castleId) })),
