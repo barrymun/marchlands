@@ -118,7 +118,12 @@ export function usePushSync(enabled: boolean): PushStatus {
         void qc.invalidateQueries({ queryKey: ['market', 'shipments'] });
         if (resType !== 4) toast(`Market delivery: ${amount.toLocaleString('en')} ${['food', 'lumber', 'stone', 'iron'][resType] ?? 'goods'} arrived`);
       }),
-      push.on('server.NewReport', ({ count }) => count && toast(`${count} unread report${count === 1 ? '' : 's'}`)),
+      push.on('server.NewReport', (counts) => {
+        const before = qc.getQueryData<{ count: number }>(['reports', 'unread'])?.count ?? 0;
+        qc.setQueryData(['reports', 'unread'], counts);
+        void qc.invalidateQueries({ queryKey: ['reports', 'list'] });
+        if (counts.count > before) toast('New report', { description: 'See the Reports tab.' });
+      }),
       push.on('server.SystemInfoMsg', ({ msg }) => toast.info(msg)),
     ];
     offs.push(push.onStatus(setStatus));

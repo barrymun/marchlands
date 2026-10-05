@@ -19,6 +19,7 @@ import { MapPanel } from '@/components/map-panel';
 import { MarketPanel } from '@/components/market-panel';
 import { MilitaryPanel } from '@/components/military-panel';
 import { ResearchPanel } from '@/components/research-panel';
+import { ReportsPanel, useUnreadReports } from '@/components/reports-panel';
 import { ResourceBar } from '@/components/resource-bar';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
 import { tokenStore } from '@/lib/api';
@@ -33,6 +34,7 @@ const TABS = [
   { id: 'items', label: 'Items' },
   { id: 'market', label: 'Market' },
   { id: 'armies', label: 'Armies' },
+  { id: 'reports', label: 'Reports' },
   { id: 'map', label: 'Map' },
 ] as const;
 
@@ -48,6 +50,7 @@ export function GamePage() {
   const info = player.data?.playerInfo;
   const cities = player.data?.castles ?? [];
   const [dialog, setDialog] = useState<'lord' | 'city' | null>(null);
+  const unreadReports = useUnreadReports().data?.count ?? 0;
 
   function logout() {
     tokenStore.set(null);
@@ -133,8 +136,9 @@ export function GamePage() {
         <Tabs value={tab} onValueChange={(t) => navigate(`/cities/${cityId}/${t}`)}>
           <TabsList className="mb-4 flex-wrap">
             {TABS.map((t) => (
-              <TabsTrigger key={t.id} value={t.id}>
+              <TabsTrigger key={t.id} value={t.id} className="gap-1.5">
                 {t.label}
+                {t.id === 'reports' && unreadReports > 0 && <Badge className="h-4 min-w-4 px-1 text-[10px] tabular-nums">{unreadReports}</Badge>}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -162,6 +166,9 @@ export function GamePage() {
               </TabsContent>
               <TabsContent value="armies">
                 <ArmiesPanel />
+              </TabsContent>
+              <TabsContent value="reports">
+                <ReportsPanel />
               </TabsContent>
               <TabsContent value="map">
                 <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />

@@ -2,7 +2,7 @@
 // wrote XML files to disk).
 
 import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
-import { GameError, type ReportBody } from '@evony/core';
+import { GameError, ReportBodySchema, type ReportBody } from '@evony/core';
 import { reports } from '@evony/db';
 import type { Ctx } from '../context.ts';
 
@@ -92,7 +92,10 @@ export async function readReport(ctx: Ctx, playerId: number, id: number) {
     await ctx.tx.update(reports).set({ isRead: true }).where(eq(reports.id, id));
     await pushReportCounts(ctx, playerId);
   }
-  return { ...listBean(r), isRead: r.isRead, content: r.body };
+  // rows written before the report format was typed may not match it: show a notice instead of failing
+  const parsed = ReportBodySchema.safeParse(r.body);
+  const content: ReportBody = parsed.success ? parsed.data : { kind: 'text', text: 'This report was saved in an older format and cannot be shown.' };
+  return { ...listBean(r), isRead: r.isRead, content };
 }
 
 /** report.readOverReport */

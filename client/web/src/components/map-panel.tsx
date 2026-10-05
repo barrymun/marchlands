@@ -67,7 +67,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   return (
     <div className="grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)]">
       <Card>
-        <CardHeader className="flex-row items-center justify-between gap-2 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
           <CardTitle className="text-sm tabular-nums">
             Map ({center.x}, {center.y})
           </CardTitle>

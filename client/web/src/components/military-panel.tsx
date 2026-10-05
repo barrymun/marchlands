@@ -111,7 +111,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
 
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-between gap-2 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
         <CardTitle className="text-sm">{fort ? 'Fortifications' : 'Training'}</CardTitle>
         {!fort && barracks.length > 1 && (
           <Select value={String(pos)} onValueChange={setPosition}>
