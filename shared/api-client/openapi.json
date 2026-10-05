@@ -3292,6 +3292,75 @@
           "canTrans"
         ]
       },
+      "MapHeldValleyInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -2147483648,
+            "maximum": 2147483647
+          },
+          "type": {
+            "type": "integer",
+            "minimum": -32768,
+            "maximum": 32767
+          },
+          "level": {
+            "type": "integer",
+            "minimum": -32768,
+            "maximum": 32767
+          },
+          "x": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "y": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "cityId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "cityName": {
+            "type": "string"
+          },
+          "playerId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "userName": {
+            "type": "string"
+          },
+          "allianceName": {
+            "type": "string",
+            "description": "'' when not in an alliance"
+          },
+          "relation": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "level",
+          "x",
+          "y",
+          "cityId",
+          "cityName",
+          "playerId",
+          "userName",
+          "allianceName",
+          "relation"
+        ]
+      },
       "MapViewInput": {
         "type": "object",
         "properties": {
@@ -3324,6 +3393,13 @@
             "items": {
               "$ref": "#/components/schemas/MapCastleInput"
             }
+          },
+          "valleys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapHeldValleyInput"
+            },
+            "description": "valleys in view that a city holds (the viewer's included)"
           }
         },
         "required": [
@@ -3332,7 +3408,8 @@
           "x2",
           "y2",
           "mapStr",
-          "castles"
+          "castles",
+          "valleys"
         ]
       },
       "MapTileOwnerInput": {
@@ -12408,6 +12485,76 @@
         ],
         "additionalProperties": false
       },
+      "MapHeldValley": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -2147483648,
+            "maximum": 2147483647
+          },
+          "type": {
+            "type": "integer",
+            "minimum": -32768,
+            "maximum": 32767
+          },
+          "level": {
+            "type": "integer",
+            "minimum": -32768,
+            "maximum": 32767
+          },
+          "x": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "y": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "cityId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "cityName": {
+            "type": "string"
+          },
+          "playerId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "userName": {
+            "type": "string"
+          },
+          "allianceName": {
+            "type": "string",
+            "description": "'' when not in an alliance"
+          },
+          "relation": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "level",
+          "x",
+          "y",
+          "cityId",
+          "cityName",
+          "playerId",
+          "userName",
+          "allianceName",
+          "relation"
+        ],
+        "additionalProperties": false
+      },
       "MapView": {
         "type": "object",
         "properties": {
@@ -12440,6 +12587,13 @@
             "items": {
               "$ref": "#/components/schemas/MapCastle"
             }
+          },
+          "valleys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapHeldValley"
+            },
+            "description": "valleys in view that a city holds (the viewer's included)"
           }
         },
         "required": [
@@ -12448,7 +12602,8 @@
           "x2",
           "y2",
           "mapStr",
-          "castles"
+          "castles",
+          "valleys"
         ],
         "additionalProperties": false
       },

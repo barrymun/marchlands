@@ -11054,6 +11054,21 @@ export interface components {
             canSend: boolean;
             canTrans: boolean;
         };
+        MapHeldValleyInput: {
+            id: number;
+            type: number;
+            level: number;
+            x: number;
+            y: number;
+            cityId: number;
+            cityName: string;
+            playerId: number;
+            userName: string;
+            /** @description '' when not in an alliance */
+            allianceName: string;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation: number;
+        };
         MapViewInput: {
             x1: number;
             y1: number;
@@ -11062,6 +11077,8 @@ export interface components {
             /** @description two hex chars per tile (type, level), row-major */
             mapStr: string;
             castles: components["schemas"]["MapCastleInput"][];
+            /** @description valleys in view that a city holds (the viewer's included) */
+            valleys: components["schemas"]["MapHeldValleyInput"][];
         };
         MapTileOwnerInput: {
             cityId: number;
@@ -12988,6 +13005,21 @@ export interface components {
             canSend: boolean;
             canTrans: boolean;
         };
+        MapHeldValley: {
+            id: number;
+            type: number;
+            level: number;
+            x: number;
+            y: number;
+            cityId: number;
+            cityName: string;
+            playerId: number;
+            userName: string;
+            /** @description '' when not in an alliance */
+            allianceName: string;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation: number;
+        };
         MapView: {
             x1: number;
             y1: number;
@@ -12996,6 +13028,8 @@ export interface components {
             /** @description two hex chars per tile (type, level), row-major */
             mapStr: string;
             castles: components["schemas"]["MapCastle"][];
+            /** @description valleys in view that a city holds (the viewer's included) */
+            valleys: components["schemas"]["MapHeldValley"][];
         };
         MapTileOwner: {
             cityId: number;
@@ -14254,6 +14288,7 @@ export type StationedArmyListInput = components['schemas']['StationedArmyListInp
 export type TroopParamsInput = components['schemas']['TroopParamsInput'];
 export type MarchEstimateInput = components['schemas']['MarchEstimateInput'];
 export type MapCastleInput = components['schemas']['MapCastleInput'];
+export type MapHeldValleyInput = components['schemas']['MapHeldValleyInput'];
 export type MapViewInput = components['schemas']['MapViewInput'];
 export type MapTileOwnerInput = components['schemas']['MapTileOwnerInput'];
 export type MapFieldTileInfoInput = components['schemas']['MapFieldTileInfoInput'];
@@ -14380,6 +14415,7 @@ export type StationedArmyList = components['schemas']['StationedArmyList'];
 export type TroopParams = components['schemas']['TroopParams'];
 export type MarchEstimate = components['schemas']['MarchEstimate'];
 export type MapCastle = components['schemas']['MapCastle'];
+export type MapHeldValley = components['schemas']['MapHeldValley'];
 export type MapView = components['schemas']['MapView'];
 export type MapTileOwner = components['schemas']['MapTileOwner'];
 export type MapFieldTileInfo = components['schemas']['MapFieldTileInfo'];

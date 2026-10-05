@@ -108,6 +108,20 @@ export const MapCastle = z
   .meta({ id: 'MapCastle' });
 export type MapCastle = z.infer<typeof MapCastle>;
 
+export const MapHeldValley = TileRow.pick({ id: true, type: true, level: true })
+  .extend({
+    x: z.number().int(),
+    y: z.number().int(),
+    cityId: z.number().int(),
+    cityName: z.string(),
+    playerId: z.number().int(),
+    userName: z.string(),
+    allianceName: z.string().describe("'' when not in an alliance"),
+    relation,
+  })
+  .meta({ id: 'MapHeldValley' });
+export type MapHeldValley = z.infer<typeof MapHeldValley>;
+
 export const MapView = z
   .object({
     x1: z.number().int(),
@@ -116,6 +130,7 @@ export const MapView = z
     y2: z.number().int(),
     mapStr: z.string().describe('two hex chars per tile (type, level), row-major'),
     castles: z.array(MapCastle),
+    valleys: z.array(MapHeldValley).describe('valleys in view that a city holds (the viewer\'s included)'),
   })
   .meta({ id: 'MapView' });
 export type MapView = z.infer<typeof MapView>;
