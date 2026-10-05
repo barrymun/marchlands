@@ -14,13 +14,19 @@
 ## Packages
 
 ```
-@evony/core    pure rules, no I/O; deterministic given an Rng
+@evony/core        pure rules + persisted-state zod schemas, no I/O (shared/, also used by the client)
      ▲
-@evony/db      Drizzle schema + migrations; jsonb types come from core
+@evony/db          Drizzle schema + migrations; jsonb column types come from core
      ▲
-@evony/game    services: (ctx, playerId, ...args) => result, run inside a transaction
-     ▲                 ▲
+@evony/contracts   zod schemas of the API surface; row shapes via drizzle-zod (shared/)
+     ▲
+@evony/game        services: (ctx, playerId, ...args) => result, run inside a transaction;
+     ▲                 ▲      DTO builders and ctx.push are typed by the contracts
 @evony/api       @evony/worker
+
+@evony/api-client  openapi-fetch over types generated from the API's OpenAPI document,
+     ▲             plus a typed WebSocket client (push types from contracts)
+@evony/web         Vite + React client (client/web)
 ```
 
 - **core** contains the static data converted from the original `config_*` tables (`src/data/legacy/*.json`). It also holds:
@@ -29,7 +35,8 @@
   - heroes, march maths, items, quests, titles, map generation and NPC tables;
   - the battle simulator (`battle/simulator.ts`, a float32-exact port) and its game-level wrapper (`battle/resolve.ts`).
 - **game** turns rules into persisted state changes. Each `services/*.ts` matches one packet group of the original (castle, tech, troop, hero, army, alliance, …). `combat.ts` handles army arrival: transport, reinforce, scout, build city and attack (player cities, barbarian cities and valleys).
-- **api** is a thin Fastify layer. It validates input with zod, authenticates with a JWT and calls one service per request inside `runGame()`.
+- **contracts** declares every request body, query, response and push as a zod schema. Shapes that mirror a table are `createSelectSchema(table).pick(...).extend(...)`, so a column change propagates. Named schemas carry `.meta({ id })` and become OpenAPI components.
+- **api** is a thin Fastify layer. Each route passes its contract schemas to `doc(tag, summary, DataSchema, { params, body, querystring })`; fastify-type-provider-zod validates input, serializes output through the schema (stripping unknown keys) and type-checks the handler's return value against it. It authenticates with a JWT and calls one service per request inside `runGame()`. `src/openapi.ts` writes the OpenAPI document without a database (`npm run gen:api`).
 - **worker** seeds the world on first boot, processes due timed events and runs periodic jobs: rankings, zone stats, beginner-protection expiry and cleanup.
 
 ## A request

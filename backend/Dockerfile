@@ -6,15 +6,21 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # dependency layer: only manifests, so source edits don't bust the npm cache
+# (every workspace manifest is copied so the lockfile resolves; only the backend's deps are installed)
 COPY package.json package-lock.json ./
-COPY backend/packages/core/package.json backend/packages/core/
+COPY shared/core/package.json shared/core/
+COPY shared/contracts/package.json shared/contracts/
+COPY shared/api-client/package.json shared/api-client/
 COPY backend/packages/db/package.json backend/packages/db/
 COPY backend/packages/game/package.json backend/packages/game/
 COPY backend/services/api/package.json backend/services/api/
 COPY backend/services/worker/package.json backend/services/worker/
-RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+COPY client/web/package.json client/web/
+RUN npm ci --omit=dev --ignore-scripts -w @evony/api -w @evony/worker && npm cache clean --force
 
 COPY tsconfig.base.json ./
+COPY shared/core shared/core
+COPY shared/contracts shared/contracts
 COPY backend/packages backend/packages
 COPY backend/services backend/services
 COPY db/seed db/seed

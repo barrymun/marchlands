@@ -4,15 +4,17 @@
 
 import { sql } from 'drizzle-orm';
 import { defaultRng, GameError, type Rng } from '@evony/core';
+import type { PushCmd, PushData } from '@evony/contracts';
 import { pgArray, pushMessages, timedEvents, type Db, type Tx } from '@evony/db';
 
 export const PUSH_CHANNEL = 'evony_push';
 
-export interface PushMessage {
+/** A push queued for the outbox (frame = `{ cmd, data }`, see PushMessage in @evony/contracts). */
+export interface QueuedPush {
   /** recipients; empty = everyone online */
   playerIds: number[];
-  cmd: string;
-  data: unknown;
+  cmd: PushCmd;
+  data: PushData<PushCmd>;
 }
 
 export interface ScheduledEvent {
@@ -30,9 +32,9 @@ export interface Ctx {
   now: number;
   rng: Rng;
   /** queue a push to players (delivered after commit) */
-  push(playerIds: number | number[], cmd: string, data: unknown): void;
+  push<K extends PushCmd>(playerIds: number | number[], cmd: K, data: PushData<K>): void;
   /** broadcast to every connected player */
-  broadcast(cmd: string, data: unknown): void;
+  broadcast<K extends PushCmd>(cmd: K, data: PushData<K>): void;
   /** (re)schedule a timed event */
   schedule(ev: ScheduledEvent): void;
   /** cancel a pending timed event by ref key */
@@ -42,7 +44,7 @@ export interface Ctx {
 }
 
 interface CtxInternals extends Ctx {
-  _pushes: PushMessage[];
+  _pushes: QueuedPush[];
   _events: Map<string, ScheduledEvent>;
   _unscheduled: Set<string>;
   _anonymous: ScheduledEvent[];
@@ -112,7 +114,7 @@ async function flush(ctx: CtxInternals) {
   if (ctx._pushes.length) {
     const rows = await tx
       .insert(pushMessages)
-      .values(ctx._pushes.map((p) => ({ playerIds: p.playerIds, cmd: p.cmd, data: p.data as object, createdAt: now })))
+      .values(ctx._pushes.map((p) => ({ playerIds: p.playerIds, cmd: p.cmd, data: p.data, createdAt: now })))
       .returning({ id: pushMessages.id });
     for (const r of rows) await tx.execute(sql`select pg_notify(${PUSH_CHANNEL}, ${String(r.id)})`);
   }

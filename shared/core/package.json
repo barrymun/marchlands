@@ -1,0 +1,13 @@
+{
+  "name": "@evony/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure game rules for evony-re: static data, formulas, persisted-state schemas, battle simulator, map generation. No I/O; runs in Node and the browser.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  }
+}

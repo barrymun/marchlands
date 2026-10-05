@@ -333,7 +333,7 @@ export const reports = pgTable(
     playerId: integer('player_id')
       .notNull()
       .references(() => players.id, { onDelete: 'cascade' }),
-    /** 1 = military, 2 = trade/other (client tab) */
+    /** 0 = trade, 1 = army, 2 = other (client tab; ReportType in the game reports service) */
     typeId: smallint('type_id').notNull().default(1),
     /** Mission of the army involved */
     armyType: smallint('army_type').notNull().default(0),

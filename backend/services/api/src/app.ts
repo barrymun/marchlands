@@ -3,7 +3,7 @@ import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import websocket from '@fastify/websocket';
-import { jsonSchemaTransform, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
+import { jsonSchemaTransform, jsonSchemaTransformObject, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { sql } from 'drizzle-orm';
 import type { Db } from '@evony/db';
 import { verifyToken } from './auth/jwt.ts';
@@ -15,7 +15,7 @@ import economyRoutes from './routes/economy.ts';
 import militaryRoutes from './routes/military.ts';
 import playerRoutes from './routes/player.ts';
 import socialRoutes from './routes/social.ts';
-import type { PushGateway } from './ws/gateway.ts';
+import { sendPush, type PushGateway } from './ws/gateway.ts';
 
 export interface BuildOptions {
   db: Db;
@@ -45,6 +45,7 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
   await app.register(cors, { origin: config.corsOrigin, credentials: true });
   await app.register(swagger, {
     openapi: {
+      openapi: '3.1.0',
       info: {
         title: 'evony-re API',
         version: '0.1.0',
@@ -55,6 +56,7 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
       components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } } },
     },
     transform: jsonSchemaTransform,
+    transformObject: jsonSchemaTransformObject,
   });
   await app.register(swaggerUi, { routePrefix: '/docs' });
   await app.register(websocket, { options: { maxPayload: 64 * 1024 } });
@@ -69,7 +71,7 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     const token = (req.query as Record<string, string>).token;
     const claims = token ? verifyToken(token, config.jwtSecret) : null;
     if (!claims || !gateway) {
-      socket.send(JSON.stringify({ cmd: 'server.ConnectionLost', data: { reasonCode: 5, msg: 'Not logged in.' } }));
+      sendPush(socket, { cmd: 'server.ConnectionLost', data: { reasonCode: 5, msg: 'Not logged in.' } });
       socket.close(4001, 'unauthorized');
       return;
     }
@@ -78,16 +80,16 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     try {
       playerId = await playerIdOf(db, req);
     } catch {
-      socket.send(JSON.stringify({ cmd: 'server.ConnectionLost', data: { reasonCode: 5, msg: 'need create player' } }));
+      sendPush(socket, { cmd: 'server.ConnectionLost', data: { reasonCode: 5, msg: 'need create player' } });
       socket.close(4004, 'no player');
       return;
     }
     gateway.add(playerId, socket);
-    socket.send(JSON.stringify({ cmd: 'server.Connected', data: { playerId, serverTime: Date.now() } }));
+    sendPush(socket, { cmd: 'server.Connected', data: { playerId, serverTime: Date.now() } });
     socket.on('message', (raw: Buffer) => {
       try {
         const msg = JSON.parse(raw.toString()) as { cmd?: string };
-        if (msg.cmd === 'ping') socket.send(JSON.stringify({ cmd: 'pong', data: { serverTime: Date.now() } }));
+        if (msg.cmd === 'ping') sendPush(socket, { cmd: 'pong', data: { serverTime: Date.now() } });
       } catch {
         /* ignore malformed frames */
       }

@@ -1,0 +1,195 @@
+// City management: interior, buildings, research, troops and fortifications
+// (backend/services/api/src/routes/cities.ts).
+
+import { z } from 'zod';
+import { FortKeySchema, RequirementCheckSchema, ResourceKeySchema, TroopKeySchema } from '@evony/core';
+import { Ms, ResourceAmounts, zCityParams, zId, zTroops } from './common.ts';
+import { BuildingBean } from './beans.ts';
+
+// ---- requests ----
+
+export const BuildingPositionId = z.coerce.number().int().min(-2).max(1040);
+export const CityPositionParams = zCityParams.extend({ positionId: BuildingPositionId });
+export const TrainingQueueParams = zCityParams.extend({ positionId: BuildingPositionId, queueId: zId });
+export const SpeedupBody = z.object({ itemId: z.string().describe('free.speed | coins.speed | consume.2.a ... consume.2.d | player.speedup.1 | player.destroy.1.a') });
+
+export const UpdateCityBody = z.object({ name: z.string().optional(), logoUrl: z.string().optional(), goOutForBattle: z.boolean().optional(), allowAlliance: z.boolean().optional() });
+export const TaxRateBody = z.object({ rate: z.number().int() });
+export const ResourcePercentBody = z.object({ food: z.number().int(), wood: z.number().int(), stone: z.number().int(), iron: z.number().int() }).partial();
+export const ComfortBody = z.object({ typeId: z.number().int() });
+export const LevyBody = z.object({ typeId: z.number().int() });
+export const MoveCityBody = z.object({ zoneId: z.number().int().optional(), targetTileId: zId.optional() });
+
+export const AvailableBuildingsQuery = z.object({ area: z.enum(['inside', 'outside', 'walls']).default('inside') });
+export const ConstructBody = z.object({ typeId: z.number().int(), positionId: z.number().int() });
+
+export const ResearchBody = z.object({ techId: z.number().int() });
+
+export const TrainBody = z.object({ troopId: z.number().int(), count: z.number().int(), positionId: z.number().int().optional() });
+export const TroopCountBody = z.object({ troopId: z.number().int(), count: z.number().int() });
+export const InjuredTroopsBody = z.object({ troops: zTroops });
+
+// ---- shared pieces ----
+
+const int = () => z.number().int();
+/** Config costs are whole numbers. */
+const costShape = { gold: int(), food: int(), wood: int(), stone: int(), iron: int() };
+
+export const RequirementCheck = RequirementCheckSchema.meta({ id: 'RequirementCheck' });
+export type RequirementCheck = z.infer<typeof RequirementCheck>;
+
+export const CitySpeedupCost = z
+  .object({ coinsNeed: int(), timeLeft: z.number().describe('ms') })
+  .meta({ id: 'CitySpeedupCost' });
+export type CitySpeedupCost = z.infer<typeof CitySpeedupCost>;
+
+// ---- interior ----
+
+export const ComfortResult = z
+  .object({ freeBlessing: z.boolean().describe('blessing (type 3) granted double food') })
+  .meta({ id: 'ComfortResult' });
+export type ComfortResult = z.infer<typeof ComfortResult>;
+
+export const ResourceProductionLine = z
+  .object({
+    typeid: int().describe('1 food, 2 wood, 3 stone, 4 iron'),
+    resource: ResourceKeySchema.exclude(['gold']),
+    basicOutput: int().describe('per hour, regardless of fields'),
+    fieldOutput: int().describe('per hour, after work rate and efficiency'),
+    bonusPercent: int(),
+    armyConsumption: int().describe('food upkeep per hour (0 for other resources)'),
+    totalOutput: int().describe('net per hour'),
+    commenceRate: int().describe('work rate, %'),
+    maxLabour: int(),
+    storage: int(),
+  })
+  .meta({ id: 'ResourceProductionLine' });
+export type ResourceProductionLine = z.infer<typeof ResourceProductionLine>;
+
+export const ProductionBreakdown = z.array(ResourceProductionLine).meta({ id: 'ProductionBreakdown' });
+export type ProductionBreakdown = z.infer<typeof ProductionBreakdown>;
+
+export const CityMoveResult = z
+  .object({ fieldId: int().describe('new tile id'), x: int(), y: int() })
+  .meta({ id: 'CityMoveResult' });
+export type CityMoveResult = z.infer<typeof CityMoveResult>;
+
+// ---- buildings ----
+
+export const BuildingLevelInfo = z
+  .object({
+    typeId: int(),
+    level: int().describe('level being built'),
+    time: int().describe('build time, seconds'),
+    destructTime: int().describe('seconds to demolish back from this level (0 for level 1)'),
+    ...costShape,
+    requirements: z.array(RequirementCheck),
+    ok: z.boolean().describe('all requirements met'),
+  })
+  .meta({ id: 'BuildingLevelInfo' });
+export type BuildingLevelInfo = z.infer<typeof BuildingLevelInfo>;
+
+export const AvailableBuildings = z
+  .object({ buildings: z.array(BuildingLevelInfo.nullable()), unlockedOuterSlots: int() })
+  .meta({ id: 'AvailableBuildings' });
+export type AvailableBuildings = z.infer<typeof AvailableBuildings>;
+
+export const BuildingUpgradeInfo = z
+  .object({
+    building: BuildingBean,
+    maxLevel: int(),
+    next: BuildingLevelInfo.nullable().describe('null at max level'),
+    demolishTime: int().describe('seconds'),
+    demolishRefund: ResourceAmounts.nullable().describe('a third of the current level cost (unrounded); null at level 0'),
+  })
+  .meta({ id: 'BuildingUpgradeInfo' });
+export type BuildingUpgradeInfo = z.infer<typeof BuildingUpgradeInfo>;
+
+// ---- research ----
+
+export const TechBean = z
+  .object({
+    typeId: int(),
+    name: z.string(),
+    level: int(),
+    maxLevel: int(),
+    effectiveLevel: int().describe('level usable in this city (capped by the Academy level)'),
+    upgrading: z.boolean(),
+    castleId: int().nullable().describe('city researching the next level'),
+    startTime: Ms.describe('0 when idle'),
+    endTime: Ms.describe('0 when idle'),
+    permission: z.boolean().describe('can be researched here now'),
+    next: z
+      .object({ time: int().describe('seconds'), requirements: z.array(RequirementCheck), ...costShape })
+      .nullable()
+      .describe('null at max level'),
+  })
+  .meta({ id: 'TechBean' });
+export type TechBean = z.infer<typeof TechBean>;
+
+export const ResearchList = z
+  .object({ academyLevel: int(), researching: int().nullable().describe('tech being researched in this city'), techs: z.array(TechBean) })
+  .meta({ id: 'ResearchList' });
+export type ResearchList = z.infer<typeof ResearchList>;
+
+export const ResearchStarted = z
+  .object({ typeId: int(), level: int().describe('current level (the next one is being researched)'), startTime: Ms, endTime: Ms, castleId: int() })
+  .meta({ id: 'ResearchStarted' });
+export type ResearchStarted = z.infer<typeof ResearchStarted>;
+
+export const ResearchSpeedupResult = z.object({ endTime: Ms }).meta({ id: 'ResearchSpeedupResult' });
+export type ResearchSpeedupResult = z.infer<typeof ResearchSpeedupResult>;
+
+// ---- troops & fortifications ----
+
+export const TrainableUnit = z
+  .object({
+    typeId: int(),
+    key: z.union([TroopKeySchema, FortKeySchema]).optional(),
+    ...costShape,
+    population: int().describe('per unit'),
+    time: int().describe('seconds per unit'),
+    requirements: z.array(RequirementCheck),
+    permission: z.boolean(),
+    stats: z.object({ life: int(), attack: int(), defense: int(), speed: int(), range: int(), load: int(), upkeep: int().describe('food per hour') }),
+  })
+  .meta({ id: 'TrainableUnit' });
+export type TrainableUnit = z.infer<typeof TrainableUnit>;
+
+export const TrainableList = z.array(TrainableUnit).meta({ id: 'TrainableList' });
+export type TrainableList = z.infer<typeof TrainableList>;
+
+export const ProduceBatch = z
+  .object({
+    queueId: int(),
+    type: int().describe('troop / fortification type id'),
+    num: int(),
+    startTime: Ms.describe('0 while waiting'),
+    endTime: Ms.describe('0 while waiting'),
+    costTime: int().describe('seconds'),
+  })
+  .meta({ id: 'ProduceBatch' });
+export type ProduceBatch = z.infer<typeof ProduceBatch>;
+
+export const ProduceQueue = z
+  .object({ positionId: int().describe('barracks position (-2 for the walls)'), allProduceQueue: z.array(ProduceBatch) })
+  .meta({ id: 'ProduceQueue' });
+export type ProduceQueue = z.infer<typeof ProduceQueue>;
+
+export const BarracksQueues = z
+  .object({ queues: z.array(ProduceQueue.extend({ capacity: int().describe('max batches (barracks level)') })) })
+  .meta({ id: 'BarracksQueues' });
+export type BarracksQueues = z.infer<typeof BarracksQueues>;
+
+export const WallsQueues = z
+  .object({
+    queues: z.array(ProduceQueue),
+    capacity: int().describe('max batches (walls level)'),
+    wallSpace: z.object({ used: int(), max: int() }),
+  })
+  .meta({ id: 'WallsQueues' });
+export type WallsQueues = z.infer<typeof WallsQueues>;
+
+/** Troops answer BarracksQueues, fortifications WallsQueues. */
+export const ProductionQueues = z.union([WallsQueues, BarracksQueues]).meta({ id: 'ProductionQueues' });
+export type ProductionQueues = z.infer<typeof ProductionQueues>;

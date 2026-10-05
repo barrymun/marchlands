@@ -7,6 +7,7 @@ import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { GameError } from '@evony/core';
+import { ErrorResponse, Ok } from '@evony/contracts';
 import { accounts, players, type Db } from '@evony/db';
 import { runGame, type Ctx } from '@evony/game';
 import { verifyToken, type TokenClaims } from './auth/jwt.ts';
@@ -74,33 +75,26 @@ export async function requireAdmin(req: FastifyRequest) {
   if (!row?.admin) throw new GameError('Administrators only.', -42, 403);
 }
 
+/** `void` commands answer `data: null`. */
+export type Data<T> = [T] extends [void] ? null : T;
+
 /** Run a game operation for the authenticated lord in one transaction. */
-export async function game<T>(req: FastifyRequest, fn: (ctx: Ctx, playerId: number) => Promise<T>): Promise<{ ok: 1; data: T }> {
+export async function game<T>(req: FastifyRequest, fn: (ctx: Ctx, playerId: number) => Promise<T>): Promise<{ ok: 1; data: Data<T> }> {
   const db = req.server.deps.db;
   const playerId = await playerIdOf(db, req);
   const data = await runGame(db, (ctx) => fn(ctx, playerId));
-  return { ok: 1, data: data ?? (null as T) };
+  return { ok: 1, data: (data ?? null) as Data<T> };
 }
 
 /** Run a world-level operation (no lord required). */
-export async function anon<T>(req: FastifyRequest, fn: (ctx: Ctx) => Promise<T>): Promise<{ ok: 1; data: T }> {
+export async function anon<T>(req: FastifyRequest, fn: (ctx: Ctx) => Promise<T>): Promise<{ ok: 1; data: Data<T> }> {
   const data = await runGame(req.server.deps.db, fn);
-  return { ok: 1, data };
+  return { ok: 1, data: (data ?? null) as Data<T> };
 }
 
-// ---- common schemas ----
+// ---- common request schemas (defined in @evony/contracts) ----
 
-export const zId = z.coerce.number().int().nonnegative();
-export const zCityParams = z.object({ cityId: zId });
-export const zPaging = z.object({
-  pageNo: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(50).default(10),
-});
-export const zIds = z.object({ ids: z.array(z.number().int()).max(500) });
-export const zTroops = z.record(z.string(), z.number().int().nonnegative());
-export const zResources = z
-  .object({ gold: z.number().nonnegative(), food: z.number().nonnegative(), wood: z.number().nonnegative(), stone: z.number().nonnegative(), iron: z.number().nonnegative() })
-  .partial();
+export { zCityParams, zId, zIds, zPaging, zResources, zTroops } from '@evony/contracts';
 
 export const tags = {
   auth: ['auth'],
@@ -127,7 +121,19 @@ export const tags = {
 
 export const secured = [{ bearerAuth: [] }];
 
-/** Route options with OpenAPI metadata; keeps the zod schema types for request inference. */
-export function doc<T extends object = {}>(tag: string[], summary: string, extra?: T) {
-  return { schema: { tags: tag, security: secured, summary, ...((extra ?? {}) as T) } };
+/**
+ * Route options with OpenAPI metadata. `data` is the schema of the `data` field of a successful
+ * answer (from @evony/contracts); it is wrapped in the `{ ok: 1, data }` envelope, validated on
+ * the way out (unknown keys are stripped) and type-checked against the handler's return value.
+ */
+export function doc<R extends z.ZodType, T extends object = {}>(tag: string[], summary: string, data: R, extra?: T) {
+  return {
+    schema: {
+      tags: tag,
+      security: secured,
+      summary,
+      ...((extra ?? {}) as T),
+      response: { 200: Ok(data), '4xx': ErrorResponse, '5xx': ErrorResponse },
+    },
+  };
 }

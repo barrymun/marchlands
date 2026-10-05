@@ -3,5 +3,4 @@
 .git
 .env
 docs
-client
 coverage

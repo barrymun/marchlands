@@ -9,8 +9,10 @@
     "start": "node src/main.ts"
   },
   "dependencies": {
+    "@evony/contracts": "*",
     "@evony/core": "*",
     "@evony/db": "*",
+    "@evony/game": "*",
     "@fastify/cors": "^11.3.0",
     "@fastify/swagger": "^9.9.1",
     "@fastify/swagger-ui": "^6.1.1",

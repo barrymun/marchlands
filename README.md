@@ -15,9 +15,10 @@ The original left a lot unimplemented: attacks, transport, reinforcement, the ma
 
 ```bash
 cp .env.example .env          # adjust ports / secrets if needed
-docker compose up -d --build  # postgres, migrate (one-shot), worker, api
+docker compose up -d --build  # postgres, migrate (one-shot), worker, api, web
 ```
 
+- Web client: http://localhost:8000 (`WEB_PORT`)
 - API: http://localhost:3000/api/v1 (`API_PORT`)
 - Interactive docs: http://localhost:3000/docs
 - WebSocket: ws://localhost:3000/ws?token=JWT
@@ -46,23 +47,28 @@ curl -s $API/cities/$CITY/buildings -H "authorization: Bearer $TOKEN" -H 'conten
 
 ```
 evony-re/
-├── docker-compose.yml        postgres · migrate · worker · api · (adminer)
+├── docker-compose.yml        postgres · migrate · worker · api · web · (adminer)
+├── shared/                   packages used by the backend *and* the client
+│   ├── core/                 pure game rules: static data, persisted-state schemas, economy,
+│   │                         construction, heroes, troops & marching, battle simulator, map, items
+│   ├── contracts/            zod schemas of every request, response and WebSocket push
+│   │                         (row shapes derived from the Drizzle tables via drizzle-zod)
+│   └── api-client/           typed HTTP client (generated from OpenAPI) + WebSocket client
 ├── backend/                  TypeScript (Node 24 runs .ts directly — no build step)
 │   ├── Dockerfile            one image for every backend service
 │   ├── packages/
-│   │   ├── core/             pure game rules: static data, economy, construction, heroes,
-│   │   │                     troops & marching, battle simulator, map generation, items, quests
-│   │   ├── db/               Drizzle schema, SQL migrations, connection helpers
+│   │   ├── db/               Drizzle schema (source of truth), SQL migrations, connection helpers
 │   │   └── game/             transactional game services shared by api + worker
 │   │                         (one service module per original packet group)
 │   └── services/
 │       ├── api/              Fastify HTTP API + WebSocket push gateway
 │       └── worker/           game clock: timed events (builds, research, training, marches,
 │                             battles, deliveries, buff expiry) + periodic jobs
+├── client/
+│   └── web/                  Vite + React + Tailwind + shadcn/ui browser client
 ├── db/                       postgres config, init scripts, seed data (legacy map)
-├── client/                   (future) game client
 ├── docs/
-│   ├── architecture.md       how it fits together
+│   ├── architecture.md       how it fits together (incl. the type pipeline)
 │   ├── api-endpoints.md      every endpoint, mapped to the original commands
 │   ├── websocket.md          push messages
 │   ├── deviations.md         what differs from the C++ server and why
@@ -73,6 +79,23 @@ evony-re/
     └── docs/                 doc generators
 ```
 
+## Types: one source, every app
+
+```
+backend/packages/db/src/schema.ts ──► SQL migrations (drizzle-kit)
+          │  (jsonb columns typed by shared/core/src/types.ts zod schemas)
+          ▼
+shared/contracts  (drizzle-zod row schemas → API responses, requests, pushes)
+          │  route schemas: validation, response serialization, compile-time checks
+          ▼
+backend/services/api ──► OpenAPI 3.1 (shared/api-client/openapi.json)
+          │                         │  openapi-typescript
+          ▼                         ▼
+       /docs              shared/api-client/src/generated/openapi.ts ──► client/web
+```
+
+Change a column, contract or route, then run `npm run gen:api` (no database or server needed) to refresh the OpenAPI document, the generated client types and `docs/api-endpoints.md`. `npm run typecheck` then flags every backend handler and client call that no longer fits. Responses are validated on the way out and unknown keys are stripped, so the contract is exactly what clients receive.
+
 ## Development
 
 ```bash
@@ -81,8 +104,10 @@ docker compose up -d postgres
 npm run db:migrate                      # uses DATABASE_URL from .env
 npm run dev:worker                      # in one terminal
 npm run dev:api                         # in another (pretty logs, auto-reload)
+npm run dev:web                         # Vite dev server on :5173, proxies /api and /ws to API_PORT
 
-npm run typecheck
+npm run gen:api                         # after changing contracts/routes: OpenAPI + client types + docs
+npm run typecheck                       # backend and client
 npm test                                # unit tests incl. the 36k-case battle regression suite
 API=http://localhost:3000 npm run smoke # end-to-end scenarios (needs GAME_SPEED>=50 and an operator)
 ```
@@ -96,7 +121,7 @@ To rebuild the static game data from the original dumps, run `npm run legacy:con
 | Variable | Default | Purpose |
 |---|---|---|
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `evony` | database credentials |
-| `POSTGRES_PORT`, `API_PORT` | 5432, 3000 | host ports |
+| `POSTGRES_PORT`, `API_PORT`, `WEB_PORT` | 5432, 3000, 8000 | host ports |
 | `DATABASE_URL` | – | for services run outside docker |
 | `JWT_SECRET` | `change-me-in-production` | token signing key (**change it**) |
 | `JWT_TTL` | 604800 | token lifetime, seconds |
@@ -108,4 +133,4 @@ To rebuild the static game data from the original dumps, run `npm run legacy:con
 | `LOG_LEVEL` | `info` | pino log level |
 | `WORKER_BATCH`, `WORKER_IDLE_MS` | 50, 250 | worker tuning |
 
-Gameplay constants are collected in `backend/packages/core/src/balance.ts`. Values marked `(orig)` come from the original server; values marked `(evony)` fill gaps the original never implemented.
+Gameplay constants are collected in `shared/core/src/balance.ts`. Values marked `(orig)` come from the original server; values marked `(evony)` fill gaps the original never implemented.

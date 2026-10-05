@@ -4,7 +4,7 @@
 //   node tools/legacy-import/convert.mjs <path-to-evony-private-server/DB>
 //
 // Outputs:
-//   backend/packages/core/src/data/legacy/{buildings,research,troops,items,quests}.json
+//   shared/core/src/data/legacy/{buildings,research,troops,items,quests}.json
 //   db/seed/legacy-map-800.bin.gz   (640000 * [type:u8, level:u8], index = tile id)
 
 import fs from 'node:fs';
@@ -19,7 +19,7 @@ const dbDir = path.resolve(process.argv[2] ?? path.join(root, '../evony-private-
 const configDump = path.join(dbDir, 'evony (3).sql');
 const worldDump = path.join(dbDir, 's2 (1).sql');
 
-const outData = path.join(root, 'backend/packages/core/src/data/legacy');
+const outData = path.join(root, 'shared/core/src/data/legacy');
 const outSeed = path.join(root, 'db/seed');
 fs.mkdirSync(outData, { recursive: true });
 fs.mkdirSync(outSeed, { recursive: true });

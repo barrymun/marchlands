@@ -16,6 +16,7 @@ import {
   type TroopCounts,
 } from '@evony/core';
 import type { Ctx } from './context.ts';
+import { troopBean } from './dto.ts';
 import { armiesOfCity, findCity, getCity, getPlayer, heroesOfCity, valleysOfCity, type CityRow, type HeroRow, type PlayerRow, type TileRow } from './repo.ts';
 
 export interface CityBundle {
@@ -66,7 +67,7 @@ export async function loadBundle(ctx: Ctx, city: CityRow, player: PlayerRow): Pr
 export function settle(ctx: Ctx, b: CityBundle): SettleResult {
   const r = settleCity(b.city, economyContext(b), ctx.now);
   if (Object.keys(r.deserted).length) {
-    ctx.push(b.player.id, 'server.TroopUpdate', { castleId: b.city.id, troop: b.city.troops });
+    ctx.push(b.player.id, 'server.TroopUpdate', { castleId: b.city.id, troop: troopBean(b.city.troops) });
   }
   return r;
 }

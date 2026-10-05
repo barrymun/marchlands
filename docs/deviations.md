@@ -1,6 +1,6 @@
 # Deviations from the original server
 
-The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bugs included. This file lists where evony-re does something different, and why. Every tunable value lives in `backend/packages/core/src/balance.ts`.
+The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bugs included. This file lists where evony-re does something different, and why. Every tunable value lives in `shared/core/src/balance.ts`.
 
 ## Ported exactly
 
@@ -66,7 +66,7 @@ The original either stubbed these or never answered them.
 - **Production bonuses.**
   - Agriculture, Lumbering, Masonry and Mining: +10% per effective level.
   - Mayor management: +1% per point.
-  - Valleys: +5% per level for the matching resource.
+  - Valleys: grassland 3–12%, swamp/forest/desert/hill 5–23%, lake 8–35% by level, for the matching resource (lake, swamp, grassland → food; forest → wood; desert → stone; hill → iron).
   - Stockpile: +10% storage per level.
   - Production buffs: +25%.
 - **Troop food upkeep** from `config_troops.movecost`; troops desert at 10% per hour while food is at 0.
@@ -93,7 +93,6 @@ The original either stubbed these or never answered them.
 
 These Evony Age 1 values were not in the original code. They are marked `(evony)` in `balance.ts`:
 
-- valley bonus of 5% per level;
 - warehouse protection table;
 - wall space per fortification;
 - loyalty damage per attack of 10–15;

@@ -336,20 +336,22 @@ export async function cancelInvite(ctx: Ctx, playerId: number, userName: string)
 export async function sentInvites(ctx: Ctx, playerId: number) {
   const p = await getPlayer(ctx, playerId);
   const allianceId = requireMember(p);
-  return ctx.tx
+  const rows = await ctx.tx
     .select({ userName: players.name, prestige: players.prestige, rank: players.prestigeRank, invitePerson: allianceRequests.invitedByName, inviteTime: allianceRequests.createdAt })
     .from(allianceRequests)
     .innerJoin(players, eq(players.id, allianceRequests.playerId))
     .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.kind, 'invite')));
+  return rows.map((r) => ({ ...r, prestige: Math.floor(r.prestige) }));
 }
 
 /** alliance.leaderWantUserInAllianceList: invitations I received. */
 export async function myInvites(ctx: Ctx, playerId: number) {
-  return ctx.tx
+  const rows = await ctx.tx
     .select({ allianceName: alliances.name, prestige: alliances.prestige, rank: alliances.prestigeRank, memberCount: alliances.memberCount, invitePerson: allianceRequests.invitedByName })
     .from(allianceRequests)
     .innerJoin(alliances, eq(alliances.id, allianceRequests.allianceId))
     .where(and(eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, 'invite')));
+  return rows.map((r) => ({ ...r, prestige: Math.floor(r.prestige) }));
 }
 
 /** alliance.agreeComeinAllianceByUser: accept an invitation (needs an Embassy). */
@@ -414,7 +416,7 @@ export async function myApplication(ctx: Ctx, playerId: number) {
 export async function applications(ctx: Ctx, playerId: number) {
   const p = await getPlayer(ctx, playerId);
   requireRank(p, AllianceRank.PRESIDENT);
-  return ctx.tx
+  const rows = await ctx.tx
     .select({
       userName: players.name,
       prestige: players.prestige,
@@ -425,6 +427,7 @@ export async function applications(ctx: Ctx, playerId: number) {
     .from(allianceRequests)
     .innerJoin(players, eq(players.id, allianceRequests.playerId))
     .where(and(eq(allianceRequests.allianceId, p.allianceId!), eq(allianceRequests.kind, 'apply')));
+  return rows.map((r) => ({ ...r, prestige: Math.floor(r.prestige), castleCount: Number(r.castleCount) }));
 }
 
 /** alliance.agreeComeinAllianceByLeader */

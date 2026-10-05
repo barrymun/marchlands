@@ -1,0 +1,150 @@
+// Shared client-facing shapes ("beans" of the original protocol), built by
+// backend/packages/game/src/dto.ts and reused across many endpoints and pushes.
+
+import { z } from 'zod';
+import { BuildingStateSchema } from '@evony/core';
+import { FortBean, Ms, ResourceAmounts, TroopBean } from './common.ts';
+import { ArmyRow, HeroRow, PlayerRow, TileRow } from './rows.ts';
+
+export const BuildingBean = BuildingStateSchema.extend({ name: z.string() }).meta({ id: 'BuildingBean' });
+export type BuildingBean = z.infer<typeof BuildingBean>;
+
+export const HeroBean = HeroRow.pick({
+  id: true,
+  name: true,
+  logoUrl: true,
+  status: true,
+  level: true,
+  upgradeExp: true,
+  loyalty: true,
+  power: true,
+  management: true,
+  stratagem: true,
+  powerAdded: true,
+  managementAdded: true,
+  stratagemAdded: true,
+  powerBuffAdded: true,
+  managementBuffAdded: true,
+  stratagemBuffAdded: true,
+  remainPoint: true,
+  basePower: true,
+  baseManagement: true,
+  baseStratagem: true,
+  cityId: true,
+})
+  .extend({ experience: z.number().int(), seized: z.boolean().describe('held captive by another lord') })
+  .meta({ id: 'HeroBean' });
+export type HeroBean = z.infer<typeof HeroBean>;
+
+export const ResourceLine = z
+  .object({
+    amount: z.number().int(),
+    max: z.number(),
+    storePercent: z.number(),
+    workRate: z.number(),
+    workPeople: z.number(),
+    increaseRate: z.number().int().describe('net change per hour (food is after troop upkeep)'),
+    bonusPercent: z.number().int(),
+  })
+  .meta({ id: 'ResourceLine' });
+export type ResourceLine = z.infer<typeof ResourceLine>;
+
+export const ResourceBean = z
+  .object({
+    gold: z.number().int(),
+    goldRate: z.number().int(),
+    food: ResourceLine,
+    wood: ResourceLine,
+    stone: ResourceLine,
+    iron: ResourceLine,
+    taxRate: z.number().int(),
+    taxIncome: z.number().int(),
+    herosSalary: z.number(),
+    troopCostFood: z.number().int(),
+    curPopulation: z.number().int(),
+    maxPopulation: z.number(),
+    idlePopulation: z.number(),
+    workPeople: z.number(),
+    efficiency: z.number().int().describe('percent'),
+    support: z.number().int().describe('loyalty'),
+    complaint: z.number().int().describe('grievance'),
+    populationDirection: z.number().int(),
+    updatedAt: Ms,
+  })
+  .meta({ id: 'ResourceBean' });
+export type ResourceBean = z.infer<typeof ResourceBean>;
+
+export const ValleyBean = TileRow.pick({ id: true, type: true, level: true, ownerCityId: true })
+  .extend({ x: z.number().int(), y: z.number().int() })
+  .meta({ id: 'ValleyBean' });
+export type ValleyBean = z.infer<typeof ValleyBean>;
+
+export const CityBean = z
+  .object({
+    id: z.number().int(),
+    name: z.string(),
+    logoUrl: z.string(),
+    fieldId: z.number().int().describe('tile id'),
+    x: z.number().int(),
+    y: z.number().int(),
+    zoneName: z.string(),
+    status: z.number().int(),
+    allowAlliance: z.boolean(),
+    goOutForBattle: z.boolean(),
+    resource: ResourceBean,
+    buildings: z.array(BuildingBean),
+    troop: TroopBean,
+    injuredTroop: TroopBean,
+    fortification: FortBean,
+    heros: z.array(HeroBean),
+    fields: z.array(ValleyBean),
+    createdAt: Ms,
+  })
+  .meta({ id: 'CityBean' });
+export type CityBean = z.infer<typeof CityBean>;
+
+export const PlayerInfo = PlayerRow.pick({ id: true, sex: true, flag: true, faceUrl: true, cents: true, beginner: true, status: true, allianceId: true })
+  .extend({
+    userName: z.string(),
+    prestige: z.number().int(),
+    honor: z.number().int(),
+    medal: z.number().int(),
+    titleId: z.number().int(),
+    titleName: z.string(),
+    ranking: z.number().int(),
+    honorRank: z.number().int(),
+    alliance: z.string(),
+    levelId: z.number().int().describe('alliance rank'),
+    castleCount: z.number().int(),
+    population: z.number(),
+    icon: z.number().int(),
+    changedFace: z.boolean(),
+    createrTime: Ms,
+    lastLoginTime: Ms,
+  })
+  .meta({ id: 'PlayerInfo' });
+export type PlayerInfo = z.infer<typeof PlayerInfo>;
+
+export const ItemCount = z.object({ id: z.string(), count: z.number().int() }).meta({ id: 'ItemCount' });
+export type ItemCount = z.infer<typeof ItemCount>;
+
+export const BuffBean = z
+  .object({ id: z.string(), desc: z.string(), endTime: Ms, param: z.number().optional(), cityId: z.number().int().optional() })
+  .meta({ id: 'BuffBean' });
+export type BuffBean = z.infer<typeof BuffBean>;
+
+export const ArmyBean = ArmyRow.pick({ playerId: true, cityId: true, heroId: true, startTime: true, reachTime: true, restTime: true, startPosName: true, targetPosName: true })
+  .extend({
+    armyId: z.number().int(),
+    king: z.string(),
+    hero: z.string(),
+    heroLevel: z.number().int(),
+    missionType: z.number().int(),
+    direction: z.number().int(),
+    startFieldId: z.number().int(),
+    targetFieldId: z.number().int(),
+    troop: TroopBean.nullable().describe('null when hidden (enemy army without Beacon Tower)'),
+    resource: ResourceAmounts.nullable(),
+  })
+  .meta({ id: 'ArmyBean' });
+export type ArmyBean = z.infer<typeof ArmyBean>;

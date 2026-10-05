@@ -16,13 +16,14 @@ import {
   type FortCounts,
   type TroopCounts,
 } from '@evony/core';
+import type { ArmyBean, BuffBean, BuildingBean, CityBean, FortBean, HeroBean, ItemCount, PlayerInfo, ResourceBean, TroopBean, ValleyBean } from '@evony/contracts';
 import { cityStats, type CityBundle } from './city.ts';
 import type { ArmyRow, CityRow, HeroRow, PlayerRow, TileRow } from './repo.ts';
 
-export const troopBean = (t: TroopCounts) => Object.fromEntries(TROOP_KEY_LIST.map((k) => [k, Math.floor(t[k] ?? 0)]));
-export const fortBean = (f: FortCounts) => Object.fromEntries(FORT_KEY_LIST.map((k) => [k, Math.floor(f[k] ?? 0)]));
+export const troopBean = (t: TroopCounts): TroopBean => Object.fromEntries(TROOP_KEY_LIST.map((k) => [k, Math.floor(t[k] ?? 0)])) as TroopBean;
+export const fortBean = (f: FortCounts): FortBean => Object.fromEntries(FORT_KEY_LIST.map((k) => [k, Math.floor(f[k] ?? 0)])) as FortBean;
 
-export function buildingBean(b: CityRow['buildings'][number]) {
+export function buildingBean(b: CityRow['buildings'][number]): BuildingBean {
   return {
     positionId: b.positionId,
     typeId: b.typeId,
@@ -34,7 +35,7 @@ export function buildingBean(b: CityRow['buildings'][number]) {
   };
 }
 
-export function heroBean(h: HeroRow) {
+export function heroBean(h: HeroRow): HeroBean {
   return {
     id: h.id,
     name: h.name,
@@ -62,7 +63,7 @@ export function heroBean(h: HeroRow) {
   };
 }
 
-export function resourceBean(b: CityBundle, stats: CityStats) {
+export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
   const c = b.city;
   const res = (r: (typeof BASIC_RESOURCES)[number]) => ({
     amount: Math.floor(c[r]),
@@ -97,7 +98,7 @@ export function resourceBean(b: CityBundle, stats: CityStats) {
   };
 }
 
-export function cityBean(b: CityBundle, now: number) {
+export function cityBean(b: CityBundle, now: number): CityBean {
   const stats = cityStats(b, now);
   const c = b.city;
   const { x, y } = tileXY(c.tileId);
@@ -123,12 +124,12 @@ export function cityBean(b: CityBundle, now: number) {
   };
 }
 
-export function valleyBean(t: TileRow) {
+export function valleyBean(t: TileRow): ValleyBean {
   const { x, y } = tileXY(t.id);
   return { id: t.id, x, y, type: t.type, level: t.level, ownerCityId: t.ownerCityId };
 }
 
-export function playerInfo(p: PlayerRow, extras: { allianceName?: string; cityCount: number; population?: number }) {
+export function playerInfo(p: PlayerRow, extras: { allianceName?: string; cityCount: number; population?: number }): PlayerInfo {
   return {
     id: p.id,
     userName: p.name,
@@ -157,18 +158,18 @@ export function playerInfo(p: PlayerRow, extras: { allianceName?: string; cityCo
   };
 }
 
-export function itemsArray(items: PlayerRow['items']) {
+export function itemsArray(items: PlayerRow['items']): ItemCount[] {
   return Object.entries(items)
     .filter(([, n]) => n > 0)
     .map(([id, count]) => ({ id, count }))
     .sort((a, b) => a.id.localeCompare(b.id));
 }
 
-export function buffsArray(buffs: PlayerRow['buffs'], now: number) {
+export function buffsArray(buffs: PlayerRow['buffs'], now: number): BuffBean[] {
   return buffs.filter((b) => b.endTime > now).map((b) => ({ id: b.id, desc: b.desc, endTime: b.endTime, param: b.param, cityId: b.cityId }));
 }
 
-export function armyBean(a: ArmyRow, extra: { heroName?: string; heroLevel?: number; king?: string; visible?: boolean } = {}) {
+export function armyBean(a: ArmyRow, extra: { heroName?: string; heroLevel?: number; king?: string; visible?: boolean } = {}): ArmyBean {
   const hidden = extra.visible === false;
   return {
     armyId: a.id,

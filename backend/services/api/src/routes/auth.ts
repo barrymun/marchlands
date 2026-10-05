@@ -1,15 +1,14 @@
 import { eq, sql } from 'drizzle-orm';
-import { z } from 'zod';
+import type { z } from 'zod';
 import { GameError } from '@evony/core';
+import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody } from '@evony/contracts';
 import { accounts, players } from '@evony/db';
 import { hashPassword, verifyPassword } from '../auth/password.ts';
 import { signToken } from '../auth/jwt.ts';
 import { authenticate, secured, tags, type ZApp } from '../http.ts';
 
-const credentials = z.object({
-  username: z.string().trim().min(3).max(30).regex(/^[A-Za-z0-9_.-]+$/, 'letters, digits, _ . - only'),
-  password: z.string().min(6).max(200),
-});
+/** Public routes cannot use doc(): same envelope, no `security`. */
+const responses = <T extends z.ZodType>(data: T) => ({ 200: Ok(data), '4xx': ErrorResponse, '5xx': ErrorResponse });
 
 export default async function authRoutes(app: ZApp) {
   const { db, config } = app.deps;
@@ -27,7 +26,7 @@ export default async function authRoutes(app: ZApp) {
 
   app.post(
     '/auth/register',
-    { schema: { tags: tags.auth, summary: 'Create an account', body: credentials.extend({ email: z.email().max(120) }) } },
+    { schema: { tags: tags.auth, summary: 'Create an account', body: RegisterBody, response: responses(AuthSession) } },
     async (req) => {
       const { username, password, email } = req.body;
       const [dupe] = await db
@@ -42,11 +41,11 @@ export default async function authRoutes(app: ZApp) {
         .insert(accounts)
         .values({ username, email, passwordHash: await hashPassword(password), isAdmin, createdAt: Date.now(), lastLoginAt: Date.now(), lastLoginIp: req.ip })
         .returning();
-      return { ok: 1, data: await issue(row.id, row.isAdmin) };
+      return { ok: 1 as const, data: await issue(row.id, row.isAdmin) };
     },
   );
 
-  app.post('/auth/login', { schema: { tags: tags.auth, summary: 'Log in (orig `login`)', body: credentials } }, async (req, reply) => {
+  app.post('/auth/login', { schema: { tags: tags.auth, summary: 'Log in (orig `login`)', body: LoginBody, response: responses(AuthSession) } }, async (req, reply) => {
     const { username, password } = req.body;
     const [acc] = await db.select().from(accounts).where(sql`lower(${accounts.username}) = lower(${username})`);
     if (!acc || !(await verifyPassword(password, acc.passwordHash))) {
@@ -56,22 +55,22 @@ export default async function authRoutes(app: ZApp) {
     const isAdmin = acc.isAdmin || config.adminUsernames.includes(acc.username.toLowerCase());
     await db.update(accounts).set({ lastLoginAt: Date.now(), lastLoginIp: req.ip, isAdmin }).where(eq(accounts.id, acc.id));
     await db.update(players).set({ lastLoginAt: Date.now(), lastSeenAt: Date.now() }).where(eq(players.accountId, acc.id));
-    return { ok: 1, data: await issue(acc.id, isAdmin) };
+    return { ok: 1 as const, data: await issue(acc.id, isAdmin) };
   });
 
-  app.get('/auth/me', { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Current account and its lord' } }, async (req) => {
+  app.get('/auth/me', { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Current account and its lord', response: responses(AuthAccount) } }, async (req) => {
     const [acc] = await db
       .select({ id: accounts.id, username: accounts.username, email: accounts.email, isAdmin: accounts.isAdmin, createdAt: accounts.createdAt })
       .from(accounts)
       .where(eq(accounts.id, req.claims!.sub));
     if (!acc) throw new GameError('Account not found.', -2, 401);
     const [p] = await db.select({ id: players.id, name: players.name }).from(players).where(eq(players.accountId, acc.id));
-    return { ok: 1, data: { ...acc, player: p ?? null } };
+    return { ok: 1 as const, data: { ...acc, player: p ?? null } };
   });
 
-  app.post('/auth/refresh', { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Issue a fresh token' } }, async (req) => {
+  app.post('/auth/refresh', { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Issue a fresh token', response: responses(AuthSession) } }, async (req) => {
     const [acc] = await db.select({ id: accounts.id, isAdmin: accounts.isAdmin, status: accounts.status }).from(accounts).where(eq(accounts.id, req.claims!.sub));
     if (!acc || acc.status !== 0) throw new GameError('Not logged in.', -2, 401);
-    return { ok: 1, data: await issue(acc.id, acc.isAdmin) };
+    return { ok: 1 as const, data: await issue(acc.id, acc.isAdmin) };
   });
 }

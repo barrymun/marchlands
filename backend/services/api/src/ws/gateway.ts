@@ -4,6 +4,7 @@
 
 import pg from 'pg';
 import { eq } from 'drizzle-orm';
+import type { PushMessage } from '@evony/contracts';
 import { players, pushMessages, type Db } from '@evony/db';
 import { PUSH_CHANNEL } from '@evony/game';
 
@@ -11,6 +12,11 @@ export interface Socketish {
   send(data: string): void;
   readyState: number;
   close(code?: number, reason?: string): void;
+}
+
+/** Send one typed `{ cmd, data }` frame. */
+export function sendPush(socket: Pick<Socketish, 'send'>, msg: PushMessage) {
+  socket.send(JSON.stringify(msg));
 }
 
 export interface GatewayLogger {
@@ -84,7 +90,8 @@ export class PushGateway {
     if (this.sockets.size === 0) return;
     const [row] = await this.db.select().from(pushMessages).where(eq(pushMessages.id, id));
     if (!row) return;
-    const frame = JSON.stringify({ cmd: row.cmd, data: row.data });
+    // rows are only written by ctx.push / ctx.broadcast, which are typed against PushSchemas
+    const frame = JSON.stringify({ cmd: row.cmd, data: row.data } as PushMessage);
     const targets = row.playerIds.length ? row.playerIds : [...this.sockets.keys()];
     for (const pid of targets) for (const s of this.sockets.get(pid) ?? []) if (s.readyState === 1) s.send(frame);
   }

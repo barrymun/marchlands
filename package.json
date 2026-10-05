@@ -3,14 +3,16 @@
   "private": true,
   "type": "module",
   "workspaces": [
+    "shared/*",
     "backend/packages/*",
-    "backend/services/*"
+    "backend/services/*",
+    "client/*"
   ],
   "engines": {
     "node": ">=24"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p client/web --noEmit",
     "test": "vitest run",
     "dev:api": "npm run dev -w @evony/api",
     "dev:worker": "npm run dev -w @evony/worker",
@@ -18,7 +20,10 @@
     "db:migrate": "npm run migrate -w @evony/db",
     "legacy:convert": "node tools/legacy-import/convert.mjs",
     "smoke": "node tools/smoke/smoke.mjs && node tools/smoke/war.mjs",
-    "docs:api": "node tools/docs/gen-api-md.mjs"
+    "docs:api": "node tools/docs/gen-api-md.mjs",
+    "gen:api": "node backend/services/api/src/openapi.ts && npm run generate -w @evony/api-client && npm run docs:api",
+    "dev:web": "npm run dev -w @evony/web",
+    "build:web": "npm run build -w @evony/web"
   },
   "devDependencies": {
     "@types/node": "^24.19.1",

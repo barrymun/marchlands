@@ -34,10 +34,12 @@ import {
   totalResources,
   totalTroops,
   valleyGarrison,
+  type BattleExtra,
   type BuildingState,
   type CombatResult,
   type FortCounts,
   type NpcState,
+  type ReportBody,
   type ResourceSet,
   type TroopCounts,
 } from '@evony/core';
@@ -564,8 +566,8 @@ function battleBody(
   r: CombatResult,
   attacker: BattleSideReport,
   defender: BattleSideReport & { forts?: { before: FortCounts; lost: FortCounts; after: FortCounts }; wallLevel?: number },
-  extra: Record<string, unknown>,
-) {
+  extra: BattleExtra,
+): ReportBody {
   return {
     kind: 'battle' as const,
     battle: {

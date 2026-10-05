@@ -1,0 +1,147 @@
+// Heroes, armies, map and valleys (backend/services/api/src/routes/military.ts).
+
+import { z } from 'zod';
+import { STATE_NAMES, TileType } from '@evony/core';
+import { zCityParams, zId, zResources, zTroops } from './common.ts';
+import { ArmyBean, HeroBean } from './beans.ts';
+import { TileRow } from './rows.ts';
+
+// ---- requests ----
+
+export const HeroParams = z.object({ heroId: zId });
+export const TavernHireParams = zCityParams.extend({ heroId: zId });
+export const HeroPointsBody = z.object({ power: z.number().int(), management: z.number().int(), stratagem: z.number().int() });
+export const UseHeroItemBody = z.object({ itemId: z.string() });
+export const RenameHeroBody = z.object({ name: z.string() });
+
+export const ArmyParams = z.object({ armyId: zId });
+export const SendArmyBody = z.object({
+  targetTileId: zId,
+  mission: z.number().int().min(1).max(5),
+  troops: zTroops,
+  resources: zResources.optional(),
+  heroId: z.number().int().nullish(),
+  restTime: z.number().int().min(0).optional().describe('seconds to camp before returning (0 = until recalled)'),
+});
+export const MarchEstimateBody = z.object({ targetTileId: zId, troops: zTroops });
+
+export const TileParams = z.object({ tileId: zId });
+export const MapQuery = z.object({ x1: z.coerce.number().int(), y1: z.coerce.number().int(), x2: z.coerce.number().int(), y2: z.coerce.number().int() });
+export const MapSearchQuery = z.object({ x: z.coerce.number().int(), y: z.coerce.number().int(), radius: z.coerce.number().int().default(10), type: z.coerce.number().int() });
+
+// ---- heroes ----
+
+export const CityHeroList = z
+  .object({ heroes: z.array(HeroBean).describe('hired heroes and captives held'), slots: z.number().int().describe('Feasting Hall capacity') })
+  .meta({ id: 'CityHeroList' });
+export type CityHeroList = z.infer<typeof CityHeroList>;
+
+export const TavernOffers = z
+  .object({ posCount: z.number().int().describe('free hero slots'), heros: z.array(HeroBean) })
+  .meta({ id: 'TavernOffers' });
+export type TavernOffers = z.infer<typeof TavernOffers>;
+
+// ---- armies ----
+
+export const VisibleArmies = z
+  .object({
+    self: z.array(ArmyBean),
+    friend: z.array(ArmyBean).describe('other lords stationed at or reinforcing/transporting to me'),
+    enemy: z.array(ArmyBean).describe('hostile armies heading for me (troops need a Beacon Tower)'),
+  })
+  .meta({ id: 'VisibleArmies' });
+export type VisibleArmies = z.infer<typeof VisibleArmies>;
+
+export const StationedArmyList = z.array(ArmyBean).meta({ id: 'StationedArmyList' });
+export type StationedArmyList = z.infer<typeof StationedArmyList>;
+
+export const TroopParams = z
+  .object({
+    marchSkillParam: z.number().int().describe('Compass bonus percent'),
+    loadSkillParam: z.number().int().describe('Logistics bonus percent'),
+    driveSkillParam: z.number().int().describe('Horseback Riding bonus percent'),
+    transportStationParam: z.number().int().describe('Relief Station speed multiplier between own cities'),
+    maxArmies: z.number().int(),
+  })
+  .meta({ id: 'TroopParams' });
+export type TroopParams = z.infer<typeof TroopParams>;
+
+export const MarchEstimate = z
+  .object({ marchTime: z.number().int().describe('milliseconds'), load: z.number().int().describe('carry capacity') })
+  .meta({ id: 'MarchEstimate' });
+export type MarchEstimate = z.infer<typeof MarchEstimate>;
+
+// ---- map ----
+
+const MapPermissions = z.object({ canLoot: z.boolean(), canOccupy: z.boolean(), canScout: z.boolean(), canSend: z.boolean(), canTrans: z.boolean() });
+const relation = z.number().int().describe('Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self');
+
+/** A player castle or barbarian (NPC) city on the map. Player fields are absent for NPC cities. */
+export const MapCastle = z
+  .object({
+    id: z.number().int().describe('tile id'),
+    x: z.number().int(),
+    y: z.number().int(),
+    name: z.string(),
+    npc: z.boolean(),
+    level: z.number().int(),
+    cityId: z.number().int().optional(),
+    playerId: z.number().int().optional(),
+    userName: z.string().optional(),
+    prestige: z.number().int().optional(),
+    honor: z.number().int().optional(),
+    flag: z.string().optional(),
+    allianceName: z.string().optional(),
+    playerLogoUrl: z.string().optional(),
+    relation: relation.optional(),
+    state: z.number().int().optional().describe('player status'),
+    furlough: z.boolean().optional().describe('beginner protection'),
+    zoneName: z.string(),
+  })
+  .extend(MapPermissions.shape)
+  .meta({ id: 'MapCastle' });
+export type MapCastle = z.infer<typeof MapCastle>;
+
+export const MapView = z
+  .object({
+    x1: z.number().int(),
+    y1: z.number().int(),
+    x2: z.number().int(),
+    y2: z.number().int(),
+    mapStr: z.string().describe('two hex chars per tile (type, level), row-major'),
+    castles: z.array(MapCastle),
+  })
+  .meta({ id: 'MapView' });
+export type MapView = z.infer<typeof MapView>;
+
+export const MapTileOwner = z
+  .object({ cityId: z.number().int(), cityName: z.string(), playerId: z.number().int(), userName: z.string() })
+  .meta({ id: 'MapTileOwner' });
+export type MapTileOwner = z.infer<typeof MapTileOwner>;
+
+/** Valley, flat or barbarian city tile. */
+export const MapFieldTileInfo = TileRow.pick({ id: true, type: true, level: true })
+  .extend({
+    x: z.number().int(),
+    y: z.number().int(),
+    zoneName: z.enum([...STATE_NAMES, 'UNKNOWN']),
+    name: z.string(),
+    npc: z.boolean(),
+    owner: MapTileOwner.nullable().describe('controlling city of an occupied valley / captured NPC city'),
+    relation,
+  })
+  .extend(MapPermissions.shape)
+  .meta({ id: 'MapFieldTileInfo' });
+export type MapFieldTileInfo = z.infer<typeof MapFieldTileInfo>;
+
+/** Player castle tile. */
+export const MapFieldCastleInfo = MapCastle.extend({ type: z.literal(TileType.CASTLE) }).meta({ id: 'MapFieldCastleInfo' });
+export type MapFieldCastleInfo = z.infer<typeof MapFieldCastleInfo>;
+
+export const MapFieldInfo = z.union([MapFieldTileInfo, MapFieldCastleInfo]).meta({ id: 'MapFieldInfo' });
+export type MapFieldInfo = z.infer<typeof MapFieldInfo>;
+
+export const MapSearchResult = z
+  .array(TileRow.pick({ id: true, type: true, level: true, ownerCityId: true, cityId: true }).extend({ x: z.number().int(), y: z.number().int() }))
+  .meta({ id: 'MapSearchResult' });
+export type MapSearchResult = z.infer<typeof MapSearchResult>;

@@ -1,4 +1,12 @@
 {
   "extends": "./tsconfig.base.json",
-  "include": ["backend/packages/*/src/**/*.ts", "backend/packages/*/test/**/*.ts", "backend/services/*/src/**/*.ts", "backend/services/*/test/**/*.ts", "backend/packages/db/drizzle.config.ts"]
+  "include": [
+    "shared/*/src/**/*.ts",
+    "shared/*/test/**/*.ts",
+    "backend/packages/*/src/**/*.ts",
+    "backend/packages/*/test/**/*.ts",
+    "backend/services/*/src/**/*.ts",
+    "backend/services/*/test/**/*.ts",
+    "backend/packages/db/drizzle.config.ts"
+  ]
 }

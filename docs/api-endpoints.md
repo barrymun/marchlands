@@ -1,6 +1,6 @@
 # API endpoints
 
-Generated from the OpenAPI document (`/docs/json`) by `tools/docs/gen-api-md.mjs`. Interactive docs: `/docs`.
+Generated from the OpenAPI document by `npm run gen:api` (`tools/docs/gen-api-md.mjs`). Interactive docs: `/docs`.
 
 All paths are relative to the server root. Names in parentheses are the original client commands (`module.command`) each endpoint replaces.
 
@@ -178,7 +178,7 @@ All paths are relative to the server root. Names in parentheses are the original
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/v1/alliance` | My alliance with relations (alliance.isHasAlliance) |
+| GET | `/api/v1/alliance` | My alliance with relations (alliance.isHasAlliance); null when not in one |
 | POST | `/api/v1/alliance` | Found an alliance for 10,000 gold (alliance.createAlliance) |
 | PATCH | `/api/v1/alliance` | Note / intro / motd (alliance.setAllInfoForAlliance) |
 | GET | `/api/v1/alliance/applications` | Applications to review (alliance.agreeComeinAllianceList) |

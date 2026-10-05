@@ -33,6 +33,7 @@ import { citiesOf, findPlayerByName, getCity, getPlayer, savePlayer, type Player
 import { pickOpenFlat } from './world.ts';
 import { relationBetween } from './relations.ts';
 import { leaveAlliance } from './alliance.ts';
+import { pushMailCounts } from './mail.ts';
 import { visibleArmies } from './armies.ts';
 
 export interface CreatePlayerInput {
@@ -291,7 +292,7 @@ export async function checkBeginner(ctx: Ctx, p: PlayerRow, townHallLevel?: numb
         "Your Beginner's Protection has expired. Your cities can now be attacked by other lords, and you may attack them. Build your defences and consider joining an alliance.",
       sentAt: ctx.now,
     });
-    ctx.push(p.id, 'server.NewMail', { count_system: 1 });
+    await pushMailCounts(ctx, p.id);
     await pushPlayerInfo(ctx, p);
   }
 }

@@ -1,0 +1,20 @@
+{
+  "name": "@evony/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Typed HTTP + WebSocket client for the evony-re API. src/generated/openapi.ts is generated: npm run gen:api.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "openapi-typescript openapi.json -o src/generated/openapi.ts --root-types --root-types-no-schema-prefix"
+  },
+  "dependencies": {
+    "@evony/contracts": "*",
+    "openapi-fetch": "^0.17.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.13.0"
+  }
+}

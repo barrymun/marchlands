@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Postgres schema (Drizzle), migrations and connection helpers.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
   },
   "scripts": {
     "generate": "drizzle-kit generate",

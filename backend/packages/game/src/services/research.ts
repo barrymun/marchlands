@@ -174,7 +174,7 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
     ctx.push(playerId, 'server.HeroUpdate', { castleId: home!.city.id, hero: heroBean(mayor), updateType: 2 });
   }
   await savePlayer(ctx, p);
-  ctx.push(playerId, 'server.ResearchCompleteUpdate', { castleId: r.cityId, typeId: techId, level });
+  ctx.push(playerId, 'server.ResearchCompleteUpdate', { castleId: r.cityId!, typeId: techId, level });
   for (const b of bundles) pushResources(ctx, b);
   await pushPlayerInfo(ctx, p);
 }

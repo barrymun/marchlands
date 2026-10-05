@@ -71,6 +71,19 @@ services:
     <<: *backend
     command: ["node", "backend/services/worker/src/main.ts"]
 
+  # Browser client (static build) on nginx; proxies /api, /ws and /docs to the api service.
+  web:
+    build:
+      context: .
+      dockerfile: client/web/Dockerfile
+    image: evony-re/web:dev
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8000}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
   # Optional DB browser: docker compose --profile tools up adminer
   adminer:
     image: adminer:latest
