@@ -13,6 +13,7 @@ import {
   rollAmulet,
   seededRng,
   settleCity,
+  splitTraining,
   stateOf,
   troopConfig,
   valleyBonus,
@@ -203,6 +204,22 @@ describe('armies', () => {
       expect(valleyBonus(t, 10)).toBeCloseTo(0.23);
     }
     expect(valleyBonus(10, 5)).toBe(0);
+  });
+
+  it('splits training across barracks so they finish together', () => {
+    const lanes = Array.from({ length: 10 }, (_, i) => ({ positionId: i, freeAt: 0 }));
+    const even = splitTraining(lanes, 1000, 100);
+    expect(even).toHaveLength(10);
+    expect(even.every((a) => a.count === 100)).toBe(true);
+    expect(Math.max(...even.map((a) => a.finishAt))).toBe(10_000);
+    // a barracks already busy for a while gets fewer units; remainders are spread
+    const busy = splitTraining([{ positionId: 1, freeAt: 0 }, { positionId: 2, freeAt: 0 }, { positionId: 3, freeAt: 5_000 }], 101, 100);
+    expect(busy.reduce((s, a) => s + a.count, 0)).toBe(101);
+    const t = busy.map((a) => a.finishAt);
+    expect(Math.max(...t) - Math.min(...t)).toBeLessThanOrEqual(100);
+    // a queue busy past the common finish time gets nothing
+    expect(splitTraining([{ positionId: 1, freeAt: 0 }, { positionId: 2, freeAt: 1e9 }], 10, 100).map((a) => a.positionId)).toEqual([1]);
+    expect(splitTraining([{ positionId: 1, freeAt: 0 }], 7, 100)).toEqual([{ positionId: 1, count: 7, finishAt: 700 }]);
   });
 });
 

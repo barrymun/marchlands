@@ -26,6 +26,14 @@ export const ConstructBody = z.object({ typeId: z.number().int(), positionId: z.
 export const ResearchBody = z.object({ techId: z.number().int() });
 
 export const TrainBody = z.object({ troopId: z.number().int(), count: z.number().int(), positionId: z.number().int().optional() });
+export const TrainSplitBody = z.object({ troopId: z.number().int(), count: z.number().int() });
+export const TrainSplitResult = z
+  .object({
+    batches: z.array(z.object({ positionId: z.number().int().describe('barracks'), count: z.number().int(), endTime: Ms.describe('estimated finish') })),
+    finishAt: Ms.describe('when the last batch finishes'),
+  })
+  .meta({ id: 'TrainSplitResult' });
+export type TrainSplitResult = z.infer<typeof TrainSplitResult>;
 export const TroopCountBody = z.object({ troopId: z.number().int(), count: z.number().int() });
 export const InjuredTroopsBody = z.object({ troops: zTroops });
 

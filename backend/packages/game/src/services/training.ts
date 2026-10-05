@@ -27,6 +27,9 @@ import {
   type FortKey,
   type TrainBatch,
   type TroopQueueState,
+  getGameSpeed,
+  splitTraining,
+  type SplitLane,
 } from '@evony/core';
 import { cityStats, mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -175,6 +178,56 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
   return queueBean(positionId, next);
+}
+
+/**
+ * Train one order split over every barracks with room in its queue, sized so all batches finish
+ * together (core splitTraining): busy barracks get fewer units. Paid and checked as one order.
+ */
+export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, troopId: number, count: number) {
+  const b = await openOwnCity(ctx, playerId, cityId);
+  assertCanTrain(troopId, count, b.city.buildings, b.player.research, b.player.items, false);
+  const cfg = troopConfig(troopId)!;
+  if (cfg.inside === 2) throw new GameError('Fortifications are built at the walls.', -99);
+  const lanes: SplitLane[] = [];
+  for (const x of b.city.buildings) {
+    if (x.typeId !== BuildingType.BARRACKS || x.level < 1) continue;
+    const { queue } = queueOf(b, x.positionId);
+    if (queue.length >= x.level) continue;
+    const head = queue[0];
+    const busyUntil = head ? Math.max(ctx.now, head.endTime || ctx.now + head.costTime) + queue.slice(1).reduce((t, q) => t + q.costTime, 0) : ctx.now;
+    lanes.push({ positionId: x.positionId, freeAt: busyUntil });
+  }
+  if (lanes.length === 0) throw new GameError('Every barracks queue is full.', -99);
+  const pop = cfg.population * count;
+  if (pop > cityStats(b, ctx.now).idlePopulation) throw new GameError('Not enough population.', -1);
+  spendResources(b.city, trainCost(troopId, count));
+  b.city.population -= pop;
+
+  const mayor = mayorStats(b.heroes);
+  const unitMs = (Math.max(1, troopUnitSeconds(troopId, mayor, b.player.research)) * 1000) / getGameSpeed();
+  const plan = splitTraining(lanes, count, unitMs);
+  const batches: { positionId: number; count: number; endTime: number }[] = [];
+  for (const p of plan) {
+    const { queue, nextQueueId } = queueOf(b, p.positionId);
+    const ms = trainBatchMs(troopId, p.count, mayor, b.player.research);
+    const batch: TrainBatch = {
+      queueId: nextQueueId,
+      troopId,
+      count: p.count,
+      costTime: ms,
+      startTime: queue.length === 0 ? ctx.now : 0,
+      endTime: queue.length === 0 ? ctx.now + ms : 0,
+    };
+    const next = [...queue, batch];
+    setQueue(b, p.positionId, next, nextQueueId + 1);
+    scheduleHead(ctx, b, p.positionId, next);
+    pushQueues(ctx, b, p.positionId);
+    batches.push({ positionId: p.positionId, count: p.count, endTime: Math.round(p.finishAt) });
+  }
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
+  return { batches, finishAt: Math.max(...batches.map((x) => x.endTime)) };
 }
 
 /** troop.cancelTroopProduce / fortifications.cancelFortificationProduce */

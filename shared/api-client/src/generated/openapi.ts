@@ -3268,6 +3268,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cities/{cityId}/troops/train-split": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Train one order split over all barracks so the batches finish together */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cityId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        troopId: number;
+                        count: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["TrainSplitResult"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cities/{cityId}/troops/disband": {
         parameters: {
             query?: never;
@@ -10665,6 +10732,17 @@ export interface components {
             /** @description hero produced by a hero box */
             hero?: components["schemas"]["HeroBeanInput"];
         };
+        TrainSplitResultInput: {
+            batches: {
+                /** @description barracks */
+                positionId: number;
+                count: number;
+                /** @description estimated finish */
+                endTime: number;
+            }[];
+            /** @description when the last batch finishes */
+            finishAt: number;
+        };
         RequirementCheckInput: {
             /** @enum {string} */
             kind: "building" | "tech" | "item";
@@ -12532,6 +12610,17 @@ export interface components {
             /** @description hero produced by a hero box */
             hero?: components["schemas"]["HeroBean"];
         };
+        TrainSplitResult: {
+            batches: {
+                /** @description barracks */
+                positionId: number;
+                count: number;
+                /** @description estimated finish */
+                endTime: number;
+            }[];
+            /** @description when the last batch finishes */
+            finishAt: number;
+        };
         RequirementCheck: {
             /** @enum {string} */
             kind: "building" | "tech" | "item";
@@ -14024,6 +14113,7 @@ export type PublicPlayerInfoInput = components['schemas']['PublicPlayerInfoInput
 export type TitlePromotionInput = components['schemas']['TitlePromotionInput'];
 export type GrantContentsInput = components['schemas']['GrantContentsInput'];
 export type UseItemResultInput = components['schemas']['UseItemResultInput'];
+export type TrainSplitResultInput = components['schemas']['TrainSplitResultInput'];
 export type RequirementCheckInput = components['schemas']['RequirementCheckInput'];
 export type CitySpeedupCostInput = components['schemas']['CitySpeedupCostInput'];
 export type ComfortResultInput = components['schemas']['ComfortResultInput'];
@@ -14148,6 +14238,7 @@ export type PublicPlayerInfo = components['schemas']['PublicPlayerInfo'];
 export type TitlePromotion = components['schemas']['TitlePromotion'];
 export type GrantContents = components['schemas']['GrantContents'];
 export type UseItemResult = components['schemas']['UseItemResult'];
+export type TrainSplitResult = components['schemas']['TrainSplitResult'];
 export type RequirementCheck = components['schemas']['RequirementCheck'];
 export type CitySpeedupCost = components['schemas']['CitySpeedupCost'];
 export type ComfortResult = components['schemas']['ComfortResult'];

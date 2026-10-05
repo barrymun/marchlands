@@ -305,3 +305,44 @@ export const SPEEDUP_ITEMS: Record<string, SpeedupEffect> = {
 export function speedupItemCents(itemId: string): number {
   return SPEEDUP_ITEMS[itemId]?.cents ?? itemConfig(itemId)?.cost ?? 0;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Splitting a training order across barracks
+// ---------------------------------------------------------------------------------------------
+
+export interface SplitLane {
+  /** barracks position */
+  positionId: number;
+  /** when this barracks' queue frees up (now if idle) */
+  freeAt: number;
+}
+
+/**
+ * Divide `count` units over parallel queues so they all finish as close together as possible
+ * ("water filling"): queues that are busy for longer get fewer units. `unitMs` is the time per
+ * unit (the same in every barracks). Returns only queues that get at least one unit.
+ */
+export function splitTraining(lanes: SplitLane[], count: number, unitMs: number): { positionId: number; count: number; finishAt: number }[] {
+  if (count <= 0 || lanes.length === 0) return [];
+  const u = Math.max(1e-9, unitMs);
+  const sorted = [...lanes].sort((a, b) => a.freeAt - b.freeAt);
+  // the k earliest-free queues share the work; T is their common finish time
+  let k = 1;
+  let sum = sorted[0].freeAt;
+  let finish = sum + count * u;
+  while (k < sorted.length && sorted[k].freeAt < finish) {
+    sum += sorted[k].freeAt;
+    k++;
+    finish = (count * u + sum) / k;
+  }
+  const alloc = sorted.slice(0, k).map((l) => ({ positionId: l.positionId, freeAt: l.freeAt, count: Math.max(0, Math.floor((finish - l.freeAt) / u)) }));
+  let left = count - alloc.reduce((s, a) => s + a.count, 0);
+  // hand out the rounding remainder to whichever queue would finish earliest with one more unit
+  while (left > 0) {
+    let best = alloc[0];
+    for (const a of alloc) if (a.freeAt + (a.count + 1) * u < best.freeAt + (best.count + 1) * u) best = a;
+    best.count++;
+    left--;
+  }
+  return alloc.filter((a) => a.count > 0).map((a) => ({ positionId: a.positionId, count: a.count, finishAt: a.freeAt + a.count * u }));
+}

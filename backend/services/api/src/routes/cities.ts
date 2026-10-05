@@ -30,6 +30,8 @@ import {
   TrainBody,
   TrainingQueueParams,
   TroopCountBody,
+  TrainSplitBody,
+  TrainSplitResult,
   UpdateCityBody,
 } from '@evony/contracts';
 import { buildings, interior, research, training } from '@evony/game';
@@ -159,6 +161,11 @@ export default async function cityRoutes(app: ZApp) {
       (req) => game(req, (ctx, pid) => training.speedupTraining(ctx, pid, req.params.cityId, fort ? training.WALLS_QUEUE : req.params.positionId, req.params.queueId)),
     );
   }
+  app.post(
+    '/cities/:cityId/troops/train-split',
+    s(tags.troops, 'Train one order split over all barracks so the batches finish together', TrainSplitResult, { params: zCityParams, body: TrainSplitBody }),
+    (req) => game(req, (ctx, pid) => training.trainSplit(ctx, pid, req.params.cityId, req.body.troopId, req.body.count)),
+  );
   app.post('/cities/:cityId/troops/disband', s(tags.troops, 'Dismiss troops (troop.disbandTroop)', Empty, { params: zCityParams, body: TroopCountBody }), (req) =>
     game(req, (ctx, pid) => training.disbandTroops(ctx, pid, req.params.cityId, req.body.troopId, req.body.count)),
   );

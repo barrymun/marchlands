@@ -88,6 +88,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | DELETE | `/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}` | Cancel a batch |
 | POST | `/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}/speedup` | Napoleon's Diary: -30% (troop.accTroopProduce) |
 | POST | `/api/v1/cities/{cityId}/troops/train` | Train troops at a barracks (troop.produceTroop) |
+| POST | `/api/v1/cities/{cityId}/troops/train-split` | Train one order split over all barracks so the batches finish together |
 | GET | `/api/v1/cities/{cityId}/troops/trainable` | Trainable troops (troop.getTroopProduceList) |
 
 ## heroes
