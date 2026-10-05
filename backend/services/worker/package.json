@@ -1,0 +1,17 @@
+{
+  "name": "@evony/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Game clock: processes due timed events (construction, research, training, armies, battles).",
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=../../../.env src/main.ts",
+    "start": "node src/main.ts"
+  },
+  "dependencies": {
+    "@evony/core": "*",
+    "@evony/db": "*",
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.1"
+  }
+}

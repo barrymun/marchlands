@@ -1,0 +1,451 @@
+[
+ {
+  "id": 1,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Rebuild",
+  "name": "rebuild",
+  "typeId": 1,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 2,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Domain Expansion",
+  "name": "domain expansion",
+  "typeId": 2,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 3,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Commodity Gathering",
+  "name": "commodity gathering",
+  "typeId": 4,
+  "requires": {
+   "buildings": [
+    4,
+    5,
+    6,
+    7
+   ],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 4,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Comforting",
+  "name": "comforting",
+  "typeId": 5,
+  "requires": {
+   "buildings": [
+    31
+   ],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 5,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Resource Levy",
+  "name": "resource levy",
+  "typeId": 5,
+  "requires": {
+   "buildings": [
+    31
+   ],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 6,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Administration",
+  "name": "adminstration",
+  "typeId": 6,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 7,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Trading",
+  "name": "trading",
+  "typeId": 7,
+  "requires": {
+   "buildings": [
+    31
+   ],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 8,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Scientific Research",
+  "name": "scientific research",
+  "typeId": 8,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 9,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Alliance",
+  "name": "alliance",
+  "typeId": 9,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 10,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Correspondence",
+  "name": "correspondence",
+  "typeId": 10,
+  "requires": {
+   "buildings": [
+    31
+   ],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 11,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Hero Recuritment",
+  "name": "hero recuritment",
+  "typeId": 11,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 12,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Military Service",
+  "name": "military service",
+  "typeId": 11,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 13,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Scouting",
+  "name": "scouting",
+  "typeId": 13,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": [
+    16
+   ]
+  }
+ },
+ {
+  "id": 14,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Fortification",
+  "name": "fortification",
+  "typeId": 14,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 15,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Colony",
+  "name": "colony",
+  "typeId": 15,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 16,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "City Expansion",
+  "name": "city Expansion",
+  "typeId": 16,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 17,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Rich Store",
+  "name": "rich store",
+  "typeId": 17,
+  "requires": {
+   "buildings": [
+    7
+   ],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 18,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Transportation",
+  "name": "transportation",
+  "typeId": 18,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 19,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Alarming",
+  "name": "alarming",
+  "typeId": 19,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": [
+    12
+   ]
+  }
+ },
+ {
+  "id": 20,
+  "mainId": 1,
+  "isFinish": false,
+  "description": "Population Increase",
+  "name": "population increase",
+  "typeId": 20,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 21,
+  "mainId": 1,
+  "isFinish": true,
+  "description": "The Medals",
+  "name": "The Medals",
+  "typeId": 1,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": [
+    30
+   ]
+  }
+ },
+ {
+  "id": 22,
+  "mainId": 1,
+  "isFinish": true,
+  "description": "Wealthy Society",
+  "name": "Wealthy Society",
+  "typeId": 1,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 23,
+  "mainId": 1,
+  "isFinish": true,
+  "description": "Prestiage Building",
+  "name": "Prestiage Building",
+  "typeId": 1,
+  "requires": {
+   "buildings": [
+    31
+   ],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 25,
+  "mainId": 1,
+  "isFinish": true,
+  "description": "Item Purchase",
+  "name": "Item Purchase",
+  "typeId": 1,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 26,
+  "mainId": 1,
+  "isFinish": true,
+  "description": "Christmas Hunt",
+  "name": "Christmas Hunt",
+  "typeId": 1,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 27,
+  "mainId": 1,
+  "isFinish": true,
+  "description": "Consolation",
+  "name": "Consolation",
+  "typeId": 1,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 28,
+  "mainId": 1,
+  "isFinish": true,
+  "description": "Guidelines",
+  "name": "Guidelines",
+  "typeId": 1,
+  "requires": {
+   "buildings": [
+    31
+   ],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 29,
+  "mainId": 1,
+  "isFinish": true,
+  "description": "BattleField",
+  "name": "BattleField",
+  "typeId": 1,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": [
+    16
+   ]
+  }
+ },
+ {
+  "id": 30,
+  "mainId": 1,
+  "isFinish": true,
+  "description": "Promotion",
+  "name": "Promotion",
+  "typeId": 1,
+  "requires": {
+   "buildings": [],
+   "items": [],
+   "techs": [],
+   "quests": []
+  }
+ },
+ {
+  "id": 31,
+  "mainId": 3,
+  "isFinish": true,
+  "description": "Amulet",
+  "name": "Amulet",
+  "typeId": 31,
+  "requires": {
+   "buildings": [],
+   "items": [
+    48
+   ],
+   "techs": [],
+   "quests": []
+  }
+ }
+]

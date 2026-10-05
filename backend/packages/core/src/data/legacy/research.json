@@ -1,0 +1,5282 @@
+[
+ {
+  "techId": 1,
+  "level": 1,
+  "buildTime": 400,
+  "cost": {
+   "food": 500,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 1000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 1,
+  "level": 2,
+  "buildTime": 800,
+  "cost": {
+   "food": 1000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 2000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 2
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 1,
+  "level": 3,
+  "buildTime": 1600,
+  "cost": {
+   "food": 2000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 4000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 1,
+  "level": 4,
+  "buildTime": 3200,
+  "cost": {
+   "food": 4000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 8000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 1,
+  "level": 5,
+  "buildTime": 6400,
+  "cost": {
+   "food": 8000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 16000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 1,
+  "level": 6,
+  "buildTime": 12800,
+  "cost": {
+   "food": 16000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 32000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 1,
+  "level": 7,
+  "buildTime": 25600,
+  "cost": {
+   "food": 32000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 64000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 7
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 1,
+  "level": 8,
+  "buildTime": 51200,
+  "cost": {
+   "food": 64000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 128000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 1,
+  "level": 9,
+  "buildTime": 102400,
+  "cost": {
+   "food": 128000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 256000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 1,
+  "level": 10,
+  "buildTime": 204800,
+  "cost": {
+   "food": 256000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 512000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 7,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 1,
+  "buildTime": 500,
+  "cost": {
+   "food": 0,
+   "wood": 500,
+   "stone": 0,
+   "iron": 100,
+   "gold": 1200
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 2,
+  "buildTime": 1000,
+  "cost": {
+   "food": 0,
+   "wood": 1000,
+   "stone": 0,
+   "iron": 200,
+   "gold": 2400
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 2
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 3,
+  "buildTime": 2000,
+  "cost": {
+   "food": 0,
+   "wood": 2000,
+   "stone": 0,
+   "iron": 400,
+   "gold": 4800
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 4,
+  "buildTime": 4000,
+  "cost": {
+   "food": 0,
+   "wood": 4000,
+   "stone": 0,
+   "iron": 800,
+   "gold": 9600
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 5,
+  "buildTime": 8000,
+  "cost": {
+   "food": 0,
+   "wood": 8000,
+   "stone": 0,
+   "iron": 1600,
+   "gold": 19200
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 6,
+  "buildTime": 16000,
+  "cost": {
+   "food": 0,
+   "wood": 16000,
+   "stone": 0,
+   "iron": 3200,
+   "gold": 38400
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 7,
+  "buildTime": 32000,
+  "cost": {
+   "food": 0,
+   "wood": 32000,
+   "stone": 0,
+   "iron": 6400,
+   "gold": 76800
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 7
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 8,
+  "buildTime": 64000,
+  "cost": {
+   "food": 0,
+   "wood": 64000,
+   "stone": 0,
+   "iron": 12800,
+   "gold": 153600
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 9,
+  "buildTime": 128000,
+  "cost": {
+   "food": 0,
+   "wood": 128000,
+   "stone": 0,
+   "iron": 25600,
+   "gold": 307200
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 2,
+  "level": 10,
+  "buildTime": 256000,
+  "cost": {
+   "food": 0,
+   "wood": 256000,
+   "stone": 0,
+   "iron": 51200,
+   "gold": 614400
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 4,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 3,
+  "level": 1,
+  "buildTime": 600,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 500,
+   "iron": 200,
+   "gold": 1500
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 3,
+  "level": 2,
+  "buildTime": 1200,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 1000,
+   "iron": 400,
+   "gold": 3000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 3,
+  "level": 3,
+  "buildTime": 2400,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 2000,
+   "iron": 800,
+   "gold": 6000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 3,
+  "level": 4,
+  "buildTime": 4800,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 4000,
+   "iron": 1600,
+   "gold": 12000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 3,
+  "level": 5,
+  "buildTime": 9600,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 8000,
+   "iron": 3200,
+   "gold": 24000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 3,
+  "level": 6,
+  "buildTime": 19200,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 16000,
+   "iron": 6400,
+   "gold": 48000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 3,
+  "level": 7,
+  "buildTime": 38400,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 32000,
+   "iron": 12800,
+   "gold": 96000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 7
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 3,
+  "level": 8,
+  "buildTime": 76800,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 64000,
+   "iron": 25600,
+   "gold": 192000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 3,
+  "level": 9,
+  "buildTime": 153600,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 128000,
+   "iron": 51200,
+   "gold": 384000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 3,
+  "level": 10,
+  "buildTime": 307200,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 256000,
+   "iron": 102400,
+   "gold": 768000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 5,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 1,
+  "buildTime": 700,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 800,
+   "gold": 2000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 2,
+  "buildTime": 1400,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 1600,
+   "gold": 4000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 2
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 3,
+  "buildTime": 2800,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 3200,
+   "gold": 8000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 4,
+  "buildTime": 5600,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 6400,
+   "gold": 16000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 5,
+  "buildTime": 11200,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 12800,
+   "gold": 32000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 6,
+  "buildTime": 22400,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 25600,
+   "gold": 64000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 7,
+  "buildTime": 44800,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 51200,
+   "gold": 128000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 7
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 8,
+  "buildTime": 89600,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 102400,
+   "gold": 256000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 9,
+  "buildTime": 179200,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 204800,
+   "gold": 512000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 4,
+  "level": 10,
+  "buildTime": 358400,
+  "cost": {
+   "food": 0,
+   "wood": 0,
+   "stone": 0,
+   "iron": 409600,
+   "gold": 1024000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 2
+    },
+    {
+     "id": 6,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 3,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 1,
+  "buildTime": 900,
+  "cost": {
+   "food": 0,
+   "wood": 500,
+   "stone": 0,
+   "iron": 500,
+   "gold": 5000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 2,
+  "buildTime": 1800,
+  "cost": {
+   "food": 0,
+   "wood": 1000,
+   "stone": 0,
+   "iron": 1000,
+   "gold": 10000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 3,
+  "buildTime": 3600,
+  "cost": {
+   "food": 0,
+   "wood": 2000,
+   "stone": 0,
+   "iron": 2000,
+   "gold": 20000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 4,
+  "buildTime": 7200,
+  "cost": {
+   "food": 0,
+   "wood": 4000,
+   "stone": 0,
+   "iron": 4000,
+   "gold": 40000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 5,
+  "buildTime": 14400,
+  "cost": {
+   "food": 0,
+   "wood": 8000,
+   "stone": 0,
+   "iron": 8000,
+   "gold": 80000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 6,
+  "buildTime": 28800,
+  "cost": {
+   "food": 0,
+   "wood": 16000,
+   "stone": 0,
+   "iron": 16000,
+   "gold": 160000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 7,
+  "buildTime": 57600,
+  "cost": {
+   "food": 0,
+   "wood": 32000,
+   "stone": 0,
+   "iron": 32000,
+   "gold": 320000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 8,
+  "buildTime": 115200,
+  "cost": {
+   "food": 0,
+   "wood": 64000,
+   "stone": 0,
+   "iron": 64000,
+   "gold": 640000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 9,
+  "buildTime": 230400,
+  "cost": {
+   "food": 0,
+   "wood": 128000,
+   "stone": 0,
+   "iron": 128000,
+   "gold": 1280000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 5,
+  "level": 10,
+  "buildTime": 460800,
+  "cost": {
+   "food": 0,
+   "wood": 256000,
+   "stone": 0,
+   "iron": 256000,
+   "gold": 2560000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 26,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 4,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 7,
+  "level": 1,
+  "buildTime": 300,
+  "cost": {
+   "food": 300,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 2000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 7,
+  "level": 2,
+  "buildTime": 600,
+  "cost": {
+   "food": 600,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 4000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 7,
+  "level": 3,
+  "buildTime": 1200,
+  "cost": {
+   "food": 1200,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 8000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 7,
+  "level": 4,
+  "buildTime": 2400,
+  "cost": {
+   "food": 2400,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 16000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 7,
+  "level": 5,
+  "buildTime": 4800,
+  "cost": {
+   "food": 4800,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 32000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 7,
+  "level": 6,
+  "buildTime": 9600,
+  "cost": {
+   "food": 9600,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 64000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 7,
+  "level": 7,
+  "buildTime": 19200,
+  "cost": {
+   "food": 19200,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 128000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 7,
+  "level": 8,
+  "buildTime": 38400,
+  "cost": {
+   "food": 38400,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 256000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 7,
+  "level": 9,
+  "buildTime": 76800,
+  "cost": {
+   "food": 76800,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 512000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 7,
+  "level": 10,
+  "buildTime": 153600,
+  "cost": {
+   "food": 153600,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 1024000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 1,
+  "buildTime": 900,
+  "cost": {
+   "food": 600,
+   "wood": 100,
+   "stone": 100,
+   "iron": 150,
+   "gold": 2500
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 2,
+  "buildTime": 1800,
+  "cost": {
+   "food": 1200,
+   "wood": 200,
+   "stone": 200,
+   "iron": 300,
+   "gold": 5000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 2
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 3,
+  "buildTime": 3600,
+  "cost": {
+   "food": 2400,
+   "wood": 400,
+   "stone": 400,
+   "iron": 600,
+   "gold": 10000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 4,
+  "buildTime": 7200,
+  "cost": {
+   "food": 4800,
+   "wood": 800,
+   "stone": 800,
+   "iron": 1200,
+   "gold": 20000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 5,
+  "buildTime": 14400,
+  "cost": {
+   "food": 9600,
+   "wood": 1600,
+   "stone": 1600,
+   "iron": 2400,
+   "gold": 40000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 6,
+  "buildTime": 28800,
+  "cost": {
+   "food": 19200,
+   "wood": 3200,
+   "stone": 3200,
+   "iron": 4800,
+   "gold": 80000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 7,
+  "buildTime": 57600,
+  "cost": {
+   "food": 38400,
+   "wood": 6400,
+   "stone": 6400,
+   "iron": 9600,
+   "gold": 160000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 7
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 8,
+  "buildTime": 115200,
+  "cost": {
+   "food": 76800,
+   "wood": 12800,
+   "stone": 12800,
+   "iron": 19200,
+   "gold": 320000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 9,
+  "buildTime": 230400,
+  "cost": {
+   "food": 153600,
+   "wood": 25600,
+   "stone": 25600,
+   "iron": 38400,
+   "gold": 640000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 8,
+  "level": 10,
+  "buildTime": 460800,
+  "cost": {
+   "food": 307200,
+   "wood": 51200,
+   "stone": 51200,
+   "iron": 76800,
+   "gold": 1280000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    },
+    {
+     "id": 22,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 9,
+  "level": 1,
+  "buildTime": 1200,
+  "cost": {
+   "food": 800,
+   "wood": 120,
+   "stone": 0,
+   "iron": 200,
+   "gold": 3000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 9,
+  "level": 2,
+  "buildTime": 2400,
+  "cost": {
+   "food": 1600,
+   "wood": 240,
+   "stone": 0,
+   "iron": 400,
+   "gold": 6000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 9,
+  "level": 3,
+  "buildTime": 4800,
+  "cost": {
+   "food": 3200,
+   "wood": 480,
+   "stone": 0,
+   "iron": 800,
+   "gold": 12000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 9,
+  "level": 4,
+  "buildTime": 9600,
+  "cost": {
+   "food": 6400,
+   "wood": 960,
+   "stone": 0,
+   "iron": 1600,
+   "gold": 24000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 9,
+  "level": 5,
+  "buildTime": 19200,
+  "cost": {
+   "food": 12800,
+   "wood": 1920,
+   "stone": 0,
+   "iron": 3200,
+   "gold": 48000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 9,
+  "level": 6,
+  "buildTime": 38400,
+  "cost": {
+   "food": 25600,
+   "wood": 3840,
+   "stone": 0,
+   "iron": 6400,
+   "gold": 96000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 9,
+  "level": 7,
+  "buildTime": 76800,
+  "cost": {
+   "food": 51200,
+   "wood": 7680,
+   "stone": 0,
+   "iron": 12800,
+   "gold": 192000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 9,
+  "level": 8,
+  "buildTime": 153600,
+  "cost": {
+   "food": 102400,
+   "wood": 15360,
+   "stone": 0,
+   "iron": 25600,
+   "gold": 384000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 9,
+  "level": 9,
+  "buildTime": 307200,
+  "cost": {
+   "food": 204800,
+   "wood": 30720,
+   "stone": 0,
+   "iron": 51200,
+   "gold": 768000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 9,
+  "level": 10,
+  "buildTime": 614400,
+  "cost": {
+   "food": 409600,
+   "wood": 61440,
+   "stone": 0,
+   "iron": 102400,
+   "gold": 1536000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 1
+    }
+   ]
+  }
+ },
+ {
+  "techId": 10,
+  "level": 1,
+  "buildTime": 1500,
+  "cost": {
+   "food": 700,
+   "wood": 150,
+   "stone": 0,
+   "iron": 300,
+   "gold": 3500
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 10,
+  "level": 2,
+  "buildTime": 3000,
+  "cost": {
+   "food": 1400,
+   "wood": 300,
+   "stone": 0,
+   "iron": 600,
+   "gold": 7000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 10,
+  "level": 3,
+  "buildTime": 6000,
+  "cost": {
+   "food": 2800,
+   "wood": 600,
+   "stone": 0,
+   "iron": 1200,
+   "gold": 14000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 10,
+  "level": 4,
+  "buildTime": 12000,
+  "cost": {
+   "food": 5600,
+   "wood": 1200,
+   "stone": 0,
+   "iron": 2400,
+   "gold": 28000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 10,
+  "level": 5,
+  "buildTime": 24000,
+  "cost": {
+   "food": 11200,
+   "wood": 2400,
+   "stone": 0,
+   "iron": 4800,
+   "gold": 56000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 10,
+  "level": 6,
+  "buildTime": 48000,
+  "cost": {
+   "food": 22400,
+   "wood": 4800,
+   "stone": 0,
+   "iron": 9600,
+   "gold": 112000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 10,
+  "level": 7,
+  "buildTime": 96000,
+  "cost": {
+   "food": 44800,
+   "wood": 9600,
+   "stone": 0,
+   "iron": 19200,
+   "gold": 224000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 10,
+  "level": 8,
+  "buildTime": 192000,
+  "cost": {
+   "food": 89600,
+   "wood": 19200,
+   "stone": 0,
+   "iron": 38400,
+   "gold": 448000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 10,
+  "level": 9,
+  "buildTime": 384000,
+  "cost": {
+   "food": 179200,
+   "wood": 38400,
+   "stone": 0,
+   "iron": 76800,
+   "gold": 896000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 10,
+  "level": 10,
+  "buildTime": 768000,
+  "cost": {
+   "food": 358400,
+   "wood": 76800,
+   "stone": 0,
+   "iron": 153600,
+   "gold": 1792000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": []
+  }
+ },
+ {
+  "techId": 11,
+  "level": 1,
+  "buildTime": 1600,
+  "cost": {
+   "food": 500,
+   "wood": 0,
+   "stone": 200,
+   "iron": 0,
+   "gold": 3000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 11,
+  "level": 2,
+  "buildTime": 3200,
+  "cost": {
+   "food": 1000,
+   "wood": 0,
+   "stone": 400,
+   "iron": 0,
+   "gold": 6000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 11,
+  "level": 3,
+  "buildTime": 6400,
+  "cost": {
+   "food": 2000,
+   "wood": 0,
+   "stone": 800,
+   "iron": 0,
+   "gold": 12000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 11,
+  "level": 4,
+  "buildTime": 12800,
+  "cost": {
+   "food": 4000,
+   "wood": 0,
+   "stone": 1600,
+   "iron": 0,
+   "gold": 24000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 11,
+  "level": 5,
+  "buildTime": 25600,
+  "cost": {
+   "food": 8000,
+   "wood": 0,
+   "stone": 3200,
+   "iron": 0,
+   "gold": 48000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 11,
+  "level": 6,
+  "buildTime": 51200,
+  "cost": {
+   "food": 16000,
+   "wood": 0,
+   "stone": 6400,
+   "iron": 0,
+   "gold": 96000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 11,
+  "level": 7,
+  "buildTime": 102400,
+  "cost": {
+   "food": 32000,
+   "wood": 0,
+   "stone": 12800,
+   "iron": 0,
+   "gold": 192000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 11,
+  "level": 8,
+  "buildTime": 204800,
+  "cost": {
+   "food": 64000,
+   "wood": 0,
+   "stone": 25600,
+   "iron": 0,
+   "gold": 384000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 11,
+  "level": 9,
+  "buildTime": 409600,
+  "cost": {
+   "food": 128000,
+   "wood": 0,
+   "stone": 51200,
+   "iron": 0,
+   "gold": 768000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 11,
+  "level": 10,
+  "buildTime": 819200,
+  "cost": {
+   "food": 256000,
+   "wood": 0,
+   "stone": 102400,
+   "iron": 0,
+   "gold": 1536000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 1,
+  "buildTime": 1800,
+  "cost": {
+   "food": 600,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 3000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 2,
+  "buildTime": 3600,
+  "cost": {
+   "food": 1200,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 6000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 3,
+  "buildTime": 7200,
+  "cost": {
+   "food": 2400,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 12000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 4,
+  "buildTime": 14400,
+  "cost": {
+   "food": 4800,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 24000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 5,
+  "buildTime": 28800,
+  "cost": {
+   "food": 9600,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 48000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 6,
+  "buildTime": 57600,
+  "cost": {
+   "food": 19200,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 96000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 7,
+  "buildTime": 115200,
+  "cost": {
+   "food": 38400,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 192000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 8,
+  "buildTime": 230400,
+  "cost": {
+   "food": 76800,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 384000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 9,
+  "buildTime": 460800,
+  "cost": {
+   "food": 153600,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 768000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 12,
+  "level": 10,
+  "buildTime": 921600,
+  "cost": {
+   "food": 307200,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 1536000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 1,
+  "buildTime": 2000,
+  "cost": {
+   "food": 1000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 6000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 2,
+  "buildTime": 4000,
+  "cost": {
+   "food": 2000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 12000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 3,
+  "buildTime": 8000,
+  "cost": {
+   "food": 4000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 24000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 4,
+  "buildTime": 16000,
+  "cost": {
+   "food": 8000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 48000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 5,
+  "buildTime": 32000,
+  "cost": {
+   "food": 16000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 96000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 6,
+  "buildTime": 64000,
+  "cost": {
+   "food": 32000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 192000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 7,
+  "buildTime": 128000,
+  "cost": {
+   "food": 64000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 384000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 8,
+  "buildTime": 256000,
+  "cost": {
+   "food": 128000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 768000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 9,
+  "buildTime": 512000,
+  "cost": {
+   "food": 256000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 1536000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 13,
+  "level": 10,
+  "buildTime": 1024000,
+  "cost": {
+   "food": 512000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 3072000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    },
+    {
+     "id": 20,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 5
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 1,
+  "buildTime": 2400,
+  "cost": {
+   "food": 0,
+   "wood": 800,
+   "stone": 500,
+   "iron": 600,
+   "gold": 5000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 2,
+  "buildTime": 4800,
+  "cost": {
+   "food": 0,
+   "wood": 1600,
+   "stone": 1000,
+   "iron": 1200,
+   "gold": 10000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 3,
+  "buildTime": 9600,
+  "cost": {
+   "food": 0,
+   "wood": 3200,
+   "stone": 2000,
+   "iron": 2400,
+   "gold": 20000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 4,
+  "buildTime": 19200,
+  "cost": {
+   "food": 0,
+   "wood": 6400,
+   "stone": 4000,
+   "iron": 4800,
+   "gold": 40000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 5,
+  "buildTime": 38400,
+  "cost": {
+   "food": 0,
+   "wood": 12800,
+   "stone": 8000,
+   "iron": 9600,
+   "gold": 80000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 6,
+  "buildTime": 76800,
+  "cost": {
+   "food": 0,
+   "wood": 25600,
+   "stone": 16000,
+   "iron": 19200,
+   "gold": 160000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 7,
+  "buildTime": 153600,
+  "cost": {
+   "food": 0,
+   "wood": 51200,
+   "stone": 32000,
+   "iron": 38400,
+   "gold": 320000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 8,
+  "buildTime": 307200,
+  "cost": {
+   "food": 0,
+   "wood": 102400,
+   "stone": 64000,
+   "iron": 76800,
+   "gold": 640000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 9,
+  "buildTime": 614400,
+  "cost": {
+   "food": 0,
+   "wood": 204800,
+   "stone": 128000,
+   "iron": 153600,
+   "gold": 1280000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 14,
+  "level": 10,
+  "buildTime": 1228800,
+  "cost": {
+   "food": 0,
+   "wood": 409600,
+   "stone": 256000,
+   "iron": 307200,
+   "gold": 2560000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 8,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 1,
+  "buildTime": 900,
+  "cost": {
+   "food": 0,
+   "wood": 1200,
+   "stone": 1000,
+   "iron": 800,
+   "gold": 2000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 1
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 2,
+  "buildTime": 1800,
+  "cost": {
+   "food": 0,
+   "wood": 2400,
+   "stone": 2000,
+   "iron": 1600,
+   "gold": 4000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 2
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 3,
+  "buildTime": 3600,
+  "cost": {
+   "food": 0,
+   "wood": 4800,
+   "stone": 4000,
+   "iron": 3200,
+   "gold": 8000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 3
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 4,
+  "buildTime": 7200,
+  "cost": {
+   "food": 0,
+   "wood": 9600,
+   "stone": 8000,
+   "iron": 6400,
+   "gold": 16000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 4
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 5,
+  "buildTime": 14400,
+  "cost": {
+   "food": 0,
+   "wood": 19200,
+   "stone": 16000,
+   "iron": 12800,
+   "gold": 32000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 6,
+  "buildTime": 28800,
+  "cost": {
+   "food": 0,
+   "wood": 38400,
+   "stone": 32000,
+   "iron": 25600,
+   "gold": 64000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 7,
+  "buildTime": 57600,
+  "cost": {
+   "food": 0,
+   "wood": 76800,
+   "stone": 64000,
+   "iron": 51200,
+   "gold": 128000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 7
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 8,
+  "buildTime": 115200,
+  "cost": {
+   "food": 0,
+   "wood": 153600,
+   "stone": 128000,
+   "iron": 102400,
+   "gold": 256000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 9,
+  "buildTime": 230400,
+  "cost": {
+   "food": 0,
+   "wood": 307200,
+   "stone": 256000,
+   "iron": 204800,
+   "gold": 512000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 15,
+  "level": 10,
+  "buildTime": 460800,
+  "cost": {
+   "food": 0,
+   "wood": 614400,
+   "stone": 512000,
+   "iron": 409600,
+   "gold": 1024000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    },
+    {
+     "id": 3,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 1,
+  "buildTime": 1800,
+  "cost": {
+   "food": 1500,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 3600
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 2,
+  "buildTime": 3600,
+  "cost": {
+   "food": 3000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 7200
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 3,
+  "buildTime": 7200,
+  "cost": {
+   "food": 6000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 14400
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 4,
+  "buildTime": 14400,
+  "cost": {
+   "food": 12000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 28800
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 5,
+  "buildTime": 28800,
+  "cost": {
+   "food": 24000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 57600
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 6,
+  "buildTime": 57600,
+  "cost": {
+   "food": 48000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 115200
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 7,
+  "buildTime": 115200,
+  "cost": {
+   "food": 96000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 230400
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 8,
+  "buildTime": 230400,
+  "cost": {
+   "food": 192000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 460800
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 9,
+  "buildTime": 460800,
+  "cost": {
+   "food": 384000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 921600
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 16,
+  "level": 10,
+  "buildTime": 921600,
+  "cost": {
+   "food": 768000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 0,
+   "gold": 1843200
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 6
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 11,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 1,
+  "buildTime": 1800,
+  "cost": {
+   "food": 0,
+   "wood": 2000,
+   "stone": 2000,
+   "iron": 2000,
+   "gold": 5000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 2,
+  "buildTime": 3600,
+  "cost": {
+   "food": 0,
+   "wood": 4000,
+   "stone": 4000,
+   "iron": 4000,
+   "gold": 10000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 3,
+  "buildTime": 7200,
+  "cost": {
+   "food": 0,
+   "wood": 8000,
+   "stone": 8000,
+   "iron": 8000,
+   "gold": 20000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 4,
+  "buildTime": 14400,
+  "cost": {
+   "food": 0,
+   "wood": 16000,
+   "stone": 16000,
+   "iron": 16000,
+   "gold": 40000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 5,
+  "buildTime": 28800,
+  "cost": {
+   "food": 0,
+   "wood": 32000,
+   "stone": 32000,
+   "iron": 32000,
+   "gold": 80000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 6,
+  "buildTime": 57600,
+  "cost": {
+   "food": 0,
+   "wood": 64000,
+   "stone": 64000,
+   "iron": 64000,
+   "gold": 160000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 7,
+  "buildTime": 115200,
+  "cost": {
+   "food": 0,
+   "wood": 128000,
+   "stone": 128000,
+   "iron": 128000,
+   "gold": 320000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 8,
+  "buildTime": 230400,
+  "cost": {
+   "food": 0,
+   "wood": 256000,
+   "stone": 256000,
+   "iron": 256000,
+   "gold": 640000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 9,
+  "buildTime": 460800,
+  "cost": {
+   "food": 0,
+   "wood": 512000,
+   "stone": 512000,
+   "iron": 512000,
+   "gold": 1280000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 17,
+  "level": 10,
+  "buildTime": 921600,
+  "cost": {
+   "food": 0,
+   "wood": 1024000,
+   "stone": 1024000,
+   "iron": 1024000,
+   "gold": 2560000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 5
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 2,
+     "level": 5
+    },
+    {
+     "id": 5,
+     "level": 2
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 1,
+  "buildTime": 2100,
+  "cost": {
+   "food": 0,
+   "wood": 2500,
+   "stone": 3000,
+   "iron": 1500,
+   "gold": 6000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 2,
+  "buildTime": 4200,
+  "cost": {
+   "food": 0,
+   "wood": 5000,
+   "stone": 6000,
+   "iron": 3000,
+   "gold": 12000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 3,
+  "buildTime": 8400,
+  "cost": {
+   "food": 0,
+   "wood": 10000,
+   "stone": 12000,
+   "iron": 6000,
+   "gold": 24000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 4,
+  "buildTime": 16800,
+  "cost": {
+   "food": 0,
+   "wood": 20000,
+   "stone": 24000,
+   "iron": 12000,
+   "gold": 48000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 5,
+  "buildTime": 33600,
+  "cost": {
+   "food": 0,
+   "wood": 40000,
+   "stone": 48000,
+   "iron": 24000,
+   "gold": 96000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 6,
+  "buildTime": 67200,
+  "cost": {
+   "food": 0,
+   "wood": 80000,
+   "stone": 96000,
+   "iron": 48000,
+   "gold": 192000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 7,
+  "buildTime": 134400,
+  "cost": {
+   "food": 0,
+   "wood": 160000,
+   "stone": 192000,
+   "iron": 96000,
+   "gold": 384000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 8,
+  "buildTime": 268800,
+  "cost": {
+   "food": 0,
+   "wood": 320000,
+   "stone": 384000,
+   "iron": 192000,
+   "gold": 768000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 9,
+  "buildTime": 537600,
+  "cost": {
+   "food": 0,
+   "wood": 640000,
+   "stone": 768000,
+   "iron": 384000,
+   "gold": 1536000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 18,
+  "level": 10,
+  "buildTime": 1075200,
+  "cost": {
+   "food": 0,
+   "wood": 1280000,
+   "stone": 1536000,
+   "iron": 768000,
+   "gold": 3072000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 8
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 17,
+     "level": 3
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 1,
+  "buildTime": 2400,
+  "cost": {
+   "food": 0,
+   "wood": 600,
+   "stone": 700,
+   "iron": 800,
+   "gold": 5500
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 2,
+  "buildTime": 4800,
+  "cost": {
+   "food": 0,
+   "wood": 1200,
+   "stone": 1400,
+   "iron": 1600,
+   "gold": 11000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 3,
+  "buildTime": 9600,
+  "cost": {
+   "food": 0,
+   "wood": 2400,
+   "stone": 2800,
+   "iron": 3200,
+   "gold": 22000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 4,
+  "buildTime": 19200,
+  "cost": {
+   "food": 0,
+   "wood": 4800,
+   "stone": 5600,
+   "iron": 6400,
+   "gold": 44000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 5,
+  "buildTime": 38400,
+  "cost": {
+   "food": 0,
+   "wood": 9600,
+   "stone": 11200,
+   "iron": 12800,
+   "gold": 88000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 6,
+  "buildTime": 76800,
+  "cost": {
+   "food": 0,
+   "wood": 19200,
+   "stone": 22400,
+   "iron": 25600,
+   "gold": 176000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 7,
+  "buildTime": 153600,
+  "cost": {
+   "food": 0,
+   "wood": 38400,
+   "stone": 44800,
+   "iron": 51200,
+   "gold": 352000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 8,
+  "buildTime": 307200,
+  "cost": {
+   "food": 0,
+   "wood": 76800,
+   "stone": 89600,
+   "iron": 102400,
+   "gold": 704000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 9,
+  "buildTime": 614400,
+  "cost": {
+   "food": 0,
+   "wood": 153600,
+   "stone": 179200,
+   "iron": 204800,
+   "gold": 1408000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 19,
+  "level": 10,
+  "buildTime": 1228800,
+  "cost": {
+   "food": 0,
+   "wood": 307200,
+   "stone": 358400,
+   "iron": 409600,
+   "gold": 2816000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 9
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 5,
+     "level": 4
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 1,
+  "buildTime": 3600,
+  "cost": {
+   "food": 5000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 2000,
+   "gold": 10000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 2,
+  "buildTime": 7200,
+  "cost": {
+   "food": 10000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 4000,
+   "gold": 20000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 3,
+  "buildTime": 14400,
+  "cost": {
+   "food": 20000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 8000,
+   "gold": 40000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 4,
+  "buildTime": 28800,
+  "cost": {
+   "food": 40000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 16000,
+   "gold": 80000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 5,
+  "buildTime": 57600,
+  "cost": {
+   "food": 80000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 32000,
+   "gold": 160000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 6,
+  "buildTime": 115200,
+  "cost": {
+   "food": 160000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 64000,
+   "gold": 320000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 7,
+  "buildTime": 230400,
+  "cost": {
+   "food": 320000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 128000,
+   "gold": 640000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 8,
+  "buildTime": 460800,
+  "cost": {
+   "food": 640000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 256000,
+   "gold": 1280000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 9,
+  "buildTime": 921600,
+  "cost": {
+   "food": 1280000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 512000,
+   "gold": 2560000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ },
+ {
+  "techId": 20,
+  "level": 10,
+  "buildTime": 1843200,
+  "cost": {
+   "food": 2560000,
+   "wood": 0,
+   "stone": 0,
+   "iron": 1024000,
+   "gold": 5120000
+  },
+  "requires": {
+   "buildings": [
+    {
+     "id": 25,
+     "level": 10
+    }
+   ],
+   "items": [],
+   "techs": [
+    {
+     "id": 7,
+     "level": 5
+    },
+    {
+     "id": 8,
+     "level": 8
+    }
+   ]
+  }
+ }
+]

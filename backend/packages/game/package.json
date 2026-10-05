@@ -1,0 +1,16 @@
+{
+  "name": "@evony/game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Game services: transactional, DB-backed operations shared by the API and the worker.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@evony/core": "*",
+    "@evony/db": "*",
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.1"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "evony-re",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "backend/packages/*",
+    "backend/services/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "dev:api": "npm run dev -w @evony/api",
+    "dev:worker": "npm run dev -w @evony/worker",
+    "db:generate": "npm run generate -w @evony/db",
+    "db:migrate": "npm run migrate -w @evony/db",
+    "legacy:convert": "node tools/legacy-import/convert.mjs",
+    "smoke": "node tools/smoke/smoke.mjs && node tools/smoke/war.mjs",
+    "docs:api": "node tools/docs/gen-api-md.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.1",
+    "@types/pg": "^8.23.1",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

@@ -1,0 +1,86 @@
+name: evony-re
+
+x-backend: &backend
+  build:
+    context: .
+    dockerfile: backend/Dockerfile
+  image: evony-re/backend:dev
+  restart: unless-stopped
+  env_file:
+    - path: .env
+      required: false
+  environment: &backend-env
+    DATABASE_URL: postgres://${POSTGRES_USER:-evony}:${POSTGRES_PASSWORD:-evony}@postgres:5432/${POSTGRES_DB:-evony}
+    LOG_LEVEL: ${LOG_LEVEL:-info}
+    JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    WORLD_MAP: ${WORLD_MAP:-generated}
+    WORLD_SEED: ${WORLD_SEED:-evony}
+    GAME_SPEED: ${GAME_SPEED:-1}
+    ADMIN_USERNAMES: ${ADMIN_USERNAMES:-}
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-evony}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-evony}
+      POSTGRES_DB: ${POSTGRES_DB:-evony}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+      - ./db/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # One-shot: applies SQL migrations, then exits.
+  migrate:
+    <<: *backend
+    restart: "no"
+    command: ["node", "backend/packages/db/src/migrate.ts"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # HTTP + WebSocket API (OpenAPI docs at /docs).
+  api:
+    <<: *backend
+    command: ["node", "backend/services/api/src/main.ts"]
+    environment:
+      <<: *backend-env
+      PORT: 3000
+    ports:
+      - "${API_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Game clock: seeds the world on first boot and processes due timed events.
+  worker:
+    <<: *backend
+    command: ["node", "backend/services/worker/src/main.ts"]
+
+  # Optional DB browser: docker compose --profile tools up adminer
+  adminer:
+    image: adminer:latest
+    profiles: ["tools"]
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
