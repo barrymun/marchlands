@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import type { ReportDetail, ReportSummary } from '@evony/api-client';
@@ -225,15 +225,51 @@ function BattleView({ battle: b }: { battle: BattleReport }) {
         <SideView title="Attacker" side={b.attacker} />
         <SideView title="Defender" side={b.defender} forts={b.defender.forts} wallLevel={b.defender.wallLevel} />
       </div>
-      {'plunder' in b && (
-        <div className="grid gap-1 rounded-md bg-muted/50 p-3">
-          <div className="font-medium">Plunder</div>
-          <ResourceList res={b.plunder} empty="Nothing taken" />
-          <div className="text-xs text-muted-foreground">
-            Loyalty −{fmtExact(b.loyaltyDamage)} (now {fmtExact(b.loyaltyLeft)}){b.captured && ' · city captured'}
-          </div>
+      <LootBox battle={b} me={me} />
+    </div>
+  );
+}
+
+/** What the attacker took: per resource and in total (valleys hold nothing). */
+function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }) {
+  const mine = b.attacker.player === me;
+  if (!('plunder' in b)) {
+    return (
+      <div className="grid gap-1 rounded-md bg-muted/50 p-3">
+        <div className="font-medium">Loot</div>
+        <span className="text-muted-foreground">Nothing: valleys hold no resources to take{'occupied' in b && b.occupied ? ' (holding it raises your production instead)' : ''}.</span>
+      </div>
+    );
+  }
+  const entries = (['gold', 'food', 'wood', 'stone', 'iron'] as const).map((k) => [k, Math.floor(b.plunder[k] ?? 0)] as const);
+  const total = entries.reduce((s, [, n]) => s + n, 0);
+  return (
+    <div className="grid gap-1.5 rounded-md bg-muted/50 p-3">
+      <div className="font-medium">{mine ? 'Loot taken' : 'Resources lost to the attacker'}</div>
+      {total === 0 ? (
+        <span className="text-muted-foreground">
+          Nothing{b.result === 'attackerWon' ? ' (nothing left unprotected, or no room to carry it)' : ': the attack failed'}.
+        </span>
+      ) : (
+        <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-0.5 tabular-nums sm:grid-cols-[repeat(3,auto_1fr)]">
+          {entries
+            .filter(([, n]) => n > 0)
+            .map(([k, n]) => (
+              <Fragment key={k}>
+                <span className="text-muted-foreground">{RES_LABEL[k]}</span>
+                <span className={mine ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}>
+                  {mine ? '+' : '−'}
+                  {fmtExact(n)}
+                </span>
+              </Fragment>
+            ))}
+          <span className="font-medium">Total</span>
+          <span className="font-medium">{fmtExact(total)}</span>
         </div>
       )}
+      <div className="text-xs text-muted-foreground">
+        Loyalty −{fmtExact(b.loyaltyDamage)} (now {fmtExact(b.loyaltyLeft)}){b.captured && ' · city captured'}
+      </div>
     </div>
   );
 }
@@ -417,8 +453,8 @@ function MovementView({ movement: m }: { movement: Extract<ReportBody, { kind: '
         <TroopList troops={m.troops} />
       </Line>
       {'resources' in m && (
-        <Line label="Resources">
-          <ResourceList res={m.resources} />
+        <Line label={'heroReturned' in m ? 'Resources' : 'Brought home'}>
+          <ResourceList res={m.resources} empty="nothing" />
         </Line>
       )}
       {'heroReturned' in m && m.heroReturned && <p className="text-xs text-muted-foreground">No free Feasting Hall slot: the hero returned home.</p>}
