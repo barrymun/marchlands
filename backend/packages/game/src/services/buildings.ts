@@ -48,9 +48,9 @@ import { clearTavern } from './heroes.ts';
 
 const refKey = (cityId: number, pos: number) => `building:${cityId}:${pos}`;
 
-/** How many constructions may run at once (Bernini's Hammer adds a second queue). */
+/** How many constructions may run at once (Bernini's Hammer adds one more queue). */
 function maxConcurrent(b: CityBundle, now: number) {
-  return activeBuff(b.player, 'BuildingQueueBuff', now) ? 2 : 1;
+  return BALANCE.buildQueues + (activeBuff(b.player, 'BuildingQueueBuff', now) ? 1 : 0);
 }
 
 function scheduleBuilding(ctx: Ctx, b: CityBundle, bld: BuildingState) {
@@ -199,7 +199,7 @@ export async function demolish(ctx: Ctx, playerId: number, cityId: number, posit
   if (bld.status !== BuildingStatus.IDLE) throw new GameError('Building is busy.', -45);
   if (bld.typeId === BuildingType.TOWN_HALL) throw new GameError('The Town Hall cannot be demolished.', -99);
   if (b.city.buildings.filter((x) => x.status !== BuildingStatus.IDLE).length >= maxConcurrent(b, ctx.now)) {
-    throw new GameError('One building allowed to be built at a time.', -48);
+    throw new GameError('All construction queues are busy.', -48);
   }
   const ms = demolishTimeMs(bld.typeId, bld.level, mayorStats(b.heroes), b.player.research);
   const next: BuildingState = { ...bld, status: BuildingStatus.DEMOLISHING, startTime: ctx.now, endTime: ctx.now + ms };

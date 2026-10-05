@@ -45,6 +45,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 | Captured hero copied into every empty slot; a "returning" hero stayed SEIZED | one slot; the hero goes home idle |
 | Abatis never consumed; an overkill trebuchet volley killed nothing | fixed in game battles (`fixes: true`); parity mode kept for the regression tests |
 | `restTime` in seconds added to a millisecond timestamp | seconds × 1000 |
+| *(design change)* One construction at a time per city | two at once (`BALANCE.buildQueues`); Bernini's Hammer adds a third |
 | The Rally Spot army limit was never enforced | at most one army per Rally Spot level (+1 with War Ensign) |
 | Fixed hero names like `"Test Name453160"` | name and portrait generator |
 
@@ -76,7 +77,7 @@ The original either stubbed these or never answered them.
   - Bought goods travel for 60 min divided by the Marketplace level (halved by Merchant Fleet).
   - Order cap of 2 per Marketplace level; cancellation refunds.
 - **Walls.** Fortifications take wall space (by Walls level).
-- **Items.** A declarative effect for every item in `config_items`: production, attack, defence and upkeep buffs; boxes, chests and keys, troop boxes, hero helms; the chat icon; Ritual of Pact; Bernini's Hammer (second build queue); War Ensign; Speech Text; Civil Code; Penicillin.
+- **Items.** A declarative effect for every item in `config_items`: production, attack, defence and upkeep buffs; boxes, chests and keys, troop boxes, hero helms; the chat icon; Ritual of Pact; Bernini's Hammer (one extra build queue); War Ensign; Speech Text; Civil Code; Penicillin.
 - **Nobility titles** (Knight … Prince) bought with prestige and medals. A title limits how many cities a lord may own.
 - **Social.** Friends and block list (blocked lords' mail and whispers are dropped); mail delete and bulk read; alliance event log, member circulars, military overview and diplomacy drop.
 - **Quests.** A real catalogue: about 30 beginner quests over the original quest groups, with targets evaluated from game state and claimable awards, plus a daily gift.

@@ -11586,6 +11586,7 @@ export interface components {
             disbandRefund: number;
             outerSlotsBase: number;
             outerSlotsPerTownHall: number;
+            buildQueues: number;
             /** @description milliseconds */
             freeSpeedupMs: number;
             /** @description wall capacity by wall level (index 0 unused) */
@@ -13331,6 +13332,7 @@ export interface components {
             disbandRefund: number;
             outerSlotsBase: number;
             outerSlotsPerTownHall: number;
+            buildQueues: number;
             /** @description milliseconds */
             freeSpeedupMs: number;
             /** @description wall capacity by wall level (index 0 unused) */

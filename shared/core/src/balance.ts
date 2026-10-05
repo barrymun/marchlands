@@ -67,6 +67,8 @@ export const BALANCE = {
   disbandRefund: 0, // (evony) disbanding returns nothing
   outerSlotsBase: 10, // (orig intended) field slots = 10 + 3*TownHall
   outerSlotsPerTownHall: 3,
+  /** (evony-re) constructions a city may run at once (orig 1); Bernini's Hammer adds one more */
+  buildQueues: 2,
   freeSpeedupMs: 5 * MINUTE, // (orig) free speed-up threshold & amount
 
   // ---- fortifications ----

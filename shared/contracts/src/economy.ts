@@ -143,6 +143,7 @@ export const ConfigBalance = z
     disbandRefund: z.number(),
     outerSlotsBase: int(),
     outerSlotsPerTownHall: int(),
+    buildQueues: z.number().int(),
     freeSpeedupMs: ms(),
     wallSpace: intArray().describe('wall capacity by wall level (index 0 unused)'),
     fortSpace: z.record(z.number().int(), int()).describe('wall space used per fort unit, by troopId'),

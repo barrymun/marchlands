@@ -57,7 +57,7 @@ export function findBuilding(buildings: BuildingState[], pos: number): BuildingS
   return buildings.find((b) => b.positionId === pos);
 }
 
-/** true when no construction slot is free (orig: one at a time, -48; Bernini's Hammer adds one). */
+/** true when no construction slot is free (orig: one at a time, -48; see BALANCE.buildQueues). */
 export function isConstructing(buildings: BuildingState[], maxConcurrent = 1): boolean {
   return buildings.filter((b) => b.status !== 0).length >= maxConcurrent;
 }
@@ -195,7 +195,7 @@ export function assertCanConstruct({ typeId, positionId, buildings, research, it
     const th = buildingLevel(buildings, BuildingType.TOWN_HALL);
     if (positionId - 1000 > unlockedOuterSlots(th)) throw new GameError('Out of bounds.', -99);
   }
-  if (isConstructing(buildings, maxConcurrent)) throw new GameError('One building allowed to be built at a time.', -48);
+  if (isConstructing(buildings, maxConcurrent)) throw new GameError('All construction queues are busy.', -48);
   if (!requirementsMet(checkRequirements(cfg.requires, buildings, research, items))) {
     throw new GameError('Building Prerequisites not met.', -99);
   }
@@ -215,7 +215,7 @@ export function assertCanUpgrade(
       -45,
     );
   }
-  if (isConstructing(buildings, maxConcurrent)) throw new GameError('One building allowed to be built at a time.', -48);
+  if (isConstructing(buildings, maxConcurrent)) throw new GameError('All construction queues are busy.', -48);
   if (b.level >= buildingMaxLevel(b.typeId)) throw new GameError('Building is already at its maximum level.', -99);
   const cfg = buildingConfig(b.typeId, b.level + 1);
   if (!cfg) throw new GameError('Building Prerequisites not met.', -99);

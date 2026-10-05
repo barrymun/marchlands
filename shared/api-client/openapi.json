@@ -7166,6 +7166,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "buildQueues": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "freeSpeedupMs": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -7416,6 +7421,7 @@
           "disbandRefund",
           "outerSlotsBase",
           "outerSlotsPerTownHall",
+          "buildQueues",
           "freeSpeedupMs",
           "wallSpace",
           "fortSpace",
@@ -15680,6 +15686,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "buildQueues": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "freeSpeedupMs": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -15932,6 +15943,7 @@
           "disbandRefund",
           "outerSlotsBase",
           "outerSlotsPerTownHall",
+          "buildQueues",
           "freeSpeedupMs",
           "wallSpace",
           "fortSpace",
