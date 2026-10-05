@@ -2795,6 +2795,10 @@
           "permission": {
             "type": "boolean"
           },
+          "description": {
+            "type": "string",
+            "description": "role and special battle rules"
+          },
           "stats": {
             "type": "object",
             "properties": {
@@ -2857,6 +2861,7 @@
           "time",
           "requirements",
           "permission",
+          "description",
           "stats"
         ]
       },
@@ -11892,6 +11897,10 @@
           "permission": {
             "type": "boolean"
           },
+          "description": {
+            "type": "string",
+            "description": "role and special battle rules"
+          },
           "stats": {
             "type": "object",
             "properties": {
@@ -11955,6 +11964,7 @@
           "time",
           "requirements",
           "permission",
+          "description",
           "stats"
         ],
         "additionalProperties": false

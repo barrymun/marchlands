@@ -181,6 +181,7 @@ export const TrainableUnit = z
     time: int().describe('seconds per unit'),
     requirements: z.array(RequirementCheck),
     permission: z.boolean(),
+    description: z.string().describe('role and special battle rules'),
     stats: z.object({ life: int(), attack: int(), defense: int(), speed: int(), range: int(), load: int(), upkeep: int().describe('food per hour') }),
   })
   .meta({ id: 'TrainableUnit' });

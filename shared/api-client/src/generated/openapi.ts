@@ -10935,6 +10935,8 @@ export interface components {
             time: number;
             requirements: components["schemas"]["RequirementCheckInput"][];
             permission: boolean;
+            /** @description role and special battle rules */
+            description: string;
             stats: {
                 life: number;
                 attack: number;
@@ -12867,6 +12869,8 @@ export interface components {
             time: number;
             requirements: components["schemas"]["RequirementCheck"][];
             permission: boolean;
+            /** @description role and special battle rules */
+            description: string;
             stats: {
                 life: number;
                 attack: number;

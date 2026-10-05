@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
-import { BuildingType, FORT_KEYS, getGameSpeed, heroManagement, heroPower, HeroStatus, itemConfig, splitTraining, TROOP_KEYS } from '@evony/core';
+import { BuildingType, FORT_KEYS, getGameSpeed, troopDescription, heroManagement, heroPower, HeroStatus, itemConfig, splitTraining, TROOP_KEYS } from '@evony/core';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TimerBar } from '@/components/countdown';
@@ -38,14 +39,18 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
             <TableBody>
               {garrison.map((t) => (
                 <TableRow key={t.id} className={t.count || t.injured ? '' : 'text-muted-foreground'}>
-                  <TableCell>{troopName(t.id)}</TableCell>
+                  <TableCell>
+                    <UnitName id={t.id} />
+                  </TableCell>
                   <TableCell className="text-right tabular-nums">{fmtExact(t.count)}</TableCell>
                   <TableCell className="text-right tabular-nums">{t.injured ? fmtExact(t.injured) : '—'}</TableCell>
                 </TableRow>
               ))}
               {forts.map((f) => (
                 <TableRow key={f.id} className={f.count ? '' : 'text-muted-foreground'}>
-                  <TableCell>{troopName(f.id)}</TableCell>
+                  <TableCell>
+                    <UnitName id={f.id} />
+                  </TableCell>
                   <TableCell className="text-right tabular-nums">{fmtExact(f.count)}</TableCell>
                   <TableCell />
                 </TableRow>
@@ -183,7 +188,9 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
               <div>
                 <div className="font-medium">{troopName(u.typeId)}</div>
                 <div className="text-xs text-muted-foreground">
-                  atk {u.stats.attack} · def {u.stats.defense} · hp {u.stats.life} · load {u.stats.load} · {u.population} pop
+                  atk {u.stats.attack} · def {u.stats.defense} · hp {u.stats.life}
+                  {!fort && ` · speed ${u.stats.speed} · range ${u.stats.range} · load ${u.stats.load} · ${u.stats.upkeep} food/h`}
+                  {fort && u.stats.range > 0 && ` · range ${u.stats.range}`} · {u.population} pop
                 </div>
               </div>
               <form
@@ -216,6 +223,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                 </Button>
               </form>
             </div>
+            <p className="text-sm text-muted-foreground">{u.description}</p>
             <CostList cost={u} have={have} />
             <TrainEstimate unitSeconds={u.time} count={Number(counts[u.typeId] ?? 0)} queues={queueList} barracks={barracks} pos={pos} splitting={splitting} fort={fort} />
             {!u.permission && <Requirements list={u.requirements.filter((r) => !r.ok)} />}
@@ -290,5 +298,14 @@ function TrainEstimate({
       {perUnit} per unit · {fmtExact(count)} ready in <span className="font-medium text-foreground">{duration(finish)}</span> across {plan.length} barracks (
       {plan.map((p) => fmtExact(p.count)).join(' / ')}) instead of {duration(count * unitMs)} in one
     </span>
+  );
+}
+
+function UnitName({ id }: { id: number }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger className="cursor-help text-left underline decoration-dotted decoration-muted-foreground/50 underline-offset-2">{troopName(id)}</TooltipTrigger>
+      <TooltipContent className="max-w-72">{troopDescription(id)}</TooltipContent>
+    </Tooltip>
   );
 }

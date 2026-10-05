@@ -17,6 +17,7 @@ import {
   troopConfig,
   troopKey,
   troopUnitSeconds,
+  troopDescription,
   TROOPS,
   usedWallSpace,
   wallCapacity,
@@ -116,6 +117,7 @@ export async function trainableList(ctx: Ctx, playerId: number, cityId: number, 
       time: troopUnitSeconds(t.troopId, mayor, b.player.research),
       requirements: checks,
       permission: requirementsMet(checks),
+      description: troopDescription(t.troopId),
       stats: { life: t.life, attack: t.attack, defense: t.defense, speed: t.speed, range: t.range, load: t.load, upkeep: t.upkeep },
     };
   });
