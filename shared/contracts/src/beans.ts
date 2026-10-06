@@ -43,7 +43,7 @@ export const ResourceLine = z
     storePercent: z.number(),
     workRate: z.number(),
     workPeople: z.number(),
-    increaseRate: z.number().int().describe('net change per hour (food is after troop upkeep)'),
+    increaseRate: z.number().describe('net change per game hour (food is after troop upkeep), 2 decimals'),
     bonusPercent: z.number().int(),
     breakdown: z
       .object({
@@ -53,7 +53,7 @@ export const ResourceLine = z
         mayor: z.number().int().describe("from the mayor's politics"),
         valley: z.number().int().describe('from occupied valleys'),
         buff: z.number().int().describe('from production items'),
-        upkeep: z.number().int().describe('troop food upkeep (negative; 0 for other resources)'),
+        upkeep: z.number().describe('troop food upkeep per game hour (negative; 0 for other resources), 2 decimals'),
         techPercent: z.number().int(),
         mayorPercent: z.number().int(),
         valleyPercent: z.number().int(),
@@ -67,7 +67,7 @@ export type ResourceLine = z.infer<typeof ResourceLine>;
 export const ResourceBean = z
   .object({
     gold: z.number().int(),
-    goldRate: z.number().int(),
+    goldRate: z.number().describe('net gold per game hour, 2 decimals'),
     food: ResourceLine,
     wood: ResourceLine,
     stone: ResourceLine,
@@ -75,7 +75,7 @@ export const ResourceBean = z
     taxRate: z.number().int(),
     taxIncome: z.number().int(),
     herosSalary: z.number(),
-    troopCostFood: z.number().int(),
+    troopCostFood: z.number().describe('troop food upkeep per game hour, 2 decimals'),
     curPopulation: z.number().int(),
     maxPopulation: z.number(),
     idlePopulation: z.number(),

@@ -3,7 +3,7 @@
 // CalculateResources / RecalculateCityStats, with the gaps the original left as TODO filled in
 // (tech, mayor and valley production bonuses, troop food upkeep, starvation).
 
-import { BALANCE, scaled } from './balance.ts';
+import { BALANCE, getGameSpeed, scaled } from './balance.ts';
 import { BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, type ResourceKey } from './constants.ts';
 import { troopConfig } from './data/index.ts';
 import type { BuffState, BuildingState, CityMisc, ResearchState, ResourceSet, TroopCounts } from './types.ts';
@@ -216,7 +216,12 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
 
   let upkeep = troopUpkeep(city.troops) + troopUpkeep(ctx.awayTroops);
   if (hasBuff(ctx.buffs, 'UpkeepReduceBuff', now)) upkeep *= 0.5;
-  const heroSalary = BALANCE.heroSalaries ? ctx.heroLevels.reduce((s, l) => s + l * BALANCE.heroSalaryPerLevel, 0) : 0;
+  // rates are per game hour; with upkeepPerRealHour troops eat their upkeep per real hour instead,
+  // i.e. 1/GAME_SPEED of it per game hour, so a faster game does not make them hungrier
+  if (BALANCE.upkeepPerRealHour) upkeep /= getGameSpeed();
+  let heroSalary = BALANCE.heroSalaries ? ctx.heroLevels.reduce((s, l) => s + l * BALANCE.heroSalaryPerLevel, 0) : 0;
+  // like upkeep: paid per real hour, not per game hour, when salaryPerRealHour is on
+  if (BALANCE.salaryPerRealHour) heroSalary /= getGameSpeed();
   let taxIncome = (population * city.taxRate) / 100;
   if (hasBuff(ctx.buffs, 'GoldProductionBuff', now)) taxIncome *= 1 + BALANCE.resourceBuffBonus;
 

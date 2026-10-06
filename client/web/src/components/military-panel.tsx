@@ -219,7 +219,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                 <div className="font-medium">{troopName(u.typeId)}</div>
                 <div className="text-xs text-muted-foreground">
                   atk {u.stats.attack} · def {u.stats.defense} · hp {u.stats.life}
-                  {!fort && ` · speed ${u.stats.speed} · range ${u.stats.range} · load ${u.stats.load} · ${fmt(realHourly(u.stats.upkeep))} food/h`}
+                  {!fort && ` · speed ${u.stats.speed} · range ${u.stats.range} · load ${u.stats.load} · ${fmt(BALANCE.upkeepPerRealHour ? u.stats.upkeep : realHourly(u.stats.upkeep))} food/h`}
                   {fort && u.stats.range > 0 && ` · range ${u.stats.range}`} · {u.population} pop
                 </div>
               </div>

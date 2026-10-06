@@ -366,10 +366,8 @@
             "description": "from production items"
           },
           "upkeep": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "troop food upkeep (negative; 0 for other resources)"
+            "type": "number",
+            "description": "troop food upkeep per game hour (negative; 0 for other resources), 2 decimals"
           },
           "techPercent": {
             "type": "integer",
@@ -428,10 +426,8 @@
             "type": "number"
           },
           "increaseRate": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "net change per hour (food is after troop upkeep)"
+            "type": "number",
+            "description": "net change per game hour (food is after troop upkeep), 2 decimals"
           },
           "bonusPercent": {
             "type": "integer",
@@ -462,9 +458,8 @@
             "maximum": 9007199254740991
           },
           "goldRate": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "type": "number",
+            "description": "net gold per game hour, 2 decimals"
           },
           "food": {
             "$ref": "#/components/schemas/ResourceLineInput"
@@ -492,9 +487,8 @@
             "type": "number"
           },
           "troopCostFood": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "type": "number",
+            "description": "troop food upkeep per game hour, 2 decimals"
           },
           "curPopulation": {
             "type": "integer",
@@ -9716,10 +9710,8 @@
             "description": "from production items"
           },
           "upkeep": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "troop food upkeep (negative; 0 for other resources)"
+            "type": "number",
+            "description": "troop food upkeep per game hour (negative; 0 for other resources), 2 decimals"
           },
           "techPercent": {
             "type": "integer",
@@ -9779,10 +9771,8 @@
             "type": "number"
           },
           "increaseRate": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "net change per hour (food is after troop upkeep)"
+            "type": "number",
+            "description": "net change per game hour (food is after troop upkeep), 2 decimals"
           },
           "bonusPercent": {
             "type": "integer",
@@ -9814,9 +9804,8 @@
             "maximum": 9007199254740991
           },
           "goldRate": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "type": "number",
+            "description": "net gold per game hour, 2 decimals"
           },
           "food": {
             "$ref": "#/components/schemas/ResourceLine"
@@ -9844,9 +9833,8 @@
             "type": "number"
           },
           "troopCostFood": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "type": "number",
+            "description": "troop food upkeep per game hour, 2 decimals"
           },
           "curPopulation": {
             "type": "integer",

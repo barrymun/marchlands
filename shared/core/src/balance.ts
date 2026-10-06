@@ -53,6 +53,8 @@ export const BALANCE = {
   heroSalaryPerLevel: 20, // (orig) gold per hour per hero level
   /** (evony-re) on: every hero costs heroSalaryPerLevel gold per hour per level (orig). Off: heroes are free */
   heroSalaries: false as boolean,
+  /** (evony-re) on: salaries are paid per real hour, unaffected by GAME_SPEED. Off: per game hour (orig) */
+  salaryPerRealHour: true as boolean,
   heroHireCostPerLevel: 1000, // (orig)
   /** (evony-re) gold to re-roll the Inn's offers, per Inn level (the Hero Hunting item does it for free) */
   tavernRefreshGoldPerInnLevel: 1000,
@@ -108,6 +110,11 @@ export const BALANCE = {
   plunderShare: 1,
   /** (evony) attacker troops lost in a win that become injured (Relief/Medicine aware) */
   injuredShare: 0.2,
+  /**
+   * (evony-re) on: troops eat their upkeep per real hour, unaffected by GAME_SPEED (production still
+   * speeds up). Off: per game hour, like every other rate (orig)
+   */
+  upkeepPerRealHour: true as boolean,
   /** (evony-re) on: troops desert 10% per game hour while food is at 0 (Evony). Off: food stops at 0 and troops stay */
   starvationDesertion: false as boolean,
   /** (orig) healing an injured troop costs this share of its training cost */

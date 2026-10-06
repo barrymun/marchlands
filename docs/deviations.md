@@ -5,7 +5,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 ## Ported exactly
 
 - **Static data.** Building, research and troop costs, times and prerequisites, and items are converted from `config_*` (`tools/legacy-import`).
-- **Economy.** Fields (production `100F`/h, storage `10000F`, workers `10F`), cottages, base +100/h, tax income, hero salaries (`level×20`/h; *(design change)* switched off for now with `BALANCE.heroSalaries = false`), 6-minute population and loyalty drift.
+- **Economy.** Fields (production `100F`/h, storage `10000F`, workers `10F`), cottages, base +100/h, tax income, hero salaries (`level×20`/h; *(design change)* switched off for now with `BALANCE.heroSalaries = false`; when on they are paid per real hour, unaffected by `GAME_SPEED` (`BALANCE.salaryPerRealHour`)), 6-minute population and loyalty drift.
 - **Timing.**
   - Build time: `time × 0.995^management × 0.9^Construction`; demolition takes half the build time.
   - Research time: `time × 0.995^stratagem`.
@@ -75,7 +75,7 @@ The original either stubbed these or never answered them.
   - Valleys: *(design change)* every valley gives 8–35% by level (+3% per level, Evony's lake table; Evony had grassland 3–12% and swamp/forest/desert/hill 5–23%), for the matching resource (lake, swamp, grassland → food; forest → wood; desert → stone; hill → iron).
   - Stockpile: +10% storage per level.
   - Production buffs: +25%.
-- **Troop food upkeep** from `config_troops.movecost`. *(design change)* Desertion is switched off for now (`BALANCE.starvationDesertion = false`): food stops at 0 and troops stay. With it on, troops desert at 10% per game hour while food is at 0.
+- **Troop food upkeep** from `config_troops.movecost`. *(design change)* It is eaten per real hour, unaffected by `GAME_SPEED` (`BALANCE.upkeepPerRealHour`), while production speeds up. *(design change)* Desertion is switched off for now (`BALANCE.starvationDesertion = false`): food stops at 0 and troops stay. With it on, troops desert at 10% per game hour while food is at 0.
 - **Market.**
   - Escrow when an order is placed; price-time priority matching at the resting order's price; a 0.5% fee paid by the buyer.
   - *(design change)* **Instant settlement**: the lord placing an order is paid in the same transaction; lords whose resting orders are hit are paid within a moment (zero-time shipments). `BALANCE.marketShipmentBaseMs > 0` restores Evony's travel time (60 min ÷ Marketplace level). Merchant Fleet therefore has no effect.

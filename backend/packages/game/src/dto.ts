@@ -75,13 +75,16 @@ function productionBreakdownOf(stats: CityStats, r: (typeof BASIC_RESOURCES)[num
     mayor: Math.round(fields * p.mayor),
     valley: Math.round(fields * p.valley),
     buff: Math.round(fields * p.buff),
-    upkeep: r === 'food' ? -Math.round(stats.upkeep) : 0,
+    upkeep: r === 'food' ? -round2(stats.upkeep) : 0,
     techPercent: Math.round(p.tech * 100),
     mayorPercent: Math.round(p.mayor * 100),
     valleyPercent: Math.round(p.valley * 100),
     buffPercent: Math.round(p.buff * 100),
   };
 }
+
+/** per-game-hour rates keep 2 decimals: at high GAME_SPEED the client multiplies them back up per real hour */
+const round2 = (n: number) => Math.round(n * 100) / 100;
 
 export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
   const c = b.city;
@@ -92,21 +95,21 @@ export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
     workRate: c.workRates[r] ?? 100,
     workPeople: stats.workers[r],
     /** net change per hour (food is after troop upkeep) */
-    increaseRate: Math.round(stats.rates[r]),
+    increaseRate: round2(stats.rates[r]),
     bonusPercent: Math.round(stats.bonus[r] * 100),
     breakdown: productionBreakdownOf(stats, r),
   });
   return {
     gold: Math.floor(c.gold),
-    goldRate: Math.round(stats.rates.gold),
+    goldRate: round2(stats.rates.gold),
     food: res('food'),
     wood: res('wood'),
     stone: res('stone'),
     iron: res('iron'),
     taxRate: c.taxRate,
     taxIncome: Math.round(stats.taxIncome),
-    herosSalary: stats.heroSalary,
-    troopCostFood: Math.round(stats.upkeep),
+    herosSalary: round2(stats.heroSalary),
+    troopCostFood: round2(stats.upkeep),
     curPopulation: Math.floor(c.population),
     maxPopulation: stats.maxPopulation,
     idlePopulation: stats.idlePopulation,

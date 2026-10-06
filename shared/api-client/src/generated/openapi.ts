@@ -10471,7 +10471,7 @@ export interface components {
             valley: number;
             /** @description from production items */
             buff: number;
-            /** @description troop food upkeep (negative; 0 for other resources) */
+            /** @description troop food upkeep per game hour (negative; 0 for other resources), 2 decimals */
             upkeep: number;
             techPercent: number;
             mayorPercent: number;
@@ -10484,13 +10484,14 @@ export interface components {
             storePercent: number;
             workRate: number;
             workPeople: number;
-            /** @description net change per hour (food is after troop upkeep) */
+            /** @description net change per game hour (food is after troop upkeep), 2 decimals */
             increaseRate: number;
             bonusPercent: number;
             breakdown: components["schemas"]["ProductionSourcesInput"];
         };
         ResourceBeanInput: {
             gold: number;
+            /** @description net gold per game hour, 2 decimals */
             goldRate: number;
             food: components["schemas"]["ResourceLineInput"];
             wood: components["schemas"]["ResourceLineInput"];
@@ -10499,6 +10500,7 @@ export interface components {
             taxRate: number;
             taxIncome: number;
             herosSalary: number;
+            /** @description troop food upkeep per game hour, 2 decimals */
             troopCostFood: number;
             curPopulation: number;
             maxPopulation: number;
@@ -12468,7 +12470,7 @@ export interface components {
             valley: number;
             /** @description from production items */
             buff: number;
-            /** @description troop food upkeep (negative; 0 for other resources) */
+            /** @description troop food upkeep per game hour (negative; 0 for other resources), 2 decimals */
             upkeep: number;
             techPercent: number;
             mayorPercent: number;
@@ -12481,13 +12483,14 @@ export interface components {
             storePercent: number;
             workRate: number;
             workPeople: number;
-            /** @description net change per hour (food is after troop upkeep) */
+            /** @description net change per game hour (food is after troop upkeep), 2 decimals */
             increaseRate: number;
             bonusPercent: number;
             breakdown: components["schemas"]["ProductionSources"];
         };
         ResourceBean: {
             gold: number;
+            /** @description net gold per game hour, 2 decimals */
             goldRate: number;
             food: components["schemas"]["ResourceLine"];
             wood: components["schemas"]["ResourceLine"];
@@ -12496,6 +12499,7 @@ export interface components {
             taxRate: number;
             taxIncome: number;
             herosSalary: number;
+            /** @description troop food upkeep per game hour, 2 decimals */
             troopCostFood: number;
             curPopulation: number;
             maxPopulation: number;

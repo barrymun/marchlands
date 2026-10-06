@@ -88,6 +88,8 @@ export function settle(ctx: Ctx, b: CityBundle): SettleResult {
   return r;
 }
 
+const r2 = (n: number) => Math.round(n * 100) / 100;
+
 /** Settle a locked city and report any troops that deserted for lack of food. */
 export async function settleAndReport(ctx: Ctx, b: CityBundle): Promise<SettleResult> {
   const from = b.city.resourcesAt;
@@ -101,7 +103,7 @@ export async function settleAndReport(ctx: Ctx, b: CityBundle): Promise<SettleRe
       city: b.city.name,
       from,
       troops: r.deserted,
-      food: { production: Math.round(stats.rates.food + stats.upkeep), upkeep: Math.round(stats.upkeep), net: Math.round(stats.rates.food) },
+      food: { production: r2(stats.rates.food + stats.upkeep), upkeep: r2(stats.upkeep), net: r2(stats.rates.food) },
       position: `${b.city.name} (${x},${y})`,
     });
   }

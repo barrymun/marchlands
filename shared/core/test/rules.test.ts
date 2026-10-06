@@ -18,6 +18,7 @@ import {
   rollAmulet,
   seededRng,
   settleCity,
+  setGameSpeed,
   splitTraining,
   stateOf,
   troopConfig,
@@ -309,5 +310,46 @@ describe('healing injured troops', () => {
     const a = trainCost(7, 10);
     expect(c.food).toBeCloseTo((m.food + a.food) * BALANCE.healCostShare);
     expect(c.wood).toBeCloseTo((m.wood + a.wood) * BALANCE.healCostShare);
+  });
+});
+
+describe('troop upkeep and game speed', () => {
+  it('is eaten per real hour when upkeepPerRealHour is on', () => {
+    const cfg = BALANCE as { upkeepPerRealHour: boolean };
+    const was = cfg.upkeepPerRealHour;
+    try {
+      setGameSpeed(60);
+      cfg.upkeepPerRealHour = true;
+      const on = computeCityStats(city({ troops: { militia: 1000 } }), ctx(), 0);
+      cfg.upkeepPerRealHour = false;
+      const off = computeCityStats(city({ troops: { militia: 1000 } }), ctx(), 0);
+      expect(off.upkeep).toBeCloseTo(3000);
+      // per game hour; x60 game hours per real hour = 3,000 food per real hour
+      expect(on.upkeep).toBeCloseTo(3000 / 60);
+    } finally {
+      cfg.upkeepPerRealHour = was;
+      setGameSpeed(1);
+    }
+  });
+});
+
+describe('hero salaries and game speed', () => {
+  it('are paid per real hour when salaryPerRealHour is on', () => {
+    const cfg = BALANCE as { heroSalaries: boolean; salaryPerRealHour: boolean };
+    const was = { ...cfg };
+    try {
+      setGameSpeed(60);
+      cfg.heroSalaries = true;
+      cfg.salaryPerRealHour = true;
+      const on = computeCityStats(city({ population: 100 }), ctx({ heroLevels: [10] }), 0);
+      cfg.salaryPerRealHour = false;
+      const off = computeCityStats(city({ population: 100 }), ctx({ heroLevels: [10] }), 0);
+      expect(off.heroSalary).toBeCloseTo(10 * BALANCE.heroSalaryPerLevel);
+      expect(on.heroSalary).toBeCloseTo((10 * BALANCE.heroSalaryPerLevel) / 60);
+    } finally {
+      cfg.heroSalaries = was.heroSalaries;
+      cfg.salaryPerRealHour = was.salaryPerRealHour;
+      setGameSpeed(1);
+    }
   });
 });
