@@ -63,6 +63,22 @@ export async function buyItem(ctx: Ctx, playerId: number, itemId: string, amount
   return { cents: p.cents, count: itemCount(p, itemId) };
 }
 
+/** Buy items with a city's gold (BALANCE.goldShop); they go to the lord's inventory. */
+export async function buyItemWithGold(ctx: Ctx, playerId: number, cityId: number, itemId: string, amount: number) {
+  const price = BALANCE.goldShop[itemId];
+  if (price == null) throw new GameError('This item cannot be bought with gold.', -99);
+  if (!Number.isInteger(amount) || amount < 1 || amount > 1000) throw new GameError('Not going to happen.', -28);
+  const b = await openOwnCity(ctx, playerId, cityId);
+  const gold = price * amount;
+  if (b.city.gold < gold) throw new GameError(`Not enough gold: ${gold.toLocaleString('en')} needed.`, -99);
+  b.city.gold -= gold;
+  addItem(ctx, b.player, itemId, amount);
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
+  await savePlayer(ctx, b.player);
+  return { itemId, count: itemCount(b.player, itemId), gold };
+}
+
 /** shop.getBuyResourceInfo */
 export function resourceRates() {
   const r = BALANCE.shopResourcePerCent;

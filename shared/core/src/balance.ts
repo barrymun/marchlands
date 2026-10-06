@@ -181,6 +181,8 @@ export const BALANCE = {
     /** the reference never leaves [base / band, base x band] */
     band: 5,
   },
+  /** (evony-re) items that can be bought with city gold, and their price (item id -> gold each) */
+  goldShop: { 'player.troop.1.a': 250_000 } as Record<string, number>,
   /** (orig) units of resource per cent in shop.buyResource */
   shopResourcePerCent: { food: 100_000, wood: 100_000, stone: 50_000, iron: 40_000 },
 } as const;

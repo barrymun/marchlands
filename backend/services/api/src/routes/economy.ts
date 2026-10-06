@@ -1,20 +1,7 @@
 // Market, shop, quests, rankings, static game configuration and operator tools.
 
 import { z } from 'zod';
-import {
-  BALANCE,
-  BUILDINGS,
-  BUILDING_NAMES,
-  ITEMS,
-  itemInfo,
-  QUESTS,
-  RESEARCH,
-  STATE_NAMES,
-  TECH_NAMES,
-  TITLES,
-  TROOPS,
-  getGameSpeed,
-} from '@evony/core';
+import { BALANCE, BUILDINGS, BUILDING_NAMES, ITEMS, itemInfo, QUESTS, RESEARCH, STATE_NAMES, TECH_NAMES, TITLES, TROOPS, getGameSpeed } from '@evony/core';
 import {
   AccountIdParams,
   AdminAddedHero,
@@ -32,6 +19,8 @@ import {
   AdminSetResourcesBody,
   AdminSetTechnologyBody,
   BuyResourcesBody,
+  GoldShopBuyBody,
+  GoldShopBuyResult,
   ClaimQuestBody,
   Empty,
   ErrorResponse,
@@ -106,29 +95,45 @@ export default async function economyRoutes(app: ZApp) {
     secure.addHook('preHandler', authenticate);
 
     // ---- market ----
-    secure.get('/market/:resType', s(tags.market, 'Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades)', MarketOrderBook, { params: MarketResTypeParams }), (req) =>
-      anon(req, (ctx) => market.orderBook(ctx, req.params.resType)),
+    secure.get(
+      '/market/:resType',
+      s(tags.market, 'Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades)', MarketOrderBook, { params: MarketResTypeParams }),
+      (req) => anon(req, (ctx) => market.orderBook(ctx, req.params.resType)),
     );
     secure.get(
       '/market/:resType/quote',
-      s(tags.market, 'Preview an order: what would trade now, at what average price, and what would rest', MarketQuote, { params: MarketResTypeParams, querystring: MarketQuoteQuery }),
+      s(tags.market, 'Preview an order: what would trade now, at what average price, and what would rest', MarketQuote, {
+        params: MarketResTypeParams,
+        querystring: MarketQuoteQuery,
+      }),
       (req) => game(req, (ctx, pid) => market.quote(ctx, pid, { resType: req.params.resType, ...req.query })),
     );
-    secure.get('/market/:resType/history', s(tags.market, 'Recent trades and hourly (game time) price candles', MarketHistory, { params: MarketResTypeParams }), (req) =>
-      anon(req, (ctx) => market.history(ctx, req.params.resType)),
+    secure.get(
+      '/market/:resType/history',
+      s(tags.market, 'Recent trades and hourly (game time) price candles', MarketHistory, { params: MarketResTypeParams }),
+      (req) => anon(req, (ctx) => market.history(ctx, req.params.resType)),
     );
-    secure.get('/market/orders/mine', s(tags.market, 'My open orders (trade.getMyTradeList)', z.array(MarketOrder)), (req) => game(req, (ctx, pid) => market.myOrders(ctx, pid)));
+    secure.get('/market/orders/mine', s(tags.market, 'My open orders (trade.getMyTradeList)', z.array(MarketOrder)), (req) =>
+      game(req, (ctx, pid) => market.myOrders(ctx, pid)),
+    );
     secure.post(
       '/cities/:cityId/market/orders',
-      s(tags.market, 'Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade)', MarketPlaceOrderResult, { params: zCityParams, body: PlaceOrderBody }),
+      s(tags.market, 'Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade)', MarketPlaceOrderResult, {
+        params: zCityParams,
+        body: PlaceOrderBody,
+      }),
       (req) => game(req, (ctx, pid) => market.placeOrder(ctx, pid, req.params.cityId, req.body)),
     );
     secure.delete('/market/orders/:orderId', s(tags.market, 'Cancel (trade.cancelTrade)', Empty, { params: OrderIdParams }), (req) =>
       game(req, (ctx, pid) => market.cancelOrder(ctx, pid, req.params.orderId)),
     );
-    secure.get('/market/shipments', s(tags.market, 'Goods in transit (trade.getTransingTradeList)', z.array(MarketShipment)), (req) => game(req, (ctx, pid) => market.myShipments(ctx, pid)));
-    secure.post('/market/shipments/:shipmentId/speedup', s(tags.market, 'Instant delivery for cents (trade.speedUpTrans)', Empty, { params: ShipmentIdParams }), (req) =>
-      game(req, (ctx, pid) => market.speedupShipment(ctx, pid, req.params.shipmentId)),
+    secure.get('/market/shipments', s(tags.market, 'Goods in transit (trade.getTransingTradeList)', z.array(MarketShipment)), (req) =>
+      game(req, (ctx, pid) => market.myShipments(ctx, pid)),
+    );
+    secure.post(
+      '/market/shipments/:shipmentId/speedup',
+      s(tags.market, 'Instant delivery for cents (trade.speedUpTrans)', Empty, { params: ShipmentIdParams }),
+      (req) => game(req, (ctx, pid) => market.speedupShipment(ctx, pid, req.params.shipmentId)),
     );
 
     // ---- shop ----
@@ -136,7 +141,15 @@ export default async function economyRoutes(app: ZApp) {
     secure.post('/shop/buy', s(tags.shop, 'Buy items with cents (shop.buy)', ShopBuyResult, { body: ShopBuyBody }), (req) =>
       game(req, (ctx, pid) => shop.buyItem(ctx, pid, req.body.itemId, req.body.amount)),
     );
-    secure.get('/shop/resources', s(tags.shop, 'Resources per cent (shop.getBuyResourceInfo)', ShopResourceRates), async () => ({ ok: 1 as const, data: shop.resourceRates() }));
+    secure.get('/shop/resources', s(tags.shop, 'Resources per cent (shop.getBuyResourceInfo)', ShopResourceRates), async () => ({
+      ok: 1 as const,
+      data: shop.resourceRates(),
+    }));
+    secure.post(
+      '/cities/:cityId/shop/gold',
+      s(tags.shop, 'Buy items with the city gold (BALANCE.goldShop)', GoldShopBuyResult, { params: zCityParams, body: GoldShopBuyBody }),
+      (req) => game(req, (ctx, pid) => shop.buyItemWithGold(ctx, pid, req.params.cityId, req.body.itemId, req.body.amount)),
+    );
     secure.post(
       '/cities/:cityId/shop/resources',
       s(tags.shop, 'Spend cents on resources (shop.buyResource)', Empty, { params: zCityParams, body: BuyResourcesBody }),
@@ -144,27 +157,39 @@ export default async function economyRoutes(app: ZApp) {
     );
 
     // ---- quests ----
-    secure.get('/quests/groups', s(tags.quests, 'Quest groups (quest.getQuestType)', z.array(QuestGroupStatus)), (req) => game(req, (ctx, pid) => quests.questTypes(ctx, pid)));
+    secure.get('/quests/groups', s(tags.quests, 'Quest groups (quest.getQuestType)', z.array(QuestGroupStatus)), (req) =>
+      game(req, (ctx, pid) => quests.questTypes(ctx, pid)),
+    );
     secure.get('/quests', s(tags.quests, 'Quests with progress (quest.getQuestList)', z.array(QuestBean), { querystring: QuestListQuery }), (req) =>
       game(req, (ctx, pid) => quests.questList(ctx, pid, req.query.groupId)),
     );
-    secure.post('/quests/:questId/claim', s(tags.quests, 'Claim the award into a city (quest.award)', QuestAward, { params: QuestIdParams, body: ClaimQuestBody }), (req) =>
-      game(req, (ctx, pid) => quests.claimQuest(ctx, pid, req.params.questId, req.body.cityId)),
+    secure.post(
+      '/quests/:questId/claim',
+      s(tags.quests, 'Claim the award into a city (quest.award)', QuestAward, { params: QuestIdParams, body: ClaimQuestBody }),
+      (req) => game(req, (ctx, pid) => quests.claimQuest(ctx, pid, req.params.questId, req.body.cityId)),
     );
     secure.post('/quests/daily-gift', s(tags.quests, 'Daily gift', QuestDailyGift), (req) => game(req, (ctx, pid) => quests.claimDailyGift(ctx, pid)));
 
     // ---- rankings ----
-    secure.get('/rankings/players', s(tags.rankings, 'sortType 1 title, 2 prestige, 3 honor, 4 cities, 5 population (rank.getPlayerRank)', RankingPlayerPage, { querystring: RankingQuery }), (req) =>
-      anon(req, (ctx) => rankings.playerRanking(ctx, req.query.sortType, req.query.pageNo, req.query.pageSize, req.query.key)),
+    secure.get(
+      '/rankings/players',
+      s(tags.rankings, 'sortType 1 title, 2 prestige, 3 honor, 4 cities, 5 population (rank.getPlayerRank)', RankingPlayerPage, { querystring: RankingQuery }),
+      (req) => anon(req, (ctx) => rankings.playerRanking(ctx, req.query.sortType, req.query.pageNo, req.query.pageSize, req.query.key)),
     );
-    secure.get('/rankings/alliances', s(tags.rankings, 'sortType 1 members, 2 prestige, 3 honor (rank.getAllianceRank)', RankingAlliancePage, { querystring: RankingQuery }), (req) =>
-      anon(req, (ctx) => rankings.allianceRanking(ctx, req.query.sortType, req.query.pageNo, req.query.pageSize, req.query.key)),
+    secure.get(
+      '/rankings/alliances',
+      s(tags.rankings, 'sortType 1 members, 2 prestige, 3 honor (rank.getAllianceRank)', RankingAlliancePage, { querystring: RankingQuery }),
+      (req) => anon(req, (ctx) => rankings.allianceRanking(ctx, req.query.sortType, req.query.pageNo, req.query.pageSize, req.query.key)),
     );
-    secure.get('/rankings/heroes', s(tags.rankings, 'sortType 1 level, 2 management, 3 power, 4 stratagem (rank.getHeroRank)', RankingHeroPage, { querystring: RankingQuery }), (req) =>
-      anon(req, (ctx) => rankings.heroRanking(ctx, req.query.sortType, req.query.pageNo, req.query.pageSize, req.query.key)),
+    secure.get(
+      '/rankings/heroes',
+      s(tags.rankings, 'sortType 1 level, 2 management, 3 power, 4 stratagem (rank.getHeroRank)', RankingHeroPage, { querystring: RankingQuery }),
+      (req) => anon(req, (ctx) => rankings.heroRanking(ctx, req.query.sortType, req.query.pageNo, req.query.pageSize, req.query.key)),
     );
-    secure.get('/rankings/castles', s(tags.rankings, 'sortType 1 population, 2 level (rank.getCastleRank)', RankingCastlePage, { querystring: RankingQuery }), (req) =>
-      anon(req, (ctx) => rankings.castleRanking(ctx, req.query.sortType, req.query.pageNo, req.query.pageSize, req.query.key)),
+    secure.get(
+      '/rankings/castles',
+      s(tags.rankings, 'sortType 1 population, 2 level (rank.getCastleRank)', RankingCastlePage, { querystring: RankingQuery }),
+      (req) => anon(req, (ctx) => rankings.castleRanking(ctx, req.query.sortType, req.query.pageNo, req.query.pageSize, req.query.key)),
     );
 
     // ---- operator tools (accounts with is_admin) ----
@@ -176,9 +201,13 @@ export default async function economyRoutes(app: ZApp) {
       gm.post('/admin/items', s(t, 'Grant items (gamemaster.addItems)', Empty, { body: AdminGrantItemsBody }), (req) =>
         run((ctx) => admin.grantItems(ctx, req.body.playerName, req.body.items)),
       );
-      gm.post('/admin/cents', s(t, 'Grant cents', Empty, { body: AdminGrantCentsBody }), (req) => run((ctx) => admin.grantCents(ctx, req.body.playerName, req.body.cents)));
-      gm.put('/admin/cities/:cityId/resources', s(t, 'Set resources (gamemaster.setResources)', Empty, { params: zCityParams, body: AdminSetResourcesBody }), (req) =>
-        run((ctx) => admin.setResources(ctx, req.params.cityId, req.body.playerId, req.body)),
+      gm.post('/admin/cents', s(t, 'Grant cents', Empty, { body: AdminGrantCentsBody }), (req) =>
+        run((ctx) => admin.grantCents(ctx, req.body.playerName, req.body.cents)),
+      );
+      gm.put(
+        '/admin/cities/:cityId/resources',
+        s(t, 'Set resources (gamemaster.setResources)', Empty, { params: zCityParams, body: AdminSetResourcesBody }),
+        (req) => run((ctx) => admin.setResources(ctx, req.params.cityId, req.body.playerId, req.body)),
       );
       gm.put(
         '/admin/cities/:cityId/buildings',
@@ -188,25 +217,30 @@ export default async function economyRoutes(app: ZApp) {
       gm.put('/admin/research', s(t, 'Set a technology level (gamemaster.setTechnology)', Empty, { body: AdminSetTechnologyBody }), (req) =>
         run((ctx) => admin.setTechnology(ctx, req.body.playerName, req.body.techId, req.body.level)),
       );
-      gm.post('/admin/cities/:cityId/heroes', s(t, 'Add a random hero (gamemaster.addHero)', AdminAddedHero, { params: zCityParams, body: AdminAddHeroBody }), (req) =>
-        run((ctx) => admin.addHero(ctx, req.params.cityId, req.body.playerId, req.body.innLevel)),
+      gm.post(
+        '/admin/cities/:cityId/heroes',
+        s(t, 'Add a random hero (gamemaster.addHero)', AdminAddedHero, { params: zCityParams, body: AdminAddHeroBody }),
+        (req) => run((ctx) => admin.addHero(ctx, req.params.cityId, req.body.playerId, req.body.innLevel)),
       );
       gm.post('/admin/accounts/:accountId/ban', s(t, 'Ban / unban an account', Empty, { params: AccountIdParams, body: AdminBanBody }), (req) =>
         run((ctx) => admin.setBan(ctx, req.params.accountId, req.body.banned, req.body.reason)),
       );
-      gm.post('/admin/mute', s(t, 'Mute a lord in chat (common.denyPlayerSpeak)', Empty, { body: AdminMuteBody }), (req) => run((ctx) => admin.mute(ctx, req.body.playerName, req.body.minutes)));
+      gm.post('/admin/mute', s(t, 'Mute a lord in chat (common.denyPlayerSpeak)', Empty, { body: AdminMuteBody }), (req) =>
+        run((ctx) => admin.mute(ctx, req.body.playerName, req.body.minutes)),
+      );
       gm.post('/admin/broadcast', s(t, 'System message to everyone (\\massmsg)', Empty, { body: AdminBroadcastBody }), (req) =>
         run(async (ctx) => admin.broadcast(ctx, req.body.msg, req.body.tv)),
       );
       gm.post('/admin/mail', s(t, 'System mail to a lord', Empty, { body: AdminMailBody }), (req) =>
         run((ctx) => admin.mailPlayer(ctx, req.body.playerName, req.body.title, req.body.content)),
       );
-      gm.put('/admin/players/flags', s(t, 'Beginner protection / title', Empty, { body: AdminPlayerFlagsBody }), (req) => run((ctx) => admin.setPlayerFlags(ctx, req.body.playerName, req.body)));
+      gm.put('/admin/players/flags', s(t, 'Beginner protection / title', Empty, { body: AdminPlayerFlagsBody }), (req) =>
+        run((ctx) => admin.setPlayerFlags(ctx, req.body.playerName, req.body)),
+      );
       gm.put('/admin/cities/:cityId/stats', s(t, 'Population / loyalty / troops', Empty, { params: zCityParams, body: AdminCityStatsBody }), (req) =>
         run((ctx) => admin.setCityStats(ctx, req.params.cityId, req.body.playerId, req.body)),
       );
       gm.get('/admin/online', s(t, 'Connected lords', AdminOnline), async () => ({ ok: 1 as const, data: { online: app.deps.online() } }));
     });
   });
-
 }

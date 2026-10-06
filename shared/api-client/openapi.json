@@ -7941,6 +7941,15 @@
           "heroExpPerBuild": {
             "type": "number"
           },
+          "goldShop": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
           "valleyUpgrade": {
             "type": "object",
             "properties": {
@@ -8182,6 +8191,7 @@
           "heroExpPerTrain",
           "heroExpPerResearch",
           "heroExpPerBuild",
+          "goldShop",
           "valleyUpgrade",
           "beginnerProtectionMs",
           "beginnerTownHallLevel",
@@ -8761,6 +8771,29 @@
           "startTime",
           "endTime",
           "resourceName"
+        ]
+      },
+      "GoldShopBuyResultInput": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "owned after buying"
+          },
+          "gold": {
+            "type": "number",
+            "description": "gold paid"
+          }
+        },
+        "required": [
+          "itemId",
+          "count",
+          "gold"
         ]
       },
       "ShopItemInput": {
@@ -17495,6 +17528,15 @@
           "heroExpPerBuild": {
             "type": "number"
           },
+          "goldShop": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
           "valleyUpgrade": {
             "type": "object",
             "properties": {
@@ -17740,6 +17782,7 @@
           "heroExpPerTrain",
           "heroExpPerResearch",
           "heroExpPerBuild",
+          "goldShop",
           "valleyUpgrade",
           "beginnerProtectionMs",
           "beginnerTownHallLevel",
@@ -18330,6 +18373,30 @@
           "startTime",
           "endTime",
           "resourceName"
+        ],
+        "additionalProperties": false
+      },
+      "GoldShopBuyResult": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "owned after buying"
+          },
+          "gold": {
+            "type": "number",
+            "description": "gold paid"
+          }
+        },
+        "required": [
+          "itemId",
+          "count",
+          "gold"
         ],
         "additionalProperties": false
       },
@@ -30800,6 +30867,103 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/ShopResourceRates"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cities/{cityId}/shop/gold": {
+      "post": {
+        "summary": "Buy items with the city gold (BALANCE.goldShop)",
+        "tags": [
+          "shop"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "itemId": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "default": 1,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000
+                  }
+                },
+                "required": [
+                  "itemId"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "in": "path",
+            "name": "cityId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/GoldShopBuyResult"
                     }
                   },
                   "required": [

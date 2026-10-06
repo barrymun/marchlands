@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { CityBean } from '@evony/api-client';
-import { ITEM_CATEGORIES, ITEM_INFO, itemConfig, TROOP_ID_BY_KEY, TROOP_NAMES, type ItemInfo, type TroopKey } from '@evony/core';
+import { BALANCE, ITEM_CATEGORIES, ITEM_INFO, itemConfig, TROOP_ID_BY_KEY, TROOP_NAMES, type ItemInfo, type TroopKey } from '@evony/core';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,14 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Countdown } from '@/components/countdown';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
-import { fmtExact } from '@/lib/format';
+import { fmt, fmtExact } from '@/lib/format';
 import { cn } from '@/lib/utils';
+
+/** Gold price of an entry when one of its items is in BALANCE.goldShop. */
+function goldPriceOf(e: { ids: string[] }): { id: string; price: number } | null {
+  const id = e.ids.find((x) => BALANCE.goldShop[x] != null);
+  return id ? { id, price: BALANCE.goldShop[id] } : null;
+}
 
 /** Items with the same name and effect (e.g. the twelve Amulet ids) are shown as one entry. */
 interface Entry {
@@ -56,12 +62,19 @@ export function ItemsPanel({ city }: { city: CityBean }) {
     (itemId: string) => unwrap(api.POST('/api/v1/player/items/{itemId}/use', { params: { path: { itemId } }, body: { cityId: city.id } })),
     () => [qk.player, qk.city(city.id)],
   );
+  const buyGold = useCommand(
+    (itemId: string) => unwrap(api.POST('/api/v1/cities/{cityId}/shop/gold', { params: { path: { cityId: city.id } }, body: { itemId, amount: 1 } })),
+    () => [qk.player, qk.city(city.id)],
+  );
   function useEntry(e: Entry) {
     const id = e.ids.find((x) => (counts.get(x) ?? 0) > 0);
     if (!id) return;
     use.mutate(id, {
       onSuccess: (r) => {
-        if (r.amulet) toast.success(`Amulet: ${r.amulet.prize.count > 1 ? `${fmtExact(r.amulet.prize.count)} × ` : ''}${itemConfig(r.amulet.prize.id)?.name ?? r.amulet.prize.id}`);
+        if (r.amulet)
+          toast.success(
+            `Amulet: ${r.amulet.prize.count > 1 ? `${fmtExact(r.amulet.prize.count)} × ` : ''}${itemConfig(r.amulet.prize.id)?.name ?? r.amulet.prize.id}`,
+          );
         else if (r.granted) toast.success(`${e.info.name}: received ${describeGrant(r.granted)}`);
         else if (r.hero) toast.success(`${r.hero.name} (Lv ${r.hero.level}) joined your city`);
         else toast.success(`${e.info.name} used`);
@@ -114,11 +127,24 @@ export function ItemsPanel({ city }: { city: CityBean }) {
                 </Badge>
                 {category === ALL && <span className="text-xs text-muted-foreground">{e.info.category}</span>}
               </div>
-              {e.info.use === 'direct' && (
-                <Button size="xs" disabled={e.owned === 0 || use.isPending} onClick={() => useEntry(e)}>
-                  Use
-                </Button>
-              )}
+              <div className="flex shrink-0 gap-1">
+                {goldPriceOf(e) && (
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    disabled={city.resource.gold < goldPriceOf(e)!.price || buyGold.isPending}
+                    title={`Buy one with ${city.name}'s gold`}
+                    onClick={() => buyGold.mutate(goldPriceOf(e)!.id, { onSuccess: () => toast.success(`Bought ${e.info.name}`) })}
+                  >
+                    Buy · {fmt(goldPriceOf(e)!.price)} gold
+                  </Button>
+                )}
+                {e.info.use === 'direct' && (
+                  <Button size="xs" disabled={e.owned === 0 || use.isPending} onClick={() => useEntry(e)}>
+                    Use
+                  </Button>
+                )}
+              </div>
             </div>
             <p className="text-sm text-muted-foreground">{e.info.description}</p>
             {e.info.howTo && <p className="text-xs text-muted-foreground italic">{e.info.howTo}</p>}
@@ -131,7 +157,12 @@ export function ItemsPanel({ city }: { city: CityBean }) {
   );
 }
 
-function describeGrant(g: { items?: Record<string, number>; resources?: Record<string, number | undefined>; troops?: Record<string, number | undefined>; cents?: number }) {
+function describeGrant(g: {
+  items?: Record<string, number>;
+  resources?: Record<string, number | undefined>;
+  troops?: Record<string, number | undefined>;
+  cents?: number;
+}) {
   const parts: string[] = [];
   for (const [id, n] of Object.entries(g.items ?? {})) parts.push(`${n} × ${itemConfig(id)?.name.trim() ?? id}`);
   for (const [r, n] of Object.entries(g.resources ?? {})) if (n) parts.push(`${fmtExact(n)} ${r === 'wood' ? 'lumber' : r}`);

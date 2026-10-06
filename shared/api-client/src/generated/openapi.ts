@@ -8971,6 +8971,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cities/{cityId}/shop/gold": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Buy items with the city gold (BALANCE.goldShop) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cityId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        itemId: string;
+                        /** @default 1 */
+                        amount?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["GoldShopBuyResult"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cities/{cityId}/shop/resources": {
         parameters: {
             query?: never;
@@ -12079,6 +12147,9 @@ export interface components {
             heroExpPerTrain: number;
             heroExpPerResearch: number;
             heroExpPerBuild: number;
+            goldShop: {
+                [key: string]: number;
+            };
             valleyUpgrade: {
                 baseGold: number;
                 maxLevel: number;
@@ -12266,6 +12337,13 @@ export interface components {
             endTime: number;
             /** @description food | wood | stone | iron | gold (resType 4: sale proceeds or escrow refund) */
             resourceName: string;
+        };
+        GoldShopBuyResultInput: {
+            itemId: string;
+            /** @description owned after buying */
+            count: number;
+            /** @description gold paid */
+            gold: number;
         };
         ShopItemInput: {
             id: string;
@@ -14090,6 +14168,9 @@ export interface components {
             heroExpPerTrain: number;
             heroExpPerResearch: number;
             heroExpPerBuild: number;
+            goldShop: {
+                [key: string]: number;
+            };
             valleyUpgrade: {
                 baseGold: number;
                 maxLevel: number;
@@ -14277,6 +14358,13 @@ export interface components {
             endTime: number;
             /** @description food | wood | stone | iron | gold (resType 4: sale proceeds or escrow refund) */
             resourceName: string;
+        };
+        GoldShopBuyResult: {
+            itemId: string;
+            /** @description owned after buying */
+            count: number;
+            /** @description gold paid */
+            gold: number;
         };
         ShopItem: {
             id: string;
@@ -14543,6 +14631,7 @@ export type MarketTradeInput = components['schemas']['MarketTradeInput'];
 export type MarketCandleInput = components['schemas']['MarketCandleInput'];
 export type MarketHistoryInput = components['schemas']['MarketHistoryInput'];
 export type MarketShipmentInput = components['schemas']['MarketShipmentInput'];
+export type GoldShopBuyResultInput = components['schemas']['GoldShopBuyResultInput'];
 export type ShopItemInput = components['schemas']['ShopItemInput'];
 export type ShopCategoryInput = components['schemas']['ShopCategoryInput'];
 export type ShopBuyResultInput = components['schemas']['ShopBuyResultInput'];
@@ -14671,6 +14760,7 @@ export type MarketTrade = components['schemas']['MarketTrade'];
 export type MarketCandle = components['schemas']['MarketCandle'];
 export type MarketHistory = components['schemas']['MarketHistory'];
 export type MarketShipment = components['schemas']['MarketShipment'];
+export type GoldShopBuyResult = components['schemas']['GoldShopBuyResult'];
 export type ShopItem = components['schemas']['ShopItem'];
 export type ShopCategory = components['schemas']['ShopCategory'];
 export type ShopBuyResult = components['schemas']['ShopBuyResult'];

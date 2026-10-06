@@ -226,6 +226,7 @@ All paths are relative to the server root. Names in parentheses are the original
 
 | Method | Path | Description |
 |---|---|---|
+| POST | `/api/v1/cities/{cityId}/shop/gold` | Buy items with the city gold (BALANCE.goldShop) |
 | POST | `/api/v1/cities/{cityId}/shop/resources` | Spend cents on resources (shop.buyResource) |
 | GET | `/api/v1/shop` | Items for sale (saleTypeBeans) |
 | POST | `/api/v1/shop/buy` | Buy items with cents (shop.buy) |

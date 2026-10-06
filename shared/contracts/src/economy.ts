@@ -77,7 +77,9 @@ const itemConfig = z.object({
   rarity: int(),
   category: z.string(),
   description: z.string(),
-  use: z.enum(['direct', 'elsewhere', 'none']).describe('direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect'),
+  use: z
+    .enum(['direct', 'elsewhere', 'none'])
+    .describe('direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect'),
   howTo: z.string().optional(),
 });
 
@@ -167,6 +169,7 @@ export const ConfigBalance = z
     heroExpPerTrain: z.number(),
     heroExpPerResearch: z.number(),
     heroExpPerBuild: z.number(),
+    goldShop: z.record(z.string(), z.number()),
     valleyUpgrade: z.object({ baseGold: z.number(), maxLevel: z.number().int() }),
     beginnerProtectionMs: ms(),
     beginnerTownHallLevel: int(),
@@ -318,6 +321,11 @@ export type MarketShipment = z.infer<typeof MarketShipment>;
 // ---- shop ----
 
 export const ShopBuyBody = z.object({ itemId: z.string(), amount: z.number().int().default(1) });
+/** Buy items with the city's gold (BALANCE.goldShop). */
+export const GoldShopBuyBody = z.object({ itemId: z.string(), amount: z.number().int().min(1).max(1000).default(1) });
+export const GoldShopBuyResult = z
+  .object({ itemId: z.string(), count: z.number().int().describe('owned after buying'), gold: z.number().describe('gold paid') })
+  .meta({ id: 'GoldShopBuyResult' });
 export const BuyResourcesBody = z.object({ food: z.number().int(), wood: z.number().int(), stone: z.number().int(), iron: z.number().int() }).partial();
 
 export const ShopItem = itemConfig
@@ -377,8 +385,7 @@ export type QuestDailyGift = z.infer<typeof QuestDailyGift>;
 
 export const RankingQuery = zPaging.extend({ sortType: z.coerce.number().int().default(2), key: z.string().default('') });
 
-const rankingPage = <T extends z.ZodType>(entry: T) =>
-  z.object({ pageNo: int(), pageSize: int(), totalPage: int(), beans: z.array(entry) });
+const rankingPage = <T extends z.ZodType>(entry: T) => z.object({ pageNo: int(), pageSize: int(), totalPage: int(), beans: z.array(entry) });
 
 export const RankingPlayerEntry = PlayerRow.pick({ id: true, flag: true, faceUrl: true })
   .extend({
