@@ -17,6 +17,7 @@ export const UseHeroItemBody = z.object({
   payWith: z.enum(['gold']).optional().describe("'gold': buy the item with the hero's city gold instead of using one owned (or cents)"),
 });
 export const RenameHeroBody = z.object({ name: z.string() });
+export const LockHeroBody = z.object({ locked: z.boolean().describe('a locked hero cannot be dismissed') });
 
 export const ArmyParams = z.object({ armyId: zId });
 export const SendArmyBody = z.object({

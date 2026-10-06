@@ -231,6 +231,8 @@ export const heroes = pgTable(
     buffs: jsonb('buffs').$type<BuffState[]>().notNull().default([]),
     /** player who captured this hero (status SEIZED) */
     capturedByPlayerId: integer('captured_by_player_id'),
+    /** (evony-re) a locked hero cannot be dismissed */
+    locked: boolean('locked').notNull().default(false),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [index('heroes_city_idx').on(t.cityId), index('heroes_player_idx').on(t.playerId)],

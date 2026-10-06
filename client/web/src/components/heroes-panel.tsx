@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Check, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
+import { Check, Lock, LockOpen, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
 import type { CityBean, HeroBean } from '@evony/api-client';
 import { BALANCE, BuildingType, HeroStatus, heroManagement, heroPower, heroStratagem } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { useSticky } from '@/hooks/use-sticky';
 import { HeroPointsDialog } from '@/components/hero-points-dialog';
 import { HeroItemsDialog } from '@/components/hero-items-dialog';
 import { qk, useCommand } from '@/hooks/use-game';
@@ -49,6 +53,12 @@ export function HeroesPanel({ city }: { city: CityBean }) {
     'Hero renamed',
   );
   const fire = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/fire', { params: { path: { heroId } } })), refresh, 'Hero dismissed');
+  const lock = useCommand(
+    (v: { heroId: number; locked: boolean }) =>
+      unwrap(api.PUT('/api/v1/heroes/{heroId}/lock', { params: { path: { heroId: v.heroId } }, body: { locked: v.locked } })),
+    () => [qk.city(city.id)],
+  );
+  const [dismissing, setDismissing] = useState<HeroBean | null>(null);
 
   // the mayor's politics adds a percentage of (efficiency-adjusted) field output to every basic resource
   const fieldOutput = (['food', 'wood', 'stone', 'iron'] as const).reduce((sum, r) => sum + city.resource[r].breakdown.fields, 0);
@@ -110,6 +120,20 @@ export function HeroesPanel({ city }: { city: CityBean }) {
                   Items
                 </Button>
               )}
+              {!h.seized && (
+                <div className="flex items-center gap-1.5 px-1">
+                  <Switch
+                    id={`lock-${h.id}`}
+                    checked={h.locked}
+                    disabled={lock.isPending}
+                    onCheckedChange={(locked) => lock.mutate({ heroId: h.id, locked })}
+                  />
+                  <Label htmlFor={`lock-${h.id}`} className="gap-1 text-xs font-normal">
+                    {h.locked ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
+                    {h.locked ? 'Locked' : 'Lock'}
+                  </Label>
+                </div>
+              )}
               {h.experience >= h.upgradeExp && (
                 <Button size="xs" onClick={() => levelUp.mutate(h.id)}>
                   Level up
@@ -120,7 +144,13 @@ export function HeroesPanel({ city }: { city: CityBean }) {
                   <Button size="xs" variant="outline" onClick={() => mayor.mutate(h.id)}>
                     Make mayor
                   </Button>
-                  <Button size="xs" variant="ghost" onClick={() => fire.mutate(h.id)}>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    disabled={h.locked}
+                    title={h.locked ? 'Locked: unlock the hero to dismiss them' : undefined}
+                    onClick={() => setDismissing(h)}
+                  >
                     Dismiss
                   </Button>
                 </>
@@ -164,6 +194,12 @@ export function HeroesPanel({ city }: { city: CityBean }) {
           </CardContent>
         )}
       </Card>
+      <DismissHeroDialog
+        hero={dismissing}
+        pending={fire.isPending}
+        onCancel={() => setDismissing(null)}
+        onConfirm={(h) => fire.mutate(h.id, { onSuccess: () => setDismissing(null) })}
+      />
       <HeroItemsDialog hero={city.heros.find((h) => h.id === itemsFor) ?? null} cityId={city.id} onClose={() => setItemsFor(null)} />
       <HeroPointsDialog
         hero={city.heros.find((h) => h.id === pointsFor) ?? null}
@@ -308,5 +344,45 @@ function ExpBar({ hero }: { hero: HeroBean }) {
         )}
       </div>
     </div>
+  );
+}
+
+/** Asks before a hero is dismissed for good. */
+function DismissHeroDialog({
+  hero,
+  pending,
+  onCancel,
+  onConfirm,
+}: {
+  hero: HeroBean | null;
+  pending: boolean;
+  onCancel: () => void;
+  onConfirm: (h: HeroBean) => void;
+}) {
+  const shown = useSticky(hero);
+  return (
+    <Dialog open={hero != null} onOpenChange={(o) => !o && onCancel()}>
+      <DialogContent className="sm:max-w-md">
+        {shown && (
+          <>
+            <DialogHeader>
+              <DialogTitle>Dismiss {shown.name}?</DialogTitle>
+              <DialogDescription>
+                {shown.name} (Lv {shown.level}, att {heroPower(shown)} · pol {heroManagement(shown)} · int {heroStratagem(shown)}) will leave your city for
+                good. This cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={onCancel}>
+                Keep {shown.name}
+              </Button>
+              <Button variant="destructive" disabled={pending} onClick={() => onConfirm(shown)}>
+                Dismiss
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

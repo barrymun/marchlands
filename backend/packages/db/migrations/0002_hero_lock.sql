@@ -1,0 +1,1 @@
+ALTER TABLE "heroes" ADD COLUMN "locked" boolean DEFAULT false NOT NULL;

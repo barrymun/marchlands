@@ -27,6 +27,7 @@ import {
   UseHeroItemBody,
   VisibleArmies,
   ValleyUpgradeBody,
+  LockHeroBody,
   ValleyUpgradeResult,
 } from '@evony/contracts';
 import { doc, anon, authenticate, game, playerIdOf, tags, zCityParams, type ZApp } from '../http.ts';
@@ -58,6 +59,11 @@ export default async function militaryRoutes(app: ZApp) {
   );
   app.post('/heroes/:heroId/fire', s(tags.heroes, 'Fire (hero.fireHero)', Empty, { params: HeroParams }), (req) =>
     game(req, (ctx, pid) => heroes.fire(ctx, pid, req.params.heroId)),
+  );
+  app.put(
+    '/heroes/:heroId/lock',
+    s(tags.heroes, 'Lock or unlock a hero (a locked hero cannot be dismissed)', HeroBean, { params: HeroParams, body: LockHeroBody }),
+    (req) => game(req, (ctx, pid) => heroes.setHeroLocked(ctx, pid, req.params.heroId, req.body.locked)),
   );
   app.post('/heroes/:heroId/mayor', s(tags.heroes, 'Appoint mayor (hero.promoteToChief)', Empty, { params: HeroParams }), (req) =>
     game(req, (ctx, pid) => heroes.appointMayor(ctx, pid, req.params.heroId)),

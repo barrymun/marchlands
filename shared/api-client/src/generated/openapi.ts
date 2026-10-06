@@ -3985,6 +3985,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/heroes/{heroId}/lock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Lock or unlock a hero (a locked hero cannot be dismissed) */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    heroId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description a locked hero cannot be dismissed */
+                        locked: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["HeroBean"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/heroes/{heroId}/mayor": {
         parameters: {
             query?: never;
@@ -10526,6 +10593,7 @@ export interface components {
             baseManagement: number;
             baseStratagem: number;
             cityId: number;
+            locked: boolean;
             experience: number;
             /** @description held captive by another lord */
             seized: boolean;
@@ -12551,6 +12619,7 @@ export interface components {
             baseManagement: number;
             baseStratagem: number;
             cityId: number;
+            locked: boolean;
             experience: number;
             /** @description held captive by another lord */
             seized: boolean;

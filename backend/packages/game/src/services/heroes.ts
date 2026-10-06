@@ -153,11 +153,21 @@ export async function fire(ctx: Ctx, playerId: number, heroId: number) {
   const b = await openOwnCity(ctx, playerId, pre.cityId);
   const h = await getHero(ctx, heroId, { lock: true });
   if (h.status !== HeroStatus.IDLE) throw new GameError('Status of this hero is not Idle!', -80);
+  if (h.locked) throw new GameError(`${h.name} is locked: unlock the hero before dismissing them.`, -80);
   await ctx.tx.delete(heroes).where(eq(heroes.id, heroId));
   b.heroes = b.heroes.filter((x) => x.id !== heroId);
   pushHero(ctx, playerId, h, 1);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
+}
+
+/** Lock or unlock a hero: a locked hero cannot be dismissed. */
+export async function setHeroLocked(ctx: Ctx, playerId: number, heroId: number, locked: boolean) {
+  const h = await ownHero(ctx, playerId, heroId);
+  h.locked = locked;
+  await saveHero(ctx, h);
+  pushHero(ctx, playerId, h, 2);
+  return heroBean(h);
 }
 
 /** hero.promoteToChief: appoint the city's mayor (castellan). */

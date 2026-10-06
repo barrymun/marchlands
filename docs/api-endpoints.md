@@ -104,6 +104,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/heroes/{heroId}/fire` | Fire (hero.fireHero) |
 | POST | `/api/v1/heroes/{heroId}/items` | Use a hero item (hero.useItem) |
 | POST | `/api/v1/heroes/{heroId}/level-up` | Level up (hero.levelUp) |
+| PUT | `/api/v1/heroes/{heroId}/lock` | Lock or unlock a hero (a locked hero cannot be dismissed) |
 | POST | `/api/v1/heroes/{heroId}/mayor` | Appoint mayor (hero.promoteToChief) |
 | POST | `/api/v1/heroes/{heroId}/persuade` | Recruit a captive whose loyalty is 0 |
 | POST | `/api/v1/heroes/{heroId}/points` | Assign points: new totals (hero.addPoint) |

@@ -15,6 +15,13 @@
       "when": 1791237477730,
       "tag": "0001_market_trades",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791319343540,
+      "tag": "0002_hero_lock",
+      "breakpoints": true
     }
   ]
 }

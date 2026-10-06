@@ -31,6 +31,7 @@ export const HeroBean = HeroRow.pick({
   baseManagement: true,
   baseStratagem: true,
   cityId: true,
+  locked: true,
 })
   .extend({
     experience: z.number().int(),
