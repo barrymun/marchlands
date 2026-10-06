@@ -7920,6 +7920,13 @@
           "merchant": {
             "type": "object",
             "properties": {
+              "fixedPrice": {
+                "description": "when set, the merchant buys and sells everything at this price",
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
               "basePrice": {
                 "type": "object",
                 "properties": {
@@ -7962,6 +7969,7 @@
               }
             },
             "required": [
+              "fixedPrice",
               "basePrice",
               "spread",
               "depth",
@@ -17345,6 +17353,13 @@
           "merchant": {
             "type": "object",
             "properties": {
+              "fixedPrice": {
+                "description": "when set, the merchant buys and sells everything at this price",
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
               "basePrice": {
                 "type": "object",
                 "properties": {
@@ -17388,6 +17403,7 @@
               }
             },
             "required": [
+              "fixedPrice",
               "basePrice",
               "spread",
               "depth",

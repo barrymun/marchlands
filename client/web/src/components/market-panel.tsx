@@ -4,7 +4,7 @@ import { Bot, X } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { toast } from 'sonner';
 import type { CityBean, MarketMerchant, MarketPriceLevel } from '@evony/api-client';
-import { BALANCE, BuildingType, coinsForSpeedup } from '@evony/core';
+import { BALANCE, BuildingType, coinsForSpeedup, merchantAffordable } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -86,7 +86,14 @@ export function MarketPanel({ city }: { city: CityBean }) {
         </TabsList>
       </Tabs>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <OrderBook resType={resType} buyers={book.data?.buyers ?? []} sellers={book.data?.sellers ?? []} merchant={book.data?.merchant} onLevel={pickLevel} onMerchant={pickMerchant} />
+        <OrderBook
+          resType={resType}
+          buyers={book.data?.buyers ?? []}
+          sellers={book.data?.sellers ?? []}
+          merchant={book.data?.merchant}
+          onLevel={pickLevel}
+          onMerchant={pickMerchant}
+        />
         <TradeForm
           key={resType}
           city={city}
@@ -149,8 +156,17 @@ function OrderBook({
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">Order book · {resLabel(resType)}</CardTitle>
         <CardDescription>
-          Gold per unit. The merchant always trades; its price rises as people buy and falls as they sell, then drifts back to{' '}
-          {merchant ? fmtPrice(merchant.base) : '…'}. Click a row to trade at it.
+          {BALANCE.merchant.fixedPrice != null ? (
+            <>
+              Gold per unit. The merchant always buys and sells any amount at a fixed {fmtPrice(BALANCE.merchant.fixedPrice)}, so you can always sell for at
+              least that. Click a row to trade at it.
+            </>
+          ) : (
+            <>
+              Gold per unit. The merchant always trades; its price rises as people buy and falls as they sell, then drifts back to{' '}
+              {merchant ? fmtPrice(merchant.base) : '…'}. Click a row to trade at it.
+            </>
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -216,7 +232,10 @@ function TradeForm({
     queryFn: () =>
       unwrap(
         api.GET('/api/v1/market/{resType}/quote', {
-          params: { path: { resType }, query: { side: deferred.side, amount: deferred.qty, type: deferred.mode, price: deferred.mode === 'limit' ? deferred.unit : undefined } },
+          params: {
+            path: { resType },
+            query: { side: deferred.side, amount: deferred.qty, type: deferred.mode, price: deferred.mode === 'limit' ? deferred.unit : undefined },
+          },
         }),
       ),
   });
@@ -234,7 +253,7 @@ function TradeForm({
 
   const have = side === 0 ? city.resource.gold : city.resource[res.key].amount;
   const fee = 1 + BALANCE.marketFee;
-  // instant buy: what the gold buys along the merchant's curve (a lower bound: cheaper offers from lords only add to it)
+  // instant buy: what the gold buys from the merchant (a lower bound: cheaper offers from lords only add to it)
   const maxQty =
     side === 1
       ? Math.floor(have)
@@ -243,7 +262,7 @@ function TradeForm({
           ? Math.floor(have / (unit * fee))
           : 0
         : merchant
-          ? Math.floor(BALANCE.merchant.depth * Math.log1p(have / (fee * merchant.ask * BALANCE.merchant.depth)))
+          ? merchantAffordable(merchant.ask, have, fee)
           : 0;
   const cap = market * BALANCE.marketMaxOrdersPerLevel;
   const openHere = (orders.data ?? []).filter((o) => o.cityId === city.id).length;
@@ -347,7 +366,8 @@ function TradeForm({
               onSuccess: (r) => {
                 setAmount('');
                 const parts = [];
-                if (r.filled > 0) parts.push(`${side === 0 ? 'Bought' : 'Sold'} ${fmtExact(r.filled)} ${word} for ${fmtExact(r.gold)} gold (avg ${fmtPrice(r.avgPrice ?? 0)})`);
+                if (r.filled > 0)
+                  parts.push(`${side === 0 ? 'Bought' : 'Sold'} ${fmtExact(r.filled)} ${word} for ${fmtExact(r.gold)} gold (avg ${fmtPrice(r.avgPrice ?? 0)})`);
                 if (r.rest > 0) parts.push(`${fmtExact(r.rest)} waiting on the book`);
                 toast.success(parts.join('; '));
               },
@@ -407,7 +427,9 @@ function PriceHistory({ resType }: { resType: number }) {
               <TableBody>
                 {h!.trades.map((t) => (
                   <TableRow key={t.id}>
-                    <TableCell className={cn('tabular-nums', t.takerSide === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive')}>{fmtPrice(t.price)}</TableCell>
+                    <TableCell className={cn('tabular-nums', t.takerSide === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive')}>
+                      {fmtPrice(t.price)}
+                    </TableCell>
                     <TableCell className="text-right tabular-nums">{fmtExact(t.amount)}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{t.merchant ? 'merchant' : 'lords'}</TableCell>
                     <TableCell className="text-right text-xs text-muted-foreground">{new Date(t.createdAt).toLocaleTimeString()}</TableCell>
@@ -453,7 +475,8 @@ function MyOrders() {
             {list.map((o) => (
               <TableRow key={o.id}>
                 <TableCell>
-                  <Badge variant={o.tradeType === 0 ? 'secondary' : 'outline'}>{o.tradeType === 0 ? 'Buy' : 'Sell'}</Badge> {fmtExact(o.amount)} {resLabel(o.resType).toLowerCase()}
+                  <Badge variant={o.tradeType === 0 ? 'secondary' : 'outline'}>{o.tradeType === 0 ? 'Buy' : 'Sell'}</Badge> {fmtExact(o.amount)}{' '}
+                  {resLabel(o.resType).toLowerCase()}
                 </TableCell>
                 <TableCell className="text-right tabular-nums">{fmtPrice(o.price)}</TableCell>
                 <TableCell className="text-right tabular-nums">

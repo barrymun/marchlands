@@ -14,6 +14,7 @@ import {
   coinsForSpeedup,
   GameError,
   merchantAsk,
+  merchantBase,
   merchantBid,
   merchantBuys,
   merchantMarginal,
@@ -80,7 +81,7 @@ async function loadMerchant(ctx: Ctx, lock: boolean): Promise<Partial<MerchantSt
 
 function merchantQuoteBean(res: MarketResource, state: Partial<MerchantState>, now: number) {
   const reference = merchantReference(res, state[res], now);
-  return { reference, base: BALANCE.merchant.basePrice[res], bid: merchantBid(reference), ask: merchantAsk(reference) };
+  return { reference, base: merchantBase(res), bid: merchantBid(reference), ask: merchantAsk(reference) };
 }
 
 // ---------------------------------------------------------------------------------------------

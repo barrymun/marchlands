@@ -179,6 +179,7 @@ export const ConfigBalance = z
     marketShipmentBaseMs: ms().describe('0 = market trades are instant'),
     marketMaxOrdersPerLevel: int(),
     merchant: z.object({
+      fixedPrice: z.number().nullable().describe('when set, the merchant buys and sells everything at this price'),
       basePrice: z.object({ food: z.number(), wood: z.number(), stone: z.number(), iron: z.number() }),
       spread: z.number(),
       depth: int(),

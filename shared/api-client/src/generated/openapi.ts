@@ -11990,6 +11990,8 @@ export interface components {
             marketShipmentBaseMs: number;
             marketMaxOrdersPerLevel: number;
             merchant: {
+                /** @description when set, the merchant buys and sells everything at this price */
+                fixedPrice: number | null;
                 basePrice: {
                     food: number;
                     wood: number;
@@ -13965,6 +13967,8 @@ export interface components {
             marketShipmentBaseMs: number;
             marketMaxOrdersPerLevel: number;
             merchant: {
+                /** @description when set, the merchant buys and sells everything at this price */
+                fixedPrice: number | null;
                 basePrice: {
                     food: number;
                     wood: number;

@@ -1,7 +1,59 @@
-import { describe, expect, it } from 'vitest';
-import { BALANCE, merchantAsk, merchantBid, merchantBuys, merchantReference, merchantSells, scaled } from '../src/index.ts';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import {
+  BALANCE,
+  merchantAffordable,
+  merchantAsk,
+  merchantBid,
+  merchantBuys,
+  merchantMarginal,
+  merchantReference,
+  merchantSells,
+  scaled,
+} from '../src/index.ts';
 
-describe('merchant', () => {
+const merchantCfg = BALANCE.merchant as { fixedPrice: number | null };
+const configuredFixed = merchantCfg.fixedPrice;
+
+describe('merchant (fixed price)', () => {
+  beforeAll(() => {
+    merchantCfg.fixedPrice = 1;
+  });
+  afterAll(() => {
+    merchantCfg.fixedPrice = configuredFixed;
+  });
+
+  it('buys and sells every resource at the fixed price, in any amount', () => {
+    for (const r of ['food', 'wood', 'stone', 'iron'] as const) {
+      const ref = merchantReference(r, { price: 0.01, at: 0 }, 0);
+      expect(ref).toBe(1);
+      expect(merchantAsk(ref)).toBe(1);
+      expect(merchantBid(ref)).toBe(1);
+    }
+    expect(merchantSells(1, 5_000_000)).toEqual({ qty: 5_000_000, gold: 5_000_000, ref: 1 });
+    expect(merchantBuys(1, 5_000_000)).toEqual({ qty: 5_000_000, gold: 5_000_000, ref: 1 });
+    expect(merchantMarginal(1, 'sell', 1e9)).toBe(1);
+  });
+
+  it('respects limits: never sells above or buys below the limit', () => {
+    expect(merchantSells(1, 100, 0.9).qty).toBe(0);
+    expect(merchantSells(1, 100, 1).qty).toBe(100);
+    expect(merchantBuys(1, 100, 1.1).qty).toBe(0);
+    expect(merchantBuys(1, 100, 1).qty).toBe(100);
+  });
+
+  it('affordable units are gold / (price x fee)', () => {
+    expect(merchantAffordable(1, 1_000, 1.25)).toBe(800);
+  });
+});
+
+describe('merchant (curve)', () => {
+  beforeAll(() => {
+    merchantCfg.fixedPrice = null;
+  });
+  afterAll(() => {
+    merchantCfg.fixedPrice = configuredFixed;
+  });
+
   const base = BALANCE.merchant.basePrice.food;
 
   it('quotes around the reference with the configured spread', () => {
