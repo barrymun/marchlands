@@ -47,6 +47,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 | Iron Working's troop defence bonus used integer division (`(lvl×5+100)/100`), so it did nothing below level 20 | +5% per level in game battles (`fixes: true`); parity mode unchanged |
 | `restTime` in seconds added to a millisecond timestamp | seconds × 1000 |
 | *(design change)* One construction at a time per city | two at once (`BALANCE.buildQueues`); Bernini's Hammer adds a third |
+| *(design change)* One research at a time per city's Academy | two at once (`BALANCE.researchQueues`); cancel and speed-up take a `techId` to pick one |
 | The Rally Spot army limit was never enforced | at most one army per Rally Spot level (+1 with War Ensign) |
 | Fixed hero names like `"Test Name453160"` | name and portrait generator |
 

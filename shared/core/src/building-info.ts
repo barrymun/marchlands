@@ -49,7 +49,7 @@ const TEXT: Record<number, BuildingText> = {
     effect: (l) => `${l} queued batch${l === 1 ? '' : 'es'}`,
   },
   [BuildingType.ACADEMY]: {
-    summary: 'Researches technologies. A technology only counts up to the Academy level in this city.',
+    summary: `Researches technologies, up to ${BALANCE.researchQueues} at a time. A technology only counts up to the Academy level in this city.`,
     effect: (l) => `technologies count up to level ${l}`,
   },
   [BuildingType.INN]: {

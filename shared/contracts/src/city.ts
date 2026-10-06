@@ -11,9 +11,16 @@ import { BuildingBean } from './beans.ts';
 export const BuildingPositionId = z.coerce.number().int().min(-2).max(1040);
 export const CityPositionParams = zCityParams.extend({ positionId: BuildingPositionId });
 export const TrainingQueueParams = zCityParams.extend({ positionId: BuildingPositionId, queueId: zId });
-export const SpeedupBody = z.object({ itemId: z.string().describe('free.speed | coins.speed | consume.2.a ... consume.2.d | player.speedup.1 | player.destroy.1.a') });
+export const SpeedupBody = z.object({
+  itemId: z.string().describe('free.speed | coins.speed | consume.2.a ... consume.2.d | player.speedup.1 | player.destroy.1.a'),
+});
 
-export const UpdateCityBody = z.object({ name: z.string().optional(), logoUrl: z.string().optional(), goOutForBattle: z.boolean().optional(), allowAlliance: z.boolean().optional() });
+export const UpdateCityBody = z.object({
+  name: z.string().optional(),
+  logoUrl: z.string().optional(),
+  goOutForBattle: z.boolean().optional(),
+  allowAlliance: z.boolean().optional(),
+});
 export const TaxRateBody = z.object({ rate: z.number().int() });
 export const ResourcePercentBody = z.object({ food: z.number().int(), wood: z.number().int(), stone: z.number().int(), iron: z.number().int() }).partial();
 export const ComfortBody = z.object({ typeId: z.number().int() });
@@ -24,6 +31,13 @@ export const AvailableBuildingsQuery = z.object({ area: z.enum(['inside', 'outsi
 export const ConstructBody = z.object({ typeId: z.number().int(), positionId: z.number().int() });
 
 export const ResearchBody = z.object({ techId: z.number().int() });
+/** Picks one of the city's researches; optional while the city researches only one. */
+export const ResearchTechQuery = z.object({
+  techId: z.coerce.number().int().optional().describe('tech to act on (required when the city researches several)'),
+});
+export const ResearchSpeedupBody = SpeedupBody.extend({
+  techId: z.number().int().optional().describe('tech to speed up (required when the city researches several)'),
+});
 
 export const TrainBody = z.object({ troopId: z.number().int(), count: z.number().int(), positionId: z.number().int().optional() });
 export const TrainSplitBody = z.object({ troopId: z.number().int(), count: z.number().int() });
@@ -46,16 +60,12 @@ const costShape = { gold: int(), food: int(), wood: int(), stone: int(), iron: i
 export const RequirementCheck = RequirementCheckSchema.meta({ id: 'RequirementCheck' });
 export type RequirementCheck = z.infer<typeof RequirementCheck>;
 
-export const CitySpeedupCost = z
-  .object({ coinsNeed: int(), timeLeft: z.number().describe('ms') })
-  .meta({ id: 'CitySpeedupCost' });
+export const CitySpeedupCost = z.object({ coinsNeed: int(), timeLeft: z.number().describe('ms') }).meta({ id: 'CitySpeedupCost' });
 export type CitySpeedupCost = z.infer<typeof CitySpeedupCost>;
 
 // ---- interior ----
 
-export const ComfortResult = z
-  .object({ freeBlessing: z.boolean().describe('blessing (type 3) granted double food') })
-  .meta({ id: 'ComfortResult' });
+export const ComfortResult = z.object({ freeBlessing: z.boolean().describe('blessing (type 3) granted double food') }).meta({ id: 'ComfortResult' });
 export type ComfortResult = z.infer<typeof ComfortResult>;
 
 export const ResourceProductionLine = z
@@ -77,9 +87,7 @@ export type ResourceProductionLine = z.infer<typeof ResourceProductionLine>;
 export const ProductionBreakdown = z.array(ResourceProductionLine).meta({ id: 'ProductionBreakdown' });
 export type ProductionBreakdown = z.infer<typeof ProductionBreakdown>;
 
-export const CityMoveResult = z
-  .object({ fieldId: int().describe('new tile id'), x: int(), y: int() })
-  .meta({ id: 'CityMoveResult' });
+export const CityMoveResult = z.object({ fieldId: int().describe('new tile id'), x: int(), y: int() }).meta({ id: 'CityMoveResult' });
 export type CityMoveResult = z.infer<typeof CityMoveResult>;
 
 // ---- buildings ----
@@ -158,7 +166,13 @@ export const TechBean = z
 export type TechBean = z.infer<typeof TechBean>;
 
 export const ResearchList = z
-  .object({ academyLevel: int(), researching: int().nullable().describe('tech being researched in this city'), techs: z.array(TechBean) })
+  .object({
+    academyLevel: int(),
+    researching: int().nullable().describe('first tech being researched in this city'),
+    researchingIds: z.array(int()).describe('every tech being researched in this city'),
+    slots: int().describe('technologies this city can research at once'),
+    techs: z.array(TechBean),
+  })
   .meta({ id: 'ResearchList' });
 export type ResearchList = z.infer<typeof ResearchList>;
 

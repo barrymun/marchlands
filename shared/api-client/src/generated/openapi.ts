@@ -2486,7 +2486,10 @@ export interface paths {
         /** Cancel research (tech.cancelResearch) */
         delete: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description tech to act on (required when the city researches several) */
+                    techId?: number;
+                };
                 header?: never;
                 path: {
                     cityId: number;
@@ -2543,7 +2546,10 @@ export interface paths {
         /** Coins to finish now (tech.getCoinsNeed) */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description tech to act on (required when the city researches several) */
+                    techId?: number;
+                };
                 header?: never;
                 path: {
                     cityId: number;
@@ -2601,6 +2607,8 @@ export interface paths {
                     "application/json": {
                         /** @description free.speed | coins.speed | consume.2.a ... consume.2.d | player.speedup.1 | player.destroy.1.a */
                         itemId: string;
+                        /** @description tech to speed up (required when the city researches several) */
+                        techId?: number;
                     };
                 };
             };
@@ -10903,8 +10911,12 @@ export interface components {
         };
         ResearchListInput: {
             academyLevel: number;
-            /** @description tech being researched in this city */
+            /** @description first tech being researched in this city */
             researching: number | null;
+            /** @description every tech being researched in this city */
+            researchingIds: number[];
+            /** @description technologies this city can research at once */
+            slots: number;
             techs: components["schemas"]["TechBeanInput"][];
         };
         ResearchStartedInput: {
@@ -11939,6 +11951,7 @@ export interface components {
             outerSlotsBase: number;
             outerSlotsPerTownHall: number;
             buildQueues: number;
+            researchQueues: number;
             /** @description milliseconds */
             freeSpeedupMs: number;
             /** @description wall capacity by wall level (index 0 unused) */
@@ -12880,8 +12893,12 @@ export interface components {
         };
         ResearchList: {
             academyLevel: number;
-            /** @description tech being researched in this city */
+            /** @description first tech being researched in this city */
             researching: number | null;
+            /** @description every tech being researched in this city */
+            researchingIds: number[];
+            /** @description technologies this city can research at once */
+            slots: number;
             techs: components["schemas"]["TechBean"][];
         };
         ResearchStarted: {
@@ -13916,6 +13933,7 @@ export interface components {
             outerSlotsBase: number;
             outerSlotsPerTownHall: number;
             buildQueues: number;
+            researchQueues: number;
             /** @description milliseconds */
             freeSpeedupMs: number;
             /** @description wall capacity by wall level (index 0 unused) */

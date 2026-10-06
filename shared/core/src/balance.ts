@@ -71,6 +71,8 @@ export const BALANCE = {
   outerSlotsPerTownHall: 3,
   /** (evony-re) constructions a city may run at once (orig 1); Bernini's Hammer adds one more */
   buildQueues: 2,
+  /** (evony-re) technologies one city's Academy researches at once (orig 1) */
+  researchQueues: 2,
   freeSpeedupMs: 5 * MINUTE, // (orig) free speed-up threshold & amount
 
   // ---- fortifications ----

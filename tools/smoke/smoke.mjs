@@ -102,10 +102,23 @@ async function main() {
   // ---- research ----
   const rl = await ok(a.token, 'GET', `/cities/${cid}/research`);
   check(rl.techs.length >= 19, 'research list');
+  // two researches at once per city (BALANCE.researchQueues); a third is rejected
+  const others = rl.techs.filter((t) => t.permission && t.typeId !== 8).map((t) => t.typeId);
   await ok(a.token, 'POST', `/cities/${cid}/research`, { techId: 8 });
-  await ok(a.token, 'POST', `/cities/${cid}/research/speedup`, { itemId: 'coins.speed' });
+  await ok(a.token, 'POST', `/cities/${cid}/research`, { techId: others[0] });
+  const rl2 = await ok(a.token, 'GET', `/cities/${cid}/research`);
+  check(rl2.researchingIds.length === 2 && rl2.slots === 2, `two researches running (${rl2.researchingIds.join(', ')})`);
+  if (others[1] != null) {
+    const r3 = await call(a.token, 'POST', `/cities/${cid}/research`, { techId: others[1] });
+    check(r3.ok !== 1, 'third concurrent research rejected');
+  }
+  const ambiguous = await call(a.token, 'POST', `/cities/${cid}/research/speedup`, { itemId: 'coins.speed' });
+  check(ambiguous.ok !== 1, 'speed-up without techId rejected while two run');
+  await ok(a.token, 'POST', `/cities/${cid}/research/speedup`, { itemId: 'coins.speed', techId: 8 });
   await until(async () => (await ok(a.token, 'GET', '/player')).research['8']?.level === 1, 'military science completes');
   check(true, 'research completes after coin speed-up');
+  await ok(a.token, 'DELETE', `/cities/${cid}/research?techId=${others[0]}`);
+  check((await ok(a.token, 'GET', `/cities/${cid}/research`)).researchingIds.length === 0, 'second research cancelled by techId');
 
   // ---- heroes ----
   const tav = await ok(a.token, 'GET', `/cities/${cid}/tavern`);

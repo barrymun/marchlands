@@ -1,5 +1,5 @@
-// tech.* — research is per lord; each city's Academy researches one tech at a time and a tech
-// can only be researched in one city at once.
+// tech.* — research is per lord; each city's Academy researches up to BALANCE.researchQueues
+// techs at a time (orig 1) and a tech can only be researched in one city at once.
 
 import {
   BALANCE,
@@ -32,10 +32,23 @@ import { citiesOf, getPlayer, saveCity, saveHero, savePlayer, type PlayerRow } f
 
 const refKey = (playerId: number, techId: number) => `research:${playerId}:${techId}`;
 
-/** Tech being researched in a given city, if any. */
-export function researchInCity(research: ResearchState, cityId: number): number | null {
-  for (const [id, r] of Object.entries(research)) if (r.cityId === cityId && r.endTime) return Number(id);
-  return null;
+/** Techs being researched in a given city. */
+export function researchesInCity(research: ResearchState, cityId: number): number[] {
+  return Object.entries(research)
+    .filter(([, r]) => r.cityId === cityId && r.endTime)
+    .map(([id]) => Number(id));
+}
+
+/** The city's research to act on: `techId` when given, else the only one running. */
+function pickResearch(research: ResearchState, cityId: number, techId?: number): number {
+  const busy = researchesInCity(research, cityId);
+  if (techId != null) {
+    if (!busy.includes(techId)) throw new GameError('That technology is not being researched in this city.', -99);
+    return techId;
+  }
+  if (busy.length === 0) throw new GameError('No research in progress.', -99);
+  if (busy.length > 1) throw new GameError('Several researches are running: choose one.', -99);
+  return busy[0];
 }
 
 /** tech.getResearchList */
@@ -43,10 +56,13 @@ export async function researchList(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewCity(ctx, cityId);
   if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
   const academy = buildingLevel(b.city.buildings, BuildingType.ACADEMY);
-  const busy = researchInCity(b.player.research, cityId);
+  const busy = researchesInCity(b.player.research, cityId);
+  const full = busy.length >= BALANCE.researchQueues;
   return {
     academyLevel: academy,
-    researching: busy,
+    researching: busy[0] ?? null,
+    researchingIds: busy,
+    slots: BALANCE.researchQueues,
     techs: TECH_IDS.map((techId) => {
       const r = b.player.research[techId] ?? { level: 0 };
       const max = researchMaxLevel(techId);
@@ -62,14 +78,12 @@ export async function researchList(ctx: Ctx, playerId: number, cityId: number) {
         castleId: r.cityId ?? null,
         startTime: r.startTime ?? 0,
         endTime: r.endTime ?? 0,
-        permission: !busy && !r.endTime && !!next && requirementsMet(checks),
+        permission: !full && !r.endTime && !!next && requirementsMet(checks),
         description: techInfo(techId).summary,
         effect: techEffect(techId, Math.min(academy, r.level)),
         nextEffect: next ? techEffect(techId, r.level + 1) : '',
         unlocks: techInfo(techId).unlocks,
-        next: next
-          ? { ...next.cost, time: Math.ceil(researchTimeMs(techId, r.level + 1, mayorStats(b.heroes)) / 1000), requirements: checks }
-          : null,
+        next: next ? { ...next.cost, time: Math.ceil(researchTimeMs(techId, r.level + 1, mayorStats(b.heroes)) / 1000), requirements: checks } : null,
       };
     }),
   };
@@ -79,7 +93,9 @@ export async function researchList(ctx: Ctx, playerId: number, cityId: number) {
 export async function startResearch(ctx: Ctx, playerId: number, cityId: number, techId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const research = b.player.research;
-  if (researchInCity(research, cityId) != null) throw new GameError('Research already in progress.', -99);
+  if (researchesInCity(research, cityId).length >= BALANCE.researchQueues) {
+    throw new GameError(`This city already researches ${BALANCE.researchQueues} technologies at once.`, -99);
+  }
   if (research[techId]?.endTime) throw new GameError('This technology is already being researched in another city.', -99);
   assertCanResearch(techId, b.city.buildings, research, b.player.items);
   const level = (research[techId]?.level ?? 0) + 1;
@@ -94,10 +110,9 @@ export async function startResearch(ctx: Ctx, playerId: number, cityId: number, 
 }
 
 /** tech.cancelResearch: refunds a third of the cost (orig). */
-export async function cancelResearch(ctx: Ctx, playerId: number, cityId: number) {
+export async function cancelResearch(ctx: Ctx, playerId: number, cityId: number, which?: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  const techId = researchInCity(b.player.research, cityId);
-  if (techId == null) throw new GameError('Invalid city.', -99);
+  const techId = pickResearch(b.player.research, cityId, which);
   const r = b.player.research[techId];
   gainResources(b.city, researchCost(techId, r.level + 1), BALANCE.cancelResearchRefund);
   b.player.research = { ...b.player.research, [techId]: { level: r.level } };
@@ -108,19 +123,17 @@ export async function cancelResearch(ctx: Ctx, playerId: number, cityId: number)
 }
 
 /** tech.getCoinsNeed */
-export async function researchSpeedupCost(ctx: Ctx, playerId: number, cityId: number) {
+export async function researchSpeedupCost(ctx: Ctx, playerId: number, cityId: number, which?: number) {
   const p = await getPlayer(ctx, playerId);
-  const techId = researchInCity(p.research, cityId);
-  if (techId == null) throw new GameError('Invalid tech.', -99);
+  const techId = pickResearch(p.research, cityId, which);
   const left = Math.max(0, (p.research[techId].endTime ?? 0) - ctx.now);
   return { coinsNeed: coinsForSpeedup(left), timeLeft: left };
 }
 
 /** tech.speedUpResearch */
-export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number, itemId: string) {
+export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number, itemId: string, which?: number) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  const techId = researchInCity(p.research, cityId);
-  if (techId == null) throw new GameError('Invalid tech.', -99);
+  const techId = pickResearch(p.research, cityId, which);
   const r = p.research[techId];
   const end = r.endTime!;
   const left = Math.max(0, end - ctx.now);
@@ -184,4 +197,3 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
   for (const b of bundles) pushResources(ctx, b);
   await pushPlayerInfo(ctx, p);
 }
-

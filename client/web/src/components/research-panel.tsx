@@ -13,22 +13,13 @@ import { api, unwrap } from '@/lib/api';
 
 export function ResearchPanel({ city }: { city: CityBean }) {
   const path = { cityId: city.id };
-  const list = useQuery({ queryKey: qk.research(city.id), queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/research', { params: { path } })) });
+  const list = useResearchList(city.id);
   const refresh = () => [qk.research(city.id), qk.city(city.id)];
-  const start = useCommand((techId: number) => unwrap(api.POST('/api/v1/cities/{cityId}/research', { params: { path }, body: { techId } })), refresh, 'Research started');
-  const cancel = useCommand(() => unwrap(api.DELETE('/api/v1/cities/{cityId}/research', { params: { path } })), refresh, 'Research cancelled');
-  const speedup = useCommand(
-    (itemId: string) => unwrap(api.POST('/api/v1/cities/{cityId}/research/speedup', { params: { path }, body: { itemId } })),
-    () => [...refresh(), qk.player],
+  const start = useCommand(
+    (techId: number) => unwrap(api.POST('/api/v1/cities/{cityId}/research', { params: { path }, body: { techId } })),
+    refresh,
+    'Research started',
   );
-  const researching = list.data?.techs.find((t) => t.upgrading && t.castleId === city.id);
-  const coins = useQuery({
-    queryKey: ['research-speedup-cost', city.id, researching?.endTime],
-    enabled: !!researching,
-    refetchInterval: 15_000,
-    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/research/speedup', { params: { path } })),
-  });
-
   if (list.isPending) return <Skeleton className="h-64" />;
   if (!list.data) return null;
   if (list.data.academyLevel === 0) {
@@ -43,31 +34,46 @@ export function ResearchPanel({ city }: { city: CityBean }) {
   }
   const mayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
   const mayorCut = mayor ? Math.round((1 - Math.pow(0.995, heroStratagem(mayor))) * 1000) / 10 : 0;
-  const have = { gold: city.resource.gold, food: city.resource.food.amount, wood: city.resource.wood.amount, stone: city.resource.stone.amount, iron: city.resource.iron.amount };
-  const busy = list.data.techs.find((t) => t.upgrading);
+  const have = {
+    gold: city.resource.gold,
+    food: city.resource.food.amount,
+    wood: city.resource.wood.amount,
+    stone: city.resource.stone.amount,
+    iron: city.resource.iron.amount,
+  };
+  const here = list.data.techs.filter((t) => t.upgrading && t.castleId === city.id);
+  const elsewhere = list.data.techs.filter((t) => t.upgrading && t.castleId !== city.id);
+  const full = here.length >= list.data.slots;
 
   return (
     <div className="grid gap-4">
-      {busy && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">
-              Researching {busy.name} → Lv {busy.level + 1}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            <TimerBar startTime={busy.startTime} endTime={busy.endTime} />
-            {busy.castleId === city.id && (
-              <>
-                <SpeedupOptions endTime={busy.endTime} coinsNeed={coins.data?.coinsNeed} pending={speedup.isPending} onUse={(itemId) => speedup.mutate(itemId)} />
-                <Button size="sm" variant="outline" className="justify-self-start" onClick={() => cancel.mutate(undefined)}>
-                  Cancel
-                </Button>
-              </>
-            )}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">
+            Academy · researching {here.length}/{list.data.slots}
+          </CardTitle>
+          <CardDescription>
+            {full
+              ? 'Every research slot is busy: wait for one to finish or speed it up.'
+              : `This city can research ${list.data.slots} technologies at the same time.`}
+          </CardDescription>
+        </CardHeader>
+        {(here.length > 0 || elsewhere.length > 0) && (
+          <CardContent className="grid gap-4">
+            {here.map((t) => (
+              <ResearchJob key={t.typeId} city={city} tech={t} />
+            ))}
+            {elsewhere.map((t) => (
+              <div key={t.typeId} className="grid gap-1">
+                <span className="text-sm">
+                  {t.name} → Lv {t.level + 1} <span className="text-muted-foreground">(in another city)</span>
+                </span>
+                <TimerBar startTime={t.startTime} endTime={t.endTime} />
+              </div>
+            ))}
           </CardContent>
-        </Card>
-      )}
+        )}
+      </Card>
       <p className="text-xs text-muted-foreground">
         {mayor
           ? `Research times include mayor ${mayor.name}'s Intelligence ${heroStratagem(mayor)}: −${mayorCut}%. A mayor with higher Intelligence researches faster.`
@@ -85,7 +91,7 @@ export function ResearchPanel({ city }: { city: CityBean }) {
                 {t.effectiveLevel < t.level && <span className="ml-1 text-xs text-muted-foreground">(effective {t.effectiveLevel})</span>}
               </span>
               {t.next && (
-                <Button size="sm" disabled={!t.permission || !!busy || start.isPending} onClick={() => start.mutate(t.typeId)}>
+                <Button size="sm" disabled={!t.permission || start.isPending} onClick={() => start.mutate(t.typeId)}>
                   Research
                 </Button>
               )}
@@ -101,17 +107,14 @@ export function ResearchPanel({ city }: { city: CityBean }) {
                 )}
                 {t.nextEffect && (
                   <span>
-                    <span className="text-muted-foreground">Lv {t.level + 1}:</span> <span className="text-emerald-600 dark:text-emerald-400">{t.nextEffect}</span>
+                    <span className="text-muted-foreground">Lv {t.level + 1}:</span>{' '}
+                    <span className="text-emerald-600 dark:text-emerald-400">{t.nextEffect}</span>
                     {t.level + 1 > list.data!.academyLevel && <span className="text-muted-foreground"> (needs Academy Lv {t.level + 1} to take effect)</span>}
                   </span>
                 )}
               </div>
             )}
-            {t.unlocks.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Unlocks: {t.unlocks.map((u) => `${u.name} (Lv ${u.level})`).join(', ')}
-              </p>
-            )}
+            {t.unlocks.length > 0 && <p className="text-xs text-muted-foreground">Unlocks: {t.unlocks.map((u) => `${u.name} (Lv ${u.level})`).join(', ')}</p>}
             {t.next && (
               <>
                 <CostList cost={t.next} seconds={t.next.time} have={have} />
@@ -121,6 +124,43 @@ export function ResearchPanel({ city }: { city: CityBean }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+type Tech = NonNullable<ReturnType<typeof useResearchList>['data']>['techs'][number];
+const useResearchList = (cityId: number) =>
+  useQuery({ queryKey: qk.research(cityId), queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/research', { params: { path: { cityId } } })) });
+
+/** One running research in this city: progress, speed-ups and cancel. */
+function ResearchJob({ city, tech }: { city: CityBean; tech: Tech }) {
+  const path = { cityId: city.id };
+  const techId = tech.typeId;
+  const refresh = () => [qk.research(city.id), qk.city(city.id)];
+  const cancel = useCommand(
+    () => unwrap(api.DELETE('/api/v1/cities/{cityId}/research', { params: { path, query: { techId } } })),
+    refresh,
+    `${tech.name} research cancelled`,
+  );
+  const speedup = useCommand(
+    (itemId: string) => unwrap(api.POST('/api/v1/cities/{cityId}/research/speedup', { params: { path }, body: { itemId, techId } })),
+    () => [...refresh(), qk.player],
+  );
+  const coins = useQuery({
+    queryKey: ['research-speedup-cost', city.id, techId, tech.endTime],
+    refetchInterval: 15_000,
+    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/research/speedup', { params: { path, query: { techId } } })),
+  });
+  return (
+    <div className="grid gap-2">
+      <span className="text-sm font-medium">
+        {tech.name} → Lv {tech.level + 1}
+      </span>
+      <TimerBar startTime={tech.startTime} endTime={tech.endTime} />
+      <SpeedupOptions endTime={tech.endTime} coinsNeed={coins.data?.coinsNeed} pending={speedup.isPending} onUse={(itemId) => speedup.mutate(itemId)} />
+      <Button size="sm" variant="outline" className="justify-self-start" onClick={() => cancel.mutate(undefined)}>
+        Cancel
+      </Button>
     </div>
   );
 }
