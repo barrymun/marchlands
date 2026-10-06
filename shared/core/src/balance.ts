@@ -52,6 +52,8 @@ export const BALANCE = {
   startTaxRate: 10,
   startPopulation: 50,
 
+  /** (evony-re) experience per level stops growing here: every level from 100 on needs 100² × 100 = 1,000,000 */
+  heroExpCapLevel: 100,
   heroSalaryPerLevel: 20, // (orig) gold per hour per hero level
   /**
    * (evony-re) hero items bought with the hero's city gold instead of cents: experience books cost

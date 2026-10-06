@@ -33,7 +33,11 @@ export const heroPower = (h: HeroStats) => h.power + h.powerAdded + h.powerBuffA
 export const heroManagement = (h: HeroStats) => h.management + h.managementAdded + h.managementBuffAdded;
 export const heroStratagem = (h: HeroStats) => h.stratagem + h.stratagemAdded + h.stratagemBuffAdded;
 
-export const upgradeExpFor = (level: number) => level * level * 100;
+/** Experience for the next level: level² × 100, flat from BALANCE.heroExpCapLevel on (level 100 → 1,000,000). */
+export const upgradeExpFor = (level: number) => {
+  const l = Math.min(level, BALANCE.heroExpCapLevel);
+  return l * l * 100;
+};
 
 /** Base attribute roll (orig RandomStat distribution). */
 export function randomStat(rng: Rng): number {

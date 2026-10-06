@@ -27,6 +27,7 @@ import {
   healCost,
   heroItemGoldPrice,
   syncHeroBuffs,
+  upgradeExpFor,
   trainCost,
   valleyGarrison,
   type EconomyCity,
@@ -400,5 +401,15 @@ describe('hero attribute boosts', () => {
     expect(h.powerBuffAdded).toBe(41);
     expect(h.buffs[0].param).toBe(41);
     expect(h.managementBuffAdded).toBe(0);
+  });
+});
+
+describe('hero level experience', () => {
+  it('grows as level² × 100 up to level 100, then stays at 1,000,000', () => {
+    expect(upgradeExpFor(10)).toBe(10_000);
+    expect(upgradeExpFor(99)).toBe(980_100);
+    expect(upgradeExpFor(100)).toBe(1_000_000);
+    expect(upgradeExpFor(112)).toBe(1_000_000);
+    expect(upgradeExpFor(500)).toBe(1_000_000);
   });
 });
