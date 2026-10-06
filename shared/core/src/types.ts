@@ -106,6 +106,8 @@ export type CastleSign = z.infer<typeof CastleSignSchema>;
 export const CityMiscSchema = z.object({
   /** last population/loyalty drift tick boundary (ms) */
   lastTickAt: z.number().optional(),
+  /** last loyalty drift boundary on real time (BALANCE.cityLoyaltyRealTime) */
+  loyaltyTickAt: z.number().optional(),
   lastComfortAt: z.number().optional(),
   lastLevyAt: z.number().optional(),
   /** food shortfall carried into troop desertion */

@@ -32,6 +32,8 @@ import {
   injuredOf,
   healHonorCost,
   rollMedalDrops,
+  freshNpcState,
+  regenerateNpc,
   trainCost,
   valleyGarrison,
   type EconomyCity,
@@ -467,5 +469,39 @@ describe('medal drops', () => {
     expect(l10.max).toBe(9);
     expect(l10.two).toBeGreaterThan(0.5);
     expect(l10.three).toBeGreaterThan(0.2);
+  });
+});
+
+describe('barbarian loyalty recovery', () => {
+  it('runs on real time, not game speed', () => {
+    setGameSpeed(60);
+    try {
+      const fresh = freshNpcState(10, 0);
+      const hit = { ...fresh.state, loyalty: 50 };
+      // 6 real seconds = one game tick at 60x: troops recover, loyalty does not
+      const a = regenerateNpc(10, hit, {}, {}, 6_000);
+      expect(a.troops.militia).toBe(40_000);
+      expect(a.state.loyalty).toBe(50);
+      // 6 real minutes: +1 loyalty
+      const b = regenerateNpc(10, a.state, a.troops, a.forts, 6 * 60_000);
+      expect(b.state.loyalty).toBe(51);
+    } finally {
+      setGameSpeed(1);
+    }
+  });
+});
+
+describe('city loyalty and game speed', () => {
+  it('drifts a point per 6 real minutes while population ticks every 6 game minutes', () => {
+    setGameSpeed(60);
+    try {
+      const c = city({ population: 50, loyalty: 50, taxRate: 10 });
+      settleCity(c, ctx(), 6_000);
+      expect(c.loyalty).toBe(50);
+      settleCity(c, ctx(), 6 * 60_000);
+      expect(c.loyalty).toBe(51);
+    } finally {
+      setGameSpeed(1);
+    }
   });
 });

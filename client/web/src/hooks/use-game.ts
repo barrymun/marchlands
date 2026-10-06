@@ -38,15 +38,21 @@ export function useCity(cityId: number | undefined) {
     queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}', { params: { path: { cityId: cityId! } } })),
     // population and loyalty drift a step every city tick on the server; refetch on each tick
     // while they are still moving so the header follows them live
-    refetchInterval: (q) => (q.state.data && cityIsDrifting(q.state.data) ? Math.max(1000, scaled(BALANCE.cityTickMs)) : false),
+    refetchInterval: (q) => {
+      const c = q.state.data;
+      if (!c) return false;
+      if (c.resource.populationDirection !== 0) return Math.max(1000, scaled(BALANCE.cityTickMs));
+      // loyalty moves a point per cityTickMs of real time (BALANCE.cityLoyaltyRealTime)
+      if (loyaltyDrifting(c)) return BALANCE.cityLoyaltyRealTime ? BALANCE.cityTickMs : Math.max(1000, scaled(BALANCE.cityTickMs));
+      return false;
+    },
   });
 }
 
-/** Population still moving towards its target, or loyalty towards 100 - (tax + grievance) (core populationTick). */
-function cityIsDrifting(c: CityBean): boolean {
+/** Loyalty still moving towards 100 - (tax + grievance) (core loyaltyTick). */
+function loyaltyDrifting(c: CityBean): boolean {
   const r = c.resource;
-  const targetLoyalty = 100 - Math.min(100, r.taxRate + r.complaint);
-  return r.populationDirection !== 0 || r.support !== targetLoyalty;
+  return r.support !== 100 - Math.min(100, r.taxRate + r.complaint);
 }
 
 /** Wraps a command: toasts failures and refreshes the given queries on success. */

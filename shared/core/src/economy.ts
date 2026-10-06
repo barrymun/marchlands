@@ -259,8 +259,9 @@ const MAX_TICKS_DETAILED = 5000;
 
 /**
  * Advance a city's resources, population and loyalty from `city.resourcesAt` to `now`,
- * mutating `city` in place. Population/loyalty drift every `BALANCE.cityTickMs` (scaled
- * by game speed); resources integrate piecewise between drift ticks.
+ * mutating `city` in place. Population drifts every `BALANCE.cityTickMs` (scaled by game speed),
+ * loyalty every cityTickMs of real time (BALANCE.cityLoyaltyRealTime; else with population);
+ * resources integrate piecewise between drift ticks.
  */
 export function settleCity(city: EconomyCity, ctx: EconomyContext, now: number): SettleResult {
   const result: SettleResult = { deserted: {}, ticks: 0 };
@@ -273,6 +274,16 @@ export function settleCity(city: EconomyCity, ctx: EconomyContext, now: number):
   // otherwise rewind the clock and integrate the same time twice): keep the phase, drop old ticks
   if (lastTick + tickMs < t) lastTick = t - ((t - lastTick) % tickMs);
   let stats = computeCityStats(city, ctx, t);
+  // loyalty drifts on real time when cityLoyaltyRealTime is on (one step per cityTickMs of real time)
+  const realLoyalty = BALANCE.cityLoyaltyRealTime;
+  const loyaltyTickMs = BALANCE.cityTickMs;
+  let loyaltyAt = Math.min(city.misc.loyaltyTickAt ?? t, t);
+  const stepLoyalty = (upTo: number) => {
+    const n = Math.floor((upTo - loyaltyAt) / loyaltyTickMs);
+    if (n <= 0) return;
+    for (let i = 0; i < Math.min(n, 200); i++) loyaltyTick(city);
+    loyaltyAt += n * loyaltyTickMs;
+  };
 
   while (t < now) {
     const nextTick = lastTick + tickMs;
@@ -280,7 +291,8 @@ export function settleCity(city: EconomyCity, ctx: EconomyContext, now: number):
     integrate(city, stats, segEnd - t, result);
     t = segEnd;
     if (t === nextTick) {
-      populationTick(city, stats);
+      if (realLoyalty) stepLoyalty(t);
+      populationTick(city, stats, !realLoyalty);
       lastTick = nextTick;
       result.ticks++;
       stats = computeCityStats(city, ctx, t);
@@ -288,8 +300,9 @@ export function settleCity(city: EconomyCity, ctx: EconomyContext, now: number):
       lastTick = now;
     }
   }
+  if (realLoyalty) stepLoyalty(now);
   city.resourcesAt = now;
-  city.misc = { ...city.misc, lastTickAt: lastTick };
+  city.misc = { ...city.misc, lastTickAt: lastTick, ...(realLoyalty ? { loyaltyTickAt: loyaltyAt } : {}) };
   return result;
 }
 
@@ -334,14 +347,18 @@ function starve(city: EconomyCity, starvingHours: number, result: SettleResult) 
 }
 
 /** Population and loyalty drift (orig RecalculateCityStats). */
-export function populationTick(city: EconomyCity, stats: CityStats) {
+export function populationTick(city: EconomyCity, stats: CityStats, withLoyalty = true) {
   const maxPop = stats.maxPopulation;
   const target = Math.floor((maxPop * Math.min(100, city.loyalty + city.grievance)) / 100);
   const step = Math.floor(maxPop * BALANCE.populationStep);
   const pop = city.population;
   if (pop > target) city.population = Math.max(target, pop - step);
   else if (pop < target) city.population = Math.min(target, maxPop, pop + step);
+  if (withLoyalty) loyaltyTick(city);
+}
 
+/** Loyalty moves 1 towards 100 - (tax + grievance). */
+export function loyaltyTick(city: EconomyCity) {
   const targetLoyalty = 100 - Math.min(100, city.taxRate + city.grievance);
   if (city.loyalty < targetLoyalty) city.loyalty = Math.min(targetLoyalty, city.loyalty + 1);
   else if (city.loyalty > targetLoyalty) city.loyalty = Math.max(targetLoyalty, city.loyalty - 1);

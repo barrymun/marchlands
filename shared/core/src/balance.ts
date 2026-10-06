@@ -47,6 +47,8 @@ export const BALANCE = {
 
   // population / loyalty drift (orig: every 6 minutes)
   cityTickMs: 6 * MINUTE,
+  /** (evony-re) a city's loyalty drifts 1 point per cityTickMs of real time, unaffected by GAME_SPEED */
+  cityLoyaltyRealTime: true as boolean,
   populationStep: 0.05,
   startLoyalty: 90,
   startTaxRate: 10,
@@ -119,6 +121,8 @@ export const BALANCE = {
   npcLoyaltyStart: { low: 80, high: 90 },
   /** (orig) NPC/valley regeneration interval */
   npcRegenMs: 6 * MINUTE,
+  /** (evony-re) barbarian city loyalty recovers +1 per npcRegenMs of real time, not game time */
+  npcLoyaltyRegenRealTime: true as boolean,
   /** (evony) share of plunderable stock taken per successful attack, capped by load */
   plunderShare: 1,
   /** (evony) attacker troops lost in a win that become injured (Relief/Medicine aware) */

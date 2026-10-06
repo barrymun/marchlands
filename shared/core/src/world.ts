@@ -148,6 +148,8 @@ export interface NpcState {
   population: number;
   /** last regeneration boundary */
   regenAt: number;
+  /** last loyalty regeneration boundary (real time, see BALANCE.npcLoyaltyRegenRealTime) */
+  loyaltyAt?: number;
   /** seed of the defending hero, so every scout and attack meets the same one (combat.ts guardHeroOf) */
   heroSeed?: number;
 }
@@ -155,7 +157,7 @@ export interface NpcState {
 export function freshNpcState(level: number, now: number): { state: NpcState; troops: TroopCounts; forts: FortCounts } {
   const t = npcTemplate(level);
   return {
-    state: { ...t.resources, loyalty: t.loyalty, population: t.population, regenAt: now },
+    state: { ...t.resources, loyalty: t.loyalty, population: t.population, regenAt: now, loyaltyAt: now },
     troops: { ...t.troops },
     forts: { ...t.forts },
   };
@@ -163,16 +165,22 @@ export function freshNpcState(level: number, now: number): { state: NpcState; tr
 
 /**
  * Lazily apply NPC regeneration (orig every 6 min: food/wood/stone/iron +max/80, troops and forts
- * +max/10, loyalty +1; gold does not regenerate).
+ * +max/10, loyalty +1; gold does not regenerate). Loyalty can run on real time instead
+ * (BALANCE.npcLoyaltyRegenRealTime), so a faster game does not undo attacks faster.
  */
 export function regenerateNpc(level: number, state: NpcState, troops: TroopCounts, forts: FortCounts, now: number) {
   const t = npcTemplate(level);
   const tick = Math.max(1000, scaled(BALANCE.npcRegenMs));
   const ticks = Math.floor((now - state.regenAt) / tick);
-  if (ticks <= 0) return { state, troops, forts };
-  const s = { ...state, regenAt: state.regenAt + ticks * tick };
+  // loyalty recovers +1 per npcRegenMs of real time (unaffected by GAME_SPEED) when npcLoyaltyRegenRealTime is on
+  const loyaltyTick = BALANCE.npcLoyaltyRegenRealTime ? BALANCE.npcRegenMs : tick;
+  const loyaltyFrom = state.loyaltyAt ?? state.regenAt;
+  const loyaltyTicks = Math.max(0, Math.floor((now - loyaltyFrom) / loyaltyTick));
+  if (ticks <= 0 && loyaltyTicks <= 0) return { state, troops, forts };
+  const s = { ...state, regenAt: state.regenAt + Math.max(0, ticks) * tick, loyaltyAt: loyaltyFrom + loyaltyTicks * loyaltyTick };
+  s.loyalty = Math.min(t.loyalty, s.loyalty + loyaltyTicks);
+  if (ticks <= 0) return { state: s, troops, forts };
   for (const r of ['food', 'wood', 'stone', 'iron'] as const) s[r] = Math.min(t.resources[r], s[r] + (t.resources[r] / 80) * ticks);
-  s.loyalty = Math.min(t.loyalty, s.loyalty + ticks);
   const tr: TroopCounts = { ...troops };
   for (const [k, max] of Object.entries(t.troops) as [keyof TroopCounts, number][]) {
     tr[k] = Math.min(max, (tr[k] ?? 0) + Math.floor(max / 10) * ticks);
