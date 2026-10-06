@@ -180,6 +180,12 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
   pushQueues(ctx, b, positionId);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
+  // instant training (a strong enough mayor, BALANCE.minTrainUnitSeconds = 0): done right away
+  if (batch.endTime > 0 && batch.endTime <= ctx.now) {
+    await completeTraining(ctx, cityId, positionId);
+    const after = await openCity(ctx, cityId);
+    if (after) return queueBean(positionId, queueOf(after, positionId).queue);
+  }
   return queueBean(positionId, next);
 }
 
@@ -208,7 +214,7 @@ export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, tro
   b.city.population -= pop;
 
   const mayor = mayorStats(b.heroes);
-  const unitMs = (Math.max(1, troopUnitSeconds(troopId, mayor, b.player.research)) * 1000) / getGameSpeed();
+  const unitMs = (Math.max(BALANCE.minTrainUnitSeconds, troopUnitSeconds(troopId, mayor, b.player.research)) * 1000) / getGameSpeed();
   const plan = splitTraining(lanes, count, unitMs);
   const batches: { positionId: number; count: number; endTime: number }[] = [];
   for (const p of plan) {
@@ -230,6 +236,8 @@ export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, tro
   }
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
+  // instant training: finish zero-time batches right away
+  for (const x of batches) if (x.endTime <= ctx.now) await completeTraining(ctx, cityId, x.positionId);
   return { batches, finishAt: Math.max(...batches.map((x) => x.endTime)) };
 }
 

@@ -75,6 +75,8 @@ export const BALANCE = {
   outerSlotsPerTownHall: 3,
   /** (evony-re) constructions a city may run at once (orig 1); Bernini's Hammer adds one more */
   buildQueues: 2,
+  /** (evony-re) floor on a troop's training time per unit, in game seconds (orig 1); 0 lets a strong mayor train instantly */
+  minTrainUnitSeconds: 0,
   /** (evony-re) off: level-10 buildings no longer need (and use up) a Michelangelo's Script (orig on) */
   buildingItemRequirements: false as boolean,
   /** (evony-re) technologies one city's Academy researches at once (orig 1) */

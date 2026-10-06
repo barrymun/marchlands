@@ -333,21 +333,24 @@ function TrainEstimate({
   fort: boolean;
 }) {
   const now = Date.now();
-  const unitMs = (Math.max(1, unitSeconds) * 1000) / getGameSpeed();
+  const unitMs = (Math.max(BALANCE.minTrainUnitSeconds, unitSeconds) * 1000) / getGameSpeed();
   const freeAt = (q?: Queue) => {
     const list = q?.allProduceQueue ?? [];
     if (!list.length) return now;
     const head = Math.max(now, list[0].endTime || now + list[0].costTime * 1000);
     return head + list.slice(1).reduce((t, b) => t + b.costTime * 1000, 0);
   };
-  const perUnit = unitMs < 10_000 ? `${(unitMs / 1000).toLocaleString('en', { maximumFractionDigits: 2 })}s` : duration(unitMs);
-  const each = <span className="text-xs text-muted-foreground">{perUnit} per unit</span>;
+  const perUnit =
+    unitMs <= 0
+      ? 'instant (mayor and Military Science fast enough)'
+      : `${unitMs < 10_000 ? `${(unitMs / 1000).toLocaleString('en', { maximumFractionDigits: 2 })}s` : duration(unitMs)} per unit`;
+  const each = <span className="text-xs text-muted-foreground">{perUnit}</span>;
   if (count <= 0 || fort) return each;
   const single = freeAt(queues.find((q) => q.positionId === pos)) + count * unitMs - now;
   if (!splitting) {
     return (
       <span className="text-xs text-muted-foreground">
-        {perUnit} per unit · {fmtExact(count)} ready in {duration(single)}
+        {perUnit} · {fmtExact(count)} ready in {duration(single)}
       </span>
     );
   }
@@ -359,7 +362,7 @@ function TrainEstimate({
   const finish = Math.max(...plan.map((p) => p.finishAt)) - now;
   return (
     <span className="text-xs text-muted-foreground">
-      {perUnit} per unit · {fmtExact(count)} ready in <span className="font-medium text-foreground">{duration(finish)}</span> across {plan.length} barracks (
+      {perUnit} · {fmtExact(count)} ready in <span className="font-medium text-foreground">{duration(finish)}</span> across {plan.length} barracks (
       {plan.map((p) => fmtExact(p.count)).join(' / ')}) instead of {duration(count * unitMs)} in one
     </span>
   );

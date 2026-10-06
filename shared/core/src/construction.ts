@@ -149,7 +149,7 @@ export function troopUnitSeconds(troopId: number, mayor: MayorStats | null, rese
 }
 
 export function trainBatchMs(troopId: number, count: number, mayor: MayorStats | null, research: ResearchState): number {
-  return scaled(Math.max(1, troopUnitSeconds(troopId, mayor, research)) * count * 1000);
+  return scaled(Math.max(BALANCE.minTrainUnitSeconds, troopUnitSeconds(troopId, mayor, research)) * count * 1000);
 }
 
 // ---------------------------------------------------------------------------------------------
