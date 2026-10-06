@@ -31,6 +31,7 @@ import {
   maxArmyTroops,
   injuredOf,
   healHonorCost,
+  rollMedalDrops,
   trainCost,
   valleyGarrison,
   type EconomyCity,
@@ -435,5 +436,36 @@ describe('medicine and honor healing', () => {
   });
   it('heals for honor: each unit costs its food upkeep', () => {
     expect(healHonorCost({ archer: 100, militia: 10 })).toBe(100 * 9 * BALANCE.healHonorPerUpkeep + 10 * 3 * BALANCE.healHonorPerUpkeep);
+  });
+});
+
+describe('medal drops', () => {
+  const tally = (level: number, n = 20000) => {
+    const rng = seededRng(`medals-${level}`);
+    let any = 0, two = 0, three = 0, max = 0, min = 99;
+    for (let i = 0; i < n; i++) {
+      const d = rollMedalDrops(level, rng);
+      const count = Object.values(d).reduce((a, b) => a + b, 0);
+      if (count >= 1) any++;
+      if (count >= 2) two++;
+      if (count >= 3) three++;
+      for (const id of Object.keys(d)) {
+        const l = Number(id.split('.').pop());
+        max = Math.max(max, l);
+        min = Math.min(min, l);
+      }
+    }
+    return { any: any / n, two: two / n, three: three / n, max, min };
+  };
+  it('drop more often, and better medals, from higher cities', () => {
+    const l1 = tally(1);
+    const l10 = tally(10);
+    expect(l1.any).toBeCloseTo(0.17, 1);
+    expect(l1.max).toBe(1);
+    expect(l1.two).toBe(0);
+    expect(l10.any).toBeCloseTo(0.8, 1);
+    expect(l10.max).toBe(9);
+    expect(l10.two).toBeGreaterThan(0.5);
+    expect(l10.three).toBeGreaterThan(0.2);
   });
 });

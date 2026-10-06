@@ -185,6 +185,12 @@ export const BALANCE = {
     /** the reference never leaves [base / band, base x band] */
     band: 5,
   },
+  /**
+   * (evony-re) medals (hero.loyalty.1 Cross … .9 Nation) a won attack on a city can drop, by city
+   * level L (barbarian level / Town Hall level): one medal with chance base + perLevel x L, of level
+   * L-3 … L-1 (1 … 9); from level 8 a second (and from 9 a third) low-mid medal of level 1 … ceil(L/2)
+   */
+  medalDrops: { base: 0.1, perLevel: 0.07, secondFrom: 8, secondPerLevel: 0.25, thirdFrom: 9, thirdPerLevel: 0.2 },
   /** (evony-re) items that can be bought with city gold, and their price (item id -> gold each) */
   goldShop: { 'player.troop.1.a': 250_000 } as Record<string, number>,
   /** (orig) units of resource per cent in shop.buyResource */

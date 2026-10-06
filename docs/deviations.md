@@ -56,6 +56,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 | Level-10 buildings need a Michelangelo's Script item (bought with coins) | *(design change)* no item needed (`BALANCE.buildingItemRequirements = false`), as this server has no coin shop |
 | Hero items (experience books, attribute boosts) are bought on use with cents | *(design change)* they can also be bought with the hero's city gold (`BALANCE.heroItemGold`: 1 gold per experience point, 100,000 for a 24-hour attribute boost); loyalty medals still cannot be bought |
 | Items are bought with cents | *(design change)* some can also be bought with a city's gold (`BALANCE.goldShop`): War Ensign 250,000 |
+| Attacks never drop items | *(design change)* a won attack on a barbarian or player city can drop medals (`BALANCE.medalDrops`): chance 10% + 7% per city level (80% at level 10), one medal of level L-3 … L-1, and at level 8+ a second (and at 9+ a third) low-mid medal |
 | Experience per hero level is level² × 100 without limit | *(design change)* it stops growing at level 100 (`BALANCE.heroExpCapLevel`): every level from 100 on needs 1,000,000 |
 | The Rally Spot army limits were never enforced | at most one army per Rally Spot level, each of at most 10,000 troops per level (100,000 at level 10; a War Ensign adds 25%), as in Evony |
 | Fixed hero names like `"Test Name453160"` | name and portrait generator |

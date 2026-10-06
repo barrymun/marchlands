@@ -4616,6 +4616,15 @@
                           "captured": {
                             "type": "boolean"
                           },
+                          "medals": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string"
+                            },
+                            "additionalProperties": {
+                              "type": "number"
+                            }
+                          },
                           "city": {
                             "type": "string"
                           }
@@ -5071,6 +5080,15 @@
                           },
                           "captured": {
                             "type": "boolean"
+                          },
+                          "medals": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string"
+                            },
+                            "additionalProperties": {
+                              "type": "number"
+                            }
                           },
                           "level": {
                             "type": "integer",
@@ -14279,6 +14297,15 @@
                           "captured": {
                             "type": "boolean"
                           },
+                          "medals": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string"
+                            },
+                            "additionalProperties": {
+                              "type": "number"
+                            }
+                          },
                           "city": {
                             "type": "string"
                           }
@@ -14743,6 +14770,15 @@
                           },
                           "captured": {
                             "type": "boolean"
+                          },
+                          "medals": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string"
+                            },
+                            "additionalProperties": {
+                              "type": "number"
+                            }
                           },
                           "level": {
                             "type": "integer",

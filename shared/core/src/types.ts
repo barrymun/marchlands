@@ -164,6 +164,8 @@ const BattlePlunderSchema = z.object({
   loyaltyDamage: z.number(),
   loyaltyLeft: z.number(),
   captured: z.boolean(),
+  /** medals the attacker found (item id -> count) */
+  medals: z.record(z.string(), z.number()).optional(),
 });
 /** Extra fields of each battle report variant, by target (player city, NPC city, valley). */
 export const BattleCityExtraSchema = BattlePlunderSchema.extend({ city: z.string() });

@@ -323,3 +323,45 @@ export function syncHeroBuffs(h: BuffedHero): boolean {
   });
   return changed;
 }
+
+/** Medal item id of a level 1 (Cross) … 9 (Nation). */
+export const medalId = (level: number) => `hero.loyalty.${Math.min(9, Math.max(1, level))}`;
+
+/** Medal drop odds for a won attack on a city of `level` (BALANCE.medalDrops). */
+export function medalOdds(level: number) {
+  const c = BALANCE.medalDrops;
+  const L = Math.min(10, Math.max(1, level));
+  const chance = Math.min(1, c.base + c.perLevel * L);
+  /** chance of a second medal once one dropped, and of a third once two did */
+  const second = L >= c.secondFrom ? Math.min(1, (L - c.secondFrom + 1) * c.secondPerLevel) : 0;
+  const third = L >= c.thirdFrom ? Math.min(1, (L - c.thirdFrom + 1) * c.thirdPerLevel) : 0;
+  return {
+    chance,
+    /** medal levels of the main drop */
+    main: [Math.max(1, L - 3), Math.max(1, Math.min(9, L - 1))] as const,
+    second,
+    third,
+    /** medal levels of the extra drops */
+    extra: [1, Math.max(1, Math.ceil(L / 2))] as const,
+  };
+}
+
+/**
+ * Medals dropped by a won attack on a city of `level` (BALANCE.medalDrops): maybe one medal near the
+ * city's level, and for very high cities one or two extra low-mid ones. Returns item id -> count.
+ */
+export function rollMedalDrops(level: number, rng: Rng): Record<string, number> {
+  const o = medalOdds(level);
+  const out: Record<string, number> = {};
+  const add = (lvl: number) => {
+    const id = medalId(lvl);
+    out[id] = (out[id] ?? 0) + 1;
+  };
+  if (rng.next() >= o.chance) return out;
+  add(randInt(rng, o.main[0], o.main[1]));
+  if (o.second > 0 && rng.next() < o.second) {
+    add(randInt(rng, o.extra[0], o.extra[1]));
+    if (o.third > 0 && rng.next() < o.third) add(randInt(rng, o.extra[0], o.extra[1]));
+  }
+  return out;
+}

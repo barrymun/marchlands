@@ -11549,6 +11549,9 @@ export interface components {
                     loyaltyDamage: number;
                     loyaltyLeft: number;
                     captured: boolean;
+                    medals?: {
+                        [key: string]: number;
+                    };
                     city: string;
                 } | {
                     /** @enum {string} */
@@ -11626,6 +11629,9 @@ export interface components {
                     loyaltyDamage: number;
                     loyaltyLeft: number;
                     captured: boolean;
+                    medals?: {
+                        [key: string]: number;
+                    };
                     level: number;
                 } | {
                     /** @enum {string} */
@@ -13593,6 +13599,9 @@ export interface components {
                     loyaltyDamage: number;
                     loyaltyLeft: number;
                     captured: boolean;
+                    medals?: {
+                        [key: string]: number;
+                    };
                     city: string;
                 } | {
                     /** @enum {string} */
@@ -13670,6 +13679,9 @@ export interface components {
                     loyaltyDamage: number;
                     loyaltyLeft: number;
                     captured: boolean;
+                    medals?: {
+                        [key: string]: number;
+                    };
                     level: number;
                 } | {
                     /** @enum {string} */

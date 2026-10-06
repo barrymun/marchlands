@@ -1,10 +1,11 @@
 import { Fragment, useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Medal, Trash2 } from 'lucide-react';
 import type { ReportDetail, ReportSummary } from '@evony/api-client';
 import {
   FORT_ID_BY_KEY,
   getGameSpeed,
+  itemConfig,
   TILE_NAMES,
   TROOP_ID_BY_KEY,
   TROOP_NAMES,
@@ -289,6 +290,20 @@ function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }) {
             ))}
           <span className="font-medium">Total</span>
           <span className="font-medium">{fmtExact(total)}</span>
+        </div>
+      )}
+      {b.medals && Object.keys(b.medals).length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-muted-foreground">{mine ? 'Medals found:' : 'Medals the attacker found:'}</span>
+          {Object.entries(b.medals)
+            .sort(([a], [z]) => z.localeCompare(a))
+            .map(([id, n]) => (
+              <Badge key={id} variant="secondary" className="gap-1 font-normal">
+                <Medal className="size-3 text-amber-500" />
+                {itemConfig(id)?.name ?? id}
+                {n > 1 && ` ×${n}`}
+              </Badge>
+            ))}
         </div>
       )}
       <div className="text-xs text-muted-foreground">

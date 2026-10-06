@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { itemConfig } from '@evony/core';
+import { itemConfig, TITLES, titleOf } from '@evony/core';
+import { Check, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -20,7 +21,9 @@ const TRUCE_CENTS = 30;
 export function LordDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md"><LordForm /></DialogContent>
+      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-md">
+        <LordForm />
+      </DialogContent>
     </Dialog>
   );
 }
@@ -48,20 +51,32 @@ function LordForm() {
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
+        <TitleSection />
+        <Separator />
         <div className="grid gap-2">
-          <Label htmlFor="lord-name">New name · {itemConfig(NEW_ID)?.name} ×{inv.count(NEW_ID)}</Label>
+          <Label htmlFor="lord-name">
+            New name · {itemConfig(NEW_ID)?.name} ×{inv.count(NEW_ID)}
+          </Label>
           <div className="flex gap-2">
             <Input id="lord-name" value={name} maxLength={20} placeholder={info?.userName} onChange={(e) => setName(e.target.value)} />
-            <Button disabled={!name.trim() || inv.count(NEW_ID) === 0 || rename.isPending} onClick={() => rename.mutate(undefined, { onSuccess: () => setName('') })}>
+            <Button
+              disabled={!name.trim() || inv.count(NEW_ID) === 0 || rename.isPending}
+              onClick={() => rename.mutate(undefined, { onSuccess: () => setName('') })}
+            >
               Rename
             </Button>
           </div>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="lord-flag">New flag · {itemConfig(FLAG)?.name} ×{inv.count(FLAG)}</Label>
+          <Label htmlFor="lord-flag">
+            New flag · {itemConfig(FLAG)?.name} ×{inv.count(FLAG)}
+          </Label>
           <div className="flex gap-2">
             <Input id="lord-flag" value={flag} maxLength={5} placeholder={info?.flag} onChange={(e) => setFlag(e.target.value)} />
-            <Button disabled={!flag.trim() || inv.count(FLAG) === 0 || changeFlag.isPending} onClick={() => changeFlag.mutate(undefined, { onSuccess: () => setFlag('') })}>
+            <Button
+              disabled={!flag.trim() || inv.count(FLAG) === 0 || changeFlag.isPending}
+              onClick={() => changeFlag.mutate(undefined, { onSuccess: () => setFlag('') })}
+            >
               Change
             </Button>
           </div>
@@ -102,5 +117,87 @@ function LordForm() {
         </div>
       </div>
     </>
+  );
+}
+
+/**
+ * Nobility titles: each raises how many cities the lord may own (Civilian 1 … Prince 10) and needs
+ * prestige plus medals, which the promotion uses up.
+ */
+function TitleSection() {
+  const player = usePlayer();
+  const inv = useInventory();
+  const info = player.data?.playerInfo;
+  const promote = useCommand(
+    () => unwrap(api.POST('/api/v1/player/title/promote')),
+    () => [qk.player],
+    'Promoted',
+  );
+  if (!info) return null;
+  const current = titleOf(info.titleId);
+  const next = TITLES[info.titleId + 1];
+  const cities = player.data?.castles.length ?? 1;
+  const req = next
+    ? [
+        {
+          label: `${next.prestige.toLocaleString('en')} prestige`,
+          have: `${Math.floor(info.prestige).toLocaleString('en')}`,
+          ok: info.prestige >= next.prestige,
+        },
+        ...Object.entries(next.medals).map(([id, n]) => ({
+          label: `${n} × ${itemConfig(id)?.name ?? id}`,
+          have: `${inv.count(id)}`,
+          ok: inv.count(id) >= n,
+        })),
+      ]
+    : [];
+  return (
+    <div className="grid gap-2">
+      <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+        Title: {current.name}
+        <Badge variant="secondary">
+          {cities} / {current.maxCities} cit{current.maxCities === 1 ? 'y' : 'ies'}
+        </Badge>
+      </div>
+      {next ? (
+        <>
+          <p className="text-xs text-muted-foreground">
+            {next.name} raises your city limit to {next.maxCities}. The medals are used up.
+          </p>
+          <ul className="grid gap-1 text-sm">
+            {req.map((r) => (
+              <li key={r.label} className="flex items-center gap-1.5">
+                {r.ok ? <Check className="size-3.5 text-emerald-600" /> : <X className="size-3.5 text-destructive" />}
+                {r.label} <span className="text-xs text-muted-foreground">(have {r.have})</span>
+              </li>
+            ))}
+          </ul>
+          <Button size="sm" className="justify-self-start" disabled={!req.every((r) => r.ok) || promote.isPending} onClick={() => promote.mutate(undefined)}>
+            Promote to {next.name}
+          </Button>
+        </>
+      ) : (
+        <p className="text-xs text-muted-foreground">The highest title: up to {current.maxCities} cities.</p>
+      )}
+      <details className="text-xs text-muted-foreground">
+        <summary className="cursor-pointer">All titles</summary>
+        <table className="mt-1 w-full tabular-nums">
+          <tbody>
+            {TITLES.slice(1).map((t) => (
+              <tr key={t.id} className={t.id === info.titleId ? 'font-medium text-foreground' : ''}>
+                <td className="pr-2">{t.name}</td>
+                <td className="pr-2">{t.maxCities} cities</td>
+                <td className="pr-2">{t.prestige.toLocaleString('en')} prestige</td>
+                <td>
+                  {Object.entries(t.medals)
+                    .map(([id, n]) => `${n} × ${itemConfig(id)?.name ?? id}`)
+                    .join(', ')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    </div>
   );
 }

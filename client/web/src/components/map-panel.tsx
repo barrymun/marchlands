@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Eye } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Eye, Medal } from 'lucide-react';
 import type { CityBean, MapCastle } from '@evony/api-client';
-import { Mission, Relation, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@evony/core';
+import { itemConfig, medalId, medalOdds, Mission, Relation, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -194,6 +194,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                     {info.data.allianceName ? ` of ${info.data.allianceName}` : ''} · prestige {fmt(info.data.prestige ?? 0)}
                   </p>
                 )}
+                {(info.data.type === TileType.NPC || (info.data.type === TileType.CASTLE && info.data.canLoot)) && <MedalOdds level={info.data.level} />}
                 {'owner' in info.data && info.data.owner && (
                   <p>
                     Held by {info.data.owner.cityName} ({info.data.owner.userName})
@@ -382,3 +383,22 @@ function ValleyUpgrade({
     </div>
   );
 }
+
+/** What winning an attack on this city can drop (core medalOdds; a lord's city counts its Town Hall level). */
+function MedalOdds({ level }: { level: number }) {
+  const o = medalOdds(level);
+  const pct = (x: number) => `${Math.round(x * 100)}%`;
+  const names = (r: readonly [number, number]) => (r[0] === r[1] ? medalName(r[0]) : `${medalName(r[0])}–${medalName(r[1])}`);
+  return (
+    <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+      <Medal className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
+      <span>
+        Win: {pct(o.chance)} chance of a {names(o.main)} medal
+        {o.second > 0 && `; then ${pct(o.second)} of a second (${names(o.extra)})`}
+        {o.third > 0 && ` and ${pct(o.third)} of a third`}.
+      </span>
+    </p>
+  );
+}
+
+const medalName = (level: number) => (itemConfig(medalId(level))?.name ?? `Medal ${level}`).replace(/ Medal$/, '');

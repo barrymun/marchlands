@@ -22,6 +22,7 @@ import {
   protectedResources,
   randInt,
   injuredOf,
+  rollMedalDrops,
   seededRng,
   regenerateNpc,
   researchLevel,
@@ -51,7 +52,7 @@ import { armies, cities, heroes, tiles } from '@evony/db';
 import { openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { fortBean, heroBean, troopBean } from '../dto.ts';
-import { addPrestige, activeBuff, gainResources, pushCity, pushResources } from '../helpers.ts';
+import { addItem, addPrestige, activeBuff, gainResources, pushCity, pushResources } from '../helpers.ts';
 import {
   armiesStationedAt,
   citiesOf,
@@ -645,6 +646,13 @@ interface BattleSideReport {
   injured?: TroopCounts;
 }
 
+/** Medals a won attack on a city of `level` drops (BALANCE.medalDrops), added to the attacker's items. */
+function awardMedals(ctx: Ctx, attacker: PlayerRow, level: number): Record<string, number> {
+  const medals = rollMedalDrops(level, ctx.rng);
+  for (const [id, n] of Object.entries(medals)) addItem(ctx, attacker, id, n);
+  return medals;
+}
+
 /**
  * Medicine for attackers (BALANCE.attackersGetInjured): part of an attacking army's fallen are
  * carried home injured, healable in the army's home city with resources or honor.
@@ -786,6 +794,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
 
   attacker.honor += r.attackerHonor;
   def.player.honor += r.defenderHonor;
+  const medals = r.attackerWon ? awardMedals(ctx, attacker, buildingLevel(def.city.buildings, BuildingType.TOWN_HALL)) : {};
   await grantHeroExp(ctx, hero, r.attackerHeroExp);
   await grantHeroExp(ctx, defHero, r.defenderHeroExp);
   await savePlayer(ctx, attacker);
@@ -812,6 +821,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     loyaltyLeft: Math.floor(def.city.loyalty),
     captured,
     city: def.city.name,
+    ...(Object.keys(medals).length ? { medals } : {}),
   });
   const reportCommon = { armyType: Mission.ATTACK, startPos: a.startPosName, targetPos: a.targetPosName, body };
   await createReport(ctx, { ...reportCommon, playerId: a.playerId, title: r.attackerWon ? 'Attack Succeeded' : 'Attack Failed', isAttack: true });
@@ -913,6 +923,7 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   }
   if (!captured) await saveTile(ctx, tile);
   attacker.honor += r.attackerHonor;
+  const medals = r.attackerWon ? awardMedals(ctx, attacker, tile.level) : {};
   await savePlayer(ctx, attacker);
   await grantHeroExp(ctx, hero, r.attackerHeroExp);
   const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
@@ -926,7 +937,7 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
       forts: r.forts,
       wallLevel: tile.level,
     },
-    { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured, level: tile.level },
+    { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured, level: tile.level, ...(Object.keys(medals).length ? { medals } : {}) },
   );
   await createReport(ctx, {
     playerId: a.playerId,
