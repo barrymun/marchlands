@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
 import {
   BALANCE,
+  armyLoad,
+  troopConfig,
   usedWallSpace,
   wallCapacity,
   healCost,
@@ -41,7 +43,15 @@ import { api, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, realHourly, troopName } from '@/lib/format';
 
 export function MilitaryPanel({ city }: { city: CityBean }) {
-  const garrison = Object.entries(TROOP_KEYS).map(([id, key]) => ({ id: Number(id), count: city.troop[key], injured: city.injuredTroop[key] }));
+  const player = usePlayer();
+  const logistics = researchLevel(player.data?.research ?? {}, TechType.LOGISTICS);
+  const loadFactor = 1 + BALANCE.logisticsLoadPerLevel * logistics;
+  const garrison = Object.entries(TROOP_KEYS).map(([id, key]) => ({
+    id: Number(id),
+    count: city.troop[key],
+    injured: city.injuredTroop[key],
+    load: troopConfig(Number(id))?.load ?? 0,
+  }));
   const forts = Object.entries(FORT_KEYS).map(([id, key]) => ({ id: Number(id), count: city.fortification[key] }));
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
@@ -57,6 +67,7 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
                   <TableHead>Unit</TableHead>
                   <TableHead className="text-right">Ready</TableHead>
                   <TableHead className="text-right">Injured</TableHead>
+                  <TableHead className="text-right">Can carry</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -67,14 +78,22 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
                     </TableCell>
                     <TableCell className="text-right tabular-nums">{fmtExact(t.count)}</TableCell>
                     <TableCell className="text-right tabular-nums">{t.injured ? fmtExact(t.injured) : '—'}</TableCell>
+                    <TableCell className="text-right tabular-nums">{t.count && t.load ? fmt(t.count * t.load * loadFactor) : '—'}</TableCell>
                   </TableRow>
                 ))}
+                <TableRow className="font-medium">
+                  <TableCell colSpan={3}>
+                    Total the garrison can carry{logistics > 0 && <span className="font-normal text-muted-foreground"> (Logistics Lv {logistics})</span>}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">{fmt(armyLoad(city.troop, player.data?.research ?? {}))}</TableCell>
+                </TableRow>
                 {forts.map((f) => (
                   <TableRow key={f.id} className={f.count ? '' : 'text-muted-foreground'}>
                     <TableCell>
                       <UnitName id={f.id} />
                     </TableCell>
                     <TableCell className="text-right tabular-nums">{fmtExact(f.count)}</TableCell>
+                    <TableCell />
                     <TableCell />
                   </TableRow>
                 ))}
@@ -94,6 +113,9 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
 
 function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const kind = fort ? 'fortifications' : 'troops';
+  const player = usePlayer();
+  // carrying capacity per unit, with the Logistics bonus
+  const loadFactor = 1 + BALANCE.logisticsLoadPerLevel * researchLevel(player.data?.research ?? {}, TechType.LOGISTICS);
   const barracks = city.buildings.filter((b) => b.typeId === BuildingType.BARRACKS && b.level > 0);
   const walls = city.buildings.find((b) => b.positionId === -2 && b.level > 0);
   const [position, setPosition] = useState<string>('');
@@ -230,7 +252,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                 <div className="text-xs text-muted-foreground">
                   atk {u.stats.attack} · def {u.stats.defense} · hp {u.stats.life}
                   {!fort &&
-                    ` · speed ${u.stats.speed} · range ${u.stats.range} · load ${u.stats.load} · ${fmt(BALANCE.upkeepPerRealHour ? u.stats.upkeep : realHourly(u.stats.upkeep))} food/h`}
+                    ` · speed ${u.stats.speed} · range ${u.stats.range} · carries ${fmt(Math.floor(u.stats.load * loadFactor))} · ${fmt(BALANCE.upkeepPerRealHour ? u.stats.upkeep : realHourly(u.stats.upkeep))} food/h`}
                   {fort && u.stats.range > 0 && ` · range ${u.stats.range}`} · {u.population} pop
                 </div>
               </div>
