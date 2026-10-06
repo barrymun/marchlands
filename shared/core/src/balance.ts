@@ -107,6 +107,8 @@ export const BALANCE = {
   injuredShare: 0.2,
   /** (evony-re) on: troops desert 10% per game hour while food is at 0 (Evony). Off: food stops at 0 and troops stay */
   starvationDesertion: false as boolean,
+  /** (orig) healing an injured troop costs this share of its training cost */
+  healCostShare: 0.25,
   /** (evony) Medicine: +5% of lost defenders recover as injured per level */
   medicinePerLevel: 0.05,
   /** (evony) hero exp per point of experience weight (orig TROOP_EXPS, troops.ts unitExp) of enemy units killed */

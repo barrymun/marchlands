@@ -11,7 +11,6 @@ import {
   PrestigeAction,
   checkRequirements,
   requirementsMet,
-  scaleResources,
   trainBatchMs,
   trainCost,
   troopConfig,
@@ -32,6 +31,7 @@ import {
   splitTraining,
   type SplitLane,
   unitExp,
+  healCost,
 } from '@evony/core';
 import { cityStats, mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -351,18 +351,14 @@ export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, f
   await saveCity(ctx, b.city);
 }
 
-/** army.cureInjuredTroop: heal injured troops for a quarter of their training cost. */
+/** army.cureInjuredTroop: heal injured troops for BALANCE.healCostShare of their training cost. */
 export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, troops: Record<string, number>) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  let cost = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
   for (const [key, n] of Object.entries(troops)) {
     if (!Number.isInteger(n) || n < 0) throw new GameError('Invalid troop count.', -99);
     if ((b.city.injuredTroops[key as keyof typeof b.city.injuredTroops] ?? 0) < n) throw new GameError('Not enough injured troops.', -99);
-    const id = TROOPS.find((t) => troopKey(t.troopId) === key)?.troopId;
-    if (!id) throw new GameError('Invalid troop type.', -99);
-    const c = scaleResources(trainCost(id, n), 0.25);
-    cost = { gold: cost.gold + c.gold, food: cost.food + c.food, wood: cost.wood + c.wood, stone: cost.stone + c.stone, iron: cost.iron + c.iron };
   }
+  const cost = healCost(troops);
   spendResources(b.city, cost);
   b.city.injuredTroops = addTroops(b.city.injuredTroops, troops, -1);
   b.city.troops = addTroops(b.city.troops, troops);

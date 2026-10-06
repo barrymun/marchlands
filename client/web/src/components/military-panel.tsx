@@ -3,6 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
 import {
   BALANCE,
+  healCost,
+  researchLevel,
+  TechType,
   buildingLevel,
   BuildingType,
   FORT_KEYS,
@@ -16,6 +19,7 @@ import {
   PrestigeAction,
   splitTraining,
   TROOP_KEYS,
+  type TroopKey,
   unitExp,
 } from '@evony/core';
 import { toast } from 'sonner';
@@ -29,7 +33,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TimerBar } from '@/components/countdown';
 import { CostList, Requirements } from '@/components/cost-list';
-import { qk, useCommand } from '@/hooks/use-game';
+import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, realHourly, troopName } from '@/lib/format';
@@ -39,42 +43,45 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
   const forts = Object.entries(FORT_KEYS).map(([id, key]) => ({ id: Number(id), count: city.fortification[key] }));
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Garrison</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Unit</TableHead>
-                <TableHead className="text-right">Ready</TableHead>
-                <TableHead className="text-right">Injured</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {garrison.map((t) => (
-                <TableRow key={t.id} className={t.count || t.injured ? '' : 'text-muted-foreground'}>
-                  <TableCell>
-                    <UnitName id={t.id} />
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">{fmtExact(t.count)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{t.injured ? fmtExact(t.injured) : '—'}</TableCell>
+      <div className="grid content-start gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Garrison</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Unit</TableHead>
+                  <TableHead className="text-right">Ready</TableHead>
+                  <TableHead className="text-right">Injured</TableHead>
                 </TableRow>
-              ))}
-              {forts.map((f) => (
-                <TableRow key={f.id} className={f.count ? '' : 'text-muted-foreground'}>
-                  <TableCell>
-                    <UnitName id={f.id} />
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">{fmtExact(f.count)}</TableCell>
-                  <TableCell />
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {garrison.map((t) => (
+                  <TableRow key={t.id} className={t.count || t.injured ? '' : 'text-muted-foreground'}>
+                    <TableCell>
+                      <UnitName id={t.id} />
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">{fmtExact(t.count)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{t.injured ? fmtExact(t.injured) : '—'}</TableCell>
+                  </TableRow>
+                ))}
+                {forts.map((f) => (
+                  <TableRow key={f.id} className={f.count ? '' : 'text-muted-foreground'}>
+                    <TableCell>
+                      <UnitName id={f.id} />
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">{fmtExact(f.count)}</TableCell>
+                    <TableCell />
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+        <InjuredCard city={city} />
+      </div>
       <div className="grid content-start gap-4">
         <Production city={city} fort={false} />
         <Production city={city} fort />
@@ -366,5 +373,99 @@ function UnitName({ id }: { id: number }) {
       </TooltipTrigger>
       <TooltipContent className="max-w-72">{troopDescription(id)}</TooltipContent>
     </Tooltip>
+  );
+}
+
+/**
+ * Injured troops of this city: defenders that fell while it was attacked survive injured, a share
+ * set by Medicine (BALANCE.medicinePerLevel per level, up to 50%). Heal them for part of their
+ * training cost, or dismiss them.
+ */
+function InjuredCard({ city }: { city: CityBean }) {
+  const player = usePlayer();
+  const [amounts, setAmounts] = useState<Partial<Record<TroopKey, string>>>({});
+  const injured = Object.entries(TROOP_KEYS)
+    .map(([id, key]) => ({ id: Number(id), key, count: city.injuredTroop[key] ?? 0 }))
+    .filter((t) => t.count > 0);
+  const medicine = researchLevel(player.data?.research ?? {}, TechType.MEDICINE);
+  const share = Math.min(0.5, medicine * BALANCE.medicinePerLevel);
+  // an empty field means "all of them"
+  const chosen = Object.fromEntries(
+    injured
+      .map((t) => [t.key, Math.min(t.count, amounts[t.key] === undefined || amounts[t.key] === '' ? t.count : Number(amounts[t.key]))])
+      .filter(([, n]) => Number(n) > 0),
+  ) as Record<string, number>;
+  const cost = healCost(chosen);
+  const have = {
+    gold: city.resource.gold,
+    food: city.resource.food.amount,
+    wood: city.resource.wood.amount,
+    stone: city.resource.stone.amount,
+    iron: city.resource.iron.amount,
+  };
+  const affordable = (['gold', 'food', 'wood', 'stone', 'iron'] as const).every((k) => have[k] >= cost[k]);
+  const total = Object.values(chosen).reduce((s, n) => s + n, 0);
+  const path = { cityId: city.id };
+  const [confirming, setConfirming] = useState(false);
+  const done = () => {
+    setAmounts({});
+    setConfirming(false);
+  };
+  const heal = useCommand(
+    () => unwrap(api.POST('/api/v1/cities/{cityId}/troops/injured/cure', { params: { path }, body: { troops: chosen } })),
+    () => [qk.city(city.id)],
+    `Healed ${fmtExact(total)} troops`,
+  );
+  const dismiss = useCommand(
+    () => unwrap(api.POST('/api/v1/cities/{cityId}/troops/injured/disband', { params: { path }, body: { troops: chosen } })),
+    () => [qk.city(city.id)],
+    `Dismissed ${fmtExact(total)} injured troops`,
+  );
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">Injured troops</CardTitle>
+        <CardDescription>
+          {medicine > 0
+            ? `Medicine Lv ${medicine}: ${Math.round(share * 100)}% of defenders who fall while this city is attacked survive injured.`
+            : 'Research Medicine so that some defenders who fall while this city is attacked survive injured (5% per level, up to 50%).'}{' '}
+          Healing costs {Math.round(BALANCE.healCostShare * 100)}% of their training cost.
+        </CardDescription>
+      </CardHeader>
+      {injured.length > 0 && (
+        <CardContent className="grid gap-3">
+          {injured.map((t) => (
+            <div key={t.key} className="flex items-center justify-between gap-2 text-sm">
+              <span>
+                <UnitName id={t.id} /> <span className="text-muted-foreground">({fmtExact(t.count)})</span>
+              </span>
+              <Input
+                className="h-8 w-24"
+                inputMode="numeric"
+                placeholder={`all ${fmtExact(t.count)}`}
+                value={amounts[t.key] ?? ''}
+                onChange={(e) => setAmounts({ ...amounts, [t.key]: e.target.value.replace(/\D/g, '') })}
+              />
+            </div>
+          ))}
+          <CostList cost={cost} have={have} />
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" disabled={total <= 0 || !affordable || heal.isPending} onClick={() => heal.mutate(undefined, { onSuccess: done })}>
+              Heal {fmtExact(total)}
+            </Button>
+            <Button
+              size="sm"
+              variant={confirming ? 'destructive' : 'outline'}
+              disabled={total <= 0 || dismiss.isPending}
+              onBlur={() => setConfirming(false)}
+              onClick={() => (confirming ? dismiss.mutate(undefined, { onSuccess: done }) : setConfirming(true))}
+            >
+              {confirming ? `Click again to dismiss ${fmtExact(total)} for good` : 'Dismiss'}
+            </Button>
+            {!affordable && total > 0 && <span className="self-center text-xs text-destructive">Not enough resources.</span>}
+          </div>
+        </CardContent>
+      )}
+    </Card>
   );
 }

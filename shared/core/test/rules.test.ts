@@ -23,6 +23,8 @@ import {
   troopConfig,
   valleyBonus,
   valleyUpgradeCost,
+  healCost,
+  trainCost,
   valleyGarrison,
   type EconomyCity,
   type EconomyContext,
@@ -301,5 +303,15 @@ describe('hero salaries', () => {
     const s = run(false);
     expect(s.heroSalary).toBe(0);
     expect(s.rates.gold).toBeCloseTo(s.taxIncome);
+  });
+});
+
+describe('healing injured troops', () => {
+  it('costs the configured share of the training cost', () => {
+    const c = healCost({ militia: 100, archer: 10 });
+    const m = trainCost(3, 100);
+    const a = trainCost(7, 10);
+    expect(c.food).toBeCloseTo((m.food + a.food) * BALANCE.healCostShare);
+    expect(c.wood).toBeCloseTo((m.wood + a.wood) * BALANCE.healCostShare);
   });
 });

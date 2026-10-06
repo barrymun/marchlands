@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 import { BALANCE, scaled } from './balance.ts';
-import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_KEYS, TroopType } from './constants.ts';
+import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEYS, TroopType } from './constants.ts';
 import {
   buildingConfig,
   buildingMaxLevel,
@@ -359,4 +359,17 @@ export function buildingHeroExp(typeId: number, level: number, townHallLevel: nu
   const c = buildCost(typeId, level);
   const spent = c.food + c.wood + c.stone + c.iron + c.gold;
   return prestigeOf(PrestigeAction.BUILDING, typeId, level, townHallLevel) + spent * BALANCE.heroExpPerBuild;
+}
+
+/** Resources to heal injured troops (army.cureInjuredTroop): BALANCE.healCostShare of their training cost. */
+export function healCost(troops: Partial<Record<string, number>>): Resources {
+  let cost: Resources = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
+  for (const [key, n] of Object.entries(troops)) {
+    if (!n) continue;
+    const id = TROOP_ID_BY_KEY[key as keyof typeof TROOP_ID_BY_KEY];
+    if (!id) throw new GameError('Invalid troop type.', -99);
+    const c = scaleResources(trainCost(id, n), BALANCE.healCostShare);
+    cost = { gold: cost.gold + c.gold, food: cost.food + c.food, wood: cost.wood + c.wood, stone: cost.stone + c.stone, iron: cost.iron + c.iron };
+  }
+  return cost;
 }
