@@ -1,16 +1,23 @@
 import type { HeroBean } from '@evony/api-client';
-import { experienceItemGain, HERO_ATTRIBUTE_BUFF, HERO_ATTRIBUTE_ITEMS, itemConfig, LOYALTY_MEDALS } from '@evony/core';
+import { experienceItemGain, HERO_ATTRIBUTE_BUFF, HERO_ATTRIBUTE_ITEMS, heroItemGoldPrice, itemConfig, LOYALTY_MEDALS } from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { qk, useCommand } from '@/hooks/use-game';
+import { qk, useCity, useCommand } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
-import { fmtExact } from '@/lib/format';
+import { duration, fmt, fmtExact } from '@/lib/format';
 
 const ATTR_LABEL = { power: 'Attack', management: 'Politics', stratagem: 'Intelligence' } as const;
 /** Cents charged when the item is not owned (medals cannot be bought on use). */
-const CENTS: Record<string, number> = { 'player.experience.1.a': 8, 'player.experience.1.b': 30, 'player.experience.1.c': 100, 'hero.power.1': 40, 'hero.management.1': 40, 'hero.intelligence.1': 40 };
+const CENTS: Record<string, number> = {
+  'player.experience.1.a': 8,
+  'player.experience.1.b': 30,
+  'player.experience.1.c': 100,
+  'hero.power.1': 40,
+  'hero.management.1': 40,
+  'hero.intelligence.1': 40,
+};
 
 export function HeroItemsDialog({ hero, cityId, onClose }: { hero: HeroBean | null; cityId: number; onClose: () => void }) {
   const shown = useSticky(hero);
@@ -23,15 +30,23 @@ export function HeroItemsDialog({ hero, cityId, onClose }: { hero: HeroBean | nu
 
 function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
   const inv = useInventory();
+  const city = useCity(cityId);
+  const gold = city.data?.resource.gold ?? 0;
   const use = useCommand(
     (itemId: string) => unwrap(api.POST('/api/v1/heroes/{heroId}/items', { params: { path: { heroId: hero.id } }, body: { itemId } })),
     () => [qk.city(cityId), qk.player],
     'Item used',
   );
+  const buy = useCommand(
+    (itemId: string) => unwrap(api.POST('/api/v1/heroes/{heroId}/items', { params: { path: { heroId: hero.id } }, body: { itemId, payWith: 'gold' } })),
+    () => [qk.city(cityId), qk.player],
+    'Bought with gold and used',
+  );
   const row = (itemId: string, effect: string, disabledReason?: string) => {
     const owned = inv.count(itemId);
     const cents = CENTS[itemId];
     const affordable = owned > 0 || (cents != null && inv.cents >= cents);
+    const price = heroItemGoldPrice(itemId, hero.upgradeExp);
     return (
       <div key={itemId} className="flex items-center justify-between gap-2 rounded-md border p-2 text-sm">
         <div>
@@ -40,9 +55,34 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
           </div>
           <div className="text-xs text-muted-foreground">{disabledReason ?? effect}</div>
         </div>
-        <Button size="xs" variant={owned > 0 ? 'default' : 'outline'} disabled={!affordable || !!disabledReason || use.isPending} onClick={() => use.mutate(itemId)}>
-          {owned > 0 ? 'Use' : cents != null ? `${cents} cents` : 'None'}
-        </Button>
+        <div className="flex shrink-0 flex-wrap justify-end gap-1">
+          {(owned > 0 || cents != null) && (
+            <Button
+              size="xs"
+              variant={owned > 0 ? 'default' : 'outline'}
+              disabled={!affordable || !!disabledReason || use.isPending}
+              onClick={() => use.mutate(itemId)}
+            >
+              {owned > 0 ? 'Use' : `${cents} cents`}
+            </Button>
+          )}
+          {price != null && (
+            <Button
+              size="xs"
+              variant={owned > 0 ? 'outline' : 'default'}
+              disabled={gold < price || !!disabledReason || buy.isPending}
+              title={gold < price ? `Not enough gold in this city (${fmtExact(price)} needed)` : undefined}
+              onClick={() => buy.mutate(itemId)}
+            >
+              {fmt(price)} gold
+            </Button>
+          )}
+          {owned <= 0 && cents == null && price == null && (
+            <Button size="xs" variant="outline" disabled>
+              None
+            </Button>
+          )}
+        </div>
       </div>
     );
   };
@@ -55,13 +95,16 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
           Items for {hero.name} <span className="font-normal text-muted-foreground">Lv {hero.level}</span>
         </DialogTitle>
         <DialogDescription>
-          Experience {fmtExact(hero.experience)} / {fmtExact(hero.upgradeExp)} · loyalty {hero.loyalty} · {fmtExact(inv.cents)} cents
+          Experience {fmtExact(hero.experience)} / {fmtExact(hero.upgradeExp)} · loyalty {hero.loyalty} · {fmtExact(gold)} gold in this city ·{' '}
+          {fmtExact(inv.cents)} cents
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
         <section className="grid gap-1.5">
           <h3 className="text-sm font-medium">Experience</h3>
-          {['player.experience.1.a', 'player.experience.1.b', 'player.experience.1.c'].map((id) => row(id, `+${fmtExact(experienceItemGain(id, hero.upgradeExp))} experience`))}
+          {['player.experience.1.a', 'player.experience.1.b', 'player.experience.1.c'].map((id) =>
+            row(id, `+${fmtExact(experienceItemGain(id, hero.upgradeExp))} experience`),
+          )}
         </section>
         <section className="grid gap-1.5">
           <h3 className="text-sm font-medium">Attribute boosts</h3>
@@ -69,7 +112,9 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
             row(
               id,
               `${ATTR_LABEL[attr]} +${HERO_ATTRIBUTE_BUFF.bonus * 100}% (+${Math.ceil(hero[attr] * HERO_ATTRIBUTE_BUFF.bonus)}) for 24 hours`,
-              buffed(attr) ? `${ATTR_LABEL[attr]} boost already active (using again restarts it)` : undefined,
+              buffed(attr)
+                ? `${ATTR_LABEL[attr]} boost active, ${duration(Math.max(0, (hero.buffs.find((b) => b.id === attr)?.endTime ?? 0) - Date.now()))} left (using again restarts it)`
+                : undefined,
             ),
           )}
         </section>

@@ -298,6 +298,35 @@
           "seized": {
             "type": "boolean",
             "description": "held captive by another lord"
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "power | management | stratagem"
+                },
+                "desc": {
+                  "type": "string"
+                },
+                "endTime": {
+                  "type": "number",
+                  "description": "epoch milliseconds"
+                },
+                "param": {
+                  "description": "points added",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "desc",
+                "endTime"
+              ]
+            },
+            "description": "active attribute boosts (24 real hours each, unaffected by GAME_SPEED)"
           }
         },
         "required": [
@@ -323,7 +352,8 @@
           "baseStratagem",
           "cityId",
           "experience",
-          "seized"
+          "seized",
+          "buffs"
         ]
       },
       "ProductionSourcesInput": {
@@ -9641,6 +9671,36 @@
           "seized": {
             "type": "boolean",
             "description": "held captive by another lord"
+          },
+          "buffs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "power | management | stratagem"
+                },
+                "desc": {
+                  "type": "string"
+                },
+                "endTime": {
+                  "type": "number",
+                  "description": "epoch milliseconds"
+                },
+                "param": {
+                  "description": "points added",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "desc",
+                "endTime"
+              ],
+              "additionalProperties": false
+            },
+            "description": "active attribute boosts (24 real hours each, unaffected by GAME_SPEED)"
           }
         },
         "required": [
@@ -9666,7 +9726,8 @@
           "baseStratagem",
           "cityId",
           "experience",
-          "seized"
+          "seized",
+          "buffs"
         ],
         "additionalProperties": false
       },
@@ -24741,6 +24802,13 @@
                 "properties": {
                   "itemId": {
                     "type": "string"
+                  },
+                  "payWith": {
+                    "description": "'gold': buy the item with the hero's city gold instead of using one owned (or cents)",
+                    "type": "string",
+                    "enum": [
+                      "gold"
+                    ]
                   }
                 },
                 "required": [

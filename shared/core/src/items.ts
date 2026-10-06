@@ -3,6 +3,8 @@
 // Effects are declarative; the game service applies them.
 
 import { z } from 'zod';
+import { BALANCE } from './balance.ts';
+import { experienceItemGain } from './heroes.ts';
 import { DAY, HOUR } from './time.ts';
 import { ITEMS, itemConfig } from './data/index.ts';
 import { pick, randInt, type Rng } from './rng.ts';
@@ -279,3 +281,45 @@ export function amuletDirectPayout(slotId: string): { resource?: keyof ResourceS
 }
 
 export const TRUCE_DURATION_MS = 12 * HOUR;
+
+/** Gold price of a hero item bought on use (BALANCE.heroItemGold), or null when it cannot be bought with gold. */
+export function heroItemGoldPrice(itemId: string, upgradeExp: number): number | null {
+  const gain = experienceItemGain(itemId, upgradeExp);
+  if (gain > 0) return Math.ceil(gain * BALANCE.heroItemGold.perExp);
+  if (itemId in HERO_ATTRIBUTE_ITEMS) return BALANCE.heroItemGold.attributeBoost;
+  return null;
+}
+
+type BuffedHero = {
+  power: number;
+  management: number;
+  stratagem: number;
+  powerBuffAdded: number;
+  managementBuffAdded: number;
+  stratagemBuffAdded: number;
+  buffs: { id: string; desc: string; endTime: number; param?: number }[];
+};
+
+/** Points an attribute boost adds: HERO_ATTRIBUTE_BUFF.bonus of the attribute's own points. */
+export const heroBuffAmount = (attributePoints: number) => Math.ceil(attributePoints * HERO_ATTRIBUTE_BUFF.bonus);
+
+/**
+ * Keep active attribute boosts in step with the hero's current attributes (they grow as the hero
+ * levels up and points are assigned). Mutates the hero; returns true when anything changed.
+ */
+export function syncHeroBuffs(h: BuffedHero): boolean {
+  let changed = false;
+  h.buffs = h.buffs.map((b) => {
+    const attr = b.id as 'power' | 'management' | 'stratagem';
+    if (attr !== 'power' && attr !== 'management' && attr !== 'stratagem') return b;
+    const amount = heroBuffAmount(h[attr]);
+    if (h[`${attr}BuffAdded`] !== amount) {
+      h[`${attr}BuffAdded`] = amount;
+      changed = true;
+    }
+    if (b.param === amount) return b;
+    changed = true;
+    return { ...b, param: amount };
+  });
+  return changed;
+}

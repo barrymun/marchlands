@@ -3,7 +3,7 @@
 // (by id), then tiles, then heroes/armies.
 
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
-import { GameError } from '@evony/core';
+import { GameError, syncHeroBuffs } from '@evony/core';
 import { armies, cities, heroes, players, tiles } from '@evony/db';
 import type { Ctx } from './context.ts';
 
@@ -97,6 +97,8 @@ export async function getHero(ctx: Ctx, id: number, opts: Opts = {}): Promise<He
   return row;
 }
 export async function saveHero(ctx: Ctx, h: HeroRow): Promise<void> {
+  // attribute boosts follow the hero's current attributes (level ups, assigned points)
+  syncHeroBuffs(h);
   const { id, createdAt: _c, ...rest } = h;
   await ctx.tx.update(heroes).set(rest).where(eq(heroes.id, id));
 }

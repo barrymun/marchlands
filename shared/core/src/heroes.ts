@@ -162,3 +162,4 @@ export const LOYALTY_MEDALS: Record<string, number> = {
   'hero.loyalty.8': 50,
   'hero.loyalty.9': 60,
 };
+

@@ -51,6 +51,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 | Training takes at least 1 second per unit | *(design change)* no minimum (`BALANCE.minTrainUnitSeconds = 0`): once mayor Attack and Military Science / Metal Casting bring a unit's time below 1 game second it trains instantly (batches finish in the same request) |
 | *(design change)* Valley levels are fixed by the map | any lord can raise an unowned valley one level at a time for gold (`BALANCE.valleyUpgrade`: 10,000 for Lv 1→2, doubling each level, up to Lv 10); its garrison regenerates at the new level |
 | Level-10 buildings need a Michelangelo's Script item (bought with coins) | *(design change)* no item needed (`BALANCE.buildingItemRequirements = false`), as this server has no coin shop |
+| Hero items (experience books, attribute boosts) are bought on use with cents | *(design change)* they can also be bought with the hero's city gold (`BALANCE.heroItemGold`: 1 gold per experience point, 100,000 for a 24-hour attribute boost); loyalty medals still cannot be bought |
 | The Rally Spot army limit was never enforced | at most one army per Rally Spot level (+1 with War Ensign) |
 | Fixed hero names like `"Test Name453160"` | name and portrait generator |
 

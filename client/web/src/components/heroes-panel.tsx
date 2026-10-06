@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Check, Pencil, RefreshCw, X } from 'lucide-react';
+import { Check, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
 import type { CityBean, HeroBean } from '@evony/api-client';
 import { BALANCE, BuildingType, HeroStatus, heroManagement, heroPower, heroStratagem } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { HeroPointsDialog } from '@/components/hero-points-dialog';
 import { HeroItemsDialog } from '@/components/hero-items-dialog';
 import { qk, useCommand } from '@/hooks/use-game';
+import { useNow } from '@/hooks/use-now';
 import { api, unwrap } from '@/lib/api';
-import { fmt, fmtExact, signedRate } from '@/lib/format';
+import { duration, fmt, fmtExact, signedRate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 const STATUS: Record<number, string> = {
@@ -200,7 +201,7 @@ function HeroRow({
     }
   };
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2">
+    <div className="grid gap-2 rounded-md border p-2">
       <div>
         {editing ? (
           <form
@@ -251,9 +252,29 @@ function HeroRow({
           {hero.remainPoint > 0 && ` · ${hero.remainPoint} points`}
         </div>
         {note && <div className="text-xs tabular-nums">{note}</div>}
+        <HeroBuffs hero={hero} />
         {showExp && <ExpBar hero={hero} />}
       </div>
-      <div className="flex items-center gap-2">{children}</div>
+      <div className="flex flex-wrap items-center gap-2">{children}</div>
+    </div>
+  );
+}
+
+const BUFF_LABEL: Record<string, string> = { power: 'Attack', management: 'Politics', stratagem: 'Intelligence' };
+
+/** Active attribute boosts with a live countdown (real time: boosts are not sped up by GAME_SPEED). */
+function HeroBuffs({ hero }: { hero: HeroBean }) {
+  const now = useNow();
+  const active = (hero.buffs ?? []).filter((b) => b.endTime > now);
+  if (!active.length) return null;
+  return (
+    <div className="mt-1 flex flex-wrap gap-1">
+      {active.map((b) => (
+        <Badge key={b.id} variant="outline" className="gap-1 font-normal tabular-nums">
+          <Sparkles className="size-3 text-amber-500" />
+          {BUFF_LABEL[b.id] ?? b.id} +{b.param ?? '25%'} · {duration(b.endTime - now)} left
+        </Badge>
+      ))}
     </div>
   );
 }

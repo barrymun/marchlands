@@ -25,6 +25,8 @@ import {
   valleyBonus,
   valleyUpgradeCost,
   healCost,
+  heroItemGoldPrice,
+  syncHeroBuffs,
   trainCost,
   valleyGarrison,
   type EconomyCity,
@@ -377,5 +379,26 @@ describe('storage multiplier', () => {
     } finally {
       cfg.storageMultiplier = was;
     }
+  });
+});
+
+describe('hero items for gold', () => {
+  it('price experience books by the experience they give, boosts at a flat price, medals not at all', () => {
+    expect(heroItemGoldPrice('player.experience.1.a', 1600)).toBe(Math.ceil(1000 * BALANCE.heroItemGold.perExp));
+    expect(heroItemGoldPrice('player.experience.1.c', 1_000_000)).toBe(Math.ceil(1_000_000 * BALANCE.heroItemGold.perExp));
+    expect(heroItemGoldPrice('hero.power.1', 1600)).toBe(BALANCE.heroItemGold.attributeBoost);
+    expect(heroItemGoldPrice('hero.loyalty.1', 1600)).toBeNull();
+  });
+});
+
+describe('hero attribute boosts', () => {
+  it('follow the attribute as it grows', () => {
+    const h = { power: 128, management: 40, stratagem: 30, powerBuffAdded: 32, managementBuffAdded: 0, stratagemBuffAdded: 0, buffs: [{ id: 'power', desc: 'power +25%', endTime: 1, param: 32 }] };
+    expect(syncHeroBuffs(h)).toBe(false);
+    h.power = 161;
+    expect(syncHeroBuffs(h)).toBe(true);
+    expect(h.powerBuffAdded).toBe(41);
+    expect(h.buffs[0].param).toBe(41);
+    expect(h.managementBuffAdded).toBe(0);
   });
 });

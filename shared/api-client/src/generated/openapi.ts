@@ -4316,6 +4316,11 @@ export interface paths {
                 content: {
                     "application/json": {
                         itemId: string;
+                        /**
+                         * @description 'gold': buy the item with the hero's city gold instead of using one owned (or cents)
+                         * @enum {string}
+                         */
+                        payWith?: "gold";
                     };
                 };
             };
@@ -10456,6 +10461,16 @@ export interface components {
             experience: number;
             /** @description held captive by another lord */
             seized: boolean;
+            /** @description active attribute boosts (24 real hours each, unaffected by GAME_SPEED) */
+            buffs: {
+                /** @description power | management | stratagem */
+                id: string;
+                desc: string;
+                /** @description epoch milliseconds */
+                endTime: number;
+                /** @description points added */
+                param?: number;
+            }[];
         };
         /** @description per-hour amounts by source; they sum to increaseRate (up to rounding) */
         ProductionSourcesInput: {
@@ -12455,6 +12470,16 @@ export interface components {
             experience: number;
             /** @description held captive by another lord */
             seized: boolean;
+            /** @description active attribute boosts (24 real hours each, unaffected by GAME_SPEED) */
+            buffs: {
+                /** @description power | management | stratagem */
+                id: string;
+                desc: string;
+                /** @description epoch milliseconds */
+                endTime: number;
+                /** @description points added */
+                param?: number;
+            }[];
         };
         /** @description per-hour amounts by source; they sum to increaseRate (up to rounding) */
         ProductionSources: {

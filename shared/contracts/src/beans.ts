@@ -32,7 +32,20 @@ export const HeroBean = HeroRow.pick({
   baseStratagem: true,
   cityId: true,
 })
-  .extend({ experience: z.number().int(), seized: z.boolean().describe('held captive by another lord') })
+  .extend({
+    experience: z.number().int(),
+    seized: z.boolean().describe('held captive by another lord'),
+    buffs: z
+      .array(
+        z.object({
+          id: z.string().describe('power | management | stratagem'),
+          desc: z.string(),
+          endTime: Ms,
+          param: z.number().optional().describe('points added'),
+        }),
+      )
+      .describe('active attribute boosts (24 real hours each, unaffected by GAME_SPEED)'),
+  })
   .meta({ id: 'HeroBean' });
 export type HeroBean = z.infer<typeof HeroBean>;
 
@@ -148,7 +161,16 @@ export const BuffBean = z
   .meta({ id: 'BuffBean' });
 export type BuffBean = z.infer<typeof BuffBean>;
 
-export const ArmyBean = ArmyRow.pick({ playerId: true, cityId: true, heroId: true, startTime: true, reachTime: true, restTime: true, startPosName: true, targetPosName: true })
+export const ArmyBean = ArmyRow.pick({
+  playerId: true,
+  cityId: true,
+  heroId: true,
+  startTime: true,
+  reachTime: true,
+  restTime: true,
+  startPosName: true,
+  targetPosName: true,
+})
   .extend({
     armyId: z.number().int(),
     king: z.string(),

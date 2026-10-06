@@ -6,6 +6,8 @@ import {
   buildingLevel,
   createRandomHero,
   experienceItemGain,
+  heroItemGoldPrice,
+  heroBuffAmount,
   GameError,
   HERO_ATTRIBUTE_BUFF,
   HERO_ATTRIBUTE_ITEMS,
@@ -266,15 +268,27 @@ export async function reward(ctx: Ctx, playerId: number, heroId: number) {
 }
 
 /** hero.useItem: experience books, loyalty medals, attribute items. */
-export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, itemId: string) {
+export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, itemId: string, payWith?: 'gold') {
   const p = await getPlayer(ctx, playerId, { lock: true });
   const h = await ownHero(ctx, playerId, heroId);
-  const city = HERO_ATTRIBUTE_ITEMS[itemId] === 'management' ? await openMayorCity(ctx, h) : null;
+  let city = HERO_ATTRIBUTE_ITEMS[itemId] === 'management' ? await openMayorCity(ctx, h) : null;
+  // buying with gold: the hero's city pays (BALANCE.heroItemGold)
+  let paidInGold = false;
+  if (payWith === 'gold') {
+    const price = heroItemGoldPrice(itemId, h.upgradeExp);
+    if (price == null) throw new GameError('This item cannot be bought with gold.', -99);
+    city ??= await openOwnCity(ctx, playerId, h.cityId);
+    if (city.city.gold < price) throw new GameError(`Not enough gold: ${price.toLocaleString('en')} needed.`, -99);
+    city.city.gold -= price;
+    paidInGold = true;
+  }
   if (itemId.startsWith('player.experience.1.')) {
     const gain = experienceItemGain(itemId, h.upgradeExp);
     if (!gain) throw new GameError('Invalid Item.', -99);
-    if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
-    else spendCents(ctx, p, { 'player.experience.1.a': 8, 'player.experience.1.b': 30, 'player.experience.1.c': 100 }[itemId] ?? 0);
+    if (!paidInGold) {
+      if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
+      else spendCents(ctx, p, { 'player.experience.1.a': 8, 'player.experience.1.b': 30, 'player.experience.1.c': 100 }[itemId] ?? 0);
+    }
     h.experience += gain;
   } else if (LOYALTY_MEDALS[itemId]) {
     if (itemCount(p, itemId) <= 0) throw new GameError('No Item.', -99);
@@ -282,9 +296,11 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     h.loyalty = Math.min(100, h.loyalty + LOYALTY_MEDALS[itemId]);
   } else if (HERO_ATTRIBUTE_ITEMS[itemId]) {
     const attr = HERO_ATTRIBUTE_ITEMS[itemId];
-    if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
-    else spendCents(ctx, p, 40);
-    const amount = Math.ceil(h[attr] * HERO_ATTRIBUTE_BUFF.bonus);
+    if (!paidInGold) {
+      if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
+      else spendCents(ctx, p, 40);
+    }
+    const amount = heroBuffAmount(h[attr]);
     const endTime = ctx.now + HERO_ATTRIBUTE_BUFF.durationMs;
     h.buffs = [...h.buffs.filter((x) => x.id !== attr), { id: attr, desc: `${attr} +25%`, endTime, param: amount }];
     if (attr === 'power') h.powerBuffAdded = amount;

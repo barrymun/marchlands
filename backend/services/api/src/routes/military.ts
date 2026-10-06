@@ -77,7 +77,7 @@ export default async function militaryRoutes(app: ZApp) {
     game(req, (ctx, pid) => heroes.reward(ctx, pid, req.params.heroId)),
   );
   app.post('/heroes/:heroId/items', s(tags.heroes, 'Use a hero item (hero.useItem)', HeroBean, { params: HeroParams, body: UseHeroItemBody }), (req) =>
-    game(req, (ctx, pid) => heroes.useHeroItem(ctx, pid, req.params.heroId, req.body.itemId)),
+    game(req, (ctx, pid) => heroes.useHeroItem(ctx, pid, req.params.heroId, req.body.itemId, req.body.payWith)),
   );
   app.patch('/heroes/:heroId', s(tags.heroes, 'Rename (hero.changeName)', HeroBean, { params: HeroParams, body: RenameHeroBody }), (req) =>
     game(req, (ctx, pid) => heroes.renameHero(ctx, pid, req.params.heroId, req.body.name)),

@@ -12,7 +12,10 @@ export const HeroParams = z.object({ heroId: zId });
 export const TavernHireParams = zCityParams.extend({ heroId: zId });
 export const TavernRefreshBody = z.object({ payWith: z.enum(['gold', 'item']).default('gold').describe('gold, or one Hero Hunting item') });
 export const HeroPointsBody = z.object({ power: z.number().int(), management: z.number().int(), stratagem: z.number().int() });
-export const UseHeroItemBody = z.object({ itemId: z.string() });
+export const UseHeroItemBody = z.object({
+  itemId: z.string(),
+  payWith: z.enum(['gold']).optional().describe("'gold': buy the item with the hero's city gold instead of using one owned (or cents)"),
+});
 export const RenameHeroBody = z.object({ name: z.string() });
 
 export const ArmyParams = z.object({ armyId: zId });

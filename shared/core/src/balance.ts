@@ -53,6 +53,11 @@ export const BALANCE = {
   startPopulation: 50,
 
   heroSalaryPerLevel: 20, // (orig) gold per hour per hero level
+  /**
+   * (evony-re) hero items bought with the hero's city gold instead of cents: experience books cost
+   * `perExp` gold per experience point they give, attribute boosts a flat price
+   */
+  heroItemGold: { perExp: 1, attributeBoost: 100_000 },
   /** (evony-re) on: every hero costs heroSalaryPerLevel gold per hour per level (orig). Off: heroes are free */
   heroSalaries: false as boolean,
   /** (evony-re) on: salaries are paid per real hour, unaffected by GAME_SPEED. Off: per game hour (orig) */
