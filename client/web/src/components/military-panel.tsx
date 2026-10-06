@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
 import {
   BALANCE,
+  usedWallSpace,
+  wallCapacity,
   healCost,
   researchLevel,
   TechType,
@@ -153,6 +155,14 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
     iron: city.resource.iron.amount,
   };
   const queueList = queues.data?.queues ?? [];
+  // free wall space for fortifications: capacity minus built and queued ones
+  const wallRoom = fort
+    ? wallCapacity(city.buildings) -
+      usedWallSpace(
+        city.fortification,
+        queueList.flatMap((q) => q.allProduceQueue.map((b) => ({ troopId: b.type, count: b.num, queueId: b.queueId, costTime: 0, startTime: 0, endTime: 0 }))),
+      )
+    : Infinity;
 
   return (
     <Card>
@@ -219,7 +229,8 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                 <div className="font-medium">{troopName(u.typeId)}</div>
                 <div className="text-xs text-muted-foreground">
                   atk {u.stats.attack} · def {u.stats.defense} · hp {u.stats.life}
-                  {!fort && ` · speed ${u.stats.speed} · range ${u.stats.range} · load ${u.stats.load} · ${fmt(BALANCE.upkeepPerRealHour ? u.stats.upkeep : realHourly(u.stats.upkeep))} food/h`}
+                  {!fort &&
+                    ` · speed ${u.stats.speed} · range ${u.stats.range} · load ${u.stats.load} · ${fmt(BALANCE.upkeepPerRealHour ? u.stats.upkeep : realHourly(u.stats.upkeep))} food/h`}
                   {fort && u.stats.range > 0 && ` · range ${u.stats.range}`} · {u.population} pop
                 </div>
               </div>
@@ -248,6 +259,21 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                   value={counts[u.typeId] ?? ''}
                   onChange={(e) => setCounts({ ...counts, [u.typeId]: e.target.value.replace(/\D/g, '') })}
                 />
+                {(() => {
+                  const m = maxTrainable(u, have, city.resource.idlePopulation, fort ? wallRoom : Infinity, fort);
+                  return (
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="outline"
+                      disabled={!u.permission || m.count <= 0}
+                      title={m.count > 0 ? `${fmtExact(m.count)}: limited by ${m.limit}` : `None: not enough ${m.limit}`}
+                      onClick={() => setCounts({ ...counts, [u.typeId]: String(m.count) })}
+                    >
+                      Max
+                    </Button>
+                  );
+                })()}
                 <Button size="sm" disabled={!u.permission || train.isPending || trainSplit.isPending}>
                   {fort ? 'Build' : 'Train'}
                 </Button>
@@ -310,6 +336,24 @@ function MayorExpHint({ city, typeId, count }: { city: CityBean; typeId: number;
       )}
     </span>
   );
+}
+
+const RES_KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
+
+/** Most units of a type the city can order now: resources, idle population and (fortifications) wall space. */
+function maxTrainable(
+  u: { typeId: number; population: number } & Record<(typeof RES_KEYS)[number], number>,
+  have: Record<(typeof RES_KEYS)[number], number>,
+  idlePopulation: number,
+  wallRoom: number,
+  fort: boolean,
+): { count: number; limit: string } {
+  const limits: [string, number][] = RES_KEYS.filter((k) => u[k] > 0).map((k) => [k === 'wood' ? 'lumber' : k, Math.floor(have[k] / u[k])]);
+  if (u.population > 0) limits.push(['idle population', Math.floor(idlePopulation / u.population)]);
+  if (fort) limits.push(['wall space', Math.floor(wallRoom / (BALANCE.fortSpace[u.typeId] ?? 1))]);
+  if (!limits.length) return { count: 0, limit: 'resources' };
+  const [limit, count] = limits.reduce((a, b) => (b[1] < a[1] ? b : a));
+  return { count: Math.max(0, count), limit };
 }
 
 type Queue = { positionId: number; allProduceQueue: { endTime: number; costTime: number }[]; capacity?: number };
