@@ -26,6 +26,7 @@ import {
   unitExp,
 } from '@evony/core';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -34,6 +35,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TimerBar } from '@/components/countdown';
 import { CostList, Requirements } from '@/components/cost-list';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
@@ -103,6 +105,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const [position, setPosition] = useState<string>('');
   const pos = Number(position || barracks[0]?.positionId || 0);
   const [counts, setCounts] = useState<Record<number, string>>({});
+  const [tab, setTab] = useState<'train' | 'queue'>('train');
   // with several barracks, orders are split so every barracks trains a share in parallel
   const [split, setSplit] = useState(true);
   const splitting = !fort && split && barracks.length > 1;
@@ -159,6 +162,10 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
     iron: city.resource.iron.amount,
   };
   const queueList = queues.data?.queues ?? [];
+  // batches shown under "In progress": every queue when splitting (or for the walls), else the chosen barracks
+  const batches = queueList
+    .filter((q) => fort || splitting || q.positionId === pos)
+    .flatMap((q) => q.allProduceQueue.map((b) => ({ ...b, positionId: q.positionId })));
   // free wall space for fortifications: capacity minus built and queued ones
   const wallRoom = fort
     ? wallCapacity(city.buildings) -
@@ -197,10 +204,22 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
       </CardHeader>
       <CardContent className="grid gap-3">
         <MayorTrainingHint city={city} fort={fort} />
-        {queueList
-          .filter((q) => fort || splitting || q.positionId === pos)
-          .flatMap((q) => q.allProduceQueue.map((b) => ({ ...b, positionId: q.positionId })))
-          .map((b) => (
+        <Tabs value={tab} onValueChange={(v) => setTab(v as 'train' | 'queue')}>
+          <TabsList>
+            <TabsTrigger value="train">{fort ? 'Build' : 'Train'}</TabsTrigger>
+            <TabsTrigger value="queue" className="gap-1.5">
+              In progress
+              {batches.length > 0 && (
+                <Badge variant="secondary" className="h-4 min-w-4 px-1 tabular-nums">
+                  {batches.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        {tab === 'queue' && batches.length === 0 && <p className="text-sm text-muted-foreground">Nothing {fort ? 'being built' : 'in training'} right now.</p>}
+        {tab === 'queue' &&
+          batches.map((b) => (
             <div key={`${b.positionId}-${b.queueId}`} className="grid gap-1 rounded-md border p-2 text-sm">
               <div className="flex items-center justify-between">
                 <span>
@@ -226,78 +245,79 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
               {b.endTime > 0 ? <TimerBar startTime={b.startTime} endTime={b.endTime} /> : <span className="text-xs text-muted-foreground">Waiting</span>}
             </div>
           ))}
-        {trainable.data?.map((u) => (
-          <div key={u.typeId} className="grid gap-2 rounded-md border p-3">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <div className="font-medium">{troopName(u.typeId)}</div>
-                <div className="text-xs text-muted-foreground">
-                  atk {u.stats.attack} · def {u.stats.defense} · hp {u.stats.life}
-                  {!fort &&
-                    ` · speed ${u.stats.speed} · range ${u.stats.range} · carries ${fmt(Math.floor(u.stats.load * loadFactor))} · ${fmt(BALANCE.upkeepPerRealHour ? u.stats.upkeep : realHourly(u.stats.upkeep))} food/h`}
-                  {fort && u.stats.range > 0 && ` · range ${u.stats.range}`} · {u.population} pop
+        {tab === 'train' &&
+          trainable.data?.map((u) => (
+            <div key={u.typeId} className="grid gap-2 rounded-md border p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="font-medium">{troopName(u.typeId)}</div>
+                  <div className="text-xs text-muted-foreground">
+                    atk {u.stats.attack} · def {u.stats.defense} · hp {u.stats.life}
+                    {!fort &&
+                      ` · speed ${u.stats.speed} · range ${u.stats.range} · carries ${fmt(Math.floor(u.stats.load * loadFactor))} · ${fmt(BALANCE.upkeepPerRealHour ? u.stats.upkeep : realHourly(u.stats.upkeep))} food/h`}
+                    {fort && u.stats.range > 0 && ` · range ${u.stats.range}`} · {u.population} pop
+                  </div>
                 </div>
+                <form
+                  className="flex items-center gap-2"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const count = Number(counts[u.typeId] ?? 0);
+                    if (count <= 0) return;
+                    if (!splitting) return train.mutate({ troopId: u.typeId, count });
+                    trainSplit.mutate(
+                      { troopId: u.typeId, count },
+                      {
+                        onSuccess: (r) =>
+                          toast.success(`Training ${fmtExact(count)} ${troopName(u.typeId)} in ${r.batches.length} barracks`, {
+                            description: `All done in ${duration(r.finishAt - Date.now())}`,
+                          }),
+                      },
+                    );
+                  }}
+                >
+                  <Input
+                    className="h-8 w-20"
+                    inputMode="numeric"
+                    placeholder="0"
+                    value={counts[u.typeId] ?? ''}
+                    onChange={(e) => setCounts({ ...counts, [u.typeId]: e.target.value.replace(/\D/g, '') })}
+                  />
+                  {(() => {
+                    const m = maxTrainable(u, have, city.resource.idlePopulation, fort ? wallRoom : Infinity, fort);
+                    return (
+                      <Button
+                        type="button"
+                        size="xs"
+                        variant="outline"
+                        disabled={!u.permission || m.count <= 0}
+                        title={m.count > 0 ? `${fmtExact(m.count)}: limited by ${m.limit}` : `None: not enough ${m.limit}`}
+                        onClick={() => setCounts({ ...counts, [u.typeId]: String(m.count) })}
+                      >
+                        Max
+                      </Button>
+                    );
+                  })()}
+                  <Button size="sm" disabled={!u.permission || train.isPending || trainSplit.isPending}>
+                    {fort ? 'Build' : 'Train'}
+                  </Button>
+                </form>
               </div>
-              <form
-                className="flex items-center gap-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const count = Number(counts[u.typeId] ?? 0);
-                  if (count <= 0) return;
-                  if (!splitting) return train.mutate({ troopId: u.typeId, count });
-                  trainSplit.mutate(
-                    { troopId: u.typeId, count },
-                    {
-                      onSuccess: (r) =>
-                        toast.success(`Training ${fmtExact(count)} ${troopName(u.typeId)} in ${r.batches.length} barracks`, {
-                          description: `All done in ${duration(r.finishAt - Date.now())}`,
-                        }),
-                    },
-                  );
-                }}
-              >
-                <Input
-                  className="h-8 w-20"
-                  inputMode="numeric"
-                  placeholder="0"
-                  value={counts[u.typeId] ?? ''}
-                  onChange={(e) => setCounts({ ...counts, [u.typeId]: e.target.value.replace(/\D/g, '') })}
-                />
-                {(() => {
-                  const m = maxTrainable(u, have, city.resource.idlePopulation, fort ? wallRoom : Infinity, fort);
-                  return (
-                    <Button
-                      type="button"
-                      size="xs"
-                      variant="outline"
-                      disabled={!u.permission || m.count <= 0}
-                      title={m.count > 0 ? `${fmtExact(m.count)}: limited by ${m.limit}` : `None: not enough ${m.limit}`}
-                      onClick={() => setCounts({ ...counts, [u.typeId]: String(m.count) })}
-                    >
-                      Max
-                    </Button>
-                  );
-                })()}
-                <Button size="sm" disabled={!u.permission || train.isPending || trainSplit.isPending}>
-                  {fort ? 'Build' : 'Train'}
-                </Button>
-              </form>
+              <p className="text-sm text-muted-foreground">{u.description}</p>
+              <CostList cost={u} have={have} />
+              <TrainEstimate
+                unitSeconds={u.time}
+                count={Number(counts[u.typeId] ?? 0)}
+                queues={queueList}
+                barracks={barracks}
+                pos={pos}
+                splitting={splitting}
+                fort={fort}
+              />
+              <MayorExpHint city={city} typeId={u.typeId} count={Number(counts[u.typeId] ?? 0)} />
+              {!u.permission && <Requirements list={u.requirements.filter((r) => !r.ok)} />}
             </div>
-            <p className="text-sm text-muted-foreground">{u.description}</p>
-            <CostList cost={u} have={have} />
-            <TrainEstimate
-              unitSeconds={u.time}
-              count={Number(counts[u.typeId] ?? 0)}
-              queues={queueList}
-              barracks={barracks}
-              pos={pos}
-              splitting={splitting}
-              fort={fort}
-            />
-            <MayorExpHint city={city} typeId={u.typeId} count={Number(counts[u.typeId] ?? 0)} />
-            {!u.permission && <Requirements list={u.requirements.filter((r) => !r.ok)} />}
-          </div>
-        ))}
+          ))}
       </CardContent>
     </Card>
   );
