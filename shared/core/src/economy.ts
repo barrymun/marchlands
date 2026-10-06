@@ -300,7 +300,7 @@ function integrate(city: EconomyCity, stats: CityStats, dtMs: number, result: Se
     } else {
       const next = cur + delta;
       if (next < 0 && r === 'food') {
-        starve(city, -next / Math.max(1, stats.upkeep), result);
+        if (BALANCE.starvationDesertion) starve(city, -next / Math.max(1, stats.upkeep), result);
         city[r] = 0;
       } else city[r] = Math.max(0, next);
     }

@@ -74,7 +74,7 @@ The original either stubbed these or never answered them.
   - Valleys: grassland 3–12%, swamp/forest/desert/hill 5–23%, lake 8–35% by level, for the matching resource (lake, swamp, grassland → food; forest → wood; desert → stone; hill → iron).
   - Stockpile: +10% storage per level.
   - Production buffs: +25%.
-- **Troop food upkeep** from `config_troops.movecost`; troops desert at 10% per hour while food is at 0.
+- **Troop food upkeep** from `config_troops.movecost`. *(design change)* Desertion is switched off for now (`BALANCE.starvationDesertion = false`): food stops at 0 and troops stay. With it on, troops desert at 10% per game hour while food is at 0.
 - **Market.**
   - Escrow when an order is placed; price-time priority matching at the resting order's price; a 0.5% fee paid by the buyer.
   - *(design change)* **Instant settlement**: the lord placing an order is paid in the same transaction; lords whose resting orders are hit are paid within a moment (zero-time shipments). `BALANCE.marketShipmentBaseMs > 0` restores Evony's travel time (60 min ÷ Marketplace level). Merchant Fleet therefore has no effect.

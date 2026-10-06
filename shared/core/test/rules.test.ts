@@ -80,11 +80,33 @@ describe('economy', () => {
     expect(s.bonus.food).toBeCloseTo(0.2);
   });
 
-  it('troops eat and starve when food runs out', () => {
-    const c = city({ food: 10, troops: { militia: 1000 } });
-    const r = settleCity(c, ctx(), 3_600_000);
-    expect(c.food).toBe(0);
-    expect(r.deserted.militia).toBeGreaterThan(0);
+  it('troops eat and starve when food runs out (with desertion on)', () => {
+    const cfg = BALANCE as { starvationDesertion: boolean };
+    const was = cfg.starvationDesertion;
+    cfg.starvationDesertion = true;
+    try {
+      const c = city({ food: 10, troops: { militia: 1000 } });
+      const r = settleCity(c, ctx(), 3_600_000);
+      expect(c.food).toBe(0);
+      expect(r.deserted.militia).toBeGreaterThan(0);
+    } finally {
+      cfg.starvationDesertion = was;
+    }
+  });
+
+  it('with desertion off, food stops at 0 and troops stay', () => {
+    const cfg = BALANCE as { starvationDesertion: boolean };
+    const was = cfg.starvationDesertion;
+    cfg.starvationDesertion = false;
+    try {
+      const c = city({ food: 10, troops: { militia: 1000 } });
+      const r = settleCity(c, ctx(), 3_600_000);
+      expect(c.food).toBe(0);
+      expect(c.troops.militia).toBe(1000);
+      expect(r.deserted).toEqual({});
+    } finally {
+      cfg.starvationDesertion = was;
+    }
   });
 
   it('settling integrates resources up to storage', () => {
