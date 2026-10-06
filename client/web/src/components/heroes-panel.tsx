@@ -283,15 +283,39 @@ function HeroRow({
             )}
           </div>
         )}
-        <div className="text-xs text-muted-foreground tabular-nums">
-          pol {heroManagement(hero)} · att {heroPower(hero)} · int {heroStratagem(hero)} · loyalty {hero.loyalty}
-          {hero.remainPoint > 0 && ` · ${hero.remainPoint} points`}
-        </div>
+        <HeroAttributes hero={hero} />
         {note && <div className="text-xs tabular-nums">{note}</div>}
         <HeroBuffs hero={hero} />
         {showExp && <ExpBar hero={hero} />}
       </div>
       <div className="flex flex-wrap items-center gap-2">{children}</div>
+    </div>
+  );
+}
+
+const ATTRS = [
+  { key: 'pol', label: 'Politics', short: 'pol', value: heroManagement, tone: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' },
+  { key: 'att', label: 'Attack', short: 'att', value: heroPower, tone: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' },
+  { key: 'int', label: 'Intelligence', short: 'int', value: heroStratagem, tone: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300' },
+] as const;
+
+/** The hero's attributes, with the highest one (what the hero is best at) as a coloured badge. */
+function HeroAttributes({ hero }: { hero: HeroBean }) {
+  const values = ATTRS.map((a) => ({ ...a, v: a.value(hero) }));
+  const top = values.reduce((best, a) => (a.v > best.v ? a : best));
+  return (
+    <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs tabular-nums">
+      <span className={cn('rounded-md px-1.5 py-0.5 text-sm font-semibold', top.tone)} title={`Strongest attribute: ${top.label}`}>
+        {top.label} {top.v}
+      </span>
+      <span className="text-muted-foreground">
+        {values
+          .filter((a) => a.key !== top.key)
+          .map((a) => `${a.short} ${a.v}`)
+          .join(' · ')}{' '}
+        · loyalty {hero.loyalty}
+        {hero.remainPoint > 0 && ` · ${hero.remainPoint} points`}
+      </span>
     </div>
   );
 }
