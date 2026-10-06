@@ -8,11 +8,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { api, errorMessage, tokenStore, unwrap } from '@/lib/api';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export function LoginPage() {
   const [tab, setTab] = useState('login');
   return (
-    <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
+    <div className="relative flex min-h-svh items-center justify-center bg-muted/40 p-4">
+      <div className="absolute top-3 right-3">
+        <ThemeToggle />
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Evony</CardTitle>
@@ -79,13 +83,7 @@ function AuthForm({ mode }: { mode: 'login' | 'register' }) {
       )}
       <div className="grid gap-2">
         <Label htmlFor={`${mode}-password`}>Password</Label>
-        <Input
-          id={`${mode}-password`}
-          name="password"
-          type="password"
-          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-          required
-        />
+        <Input id={`${mode}-password`} name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required />
       </div>
       {error && (
         <Alert variant="destructive">

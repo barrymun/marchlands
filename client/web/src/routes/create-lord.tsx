@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api, errorMessage, tokenStore, unwrap } from '@/lib/api';
 import { qk } from '@/hooks/use-game';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export function CreateLordPage() {
   const navigate = useNavigate();
@@ -48,7 +49,10 @@ export function CreateLordPage() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
+    <div className="relative flex min-h-svh items-center justify-center bg-muted/40 p-4">
+      <div className="absolute top-3 right-3">
+        <ThemeToggle />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">Found your city</CardTitle>

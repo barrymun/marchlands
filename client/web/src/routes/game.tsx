@@ -5,7 +5,14 @@ import { ChevronDown, Coins, Crown, UserRound } from 'lucide-react';
 import { HeroStatus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -13,6 +20,7 @@ import { ArmiesPanel } from '@/components/armies-panel';
 import { BuildingsPanel } from '@/components/buildings-panel';
 import { CityDialog } from '@/components/city-dialog';
 import { LordDialog } from '@/components/lord-dialog';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { HeroesPanel } from '@/components/heroes-panel';
 import { ItemsPanel } from '@/components/items-panel';
 import { MapPanel } from '@/components/map-panel';
@@ -111,6 +119,7 @@ export function GamePage() {
               </TooltipTrigger>
               <TooltipContent>Live updates: {status}</TooltipContent>
             </Tooltip>
+            <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="icon-sm" variant="ghost" aria-label="Account">
@@ -130,7 +139,13 @@ export function GamePage() {
             </DropdownMenu>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-4 pb-2">{city.data ? <ResourceBar resource={city.data.resource} mayor={city.data.heros.find((h) => h.status === HeroStatus.MAYOR)} /> : <Skeleton className="h-5 w-2/3" />}</div>
+        <div className="mx-auto max-w-6xl px-4 pb-2">
+          {city.data ? (
+            <ResourceBar resource={city.data.resource} mayor={city.data.heros.find((h) => h.status === HeroStatus.MAYOR)} />
+          ) : (
+            <Skeleton className="h-5 w-2/3" />
+          )}
+        </div>
       </header>
       <main className="mx-auto max-w-6xl p-4">
         <Tabs value={tab} onValueChange={(t) => navigate(`/cities/${cityId}/${t}`)}>
