@@ -105,6 +105,10 @@ export const BALANCE = {
   heroExpPerKill: 0.1,
   /** (evony) mayor exp per point of experience weight of troops and fortifications trained in the city */
   heroExpPerTrain: 0.02,
+  /** (evony) mayor exp per unit of resources (gold included) a completed research level cost */
+  heroExpPerResearch: 0.1,
+  /** (evony) mayor exp per unit of resources (gold included) a completed building level cost */
+  heroExpPerBuild: 0.1,
 
   // ---- player ----
   beginnerProtectionMs: 7 * 24 * HOUR, // (orig)

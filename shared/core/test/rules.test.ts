@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BALANCE,
   buildCost,
   buildTimeMs,
   coinsForSpeedup,
@@ -10,6 +11,10 @@ import {
   plunder,
   prestigeOf,
   randomStat,
+  researchCost,
+  researchHeroExp,
+  buildingHeroExp,
+  PrestigeAction,
   rollAmulet,
   seededRng,
   settleCity,
@@ -223,3 +228,21 @@ describe('armies', () => {
   });
 });
 
+
+describe('research hero exp', () => {
+  it('is prestige plus a share of the level cost, growing with the level', () => {
+    const c = researchCost(1, 5);
+    const spent = c.food + c.wood + c.stone + c.iron + c.gold;
+    expect(researchHeroExp(1, 5, 5)).toBeCloseTo(prestigeOf(PrestigeAction.RESEARCH, 1, 5, 5) + spent * BALANCE.heroExpPerResearch);
+    expect(researchHeroExp(1, 6, 5)).toBeGreaterThan(researchHeroExp(1, 5, 5));
+  });
+});
+
+describe('building hero exp', () => {
+  it('is prestige plus a share of the level cost', () => {
+    const c = buildCost(5, 5);
+    const spent = c.food + c.wood + c.stone + c.iron + c.gold;
+    expect(buildingHeroExp(5, 5, 5)).toBeCloseTo(prestigeOf(PrestigeAction.BUILDING, 5, 5, 5) + spent * BALANCE.heroExpPerBuild);
+    expect(buildingHeroExp(5, 6, 5)).toBeGreaterThan(buildingHeroExp(5, 5, 5));
+  });
+});

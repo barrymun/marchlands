@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import type { BuildingBean, CityBean } from '@evony/api-client';
-import { BuildingType, heroManagement, HeroStatus } from '@evony/core';
+import { buildingHeroExp, buildingLevel, BuildingType, heroManagement, HeroStatus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
@@ -251,6 +251,7 @@ function BuildList({ city, positionId, onDone }: { city: CityBean; positionId: n
             )}
             <Unlocks list={b.info.unlocks} />
             <CostList cost={b} seconds={b.time} have={have} />
+            <MayorBuildExp city={city} typeId={b.typeId} level={1} />
             <Requirements list={b.requirements.filter((r) => !r.ok)} />
           </div>
         ))}
@@ -393,6 +394,7 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
                 </p>
               )}
               <CostList cost={next} seconds={next.time} have={have} />
+              <MayorBuildExp city={city} typeId={building.typeId} level={next.level} />
               <Requirements list={next.requirements} />
             </div>
           ) : (
@@ -428,6 +430,19 @@ function MayorBuildHint({ city }: { city: CityBean }) {
     <p className="text-xs text-muted-foreground">
       Times include mayor {mayor.name}'s Politics {politics}: −{cut}%. A mayor with higher Politics builds faster.
     </p>
+  );
+}
+
+/** Experience the mayor earns when this building level completes (construction.ts buildingHeroExp). */
+function MayorBuildExp({ city, typeId, level }: { city: CityBean; typeId: number; level: number }) {
+  const mayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
+  if (!mayor) return null;
+  // a Town Hall upgrade counts its own new level, as on the server
+  const th = typeId === BuildingType.TOWN_HALL ? level : buildingLevel(city.buildings, BuildingType.TOWN_HALL);
+  return (
+    <span className="text-xs text-muted-foreground">
+      Mayor {mayor.name} gains {Math.floor(buildingHeroExp(typeId, level, th)).toLocaleString('en')} exp when it completes
+    </span>
   );
 }
 

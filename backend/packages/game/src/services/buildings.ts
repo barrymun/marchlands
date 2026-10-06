@@ -11,6 +11,7 @@ import {
   buildingMaxLevel,
   BUILDINGS,
   buildCost,
+  buildingHeroExp,
   buildTimeMs,
   canPlace,
   checkRequirements,
@@ -297,7 +298,7 @@ export async function completeBuilding(ctx: Ctx, cityId: number, positionId: num
     addPrestige(b.player, gain);
     const mayor = mayorOf(b.heroes);
     if (mayor) {
-      mayor.experience += gain;
+      mayor.experience += buildingHeroExp(bld.typeId, level, th);
       await saveHero(ctx, mayor);
       ctx.push(playerId, 'server.HeroUpdate', { castleId: cityId, hero: heroBean(mayor), updateType: 2 });
     }

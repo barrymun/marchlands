@@ -346,3 +346,17 @@ export function splitTraining(lanes: SplitLane[], count: number, unitMs: number)
   }
   return alloc.filter((a) => a.count > 0).map((a) => ({ positionId: a.positionId, count: a.count, finishAt: a.freeAt + a.count * u }));
 }
+
+/** Experience the mayor of the researching city earns when a research level completes: prestige plus a share of its cost. */
+export function researchHeroExp(techId: number, level: number, townHallLevel: number): number {
+  const c = researchCost(techId, level);
+  const spent = c.food + c.wood + c.stone + c.iron + c.gold;
+  return prestigeOf(PrestigeAction.RESEARCH, techId, level, townHallLevel) + spent * BALANCE.heroExpPerResearch;
+}
+
+/** Experience the city's mayor earns when a building level completes: prestige plus a share of its cost. */
+export function buildingHeroExp(typeId: number, level: number, townHallLevel: number): number {
+  const c = buildCost(typeId, level);
+  const spent = c.food + c.wood + c.stone + c.iron + c.gold;
+  return prestigeOf(PrestigeAction.BUILDING, typeId, level, townHallLevel) + spent * BALANCE.heroExpPerBuild;
+}

@@ -165,6 +165,8 @@ export const ConfigBalance = z
     medicinePerLevel: z.number(),
     heroExpPerKill: z.number(),
     heroExpPerTrain: z.number(),
+    heroExpPerResearch: z.number(),
+    heroExpPerBuild: z.number(),
     beginnerProtectionMs: ms(),
     beginnerTownHallLevel: int(),
     startingCents: int(),

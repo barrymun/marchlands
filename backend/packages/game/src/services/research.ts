@@ -13,6 +13,7 @@ import {
   requirementsMet,
   researchConfig,
   researchCost,
+  researchHeroExp,
   researchMaxLevel,
   researchTimeMs,
   scaled,
@@ -188,7 +189,7 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
   addPrestige(p, gain);
   const mayor = home ? mayorOf(home.heroes) : undefined;
   if (mayor) {
-    mayor.experience += gain;
+    mayor.experience += researchHeroExp(techId, level, th);
     await saveHero(ctx, mayor);
     ctx.push(playerId, 'server.HeroUpdate', { castleId: home!.city.id, hero: heroBean(mayor), updateType: 2 });
   }
