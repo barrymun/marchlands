@@ -1,4 +1,4 @@
-import { BUILDING_NAMES, TROOP_NAMES } from '@evony/core';
+import { BUILDING_NAMES, getGameSpeed, TROOP_NAMES } from '@evony/core';
 
 const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
 const whole = new Intl.NumberFormat('en');
@@ -6,6 +6,11 @@ const whole = new Intl.NumberFormat('en');
 export const fmt = (n: number) => (Math.abs(n) >= 100_000 ? compact.format(n) : whole.format(Math.floor(n)));
 export const fmtExact = (n: number) => whole.format(Math.floor(n));
 export const signed = (n: number) => (n >= 0 ? `+${fmt(n)}` : `-${fmt(-n)}`);
+
+/** A per-game-hour rate (as the server computes it) per real hour: game time runs GAME_SPEED times faster. */
+export const realHourly = (perGameHour: number) => perGameHour * getGameSpeed();
+/** "+1.2M/h": a per-game-hour rate shown per real hour. */
+export const signedRate = (perGameHour: number) => `${signed(realHourly(perGameHour))}/h`;
 
 /** 1h 02m 03s */
 export function duration(ms: number): string {

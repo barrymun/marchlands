@@ -11,10 +11,16 @@ import { HeroPointsDialog } from '@/components/hero-points-dialog';
 import { HeroItemsDialog } from '@/components/hero-items-dialog';
 import { qk, useCommand } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
-import { fmt, fmtExact, signed } from '@/lib/format';
+import { fmt, fmtExact, signedRate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-const STATUS: Record<number, string> = { [HeroStatus.IDLE]: 'Idle', [HeroStatus.MAYOR]: 'Mayor', [HeroStatus.ATTACK]: 'Marching', [HeroStatus.SEIZED]: 'Captive', [HeroStatus.RETURN]: 'Returning' };
+const STATUS: Record<number, string> = {
+  [HeroStatus.IDLE]: 'Idle',
+  [HeroStatus.MAYOR]: 'Mayor',
+  [HeroStatus.ATTACK]: 'Marching',
+  [HeroStatus.SEIZED]: 'Captive',
+  [HeroStatus.RETURN]: 'Returning',
+};
 
 export function HeroesPanel({ city }: { city: CityBean }) {
   const hasInn = city.buildings.some((b) => b.typeId === BuildingType.INN && b.level > 0);
@@ -30,8 +36,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
     'Hero hired',
   );
   const reroll = useCommand(
-    (payWith: 'gold' | 'item') =>
-      unwrap(api.POST('/api/v1/cities/{cityId}/tavern/refresh', { params: { path: { cityId: city.id } }, body: { payWith } })),
+    (payWith: 'gold' | 'item') => unwrap(api.POST('/api/v1/cities/{cityId}/tavern/refresh', { params: { path: { cityId: city.id } }, body: { payWith } })),
     refresh,
     'New heroes at the Inn',
   );
@@ -57,7 +62,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
     if (h.status === HeroStatus.MAYOR) {
       return (
         <span className="text-emerald-600 dark:text-emerald-400">
-          Mayor bonus +{mayorPct(h)}% production · {signed(mayorGain(h))}/h
+          Mayor bonus +{mayorPct(h)}% production · {signedRate(mayorGain(h))}
         </span>
       );
     }
@@ -65,8 +70,13 @@ export function HeroesPanel({ city }: { city: CityBean }) {
     const diff = mayorGain(h) - currentGain;
     return (
       <span>
-        As mayor: +{mayorPct(h)}% production · {signed(mayorGain(h))}/h
-        {currentMayor && <span className={diff > 0 ? 'text-emerald-600 dark:text-emerald-400' : diff < 0 ? 'text-destructive' : ''}> ({signed(diff)}/h vs {currentMayor.name})</span>}
+        As mayor: +{mayorPct(h)}% production · {signedRate(mayorGain(h))}
+        {currentMayor && (
+          <span className={diff > 0 ? 'text-emerald-600 dark:text-emerald-400' : diff < 0 ? 'text-destructive' : ''}>
+            {' '}
+            ({signedRate(diff)} vs {currentMayor.name})
+          </span>
+        )}
       </span>
     );
   };
@@ -154,7 +164,12 @@ export function HeroesPanel({ city }: { city: CityBean }) {
         )}
       </Card>
       <HeroItemsDialog hero={city.heros.find((h) => h.id === itemsFor) ?? null} cityId={city.id} onClose={() => setItemsFor(null)} />
-      <HeroPointsDialog hero={city.heros.find((h) => h.id === pointsFor) ?? null} cityId={city.id} fieldOutput={fieldOutput} onClose={() => setPointsFor(null)} />
+      <HeroPointsDialog
+        hero={city.heros.find((h) => h.id === pointsFor) ?? null}
+        cityId={city.id}
+        fieldOutput={fieldOutput}
+        onClose={() => setPointsFor(null)}
+      />
     </div>
   );
 }
@@ -249,8 +264,18 @@ function ExpBar({ hero }: { hero: HeroBean }) {
   const ready = hero.experience >= hero.upgradeExp;
   return (
     <div className="mt-1.5 grid w-56 max-w-full gap-1">
-      <div className="h-1.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={hero.upgradeExp} aria-valuenow={hero.experience} aria-label="Experience">
-        <div className={cn('h-full rounded-full transition-[width] duration-700 ease-out', ready ? 'bg-amber-500' : 'bg-primary')} style={{ width: `${pct}%` }} />
+      <div
+        className="h-1.5 overflow-hidden rounded-full bg-muted"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={hero.upgradeExp}
+        aria-valuenow={hero.experience}
+        aria-label="Experience"
+      >
+        <div
+          className={cn('h-full rounded-full transition-[width] duration-700 ease-out', ready ? 'bg-amber-500' : 'bg-primary')}
+          style={{ width: `${pct}%` }}
+        />
       </div>
       <div className="text-[11px] text-muted-foreground tabular-nums">
         {ready ? (

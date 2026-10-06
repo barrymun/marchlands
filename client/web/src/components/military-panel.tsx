@@ -32,7 +32,7 @@ import { CostList, Requirements } from '@/components/cost-list';
 import { qk, useCommand } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
-import { duration, fmtExact, troopName } from '@/lib/format';
+import { duration, fmt, fmtExact, realHourly, troopName } from '@/lib/format';
 
 export function MilitaryPanel({ city }: { city: CityBean }) {
   const garrison = Object.entries(TROOP_KEYS).map(([id, key]) => ({ id: Number(id), count: city.troop[key], injured: city.injuredTroop[key] }));
@@ -212,7 +212,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                 <div className="font-medium">{troopName(u.typeId)}</div>
                 <div className="text-xs text-muted-foreground">
                   atk {u.stats.attack} · def {u.stats.defense} · hp {u.stats.life}
-                  {!fort && ` · speed ${u.stats.speed} · range ${u.stats.range} · load ${u.stats.load} · ${u.stats.upkeep} food/h`}
+                  {!fort && ` · speed ${u.stats.speed} · range ${u.stats.range} · load ${u.stats.load} · ${fmt(realHourly(u.stats.upkeep))} food/h`}
                   {fort && u.stats.range > 0 && ` · range ${u.stats.range}`} · {u.population} pop
                 </div>
               </div>

@@ -2,7 +2,17 @@ import { Fragment, useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import type { ReportDetail, ReportSummary } from '@evony/api-client';
-import { FORT_ID_BY_KEY, TILE_NAMES, TROOP_ID_BY_KEY, TROOP_NAMES, type BattleReport, type FortKey, type ReportBody, type TroopKey } from '@evony/core';
+import {
+  FORT_ID_BY_KEY,
+  getGameSpeed,
+  TILE_NAMES,
+  TROOP_ID_BY_KEY,
+  TROOP_NAMES,
+  type BattleReport,
+  type FortKey,
+  type ReportBody,
+  type TroopKey,
+} from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -13,7 +23,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useSticky } from '@/hooks/use-sticky';
 import { api, unwrap } from '@/lib/api';
-import { fmtExact } from '@/lib/format';
+import { fmtExact, signedRate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 export const rk = {
@@ -477,10 +487,13 @@ function MovementView({ movement: m }: { movement: Extract<ReportBody, { kind: '
 }
 
 function DesertionView({ desertion: d }: { desertion: Extract<ReportBody, { kind: 'desertion' }>['desertion'] }) {
-  const perHour = (n: number) => `${n >= 0 ? '+' : '−'}${fmtExact(Math.abs(n))}/h`;
+  const perHour = (n: number) => signedRate(n);
   return (
     <div className="grid gap-1.5 text-sm">
-      <p>{d.city} ran out of food, so troops deserted: 10% of every troop type for each game hour the upkeep went unpaid.</p>
+      <p>
+        {d.city} ran out of food, so troops deserted: 10% of every troop type for each game hour the upkeep went unpaid (a game hour is
+        {getGameSpeed() === 1 ? ' an hour' : ` 1/${getGameSpeed()} of a real hour`}).
+      </p>
       <Line label="Deserted">
         <TroopList troops={d.troops} />
       </Line>
@@ -488,7 +501,7 @@ function DesertionView({ desertion: d }: { desertion: Extract<ReportBody, { kind
         {new Date(d.from).toLocaleString()} and {new Date(d.to).toLocaleString()}
       </Line>
       <Line label="Food">
-        produced {perHour(d.food.production)}, troop upkeep −{fmtExact(d.food.upkeep)}/h,{' '}
+        produced {perHour(d.food.production)}, troop upkeep {signedRate(-d.food.upkeep)},{' '}
         <span className={cn('font-medium', d.food.net < 0 && 'text-destructive')}>net {perHour(d.food.net)}</span>
       </Line>
       {d.food.net < 0 && (

@@ -1,9 +1,9 @@
 import { Coins, Hammer, Heart, Mountain, Trees, Users, Wheat } from 'lucide-react';
 import type { HeroBean, ResourceBean, ResourceLine } from '@evony/api-client';
-import { scaled } from '@evony/core';
+import { getGameSpeed, scaled } from '@evony/core';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNow } from '@/hooks/use-now';
-import { fmt, fmtExact, signed } from '@/lib/format';
+import { fmt, fmtExact, signedRate } from '@/lib/format';
 
 const icons = { gold: Coins, food: Wheat, wood: Trees, stone: Mountain, iron: Hammer };
 
@@ -39,7 +39,7 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
               <div className="flex items-center gap-1.5 tabular-nums">
                 <Icon className="size-4 text-muted-foreground" />
                 <span className={full ? 'font-medium text-amber-600' : 'font-medium'}>{fmt(amount)}</span>
-                <span className={rate < 0 ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}>{signed(rate)}/h</span>
+                <span className={rate < 0 ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}>{signedRate(rate)}</span>
               </div>
             </TooltipTrigger>
             <TooltipContent className="grid gap-1.5">
@@ -111,13 +111,20 @@ function Rows({ rows, total }: { rows: [string, number][]; total: number }) {
         {rows.map(([label, v]) => (
           <tr key={label}>
             <td className="pr-4">{label}</td>
-            <td className="text-right">{signed(v)}/h</td>
+            <td className="text-right">{signedRate(v)}</td>
           </tr>
         ))}
         <tr className="border-t font-medium">
           <td className="pr-4 pt-1">Total</td>
-          <td className="pt-1 text-right">{signed(total)}/h</td>
+          <td className="pt-1 text-right">{signedRate(total)}</td>
         </tr>
+        {getGameSpeed() !== 1 && (
+          <tr>
+            <td colSpan={2} className="pt-1 text-muted-foreground">
+              Per real hour (game speed {getGameSpeed()}×)
+            </td>
+          </tr>
+        )}
       </tbody>
     </table>
   );

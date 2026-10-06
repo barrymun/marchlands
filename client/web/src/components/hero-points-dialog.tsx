@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Separator } from '@/components/ui/separator';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
-import { signed } from '@/lib/format';
+import { signedRate } from '@/lib/format';
 
 const STATS = [
   { key: 'management', label: 'Politics', hint: 'mayor: production and build speed', added: 'managementAdded', buff: 'managementBuffAdded' },
@@ -25,7 +25,9 @@ export function HeroPointsDialog({ hero, cityId, fieldOutput, onClose }: { hero:
   const shown = useSticky(hero);
   return (
     <Dialog open={hero != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">{shown && <PointsForm key={`${shown.id}-${shown.remainPoint}`} hero={shown} cityId={cityId} fieldOutput={fieldOutput} onDone={onClose} />}</DialogContent>
+      <DialogContent className="sm:max-w-md">
+        {shown && <PointsForm key={`${shown.id}-${shown.remainPoint}`} hero={shown} cityId={cityId} fieldOutput={fieldOutput} onDone={onClose} />}
+      </DialogContent>
     </Dialog>
   );
 }
@@ -78,14 +80,26 @@ function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBean; cit
               <div className="text-xs text-muted-foreground">{s.hint}</div>
             </div>
             <div className="flex items-center gap-2 tabular-nums">
-              <Button size="icon-xs" variant="outline" disabled={add[s.key] === 0} onClick={() => setAdd({ ...add, [s.key]: add[s.key] - 1 })} aria-label={`Remove ${s.label}`}>
+              <Button
+                size="icon-xs"
+                variant="outline"
+                disabled={add[s.key] === 0}
+                onClick={() => setAdd({ ...add, [s.key]: add[s.key] - 1 })}
+                aria-label={`Remove ${s.label}`}
+              >
                 <Minus />
               </Button>
               <span className="w-16 text-center text-sm">
                 {total(s.key) + add[s.key]}
                 {add[s.key] > 0 && <span className="text-emerald-600 dark:text-emerald-400"> +{add[s.key]}</span>}
               </span>
-              <Button size="icon-xs" variant="outline" disabled={left === 0} onClick={() => setAdd({ ...add, [s.key]: add[s.key] + 1 })} aria-label={`Add ${s.label}`}>
+              <Button
+                size="icon-xs"
+                variant="outline"
+                disabled={left === 0}
+                onClick={() => setAdd({ ...add, [s.key]: add[s.key] + 1 })}
+                aria-label={`Add ${s.label}`}
+              >
                 <Plus />
               </Button>
               <Button size="xs" variant="ghost" disabled={left === 0} onClick={() => setAdd({ ...add, [s.key]: add[s.key] + left })}>
@@ -96,7 +110,7 @@ function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBean; cit
         ))}
         {isMayor && add.management > 0 && (
           <p className="text-xs text-emerald-600 dark:text-emerald-400">
-            As mayor: {signed(mayorGain(add.management))}/h production (+{Math.round(add.management * BALANCE.mayorManagementProductionFactor * 100)}%)
+            As mayor: {signedRate(mayorGain(add.management))} production (+{Math.round(add.management * BALANCE.mayorManagementProductionFactor * 100)}%)
           </p>
         )}
         <Separator />

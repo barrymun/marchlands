@@ -2,7 +2,7 @@
 // (economy, construction, training, heroes, armies, market, alliance), with numbers from BALANCE,
 // so the text follows the rules. "Unlocks" is derived from the requirement data.
 
-import { BALANCE } from './balance.ts';
+import { BALANCE, getGameSpeed } from './balance.ts';
 import { BUILDING_NAMES, BuildingType, TECH_NAMES, TROOP_NAMES } from './constants.ts';
 import { BUILDINGS, RESEARCH, TROOPS, buildingConfig } from './data/index.ts';
 import { reliefMultiplier } from './troops.ts';
@@ -19,7 +19,7 @@ interface BuildingText {
 const field = (res: string): BuildingText => ({
   summary: `Produces ${res} and adds ${res} storage. Output and storage grow faster at higher levels; it needs workers from your idle population.`,
   effect: (l) =>
-    `${fmt(BALANCE.fieldProductionPerF * F(l))} ${res}/h at full labour, +${fmt(BALANCE.fieldStoragePerF * F(l))} storage, employs ${fmt(BALANCE.fieldWorkersPerF * F(l))} workers`,
+    `${fmt(BALANCE.fieldProductionPerF * F(l) * getGameSpeed())} ${res}/h at full labour, +${fmt(BALANCE.fieldStoragePerF * F(l))} storage, employs ${fmt(BALANCE.fieldWorkersPerF * F(l))} workers`,
 });
 
 const TEXT: Record<number, BuildingText> = {
