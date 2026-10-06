@@ -5066,7 +5066,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Raise an unowned valley one level for gold (instant) */
+        /** Raise an unowned valley or barbarian city one level for gold (instant) */
         post: {
             parameters: {
                 query?: never;

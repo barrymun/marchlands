@@ -127,7 +127,7 @@ export default async function militaryRoutes(app: ZApp) {
   );
   app.post(
     '/valleys/:tileId/upgrade',
-    s(tags.map, 'Raise an unowned valley one level for gold (instant)', ValleyUpgradeResult, { params: TileParams, body: ValleyUpgradeBody }),
+    s(tags.map, 'Raise an unowned valley or barbarian city one level for gold (instant)', ValleyUpgradeResult, { params: TileParams, body: ValleyUpgradeBody }),
     (req) => game(req, (ctx, pid) => combat.upgradeValley(ctx, pid, req.body.cityId, req.params.tileId)),
   );
 

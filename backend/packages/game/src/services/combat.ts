@@ -1092,19 +1092,22 @@ export async function abandonValley(ctx: Ctx, playerId: number, tileId: number) 
 }
 
 /**
- * Raise an unowned valley one level, paid in gold by one of the lord's cities (instant). Its
+ * Raise an unowned valley or barbarian city one level, paid in gold by one of the lord's cities (instant). Its
  * garrison regenerates at the new level the next time it is scouted or attacked.
  */
 export async function upgradeValley(ctx: Ctx, playerId: number, cityId: number, tileId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const tile = await getTile(ctx, tileId, { lock: true });
-  if (!VALLEY_TYPES.includes(tile.type) || tile.cityId != null) throw new GameError('Only valleys can be upgraded.', -99);
+  const npc = tile.type === TileType.NPC;
+  if ((!VALLEY_TYPES.includes(tile.type) && !npc) || tile.cityId != null) throw new GameError('Only valleys and barbarian cities can be upgraded.', -99);
   if (tile.ownerCityId != null) throw new GameError('Only valleys nobody holds can be upgraded.', -99);
+  const what = npc ? 'barbarian city' : 'valley';
   const cost = valleyUpgradeCost(tile.level);
-  if (cost == null) throw new GameError(`This valley is already level ${tile.level}, the highest.`, -99);
+  if (cost == null) throw new GameError(`This ${what} is already level ${tile.level}, the highest.`, -99);
   if (b.city.gold < cost) throw new GameError(`Not enough gold: ${cost.toLocaleString('en')} needed.`, -99);
   b.city.gold -= cost;
-  Object.assign(tile, { level: tile.level + 1, troops: null, state: null, updatedAt: ctx.now });
+  // the garrison, fortifications, resources and hero start afresh at the new level
+  Object.assign(tile, { level: tile.level + 1, troops: null, forts: null, state: null, updatedAt: ctx.now });
   await saveTile(ctx, tile);
   await saveCity(ctx, b.city);
   pushResources(ctx, b);

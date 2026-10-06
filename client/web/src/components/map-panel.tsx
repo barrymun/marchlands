@@ -210,7 +210,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                     <span className="text-xs text-muted-foreground">Stationed troops march home; the production bonus stops.</span>
                   </div>
                 )}
-                {'upgradeCost' in info.data && !info.data.owner && VALLEY_TYPES.includes(info.data.type) && (
+                {'upgradeCost' in info.data && !info.data.owner && (VALLEY_TYPES.includes(info.data.type) || info.data.type === TileType.NPC) && (
                   <ValleyUpgrade city={city} tile={info.data} onUpgrade={(tileId) => upgrade.mutate(tileId)} pending={upgrade.isPending} />
                 )}
                 {info.data.type === TileType.FLAT && 'owner' in info.data && !info.data.owner && (
@@ -355,7 +355,12 @@ function ValleyUpgrade({
   onUpgrade: (tileId: number) => void;
   pending: boolean;
 }) {
-  if (tile.upgradeCost == null) return <p className="text-xs text-muted-foreground">Level {tile.level}: the highest a valley can reach.</p>;
+  if (tile.upgradeCost == null)
+    return (
+      <p className="text-xs text-muted-foreground">
+        Level {tile.level}: the highest {tile.type === TileType.NPC ? 'a barbarian city' : 'a valley'} can reach.
+      </p>
+    );
   const pct = (l: number) => Math.round(valleyBonus(tile.type, l) * 100);
   const short = city.resource.gold < tile.upgradeCost;
   return (
@@ -370,7 +375,9 @@ function ValleyUpgrade({
         {short && <span className="text-xs text-destructive">Not enough gold in {city.name}.</span>}
       </div>
       <span className="text-xs text-muted-foreground">
-        Once held: +{pct(tile.level)}% → +{pct(tile.level + 1)}% production. Its defenders grow stronger with the level too.
+        {tile.type === TileType.NPC
+          ? `Its troops, fortifications, walls, hero and the resources you can plunder all grow to level ${tile.level + 1}, and it starts afresh at full strength.`
+          : `Once held: +${pct(tile.level)}% → +${pct(tile.level + 1)}% production. Its defenders grow stronger with the level too.`}
       </span>
     </div>
   );

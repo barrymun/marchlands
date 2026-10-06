@@ -131,7 +131,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | GET | `/api/v1/map/search` | Find tiles of a type near a point |
 | GET | `/api/v1/map/tiles/{tileId}` | Tile details (field.getOtherFieldInfo) |
 | DELETE | `/api/v1/valleys/{tileId}` | Give up an occupied valley (field.giveUpField) |
-| POST | `/api/v1/valleys/{tileId}/upgrade` | Raise an unowned valley one level for gold (instant) |
+| POST | `/api/v1/valleys/{tileId}/upgrade` | Raise an unowned valley or barbarian city one level for gold (instant) |
 | GET | `/api/v1/world` | World info |
 | GET | `/api/v1/world/zones` | States with population stats (common.zoneInfo) |
 

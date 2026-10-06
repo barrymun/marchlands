@@ -25925,7 +25925,7 @@
     },
     "/api/v1/valleys/{tileId}/upgrade": {
       "post": {
-        "summary": "Raise an unowned valley one level for gold (instant)",
+        "summary": "Raise an unowned valley or barbarian city one level for gold (instant)",
         "tags": [
           "map"
         ],
