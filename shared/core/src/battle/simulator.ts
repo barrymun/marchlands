@@ -397,7 +397,11 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
       }
       if (target) {
         const fired = Math.min(logCount, logDieRate);
-        const dmg = Math.floor(f(f(f(fired * logKillPower) * fortStats[3].attack) * target.stat.defense));
+        // the original multiplies by defence (no life division), so a few hundred logs wipe out any
+        // army; with fixes on they kill like every other attack: damage / (defence x life)
+        const dmg = fixes
+          ? Math.floor(f(f(f(fired * logKillPower) * fortStats[3].attack) / f(target.stat.defense * target.stat.life)))
+          : Math.floor(f(f(f(fired * logKillPower) * fortStats[3].attack) * target.stat.defense));
         target.eff = Math.trunc(Math.max(f(target.eff - dmg), 0));
         logCount -= fired;
       }

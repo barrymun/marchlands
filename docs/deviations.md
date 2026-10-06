@@ -45,6 +45,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 | Captured hero copied into every empty slot; a "returning" hero stayed SEIZED | one slot; the hero goes home idle |
 | Abatis never consumed; an overkill trebuchet volley killed nothing | fixed in game battles (`fixes: true`); parity mode kept for the regression tests |
 | Iron Working's troop defence bonus used integer division (`(lvl×5+100)/100`), so it did nothing below level 20 | +5% per level in game battles (`fixes: true`); parity mode unchanged |
+| Rolling logs multiplied their damage by the target's defence (no life division), so a few hundred logs wiped out the largest foot group of any size | divided by defence × life like every other attack in game battles (`fixes: true`); parity mode unchanged |
 | `restTime` in seconds added to a millisecond timestamp | seconds × 1000 |
 | *(design change)* One construction at a time per city | two at once (`BALANCE.buildQueues`); Bernini's Hammer adds a third |
 | *(design change)* One research at a time per city's Academy | two at once (`BALANCE.researchQueues`); cancel and speed-up take a `techId` to pick one |
