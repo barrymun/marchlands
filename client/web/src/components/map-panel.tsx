@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Eye } from 'lucide-react';
 import type { CityBean, MapCastle } from '@evony/api-client';
 import { Mission, Relation, TileType, VALLEY_RESOURCE, valleyBonus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
@@ -27,8 +27,7 @@ const TILE_STYLE: Record<number, { label: string; className: string }> = {
 };
 
 type RelationGroup = 'friend' | 'enemy' | 'other';
-const relationGroup = (r: number): RelationGroup =>
-  r === Relation.ALLIANCE || r === Relation.ALLY ? 'friend' : r === Relation.ENEMY ? 'enemy' : 'other';
+const relationGroup = (r: number): RelationGroup => (r === Relation.ALLIANCE || r === Relation.ALLY ? 'friend' : r === Relation.ENEMY ? 'enemy' : 'other');
 const RELATION_STYLE: Record<RelationGroup, { label: string; ring: string; dot: string }> = {
   friend: { label: 'Alliance & allies', ring: 'ring-2 ring-emerald-500 ring-inset', dot: 'bg-emerald-500' },
   enemy: { label: 'Enemy', ring: 'ring-2 ring-red-600 ring-inset', dot: 'bg-red-600' },
@@ -79,10 +78,14 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     }
   }
 
+  const scouts = city.troop.scouter ?? 0;
+  /** what can be scouted on a tile (empty land has nothing to see) */
+  const kindOf = (t: NonNullable<typeof info.data>): SendTarget['kind'] =>
+    t.type === TileType.CASTLE ? 'city' : t.type === TileType.NPC ? 'npc' : t.type === TileType.FLAT ? undefined : 'valley';
   const missionsFor = (t: NonNullable<typeof info.data>): number[] => {
     const m: number[] = [];
     if (t.canLoot || t.canOccupy) m.push(Mission.ATTACK);
-    if (t.canScout) m.push(Mission.SCOUT);
+    if (t.canScout && kindOf(t)) m.push(Mission.SCOUT);
     if (t.canSend) m.push(Mission.REINFORCE);
     if (t.canTrans) m.push(Mission.TRANSPORT);
     if (t.type === TileType.FLAT && !('owner' in t && t.owner)) m.push(Mission.BUILD_CITY);
@@ -131,7 +134,9 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                     castle
                       ? `${castle.name}${castle.userName ? ` (${castle.userName})` : ''}`
                       : `${style.label} Lv ${t.level} (${t.x},${t.y})${held ? ` · held by your city ${held.cityName}` : ''}${
-                          foreign ? ` · held by ${foreign.cityName} (${foreign.userName}${foreign.allianceName ? `, ${foreign.allianceName}` : ''}) · ${RELATION_STYLE[relationGroup(foreign.relation)].label.toLowerCase()}` : ''
+                          foreign
+                            ? ` · held by ${foreign.cityName} (${foreign.userName}${foreign.allianceName ? `, ${foreign.allianceName}` : ''}) · ${RELATION_STYLE[relationGroup(foreign.relation)].label.toLowerCase()}`
+                            : ''
                         }`
                   }
                   onClick={() => setSelected(id)}
@@ -145,7 +150,12 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                   )}
                 >
                   {t.type === TileType.FLAT ? '' : t.level}
-                  {fStyle && <span aria-label={`${fStyle.label} valley`} className={cn('absolute top-0.5 right-0.5 size-1.5 rounded-full ring-1 ring-white', fStyle.dot)} />}
+                  {fStyle && (
+                    <span
+                      aria-label={`${fStyle.label} valley`}
+                      className={cn('absolute top-0.5 right-0.5 size-1.5 rounded-full ring-1 ring-white', fStyle.dot)}
+                    />
+                  )}
                   {held && (
                     <span
                       aria-label="your valley"
@@ -159,107 +169,144 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
         </CardContent>
       </Card>
       <div className="grid content-start gap-4">
-      <Card className="content-start">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">{info.data ? info.data.name : 'Select a tile'}</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-2 text-sm">
-          {info.data && (
-            <>
-              <div className="flex flex-wrap gap-1">
-                <Badge variant="secondary">{TILE_STYLE[info.data.type]?.label ?? info.data.type}</Badge>
-                <Badge variant="secondary">Lv {info.data.level}</Badge>
-                <Badge variant="outline">
-                  ({info.data.x}, {info.data.y}) · {info.data.zoneName}
-                </Badge>
-              </div>
-              {'userName' in info.data && info.data.userName && (
-                <p>
-                  Lord {info.data.userName}
-                  {info.data.allianceName ? ` of ${info.data.allianceName}` : ''} · prestige {fmt(info.data.prestige ?? 0)}
-                </p>
-              )}
-              {'owner' in info.data && info.data.owner && (
-                <p>
-                  Held by {info.data.owner.cityName} ({info.data.owner.userName})
-                </p>
-              )}
-              {owned.get(info.data.id)?.here && (
-                <div className="flex items-center gap-2">
-                  <ConfirmButton label="Release valley" confirmLabel="Click again to release" disabled={release.isPending} onConfirm={() => release.mutate(info.data!.id)} />
-                  <span className="text-xs text-muted-foreground">Stationed troops march home; the production bonus stops.</span>
+        <Card className="content-start">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{info.data ? info.data.name : 'Select a tile'}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-2 text-sm">
+            {info.data && (
+              <>
+                <div className="flex flex-wrap gap-1">
+                  <Badge variant="secondary">{TILE_STYLE[info.data.type]?.label ?? info.data.type}</Badge>
+                  <Badge variant="secondary">Lv {info.data.level}</Badge>
+                  <Badge variant="outline">
+                    ({info.data.x}, {info.data.y}) · {info.data.zoneName}
+                  </Badge>
                 </div>
-              )}
-              {info.data.type === TileType.FLAT && 'owner' in info.data && !info.data.owner && (
-                <Button size="sm" variant="outline" className="justify-self-start" onClick={() => setMoveTo({ x: info.data!.x, y: info.data!.y })}>
-                  Move city here…
-                </Button>
-              )}
-              {missionsFor(info.data).length > 0 && (
-                <Button
-                  size="sm"
-                  className="justify-self-start"
-                  onClick={() => setTarget({ tileId: info.data!.id, name: info.data!.name, missions: missionsFor(info.data!) })}
-                >
-                  Send army
-                </Button>
-              )}
-            </>
-          )}
-          <div className="mt-2 flex flex-wrap gap-1">
-            {Object.values(TILE_STYLE).map((s) => (
-              <span key={s.label} className={cn('rounded px-1.5 py-0.5 text-[10px]', s.className)}>
-                {s.label}
-              </span>
-            ))}
-            <span className="rounded px-1.5 py-0.5 text-[10px] ring-[3px] ring-fuchsia-500 ring-inset">This city's valleys</span>
-            <span className="rounded px-1.5 py-0.5 text-[10px] ring-2 ring-violet-300 ring-inset">Your other cities' valleys</span>
-            <span className="rounded px-1.5 py-0.5 text-[10px] ring-2 ring-amber-400 ring-inset">This city</span>
-            {Object.values(RELATION_STYLE).map((r) => (
-              <span key={r.label} className={cn('rounded px-1.5 py-0.5 text-[10px]', r.ring)}>
-                {r.label} valleys
-              </span>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="content-start">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">
-            Valleys held by {city.name} <span className="font-normal text-muted-foreground">({city.fields.length})</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-1 text-sm">
-          {city.fields.length === 0 && <p className="text-muted-foreground">None yet: attack a valley to occupy it (up to your Town Hall level).</p>}
-          {[...city.fields]
-            .sort((a, b) => b.level - a.level || a.type - b.type)
-            .map((v) => {
-              const bonus = Math.round(valleyBonus(v.type, v.level) * 100);
-              const res = VALLEY_RESOURCE[v.type]?.[0];
-              return (
-                <div key={v.id} className="flex items-center justify-between gap-2 rounded-md px-2 py-1 hover:bg-muted">
-                  <button onClick={() => goTo(v.x, v.y)} className="flex flex-1 items-center justify-between gap-2 text-left">
-                    <span>
-                      {TILE_STYLE[v.type]?.label ?? 'Valley'} Lv {v.level}{' '}
-                      <span className="text-xs text-muted-foreground tabular-nums">
-                        ({v.x},{v.y})
-                      </span>
-                    </span>
-                    {res && (
-                      <span className="text-xs text-emerald-600 tabular-nums dark:text-emerald-400">
-                        +{bonus}% {res === 'wood' ? 'lumber' : res}
-                      </span>
+                {'userName' in info.data && info.data.userName && (
+                  <p>
+                    Lord {info.data.userName}
+                    {info.data.allianceName ? ` of ${info.data.allianceName}` : ''} · prestige {fmt(info.data.prestige ?? 0)}
+                  </p>
+                )}
+                {'owner' in info.data && info.data.owner && (
+                  <p>
+                    Held by {info.data.owner.cityName} ({info.data.owner.userName})
+                  </p>
+                )}
+                {owned.get(info.data.id)?.here && (
+                  <div className="flex items-center gap-2">
+                    <ConfirmButton
+                      label="Release valley"
+                      confirmLabel="Click again to release"
+                      disabled={release.isPending}
+                      onConfirm={() => release.mutate(info.data!.id)}
+                    />
+                    <span className="text-xs text-muted-foreground">Stationed troops march home; the production bonus stops.</span>
+                  </div>
+                )}
+                {info.data.type === TileType.FLAT && 'owner' in info.data && !info.data.owner && (
+                  <Button size="sm" variant="outline" className="justify-self-start" onClick={() => setMoveTo({ x: info.data!.x, y: info.data!.y })}>
+                    Move city here…
+                  </Button>
+                )}
+                {missionsFor(info.data).length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => setTarget({ tileId: info.data!.id, name: info.data!.name, missions: missionsFor(info.data!), kind: kindOf(info.data!) })}
+                    >
+                      Send army
+                    </Button>
+                    {missionsFor(info.data).includes(Mission.SCOUT) && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={scouts <= 0}
+                          onClick={() => {
+                            const kind = kindOf(info.data!);
+                            // lords' city scouts fight: send them all; elsewhere one always gets through
+                            const n = kind === 'city' ? scouts : 1;
+                            setTarget({
+                              tileId: info.data!.id,
+                              name: info.data!.name,
+                              missions: missionsFor(info.data!),
+                              mission: Mission.SCOUT,
+                              troops: { scouter: String(n) },
+                              kind,
+                            });
+                          }}
+                        >
+                          <Eye /> Scout
+                        </Button>
+                        {scouts <= 0 && <span className="text-xs text-muted-foreground">No Scouts in this city: train some in the Military tab.</span>}
+                      </>
                     )}
-                  </button>
-                  <ConfirmButton label="Release" confirmLabel="Release?" disabled={release.isPending} onConfirm={() => release.mutate(v.id)} />
-                </div>
-              );
-            })}
-        </CardContent>
-      </Card>
+                  </div>
+                )}
+              </>
+            )}
+            <div className="mt-2 flex flex-wrap gap-1">
+              {Object.values(TILE_STYLE).map((s) => (
+                <span key={s.label} className={cn('rounded px-1.5 py-0.5 text-[10px]', s.className)}>
+                  {s.label}
+                </span>
+              ))}
+              <span className="rounded px-1.5 py-0.5 text-[10px] ring-[3px] ring-fuchsia-500 ring-inset">This city's valleys</span>
+              <span className="rounded px-1.5 py-0.5 text-[10px] ring-2 ring-violet-300 ring-inset">Your other cities' valleys</span>
+              <span className="rounded px-1.5 py-0.5 text-[10px] ring-2 ring-amber-400 ring-inset">This city</span>
+              {Object.values(RELATION_STYLE).map((r) => (
+                <span key={r.label} className={cn('rounded px-1.5 py-0.5 text-[10px]', r.ring)}>
+                  {r.label} valleys
+                </span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="content-start">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">
+              Valleys held by {city.name} <span className="font-normal text-muted-foreground">({city.fields.length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-1 text-sm">
+            {city.fields.length === 0 && <p className="text-muted-foreground">None yet: attack a valley to occupy it (up to your Town Hall level).</p>}
+            {[...city.fields]
+              .sort((a, b) => b.level - a.level || a.type - b.type)
+              .map((v) => {
+                const bonus = Math.round(valleyBonus(v.type, v.level) * 100);
+                const res = VALLEY_RESOURCE[v.type]?.[0];
+                return (
+                  <div key={v.id} className="flex items-center justify-between gap-2 rounded-md px-2 py-1 hover:bg-muted">
+                    <button onClick={() => goTo(v.x, v.y)} className="flex flex-1 items-center justify-between gap-2 text-left">
+                      <span>
+                        {TILE_STYLE[v.type]?.label ?? 'Valley'} Lv {v.level}{' '}
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          ({v.x},{v.y})
+                        </span>
+                      </span>
+                      {res && (
+                        <span className="text-xs text-emerald-600 tabular-nums dark:text-emerald-400">
+                          +{bonus}% {res === 'wood' ? 'lumber' : res}
+                        </span>
+                      )}
+                    </button>
+                    <ConfirmButton label="Release" confirmLabel="Release?" disabled={release.isPending} onConfirm={() => release.mutate(v.id)} />
+                  </div>
+                );
+              })}
+          </CardContent>
+        </Card>
       </div>
       <SendArmyDialog city={city} target={target} onClose={() => setTarget(null)} />
-      <CityDialog key={moveTo ? `${moveTo.x},${moveTo.y}` : 'none'} city={city} open={moveTo != null} target={moveTo ?? undefined} onClose={() => setMoveTo(null)} />
+      <CityDialog
+        key={moveTo ? `${moveTo.x},${moveTo.y}` : 'none'}
+        city={city}
+        open={moveTo != null}
+        target={moveTo ?? undefined}
+        onClose={() => setMoveTo(null)}
+      />
     </div>
   );
 }

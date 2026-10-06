@@ -17,13 +17,21 @@ export interface SendTarget {
   tileId: number;
   name: string;
   missions: number[];
+  /** mission selected when the dialog opens (default: the first of `missions`) */
+  mission?: number;
+  /** troop amounts filled in when the dialog opens */
+  troops?: Partial<Record<TroopKey, string>>;
+  /** what is at the target, for the scouting note */
+  kind?: 'city' | 'npc' | 'valley';
 }
 
 export function SendArmyDialog({ city, target, onClose }: { city: CityBean; target: SendTarget | null; onClose: () => void }) {
   const shown = useSticky(target);
   return (
     <Dialog open={target != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg">{shown && <SendForm key={shown.tileId} city={city} target={shown} onDone={onClose} />}</DialogContent>
+      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg">
+        {shown && <SendForm key={shown.tileId} city={city} target={shown} onDone={onClose} />}
+      </DialogContent>
     </Dialog>
   );
 }
@@ -31,18 +39,29 @@ export function SendArmyDialog({ city, target, onClose }: { city: CityBean; targ
 const RES = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 
 function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget; onDone: () => void }) {
-  const [mission, setMission] = useState(String(target.missions[0]));
+  const [mission, setMission] = useState(String(target.mission ?? target.missions[0]));
   const [heroId, setHeroId] = useState('none');
-  const [troops, setTroops] = useState<Partial<Record<TroopKey, string>>>({});
+  const [troops, setTroops] = useState<Partial<Record<TroopKey, string>>>(target.troops ?? {});
+  const scouting = Number(mission) === Mission.SCOUT;
   const [resources, setResources] = useState<Partial<Record<(typeof RES)[number], string>>>({});
-  const available = Object.entries(TROOP_KEYS).filter(([, key]) => city.troop[key] > 0);
+  // only scouts go on a scouting mission
+  const available = Object.entries(TROOP_KEYS).filter(([, key]) => city.troop[key] > 0 && (!scouting || key === 'scouter'));
   const idleHeroes = city.heros.filter((h) => h.status === HeroStatus.IDLE && !h.seized);
-  const troopBody = Object.fromEntries(Object.entries(troops).map(([k, v]) => [k, Number(v || 0)]).filter(([, n]) => Number(n) > 0));
-  const resourceBody = Object.fromEntries(Object.entries(resources).map(([k, v]) => [k, Number(v || 0)]).filter(([, n]) => Number(n) > 0));
+  const troopBody = Object.fromEntries(
+    Object.entries(troops)
+      .map(([k, v]) => [k, Number(v || 0)])
+      .filter(([k, n]) => Number(n) > 0 && (!scouting || k === 'scouter')),
+  );
+  const resourceBody = Object.fromEntries(
+    Object.entries(resources)
+      .map(([k, v]) => [k, Number(v || 0)])
+      .filter(([, n]) => Number(n) > 0),
+  );
   const path = { cityId: city.id };
 
   const estimate = useMutation({
-    mutationFn: () => unwrap(api.POST('/api/v1/cities/{cityId}/armies/estimate', { params: { path }, body: { targetTileId: target.tileId, troops: troopBody } })),
+    mutationFn: () =>
+      unwrap(api.POST('/api/v1/cities/{cityId}/armies/estimate', { params: { path }, body: { targetTileId: target.tileId, troops: troopBody } })),
   });
   const send = useCommand(
     () =>
@@ -107,7 +126,10 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
         </div>
         <div className="grid gap-2">
           <Label>Troops</Label>
-          {available.length === 0 && <p className="text-sm text-muted-foreground">No troops in the city.</p>}
+          {available.length === 0 && (
+            <p className="text-sm text-muted-foreground">{scouting ? 'No Scouts in the city: train some in the Military tab.' : 'No troops in the city.'}</p>
+          )}
+          {scouting && <ScoutNote kind={target.kind} />}
           {available.map(([id, key]) => (
             <div key={key} className="flex items-center justify-between gap-2 text-sm">
               <span>
@@ -160,4 +182,17 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
       </DialogFooter>
     </>
   );
+}
+
+/** What a scouting mission does at this kind of target (combat.ts arriveScout). */
+function ScoutNote({ kind }: { kind?: SendTarget['kind'] }) {
+  const text =
+    kind === 'city'
+      ? "Your scouts fight the city's scouts (a hero helps). If any survive, the report shows its resources, troops, fortifications and loyalty; Informatics adds heroes (level 1) and buildings (level 2). If none survive, you learn nothing."
+      : kind === 'npc'
+        ? 'Barbarian cities never stop scouts: one is enough. The report shows their troops, fortifications, walls, resources, loyalty, buildings and hero.'
+        : kind === 'valley'
+          ? 'Valleys never stop scouts: one is enough. The report shows the troops guarding it and who holds it.'
+          : 'Only scouts go on a scouting mission.';
+  return <p className="text-xs text-muted-foreground">{text}</p>;
 }
