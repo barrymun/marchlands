@@ -417,6 +417,11 @@ function ScoutView({ scout: s }: { scout: Extract<ReportBody, { kind: 'scout' }>
         <Line label="Defenders">
           <TroopList troops={s.troops} empty="none" />
         </Line>
+        {s.hero && (
+          <Line label="Hero">
+            {s.hero.name} Lv {s.hero.level}
+          </Line>
+        )}
       </div>
     );
   }

@@ -11650,6 +11650,10 @@ export interface components {
                     troops: {
                         [key: string]: number;
                     };
+                    hero?: {
+                        name: string;
+                        level: number;
+                    };
                 } | {
                     /** @constant */
                     target: "city";
@@ -13670,6 +13674,10 @@ export interface components {
                     success: boolean;
                     troops: {
                         [key: string]: number;
+                    };
+                    hero?: {
+                        name: string;
+                        level: number;
                     };
                 } | {
                     /** @constant */

@@ -209,6 +209,8 @@ export const ScoutReportSchema = z.union([
     owner: z.string().nullable(),
     success: z.boolean(),
     troops: TroopCountsSchema,
+    /** the defending hero of an unowned valley (the one the next attack meets) */
+    hero: ReportHeroBriefSchema.optional(),
   }),
   /** player city, the scouting player's copy */
   z.object({

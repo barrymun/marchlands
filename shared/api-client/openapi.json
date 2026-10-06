@@ -5599,6 +5599,23 @@
                               "type": "number",
                               "minimum": 0
                             }
+                          },
+                          "hero": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "level": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "level"
+                            ]
                           }
                         },
                         "required": [
@@ -15121,6 +15138,24 @@
                               "type": "number",
                               "minimum": 0
                             }
+                          },
+                          "hero": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "level": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "level"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [

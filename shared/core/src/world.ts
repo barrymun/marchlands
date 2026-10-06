@@ -148,6 +148,8 @@ export interface NpcState {
   population: number;
   /** last regeneration boundary */
   regenAt: number;
+  /** seed of the defending hero, so every scout and attack meets the same one (combat.ts guardHeroOf) */
+  heroSeed?: number;
 }
 
 export function freshNpcState(level: number, now: number): { state: NpcState; troops: TroopCounts; forts: FortCounts } {

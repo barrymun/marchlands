@@ -21,6 +21,7 @@ import {
   plunder,
   protectedResources,
   randInt,
+  seededRng,
   regenerateNpc,
   researchLevel,
   resolveCombat,
@@ -405,6 +406,19 @@ async function arriveBuildCity(ctx: Ctx, a: ArmyRow, settler: PlayerRow) {
 // Scouting
 // ---------------------------------------------------------------------------------------------
 
+/** Highest level of an unowned valley's defending hero. */
+const VALLEY_GUARD_LEVEL = 20;
+
+/**
+ * The defending hero of a barbarian city or unowned valley, generated from a seed kept in the tile
+ * state. Attacks meet the hero the last scout reported; only a new scout (`reroll`) changes it. A
+ * tile never scouted gets one on its first attack. Changing hands or an upgrade clears the state.
+ */
+function guardHeroOf(ctx: Ctx, state: Record<string, number>, maxLevel: number, reroll = false) {
+  if (reroll || state.heroSeed == null) state.heroSeed = randInt(ctx.rng, 1, 2_147_483_646);
+  return createGuardHero(maxLevel, seededRng(`guard:${state.heroSeed}`));
+}
+
 /** Lazily (re)generate an unowned valley's garrison: regenerates 6 minutes after it was last touched. */
 function valleyDefenders(ctx: Ctx, tile: TileRow): TroopCounts {
   const stale = !tile.troops || ctx.now - (tile.state?.regenAt ?? 0) >= regenMs();
@@ -437,9 +451,10 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
 
   if (tile.cityId == null && tile.type === TileType.NPC) {
     const npc = npcState(ctx, tile);
-    Object.assign(tile, { state: npc.state as unknown as Record<string, number>, troops: npc.troops, forts: npc.forts, updatedAt: ctx.now });
+    const state = { ...(npc.state as unknown as Record<string, number>), heroSeed: tile.state?.heroSeed } as Record<string, number>;
+    const guard = guardHeroOf(ctx, state, tile.level * 10, true);
+    Object.assign(tile, { state, troops: npc.troops, forts: npc.forts, updatedAt: ctx.now });
     await saveTile(ctx, tile);
-    const guard = createGuardHero(tile.level * 10, ctx.rng);
     await createReport(ctx, {
       ...reportBase,
       body: {
@@ -472,17 +487,30 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     // valley or empty land
     let defenders: TroopCounts;
     let ownerName: string | null = null;
+    let guard: ReturnType<typeof guardHeroOf> | null = null;
     if (tile.ownerPlayerId) {
       const stationed = await armiesStationedAt(ctx, tile.id, { lock: true });
       defenders = sumTroops(stationed.map((s) => s.troops));
       ownerName = (await getPlayer(ctx, tile.ownerPlayerId)).name;
     } else if (tile.type !== TileType.FLAT) {
       defenders = valleyDefenders(ctx, tile);
+      guard = guardHeroOf(ctx, (tile.state ??= {}), VALLEY_GUARD_LEVEL, true);
       await saveTile(ctx, tile);
     } else defenders = {};
     await createReport(ctx, {
       ...reportBase,
-      body: { kind: 'scout', scout: { target: 'valley', type: tile.type, level: tile.level, owner: ownerName, success: true, troops: defenders } },
+      body: {
+        kind: 'scout',
+        scout: {
+          target: 'valley',
+          type: tile.type,
+          level: tile.level,
+          owner: ownerName,
+          success: true,
+          troops: defenders,
+          ...(guard ? { hero: { name: guard.name, level: guard.level } } : {}),
+        },
+      },
     });
     return finishScout(ctx, a, a.troops);
   }
@@ -833,7 +861,8 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const tile = await getTile(ctx, a.targetTileId, { lock: true });
   const hero = await heroOf(ctx, a);
   const npc = npcState(ctx, tile);
-  const guard = createGuardHero(tile.level * 10, ctx.rng);
+  const seedHolder = { heroSeed: tile.state?.heroSeed } as Record<string, number>;
+  const guard = guardHeroOf(ctx, seedHolder, tile.level * 10);
   const r = resolveCombat(
     {
       troops: a.troops,
@@ -848,7 +877,7 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   let loot: ResourceSet = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
   let loyaltyDamage = 0;
   let captured = false;
-  const state = { ...npc.state };
+  const state = { ...npc.state, heroSeed: seedHolder.heroSeed };
   if (r.attackerWon) {
     loot = plunder({ gold: state.gold, food: state.food, wood: state.wood, stone: state.stone, iron: state.iron }, lootCapacity(a, r.attacker.after, attacker));
     for (const k of Object.keys(loot) as (keyof ResourceSet)[]) state[k] -= loot[k];
@@ -960,7 +989,7 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const owner = defenderId ? await getPlayer(ctx, defenderId) : null;
   const stationedHeroes = await heroesOfArmies(ctx, stationed);
   const guard = owner ? bestHero(stationedHeroes) : null;
-  const npcGuard = owner ? null : createGuardHero(20, ctx.rng);
+  const npcGuard = owner ? null : guardHeroOf(ctx, (tile.state ??= {}), VALLEY_GUARD_LEVEL);
   const r = resolveCombat(
     {
       troops: a.troops,
