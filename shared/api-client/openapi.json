@@ -3190,6 +3190,12 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "maxTroops": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)"
           }
         },
         "required": [
@@ -3197,7 +3203,8 @@
           "loadSkillParam",
           "driveSkillParam",
           "transportStationParam",
-          "maxArmies"
+          "maxArmies",
+          "maxTroops"
         ]
       },
       "MarchEstimateInput": {
@@ -12623,6 +12630,12 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "maxTroops": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)"
           }
         },
         "required": [
@@ -12630,7 +12643,8 @@
           "loadSkillParam",
           "driveSkillParam",
           "transportStationParam",
-          "maxArmies"
+          "maxArmies",
+          "maxTroops"
         ],
         "additionalProperties": false
       },

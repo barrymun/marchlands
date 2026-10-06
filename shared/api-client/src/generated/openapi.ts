@@ -11114,6 +11114,8 @@ export interface components {
             /** @description Relief Station speed multiplier between own cities */
             transportStationParam: number;
             maxArmies: number;
+            /** @description troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign) */
+            maxTroops: number;
         };
         MarchEstimateInput: {
             /** @description milliseconds */
@@ -13123,6 +13125,8 @@ export interface components {
             /** @description Relief Station speed multiplier between own cities */
             transportStationParam: number;
             maxArmies: number;
+            /** @description troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign) */
+            maxTroops: number;
         };
         MarchEstimate: {
             /** @description milliseconds */

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
-import { HeroStatus, Mission, TROOP_KEYS, type TroopKey } from '@evony/core';
+import { buildingLevel, BuildingType, HeroStatus, maxArmyTroops, Mission, TROOP_KEYS, type TroopKey } from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MISSION_NAMES } from '@/components/armies-panel';
-import { qk, useCommand } from '@/hooks/use-game';
+import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, troopName } from '@/lib/format';
 
@@ -52,6 +52,13 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
       .map(([k, v]) => [k, Number(v || 0)])
       .filter(([k, n]) => Number(n) > 0 && (!scouting || k === 'scouter')),
   );
+  // troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)
+  const player = usePlayer();
+  const ensign = (player.data?.buffs ?? []).some((b) => b.id === 'WarEnsignBuff' && b.endTime > Date.now());
+  const cap = maxArmyTroops(city.buildings, ensign);
+  const rally = buildingLevel(city.buildings, BuildingType.RALLY_SPOT);
+  const chosen = Object.values(troopBody).reduce<number>((t, n) => t + Number(n), 0);
+  const over = chosen > cap;
   const resourceBody = Object.fromEntries(
     Object.entries(resources)
       .map(([k, v]) => [k, Number(v || 0)])
@@ -125,7 +132,13 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
           </div>
         </div>
         <div className="grid gap-2">
-          <Label>Troops</Label>
+          <div className="flex items-baseline justify-between gap-2">
+            <Label>Troops</Label>
+            <span className={over ? 'text-xs font-medium text-destructive tabular-nums' : 'text-xs text-muted-foreground tabular-nums'}>
+              {fmtExact(chosen)} / {fmtExact(cap)} (Rally Spot Lv {rally}
+              {ensign ? ', War Ensign +25%' : ''})
+            </span>
+          </div>
           {available.length === 0 && (
             <p className="text-sm text-muted-foreground">{scouting ? 'No Scouts in the city: train some in the Military tab.' : 'No troops in the city.'}</p>
           )}
@@ -143,7 +156,16 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
                   placeholder="0"
                   onChange={(e) => setTroops({ ...troops, [key]: e.target.value.replace(/\D/g, '') })}
                 />
-                <Button size="xs" variant="ghost" onClick={() => setTroops({ ...troops, [key]: String(city.troop[key]) })}>
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  title="As many as fit in the army"
+                  onClick={() => {
+                    // room left in the army without this type, so "All" never goes over the Rally Spot limit
+                    const others = chosen - Number(troopBody[key] ?? 0);
+                    setTroops({ ...troops, [key]: String(Math.max(0, Math.min(city.troop[key], cap - others))) });
+                  }}
+                >
                   All
                 </Button>
               </div>
@@ -176,7 +198,7 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
         <Button variant="outline" disabled={!Object.keys(troopBody).length} onClick={() => estimate.mutate()}>
           Estimate
         </Button>
-        <Button disabled={!Object.keys(troopBody).length || send.isPending} onClick={() => send.mutate(undefined, { onSuccess: onDone })}>
+        <Button disabled={!Object.keys(troopBody).length || over || send.isPending} onClick={() => send.mutate(undefined, { onSuccess: onDone })}>
           Send
         </Button>
       </DialogFooter>

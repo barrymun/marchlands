@@ -80,7 +80,7 @@ const EFFECTS: Record<string, ItemEffect> = {
   'player.attackinc.1.b': buff('AttackBuff', 'Troop attack +20%', 7 * DAY),
   'player.defendinc.1': buff('DefenseBuff', 'Troop defense +20%', DAY),
   'player.defendinc.1.b': buff('DefenseBuff', 'Troop defense +20%', 7 * DAY),
-  'player.troop.1.a': buff('WarEnsignBuff', 'One extra army may march', DAY),
+  'player.troop.1.a': buff('WarEnsignBuff', 'Armies may hold 25% more troops', DAY),
   'player.queue.building': buff('BuildingQueueBuff', 'One extra construction queue', 7 * DAY),
   'consume.transaction.1': buff('MerchantFleetBuff', 'Marketplace shipments twice as fast', DAY),
 

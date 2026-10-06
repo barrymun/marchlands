@@ -148,6 +148,12 @@ export function armyLoad(troops: TroopCounts, research: ResearchState): number {
   return Math.floor(load * (1 + BALANCE.logisticsLoadPerLevel * researchLevel(research, TechType.LOGISTICS)));
 }
 
+/** Max troops in one army: BALANCE.rallySpotTroopsPerLevel per Rally Spot level, +25% with a War Ensign. */
+export function maxArmyTroops(buildings: BuildingState[], warEnsign = false): number {
+  const base = buildingLevel(buildings, BuildingType.RALLY_SPOT) * BALANCE.rallySpotTroopsPerLevel;
+  return Math.floor(base * (warEnsign ? 1 + BALANCE.warEnsignTroopBonus : 1));
+}
+
 /** Max simultaneous armies a city may have out (Rally Spot level). */
 export function maxArmies(buildings: BuildingState[]): number {
   return buildingLevel(buildings, BuildingType.RALLY_SPOT) * BALANCE.rallySpotArmiesPerLevel;

@@ -61,8 +61,9 @@ const TEXT: Record<number, BuildingText> = {
     effect: (l) => `${l} hero slot${l === 1 ? '' : 's'}`,
   },
   [BuildingType.RALLY_SPOT]: {
-    summary: 'Sends armies out. Needed to march at all; each level allows one more army away at a time.',
-    effect: (l) => `${l * BALANCE.rallySpotArmiesPerLevel} arm${l * BALANCE.rallySpotArmiesPerLevel === 1 ? 'y' : 'ies'} out at once`,
+    summary: `Sends armies out. Needed to march at all; each level allows one more army away at a time and ${fmt(BALANCE.rallySpotTroopsPerLevel)} more troops in each army (a War Ensign adds ${BALANCE.warEnsignTroopBonus * 100}%).`,
+    effect: (l) =>
+      `${l * BALANCE.rallySpotArmiesPerLevel} arm${l * BALANCE.rallySpotArmiesPerLevel === 1 ? 'y' : 'ies'} out at once, up to ${fmt(l * BALANCE.rallySpotTroopsPerLevel)} troops each`,
   },
   [BuildingType.MARKETPLACE]: {
     summary: `Trades food, lumber, stone and iron for gold with other lords and the merchant. Each level allows ${BALANCE.marketMaxOrdersPerLevel} more waiting orders.`,

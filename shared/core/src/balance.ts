@@ -104,6 +104,10 @@ export const BALANCE = {
   // ---- army ----
   /** (orig) slowest unit of each group decides speed; values are tiles per 1000 minutes */
   rallySpotArmiesPerLevel: 1,
+  /** (evony) troops one army may hold: 10,000 per Rally Spot level (100,000 at level 10) */
+  rallySpotTroopsPerLevel: 10_000,
+  /** (evony) War Ensign raises that limit by 25% */
+  warEnsignTroopBonus: 0.25,
   compassSpeedPerLevel: 0.1, // (orig) foot speed +10%/level
   horsebackSpeedPerLevel: 0.05, // (orig) mounted speed +5%/level
   logisticsLoadPerLevel: 0.1, // (evony) +10% load per level

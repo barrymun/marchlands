@@ -11,6 +11,8 @@ import {
   HeroStatus,
   marchTimeMs,
   maxArmies,
+  maxArmyTroops,
+  totalTroops,
   maxCitiesFor,
   Mission,
   armyLoad,
@@ -94,9 +96,13 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
   if (totalResources(resources) > armyLoad(troops, b.player.research)) throw new GameError('Your troops cannot carry that much.', -99);
   if (buildingLevel(b.city.buildings, BuildingType.RALLY_SPOT) < 1) throw new GameError('You need a Rally Spot to send troops.', -51);
   const [{ n: out }] = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId));
-  const allowed = maxArmies(b.city.buildings) + (activeBuff(b.player, 'WarEnsignBuff', ctx.now) ? 1 : 0);
-  if (Number(out) >= allowed) {
+  if (Number(out) >= maxArmies(b.city.buildings)) {
     throw new GameError('No more troops are allowed to sent at current level of Rally Spot. Please upgrade the Rally Spot first.', -51);
+  }
+  const troopCap = maxArmyTroops(b.city.buildings, !!activeBuff(b.player, 'WarEnsignBuff', ctx.now));
+  if (totalTroops(troops) > troopCap) {
+    const level = buildingLevel(b.city.buildings, BuildingType.RALLY_SPOT);
+    throw new GameError(`A level ${level} Rally Spot sends at most ${troopCap.toLocaleString('en')} troops in one army.`, -51);
   }
   const target = await getTile(ctx, input.targetTileId);
   if (target.id === b.city.tileId) throw new GameError("You can't perform this operation against this target.", -13);
@@ -253,7 +259,8 @@ export async function troopParams(ctx: Ctx, playerId: number, cityId: number) {
     loadSkillParam: researchLevel(r, TechType.LOGISTICS) * 10,
     driveSkillParam: researchLevel(r, TechType.HORSEBACK_RIDING) * 5,
     transportStationParam: reliefMultiplier(b.city.buildings),
-    maxArmies: maxArmies(b.city.buildings) + (activeBuff(b.player, 'WarEnsignBuff', ctx.now) ? 1 : 0),
+    maxArmies: maxArmies(b.city.buildings),
+    maxTroops: maxArmyTroops(b.city.buildings, !!activeBuff(b.player, 'WarEnsignBuff', ctx.now)),
   };
 }
 

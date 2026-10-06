@@ -28,6 +28,7 @@ import {
   heroItemGoldPrice,
   syncHeroBuffs,
   upgradeExpFor,
+  maxArmyTroops,
   trainCost,
   valleyGarrison,
   type EconomyCity,
@@ -411,5 +412,15 @@ describe('hero level experience', () => {
     expect(upgradeExpFor(100)).toBe(1_000_000);
     expect(upgradeExpFor(112)).toBe(1_000_000);
     expect(upgradeExpFor(500)).toBe(1_000_000);
+  });
+});
+
+describe('rally spot troop limit', () => {
+  const rally = (level: number) => [{ positionId: 5, typeId: 29, level, status: 0 as const, startTime: 0, endTime: 0 }];
+  it('is 10,000 troops per level, +25% with a War Ensign', () => {
+    expect(maxArmyTroops(rally(1))).toBe(10_000);
+    expect(maxArmyTroops(rally(10))).toBe(100_000);
+    expect(maxArmyTroops(rally(10), true)).toBe(125_000);
+    expect(maxArmyTroops([])).toBe(0);
   });
 });
