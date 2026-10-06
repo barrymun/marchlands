@@ -138,7 +138,11 @@ export function usePushSync(enabled: boolean): PushStatus {
         const before = qc.getQueryData<{ count: number }>(['reports', 'unread'])?.count ?? 0;
         qc.setQueryData(['reports', 'unread'], counts);
         void qc.invalidateQueries({ queryKey: ['reports', 'list'] });
-        if (counts.count > before) toast('New report', { description: 'See the Reports tab.' });
+        if (counts.count > before) {
+          toast('New report', { description: 'See the Reports tab.' });
+          // a battle can change who holds valleys and cities (no push carries that): refresh them
+          for (const key of [['city'], qk.player, ['map'], ['tile']]) void qc.invalidateQueries({ queryKey: key });
+        }
       }),
       push.on('server.SystemInfoMsg', ({ msg }) => toast.info(msg)),
     ];
