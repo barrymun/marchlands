@@ -222,16 +222,12 @@ describe('armies', () => {
     }
   });
 
-  it('valley bonuses follow the per-terrain table', () => {
+  it('every valley type gives the same bonus per level (+3%/level from 8%)', () => {
     // 1 forest, 2 desert, 3 hill, 4 swamp, 5 grass, 6 lake, 10 flat
-    expect(valleyBonus(5, 1)).toBeCloseTo(0.03);
-    expect(valleyBonus(5, 10)).toBeCloseTo(0.12);
-    expect(valleyBonus(6, 1)).toBeCloseTo(0.08);
-    expect(valleyBonus(6, 10)).toBeCloseTo(0.35);
-    for (const t of [1, 2, 3, 4]) {
-      expect(valleyBonus(t, 1)).toBeCloseTo(0.05);
-      expect(valleyBonus(t, 7)).toBeCloseTo(0.17);
-      expect(valleyBonus(t, 10)).toBeCloseTo(0.23);
+    for (const t of [1, 2, 3, 4, 5, 6]) {
+      expect(valleyBonus(t, 1)).toBeCloseTo(0.08);
+      expect(valleyBonus(t, 7)).toBeCloseTo(0.26);
+      expect(valleyBonus(t, 10)).toBeCloseTo(0.35);
     }
     expect(valleyBonus(10, 5)).toBe(0);
   });

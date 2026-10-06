@@ -72,7 +72,7 @@ The original either stubbed these or never answered them.
 - **Production bonuses.**
   - Agriculture, Lumbering, Masonry and Mining: +10% per effective level.
   - Mayor management: +1% per point.
-  - Valleys: grassland 3–12%, swamp/forest/desert/hill 5–23%, lake 8–35% by level, for the matching resource (lake, swamp, grassland → food; forest → wood; desert → stone; hill → iron).
+  - Valleys: *(design change)* every valley gives 8–35% by level (+3% per level, Evony's lake table; Evony had grassland 3–12% and swamp/forest/desert/hill 5–23%), for the matching resource (lake, swamp, grassland → food; forest → wood; desert → stone; hill → iron).
   - Stockpile: +10% storage per level.
   - Production buffs: +25%.
 - **Troop food upkeep** from `config_troops.movecost`. *(design change)* Desertion is switched off for now (`BALANCE.starvationDesertion = false`): food stops at 0 and troops stay. With it on, troops desert at 10% per game hour while food is at 0.

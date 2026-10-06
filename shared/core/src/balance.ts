@@ -26,14 +26,15 @@ export const BALANCE = {
   mayorManagementProductionFactor: 0.01,
   /**
    * (evony) production bonus of an occupied valley, indexed by level 1-10 (index 0 unused).
-   * Grassland +1%/level from 3%, Lake +3%/level from 8%, every other valley +2%/level from 5%.
+   * Evony: grassland +1%/level from 3%, lake +3%/level from 8%, every other valley +2%/level from 5%
+   * (grass [0, .03 … .12], other [0, .05 … .23]). (evony-re) every valley now uses the lake's table.
    */
   /** (evony-re) gold to raise an unowned valley from level 1 to 2; doubles each level, up to `maxLevel` */
   valleyUpgrade: { baseGold: 10_000, maxLevel: 10 },
   valleyBonus: {
-    grass: [0, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.11, 0.12],
+    grass: [0, 0.08, 0.11, 0.14, 0.17, 0.2, 0.23, 0.26, 0.29, 0.32, 0.35],
     lake: [0, 0.08, 0.11, 0.14, 0.17, 0.2, 0.23, 0.26, 0.29, 0.32, 0.35],
-    other: [0, 0.05, 0.07, 0.09, 0.11, 0.13, 0.15, 0.17, 0.19, 0.21, 0.23],
+    other: [0, 0.08, 0.11, 0.14, 0.17, 0.2, 0.23, 0.26, 0.29, 0.32, 0.35],
   },
   /** (evony) Stockpile: +10% storage per level */
   stockpileStorageBonusPerLevel: 0.1,
