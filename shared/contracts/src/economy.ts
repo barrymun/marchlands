@@ -167,6 +167,7 @@ export const ConfigBalance = z
     heroExpPerTrain: z.number(),
     heroExpPerResearch: z.number(),
     heroExpPerBuild: z.number(),
+    valleyUpgrade: z.object({ baseGold: z.number(), maxLevel: z.number().int() }),
     beginnerProtectionMs: ms(),
     beginnerTownHallLevel: int(),
     startingCents: int(),

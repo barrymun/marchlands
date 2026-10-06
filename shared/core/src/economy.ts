@@ -40,6 +40,13 @@ export const VALLEY_RESOURCE: Record<number, BasicResource[]> = {
 };
 
 /** Production bonus (fraction) of an occupied valley for its resource. */
+/** Gold to raise an unowned valley from `level` to `level + 1` (null when it is already at the top). */
+export function valleyUpgradeCost(level: number): number | null {
+  const { baseGold, maxLevel } = BALANCE.valleyUpgrade;
+  if (level >= maxLevel) return null;
+  return baseGold * Math.pow(2, Math.max(0, level - 1));
+}
+
 export function valleyBonus(type: number, level: number): number {
   const table = type === TileType.GRASS ? BALANCE.valleyBonus.grass : type === TileType.LAKE ? BALANCE.valleyBonus.lake : BALANCE.valleyBonus.other;
   if (!VALLEY_RESOURCE[type]?.length) return 0;

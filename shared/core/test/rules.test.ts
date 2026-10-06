@@ -22,6 +22,7 @@ import {
   stateOf,
   troopConfig,
   valleyBonus,
+  valleyUpgradeCost,
   valleyGarrison,
   type EconomyCity,
   type EconomyContext,
@@ -244,5 +245,14 @@ describe('building hero exp', () => {
     const spent = c.food + c.wood + c.stone + c.iron + c.gold;
     expect(buildingHeroExp(5, 5, 5)).toBeCloseTo(prestigeOf(PrestigeAction.BUILDING, 5, 5, 5) + spent * BALANCE.heroExpPerBuild);
     expect(buildingHeroExp(5, 6, 5)).toBeGreaterThan(buildingHeroExp(5, 5, 5));
+  });
+});
+
+describe('valley upgrades', () => {
+  it('cost gold doubling per level and stop at the top level', () => {
+    expect(valleyUpgradeCost(1)).toBe(BALANCE.valleyUpgrade.baseGold);
+    expect(valleyUpgradeCost(2)).toBe(BALANCE.valleyUpgrade.baseGold * 2);
+    expect(valleyUpgradeCost(9)).toBe(BALANCE.valleyUpgrade.baseGold * 256);
+    expect(valleyUpgradeCost(BALANCE.valleyUpgrade.maxLevel)).toBeNull();
   });
 });

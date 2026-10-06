@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Eye } from 'lucide-react';
 import type { CityBean, MapCastle } from '@evony/api-client';
-import { Mission, Relation, TileType, VALLEY_RESOURCE, valleyBonus } from '@evony/core';
+import { Mission, Relation, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,6 +62,11 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     (tileId: number) => unwrap(api.DELETE('/api/v1/valleys/{tileId}', { params: { path: { tileId } } })),
     () => [qk.city(city.id), qk.player, ['map'], ['tile'], qk.armies],
     'Valley released; any troops stationed there are marching home',
+  );
+  const upgrade = useCommand(
+    (tileId: number) => unwrap(api.POST('/api/v1/valleys/{tileId}/upgrade', { params: { path: { tileId } }, body: { cityId: city.id } })),
+    () => [qk.city(city.id), ['map'], ['tile']],
+    'Valley upgraded',
   );
   const goTo = (x: number, y: number) => {
     setCenter({ x, y });
@@ -205,6 +210,9 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                     <span className="text-xs text-muted-foreground">Stationed troops march home; the production bonus stops.</span>
                   </div>
                 )}
+                {'upgradeCost' in info.data && !info.data.owner && VALLEY_TYPES.includes(info.data.type) && (
+                  <ValleyUpgrade city={city} tile={info.data} onUpgrade={(tileId) => upgrade.mutate(tileId)} pending={upgrade.isPending} />
+                )}
                 {info.data.type === TileType.FLAT && 'owner' in info.data && !info.data.owner && (
                   <Button size="sm" variant="outline" className="justify-self-start" onClick={() => setMoveTo({ x: info.data!.x, y: info.data!.y })}>
                     Move city here…
@@ -332,5 +340,38 @@ function ConfirmButton({ label, confirmLabel, disabled, onConfirm }: { label: st
     >
       {armed ? confirmLabel : label}
     </Button>
+  );
+}
+
+/** Pay gold to raise an unowned valley one level (bigger bonus once held, stronger garrison). */
+function ValleyUpgrade({
+  city,
+  tile,
+  onUpgrade,
+  pending,
+}: {
+  city: CityBean;
+  tile: { id: number; type: number; level: number; upgradeCost: number | null };
+  onUpgrade: (tileId: number) => void;
+  pending: boolean;
+}) {
+  if (tile.upgradeCost == null) return <p className="text-xs text-muted-foreground">Level {tile.level}: the highest a valley can reach.</p>;
+  const pct = (l: number) => Math.round(valleyBonus(tile.type, l) * 100);
+  const short = city.resource.gold < tile.upgradeCost;
+  return (
+    <div className="grid gap-1">
+      <div className="flex flex-wrap items-center gap-2">
+        <ConfirmButton
+          label={`Upgrade to Lv ${tile.level + 1} · ${fmt(tile.upgradeCost)} gold`}
+          confirmLabel={`Click again to pay ${fmt(tile.upgradeCost)} gold`}
+          disabled={pending || short}
+          onConfirm={() => onUpgrade(tile.id)}
+        />
+        {short && <span className="text-xs text-destructive">Not enough gold in {city.name}.</span>}
+      </div>
+      <span className="text-xs text-muted-foreground">
+        Once held: +{pct(tile.level)}% → +{pct(tile.level + 1)}% production. Its defenders grow stronger with the level too.
+      </span>
+    </div>
   );
 }

@@ -28,7 +28,12 @@ export const MarchEstimateBody = z.object({ targetTileId: zId, troops: zTroops }
 
 export const TileParams = z.object({ tileId: zId });
 export const MapQuery = z.object({ x1: z.coerce.number().int(), y1: z.coerce.number().int(), x2: z.coerce.number().int(), y2: z.coerce.number().int() });
-export const MapSearchQuery = z.object({ x: z.coerce.number().int(), y: z.coerce.number().int(), radius: z.coerce.number().int().default(10), type: z.coerce.number().int() });
+export const MapSearchQuery = z.object({
+  x: z.coerce.number().int(),
+  y: z.coerce.number().int(),
+  radius: z.coerce.number().int().default(10),
+  type: z.coerce.number().int(),
+});
 
 // ---- heroes ----
 
@@ -130,7 +135,7 @@ export const MapView = z
     y2: z.number().int(),
     mapStr: z.string().describe('two hex chars per tile (type, level), row-major'),
     castles: z.array(MapCastle),
-    valleys: z.array(MapHeldValley).describe('valleys in view that a city holds (the viewer\'s included)'),
+    valleys: z.array(MapHeldValley).describe("valleys in view that a city holds (the viewer's included)"),
   })
   .meta({ id: 'MapView' });
 export type MapView = z.infer<typeof MapView>;
@@ -150,6 +155,7 @@ export const MapFieldTileInfo = TileRow.pick({ id: true, type: true, level: true
     npc: z.boolean(),
     owner: MapTileOwner.nullable().describe('controlling city of an occupied valley / captured NPC city'),
     relation,
+    upgradeCost: z.number().nullable().describe('gold to raise this unowned valley one level (null: not upgradable)'),
   })
   .extend(MapPermissions.shape)
   .meta({ id: 'MapFieldTileInfo' });
@@ -166,3 +172,9 @@ export const MapSearchResult = z
   .array(TileRow.pick({ id: true, type: true, level: true, ownerCityId: true, cityId: true }).extend({ x: z.number().int(), y: z.number().int() }))
   .meta({ id: 'MapSearchResult' });
 export type MapSearchResult = z.infer<typeof MapSearchResult>;
+
+export const ValleyUpgradeBody = z.object({ cityId: z.number().int().describe('city that pays the gold') });
+export const ValleyUpgradeResult = z
+  .object({ tileId: z.number().int(), level: z.number().int(), gold: z.number().describe('gold paid'), nextCost: z.number().nullable() })
+  .meta({ id: 'ValleyUpgradeResult' });
+export type ValleyUpgradeResult = z.infer<typeof ValleyUpgradeResult>;

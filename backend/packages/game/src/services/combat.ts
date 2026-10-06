@@ -34,6 +34,8 @@ import {
   totalResources,
   totalTroops,
   valleyGarrison,
+  VALLEY_TYPES,
+  valleyUpgradeCost,
   type BattleExtra,
   type BuildingState,
   type CombatResult,
@@ -260,9 +262,25 @@ async function arriveTransport(ctx: Ctx, a: ArmyRow, sender: PlayerRow) {
   await saveCity(ctx, t.b.city);
   pushResources(ctx, t.b);
   const body = { kind: 'trade' as const, trade: { from: sender.name, to: t.b.player.name, resources: a.resources } };
-  await createReport(ctx, { playerId: a.playerId, typeId: ReportType.TRADE, title: 'Transport Report', armyType: a.mission, startPos: a.startPosName, targetPos: a.targetPosName, body });
+  await createReport(ctx, {
+    playerId: a.playerId,
+    typeId: ReportType.TRADE,
+    title: 'Transport Report',
+    armyType: a.mission,
+    startPos: a.startPosName,
+    targetPos: a.targetPosName,
+    body,
+  });
   if (t.b.player.id !== a.playerId) {
-    await createReport(ctx, { playerId: t.b.player.id, typeId: ReportType.TRADE, title: 'Transport Received', armyType: a.mission, startPos: a.startPosName, targetPos: a.targetPosName, body });
+    await createReport(ctx, {
+      playerId: t.b.player.id,
+      typeId: ReportType.TRADE,
+      title: 'Transport Received',
+      armyType: a.mission,
+      startPos: a.startPosName,
+      targetPos: a.targetPosName,
+      body,
+    });
   }
   a.resources = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
   await sendBack(ctx, a, await homeMarchMs(ctx, a, a.targetTileId));
@@ -348,9 +366,20 @@ async function arriveBuildCity(ctx: Ctx, a: ArmyRow, settler: PlayerRow) {
   const base = initialCity(a.playerId, tile.id, name, ctx.now);
   const [city] = await ctx.tx
     .insert(cities)
-    .values({ ...base, gold: a.resources.gold, food: a.resources.food, wood: a.resources.wood, stone: a.resources.stone, iron: a.resources.iron, troops: a.troops })
+    .values({
+      ...base,
+      gold: a.resources.gold,
+      food: a.resources.food,
+      wood: a.resources.wood,
+      stone: a.resources.stone,
+      iron: a.resources.iron,
+      troops: a.troops,
+    })
     .returning();
-  await ctx.tx.update(tiles).set({ cityId: city.id, type: TileType.CASTLE, ownerPlayerId: a.playerId, ownerCityId: null, updatedAt: ctx.now }).where(eq(tiles.id, tile.id));
+  await ctx.tx
+    .update(tiles)
+    .set({ cityId: city.id, type: TileType.CASTLE, ownerPlayerId: a.playerId, ownerCityId: null, updatedAt: ctx.now })
+    .where(eq(tiles.id, tile.id));
   const hero = await heroOf(ctx, a);
   if (hero) {
     Object.assign(hero, { cityId: city.id, status: HeroStatus.MAYOR });
@@ -397,7 +426,14 @@ function npcState(ctx: Ctx, tile: TileRow): { state: NpcState; troops: TroopCoun
 async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
   const tile = await getTile(ctx, a.targetTileId, { lock: true });
   const hero = await heroOf(ctx, a);
-  const reportBase = { playerId: a.playerId, title: 'Scout Report', armyType: Mission.SCOUT, isAttack: true, startPos: a.startPosName, targetPos: a.targetPosName };
+  const reportBase = {
+    playerId: a.playerId,
+    title: 'Scout Report',
+    armyType: Mission.SCOUT,
+    isAttack: true,
+    startPos: a.startPosName,
+    targetPos: a.targetPosName,
+  };
 
   if (tile.cityId == null && tile.type === TileType.NPC) {
     const npc = npcState(ctx, tile);
@@ -414,7 +450,13 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
           success: true,
           loyalty: Math.floor(npc.state.loyalty),
           population: npc.state.population,
-          resources: { gold: Math.floor(npc.state.gold), food: Math.floor(npc.state.food), wood: Math.floor(npc.state.wood), stone: Math.floor(npc.state.stone), iron: Math.floor(npc.state.iron) },
+          resources: {
+            gold: Math.floor(npc.state.gold),
+            food: Math.floor(npc.state.food),
+            wood: Math.floor(npc.state.wood),
+            stone: Math.floor(npc.state.stone),
+            iron: Math.floor(npc.state.iron),
+          },
           troops: npc.troops,
           fortifications: npc.forts,
           wallLevel: tile.level,
@@ -449,7 +491,7 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
   const def = await openCity(ctx, tile.cityId);
   if (!def) return turnBack(ctx, a, 'The city no longer exists.');
   const stationed = await armiesStationedAt(ctx, tile.id, { lock: true });
-  const cityScouts = def.city.goOutForBattle ? def.city.troops.scouter ?? 0 : 0;
+  const cityScouts = def.city.goOutForBattle ? (def.city.troops.scouter ?? 0) : 0;
   const defScouts = cityScouts + stationed.reduce((s, x) => s + (x.troops.scouter ?? 0), 0);
   const defHero = bestHero([...def.heroes.filter((h) => h.playerId === def.player.id && (h.status === 0 || h.status === 1))]);
   const result = resolveCombat(
@@ -473,7 +515,13 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
   const informatics = researchLevel(scoutOwner.research, TechType.INFORMATICS);
   const intel = success
     ? {
-        resources: { gold: Math.floor(def.city.gold), food: Math.floor(def.city.food), wood: Math.floor(def.city.wood), stone: Math.floor(def.city.stone), iron: Math.floor(def.city.iron) },
+        resources: {
+          gold: Math.floor(def.city.gold),
+          food: Math.floor(def.city.food),
+          wood: Math.floor(def.city.wood),
+          stone: Math.floor(def.city.stone),
+          iron: Math.floor(def.city.iron),
+        },
         troops: def.city.troops,
         fortifications: def.city.forts,
         wallLevel: buildingLevel(def.city.buildings, BuildingType.WALLS),
@@ -484,7 +532,11 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
         stationed: stationed.filter((s) => totalTroops(s.troops) > 0).map((s) => s.troops),
       }
     : null;
-  const battle = { rounds: result.rounds, attackerScouts: { before: a.troops.scouter ?? 0, after: survivors }, defenderScouts: { before: defScouts, after: result.defender.after.scouter ?? 0 } };
+  const battle = {
+    rounds: result.rounds,
+    attackerScouts: { before: a.troops.scouter ?? 0, after: survivors },
+    defenderScouts: { before: defScouts, after: result.defender.after.scouter ?? 0 },
+  };
   await createReport(ctx, { ...reportBase, body: { kind: 'scout', scout: { target: 'city', owner: def.player.name, success, battle, intel } } });
   await createReport(ctx, {
     playerId: def.player.id,
@@ -595,7 +647,13 @@ async function homeBundle(ctx: Ctx, a: ArmyRow): Promise<CityBundle | null> {
 /** Survivors head home carrying plunder. */
 async function returnWithLoot(ctx: Ctx, a: ArmyRow, survivors: TroopCounts, loot: ResourceSet) {
   a.troops = survivors;
-  a.resources = { gold: a.resources.gold + loot.gold, food: a.resources.food + loot.food, wood: a.resources.wood + loot.wood, stone: a.resources.stone + loot.stone, iron: a.resources.iron + loot.iron };
+  a.resources = {
+    gold: a.resources.gold + loot.gold,
+    food: a.resources.food + loot.food,
+    wood: a.resources.wood + loot.wood,
+    stone: a.resources.stone + loot.stone,
+    iron: a.resources.iron + loot.iron,
+  };
   await sendBack(ctx, a, await homeMarchMs(ctx, a, a.targetTileId));
   await notifyArmyParties(ctx, a);
 }
@@ -621,7 +679,13 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   const defHero = bestHero([...def.heroes.filter((h) => h.playerId === def.player.id && h.status <= HeroStatus.MAYOR), ...stationedHeroes]);
   const wallLevel = buildingLevel(def.city.buildings, BuildingType.WALLS);
   const r = resolveCombat(
-    { troops: a.troops, research: attacker.research, hero, attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now), defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now) },
+    {
+      troops: a.troops,
+      research: attacker.research,
+      hero,
+      attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now),
+      defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now),
+    },
     {
       troops: defTroops,
       research: def.player.research,
@@ -684,7 +748,11 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   await savePlayer(ctx, def.player);
   if (!captured) await saveCity(ctx, def.city);
 
-  const attackerSide = { player: attacker.name, hero: heroSummary(hero), troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after } };
+  const attackerSide = {
+    player: attacker.name,
+    hero: heroSummary(hero),
+    troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after },
+  };
   const defenderSide = {
     player: def.player.name,
     hero: heroSummary(defHero),
@@ -692,7 +760,13 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     forts: r.forts,
     wallLevel,
   };
-  const body = battleBody(r, attackerSide, defenderSide, { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(def.city.loyalty), captured, city: def.city.name });
+  const body = battleBody(r, attackerSide, defenderSide, {
+    plunder: loot,
+    loyaltyDamage,
+    loyaltyLeft: Math.floor(def.city.loyalty),
+    captured,
+    city: def.city.name,
+  });
   const reportCommon = { armyType: Mission.ATTACK, startPos: a.startPosName, targetPos: a.targetPosName, body };
   await createReport(ctx, { ...reportCommon, playerId: a.playerId, title: r.attackerWon ? 'Attack Succeeded' : 'Attack Failed', isAttack: true });
   await createReport(ctx, { ...reportCommon, playerId: def.player.id, title: r.attackerWon ? 'City Attacked' : 'Attack Repelled' });
@@ -727,7 +801,10 @@ async function tryCaptureCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, def: Ci
     });
     await saveHero(ctx, h);
   }
-  await ctx.tx.update(armies).set({ cityId: capital.id }).where(and(eq(armies.cityId, def.city.id), eq(armies.playerId, def.player.id)));
+  await ctx.tx
+    .update(armies)
+    .set({ cityId: capital.id })
+    .where(and(eq(armies.cityId, def.city.id), eq(armies.playerId, def.player.id)));
   await ctx.tx.execute(
     // pending construction/research/training events follow the city to its new owner
     sql`update timed_events set player_id = ${attacker.id} where city_id = ${def.city.id}`,
@@ -739,7 +816,9 @@ async function tryCaptureCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, def: Ci
   def.city.loyalty = 20;
   def.city.troopQueues = [];
   def.city.fortQueue = { nextQueueId: def.city.fortQueue.nextQueueId, queue: [] };
-  def.city.buildings = def.city.buildings.map((b) => (b.status !== BuildingStatus.IDLE && b.level > 0 ? { ...b, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 } : b)).filter((b) => b.level > 0);
+  def.city.buildings = def.city.buildings
+    .map((b) => (b.status !== BuildingStatus.IDLE && b.level > 0 ? { ...b, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 } : b))
+    .filter((b) => b.level > 0);
   await ctx.tx.execute(sql`delete from timed_events where city_id = ${def.city.id} and type in ('building','train')`);
   await saveCity(ctx, def.city);
   await ctx.tx.update(tiles).set({ ownerPlayerId: attacker.id, updatedAt: ctx.now }).where(eq(tiles.id, def.city.tileId));
@@ -756,7 +835,13 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const npc = npcState(ctx, tile);
   const guard = createGuardHero(tile.level * 10, ctx.rng);
   const r = resolveCombat(
-    { troops: a.troops, research: attacker.research, hero, attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now), defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now) },
+    {
+      troops: a.troops,
+      research: attacker.research,
+      hero,
+      attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now),
+      defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now),
+    },
     { troops: npc.troops, research: {}, hero: guard, forts: npc.forts, wallLevel: tile.level },
     ctx.rng,
   );
@@ -786,10 +871,24 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const body = battleBody(
     r,
     { player: attacker.name, hero: heroSummary(hero), troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after } },
-    { player: "Barbarian's City", hero: { id: 0, name: guard.name, level: guard.level, logoUrl: guard.logoUrl }, troops: { before: r.defender.before, lost: r.defender.lost, after: r.defender.after }, forts: r.forts, wallLevel: tile.level },
+    {
+      player: "Barbarian's City",
+      hero: { id: 0, name: guard.name, level: guard.level, logoUrl: guard.logoUrl },
+      troops: { before: r.defender.before, lost: r.defender.lost, after: r.defender.after },
+      forts: r.forts,
+      wallLevel: tile.level,
+    },
     { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured, level: tile.level },
   );
-  await createReport(ctx, { playerId: a.playerId, title: r.attackerWon ? 'Attack Succeeded' : 'Attack Failed', isAttack: true, armyType: Mission.ATTACK, startPos: a.startPosName, targetPos: a.targetPosName, body });
+  await createReport(ctx, {
+    playerId: a.playerId,
+    title: r.attackerWon ? 'Attack Succeeded' : 'Attack Failed',
+    isAttack: true,
+    armyType: Mission.ATTACK,
+    startPos: a.startPosName,
+    targetPos: a.targetPosName,
+    body,
+  });
   if (totalTroops(r.attacker.after) <= 0) {
     await armyWiped(ctx, a, hero, null);
     return;
@@ -826,7 +925,16 @@ async function captureNpc(ctx: Ctx, attacker: PlayerRow, tile: TileRow, state: N
       loyalty: 20,
     })
     .returning();
-  Object.assign(tile, { type: TileType.CASTLE, cityId: city.id, ownerPlayerId: attacker.id, ownerCityId: null, troops: null, forts: null, state: null, updatedAt: ctx.now });
+  Object.assign(tile, {
+    type: TileType.CASTLE,
+    cityId: city.id,
+    ownerPlayerId: attacker.id,
+    ownerCityId: null,
+    troops: null,
+    forts: null,
+    state: null,
+    updatedAt: ctx.now,
+  });
   await saveTile(ctx, tile);
   pushCity(ctx, await viewCity(ctx, city.id));
   addPrestige(attacker, 1000 * tile.level);
@@ -854,7 +962,13 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const guard = owner ? bestHero(stationedHeroes) : null;
   const npcGuard = owner ? null : createGuardHero(20, ctx.rng);
   const r = resolveCombat(
-    { troops: a.troops, research: attacker.research, hero, attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now), defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now) },
+    {
+      troops: a.troops,
+      research: attacker.research,
+      hero,
+      attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now),
+      defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now),
+    },
     { troops: defTroops, research: owner?.research ?? {}, hero: guard ?? npcGuard },
     ctx.rng,
   );
@@ -899,11 +1013,20 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const body = battleBody(
     r,
     { player: attacker.name, hero: heroSummary(hero), troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after } },
-    { player: defenderName, hero: g ? { id: 0, name: g.name, level: g.level, logoUrl: g.logoUrl } : null, troops: { before: r.defender.before, lost: r.defender.lost, after: r.defender.after } },
+    {
+      player: defenderName,
+      hero: g ? { id: 0, name: g.name, level: g.level, logoUrl: g.logoUrl } : null,
+      troops: { before: r.defender.before, lost: r.defender.lost, after: r.defender.after },
+    },
     { occupied, reason, valley: { type: tile.type, level: tile.level } },
   );
   const common = { armyType: Mission.ATTACK, startPos: a.startPosName, targetPos: a.targetPosName, body };
-  await createReport(ctx, { ...common, playerId: a.playerId, title: r.attackerWon ? (occupied ? 'Valley Occupied' : 'Attack Succeeded') : 'Attack Failed', isAttack: true });
+  await createReport(ctx, {
+    ...common,
+    playerId: a.playerId,
+    title: r.attackerWon ? (occupied ? 'Valley Occupied' : 'Attack Succeeded') : 'Attack Failed',
+    isAttack: true,
+  });
   if (defenderId) await createReport(ctx, { ...common, playerId: defenderId, title: occupied ? 'Valley Lost' : 'Valley Defended' });
   if (totalTroops(r.attacker.after) <= 0) {
     await armyWiped(ctx, a, hero, null);
@@ -939,3 +1062,22 @@ export async function abandonValley(ctx: Ctx, playerId: number, tileId: number) 
   pushResources(ctx, b);
 }
 
+/**
+ * Raise an unowned valley one level, paid in gold by one of the lord's cities (instant). Its
+ * garrison regenerates at the new level the next time it is scouted or attacked.
+ */
+export async function upgradeValley(ctx: Ctx, playerId: number, cityId: number, tileId: number) {
+  const b = await openOwnCity(ctx, playerId, cityId);
+  const tile = await getTile(ctx, tileId, { lock: true });
+  if (!VALLEY_TYPES.includes(tile.type) || tile.cityId != null) throw new GameError('Only valleys can be upgraded.', -99);
+  if (tile.ownerCityId != null) throw new GameError('Only valleys nobody holds can be upgraded.', -99);
+  const cost = valleyUpgradeCost(tile.level);
+  if (cost == null) throw new GameError(`This valley is already level ${tile.level}, the highest.`, -99);
+  if (b.city.gold < cost) throw new GameError(`Not enough gold: ${cost.toLocaleString('en')} needed.`, -99);
+  b.city.gold -= cost;
+  Object.assign(tile, { level: tile.level + 1, troops: null, state: null, updatedAt: ctx.now });
+  await saveTile(ctx, tile);
+  await saveCity(ctx, b.city);
+  pushResources(ctx, b);
+  return { tileId, level: tile.level, gold: cost, nextCost: valleyUpgradeCost(tile.level) };
+}

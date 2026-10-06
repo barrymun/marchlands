@@ -18,6 +18,8 @@ import {
   TILE_NAMES,
   TileType,
   tileXY,
+  VALLEY_TYPES,
+  valleyUpgradeCost,
 } from '@evony/core';
 import { cities, pgArray, players, tiles, worldState, type Db } from '@evony/db';
 import type { Ctx } from '../context.ts';
@@ -229,7 +231,10 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
         .where(inArray(cities.id, cityIds))
     : [];
   const cityById = new Map(cityRows.map((c) => [c.id, c]));
-  const allianceNames = await allianceNameMap(ctx, cityRows.map((c) => c.allianceId));
+  const allianceNames = await allianceNameMap(
+    ctx,
+    cityRows.map((c) => c.allianceId),
+  );
   let mapStr = '';
   const castles: MapCastle[] = [];
   for (const id of ids) {
@@ -259,7 +264,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
           prestige: Math.floor(c.prestige),
           honor: Math.floor(c.honor),
           flag: c.flag,
-          allianceName: c.allianceId ? allianceNames.get(c.allianceId) ?? '' : '',
+          allianceName: c.allianceId ? (allianceNames.get(c.allianceId) ?? '') : '',
           playerLogoUrl: c.faceUrl,
           relation,
           state: c.pstatus,
@@ -286,7 +291,10 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
         .where(inArray(cities.id, holderIds))
     : [];
   const holderById = new Map(holders.map((h) => [h.id, h]));
-  const holderAlliances = await allianceNameMap(ctx, holders.map((h) => h.allianceId));
+  const holderAlliances = await allianceNameMap(
+    ctx,
+    holders.map((h) => h.allianceId),
+  );
   const relationOf = new Map<number, number>();
   const valleys = [];
   for (const t of held) {
@@ -343,7 +351,8 @@ export async function fieldInfo(ctx: Ctx, viewerId: number | null, tileId: numbe
     owner = c;
   }
   const relation = owner && viewerId ? await relationBetween(ctx, viewerId, owner.playerId) : Relation.NO_RELATION;
-  return { ...base, npc: t.type === TileType.NPC, owner: owner ?? null, relation, ...permissions(relation) };
+  const upgradeCost = !owner && VALLEY_TYPES.includes(t.type) ? valleyUpgradeCost(t.level) : null;
+  return { ...base, npc: t.type === TileType.NPC, owner: owner ?? null, relation, upgradeCost, ...permissions(relation) };
 }
 
 /** All tiles of a type/level in an area, used by the "search nearby" UI. */

@@ -142,6 +142,23 @@ async function main() {
   const own = map.castles.find((c) => c.cityId === cid);
   check(!!own, 'own castle on map');
 
+  // ---- upgrade an unowned valley for gold ----
+  let wild;
+  for (let type = 1; type <= 6 && !wild; type++) {
+    const found = await ok(a.token, 'GET', `/map/search?x=${city.x}&y=${city.y}&radius=10&type=${type}`);
+    wild = found.find((t) => t.ownerCityId == null && t.level < 10);
+  }
+  if (wild) {
+    const info0 = await ok(a.token, 'GET', `/map/tiles/${wild.id}`);
+    const gold0 = (await ok(a.token, 'GET', `/cities/${cid}`)).resource.gold;
+    const up = await ok(a.token, 'POST', `/valleys/${wild.id}/upgrade`, { cityId: cid });
+    check(up.level === info0.level + 1 && up.gold === info0.upgradeCost, `valley Lv ${info0.level} → ${up.level} for ${up.gold} gold`);
+    check(gold0 - (await ok(a.token, 'GET', `/cities/${cid}`)).resource.gold >= up.gold - 1, 'gold paid by the city');
+    check((await ok(a.token, 'GET', `/map/tiles/${wild.id}`)).level === up.level, 'map shows the new level');
+    const ownValley = await call(a.token, 'POST', `/valleys/${own.id}/upgrade`, { cityId: cid });
+    check(ownValley.ok !== 1, 'a city tile cannot be upgraded');
+  } else console.log('  (no unowned valley nearby; valley upgrade skipped)');
+
   // ---- scout + attack a barbarian city ----
   if (npc) {
     await ok(a.token, 'POST', `/cities/${cid}/armies`, { targetTileId: npc.id, mission: 5, troops: { militia: 40 }, heroId: h2.id });

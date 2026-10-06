@@ -5052,6 +5052,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/valleys/{tileId}/upgrade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Raise an unowned valley one level for gold (instant) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    tileId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description city that pays the gold */
+                        cityId: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["ValleyUpgradeResult"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/map": {
         parameters: {
             query?: never;
@@ -11112,6 +11179,8 @@ export interface components {
             owner: components["schemas"]["MapTileOwnerInput"] | null;
             /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
             relation: number;
+            /** @description gold to raise this unowned valley one level (null: not upgradable) */
+            upgradeCost: number | null;
             canLoot: boolean;
             canOccupy: boolean;
             canScout: boolean;
@@ -11159,6 +11228,13 @@ export interface components {
             x: number;
             y: number;
         }[];
+        ValleyUpgradeResultInput: {
+            tileId: number;
+            level: number;
+            /** @description gold paid */
+            gold: number;
+            nextCost: number | null;
+        };
         MailCountsInput: {
             /** @description unread inbox + system */
             count: number;
@@ -11984,6 +12060,10 @@ export interface components {
             heroExpPerTrain: number;
             heroExpPerResearch: number;
             heroExpPerBuild: number;
+            valleyUpgrade: {
+                baseGold: number;
+                maxLevel: number;
+            };
             /** @description milliseconds */
             beginnerProtectionMs: number;
             beginnerTownHallLevel: number;
@@ -13096,6 +13176,8 @@ export interface components {
             owner: components["schemas"]["MapTileOwner"] | null;
             /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
             relation: number;
+            /** @description gold to raise this unowned valley one level (null: not upgradable) */
+            upgradeCost: number | null;
             canLoot: boolean;
             canOccupy: boolean;
             canScout: boolean;
@@ -13143,6 +13225,13 @@ export interface components {
             x: number;
             y: number;
         }[];
+        ValleyUpgradeResult: {
+            tileId: number;
+            level: number;
+            /** @description gold paid */
+            gold: number;
+            nextCost: number | null;
+        };
         MailCounts: {
             /** @description unread inbox + system */
             count: number;
@@ -13968,6 +14057,10 @@ export interface components {
             heroExpPerTrain: number;
             heroExpPerResearch: number;
             heroExpPerBuild: number;
+            valleyUpgrade: {
+                baseGold: number;
+                maxLevel: number;
+            };
             /** @description milliseconds */
             beginnerProtectionMs: number;
             beginnerTownHallLevel: number;
@@ -14369,6 +14462,7 @@ export type MapFieldTileInfoInput = components['schemas']['MapFieldTileInfoInput
 export type MapFieldCastleInfoInput = components['schemas']['MapFieldCastleInfoInput'];
 export type MapFieldInfoInput = components['schemas']['MapFieldInfoInput'];
 export type MapSearchResultInput = components['schemas']['MapSearchResultInput'];
+export type ValleyUpgradeResultInput = components['schemas']['ValleyUpgradeResultInput'];
 export type MailCountsInput = components['schemas']['MailCountsInput'];
 export type MailSummaryInput = components['schemas']['MailSummaryInput'];
 export type MailListInput = components['schemas']['MailListInput'];
@@ -14496,6 +14590,7 @@ export type MapFieldTileInfo = components['schemas']['MapFieldTileInfo'];
 export type MapFieldCastleInfo = components['schemas']['MapFieldCastleInfo'];
 export type MapFieldInfo = components['schemas']['MapFieldInfo'];
 export type MapSearchResult = components['schemas']['MapSearchResult'];
+export type ValleyUpgradeResult = components['schemas']['ValleyUpgradeResult'];
 export type MailCounts = components['schemas']['MailCounts'];
 export type MailSummary = components['schemas']['MailSummary'];
 export type MailList = components['schemas']['MailList'];
