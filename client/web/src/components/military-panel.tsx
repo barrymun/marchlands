@@ -291,7 +291,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                         size="xs"
                         variant="outline"
                         disabled={!u.permission || m.count <= 0}
-                        title={m.count > 0 ? `${fmtExact(m.count)}: limited by ${m.limit}` : `None: not enough ${m.limit}`}
+                        title={`${m.count > 0 ? `${fmtExact(m.count)}: limited by ${m.limit}` : `None: not enough ${m.limit}`}${m.limit === 'idle population' ? ' (lower the work rates in City settings to free workers)' : ''}`}
                         onClick={() => setCounts({ ...counts, [u.typeId]: String(m.count) })}
                       >
                         Max

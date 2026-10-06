@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient, type QueryClient, type QueryKey } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { setGameSpeed } from '@evony/core';
+import { BALANCE, scaled, setGameSpeed } from '@evony/core';
 import type { CityBean, PushStatus } from '@evony/api-client';
 import { api, errorMessage, push, unwrap } from '@/lib/api';
 
@@ -36,7 +36,17 @@ export function useCity(cityId: number | undefined) {
     queryKey: qk.city(cityId ?? 0),
     enabled: cityId != null,
     queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}', { params: { path: { cityId: cityId! } } })),
+    // population and loyalty drift a step every city tick on the server; refetch on each tick
+    // while they are still moving so the header follows them live
+    refetchInterval: (q) => (q.state.data && cityIsDrifting(q.state.data) ? Math.max(1000, scaled(BALANCE.cityTickMs)) : false),
   });
+}
+
+/** Population still moving towards its target, or loyalty towards 100 - (tax + grievance) (core populationTick). */
+function cityIsDrifting(c: CityBean): boolean {
+  const r = c.resource;
+  const targetLoyalty = 100 - Math.min(100, r.taxRate + r.complaint);
+  return r.populationDirection !== 0 || r.support !== targetLoyalty;
 }
 
 /** Wraps a command: toasts failures and refreshes the given queries on success. */
