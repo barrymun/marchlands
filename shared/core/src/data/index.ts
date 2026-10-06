@@ -1,6 +1,7 @@
 // Static game configuration converted from the legacy `config_*` tables
 // (tools/legacy-import/convert.mjs). Treat as read-only.
 
+import { BALANCE } from '../balance.ts';
 import type { Resources } from '../resources.ts';
 import buildingRows from './legacy/buildings.json' with { type: 'json' };
 import researchRows from './legacy/research.json' with { type: 'json' };
@@ -74,7 +75,11 @@ export interface QuestConfig {
   requires: { buildings: number[]; items: number[]; techs: number[]; quests: number[] };
 }
 
-export const BUILDINGS = buildingRows as BuildingLevelConfig[];
+// (evony-re) the original's level-10 upgrades also need a Michelangelo's Script item; with
+// BALANCE.buildingItemRequirements off they need only resources, time and the usual prerequisites
+export const BUILDINGS = (buildingRows as BuildingLevelConfig[]).map((b) =>
+  BALANCE.buildingItemRequirements || !b.requires.items.length ? b : { ...b, requires: { ...b.requires, items: [] } },
+);
 export const RESEARCH = researchRows as ResearchLevelConfig[];
 export const TROOPS = troopRows as TroopConfig[];
 export const ITEMS = itemRows as ItemConfig[];
