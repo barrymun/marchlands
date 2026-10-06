@@ -2,7 +2,7 @@
 // wrote XML files to disk).
 
 import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
-import { GameError, ReportBodySchema, type ReportBody } from '@evony/core';
+import { addTroops, GameError, ReportBodySchema, type DesertionReport, type ReportBody, type TroopCounts } from '@evony/core';
 import { reports } from '@evony/db';
 import type { Ctx } from '../context.ts';
 
@@ -39,6 +39,56 @@ export async function createReport(ctx: Ctx, r: NewReport): Promise<number> {
     .returning({ id: reports.id });
   await pushReportCounts(ctx, r.playerId);
   return row.id;
+}
+
+/**
+ * Report troops that deserted a starving city. Settles happen on every action, so while a city
+ * starves they are merged into the latest unread "Troops Deserted" report of that city. A settle
+ * whose city row was not saved is recomputed from the same start by the next one: that window
+ * replaces the previous contribution instead of being counted twice.
+ */
+export async function reportDesertion(
+  ctx: Ctx,
+  r: { playerId: number; cityId: number; city: string; from: number; troops: TroopCounts; food: DesertionReport['food']; position: string },
+) {
+  const [prev] = await ctx.tx
+    .select()
+    .from(reports)
+    .where(
+      and(eq(reports.playerId, r.playerId), sql`${reports.body}->>'kind' = 'desertion'`, sql`(${reports.body}->'desertion'->>'cityId')::int = ${r.cityId}`),
+    )
+    .orderBy(desc(reports.id))
+    .limit(1);
+  const old = prev && (prev.body as ReportBody).kind === 'desertion' ? (prev.body as Extract<ReportBody, { kind: 'desertion' }>).desertion : null;
+  const replaces = old != null && old.last.from === r.from;
+  if (prev && old && (replaces || !prev.isRead)) {
+    const base = replaces ? addTroops(old.troops, old.last.troops, -1) : old.troops;
+    const desertion: DesertionReport = {
+      ...old,
+      city: r.city,
+      troops: addTroops(base, r.troops),
+      to: ctx.now,
+      food: r.food,
+      last: { from: r.from, troops: r.troops },
+    };
+    await ctx.tx
+      .update(reports)
+      .set({ body: { kind: 'desertion', desertion }, eventTime: ctx.now, isRead: false })
+      .where(eq(reports.id, prev.id));
+    await pushReportCounts(ctx, r.playerId);
+    return prev.id;
+  }
+  return createReport(ctx, {
+    playerId: r.playerId,
+    typeId: ReportType.ARMY,
+    title: 'Troops Deserted',
+    startPos: r.position,
+    targetPos: r.position,
+    body: {
+      kind: 'desertion',
+      desertion: { cityId: r.cityId, city: r.city, troops: r.troops, from: r.from, to: ctx.now, food: r.food, last: { from: r.from, troops: r.troops } },
+    },
+  });
 }
 
 export async function reportCounts(ctx: Ctx, playerId: number) {
@@ -86,7 +136,10 @@ export async function listReports(ctx: Ctx, playerId: number, type: number | nul
 
 /** report.markAsRead (open a report) */
 export async function readReport(ctx: Ctx, playerId: number, id: number) {
-  const [r] = await ctx.tx.select().from(reports).where(and(eq(reports.id, id), eq(reports.playerId, playerId)));
+  const [r] = await ctx.tx
+    .select()
+    .from(reports)
+    .where(and(eq(reports.id, id), eq(reports.playerId, playerId)));
   if (!r) throw new GameError('Invalid report id.', -99, 404);
   if (!r.isRead) {
     await ctx.tx.update(reports).set({ isRead: true }).where(eq(reports.id, id));
@@ -100,8 +153,7 @@ export async function readReport(ctx: Ctx, playerId: number, id: number) {
 
 /** report.readOverReport */
 export async function markReportsRead(ctx: Ctx, playerId: number, ids: number[] | 'all') {
-  const where =
-    ids === 'all' ? eq(reports.playerId, playerId) : and(eq(reports.playerId, playerId), inArray(reports.id, ids.length ? ids : [-1]));
+  const where = ids === 'all' ? eq(reports.playerId, playerId) : and(eq(reports.playerId, playerId), inArray(reports.id, ids.length ? ids : [-1]));
   await ctx.tx.update(reports).set({ isRead: true }).where(where);
   await pushReportCounts(ctx, playerId);
 }

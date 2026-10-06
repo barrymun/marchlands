@@ -14,7 +14,7 @@ import {
   type BuildingState,
 } from '@evony/core';
 import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@evony/db';
-import { viewCity } from '../city.ts';
+import { viewOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { buffsArray, cityBean, itemsArray } from '../dto.ts';
 import {
@@ -122,7 +122,7 @@ export async function playerState(ctx: Ctx, playerId: number) {
   const cityRows = await citiesOf(ctx, playerId);
   const castles = [];
   for (const c of cityRows) {
-    const b = await viewCity(ctx, c.id, player);
+    const b = await viewOwnCity(ctx, playerId, c.id, player);
     castles.push(cityBean(b, ctx.now));
   }
   const unread = await ctx.tx

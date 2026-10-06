@@ -6228,6 +6228,124 @@
                   "kind",
                   "text"
                 ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "desertion"
+                  },
+                  "desertion": {
+                    "type": "object",
+                    "properties": {
+                      "cityId": {
+                        "type": "number"
+                      },
+                      "city": {
+                        "type": "string"
+                      },
+                      "troops": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "enum": [
+                            "peasants",
+                            "militia",
+                            "scouter",
+                            "pikemen",
+                            "swordsmen",
+                            "archer",
+                            "carriage",
+                            "lightCavalry",
+                            "heavyCavalry",
+                            "ballista",
+                            "batteringRam",
+                            "catapult"
+                          ]
+                        },
+                        "additionalProperties": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      "from": {
+                        "type": "number"
+                      },
+                      "to": {
+                        "type": "number"
+                      },
+                      "food": {
+                        "type": "object",
+                        "properties": {
+                          "production": {
+                            "type": "number"
+                          },
+                          "upkeep": {
+                            "type": "number"
+                          },
+                          "net": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "production",
+                          "upkeep",
+                          "net"
+                        ]
+                      },
+                      "last": {
+                        "type": "object",
+                        "properties": {
+                          "from": {
+                            "type": "number"
+                          },
+                          "troops": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string",
+                              "enum": [
+                                "peasants",
+                                "militia",
+                                "scouter",
+                                "pikemen",
+                                "swordsmen",
+                                "archer",
+                                "carriage",
+                                "lightCavalry",
+                                "heavyCavalry",
+                                "ballista",
+                                "batteringRam",
+                                "catapult"
+                              ]
+                            },
+                            "additionalProperties": {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          }
+                        },
+                        "required": [
+                          "from",
+                          "troops"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "cityId",
+                      "city",
+                      "troops",
+                      "from",
+                      "to",
+                      "food",
+                      "last"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "desertion"
+                ]
               }
             ]
           }
@@ -15496,6 +15614,128 @@
                 "required": [
                   "kind",
                   "text"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "desertion"
+                  },
+                  "desertion": {
+                    "type": "object",
+                    "properties": {
+                      "cityId": {
+                        "type": "number"
+                      },
+                      "city": {
+                        "type": "string"
+                      },
+                      "troops": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "enum": [
+                            "peasants",
+                            "militia",
+                            "scouter",
+                            "pikemen",
+                            "swordsmen",
+                            "archer",
+                            "carriage",
+                            "lightCavalry",
+                            "heavyCavalry",
+                            "ballista",
+                            "batteringRam",
+                            "catapult"
+                          ]
+                        },
+                        "additionalProperties": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      "from": {
+                        "type": "number"
+                      },
+                      "to": {
+                        "type": "number"
+                      },
+                      "food": {
+                        "type": "object",
+                        "properties": {
+                          "production": {
+                            "type": "number"
+                          },
+                          "upkeep": {
+                            "type": "number"
+                          },
+                          "net": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "production",
+                          "upkeep",
+                          "net"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "last": {
+                        "type": "object",
+                        "properties": {
+                          "from": {
+                            "type": "number"
+                          },
+                          "troops": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string",
+                              "enum": [
+                                "peasants",
+                                "militia",
+                                "scouter",
+                                "pikemen",
+                                "swordsmen",
+                                "archer",
+                                "carriage",
+                                "lightCavalry",
+                                "heavyCavalry",
+                                "ballista",
+                                "batteringRam",
+                                "catapult"
+                              ]
+                            },
+                            "additionalProperties": {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          }
+                        },
+                        "required": [
+                          "from",
+                          "troops"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "cityId",
+                      "city",
+                      "troops",
+                      "from",
+                      "to",
+                      "food",
+                      "last"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "desertion"
                 ],
                 "additionalProperties": false
               }

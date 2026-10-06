@@ -24,7 +24,7 @@ import {
   assertCanResearch,
   type ResearchState,
 } from '@evony/core';
-import { loadBundle, mayorOf, mayorStats, openOwnCity, settle, viewCity, type CityBundle } from '../city.ts';
+import { loadBundle, mayorOf, mayorStats, openOwnCity, settleAndReport, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';
 import { addPrestige, gainResources, pushPlayerInfo, pushResources, spendCents, spendResources, useItemOrCents } from '../helpers.ts';
@@ -150,7 +150,7 @@ export async function settleAllCities(ctx: Ctx, p: PlayerRow): Promise<CityBundl
   const out: CityBundle[] = [];
   for (const c of await citiesOf(ctx, p.id, { lock: true })) {
     const b = await loadBundle(ctx, c, p);
-    settle(ctx, b);
+    await settleAndReport(ctx, b);
     await saveCity(ctx, b.city);
     out.push(b);
   }

@@ -11613,6 +11613,29 @@ export interface components {
                 /** @constant */
                 kind: "text";
                 text: string;
+            } | {
+                /** @constant */
+                kind: "desertion";
+                desertion: {
+                    cityId: number;
+                    city: string;
+                    troops: {
+                        [key: string]: number;
+                    };
+                    from: number;
+                    to: number;
+                    food: {
+                        production: number;
+                        upkeep: number;
+                        net: number;
+                    };
+                    last: {
+                        from: number;
+                        troops: {
+                            [key: string]: number;
+                        };
+                    };
+                };
             };
         };
         ChatMessageInput: {
@@ -13565,6 +13588,29 @@ export interface components {
                 /** @constant */
                 kind: "text";
                 text: string;
+            } | {
+                /** @constant */
+                kind: "desertion";
+                desertion: {
+                    cityId: number;
+                    city: string;
+                    troops: {
+                        [key: string]: number;
+                    };
+                    from: number;
+                    to: number;
+                    food: {
+                        production: number;
+                        upkeep: number;
+                        net: number;
+                    };
+                    last: {
+                        from: number;
+                        troops: {
+                            [key: string]: number;
+                        };
+                    };
+                };
             };
         };
         ChatMessage: {

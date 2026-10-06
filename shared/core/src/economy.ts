@@ -257,6 +257,9 @@ export function settleCity(city: EconomyCity, ctx: EconomyContext, now: number):
   let t = city.resourcesAt;
   let lastTick = city.misc.lastTickAt ?? t;
   if (lastTick > t) lastTick = t;
+  // never step back before `t` (a stale tick, e.g. after the game speed shrank the interval, would
+  // otherwise rewind the clock and integrate the same time twice): keep the phase, drop old ticks
+  if (lastTick + tickMs < t) lastTick = t - ((t - lastTick) % tickMs);
   let stats = computeCityStats(city, ctx, t);
 
   while (t < now) {

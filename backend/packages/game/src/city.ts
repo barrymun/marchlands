@@ -8,6 +8,7 @@ import {
   heroStratagem,
   HeroStatus,
   settleCity,
+  tileXY,
   addTroops,
   type CityStats,
   type EconomyContext,
@@ -17,7 +18,20 @@ import {
 } from '@evony/core';
 import type { Ctx } from './context.ts';
 import { troopBean } from './dto.ts';
-import { armiesOfCity, findCity, getCity, getPlayer, heroesOfCity, valleysOfCity, type CityRow, type HeroRow, type PlayerRow, type TileRow } from './repo.ts';
+import { reportDesertion } from './services/reports.ts';
+import {
+  armiesOfCity,
+  findCity,
+  getCity,
+  getPlayer,
+  heroesOfCity,
+  saveCity,
+  valleysOfCity,
+  type CityRow,
+  type HeroRow,
+  type PlayerRow,
+  type TileRow,
+} from './repo.ts';
 
 export interface CityBundle {
   player: PlayerRow;
@@ -26,6 +40,8 @@ export interface CityBundle {
   valleys: TileRow[];
   /** troops of this city that are out marching or stationed elsewhere */
   awayTroops: TroopCounts;
+  /** set by viewCity: troops the in-memory settle found deserting (not yet saved or reported) */
+  deserted?: TroopCounts;
 }
 
 export function mayorOf(heroes: HeroRow[]): HeroRow | undefined {
@@ -72,6 +88,26 @@ export function settle(ctx: Ctx, b: CityBundle): SettleResult {
   return r;
 }
 
+/** Settle a locked city and report any troops that deserted for lack of food. */
+export async function settleAndReport(ctx: Ctx, b: CityBundle): Promise<SettleResult> {
+  const from = b.city.resourcesAt;
+  const r = settle(ctx, b);
+  if (Object.keys(r.deserted).length) {
+    const stats = cityStats(b, ctx.now);
+    const { x, y } = tileXY(b.city.tileId);
+    await reportDesertion(ctx, {
+      playerId: b.player.id,
+      cityId: b.city.id,
+      city: b.city.name,
+      from,
+      troops: r.deserted,
+      food: { production: Math.round(stats.rates.food + stats.upkeep), upkeep: Math.round(stats.upkeep), net: Math.round(stats.rates.food) },
+      position: `${b.city.name} (${x},${y})`,
+    });
+  }
+  return r;
+}
+
 /**
  * Lock the player and one of their cities, load the economy context and settle it.
  * Throws when the city does not belong to the player.
@@ -81,7 +117,7 @@ export async function openOwnCity(ctx: Ctx, playerId: number, cityId: number): P
   const city = await getCity(ctx, cityId, { lock: true });
   if (city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
   const b = await loadBundle(ctx, city, player);
-  settle(ctx, b);
+  await settleAndReport(ctx, b);
   return b;
 }
 
@@ -94,7 +130,7 @@ export async function openCity(ctx: Ctx, cityId: number): Promise<CityBundle | n
     const city = await getCity(ctx, cityId, { lock: true });
     if (city.playerId !== player.id) continue; // ownership changed while we waited
     const b = await loadBundle(ctx, city, player);
-    settle(ctx, b);
+    await settleAndReport(ctx, b);
     return b;
   }
   return null;
@@ -105,6 +141,19 @@ export async function viewCity(ctx: Ctx, cityId: number, player?: PlayerRow): Pr
   const city = await getCity(ctx, cityId);
   const owner = player && player.id === city.playerId ? player : await getPlayer(ctx, city.playerId);
   const b = await loadBundle(ctx, city, owner);
-  settleCity(b.city, economyContext(b), ctx.now);
+  const r = settleCity(b.city, economyContext(b), ctx.now);
+  if (Object.keys(r.deserted).length) b.deserted = r.deserted;
   return b;
+}
+
+/**
+ * The owner's view of their city. When troops deserted since the last save, the city is
+ * settled for real (locked, saved, desertion reported) so the report shows up straight away.
+ */
+export async function viewOwnCity(ctx: Ctx, playerId: number, cityId: number, player?: PlayerRow): Promise<CityBundle> {
+  const b = await viewCity(ctx, cityId, player);
+  if (!b.deserted || b.city.playerId !== playerId) return b;
+  const own = await openOwnCity(ctx, playerId, cityId);
+  await saveCity(ctx, own.city);
+  return own;
 }

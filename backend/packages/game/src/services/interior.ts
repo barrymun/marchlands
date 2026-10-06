@@ -3,7 +3,7 @@
 import { and, count, eq, inArray, ne } from 'drizzle-orm';
 import { BALANCE, BASIC_RESOURCES, GameError, scaled, TileType, tileXY, type ResourceSet } from '@evony/core';
 import { armies, tiles } from '@evony/db';
-import { cityStats, openOwnCity, viewCity } from '../city.ts';
+import { cityStats, openOwnCity, viewCity, viewOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { cityBean } from '../dto.ts';
 import { activeBuff, assertClean, cleanName, consumeItem, itemCount, pushCity, pushResources, setBuff } from '../helpers.ts';
@@ -11,7 +11,7 @@ import { saveCity, savePlayer } from '../repo.ts';
 import { pickOpenFlat } from './world.ts';
 
 export async function getCity(ctx: Ctx, playerId: number, cityId: number) {
-  const b = await viewCity(ctx, cityId);
+  const b = await viewOwnCity(ctx, playerId, cityId);
   if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
   return cityBean(b, ctx.now);
 }

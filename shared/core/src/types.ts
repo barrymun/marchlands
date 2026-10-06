@@ -256,6 +256,23 @@ export const TradeReportSchema = z.union([
 ]);
 export type TradeReport = z.infer<typeof TradeReportSchema>;
 
+/** Troops that deserted a city while it had no food (economy.ts starve). */
+export const DesertionReportSchema = z.object({
+  cityId: z.number(),
+  city: z.string(),
+  /** troops that left, summed over every settle merged into this report */
+  troops: TroopCountsSchema,
+  /** game time the city first ran short (start of the first merged settle window) */
+  from: z.number(),
+  /** game time of the last settle that found deserters */
+  to: z.number(),
+  /** food production, troop upkeep and net food per hour when the report was last updated */
+  food: z.object({ production: z.number(), upkeep: z.number(), net: z.number() }),
+  /** the latest merged settle window: a settle that was not saved is recomputed from the same start and replaces it */
+  last: z.object({ from: z.number(), troops: TroopCountsSchema }),
+});
+export type DesertionReport = z.infer<typeof DesertionReportSchema>;
+
 /** Report payloads are structured JSON (the original wrote XML files). */
 export const ReportBodySchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('battle'), battle: BattleReportSchema }),
@@ -263,5 +280,6 @@ export const ReportBodySchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('movement'), movement: MovementReportSchema }),
   z.object({ kind: z.literal('trade'), trade: TradeReportSchema }),
   z.object({ kind: z.literal('text'), text: z.string() }),
+  z.object({ kind: z.literal('desertion'), desertion: DesertionReportSchema }),
 ]);
 export type ReportBody = z.infer<typeof ReportBodySchema>;

@@ -45,7 +45,11 @@ export function ReportsPanel() {
     placeholderData: keepPreviousData,
     queryFn: () => unwrap(api.GET('/api/v1/reports', { params: { query: { type: type ?? undefined, pageNo: page, pageSize: PAGE_SIZE } } })),
   });
-  const markAll = useCommand(() => unwrap(api.POST('/api/v1/reports/read', { body: {} })), () => [['reports']], 'All reports marked as read');
+  const markAll = useCommand(
+    () => unwrap(api.POST('/api/v1/reports/read', { body: {} })),
+    () => [['reports']],
+    'All reports marked as read',
+  );
   const reports = list.data?.reports ?? [];
   const totalPage = Math.max(1, list.data?.totalPage ?? 1);
 
@@ -53,27 +57,25 @@ export function ReportsPanel() {
     <Card>
       <CardHeader className="pb-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-        <Tabs
-          value={tab}
-          onValueChange={(v) => {
-            setTab(v as typeof tab);
-            setPage(1);
-          }}
-        >
-          <TabsList>
-            {TABS.map((t) => (
-              <TabsTrigger key={t.id} value={t.id} className="gap-1.5">
-                {t.label}
-                {(unread.data?.[t.count] ?? 0) > 0 && (
-                  <Badge className="h-4 min-w-4 px-1 text-[10px] tabular-nums">{unread.data?.[t.count]}</Badge>
-                )}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        <Button size="sm" variant="outline" disabled={!unread.data?.count || markAll.isPending} onClick={() => markAll.mutate(undefined)}>
-          Mark all read
-        </Button>
+          <Tabs
+            value={tab}
+            onValueChange={(v) => {
+              setTab(v as typeof tab);
+              setPage(1);
+            }}
+          >
+            <TabsList>
+              {TABS.map((t) => (
+                <TabsTrigger key={t.id} value={t.id} className="gap-1.5">
+                  {t.label}
+                  {(unread.data?.[t.count] ?? 0) > 0 && <Badge className="h-4 min-w-4 px-1 text-[10px] tabular-nums">{unread.data?.[t.count]}</Badge>}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+          <Button size="sm" variant="outline" disabled={!unread.data?.count || markAll.isPending} onClick={() => markAll.mutate(undefined)}>
+            Mark all read
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="grid gap-2">
@@ -168,7 +170,13 @@ function ReportDialog({ reportId, onClose }: { reportId: number | null; onClose:
         {detail.isPending ? <Skeleton className="h-48" /> : r ? <ReportContent report={r} /> : null}
         {r && (
           <div className="flex justify-end">
-            <Button size="sm" variant="ghost" className="text-destructive" disabled={remove.isPending} onClick={() => remove.mutate(r.id, { onSuccess: onClose })}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-destructive"
+              disabled={remove.isPending}
+              onClick={() => remove.mutate(r.id, { onSuccess: onClose })}
+            >
               <Trash2 /> Delete
             </Button>
           </div>
@@ -198,6 +206,8 @@ function ReportContent({ report }: { report: ReportDetail }) {
       return <TradeView trade={body.trade} />;
     case 'text':
       return <p className="text-sm">{body.text}</p>;
+    case 'desertion':
+      return <DesertionView desertion={body.desertion} />;
   }
 }
 
@@ -209,7 +219,9 @@ function BattleView({ battle: b }: { battle: BattleReport }) {
   return (
     <div className="grid gap-4 text-sm">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={myWin ? 'default' : myLoss ? 'destructive' : 'secondary'}>{myWin ? 'Victory' : myLoss ? 'Defeat' : b.result === 'draw' ? 'Draw' : resultLabel(b.result)}</Badge>
+        <Badge variant={myWin ? 'default' : myLoss ? 'destructive' : 'secondary'}>
+          {myWin ? 'Victory' : myLoss ? 'Defeat' : b.result === 'draw' ? 'Draw' : resultLabel(b.result)}
+        </Badge>
         <span className="text-muted-foreground">
           {b.rounds} round{b.rounds === 1 ? '' : 's'}
         </span>
@@ -237,7 +249,9 @@ function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }) {
     return (
       <div className="grid gap-1 rounded-md bg-muted/50 p-3">
         <div className="font-medium">Loot</div>
-        <span className="text-muted-foreground">Nothing: valleys hold no resources to take{'occupied' in b && b.occupied ? ' (holding it raises your production instead)' : ''}.</span>
+        <span className="text-muted-foreground">
+          Nothing: valleys hold no resources to take{'occupied' in b && b.occupied ? ' (holding it raises your production instead)' : ''}.
+        </span>
       </div>
     );
   }
@@ -458,6 +472,30 @@ function MovementView({ movement: m }: { movement: Extract<ReportBody, { kind: '
         </Line>
       )}
       {'heroReturned' in m && m.heroReturned && <p className="text-xs text-muted-foreground">No free Feasting Hall slot: the hero returned home.</p>}
+    </div>
+  );
+}
+
+function DesertionView({ desertion: d }: { desertion: Extract<ReportBody, { kind: 'desertion' }>['desertion'] }) {
+  const perHour = (n: number) => `${n >= 0 ? '+' : '−'}${fmtExact(Math.abs(n))}/h`;
+  return (
+    <div className="grid gap-1.5 text-sm">
+      <p>{d.city} ran out of food, so troops deserted: 10% of every troop type for each game hour the upkeep went unpaid.</p>
+      <Line label="Deserted">
+        <TroopList troops={d.troops} />
+      </Line>
+      <Line label="Between">
+        {new Date(d.from).toLocaleString()} and {new Date(d.to).toLocaleString()}
+      </Line>
+      <Line label="Food">
+        produced {perHour(d.food.production)}, troop upkeep −{fmtExact(d.food.upkeep)}/h,{' '}
+        <span className={cn('font-medium', d.food.net < 0 && 'text-destructive')}>net {perHour(d.food.net)}</span>
+      </Line>
+      {d.food.net < 0 && (
+        <p className="text-xs text-muted-foreground">
+          Food is still running out: buy food at the Market, build or upgrade Farms, hold grassland or lake valleys, or keep fewer troops.
+        </p>
+      )}
     </div>
   );
 }

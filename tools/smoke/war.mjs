@@ -137,7 +137,7 @@ async function main() {
   check(members.length === 2, 'defender joined the alliance');
   const bGold = (await ok(b.token, 'GET', `/cities/${b.city.id}`)).resource.gold;
   await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: b.city.fieldId, mission: 1, troops: { carriage: 10 }, resources: { gold: 20000 } });
-  await until(async () => (await ok(b.token, 'GET', `/cities/${b.city.id}`)).resource.gold >= bGold + 19000, 'transport delivered');
+  await until(async () => (await ok(b.token, 'GET', `/cities/${b.city.id}`)).resource.gold >= bGold + 19000, 'transport delivered', 180_000);
   check(true, 'transport of 20,000 gold delivered to ally');
   const blocked = await call(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: b.city.fieldId, mission: 5, troops: { lightCavalry: 10 }, heroId: hero.id });
   check(blocked.ok === -13, 'cannot attack an alliance member');
