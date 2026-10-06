@@ -5,7 +5,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 ## Ported exactly
 
 - **Static data.** Building, research and troop costs, times and prerequisites, and items are converted from `config_*` (`tools/legacy-import`).
-- **Economy.** Fields (production `100F`/h, storage `10000F`, workers `10F`), cottages, base +100/h, tax income, hero salaries (`level×20`/h; *(design change)* switched off for now with `BALANCE.heroSalaries = false`; when on they are paid per real hour, unaffected by `GAME_SPEED` (`BALANCE.salaryPerRealHour`)), 6-minute population and loyalty drift.
+- **Economy.** Fields (production `100F`/h, storage `10000F` — *(design change)* every city's storage is ×20 (`BALANCE.storageMultiplier`), workers `10F`), cottages, base +100/h, tax income, hero salaries (`level×20`/h; *(design change)* switched off for now with `BALANCE.heroSalaries = false`; when on they are paid per real hour, unaffected by `GAME_SPEED` (`BALANCE.salaryPerRealHour`)), 6-minute population and loyalty drift.
 - **Timing.**
   - Build time: `time × 0.995^management × 0.9^Construction`; demolition takes half the build time.
   - Research time: `time × 0.995^stratagem`.

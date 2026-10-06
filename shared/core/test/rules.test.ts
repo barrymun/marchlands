@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   BALANCE,
   buildCost,
@@ -60,6 +60,16 @@ const city = (over: Partial<EconomyCity> = {}): EconomyCity => ({
 });
 
 describe('economy', () => {
+  // these check the original storage numbers; storageMultiplier is tested on its own below
+  const storageCfg = BALANCE as { storageMultiplier: number };
+  const configuredStorage = storageCfg.storageMultiplier;
+  beforeAll(() => {
+    storageCfg.storageMultiplier = 1;
+  });
+  afterAll(() => {
+    storageCfg.storageMultiplier = configuredStorage;
+  });
+
   it('starting city matches the original numbers', () => {
     const s = computeCityStats(city(), ctx(), 0);
     expect(s.maxPopulation).toBe(50);
@@ -350,6 +360,22 @@ describe('hero salaries and game speed', () => {
       cfg.heroSalaries = was.heroSalaries;
       cfg.salaryPerRealHour = was.salaryPerRealHour;
       setGameSpeed(1);
+    }
+  });
+});
+
+describe('storage multiplier', () => {
+  it('multiplies every resource storage after Stockpile', () => {
+    const cfg = BALANCE as { storageMultiplier: number };
+    const was = cfg.storageMultiplier;
+    try {
+      cfg.storageMultiplier = 1;
+      const one = computeCityStats(city({}), ctx(), 0).storage;
+      cfg.storageMultiplier = 20;
+      const twenty = computeCityStats(city({}), ctx(), 0).storage;
+      for (const r of ['food', 'wood', 'stone', 'iron'] as const) expect(twenty[r]).toBe(one[r] * 20);
+    } finally {
+      cfg.storageMultiplier = was;
     }
   });
 });

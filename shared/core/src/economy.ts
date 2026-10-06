@@ -180,7 +180,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   }
 
   const stockpile = effectiveTechLevel(ctx.research, city.buildings, TechType.STOCKPILE);
-  for (const r of BASIC_RESOURCES) storage[r] = Math.floor(storage[r] * (1 + stockpile * BALANCE.stockpileStorageBonusPerLevel));
+  for (const r of BASIC_RESOURCES) storage[r] = Math.floor(storage[r] * (1 + stockpile * BALANCE.stockpileStorageBonusPerLevel) * BALANCE.storageMultiplier);
 
   const fieldProduction = { food: 0, wood: 0, stone: 0, iron: 0 };
   let workersNeeded = 0;

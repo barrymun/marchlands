@@ -36,6 +36,8 @@ export const BALANCE = {
     lake: [0, 0.08, 0.11, 0.14, 0.17, 0.2, 0.23, 0.26, 0.29, 0.32, 0.35],
     other: [0, 0.08, 0.11, 0.14, 0.17, 0.2, 0.23, 0.26, 0.29, 0.32, 0.35],
   },
+  /** (evony-re) multiplies every city's food/lumber/stone/iron storage, after Stockpile (orig 1) */
+  storageMultiplier: 20,
   /** (evony) Stockpile: +10% storage per level */
   stockpileStorageBonusPerLevel: 0.1,
   /** (evony) warehouse protects this much of each resource per level from plunder (x storePercent) */

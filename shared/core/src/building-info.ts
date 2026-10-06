@@ -19,7 +19,7 @@ interface BuildingText {
 const field = (res: string): BuildingText => ({
   summary: `Produces ${res} and adds ${res} storage. Output and storage grow faster at higher levels; it needs workers from your idle population.`,
   effect: (l) =>
-    `${fmt(BALANCE.fieldProductionPerF * F(l) * getGameSpeed())} ${res}/h at full labour, +${fmt(BALANCE.fieldStoragePerF * F(l))} storage, employs ${fmt(BALANCE.fieldWorkersPerF * F(l))} workers`,
+    `${fmt(BALANCE.fieldProductionPerF * F(l) * getGameSpeed())} ${res}/h at full labour, +${fmt(BALANCE.fieldStoragePerF * F(l) * BALANCE.storageMultiplier)} storage, employs ${fmt(BALANCE.fieldWorkersPerF * F(l))} workers`,
 });
 
 const TEXT: Record<number, BuildingText> = {
