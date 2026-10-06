@@ -14,6 +14,7 @@ import {
   ConstructBody,
   Empty,
   InjuredTroopsBody,
+  CureInjuredBody,
   LevyBody,
   MoveCityBody,
   ProduceQueue,
@@ -218,8 +219,8 @@ export default async function cityRoutes(app: ZApp) {
   );
   app.post(
     '/cities/:cityId/troops/injured/cure',
-    s(tags.troops, 'Heal injured troops (army.cureInjuredTroop)', Empty, { params: zCityParams, body: InjuredTroopsBody }),
-    (req) => game(req, (ctx, pid) => training.cureInjured(ctx, pid, req.params.cityId, req.body.troops)),
+    s(tags.troops, 'Heal injured troops with resources or honor (army.cureInjuredTroop)', Empty, { params: zCityParams, body: CureInjuredBody }),
+    (req) => game(req, (ctx, pid) => training.cureInjured(ctx, pid, req.params.cityId, req.body.troops, req.body.payWith)),
   );
   app.post(
     '/cities/:cityId/troops/injured/disband',

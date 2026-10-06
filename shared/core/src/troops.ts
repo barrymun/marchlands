@@ -203,3 +203,30 @@ export function unitsExp(troops: TroopCounts, forts: FortCounts = {}): number {
   for (const k of FORT_KEY_LIST) exp += (forts[k] ?? 0) * unitExp(FORT_ID_BY_KEY[k]);
   return exp;
 }
+
+/** Medicine: share of fallen troops that survive injured (BALANCE.medicinePerLevel per level, up to 50%). */
+export function medicineShare(research: ResearchState): number {
+  return Math.min(0.5, researchLevel(research, TechType.MEDICINE) * BALANCE.medicinePerLevel);
+}
+
+/** The part of `lost` that survives injured under the Medicine share. */
+export function injuredOf(lost: TroopCounts, research: ResearchState): TroopCounts {
+  const share = medicineShare(research);
+  const out: TroopCounts = {};
+  if (share <= 0) return out;
+  for (const k of TROOP_KEY_LIST) {
+    const n = Math.floor((lost[k] ?? 0) * share);
+    if (n > 0) out[k] = n;
+  }
+  return out;
+}
+
+/** Honor to heal injured troops: their food upkeep x BALANCE.healHonorPerUpkeep (what killing them earns). */
+export function healHonorCost(troops: Partial<Record<string, number>>): number {
+  let honor = 0;
+  for (const [key, n] of Object.entries(troops)) {
+    if (!n) continue;
+    honor += n * (troopConfig(TROOP_ID_BY_KEY[key as TroopKey])?.upkeep ?? 0) * BALANCE.healHonorPerUpkeep;
+  }
+  return Math.ceil(honor);
+}

@@ -29,6 +29,8 @@ import {
   syncHeroBuffs,
   upgradeExpFor,
   maxArmyTroops,
+  injuredOf,
+  healHonorCost,
   trainCost,
   valleyGarrison,
   type EconomyCity,
@@ -422,5 +424,16 @@ describe('rally spot troop limit', () => {
     expect(maxArmyTroops(rally(10))).toBe(100_000);
     expect(maxArmyTroops(rally(10), true)).toBe(125_000);
     expect(maxArmyTroops([])).toBe(0);
+  });
+});
+
+describe('medicine and honor healing', () => {
+  it('saves 5% of the fallen per Medicine level, up to 50%', () => {
+    expect(injuredOf({ archer: 10000, militia: 999 }, { 16: { level: 7 } })).toEqual({ archer: 3500, militia: 349 });
+    expect(injuredOf({ archer: 10000 }, { 16: { level: 20 } })).toEqual({ archer: 5000 });
+    expect(injuredOf({ archer: 10000 }, {})).toEqual({});
+  });
+  it('heals for honor: each unit costs its food upkeep', () => {
+    expect(healHonorCost({ archer: 100, militia: 10 })).toBe(100 * 9 * BALANCE.healHonorPerUpkeep + 10 * 3 * BALANCE.healHonorPerUpkeep);
   });
 });

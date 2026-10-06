@@ -32,11 +32,12 @@ import {
   type SplitLane,
   unitExp,
   healCost,
+  healHonorCost,
 } from '@evony/core';
 import { cityStats, mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { fortBean, heroBean, troopBean } from '../dto.ts';
-import { addItem, addPrestige, gainResources, itemCount, pushResources, spendCents, spendResources } from '../helpers.ts';
+import { addItem, addPrestige, gainResources, itemCount, pushPlayerInfo, pushResources, spendCents, spendResources } from '../helpers.ts';
 import { saveCity, saveHero, savePlayer } from '../repo.ts';
 
 export const WALLS_QUEUE = -2;
@@ -359,15 +360,21 @@ export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, f
   await saveCity(ctx, b.city);
 }
 
-/** army.cureInjuredTroop: heal injured troops for BALANCE.healCostShare of their training cost. */
-export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, troops: Record<string, number>) {
+/** army.cureInjuredTroop: heal injured troops for BALANCE.healCostShare of their training cost, or for honor. */
+export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, troops: Record<string, number>, payWith: 'resources' | 'honor' = 'resources') {
   const b = await openOwnCity(ctx, playerId, cityId);
   for (const [key, n] of Object.entries(troops)) {
     if (!Number.isInteger(n) || n < 0) throw new GameError('Invalid troop count.', -99);
     if ((b.city.injuredTroops[key as keyof typeof b.city.injuredTroops] ?? 0) < n) throw new GameError('Not enough injured troops.', -99);
   }
-  const cost = healCost(troops);
-  spendResources(b.city, cost);
+  if (payWith === 'honor') {
+    // honor earned by killing pays to heal: each unit costs its food upkeep x BALANCE.healHonorPerUpkeep
+    const honor = healHonorCost(troops);
+    if (b.player.honor < honor) throw new GameError(`Not enough honor: ${honor.toLocaleString('en')} needed.`, -99);
+    b.player.honor -= honor;
+    await savePlayer(ctx, b.player);
+    await pushPlayerInfo(ctx, b.player);
+  } else spendResources(b.city, healCost(troops));
   b.city.injuredTroops = addTroops(b.city.injuredTroops, troops, -1);
   b.city.troops = addTroops(b.city.troops, troops);
   ctx.push(playerId, 'server.TroopUpdate', { castleId: cityId, troop: troopBean(b.city.troops) });

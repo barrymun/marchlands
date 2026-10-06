@@ -6,6 +6,7 @@ import {
   usedWallSpace,
   wallCapacity,
   healCost,
+  healHonorCost,
   researchLevel,
   TechType,
   buildingLevel,
@@ -462,10 +463,13 @@ function InjuredCard({ city }: { city: CityBean }) {
     setConfirming(false);
   };
   const heal = useCommand(
-    () => unwrap(api.POST('/api/v1/cities/{cityId}/troops/injured/cure', { params: { path }, body: { troops: chosen } })),
-    () => [qk.city(city.id)],
+    (payWith: 'resources' | 'honor') =>
+      unwrap(api.POST('/api/v1/cities/{cityId}/troops/injured/cure', { params: { path }, body: { troops: chosen, payWith } })),
+    () => [qk.city(city.id), qk.player],
     `Healed ${fmtExact(total)} troops`,
   );
+  const honor = player.data?.playerInfo.honor ?? 0;
+  const honorCost = healHonorCost(chosen);
   const dismiss = useCommand(
     () => unwrap(api.POST('/api/v1/cities/{cityId}/troops/injured/disband', { params: { path }, body: { troops: chosen } })),
     () => [qk.city(city.id)],
@@ -477,9 +481,9 @@ function InjuredCard({ city }: { city: CityBean }) {
         <CardTitle className="text-sm">Injured troops</CardTitle>
         <CardDescription>
           {medicine > 0
-            ? `Medicine Lv ${medicine}: ${Math.round(share * 100)}% of defenders who fall while this city is attacked survive injured.`
-            : 'Research Medicine so that some defenders who fall while this city is attacked survive injured (5% per level, up to 50%).'}{' '}
-          Healing costs {Math.round(BALANCE.healCostShare * 100)}% of their training cost.
+            ? `Medicine Lv ${medicine}: ${Math.round(share * 100)}% of the troops this city loses, defending or attacking, survive injured.`
+            : 'Research Medicine so that some of the troops this city loses, defending or attacking, survive injured (5% per level, up to 50%).'}{' '}
+          Heal them for {Math.round(BALANCE.healCostShare * 100)}% of their training cost, or for honor ({fmtExact(honor)} available).
         </CardDescription>
       </CardHeader>
       {injured.length > 0 && (
@@ -500,8 +504,17 @@ function InjuredCard({ city }: { city: CityBean }) {
           ))}
           <CostList cost={cost} have={have} />
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" disabled={total <= 0 || !affordable || heal.isPending} onClick={() => heal.mutate(undefined, { onSuccess: done })}>
-              Heal {fmtExact(total)}
+            <Button size="sm" disabled={total <= 0 || !affordable || heal.isPending} onClick={() => heal.mutate('resources', { onSuccess: done })}>
+              Heal {fmtExact(total)} · resources
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={total <= 0 || honor < honorCost || heal.isPending}
+              title={honor < honorCost ? `Not enough honor (${fmtExact(honorCost)} needed)` : undefined}
+              onClick={() => heal.mutate('honor', { onSuccess: done })}
+            >
+              Heal · {fmt(honorCost)} honor
             </Button>
             <Button
               size="sm"

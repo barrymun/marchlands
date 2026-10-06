@@ -45,6 +45,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 | Captured hero copied into every empty slot; a "returning" hero stayed SEIZED | one slot; the hero goes home idle |
 | Abatis never consumed; an overkill trebuchet volley killed nothing | fixed in game battles (`fixes: true`); parity mode kept for the regression tests |
 | Iron Working's troop defence bonus used integer division (`(lvl×5+100)/100`), so it did nothing below level 20 | +5% per level in game battles (`fixes: true`); parity mode unchanged |
+| Only a city's defenders could survive injured (Medicine), healed with resources | *(design change)* the Medicine share (5% per level, up to 50%) also applies to an attacking army's fallen, who come home injured (`BALANCE.attackersGetInjured`); injured troops can also be healed with honor, each unit costing its food upkeep (`BALANCE.healHonorPerUpkeep`) |
 | Rolling logs multiplied their damage by the target's defence (no life division), so a few hundred logs wiped out the largest foot group of any size | divided by defence × life like every other attack in game battles (`fixes: true`); parity mode unchanged |
 | A barbarian city's or wild valley's defending hero was generated anew for every scout and attack | each scout picks a new hero and keeps it (a seed in the tile state); attacks meet the hero the last scout reported (a tile never scouted gets one on its first attack). Changing hands or an upgrade resets it |
 | `restTime` in seconds added to a millisecond timestamp | seconds × 1000 |

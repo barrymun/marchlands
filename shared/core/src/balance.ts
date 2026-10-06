@@ -134,6 +134,10 @@ export const BALANCE = {
   healCostShare: 0.25,
   /** (evony) Medicine: +5% of lost defenders recover as injured per level */
   medicinePerLevel: 0.05,
+  /** (evony-re) the Medicine share also applies to an attacking army's fallen: they come home injured */
+  attackersGetInjured: true as boolean,
+  /** (evony-re) healing an injured unit with honor costs its food upkeep x this (the honor killing one earns) */
+  healHonorPerUpkeep: 1,
   /** (evony) hero exp per point of experience weight (orig TROOP_EXPS, troops.ts unitExp) of enemy units killed */
   heroExpPerKill: 0.1,
   /** (evony) mayor exp per point of experience weight of troops and fortifications trained in the city */

@@ -354,6 +354,12 @@ function SideView({
           </TableBody>
         </Table>
       )}
+      {side.injured && Object.values(side.injured).some((n) => (n ?? 0) > 0) && (
+        <div className="text-xs">
+          <span className="text-muted-foreground">Survived injured (Medicine): </span>
+          <TroopList troops={side.injured} /> <span className="text-muted-foreground">· heal them in the Military tab</span>
+        </div>
+      )}
       <div className="text-xs text-muted-foreground tabular-nums">
         {side.honor > 0 && `+${fmtExact(side.honor)} honor`}
         {side.honor > 0 && side.heroExp > 0 && ' · '}

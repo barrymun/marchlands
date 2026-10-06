@@ -3486,7 +3486,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Heal injured troops (army.cureInjuredTroop) */
+        /** Heal injured troops with resources or honor (army.cureInjuredTroop) */
         post: {
             parameters: {
                 query?: never;
@@ -3502,6 +3502,12 @@ export interface paths {
                         troops: {
                             [key: string]: number;
                         };
+                        /**
+                         * @description resources: a share of the training cost; honor: each unit costs its food upkeep
+                         * @default resources
+                         * @enum {string}
+                         */
+                        payWith?: "resources" | "honor";
                     };
                 };
             };
@@ -11490,6 +11496,9 @@ export interface components {
                                 [key: string]: number;
                             };
                         };
+                        injured?: {
+                            [key: string]: number;
+                        };
                         honor: number;
                         heroExp: number;
                     };
@@ -11511,6 +11520,9 @@ export interface components {
                             after: {
                                 [key: string]: number;
                             };
+                        };
+                        injured?: {
+                            [key: string]: number;
                         };
                         honor: number;
                         heroExp: number;
@@ -11561,6 +11573,9 @@ export interface components {
                                 [key: string]: number;
                             };
                         };
+                        injured?: {
+                            [key: string]: number;
+                        };
                         honor: number;
                         heroExp: number;
                     };
@@ -11582,6 +11597,9 @@ export interface components {
                             after: {
                                 [key: string]: number;
                             };
+                        };
+                        injured?: {
+                            [key: string]: number;
                         };
                         honor: number;
                         heroExp: number;
@@ -11632,6 +11650,9 @@ export interface components {
                                 [key: string]: number;
                             };
                         };
+                        injured?: {
+                            [key: string]: number;
+                        };
                         honor: number;
                         heroExp: number;
                     };
@@ -11653,6 +11674,9 @@ export interface components {
                             after: {
                                 [key: string]: number;
                             };
+                        };
+                        injured?: {
+                            [key: string]: number;
                         };
                         honor: number;
                         heroExp: number;
@@ -13516,6 +13540,9 @@ export interface components {
                                 [key: string]: number;
                             };
                         };
+                        injured?: {
+                            [key: string]: number;
+                        };
                         honor: number;
                         heroExp: number;
                     };
@@ -13537,6 +13564,9 @@ export interface components {
                             after: {
                                 [key: string]: number;
                             };
+                        };
+                        injured?: {
+                            [key: string]: number;
                         };
                         honor: number;
                         heroExp: number;
@@ -13587,6 +13617,9 @@ export interface components {
                                 [key: string]: number;
                             };
                         };
+                        injured?: {
+                            [key: string]: number;
+                        };
                         honor: number;
                         heroExp: number;
                     };
@@ -13608,6 +13641,9 @@ export interface components {
                             after: {
                                 [key: string]: number;
                             };
+                        };
+                        injured?: {
+                            [key: string]: number;
                         };
                         honor: number;
                         heroExp: number;
@@ -13658,6 +13694,9 @@ export interface components {
                                 [key: string]: number;
                             };
                         };
+                        injured?: {
+                            [key: string]: number;
+                        };
                         honor: number;
                         heroExp: number;
                     };
@@ -13679,6 +13718,9 @@ export interface components {
                             after: {
                                 [key: string]: number;
                             };
+                        };
+                        injured?: {
+                            [key: string]: number;
                         };
                         honor: number;
                         heroExp: number;

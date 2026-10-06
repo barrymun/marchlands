@@ -53,8 +53,8 @@ const TEXT: Record<number, TechText> = {
     effect: (l) => `+${l * 5}% troop defence`,
   },
   [TechType.MEDICINE]: {
-    summary: `Life of foot troops (workers to archers) and Archer's Towers +5% per level in battle. When your city is attacked, ${pct(BALANCE.medicinePerLevel)} per level of your fallen defenders (up to 50%) survive as injured troops you can heal.`,
-    effect: (l) => `+${l * 5}% foot troop life, ${pct(Math.min(0.5, l * BALANCE.medicinePerLevel))} of fallen defenders recover`,
+    summary: `Life of foot troops (workers to archers) and Archer's Towers +5% per level in battle. ${pct(BALANCE.medicinePerLevel)} per level of the troops you lose (up to 50%), defending your city or attacking, survive as injured troops you can heal with resources or honor.`,
+    effect: (l) => `+${l * 5}% foot troop life, ${pct(Math.min(0.5, l * BALANCE.medicinePerLevel))} of fallen troops recover injured`,
   },
   [TechType.ARCHERY]: {
     summary: "Range of archers, ballistas, catapults and Archer's Towers +5% per level in battle.",

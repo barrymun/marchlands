@@ -82,7 +82,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/cities/{cityId}/fortifications/train` | Build fortifications (fortifications.produceWallProtect) |
 | GET | `/api/v1/cities/{cityId}/fortifications/trainable` | Trainable fortifications (fortifications.getFortificationsProduceList) |
 | POST | `/api/v1/cities/{cityId}/troops/disband` | Dismiss troops (troop.disbandTroop) |
-| POST | `/api/v1/cities/{cityId}/troops/injured/cure` | Heal injured troops (army.cureInjuredTroop) |
+| POST | `/api/v1/cities/{cityId}/troops/injured/cure` | Heal injured troops with resources or honor (army.cureInjuredTroop) |
 | POST | `/api/v1/cities/{cityId}/troops/injured/disband` | Dismiss injured troops (army.disbandInjuredTroop) |
 | GET | `/api/v1/cities/{cityId}/troops/queues` | Production queues (troop.getProduceQueue) |
 | DELETE | `/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}` | Cancel a batch |

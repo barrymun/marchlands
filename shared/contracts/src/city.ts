@@ -50,6 +50,9 @@ export const TrainSplitResult = z
 export type TrainSplitResult = z.infer<typeof TrainSplitResult>;
 export const TroopCountBody = z.object({ troopId: z.number().int(), count: z.number().int() });
 export const InjuredTroopsBody = z.object({ troops: zTroops });
+export const CureInjuredBody = InjuredTroopsBody.extend({
+  payWith: z.enum(['resources', 'honor']).default('resources').describe('resources: a share of the training cost; honor: each unit costs its food upkeep'),
+});
 
 // ---- shared pieces ----
 

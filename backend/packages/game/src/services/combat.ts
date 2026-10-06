@@ -21,6 +21,7 @@ import {
   plunder,
   protectedResources,
   randInt,
+  injuredOf,
   seededRng,
   regenerateNpc,
   researchLevel,
@@ -640,6 +641,24 @@ interface BattleSideReport {
   player: string;
   hero: ReturnType<typeof heroSummary>;
   troops: { before: TroopCounts; lost: TroopCounts; after: TroopCounts };
+  /** fallen troops that survived injured (Medicine) */
+  injured?: TroopCounts;
+}
+
+/**
+ * Medicine for attackers (BALANCE.attackersGetInjured): part of an attacking army's fallen are
+ * carried home injured, healable in the army's home city with resources or honor.
+ */
+async function woundAttackers(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, lost: TroopCounts): Promise<TroopCounts> {
+  if (!BALANCE.attackersGetInjured) return {};
+  const injured = injuredOf(lost, attacker.research);
+  if (totalTroops(injured) <= 0) return {};
+  const home = await openCity(ctx, a.cityId);
+  if (!home) return {};
+  home.city.injuredTroops = addTroops(home.city.injuredTroops, injured);
+  await saveCity(ctx, home.city);
+  ctx.push(home.player.id, 'server.InjuredTroopUpdate', { castleId: home.city.id, troop: troopBean(home.city.injuredTroops) });
+  return injured;
 }
 
 function battleBody(
@@ -726,18 +745,15 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     ctx.rng,
   );
 
+  let defenderInjured: TroopCounts = {};
   // apply defender losses
   const afterGroups = distributeLosses(groups, defTroops, r.defender.after);
   if (def.city.goOutForBattle) {
     const lost = addTroops(def.city.troops, afterGroups[0], -1);
     def.city.troops = afterGroups[0];
     // Medicine: part of the city's own fallen recover as injured
-    const share = Math.min(0.5, researchLevel(def.player.research, TechType.MEDICINE) * BALANCE.medicinePerLevel);
-    if (share > 0) {
-      const injured: TroopCounts = {};
-      for (const k of TROOP_KEY_LIST) if ((lost[k] ?? 0) > 0) injured[k] = Math.floor(lost[k]! * share);
-      def.city.injuredTroops = addTroops(def.city.injuredTroops, injured);
-    }
+    defenderInjured = injuredOf(lost, def.player.research);
+    def.city.injuredTroops = addTroops(def.city.injuredTroops, defenderInjured);
   }
   for (let i = 0; i < stationed.length; i++) {
     const s = stationed[i];
@@ -780,11 +796,13 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     player: attacker.name,
     hero: heroSummary(hero),
     troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after },
+    injured: await woundAttackers(ctx, a, attacker, r.attacker.lost),
   };
   const defenderSide = {
     player: def.player.name,
     hero: heroSummary(defHero),
     troops: { before: r.defender.before, lost: r.defender.lost, after: r.defender.after },
+    injured: defenderInjured,
     forts: r.forts,
     wallLevel,
   };
@@ -897,9 +915,10 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   attacker.honor += r.attackerHonor;
   await savePlayer(ctx, attacker);
   await grantHeroExp(ctx, hero, r.attackerHeroExp);
+  const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
   const body = battleBody(
     r,
-    { player: attacker.name, hero: heroSummary(hero), troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after } },
+    { player: attacker.name, hero: heroSummary(hero), troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after }, injured },
     {
       player: "Barbarian's City",
       hero: { id: 0, name: guard.name, level: guard.level, logoUrl: guard.logoUrl },
@@ -1039,9 +1058,10 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   await grantHeroExp(ctx, hero, r.attackerHeroExp);
   await grantHeroExp(ctx, guard, r.defenderHeroExp);
   const g = guard ?? npcGuard;
+  const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
   const body = battleBody(
     r,
-    { player: attacker.name, hero: heroSummary(hero), troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after } },
+    { player: attacker.name, hero: heroSummary(hero), troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after }, injured },
     {
       player: defenderName,
       hero: g ? { id: 0, name: g.name, level: g.level, logoUrl: g.logoUrl } : null,

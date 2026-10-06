@@ -4314,6 +4314,30 @@
                                   "after"
                                 ]
                               },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
+                              },
                               "honor": {
                                 "type": "number"
                               },
@@ -4450,6 +4474,30 @@
                                   "lost",
                                   "after"
                                 ]
+                              },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
                               },
                               "honor": {
                                 "type": "number"
@@ -4722,6 +4770,30 @@
                                   "after"
                                 ]
                               },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
+                              },
                               "honor": {
                                 "type": "number"
                               },
@@ -4858,6 +4930,30 @@
                                   "lost",
                                   "after"
                                 ]
+                              },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
                               },
                               "honor": {
                                 "type": "number"
@@ -5132,6 +5228,30 @@
                                   "after"
                                 ]
                               },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
+                              },
                               "honor": {
                                 "type": "number"
                               },
@@ -5268,6 +5388,30 @@
                                   "lost",
                                   "after"
                                 ]
+                              },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
                               },
                               "honor": {
                                 "type": "number"
@@ -13827,6 +13971,30 @@
                                 ],
                                 "additionalProperties": false
                               },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
+                              },
                               "honor": {
                                 "type": "number"
                               },
@@ -13966,6 +14134,30 @@
                                   "after"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
                               },
                               "honor": {
                                 "type": "number"
@@ -14244,6 +14436,30 @@
                                 ],
                                 "additionalProperties": false
                               },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
+                              },
                               "honor": {
                                 "type": "number"
                               },
@@ -14383,6 +14599,30 @@
                                   "after"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
                               },
                               "honor": {
                                 "type": "number"
@@ -14663,6 +14903,30 @@
                                 ],
                                 "additionalProperties": false
                               },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
+                              },
                               "honor": {
                                 "type": "number"
                               },
@@ -14802,6 +15066,30 @@
                                   "after"
                                 ],
                                 "additionalProperties": false
+                              },
+                              "injured": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string",
+                                  "enum": [
+                                    "peasants",
+                                    "militia",
+                                    "scouter",
+                                    "pikemen",
+                                    "swordsmen",
+                                    "archer",
+                                    "carriage",
+                                    "lightCavalry",
+                                    "heavyCavalry",
+                                    "ballista",
+                                    "batteringRam",
+                                    "catapult"
+                                  ]
+                                },
+                                "additionalProperties": {
+                                  "type": "number",
+                                  "minimum": 0
+                                }
                               },
                               "honor": {
                                 "type": "number"
@@ -23849,7 +24137,7 @@
     },
     "/api/v1/cities/{cityId}/troops/injured/cure": {
       "post": {
-        "summary": "Heal injured troops (army.cureInjuredTroop)",
+        "summary": "Heal injured troops with resources or honor (army.cureInjuredTroop)",
         "tags": [
           "troops"
         ],
@@ -23870,6 +24158,15 @@
                       "minimum": 0,
                       "maximum": 9007199254740991
                     }
+                  },
+                  "payWith": {
+                    "default": "resources",
+                    "description": "resources: a share of the training cost; honor: each unit costs its food upkeep",
+                    "type": "string",
+                    "enum": [
+                      "resources",
+                      "honor"
+                    ]
                   }
                 },
                 "required": [

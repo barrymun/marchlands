@@ -143,6 +143,8 @@ export const BattleSideReportSchema = z.object({
   player: z.string(),
   hero: ReportHeroSchema.nullable(),
   troops: BeforeLostAfter(TroopCountsSchema),
+  /** fallen troops that survived injured (Medicine); heal them in the city's Military tab */
+  injured: TroopCountsSchema.optional(),
   honor: z.number(),
   heroExp: z.number(),
 });
