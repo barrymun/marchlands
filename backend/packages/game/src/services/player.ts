@@ -12,6 +12,8 @@ import {
   titleOf,
   tileXY,
   type BuildingState,
+  type TroopCounts,
+  TROOP_KEY_LIST,
 } from '@evony/core';
 import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@evony/db';
 import { viewOwnCity } from '../city.ts';
@@ -386,3 +388,42 @@ export async function removeCastleSign(ctx: Ctx, playerId: number, tileId: numbe
   return p.castleSigns;
 }
 
+
+// ---------------------------------------------------------------------------------------------
+// Army presets (evony-re): named army compositions for the send-army dialog
+// ---------------------------------------------------------------------------------------------
+
+const MAX_PRESETS = 30;
+
+export async function armyPresets(ctx: Ctx, playerId: number) {
+  const p = await getPlayer(ctx, playerId);
+  return p.misc.armyPresets ?? [];
+}
+
+/** Save a preset; a preset with the same name (any case) is replaced. */
+export async function saveArmyPreset(ctx: Ctx, playerId: number, name: string, troopsIn: Record<string, unknown>) {
+  const clean = name.trim();
+  if (!clean || clean.length > 30) throw new GameError('Give the preset a name of up to 30 characters.', -99);
+  const troops: TroopCounts = {};
+  for (const k of TROOP_KEY_LIST) {
+    const n = Number(troopsIn[k] ?? 0);
+    if (!Number.isInteger(n) || n < 0) throw new GameError('Invalid troop count.', -99);
+    if (n > 0) troops[k] = n;
+  }
+  if (!Object.keys(troops).length) throw new GameError('Choose some troops to save.', -99);
+  const p = await getPlayer(ctx, playerId, { lock: true });
+  const list = p.misc.armyPresets ?? [];
+  const existing = list.find((x) => x.name.toLowerCase() === clean.toLowerCase());
+  if (!existing && list.length >= MAX_PRESETS) throw new GameError(`At most ${MAX_PRESETS} presets.`, -99);
+  const preset = { id: existing?.id ?? `${ctx.now.toString(36)}${Math.floor(ctx.rng.next() * 1e6).toString(36)}`, name: clean, troops };
+  p.misc = { ...p.misc, armyPresets: existing ? list.map((x) => (x.id === existing.id ? preset : x)) : [...list, preset] };
+  await savePlayer(ctx, p);
+  return p.misc.armyPresets!;
+}
+
+export async function deleteArmyPreset(ctx: Ctx, playerId: number, id: string) {
+  const p = await getPlayer(ctx, playerId, { lock: true });
+  p.misc = { ...p.misc, armyPresets: (p.misc.armyPresets ?? []).filter((x) => x.id !== id) };
+  await savePlayer(ctx, p);
+  return p.misc.armyPresets!;
+}

@@ -1191,6 +1191,176 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/player/army-presets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Saved army compositions */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["ArmyPreset"][];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Save an army composition (same name replaces) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description replaces a preset with the same name */
+                        name: string;
+                        troops: {
+                            [key: string]: number;
+                        };
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["ArmyPreset"][];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/player/army-presets/{presetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a saved army composition */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    presetId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["ArmyPreset"][];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/player/bookmarks/{tileId}": {
         parameters: {
             query?: never;
@@ -10806,6 +10976,13 @@ export interface components {
             /** @description connected players */
             online: number;
         };
+        ArmyPresetInput: {
+            id: string;
+            name: string;
+            troops: {
+                [key: string]: number;
+            };
+        };
         CastleSignInput: {
             tileId: number;
             name: string;
@@ -12856,6 +13033,13 @@ export interface components {
             /** @description connected players */
             online: number;
         };
+        ArmyPreset: {
+            id: string;
+            name: string;
+            troops: {
+                [key: string]: number;
+            };
+        };
         CastleSign: {
             tileId: number;
             name: string;
@@ -14671,6 +14855,7 @@ export type AuthSessionInput = components['schemas']['AuthSessionInput'];
 export type AuthAccountInput = components['schemas']['AuthAccountInput'];
 export type ZoneStatsInput = components['schemas']['ZoneStatsInput'];
 export type WorldInfoInput = components['schemas']['WorldInfoInput'];
+export type ArmyPresetInput = components['schemas']['ArmyPresetInput'];
 export type CastleSignInput = components['schemas']['CastleSignInput'];
 export type PlayerStateInput = components['schemas']['PlayerStateInput'];
 export type PlayerCreatedInput = components['schemas']['PlayerCreatedInput'];
@@ -14800,6 +14985,7 @@ export type AuthSession = components['schemas']['AuthSession'];
 export type AuthAccount = components['schemas']['AuthAccount'];
 export type ZoneStats = components['schemas']['ZoneStats'];
 export type WorldInfo = components['schemas']['WorldInfo'];
+export type ArmyPreset = components['schemas']['ArmyPreset'];
 export type CastleSign = components['schemas']['CastleSign'];
 export type PlayerState = components['schemas']['PlayerState'];
 export type PlayerCreated = components['schemas']['PlayerCreated'];

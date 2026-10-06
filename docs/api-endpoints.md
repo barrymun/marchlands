@@ -19,6 +19,9 @@ All paths are relative to the server root. Names in parentheses are the original
 |---|---|---|
 | POST | `/api/v1/player` | Create the lord and first city (common.createNewPlayer) |
 | GET | `/api/v1/player` | Full lord state: cities, items, buffs, armies, counters (login bean) |
+| GET | `/api/v1/player/army-presets` | Saved army compositions |
+| POST | `/api/v1/player/army-presets` | Save an army composition (same name replaces) |
+| DELETE | `/api/v1/player/army-presets/{presetId}` | Delete a saved army composition |
 | GET | `/api/v1/player/bookmarks` | Map bookmarks (castleSignBean) |
 | POST | `/api/v1/player/bookmarks` | Bookmark a castle (castle.saveCastleSignList) |
 | DELETE | `/api/v1/player/bookmarks/{tileId}` | Remove a bookmark |

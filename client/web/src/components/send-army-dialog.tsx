@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { Star, Trash2 } from 'lucide-react';
 import type { CityBean } from '@evony/api-client';
-import { buildingLevel, BuildingType, HeroStatus, maxArmyTroops, Mission, TROOP_KEYS, type TroopKey } from '@evony/core';
+import { buildingLevel, BuildingType, HeroStatus, maxArmyTroops, Mission, TROOP_ID_BY_KEY, TROOP_KEYS, type TroopKey } from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -131,6 +132,7 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
             </Select>
           </div>
         </div>
+        {!scouting && <ArmyPresets city={city} troops={troopBody} onLoad={setTroops} />}
         <div className="grid gap-2">
           <div className="flex items-baseline justify-between gap-2">
             <Label>Troops</Label>
@@ -217,4 +219,84 @@ function ScoutNote({ kind }: { kind?: SendTarget['kind'] }) {
           ? 'Valleys never stop scouts: one is enough. The report shows the troops guarding it and who holds it.'
           : 'Only scouts go on a scouting mission.';
   return <p className="text-xs text-muted-foreground">{text}</p>;
+}
+
+/**
+ * Saved army compositions (e.g. a layered wave): load one into the form, or save the troops chosen
+ * now under a name. Kept on the server per lord, so every city and device sees them.
+ */
+function ArmyPresets({ city, troops, onLoad }: { city: CityBean; troops: Record<string, number>; onLoad: (t: Partial<Record<TroopKey, string>>) => void }) {
+  const presets = useQuery({ queryKey: ['army-presets'], queryFn: () => unwrap(api.GET('/api/v1/player/army-presets')) });
+  const [selected, setSelected] = useState('');
+  const [name, setName] = useState('');
+  const [short, setShort] = useState('');
+  const save = useCommand(
+    () => unwrap(api.POST('/api/v1/player/army-presets', { body: { name: name.trim(), troops } })),
+    () => [['army-presets']],
+    `Saved "${name.trim()}"`,
+  );
+  const remove = useCommand(
+    (presetId: string) => unwrap(api.DELETE('/api/v1/player/army-presets/{presetId}', { params: { path: { presetId } } })),
+    () => [['army-presets']],
+    'Preset deleted',
+  );
+  const list = presets.data ?? [];
+  const load = (id: string) => {
+    setSelected(id);
+    const p = list.find((x) => x.id === id);
+    if (!p) return;
+    // fill in what the city has; note anything it is short of
+    const next: Partial<Record<TroopKey, string>> = {};
+    const missing: string[] = [];
+    for (const [k, n] of Object.entries(p.troops) as [TroopKey, number][]) {
+      const have = city.troop[k] ?? 0;
+      next[k] = String(Math.min(n, have));
+      if (have < n) missing.push(`${fmtExact(n - have)} ${troopName(TROOP_ID_BY_KEY[k])}`);
+    }
+    onLoad(next);
+    setShort(missing.length ? `Short of ${missing.join(', ')}: loaded what the city has.` : '');
+  };
+  const hasTroops = Object.keys(troops).length > 0;
+  return (
+    <div className="grid gap-2 rounded-md border p-2">
+      <Label className="text-xs">Saved armies</Label>
+      <div className="flex gap-2">
+        <Select value={selected} onValueChange={load} disabled={!list.length}>
+          <SelectTrigger className="w-full" size="sm">
+            <SelectValue placeholder={list.length ? 'Load a saved army…' : 'No saved armies yet'} />
+          </SelectTrigger>
+          <SelectContent>
+            {list.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.name} · {fmtExact(Object.values(p.troops).reduce((a, b) => a + (b ?? 0), 0))} troops
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {selected && (
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            aria-label="Delete this saved army"
+            disabled={remove.isPending}
+            onClick={() => remove.mutate(selected, { onSuccess: () => (setSelected(''), setShort('')) })}
+          >
+            <Trash2 />
+          </Button>
+        )}
+      </div>
+      {short && <p className="text-xs text-amber-600">{short}</p>}
+      <div className="flex gap-2">
+        <Input className="h-8" placeholder="Name this army, e.g. Layered L10" maxLength={30} value={name} onChange={(e) => setName(e.target.value)} />
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!name.trim() || !hasTroops || save.isPending}
+          onClick={() => save.mutate(undefined, { onSuccess: () => setName('') })}
+        >
+          <Star /> Save
+        </Button>
+      </div>
+    </div>
+  );
 }

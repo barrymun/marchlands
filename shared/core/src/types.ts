@@ -113,6 +113,10 @@ export const CityMiscSchema = z.object({
 });
 export type CityMisc = z.infer<typeof CityMiscSchema>;
 
+/** A named army composition a lord saved to send again quickly. */
+export const ArmyPresetSchema = z.object({ id: z.string(), name: z.string(), troops: TroopCountsSchema });
+export type ArmyPreset = z.infer<typeof ArmyPresetSchema>;
+
 export const PlayerMiscSchema = z.object({
   icon: z.number().int().optional(),
   changedFace: z.boolean().optional(),
@@ -125,8 +129,11 @@ export const PlayerMiscSchema = z.object({
   tutorialStep: z.number().int().optional(),
   dailyGiftDay: z.string().optional(),
   denyChatUntil: z.number().optional(),
+  /** (evony-re) saved army compositions for the send-army dialog */
+  armyPresets: z.array(ArmyPresetSchema).optional(),
 });
 export type PlayerMisc = z.infer<typeof PlayerMiscSchema>;
+
 
 // ---- report payloads ----
 // Unions of plain objects resolve to the first variant that parses (unknown keys are stripped),

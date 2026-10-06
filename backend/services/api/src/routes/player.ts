@@ -1,6 +1,9 @@
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import {
+  ArmyPreset,
+  ArmyPresetBody,
+  ArmyPresetParams,
   BookmarkBody,
   BookmarkParams,
   CastleSign,
@@ -96,6 +99,13 @@ export default async function playerRoutes(app: ZApp) {
   );
   app.post('/player/bookmarks', s('Bookmark a castle (castle.saveCastleSignList)', z.array(CastleSign), { body: BookmarkBody }), (req) =>
     game(req, (ctx, pid) => player.addCastleSign(ctx, pid, req.body.tileId)),
+  );
+  app.get('/player/army-presets', s('Saved army compositions', z.array(ArmyPreset)), (req) => game(req, (ctx, pid) => player.armyPresets(ctx, pid)));
+  app.post('/player/army-presets', s('Save an army composition (same name replaces)', z.array(ArmyPreset), { body: ArmyPresetBody }), (req) =>
+    game(req, (ctx, pid) => player.saveArmyPreset(ctx, pid, req.body.name, req.body.troops)),
+  );
+  app.delete('/player/army-presets/:presetId', s('Delete a saved army composition', z.array(ArmyPreset), { params: ArmyPresetParams }), (req) =>
+    game(req, (ctx, pid) => player.deleteArmyPreset(ctx, pid, req.params.presetId)),
   );
   app.delete('/player/bookmarks/:tileId', s('Remove a bookmark', z.array(CastleSign), { params: BookmarkParams }), (req) =>
     game(req, (ctx, pid) => player.removeCastleSign(ctx, pid, req.params.tileId)),

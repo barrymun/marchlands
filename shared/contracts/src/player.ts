@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { createSelectSchema } from 'drizzle-zod';
-import { CastleSignSchema, GrantContentsSchema, ResearchStateSchema } from '@evony/core';
+import { ArmyPresetSchema, CastleSignSchema, GrantContentsSchema, ResearchStateSchema } from '@evony/core';
 import { accounts } from '@evony/db/schema';
 import { Ms, zId } from './common.ts';
 import { ArmyBean, BuffBean, CityBean, HeroBean, ItemCount, PlayerInfo } from './beans.ts';
@@ -80,6 +80,10 @@ export const TutorialStepBody = z.object({ step: z.number().int().min(0) });
 export const FurloughBody = z.object({ days: z.number().int() });
 export const TruceBody = z.object({ itemId: z.string().default('player.peace.1') });
 export const BookmarkBody = z.object({ tileId: zId });
+export const ArmyPreset = ArmyPresetSchema.meta({ id: 'ArmyPreset' });
+export type ArmyPreset = z.infer<typeof ArmyPreset>;
+export const ArmyPresetBody = z.object({ name: z.string().describe('replaces a preset with the same name'), troops: z.record(z.string(), z.number().int()) });
+export const ArmyPresetParams = z.object({ presetId: z.string() });
 export const BookmarkParams = z.object({ tileId: zId });
 export const UseItemParams = z.object({ itemId: z.string() });
 export const UseItemBody = z.object({ cityId: zId.nullish() }).default({});
