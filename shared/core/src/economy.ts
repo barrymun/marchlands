@@ -216,7 +216,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
 
   let upkeep = troopUpkeep(city.troops) + troopUpkeep(ctx.awayTroops);
   if (hasBuff(ctx.buffs, 'UpkeepReduceBuff', now)) upkeep *= 0.5;
-  const heroSalary = ctx.heroLevels.reduce((s, l) => s + l * BALANCE.heroSalaryPerLevel, 0);
+  const heroSalary = BALANCE.heroSalaries ? ctx.heroLevels.reduce((s, l) => s + l * BALANCE.heroSalaryPerLevel, 0) : 0;
   let taxIncome = (population * city.taxRate) / 100;
   if (hasBuff(ctx.buffs, 'GoldProductionBuff', now)) taxIncome *= 1 + BALANCE.resourceBuffBonus;
 

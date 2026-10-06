@@ -50,6 +50,8 @@ export const BALANCE = {
   startPopulation: 50,
 
   heroSalaryPerLevel: 20, // (orig) gold per hour per hero level
+  /** (evony-re) on: every hero costs heroSalaryPerLevel gold per hour per level (orig). Off: heroes are free */
+  heroSalaries: false as boolean,
   heroHireCostPerLevel: 1000, // (orig)
   /** (evony-re) gold to re-roll the Inn's offers, per Inn level (the Hero Hunting item does it for free) */
   tavernRefreshGoldPerInnLevel: 1000,

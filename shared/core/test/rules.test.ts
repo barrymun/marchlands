@@ -278,3 +278,28 @@ describe('valley upgrades', () => {
     expect(valleyUpgradeCost(BALANCE.valleyUpgrade.maxLevel)).toBeNull();
   });
 });
+
+describe('hero salaries', () => {
+  const cfg = BALANCE as { heroSalaries: boolean };
+  const run = (on: boolean) => {
+    const was = cfg.heroSalaries;
+    cfg.heroSalaries = on;
+    try {
+      return computeCityStats(city({ population: 100 }), ctx({ heroLevels: [10, 5] }), 0);
+    } finally {
+      cfg.heroSalaries = was;
+    }
+  };
+
+  it('cost gold per hero level when on', () => {
+    const s = run(true);
+    expect(s.heroSalary).toBe(15 * BALANCE.heroSalaryPerLevel);
+    expect(s.rates.gold).toBeCloseTo(s.taxIncome - s.heroSalary);
+  });
+
+  it('cost nothing when off', () => {
+    const s = run(false);
+    expect(s.heroSalary).toBe(0);
+    expect(s.rates.gold).toBeCloseTo(s.taxIncome);
+  });
+});

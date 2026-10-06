@@ -52,10 +52,7 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
                 <Breakdown line={line} mayor={mayor} />
               ) : (
                 <Rows
-                  rows={[
-                    ['Tax income', r.taxIncome],
-                    ['Hero salaries', -r.herosSalary],
-                  ]}
+                  rows={[['Tax income', r.taxIncome], ...(r.herosSalary ? [['Hero salaries', -r.herosSalary] as [string, number]] : [])]}
                   total={r.goldRate}
                 />
               )}
