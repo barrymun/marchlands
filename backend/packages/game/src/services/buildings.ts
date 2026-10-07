@@ -17,6 +17,7 @@ import {
   checkRequirements,
   coinsForSpeedup,
   demolishTimeMs,
+  fullDemolishRefund,
   findBuilding,
   GameError,
   prestigeOf,
@@ -35,17 +36,7 @@ import {
 import { mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { buildingBean, heroBean } from '../dto.ts';
-import {
-  activeBuff,
-  addItem,
-  addPrestige,
-  gainResources,
-  pushPlayerInfo,
-  pushResources,
-  spendCents,
-  spendResources,
-  useItemOrCents,
-} from '../helpers.ts';
+import { activeBuff, addItem, addPrestige, gainResources, pushPlayerInfo, pushResources, spendCents, spendResources, useItemOrCents } from '../helpers.ts';
 import { saveCity, saveHero, savePlayer } from '../repo.ts';
 import { checkBeginner } from './player.ts';
 import { clearTavern } from './heroes.ts';
@@ -131,8 +122,14 @@ export async function upgradeInfo(ctx: Ctx, playerId: number, cityId: number, po
     effect: buildingEffect(bld.typeId, bld.level),
     maxLevel: max,
     next: bld.level < max ? requirementsView(b, bld.typeId, bld.level + 1) : null,
-    demolishTime: bld.level > 0 ? Math.ceil(demolishTimeMs(bld.typeId, bld.level, mayorStats(b.heroes), b.player.research) / 1000) : 0,
-    demolishRefund: bld.level > 0 ? scaleResources(buildingConfig(bld.typeId, bld.level)!.cost, BALANCE.demolishRefund) : null,
+    demolishTime:
+      bld.level > 0 && !BALANCE.instantDemolish ? Math.ceil(demolishTimeMs(bld.typeId, bld.level, mayorStats(b.heroes), b.player.research) / 1000) : 0,
+    demolishRefund:
+      bld.level <= 0
+        ? null
+        : BALANCE.instantDemolish
+          ? fullDemolishRefund(bld.typeId, bld.level)
+          : scaleResources(buildingConfig(bld.typeId, bld.level)!.cost, BALANCE.demolishRefund),
   };
 }
 
@@ -199,13 +196,26 @@ export async function upgrade(ctx: Ctx, playerId: number, cityId: number, positi
   return buildingBean(next);
 }
 
-/** castle.destructBuilding: demolish one level. */
+/**
+ * castle.destructBuilding: demolish one level (timed); (evony-re) with BALANCE.instantDemolish the whole
+ * building goes at once, refunding a third of every level's cost.
+ */
 export async function demolish(ctx: Ctx, playerId: number, cityId: number, positionId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const bld = findBuilding(b.city.buildings, positionId);
   if (!bld || bld.level <= 0) throw new GameError("Can't destroy building.", -99);
   if (bld.status !== BuildingStatus.IDLE) throw new GameError('Building is busy.', -45);
   if (bld.typeId === BuildingType.TOWN_HALL) throw new GameError('The Town Hall cannot be demolished.', -99);
+  if (bld.typeId === BuildingType.WALLS) throw new GameError('The Walls cannot be demolished.', -99);
+  if (BALANCE.instantDemolish) {
+    gainResources(b.city, fullDemolishRefund(bld.typeId, bld.level));
+    removeBuilding(b, bld);
+    const gone: BuildingState = { positionId, typeId: 0, level: 0, status: 0, startTime: 0, endTime: 0 };
+    pushBuilding(ctx, b, gone);
+    pushResources(ctx, b);
+    await commit(ctx, b);
+    return buildingBean(gone);
+  }
   if (b.city.buildings.filter((x) => x.status !== BuildingStatus.IDLE).length >= maxConcurrent(b, ctx.now)) {
     throw new GameError('All construction queues are busy.', -48);
   }
@@ -276,6 +286,12 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
   return buildingBean(next);
 }
 
+/** Take a building off the city; a Barracks takes its training queue with it. */
+function removeBuilding(b: CityBundle, bld: BuildingState) {
+  b.city.buildings = b.city.buildings.filter((x) => x.positionId !== bld.positionId);
+  if (bld.typeId === BuildingType.BARRACKS) b.city.troopQueues = b.city.troopQueues.filter((q) => q.positionId !== bld.positionId);
+}
+
 // ---------------------------------------------------------------------------------------------
 // Completion (timed event)
 // ---------------------------------------------------------------------------------------------
@@ -310,9 +326,7 @@ export async function completeBuilding(ctx: Ctx, cityId: number, positionId: num
     const level = bld.level - 1;
     gainResources(b.city, buildingConfig(bld.typeId, bld.level)!.cost, BALANCE.demolishRefund);
     after = level > 0 ? { ...bld, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 } : null;
-    if (!after && bld.typeId === BuildingType.BARRACKS) {
-      b.city.troopQueues = b.city.troopQueues.filter((q) => q.positionId !== positionId);
-    }
+    if (!after) removeBuilding(b, bld);
   }
   b.city.buildings = after
     ? b.city.buildings.map((x) => (x.positionId === positionId ? after! : x))
@@ -322,4 +336,3 @@ export async function completeBuilding(ctx: Ctx, cityId: number, positionId: num
   await pushPlayerInfo(ctx, b.player);
   await commit(ctx, b);
 }
-

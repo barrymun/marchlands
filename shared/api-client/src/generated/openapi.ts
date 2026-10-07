@@ -2323,7 +2323,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Demolish one level (castle.destructBuilding) */
+        /** Demolish: the whole building at once with BALANCE.instantDemolish, else one level (castle.destructBuilding) */
         post: {
             parameters: {
                 query?: never;
@@ -11644,9 +11644,9 @@ export interface components {
             maxLevel: number;
             /** @description null at max level */
             next: components["schemas"]["BuildingLevelInfoInput"] | null;
-            /** @description seconds */
+            /** @description seconds (0: demolition is instant, BALANCE.instantDemolish) */
             demolishTime: number;
-            /** @description a third of the current level cost (unrounded); null at level 0 */
+            /** @description a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0 */
             demolishRefund: components["schemas"]["ResourceAmountsInput"] | null;
         };
         TechBeanInput: {
@@ -13718,9 +13718,9 @@ export interface components {
             maxLevel: number;
             /** @description null at max level */
             next: components["schemas"]["BuildingLevelInfo"] | null;
-            /** @description seconds */
+            /** @description seconds (0: demolition is instant, BALANCE.instantDemolish) */
             demolishTime: number;
-            /** @description a third of the current level cost (unrounded); null at level 0 */
+            /** @description a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0 */
             demolishRefund: components["schemas"]["ResourceAmounts"] | null;
         };
         TechBean: {

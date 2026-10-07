@@ -112,6 +112,14 @@ async function main() {
     await ok(gm.token, 'PUT', `/admin/cities/${cid}/resources`, { playerId: pid, gold: 5e6, food: 5e6, wood: 5e6, stone: 5e6, iron: 5e6 });
     await ok(gm.token, 'POST', '/admin/cents', { playerName: a.state.playerInfo.userName, cents: 5000 });
     check(true, 'admin fast-forward (buildings, resources, cents)');
+    // demolition is instant and removes the whole building (BALANCE.instantDemolish)
+    await ok(gm.token, 'PUT', `/admin/cities/${cid}/buildings`, { playerId: pid, positionId: 20, typeId: 1, level: 3 });
+    const before = await ok(a.token, 'GET', `/cities/${cid}`);
+    await ok(a.token, 'POST', `/cities/${cid}/buildings/20/demolish`);
+    const after = await ok(a.token, 'GET', `/cities/${cid}`);
+    check(!after.buildings.some((x) => x.positionId === 20), 'cottage Lv 3 demolished at once');
+    check(after.resource.wood.amount > before.resource.wood.amount, 'demolition refunds resources');
+    check((await call(a.token, 'POST', `/cities/${cid}/buildings/-1/demolish`)).ok !== 1, 'Town Hall cannot be demolished');
   }
 
   // ---- research ----

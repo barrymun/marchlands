@@ -98,6 +98,11 @@ export const BALANCE = {
   heroTimeFactor: 0.995, // (orig) per point of the relevant mayor attribute
   techTimeFactor: 0.9, // (orig) per research level
   demolishRefund: 1 / 3, // (orig)
+  /**
+   * (evony-re) demolishing removes the whole building at once, instantly, refunding demolishRefund of
+   * every level's cost (what demolishing it level by level returns); orig: one level per timed demolition
+   */
+  instantDemolish: true as boolean,
   cancelBuildRefund: 1, // (orig intended)
   cancelResearchRefund: 1 / 3, // (orig)
   cancelTrainInProgressRefund: 1 / 3, // (orig)

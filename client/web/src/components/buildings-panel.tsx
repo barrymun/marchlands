@@ -15,7 +15,7 @@ import { CostList, Requirements } from '@/components/cost-list';
 import { SpeedupOptions } from '@/components/speedup-options';
 import { qk, useCommand } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
-import { buildingName } from '@/lib/format';
+import { buildingName, fmt } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 const INSIDE = Array.from({ length: 32 }, (_, i) => i);
@@ -292,8 +292,9 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
         }),
       ),
     refresh,
-    'Demolition started',
+    BALANCE.instantDemolish ? 'Building demolished' : 'Demolition started',
   );
+  const [confirmDemolish, setConfirmDemolish] = useState(false);
   const cancel = useCommand(
     () =>
       unwrap(
@@ -405,13 +406,38 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
               <Separator />
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs text-muted-foreground">
-                  Demolish one level
-                  {info.data ? ` (${Math.round(info.data.demolishTime / 60)} min)` : ''}
+                  {BALANCE.instantDemolish ? 'Demolish the whole building, instantly' : 'Demolish one level'}
+                  {info.data && !BALANCE.instantDemolish ? ` (${Math.round(info.data.demolishTime / 60)} min)` : ''}
+                  {info.data?.demolishRefund && <> · returns {refundText(info.data.demolishRefund)}</>}
                 </span>
-                <Button size="sm" variant="destructive" disabled={demolish.isPending} onClick={() => demolish.mutate(undefined, { onSuccess: onDone })}>
-                  Demolish
-                </Button>
+                {!confirmDemolish && (
+                  <Button size="sm" variant="destructive" disabled={demolish.isPending} onClick={() => setConfirmDemolish(true)}>
+                    Demolish
+                  </Button>
+                )}
               </div>
+              {confirmDemolish && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-xs">
+                  <span>
+                    {BALANCE.instantDemolish
+                      ? `Remove ${buildingName(building.typeId)} (Lv ${building.level}) for good? This cannot be undone.`
+                      : `Start demolishing one level of ${buildingName(building.typeId)}?`}
+                  </span>
+                  <div className="flex gap-1">
+                    <Button size="xs" variant="outline" onClick={() => setConfirmDemolish(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="destructive"
+                      disabled={demolish.isPending}
+                      onClick={() => demolish.mutate(undefined, { onSuccess: () => (setConfirmDemolish(false), onDone()) })}
+                    >
+                      Demolish
+                    </Button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -449,4 +475,14 @@ function MayorBuildExp({ city, typeId, level }: { city: CityBean; typeId: number
 function Unlocks({ list }: { list: { name: string; level: number }[] }) {
   if (!list.length) return null;
   return <p className="text-xs text-muted-foreground">Unlocks: {list.map((u) => `${u.name} (Lv ${u.level})`).join(', ')}</p>;
+}
+
+const REFUND_NAMES = { gold: 'gold', food: 'food', wood: 'lumber', stone: 'stone', iron: 'iron' } as const;
+
+/** What a demolition returns, e.g. "1.2K food, 800 lumber". */
+function refundText(r: Partial<Record<keyof typeof REFUND_NAMES, number>>): string {
+  const parts = (Object.keys(REFUND_NAMES) as (keyof typeof REFUND_NAMES)[])
+    .filter((k) => Math.floor(r[k] ?? 0) > 0)
+    .map((k) => `${fmt(Math.floor(r[k]!))} ${REFUND_NAMES[k]}`);
+  return parts.length ? parts.join(', ') : 'nothing';
 }

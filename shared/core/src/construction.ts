@@ -7,7 +7,7 @@ import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEY
 import { buildingConfig, buildingMaxLevel, itemConfig, ITEMS, researchConfig, researchMaxLevel, troopConfig, type Requirements } from './data/index.ts';
 import { buildingCount, buildingLevel, researchLevel, type MayorStats } from './economy.ts';
 import { GameError } from './errors.ts';
-import { scaleResources, type Resources } from './resources.ts';
+import { addResources, emptyResources, scaleResources, type Resources } from './resources.ts';
 import type { BuildingState, FortCounts, ItemCounts, ResearchState, TrainBatch } from './types.ts';
 
 // ---------------------------------------------------------------------------------------------
@@ -106,6 +106,13 @@ export function buildTimeMs(typeId: number, targetLevel: number, mayor: MayorSta
   if (!cfg) throw new GameError('Invalid building.', -99);
   const seconds = cfg.buildTime * heroFactor(mayor?.management, BALANCE.heroTimeFloor.building) * techFactor(researchLevel(research, TechType.CONSTRUCTION));
   return scaled(Math.floor(seconds) * 1000);
+}
+
+/** (evony-re) Resources a full demolition returns: BALANCE.demolishRefund of the cost of every level up to `level`. */
+export function fullDemolishRefund(typeId: number, level: number): Resources {
+  let total = emptyResources();
+  for (let l = 1; l <= level; l++) total = addResources(total, buildingConfig(typeId, l)?.cost ?? {});
+  return scaleResources(total, BALANCE.demolishRefund);
 }
 
 /** Demolishing one level takes half the time it took to build it (orig §3.2). */

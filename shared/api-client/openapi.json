@@ -3303,7 +3303,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "seconds"
+            "description": "seconds (0: demolition is instant, BALANCE.instantDemolish)"
           },
           "demolishRefund": {
             "anyOf": [
@@ -3314,7 +3314,7 @@
                 "type": "null"
               }
             ],
-            "description": "a third of the current level cost (unrounded); null at level 0"
+            "description": "a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0"
           }
         },
         "required": [
@@ -13043,7 +13043,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "seconds"
+            "description": "seconds (0: demolition is instant, BALANCE.instantDemolish)"
           },
           "demolishRefund": {
             "anyOf": [
@@ -13054,7 +13054,7 @@
                 "type": "null"
               }
             ],
-            "description": "a third of the current level cost (unrounded); null at level 0"
+            "description": "a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0"
           }
         },
         "required": [
@@ -22636,7 +22636,7 @@
     },
     "/api/v1/cities/{cityId}/buildings/{positionId}/demolish": {
       "post": {
-        "summary": "Demolish one level (castle.destructBuilding)",
+        "summary": "Demolish: the whole building at once with BALANCE.instantDemolish, else one level (castle.destructBuilding)",
         "tags": [
           "buildings"
         ],

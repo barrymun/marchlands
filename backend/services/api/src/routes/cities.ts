@@ -119,7 +119,9 @@ export default async function cityRoutes(app: ZApp) {
   );
   app.post(
     '/cities/:cityId/buildings/:positionId/demolish',
-    s(tags.buildings, 'Demolish one level (castle.destructBuilding)', BuildingBean, { params: CityPositionParams }),
+    s(tags.buildings, 'Demolish: the whole building at once with BALANCE.instantDemolish, else one level (castle.destructBuilding)', BuildingBean, {
+      params: CityPositionParams,
+    }),
     (req) => game(req, (ctx, pid) => buildings.demolish(ctx, pid, req.params.cityId, req.params.positionId)),
   );
   app.post(

@@ -29,6 +29,8 @@ import {
   syncHeroBuffs,
   upgradeExpFor,
   levelUpAll,
+  fullDemolishRefund,
+  buildingConfig,
   softCapAttribute,
   mayorProductionBonus,
   heroBattleAttackBonus,
@@ -732,5 +734,14 @@ describe('barbarian city gold', () => {
     const r = regenerateNpc(10, raided, fresh.troops, fresh.forts, 6 * 60_000);
     expect(r.state.gold).toBe(19_000_000 / 80);
     expect(r.state.food).toBe(19_000_000 / 80);
+  });
+});
+
+describe('full demolition', () => {
+  it('refunds a third of every level up to the current one', () => {
+    const sum = (l: number, k: 'food' | 'wood') => [...Array(l)].reduce((t, _, i) => t + (buildingConfig(BuildingType.COTTAGE, i + 1)?.cost[k] ?? 0), 0);
+    const r = fullDemolishRefund(BuildingType.COTTAGE, 3);
+    expect(r.wood).toBeCloseTo(sum(3, 'wood') / 3);
+    expect(r.food).toBeCloseTo(sum(3, 'food') / 3);
   });
 });

@@ -134,8 +134,10 @@ export const BuildingUpgradeInfo = z
     effect: z.string().describe('what the building gives at its current level'),
     maxLevel: int(),
     next: BuildingLevelInfo.nullable().describe('null at max level'),
-    demolishTime: int().describe('seconds'),
-    demolishRefund: ResourceAmounts.nullable().describe('a third of the current level cost (unrounded); null at level 0'),
+    demolishTime: int().describe('seconds (0: demolition is instant, BALANCE.instantDemolish)'),
+    demolishRefund: ResourceAmounts.nullable().describe(
+      'a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0',
+    ),
   })
   .meta({ id: 'BuildingUpgradeInfo' });
 export type BuildingUpgradeInfo = z.infer<typeof BuildingUpgradeInfo>;
