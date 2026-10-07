@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Star, Trash2 } from 'lucide-react';
 import type { CityBean } from '@evony/api-client';
-import { buildingLevel, BuildingType, HeroStatus, maxArmyTroops, Mission, TROOP_ID_BY_KEY, TROOP_KEYS, type TroopKey } from '@evony/core';
+import { armyLoad, buildingLevel, BuildingType, HeroStatus, maxArmyTroops, Mission, TROOP_ID_BY_KEY, TROOP_KEYS, type TroopKey } from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -66,6 +66,16 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
       .filter(([, n]) => Number(n) > 0),
   );
   const path = { cityId: city.id };
+  // carrying capacity of the chosen troops (troop load x Logistics), shared by every resource
+  const capacity = armyLoad(troopBody, player.data?.research ?? {});
+  const loaded = Object.values(resourceBody).reduce<number>((t, n) => t + Number(n), 0);
+  const overloaded = loaded > capacity;
+  const inCity = (r: (typeof RES)[number]) => Math.floor(r === 'gold' ? city.resource.gold : city.resource[r].amount);
+  /** Fill one resource with whatever the troops can still carry (and the city has). */
+  const maxOf = (r: (typeof RES)[number]) => {
+    const others = loaded - Number(resourceBody[r] ?? 0);
+    setResources({ ...resources, [r]: String(Math.max(0, Math.min(inCity(r), capacity - others))) });
+  };
 
   const estimate = useMutation({
     mutationFn: () =>
@@ -176,18 +186,31 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
         </div>
         {carriesResources && (
           <div className="grid gap-2">
-            <Label>Resources</Label>
-            <div className="grid grid-cols-5 gap-2">
-              {RES.map((r) => (
-                <Input
-                  key={r}
-                  inputMode="numeric"
-                  placeholder={r === 'wood' ? 'lumber' : r}
-                  value={resources[r] ?? ''}
-                  onChange={(e) => setResources({ ...resources, [r]: e.target.value.replace(/\D/g, '') })}
-                />
-              ))}
+            <div className="flex items-baseline justify-between gap-2">
+              <Label>Resources</Label>
+              <span className={overloaded ? 'text-xs font-medium text-destructive tabular-nums' : 'text-xs text-muted-foreground tabular-nums'}>
+                {capacity > 0 ? `${fmtExact(loaded)} / ${fmtExact(capacity)} carried` : 'Choose troops to carry resources'}
+              </span>
             </div>
+            {RES.map((r) => (
+              <div key={r} className="flex items-center justify-between gap-2 text-sm">
+                <span className="capitalize">
+                  {r === 'wood' ? 'lumber' : r} <span className="text-muted-foreground">({fmtExact(inCity(r))})</span>
+                </span>
+                <div className="flex items-center gap-1">
+                  <Input
+                    className="h-8 w-32"
+                    inputMode="numeric"
+                    placeholder="0"
+                    value={resources[r] ?? ''}
+                    onChange={(e) => setResources({ ...resources, [r]: e.target.value.replace(/\D/g, '') })}
+                  />
+                  <Button size="xs" variant="ghost" disabled={capacity <= 0} title="As much as the troops can still carry" onClick={() => maxOf(r)}>
+                    Max
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
         {estimate.data && (
@@ -200,7 +223,10 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
         <Button variant="outline" disabled={!Object.keys(troopBody).length} onClick={() => estimate.mutate()}>
           Estimate
         </Button>
-        <Button disabled={!Object.keys(troopBody).length || over || send.isPending} onClick={() => send.mutate(undefined, { onSuccess: onDone })}>
+        <Button
+          disabled={!Object.keys(troopBody).length || over || (carriesResources && overloaded) || send.isPending}
+          onClick={() => send.mutate(undefined, { onSuccess: onDone })}
+        >
           Send
         </Button>
       </DialogFooter>
