@@ -17,7 +17,7 @@ import {
   heroPointCap,
   HeroStatus,
   LOYALTY_MEDALS,
-  upgradeExpFor,
+  levelUpAll,
   type GeneratedHero,
 } from '@evony/core';
 import { heroes } from '@evony/db';
@@ -249,14 +249,10 @@ export async function assignPoints(ctx: Ctx, playerId: number, heroId: number, v
   return heroBean(h);
 }
 
-/** hero.levelUp */
+/** hero.levelUp; (evony-re) takes every level the experience pays for in one go. */
 export async function levelUp(ctx: Ctx, playerId: number, heroId: number) {
   const h = await ownHero(ctx, playerId, heroId);
-  if (h.experience < h.upgradeExp) throw new GameError('Not enough experience.', -99);
-  h.experience -= h.upgradeExp;
-  h.level += 1;
-  h.remainPoint += 1;
-  h.upgradeExp = upgradeExpFor(h.level);
+  if (levelUpAll(h) === 0) throw new GameError('Not enough experience.', -99);
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
   return heroBean(h);

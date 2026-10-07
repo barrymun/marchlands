@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Check, Lock, LockOpen, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
 import type { CityBean, HeroBean } from '@evony/api-client';
-import { BALANCE, BuildingType, HeroStatus, heroManagement, heroPower, heroStratagem } from '@evony/core';
+import { toast } from 'sonner';
+import { BALANCE, BuildingType, HeroStatus, heroManagement, heroPower, heroStratagem, levelsReady } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,7 +48,14 @@ export function HeroesPanel({ city }: { city: CityBean }) {
     'New heroes at the Inn',
   );
   const mayor = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/mayor', { params: { path: { heroId } } })), refresh, 'Mayor appointed');
-  const levelUp = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/level-up', { params: { path: { heroId } } })), refresh, 'Level up!');
+  // one click takes every level the experience pays for
+  const levelUp = useCommand(async (heroId: number) => {
+    const before = city.heros.find((h) => h.id === heroId)?.level;
+    const h = await unwrap(api.POST('/api/v1/heroes/{heroId}/level-up', { params: { path: { heroId } } }));
+    const gained = before != null ? h.level - before : 1;
+    toast.success(`${h.name} reached level ${h.level}${gained > 1 ? ` (+${gained} levels, +${gained} points)` : ''}`);
+    return h;
+  }, refresh);
   const rename = useCommand(
     (v: { heroId: number; name: string }) => unwrap(api.PATCH('/api/v1/heroes/{heroId}', { params: { path: { heroId: v.heroId } }, body: { name: v.name } })),
     refresh,
@@ -136,8 +144,8 @@ export function HeroesPanel({ city }: { city: CityBean }) {
                 </div>
               )}
               {h.experience >= h.upgradeExp && (
-                <Button size="xs" onClick={() => levelUp.mutate(h.id)}>
-                  Level up
+                <Button size="xs" onClick={() => levelUp.mutate(h.id)} disabled={levelUp.isPending}>
+                  {levelsReady(h) > 1 ? `Level up ×${levelsReady(h)} → Lv ${h.level + levelsReady(h)}` : 'Level up'}
                 </Button>
               )}
               {h.status === HeroStatus.IDLE && !h.seized && (
@@ -355,7 +363,7 @@ function ExpBar({ hero }: { hero: HeroBean }) {
       </div>
       <div className="text-[11px] text-muted-foreground tabular-nums">
         {ready ? (
-          <span className="font-medium text-amber-600 dark:text-amber-400">Ready to level up</span>
+          <span className="font-medium text-amber-600 dark:text-amber-400">Ready to level up{levelsReady(hero) > 1 && ` ${levelsReady(hero)} times`}</span>
         ) : (
           <>
             XP {fmtExact(hero.experience)} / {fmtExact(hero.upgradeExp)} · {fmtExact(hero.upgradeExp - hero.experience)} to Lv {hero.level + 1}

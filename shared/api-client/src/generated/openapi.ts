@@ -4425,7 +4425,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Level up (hero.levelUp) */
+        /** Level up as many times as the experience pays for (hero.levelUp) */
         post: {
             parameters: {
                 query?: never;

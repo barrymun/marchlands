@@ -25504,7 +25504,7 @@
     },
     "/api/v1/heroes/{heroId}/level-up": {
       "post": {
-        "summary": "Level up (hero.levelUp)",
+        "summary": "Level up as many times as the experience pays for (hero.levelUp)",
         "tags": [
           "heroes"
         ],

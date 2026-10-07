@@ -60,6 +60,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 | Barbarian city loyalty recovers +1 per 6 minutes of game time | *(design change)* per 6 minutes of real time (`BALANCE.npcLoyaltyRegenRealTime`), so GAME_SPEED does not undo attacks faster; troops, fortifications and resources still regenerate on game time |
 | A city's loyalty drifts 1 point per 6 minutes of game time | *(design change)* per 6 minutes of real time (`BALANCE.cityLoyaltyRealTime`), so GAME_SPEED does not speed up recovering from attacks or adjusting to the tax rate; population still drifts on game time |
 | Experience per hero level is level² × 100 without limit | *(design change)* it stops growing at level 100 (`BALANCE.heroExpCapLevel`): every level from 100 on needs 1,000,000 |
+| `hero.levelUp` takes one level per call | *(design change)* one call takes every level the experience pays for (`levelUpAll`), +1 attribute point each |
 | The Rally Spot army limits were never enforced | at most one army per Rally Spot level, each of at most 10,000 troops per level (100,000 at level 10; a War Ensign adds 25%), as in Evony |
 | Fixed hero names like `"Test Name453160"` | name and portrait generator |
 

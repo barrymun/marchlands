@@ -106,7 +106,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | PATCH | `/api/v1/heroes/{heroId}` | Rename (hero.changeName) |
 | POST | `/api/v1/heroes/{heroId}/fire` | Fire (hero.fireHero) |
 | POST | `/api/v1/heroes/{heroId}/items` | Use a hero item (hero.useItem) |
-| POST | `/api/v1/heroes/{heroId}/level-up` | Level up (hero.levelUp) |
+| POST | `/api/v1/heroes/{heroId}/level-up` | Level up as many times as the experience pays for (hero.levelUp) |
 | PUT | `/api/v1/heroes/{heroId}/lock` | Lock or unlock a hero (a locked hero cannot be dismissed) |
 | POST | `/api/v1/heroes/{heroId}/mayor` | Appoint mayor (hero.promoteToChief) |
 | POST | `/api/v1/heroes/{heroId}/persuade` | Recruit a captive whose loyalty is 0 |

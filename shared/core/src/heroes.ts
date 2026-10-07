@@ -39,6 +39,33 @@ export const upgradeExpFor = (level: number) => {
   return l * l * 100;
 };
 
+type Levelling = { level: number; experience: number; upgradeExp: number; remainPoint: number };
+
+/** (evony-re) How many levels the hero's experience pays for right now (orig: one per hero.levelUp). */
+export function levelsReady(h: Omit<Levelling, 'remainPoint'>): number {
+  let { level, experience, upgradeExp } = h;
+  let n = 0;
+  while (experience >= upgradeExp) {
+    experience -= upgradeExp;
+    level += 1;
+    upgradeExp = upgradeExpFor(level);
+    n += 1;
+  }
+  return n;
+}
+
+/** Spend experience on every level it pays for (+1 attribute point each); returns the levels gained. */
+export function levelUpAll(h: Levelling): number {
+  const n = levelsReady(h);
+  for (let i = 0; i < n; i++) {
+    h.experience -= h.upgradeExp;
+    h.level += 1;
+    h.remainPoint += 1;
+    h.upgradeExp = upgradeExpFor(h.level);
+  }
+  return n;
+}
+
 /** Base attribute roll (orig RandomStat distribution). */
 export function randomStat(rng: Rng): number {
   const r = randInt(rng, 0, 9999);
@@ -52,14 +79,66 @@ export function randomStat(rng: Rng): number {
 }
 
 const FIRST_NAMES = [
-  'Aldric', 'Baldwin', 'Cedric', 'Conrad', 'Edmund', 'Godfrey', 'Gunther', 'Hector', 'Leopold', 'Lothar',
-  'Magnus', 'Odo', 'Otto', 'Rainald', 'Roland', 'Siegfried', 'Tancred', 'Theobald', 'Ulric', 'Walter',
-  'Adela', 'Beatrix', 'Cunigunde', 'Edith', 'Gisela', 'Hildegard', 'Isolde', 'Mathilda', 'Richenza', 'Sibylla',
-  'Arnulf', 'Bertram', 'Dietrich', 'Eckhart', 'Florian', 'Gerold', 'Heinrich', 'Ivo', 'Konrad', 'Ludwig',
+  'Aldric',
+  'Baldwin',
+  'Cedric',
+  'Conrad',
+  'Edmund',
+  'Godfrey',
+  'Gunther',
+  'Hector',
+  'Leopold',
+  'Lothar',
+  'Magnus',
+  'Odo',
+  'Otto',
+  'Rainald',
+  'Roland',
+  'Siegfried',
+  'Tancred',
+  'Theobald',
+  'Ulric',
+  'Walter',
+  'Adela',
+  'Beatrix',
+  'Cunigunde',
+  'Edith',
+  'Gisela',
+  'Hildegard',
+  'Isolde',
+  'Mathilda',
+  'Richenza',
+  'Sibylla',
+  'Arnulf',
+  'Bertram',
+  'Dietrich',
+  'Eckhart',
+  'Florian',
+  'Gerold',
+  'Heinrich',
+  'Ivo',
+  'Konrad',
+  'Ludwig',
 ];
 const EPITHETS = [
-  'the Bold', 'the Wise', 'the Just', 'the Stern', 'the Fair', 'the Young', 'the Elder', 'the Lion', 'the Hammer',
-  'the Pious', 'the Brave', 'the Swift', 'the Iron', 'the Red', 'the Black', 'the Tall', 'the Silent', 'the Shrewd',
+  'the Bold',
+  'the Wise',
+  'the Just',
+  'the Stern',
+  'the Fair',
+  'the Young',
+  'the Elder',
+  'the Lion',
+  'the Hammer',
+  'the Pious',
+  'the Brave',
+  'the Swift',
+  'the Iron',
+  'the Red',
+  'the Black',
+  'the Tall',
+  'the Silent',
+  'the Shrewd',
 ];
 const FACES = Array.from({ length: 30 }, (_, i) => `images/icon/player/faceA${i + 1}.jpg`);
 
@@ -166,4 +245,3 @@ export const LOYALTY_MEDALS: Record<string, number> = {
   'hero.loyalty.8': 50,
   'hero.loyalty.9': 60,
 };
-

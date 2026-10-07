@@ -28,6 +28,8 @@ import {
   heroItemGoldPrice,
   syncHeroBuffs,
   upgradeExpFor,
+  levelUpAll,
+  levelsReady,
   maxArmyTroops,
   injuredOf,
   healHonorCost,
@@ -259,16 +261,32 @@ describe('armies', () => {
     expect(even.every((a) => a.count === 100)).toBe(true);
     expect(Math.max(...even.map((a) => a.finishAt))).toBe(10_000);
     // a barracks already busy for a while gets fewer units; remainders are spread
-    const busy = splitTraining([{ positionId: 1, freeAt: 0 }, { positionId: 2, freeAt: 0 }, { positionId: 3, freeAt: 5_000 }], 101, 100);
+    const busy = splitTraining(
+      [
+        { positionId: 1, freeAt: 0 },
+        { positionId: 2, freeAt: 0 },
+        { positionId: 3, freeAt: 5_000 },
+      ],
+      101,
+      100,
+    );
     expect(busy.reduce((s, a) => s + a.count, 0)).toBe(101);
     const t = busy.map((a) => a.finishAt);
     expect(Math.max(...t) - Math.min(...t)).toBeLessThanOrEqual(100);
     // a queue busy past the common finish time gets nothing
-    expect(splitTraining([{ positionId: 1, freeAt: 0 }, { positionId: 2, freeAt: 1e9 }], 10, 100).map((a) => a.positionId)).toEqual([1]);
+    expect(
+      splitTraining(
+        [
+          { positionId: 1, freeAt: 0 },
+          { positionId: 2, freeAt: 1e9 },
+        ],
+        10,
+        100,
+      ).map((a) => a.positionId),
+    ).toEqual([1]);
     expect(splitTraining([{ positionId: 1, freeAt: 0 }], 7, 100)).toEqual([{ positionId: 1, count: 7, finishAt: 700 }]);
   });
 });
-
 
 describe('research hero exp', () => {
   it('is prestige plus a share of the level cost, growing with the level', () => {
@@ -400,7 +418,15 @@ describe('hero items for gold', () => {
 
 describe('hero attribute boosts', () => {
   it('follow the attribute as it grows', () => {
-    const h = { power: 128, management: 40, stratagem: 30, powerBuffAdded: 32, managementBuffAdded: 0, stratagemBuffAdded: 0, buffs: [{ id: 'power', desc: 'power +25%', endTime: 1, param: 32 }] };
+    const h = {
+      power: 128,
+      management: 40,
+      stratagem: 30,
+      powerBuffAdded: 32,
+      managementBuffAdded: 0,
+      stratagemBuffAdded: 0,
+      buffs: [{ id: 'power', desc: 'power +25%', endTime: 1, param: 32 }],
+    };
     expect(syncHeroBuffs(h)).toBe(false);
     h.power = 161;
     expect(syncHeroBuffs(h)).toBe(true);
@@ -444,7 +470,11 @@ describe('medicine and honor healing', () => {
 describe('medal drops', () => {
   const tally = (level: number, n = 20000) => {
     const rng = seededRng(`medals-${level}`);
-    let any = 0, two = 0, three = 0, max = 0, min = 99;
+    let any = 0,
+      two = 0,
+      three = 0,
+      max = 0,
+      min = 99;
     for (let i = 0; i < n; i++) {
       const d = rollMedalDrops(level, rng);
       const count = Object.values(d).reduce((a, b) => a + b, 0);
@@ -503,5 +533,22 @@ describe('city loyalty and game speed', () => {
     } finally {
       setGameSpeed(1);
     }
+  });
+});
+
+describe('level up all at once', () => {
+  it('spends experience on every level it pays for', () => {
+    // Lv 10 needs 10,000, Lv 11 needs 12,100, Lv 12 needs 14,400
+    const h = { level: 10, experience: 10_000 + 12_100 + 500, upgradeExp: upgradeExpFor(10), remainPoint: 0 };
+    expect(levelsReady(h)).toBe(2);
+    expect(levelUpAll(h)).toBe(2);
+    expect(h).toEqual({ level: 12, experience: 500, upgradeExp: 14_400, remainPoint: 2 });
+    expect(levelUpAll(h)).toBe(0);
+  });
+
+  it('keeps going past the exp cap at a flat 1,000,000 per level', () => {
+    const h = { level: 100, experience: 3_500_000, upgradeExp: upgradeExpFor(100), remainPoint: 5 };
+    expect(levelUpAll(h)).toBe(3);
+    expect(h).toEqual({ level: 103, experience: 500_000, upgradeExp: 1_000_000, remainPoint: 8 });
   });
 });

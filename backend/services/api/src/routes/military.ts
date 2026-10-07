@@ -76,7 +76,7 @@ export default async function militaryRoutes(app: ZApp) {
     s(tags.heroes, 'Assign points: new totals (hero.addPoint)', HeroBean, { params: HeroParams, body: HeroPointsBody }),
     (req) => game(req, (ctx, pid) => heroes.assignPoints(ctx, pid, req.params.heroId, req.body)),
   );
-  app.post('/heroes/:heroId/level-up', s(tags.heroes, 'Level up (hero.levelUp)', HeroBean, { params: HeroParams }), (req) =>
+  app.post('/heroes/:heroId/level-up', s(tags.heroes, 'Level up as many times as the experience pays for (hero.levelUp)', HeroBean, { params: HeroParams }), (req) =>
     game(req, (ctx, pid) => heroes.levelUp(ctx, pid, req.params.heroId)),
   );
   app.post('/heroes/:heroId/reward', s(tags.heroes, '+5 loyalty for gold (hero.awardGold)', HeroBean, { params: HeroParams }), (req) =>
