@@ -54,7 +54,8 @@ export function ItemsPanel({ city }: { city: CityBean }) {
     .filter((e) => category === ALL || e.info.category === category)
     .filter((e) => !ownedOnly || e.owned > 0)
     .filter((e) => !q || e.info.name.toLowerCase().includes(q) || e.info.description.toLowerCase().includes(q))
-    .sort((a, b) => Number(b.owned > 0) - Number(a.owned > 0) || a.info.name.localeCompare(b.info.name));
+    // alphabetical only, so buying or using an item never moves it
+    .sort((a, b) => a.info.name.localeCompare(b.info.name));
   const ownedTotal = entries.filter((e) => e.owned > 0).length;
   const buffs = (player.data?.buffs ?? []).filter((b) => b.endTime > Date.now());
 
@@ -118,9 +119,10 @@ export function ItemsPanel({ city }: { city: CityBean }) {
       </div>
       <div className="grid gap-2 md:grid-cols-2">
         {shown.map((e) => (
-          <div key={e.ids[0]} className={cn('grid gap-1.5 rounded-md border bg-card p-3', e.owned === 0 && 'opacity-60')}>
+          <div key={e.ids[0]} className="grid gap-1.5 rounded-md border bg-card p-3">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex flex-wrap items-center gap-2">
+              {/* items not owned are dimmed, but never their buttons (a Buy button must not look disabled) */}
+              <div className={cn('flex flex-wrap items-center gap-2', e.owned === 0 && 'opacity-60')}>
                 <span className="font-medium">{e.info.name}</span>
                 <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
                   ×{fmtExact(e.owned)}
@@ -131,9 +133,13 @@ export function ItemsPanel({ city }: { city: CityBean }) {
                 {goldPriceOf(e) && (
                   <Button
                     size="xs"
-                    variant="outline"
+                    variant={e.owned === 0 ? 'default' : 'outline'}
                     disabled={city.resource.gold < goldPriceOf(e)!.price || buyGold.isPending}
-                    title={`Buy one with ${city.name}'s gold`}
+                    title={
+                      city.resource.gold < goldPriceOf(e)!.price
+                        ? `Not enough gold in ${city.name} (${fmtExact(goldPriceOf(e)!.price)} needed)`
+                        : `Buy one with ${city.name}'s gold`
+                    }
                     onClick={() => buyGold.mutate(goldPriceOf(e)!.id, { onSuccess: () => toast.success(`Bought ${e.info.name}`) })}
                   >
                     Buy · {fmt(goldPriceOf(e)!.price)} gold
@@ -146,9 +152,11 @@ export function ItemsPanel({ city }: { city: CityBean }) {
                 )}
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">{e.info.description}</p>
-            {e.info.howTo && <p className="text-xs text-muted-foreground italic">{e.info.howTo}</p>}
-            {e.info.price > 0 && <p className="text-xs text-muted-foreground">Shop price: {fmtExact(e.info.price)} cents</p>}
+            <div className={cn('grid gap-1.5', e.owned === 0 && 'opacity-60')}>
+              <p className="text-sm text-muted-foreground">{e.info.description}</p>
+              {e.info.howTo && <p className="text-xs text-muted-foreground italic">{e.info.howTo}</p>}
+              {e.info.price > 0 && <p className="text-xs text-muted-foreground">Shop price: {fmtExact(e.info.price)} cents</p>}
+            </div>
           </div>
         ))}
         {shown.length === 0 && <p className="text-sm text-muted-foreground">No items match.</p>}

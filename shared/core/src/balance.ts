@@ -224,7 +224,22 @@ export const BALANCE = {
    */
   medalDrops: { base: 0.1, perLevel: 0.07, secondFrom: 8, secondPerLevel: 0.25, thirdFrom: 9, thirdPerLevel: 0.2 },
   /** (evony-re) items that can be bought with city gold, and their price (item id -> gold each) */
-  goldShop: { 'player.troop.1.a': 250_000 } as Record<string, number>,
+  // prices follow the War Ensign's rate (30 cents = 250,000 gold, ~8,333 gold a cent), rounded to 5,000
+  goldShop: {
+    'player.troop.1.a': 250_000, // War Ensign (30 cents)
+    // production boosts, +25% for 1 day (8 cents) / 7 days (50 cents)
+    'player.resinc.1': 65_000,
+    'player.resinc.1.b': 415_000,
+    'player.resinc.2': 65_000,
+    'player.resinc.2.b': 415_000,
+    'player.resinc.3': 65_000,
+    'player.resinc.3.b': 415_000,
+    'player.resinc.4': 65_000,
+    'player.resinc.4.b': 415_000,
+    // gold income +25% for 1 day (45 cents) / 7 days (280 cents)
+    'player.gold.1.a': 375_000,
+    'player.gold.1.b': 2_335_000,
+  } as Record<string, number>,
   /** (orig) units of resource per cent in shop.buyResource */
   shopResourcePerCent: { food: 100_000, wood: 100_000, stone: 50_000, iron: 40_000 },
 } as const;
