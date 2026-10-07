@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient, type QueryClient, type QueryKey } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { BALANCE, scaled, setGameSpeed } from '@evony/core';
-import type { CityBean, PushStatus } from '@evony/api-client';
+import type { CityBean, HeroBean, PushStatus } from '@evony/api-client';
 import { api, errorMessage, push, unwrap } from '@/lib/api';
 
 export const qk = {
@@ -68,6 +68,13 @@ export function useCommand<A, R>(fn: (args: A) => Promise<R>, refresh: (args: A,
   });
 }
 
+/** Apply a HeroUpdate push to a city's hero list (updateType 1 = the hero left). */
+function patchHeroes(heros: HeroBean[], hero: HeroBean, updateType: number): HeroBean[] {
+  const rest = heros.filter((h) => h.id !== hero.id);
+  if (updateType === 1) return rest;
+  return heros.some((h) => h.id === hero.id) ? heros.map((h) => (h.id === hero.id ? hero : h)) : [...rest, hero];
+}
+
 /** Connect the push socket while a lord is logged in and route pushes into the query cache. */
 export function usePushSync(enabled: boolean): PushStatus {
   const qc = useQueryClient();
@@ -76,9 +83,7 @@ export function usePushSync(enabled: boolean): PushStatus {
     if (!enabled) return;
     const city = (castleId: number) => void qc.invalidateQueries({ queryKey: qk.city(castleId) });
     const offs = [
-      push.on('server.ResourceUpdate', ({ castleId, resource }) =>
-        qc.setQueryData<CityBean>(qk.city(castleId), (c) => (c ? { ...c, resource } : c)),
-      ),
+      push.on('server.ResourceUpdate', ({ castleId, resource }) => qc.setQueryData<CityBean>(qk.city(castleId), (c) => (c ? { ...c, resource } : c))),
       push.on('server.BuildComplate', ({ castleId, buildingBean }) => {
         city(castleId);
         void qc.invalidateQueries({ queryKey: ['upgrade', castleId] });
@@ -86,7 +91,9 @@ export function usePushSync(enabled: boolean): PushStatus {
         if (buildingBean.typeId && buildingBean.status === 0) toast(`${buildingBean.name} reached level ${buildingBean.level}`);
       }),
       push.on('server.TroopUpdate', ({ castleId, troop }) => qc.setQueryData<CityBean>(qk.city(castleId), (c) => (c ? { ...c, troop } : c))),
-      push.on('server.InjuredTroopUpdate', ({ castleId, troop }) => qc.setQueryData<CityBean>(qk.city(castleId), (c) => (c ? { ...c, injuredTroop: troop } : c))),
+      push.on('server.InjuredTroopUpdate', ({ castleId, troop }) =>
+        qc.setQueryData<CityBean>(qk.city(castleId), (c) => (c ? { ...c, injuredTroop: troop } : c)),
+      ),
       push.on('server.FortificationsUpdate', ({ castleId, fortification }) =>
         qc.setQueryData<CityBean>(qk.city(castleId), (c) => (c ? { ...c, fortification } : c)),
       ),
@@ -96,11 +103,10 @@ export function usePushSync(enabled: boolean): PushStatus {
       }),
       // patch the hero in place (experience, stats, status) so hero cards update instantly
       push.on('server.HeroUpdate', ({ castleId, hero, updateType }) => {
-        qc.setQueryData<CityBean>(qk.city(castleId), (c) => {
-          if (!c) return c;
-          const rest = c.heros.filter((h) => h.id !== hero.id);
-          return { ...c, heros: updateType === 1 ? rest : c.heros.some((h) => h.id === hero.id) ? c.heros.map((h) => (h.id === hero.id ? hero : h)) : [...rest, hero] };
-        });
+        qc.setQueryData<CityBean>(qk.city(castleId), (c) => (c ? { ...c, heros: patchHeroes(c.heros, hero, updateType) } : c));
+        qc.setQueryData(qk.player, (p: ReturnType<typeof usePlayer>['data']) =>
+          p ? { ...p, castles: p.castles.map((c) => (c.id === castleId ? { ...c, heros: patchHeroes(c.heros, hero, updateType) } : c)) } : p,
+        );
         // the mayor's stats set production rates and build / research / training times: refresh them
         for (const key of [qk.city(castleId), qk.research(castleId), ['upgrade', castleId], ['available', castleId], ['trainable', castleId]]) {
           void qc.invalidateQueries({ queryKey: key });
@@ -115,7 +121,9 @@ export function usePushSync(enabled: boolean): PushStatus {
         city(castleId);
         toast(`Research ${typeId} reached level ${level}`);
       }),
-      push.on('server.PlayerInfoUpdate', ({ playerInfo }) => qc.setQueryData(qk.player, (p: ReturnType<typeof usePlayer>['data']) => (p ? { ...p, playerInfo } : p))),
+      push.on('server.PlayerInfoUpdate', ({ playerInfo }) =>
+        qc.setQueryData(qk.player, (p: ReturnType<typeof usePlayer>['data']) => (p ? { ...p, playerInfo } : p)),
+      ),
       push.on('server.CentsUpdate', ({ cents }) =>
         qc.setQueryData(qk.player, (p: ReturnType<typeof usePlayer>['data']) => (p ? { ...p, playerInfo: { ...p.playerInfo, cents } } : p)),
       ),

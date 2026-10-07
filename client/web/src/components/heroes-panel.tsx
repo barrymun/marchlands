@@ -17,6 +17,7 @@ import { qk, useCommand } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { api, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, signedRate } from '@/lib/format';
+import { dominantAttribute, heroAttributeValues } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
 
 const STATUS: Record<number, string> = {
@@ -293,16 +294,10 @@ function HeroRow({
   );
 }
 
-const ATTRS = [
-  { key: 'pol', label: 'Politics', short: 'pol', value: heroManagement, tone: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' },
-  { key: 'att', label: 'Attack', short: 'att', value: heroPower, tone: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' },
-  { key: 'int', label: 'Intelligence', short: 'int', value: heroStratagem, tone: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300' },
-] as const;
-
 /** The hero's attributes, with the highest one (what the hero is best at) as a coloured badge. */
 function HeroAttributes({ hero }: { hero: HeroBean }) {
-  const values = ATTRS.map((a) => ({ ...a, v: a.value(hero) }));
-  const top = values.reduce((best, a) => (a.v > best.v ? a : best));
+  const values = heroAttributeValues(hero);
+  const top = dominantAttribute(hero);
   return (
     <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs tabular-nums">
       <span className={cn('rounded-md px-1.5 py-0.5 text-sm font-semibold', top.tone)} title={`Strongest attribute: ${top.label}`}>

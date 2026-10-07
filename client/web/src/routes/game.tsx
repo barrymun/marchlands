@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import type { HeroBean } from '@evony/api-client';
 import { useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Coins, Crown, UserRound } from 'lucide-react';
+import { ChevronDown, Coins, Crown, Landmark, UserRound } from 'lucide-react';
 import { HeroStatus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ import { ResourceBar } from '@/components/resource-bar';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
 import { tokenStore } from '@/lib/api';
 import { fmt } from '@/lib/format';
+import { dominantAttribute, heroAttributeValues } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
 
 const TABS = [
@@ -59,6 +61,7 @@ export function GamePage() {
   const cities = player.data?.castles ?? [];
   const [dialog, setDialog] = useState<'lord' | 'city' | null>(null);
   const unreadReports = useUnreadReports().data?.count ?? 0;
+  const mayor = city.data && mayorOf(city.data);
 
   function logout() {
     tokenStore.set(null);
@@ -78,17 +81,24 @@ export function GamePage() {
                 <ChevronDown className="size-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
+            <DropdownMenuContent align="start" className="min-w-60">
               <DropdownMenuLabel>Your cities</DropdownMenuLabel>
               {cities.map((c) => (
-                <DropdownMenuItem key={c.id} onSelect={() => navigate(`/cities/${c.id}/${tab}`)}>
-                  {c.name} ({c.x},{c.y})
+                <DropdownMenuItem key={c.id} className="flex-col items-start gap-0.5" onSelect={() => navigate(`/cities/${c.id}/${tab}`)}>
+                  <span className={cn(c.id === cityId && 'font-semibold')}>
+                    {c.name}{' '}
+                    <span className="text-muted-foreground tabular-nums">
+                      ({c.x},{c.y})
+                    </span>
+                  </span>
+                  <MayorSummary mayor={mayorOf(c.id === cityId && city.data ? city.data : c)} />
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => setDialog('city')}>City settings…</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          {city.data && <MayorChip mayor={mayor} onClick={() => navigate(`/cities/${cityId}/heroes`)} />}
           <div className="ml-auto flex items-center gap-3 text-sm">
             {info && (
               <>
@@ -140,11 +150,7 @@ export function GamePage() {
           </div>
         </div>
         <div className="mx-auto max-w-6xl px-4 pb-2">
-          {city.data ? (
-            <ResourceBar resource={city.data.resource} mayor={city.data.heros.find((h) => h.status === HeroStatus.MAYOR)} />
-          ) : (
-            <Skeleton className="h-5 w-2/3" />
-          )}
+          {city.data ? <ResourceBar resource={city.data.resource} mayor={mayor} /> : <Skeleton className="h-5 w-2/3" />}
         </div>
       </header>
       <main className="mx-auto max-w-6xl p-4">
@@ -195,5 +201,71 @@ export function GamePage() {
       <LordDialog open={dialog === 'lord'} onClose={() => setDialog(null)} />
       {city.data && <CityDialog city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />}
     </div>
+  );
+}
+
+function mayorOf(city: { heros: HeroBean[] }): HeroBean | undefined {
+  return city.heros.find((h) => h.status === HeroStatus.MAYOR);
+}
+
+/** The hero's strongest attribute as a coloured badge (politics green, attack red, intelligence blue). */
+function DominantBadge({ hero }: { hero: HeroBean }) {
+  const top = dominantAttribute(hero);
+  return <span className={cn('rounded px-1 py-px font-semibold tabular-nums', top.tone)}>{`${top.label} ${top.v}`}</span>;
+}
+
+/** The city switcher's mayor line: name, then the strongest attribute below it. */
+function MayorSummary({ mayor }: { mayor?: HeroBean }) {
+  if (!mayor) return <span className="text-xs text-amber-700 dark:text-amber-400">No mayor</span>;
+  return (
+    <span className="flex flex-col items-start gap-1 text-xs">
+      <span className="flex items-center gap-1.5 whitespace-nowrap">
+        <Landmark className="size-3 text-muted-foreground" />
+        <span className="font-medium">{mayor.name}</span>
+      </span>
+      <DominantBadge hero={mayor} />
+    </span>
+  );
+}
+
+/** The current city's mayor at a glance; opens the Heroes tab. */
+function MayorChip({ mayor, onClick }: { mayor?: HeroBean; onClick: () => void }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          size="sm"
+          variant="outline"
+          className={cn('h-7 gap-1.5 px-2 text-xs', !mayor && 'border-amber-500/60 text-amber-700 dark:text-amber-400')}
+          onClick={onClick}
+        >
+          <Landmark className="size-3.5" />
+          {mayor ? (
+            <>
+              <span className="text-muted-foreground">Mayor</span>
+              <span className="font-medium">{mayor.name}</span>
+              <span className="text-muted-foreground tabular-nums">Lv {mayor.level}</span>
+              <DominantBadge hero={mayor} />
+            </>
+          ) : (
+            'No mayor'
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {mayor ? (
+          <span className="flex flex-wrap items-center gap-1.5">
+            {heroAttributeValues(mayor).map((a) => (
+              <span key={a.key} className={cn('rounded px-1 py-px font-semibold tabular-nums', a.tone)}>
+                {a.label} {a.v}
+              </span>
+            ))}
+            <span>Politics: production and build speed · Attack: training · Intelligence: research</span>
+          </span>
+        ) : (
+          'Appoint a mayor in the Heroes tab to speed up production, building, training and research.'
+        )}
+      </TooltipContent>
+    </Tooltip>
   );
 }
