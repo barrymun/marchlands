@@ -46,6 +46,8 @@ import { duration, fmt, fmtExact, realHourly, troopName } from '@/lib/format';
 export function MilitaryPanel({ city }: { city: CityBean }) {
   const garrison = Object.entries(TROOP_KEYS).map(([id, key]) => ({ id: Number(id), count: city.troop[key], injured: city.injuredTroop[key] }));
   const forts = Object.entries(FORT_KEYS).map(([id, key]) => ({ id: Number(id), count: city.fortification[key] }));
+  const wallCap = wallCapacity(city.buildings);
+  const wallUsed = usedWallSpace(city.fortification, []);
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
       <div className="grid content-start gap-4">
@@ -72,13 +74,32 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
                     <TableCell className="text-right tabular-nums">{t.injured ? fmtExact(t.injured) : '—'}</TableCell>
                   </TableRow>
                 ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+            <CardTitle className="text-sm">City defenses</CardTitle>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              Wall space {fmtExact(wallUsed)} / {fmtExact(wallCap)}
+            </span>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Defense</TableHead>
+                  <TableHead className="text-right">Built</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {forts.map((f) => (
                   <TableRow key={f.id} className={f.count ? '' : 'text-muted-foreground'}>
                     <TableCell>
                       <UnitName id={f.id} />
                     </TableCell>
                     <TableCell className="text-right tabular-nums">{fmtExact(f.count)}</TableCell>
-                    <TableCell />
                   </TableRow>
                 ))}
               </TableBody>
