@@ -36,7 +36,17 @@ export type GrantContents = z.infer<typeof GrantContentsSchema>;
 const buff = (buffId: string, desc: string, durationMs: number): ItemEffect => ({ kind: 'buff', buff: buffId, desc, durationMs });
 
 /** Common gamble-pool items used as filler in packages. */
-const COMMON_FILLER = ['consume.2.a', 'consume.2.b', 'consume.refreshtavern.1', 'player.resinc.1', 'player.resinc.2', 'player.resinc.3', 'player.resinc.4', 'hero.loyalty.1', 'hero.loyalty.2'];
+const COMMON_FILLER = [
+  'consume.2.a',
+  'consume.2.b',
+  'consume.refreshtavern.1',
+  'player.resinc.1',
+  'player.resinc.2',
+  'player.resinc.3',
+  'player.resinc.4',
+  'hero.loyalty.1',
+  'hero.loyalty.2',
+];
 
 function randomItems(rng: Rng, n: number, pool = COMMON_FILLER): Record<string, number> {
   const out: Record<string, number> = {};
@@ -335,14 +345,15 @@ export function medalOdds(level: number) {
   /** chance of a second medal once one dropped, and of a third once two did */
   const second = L >= c.secondFrom ? Math.min(1, (L - c.secondFrom + 1) * c.secondPerLevel) : 0;
   const third = L >= c.thirdFrom ? Math.min(1, (L - c.thirdFrom + 1) * c.thirdPerLevel) : 0;
+  const main = [Math.max(1, L - 3), Math.max(1, Math.min(9, L - 1))] as const;
   return {
     chance,
     /** medal levels of the main drop */
-    main: [Math.max(1, L - 3), Math.max(1, Math.min(9, L - 1))] as const,
+    main,
     second,
     third,
-    /** medal levels of the extra drops */
-    extra: [1, Math.max(1, Math.ceil(L / 2))] as const,
+    /** medal levels of the extra drops: every level below the main range, so no medal level is left out (level 10: 1-6 extra, 7-9 main) */
+    extra: [1, Math.max(1, main[0] - 1)] as const,
   };
 }
 

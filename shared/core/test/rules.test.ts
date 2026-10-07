@@ -500,6 +500,13 @@ describe('medal drops', () => {
     expect(l10.two).toBeGreaterThan(0.5);
     expect(l10.three).toBeGreaterThan(0.2);
   });
+
+  it('can drop every medal level from a level 10 city', () => {
+    const rng = seededRng('medals-every-level');
+    const seen = new Set<string>();
+    for (let i = 0; i < 20000; i++) for (const id of Object.keys(rollMedalDrops(10, rng))) seen.add(id);
+    expect([...seen].sort()).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9].map((l) => `hero.loyalty.${l}`));
+  });
 });
 
 describe('barbarian loyalty recovery', () => {
