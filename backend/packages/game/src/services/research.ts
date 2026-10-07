@@ -107,6 +107,8 @@ export async function startResearch(ctx: Ctx, playerId: number, cityId: number, 
   const ms = researchTimeMs(techId, level, mayorStats(b.heroes));
   b.player.research = { ...research, [techId]: { level: level - 1, cityId, startTime: ctx.now, endTime: ctx.now + ms } };
   ctx.schedule({ type: 'research', dueAt: ctx.now + ms, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
+  // other open clients (e.g. the activity dock on another device) refresh their research list
+  ctx.push(playerId, 'server.ResearchUpdate', { castleId: cityId, typeId: techId, endTime: ctx.now + ms });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, b.player);
@@ -121,6 +123,7 @@ export async function cancelResearch(ctx: Ctx, playerId: number, cityId: number,
   gainResources(b.city, researchCost(techId, r.level + 1), BALANCE.cancelResearchRefund);
   b.player.research = { ...b.player.research, [techId]: { level: r.level } };
   ctx.unschedule(refKey(playerId, techId));
+  ctx.push(playerId, 'server.ResearchUpdate', { castleId: cityId, typeId: techId, endTime: 0 });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, b.player);

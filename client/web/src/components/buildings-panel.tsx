@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import type { BuildingBean, CityBean } from '@evony/api-client';
@@ -23,10 +24,17 @@ const OUTSIDE = Array.from({ length: 40 }, (_, i) => 1001 + i);
 
 export function BuildingsPanel({ city }: { city: CityBean }) {
   const [selected, setSelected] = useState<number | null>(null);
+  // ?building=<position> (from the activity dock) opens that building's dialog
+  const [search, setSearch] = useSearchParams();
+  const requested = search.get('building');
+  useEffect(() => {
+    if (requested == null) return;
+    setSelected(Number(requested));
+    setSearch((s) => (s.delete('building'), s), { replace: true });
+  }, [requested, setSearch]);
   const byPos = new Map(city.buildings.map((b) => [b.positionId, b]));
   const townHall = byPos.get(-1)?.level ?? 0;
   const outerSlots = 10 + 3 * townHall;
-  const busy = city.buildings.filter((b) => b.status !== 0);
   // tag filter: one tag per building type present; with tags selected only those buildings show
   const [tags, setTags] = useState<number[]>([]);
   const typeCounts = new Map<number, number>();
@@ -54,23 +62,6 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
           );
         })}
       </div>
-      {busy.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Construction</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            {busy.map((b) => (
-              <button key={b.positionId} className="grid gap-1 text-left" onClick={() => setSelected(b.positionId)}>
-                <span className="text-sm">
-                  {b.status === 2 ? 'Demolishing' : 'Building'} {b.name} → Lv {b.status === 2 ? b.level - 1 : b.level + 1}
-                </span>
-                <TimerBar startTime={b.startTime} endTime={b.endTime} />
-              </button>
-            ))}
-          </CardContent>
-        </Card>
-      )}
       {active.length > 0 && (
         <Card>
           <CardHeader className="pb-2">

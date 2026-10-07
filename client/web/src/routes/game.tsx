@@ -17,6 +17,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ActivityDock } from '@/components/activity-dock';
 import { ArmiesPanel } from '@/components/armies-panel';
 import { BuildingsPanel } from '@/components/buildings-panel';
 import { CityDialog } from '@/components/city-dialog';
@@ -99,7 +100,7 @@ export function GamePage() {
             </DropdownMenuContent>
           </DropdownMenu>
           {city.data && <MayorChip mayor={mayor} onClick={() => navigate(`/cities/${cityId}/heroes`)} />}
-          <div className="ml-auto flex items-center gap-3 text-sm">
+          <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-x-3 gap-y-1 text-sm">
             {info && (
               <>
                 <Tooltip>
@@ -153,7 +154,8 @@ export function GamePage() {
           {city.data ? <ResourceBar resource={city.data.resource} mayor={mayor} /> : <Skeleton className="h-5 w-2/3" />}
         </div>
       </header>
-      <main className="mx-auto max-w-6xl p-4">
+      {/* bottom padding leaves room for the floating activity dock */}
+      <main className="mx-auto max-w-6xl p-4 pb-24">
         <Tabs value={tab} onValueChange={(t) => navigate(`/cities/${cityId}/${t}`)}>
           <TabsList className="mb-4 flex-wrap">
             {TABS.map((t) => (
@@ -198,6 +200,7 @@ export function GamePage() {
           )}
         </Tabs>
       </main>
+      {city.data && <ActivityDock city={city.data} />}
       <LordDialog open={dialog === 'lord'} onClose={() => setDialog(null)} />
       {city.data && <CityDialog city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />}
     </div>
