@@ -129,7 +129,7 @@ export function npcTemplate(level: number): NpcTemplate {
   const l = Math.min(10, Math.max(1, level));
   const [gold, food, wsi, warrior, pike, sword, archer, cav, traps, abatis, towers, logs, trebs] = NPC_TABLE[l - 1];
   return {
-    resources: { gold, food, wood: wsi, stone: wsi, iron: wsi },
+    resources: { gold: BALANCE.npcGoldMatchesTopResource ? Math.max(food, wsi) : gold, food, wood: wsi, stone: wsi, iron: wsi },
     troops: { militia: warrior, pikemen: pike, swordsmen: sword, archer, lightCavalry: cav },
     forts: { trap: traps, abatis, arrowTower: towers, rollingLogs: logs, rockfall: trebs },
     population: NPC_POPULATION[l - 1],
@@ -165,7 +165,7 @@ export function freshNpcState(level: number, now: number): { state: NpcState; tr
 
 /**
  * Lazily apply NPC regeneration (orig every 6 min: food/wood/stone/iron +max/80, troops and forts
- * +max/10, loyalty +1; gold does not regenerate). Loyalty can run on real time instead
+ * +max/10, loyalty +1; gold does not regenerate unless BALANCE.npcGoldMatchesTopResource). Loyalty can run on real time instead
  * (BALANCE.npcLoyaltyRegenRealTime), so a faster game does not undo attacks faster.
  */
 export function regenerateNpc(level: number, state: NpcState, troops: TroopCounts, forts: FortCounts, now: number) {
@@ -180,7 +180,8 @@ export function regenerateNpc(level: number, state: NpcState, troops: TroopCount
   const s = { ...state, regenAt: state.regenAt + Math.max(0, ticks) * tick, loyaltyAt: loyaltyFrom + loyaltyTicks * loyaltyTick };
   s.loyalty = Math.min(t.loyalty, s.loyalty + loyaltyTicks);
   if (ticks <= 0) return { state: s, troops, forts };
-  for (const r of ['food', 'wood', 'stone', 'iron'] as const) s[r] = Math.min(t.resources[r], s[r] + (t.resources[r] / 80) * ticks);
+  const regen = BALANCE.npcGoldMatchesTopResource ? (['gold', 'food', 'wood', 'stone', 'iron'] as const) : (['food', 'wood', 'stone', 'iron'] as const);
+  for (const r of regen) s[r] = Math.min(t.resources[r], (s[r] ?? 0) + (t.resources[r] / 80) * ticks);
   const tr: TroopCounts = { ...troops };
   for (const [k, max] of Object.entries(t.troops) as [keyof TroopCounts, number][]) {
     tr[k] = Math.min(max, (tr[k] ?? 0) + Math.floor(max / 10) * ticks);

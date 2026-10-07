@@ -721,3 +721,16 @@ describe('hero soft caps', () => {
     }
   });
 });
+
+describe('barbarian city gold', () => {
+  it('matches the largest resource and regenerates like it', () => {
+    const fresh = freshNpcState(10, 0);
+    expect(fresh.state.gold).toBe(19_000_000);
+    expect(fresh.state.food).toBe(19_000_000);
+    const raided = { ...fresh.state, gold: 0, food: 0 };
+    // one regeneration tick (6 game minutes at speed 1): +1/80 of the maximum each
+    const r = regenerateNpc(10, raided, fresh.troops, fresh.forts, 6 * 60_000);
+    expect(r.state.gold).toBe(19_000_000 / 80);
+    expect(r.state.food).toBe(19_000_000 / 80);
+  });
+});

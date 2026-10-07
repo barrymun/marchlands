@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Star, Trash2 } from 'lucide-react';
 import type { CityBean } from '@evony/api-client';
-import { armyLoad, buildingLevel, BuildingType, HeroStatus, maxArmyTroops, Mission, TROOP_ID_BY_KEY, TROOP_KEYS, type TroopKey } from '@evony/core';
+import { armyLoad, buildingLevel, BuildingType, heroPower, HeroStatus, maxArmyTroops, Mission, TROOP_ID_BY_KEY, TROOP_KEYS, type TroopKey } from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -41,7 +41,13 @@ const RES = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 
 function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget; onDone: () => void }) {
   const [mission, setMission] = useState(String(target.mission ?? target.missions[0]));
-  const [heroId, setHeroId] = useState('none');
+  // the strongest idle hero (by Attack) leads by default
+  const [heroId, setHeroId] = useState(() => {
+    const best = city.heros
+      .filter((h) => h.status === HeroStatus.IDLE && !h.seized)
+      .reduce<CityBean['heros'][number] | null>((top, h) => (!top || heroPower(h) > heroPower(top) ? h : top), null);
+    return best ? String(best.id) : 'none';
+  });
   const [troops, setTroops] = useState<Partial<Record<TroopKey, string>>>(target.troops ?? {});
   const scouting = Number(mission) === Mission.SCOUT;
   const [resources, setResources] = useState<Partial<Record<(typeof RES)[number], string>>>({});
@@ -135,7 +141,7 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
                 <SelectItem value="none">No hero</SelectItem>
                 {idleHeroes.map((h) => (
                   <SelectItem key={h.id} value={String(h.id)}>
-                    {h.name} (Lv {h.level})
+                    {h.name} (Lv {h.level}, att {heroPower(h)})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -256,6 +262,7 @@ function ArmyPresets({ city, troops, onLoad }: { city: CityBean; troops: Record<
   const [selected, setSelected] = useState('');
   const [name, setName] = useState('');
   const [short, setShort] = useState('');
+  const [managing, setManaging] = useState(false);
   const save = useCommand(
     () => unwrap(api.POST('/api/v1/player/army-presets', { body: { name: name.trim(), troops } })),
     () => [['army-presets']],
@@ -285,7 +292,43 @@ function ArmyPresets({ city, troops, onLoad }: { city: CityBean; troops: Record<
   const hasTroops = Object.keys(troops).length > 0;
   return (
     <div className="grid gap-2 rounded-md border p-2">
-      <Label className="text-xs">Saved armies</Label>
+      <div className="flex items-center justify-between gap-2">
+        <Label className="text-xs">Saved armies</Label>
+        {list.length > 0 && (
+          <Button size="xs" variant="ghost" className="h-6 text-xs" onClick={() => setManaging(!managing)}>
+            {managing ? 'Done' : 'Manage'}
+          </Button>
+        )}
+      </div>
+      {managing && (
+        <ul className="grid gap-1">
+          {list.map((p) => (
+            <li key={p.id} className="flex items-center justify-between gap-2 rounded border px-2 py-1 text-xs">
+              <span className="min-w-0 truncate">
+                {p.name}{' '}
+                <span className="text-muted-foreground tabular-nums">· {fmtExact(Object.values(p.troops).reduce((a, b) => a + (b ?? 0), 0))} troops</span>
+              </span>
+              <Button
+                size="icon-xs"
+                variant="ghost"
+                aria-label={`Delete saved army ${p.name}`}
+                title="Delete"
+                disabled={remove.isPending}
+                onClick={() =>
+                  remove.mutate(p.id, {
+                    onSuccess: () => {
+                      if (selected === p.id) setSelected('');
+                      if (list.length <= 1) setManaging(false);
+                    },
+                  })
+                }
+              >
+                <Trash2 />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="flex gap-2">
         <Select value={selected} onValueChange={load} disabled={!list.length}>
           <SelectTrigger className="w-full" size="sm">

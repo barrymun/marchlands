@@ -141,6 +141,11 @@ export const BALANCE = {
   npcRegenMs: 6 * MINUTE,
   /** (evony-re) barbarian city loyalty recovers +1 per npcRegenMs of real time, not game time */
   npcLoyaltyRegenRealTime: true as boolean,
+  /**
+   * (evony-re) barbarian cities hold as much gold as their largest resource (level 10: 19M, like
+   * their food) and regenerate it like the other resources (orig: the table's gold, never regenerated)
+   */
+  npcGoldMatchesTopResource: true as boolean,
   /** (evony) share of plunderable stock taken per successful attack, capped by load */
   plunderShare: 1,
   /** (evony) attacker troops lost in a win that become injured (Relief/Medicine aware) */
