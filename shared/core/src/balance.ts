@@ -81,7 +81,7 @@ export const BALANCE = {
    */
   heroItemGold: { perExp: 1, attributeBoost: 100_000 },
   /** (evony-re) on: every hero costs heroSalaryPerLevel gold per hour per level (orig). Off: heroes are free */
-  heroSalaries: false as boolean,
+  heroSalaries: true as boolean,
   /** (evony-re) on: salaries are paid per real hour, unaffected by GAME_SPEED. Off: per game hour (orig) */
   salaryPerRealHour: true as boolean,
   heroHireCostPerLevel: 1000, // (orig)
