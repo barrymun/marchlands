@@ -6,6 +6,7 @@ export * from './economy.ts';
 export * from './errors.ts';
 export * from './heroes.ts';
 export * from './gear.ts';
+export * from './flows.ts';
 export * from './items.ts';
 export * from './item-info.ts';
 export * from './merchant.ts';

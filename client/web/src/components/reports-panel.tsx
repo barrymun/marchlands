@@ -244,7 +244,7 @@ function BattleView({ battle: b }: { battle: BattleReport }) {
         {'level' in b && <span>Barbarian city Lv {b.level}</span>}
         {'city' in b && <span>{b.city}</span>}
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid items-start gap-4 md:grid-cols-2">
         <SideView title="Attacker" side={b.attacker} />
         <SideView title="Defender" side={b.defender} forts={b.defender.forts} wallLevel={b.defender.wallLevel} />
       </div>

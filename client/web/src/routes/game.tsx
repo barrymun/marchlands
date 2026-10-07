@@ -21,6 +21,7 @@ import { ActivityDock } from '@/components/activity-dock';
 import { ArmiesPanel } from '@/components/armies-panel';
 import { BuildingsPanel } from '@/components/buildings-panel';
 import { CityDialog } from '@/components/city-dialog';
+import { FlowsPanel } from '@/components/flows-panel';
 import { LordDialog } from '@/components/lord-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { HeroesPanel } from '@/components/heroes-panel';
@@ -47,6 +48,7 @@ const TABS = [
   { id: 'armies', label: 'Armies' },
   { id: 'reports', label: 'Reports' },
   { id: 'map', label: 'Map' },
+  { id: 'flows', label: 'Flows' },
 ] as const;
 
 export function GamePage() {
@@ -192,6 +194,9 @@ export function GamePage() {
               </TabsContent>
               <TabsContent value="reports">
                 <ReportsPanel />
+              </TabsContent>
+              <TabsContent value="flows">
+                <FlowsPanel city={city.data} />
               </TabsContent>
               <TabsContent value="map">
                 <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />

@@ -106,7 +106,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   };
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid items-start gap-4 lg:grid-cols-2">
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Your heroes</CardTitle>
@@ -173,42 +173,44 @@ export function HeroesPanel({ city }: { city: CityBean }) {
           ))}
         </CardContent>
       </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Inn</CardTitle>
-          <CardDescription>{hasInn ? `${tavern.data?.posCount ?? '…'} free hero slots.` : 'Build an Inn to recruit heroes.'}</CardDescription>
-        </CardHeader>
-        {hasInn && (
-          <CardContent className="grid gap-2">
-            {tavern.data && (
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={reroll.isPending || city.resource.gold < tavern.data.refreshCost}
-                  onClick={() => reroll.mutate('gold')}
-                >
-                  <RefreshCw /> New offers ({fmt(tavern.data.refreshCost)} gold)
-                </Button>
-                {tavern.data.huntingItems > 0 && (
-                  <Button size="sm" variant="outline" disabled={reroll.isPending} onClick={() => reroll.mutate('item')}>
-                    Use Hero Hunting ({tavern.data.huntingItems})
+      <div className="grid content-start gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Inn</CardTitle>
+            <CardDescription>{hasInn ? `${tavern.data?.posCount ?? '…'} free hero slots.` : 'Build an Inn to recruit heroes.'}</CardDescription>
+          </CardHeader>
+          {hasInn && (
+            <CardContent className="grid gap-2">
+              {tavern.data && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={reroll.isPending || city.resource.gold < tavern.data.refreshCost}
+                    onClick={() => reroll.mutate('gold')}
+                  >
+                    <RefreshCw /> New offers ({fmt(tavern.data.refreshCost)} gold)
                   </Button>
-                )}
-              </div>
-            )}
-            {tavern.data?.heros.map((h) => (
-              <HeroRow key={h.id} hero={h} note={mayorNote(h)}>
-                <span className="text-xs text-muted-foreground tabular-nums">{fmt(h.level * 1000)} gold</span>
-                <Button size="xs" disabled={hire.isPending} onClick={() => hire.mutate(h.id)}>
-                  Hire
-                </Button>
-              </HeroRow>
-            ))}
-          </CardContent>
-        )}
-      </Card>
-      <GearCard onResearch={() => navigate(`/cities/${city.id}/research`)} />
+                  {tavern.data.huntingItems > 0 && (
+                    <Button size="sm" variant="outline" disabled={reroll.isPending} onClick={() => reroll.mutate('item')}>
+                      Use Hero Hunting ({tavern.data.huntingItems})
+                    </Button>
+                  )}
+                </div>
+              )}
+              {tavern.data?.heros.map((h) => (
+                <HeroRow key={h.id} hero={h} note={mayorNote(h)}>
+                  <span className="text-xs text-muted-foreground tabular-nums">{fmt(h.level * 1000)} gold</span>
+                  <Button size="xs" disabled={hire.isPending} onClick={() => hire.mutate(h.id)}>
+                    Hire
+                  </Button>
+                </HeroRow>
+              ))}
+            </CardContent>
+          )}
+        </Card>
+        <GearCard onResearch={() => navigate(`/cities/${city.id}/research`)} />
+      </div>
       <DismissHeroDialog
         hero={dismissing}
         pending={fire.isPending}

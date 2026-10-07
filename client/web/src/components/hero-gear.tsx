@@ -29,7 +29,7 @@ export function GearCard({ onResearch }: { onResearch?: () => void }) {
   const starLimit = gearStarLimit(gear);
   const research = player.data?.research[TechType.HERO_ENHANCEMENT]?.level ?? 0;
   return (
-    <Card className="lg:col-span-2">
+    <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">Hero gear</CardTitle>
         <CardDescription>
@@ -48,7 +48,7 @@ export function GearCard({ onResearch }: { onResearch?: () => void }) {
           </div>
         )}
       </CardHeader>
-      <CardContent className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+      <CardContent className="grid gap-2 sm:grid-cols-2">
         {GEAR_PIECES.map((p) => {
           const stars = gear.stars[p.id] ?? 0;
           const full = stars >= maxStars;

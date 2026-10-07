@@ -4,6 +4,11 @@ import {
   ArmyPreset,
   ArmyPresetBody,
   ArmyPresetParams,
+  Flow,
+  FlowBody,
+  FlowParams,
+  FlowRunBody,
+  FlowRunReport,
   BookmarkBody,
   BookmarkParams,
   CastleSign,
@@ -27,9 +32,9 @@ import {
   ZoneStats,
 } from '@evony/contracts';
 import { players } from '@evony/db';
-import { player, runGame, shop, world } from '@evony/game';
+import { flows, player, runGame, shop, world } from '@evony/game';
 import { signToken } from '../auth/jwt.ts';
-import { doc, authenticate, game, tags, type ZApp } from '../http.ts';
+import { doc, authenticate, game, playerIdOf, tags, type ZApp } from '../http.ts';
 
 export default async function playerRoutes(app: ZApp) {
   app.addHook('preHandler', authenticate);
@@ -45,19 +50,15 @@ export default async function playerRoutes(app: ZApp) {
     data: { ...(await world.getWorldInfo(app.deps.db)), online: app.deps.online() },
   }));
 
-  app.post(
-    '/player',
-    s('Create the lord and first city (common.createNewPlayer)', PlayerCreated, { body: CreatePlayerBody }),
-    async (req) => {
-      const accountId = req.claims!.sub;
-      const result = await runGame(app.deps.db, async (ctx) => {
-        const p = await player.createPlayer(ctx, accountId, req.body);
-        return { playerId: p.id, state: await player.playerState(ctx, p.id) };
-      });
-      const token = signToken({ sub: accountId, pid: result.playerId, adm: req.claims!.adm }, app.deps.config.jwtSecret, app.deps.config.jwtTtl);
-      return { ok: 1 as const, data: { token, ...result.state } };
-    },
-  );
+  app.post('/player', s('Create the lord and first city (common.createNewPlayer)', PlayerCreated, { body: CreatePlayerBody }), async (req) => {
+    const accountId = req.claims!.sub;
+    const result = await runGame(app.deps.db, async (ctx) => {
+      const p = await player.createPlayer(ctx, accountId, req.body);
+      return { playerId: p.id, state: await player.playerState(ctx, p.id) };
+    });
+    const token = signToken({ sub: accountId, pid: result.playerId, adm: req.claims!.adm }, app.deps.config.jwtSecret, app.deps.config.jwtTtl);
+    return { ok: 1 as const, data: { token, ...result.state } };
+  });
 
   app.get('/player', s('Full lord state: cities, items, buffs, armies, counters (login bean)', PlayerState), (req) =>
     game(req, async (ctx, pid) => {
@@ -106,6 +107,21 @@ export default async function playerRoutes(app: ZApp) {
   );
   app.delete('/player/army-presets/:presetId', s('Delete a saved army composition', z.array(ArmyPreset), { params: ArmyPresetParams }), (req) =>
     game(req, (ctx, pid) => player.deleteArmyPreset(ctx, pid, req.params.presetId)),
+  );
+  app.get('/player/flows', s('Saved flows (series of actions run on cities)', z.array(Flow)), (req) => game(req, (ctx, pid) => flows.listFlows(ctx, pid)));
+  app.post('/player/flows', s('Create a flow, or replace one by id', z.array(Flow), { body: FlowBody }), (req) =>
+    game(req, (ctx, pid) => flows.saveFlow(ctx, pid, req.body)),
+  );
+  app.delete('/player/flows/:flowId', s('Delete a flow', z.array(Flow), { params: FlowParams }), (req) =>
+    game(req, (ctx, pid) => flows.deleteFlow(ctx, pid, req.params.flowId)),
+  );
+  app.post(
+    '/player/flows/:flowId/run',
+    s('Run a flow on cities, each all-or-nothing (or preview it: run and roll back)', FlowRunReport, { params: FlowParams, body: FlowRunBody }),
+    async (req) => {
+      const pid = await playerIdOf(app.deps.db, req);
+      return { ok: 1 as const, data: await flows.runFlow(app.deps.db, pid, req.params.flowId, req.body.cityIds, req.body.preview) };
+    },
   );
   app.delete('/player/bookmarks/:tileId', s('Remove a bookmark', z.array(CastleSign), { params: BookmarkParams }), (req) =>
     game(req, (ctx, pid) => player.removeCastleSign(ctx, pid, req.params.tileId)),

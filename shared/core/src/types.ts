@@ -119,6 +119,44 @@ export type CityMisc = z.infer<typeof CityMiscSchema>;
 export const ArmyPresetSchema = z.object({ id: z.string(), name: z.string(), troops: TroopCountsSchema });
 export type ArmyPreset = z.infer<typeof ArmyPresetSchema>;
 
+/** Targets one city may attack in a flow action (a level 10 Rally Spot sends 10 armies). */
+export const FLOW_MAX_TARGETS_PER_CITY = 10;
+
+/**
+ * (evony-re) One action of a flow (flows.ts): appoint the city's best hero by an attribute as mayor,
+ * or train troops of a type (a number, or as many as the city can afford).
+ */
+export const FlowActionSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('setMayor'), stat: z.enum(['power', 'management', 'stratagem']).describe('attribute the new mayor is best at') }),
+  z.object({
+    type: z.literal('trainTroops'),
+    troopId: z.number().int().describe('troop type id'),
+    amount: z.union([z.literal('max'), z.number().int().min(1)]).describe("a number, or 'max' for as many as the city can afford"),
+  }),
+  z.object({
+    type: z.literal('healTroops'),
+    payWith: z.enum(['resources', 'honor']).describe('heal every injured troop, paid with resources or honor'),
+    when: z.enum(['now', 'armiesHome']).default('now').describe("'armiesHome': once every army of the city is back (e.g. after farming)"),
+  }),
+  z.object({
+    type: z.literal('attackTargets'),
+    presetId: z.string().describe('saved army sent at each target'),
+    /** each city's own targets (city id -> tile ids), attacked in order with its idle heroes, strongest Attack first */
+    targets: z.record(z.string(), z.array(z.number().int()).max(FLOW_MAX_TARGETS_PER_CITY)),
+  }),
+]);
+export type FlowAction = z.infer<typeof FlowActionSchema>;
+
+/** (evony-re) A named series of actions a lord runs on any of their cities. */
+export const FlowSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1).max(40),
+  actions: z.array(FlowActionSchema).min(1).max(20),
+  /** cities the flow runs on: 'all' (every city, including ones gained later) or chosen city ids */
+  cities: z.union([z.literal('all'), z.array(z.number().int())]).default('all'),
+});
+export type Flow = z.infer<typeof FlowSchema>;
+
 export const PlayerMiscSchema = z.object({
   icon: z.number().int().optional(),
   changedFace: z.boolean().optional(),
@@ -135,9 +173,10 @@ export const PlayerMiscSchema = z.object({
   armyPresets: z.array(ArmyPresetSchema).optional(),
   /** (evony-re) hero gear stars bought per piece (gear.ts) */
   gearStars: z.record(z.string(), z.number().int()).optional(),
+  /** (evony-re) saved flows (Flows tab) */
+  flows: z.array(FlowSchema).optional(),
 });
 export type PlayerMisc = z.infer<typeof PlayerMiscSchema>;
-
 
 // ---- report payloads ----
 // Unions of plain objects resolve to the first variant that parses (unknown keys are stripped),

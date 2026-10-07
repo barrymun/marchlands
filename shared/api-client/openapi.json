@@ -2059,6 +2059,260 @@
           "troops"
         ]
       },
+      "FlowActionInput": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "setMayor"
+              },
+              "stat": {
+                "type": "string",
+                "enum": [
+                  "power",
+                  "management",
+                  "stratagem"
+                ],
+                "description": "attribute the new mayor is best at"
+              }
+            },
+            "required": [
+              "type",
+              "stat"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "trainTroops"
+              },
+              "troopId": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "troop type id"
+              },
+              "amount": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "max"
+                  },
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                ],
+                "description": "a number, or 'max' for as many as the city can afford"
+              }
+            },
+            "required": [
+              "type",
+              "troopId",
+              "amount"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "healTroops"
+              },
+              "payWith": {
+                "type": "string",
+                "enum": [
+                  "resources",
+                  "honor"
+                ],
+                "description": "heal every injured troop, paid with resources or honor"
+              },
+              "when": {
+                "default": "now",
+                "description": "'armiesHome': once every army of the city is back (e.g. after farming)",
+                "type": "string",
+                "enum": [
+                  "now",
+                  "armiesHome"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "payWith"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "attackTargets"
+              },
+              "presetId": {
+                "type": "string",
+                "description": "saved army sent at each target"
+              },
+              "targets": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "maxItems": 10,
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                }
+              }
+            },
+            "required": [
+              "type",
+              "presetId",
+              "targets"
+            ]
+          }
+        ]
+      },
+      "FlowInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowActionInput"
+            }
+          },
+          "cities": {
+            "default": "all",
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "all"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "actions"
+        ]
+      },
+      "FlowRunReportInput": {
+        "type": "object",
+        "properties": {
+          "preview": {
+            "type": "boolean"
+          },
+          "cities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cityId": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "cityName": {
+                  "type": "string"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "description": "false: an action failed and everything the flow did in this city was rolled back"
+                },
+                "error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "steps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "action": {
+                        "type": "string"
+                      },
+                      "ok": {
+                        "type": "boolean"
+                      },
+                      "detail": {
+                        "type": "string"
+                      },
+                      "items": {
+                        "description": "per-target outcomes (attack actions)",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string"
+                            },
+                            "ok": {
+                              "type": "boolean"
+                            },
+                            "detail": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "label",
+                            "ok",
+                            "detail"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "ok",
+                      "detail"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "cityId",
+                "cityName",
+                "ok",
+                "error",
+                "steps"
+              ]
+            }
+          }
+        },
+        "required": [
+          "preview",
+          "cities"
+        ]
+      },
       "CastleSignInput": {
         "type": "object",
         "properties": {
@@ -11773,6 +12027,271 @@
         ],
         "additionalProperties": false
       },
+      "FlowAction": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "setMayor"
+              },
+              "stat": {
+                "type": "string",
+                "enum": [
+                  "power",
+                  "management",
+                  "stratagem"
+                ],
+                "description": "attribute the new mayor is best at"
+              }
+            },
+            "required": [
+              "type",
+              "stat"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "trainTroops"
+              },
+              "troopId": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "troop type id"
+              },
+              "amount": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "max"
+                  },
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                ],
+                "description": "a number, or 'max' for as many as the city can afford"
+              }
+            },
+            "required": [
+              "type",
+              "troopId",
+              "amount"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "healTroops"
+              },
+              "payWith": {
+                "type": "string",
+                "enum": [
+                  "resources",
+                  "honor"
+                ],
+                "description": "heal every injured troop, paid with resources or honor"
+              },
+              "when": {
+                "default": "now",
+                "description": "'armiesHome': once every army of the city is back (e.g. after farming)",
+                "type": "string",
+                "enum": [
+                  "now",
+                  "armiesHome"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "payWith",
+              "when"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "attackTargets"
+              },
+              "presetId": {
+                "type": "string",
+                "description": "saved army sent at each target"
+              },
+              "targets": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "maxItems": 10,
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                }
+              }
+            },
+            "required": [
+              "type",
+              "presetId",
+              "targets"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "Flow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowAction"
+            }
+          },
+          "cities": {
+            "default": "all",
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "all"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "actions",
+          "cities"
+        ],
+        "additionalProperties": false
+      },
+      "FlowRunReport": {
+        "type": "object",
+        "properties": {
+          "preview": {
+            "type": "boolean"
+          },
+          "cities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cityId": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "cityName": {
+                  "type": "string"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "description": "false: an action failed and everything the flow did in this city was rolled back"
+                },
+                "error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "steps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "action": {
+                        "type": "string"
+                      },
+                      "ok": {
+                        "type": "boolean"
+                      },
+                      "detail": {
+                        "type": "string"
+                      },
+                      "items": {
+                        "description": "per-target outcomes (attack actions)",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string"
+                            },
+                            "ok": {
+                              "type": "boolean"
+                            },
+                            "detail": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "label",
+                            "ok",
+                            "detail"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "ok",
+                      "detail"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "cityId",
+                "cityName",
+                "ok",
+                "error",
+                "steps"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "preview",
+          "cities"
+        ],
+        "additionalProperties": false
+      },
       "CastleSign": {
         "type": "object",
         "properties": {
@@ -21251,6 +21770,359 @@
                       "items": {
                         "$ref": "#/components/schemas/ArmyPreset"
                       }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/player/flows": {
+      "get": {
+        "summary": "Saved flows (series of actions run on cities)",
+        "tags": [
+          "player"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Flow"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a flow, or replace one by id",
+        "tags": [
+          "player"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "description": "a saved flow to replace; omit to create one",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "actions": {
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/FlowActionInput"
+                    }
+                  },
+                  "cities": {
+                    "default": "all",
+                    "description": "'all' (every city, including ones gained later) or chosen city ids",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "all"
+                        ]
+                      },
+                      {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "actions"
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Flow"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/player/flows/{flowId}": {
+      "delete": {
+        "summary": "Delete a flow",
+        "tags": [
+          "player"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Flow"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/player/flows/{flowId}/run": {
+      "post": {
+        "summary": "Run a flow on cities, each all-or-nothing (or preview it: run and roll back)",
+        "tags": [
+          "player"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cityIds": {
+                    "description": "cities to run the flow on (default: the flow's saved cities)",
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "preview": {
+                    "default": false,
+                    "description": "run and roll everything back: shows what would happen",
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/FlowRunReport"
                     }
                   },
                   "required": [

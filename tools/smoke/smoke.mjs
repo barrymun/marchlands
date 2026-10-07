@@ -151,6 +151,63 @@ async function main() {
   const h2 = await ok(a.token, 'POST', `/cities/${cid}/tavern/${tav.heros[1].id}/hire`);
   check(!!h2.id, 'hired two heroes, one mayor');
 
+  // ---- flows: a series of actions run on cities, each city all-or-nothing ----
+  {
+    const saved = await ok(a.token, 'POST', '/player/flows', {
+      name: 'Smoke flow',
+      actions: [
+        { type: 'setMayor', stat: 'power' },
+        { type: 'trainTroops', troopId: 3, amount: 5 },
+        { type: 'setMayor', stat: 'management' },
+        { type: 'healTroops', payWith: 'resources' },
+      ],
+    });
+    const fid = saved.find((f) => f.name === 'Smoke flow').id;
+    const before = await ok(a.token, 'GET', `/cities/${cid}`);
+    const preview = await ok(a.token, 'POST', `/player/flows/${fid}/run`, { cityIds: [cid], preview: true });
+    check(preview.cities[0].ok && preview.cities[0].steps.length === 4, 'flow preview runs every action');
+    check(preview.cities[0].steps[3].detail === 'No injured troops', 'heal action passes when nothing is injured');
+    const saved1 = (await ok(a.token, 'GET', '/player/flows')).find((f) => f.id === fid);
+    check(saved1.cities === 'all', 'a flow runs on all cities unless cities are chosen');
+    const viaSaved = await ok(a.token, 'POST', `/player/flows/${fid}/run`, { preview: true });
+    check(viaSaved.cities.length === 1 && viaSaved.cities[0].cityId === cid, "without cityIds a run uses the flow's saved cities");
+    const still = await ok(a.token, 'GET', `/cities/${cid}`);
+    check(Math.abs(still.resource.food.amount - before.resource.food.amount) < 100, 'flow preview changes nothing');
+    const run = await ok(a.token, 'POST', `/player/flows/${fid}/run`, { cityIds: [cid] });
+    check(run.cities[0].ok && run.cities[0].steps.every((s) => s.ok), 'flow runs');
+    // a flow that fails half way is rolled back in that city (catapults need research)
+    const bad = (
+      await ok(a.token, 'POST', '/player/flows', {
+        name: 'Smoke bad',
+        actions: [
+          { type: 'setMayor', stat: 'stratagem' },
+          { type: 'trainTroops', troopId: 13, amount: 1 },
+        ],
+      })
+    ).find((f) => f.name === 'Smoke bad');
+    const mayorsBefore = (await ok(a.token, 'GET', `/cities/${cid}`)).heros.map((h) => `${h.id}:${h.status}`).join();
+    const failed = await ok(a.token, 'POST', `/player/flows/${bad.id}/run`, { cityIds: [cid] });
+    const mayorsAfter = (await ok(a.token, 'GET', `/cities/${cid}`)).heros.map((h) => `${h.id}:${h.status}`).join();
+    check(!failed.cities[0].ok && mayorsBefore === mayorsAfter, 'failed flow rolled back');
+    // attack targets: a target the city cannot satisfy is skipped, the flow still succeeds
+    const huge = (await ok(a.token, 'POST', '/player/army-presets', { name: 'Smoke huge', troops: { militia: 10_000_000 } })).find(
+      (x) => x.name === 'Smoke huge',
+    );
+    const farm = (
+      await ok(a.token, 'POST', '/player/flows', {
+        name: 'Smoke farm',
+        actions: [{ type: 'attackTargets', presetId: huge.id, targets: { [cid]: [a.city.fieldId + 1] } }],
+      })
+    ).find((f) => f.name === 'Smoke farm');
+    const farmed = await ok(a.token, 'POST', `/player/flows/${farm.id}/run`, { preview: true });
+    check(
+      farmed.cities[0].ok && farmed.cities[0].steps[0].items?.[0]?.ok === false && /skipped/.test(farmed.cities[0].steps[0].items[0].detail),
+      'attack target without enough troops is skipped, not failed',
+    );
+    // put the original mayor back for the rest of the run
+    await ok(a.token, 'POST', `/heroes/${hero.id}/mayor`);
+  }
+
   // ---- hero gear (Hero Enhancement research + medal stars, for every hero) ----
   {
     const playerName = a.state.playerInfo.userName;

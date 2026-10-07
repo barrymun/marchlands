@@ -1361,6 +1361,252 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/player/flows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Saved flows (series of actions run on cities) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["Flow"][];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create a flow, or replace one by id */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description a saved flow to replace; omit to create one */
+                        id?: string | null;
+                        name: string;
+                        actions: components["schemas"]["FlowActionInput"][];
+                        /**
+                         * @description 'all' (every city, including ones gained later) or chosen city ids
+                         * @default all
+                         */
+                        cities?: "all" | number[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["Flow"][];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/player/flows/{flowId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a flow */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    flowId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["Flow"][];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/player/flows/{flowId}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run a flow on cities, each all-or-nothing (or preview it: run and roll back) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    flowId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description cities to run the flow on (default: the flow's saved cities) */
+                        cityIds?: number[];
+                        /**
+                         * @description run and roll everything back: shows what would happen
+                         * @default false
+                         */
+                        preview?: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["FlowRunReport"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/player/bookmarks/{tileId}": {
         parameters: {
             query?: never;
@@ -11358,6 +11604,72 @@ export interface components {
                 [key: string]: number;
             };
         };
+        FlowActionInput: {
+            /** @constant */
+            type: "setMayor";
+            /**
+             * @description attribute the new mayor is best at
+             * @enum {string}
+             */
+            stat: "power" | "management" | "stratagem";
+        } | {
+            /** @constant */
+            type: "trainTroops";
+            /** @description troop type id */
+            troopId: number;
+            /** @description a number, or 'max' for as many as the city can afford */
+            amount: "max" | number;
+        } | {
+            /** @constant */
+            type: "healTroops";
+            /**
+             * @description heal every injured troop, paid with resources or honor
+             * @enum {string}
+             */
+            payWith: "resources" | "honor";
+            /**
+             * @description 'armiesHome': once every army of the city is back (e.g. after farming)
+             * @default now
+             * @enum {string}
+             */
+            when: "now" | "armiesHome";
+        } | {
+            /** @constant */
+            type: "attackTargets";
+            /** @description saved army sent at each target */
+            presetId: string;
+            targets: {
+                [key: string]: number[];
+            };
+        };
+        FlowInput: {
+            id: string;
+            name: string;
+            actions: components["schemas"]["FlowActionInput"][];
+            /** @default all */
+            cities: "all" | number[];
+        };
+        FlowRunReportInput: {
+            preview: boolean;
+            cities: {
+                cityId: number;
+                cityName: string;
+                /** @description false: an action failed and everything the flow did in this city was rolled back */
+                ok: boolean;
+                error: string | null;
+                steps: {
+                    action: string;
+                    ok: boolean;
+                    detail: string;
+                    /** @description per-target outcomes (attack actions) */
+                    items?: {
+                        label: string;
+                        ok: boolean;
+                        detail: string;
+                    }[];
+                }[];
+            }[];
+        };
         CastleSignInput: {
             tileId: number;
             name: string;
@@ -13432,6 +13744,72 @@ export interface components {
                 [key: string]: number;
             };
         };
+        FlowAction: {
+            /** @constant */
+            type: "setMayor";
+            /**
+             * @description attribute the new mayor is best at
+             * @enum {string}
+             */
+            stat: "power" | "management" | "stratagem";
+        } | {
+            /** @constant */
+            type: "trainTroops";
+            /** @description troop type id */
+            troopId: number;
+            /** @description a number, or 'max' for as many as the city can afford */
+            amount: "max" | number;
+        } | {
+            /** @constant */
+            type: "healTroops";
+            /**
+             * @description heal every injured troop, paid with resources or honor
+             * @enum {string}
+             */
+            payWith: "resources" | "honor";
+            /**
+             * @description 'armiesHome': once every army of the city is back (e.g. after farming)
+             * @default now
+             * @enum {string}
+             */
+            when: "now" | "armiesHome";
+        } | {
+            /** @constant */
+            type: "attackTargets";
+            /** @description saved army sent at each target */
+            presetId: string;
+            targets: {
+                [key: string]: number[];
+            };
+        };
+        Flow: {
+            id: string;
+            name: string;
+            actions: components["schemas"]["FlowAction"][];
+            /** @default all */
+            cities: "all" | number[];
+        };
+        FlowRunReport: {
+            preview: boolean;
+            cities: {
+                cityId: number;
+                cityName: string;
+                /** @description false: an action failed and everything the flow did in this city was rolled back */
+                ok: boolean;
+                error: string | null;
+                steps: {
+                    action: string;
+                    ok: boolean;
+                    detail: string;
+                    /** @description per-target outcomes (attack actions) */
+                    items?: {
+                        label: string;
+                        ok: boolean;
+                        detail: string;
+                    }[];
+                }[];
+            }[];
+        };
         CastleSign: {
             tileId: number;
             name: string;
@@ -15095,6 +15473,9 @@ export type AuthAccountInput = components['schemas']['AuthAccountInput'];
 export type ZoneStatsInput = components['schemas']['ZoneStatsInput'];
 export type WorldInfoInput = components['schemas']['WorldInfoInput'];
 export type ArmyPresetInput = components['schemas']['ArmyPresetInput'];
+export type FlowActionInput = components['schemas']['FlowActionInput'];
+export type FlowInput = components['schemas']['FlowInput'];
+export type FlowRunReportInput = components['schemas']['FlowRunReportInput'];
 export type CastleSignInput = components['schemas']['CastleSignInput'];
 export type PlayerStateInput = components['schemas']['PlayerStateInput'];
 export type PlayerCreatedInput = components['schemas']['PlayerCreatedInput'];
@@ -15226,6 +15607,9 @@ export type AuthAccount = components['schemas']['AuthAccount'];
 export type ZoneStats = components['schemas']['ZoneStats'];
 export type WorldInfo = components['schemas']['WorldInfo'];
 export type ArmyPreset = components['schemas']['ArmyPreset'];
+export type FlowAction = components['schemas']['FlowAction'];
+export type Flow = components['schemas']['Flow'];
+export type FlowRunReport = components['schemas']['FlowRunReport'];
 export type CastleSign = components['schemas']['CastleSign'];
 export type PlayerState = components['schemas']['PlayerState'];
 export type PlayerCreated = components['schemas']['PlayerCreated'];

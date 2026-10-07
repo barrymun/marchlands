@@ -27,6 +27,10 @@ All paths are relative to the server root. Names in parentheses are the original
 | DELETE | `/api/v1/player/bookmarks/{tileId}` | Remove a bookmark |
 | PATCH | `/api/v1/player/face` | Set portrait and sex once (common.changeUserFace) |
 | POST | `/api/v1/player/flag` | Change flag with a National Flag (city.modifyFlag) |
+| GET | `/api/v1/player/flows` | Saved flows (series of actions run on cities) |
+| POST | `/api/v1/player/flows` | Create a flow, or replace one by id |
+| DELETE | `/api/v1/player/flows/{flowId}` | Delete a flow |
+| POST | `/api/v1/player/flows/{flowId}/run` | Run a flow on cities, each all-or-nothing (or preview it: run and roll back) |
 | POST | `/api/v1/player/furlough` | Holiday mode, 10 cents/day (furlough.isFurlought) |
 | DELETE | `/api/v1/player/furlough` | End holiday mode (furlough.cancelFurlought) |
 | POST | `/api/v1/player/items/{itemId}/use` | Use an item (shop.useGoods / shop.useCastleGoods) |

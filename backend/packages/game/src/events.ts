@@ -6,6 +6,7 @@ import { getPlayer, savePlayer } from './repo.ts';
 import { activeBuff, pushPlayerInfo, removeBuff, setBuff } from './helpers.ts';
 import { completeBuilding } from './services/buildings.ts';
 import { processArmy } from './services/combat.ts';
+import { runScheduledHeal } from './services/flows.ts';
 import { expireHeroBuff } from './services/heroes.ts';
 import { deliverShipment } from './services/market.ts';
 import { completeResearch, settleAllCities } from './services/research.ts';
@@ -62,8 +63,15 @@ export async function dispatchEvent(ctx: Ctx, ev: EventRow): Promise<void> {
       return expireHeroBuff(ctx, num(p.heroId), String(p.attr));
     case 'shipment':
       return deliverShipment(ctx, num(p.shipmentId));
+    case 'flow.heal':
+      return runScheduledHeal(
+        ctx,
+        ev.playerId!,
+        ev.cityId!,
+        p.payWith === 'honor' ? 'honor' : 'resources',
+        Array.isArray(p.armyIds) ? p.armyIds.map(Number).filter(Number.isInteger) : [],
+      );
     default:
       throw new Error(`unknown timed event type ${ev.type}`);
   }
 }
-

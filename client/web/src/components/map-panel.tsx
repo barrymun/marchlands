@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SendArmyDialog, type SendTarget } from '@/components/send-army-dialog';
+import { AddToFarmButton } from '@/components/flow-attack';
 import { CityDialog } from '@/components/city-dialog';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
@@ -98,7 +99,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   };
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[auto_minmax(0,1fr)]">
+    <div className="grid items-start gap-4 lg:grid-cols-[auto_minmax(0,1fr)]">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
           <CardTitle className="text-sm tabular-nums">
@@ -227,6 +228,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                     >
                       Send army
                     </Button>
+                    {missionsFor(info.data).includes(Mission.ATTACK) && <AddToFarmButton city={city} tileId={info.data.id} tileName={info.data.name} />}
                     {missionsFor(info.data).includes(Mission.SCOUT) && (
                       <>
                         <Button

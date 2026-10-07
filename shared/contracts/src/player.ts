@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { createSelectSchema } from 'drizzle-zod';
-import { ArmyPresetSchema, CastleSignSchema, GrantContentsSchema, ResearchStateSchema } from '@evony/core';
+import { ArmyPresetSchema, CastleSignSchema, FlowActionSchema, FlowSchema, GrantContentsSchema, ResearchStateSchema } from '@evony/core';
 import { accounts } from '@evony/db/schema';
 import { Ms, zId } from './common.ts';
 import { ArmyBean, BuffBean, CityBean, HeroBean, ItemCount, PlayerInfo } from './beans.ts';
@@ -90,6 +90,49 @@ export const ArmyPreset = ArmyPresetSchema.meta({ id: 'ArmyPreset' });
 export type ArmyPreset = z.infer<typeof ArmyPreset>;
 export const ArmyPresetBody = z.object({ name: z.string().describe('replaces a preset with the same name'), troops: z.record(z.string(), z.number().int()) });
 export const ArmyPresetParams = z.object({ presetId: z.string() });
+export const FlowAction = FlowActionSchema.meta({ id: 'FlowAction' });
+export type FlowAction = z.infer<typeof FlowAction>;
+export const Flow = FlowSchema.extend({ actions: z.array(FlowAction) }).meta({ id: 'Flow' });
+export type Flow = z.infer<typeof Flow>;
+export const FlowBody = z.object({
+  id: z.string().nullish().describe('a saved flow to replace; omit to create one'),
+  name: z.string(),
+  actions: z.array(FlowAction).min(1).max(20),
+  cities: z
+    .union([z.literal('all'), z.array(zId).min(1)])
+    .default('all')
+    .describe("'all' (every city, including ones gained later) or chosen city ids"),
+});
+export const FlowParams = z.object({ flowId: z.string() });
+export const FlowRunBody = z.object({
+  cityIds: z.array(zId).min(1).optional().describe("cities to run the flow on (default: the flow's saved cities)"),
+  preview: z.boolean().default(false).describe('run and roll everything back: shows what would happen'),
+});
+export const FlowRunReport = z
+  .object({
+    preview: z.boolean(),
+    cities: z.array(
+      z.object({
+        cityId: zId,
+        cityName: z.string(),
+        ok: z.boolean().describe('false: an action failed and everything the flow did in this city was rolled back'),
+        error: z.string().nullable(),
+        steps: z.array(
+          z.object({
+            action: z.string(),
+            ok: z.boolean(),
+            detail: z.string(),
+            items: z
+              .array(z.object({ label: z.string(), ok: z.boolean(), detail: z.string() }))
+              .optional()
+              .describe('per-target outcomes (attack actions)'),
+          }),
+        ),
+      }),
+    ),
+  })
+  .meta({ id: 'FlowRunReport' });
+export type FlowRunReport = z.infer<typeof FlowRunReport>;
 export const BookmarkParams = z.object({ tileId: zId });
 export const UseItemParams = z.object({ itemId: z.string() });
 export const UseItemBody = z.object({ cityId: zId.nullish() }).default({});
