@@ -133,6 +133,8 @@ export const PlayerMiscSchema = z.object({
   denyChatUntil: z.number().optional(),
   /** (evony-re) saved army compositions for the send-army dialog */
   armyPresets: z.array(ArmyPresetSchema).optional(),
+  /** (evony-re) hero gear stars bought per piece (gear.ts) */
+  gearStars: z.record(z.string(), z.number().int()).optional(),
 });
 export type PlayerMisc = z.infer<typeof PlayerMiscSchema>;
 

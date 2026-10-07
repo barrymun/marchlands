@@ -18,6 +18,16 @@ export const UseHeroItemBody = z.object({
 });
 export const RenameHeroBody = z.object({ name: z.string() });
 export const LockHeroBody = z.object({ locked: z.boolean().describe('a locked hero cannot be dismissed') });
+export const HeroGearStatBody = z.object({ stat: z.enum(['power', 'management', 'stratagem']).describe("attribute the lord's gear boosts on this hero") });
+export const GearPieceParams = z.object({ pieceId: z.string().describe('gear piece id (weapon, shield, …)') });
+/** (evony-re) A lord's hero gear: piece level (Hero Enhancement research) and stars per piece. */
+export const LordGear = z
+  .object({
+    level: z.number().int().describe("Hero Enhancement level = every piece's level"),
+    stars: z.record(z.string(), z.number().int()).describe('piece id -> stars'),
+  })
+  .meta({ id: 'LordGear' });
+export type LordGear = z.infer<typeof LordGear>;
 
 export const ArmyParams = z.object({ armyId: zId });
 export const SendArmyBody = z.object({

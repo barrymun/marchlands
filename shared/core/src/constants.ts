@@ -179,6 +179,8 @@ export const TechType = {
   ENGINEERING: 18,
   MACHINERY: 19,
   PRIVATEERING: 20,
+  /** (evony-re) hero gear level (gear.ts) */
+  HERO_ENHANCEMENT: 21,
 } as const;
 export type TechType = (typeof TechType)[keyof typeof TechType];
 
@@ -202,6 +204,7 @@ export const TECH_NAMES: Record<number, string> = {
   18: 'Engineering',
   19: 'Machinery',
   20: 'Privateering',
+  21: 'Hero Enhancement',
 };
 
 /** Player state flags (playerInfo.status). */

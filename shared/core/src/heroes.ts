@@ -33,19 +33,43 @@ export const heroPower = (h: HeroStats) => h.power + h.powerAdded + h.powerBuffA
 export const heroManagement = (h: HeroStats) => h.management + h.managementAdded + h.managementBuffAdded;
 export const heroStratagem = (h: HeroStats) => h.stratagem + h.stratagemAdded + h.stratagemBuffAdded;
 
-/** Experience for the next level: level² × 100, flat from BALANCE.heroExpCapLevel on (level 100 → 1,000,000). */
+/** Experience for the next level: level² × 100 (level 99 → 980,100); (evony-re) none past BALANCE.heroMaxLevel. */
 export const upgradeExpFor = (level: number) => {
-  const l = Math.min(level, BALANCE.heroExpCapLevel);
+  const l = Math.min(level, BALANCE.heroMaxLevel);
   return l * l * 100;
 };
 
+/** (evony-re) BALANCE.heroSoftCap: the attribute in full up to the knee, √(knee × attribute) above it. */
+export function softCapAttribute(value: number, on: boolean): number {
+  const { knee } = BALANCE.heroSoftCap;
+  return on && value > knee ? Math.sqrt(knee * value) : value;
+}
+
+/** Mayor production bonus (share of field output) from the mayor's politics, soft-capped when on. */
+export const mayorProductionBonus = (politics: number) => softCapAttribute(politics, BALANCE.heroSoftCap.production) * BALANCE.mayorManagementProductionFactor;
+
+/** Hero attack's share added to troop attack in battle (attack / 100), soft-capped when on. */
+export const heroBattleAttackBonus = (attack: number) => softCapAttribute(attack, BALANCE.heroSoftCap.battle) / 100;
+
+/** (evony-re) Heroes at BALANCE.heroMaxLevel gain no more experience. */
+export const heroAtMaxLevel = (h: { level: number }) => h.level >= BALANCE.heroMaxLevel;
+
+/** Add experience to a hero (nothing at the maximum level). */
+export function addHeroExp(h: { level: number; experience: number }, exp: number): void {
+  if (heroAtMaxLevel(h)) {
+    h.experience = 0;
+    return;
+  }
+  h.experience += exp;
+}
+
 type Levelling = { level: number; experience: number; upgradeExp: number; remainPoint: number };
 
-/** (evony-re) How many levels the hero's experience pays for right now (orig: one per hero.levelUp). */
+/** (evony-re) How many levels the hero's experience pays for right now, up to BALANCE.heroMaxLevel (orig: one per hero.levelUp). */
 export function levelsReady(h: Omit<Levelling, 'remainPoint'>): number {
   let { level, experience, upgradeExp } = h;
   let n = 0;
-  while (experience >= upgradeExp) {
+  while (experience >= upgradeExp && level < BALANCE.heroMaxLevel) {
     experience -= upgradeExp;
     level += 1;
     upgradeExp = upgradeExpFor(level);
@@ -63,6 +87,8 @@ export function levelUpAll(h: Levelling): number {
     h.remainPoint += 1;
     h.upgradeExp = upgradeExpFor(h.level);
   }
+  // experience left over at the maximum level is dropped
+  if (heroAtMaxLevel(h)) h.experience = 0;
   return n;
 }
 

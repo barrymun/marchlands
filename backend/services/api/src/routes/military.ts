@@ -28,6 +28,9 @@ import {
   VisibleArmies,
   ValleyUpgradeBody,
   LockHeroBody,
+  HeroGearStatBody,
+  GearPieceParams,
+  LordGear,
   ValleyUpgradeResult,
 } from '@evony/contracts';
 import { doc, anon, authenticate, game, playerIdOf, tags, zCityParams, type ZApp } from '../http.ts';
@@ -65,6 +68,17 @@ export default async function militaryRoutes(app: ZApp) {
     s(tags.heroes, 'Lock or unlock a hero (a locked hero cannot be dismissed)', HeroBean, { params: HeroParams, body: LockHeroBody }),
     (req) => game(req, (ctx, pid) => heroes.setHeroLocked(ctx, pid, req.params.heroId, req.body.locked)),
   );
+  app.put(
+    '/heroes/:heroId/gear-stat',
+    s(tags.heroes, "Choose the attribute the lord's gear boosts on this hero (free)", HeroBean, { params: HeroParams, body: HeroGearStatBody }),
+    (req) => game(req, (ctx, pid) => heroes.setHeroGearStat(ctx, pid, req.params.heroId, req.body.stat)),
+  );
+  app.get('/gear', s(tags.heroes, "The lord's hero gear: Hero Enhancement level and stars per piece", LordGear), (req) =>
+    game(req, (ctx, pid) => heroes.gearState(ctx, pid)),
+  );
+  app.post('/gear/:pieceId/star', s(tags.heroes, 'Add a star to a gear piece for every hero, paid in medals', LordGear, { params: GearPieceParams }), (req) =>
+    game(req, (ctx, pid) => heroes.buyGearStar(ctx, pid, req.params.pieceId)),
+  );
   app.post('/heroes/:heroId/mayor', s(tags.heroes, 'Appoint mayor (hero.promoteToChief)', Empty, { params: HeroParams }), (req) =>
     game(req, (ctx, pid) => heroes.appointMayor(ctx, pid, req.params.heroId)),
   );
@@ -76,8 +90,10 @@ export default async function militaryRoutes(app: ZApp) {
     s(tags.heroes, 'Assign points: new totals (hero.addPoint)', HeroBean, { params: HeroParams, body: HeroPointsBody }),
     (req) => game(req, (ctx, pid) => heroes.assignPoints(ctx, pid, req.params.heroId, req.body)),
   );
-  app.post('/heroes/:heroId/level-up', s(tags.heroes, 'Level up as many times as the experience pays for (hero.levelUp)', HeroBean, { params: HeroParams }), (req) =>
-    game(req, (ctx, pid) => heroes.levelUp(ctx, pid, req.params.heroId)),
+  app.post(
+    '/heroes/:heroId/level-up',
+    s(tags.heroes, 'Level up as many times as the experience pays for (hero.levelUp)', HeroBean, { params: HeroParams }),
+    (req) => game(req, (ctx, pid) => heroes.levelUp(ctx, pid, req.params.heroId)),
   );
   app.post('/heroes/:heroId/reward', s(tags.heroes, '+5 loyalty for gold (hero.awardGold)', HeroBean, { params: HeroParams }), (req) =>
     game(req, (ctx, pid) => heroes.reward(ctx, pid, req.params.heroId)),

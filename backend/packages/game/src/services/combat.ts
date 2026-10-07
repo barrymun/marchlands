@@ -47,6 +47,7 @@ import {
   type ReportBody,
   type ResourceSet,
   type TroopCounts,
+  addHeroExp,
 } from '@evony/core';
 import { armies, cities, heroes, tiles } from '@evony/db';
 import { openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
@@ -183,7 +184,7 @@ function sumTroops(list: TroopCounts[]): TroopCounts {
 
 async function grantHeroExp(ctx: Ctx, h: HeroRow | null | undefined, exp: number) {
   if (!h || exp <= 0) return;
-  h.experience += exp;
+  addHeroExp(h, exp);
   await saveHero(ctx, h);
   if (h.playerId) pushHero(ctx, h.playerId, h, 2);
 }

@@ -36,6 +36,7 @@ export const HeroBean = HeroRow.pick({
   .extend({
     experience: z.number().int(),
     seized: z.boolean().describe('held captive by another lord'),
+    gearStat: z.enum(['power', 'management', 'stratagem']).describe("(evony-re) attribute the lord's gear boosts on this hero"),
     buffs: z
       .array(
         z.object({

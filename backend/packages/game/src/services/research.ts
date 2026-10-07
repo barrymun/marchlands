@@ -24,10 +24,13 @@ import {
   techInfo,
   assertCanResearch,
   type ResearchState,
+  addHeroExp,
+  TechType,
 } from '@evony/core';
 import { loadBundle, mayorOf, mayorStats, openOwnCity, settleAndReport, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';
+import { resyncHeroGear } from './heroes.ts';
 import { addPrestige, gainResources, pushPlayerInfo, pushResources, spendCents, spendResources, useItemOrCents } from '../helpers.ts';
 import { citiesOf, getPlayer, saveCity, saveHero, savePlayer, type PlayerRow } from '../repo.ts';
 
@@ -189,7 +192,7 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
   addPrestige(p, gain);
   const mayor = home ? mayorOf(home.heroes) : undefined;
   if (mayor) {
-    mayor.experience += researchHeroExp(techId, level, th);
+    addHeroExp(mayor, researchHeroExp(techId, level, th));
     await saveHero(ctx, mayor);
     ctx.push(playerId, 'server.HeroUpdate', { castleId: home!.city.id, hero: heroBean(mayor), updateType: 2 });
   }
@@ -197,4 +200,6 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
   ctx.push(playerId, 'server.ResearchCompleteUpdate', { castleId: r.cityId!, typeId: techId, level });
   for (const b of bundles) pushResources(ctx, b);
   await pushPlayerInfo(ctx, p);
+  // Hero Enhancement raises every hero's gear (gear.ts)
+  if (techId === TechType.HERO_ENHANCEMENT) await resyncHeroGear(ctx, playerId);
 }

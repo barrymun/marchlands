@@ -54,8 +54,26 @@ export const BALANCE = {
   startTaxRate: 10,
   startPopulation: 50,
 
-  /** (evony-re) experience per level stops growing here: every level from 100 on needs 100² × 100 = 1,000,000 */
-  heroExpCapLevel: 100,
+  /** (evony-re) heroes stop levelling here (orig: no limit); they keep growing through gear (gear.ts) */
+  heroMaxLevel: 100,
+  /**
+   * (evony-re) hero gear (Age II Hero Enhancement): piece levels follow the Hero Enhancement research,
+   * each level adds its number in points (55 per piece at 10); each star adds starPoints; star 10 of a
+   * piece costs lastStarMedals Nation Medals (stars 1-9: one medal of that level)
+   */
+  heroGear: { maxLevel: 10, maxStars: 10, starPoints: 3, lastStarMedals: 3 },
+  /**
+   * (evony-re) soft caps for geared heroes (orig: linear). With a toggle on, a hero attribute counts
+   * in full up to `knee` and as √(knee × attribute) above it (knee 200: 450 → 300, 800 → 400,
+   * 1,250 → 500): `production` for the mayor's production bonus, `battle` for hero attack in battle.
+   * Training speed is never capped.
+   */
+  heroSoftCap: { production: true as boolean, battle: true as boolean, knee: 200 },
+  /**
+   * (evony-re) the most a mayor's attribute can cut construction / research times to: at least this
+   * share of the time is kept (null: no floor, orig). Training is never floored.
+   */
+  heroTimeFloor: { building: 0.1 as number | null, research: 0.1 as number | null },
   heroSalaryPerLevel: 20, // (orig) gold per hour per hero level
   /**
    * (evony-re) hero items bought with the hero's city gold instead of cents: experience books cost

@@ -30,6 +30,7 @@ import {
   scaleResources,
   ITEMS,
   type BuildingState,
+  addHeroExp,
 } from '@evony/core';
 import { mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -298,7 +299,7 @@ export async function completeBuilding(ctx: Ctx, cityId: number, positionId: num
     addPrestige(b.player, gain);
     const mayor = mayorOf(b.heroes);
     if (mayor) {
-      mayor.experience += buildingHeroExp(bld.typeId, level, th);
+      addHeroExp(mayor, buildingHeroExp(bld.typeId, level, th));
       await saveHero(ctx, mayor);
       ctx.push(playerId, 'server.HeroUpdate', { castleId: cityId, hero: heroBean(mayor), updateType: 2 });
     }

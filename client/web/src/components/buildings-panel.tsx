@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import type { BuildingBean, CityBean } from '@evony/api-client';
-import { buildingHeroExp, buildingLevel, BuildingType, heroManagement, HeroStatus } from '@evony/core';
+import { BALANCE, buildingHeroExp, buildingLevel, BuildingType, heroManagement, HeroStatus, heroTimeMultiplier } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
@@ -420,12 +420,12 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
   );
 }
 
-/** How the mayor's Politics shortens build times (×0.995 per point); refreshed live with the hero. */
+/** How the mayor's Politics shortens build times (×0.995 per point, at most to BALANCE.heroTimeFloor.building); refreshed live with the hero. */
 function MayorBuildHint({ city }: { city: CityBean }) {
   const mayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
   if (!mayor) return <p className="text-xs text-muted-foreground">No mayor: appoint one with high Politics in the Heroes tab to build faster.</p>;
   const politics = heroManagement(mayor);
-  const cut = Math.round((1 - Math.pow(0.995, politics)) * 1000) / 10;
+  const cut = Math.round((1 - heroTimeMultiplier(politics, BALANCE.heroTimeFloor.building)) * 1000) / 10;
   return (
     <p className="text-xs text-muted-foreground">
       Times include mayor {mayor.name}'s Politics {politics}: −{cut}%. A mayor with higher Politics builds faster.

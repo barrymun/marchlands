@@ -103,8 +103,11 @@ All paths are relative to the server root. Names in parentheses are the original
 | GET | `/api/v1/cities/{cityId}/tavern` | Inn offers (hero.getHerosListFromTavern) |
 | POST | `/api/v1/cities/{cityId}/tavern/{heroId}/hire` | Hire (hero.hireHero) |
 | POST | `/api/v1/cities/{cityId}/tavern/refresh` | New offers for gold or a Hero Hunting item (hero.refreshHerosListFromTavern) |
+| GET | `/api/v1/gear` | The lord's hero gear: Hero Enhancement level and stars per piece |
+| POST | `/api/v1/gear/{pieceId}/star` | Add a star to a gear piece for every hero, paid in medals |
 | PATCH | `/api/v1/heroes/{heroId}` | Rename (hero.changeName) |
 | POST | `/api/v1/heroes/{heroId}/fire` | Fire (hero.fireHero) |
+| PUT | `/api/v1/heroes/{heroId}/gear-stat` | Choose the attribute the lord's gear boosts on this hero (free) |
 | POST | `/api/v1/heroes/{heroId}/items` | Use a hero item (hero.useItem) |
 | POST | `/api/v1/heroes/{heroId}/level-up` | Level up as many times as the experience pays for (hero.levelUp) |
 | PUT | `/api/v1/heroes/{heroId}/lock` | Lock or unlock a hero (a locked hero cannot be dismissed) |

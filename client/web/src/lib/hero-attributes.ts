@@ -1,6 +1,6 @@
 // Hero attributes with their display colours: one place to reference politics = green, attack = red, intelligence = blue.
 
-import { heroManagement, heroPower, heroStratagem } from '@evony/core';
+import { heroManagement, heroPower, heroStratagem, type GearStat } from '@evony/core';
 import type { HeroBean } from '@evony/api-client';
 
 /** Badge colours (background + text, light and dark) per attribute. */
@@ -12,11 +12,15 @@ export const ATTRIBUTE_TONE = {
 
 export type AttributeKey = keyof typeof ATTRIBUTE_TONE;
 
+/** `stat`: the attribute's field name on the hero (and in gear / boost APIs). */
 export const HERO_ATTRIBUTES = [
-  { key: 'pol', label: 'Politics', short: 'pol', value: heroManagement, tone: ATTRIBUTE_TONE.pol },
-  { key: 'att', label: 'Attack', short: 'att', value: heroPower, tone: ATTRIBUTE_TONE.att },
-  { key: 'int', label: 'Intelligence', short: 'int', value: heroStratagem, tone: ATTRIBUTE_TONE.int },
-] as const satisfies readonly { key: AttributeKey; label: string; short: string; value: (h: HeroBean) => number; tone: string }[];
+  { key: 'pol', stat: 'management', label: 'Politics', short: 'pol', value: heroManagement, tone: ATTRIBUTE_TONE.pol },
+  { key: 'att', stat: 'power', label: 'Attack', short: 'att', value: heroPower, tone: ATTRIBUTE_TONE.att },
+  { key: 'int', stat: 'stratagem', label: 'Intelligence', short: 'int', value: heroStratagem, tone: ATTRIBUTE_TONE.int },
+] as const satisfies readonly { key: AttributeKey; stat: GearStat; label: string; short: string; value: (h: HeroBean) => number; tone: string }[];
+
+/** The attribute entry for a field name ('power' | 'management' | 'stratagem'). */
+export const attributeOfStat = (stat: GearStat) => HERO_ATTRIBUTES.find((a) => a.stat === stat)!;
 
 export type HeroAttributeValue = (typeof HERO_ATTRIBUTES)[number] & { v: number };
 

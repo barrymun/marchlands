@@ -29,6 +29,24 @@ import {
   syncHeroBuffs,
   upgradeExpFor,
   levelUpAll,
+  softCapAttribute,
+  mayorProductionBonus,
+  heroBattleAttackBonus,
+  heroTimeMultiplier,
+  researchTimeMs,
+  addHeroExp,
+  GEAR_PIECES,
+  gearTier,
+  gearLevelPoints,
+  heroGearBonus,
+  syncHeroGear,
+  gearStarCost,
+  gearStarLimit,
+  lordGear,
+  researchMaxLevel,
+  researchConfig,
+  TechType,
+  BuildingType,
   levelsReady,
   maxArmyTroops,
   injuredOf,
@@ -422,6 +440,9 @@ describe('hero attribute boosts', () => {
       power: 128,
       management: 40,
       stratagem: 30,
+      powerAdded: 0,
+      managementAdded: 0,
+      stratagemAdded: 0,
       powerBuffAdded: 32,
       managementBuffAdded: 0,
       stratagemBuffAdded: 0,
@@ -437,12 +458,18 @@ describe('hero attribute boosts', () => {
 });
 
 describe('hero level experience', () => {
-  it('grows as level² × 100 up to level 100, then stays at 1,000,000', () => {
+  it('grows as level² × 100', () => {
     expect(upgradeExpFor(10)).toBe(10_000);
     expect(upgradeExpFor(99)).toBe(980_100);
-    expect(upgradeExpFor(100)).toBe(1_000_000);
-    expect(upgradeExpFor(112)).toBe(1_000_000);
-    expect(upgradeExpFor(500)).toBe(1_000_000);
+  });
+
+  it('stops at the maximum level', () => {
+    const h = { level: 100, experience: 0 };
+    addHeroExp(h, 50_000);
+    expect(h.experience).toBe(0);
+    const young = { level: 99, experience: 0 };
+    addHeroExp(young, 50_000);
+    expect(young.experience).toBe(50_000);
   });
 });
 
@@ -553,9 +580,144 @@ describe('level up all at once', () => {
     expect(levelUpAll(h)).toBe(0);
   });
 
-  it('keeps going past the exp cap at a flat 1,000,000 per level', () => {
-    const h = { level: 100, experience: 3_500_000, upgradeExp: upgradeExpFor(100), remainPoint: 5 };
-    expect(levelUpAll(h)).toBe(3);
-    expect(h).toEqual({ level: 103, experience: 500_000, upgradeExp: 1_000_000, remainPoint: 8 });
+  it('stops at level 100 and drops the experience left over', () => {
+    const h = { level: 98, experience: 5_000_000, upgradeExp: upgradeExpFor(98), remainPoint: 5 };
+    expect(levelsReady(h)).toBe(2);
+    expect(levelUpAll(h)).toBe(2);
+    expect(h).toEqual({ level: 100, experience: 0, upgradeExp: 1_000_000, remainPoint: 7 });
+    expect(levelUpAll({ ...h, experience: 2_000_000 })).toBe(0);
+  });
+});
+
+describe('hero gear', () => {
+  const allStars = (n: number) => Object.fromEntries(GEAR_PIECES.map((p) => [p.id, n]));
+  const hero = (level: number, power: number, gearStat: string | null = null) => ({
+    level,
+    power,
+    management: 20,
+    stratagem: 30,
+    powerAdded: 0,
+    managementAdded: 0,
+    stratagemAdded: 0,
+    gearStat,
+  });
+
+  it('lets a hero use one gear level and star per 10 levels: none below level 10, all 10 at level 100', () => {
+    expect([1, 9, 10, 19, 50, 79, 80, 99, 100].map(gearTier)).toEqual([0, 0, 1, 1, 5, 7, 8, 9, 10]);
+  });
+
+  it('gives 1 + … + L points per piece level and 3 per star', () => {
+    expect(gearLevelPoints(10)).toBe(55);
+    const maxed = { level: 10, stars: allStars(10) };
+    expect(heroGearBonus(100, maxed)).toBe(14 * (55 + 30));
+    // level 50 (tier 5): level 5 pieces and 5 stars of each; nothing below level 10
+    expect(heroGearBonus(50, maxed)).toBe(14 * (15 + 15));
+    expect(heroGearBonus(9, maxed)).toBe(0);
+    // research and stars still limit a maxed hero
+    expect(heroGearBonus(100, { level: 3, stars: { weapon: 2 } })).toBe(14 * 6 + 6);
+  });
+
+  it('reaches at least 1,250 in one attribute for a maxed level 100 hero', () => {
+    const h = hero(100, 70 + 100);
+    syncHeroGear(h, { level: 10, stars: allStars(10) });
+    expect(h.power + h.powerAdded).toBe(1_360);
+  });
+
+  it('boosts the chosen attribute, else the strongest one; none without gear', () => {
+    const gear = { level: 2, stars: {} };
+    const h = hero(30, 100);
+    syncHeroGear(h, gear);
+    expect([h.powerAdded, h.managementAdded, h.stratagemAdded]).toEqual([42, 0, 0]);
+    h.gearStat = 'stratagem';
+    expect(syncHeroGear(h, gear)).toBe(true);
+    expect([h.powerAdded, h.managementAdded, h.stratagemAdded]).toEqual([0, 0, 42]);
+    expect(syncHeroGear(h, gear)).toBe(false);
+    syncHeroGear(h, null);
+    expect(h.stratagemAdded).toBe(0);
+  });
+
+  it('counts no more stars than the Hero Enhancement level', () => {
+    expect(gearStarLimit({ level: 3, stars: {} })).toBe(3);
+    expect(heroGearBonus(100, { level: 0, stars: { weapon: 10 } })).toBe(0);
+    expect(heroGearBonus(100, { level: 3, stars: { weapon: 10 } })).toBe(14 * 6 + 3 * 3);
+  });
+
+  it('prices stars 1-9 at one medal of that level and star 10 at three Nation Medals', () => {
+    expect(gearStarCost(1)).toEqual({ itemId: 'hero.loyalty.1', count: 1 });
+    expect(gearStarCost(6)).toEqual({ itemId: 'hero.loyalty.6', count: 1 });
+    expect(gearStarCost(9)).toEqual({ itemId: 'hero.loyalty.9', count: 1 });
+    expect(gearStarCost(10)).toEqual({ itemId: 'hero.loyalty.9', count: 3 });
+  });
+
+  it('reads the lord gear from Hero Enhancement and the stars bought', () => {
+    expect(lordGear({ research: { [TechType.HERO_ENHANCEMENT]: { level: 4 } }, misc: { gearStars: { weapon: 3, bogus: 9 } } })).toEqual({
+      level: 4,
+      stars: { weapon: 3 },
+    });
+    expect(researchMaxLevel(TechType.HERO_ENHANCEMENT)).toBe(10);
+    expect(researchConfig(TechType.HERO_ENHANCEMENT, 7)?.requires.buildings).toEqual([{ id: BuildingType.ACADEMY, level: 7 }]);
+  });
+
+  it('applies attribute boosts to gear too', () => {
+    // level 100, base 76: 175 own points + 800 gear = 975, +25% = 1,219
+    const h = {
+      power: 175,
+      management: 0,
+      stratagem: 0,
+      powerAdded: 800,
+      managementAdded: 0,
+      stratagemAdded: 0,
+      powerBuffAdded: 0,
+      managementBuffAdded: 0,
+      stratagemBuffAdded: 0,
+      buffs: [{ id: 'power', desc: '', endTime: 1, param: 0 }],
+    };
+    syncHeroBuffs(h);
+    expect(h.power + h.powerAdded + h.powerBuffAdded).toBe(1_219);
+  });
+});
+
+describe('hero soft caps', () => {
+  it('count an attribute in full up to the knee and as √(knee × value) above it', () => {
+    expect(softCapAttribute(150, true)).toBe(150);
+    expect(softCapAttribute(450, true)).toBeCloseTo(300);
+    expect(softCapAttribute(1_250, true)).toBeCloseTo(500);
+    expect(softCapAttribute(1_250, false)).toBe(1_250);
+  });
+
+  it('soften the mayor production bonus and battle attack when on', () => {
+    const cfg = BALANCE.heroSoftCap as { production: boolean; battle: boolean };
+    const was = { ...cfg };
+    try {
+      cfg.production = true;
+      cfg.battle = true;
+      expect(mayorProductionBonus(150)).toBeCloseTo(1.5);
+      expect(mayorProductionBonus(1_250)).toBeCloseTo(5);
+      expect(heroBattleAttackBonus(800)).toBeCloseTo(4);
+      cfg.production = false;
+      cfg.battle = false;
+      expect(mayorProductionBonus(1_250)).toBeCloseTo(12.5);
+      expect(heroBattleAttackBonus(800)).toBeCloseTo(8);
+    } finally {
+      Object.assign(cfg, was);
+    }
+  });
+
+  it('keep at least the floor of build and research times, but not of training', () => {
+    const floor = BALANCE.heroTimeFloor as { building: number | null; research: number | null };
+    const was = { ...floor };
+    try {
+      floor.building = 0.1;
+      floor.research = 0.1;
+      const mayor = { power: 1_500, management: 1_500, stratagem: 1_500 };
+      const cfg = researchConfig(TechType.AGRICULTURE, 1)!;
+      expect(researchTimeMs(TechType.AGRICULTURE, 1, mayor)).toBe(Math.floor(cfg.buildTime * 0.1) * 1000);
+      expect(heroTimeMultiplier(1_500, 0.1)).toBe(0.1);
+      expect(heroTimeMultiplier(1_500, null)).toBeLessThan(0.001);
+      floor.research = null;
+      expect(researchTimeMs(TechType.AGRICULTURE, 1, mayor)).toBeLessThan(Math.floor(cfg.buildTime * 0.1) * 1000);
+    } finally {
+      Object.assign(floor, was);
+    }
   });
 });

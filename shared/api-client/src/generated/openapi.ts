@@ -4228,6 +4228,195 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/heroes/{heroId}/gear-stat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Choose the attribute the lord's gear boosts on this hero (free) */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    heroId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * @description attribute the lord's gear boosts on this hero
+                         * @enum {string}
+                         */
+                        stat: "power" | "management" | "stratagem";
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["HeroBean"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/gear": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The lord's hero gear: Hero Enhancement level and stars per piece */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["LordGear"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/gear/{pieceId}/star": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a star to a gear piece for every hero, paid in medals */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description gear piece id (weapon, shield, …) */
+                    pieceId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["LordGear"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/heroes/{heroId}/mayor": {
         parameters: {
             query?: never;
@@ -10773,6 +10962,11 @@ export interface components {
             experience: number;
             /** @description held captive by another lord */
             seized: boolean;
+            /**
+             * @description (evony-re) attribute the lord's gear boosts on this hero
+             * @enum {string}
+             */
+            gearStat: "power" | "management" | "stratagem";
             /** @description active attribute boosts (24 real hours each, unaffected by GAME_SPEED) */
             buffs: {
                 /** @description power | management | stratagem */
@@ -10935,6 +11129,187 @@ export interface components {
             troop: components["schemas"]["TroopBeanInput"] | null;
             resource: components["schemas"]["ResourceAmountsInput"] | null;
         };
+        LordGearInput: {
+            /** @description Hero Enhancement level = every piece's level */
+            level: number;
+            /** @description piece id -> stars */
+            stars: {
+                [key: string]: number;
+            };
+        };
+        CityHeroListInput: {
+            /** @description hired heroes and captives held */
+            heroes: components["schemas"]["HeroBeanInput"][];
+            /** @description Feasting Hall capacity */
+            slots: number;
+        };
+        TavernOffersInput: {
+            /** @description free hero slots */
+            posCount: number;
+            heros: components["schemas"]["HeroBeanInput"][];
+            /** @description gold to re-roll the offers */
+            refreshCost: number;
+            /** @description Hero Hunting items owned (free re-roll each) */
+            huntingItems: number;
+        };
+        VisibleArmiesInput: {
+            self: components["schemas"]["ArmyBeanInput"][];
+            /** @description other lords stationed at or reinforcing/transporting to me */
+            friend: components["schemas"]["ArmyBeanInput"][];
+            /** @description hostile armies heading for me (troops need a Beacon Tower) */
+            enemy: components["schemas"]["ArmyBeanInput"][];
+        };
+        StationedArmyListInput: components["schemas"]["ArmyBeanInput"][];
+        TroopParamsInput: {
+            /** @description Compass bonus percent */
+            marchSkillParam: number;
+            /** @description Logistics bonus percent */
+            loadSkillParam: number;
+            /** @description Horseback Riding bonus percent */
+            driveSkillParam: number;
+            /** @description Relief Station speed multiplier between own cities */
+            transportStationParam: number;
+            maxArmies: number;
+            /** @description troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign) */
+            maxTroops: number;
+        };
+        MarchEstimateInput: {
+            /** @description milliseconds */
+            marchTime: number;
+            /** @description carry capacity */
+            load: number;
+        };
+        MapCastleInput: {
+            /** @description tile id */
+            id: number;
+            x: number;
+            y: number;
+            name: string;
+            npc: boolean;
+            level: number;
+            cityId?: number;
+            playerId?: number;
+            userName?: string;
+            prestige?: number;
+            honor?: number;
+            flag?: string;
+            allianceName?: string;
+            playerLogoUrl?: string;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation?: number;
+            /** @description player status */
+            state?: number;
+            /** @description beginner protection */
+            furlough?: boolean;
+            zoneName: string;
+            canLoot: boolean;
+            canOccupy: boolean;
+            canScout: boolean;
+            canSend: boolean;
+            canTrans: boolean;
+        };
+        MapHeldValleyInput: {
+            id: number;
+            type: number;
+            level: number;
+            x: number;
+            y: number;
+            cityId: number;
+            cityName: string;
+            playerId: number;
+            userName: string;
+            /** @description '' when not in an alliance */
+            allianceName: string;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation: number;
+        };
+        MapViewInput: {
+            x1: number;
+            y1: number;
+            x2: number;
+            y2: number;
+            /** @description two hex chars per tile (type, level), row-major */
+            mapStr: string;
+            castles: components["schemas"]["MapCastleInput"][];
+            /** @description valleys in view that a city holds (the viewer's included) */
+            valleys: components["schemas"]["MapHeldValleyInput"][];
+        };
+        MapTileOwnerInput: {
+            cityId: number;
+            cityName: string;
+            playerId: number;
+            userName: string;
+        };
+        MapFieldTileInfoInput: {
+            id: number;
+            type: number;
+            level: number;
+            x: number;
+            y: number;
+            /** @enum {string} */
+            zoneName: "FRIESLAND" | "SAXONY" | "NORTH MARCH" | "BOHEMIA" | "LOWER LORRAINE" | "FRANCONIA" | "THURINGIA" | "MORAVIA" | "UPPER LORRAINE" | "SWABIA" | "BAVARIA" | "CARINTHIA" | "BURGUNDY" | "LOMBARDY" | "TUSCANY" | "ROMAGNA" | "UNKNOWN";
+            name: string;
+            npc: boolean;
+            /** @description controlling city of an occupied valley / captured NPC city */
+            owner: components["schemas"]["MapTileOwnerInput"] | null;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation: number;
+            /** @description gold to raise this unowned valley one level (null: not upgradable) */
+            upgradeCost: number | null;
+            canLoot: boolean;
+            canOccupy: boolean;
+            canScout: boolean;
+            canSend: boolean;
+            canTrans: boolean;
+        };
+        MapFieldCastleInfoInput: {
+            /** @description tile id */
+            id: number;
+            x: number;
+            y: number;
+            name: string;
+            npc: boolean;
+            level: number;
+            cityId?: number;
+            playerId?: number;
+            userName?: string;
+            prestige?: number;
+            honor?: number;
+            flag?: string;
+            allianceName?: string;
+            playerLogoUrl?: string;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation?: number;
+            /** @description player status */
+            state?: number;
+            /** @description beginner protection */
+            furlough?: boolean;
+            zoneName: string;
+            canLoot: boolean;
+            canOccupy: boolean;
+            canScout: boolean;
+            canSend: boolean;
+            canTrans: boolean;
+            /** @constant */
+            type: 11;
+        };
+        MapFieldInfoInput: components["schemas"]["MapFieldTileInfoInput"] | components["schemas"]["MapFieldCastleInfoInput"];
+        MapSearchResultInput: {
+            id: number;
+            type: number;
+            level: number;
+            ownerCityId: number | null;
+            cityId: number | null;
+            x: number;
+            y: number;
+        }[];
+        ValleyUpgradeResultInput: {
+            tileId: number;
+            level: number;
+            /** @description gold paid */
+            gold: number;
+            nextCost: number | null;
+        };
         AuthSessionInput: {
             /** @description bearer token */
             token: string;
@@ -11003,6 +11378,8 @@ export interface components {
                     endTime?: number;
                 };
             };
+            /** @description (evony-re) the lord's hero gear */
+            gear: components["schemas"]["LordGearInput"];
             selfArmys: components["schemas"]["ArmyBeanInput"][];
             friendArmys: components["schemas"]["ArmyBeanInput"][];
             enemyArmys: components["schemas"]["ArmyBeanInput"][];
@@ -11038,6 +11415,8 @@ export interface components {
                     endTime?: number;
                 };
             };
+            /** @description (evony-re) the lord's hero gear */
+            gear: components["schemas"]["LordGearInput"];
             selfArmys: components["schemas"]["ArmyBeanInput"][];
             friendArmys: components["schemas"]["ArmyBeanInput"][];
             enemyArmys: components["schemas"]["ArmyBeanInput"][];
@@ -11400,179 +11779,6 @@ export interface components {
             };
         };
         ProductionQueuesInput: components["schemas"]["WallsQueuesInput"] | components["schemas"]["BarracksQueuesInput"];
-        CityHeroListInput: {
-            /** @description hired heroes and captives held */
-            heroes: components["schemas"]["HeroBeanInput"][];
-            /** @description Feasting Hall capacity */
-            slots: number;
-        };
-        TavernOffersInput: {
-            /** @description free hero slots */
-            posCount: number;
-            heros: components["schemas"]["HeroBeanInput"][];
-            /** @description gold to re-roll the offers */
-            refreshCost: number;
-            /** @description Hero Hunting items owned (free re-roll each) */
-            huntingItems: number;
-        };
-        VisibleArmiesInput: {
-            self: components["schemas"]["ArmyBeanInput"][];
-            /** @description other lords stationed at or reinforcing/transporting to me */
-            friend: components["schemas"]["ArmyBeanInput"][];
-            /** @description hostile armies heading for me (troops need a Beacon Tower) */
-            enemy: components["schemas"]["ArmyBeanInput"][];
-        };
-        StationedArmyListInput: components["schemas"]["ArmyBeanInput"][];
-        TroopParamsInput: {
-            /** @description Compass bonus percent */
-            marchSkillParam: number;
-            /** @description Logistics bonus percent */
-            loadSkillParam: number;
-            /** @description Horseback Riding bonus percent */
-            driveSkillParam: number;
-            /** @description Relief Station speed multiplier between own cities */
-            transportStationParam: number;
-            maxArmies: number;
-            /** @description troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign) */
-            maxTroops: number;
-        };
-        MarchEstimateInput: {
-            /** @description milliseconds */
-            marchTime: number;
-            /** @description carry capacity */
-            load: number;
-        };
-        MapCastleInput: {
-            /** @description tile id */
-            id: number;
-            x: number;
-            y: number;
-            name: string;
-            npc: boolean;
-            level: number;
-            cityId?: number;
-            playerId?: number;
-            userName?: string;
-            prestige?: number;
-            honor?: number;
-            flag?: string;
-            allianceName?: string;
-            playerLogoUrl?: string;
-            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
-            relation?: number;
-            /** @description player status */
-            state?: number;
-            /** @description beginner protection */
-            furlough?: boolean;
-            zoneName: string;
-            canLoot: boolean;
-            canOccupy: boolean;
-            canScout: boolean;
-            canSend: boolean;
-            canTrans: boolean;
-        };
-        MapHeldValleyInput: {
-            id: number;
-            type: number;
-            level: number;
-            x: number;
-            y: number;
-            cityId: number;
-            cityName: string;
-            playerId: number;
-            userName: string;
-            /** @description '' when not in an alliance */
-            allianceName: string;
-            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
-            relation: number;
-        };
-        MapViewInput: {
-            x1: number;
-            y1: number;
-            x2: number;
-            y2: number;
-            /** @description two hex chars per tile (type, level), row-major */
-            mapStr: string;
-            castles: components["schemas"]["MapCastleInput"][];
-            /** @description valleys in view that a city holds (the viewer's included) */
-            valleys: components["schemas"]["MapHeldValleyInput"][];
-        };
-        MapTileOwnerInput: {
-            cityId: number;
-            cityName: string;
-            playerId: number;
-            userName: string;
-        };
-        MapFieldTileInfoInput: {
-            id: number;
-            type: number;
-            level: number;
-            x: number;
-            y: number;
-            /** @enum {string} */
-            zoneName: "FRIESLAND" | "SAXONY" | "NORTH MARCH" | "BOHEMIA" | "LOWER LORRAINE" | "FRANCONIA" | "THURINGIA" | "MORAVIA" | "UPPER LORRAINE" | "SWABIA" | "BAVARIA" | "CARINTHIA" | "BURGUNDY" | "LOMBARDY" | "TUSCANY" | "ROMAGNA" | "UNKNOWN";
-            name: string;
-            npc: boolean;
-            /** @description controlling city of an occupied valley / captured NPC city */
-            owner: components["schemas"]["MapTileOwnerInput"] | null;
-            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
-            relation: number;
-            /** @description gold to raise this unowned valley one level (null: not upgradable) */
-            upgradeCost: number | null;
-            canLoot: boolean;
-            canOccupy: boolean;
-            canScout: boolean;
-            canSend: boolean;
-            canTrans: boolean;
-        };
-        MapFieldCastleInfoInput: {
-            /** @description tile id */
-            id: number;
-            x: number;
-            y: number;
-            name: string;
-            npc: boolean;
-            level: number;
-            cityId?: number;
-            playerId?: number;
-            userName?: string;
-            prestige?: number;
-            honor?: number;
-            flag?: string;
-            allianceName?: string;
-            playerLogoUrl?: string;
-            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
-            relation?: number;
-            /** @description player status */
-            state?: number;
-            /** @description beginner protection */
-            furlough?: boolean;
-            zoneName: string;
-            canLoot: boolean;
-            canOccupy: boolean;
-            canScout: boolean;
-            canSend: boolean;
-            canTrans: boolean;
-            /** @constant */
-            type: 11;
-        };
-        MapFieldInfoInput: components["schemas"]["MapFieldTileInfoInput"] | components["schemas"]["MapFieldCastleInfoInput"];
-        MapSearchResultInput: {
-            id: number;
-            type: number;
-            level: number;
-            ownerCityId: number | null;
-            cityId: number | null;
-            x: number;
-            y: number;
-        }[];
-        ValleyUpgradeResultInput: {
-            tileId: number;
-            level: number;
-            /** @description gold paid */
-            gold: number;
-            nextCost: number | null;
-        };
         MailCountsInput: {
             /** @description unread inbox + system */
             count: number;
@@ -12830,6 +13036,11 @@ export interface components {
             experience: number;
             /** @description held captive by another lord */
             seized: boolean;
+            /**
+             * @description (evony-re) attribute the lord's gear boosts on this hero
+             * @enum {string}
+             */
+            gearStat: "power" | "management" | "stratagem";
             /** @description active attribute boosts (24 real hours each, unaffected by GAME_SPEED) */
             buffs: {
                 /** @description power | management | stratagem */
@@ -12992,6 +13203,187 @@ export interface components {
             troop: components["schemas"]["TroopBean"] | null;
             resource: components["schemas"]["ResourceAmounts"] | null;
         };
+        LordGear: {
+            /** @description Hero Enhancement level = every piece's level */
+            level: number;
+            /** @description piece id -> stars */
+            stars: {
+                [key: string]: number;
+            };
+        };
+        CityHeroList: {
+            /** @description hired heroes and captives held */
+            heroes: components["schemas"]["HeroBean"][];
+            /** @description Feasting Hall capacity */
+            slots: number;
+        };
+        TavernOffers: {
+            /** @description free hero slots */
+            posCount: number;
+            heros: components["schemas"]["HeroBean"][];
+            /** @description gold to re-roll the offers */
+            refreshCost: number;
+            /** @description Hero Hunting items owned (free re-roll each) */
+            huntingItems: number;
+        };
+        VisibleArmies: {
+            self: components["schemas"]["ArmyBean"][];
+            /** @description other lords stationed at or reinforcing/transporting to me */
+            friend: components["schemas"]["ArmyBean"][];
+            /** @description hostile armies heading for me (troops need a Beacon Tower) */
+            enemy: components["schemas"]["ArmyBean"][];
+        };
+        StationedArmyList: components["schemas"]["ArmyBean"][];
+        TroopParams: {
+            /** @description Compass bonus percent */
+            marchSkillParam: number;
+            /** @description Logistics bonus percent */
+            loadSkillParam: number;
+            /** @description Horseback Riding bonus percent */
+            driveSkillParam: number;
+            /** @description Relief Station speed multiplier between own cities */
+            transportStationParam: number;
+            maxArmies: number;
+            /** @description troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign) */
+            maxTroops: number;
+        };
+        MarchEstimate: {
+            /** @description milliseconds */
+            marchTime: number;
+            /** @description carry capacity */
+            load: number;
+        };
+        MapCastle: {
+            /** @description tile id */
+            id: number;
+            x: number;
+            y: number;
+            name: string;
+            npc: boolean;
+            level: number;
+            cityId?: number;
+            playerId?: number;
+            userName?: string;
+            prestige?: number;
+            honor?: number;
+            flag?: string;
+            allianceName?: string;
+            playerLogoUrl?: string;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation?: number;
+            /** @description player status */
+            state?: number;
+            /** @description beginner protection */
+            furlough?: boolean;
+            zoneName: string;
+            canLoot: boolean;
+            canOccupy: boolean;
+            canScout: boolean;
+            canSend: boolean;
+            canTrans: boolean;
+        };
+        MapHeldValley: {
+            id: number;
+            type: number;
+            level: number;
+            x: number;
+            y: number;
+            cityId: number;
+            cityName: string;
+            playerId: number;
+            userName: string;
+            /** @description '' when not in an alliance */
+            allianceName: string;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation: number;
+        };
+        MapView: {
+            x1: number;
+            y1: number;
+            x2: number;
+            y2: number;
+            /** @description two hex chars per tile (type, level), row-major */
+            mapStr: string;
+            castles: components["schemas"]["MapCastle"][];
+            /** @description valleys in view that a city holds (the viewer's included) */
+            valleys: components["schemas"]["MapHeldValley"][];
+        };
+        MapTileOwner: {
+            cityId: number;
+            cityName: string;
+            playerId: number;
+            userName: string;
+        };
+        MapFieldTileInfo: {
+            id: number;
+            type: number;
+            level: number;
+            x: number;
+            y: number;
+            /** @enum {string} */
+            zoneName: "FRIESLAND" | "SAXONY" | "NORTH MARCH" | "BOHEMIA" | "LOWER LORRAINE" | "FRANCONIA" | "THURINGIA" | "MORAVIA" | "UPPER LORRAINE" | "SWABIA" | "BAVARIA" | "CARINTHIA" | "BURGUNDY" | "LOMBARDY" | "TUSCANY" | "ROMAGNA" | "UNKNOWN";
+            name: string;
+            npc: boolean;
+            /** @description controlling city of an occupied valley / captured NPC city */
+            owner: components["schemas"]["MapTileOwner"] | null;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation: number;
+            /** @description gold to raise this unowned valley one level (null: not upgradable) */
+            upgradeCost: number | null;
+            canLoot: boolean;
+            canOccupy: boolean;
+            canScout: boolean;
+            canSend: boolean;
+            canTrans: boolean;
+        };
+        MapFieldCastleInfo: {
+            /** @description tile id */
+            id: number;
+            x: number;
+            y: number;
+            name: string;
+            npc: boolean;
+            level: number;
+            cityId?: number;
+            playerId?: number;
+            userName?: string;
+            prestige?: number;
+            honor?: number;
+            flag?: string;
+            allianceName?: string;
+            playerLogoUrl?: string;
+            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
+            relation?: number;
+            /** @description player status */
+            state?: number;
+            /** @description beginner protection */
+            furlough?: boolean;
+            zoneName: string;
+            canLoot: boolean;
+            canOccupy: boolean;
+            canScout: boolean;
+            canSend: boolean;
+            canTrans: boolean;
+            /** @constant */
+            type: 11;
+        };
+        MapFieldInfo: components["schemas"]["MapFieldTileInfo"] | components["schemas"]["MapFieldCastleInfo"];
+        MapSearchResult: {
+            id: number;
+            type: number;
+            level: number;
+            ownerCityId: number | null;
+            cityId: number | null;
+            x: number;
+            y: number;
+        }[];
+        ValleyUpgradeResult: {
+            tileId: number;
+            level: number;
+            /** @description gold paid */
+            gold: number;
+            nextCost: number | null;
+        };
         AuthSession: {
             /** @description bearer token */
             token: string;
@@ -13060,6 +13452,8 @@ export interface components {
                     endTime?: number;
                 };
             };
+            /** @description (evony-re) the lord's hero gear */
+            gear: components["schemas"]["LordGear"];
             selfArmys: components["schemas"]["ArmyBean"][];
             friendArmys: components["schemas"]["ArmyBean"][];
             enemyArmys: components["schemas"]["ArmyBean"][];
@@ -13095,6 +13489,8 @@ export interface components {
                     endTime?: number;
                 };
             };
+            /** @description (evony-re) the lord's hero gear */
+            gear: components["schemas"]["LordGear"];
             selfArmys: components["schemas"]["ArmyBean"][];
             friendArmys: components["schemas"]["ArmyBean"][];
             enemyArmys: components["schemas"]["ArmyBean"][];
@@ -13457,179 +13853,6 @@ export interface components {
             };
         };
         ProductionQueues: components["schemas"]["WallsQueues"] | components["schemas"]["BarracksQueues"];
-        CityHeroList: {
-            /** @description hired heroes and captives held */
-            heroes: components["schemas"]["HeroBean"][];
-            /** @description Feasting Hall capacity */
-            slots: number;
-        };
-        TavernOffers: {
-            /** @description free hero slots */
-            posCount: number;
-            heros: components["schemas"]["HeroBean"][];
-            /** @description gold to re-roll the offers */
-            refreshCost: number;
-            /** @description Hero Hunting items owned (free re-roll each) */
-            huntingItems: number;
-        };
-        VisibleArmies: {
-            self: components["schemas"]["ArmyBean"][];
-            /** @description other lords stationed at or reinforcing/transporting to me */
-            friend: components["schemas"]["ArmyBean"][];
-            /** @description hostile armies heading for me (troops need a Beacon Tower) */
-            enemy: components["schemas"]["ArmyBean"][];
-        };
-        StationedArmyList: components["schemas"]["ArmyBean"][];
-        TroopParams: {
-            /** @description Compass bonus percent */
-            marchSkillParam: number;
-            /** @description Logistics bonus percent */
-            loadSkillParam: number;
-            /** @description Horseback Riding bonus percent */
-            driveSkillParam: number;
-            /** @description Relief Station speed multiplier between own cities */
-            transportStationParam: number;
-            maxArmies: number;
-            /** @description troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign) */
-            maxTroops: number;
-        };
-        MarchEstimate: {
-            /** @description milliseconds */
-            marchTime: number;
-            /** @description carry capacity */
-            load: number;
-        };
-        MapCastle: {
-            /** @description tile id */
-            id: number;
-            x: number;
-            y: number;
-            name: string;
-            npc: boolean;
-            level: number;
-            cityId?: number;
-            playerId?: number;
-            userName?: string;
-            prestige?: number;
-            honor?: number;
-            flag?: string;
-            allianceName?: string;
-            playerLogoUrl?: string;
-            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
-            relation?: number;
-            /** @description player status */
-            state?: number;
-            /** @description beginner protection */
-            furlough?: boolean;
-            zoneName: string;
-            canLoot: boolean;
-            canOccupy: boolean;
-            canScout: boolean;
-            canSend: boolean;
-            canTrans: boolean;
-        };
-        MapHeldValley: {
-            id: number;
-            type: number;
-            level: number;
-            x: number;
-            y: number;
-            cityId: number;
-            cityName: string;
-            playerId: number;
-            userName: string;
-            /** @description '' when not in an alliance */
-            allianceName: string;
-            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
-            relation: number;
-        };
-        MapView: {
-            x1: number;
-            y1: number;
-            x2: number;
-            y2: number;
-            /** @description two hex chars per tile (type, level), row-major */
-            mapStr: string;
-            castles: components["schemas"]["MapCastle"][];
-            /** @description valleys in view that a city holds (the viewer's included) */
-            valleys: components["schemas"]["MapHeldValley"][];
-        };
-        MapTileOwner: {
-            cityId: number;
-            cityName: string;
-            playerId: number;
-            userName: string;
-        };
-        MapFieldTileInfo: {
-            id: number;
-            type: number;
-            level: number;
-            x: number;
-            y: number;
-            /** @enum {string} */
-            zoneName: "FRIESLAND" | "SAXONY" | "NORTH MARCH" | "BOHEMIA" | "LOWER LORRAINE" | "FRANCONIA" | "THURINGIA" | "MORAVIA" | "UPPER LORRAINE" | "SWABIA" | "BAVARIA" | "CARINTHIA" | "BURGUNDY" | "LOMBARDY" | "TUSCANY" | "ROMAGNA" | "UNKNOWN";
-            name: string;
-            npc: boolean;
-            /** @description controlling city of an occupied valley / captured NPC city */
-            owner: components["schemas"]["MapTileOwner"] | null;
-            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
-            relation: number;
-            /** @description gold to raise this unowned valley one level (null: not upgradable) */
-            upgradeCost: number | null;
-            canLoot: boolean;
-            canOccupy: boolean;
-            canScout: boolean;
-            canSend: boolean;
-            canTrans: boolean;
-        };
-        MapFieldCastleInfo: {
-            /** @description tile id */
-            id: number;
-            x: number;
-            y: number;
-            name: string;
-            npc: boolean;
-            level: number;
-            cityId?: number;
-            playerId?: number;
-            userName?: string;
-            prestige?: number;
-            honor?: number;
-            flag?: string;
-            allianceName?: string;
-            playerLogoUrl?: string;
-            /** @description Relation: 0 alliance, 1 ally, 2 neutral, 3 enemy, 4 none, 5 self */
-            relation?: number;
-            /** @description player status */
-            state?: number;
-            /** @description beginner protection */
-            furlough?: boolean;
-            zoneName: string;
-            canLoot: boolean;
-            canOccupy: boolean;
-            canScout: boolean;
-            canSend: boolean;
-            canTrans: boolean;
-            /** @constant */
-            type: 11;
-        };
-        MapFieldInfo: components["schemas"]["MapFieldTileInfo"] | components["schemas"]["MapFieldCastleInfo"];
-        MapSearchResult: {
-            id: number;
-            type: number;
-            level: number;
-            ownerCityId: number | null;
-            cityId: number | null;
-            x: number;
-            y: number;
-        }[];
-        ValleyUpgradeResult: {
-            tileId: number;
-            level: number;
-            /** @description gold paid */
-            gold: number;
-            nextCost: number | null;
-        };
         MailCounts: {
             /** @description unread inbox + system */
             count: number;
@@ -14851,6 +15074,22 @@ export type PlayerInfoInput = components['schemas']['PlayerInfoInput'];
 export type ItemCountInput = components['schemas']['ItemCountInput'];
 export type BuffBeanInput = components['schemas']['BuffBeanInput'];
 export type ArmyBeanInput = components['schemas']['ArmyBeanInput'];
+export type LordGearInput = components['schemas']['LordGearInput'];
+export type CityHeroListInput = components['schemas']['CityHeroListInput'];
+export type TavernOffersInput = components['schemas']['TavernOffersInput'];
+export type VisibleArmiesInput = components['schemas']['VisibleArmiesInput'];
+export type StationedArmyListInput = components['schemas']['StationedArmyListInput'];
+export type TroopParamsInput = components['schemas']['TroopParamsInput'];
+export type MarchEstimateInput = components['schemas']['MarchEstimateInput'];
+export type MapCastleInput = components['schemas']['MapCastleInput'];
+export type MapHeldValleyInput = components['schemas']['MapHeldValleyInput'];
+export type MapViewInput = components['schemas']['MapViewInput'];
+export type MapTileOwnerInput = components['schemas']['MapTileOwnerInput'];
+export type MapFieldTileInfoInput = components['schemas']['MapFieldTileInfoInput'];
+export type MapFieldCastleInfoInput = components['schemas']['MapFieldCastleInfoInput'];
+export type MapFieldInfoInput = components['schemas']['MapFieldInfoInput'];
+export type MapSearchResultInput = components['schemas']['MapSearchResultInput'];
+export type ValleyUpgradeResultInput = components['schemas']['ValleyUpgradeResultInput'];
 export type AuthSessionInput = components['schemas']['AuthSessionInput'];
 export type AuthAccountInput = components['schemas']['AuthAccountInput'];
 export type ZoneStatsInput = components['schemas']['ZoneStatsInput'];
@@ -14885,21 +15124,6 @@ export type ProduceQueueInput = components['schemas']['ProduceQueueInput'];
 export type BarracksQueuesInput = components['schemas']['BarracksQueuesInput'];
 export type WallsQueuesInput = components['schemas']['WallsQueuesInput'];
 export type ProductionQueuesInput = components['schemas']['ProductionQueuesInput'];
-export type CityHeroListInput = components['schemas']['CityHeroListInput'];
-export type TavernOffersInput = components['schemas']['TavernOffersInput'];
-export type VisibleArmiesInput = components['schemas']['VisibleArmiesInput'];
-export type StationedArmyListInput = components['schemas']['StationedArmyListInput'];
-export type TroopParamsInput = components['schemas']['TroopParamsInput'];
-export type MarchEstimateInput = components['schemas']['MarchEstimateInput'];
-export type MapCastleInput = components['schemas']['MapCastleInput'];
-export type MapHeldValleyInput = components['schemas']['MapHeldValleyInput'];
-export type MapViewInput = components['schemas']['MapViewInput'];
-export type MapTileOwnerInput = components['schemas']['MapTileOwnerInput'];
-export type MapFieldTileInfoInput = components['schemas']['MapFieldTileInfoInput'];
-export type MapFieldCastleInfoInput = components['schemas']['MapFieldCastleInfoInput'];
-export type MapFieldInfoInput = components['schemas']['MapFieldInfoInput'];
-export type MapSearchResultInput = components['schemas']['MapSearchResultInput'];
-export type ValleyUpgradeResultInput = components['schemas']['ValleyUpgradeResultInput'];
 export type MailCountsInput = components['schemas']['MailCountsInput'];
 export type MailSummaryInput = components['schemas']['MailSummaryInput'];
 export type MailListInput = components['schemas']['MailListInput'];
@@ -14981,6 +15205,22 @@ export type PlayerInfo = components['schemas']['PlayerInfo'];
 export type ItemCount = components['schemas']['ItemCount'];
 export type BuffBean = components['schemas']['BuffBean'];
 export type ArmyBean = components['schemas']['ArmyBean'];
+export type LordGear = components['schemas']['LordGear'];
+export type CityHeroList = components['schemas']['CityHeroList'];
+export type TavernOffers = components['schemas']['TavernOffers'];
+export type VisibleArmies = components['schemas']['VisibleArmies'];
+export type StationedArmyList = components['schemas']['StationedArmyList'];
+export type TroopParams = components['schemas']['TroopParams'];
+export type MarchEstimate = components['schemas']['MarchEstimate'];
+export type MapCastle = components['schemas']['MapCastle'];
+export type MapHeldValley = components['schemas']['MapHeldValley'];
+export type MapView = components['schemas']['MapView'];
+export type MapTileOwner = components['schemas']['MapTileOwner'];
+export type MapFieldTileInfo = components['schemas']['MapFieldTileInfo'];
+export type MapFieldCastleInfo = components['schemas']['MapFieldCastleInfo'];
+export type MapFieldInfo = components['schemas']['MapFieldInfo'];
+export type MapSearchResult = components['schemas']['MapSearchResult'];
+export type ValleyUpgradeResult = components['schemas']['ValleyUpgradeResult'];
 export type AuthSession = components['schemas']['AuthSession'];
 export type AuthAccount = components['schemas']['AuthAccount'];
 export type ZoneStats = components['schemas']['ZoneStats'];
@@ -15015,21 +15255,6 @@ export type ProduceQueue = components['schemas']['ProduceQueue'];
 export type BarracksQueues = components['schemas']['BarracksQueues'];
 export type WallsQueues = components['schemas']['WallsQueues'];
 export type ProductionQueues = components['schemas']['ProductionQueues'];
-export type CityHeroList = components['schemas']['CityHeroList'];
-export type TavernOffers = components['schemas']['TavernOffers'];
-export type VisibleArmies = components['schemas']['VisibleArmies'];
-export type StationedArmyList = components['schemas']['StationedArmyList'];
-export type TroopParams = components['schemas']['TroopParams'];
-export type MarchEstimate = components['schemas']['MarchEstimate'];
-export type MapCastle = components['schemas']['MapCastle'];
-export type MapHeldValley = components['schemas']['MapHeldValley'];
-export type MapView = components['schemas']['MapView'];
-export type MapTileOwner = components['schemas']['MapTileOwner'];
-export type MapFieldTileInfo = components['schemas']['MapFieldTileInfo'];
-export type MapFieldCastleInfo = components['schemas']['MapFieldCastleInfo'];
-export type MapFieldInfo = components['schemas']['MapFieldInfo'];
-export type MapSearchResult = components['schemas']['MapSearchResult'];
-export type ValleyUpgradeResult = components['schemas']['ValleyUpgradeResult'];
 export type MailCounts = components['schemas']['MailCounts'];
 export type MailSummary = components['schemas']['MailSummary'];
 export type MailList = components['schemas']['MailList'];

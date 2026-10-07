@@ -7,6 +7,7 @@ import { BALANCE, getGameSpeed, scaled } from './balance.ts';
 import { BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, type ResourceKey } from './constants.ts';
 import { troopConfig } from './data/index.ts';
 import type { BuffState, BuildingState, CityMisc, ResearchState, ResourceSet, TroopCounts } from './types.ts';
+import { mayorProductionBonus } from './heroes.ts';
 
 export type BasicResource = Exclude<ResourceKey, 'gold'>;
 export const BASIC_RESOURCES: readonly BasicResource[] = ['food', 'wood', 'stone', 'iron'];
@@ -194,7 +195,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   const efficiency = workersNeeded <= 0 || population >= workersNeeded ? 1 : population / workersNeeded;
   const idlePopulation = Math.max(0, population - workersNeeded);
 
-  const mayorBonus = ctx.mayor ? ctx.mayor.management * BALANCE.mayorManagementProductionFactor : 0;
+  const mayorBonus = ctx.mayor ? mayorProductionBonus(ctx.mayor.management) : 0;
   const parts = (): BonusParts => ({ tech: 0, mayor: mayorBonus, valley: 0, buff: 0 });
   const bonusParts = { food: parts(), wood: parts(), stone: parts(), iron: parts() };
   for (const r of BASIC_RESOURCES) {

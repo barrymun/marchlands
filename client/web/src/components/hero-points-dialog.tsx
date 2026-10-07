@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import type { HeroBean } from '@evony/api-client';
-import { BALANCE, HeroStatus } from '@evony/core';
+import { HeroStatus, heroManagement, mayorProductionBonus } from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -56,7 +56,9 @@ function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBean; cit
   const canReset = holyWater > 0 || cents >= RESET_CENTS;
   const assigned = hero.level - hero.remainPoint;
   const isMayor = hero.status === HeroStatus.MAYOR;
-  const mayorGain = (politics: number) => Math.round(fieldOutput * politics * BALANCE.mayorManagementProductionFactor);
+  // change in the mayor's production bonus from the added politics (soft-capped: BALANCE.heroSoftCap)
+  const bonusGain = (added: number) => mayorProductionBonus(heroManagement(hero) + added) - mayorProductionBonus(heroManagement(hero));
+  const mayorGain = (added: number) => Math.round(fieldOutput * bonusGain(added));
   const total = (k: StatKey) => {
     const s = STATS.find((x) => x.key === k)!;
     return hero[k] + hero[s.added] + hero[s.buff];
@@ -110,7 +112,7 @@ function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBean; cit
         ))}
         {isMayor && add.management > 0 && (
           <p className="text-xs text-emerald-600 dark:text-emerald-400">
-            As mayor: {signedRate(mayorGain(add.management))} production (+{Math.round(add.management * BALANCE.mayorManagementProductionFactor * 100)}%)
+            As mayor: {signedRate(mayorGain(add.management))} production (+{Math.round(bonusGain(add.management) * 100)}%)
           </p>
         )}
         <Separator />

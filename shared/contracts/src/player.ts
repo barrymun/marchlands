@@ -6,12 +6,18 @@ import { ArmyPresetSchema, CastleSignSchema, GrantContentsSchema, ResearchStateS
 import { accounts } from '@evony/db/schema';
 import { Ms, zId } from './common.ts';
 import { ArmyBean, BuffBean, CityBean, HeroBean, ItemCount, PlayerInfo } from './beans.ts';
+import { LordGear } from './military.ts';
 import { CityRow, PlayerRow } from './rows.ts';
 
 // ---- auth ----
 
 const Credentials = z.object({
-  username: z.string().trim().min(3).max(30).regex(/^[A-Za-z0-9_.-]+$/, 'letters, digits, _ . - only'),
+  username: z
+    .string()
+    .trim()
+    .min(3)
+    .max(30)
+    .regex(/^[A-Za-z0-9_.-]+$/, 'letters, digits, _ . - only'),
   password: z.string().min(6).max(200),
 });
 export const LoginBody = Credentials;
@@ -99,6 +105,7 @@ export const PlayerState = z
     items: z.array(ItemCount),
     buffs: z.array(BuffBean),
     research: ResearchStateSchema.describe('techId -> state'),
+    gear: LordGear.describe("(evony-re) the lord's hero gear"),
     selfArmys: z.array(ArmyBean),
     friendArmys: z.array(ArmyBean),
     enemyArmys: z.array(ArmyBean),

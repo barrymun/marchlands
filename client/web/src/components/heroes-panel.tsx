@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Check, Lock, LockOpen, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
 import type { CityBean, HeroBean } from '@evony/api-client';
 import { toast } from 'sonner';
-import { BALANCE, BuildingType, HeroStatus, heroManagement, heroPower, heroStratagem, levelsReady } from '@evony/core';
+import { BALANCE, BuildingType, HeroStatus, heroAtMaxLevel, heroManagement, mayorProductionBonus, heroPower, heroStratagem, levelsReady } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { useSticky } from '@/hooks/use-sticky';
 import { HeroPointsDialog } from '@/components/hero-points-dialog';
 import { HeroItemsDialog } from '@/components/hero-items-dialog';
+import { GearCard, HeroGearLine } from '@/components/hero-gear';
 import { qk, useCommand } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { api, unwrap } from '@/lib/api';
@@ -30,6 +32,7 @@ const STATUS: Record<number, string> = {
 };
 
 export function HeroesPanel({ city }: { city: CityBean }) {
+  const navigate = useNavigate();
   const hasInn = city.buildings.some((b) => b.typeId === BuildingType.INN && b.level > 0);
   const tavern = useQuery({
     queryKey: ['tavern', city.id],
@@ -71,8 +74,9 @@ export function HeroesPanel({ city }: { city: CityBean }) {
 
   // the mayor's politics adds a percentage of (efficiency-adjusted) field output to every basic resource
   const fieldOutput = (['food', 'wood', 'stone', 'iron'] as const).reduce((sum, r) => sum + city.resource[r].breakdown.fields, 0);
-  const mayorPct = (h: HeroBean) => Math.round(heroManagement(h) * BALANCE.mayorManagementProductionFactor * 100);
-  const mayorGain = (h: HeroBean) => Math.round(fieldOutput * heroManagement(h) * BALANCE.mayorManagementProductionFactor);
+  // (soft-capped above BALANCE.heroSoftCap.knee when BALANCE.heroSoftCap.production is on)
+  const mayorPct = (h: HeroBean) => Math.round(mayorProductionBonus(heroManagement(h)) * 100);
+  const mayorGain = (h: HeroBean) => Math.round(fieldOutput * mayorProductionBonus(heroManagement(h)));
   const currentMayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
   const [pointsFor, setPointsFor] = useState<number | null>(null);
   const [itemsFor, setItemsFor] = useState<number | null>(null);
@@ -116,6 +120,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
               hero={h}
               note={mayorNote(h)}
               showExp
+              gear={<HeroGearLine hero={h} cityId={city.id} />}
               onRename={h.seized ? undefined : (name) => rename.mutateAsync({ heroId: h.id, name }).then(() => undefined)}
             >
               <Badge variant={h.status === HeroStatus.MAYOR ? 'default' : 'secondary'}>{h.seized ? 'Captive' : (STATUS[h.status] ?? h.status)}</Badge>
@@ -143,7 +148,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
                   </Label>
                 </div>
               )}
-              {h.experience >= h.upgradeExp && (
+              {h.experience >= h.upgradeExp && !heroAtMaxLevel(h) && (
                 <Button size="xs" onClick={() => levelUp.mutate(h.id)} disabled={levelUp.isPending}>
                   {levelsReady(h) > 1 ? `Level up ×${levelsReady(h)} → Lv ${h.level + levelsReady(h)}` : 'Level up'}
                 </Button>
@@ -203,6 +208,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
           </CardContent>
         )}
       </Card>
+      <GearCard onResearch={() => navigate(`/cities/${city.id}/research`)} />
       <DismissHeroDialog
         hero={dismissing}
         pending={fire.isPending}
@@ -224,12 +230,14 @@ function HeroRow({
   hero,
   note,
   showExp = false,
+  gear,
   onRename,
   children,
 }: {
   hero: HeroBean;
   note?: React.ReactNode;
   showExp?: boolean;
+  gear?: React.ReactNode;
   onRename?: (name: string) => Promise<void>;
   children: React.ReactNode;
 }) {
@@ -293,6 +301,7 @@ function HeroRow({
           </div>
         )}
         <HeroAttributes hero={hero} />
+        {gear}
         {note && <div className="text-xs tabular-nums">{note}</div>}
         <HeroBuffs hero={hero} />
         {showExp && <ExpBar hero={hero} />}
@@ -344,6 +353,13 @@ function HeroBuffs({ hero }: { hero: HeroBean }) {
 
 /** Experience towards the next level; animates when a push updates the hero. */
 function ExpBar({ hero }: { hero: HeroBean }) {
+  if (heroAtMaxLevel(hero)) {
+    return (
+      <div className="mt-1.5 text-[11px] font-medium text-emerald-600 tabular-nums dark:text-emerald-400">
+        Max level {BALANCE.heroMaxLevel}: grows through gear now
+      </div>
+    );
+  }
   const pct = Math.min(100, (hero.experience / Math.max(1, hero.upgradeExp)) * 100);
   const ready = hero.experience >= hero.upgradeExp;
   return (

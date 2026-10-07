@@ -2,6 +2,7 @@
 // (tools/legacy-import/convert.mjs). Treat as read-only.
 
 import { BALANCE } from '../balance.ts';
+import { BuildingType, TechType } from '../constants.ts';
 import type { Resources } from '../resources.ts';
 import buildingRows from './legacy/buildings.json' with { type: 'json' };
 import researchRows from './legacy/research.json' with { type: 'json' };
@@ -80,7 +81,19 @@ export interface QuestConfig {
 export const BUILDINGS = (buildingRows as BuildingLevelConfig[]).map((b) =>
   BALANCE.buildingItemRequirements || !b.requires.items.length ? b : { ...b, requires: { ...b.requires, items: [] } },
 );
-export const RESEARCH = researchRows as ResearchLevelConfig[];
+/**
+ * (evony-re) Hero Enhancement (gear.ts): twice Military Science's cost and time, level N needs Academy level N.
+ */
+const HERO_ENHANCEMENT_RESEARCH: ResearchLevelConfig[] = (researchRows as ResearchLevelConfig[])
+  .filter((r) => r.techId === TechType.MILITARY_SCIENCE)
+  .map((r) => ({
+    techId: TechType.HERO_ENHANCEMENT,
+    level: r.level,
+    buildTime: r.buildTime * 2,
+    cost: Object.fromEntries(Object.entries(r.cost).map(([k, v]) => [k, (v as number) * 2])) as ResearchLevelConfig['cost'],
+    requires: { buildings: [{ id: BuildingType.ACADEMY, level: r.level }], items: [], techs: [] },
+  }));
+export const RESEARCH = [...(researchRows as ResearchLevelConfig[]), ...HERO_ENHANCEMENT_RESEARCH];
 export const TROOPS = troopRows as TroopConfig[];
 export const ITEMS = itemRows as ItemConfig[];
 export const QUESTS = questRows as QuestConfig[];

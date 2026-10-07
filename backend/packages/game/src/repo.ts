@@ -3,7 +3,7 @@
 // (by id), then tiles, then heroes/armies.
 
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
-import { GameError, syncHeroBuffs } from '@evony/core';
+import { GameError, HeroStatus, lordGear, syncHeroBuffs, syncHeroGear, type LordGear } from '@evony/core';
 import { armies, cities, heroes, players, tiles } from '@evony/db';
 import type { Ctx } from './context.ts';
 
@@ -96,8 +96,17 @@ export async function getHero(ctx: Ctx, id: number, opts: Opts = {}): Promise<He
   if (!row) throw new GameError('Hero does not exist!', -99, 404);
   return row;
 }
+/** The gear a hero wears: its lord's (gear.ts); none in a tavern or while held captive. */
+export async function gearOfHero(ctx: Ctx, h: Pick<HeroRow, 'playerId' | 'inTavern' | 'status'>): Promise<LordGear | null> {
+  if (h.playerId == null || h.inTavern || h.status === HeroStatus.SEIZED) return null;
+  const [p] = await ctx.tx.select({ research: players.research, misc: players.misc }).from(players).where(eq(players.id, h.playerId));
+  return p ? lordGear(p) : null;
+}
+
 export async function saveHero(ctx: Ctx, h: HeroRow): Promise<void> {
-  // attribute boosts follow the hero's current attributes (level ups, assigned points)
+  // gear follows the lord's research and stars and the hero's level; attribute boosts follow the
+  // hero's current attributes (level ups, assigned points, gear)
+  syncHeroGear(h, await gearOfHero(ctx, h));
   syncHeroBuffs(h);
   const { id, createdAt: _c, ...rest } = h;
   await ctx.tx.update(heroes).set(rest).where(eq(heroes.id, id));

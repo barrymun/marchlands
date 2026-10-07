@@ -16,6 +16,7 @@ import {
   type CityStats,
   type FortCounts,
   type TroopCounts,
+  heroGearStat,
 } from '@evony/core';
 import type { ArmyBean, BuffBean, BuildingBean, CityBean, FortBean, HeroBean, ItemCount, PlayerInfo, ResourceBean, TroopBean, ValleyBean } from '@evony/contracts';
 import { cityStats, type CityBundle } from './city.ts';
@@ -61,6 +62,7 @@ export function heroBean(h: HeroRow): HeroBean {
     baseStratagem: h.baseStratagem,
     cityId: h.cityId,
     seized: h.capturedByPlayerId != null,
+    gearStat: heroGearStat(h),
     locked: h.locked,
     buffs: (h.buffs ?? []).map((b) => ({ id: b.id, desc: b.desc, endTime: b.endTime, param: b.param })),
   };

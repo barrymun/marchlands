@@ -14,6 +14,7 @@ import {
   type BuildingState,
   type TroopCounts,
   TROOP_KEY_LIST,
+  lordGear,
 } from '@evony/core';
 import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@evony/db';
 import { viewOwnCity } from '../city.ts';
@@ -147,6 +148,7 @@ export async function playerState(ctx: Ctx, playerId: number) {
     items: itemsArray(player.items),
     buffs: buffsArray(player.buffs, ctx.now),
     research: player.research,
+    gear: lordGear(player),
     selfArmys: armiesView.self,
     friendArmys: armiesView.friend,
     enemyArmys: armiesView.enemy,

@@ -4,16 +4,7 @@
 import { z } from 'zod';
 import { BALANCE, scaled } from './balance.ts';
 import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEYS, TroopType } from './constants.ts';
-import {
-  buildingConfig,
-  buildingMaxLevel,
-  itemConfig,
-  ITEMS,
-  researchConfig,
-  researchMaxLevel,
-  troopConfig,
-  type Requirements,
-} from './data/index.ts';
+import { buildingConfig, buildingMaxLevel, itemConfig, ITEMS, researchConfig, researchMaxLevel, troopConfig, type Requirements } from './data/index.ts';
 import { buildingCount, buildingLevel, researchLevel, type MayorStats } from './economy.ts';
 import { GameError } from './errors.ts';
 import { scaleResources, type Resources } from './resources.ts';
@@ -80,12 +71,7 @@ function itemIdFromLegacy(legacyId: number): string | undefined {
   return ITEMS.find((i) => i.legacyId === legacyId)?.id;
 }
 
-export function checkRequirements(
-  req: Requirements,
-  buildings: BuildingState[],
-  research: ResearchState,
-  items: ItemCounts,
-): RequirementCheck[] {
+export function checkRequirements(req: Requirements, buildings: BuildingState[], research: ResearchState, items: ItemCounts): RequirementCheck[] {
   const out: RequirementCheck[] = [];
   for (const b of req.buildings) {
     const cur = buildingLevel(buildings, b.id);
@@ -109,14 +95,16 @@ export const requirementsMet = (checks: RequirementCheck[]) => checks.every((c) 
 // Timing (all return ms, already scaled by game speed)
 // ---------------------------------------------------------------------------------------------
 
-const heroFactor = (attr: number | undefined) => Math.pow(BALANCE.heroTimeFactor, attr ?? 0);
+/** Time multiplier from a mayor attribute: ×heroTimeFactor per point, never below `floor` (BALANCE.heroTimeFloor). */
+export const heroTimeMultiplier = (attr: number | undefined, floor: number | null = null) => Math.max(floor ?? 0, Math.pow(BALANCE.heroTimeFactor, attr ?? 0));
+const heroFactor = heroTimeMultiplier;
 const techFactor = (level: number) => Math.pow(BALANCE.techTimeFactor, level);
 
-/** Construction/upgrade time to reach `targetLevel`: mayor management + Construction (orig §3.1). */
+/** Construction/upgrade time to reach `targetLevel`: mayor management + Construction (orig §3.1); (evony-re) the mayor's cut is floored at BALANCE.heroTimeFloor.building. */
 export function buildTimeMs(typeId: number, targetLevel: number, mayor: MayorStats | null, research: ResearchState): number {
   const cfg = buildingConfig(typeId, targetLevel);
   if (!cfg) throw new GameError('Invalid building.', -99);
-  const seconds = cfg.buildTime * heroFactor(mayor?.management) * techFactor(researchLevel(research, TechType.CONSTRUCTION));
+  const seconds = cfg.buildTime * heroFactor(mayor?.management, BALANCE.heroTimeFloor.building) * techFactor(researchLevel(research, TechType.CONSTRUCTION));
   return scaled(Math.floor(seconds) * 1000);
 }
 
@@ -124,15 +112,16 @@ export function buildTimeMs(typeId: number, targetLevel: number, mayor: MayorSta
 export function demolishTimeMs(typeId: number, currentLevel: number, mayor: MayorStats | null, research: ResearchState): number {
   const cfg = buildingConfig(typeId, currentLevel);
   if (!cfg) throw new GameError('Invalid building.', -99);
-  const seconds = (cfg.buildTime / 2) * heroFactor(mayor?.management) * techFactor(researchLevel(research, TechType.CONSTRUCTION));
+  const seconds =
+    (cfg.buildTime / 2) * heroFactor(mayor?.management, BALANCE.heroTimeFloor.building) * techFactor(researchLevel(research, TechType.CONSTRUCTION));
   return scaled(Math.floor(seconds) * 1000);
 }
 
-/** Research time: mayor stratagem only (orig §3.3). */
+/** Research time: mayor stratagem only (orig §3.3); (evony-re) never below BALANCE.heroTimeFloor.research. */
 export function researchTimeMs(techId: number, targetLevel: number, mayor: MayorStats | null): number {
   const cfg = researchConfig(techId, targetLevel);
   if (!cfg) throw new GameError('Invalid technology.', -99);
-  return scaled(Math.floor(cfg.buildTime * heroFactor(mayor?.stratagem)) * 1000);
+  return scaled(Math.floor(cfg.buildTime * heroFactor(mayor?.stratagem, BALANCE.heroTimeFloor.research)) * 1000);
 }
 
 const SIEGE: readonly number[] = [TroopType.CATAPULT, TroopType.RAM, TroopType.TRANSPORTER, TroopType.BALLISTA];
@@ -201,13 +190,7 @@ export function assertCanConstruct({ typeId, positionId, buildings, research, it
   }
 }
 
-export function assertCanUpgrade(
-  b: BuildingState | undefined,
-  buildings: BuildingState[],
-  research: ResearchState,
-  items: ItemCounts,
-  maxConcurrent = 1,
-) {
+export function assertCanUpgrade(b: BuildingState | undefined, buildings: BuildingState[], research: ResearchState, items: ItemCounts, maxConcurrent = 1) {
   if (!b) throw new GameError('Building not found.', -99, 404);
   if (b.status !== 0) {
     throw new GameError(
@@ -265,11 +248,45 @@ export const isTroopType = (id: number) => id in TROOP_KEYS;
 
 const PRESTIGE_RESEARCH: Record<number, number> = { 1: 52, 2: 62, 3: 82, 4: 110, 5: 114, 7: 118, 8: 122, 9: 156 };
 const PRESTIGE_BUILDING: Record<number, number> = {
-  1: 4, 2: 28, 3: 21, 4: 7, 5: 9, 6: 11, 7: 5, 20: 36, 21: 26, 22: 26, 23: 32, 24: 26, 25: 30,
-  26: 38, 27: 35, 28: 18, 29: 25, 30: 39, 31: 112, 32: 128,
+  1: 4,
+  2: 28,
+  3: 21,
+  4: 7,
+  5: 9,
+  6: 11,
+  7: 5,
+  20: 36,
+  21: 26,
+  22: 26,
+  23: 32,
+  24: 26,
+  25: 30,
+  26: 38,
+  27: 35,
+  28: 18,
+  29: 25,
+  30: 39,
+  31: 112,
+  32: 128,
 };
 const PRESTIGE_TRAIN: Record<number, number> = {
-  2: 0.5, 3: 0.5, 4: 1, 5: 2, 6: 3, 7: 4, 8: 5, 9: 6, 10: 7, 11: 8, 12: 9, 13: 10, 14: 1, 15: 2, 16: 3, 17: 4, 18: 5,
+  2: 0.5,
+  3: 0.5,
+  4: 1,
+  5: 2,
+  6: 3,
+  7: 4,
+  8: 5,
+  9: 6,
+  10: 7,
+  11: 8,
+  12: 9,
+  13: 10,
+  14: 1,
+  15: 2,
+  16: 3,
+  17: 4,
+  18: 5,
 };
 
 export const PrestigeAction = { RESEARCH: 1, BUILDING: 2, TRAIN: 3 } as const;

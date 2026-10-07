@@ -233,6 +233,8 @@ export const heroes = pgTable(
     capturedByPlayerId: integer('captured_by_player_id'),
     /** (evony-re) a locked hero cannot be dismissed */
     locked: boolean('locked').notNull().default(false),
+    /** (evony-re) attribute the lord's gear boosts ('power' | 'management' | 'stratagem'); null: the hero's highest */
+    gearStat: text('gear_stat'),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [index('heroes_city_idx').on(t.cityId), index('heroes_player_idx').on(t.playerId)],

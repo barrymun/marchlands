@@ -11,13 +11,14 @@ import {
   researchMaxLevel,
   RESOURCE_KEYS,
   type ResourceSet,
+  TechType,
 } from '@evony/core';
 import { accounts, heroes } from '@evony/db';
 import { openOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { addItem, pushCity, pushPlayerInfo } from '../helpers.ts';
-import { findPlayerByName, getPlayer, saveCity, savePlayer } from '../repo.ts';
-import { heroValues, pushHero } from './heroes.ts';
+import { findPlayerByName, getPlayer, saveCity, saveHero, savePlayer } from '../repo.ts';
+import { heroValues, pushHero, resyncHeroGear } from './heroes.ts';
 import { sendSystemMail } from './mail.ts';
 
 async function target(ctx: Ctx, name: string) {
@@ -65,18 +66,26 @@ export async function setTechnology(ctx: Ctx, playerName: string, techId: number
   if (level < 0 || level > researchMaxLevel(techId)) throw new GameError('Invalid level.', -99);
   p.research = { ...p.research, [techId]: { level } };
   await savePlayer(ctx, p);
+  if (techId === TechType.HERO_ENHANCEMENT) await resyncHeroGear(ctx, p.id);
 }
 
 export async function addHero(ctx: Ctx, cityId: number, playerId: number, innLevel: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const g = createRandomHero(Math.max(1, Math.min(20, innLevel)), ctx.rng);
-  const [row] = await ctx.tx.insert(heroes).values({ ...heroValues(g), playerId, cityId: b.city.id, createdAt: ctx.now }).returning();
+  const [row] = await ctx.tx
+    .insert(heroes)
+    .values({ ...heroValues(g), playerId, cityId: b.city.id, createdAt: ctx.now })
+    .returning();
+  await saveHero(ctx, row); // applies the lord's gear
   pushHero(ctx, playerId, row, 0);
   return row.id;
 }
 
 export async function setBan(ctx: Ctx, accountId: number, banned: boolean, reason = '') {
-  await ctx.tx.update(accounts).set({ status: banned ? 1 : 0, banReason: reason }).where(eq(accounts.id, accountId));
+  await ctx.tx
+    .update(accounts)
+    .set({ status: banned ? 1 : 0, banReason: reason })
+    .where(eq(accounts.id, accountId));
 }
 
 export async function mute(ctx: Ctx, playerName: string, minutes: number) {
@@ -103,7 +112,12 @@ export async function setPlayerFlags(ctx: Ctx, playerName: string, flags: { begi
   await pushPlayerInfo(ctx, p);
 }
 
-export async function setCityStats(ctx: Ctx, cityId: number, playerId: number, stats: { population?: number; loyalty?: number; troops?: Record<string, number> }) {
+export async function setCityStats(
+  ctx: Ctx,
+  cityId: number,
+  playerId: number,
+  stats: { population?: number; loyalty?: number; troops?: Record<string, number> },
+) {
   const b = await openOwnCity(ctx, playerId, cityId);
   if (stats.population != null) b.city.population = Math.max(0, stats.population);
   if (stats.loyalty != null) b.city.loyalty = Math.max(0, Math.min(100, stats.loyalty));

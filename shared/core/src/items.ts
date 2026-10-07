@@ -304,25 +304,31 @@ type BuffedHero = {
   power: number;
   management: number;
   stratagem: number;
+  powerAdded: number;
+  managementAdded: number;
+  stratagemAdded: number;
   powerBuffAdded: number;
   managementBuffAdded: number;
   stratagemBuffAdded: number;
   buffs: { id: string; desc: string; endTime: number; param?: number }[];
 };
 
-/** Points an attribute boost adds: HERO_ATTRIBUTE_BUFF.bonus of the attribute's own points. */
+/** Points an attribute boost adds: HERO_ATTRIBUTE_BUFF.bonus of the attribute's points (gear included). */
 export const heroBuffAmount = (attributePoints: number) => Math.ceil(attributePoints * HERO_ATTRIBUTE_BUFF.bonus);
+
+/** The points an attribute boost works on: assigned points plus gear (evony-re: orig only the hero's own points). */
+export const heroBuffBase = (h: Omit<BuffedHero, 'buffs'>, attr: 'power' | 'management' | 'stratagem') => h[attr] + h[`${attr}Added`];
 
 /**
  * Keep active attribute boosts in step with the hero's current attributes (they grow as the hero
- * levels up and points are assigned). Mutates the hero; returns true when anything changed.
+ * levels up, points are assigned and gear grows). Mutates the hero; returns true when anything changed.
  */
 export function syncHeroBuffs(h: BuffedHero): boolean {
   let changed = false;
   h.buffs = h.buffs.map((b) => {
     const attr = b.id as 'power' | 'management' | 'stratagem';
     if (attr !== 'power' && attr !== 'management' && attr !== 'stratagem') return b;
-    const amount = heroBuffAmount(h[attr]);
+    const amount = heroBuffAmount(heroBuffBase(h, attr));
     if (h[`${attr}BuffAdded`] !== amount) {
       h[`${attr}BuffAdded`] = amount;
       changed = true;

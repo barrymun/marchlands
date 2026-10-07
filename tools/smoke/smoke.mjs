@@ -60,7 +60,10 @@ async function main() {
 
   const a = await newLord('alpha');
   const b = await newLord('bravo');
-  check(a.city.buildings.some((x) => x.typeId === 31 && x.level === 1), 'new city has Town Hall 1');
+  check(
+    a.city.buildings.some((x) => x.typeId === 31 && x.level === 1),
+    'new city has Town Hall 1',
+  );
   check(a.city.resource.gold === 100000, 'starting gold 100k');
   const sock = socket(a.token);
   await until(() => sock.has('server.Connected'), 'websocket connected');
@@ -91,7 +94,19 @@ async function main() {
   if (!gm?.isAdmin) throw new Error(`${adminUser} is not an operator: add it to ADMIN_USERNAMES`);
   {
     const pid = a.state.playerInfo.id;
-    for (const [pos, type, lvl] of [[-1, 31, 5], [1, 29, 5], [2, 2, 10], [3, 25, 5], [4, 21, 5], [5, 27, 5], [6, 28, 1], [-2, 32, 3], [7, 23, 3], [8, 30, 2], [9, 22, 3]]) {
+    for (const [pos, type, lvl] of [
+      [-1, 31, 5],
+      [1, 29, 5],
+      [2, 2, 10],
+      [3, 25, 5],
+      [4, 21, 5],
+      [5, 27, 5],
+      [6, 28, 1],
+      [-2, 32, 3],
+      [7, 23, 3],
+      [8, 30, 2],
+      [9, 22, 3],
+    ]) {
       await ok(gm.token, 'PUT', `/admin/cities/${cid}/buildings`, { playerId: pid, positionId: pos, typeId: type, level: lvl });
     }
     await ok(gm.token, 'PUT', `/admin/cities/${cid}/resources`, { playerId: pid, gold: 5e6, food: 5e6, wood: 5e6, stone: 5e6, iron: 5e6 });
@@ -127,6 +142,26 @@ async function main() {
   await ok(a.token, 'POST', `/heroes/${hero.id}/mayor`);
   const h2 = await ok(a.token, 'POST', `/cities/${cid}/tavern/${tav.heros[1].id}/hire`);
   check(!!h2.id, 'hired two heroes, one mayor');
+
+  // ---- hero gear (Hero Enhancement research + medal stars, for every hero) ----
+  {
+    const playerName = a.state.playerInfo.userName;
+    await ok(gm.token, 'PUT', '/admin/research', { playerName, techId: 21, level: 3 });
+    check((await ok(a.token, 'GET', '/gear')).level === 3, 'Hero Enhancement 3 = gear level 3');
+    const g1 = (await ok(a.token, 'GET', `/cities/${cid}`)).heros.find((x) => x.id === h2.id);
+    // gear tier: hero level ÷ 10 (none below 10, 10 at 100); each piece at level L adds 1 + … + L
+    const tier = Math.min(10, Math.floor(g1.level / 10));
+    const L = Math.min(3, tier);
+    const pts = (14 * L * (L + 1)) / 2;
+    check(g1[`${g1.gearStat}Added`] === pts, `level ${g1.level} hero (tier ${tier}) gets +${pts} on ${g1.gearStat}`);
+    const sw = await ok(a.token, 'PUT', `/heroes/${h2.id}/gear-stat`, { stat: 'stratagem' });
+    check(sw.gearStat === 'stratagem' && sw.stratagemAdded === pts && sw.powerAdded === 0 && sw.managementAdded === 0, 'gear moved to intelligence');
+    check((await call(a.token, 'POST', '/gear/weapon/star')).ok !== 1, 'star needs a medal');
+    await ok(gm.token, 'POST', '/admin/items', { playerName, items: { 'hero.loyalty.1': 1 } });
+    check((await ok(a.token, 'POST', '/gear/weapon/star')).stars.weapon === 1, 'weapon star 1 for a Cross Medal');
+    const g2 = (await ok(a.token, 'GET', `/cities/${cid}`)).heros.find((x) => x.id === h2.id);
+    check(g2.stratagemAdded === pts + (tier >= 1 ? 3 : 0), 'star adds +3 to every hero with gear');
+  }
 
   // ---- troops ----
   await ok(a.token, 'POST', `/cities/${cid}/troops/train`, { troopId: 3, count: 40, positionId: 2 });
@@ -190,7 +225,10 @@ async function main() {
   await ok(a.token, 'POST', '/shop/buy', { itemId: 'player.resinc.1', amount: 1 });
   await ok(a.token, 'POST', '/player/items/player.resinc.1/use', {});
   const ps = await ok(a.token, 'GET', '/player');
-  check(ps.buffs.some((x) => x.id === 'FoodProductionBuff'), 'production buff active');
+  check(
+    ps.buffs.some((x) => x.id === 'FoodProductionBuff'),
+    'production buff active',
+  );
 
   // ---- market ----
   await ok(a.token, 'POST', `/cities/${cid}/market/orders`, { resType: 0, side: 1, amount: 1000, price: 0.5 });

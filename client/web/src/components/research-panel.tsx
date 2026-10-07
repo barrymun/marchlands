@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { CityBean } from '@evony/api-client';
-import { buildingLevel, BuildingType, heroStratagem, HeroStatus, researchHeroExp } from '@evony/core';
+import { BALANCE, buildingLevel, BuildingType, heroStratagem, HeroStatus, heroTimeMultiplier, researchHeroExp } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,7 +34,7 @@ export function ResearchPanel({ city }: { city: CityBean }) {
   }
   const mayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
   const townHall = buildingLevel(city.buildings, BuildingType.TOWN_HALL);
-  const mayorCut = mayor ? Math.round((1 - Math.pow(0.995, heroStratagem(mayor))) * 1000) / 10 : 0;
+  const mayorCut = mayor ? Math.round((1 - heroTimeMultiplier(heroStratagem(mayor), BALANCE.heroTimeFloor.research)) * 1000) / 10 : 0;
   const have = {
     gold: city.resource.gold,
     food: city.resource.food.amount,

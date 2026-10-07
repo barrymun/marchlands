@@ -5,6 +5,7 @@
 import { BALANCE } from './balance.ts';
 import { BUILDING_NAMES, TECH_NAMES, TechType, TROOP_NAMES } from './constants.ts';
 import { BUILDINGS, RESEARCH, TROOPS } from './data/index.ts';
+import { GEAR_PIECES, gearLevelPoints } from './gear.ts';
 
 const pct = (x: number) => `${Math.round(x * 1000) / 10}%`;
 const timeCut = (level: number) => pct(1 - Math.pow(BALANCE.techTimeFactor, level));
@@ -16,7 +17,12 @@ interface TechText {
   effect?: (level: number) => string;
 }
 
-const RES_TECH: Record<number, string> = { [TechType.AGRICULTURE]: 'food', [TechType.LUMBERING]: 'lumber', [TechType.MASONRY]: 'stone', [TechType.MINING]: 'iron' };
+const RES_TECH: Record<number, string> = {
+  [TechType.AGRICULTURE]: 'food',
+  [TechType.LUMBERING]: 'lumber',
+  [TechType.MASONRY]: 'stone',
+  [TechType.MINING]: 'iron',
+};
 
 const TEXT: Record<number, TechText> = {
   ...Object.fromEntries(
@@ -43,6 +49,10 @@ const TEXT: Record<number, TechText> = {
   [TechType.METAL_CASTING]: {
     summary: `Training time of siege units (ballistas, battering rams, catapults) ×${BALANCE.techTimeFactor} per level.`,
     effect: (l) => `−${timeCut(l)} siege training time`,
+  },
+  [TechType.HERO_ENHANCEMENT]: {
+    summary: `Raises all ${GEAR_PIECES.length} pieces of every hero's gear one level: a piece at level L adds 1 + 2 + … + L points to the hero's gear attribute. Heroes use gear levels up to their gear tier (none at hero levels 1-9, 1 at 10-19, … 9 at 90-99, 10 at level ${BALANCE.heroMaxLevel}).`,
+    effect: (l) => `gear level ${l}: up to +${GEAR_PIECES.length * gearLevelPoints(l)} hero attribute`,
   },
   [TechType.MILITARY_TRADITION]: {
     summary: 'Troop attack +5% per level in battle.',
@@ -100,7 +110,8 @@ function unlocksOf(techId: number): TechInfo['unlocks'] {
   };
   for (const b of BUILDINGS) for (const t of b.requires.techs) if (t.id === techId && b.level === 1) add('building', BUILDING_NAMES[b.typeId], t.level);
   for (const tr of TROOPS) for (const t of tr.requires.techs) if (t.id === techId) add('troop', TROOP_NAMES[tr.troopId], t.level);
-  for (const r of RESEARCH) for (const t of r.requires.techs) if (t.id === techId && r.techId !== techId && r.level === 1) add('tech', TECH_NAMES[r.techId], t.level);
+  for (const r of RESEARCH)
+    for (const t of r.requires.techs) if (t.id === techId && r.techId !== techId && r.level === 1) add('tech', TECH_NAMES[r.techId], t.level);
   return [...out.values()].sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
 }
 

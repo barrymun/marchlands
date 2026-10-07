@@ -18,6 +18,16 @@ import {
   HeroStatus,
   LOYALTY_MEDALS,
   levelUpAll,
+  heroAtMaxLevel,
+  heroBuffBase,
+  BALANCE,
+  GEAR_STATS,
+  gearStarCost,
+  gearStarLimit,
+  isGearPiece,
+  lordGear,
+  syncHeroGear,
+  type GearStat,
   type GeneratedHero,
 } from '@evony/core';
 import { heroes } from '@evony/db';
@@ -25,7 +35,7 @@ import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';
 import { addItem, assertClean, cleanName, itemCount, pushResources, spendCents, spendResources } from '../helpers.ts';
-import { findCity, getHero, getPlayer, heroesOfCity, saveCity, saveHero, savePlayer, type HeroRow } from '../repo.ts';
+import { findCity, gearOfHero, getHero, getPlayer, heroesOfCity, saveCity, saveHero, savePlayer, type HeroRow } from '../repo.ts';
 
 export const pushHero = (ctx: Ctx, playerId: number, h: HeroRow, updateType: 0 | 1 | 2) =>
   ctx.push(playerId, 'server.HeroUpdate', { castleId: h.cityId, hero: heroBean(h), updateType });
@@ -249,13 +259,71 @@ export async function assignPoints(ctx: Ctx, playerId: number, heroId: number, v
   return heroBean(h);
 }
 
-/** hero.levelUp; (evony-re) takes every level the experience pays for in one go. */
+/** hero.levelUp; (evony-re) takes every level the experience pays for in one go, up to BALANCE.heroMaxLevel. */
 export async function levelUp(ctx: Ctx, playerId: number, heroId: number) {
   const h = await ownHero(ctx, playerId, heroId);
+  if (heroAtMaxLevel(h)) throw new GameError(`This hero is already at the maximum level (${BALANCE.heroMaxLevel}).`, -99);
+  // a higher level can unlock more gear (gear tier), which may change a mayor's politics
+  const city = await openMayorCity(ctx, h);
   if (levelUpAll(h) === 0) throw new GameError('Not enough experience.', -99);
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
+  await closeMayorCity(ctx, city, h);
   return heroBean(h);
+}
+
+/** (evony-re) Choose the attribute the lord's gear boosts on this hero; free, any time. */
+export async function setHeroGearStat(ctx: Ctx, playerId: number, heroId: number, stat: GearStat) {
+  if (!GEAR_STATS.includes(stat)) throw new GameError('Invalid attribute.', -99);
+  const h = await ownHero(ctx, playerId, heroId);
+  const city = await openMayorCity(ctx, h);
+  h.gearStat = stat;
+  await saveHero(ctx, h);
+  pushHero(ctx, playerId, h, 2);
+  await closeMayorCity(ctx, city, h);
+  return heroBean(h);
+}
+
+/**
+ * Re-apply the lord's gear to every hero they own (after Hero Enhancement research or a new star).
+ * Mayors' cities are settled at the old rates first, as with any change to a mayor's attributes.
+ */
+export async function resyncHeroGear(ctx: Ctx, playerId: number) {
+  const owned = await ctx.tx
+    .select()
+    .from(heroes)
+    .where(and(eq(heroes.playerId, playerId), eq(heroes.inTavern, false)))
+    .for('update');
+  for (const h of owned) {
+    const probe = { ...h };
+    if (!syncHeroGear(probe, await gearOfHero(ctx, h))) continue;
+    const city = await openMayorCity(ctx, h);
+    await saveHero(ctx, h);
+    pushHero(ctx, playerId, h, 2);
+    await closeMayorCity(ctx, city, h);
+  }
+}
+
+/** (evony-re) The lord's gear: Hero Enhancement level and stars per piece. */
+export async function gearState(ctx: Ctx, playerId: number) {
+  return lordGear(await getPlayer(ctx, playerId));
+}
+
+/** (evony-re) Add a star to one gear piece for every hero, paid in medals (gearStarCost). */
+export async function buyGearStar(ctx: Ctx, playerId: number, pieceId: string) {
+  if (!isGearPiece(pieceId)) throw new GameError('Invalid gear piece.', -99);
+  const p = await getPlayer(ctx, playerId, { lock: true });
+  const stars = p.misc.gearStars?.[pieceId] ?? 0;
+  if (stars >= BALANCE.heroGear.maxStars) throw new GameError('This piece already has every star.', -99);
+  const limit = gearStarLimit(lordGear(p));
+  if (stars >= limit) throw new GameError(`Stars cannot go beyond your Hero Enhancement level (${limit}): research level ${stars + 1} first.`, -99);
+  const cost = gearStarCost(stars + 1);
+  if (itemCount(p, cost.itemId) < cost.count) throw new GameError(`Not enough medals: ${cost.count} needed.`, -99);
+  addItem(ctx, p, cost.itemId, -cost.count);
+  p.misc = { ...p.misc, gearStars: { ...p.misc.gearStars, [pieceId]: stars + 1 } };
+  await savePlayer(ctx, p);
+  await resyncHeroGear(ctx, playerId);
+  return lordGear(p);
 }
 
 /** hero.awardGold: +5 loyalty for level x 100 gold. */
@@ -289,6 +357,7 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     paidInGold = true;
   }
   if (itemId.startsWith('player.experience.1.')) {
+    if (heroAtMaxLevel(h)) throw new GameError(`This hero is at the maximum level (${BALANCE.heroMaxLevel}) and gains no more experience.`, -99);
     const gain = experienceItemGain(itemId, h.upgradeExp);
     if (!gain) throw new GameError('Invalid Item.', -99);
     if (!paidInGold) {
@@ -306,7 +375,7 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
       if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
       else spendCents(ctx, p, 40);
     }
-    const amount = heroBuffAmount(h[attr]);
+    const amount = heroBuffAmount(heroBuffBase(h, attr));
     const endTime = ctx.now + HERO_ATTRIBUTE_BUFF.durationMs;
     h.buffs = [...h.buffs.filter((x) => x.id !== attr), { id: attr, desc: `${attr} +25%`, endTime, param: amount }];
     if (attr === 'power') h.powerBuffAdded = amount;

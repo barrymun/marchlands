@@ -1,5 +1,16 @@
 import type { HeroBean } from '@evony/api-client';
-import { experienceItemGain, HERO_ATTRIBUTE_BUFF, HERO_ATTRIBUTE_ITEMS, heroItemGoldPrice, itemConfig, LOYALTY_MEDALS } from '@evony/core';
+import {
+  BALANCE,
+  experienceItemGain,
+  HERO_ATTRIBUTE_BUFF,
+  HERO_ATTRIBUTE_ITEMS,
+  heroAtMaxLevel,
+  heroBuffAmount,
+  heroBuffBase,
+  heroItemGoldPrice,
+  itemConfig,
+  LOYALTY_MEDALS,
+} from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -95,15 +106,19 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
           Items for {hero.name} <span className="font-normal text-muted-foreground">Lv {hero.level}</span>
         </DialogTitle>
         <DialogDescription>
-          Experience {fmtExact(hero.experience)} / {fmtExact(hero.upgradeExp)} · loyalty {hero.loyalty} · {fmtExact(gold)} gold in this city ·{' '}
-          {fmtExact(inv.cents)} cents
+          {heroAtMaxLevel(hero) ? 'Max level' : `Experience ${fmtExact(hero.experience)} / ${fmtExact(hero.upgradeExp)}`} · loyalty {hero.loyalty} ·{' '}
+          {fmtExact(gold)} gold in this city · {fmtExact(inv.cents)} cents
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
         <section className="grid gap-1.5">
           <h3 className="text-sm font-medium">Experience</h3>
           {['player.experience.1.a', 'player.experience.1.b', 'player.experience.1.c'].map((id) =>
-            row(id, `+${fmtExact(experienceItemGain(id, hero.upgradeExp))} experience`),
+            row(
+              id,
+              `+${fmtExact(experienceItemGain(id, hero.upgradeExp))} experience`,
+              heroAtMaxLevel(hero) ? `Level ${BALANCE.heroMaxLevel} is the maximum: no more experience` : undefined,
+            ),
           )}
         </section>
         <section className="grid gap-1.5">
@@ -111,7 +126,7 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
           {Object.entries(HERO_ATTRIBUTE_ITEMS).map(([id, attr]) =>
             row(
               id,
-              `${ATTR_LABEL[attr]} +${HERO_ATTRIBUTE_BUFF.bonus * 100}% (+${Math.ceil(hero[attr] * HERO_ATTRIBUTE_BUFF.bonus)}) for 24 hours`,
+              `${ATTR_LABEL[attr]} +${HERO_ATTRIBUTE_BUFF.bonus * 100}% (+${heroBuffAmount(heroBuffBase(hero, attr))}, gear included) for 24 hours`,
               buffed(attr)
                 ? `${ATTR_LABEL[attr]} boost active, ${duration(Math.max(0, (hero.buffs.find((b) => b.id === attr)?.endTime ?? 0) - Date.now()))} left (using again restarts it)`
                 : undefined,
