@@ -113,9 +113,9 @@ export function ItemsPanel({ city }: { city: CityBean }) {
           </CardContent>
         </Card>
       )}
-      <div className="flex flex-wrap items-center gap-3">
-        <Tabs value={category} onValueChange={setCategory}>
-          <TabsList className="flex-wrap">
+      <div className="flex min-w-0 flex-wrap items-center gap-3">
+        <Tabs value={category} onValueChange={setCategory} className="max-w-full min-w-0">
+          <TabsList className="max-w-full justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {[ALL, ...Object.values(ITEM_CATEGORIES)].map((c) => (
               <TabsTrigger key={c} value={c}>
                 {c}
@@ -123,7 +123,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
             ))}
           </TabsList>
         </Tabs>
-        <Input className="h-8 w-48" placeholder="Search items" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <Input className="h-8 min-w-0 flex-1 sm:w-48 sm:flex-none" placeholder="Search items" value={query} onChange={(e) => setQuery(e.target.value)} />
         <div className="flex items-center gap-2">
           <Switch id="owned-only" checked={ownedOnly} onCheckedChange={setOwnedOnly} />
           <Label htmlFor="owned-only" className="text-sm font-normal">

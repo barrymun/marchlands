@@ -84,7 +84,7 @@ export function MarketPanel({ city }: { city: CityBean }) {
           ))}
         </TabsList>
       </Tabs>
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid gap-4 lg:grid-cols-2">
         <OrderBook
           resType={resType}
           buyers={book.data?.buyers ?? []}
@@ -106,8 +106,8 @@ export function MarketPanel({ city }: { city: CityBean }) {
           price={price}
           setPrice={setPrice}
         />
+        <PriceHistory resType={resType} />
       </div>
-      <PriceHistory resType={resType} />
       <MyOrders />
       <Shipments />
     </div>
@@ -392,7 +392,7 @@ function PriceHistory({ resType }: { resType: number }) {
   const h = history.data;
   const data = (h?.candles ?? []).map((c) => ({ ...c, label: new Date(c.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }));
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <>
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Price · {resLabel(resType)}</CardTitle>
@@ -402,7 +402,7 @@ function PriceHistory({ resType }: { resType: number }) {
           {data.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">No trades yet.</p>
           ) : (
-            <ChartContainer config={chartConfig} className="aspect-auto h-48 w-full">
+            <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
               <LineChart data={data} margin={{ left: 0, right: 8, top: 8, bottom: 0 }}>
                 <CartesianGrid vertical={false} />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} minTickGap={24} />
@@ -439,7 +439,7 @@ function PriceHistory({ resType }: { resType: number }) {
           )}
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 }
 
