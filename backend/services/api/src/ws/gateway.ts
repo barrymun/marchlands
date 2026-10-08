@@ -1,9 +1,10 @@
 // WebSocket push gateway. Game transactions write to `push_messages` and NOTIFY the id on
-// commit; this gateway LISTENs, loads the row and fans it out to the recipients' sockets.
+// commit; this gateway LISTENs, loads the rows and fans them out to the recipients' sockets, in id
+// order (one transaction's pushes arrive as written, e.g. a mayor swapped in and back out).
 // Any number of API replicas can run: each delivers to the sockets it holds.
 
 import pg from 'pg';
-import { eq } from 'drizzle-orm';
+import { asc, eq, inArray } from 'drizzle-orm';
 import type { PushMessage } from '@evony/contracts';
 import { players, pushMessages, type Db } from '@evony/db';
 import { PUSH_CHANNEL } from '@evony/game';
@@ -37,6 +38,9 @@ export class PushGateway {
   private readonly url: string;
   private readonly db: Db;
   private log: GatewayLogger;
+  /** notified push ids not delivered yet; drained one batch at a time so pushes go out in order */
+  private pending: number[] = [];
+  private draining = false;
 
   constructor(url: string, db: Db, log: GatewayLogger = consoleLogger) {
     this.url = url;
@@ -60,7 +64,7 @@ export class PushGateway {
       void this.reconnect();
     });
     client.on('notification', (n) => {
-      if (n.channel === PUSH_CHANNEL && n.payload) void this.deliver(Number(n.payload));
+      if (n.channel === PUSH_CHANNEL && n.payload) this.enqueue(Number(n.payload));
     });
     await client.connect();
     await client.query(`LISTEN ${PUSH_CHANNEL}`);
@@ -86,21 +90,47 @@ export class PushGateway {
     for (const set of this.sockets.values()) for (const s of set) s.close(1001, 'server shutting down');
   }
 
-  private async deliver(id: number) {
-    if (this.sockets.size === 0) return;
-    const [row] = await this.db.select().from(pushMessages).where(eq(pushMessages.id, id));
-    if (!row) return;
-    // rows are only written by ctx.push / ctx.broadcast, which are typed against PushSchemas
-    const frame = JSON.stringify({ cmd: row.cmd, data: row.data } as PushMessage);
-    const targets = row.playerIds.length ? row.playerIds : [...this.sockets.keys()];
-    for (const pid of targets) for (const s of this.sockets.get(pid) ?? []) if (s.readyState === 1) s.send(frame);
+  private enqueue(id: number) {
+    this.pending.push(id);
+    if (!this.draining) void this.drain();
+  }
+
+  /**
+   * Deliver notified pushes strictly in id order: loading each row on its own let later pushes overtake
+   * earlier ones (a client could end on a stale state, e.g. the wrong mayor).
+   */
+  private async drain() {
+    this.draining = true;
+    try {
+      while (this.pending.length) {
+        const ids = this.pending.splice(0);
+        if (this.sockets.size === 0) continue;
+        try {
+          const rows = await this.db.select().from(pushMessages).where(inArray(pushMessages.id, ids)).orderBy(asc(pushMessages.id));
+          for (const row of rows) {
+            // rows are only written by ctx.push / ctx.broadcast, which are typed against PushSchemas
+            const frame = JSON.stringify({ cmd: row.cmd, data: row.data } as PushMessage);
+            const targets = row.playerIds.length ? row.playerIds : [...this.sockets.keys()];
+            for (const pid of targets) for (const s of this.sockets.get(pid) ?? []) if (s.readyState === 1) s.send(frame);
+          }
+        } catch (err) {
+          this.log.error({ err }, 'push delivery failed');
+        }
+      }
+    } finally {
+      this.draining = false;
+    }
   }
 
   add(playerId: number, socket: Socketish) {
     let set = this.sockets.get(playerId);
     if (!set) this.sockets.set(playerId, (set = new Set()));
     set.add(socket);
-    void this.db.update(players).set({ lastSeenAt: Date.now() }).where(eq(players.id, playerId)).catch(() => {});
+    void this.db
+      .update(players)
+      .set({ lastSeenAt: Date.now() })
+      .where(eq(players.id, playerId))
+      .catch(() => {});
   }
 
   remove(playerId: number, socket: Socketish) {
@@ -108,7 +138,11 @@ export class PushGateway {
     if (!set) return;
     set.delete(socket);
     if (!set.size) this.sockets.delete(playerId);
-    void this.db.update(players).set({ lastSeenAt: Date.now() }).where(eq(players.id, playerId)).catch(() => {});
+    void this.db
+      .update(players)
+      .set({ lastSeenAt: Date.now() })
+      .where(eq(players.id, playerId))
+      .catch(() => {});
   }
 
   /** Lords with at least one open socket on this replica. */
