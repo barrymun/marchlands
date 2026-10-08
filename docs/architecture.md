@@ -53,7 +53,7 @@
 
 ## The game clock
 
-- **Rows.** `timed_events(type, due_at, ref_key, payload)` holds one row per pending completion. The types are `building`, `research`, `train`, `army`, `buff.expire`, `hero.buff` and `shipment`. `ref_key` is unique, so speed-ups and recalls simply move the same event.
+- **Rows.** `timed_events(type, due_at, ref_key, payload)` holds one row per pending completion. The types are `building`, `research`, `train`, `army`, `buff.expire`, `hero.buff`, `shipment`, and for flows `flow.resume`, `flow.queue` and `flow.heal` (see [Flows](#flows)). `ref_key` is unique, so speed-ups and recalls simply move the same event.
 - **Claiming.** The worker loop selects one due row with `FOR UPDATE SKIP LOCKED`, deletes it and dispatches it, all in the same transaction. If the handler fails, the transaction rolls back and the worker records the error and retries with backoff, giving up after 5 attempts.
 - **Idempotent handlers.** Each handler re-reads the state and does nothing if the event is stale. For example, a building that was cancelled or already completed by a coin speed-up is skipped. When a delayed event is found early, the handler reschedules it.
 - **Game speed.** `GAME_SPEED` divides every duration through `scaled()`. Production and population ticks also scale, so a whole game can be compressed for testing.
@@ -84,9 +84,22 @@ Whenever something changes a city's rates, the city is settled first. Examples a
 | `player_relations` | friends and blocks |
 | `market_orders`, `market_shipments` | order book with escrow; goods and gold in transit |
 | `quest_progress`, `world_state` | claimed quests; world metadata and cached zone stats |
+| `flows` | (evony-re) a lord's saved flows: actions, cities and the `repeat` switch, plus the current run's state (`status`, `next_action`, `army_ids`, `wait_until`, `held_since`, `last_run`) |
 
 ## Consistency rules
 
 - Lock order is: players (ascending id), then cities (ascending), then tiles, then heroes, armies and orders. Use `lockPlayers()` when more than one lord is involved. Combat locks the attacker and the defender before touching any city.
 - A market trade never locks the counterparty's city. Gold and goods move as `market_shipments` rows, and the worker delivers them.
 - Retryable Postgres errors (40001 serialization failure, 40P01 deadlock) are retried by `runGame()`.
+- `savepoint(ctx, fn)` runs `fn` in a savepoint of the current transaction: if it throws, its writes and the pushes and events it queued are discarded and the outer transaction carries on. Flows use it to roll back one city at a time.
+
+## Flows
+
+(evony-re; `backend/packages/game/src/services/flows.ts`, rules in [deviations.md](deviations.md).) A flow is a list of actions run on some or all of a lord's cities.
+
+- **Parts.** Wait actions split a run into parts. A part runs the actions between two waits in every city of the run, in one transaction with a savepoint per city. A city whose action fails is rolled back to the start of the part; the other cities finish it, then the flow stops (`repeat` goes off). Nothing outside the transaction ever sees a part half done (e.g. an Attack mayor swapped in to train and swapped back).
+- **Serialising.** Every flow operation (run, repeat, stop, save, and the worker's flow events) first locks all of the lord's `flows` rows with `SELECT … FOR UPDATE` in `created_at` order. So a lord's flows act one at a time, a part at a time; other flows run during a flow's waits.
+- **Waits.** A wait sets `status = 'waiting'` and `wait_until`, and schedules `flow.resume` (`ref_key flow:<id>`). A time wait ends after its real minutes. An armies-home wait ends when every army in the run's `army_ids` has stopped moving; until then the resume reschedules itself at the expected return, then every 5 s.
+- **Heroes home.** Before each part, a flow checks the run's cities for armies with a hero that are marching out or coming back (`armies.hero_id is not null and direction in (forward, backward)`). If there are any, the flow is held: `held_since` is set and `flow.resume` is scheduled for the expected return. A flow that is not held also holds while another flow has an earlier `held_since`. A resume of any held flow carries on the held flows oldest first and stops at the first one still blocked, so a repeating farming flow cannot starve the others.
+- **Repeat and queue.** At the end of a run, a repeating flow becomes `queued` with `not_before` set to 1 minute after its run started. `flow.queue` (`ref_key flowqueue:<playerId>`) carries on held flows and then starts every queued flow whose `not_before` has passed.
+- **Updates.** Every change to a flow's row pushes `server.FlowUpdate`. A run that stops on its own also sends a `server.SystemInfoMsg` with the reason.

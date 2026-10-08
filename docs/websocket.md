@@ -20,6 +20,7 @@ The authoritative types are `PushMessage` (a union discriminated on `cmd`), `Pus
 | `server.TroopQueueUpdate` / `server.FortificationsQueueUpdate` | `{ castleId, positionId, allProduceQueue }` | production queue changed |
 | `server.ResearchUpdate` | `{ castleId, typeId, endTime }` | research sped up |
 | `server.ResearchCompleteUpdate` | `{ castleId, typeId, level }` | research finished |
+| `server.FlowUpdate` | `{ flowId, status }` | (evony-re) a flow started, waited, was held, finished or stopped; refetch `GET /player/flows` |
 | `server.HeroUpdate` | `{ castleId, hero, updateType }` | 0 = hero added, 1 = removed, 2 = changed |
 | `server.PlayerInfoUpdate` | `{ playerInfo }` | prestige, title, alliance or profile changed |
 | `server.CentsUpdate` | `{ cents }` | premium currency changed |
