@@ -92,7 +92,6 @@ const EFFECTS: Record<string, ItemEffect> = {
   'player.defendinc.1.b': buff('DefenseBuff', 'Troop defense +20%', 7 * DAY),
   'player.troop.1.a': buff('WarEnsignBuff', 'Armies may hold 25% more troops', DAY),
   'player.queue.building': buff('BuildingQueueBuff', 'One extra construction queue', 7 * DAY),
-  'consume.transaction.1': buff('MerchantFleetBuff', 'Marketplace shipments twice as fast', DAY),
 
   // ---- upkeep ----
   'player.reduce.troops.upkeep.1': buff('UpkeepReduceBuff', 'Troop upkeep -50%', DAY),
@@ -251,7 +250,7 @@ function gambleCount(id: string, rng: Rng): number {
   const p = randInt(rng, 0, 4) === 1;
   const q = randInt(rng, 0, 1) === 1;
   if (['consume.1.a', 'consume.2.a', 'consume.2.b', 'consume.2.b.1', 'consume.blueprint.1'].includes(id)) return p ? 5 : 1;
-  if (['consume.refreshtavern.1', 'consume.transaction.1'].includes(id)) return p ? 10 : 5;
+  if (id === 'consume.refreshtavern.1') return p ? 10 : 5;
   if (/^hero\.loyalty\.[1-6]$/.test(id)) return p ? 5 : 1;
   if (id === 'hero.loyalty.7') return p ? 4 : 1;
   if (id === 'hero.loyalty.8') return p ? 3 : 1;

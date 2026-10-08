@@ -27,7 +27,7 @@ import {
 import { marketOrders, marketShipments, marketTrades, pgArray, worldState } from '@evony/db';
 import { openCity, openOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
-import { activeBuff, gainResources, pushResources, spendCents } from '../helpers.ts';
+import { gainResources, pushResources, spendCents } from '../helpers.ts';
 import { citiesOf, getPlayer, saveCity, savePlayer } from '../repo.ts';
 import { createReport, ReportType } from './reports.ts';
 
@@ -255,7 +255,12 @@ export async function history(ctx: Ctx, resType: number, buckets = 24) {
       c.volume += t.amount;
     } else candles.push({ t: start, open: t.price, high: t.price, low: t.price, close: t.price, volume: t.amount });
   }
-  const recent = await ctx.tx.select().from(marketTrades).where(eq(marketTrades.resType, resType)).orderBy(desc(marketTrades.createdAt), desc(marketTrades.id)).limit(30);
+  const recent = await ctx.tx
+    .select()
+    .from(marketTrades)
+    .where(eq(marketTrades.resType, resType))
+    .orderBy(desc(marketTrades.createdAt), desc(marketTrades.id))
+    .limit(30);
   return {
     resType,
     bucketMs,
@@ -282,19 +287,36 @@ export async function myOrders(ctx: Ctx, playerId: number) {
 /** trade.getTransingTradeList */
 export async function myShipments(ctx: Ctx, playerId: number) {
   const rows = await ctx.tx.select().from(marketShipments).where(eq(marketShipments.playerId, playerId)).orderBy(asc(marketShipments.endTime));
-  return rows.map((s) => ({ id: s.id, cityId: s.cityId, resType: s.resType, resourceName: resKey(s.resType), amount: s.amount, price: s.price, startTime: s.startTime, endTime: s.endTime }));
+  return rows.map((s) => ({
+    id: s.id,
+    cityId: s.cityId,
+    resType: s.resType,
+    resourceName: resKey(s.resType),
+    amount: s.amount,
+    price: s.price,
+    startTime: s.startTime,
+    endTime: s.endTime,
+  }));
 }
 
-function shipmentMs(ctx: Ctx, marketLevel: number, fleet: boolean) {
+function shipmentMs(marketLevel: number) {
   if (BALANCE.marketShipmentBaseMs <= 0) return 0;
-  const base = BALANCE.marketShipmentBaseMs / Math.max(1, marketLevel);
-  return scaled(Math.floor(fleet ? base / 2 : base));
+  return scaled(Math.floor(BALANCE.marketShipmentBaseMs / Math.max(1, marketLevel)));
 }
 
 async function ship(ctx: Ctx, s: { playerId: number; cityId: number; orderId: number; resType: number; amount: number; price: number; ms: number }) {
   const [row] = await ctx.tx
     .insert(marketShipments)
-    .values({ playerId: s.playerId, cityId: s.cityId, orderId: s.orderId, resType: s.resType, amount: s.amount, price: s.price, startTime: ctx.now, endTime: ctx.now + s.ms })
+    .values({
+      playerId: s.playerId,
+      cityId: s.cityId,
+      orderId: s.orderId,
+      resType: s.resType,
+      amount: s.amount,
+      price: s.price,
+      startTime: ctx.now,
+      endTime: ctx.now + s.ms,
+    })
     .returning();
   ctx.schedule({ type: 'shipment', dueAt: row.endTime, playerId: s.playerId, cityId: s.cityId, refKey: `shipment:${row.id}`, payload: { shipmentId: row.id } });
   return row;
@@ -338,7 +360,6 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
   }
 
   // counterparties: resting orders are updated and their owners paid by zero-time shipments
-  const fleet = !!activeBuff(b.player, 'MerchantFleetBuff', ctx.now);
   for (const f of plan.fills) {
     const gold = Math.floor(f.gold);
     await ctx.tx.insert(marketTrades).values({
@@ -360,7 +381,15 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
       await ship(ctx, { playerId: other.playerId, cityId: other.cityId, orderId: other.id, resType: GOLD, amount: gold, price: other.price, ms: 0 });
     } else {
       // their bid bought: goods to them (their gold was escrowed at this price)
-      await ship(ctx, { playerId: other.playerId, cityId: other.cityId, orderId: other.id, resType: o.resType, amount: f.qty, price: other.price, ms: shipmentMs(ctx, await marketLevelOf(ctx, other.cityId), fleet) });
+      await ship(ctx, {
+        playerId: other.playerId,
+        cityId: other.cityId,
+        orderId: other.id,
+        resType: o.resType,
+        amount: f.qty,
+        price: other.price,
+        ms: shipmentMs(await marketLevelOf(ctx, other.cityId)),
+      });
     }
     ctx.push(other.playerId, 'server.TradesUpdate', { resType: o.resType, amount: f.qty, price: other.price });
     await createReport(ctx, {

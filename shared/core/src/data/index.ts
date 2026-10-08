@@ -95,7 +95,12 @@ const HERO_ENHANCEMENT_RESEARCH: ResearchLevelConfig[] = (researchRows as Resear
   }));
 export const RESEARCH = [...(researchRows as ResearchLevelConfig[]), ...HERO_ENHANCEMENT_RESEARCH];
 export const TROOPS = troopRows as TroopConfig[];
-export const ITEMS = itemRows as ItemConfig[];
+/** (evony-re) legacy items removed from this game: never sold, won or granted */
+export const REMOVED_ITEMS: readonly string[] = [
+  // Merchant Fleet: halved market shipment time (market trades settle instantly here)
+  'consume.transaction.1',
+];
+export const ITEMS = (itemRows as ItemConfig[]).filter((i) => !REMOVED_ITEMS.includes(i.id));
 export const QUESTS = questRows as QuestConfig[];
 
 const buildingIndex = new Map<string, BuildingLevelConfig>(BUILDINGS.map((b) => [`${b.typeId}:${b.level}`, b]));

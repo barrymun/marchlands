@@ -151,8 +151,6 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
   if (payout) return { description: `Amulet prize, paid straight into your city as ${RES_NAMES[payout[1] as keyof typeof RES_NAMES]}.`, use: 'none' };
   if (id === 'player.box.gambling.medal.10') return { description: 'Amulet prize, paid straight to you as cents.', use: 'none' };
 
-  if (id === 'consume.transaction.1' && BALANCE.marketShipmentBaseMs <= 0)
-    return { description: 'No effect on this server: market trades are already instant.', use: 'none' };
   const e = itemEffect(id);
   if (!e) return { description: 'Event item with no effect on this server.', use: 'none' };
   switch (e.kind) {
