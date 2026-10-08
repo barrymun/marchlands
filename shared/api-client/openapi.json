@@ -3316,6 +3316,25 @@
           "finishAt"
         ]
       },
+      "TrainManyResultInput": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "units": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "orders",
+          "units"
+        ]
+      },
       "RequirementCheckInput": {
         "type": "object",
         "properties": {
@@ -13542,6 +13561,26 @@
         "required": [
           "batches",
           "finishAt"
+        ],
+        "additionalProperties": false
+      },
+      "TrainManyResult": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "units": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "orders",
+          "units"
         ],
         "additionalProperties": false
       },
@@ -25158,6 +25197,130 @@
         }
       }
     },
+    "/api/v1/cities/{cityId}/troops/train-many": {
+      "post": {
+        "summary": "Order several troops at once (one order per type), all or nothing",
+        "tags": [
+          "troops"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orders": {
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "troopId": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "count": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "troopId",
+                        "count"
+                      ]
+                    },
+                    "description": "one order per unit type, all trained or none"
+                  },
+                  "split": {
+                    "default": true,
+                    "description": "troops: split each order over every barracks (false: all at positionId)",
+                    "type": "boolean"
+                  },
+                  "positionId": {
+                    "description": "troops: the barracks when not splitting",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "orders"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "in": "path",
+            "name": "cityId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TrainManyResult"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}": {
       "delete": {
         "summary": "Cancel a batch",
@@ -25560,6 +25723,130 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/ProduceQueue"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cities/{cityId}/fortifications/train-many": {
+      "post": {
+        "summary": "Order several fortifications at once (one order per type), all or nothing",
+        "tags": [
+          "troops"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "orders": {
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "troopId": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "count": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "troopId",
+                        "count"
+                      ]
+                    },
+                    "description": "one order per unit type, all trained or none"
+                  },
+                  "split": {
+                    "default": true,
+                    "description": "troops: split each order over every barracks (false: all at positionId)",
+                    "type": "boolean"
+                  },
+                  "positionId": {
+                    "description": "troops: the barracks when not splitting",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "orders"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "in": "path",
+            "name": "cityId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TrainManyResult"
                     }
                   },
                   "required": [

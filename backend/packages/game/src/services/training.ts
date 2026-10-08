@@ -197,6 +197,29 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
 }
 
 /**
+ * (evony-re) Several orders in one go (one per troop type), all or nothing: an order that cannot be
+ * paid for or queued fails the request, undoing the orders before it. Troops go to one barracks or
+ * split over all of them (trainSplit); fortifications go to the walls.
+ */
+export async function trainMany(
+  ctx: Ctx,
+  playerId: number,
+  cityId: number,
+  orders: { troopId: number; count: number }[],
+  opts: { fort: boolean; split: boolean; positionId?: number },
+): Promise<{ orders: number; units: number }> {
+  if (!orders.length || orders.length > 20) throw new GameError('Order 1 to 20 unit types at a time.', -99);
+  if (new Set(orders.map((o) => o.troopId)).size !== orders.length) throw new GameError('Each unit type can be ordered once.', -99);
+  for (const o of orders) {
+    if (!Number.isInteger(o.count) || o.count < 1) throw new GameError('Invalid amount.', -99);
+    if (opts.fort) await train(ctx, playerId, cityId, o.troopId, o.count, WALLS_QUEUE);
+    else if (opts.split) await trainSplit(ctx, playerId, cityId, o.troopId, o.count);
+    else await train(ctx, playerId, cityId, o.troopId, o.count, opts.positionId ?? -999);
+  }
+  return { orders: orders.length, units: orders.reduce((s, o) => s + o.count, 0) };
+}
+
+/**
  * Train one order split over every barracks with room in its queue, sized so all batches finish
  * together (core splitTraining): busy barracks get fewer units. Paid and checked as one order.
  */

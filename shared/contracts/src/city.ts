@@ -48,6 +48,16 @@ export const TrainSplitResult = z
   })
   .meta({ id: 'TrainSplitResult' });
 export type TrainSplitResult = z.infer<typeof TrainSplitResult>;
+export const TrainManyBody = z.object({
+  orders: z
+    .array(z.object({ troopId: z.number().int(), count: z.number().int().min(1) }))
+    .min(1)
+    .max(20)
+    .describe('one order per unit type, all trained or none'),
+  split: z.boolean().default(true).describe('troops: split each order over every barracks (false: all at positionId)'),
+  positionId: z.number().int().optional().describe('troops: the barracks when not splitting'),
+});
+export const TrainManyResult = z.object({ orders: z.number().int(), units: z.number().int() }).meta({ id: 'TrainManyResult' });
 export const TroopCountBody = z.object({ troopId: z.number().int(), count: z.number().int() });
 export const InjuredTroopsBody = z.object({ troops: zTroops });
 export const CureInjuredBody = InjuredTroopsBody.extend({

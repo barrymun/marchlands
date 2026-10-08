@@ -31,6 +31,8 @@ import {
   TaxRateBody,
   TrainableList,
   TrainBody,
+  TrainManyBody,
+  TrainManyResult,
   TrainingQueueParams,
   TroopCountBody,
   TrainSplitBody,
@@ -190,6 +192,14 @@ export default async function cityRoutes(app: ZApp) {
       (req) =>
         game(req, (ctx, pid) =>
           training.train(ctx, pid, req.params.cityId, req.body.troopId, req.body.count, fort ? training.WALLS_QUEUE : (req.body.positionId ?? -999)),
+        ),
+    );
+    app.post(
+      `/cities/:cityId/${kind}/train-many`,
+      s(tag, `Order several ${kind} at once (one order per type), all or nothing`, TrainManyResult, { params: zCityParams, body: TrainManyBody }),
+      (req) =>
+        game(req, (ctx, pid) =>
+          training.trainMany(ctx, pid, req.params.cityId, req.body.orders, { fort, split: req.body.split, positionId: req.body.positionId }),
         ),
     );
     app.delete(`/cities/:cityId/${kind}/queues/:positionId/:queueId`, s(tag, 'Cancel a batch', Empty, { params: TrainingQueueParams }), (req) =>

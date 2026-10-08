@@ -3382,6 +3382,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cities/{cityId}/troops/train-many": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Order several troops at once (one order per type), all or nothing */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cityId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description one order per unit type, all trained or none */
+                        orders: {
+                            troopId: number;
+                            count: number;
+                        }[];
+                        /**
+                         * @description troops: split each order over every barracks (false: all at positionId)
+                         * @default true
+                         */
+                        split?: boolean;
+                        /** @description troops: the barracks when not splitting */
+                        positionId?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["TrainManyResult"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}": {
         parameters: {
             query?: never;
@@ -3665,6 +3742,83 @@ export interface paths {
                             /** @enum {number} */
                             ok: 1;
                             data: components["schemas"]["ProduceQueue"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cities/{cityId}/fortifications/train-many": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Order several fortifications at once (one order per type), all or nothing */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    cityId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description one order per unit type, all trained or none */
+                        orders: {
+                            troopId: number;
+                            count: number;
+                        }[];
+                        /**
+                         * @description troops: split each order over every barracks (false: all at positionId)
+                         * @default true
+                         */
+                        split?: boolean;
+                        /** @description troops: the barracks when not splitting */
+                        positionId?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["TrainManyResult"];
                         };
                     };
                 };
@@ -12105,6 +12259,10 @@ export interface components {
             /** @description when the last batch finishes */
             finishAt: number;
         };
+        TrainManyResultInput: {
+            orders: number;
+            units: number;
+        };
         RequirementCheckInput: {
             /** @enum {string} */
             kind: "building" | "tech" | "item";
@@ -14312,6 +14470,10 @@ export interface components {
             /** @description when the last batch finishes */
             finishAt: number;
         };
+        TrainManyResult: {
+            orders: number;
+            units: number;
+        };
         RequirementCheck: {
             /** @enum {string} */
             kind: "building" | "tech" | "item";
@@ -15812,6 +15974,7 @@ export type TitlePromotionInput = components['schemas']['TitlePromotionInput'];
 export type GrantContentsInput = components['schemas']['GrantContentsInput'];
 export type UseItemResultInput = components['schemas']['UseItemResultInput'];
 export type TrainSplitResultInput = components['schemas']['TrainSplitResultInput'];
+export type TrainManyResultInput = components['schemas']['TrainManyResultInput'];
 export type RequirementCheckInput = components['schemas']['RequirementCheckInput'];
 export type CitySpeedupCostInput = components['schemas']['CitySpeedupCostInput'];
 export type ComfortResultInput = components['schemas']['ComfortResultInput'];
@@ -15947,6 +16110,7 @@ export type TitlePromotion = components['schemas']['TitlePromotion'];
 export type GrantContents = components['schemas']['GrantContents'];
 export type UseItemResult = components['schemas']['UseItemResult'];
 export type TrainSplitResult = components['schemas']['TrainSplitResult'];
+export type TrainManyResult = components['schemas']['TrainManyResult'];
 export type RequirementCheck = components['schemas']['RequirementCheck'];
 export type CitySpeedupCost = components['schemas']['CitySpeedupCost'];
 export type ComfortResult = components['schemas']['ComfortResult'];

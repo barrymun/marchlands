@@ -154,6 +154,19 @@ async function main() {
   const listed = (await ok(a.token, 'GET', `/cities/${cid}`)).heros.map((h) => h.id);
   check(reordered.heroes[0].id === h2.id && listed[0] === h2.id && listed[1] === hero.id, 'heroes keep the order the lord set');
 
+  // ---- several troop types in one order, all or nothing ----
+  {
+    const many = await ok(a.token, 'POST', `/cities/${cid}/troops/train-many`, { orders: [{ troopId: 2, count: 3 }, { troopId: 3, count: 4 }] });
+    check(many.orders === 2 && many.units === 7, 'train several troop types at once');
+    const queued = JSON.stringify(await ok(a.token, 'GET', `/cities/${cid}/troops/queues`));
+    const tooMany = await call(a.token, 'POST', `/cities/${cid}/troops/train-many`, { orders: [{ troopId: 2, count: 1 }, { troopId: 3, count: 50_000_000 }] });
+    const after = JSON.stringify(await ok(a.token, 'GET', `/cities/${cid}/troops/queues`));
+    check(tooMany.ok !== 1 && queued === after, 'a multi-type order that cannot be paid trains nothing');
+    // cancel them again: later checks need the population
+    for (const q of (await ok(a.token, 'GET', `/cities/${cid}/troops/queues`)).queues)
+      for (const b of [...q.allProduceQueue].reverse()) await ok(a.token, 'DELETE', `/cities/${cid}/troops/queues/${q.positionId}/${b.queueId}`);
+  }
+
   // ---- flows: a series of actions run on cities, each city all-or-nothing ----
   {
     const saved = await ok(a.token, 'POST', '/player/flows', {
