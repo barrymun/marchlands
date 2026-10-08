@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { CircleCheck } from 'lucide-react';
 import type { CityBean } from '@evony/api-client';
 import { BALANCE, buildingLevel, BuildingType, heroStratagem, HeroStatus, heroTimeMultiplier, researchHeroExp } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
@@ -45,41 +46,56 @@ export function ResearchPanel({ city }: { city: CityBean }) {
   const here = list.data.techs.filter((t) => t.upgrading && t.castleId === city.id);
   const elsewhere = list.data.techs.filter((t) => t.upgrading && t.castleId !== city.id);
   const full = here.length >= list.data.slots;
+  // every technology at its maximum level, none still running: nothing left to research
+  const allDone = list.data.techs.length > 0 && list.data.techs.every((t) => t.level >= t.maxLevel && !t.upgrading);
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">
-            Academy · researching {here.length}/{list.data.slots}
-          </CardTitle>
-          <CardDescription>
-            {full
-              ? 'Every research slot is busy: wait for one to finish or speed it up.'
-              : `This city can research ${list.data.slots} technologies at the same time.`}
-          </CardDescription>
-        </CardHeader>
-        {(here.length > 0 || elsewhere.length > 0) && (
-          <CardContent className="grid gap-4">
-            {here.map((t) => (
-              <ResearchJob key={t.typeId} city={city} tech={t} />
-            ))}
-            {elsewhere.map((t) => (
-              <div key={t.typeId} className="grid gap-1">
-                <span className="text-sm">
-                  {t.name} → Lv {t.level + 1} <span className="text-muted-foreground">(in another city)</span>
-                </span>
-                <TimerBar startTime={t.startTime} endTime={t.endTime} />
-              </div>
-            ))}
-          </CardContent>
-        )}
-      </Card>
-      <p className="text-xs text-muted-foreground">
-        {mayor
-          ? `Research times include mayor ${mayor.name}'s Intelligence ${heroStratagem(mayor)}: −${mayorCut}%. A mayor with higher Intelligence researches faster.`
-          : 'No mayor: appoint one with high Intelligence in the Heroes tab to research faster.'}
-      </p>
+      {allDone ? (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
+              <CircleCheck className="size-4" /> All research complete
+            </CardTitle>
+            <CardDescription>Every one of the {list.data.techs.length} technologies is at its maximum level.</CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">
+              Academy · researching {here.length}/{list.data.slots}
+            </CardTitle>
+            <CardDescription>
+              {full
+                ? 'Every research slot is busy: wait for one to finish or speed it up.'
+                : `This city can research ${list.data.slots} technologies at the same time.`}
+            </CardDescription>
+          </CardHeader>
+          {(here.length > 0 || elsewhere.length > 0) && (
+            <CardContent className="grid gap-4">
+              {here.map((t) => (
+                <ResearchJob key={t.typeId} city={city} tech={t} />
+              ))}
+              {elsewhere.map((t) => (
+                <div key={t.typeId} className="grid gap-1">
+                  <span className="text-sm">
+                    {t.name} → Lv {t.level + 1} <span className="text-muted-foreground">(in another city)</span>
+                  </span>
+                  <TimerBar startTime={t.startTime} endTime={t.endTime} />
+                </div>
+              ))}
+            </CardContent>
+          )}
+        </Card>
+      )}
+      {!allDone && (
+        <p className="text-xs text-muted-foreground">
+          {mayor
+            ? `Research times include mayor ${mayor.name}'s Intelligence ${heroStratagem(mayor)}: −${mayorCut}%. A mayor with higher Intelligence researches faster.`
+            : 'No mayor: appoint one with high Intelligence in the Heroes tab to research faster.'}
+        </p>
+      )}
       <div className="grid gap-2 md:grid-cols-2">
         {list.data.techs.map((t) => (
           <div key={t.typeId} className="grid gap-2 rounded-md border p-3">
