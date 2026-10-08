@@ -14,7 +14,10 @@ export const TavernRefreshBody = z.object({ payWith: z.enum(['gold', 'item']).de
 export const HeroPointsBody = z.object({ power: z.number().int(), management: z.number().int(), stratagem: z.number().int() });
 export const UseHeroItemBody = z.object({
   itemId: z.string(),
-  payWith: z.enum(['gold']).optional().describe("'gold': buy the item with the hero's city gold instead of using one owned (or cents)"),
+  payWith: z
+    .enum(['gold'])
+    .optional()
+    .describe("'gold': buy the item with the hero's city gold even if one is owned (one not owned is always bought with gold)"),
 });
 export const RenameHeroBody = z.object({ name: z.string() });
 export const HeroOrderBody = z.object({ heroIds: z.array(zId).max(100).describe("the city's heroes in the new order (first = top)") });

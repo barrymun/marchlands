@@ -1,4 +1,5 @@
 // Hero attributes with their display colours: one place to reference politics = green, attack = red, intelligence = blue.
+// (Running item bonuses are purple: tones.ts.)
 
 import { heroManagement, heroPower, heroStratagem, type GearStat } from '@evony/core';
 import type { HeroBean } from '@evony/api-client';

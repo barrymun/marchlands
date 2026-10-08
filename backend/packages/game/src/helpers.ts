@@ -1,13 +1,7 @@
 // Small shared mutations + their push notifications.
 
 import { count, eq } from 'drizzle-orm';
-import {
-  GameError,
-  hasResources,
-  RESOURCE_KEYS,
-  type BuffState,
-  type Resources,
-} from '@evony/core';
+import { GameError, hasResources, RESOURCE_KEYS, type BuffState, type Resources } from '@evony/core';
 import { alliances, cities } from '@evony/db';
 import { cityStats, type CityBundle } from './city.ts';
 import type { Ctx } from './context.ts';
@@ -50,29 +44,38 @@ export function consumeItem(ctx: Ctx, p: PlayerRow, id: string, n = 1) {
   addItem(ctx, p, id, -n);
 }
 
-export function spendCents(ctx: Ctx, p: PlayerRow, cents: number) {
-  if (cents <= 0) return;
-  if (p.cents < cents) throw new GameError('Not enough cents.', -99);
-  p.cents -= cents;
-  ctx.push(p.id, 'server.CentsUpdate', { cents: p.cents });
+/**
+ * (evony-re) Charge `gold` from a city: there are no cents, so what the original sold for cents costs
+ * city gold (goldForCents). The caller saves the city and pushes its resources.
+ */
+export function spendGold(city: CityRow, gold: number) {
+  if (gold <= 0) return;
+  if (city.gold < gold) throw new GameError(`Not enough gold: ${Math.ceil(gold).toLocaleString('en')} needed.`, -99);
+  city.gold -= gold;
 }
 
-/** Consume one of `itemId` if owned, otherwise charge `cents` (auto-buy, orig speed-up rule). */
-export function useItemOrCents(ctx: Ctx, p: PlayerRow, itemId: string, cents: number) {
+/** Consume one of `itemId` if owned, otherwise buy it on use with the city's gold (orig: cents). */
+export function useItemOrGold(ctx: Ctx, p: PlayerRow, city: CityRow, itemId: string, gold: number) {
   if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
-  else spendCents(ctx, p, cents);
+  else spendGold(city, gold);
 }
 
 // ---- buffs ----
 
-export const activeBuff = (p: PlayerRow, id: string, now: number): BuffState | undefined =>
-  p.buffs.find((b) => b.id === id && b.endTime > now);
+export const activeBuff = (p: PlayerRow, id: string, now: number): BuffState | undefined => p.buffs.find((b) => b.id === id && b.endTime > now);
 
 /** Set (or extend when `extend`) a timed buff, scheduling its expiry. */
-export function setBuff(ctx: Ctx, p: PlayerRow, id: string, desc: string, endTime: number, opts: { extend?: boolean; param?: number } = {}) {
+export function setBuff(
+  ctx: Ctx,
+  p: PlayerRow,
+  id: string,
+  desc: string,
+  endTime: number,
+  opts: { extend?: boolean; param?: number; itemId?: string } = {},
+) {
   const cur = activeBuff(p, id, ctx.now);
   const end = opts.extend && cur ? cur.endTime + (endTime - ctx.now) : endTime;
-  const buff: BuffState = { id, desc, endTime: end, ...(opts.param != null ? { param: opts.param } : {}) };
+  const buff: BuffState = { id, desc, endTime: end, ...(opts.param != null ? { param: opts.param } : {}), ...(opts.itemId ? { itemId: opts.itemId } : {}) };
   p.buffs = [...p.buffs.filter((b) => b.id !== id && b.endTime > ctx.now), buff];
   ctx.schedule({ type: 'buff.expire', dueAt: end, playerId: p.id, refKey: `buff:${p.id}:${id}`, payload: { buffId: id } });
   ctx.push(p.id, 'server.PlayerBuffUpdate', { buffBean: { typeId: id, descName: desc, endTime: end }, updateType: 0 });
@@ -115,7 +118,9 @@ export function pushBuffs(ctx: Ctx, p: PlayerRow) {
 
 /** Validate a free-text name: length and a conservative character set. */
 export function cleanName(raw: unknown, min: number, max: number, what = 'Name'): string {
-  const s = String(raw ?? '').trim().replace(/\s+/g, ' ');
+  const s = String(raw ?? '')
+    .trim()
+    .replace(/\s+/g, ' ');
   if (s.length < min || s.length > max) throw new GameError(`${what} must be ${min}-${max} characters.`, -87);
   if (!/^[\p{L}\p{N} _.'-]+$/u.test(s)) throw new GameError(`${what} contains invalid characters.`, -87);
   return s;

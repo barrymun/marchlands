@@ -2,9 +2,11 @@
 // pfortifications logic with the original's validation gaps closed.
 
 import { z } from 'zod';
-import { BALANCE, scaled } from './balance.ts';
+import { BALANCE, goldForCents, scaled } from './balance.ts';
+import { itemGoldPrice } from './items.ts';
+import { coinsForSpeedup } from './time.ts';
 import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEYS, TroopType } from './constants.ts';
-import { buildingConfig, buildingMaxLevel, itemConfig, ITEMS, researchConfig, researchMaxLevel, troopConfig, type Requirements } from './data/index.ts';
+import { buildingConfig, buildingMaxLevel, ITEMS, researchConfig, researchMaxLevel, troopConfig, type Requirements } from './data/index.ts';
 import { buildingCount, buildingLevel, researchLevel, type MayorStats } from './economy.ts';
 import { GameError } from './errors.ts';
 import { addResources, emptyResources, scaleResources, type Resources } from './resources.ts';
@@ -323,7 +325,7 @@ export function prestigeOf(action: number, id: number, level: number, townHallLe
 // ---------------------------------------------------------------------------------------------
 
 export interface SpeedupEffect {
-  /** cents charged when the player has none of the item */
+  /** (orig) price in cents; charged in gold (goldForCents) when the player has none of the item */
   cents: number;
   /** ms removed from the remaining time, given the total duration */
   reduce(totalMs: number, rng: () => number): number;
@@ -340,8 +342,14 @@ export const SPEEDUP_ITEMS: Record<string, SpeedupEffect> = {
   'player.speedup.1': { cents: 175, reduce: (t) => t * 0.5 },
 };
 
-export function speedupItemCents(itemId: string): number {
-  return SPEEDUP_ITEMS[itemId]?.cents ?? itemConfig(itemId)?.cost ?? 0;
+/** Gold charged for a speed-up item the player has none of (its gold price). */
+export function speedupItemGold(itemId: string): number {
+  return itemGoldPrice(itemId) ?? goldForCents(SPEEDUP_ITEMS[itemId]?.cents ?? 0);
+}
+
+/** (evony-re) Gold to finish something with `timeLeftMs` remaining at once: the original's coins (coinsForSpeedup) in gold. */
+export function goldForSpeedup(timeLeftMs: number): number {
+  return goldForCents(coinsForSpeedup(timeLeftMs));
 }
 
 // ---------------------------------------------------------------------------------------------

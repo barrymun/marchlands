@@ -4,6 +4,7 @@ import { getGameSpeed, scaled } from '@evony/core';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNow } from '@/hooks/use-now';
 import { fmt, fmtExact, signedRate } from '@/lib/format';
+import { ITEM_BONUS_TEXT_INVERTED } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 const icons = { gold: Coins, food: Wheat, wood: Trees, stone: Mountain, iron: Hammer };
@@ -95,24 +96,27 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
 
 function Breakdown({ line, mayor }: { line: ResourceLine; mayor?: HeroBean }) {
   const b = line.breakdown;
-  const rows: [string, number][] = [
+  const rows: Row[] = [
     ['Base', b.base],
     [`Fields${line.workRate !== 100 ? ` (${line.workRate}% work rate)` : ''}`, b.fields],
   ];
   if (b.tech) rows.push([`Technology +${b.techPercent}%`, b.tech]);
   rows.push([mayor ? `Mayor ${mayor.name} +${b.mayorPercent}%` : 'No mayor', b.mayor]);
   if (b.valley) rows.push([`Valleys +${b.valleyPercent}%`, b.valley]);
-  if (b.buff) rows.push([`Items +${b.buffPercent}%`, b.buff]);
+  if (b.buff) rows.push([`Items +${b.buffPercent}%`, b.buff, ITEM_BONUS_TEXT_INVERTED]);
   if (b.upkeep) rows.push(['Troop upkeep', b.upkeep]);
   return <Rows rows={rows} total={line.increaseRate} />;
 }
 
-function Rows({ rows, total }: { rows: [string, number][]; total: number }) {
+/** A breakdown row: label, per-hour amount, and an optional colour (e.g. an item bonus). */
+type Row = [label: string, value: number, className?: string];
+
+function Rows({ rows, total }: { rows: Row[]; total: number }) {
   return (
     <table className="text-xs tabular-nums">
       <tbody>
-        {rows.map(([label, v]) => (
-          <tr key={label}>
+        {rows.map(([label, v, className]) => (
+          <tr key={label} className={className}>
             <td className="pr-4">{label}</td>
             <td className="text-right">{signedRate(v)}</td>
           </tr>

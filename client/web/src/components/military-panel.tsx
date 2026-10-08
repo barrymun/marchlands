@@ -18,6 +18,7 @@ import {
   heroPower,
   HeroStatus,
   itemConfig,
+  itemGoldPrice,
   prestigeOf,
   PrestigeAction,
   splitTraining,
@@ -43,6 +44,7 @@ import { useNow } from '@/hooks/use-now';
 import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, realHourly, troopName } from '@/lib/format';
+import { ITEM_BONUS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 export function MilitaryPanel({ city }: { city: CityBean }) {
@@ -151,7 +153,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   );
   const inv = useInventory();
   const boostItem = fort ? 'player.fort.1.c' : 'player.troop.1.b';
-  const boostCents = fort ? 35 : 30;
+  const boostGold = itemGoldPrice(boostItem) ?? 0;
   const boost = useCommand(
     (b: { positionId: number; queueId: number }) =>
       unwrap(api.POST(`/api/v1/cities/{cityId}/${kind}/queues/{positionId}/{queueId}/speedup`, { params: { path: { ...path, ...b } } })),
@@ -282,10 +284,10 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                     <Button
                       size="xs"
                       variant="secondary"
-                      disabled={boost.isPending || (inv.count(boostItem) === 0 && inv.cents < boostCents)}
+                      disabled={boost.isPending || (inv.count(boostItem) === 0 && city.resource.gold < boostGold)}
                       onClick={() => boost.mutate({ positionId: b.positionId, queueId: b.queueId })}
                     >
-                      {itemConfig(boostItem)?.name} −30% · {inv.count(boostItem) > 0 ? `×${inv.count(boostItem)}` : `${boostCents} cents`}
+                      {itemConfig(boostItem)?.name} −30% · {inv.count(boostItem) > 0 ? `×${inv.count(boostItem)}` : `${fmt(boostGold)} gold`}
                     </Button>
                   )}
                   <Button size="xs" variant="ghost" onClick={() => cancel.mutate({ positionId: b.positionId, queueId: b.queueId })}>
@@ -398,7 +400,7 @@ function TrainDiscountHint({ share }: { share: number }) {
   const now = useNow(30_000);
   const end = (player.data?.buffs ?? []).find((b) => b.id === 'TrainCostReduceBuff')?.endTime ?? 0;
   return (
-    <p className="text-xs text-emerald-600 dark:text-emerald-400">
+    <p className={cn('text-xs', ITEM_BONUS_TEXT)}>
       Training cost −{Math.round((1 - share) * 100)}% (Quartermaster){end > now ? ` for ${duration(end - now)}` : ''}: the costs below include it.
     </p>
   );

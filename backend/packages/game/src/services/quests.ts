@@ -101,7 +101,6 @@ export async function claimQuest(ctx: Ctx, playerId: number, questId: number, ci
   if (!q.targets.every((t) => evaluateTarget(t.target, s))) throw new GameError('Quest not finished yet.', -99);
   if (q.award.resources) gainResources(b.city, q.award.resources);
   for (const [id, n] of Object.entries(q.award.items ?? {})) addItem(ctx, b.player, id, n);
-  if (q.award.cents) b.player.cents += q.award.cents;
   await ctx.tx
     .insert(questProgress)
     .values({ playerId, questId, status: 2, updatedAt: ctx.now })

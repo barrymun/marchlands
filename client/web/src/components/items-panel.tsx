@@ -1,6 +1,17 @@
 import { useMemo, useState } from 'react';
 import type { CityBean } from '@evony/api-client';
-import { BALANCE, ITEM_CATEGORIES, ITEM_INFO, itemConfig, medalSources, TROOP_ID_BY_KEY, TROOP_NAMES, type ItemInfo, type TroopKey } from '@evony/core';
+import {
+  ITEM_CATEGORIES,
+  ITEM_INFO,
+  itemConfig,
+  itemEffect,
+  itemGoldPrice,
+  medalSources,
+  TROOP_ID_BY_KEY,
+  TROOP_NAMES,
+  type ItemInfo,
+  type TroopKey,
+} from '@evony/core';
 import { Medal } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -12,14 +23,16 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Countdown } from '@/components/countdown';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
+import { useNow } from '@/hooks/use-now';
 import { api, unwrap } from '@/lib/api';
 import { fmt, fmtExact } from '@/lib/format';
+import { ITEM_BONUS_OUTLINE, ITEM_BONUS_TONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
-/** Gold price of an entry when one of its items is in BALANCE.goldShop. */
+/** Gold price of an entry when one of its items is for sale (itemGoldPrice: there are no cents). */
 function goldPriceOf(e: { ids: string[] }): { id: string; price: number } | null {
-  const id = e.ids.find((x) => BALANCE.goldShop[x] != null);
-  return id ? { id, price: BALANCE.goldShop[id] } : null;
+  const id = e.ids.find((x) => itemGoldPrice(x) != null);
+  return id ? { id, price: itemGoldPrice(id)! } : null;
 }
 
 /** Items with the same name and effect (e.g. the twelve Amulet ids) are shown as one entry. */
@@ -93,7 +106,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {buffs.map((b) => (
-              <Badge key={b.id} variant="secondary" className="gap-1 font-normal">
+              <Badge key={b.id} className={cn('gap-1 font-normal', ITEM_BONUS_TONE)}>
                 {b.desc} · <Countdown endTime={b.endTime} />
               </Badge>
             ))}
@@ -122,13 +135,16 @@ export function ItemsPanel({ city }: { city: CityBean }) {
         {shown.map((e) => (
           <div key={e.ids[0]} className="grid gap-1.5 rounded-md border bg-card p-3">
             <div className="flex items-start justify-between gap-2">
-              {/* items not owned are dimmed, but never their buttons (a Buy button must not look disabled) */}
-              <div className={cn('flex flex-wrap items-center gap-2', e.owned === 0 && 'opacity-60')}>
-                <span className="font-medium">{e.info.name}</span>
-                <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
-                  ×{fmtExact(e.owned)}
-                </Badge>
-                {category === ALL && <span className="text-xs text-muted-foreground">{e.info.category}</span>}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* items not owned are dimmed, but never their buttons (a Buy button must not look disabled) or the active bonus */}
+                <div className={cn('flex flex-wrap items-center gap-2', e.owned === 0 && 'opacity-60')}>
+                  <span className="font-medium">{e.info.name}</span>
+                  <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
+                    ×{fmtExact(e.owned)}
+                  </Badge>
+                  {category === ALL && <span className="text-xs text-muted-foreground">{e.info.category}</span>}
+                </div>
+                <ActiveBonus ids={e.ids} buffs={player.data?.buffs ?? []} />
               </div>
               <div className="flex shrink-0 gap-1">
                 {goldPriceOf(e) && (
@@ -156,7 +172,6 @@ export function ItemsPanel({ city }: { city: CityBean }) {
             <div className={cn('grid gap-1.5', e.owned === 0 && 'opacity-60')}>
               <p className="text-sm text-muted-foreground">{e.info.description}</p>
               {e.info.howTo && <p className="text-xs text-muted-foreground italic">{e.info.howTo}</p>}
-              {e.info.price > 0 && <p className="text-xs text-muted-foreground">Shop price: {fmtExact(e.info.price)} cents</p>}
               {medalLevelOf(e.ids) != null && <MedalSourcesInfo level={medalLevelOf(e.ids)!} />}
             </div>
           </div>
@@ -167,17 +182,11 @@ export function ItemsPanel({ city }: { city: CityBean }) {
   );
 }
 
-function describeGrant(g: {
-  items?: Record<string, number>;
-  resources?: Record<string, number | undefined>;
-  troops?: Record<string, number | undefined>;
-  cents?: number;
-}) {
+function describeGrant(g: { items?: Record<string, number>; resources?: Record<string, number | undefined>; troops?: Record<string, number | undefined> }) {
   const parts: string[] = [];
   for (const [id, n] of Object.entries(g.items ?? {})) parts.push(`${n} × ${itemConfig(id)?.name.trim() ?? id}`);
   for (const [r, n] of Object.entries(g.resources ?? {})) if (n) parts.push(`${fmtExact(n)} ${r === 'wood' ? 'lumber' : r}`);
   for (const [k, n] of Object.entries(g.troops ?? {})) if (n) parts.push(`${fmtExact(n)} ${TROOP_NAMES[TROOP_ID_BY_KEY[k as TroopKey]] ?? k}`);
-  if (g.cents) parts.push(`${fmtExact(g.cents)} cents`);
   return parts.join(', ') || 'nothing';
 }
 
@@ -224,7 +233,7 @@ function MedalSourcesInfo({ level }: { level: number }) {
         {s.containers.map((c) => (
           <li key={c.id}>
             <span className="text-foreground">{c.name}</span> ({c.always ? range(c.min, c.max) : `sometimes ${range(c.min, c.max)}`}):{' '}
-            {[c.price > 0 && `${fmtExact(c.price)} cents in the shop`, c.amulet && 'an Amulet prize'].filter(Boolean).join(' or ')}
+            {[c.price > 0 && `${fmt(c.price)} gold in the shop`, c.amulet && 'an Amulet prize'].filter(Boolean).join(' or ')}
             {c.key && ` (opens with a ${c.key})`}
           </li>
         ))}
@@ -235,5 +244,37 @@ function MedalSourcesInfo({ level }: { level: number }) {
         ))}
       </ul>
     </div>
+  );
+}
+
+/**
+ * For an item that applies a timed bonus (a buff on the lord): whether that bonus is running now and
+ * for how long. Items sharing a bonus (e.g. the 1-day and 7-day production items) extend the same one:
+ * the item last used shows it as active, the others which item is running and what using them adds.
+ */
+function ActiveBonus({ ids, buffs }: { ids: string[]; buffs: { id: string; endTime: number; itemId?: string }[] }) {
+  const now = useNow(30_000);
+  const effect = ids.map(itemEffect).find((e) => e?.kind === 'buff');
+  if (effect?.kind !== 'buff') return null;
+  const active = buffs.find((b) => b.id === effect.buff && b.endTime > now);
+  if (!active) return null;
+  if (active.itemId && ids.includes(active.itemId)) {
+    return (
+      <Badge className={cn('gap-1 tabular-nums', ITEM_BONUS_TONE)} title="This bonus is running now; using another extends it">
+        Active · <Countdown endTime={active.endTime} />
+      </Badge>
+    );
+  }
+  // the same bonus, set by another item (or before the item was recorded)
+  const source = active.itemId ? itemConfig(active.itemId)?.name.trim() : null;
+  const days = effect.durationMs / 86_400_000;
+  const adds = days >= 1 ? `${days} day${days === 1 ? '' : 's'}` : `${Math.round(effect.durationMs / 3_600_000)} hours`;
+  return (
+    <span className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+      <Badge variant="outline" className={cn('gap-1 tabular-nums', ITEM_BONUS_OUTLINE)} title={`The same bonus is running${source ? ` from ${source}` : ''}`}>
+        {source ? `${source} active` : 'Bonus active'} · <Countdown endTime={active.endTime} />
+      </Badge>
+      using this adds {adds}
+    </span>
   );
 }

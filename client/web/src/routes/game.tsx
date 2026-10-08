@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { HeroBean } from '@evony/api-client';
 import { useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Coins, Crown, Landmark, UserRound } from 'lucide-react';
+import { ChevronDown, Crown, Landmark, UserRound } from 'lucide-react';
 import { HeroStatus } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -100,7 +100,7 @@ export function GamePage() {
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setDialog('city')}>City settings…</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDialog('city')}>City settings</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             {/* phones: the mayor gets its own row under the city and the account controls */}
@@ -123,10 +123,6 @@ export function GamePage() {
                       Prestige {fmt(info.prestige)} · rank {info.ranking || '—'} · honor {fmt(info.honor)}
                     </TooltipContent>
                   </Tooltip>
-                  <span className="flex items-center gap-1 tabular-nums">
-                    <Coins className="size-4 text-amber-500" />
-                    {fmt(info.cents)}
-                  </span>
                   {info.beginner && (
                     <Badge variant="secondary" className="hidden sm:inline-flex">
                       Beginner protection
@@ -165,7 +161,7 @@ export function GamePage() {
                     </DropdownMenuLabel>
                   )}
                   {info && <DropdownMenuSeparator className="sm:hidden" />}
-                  <DropdownMenuItem onSelect={() => setDialog('lord')}>Lord settings…</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDialog('lord')}>Lord settings</DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <a href="/docs" target="_blank" rel="noreferrer">
                       API docs
@@ -232,7 +228,7 @@ export function GamePage() {
         </main>
       </Tabs>
       {city.data && <ActivityDock city={city.data} />}
-      <LordDialog open={dialog === 'lord'} onClose={() => setDialog(null)} />
+      <LordDialog open={dialog === 'lord'} onClose={() => setDialog(null)} city={city.data} />
       {city.data && <CityDialog city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />}
     </div>
   );

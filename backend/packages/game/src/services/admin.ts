@@ -37,14 +37,6 @@ export async function grantItems(ctx: Ctx, playerName: string, items: Record<str
   await savePlayer(ctx, p);
 }
 
-export async function grantCents(ctx: Ctx, playerName: string, cents: number) {
-  if (!Number.isInteger(cents)) throw new GameError('Invalid amount.', -99);
-  const p = await target(ctx, playerName);
-  p.cents = Math.max(0, p.cents + cents);
-  await savePlayer(ctx, p);
-  await pushPlayerInfo(ctx, p);
-}
-
 export async function setResources(ctx: Ctx, cityId: number, playerId: number, res: Partial<ResourceSet>) {
   const b = await openOwnCity(ctx, playerId, cityId);
   for (const k of RESOURCE_KEYS) if (res[k] != null) b.city[k] = Math.max(0, Number(res[k]));

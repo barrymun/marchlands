@@ -15,7 +15,8 @@ import {
   buildTimeMs,
   canPlace,
   checkRequirements,
-  coinsForSpeedup,
+  goldForSpeedup,
+  speedupItemGold,
   demolishTimeMs,
   fullDemolishRefund,
   findBuilding,
@@ -36,7 +37,7 @@ import {
 import { mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { buildingBean, heroBean } from '../dto.ts';
-import { activeBuff, addItem, addPrestige, gainResources, pushPlayerInfo, pushResources, spendCents, spendResources, useItemOrCents } from '../helpers.ts';
+import { activeBuff, addItem, addPrestige, gainResources, pushPlayerInfo, pushResources, spendGold, spendResources, useItemOrGold } from '../helpers.ts';
 import { saveCity, saveHero, savePlayer } from '../repo.ts';
 import { checkBeginner } from './player.ts';
 import { clearTavern } from './heroes.ts';
@@ -144,7 +145,7 @@ export async function speedupCost(ctx: Ctx, playerId: number, cityId: number, po
   const b = await ownView(ctx, playerId, cityId);
   const bld = findBuilding(b.city.buildings, positionId);
   if (!bld || bld.status === BuildingStatus.IDLE || bld.endTime < ctx.now) throw new GameError('Invalid position id.', -99);
-  return { coinsNeed: coinsForSpeedup(bld.endTime - ctx.now), timeLeft: bld.endTime - ctx.now };
+  return { goldNeed: goldForSpeedup(bld.endTime - ctx.now), timeLeft: bld.endTime - ctx.now };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -259,12 +260,13 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
   if (itemId === 'free.speed') {
     if (left > scaled(BALANCE.freeSpeedupMs)) throw new GameError('Free speed-up is only available for the last 5 minutes.', -99);
     reduce = left;
-  } else if (itemId === 'coins.speed') {
-    spendCents(ctx, b.player, coinsForSpeedup(left));
+  } else if (itemId === 'gold.speed') {
+    spendGold(b.city, goldForSpeedup(left));
     reduce = left;
   } else if (itemId === 'player.destroy.1.a') {
     if (bld.status !== BuildingStatus.DEMOLISHING) throw new GameError('Dynamite can only speed up demolition.', -99);
-    useItemOrCents(ctx, b.player, itemId, 20);
+    useItemOrGold(ctx, b.player, b.city, itemId, speedupItemGold(itemId));
+    pushResources(ctx, b);
     // demolish the whole building at once: completion removes it entirely
     const next: BuildingState = { ...bld, level: 1, endTime: ctx.now };
     b.city.buildings = b.city.buildings.map((x) => (x.positionId === positionId ? next : x));
@@ -275,9 +277,10 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
   } else {
     const eff = SPEEDUP_ITEMS[itemId];
     if (!eff) throw new GameError('Invalid speed up.', -99);
-    useItemOrCents(ctx, b.player, itemId, eff.cents);
+    useItemOrGold(ctx, b.player, b.city, itemId, speedupItemGold(itemId));
     reduce = scaled(eff.reduce(total, () => ctx.rng.next()));
   }
+  pushResources(ctx, b);
   const next: BuildingState = { ...bld, endTime: Math.max(ctx.now, bld.endTime - reduce) };
   b.city.buildings = b.city.buildings.map((x) => (x.positionId === positionId ? next : x));
   scheduleBuilding(ctx, b, next);

@@ -3,6 +3,8 @@
 
 import { and, count, eq, inArray, ne, sql } from 'drizzle-orm';
 import {
+  goldForCents,
+  itemGoldPrice,
   BALANCE,
   BuildingStatus,
   DAY,
@@ -17,7 +19,7 @@ import {
   lordGear,
 } from '@evony/core';
 import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@evony/db';
-import { viewOwnCity } from '../city.ts';
+import { openOwnCity, viewOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { buffsArray, cityBean, itemsArray } from '../dto.ts';
 import {
@@ -28,11 +30,13 @@ import {
   itemCount,
   playerInfoOf,
   pushPlayerInfo,
+  pushResources,
   removeBuff,
   setBuff,
-  spendCents,
+  spendGold,
+  useItemOrGold,
 } from '../helpers.ts';
-import { citiesOf, findPlayerByName, getCity, getPlayer, savePlayer, type PlayerRow } from '../repo.ts';
+import { citiesOf, findPlayerByName, getCity, getPlayer, saveCity, savePlayer, type PlayerRow } from '../repo.ts';
 import { pickOpenFlat } from './world.ts';
 import { relationBetween } from './relations.ts';
 import { leaveAlliance } from './alliance.ts';
@@ -104,14 +108,16 @@ export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePla
         flag,
         faceUrl,
         sex: input.sex,
-        cents: BALANCE.startingCents,
         items: { 'player.box.present.2': 1, 'consume.1.a': 10 },
         createdAt: ctx.now,
         lastLoginAt: ctx.now,
       })
       .returning();
   }
-  const [city] = await ctx.tx.insert(cities).values(initialCity(player.id, tileId, castleName, ctx.now)).returning();
+  const [city] = await ctx.tx
+    .insert(cities)
+    .values(initialCity(player.id, tileId, castleName, ctx.now))
+    .returning();
   await ctx.tx
     .update(tiles)
     .set({ cityId: city.id, type: TileType.CASTLE, ownerPlayerId: player.id, ownerCityId: null, troops: null, forts: null, state: null, updatedAt: ctx.now })
@@ -240,15 +246,18 @@ export async function saveTutorialStep(ctx: Ctx, playerId: number, step: number)
 // Protection
 // ---------------------------------------------------------------------------------------------
 
-/** furlough.isFurlought: holiday mode, 10 cents per day, max 30 days. */
-export async function startFurlough(ctx: Ctx, playerId: number, days: number) {
+/** furlough.isFurlought: holiday mode, max 30 days, paid per day with a city's gold (orig: 10 cents a day). */
+export async function startFurlough(ctx: Ctx, playerId: number, days: number, cityId: number) {
   if (!Number.isInteger(days) || days < 1 || days > 30) throw new GameError('Invalid number of days.', -99);
-  const p = await getPlayer(ctx, playerId, { lock: true });
+  const b = await openOwnCity(ctx, playerId, cityId);
+  const p = b.player;
   const outgoing = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.playerId, playerId));
   if (Number(outgoing[0].n) > 0) throw new GameError('You must recall all of your troops first.', -77);
-  spendCents(ctx, p, days * 10);
+  spendGold(b.city, days * goldForCents(BALANCE.furloughCentsPerDay));
   setBuff(ctx, p, 'FurloughBuff', 'Holiday', ctx.now + days * DAY);
   p.status = 5;
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
 }
@@ -262,12 +271,15 @@ export async function cancelFurlough(ctx: Ctx, playerId: number) {
 }
 
 /** city.setStopWarState: Truce Agreement (12h) with a 12h cooldown afterwards. */
-export async function startTruce(ctx: Ctx, playerId: number, itemId = 'player.peace.1') {
-  const p = await getPlayer(ctx, playerId, { lock: true });
+export async function startTruce(ctx: Ctx, playerId: number, itemId: string, cityId: number) {
+  // without a Truce Agreement, one is bought with the city's gold
+  const b = await openOwnCity(ctx, playerId, cityId);
+  const p = b.player;
   if (activeBuff(p, 'PlayerPeaceCoolDownBuff', ctx.now)) throw new GameError('Truce Agreement is in cooldown.', -99);
-  if (!['player.peace.1', 'player.truce.dream'].includes(itemId)) throw new GameError('Invalid state.', -99);
-  if (itemCount(p, itemId) > 0) consumeItem(ctx, p, itemId);
-  else spendCents(ctx, p, 30);
+  if (itemId !== 'player.peace.1') throw new GameError('Invalid state.', -99);
+  useItemOrGold(ctx, p, b.city, itemId, itemGoldPrice(itemId) ?? 0);
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
   setBuff(ctx, p, 'PlayerPeaceBuff', 'Truce Agreement activated', ctx.now + BALANCE.truceDurationMs);
   p.status = 2;
   await savePlayer(ctx, p);
@@ -332,10 +344,16 @@ export async function restartPlayer(ctx: Ctx, playerId: number) {
   // armies of others stationed in my cities go home
   if (cityIds.length) {
     const tileIds = cityRows.map((c) => c.tileId);
-    const guests = await ctx.tx.select().from(armies).where(and(inArray(armies.targetTileId, tileIds), ne(armies.playerId, playerId)));
+    const guests = await ctx.tx
+      .select()
+      .from(armies)
+      .where(and(inArray(armies.targetTileId, tileIds), ne(armies.playerId, playerId)));
     for (const g of guests) {
       const back = Math.max(1000, g.reachTime - g.startTime);
-      await ctx.tx.update(armies).set({ direction: 2, startTime: ctx.now, reachTime: ctx.now + back, restTime: 0 }).where(eq(armies.id, g.id));
+      await ctx.tx
+        .update(armies)
+        .set({ direction: 2, startTime: ctx.now, reachTime: ctx.now + back, restTime: 0 })
+        .where(eq(armies.id, g.id));
       ctx.schedule({ type: 'army', dueAt: ctx.now + back, playerId: g.playerId, refKey: `army:${g.id}`, payload: { armyId: g.id } });
     }
   }
@@ -389,7 +407,6 @@ export async function removeCastleSign(ctx: Ctx, playerId: number, tileId: numbe
   await savePlayer(ctx, p);
   return p.castleSigns;
 }
-
 
 // ---------------------------------------------------------------------------------------------
 // Army presets (evony-re): named army compositions for the send-army dialog

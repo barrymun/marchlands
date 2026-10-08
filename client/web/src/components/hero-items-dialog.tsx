@@ -20,15 +20,6 @@ import { api, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact } from '@/lib/format';
 
 const ATTR_LABEL = { power: 'Attack', management: 'Politics', stratagem: 'Intelligence' } as const;
-/** Cents charged when the item is not owned (medals cannot be bought on use). */
-const CENTS: Record<string, number> = {
-  'player.experience.1.a': 8,
-  'player.experience.1.b': 30,
-  'player.experience.1.c': 100,
-  'hero.power.1': 40,
-  'hero.management.1': 40,
-  'hero.intelligence.1': 40,
-};
 
 export function HeroItemsDialog({ hero, cityId, onClose }: { hero: HeroBean | null; cityId: number; onClose: () => void }) {
   const shown = useSticky(hero);
@@ -55,8 +46,6 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
   );
   const row = (itemId: string, effect: string, disabledReason?: string) => {
     const owned = inv.count(itemId);
-    const cents = CENTS[itemId];
-    const affordable = owned > 0 || (cents != null && inv.cents >= cents);
     const price = heroItemGoldPrice(itemId, hero.upgradeExp);
     return (
       <div key={itemId} className="flex items-center justify-between gap-2 rounded-md border p-2 text-sm">
@@ -67,14 +56,9 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
           <div className="text-xs text-muted-foreground">{disabledReason ?? effect}</div>
         </div>
         <div className="flex shrink-0 flex-wrap justify-end gap-1">
-          {(owned > 0 || cents != null) && (
-            <Button
-              size="xs"
-              variant={owned > 0 ? 'default' : 'outline'}
-              disabled={!affordable || !!disabledReason || use.isPending}
-              onClick={() => use.mutate(itemId)}
-            >
-              {owned > 0 ? 'Use' : `${cents} cents`}
+          {owned > 0 && (
+            <Button size="xs" disabled={!!disabledReason || use.isPending} onClick={() => use.mutate(itemId)}>
+              Use
             </Button>
           )}
           {price != null && (
@@ -88,7 +72,7 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
               {fmt(price)} gold
             </Button>
           )}
-          {owned <= 0 && cents == null && price == null && (
+          {owned <= 0 && price == null && (
             <Button size="xs" variant="outline" disabled>
               None
             </Button>
@@ -107,7 +91,7 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
         </DialogTitle>
         <DialogDescription>
           {heroAtMaxLevel(hero) ? 'Max level' : `Experience ${fmtExact(hero.experience)} / ${fmtExact(hero.upgradeExp)}`} · loyalty {hero.loyalty} ·{' '}
-          {fmtExact(gold)} gold in this city · {fmtExact(inv.cents)} cents
+          {fmtExact(gold)} gold in this city
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">

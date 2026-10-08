@@ -4,7 +4,7 @@ import { Bot, X } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { toast } from 'sonner';
 import type { CityBean, MarketMerchant, MarketPriceLevel } from '@evony/api-client';
-import { BALANCE, BuildingType, coinsForSpeedup, merchantAffordable } from '@evony/core';
+import { BALANCE, BuildingType, goldForSpeedup, merchantAffordable } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,8 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Countdown } from '@/components/countdown';
-import { qk, useCommand } from '@/hooks/use-game';
-import { useInventory } from '@/hooks/use-inventory';
+import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { api, unwrap } from '@/lib/api';
 import { fmtExact } from '@/lib/format';
@@ -500,11 +499,12 @@ function MyOrders() {
 /** Only relevant if travel times are re-enabled (BALANCE.marketShipmentBaseMs > 0). */
 function Shipments() {
   const now = useNow();
-  const inv = useInventory();
+  // the receiving city pays to deliver now
+  const castles = usePlayer().data?.castles ?? [];
   const shipments = useQuery({ queryKey: mk.shipments, queryFn: () => unwrap(api.GET('/api/v1/market/shipments')) });
   const rush = useCommand(
     (shipmentId: number) => unwrap(api.POST('/api/v1/market/shipments/{shipmentId}/speedup', { params: { path: { shipmentId } } })),
-    () => [mk.shipments, qk.player],
+    () => [mk.shipments, qk.player, ['city']],
     'Delivered',
   );
   const list = (shipments.data ?? []).filter((s) => s.endTime > now + 1000);
@@ -516,7 +516,8 @@ function Shipments() {
       </CardHeader>
       <CardContent className="grid gap-2">
         {list.map((s) => {
-          const cents = coinsForSpeedup(Math.max(0, s.endTime - now));
+          const gold = goldForSpeedup(Math.max(0, s.endTime - now));
+          const has = castles.find((c) => c.id === s.cityId)?.resource.gold ?? 0;
           return (
             <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2 text-sm">
               <span className="tabular-nums">
@@ -524,8 +525,8 @@ function Shipments() {
               </span>
               <span className="flex items-center gap-2 text-xs text-muted-foreground">
                 arrives in <Countdown endTime={s.endTime} />
-                <Button size="xs" variant="outline" disabled={rush.isPending || inv.cents < cents} onClick={() => rush.mutate(s.id)}>
-                  Deliver now · {fmtExact(cents)} cents
+                <Button size="xs" variant="outline" disabled={rush.isPending || has < gold} onClick={() => rush.mutate(s.id)}>
+                  Deliver now · {fmtExact(gold)} gold
                 </Button>
               </span>
             </div>

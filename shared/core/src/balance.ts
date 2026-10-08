@@ -182,9 +182,10 @@ export const BALANCE = {
   // ---- player ----
   beginnerProtectionMs: 7 * 24 * HOUR, // (orig)
   beginnerTownHallLevel: 5, // (orig)
-  startingCents: 0,
   startingResources: 100_000, // (orig) every resource
   truceDurationMs: 12 * HOUR, // (orig)
+  /** (orig) holiday mode costs 10 cents a day, charged in city gold (goldForCents) */
+  furloughCentsPerDay: 10,
   truceCooldownMs: 12 * HOUR, // (orig)
   teleportCooldownMs: 12 * HOUR, // (orig)
 
@@ -226,7 +227,7 @@ export const BALANCE = {
   /** (evony-re) share of troop training cost saved while a Quartermaster item's buff runs (fortifications pay in full) */
   trainCostReduction: 0.25,
   /** (evony-re) items that can be bought with city gold, and their price (item id -> gold each) */
-  // prices follow the War Ensign's rate (30 cents = 250,000 gold, ~8,333 gold a cent), rounded to 5,000
+  // set prices; every other item the original sold for cents costs goldForCents(its price) (itemGoldPrice)
   goldShop: {
     'player.troop.1.a': 250_000, // War Ensign (30 cents)
     // production boosts, +25% for 1 day (8 cents) / 7 days (50 cents)
@@ -248,9 +249,18 @@ export const BALANCE = {
     'player.reduce.troops.cost.1': 250_000,
     'player.reduce.troops.cost.7': 1_600_000,
   } as Record<string, number>,
-  /** (orig) units of resource per cent in shop.buyResource */
-  shopResourcePerCent: { food: 100_000, wood: 100_000, stone: 50_000, iron: 40_000 },
+  /**
+   * (evony-re) there are no cents: everything the original sold for cents costs city gold at this rate
+   * (the War Ensign's: 30 cents = 250,000 gold), rounded to 5,000 (goldForCents)
+   */
+  goldPerCent: 250_000 / 30,
 } as const;
+
+/** (evony-re) Gold for something the original priced in cents (BALANCE.goldPerCent), rounded to 5,000 (at least 5,000). */
+export function goldForCents(cents: number): number {
+  if (cents <= 0) return 0;
+  return Math.max(5_000, Math.round((cents * BALANCE.goldPerCent) / 5_000) * 5_000);
+}
 
 /** Global multiplier for every timer (GAME_SPEED env). Set once at boot. */
 let gameSpeed = 1;

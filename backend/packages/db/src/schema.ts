@@ -86,8 +86,6 @@ export const players = pgTable(
     allianceJoinedAt: ms('alliance_joined_at').notNull().default(0),
     prestige: doublePrecision('prestige').notNull().default(0),
     honor: doublePrecision('honor').notNull().default(0),
-    /** premium currency ("cents"/"medal" in the client) */
-    cents: integer('cents').notNull().default(0),
     /** nobility title id */
     title: smallint('title').notNull().default(0),
     beginner: boolean('beginner').notNull().default(true),

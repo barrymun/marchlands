@@ -133,12 +133,11 @@ export const CityBean = z
   .meta({ id: 'CityBean' });
 export type CityBean = z.infer<typeof CityBean>;
 
-export const PlayerInfo = PlayerRow.pick({ id: true, sex: true, flag: true, faceUrl: true, cents: true, beginner: true, status: true, allianceId: true })
+export const PlayerInfo = PlayerRow.pick({ id: true, sex: true, flag: true, faceUrl: true, beginner: true, status: true, allianceId: true })
   .extend({
     userName: z.string(),
     prestige: z.number().int(),
     honor: z.number().int(),
-    medal: z.number().int(),
     titleId: z.number().int(),
     titleName: z.string(),
     ranking: z.number().int(),
@@ -159,7 +158,14 @@ export const ItemCount = z.object({ id: z.string(), count: z.number().int() }).m
 export type ItemCount = z.infer<typeof ItemCount>;
 
 export const BuffBean = z
-  .object({ id: z.string(), desc: z.string(), endTime: Ms, param: z.number().optional(), cityId: z.number().int().optional() })
+  .object({
+    id: z.string(),
+    desc: z.string(),
+    endTime: Ms,
+    param: z.number().optional(),
+    cityId: z.number().int().optional(),
+    itemId: z.string().optional().describe('(evony-re) the item last used to set or extend it'),
+  })
   .meta({ id: 'BuffBean' });
 export type BuffBean = z.infer<typeof BuffBean>;
 

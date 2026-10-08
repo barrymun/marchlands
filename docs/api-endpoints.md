@@ -33,7 +33,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/player/flows/{flowId}/repeat` | Switch repeat on (the flow runs again after every run; starts or queues it now) or off (the current run finishes) |
 | POST | `/api/v1/player/flows/{flowId}/run` | Run a flow on cities, each all-or-nothing (or preview it: run and roll back) |
 | POST | `/api/v1/player/flows/{flowId}/stop` | Stop a flow now (a run ends where it is; repeat goes off) |
-| POST | `/api/v1/player/furlough` | Holiday mode, 10 cents/day (furlough.isFurlought) |
+| POST | `/api/v1/player/furlough` | Holiday mode, paid per day with a city's gold (furlough.isFurlought) |
 | DELETE | `/api/v1/player/furlough` | End holiday mode (furlough.cancelFurlought) |
 | POST | `/api/v1/player/items/{itemId}/use` | Use an item (shop.useGoods / shop.useCastleGoods) |
 | POST | `/api/v1/player/rename` | Rename the lord with a New ID (city.modifyUserName) |
@@ -65,7 +65,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | GET | `/api/v1/cities/{cityId}/buildings/{positionId}` | Next-level cost (castle.checkOutUpgrade) |
 | POST | `/api/v1/cities/{cityId}/buildings/{positionId}/cancel` | Cancel construction (castle.cancleBuildCommand) |
 | POST | `/api/v1/cities/{cityId}/buildings/{positionId}/demolish` | Demolish: the whole building at once with BALANCE.instantDemolish, else one level (castle.destructBuilding) |
-| GET | `/api/v1/cities/{cityId}/buildings/{positionId}/speedup` | Coins to finish now (castle.getCoinsNeed) |
+| GET | `/api/v1/cities/{cityId}/buildings/{positionId}/speedup` | Gold to finish now (castle.getCoinsNeed) |
 | POST | `/api/v1/cities/{cityId}/buildings/{positionId}/speedup` | Speed up (castle.speedUpBuildCommand) |
 | POST | `/api/v1/cities/{cityId}/buildings/{positionId}/upgrade` | Upgrade (castle.upgradeBuilding) |
 | GET | `/api/v1/cities/{cityId}/buildings/available` | Buildable types (castle.getAvailableBuildingList*) |
@@ -77,7 +77,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | GET | `/api/v1/cities/{cityId}/research` | Technologies (tech.getResearchList) |
 | POST | `/api/v1/cities/{cityId}/research` | Start research (tech.research) |
 | DELETE | `/api/v1/cities/{cityId}/research` | Cancel research (tech.cancelResearch) |
-| GET | `/api/v1/cities/{cityId}/research/speedup` | Coins to finish now (tech.getCoinsNeed) |
+| GET | `/api/v1/cities/{cityId}/research/speedup` | Gold to finish now (tech.getCoinsNeed) |
 | POST | `/api/v1/cities/{cityId}/research/speedup` | Speed up (tech.speedUpResearch) |
 
 ## troops
@@ -236,17 +236,14 @@ All paths are relative to the server root. Names in parentheses are the original
 | DELETE | `/api/v1/market/orders/{orderId}` | Cancel (trade.cancelTrade) |
 | GET | `/api/v1/market/orders/mine` | My open orders (trade.getMyTradeList) |
 | GET | `/api/v1/market/shipments` | Goods in transit (trade.getTransingTradeList) |
-| POST | `/api/v1/market/shipments/{shipmentId}/speedup` | Instant delivery for cents (trade.speedUpTrans) |
+| POST | `/api/v1/market/shipments/{shipmentId}/speedup` | Instant delivery, paid with the gold of the city receiving it (trade.speedUpTrans) |
 
 ## shop
 
 | Method | Path | Description |
 |---|---|---|
-| POST | `/api/v1/cities/{cityId}/shop/gold` | Buy items with the city gold (BALANCE.goldShop) |
-| POST | `/api/v1/cities/{cityId}/shop/resources` | Spend cents on resources (shop.buyResource) |
+| POST | `/api/v1/cities/{cityId}/shop/gold` | Buy items with the city gold (itemGoldPrice) |
 | GET | `/api/v1/shop` | Items for sale (saleTypeBeans) |
-| POST | `/api/v1/shop/buy` | Buy items with cents (shop.buy) |
-| GET | `/api/v1/shop/resources` | Resources per cent (shop.getBuyResourceInfo) |
 
 ## quests
 
@@ -278,7 +275,6 @@ All paths are relative to the server root. Names in parentheses are the original
 |---|---|---|
 | POST | `/api/v1/admin/accounts/{accountId}/ban` | Ban / unban an account |
 | POST | `/api/v1/admin/broadcast` | System message to everyone (\massmsg) |
-| POST | `/api/v1/admin/cents` | Grant cents |
 | PUT | `/api/v1/admin/cities/{cityId}/buildings` | Set a building level, 0 removes (gamemaster.addBuilding / removeBuilding) |
 | POST | `/api/v1/admin/cities/{cityId}/heroes` | Add a random hero (gamemaster.addHero) |
 | PUT | `/api/v1/admin/cities/{cityId}/resources` | Set resources (gamemaster.setResources) |

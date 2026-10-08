@@ -14,6 +14,7 @@ import {
   HERO_ATTRIBUTE_ITEMS,
   HERO_BOX_QUALITY,
   itemEffect,
+  itemGoldPrice,
   medalId,
   medalOdds,
   type GrantContents,
@@ -42,7 +43,7 @@ export interface ItemInfo {
    */
   use: 'direct' | 'elsewhere' | 'none';
   howTo?: string;
-  /** shop price in cents (0 = not sold) */
+  /** shop price in city gold (0 = not sold; itemGoldPrice) */
   price: number;
 }
 
@@ -65,7 +66,6 @@ function contents(c: GrantContents): string {
   for (const [id, n] of Object.entries(c.items ?? {})) parts.push(`${n} × ${itemConfig(id)?.name.trim() ?? id}`);
   for (const [r, n] of Object.entries(c.resources ?? {})) if (n) parts.push(`${fmt(n)} ${RES_NAMES[r as keyof typeof RES_NAMES]}`);
   for (const [k, n] of Object.entries(c.troops ?? {})) if (n) parts.push(`${fmt(n)} ${TROOP_NAMES[TROOP_ID_BY_KEY[k as TroopKey]]}`);
-  if (c.cents) parts.push(`${fmt(c.cents)} cents`);
   return list(parts);
 }
 
@@ -73,7 +73,6 @@ const MEDAL_BOXES: Record<string, number[]> = {
   'player.box.special.1': [1, 2, 3],
   'player.box.special.2': [4, 5, 6],
   'player.box.special.3': [7, 8, 9],
-  'player.box.present.10': [1, 2, 3, 4],
 };
 
 const SPEEDUPS: Record<string, string> = {
@@ -149,7 +148,6 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
     return { description: `Opens a ${chestFor.name.trim()}.`, use: 'elsewhere', howTo: `Use the ${chestFor.name.trim()}; the key is taken automatically.` };
   const payout = /^player\.box\.gambling\.(food|wood|stone|iron|gold)$/.exec(id);
   if (payout) return { description: `Amulet prize, paid straight into your city as ${RES_NAMES[payout[1] as keyof typeof RES_NAMES]}.`, use: 'none' };
-  if (id === 'player.box.gambling.medal.10') return { description: 'Amulet prize, paid straight to you as cents.', use: 'none' };
 
   const e = itemEffect(id);
   if (!e) return { description: 'Event item with no effect on this server.', use: 'none' };
@@ -162,14 +160,9 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
       return { description: `Locked chest: needs a ${name(e.key)}. Contains ${contents(e.contents())}.`, use: 'direct' };
     case 'box':
       if (MEDAL_BOXES[id]) return { description: `Contains 2–4 each of ${list(MEDAL_BOXES[id].map((l) => name(`hero.loyalty.${l}`)))}.`, use: 'direct' };
-      if (id === 'player.box.wood.1')
-        return { description: 'Contains 2 random common items (speed-ups, Hero Hunting, production items or medals).', use: 'direct' };
-      return {
-        description: 'Package: 3 random common items plus 50,000 food, 50,000 lumber, 25,000 stone and 20,000 iron for the current city.',
-        use: 'direct',
-      };
+      return { description: 'Contains random items.', use: 'direct' };
     case 'amulet':
-      return { description: 'Spin the Amulet: win one of 24 prizes (items, resources or cents); rarer prizes are less likely.', use: 'direct' };
+      return { description: 'Spin the Amulet: win one of 24 prizes (items or resources); rarer prizes are less likely.', use: 'direct' };
     case 'special':
       switch (e.handler) {
         case 'speechText':
@@ -201,7 +194,6 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
         'consume.refreshtavern.1': "Replaces the Inn's hero offers for free.",
         'hero.reset.1': "Un-assigns all of a hero's level points so you can spend them again.",
         'player.peace.1': `Truce: your cities cannot be attacked ${duration(BALANCE.truceDurationMs)}, but you cannot attack either.`,
-        'player.truce.dream': `Truce: your cities cannot be attacked ${duration(BALANCE.truceDurationMs)}, but you cannot attack either.`,
       };
       if (text[id]) return { description: text[id], use: 'elsewhere', howTo: HOW_TO[e.command] };
       return { description: 'Not usable on this server yet.', use: 'none' };
@@ -214,7 +206,7 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
 export function itemInfo(id: string): ItemInfo | undefined {
   const cfg = itemConfig(id);
   if (!cfg) return undefined;
-  return { id, name: cfg.name.trim(), category: ITEM_CATEGORIES[cfg.type] ?? 'Other', price: cfg.buyable ? cfg.cost : 0, ...describe(id) };
+  return { id, name: cfg.name.trim(), category: ITEM_CATEGORIES[cfg.type] ?? 'Other', price: itemGoldPrice(id) ?? 0, ...describe(id) };
 }
 
 /** Amulet prizes paid out directly (never held) and the test item are left out. */
@@ -231,7 +223,7 @@ export interface MedalSources {
   attacks: { cityLevel: number; chance: number }[];
   /** as an Amulet prize (the daily gift is an Amulet) */
   amulet: { chance: number; min: number; max: number } | null;
-  /** boxes and chests a lord can get (shop or Amulet) that hold it */
+  /** boxes and chests a lord can get (gold shop or Amulet) that hold it; price in gold */
   containers: { id: string; name: string; min: number; max: number; always: boolean; price: number; amulet: boolean; key: string | null }[];
   /** one-off quest rewards */
   quests: { name: string; count: number }[];
@@ -251,7 +243,7 @@ export function medalSources(level: number): MedalSources {
   for (const item of ITEMS) {
     const e = itemEffect(item.id);
     if (!e || (e.kind !== 'box' && e.kind !== 'chest')) continue;
-    const price = item.buyable ? item.cost : 0;
+    const price = itemGoldPrice(item.id) ?? 0;
     if (!price && !item.canGamble) continue;
     // random contents: look at many openings
     const rng = seededRng(`medal-sources:${item.id}`);

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, Check, GripVertical, Lock, LockOpen, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, CircleCheck, GripVertical, Lock, LockOpen, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
 import type { CityBean, HeroBean } from '@evony/api-client';
 import { toast } from 'sonner';
 import { BALANCE, BuildingType, HeroStatus, heroAtMaxLevel, heroManagement, mayorProductionBonus, heroPower, heroStratagem, levelsReady } from '@evony/core';
@@ -21,6 +21,7 @@ import { useNow } from '@/hooks/use-now';
 import { api, errorMessage, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, signedRate } from '@/lib/format';
 import { dominantAttribute, heroAttributeValues } from '@/lib/hero-attributes';
+import { STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 const STATUS: Record<number, string> = {
@@ -441,8 +442,8 @@ function HeroBuffs({ hero }: { hero: HeroBean }) {
 function ExpBar({ hero }: { hero: HeroBean }) {
   if (heroAtMaxLevel(hero)) {
     return (
-      <div className="mt-1.5 text-[11px] font-medium text-emerald-600 tabular-nums dark:text-emerald-400">
-        Max level {BALANCE.heroMaxLevel}: grows through gear now
+      <div className={cn('mt-1.5 flex items-center gap-1 text-[11px] font-medium tabular-nums', STATUS_DONE)}>
+        <CircleCheck className="size-3" aria-hidden /> Max level {BALANCE.heroMaxLevel}: grows through gear now
       </div>
     );
   }

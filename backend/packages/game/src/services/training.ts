@@ -13,6 +13,7 @@ import {
   requirementsMet,
   trainBatchMs,
   trainCost,
+  itemGoldPrice,
   troopCostShare,
   troopConfig,
   troopKey,
@@ -39,7 +40,7 @@ import {
 import { cityStats, mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { fortBean, heroBean, troopBean } from '../dto.ts';
-import { addItem, addPrestige, gainResources, itemCount, pushPlayerInfo, pushResources, spendCents, spendResources } from '../helpers.ts';
+import { addPrestige, gainResources, pushPlayerInfo, pushResources, spendResources, useItemOrGold } from '../helpers.ts';
 import { saveCity, saveHero, savePlayer } from '../repo.ts';
 
 export const WALLS_QUEUE = -2;
@@ -305,8 +306,7 @@ export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number
   const { queue, nextQueueId } = queueOf(b, positionId);
   const idx = queue.findIndex((q) => q.queueId === queueId);
   if (idx < 0) throw new GameError('Batch not found.', -99, 404);
-  if (itemCount(b.player, itemId) > 0) addItem(ctx, b.player, itemId, -1);
-  else spendCents(ctx, b.player, fort ? 35 : 30);
+  useItemOrGold(ctx, b.player, b.city, itemId, itemGoldPrice(itemId) ?? 0);
   const batch = queue[idx];
   const next = [...queue];
   if (idx === 0) {
@@ -316,6 +316,7 @@ export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number
   setQueue(b, positionId, next, nextQueueId);
   scheduleHead(ctx, b, positionId, next);
   pushQueues(ctx, b, positionId);
+  pushResources(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, b.player);
 }

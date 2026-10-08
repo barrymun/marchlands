@@ -53,7 +53,6 @@ export const PushSchemas = {
 
   // player
   'server.PlayerInfoUpdate': z.object({ playerInfo: PlayerInfo }),
-  'server.CentsUpdate': z.object({ cents: int }),
   'server.ItemUpdate': z.object({ items: z.array(ItemCount) }),
   'server.PlayerBuffUpdate': z.object({
     buffBean: z.object({ typeId: z.string(), descName: z.string(), endTime: Ms }),

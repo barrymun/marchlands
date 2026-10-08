@@ -3,7 +3,7 @@
 // Effects are declarative; the game service applies them.
 
 import { z } from 'zod';
-import { BALANCE } from './balance.ts';
+import { BALANCE, goldForCents } from './balance.ts';
 import { experienceItemGain } from './heroes.ts';
 import { DAY, HOUR } from './time.ts';
 import { ITEMS, itemConfig } from './data/index.ts';
@@ -13,8 +13,8 @@ import { ResourceSetSchema, TroopCountsSchema, type ResourceSet, type TroopCount
 export type ItemEffect =
   /** timed player buff (stacks by extending) */
   | { kind: 'buff'; buff: string; desc: string; durationMs: number }
-  /** immediate grant of items / resources (to the target city) / troops / cents */
-  | { kind: 'grant'; items?: Record<string, number>; resources?: Partial<ResourceSet>; troops?: TroopCounts; cents?: number }
+  /** immediate grant of items / resources (to the target city) / troops */
+  | { kind: 'grant'; items?: Record<string, number>; resources?: Partial<ResourceSet>; troops?: TroopCounts }
   /** box opened with a key item */
   | { kind: 'chest'; key: string; contents: () => GrantContents }
   /** random contents */
@@ -29,38 +29,10 @@ export const GrantContentsSchema = z.object({
   items: z.record(z.string(), z.number().int()).optional().describe('itemId -> count'),
   resources: ResourceSetSchema.partial().optional(),
   troops: TroopCountsSchema.optional(),
-  cents: z.number().int().optional(),
 });
 export type GrantContents = z.infer<typeof GrantContentsSchema>;
 
 const buff = (buffId: string, desc: string, durationMs: number): ItemEffect => ({ kind: 'buff', buff: buffId, desc, durationMs });
-
-/** Common gamble-pool items used as filler in packages. */
-const COMMON_FILLER = [
-  'consume.2.a',
-  'consume.2.b',
-  'consume.refreshtavern.1',
-  'player.resinc.1',
-  'player.resinc.2',
-  'player.resinc.3',
-  'player.resinc.4',
-  'hero.loyalty.1',
-  'hero.loyalty.2',
-];
-
-function randomItems(rng: Rng, n: number, pool = COMMON_FILLER): Record<string, number> {
-  const out: Record<string, number> = {};
-  for (let i = 0; i < n; i++) {
-    const id = pick(rng, pool);
-    out[id] = (out[id] ?? 0) + 1;
-  }
-  return out;
-}
-
-const PACKAGE_DEFAULT = (rng: Rng): GrantContents => ({
-  items: randomItems(rng, 3),
-  resources: { food: 50_000, wood: 50_000, stone: 25_000, iron: 20_000 },
-});
 
 const EFFECTS: Record<string, ItemEffect> = {
   // ---- chat ----
@@ -98,13 +70,9 @@ const EFFECTS: Record<string, ItemEffect> = {
   'player.reduce.troops.upkeep.7': buff('UpkeepReduceBuff', 'Troop upkeep -50%', 7 * DAY),
   'player.reduce.troops.cost.1': buff('TrainCostReduceBuff', `Troop training cost -${BALANCE.trainCostReduction * 100}%`, DAY),
   'player.reduce.troops.cost.7': buff('TrainCostReduceBuff', `Troop training cost -${BALANCE.trainCostReduction * 100}%`, 7 * DAY),
-  'player.running.shoes': buff('UpkeepReduceBuff', 'Troop upkeep -50%', DAY),
-  'player.santa.stoptoopsupkeep': buff('UpkeepReduceBuff', 'Troop upkeep -50%', DAY),
-  'player.newyear.stoptoopsupkeep': buff('UpkeepReduceBuff', 'Troop upkeep -50%', DAY),
 
   // ---- protection ----
   'player.peace.1': { kind: 'command', command: 'city.truce' },
-  'player.truce.dream': { kind: 'command', command: 'city.truce' },
 
   // ---- city items ----
   'player.heart.1.a': { kind: 'special', handler: 'speechText' },
@@ -120,30 +88,16 @@ const EFFECTS: Record<string, ItemEffect> = {
   'player.box.troop.b': { kind: 'grant', troops: { pikemen: 2000, swordsmen: 1000 } },
   'player.box.troop.c': { kind: 'grant', troops: { lightCavalry: 1000, heavyCavalry: 500 } },
   'player.box.troop.d': { kind: 'grant', troops: { ballista: 100, batteringRam: 50, catapult: 50 } },
-  'player.box.troop.1': { kind: 'grant', troops: { archer: 5000, lightCavalry: 2000 } },
   'player.box.hero.a': { kind: 'special', handler: 'heroBox' },
   'player.box.hero.b': { kind: 'special', handler: 'heroBox' },
   'player.box.hero.c': { kind: 'special', handler: 'heroBox' },
   'player.box.hero.d': { kind: 'special', handler: 'heroBox' },
   'player.box.currently.1': { kind: 'special', handler: 'heroBox' },
-  'player.box.resource.1': { kind: 'grant', resources: { gold: 100_000, food: 500_000, wood: 500_000, stone: 300_000, iron: 200_000 } },
-  'player.box.wood.1': { kind: 'box', contents: (rng) => ({ items: randomItems(rng, 2) }) },
-  'player.box.gambling.medal.300': { kind: 'grant', cents: 300 },
-  'player.box.present.medal.50': { kind: 'grant', cents: 50 },
-  'player.box.present.medal.500': { kind: 'grant', cents: 500 },
-  'player.box.present.medal.3500': { kind: 'grant', cents: 3500 },
   'player.box.present.2': {
     kind: 'grant',
     items: { 'consume.2.a': 5, 'consume.2.b': 3, 'consume.refreshtavern.1': 2, 'player.box.gambling.3': 3, 'consume.1.a': 20 },
     resources: { food: 50_000, wood: 50_000, stone: 50_000, iron: 50_000 },
   },
-  'player.box.present.5': { kind: 'grant', items: { 'hero.loyalty.1': 3, 'hero.loyalty.2': 2, 'hero.loyalty.3': 1 } },
-  'player.box.present.6': { kind: 'grant', items: { 'player.resinc.1': 1, 'player.resinc.2': 1, 'player.resinc.3': 1, 'player.resinc.4': 1 } },
-  'player.box.present.7': { kind: 'grant', items: { 'player.attackinc.1': 1, 'player.defendinc.1': 1, 'player.troop.1.b': 1 } },
-  'player.box.present.10': { kind: 'box', contents: (rng) => medals(rng, [1, 2, 3, 4]) },
-  'player.box.1': { kind: 'chest', key: 'consume.key.1', contents: () => ({ items: { 'consume.2.b': 2, 'player.box.gambling.3': 1 } }) },
-  'player.box.2': { kind: 'chest', key: 'consume.key.2', contents: () => ({ items: { 'consume.2.c': 1, 'player.box.gambling.3': 3, 'hero.loyalty.4': 1 } }) },
-  'player.box.3': { kind: 'chest', key: 'consume.key.3', contents: () => ({ items: { 'consume.2.d': 1, 'player.box.gambling.3': 5, 'hero.loyalty.7': 1 } }) },
 
   // ---- used through dedicated commands ----
   'consume.2.a': { kind: 'command', command: 'speedup' },
@@ -157,7 +111,6 @@ const EFFECTS: Record<string, ItemEffect> = {
   'player.fort.1.c': { kind: 'command', command: 'fortifications.speedup' },
   'consume.move.1': { kind: 'command', command: 'city.move' },
   'player.more.castle.1.a': { kind: 'command', command: 'city.move' },
-  'player.move.castle.1.b': { kind: 'command', command: 'city.move' },
   'consume.changeflag.1': { kind: 'command', command: 'player.flag' },
   'player.name.1.a': { kind: 'command', command: 'player.rename' },
   'consume.refreshtavern.1': { kind: 'command', command: 'heroes.tavern.refresh' },
@@ -175,7 +128,6 @@ const EFFECTS: Record<string, ItemEffect> = {
   'alliance.ritual_of_pact.premium': { kind: 'command', command: 'alliance.useItem' },
   'alliance.ritual_of_pact.ultimate': { kind: 'command', command: 'alliance.useItem' },
 };
-for (let i = 1; i <= 12; i++) if (i !== 3) EFFECTS[`player.box.gambling.${i}`] = { kind: 'amulet' };
 for (const l of [1, 2, 3, 4, 5, 6, 7, 8, 9]) EFFECTS[`hero.loyalty.${l}`] = { kind: 'command', command: 'heroes.useItem' };
 
 function medals(rng: Rng, levels: number[]): GrantContents {
@@ -184,14 +136,9 @@ function medals(rng: Rng, levels: number[]): GrantContents {
   return { items };
 }
 
-/** Effect of using an item, or a generic package for unknown `player.box.present.*` ids. */
+/** Effect of using an item. */
 export function itemEffect(itemId: string): ItemEffect | undefined {
-  const e = EFFECTS[itemId];
-  if (e) return e;
-  if (/^player\.box\.(present|compensation|evony|toolbarbonus|merger)/.test(itemId) && itemConfig(itemId)) {
-    return { kind: 'box', contents: PACKAGE_DEFAULT };
-  }
-  return undefined;
+  return EFFECTS[itemId];
 }
 
 /** Hero-attribute items (Excalibur etc.): +25% of the attribute for 24h as a buff bonus. */
@@ -261,7 +208,6 @@ function gambleCount(id: string, rng: Rng): number {
   if (id === 'player.box.gambling.food' || id === 'player.box.gambling.wood') return q ? 250_000 : 500_000;
   if (id === 'player.box.gambling.stone' || id === 'player.box.gambling.gold') return q ? 150_000 : 300_000;
   if (id === 'player.box.gambling.iron') return q ? 100_000 : 200_000;
-  if (id === 'player.box.gambling.medal.10') return 10;
   if (['player.heart.1.a', 'player.queue.building', 'player.gold.1.a', 'player.gold.1.b'].includes(id)) return p ? 10 : 5;
   return 1;
 }
@@ -300,11 +246,10 @@ export function amuletPrize(itemId: string): { chance: number; min: number; max:
   return { chance: AMULET_RARITY_SHARE[r] / buckets[r].length, min: Math.min(...counts), max: Math.max(...counts) };
 }
 
-/** Resources/cents an amulet slot pays out directly instead of as an item. */
-export function amuletDirectPayout(slotId: string): { resource?: keyof ResourceSet; cents?: boolean } | undefined {
+/** Resources an amulet slot pays out directly instead of as an item. */
+export function amuletDirectPayout(slotId: string): { resource?: keyof ResourceSet } | undefined {
   const m = /^player\.box\.gambling\.(food|wood|stone|iron|gold)$/.exec(slotId);
   if (m) return { resource: m[1] as keyof ResourceSet };
-  if (slotId === 'player.box.gambling.medal.10') return { cents: true };
   return undefined;
 }
 
@@ -399,4 +344,15 @@ export function rollMedalDrops(level: number, rng: Rng): Record<string, number> 
     if (o.third > 0 && rng.next() < o.third) add(randInt(rng, o.extra[0], o.extra[1]));
   }
   return out;
+}
+
+/**
+ * (evony-re) Gold price of an item in the shop (bought with a city's gold): its set price
+ * (BALANCE.goldShop), or the original's cents price in gold (goldForCents); null when not for sale.
+ */
+export function itemGoldPrice(itemId: string): number | null {
+  const set = BALANCE.goldShop[itemId];
+  if (set != null) return set;
+  const cfg = itemConfig(itemId);
+  return cfg?.buyable && cfg.cost > 0 ? goldForCents(cfg.cost) : null;
 }

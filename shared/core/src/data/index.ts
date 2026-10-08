@@ -99,7 +99,41 @@ export const TROOPS = troopRows as TroopConfig[];
 export const REMOVED_ITEMS: readonly string[] = [
   // Merchant Fleet: halved market shipment time (market trades settle instantly here)
   'consume.transaction.1',
+  // lockboxes and their keys: no key can be obtained, so no box can be opened
+  'player.box.1',
+  'player.box.2',
+  'player.box.3',
+  'consume.key.1',
+  'consume.key.2',
+  'consume.key.3',
+  // the same upkeep buff as Vesta's Blessing, from past events
+  'player.santa.stoptoopsupkeep',
+  'player.newyear.stoptoopsupkeep',
+  'player.running.shoes',
+  // never sold, won or granted here
+  'player.box.gambling.medal.300', // Closed Beta Awards
+  'player.truce.dream',
+  'player.move.castle.1.b', // Pioneer Express Teleport
+  'player.box.resource.1', // Grand Resources
+  'player.box.troop.1', // Superb Regiments
+  'player.box.wood.1', // Wooden Chest
+  'player.box.test.1', // Test Item (sold for cents, did nothing)
+  // there are no cents: the Amulet prize that paid them
+  'player.box.gambling.medal.10',
 ];
+/**
+ * (evony-re) legacy item families removed from this game: event, promotion and compensation packages
+ * (every gift package but the Newbies Package each new lord gets), event keys and tokens, and the Amulet
+ * copies other than the one sold and won (player.box.gambling.3)
+ */
+const REMOVED_ITEM_PATTERNS: readonly RegExp[] = [
+  /^player\.box\.present\.(?!2$)/,
+  /^player\.box\.(compensation|merger|evony|toolbarbonus)/,
+  /^player\.key\./,
+  /^player\.(halloween|cupid|irish|easter)\./,
+  /^player\.box\.gambling\.(?!3$)\d+$/,
+];
+export const isRemovedItem = (id: string) => REMOVED_ITEMS.includes(id) || REMOVED_ITEM_PATTERNS.some((r) => r.test(id));
 /** (evony-re) items this game adds to the legacy ones (sold for city gold, BALANCE.goldShop) */
 const EXTRA_ITEMS: ItemConfig[] = [
   {
@@ -126,7 +160,7 @@ const EXTRA_ITEMS: ItemConfig[] = [
     rarity: 0,
   },
 ];
-export const ITEMS = [...(itemRows as ItemConfig[]).filter((i) => !REMOVED_ITEMS.includes(i.id)), ...EXTRA_ITEMS];
+export const ITEMS = [...(itemRows as ItemConfig[]).filter((i) => !isRemovedItem(i.id)), ...EXTRA_ITEMS];
 export const QUESTS = questRows as QuestConfig[];
 
 const buildingIndex = new Map<string, BuildingLevelConfig>(BUILDINGS.map((b) => [`${b.typeId}:${b.level}`, b]));

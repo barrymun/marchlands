@@ -73,7 +73,9 @@ const costShape = { gold: int(), food: int(), wood: int(), stone: int(), iron: i
 export const RequirementCheck = RequirementCheckSchema.meta({ id: 'RequirementCheck' });
 export type RequirementCheck = z.infer<typeof RequirementCheck>;
 
-export const CitySpeedupCost = z.object({ coinsNeed: int(), timeLeft: z.number().describe('ms') }).meta({ id: 'CitySpeedupCost' });
+export const CitySpeedupCost = z
+  .object({ goldNeed: int().describe('city gold to finish now'), timeLeft: z.number().describe('ms') })
+  .meta({ id: 'CitySpeedupCost' });
 export type CitySpeedupCost = z.infer<typeof CitySpeedupCost>;
 
 // ---- interior ----

@@ -83,8 +83,11 @@ export const ChangeFaceBody = z.object({ faceUrl: z.string(), sex: z.number().in
 export const ChangeFlagBody = z.object({ flag: z.string() });
 export const RenamePlayerBody = z.object({ userName: z.string() });
 export const TutorialStepBody = z.object({ step: z.number().int().min(0) });
-export const FurloughBody = z.object({ days: z.number().int() });
-export const TruceBody = z.object({ itemId: z.string().default('player.peace.1') });
+export const FurloughBody = z.object({ days: z.number().int(), cityId: zId.describe('the city whose gold pays') });
+export const TruceBody = z.object({
+  itemId: z.string().default('player.peace.1'),
+  cityId: zId.describe('the city whose gold pays when no Truce Agreement is owned'),
+});
 export const BookmarkBody = z.object({ tileId: zId });
 export const ArmyPreset = ArmyPresetSchema.meta({ id: 'ArmyPreset' });
 export type ArmyPreset = z.infer<typeof ArmyPreset>;

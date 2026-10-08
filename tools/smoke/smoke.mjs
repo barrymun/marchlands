@@ -110,8 +110,7 @@ async function main() {
       await ok(gm.token, 'PUT', `/admin/cities/${cid}/buildings`, { playerId: pid, positionId: pos, typeId: type, level: lvl });
     }
     await ok(gm.token, 'PUT', `/admin/cities/${cid}/resources`, { playerId: pid, gold: 5e6, food: 5e6, wood: 5e6, stone: 5e6, iron: 5e6 });
-    await ok(gm.token, 'POST', '/admin/cents', { playerName: a.state.playerInfo.userName, cents: 5000 });
-    check(true, 'admin fast-forward (buildings, resources, cents)');
+    check(true, 'admin fast-forward (buildings, resources)');
     // demolition is instant and removes the whole building (BALANCE.instantDemolish)
     await ok(gm.token, 'PUT', `/admin/cities/${cid}/buildings`, { playerId: pid, positionId: 20, typeId: 1, level: 3 });
     const before = await ok(a.token, 'GET', `/cities/${cid}`);
@@ -135,11 +134,11 @@ async function main() {
     const r3 = await call(a.token, 'POST', `/cities/${cid}/research`, { techId: others[1] });
     check(r3.ok !== 1, 'third concurrent research rejected');
   }
-  const ambiguous = await call(a.token, 'POST', `/cities/${cid}/research/speedup`, { itemId: 'coins.speed' });
+  const ambiguous = await call(a.token, 'POST', `/cities/${cid}/research/speedup`, { itemId: 'gold.speed' });
   check(ambiguous.ok !== 1, 'speed-up without techId rejected while two run');
-  await ok(a.token, 'POST', `/cities/${cid}/research/speedup`, { itemId: 'coins.speed', techId: 8 });
+  await ok(a.token, 'POST', `/cities/${cid}/research/speedup`, { itemId: 'gold.speed', techId: 8 });
   await until(async () => (await ok(a.token, 'GET', '/player')).research['8']?.level === 1, 'military science completes');
-  check(true, 'research completes after coin speed-up');
+  check(true, 'research completes after a gold speed-up');
   await ok(a.token, 'DELETE', `/cities/${cid}/research?techId=${others[0]}`);
   check((await ok(a.token, 'GET', `/cities/${cid}/research`)).researchingIds.length === 0, 'second research cancelled by techId');
 
@@ -360,10 +359,18 @@ async function main() {
   check(true, 'alliance chat push received');
 
   // ---- shop / items ----
-  await ok(a.token, 'POST', '/shop/buy', { itemId: 'player.box.gambling.3', amount: 2 });
+  // there are no cents: the shop sells for city gold
+  const playerNow = await ok(a.token, 'GET', '/player');
+  check(!('cents' in playerNow.playerInfo), 'no cents on the lord');
+  const goldBefore = (await ok(a.token, 'GET', `/cities/${cid}`)).resource.gold;
+  const amulets = await ok(a.token, 'POST', `/cities/${cid}/shop/gold`, { itemId: 'player.box.gambling.3', amount: 2 });
+  check(
+    amulets.gold === 80_000 && goldBefore - (await ok(a.token, 'GET', `/cities/${cid}`)).resource.gold >= 79_000,
+    'Amulets bought with city gold (5 cents = 40,000 each)',
+  );
   const amulet = await ok(a.token, 'POST', '/player/items/player.box.gambling.3/use', { cityId: cid });
   check(amulet.amulet?.slots.length === 24, `amulet won ${amulet.amulet?.prize.count} x ${amulet.amulet?.prize.id}`);
-  await ok(a.token, 'POST', '/shop/buy', { itemId: 'player.resinc.1', amount: 1 });
+  await ok(a.token, 'POST', `/cities/${cid}/shop/gold`, { itemId: 'player.resinc.1', amount: 1 });
   await ok(a.token, 'POST', '/player/items/player.resinc.1/use', {});
   const ps = await ok(a.token, 'GET', '/player');
   check(

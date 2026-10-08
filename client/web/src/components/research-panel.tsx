@@ -11,6 +11,8 @@ import { CostList, Requirements } from '@/components/cost-list';
 import { SpeedupOptions } from '@/components/speedup-options';
 import { qk, useCommand } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
+import { STATUS_DONE } from '@/lib/tones';
+import { cn } from '@/lib/utils';
 
 export function ResearchPanel({ city }: { city: CityBean }) {
   const path = { cityId: city.id };
@@ -54,8 +56,8 @@ export function ResearchPanel({ city }: { city: CityBean }) {
       {allDone ? (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
-              <CircleCheck className="size-4" /> All research complete
+            <CardTitle className="flex items-center gap-1.5 text-sm">
+              <CircleCheck className={cn('size-4', STATUS_DONE)} aria-hidden /> All research complete
             </CardTitle>
             <CardDescription>Every one of the {list.data.techs.length} technologies is at its maximum level.</CardDescription>
           </CardHeader>
@@ -179,7 +181,13 @@ function ResearchJob({ city, tech }: { city: CityBean; tech: Tech }) {
         {tech.name} → Lv {tech.level + 1}
       </span>
       <TimerBar startTime={tech.startTime} endTime={tech.endTime} />
-      <SpeedupOptions endTime={tech.endTime} coinsNeed={coins.data?.coinsNeed} pending={speedup.isPending} onUse={(itemId) => speedup.mutate(itemId)} />
+      <SpeedupOptions
+        endTime={tech.endTime}
+        goldNeed={coins.data?.goldNeed}
+        gold={city.resource.gold}
+        pending={speedup.isPending}
+        onUse={(itemId) => speedup.mutate(itemId)}
+      />
       <Button size="sm" variant="outline" className="justify-self-start" onClick={() => cancel.mutate(undefined)}>
         Cancel
       </Button>

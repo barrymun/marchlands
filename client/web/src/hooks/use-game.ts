@@ -125,9 +125,6 @@ export function usePushSync(enabled: boolean): PushStatus {
       push.on('server.PlayerInfoUpdate', ({ playerInfo }) =>
         qc.setQueryData(qk.player, (p: ReturnType<typeof usePlayer>['data']) => (p ? { ...p, playerInfo } : p)),
       ),
-      push.on('server.CentsUpdate', ({ cents }) =>
-        qc.setQueryData(qk.player, (p: ReturnType<typeof usePlayer>['data']) => (p ? { ...p, playerInfo: { ...p.playerInfo, cents } } : p)),
-      ),
       push.on('server.ItemUpdate', () => void qc.invalidateQueries({ queryKey: qk.player })),
       push.on('server.SelfArmysUpdate', () => void qc.invalidateQueries({ queryKey: qk.armies })),
       push.on('server.FriendArmysUpdate', () => void qc.invalidateQueries({ queryKey: qk.armies })),

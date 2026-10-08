@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { itemConfig, TITLES, titleOf } from '@evony/core';
+import { itemConfig, itemGoldPrice, TITLES, titleOf } from '@evony/core';
+import type { CityBean } from '@evony/api-client';
 import { Check, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,24 +12,24 @@ import { Countdown } from '@/components/countdown';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
+import { fmt } from '@/lib/format';
 
 const NEW_ID = 'player.name.1.a';
 const FLAG = 'consume.changeflag.1';
-const TRUCES = ['player.peace.1', 'player.truce.dream'];
-const TRUCE_CENTS = 30;
+const TRUCE = 'player.peace.1';
 
-/** Lord-wide item actions: rename (New ID), change flag (National Flag), truce. */
-export function LordDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+/** Lord-wide item actions: rename (New ID), change flag (National Flag), truce (bought with `city`'s gold when none is owned). */
+export function LordDialog({ open, onClose, city }: { open: boolean; onClose: () => void; city?: CityBean }) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-md">
-        <LordForm />
+        <LordForm city={city} />
       </DialogContent>
     </Dialog>
   );
 }
 
-function LordForm() {
+function LordForm({ city }: { city?: CityBean }) {
   const player = usePlayer();
   const inv = useInventory();
   const info = player.data?.playerInfo;
@@ -37,7 +38,12 @@ function LordForm() {
   const refresh = () => [qk.player];
   const rename = useCommand(() => unwrap(api.POST('/api/v1/player/rename', { body: { userName: name.trim() } })), refresh, 'Lord renamed');
   const changeFlag = useCommand(() => unwrap(api.POST('/api/v1/player/flag', { body: { flag: flag.trim() } })), refresh, 'Flag changed');
-  const truce = useCommand((itemId: string) => unwrap(api.POST('/api/v1/player/truce', { body: { itemId } })), refresh, 'Truce in effect');
+  const truce = useCommand(
+    (itemId: string) => unwrap(api.POST('/api/v1/player/truce', { body: { itemId, cityId: city!.id } })),
+    () => [qk.player, ...(city ? [qk.city(city.id)] : [])],
+    'Truce in effect',
+  );
+  const truceGold = itemGoldPrice(TRUCE) ?? 0;
   const now = Date.now();
   const truceBuff = player.data?.buffs.find((b) => b.id === 'PlayerPeaceBuff' && b.endTime > now);
   const truceCooldown = player.data?.buffs.find((b) => b.id === 'PlayerPeaceCoolDownBuff' && b.endTime > now);
@@ -47,7 +53,7 @@ function LordForm() {
       <DialogHeader>
         <DialogTitle>Lord {info?.userName}</DialogTitle>
         <DialogDescription>
-          {info?.titleName} · flag {info?.flag} · {info?.cents ?? 0} cents
+          {info?.titleName} · flag {info?.flag}
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
@@ -98,21 +104,20 @@ function LordForm() {
           </div>
           <p className="text-xs text-muted-foreground">Your cities cannot be attacked for 12 hours, and you cannot attack either. A cooldown follows.</p>
           <div className="flex flex-wrap gap-2">
-            {TRUCES.map((id) => {
-              const owned = inv.count(id);
-              if (id === 'player.truce.dream' && owned === 0) return null;
+            {(() => {
+              const owned = inv.count(TRUCE);
               return (
                 <Button
-                  key={id}
                   size="sm"
                   variant={owned > 0 ? 'default' : 'outline'}
-                  disabled={!!truceBuff || !!truceCooldown || truce.isPending || (owned === 0 && inv.cents < TRUCE_CENTS)}
-                  onClick={() => truce.mutate(id)}
+                  disabled={!city || !!truceBuff || !!truceCooldown || truce.isPending || (owned === 0 && city.resource.gold < truceGold)}
+                  title={owned > 0 ? undefined : `Bought with ${city?.name ?? 'the city'}'s gold`}
+                  onClick={() => truce.mutate(TRUCE)}
                 >
-                  {itemConfig(id)?.name} · {owned > 0 ? `×${owned}` : `${TRUCE_CENTS} cents`}
+                  {itemConfig(TRUCE)?.name} · {owned > 0 ? `×${owned}` : `${fmt(truceGold)} gold`}
                 </Button>
               );
-            })}
+            })()}
           </div>
         </div>
       </div>

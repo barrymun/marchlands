@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { CircleCheck, Plus } from 'lucide-react';
 import type { BuildingBean, CityBean } from '@evony/api-client';
 import { BALANCE, buildingHeroExp, buildingLevel, BuildingType, heroManagement, HeroStatus, heroTimeMultiplier } from '@evony/core';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ import { SpeedupOptions } from '@/components/speedup-options';
 import { qk, useCommand } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
 import { buildingName, fmt } from '@/lib/format';
+import { STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 const INSIDE = Array.from({ length: 32 }, (_, i) => i);
@@ -342,7 +343,8 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
           <SpeedupOptions
             endTime={building.endTime}
             demolishing={building.status === 2}
-            coinsNeed={coins.data?.coinsNeed}
+            goldNeed={coins.data?.goldNeed}
+            gold={city.resource.gold}
             pending={speedup.isPending}
             onUse={(itemId) => speedup.mutate(itemId)}
           />
@@ -390,7 +392,11 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
               <Requirements list={next.requirements} />
             </div>
           ) : (
-            info.data && <p className="text-sm text-muted-foreground">Maximum level reached.</p>
+            info.data && (
+              <p className={cn('flex items-center gap-1.5 text-sm', STATUS_DONE)}>
+                <CircleCheck className="size-4" aria-hidden /> Maximum level reached.
+              </p>
+            )
           )}
           {pos !== -1 && pos !== -2 && building.level > 0 && (
             <>

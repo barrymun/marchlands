@@ -85,12 +85,12 @@ export default async function playerRoutes(app: ZApp) {
   app.post('/player/tutorial', s('Store tutorial progress (common.step)', Empty, { body: TutorialStepBody }), (req) =>
     game(req, (ctx, pid) => player.saveTutorialStep(ctx, pid, req.body.step)),
   );
-  app.post('/player/furlough', s('Holiday mode, 10 cents/day (furlough.isFurlought)', Empty, { body: FurloughBody }), (req) =>
-    game(req, (ctx, pid) => player.startFurlough(ctx, pid, req.body.days)),
+  app.post('/player/furlough', s("Holiday mode, paid per day with a city's gold (furlough.isFurlought)", Empty, { body: FurloughBody }), (req) =>
+    game(req, (ctx, pid) => player.startFurlough(ctx, pid, req.body.days, req.body.cityId)),
   );
   app.delete('/player/furlough', s('End holiday mode (furlough.cancelFurlought)', Empty), (req) => game(req, (ctx, pid) => player.cancelFurlough(ctx, pid)));
   app.post('/player/truce', s('Truce Agreement (city.setStopWarState)', Empty, { body: TruceBody }), (req) =>
-    game(req, (ctx, pid) => player.startTruce(ctx, pid, req.body.itemId)),
+    game(req, (ctx, pid) => player.startTruce(ctx, pid, req.body.itemId, req.body.cityId)),
   );
   app.post('/player/restart', s('Delete everything and start over (common.deleteUserAndRestart)', Empty), (req) =>
     game(req, (ctx, pid) => player.restartPlayer(ctx, pid)),

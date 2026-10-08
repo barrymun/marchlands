@@ -26,7 +26,7 @@ export interface QuestDef {
   name: string;
   description: string;
   targets: { name: string; target: QuestTarget }[];
-  award: { resources?: Partial<ResourceSet>; items?: Record<string, number>; cents?: number };
+  award: { resources?: Partial<ResourceSet>; items?: Record<string, number> };
   /** quests that must be claimed first */
   after?: number[];
 }
@@ -101,7 +101,7 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   // 14 Fortification
   q(14, 'Traps', 'Build 100 traps on your walls.', [{ name: '100 Traps', target: { kind: 'troops', key: 'trap', count: 100 } }], { resources: res(2000, 10000, 2000, 1000) }),
   // 16 City Expansion
-  q(16, 'Second City', 'Found or conquer a second city.', [{ name: 'Own 2 cities', target: { kind: 'cities', count: 2 } }], { cents: 20 }),
+  q(16, 'Second City', 'Found or conquer a second city.', [{ name: 'Own 2 cities', target: { kind: 'cities', count: 2 } }], { resources: { gold: 165_000 } }), // (orig 20 cents)
   // 15 Colony
   q(15, 'Valley Lord', 'Occupy a valley.', [{ name: 'Own 1 valley', target: { kind: 'valleys', count: 1 } }], { resources: res(5000, 5000, 5000, 5000) }),
   // 20 Population Increase

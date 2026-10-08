@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import type { HeroBean } from '@evony/api-client';
-import { HeroStatus, heroManagement, mayorProductionBonus } from '@evony/core';
+import { HeroStatus, heroManagement, itemGoldPrice, mayorProductionBonus } from '@evony/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
-import { signedRate } from '@/lib/format';
+import { fmt, signedRate } from '@/lib/format';
 
 const STATS = [
   { key: 'management', label: 'Politics', hint: 'mayor: production and build speed', added: 'managementAdded', buff: 'managementBuffAdded' },
@@ -18,7 +18,6 @@ const STATS = [
 type StatKey = (typeof STATS)[number]['key'];
 
 const HOLY_WATER = 'hero.reset.1';
-const RESET_CENTS = 20;
 
 /** Spend a hero's unassigned points (and optionally reset them). `fieldOutput` previews a mayor's production change. */
 export function HeroPointsDialog({ hero, cityId, fieldOutput, onClose }: { hero: HeroBean | null; cityId: number; fieldOutput: number; onClose: () => void }) {
@@ -52,8 +51,10 @@ function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBean; cit
   const reset = useCommand(() => unwrap(api.POST('/api/v1/heroes/{heroId}/reset', { params: { path: { heroId: hero.id } } })), refresh, 'Points reset');
 
   const holyWater = player.data?.items.find((i) => i.id === HOLY_WATER)?.count ?? 0;
-  const cents = player.data?.playerInfo.cents ?? 0;
-  const canReset = holyWater > 0 || cents >= RESET_CENTS;
+  // without Holy Water, one is bought with the hero's city gold
+  const resetGold = itemGoldPrice(HOLY_WATER) ?? 0;
+  const cityGold = player.data?.castles.find((c) => c.id === cityId)?.resource.gold ?? 0;
+  const canReset = holyWater > 0 || cityGold >= resetGold;
   const assigned = hero.level - hero.remainPoint;
   const isMayor = hero.status === HeroStatus.MAYOR;
   // change in the mayor's production bonus from the added politics (soft-capped: BALANCE.heroSoftCap)
@@ -118,7 +119,7 @@ function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBean; cit
         <Separator />
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs text-muted-foreground">
-            Reset all {assigned} assigned points · {holyWater > 0 ? `uses 1 Holy Water (${holyWater} owned)` : `${RESET_CENTS} cents (no Holy Water)`}
+            Reset all {assigned} assigned points · {holyWater > 0 ? `uses 1 Holy Water (${holyWater} owned)` : `${fmt(resetGold)} gold for a Holy Water`}
           </span>
           <Button size="xs" variant="outline" disabled={!canReset || assigned === 0 || reset.isPending} onClick={() => reset.mutate(undefined)}>
             Reset

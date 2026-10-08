@@ -133,7 +133,7 @@ export default async function cityRoutes(app: ZApp) {
   );
   app.get(
     '/cities/:cityId/buildings/:positionId/speedup',
-    s(tags.buildings, 'Coins to finish now (castle.getCoinsNeed)', CitySpeedupCost, { params: CityPositionParams }),
+    s(tags.buildings, 'Gold to finish now (castle.getCoinsNeed)', CitySpeedupCost, { params: CityPositionParams }),
     (req) => game(req, (ctx, pid) => buildings.speedupCost(ctx, pid, req.params.cityId, req.params.positionId)),
   );
   app.post(
@@ -158,7 +158,7 @@ export default async function cityRoutes(app: ZApp) {
   );
   app.get(
     '/cities/:cityId/research/speedup',
-    s(tags.research, 'Coins to finish now (tech.getCoinsNeed)', CitySpeedupCost, { params: zCityParams, querystring: ResearchTechQuery }),
+    s(tags.research, 'Gold to finish now (tech.getCoinsNeed)', CitySpeedupCost, { params: zCityParams, querystring: ResearchTechQuery }),
     (req) => game(req, (ctx, pid) => research.researchSpeedupCost(ctx, pid, req.params.cityId, req.query.techId)),
   );
   app.post(

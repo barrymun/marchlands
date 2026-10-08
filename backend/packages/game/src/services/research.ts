@@ -6,7 +6,8 @@ import {
   BuildingType,
   buildingLevel,
   checkRequirements,
-  coinsForSpeedup,
+  goldForSpeedup,
+  speedupItemGold,
   GameError,
   prestigeOf,
   PrestigeAction,
@@ -31,7 +32,7 @@ import { loadBundle, mayorOf, mayorStats, openOwnCity, settleAndReport, viewCity
 import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';
 import { resyncHeroGear } from './heroes.ts';
-import { addPrestige, gainResources, pushPlayerInfo, pushResources, spendCents, spendResources, useItemOrCents } from '../helpers.ts';
+import { addPrestige, gainResources, pushPlayerInfo, pushResources, spendGold, spendResources, useItemOrGold } from '../helpers.ts';
 import { citiesOf, getPlayer, saveCity, saveHero, savePlayer, type PlayerRow } from '../repo.ts';
 
 const refKey = (playerId: number, techId: number) => `research:${playerId}:${techId}`;
@@ -134,12 +135,14 @@ export async function researchSpeedupCost(ctx: Ctx, playerId: number, cityId: nu
   const p = await getPlayer(ctx, playerId);
   const techId = pickResearch(p.research, cityId, which);
   const left = Math.max(0, (p.research[techId].endTime ?? 0) - ctx.now);
-  return { coinsNeed: coinsForSpeedup(left), timeLeft: left };
+  return { goldNeed: goldForSpeedup(left), timeLeft: left };
 }
 
 /** tech.speedUpResearch */
 export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number, itemId: string, which?: number) {
-  const p = await getPlayer(ctx, playerId, { lock: true });
+  // the researching city pays in gold for what is not owned
+  const b = await openOwnCity(ctx, playerId, cityId);
+  const p = b.player;
   const techId = pickResearch(p.research, cityId, which);
   const r = p.research[techId];
   const end = r.endTime!;
@@ -148,19 +151,21 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
   if (itemId === 'free.speed') {
     if (left > scaled(BALANCE.freeSpeedupMs)) throw new GameError('Free speed-up is only available for the last 5 minutes.', -99);
     reduce = left;
-  } else if (itemId === 'coins.speed') {
-    spendCents(ctx, p, coinsForSpeedup(left));
+  } else if (itemId === 'gold.speed') {
+    spendGold(b.city, goldForSpeedup(left));
     reduce = left;
   } else {
     const eff = SPEEDUP_ITEMS[itemId];
     if (!eff) throw new GameError('Invalid speed up.', -99);
-    useItemOrCents(ctx, p, itemId, eff.cents);
+    useItemOrGold(ctx, p, b.city, itemId, speedupItemGold(itemId));
     reduce = scaled(eff.reduce(end - (r.startTime ?? ctx.now), () => ctx.rng.next()));
   }
   const newEnd = Math.max(ctx.now, end - reduce);
   p.research = { ...p.research, [techId]: { ...r, endTime: newEnd } };
   ctx.schedule({ type: 'research', dueAt: newEnd, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
   ctx.push(playerId, 'server.ResearchUpdate', { castleId: cityId, typeId: techId, endTime: newEnd });
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
   await savePlayer(ctx, p);
   return { endTime: newEnd };
 }

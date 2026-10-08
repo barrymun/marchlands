@@ -94,6 +94,8 @@ export const BuffStateSchema = z.object({
   param: z.number().optional(),
   /** city-scoped buffs */
   cityId: z.number().int().optional(),
+  /** (evony-re) the item last used to set or extend it (items sharing a buff, e.g. 1-day and 7-day ones) */
+  itemId: z.string().optional(),
 });
 export type BuffState = z.infer<typeof BuffStateSchema>;
 

@@ -1,7 +1,21 @@
 // Market, shop, quests, rankings, static game configuration and operator tools.
 
 import { z } from 'zod';
-import { BALANCE, BUILDINGS, BUILDING_NAMES, ITEMS, itemInfo, QUESTS, RESEARCH, STATE_NAMES, TECH_NAMES, TITLES, TROOPS, getGameSpeed } from '@evony/core';
+import {
+  BALANCE,
+  BUILDINGS,
+  BUILDING_NAMES,
+  ITEMS,
+  itemGoldPrice,
+  itemInfo,
+  QUESTS,
+  RESEARCH,
+  STATE_NAMES,
+  TECH_NAMES,
+  TITLES,
+  TROOPS,
+  getGameSpeed,
+} from '@evony/core';
 import {
   AccountIdParams,
   AdminAddedHero,
@@ -9,7 +23,6 @@ import {
   AdminBanBody,
   AdminBroadcastBody,
   AdminCityStatsBody,
-  AdminGrantCentsBody,
   AdminGrantItemsBody,
   AdminMailBody,
   AdminMuteBody,
@@ -18,7 +31,6 @@ import {
   AdminSetBuildingBody,
   AdminSetResourcesBody,
   AdminSetTechnologyBody,
-  BuyResourcesBody,
   GoldShopBuyBody,
   GoldShopBuyResult,
   ClaimQuestBody,
@@ -47,10 +59,7 @@ import {
   RankingPlayerPage,
   RankingQuery,
   ShipmentIdParams,
-  ShopBuyBody,
-  ShopBuyResult,
   ShopCategory,
-  ShopResourceRates,
   StaticConfig,
 } from '@evony/contracts';
 import { admin, market, quests, rankings, runGame, shop } from '@evony/game';
@@ -80,9 +89,9 @@ export default async function economyRoutes(app: ZApp) {
         buildings: BUILDINGS,
         research: RESEARCH,
         troops: TROOPS,
-        items: ITEMS.map((i) => {
+        items: ITEMS.map(({ cost: _cents, buyable: _buyable, ...i }) => {
           const { category, description, use, howTo } = itemInfo(i.id)!;
-          return { ...i, category, description, use, howTo };
+          return { ...i, goldPrice: itemGoldPrice(i.id), category, description, use, howTo };
         }),
         questGroups: QUESTS,
         titles: TITLES,
@@ -132,28 +141,16 @@ export default async function economyRoutes(app: ZApp) {
     );
     secure.post(
       '/market/shipments/:shipmentId/speedup',
-      s(tags.market, 'Instant delivery for cents (trade.speedUpTrans)', Empty, { params: ShipmentIdParams }),
+      s(tags.market, 'Instant delivery, paid with the gold of the city receiving it (trade.speedUpTrans)', Empty, { params: ShipmentIdParams }),
       (req) => game(req, (ctx, pid) => market.speedupShipment(ctx, pid, req.params.shipmentId)),
     );
 
     // ---- shop ----
     secure.get('/shop', s(tags.shop, 'Items for sale (saleTypeBeans)', z.array(ShopCategory)), async () => ({ ok: 1 as const, data: shop.catalogue() }));
-    secure.post('/shop/buy', s(tags.shop, 'Buy items with cents (shop.buy)', ShopBuyResult, { body: ShopBuyBody }), (req) =>
-      game(req, (ctx, pid) => shop.buyItem(ctx, pid, req.body.itemId, req.body.amount)),
-    );
-    secure.get('/shop/resources', s(tags.shop, 'Resources per cent (shop.getBuyResourceInfo)', ShopResourceRates), async () => ({
-      ok: 1 as const,
-      data: shop.resourceRates(),
-    }));
     secure.post(
       '/cities/:cityId/shop/gold',
-      s(tags.shop, 'Buy items with the city gold (BALANCE.goldShop)', GoldShopBuyResult, { params: zCityParams, body: GoldShopBuyBody }),
+      s(tags.shop, 'Buy items with the city gold (itemGoldPrice)', GoldShopBuyResult, { params: zCityParams, body: GoldShopBuyBody }),
       (req) => game(req, (ctx, pid) => shop.buyItemWithGold(ctx, pid, req.params.cityId, req.body.itemId, req.body.amount)),
-    );
-    secure.post(
-      '/cities/:cityId/shop/resources',
-      s(tags.shop, 'Spend cents on resources (shop.buyResource)', Empty, { params: zCityParams, body: BuyResourcesBody }),
-      (req) => game(req, (ctx, pid) => shop.buyResources(ctx, pid, req.params.cityId, req.body)),
     );
 
     // ---- quests ----
@@ -200,9 +197,6 @@ export default async function economyRoutes(app: ZApp) {
       const run = <T>(fn: Parameters<typeof runGame<T>>[1]) => runGame(db, fn).then((data) => ({ ok: 1 as const, data: (data ?? null) as Data<T> }));
       gm.post('/admin/items', s(t, 'Grant items (gamemaster.addItems)', Empty, { body: AdminGrantItemsBody }), (req) =>
         run((ctx) => admin.grantItems(ctx, req.body.playerName, req.body.items)),
-      );
-      gm.post('/admin/cents', s(t, 'Grant cents', Empty, { body: AdminGrantCentsBody }), (req) =>
-        run((ctx) => admin.grantCents(ctx, req.body.playerName, req.body.cents)),
       );
       gm.put(
         '/admin/cities/:cityId/resources',

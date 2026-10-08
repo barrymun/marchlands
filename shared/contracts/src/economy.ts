@@ -69,8 +69,7 @@ const itemConfig = z.object({
   legacyId: int(),
   id: z.string(),
   name: z.string(),
-  cost: int().describe('cents'),
-  buyable: z.boolean(),
+  goldPrice: int().nullable().describe('price in city gold (null: not for sale)'),
   canGamble: z.boolean(),
   type: int(),
   dayLimit: int(),
@@ -173,9 +172,9 @@ export const ConfigBalance = z
     valleyUpgrade: z.object({ baseGold: z.number(), maxLevel: z.number().int() }),
     beginnerProtectionMs: ms(),
     beginnerTownHallLevel: int(),
-    startingCents: int(),
     startingResources: int(),
     truceDurationMs: ms(),
+    furloughCentsPerDay: int(),
     truceCooldownMs: ms(),
     teleportCooldownMs: ms(),
     worldChatSpeakerCost: int(),
@@ -193,7 +192,7 @@ export const ConfigBalance = z
       recoveryHalfLifeMs: ms(),
       band: z.number(),
     }),
-    shopResourcePerCent: z.object({ food: int(), wood: int(), stone: int(), iron: int() }),
+    goldPerCent: z.number().describe('gold per cent of the original prices (goldForCents)'),
   })
   .meta({ id: 'ConfigBalance' });
 export type ConfigBalance = z.infer<typeof ConfigBalance>;
@@ -320,33 +319,20 @@ export type MarketShipment = z.infer<typeof MarketShipment>;
 
 // ---- shop ----
 
-export const ShopBuyBody = z.object({ itemId: z.string(), amount: z.number().int().default(1) });
 /** Buy items with the city's gold (BALANCE.goldShop). */
 export const GoldShopBuyBody = z.object({ itemId: z.string(), amount: z.number().int().min(1).max(1000).default(1) });
 export const GoldShopBuyResult = z
   .object({ itemId: z.string(), count: z.number().int().describe('owned after buying'), gold: z.number().describe('gold paid') })
   .meta({ id: 'GoldShopBuyResult' });
-export const BuyResourcesBody = z.object({ food: z.number().int(), wood: z.number().int(), stone: z.number().int(), iron: z.number().int() }).partial();
 
 export const ShopItem = itemConfig
   .pick({ id: true, name: true, dayLimit: true })
-  .extend({ price: int().describe('cents') })
+  .extend({ price: int().describe('city gold') })
   .meta({ id: 'ShopItem' });
 export type ShopItem = z.infer<typeof ShopItem>;
 
 export const ShopCategory = z.object({ typeId: int(), typeName: z.string(), items: z.array(ShopItem) }).meta({ id: 'ShopCategory' });
 export type ShopCategory = z.infer<typeof ShopCategory>;
-
-export const ShopBuyResult = z
-  .object({ cents: PlayerRow.shape.cents.describe('cents left'), count: int().describe('owned count of the item after the purchase') })
-  .meta({ id: 'ShopBuyResult' });
-export type ShopBuyResult = z.infer<typeof ShopBuyResult>;
-
-export const ShopResourceRates = z
-  .object({ forFood: int(), forWood: int(), forStone: int(), forIron: int() })
-  .describe('units of each resource per cent')
-  .meta({ id: 'ShopResourceRates' });
-export type ShopResourceRates = z.infer<typeof ShopResourceRates>;
 
 // ---- quests ----
 
@@ -355,7 +341,7 @@ export const QuestIdParams = z.object({ questId: zId });
 export const ClaimQuestBody = z.object({ cityId: zId });
 
 export const QuestAward = z
-  .object({ resources: intResources.partial().optional(), items: z.record(z.string(), int()).optional().describe('item id -> count'), cents: int().optional() })
+  .object({ resources: intResources.partial().optional(), items: z.record(z.string(), int()).optional().describe('item id -> count') })
   .meta({ id: 'QuestAward' });
 export type QuestAward = z.infer<typeof QuestAward>;
 
@@ -449,7 +435,6 @@ export type RankingCastlePage = z.infer<typeof RankingCastlePage>;
 // ---- operator tools ----
 
 export const AdminGrantItemsBody = z.object({ playerName: z.string(), items: z.record(z.string(), z.number().int()) });
-export const AdminGrantCentsBody = z.object({ playerName: z.string(), cents: z.number().int() });
 export const AdminSetResourcesBody = zResources.extend({ playerId: zId });
 export const AdminSetBuildingBody = z.object({ playerId: zId, positionId: z.number().int(), typeId: z.number().int(), level: z.number().int() });
 export const AdminSetTechnologyBody = z.object({ playerName: z.string(), techId: z.number().int(), level: z.number().int() });

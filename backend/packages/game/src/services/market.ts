@@ -11,7 +11,7 @@ import {
   BALANCE,
   BuildingType,
   buildingLevel,
-  coinsForSpeedup,
+  goldForSpeedup,
   GameError,
   merchantAsk,
   merchantBase,
@@ -27,8 +27,8 @@ import {
 import { marketOrders, marketShipments, marketTrades, pgArray, worldState } from '@evony/db';
 import { openCity, openOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
-import { gainResources, pushResources, spendCents } from '../helpers.ts';
-import { citiesOf, getPlayer, saveCity, savePlayer } from '../repo.ts';
+import { gainResources, pushResources, spendGold } from '../helpers.ts';
+import { citiesOf, saveCity } from '../repo.ts';
 import { createReport, ReportType } from './reports.ts';
 
 export const RES_TYPES = ['food', 'wood', 'stone', 'iron'] as const;
@@ -509,15 +509,16 @@ export async function cancelOrder(ctx: Ctx, playerId: number, orderId: number) {
   await saveCity(ctx, b.city);
 }
 
-/** trade.speedUpTrans: instant delivery for cents. */
+/** trade.speedUpTrans: instant delivery, paid with the receiving city's gold (orig: cents). */
 export async function speedupShipment(ctx: Ctx, playerId: number, shipmentId: number) {
   const [s] = await ctx.tx.select().from(marketShipments).where(eq(marketShipments.id, shipmentId)).for('update');
   if (!s || s.playerId !== playerId) throw new GameError('Shipment not found.', -99, 404);
-  const p = await getPlayer(ctx, playerId, { lock: true });
-  spendCents(ctx, p, coinsForSpeedup(Math.max(0, s.endTime - ctx.now)));
+  const b = await openOwnCity(ctx, playerId, s.cityId);
+  spendGold(b.city, goldForSpeedup(Math.max(0, s.endTime - ctx.now)));
   await ctx.tx.update(marketShipments).set({ endTime: ctx.now }).where(eq(marketShipments.id, shipmentId));
   ctx.schedule({ type: 'shipment', dueAt: ctx.now, playerId, cityId: s.cityId, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } });
-  await savePlayer(ctx, p);
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
 }
 
 /** Delivery (timed event). Falls back to the lord's first city if the target city is gone. */

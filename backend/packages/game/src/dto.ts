@@ -166,8 +166,6 @@ export function playerInfo(p: PlayerRow, extras: { allianceName?: string; cityCo
     faceUrl: p.faceUrl,
     prestige: Math.floor(p.prestige),
     honor: Math.floor(p.honor),
-    medal: p.cents,
-    cents: p.cents,
     titleId: p.title,
     titleName: titleOf(p.title).name,
     ranking: p.prestigeRank,
@@ -194,7 +192,7 @@ export function itemsArray(items: PlayerRow['items']): ItemCount[] {
 }
 
 export function buffsArray(buffs: PlayerRow['buffs'], now: number): BuffBean[] {
-  return buffs.filter((b) => b.endTime > now).map((b) => ({ id: b.id, desc: b.desc, endTime: b.endTime, param: b.param, cityId: b.cityId }));
+  return buffs.filter((b) => b.endTime > now).map((b) => ({ id: b.id, desc: b.desc, endTime: b.endTime, param: b.param, cityId: b.cityId, itemId: b.itemId }));
 }
 
 export function armyBean(a: ArmyRow, extra: { heroName?: string; heroLevel?: number; king?: string; visible?: boolean } = {}): ArmyBean {

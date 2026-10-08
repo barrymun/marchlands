@@ -13,6 +13,7 @@ import { MISSION_NAMES } from '@/components/armies-panel';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, troopName } from '@/lib/format';
+import { ITEM_BONUS_TEXT } from '@/lib/tones';
 
 export interface SendTarget {
   tileId: number;
@@ -154,7 +155,7 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
             <Label>Troops</Label>
             <span className={over ? 'text-xs font-medium text-destructive tabular-nums' : 'text-xs text-muted-foreground tabular-nums'}>
               {fmtExact(chosen)} / {fmtExact(cap)} (Rally Spot Lv {rally}
-              {ensign ? ', War Ensign +25%' : ''})
+              {ensign && <span className={over ? undefined : ITEM_BONUS_TEXT}>, War Ensign +25%</span>})
             </span>
           </div>
           {available.length === 0 && (

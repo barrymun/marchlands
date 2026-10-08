@@ -1,15 +1,15 @@
-// shop.* — buying items with cents, buying resources, and using items (shop.useGoods /
-// shop.useCastleGoods). Item effects are declared in @evony/core items.ts.
+// shop.* — buying items with a city's gold (there are no cents: itemGoldPrice) and using items
+// (shop.useGoods / shop.useCastleGoods). Item effects are declared in @evony/core items.ts.
 
 import {
   amuletDirectPayout,
-  BALANCE,
   CHAT_ICONS,
   createRandomHero,
   GameError,
   HERO_BOX_QUALITY,
   itemConfig,
   itemEffect,
+  itemGoldPrice,
   ITEMS,
   randInt,
   rollAmulet,
@@ -21,20 +21,21 @@ import { heroes } from '@evony/db';
 import { cityStats, openOwnCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { heroBean, troopBean } from '../dto.ts';
-import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources, setBuff, spendCents } from '../helpers.ts';
+import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources, setBuff } from '../helpers.ts';
 import { getPlayer, saveCity, savePlayer, type PlayerRow } from '../repo.ts';
 import { heroSlots, heroValues, pushHero } from './heroes.ts';
 import { settleAllCities } from './research.ts';
 
 const ITEM_TYPE_NAMES: Record<number, string> = { 1: 'Speed up', 2: 'Chest', 3: 'Produce', 4: 'Treasure' };
 
-/** Shop catalogue (orig saleTypeBeans): buyable items grouped by type. */
+/** Shop catalogue (orig saleTypeBeans): items for sale grouped by type, priced in city gold. */
 export function catalogue() {
   const groups = new Map<number, { typeId: number; typeName: string; items: { id: string; name: string; price: number; dayLimit: number }[] }>();
   for (const i of ITEMS) {
-    if (!i.buyable || i.cost <= 0) continue;
+    const price = itemGoldPrice(i.id);
+    if (price == null) continue;
     const g = groups.get(i.type) ?? { typeId: i.type, typeName: ITEM_TYPE_NAMES[i.type] ?? 'Other', items: [] };
-    g.items.push({ id: i.id, name: i.name, price: i.cost, dayLimit: i.dayLimit });
+    g.items.push({ id: i.id, name: i.name, price, dayLimit: i.dayLimit });
     groups.set(i.type, g);
   }
   return [...groups.values()].sort((a, b) => a.typeId - b.typeId);
@@ -42,33 +43,21 @@ export function catalogue() {
 
 const today = (now: number) => new Date(now).toISOString().slice(0, 10);
 
-/** shop.buy */
-export async function buyItem(ctx: Ctx, playerId: number, itemId: string, amount: number) {
-  if (!Number.isInteger(amount) || amount < 1 || amount > 1000) throw new GameError('Not going to happen.', -28);
-  const cfg = itemConfig(itemId);
-  if (!cfg) throw new GameError('Item does not exist.', -99, 404);
-  if (!cfg.buyable || cfg.cost <= 0) throw new GameError('This item is not for sale.', -99);
-  const p = await getPlayer(ctx, playerId, { lock: true });
-  // dayLimit on purchasable items with a short validity is a per-day purchase cap (orig: unenforced)
-  if (cfg.dayLimit > 0 && cfg.dayLimit <= 1) {
-    const day = today(ctx.now);
-    const rec = p.misc.dailyLimits?.[itemId];
-    const used = rec?.day === day ? rec.count : 0;
-    if (used + amount > cfg.dayLimit) throw new GameError('Daily purchase limit reached.', -99);
-    p.misc = { ...p.misc, dailyLimits: { ...(p.misc.dailyLimits ?? {}), [itemId]: { day, count: used + amount } } };
-  }
-  spendCents(ctx, p, cfg.cost * amount);
-  addItem(ctx, p, itemId, amount);
-  await savePlayer(ctx, p);
-  return { cents: p.cents, count: itemCount(p, itemId) };
-}
-
-/** Buy items with a city's gold (BALANCE.goldShop); they go to the lord's inventory. */
+/** shop.buy: buy items with a city's gold (itemGoldPrice); they go to the lord's inventory. */
 export async function buyItemWithGold(ctx: Ctx, playerId: number, cityId: number, itemId: string, amount: number) {
-  const price = BALANCE.goldShop[itemId];
-  if (price == null) throw new GameError('This item cannot be bought with gold.', -99);
+  const price = itemGoldPrice(itemId);
+  if (price == null) throw new GameError('This item is not for sale.', -99);
   if (!Number.isInteger(amount) || amount < 1 || amount > 1000) throw new GameError('Not going to happen.', -28);
   const b = await openOwnCity(ctx, playerId, cityId);
+  // dayLimit on items with a short validity is a per-day purchase cap (orig: unenforced)
+  const cfg = itemConfig(itemId)!;
+  if (cfg.dayLimit > 0 && cfg.dayLimit <= 1) {
+    const day = today(ctx.now);
+    const rec = b.player.misc.dailyLimits?.[itemId];
+    const used = rec?.day === day ? rec.count : 0;
+    if (used + amount > cfg.dayLimit) throw new GameError('Daily purchase limit reached.', -99);
+    b.player.misc = { ...b.player.misc, dailyLimits: { ...(b.player.misc.dailyLimits ?? {}), [itemId]: { day, count: used + amount } } };
+  }
   const gold = price * amount;
   if (b.city.gold < gold) throw new GameError(`Not enough gold: ${gold.toLocaleString('en')} needed.`, -99);
   b.city.gold -= gold;
@@ -79,37 +68,12 @@ export async function buyItemWithGold(ctx: Ctx, playerId: number, cityId: number
   return { itemId, count: itemCount(b.player, itemId), gold };
 }
 
-/** shop.getBuyResourceInfo */
-export function resourceRates() {
-  const r = BALANCE.shopResourcePerCent;
-  return { forFood: r.food, forWood: r.wood, forStone: r.stone, forIron: r.iron };
-}
-
-/** shop.buyResource: cents -> resources in a city (validated: non-negative integers). */
-export async function buyResources(ctx: Ctx, playerId: number, cityId: number, use: { food?: number; wood?: number; stone?: number; iron?: number }) {
-  const vals = { food: use.food ?? 0, wood: use.wood ?? 0, stone: use.stone ?? 0, iron: use.iron ?? 0 };
-  for (const v of Object.values(vals)) if (!Number.isInteger(v) || v < 0) throw new GameError('Invalid amount.', -24);
-  const total = vals.food + vals.wood + vals.stone + vals.iron;
-  if (total <= 0) throw new GameError('Invalid amount.', -24);
-  const b = await openOwnCity(ctx, playerId, cityId);
-  spendCents(ctx, b.player, total);
-  const r = BALANCE.shopResourcePerCent;
-  gainResources(b.city, { food: vals.food * r.food, wood: vals.wood * r.wood, stone: vals.stone * r.stone, iron: vals.iron * r.iron });
-  pushResources(ctx, b);
-  await saveCity(ctx, b.city);
-  await savePlayer(ctx, b.player);
-}
-
 // ---------------------------------------------------------------------------------------------
 // Using items
 // ---------------------------------------------------------------------------------------------
 
 async function grant(ctx: Ctx, p: PlayerRow, b: CityBundle | null, g: GrantContents) {
   for (const [id, n] of Object.entries(g.items ?? {})) addItem(ctx, p, id, n);
-  if (g.cents) {
-    p.cents += g.cents;
-    ctx.push(p.id, 'server.CentsUpdate', { cents: p.cents });
-  }
   if (b && g.resources) {
     gainResources(b.city, g.resources);
     pushResources(ctx, b);
@@ -149,7 +113,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
       // production buffs change every city's rates: settle them first
       await settleAllCities(ctx, p);
       consumeItem(ctx, p, itemId);
-      setBuff(ctx, p, effect.buff, effect.desc, ctx.now + effect.durationMs, { extend: true });
+      setBuff(ctx, p, effect.buff, effect.desc, ctx.now + effect.durationMs, { extend: true, itemId });
       break;
     }
     case 'grant': {
@@ -185,19 +149,17 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
       if (direct?.resource) {
         gainResources(city.city, { [direct.resource]: prize.count });
         pushResources(ctx, city);
-      } else if (direct?.cents) {
-        p.cents += prize.count;
-        ctx.push(p.id, 'server.CentsUpdate', { cents: p.cents });
       } else addItem(ctx, p, prize.id, prize.count);
       result.amulet = { slots, winner, prize: { id: prize.id, count: prize.count } };
       const cfg = itemConfig(prize.id);
-      const worth = (cfg?.cost ?? 0) * prize.count;
+      const price = itemGoldPrice(prize.id);
+      const worth = price ? ` (worth ${(price * prize.count).toLocaleString('en')} gold)` : '';
       if (prize.kind <= 2) {
         ctx.broadcast('server.SystemInfoMsg', {
           alliance: false,
           tV: true,
           noSenderSystemInfo: true,
-          msg: `${p.sex === 1 ? 'Lady' : 'Lord'} <b>${p.name}</b> gained <b>${prize.count} ${cfg?.name ?? prize.id}</b> (worth ${worth} Cents) from the Amulet!`,
+          msg: `${p.sex === 1 ? 'Lady' : 'Lord'} <b>${p.name}</b> gained <b>${prize.count} ${cfg?.name ?? prize.id}</b>${worth} from the Amulet!`,
         });
       }
       break;

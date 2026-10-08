@@ -7,6 +7,7 @@ import {
   createRandomHero,
   experienceItemGain,
   heroItemGoldPrice,
+  itemGoldPrice,
   heroBuffAmount,
   GameError,
   HERO_ATTRIBUTE_BUFF,
@@ -34,7 +35,7 @@ import { heroes } from '@evony/db';
 import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';
-import { addItem, assertClean, cleanName, itemCount, pushResources, spendCents, spendResources } from '../helpers.ts';
+import { addItem, assertClean, cleanName, consumeItem, itemCount, pushResources, spendGold, spendResources } from '../helpers.ts';
 import { findCity, gearOfHero, getHero, getPlayer, heroesOfCity, saveCity, saveHero, savePlayer, type HeroRow } from '../repo.ts';
 
 export const pushHero = (ctx: Ctx, playerId: number, h: HeroRow, updateType: 0 | 1 | 2) =>
@@ -232,14 +233,17 @@ export async function dischargeMayor(ctx: Ctx, playerId: number, cityId: number)
   await saveCity(ctx, b.city);
 }
 
-/** hero.resetPoint: consumes Holy Water (the original never charged for it). */
+/** hero.resetPoint: consumes Holy Water, or buys one with the hero's city gold (the original never charged for it). */
 export async function resetPoints(ctx: Ctx, playerId: number, heroId: number) {
   const h = await ownHero(ctx, playerId, heroId);
   if (h.status !== HeroStatus.IDLE && h.status !== HeroStatus.MAYOR) throw new GameError('Status of this hero is not Idle!', -80);
   const p = await getPlayer(ctx, playerId, { lock: true });
+  let city = await openMayorCity(ctx, h);
   if (itemCount(p, 'hero.reset.1') > 0) addItem(ctx, p, 'hero.reset.1', -1);
-  else spendCents(ctx, p, 20);
-  const city = await openMayorCity(ctx, h);
+  else {
+    city ??= await openOwnCity(ctx, playerId, h.cityId);
+    spendGold(city.city, itemGoldPrice('hero.reset.1') ?? 0);
+  }
   Object.assign(h, { power: h.basePower, management: h.baseManagement, stratagem: h.baseStratagem, remainPoint: h.level });
   await saveHero(ctx, h);
   await savePlayer(ctx, p);
@@ -366,11 +370,11 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
   const p = await getPlayer(ctx, playerId, { lock: true });
   const h = await ownHero(ctx, playerId, heroId);
   let city = HERO_ATTRIBUTE_ITEMS[itemId] === 'management' ? await openMayorCity(ctx, h) : null;
-  // buying with gold: the hero's city pays (BALANCE.heroItemGold)
+  // buying with gold (asked for, or the item is not owned): the hero's city pays (BALANCE.heroItemGold)
   let paidInGold = false;
-  if (payWith === 'gold') {
-    const price = heroItemGoldPrice(itemId, h.upgradeExp);
-    if (price == null) throw new GameError('This item cannot be bought with gold.', -99);
+  const price = heroItemGoldPrice(itemId, h.upgradeExp);
+  if (payWith === 'gold' && price == null) throw new GameError('This item cannot be bought with gold.', -99);
+  if (price != null && (payWith === 'gold' || itemCount(p, itemId) <= 0)) {
     city ??= await openOwnCity(ctx, playerId, h.cityId);
     if (city.city.gold < price) throw new GameError(`Not enough gold: ${price.toLocaleString('en')} needed.`, -99);
     city.city.gold -= price;
@@ -380,10 +384,7 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     if (heroAtMaxLevel(h)) throw new GameError(`This hero is at the maximum level (${BALANCE.heroMaxLevel}) and gains no more experience.`, -99);
     const gain = experienceItemGain(itemId, h.upgradeExp);
     if (!gain) throw new GameError('Invalid Item.', -99);
-    if (!paidInGold) {
-      if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
-      else spendCents(ctx, p, { 'player.experience.1.a': 8, 'player.experience.1.b': 30, 'player.experience.1.c': 100 }[itemId] ?? 0);
-    }
+    if (!paidInGold) consumeItem(ctx, p, itemId);
     h.experience += gain;
   } else if (LOYALTY_MEDALS[itemId]) {
     if (itemCount(p, itemId) <= 0) throw new GameError('No Item.', -99);
@@ -391,10 +392,7 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     h.loyalty = Math.min(100, h.loyalty + LOYALTY_MEDALS[itemId]);
   } else if (HERO_ATTRIBUTE_ITEMS[itemId]) {
     const attr = HERO_ATTRIBUTE_ITEMS[itemId];
-    if (!paidInGold) {
-      if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
-      else spendCents(ctx, p, 40);
-    }
+    if (!paidInGold) consumeItem(ctx, p, itemId);
     const amount = heroBuffAmount(heroBuffBase(h, attr));
     const endTime = ctx.now + HERO_ATTRIBUTE_BUFF.durationMs;
     h.buffs = [...h.buffs.filter((x) => x.id !== attr), { id: attr, desc: `${attr} +25%`, endTime, param: amount }];

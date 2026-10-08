@@ -767,11 +767,6 @@
           "faceUrl": {
             "type": "string"
           },
-          "cents": {
-            "type": "integer",
-            "minimum": -2147483648,
-            "maximum": 2147483647
-          },
           "beginner": {
             "type": "boolean"
           },
@@ -801,11 +796,6 @@
             "maximum": 9007199254740991
           },
           "honor": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "medal": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
@@ -867,14 +857,12 @@
           "sex",
           "flag",
           "faceUrl",
-          "cents",
           "beginner",
           "status",
           "allianceId",
           "userName",
           "prestige",
           "honor",
-          "medal",
           "titleId",
           "titleName",
           "ranking",
@@ -926,6 +914,10 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "itemId": {
+            "description": "(evony-re) the item last used to set or extend it",
+            "type": "string"
           }
         },
         "required": [
@@ -2943,11 +2935,6 @@
           "faceUrl": {
             "type": "string"
           },
-          "cents": {
-            "type": "integer",
-            "minimum": -2147483648,
-            "maximum": 2147483647
-          },
           "beginner": {
             "type": "boolean"
           },
@@ -2977,11 +2964,6 @@
             "maximum": 9007199254740991
           },
           "honor": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "medal": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
@@ -3088,14 +3070,12 @@
           "sex",
           "flag",
           "faceUrl",
-          "cents",
           "beginner",
           "status",
           "allianceId",
           "userName",
           "prestige",
           "honor",
-          "medal",
           "titleId",
           "titleName",
           "ranking",
@@ -3187,11 +3167,6 @@
               "type": "number",
               "minimum": 0
             }
-          },
-          "cents": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
           }
         }
       },
@@ -3385,10 +3360,11 @@
       "CitySpeedupCostInput": {
         "type": "object",
         "properties": {
-          "coinsNeed": {
+          "goldNeed": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "city gold to finish now"
           },
           "timeLeft": {
             "type": "number",
@@ -3396,7 +3372,7 @@
           }
         },
         "required": [
-          "coinsNeed",
+          "goldNeed",
           "timeLeft"
         ]
       },
@@ -8199,14 +8175,18 @@
           "name": {
             "type": "string"
           },
-          "cost": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "cents"
-          },
-          "buyable": {
-            "type": "boolean"
+          "goldPrice": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "price in city gold (null: not for sale)"
           },
           "canGamble": {
             "type": "boolean"
@@ -8249,8 +8229,7 @@
           "legacyId",
           "id",
           "name",
-          "cost",
-          "buyable",
+          "goldPrice",
           "canGamble",
           "type",
           "dayLimit",
@@ -8753,11 +8732,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "startingCents": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "startingResources": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -8768,6 +8742,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
             "description": "milliseconds"
+          },
+          "furloughCentsPerDay": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "truceCooldownMs": {
             "type": "integer",
@@ -8876,36 +8855,9 @@
               "band"
             ]
           },
-          "shopResourcePerCent": {
-            "type": "object",
-            "properties": {
-              "food": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              },
-              "wood": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              },
-              "stone": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              },
-              "iron": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              }
-            },
-            "required": [
-              "food",
-              "wood",
-              "stone",
-              "iron"
-            ]
+          "goldPerCent": {
+            "type": "number",
+            "description": "gold per cent of the original prices (goldForCents)"
           }
         },
         "required": [
@@ -8970,9 +8922,9 @@
           "valleyUpgrade",
           "beginnerProtectionMs",
           "beginnerTownHallLevel",
-          "startingCents",
           "startingResources",
           "truceDurationMs",
+          "furloughCentsPerDay",
           "truceCooldownMs",
           "teleportCooldownMs",
           "worldChatSpeakerCost",
@@ -8983,7 +8935,7 @@
           "marketShipmentBaseMs",
           "marketMaxOrdersPerLevel",
           "merchant",
-          "shopResourcePerCent"
+          "goldPerCent"
         ]
       },
       "StaticConfigInput": {
@@ -9589,7 +9541,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "cents"
+            "description": "city gold"
           }
         },
         "required": [
@@ -9622,59 +9574,6 @@
           "typeName",
           "items"
         ]
-      },
-      "ShopBuyResultInput": {
-        "type": "object",
-        "properties": {
-          "cents": {
-            "type": "integer",
-            "minimum": -2147483648,
-            "maximum": 2147483647,
-            "description": "cents left"
-          },
-          "count": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "owned count of the item after the purchase"
-          }
-        },
-        "required": [
-          "cents",
-          "count"
-        ]
-      },
-      "ShopResourceRatesInput": {
-        "type": "object",
-        "properties": {
-          "forFood": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "forWood": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "forStone": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "forIron": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "forFood",
-          "forWood",
-          "forStone",
-          "forIron"
-        ],
-        "description": "units of each resource per cent"
       },
       "QuestAwardInput": {
         "type": "object",
@@ -9720,11 +9619,6 @@
               "minimum": -9007199254740991,
               "maximum": 9007199254740991
             }
-          },
-          "cents": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
           }
         }
       },
@@ -10962,11 +10856,6 @@
           "faceUrl": {
             "type": "string"
           },
-          "cents": {
-            "type": "integer",
-            "minimum": -2147483648,
-            "maximum": 2147483647
-          },
           "beginner": {
             "type": "boolean"
           },
@@ -10996,11 +10885,6 @@
             "maximum": 9007199254740991
           },
           "honor": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "medal": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
@@ -11062,14 +10946,12 @@
           "sex",
           "flag",
           "faceUrl",
-          "cents",
           "beginner",
           "status",
           "allianceId",
           "userName",
           "prestige",
           "honor",
-          "medal",
           "titleId",
           "titleName",
           "ranking",
@@ -11123,6 +11005,10 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "itemId": {
+            "description": "(evony-re) the item last used to set or extend it",
+            "type": "string"
           }
         },
         "required": [
@@ -13185,11 +13071,6 @@
           "faceUrl": {
             "type": "string"
           },
-          "cents": {
-            "type": "integer",
-            "minimum": -2147483648,
-            "maximum": 2147483647
-          },
           "beginner": {
             "type": "boolean"
           },
@@ -13219,11 +13100,6 @@
             "maximum": 9007199254740991
           },
           "honor": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "medal": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
@@ -13331,14 +13207,12 @@
           "sex",
           "flag",
           "faceUrl",
-          "cents",
           "beginner",
           "status",
           "allianceId",
           "userName",
           "prestige",
           "honor",
-          "medal",
           "titleId",
           "titleName",
           "ranking",
@@ -13433,11 +13307,6 @@
               "type": "number",
               "minimum": 0
             }
-          },
-          "cents": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
           }
         },
         "additionalProperties": false
@@ -13640,10 +13509,11 @@
       "CitySpeedupCost": {
         "type": "object",
         "properties": {
-          "coinsNeed": {
+          "goldNeed": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "city gold to finish now"
           },
           "timeLeft": {
             "type": "number",
@@ -13651,7 +13521,7 @@
           }
         },
         "required": [
-          "coinsNeed",
+          "goldNeed",
           "timeLeft"
         ],
         "additionalProperties": false
@@ -18577,14 +18447,18 @@
           "name": {
             "type": "string"
           },
-          "cost": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "cents"
-          },
-          "buyable": {
-            "type": "boolean"
+          "goldPrice": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "price in city gold (null: not for sale)"
           },
           "canGamble": {
             "type": "boolean"
@@ -18627,8 +18501,7 @@
           "legacyId",
           "id",
           "name",
-          "cost",
-          "buyable",
+          "goldPrice",
           "canGamble",
           "type",
           "dayLimit",
@@ -19138,11 +19011,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "startingCents": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "startingResources": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -19153,6 +19021,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
             "description": "milliseconds"
+          },
+          "furloughCentsPerDay": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "truceCooldownMs": {
             "type": "integer",
@@ -19263,37 +19136,9 @@
             ],
             "additionalProperties": false
           },
-          "shopResourcePerCent": {
-            "type": "object",
-            "properties": {
-              "food": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              },
-              "wood": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              },
-              "stone": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              },
-              "iron": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              }
-            },
-            "required": [
-              "food",
-              "wood",
-              "stone",
-              "iron"
-            ],
-            "additionalProperties": false
+          "goldPerCent": {
+            "type": "number",
+            "description": "gold per cent of the original prices (goldForCents)"
           }
         },
         "required": [
@@ -19358,9 +19203,9 @@
           "valleyUpgrade",
           "beginnerProtectionMs",
           "beginnerTownHallLevel",
-          "startingCents",
           "startingResources",
           "truceDurationMs",
+          "furloughCentsPerDay",
           "truceCooldownMs",
           "teleportCooldownMs",
           "worldChatSpeakerCost",
@@ -19371,7 +19216,7 @@
           "marketShipmentBaseMs",
           "marketMaxOrdersPerLevel",
           "merchant",
-          "shopResourcePerCent"
+          "goldPerCent"
         ],
         "additionalProperties": false
       },
@@ -19990,7 +19835,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "cents"
+            "description": "city gold"
           }
         },
         "required": [
@@ -20025,61 +19870,6 @@
           "items"
         ],
         "additionalProperties": false
-      },
-      "ShopBuyResult": {
-        "type": "object",
-        "properties": {
-          "cents": {
-            "type": "integer",
-            "minimum": -2147483648,
-            "maximum": 2147483647,
-            "description": "cents left"
-          },
-          "count": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "owned count of the item after the purchase"
-          }
-        },
-        "required": [
-          "cents",
-          "count"
-        ],
-        "additionalProperties": false
-      },
-      "ShopResourceRates": {
-        "type": "object",
-        "properties": {
-          "forFood": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "forWood": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "forStone": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "forIron": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "forFood",
-          "forWood",
-          "forStone",
-          "forIron"
-        ],
-        "additionalProperties": false,
-        "description": "units of each resource per cent"
       },
       "QuestAward": {
         "type": "object",
@@ -20126,11 +19916,6 @@
               "minimum": -9007199254740991,
               "maximum": 9007199254740991
             }
-          },
-          "cents": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
           }
         },
         "additionalProperties": false
@@ -21661,7 +21446,7 @@
     },
     "/api/v1/player/furlough": {
       "post": {
-        "summary": "Holiday mode, 10 cents/day (furlough.isFurlought)",
+        "summary": "Holiday mode, paid per day with a city's gold (furlough.isFurlought)",
         "tags": [
           "player"
         ],
@@ -21676,10 +21461,17 @@
                     "type": "integer",
                     "minimum": -9007199254740991,
                     "maximum": 9007199254740991
+                  },
+                  "cityId": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "the city whose gold pays"
                   }
                 },
                 "required": [
-                  "days"
+                  "days",
+                  "cityId"
                 ]
               }
             }
@@ -21815,8 +21607,17 @@
                   "itemId": {
                     "default": "player.peace.1",
                     "type": "string"
+                  },
+                  "cityId": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "the city whose gold pays when no Truce Agreement is owned"
                   }
-                }
+                },
+                "required": [
+                  "cityId"
+                ]
               }
             }
           }
@@ -24350,7 +24151,7 @@
     },
     "/api/v1/cities/{cityId}/buildings/{positionId}/speedup": {
       "get": {
-        "summary": "Coins to finish now (castle.getCoinsNeed)",
+        "summary": "Gold to finish now (castle.getCoinsNeed)",
         "tags": [
           "buildings"
         ],
@@ -24779,7 +24580,7 @@
     },
     "/api/v1/cities/{cityId}/research/speedup": {
       "get": {
-        "summary": "Coins to finish now (tech.getCoinsNeed)",
+        "summary": "Gold to finish now (tech.getCoinsNeed)",
         "tags": [
           "research"
         ],
@@ -27884,7 +27685,7 @@
                     "type": "string"
                   },
                   "payWith": {
-                    "description": "'gold': buy the item with the hero's city gold instead of using one owned (or cents)",
+                    "description": "'gold': buy the item with the hero's city gold even if one is owned (one not owned is always bought with gold)",
                     "type": "string",
                     "enum": [
                       "gold"
@@ -33619,7 +33420,7 @@
     },
     "/api/v1/market/shipments/{shipmentId}/speedup": {
       "post": {
-        "summary": "Instant delivery for cents (trade.speedUpTrans)",
+        "summary": "Instant delivery, paid with the gold of the city receiving it (trade.speedUpTrans)",
         "tags": [
           "market"
         ],
@@ -33754,155 +33555,9 @@
         }
       }
     },
-    "/api/v1/shop/buy": {
-      "post": {
-        "summary": "Buy items with cents (shop.buy)",
-        "tags": [
-          "shop"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "itemId": {
-                    "type": "string"
-                  },
-                  "amount": {
-                    "default": 1,
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  }
-                },
-                "required": [
-                  "itemId"
-                ]
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ok": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/ShopBuyResult"
-                    }
-                  },
-                  "required": [
-                    "ok",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/shop/resources": {
-      "get": {
-        "summary": "Resources per cent (shop.getBuyResourceInfo)",
-        "tags": [
-          "shop"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ok": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/ShopResourceRates"
-                    }
-                  },
-                  "required": [
-                    "ok",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/cities/{cityId}/shop/gold": {
       "post": {
-        "summary": "Buy items with the city gold (BALANCE.goldShop)",
+        "summary": "Buy items with the city gold (itemGoldPrice)",
         "tags": [
           "shop"
         ],
@@ -33963,111 +33618,6 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/GoldShopBuyResult"
-                    }
-                  },
-                  "required": [
-                    "ok",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/cities/{cityId}/shop/resources": {
-      "post": {
-        "summary": "Spend cents on resources (shop.buyResource)",
-        "tags": [
-          "shop"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "food": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  "wood": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  "stone": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  "iron": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  }
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            },
-            "in": "path",
-            "name": "cityId",
-            "required": true
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ok": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "data": {
-                      "type": "null"
                     }
                   },
                   "required": [
@@ -34847,91 +34397,6 @@
                 "required": [
                   "playerName",
                   "items"
-                ]
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ok": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "data": {
-                      "type": "null"
-                    }
-                  },
-                  "required": [
-                    "ok",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/admin/cents": {
-      "post": {
-        "summary": "Grant cents",
-        "tags": [
-          "admin"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "playerName": {
-                    "type": "string"
-                  },
-                  "cents": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  }
-                },
-                "required": [
-                  "playerName",
-                  "cents"
                 ]
               }
             }

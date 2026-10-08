@@ -865,7 +865,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Holiday mode, 10 cents/day (furlough.isFurlought) */
+        /** Holiday mode, paid per day with a city's gold (furlough.isFurlought) */
         post: {
             parameters: {
                 query?: never;
@@ -877,6 +877,8 @@ export interface paths {
                 content: {
                     "application/json": {
                         days: number;
+                        /** @description the city whose gold pays */
+                        cityId: number;
                     };
                 };
             };
@@ -984,6 +986,8 @@ export interface paths {
                     "application/json": {
                         /** @default player.peace.1 */
                         itemId?: string;
+                        /** @description the city whose gold pays when no Truce Agreement is owned */
+                        cityId: number;
                     };
                 };
             };
@@ -2815,7 +2819,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Coins to finish now (castle.getCoinsNeed) */
+        /** Gold to finish now (castle.getCoinsNeed) */
         get: {
             parameters: {
                 query?: never;
@@ -3085,7 +3089,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Coins to finish now (tech.getCoinsNeed) */
+        /** Gold to finish now (tech.getCoinsNeed) */
         get: {
             parameters: {
                 query?: {
@@ -5342,7 +5346,7 @@ export interface paths {
                     "application/json": {
                         itemId: string;
                         /**
-                         * @description 'gold': buy the item with the hero's city gold instead of using one owned (or cents)
+                         * @description 'gold': buy the item with the hero's city gold even if one is owned (one not owned is always bought with gold)
                          * @enum {string}
                          */
                         payWith?: "gold";
@@ -9763,7 +9767,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Instant delivery for cents (trade.speedUpTrans) */
+        /** Instant delivery, paid with the gold of the city receiving it (trade.speedUpTrans) */
         post: {
             parameters: {
                 query?: never;
@@ -9872,130 +9876,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/shop/buy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Buy items with cents (shop.buy) */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        itemId: string;
-                        /** @default 1 */
-                        amount?: number;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {number} */
-                            ok: 1;
-                            data: components["schemas"]["ShopBuyResult"];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                "4XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Default Response */
-                "5XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/shop/resources": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Resources per cent (shop.getBuyResourceInfo) */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {number} */
-                            ok: 1;
-                            data: components["schemas"]["ShopResourceRates"];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                "4XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Default Response */
-                "5XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/cities/{cityId}/shop/gold": {
         parameters: {
             query?: never;
@@ -10005,7 +9885,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Buy items with the city gold (BALANCE.goldShop) */
+        /** Buy items with the city gold (itemGoldPrice) */
         post: {
             parameters: {
                 query?: never;
@@ -10035,75 +9915,6 @@ export interface paths {
                             /** @enum {number} */
                             ok: 1;
                             data: components["schemas"]["GoldShopBuyResult"];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                "4XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Default Response */
-                "5XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/cities/{cityId}/shop/resources": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Spend cents on resources (shop.buyResource) */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    cityId: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        food?: number;
-                        wood?: number;
-                        stone?: number;
-                        iron?: number;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {number} */
-                            ok: 1;
-                            data: null;
                         };
                     };
                 };
@@ -10651,71 +10462,6 @@ export interface paths {
                         items: {
                             [key: string]: number;
                         };
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {number} */
-                            ok: 1;
-                            data: null;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                "4XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Default Response */
-                "5XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/cents": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Grant cents */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        playerName: string;
-                        cents: number;
                     };
                 };
             };
@@ -11665,14 +11411,12 @@ export interface components {
             sex: number;
             flag: string;
             faceUrl: string;
-            cents: number;
             beginner: boolean;
             status: number;
             allianceId: number | null;
             userName: string;
             prestige: number;
             honor: number;
-            medal: number;
             titleId: number;
             titleName: string;
             ranking: number;
@@ -11700,6 +11444,8 @@ export interface components {
             endTime: number;
             param?: number;
             cityId?: number;
+            /** @description (evony-re) the item last used to set or extend it */
+            itemId?: string;
         };
         ArmyBeanInput: {
             playerId: number;
@@ -12171,14 +11917,12 @@ export interface components {
             sex: number;
             flag: string;
             faceUrl: string;
-            cents: number;
             beginner: boolean;
             status: number;
             allianceId: number | null;
             userName: string;
             prestige: number;
             honor: number;
-            medal: number;
             titleId: number;
             titleName: string;
             ranking: number;
@@ -12224,7 +11968,6 @@ export interface components {
             troops?: {
                 [key: string]: number;
             };
-            cents?: number;
         };
         UseItemResultInput: {
             itemId: string;
@@ -12274,7 +12017,8 @@ export interface components {
             ok: boolean;
         };
         CitySpeedupCostInput: {
-            coinsNeed: number;
+            /** @description city gold to finish now */
+            goldNeed: number;
             /** @description ms */
             timeLeft: number;
         };
@@ -13240,9 +12984,8 @@ export interface components {
             legacyId: number;
             id: string;
             name: string;
-            /** @description cents */
-            cost: number;
-            buyable: boolean;
+            /** @description price in city gold (null: not for sale) */
+            goldPrice: number | null;
             canGamble: boolean;
             type: number;
             dayLimit: number;
@@ -13374,10 +13117,10 @@ export interface components {
             /** @description milliseconds */
             beginnerProtectionMs: number;
             beginnerTownHallLevel: number;
-            startingCents: number;
             startingResources: number;
             /** @description milliseconds */
             truceDurationMs: number;
+            furloughCentsPerDay: number;
             /** @description milliseconds */
             truceCooldownMs: number;
             /** @description milliseconds */
@@ -13406,12 +13149,8 @@ export interface components {
                 recoveryHalfLifeMs: number;
                 band: number;
             };
-            shopResourcePerCent: {
-                food: number;
-                wood: number;
-                stone: number;
-                iron: number;
-            };
+            /** @description gold per cent of the original prices (goldForCents) */
+            goldPerCent: number;
         };
         StaticConfigInput: {
             /** @description timer multiplier (GAME_SPEED) */
@@ -13566,26 +13305,13 @@ export interface components {
             id: string;
             name: string;
             dayLimit: number;
-            /** @description cents */
+            /** @description city gold */
             price: number;
         };
         ShopCategoryInput: {
             typeId: number;
             typeName: string;
             items: components["schemas"]["ShopItemInput"][];
-        };
-        ShopBuyResultInput: {
-            /** @description cents left */
-            cents: number;
-            /** @description owned count of the item after the purchase */
-            count: number;
-        };
-        /** @description units of each resource per cent */
-        ShopResourceRatesInput: {
-            forFood: number;
-            forWood: number;
-            forStone: number;
-            forIron: number;
         };
         QuestAwardInput: {
             resources?: {
@@ -13599,7 +13325,6 @@ export interface components {
             items?: {
                 [key: string]: number;
             };
-            cents?: number;
         };
         QuestGroupStatusInput: {
             typeId: number;
@@ -13878,14 +13603,12 @@ export interface components {
             sex: number;
             flag: string;
             faceUrl: string;
-            cents: number;
             beginner: boolean;
             status: number;
             allianceId: number | null;
             userName: string;
             prestige: number;
             honor: number;
-            medal: number;
             titleId: number;
             titleName: string;
             ranking: number;
@@ -13913,6 +13636,8 @@ export interface components {
             endTime: number;
             param?: number;
             cityId?: number;
+            /** @description (evony-re) the item last used to set or extend it */
+            itemId?: string;
         };
         ArmyBean: {
             playerId: number;
@@ -14384,14 +14109,12 @@ export interface components {
             sex: number;
             flag: string;
             faceUrl: string;
-            cents: number;
             beginner: boolean;
             status: number;
             allianceId: number | null;
             userName: string;
             prestige: number;
             honor: number;
-            medal: number;
             titleId: number;
             titleName: string;
             ranking: number;
@@ -14437,7 +14160,6 @@ export interface components {
             troops?: {
                 [key: string]: number;
             };
-            cents?: number;
         };
         UseItemResult: {
             itemId: string;
@@ -14487,7 +14209,8 @@ export interface components {
             ok: boolean;
         };
         CitySpeedupCost: {
-            coinsNeed: number;
+            /** @description city gold to finish now */
+            goldNeed: number;
             /** @description ms */
             timeLeft: number;
         };
@@ -15453,9 +15176,8 @@ export interface components {
             legacyId: number;
             id: string;
             name: string;
-            /** @description cents */
-            cost: number;
-            buyable: boolean;
+            /** @description price in city gold (null: not for sale) */
+            goldPrice: number | null;
             canGamble: boolean;
             type: number;
             dayLimit: number;
@@ -15587,10 +15309,10 @@ export interface components {
             /** @description milliseconds */
             beginnerProtectionMs: number;
             beginnerTownHallLevel: number;
-            startingCents: number;
             startingResources: number;
             /** @description milliseconds */
             truceDurationMs: number;
+            furloughCentsPerDay: number;
             /** @description milliseconds */
             truceCooldownMs: number;
             /** @description milliseconds */
@@ -15619,12 +15341,8 @@ export interface components {
                 recoveryHalfLifeMs: number;
                 band: number;
             };
-            shopResourcePerCent: {
-                food: number;
-                wood: number;
-                stone: number;
-                iron: number;
-            };
+            /** @description gold per cent of the original prices (goldForCents) */
+            goldPerCent: number;
         };
         StaticConfig: {
             /** @description timer multiplier (GAME_SPEED) */
@@ -15779,26 +15497,13 @@ export interface components {
             id: string;
             name: string;
             dayLimit: number;
-            /** @description cents */
+            /** @description city gold */
             price: number;
         };
         ShopCategory: {
             typeId: number;
             typeName: string;
             items: components["schemas"]["ShopItem"][];
-        };
-        ShopBuyResult: {
-            /** @description cents left */
-            cents: number;
-            /** @description owned count of the item after the purchase */
-            count: number;
-        };
-        /** @description units of each resource per cent */
-        ShopResourceRates: {
-            forFood: number;
-            forWood: number;
-            forStone: number;
-            forIron: number;
         };
         QuestAward: {
             resources?: {
@@ -15812,7 +15517,6 @@ export interface components {
             items?: {
                 [key: string]: number;
             };
-            cents?: number;
         };
         QuestGroupStatus: {
             typeId: number;
@@ -16050,8 +15754,6 @@ export type MarketShipmentInput = components['schemas']['MarketShipmentInput'];
 export type GoldShopBuyResultInput = components['schemas']['GoldShopBuyResultInput'];
 export type ShopItemInput = components['schemas']['ShopItemInput'];
 export type ShopCategoryInput = components['schemas']['ShopCategoryInput'];
-export type ShopBuyResultInput = components['schemas']['ShopBuyResultInput'];
-export type ShopResourceRatesInput = components['schemas']['ShopResourceRatesInput'];
 export type QuestAwardInput = components['schemas']['QuestAwardInput'];
 export type QuestGroupStatusInput = components['schemas']['QuestGroupStatusInput'];
 export type QuestBeanInput = components['schemas']['QuestBeanInput'];
@@ -16186,8 +15888,6 @@ export type MarketShipment = components['schemas']['MarketShipment'];
 export type GoldShopBuyResult = components['schemas']['GoldShopBuyResult'];
 export type ShopItem = components['schemas']['ShopItem'];
 export type ShopCategory = components['schemas']['ShopCategory'];
-export type ShopBuyResult = components['schemas']['ShopBuyResult'];
-export type ShopResourceRates = components['schemas']['ShopResourceRates'];
 export type QuestAward = components['schemas']['QuestAward'];
 export type QuestGroupStatus = components['schemas']['QuestGroupStatus'];
 export type QuestBean = components['schemas']['QuestBean'];
