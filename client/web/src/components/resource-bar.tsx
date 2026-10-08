@@ -4,6 +4,7 @@ import { getGameSpeed, scaled } from '@evony/core';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNow } from '@/hooks/use-now';
 import { fmt, fmtExact, signedRate } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 const icons = { gold: Coins, food: Wheat, wood: Trees, stone: Mountain, iron: Hammer };
 
@@ -29,17 +30,20 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
     })),
   ];
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+    // phones: a 4-column grid, the rate under the amount; wider screens: one wrapping row
+    <div className="grid grid-cols-4 gap-x-2 gap-y-1.5 text-sm sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
       {items.map(({ key, label, amount, rate, max, line }) => {
         const Icon = icons[key];
         const full = max != null && amount >= max;
         return (
           <Tooltip key={key}>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5 tabular-nums">
-                <Icon className="size-4 text-muted-foreground" />
-                <span className={full ? 'font-medium text-amber-600' : 'font-medium'}>{fmt(amount)}</span>
-                <span className={rate < 0 ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}>{signedRate(rate)}</span>
+              <div className="flex min-w-0 items-center gap-1.5 tabular-nums">
+                <Icon className="size-4 shrink-0 text-muted-foreground" />
+                <span className="flex min-w-0 flex-col leading-tight sm:flex-row sm:items-center sm:gap-1.5">
+                  <span className={full ? 'font-medium text-amber-600' : 'font-medium'}>{fmt(amount)}</span>
+                  <span className={cn('truncate text-[11px] sm:text-xs', rate < 0 ? 'text-destructive' : 'text-muted-foreground')}>{signedRate(rate)}</span>
+                </span>
               </div>
             </TooltipTrigger>
             <TooltipContent className="grid gap-1.5">
@@ -62,10 +66,12 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
       })}
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-1.5 tabular-nums">
-            <Users className="size-4 text-muted-foreground" />
-            <span className="font-medium">{fmt(r.curPopulation)}</span>
-            <span className="text-xs text-muted-foreground">/ {fmt(r.maxPopulation)}</span>
+          <div className="flex min-w-0 items-center gap-1.5 tabular-nums">
+            <Users className="size-4 shrink-0 text-muted-foreground" />
+            <span className="flex min-w-0 flex-col leading-tight sm:flex-row sm:items-center sm:gap-1.5">
+              <span className="font-medium">{fmt(r.curPopulation)}</span>
+              <span className="truncate text-[11px] text-muted-foreground sm:text-xs">/ {fmt(r.maxPopulation)}</span>
+            </span>
           </div>
         </TooltipTrigger>
         <TooltipContent>
