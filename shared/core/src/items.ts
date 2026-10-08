@@ -282,6 +282,22 @@ export function rollAmulet(rng: Rng): { slots: GambleSlot[]; winner: number } {
   return { slots, winner };
 }
 
+/** Winning-slot odds by item rarity (rollAmulet): 60% one of the 16 common slots, 25% one of 4 special, 10% one of 3 rare, 5% the top slot (rarity 2, or 1 one time in 20). */
+const AMULET_RARITY_SHARE: Record<number, number> = { 5: 0.6, 4: 0.25, 3: 0.1, 2: 0.05 * 0.95, 1: 0.05 * 0.05 };
+
+/**
+ * Chance one Amulet pays out `itemId`, and how many it pays (rollAmulet: every slot is a random item of
+ * its rarity), or null when it is never a prize.
+ */
+export function amuletPrize(itemId: string): { chance: number; min: number; max: number } | null {
+  const cfg = itemConfig(itemId);
+  if (!cfg?.canGamble) return null;
+  const r = cfg.rarity >= 1 && cfg.rarity <= 4 ? cfg.rarity : 5;
+  if (!buckets[r].length) return null;
+  const counts = [0, 0.25, 0.75].map((x) => gambleCount(itemId, { next: () => x }));
+  return { chance: AMULET_RARITY_SHARE[r] / buckets[r].length, min: Math.min(...counts), max: Math.max(...counts) };
+}
+
 /** Resources/cents an amulet slot pays out directly instead of as an item. */
 export function amuletDirectPayout(slotId: string): { resource?: keyof ResourceSet; cents?: boolean } | undefined {
   const m = /^player\.box\.gambling\.(food|wood|stone|iron|gold)$/.exec(slotId);

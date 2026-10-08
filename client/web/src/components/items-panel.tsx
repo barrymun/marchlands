@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { CityBean } from '@evony/api-client';
-import { BALANCE, ITEM_CATEGORIES, ITEM_INFO, itemConfig, TROOP_ID_BY_KEY, TROOP_NAMES, type ItemInfo, type TroopKey } from '@evony/core';
+import { BALANCE, ITEM_CATEGORIES, ITEM_INFO, itemConfig, medalSources, TROOP_ID_BY_KEY, TROOP_NAMES, type ItemInfo, type TroopKey } from '@evony/core';
+import { Medal } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -156,6 +157,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
               <p className="text-sm text-muted-foreground">{e.info.description}</p>
               {e.info.howTo && <p className="text-xs text-muted-foreground italic">{e.info.howTo}</p>}
               {e.info.price > 0 && <p className="text-xs text-muted-foreground">Shop price: {fmtExact(e.info.price)} cents</p>}
+              {medalLevelOf(e.ids) != null && <MedalSourcesInfo level={medalLevelOf(e.ids)!} />}
             </div>
           </div>
         ))}
@@ -177,4 +179,61 @@ function describeGrant(g: {
   for (const [k, n] of Object.entries(g.troops ?? {})) if (n) parts.push(`${fmtExact(n)} ${TROOP_NAMES[TROOP_ID_BY_KEY[k as TroopKey]] ?? k}`);
   if (g.cents) parts.push(`${fmtExact(g.cents)} cents`);
   return parts.join(', ') || 'nothing';
+}
+
+/** Medal level 1 (Cross) … 9 (Nation) of an entry, or null for other items. */
+function medalLevelOf(ids: string[]): number | null {
+  for (const id of ids) {
+    const m = /^hero\.loyalty\.([1-9])$/.exec(id);
+    if (m) return Number(m[1]);
+  }
+  return null;
+}
+
+const pct = (x: number) => `${x < 0.1 ? (x * 100).toFixed(1) : Math.round(x * 100)}%`;
+const range = (min: number, max: number) => (min === max ? `${min}` : `${min}–${max}`);
+
+/** Where a medal comes from, with the odds (core medalSources: the server's own drop rules). */
+function MedalSourcesInfo({ level }: { level: number }) {
+  const s = medalSources(level);
+  return (
+    <div className="mt-1 grid gap-1 rounded-md bg-muted/50 p-2 text-xs">
+      <div className="flex items-center gap-1.5 font-medium">
+        <Medal className="size-3.5 text-amber-500" /> Where to get it
+      </div>
+      <ul className="grid gap-1 text-muted-foreground">
+        {s.attacks.length > 0 && (
+          <li>
+            <span className="text-foreground">Winning attacks</span> on NPC cities of these levels (a lord&apos;s city counts its Town Hall level), chance per
+            win:
+            <span className="mt-0.5 flex flex-wrap gap-1">
+              {s.attacks.map((a) => (
+                <span key={a.cityLevel} className="rounded bg-background px-1.5 py-px tabular-nums">
+                  Lv {a.cityLevel} · {pct(a.chance)}
+                </span>
+              ))}
+            </span>
+          </li>
+        )}
+        {s.amulet && (
+          <li>
+            <span className="text-foreground">Amulet prize</span> (the daily gift is a free Amulet): {pct(s.amulet.chance)} per Amulet,{' '}
+            {range(s.amulet.min, s.amulet.max)} at a time
+          </li>
+        )}
+        {s.containers.map((c) => (
+          <li key={c.id}>
+            <span className="text-foreground">{c.name}</span> ({c.always ? range(c.min, c.max) : `sometimes ${range(c.min, c.max)}`}):{' '}
+            {[c.price > 0 && `${fmtExact(c.price)} cents in the shop`, c.amulet && 'an Amulet prize'].filter(Boolean).join(' or ')}
+            {c.key && ` (opens with a ${c.key})`}
+          </li>
+        ))}
+        {s.quests.map((q) => (
+          <li key={q.name}>
+            <span className="text-foreground">Quest &ldquo;{q.name}&rdquo;</span>: {q.count} (once)
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
