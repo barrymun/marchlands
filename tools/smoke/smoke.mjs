@@ -156,15 +156,34 @@ async function main() {
 
   // ---- several troop types in one order, all or nothing ----
   {
-    const many = await ok(a.token, 'POST', `/cities/${cid}/troops/train-many`, { orders: [{ troopId: 2, count: 3 }, { troopId: 3, count: 4 }] });
+    const many = await ok(a.token, 'POST', `/cities/${cid}/troops/train-many`, {
+      orders: [
+        { troopId: 2, count: 3 },
+        { troopId: 3, count: 4 },
+      ],
+    });
     check(many.orders === 2 && many.units === 7, 'train several troop types at once');
     const queued = JSON.stringify(await ok(a.token, 'GET', `/cities/${cid}/troops/queues`));
-    const tooMany = await call(a.token, 'POST', `/cities/${cid}/troops/train-many`, { orders: [{ troopId: 2, count: 1 }, { troopId: 3, count: 50_000_000 }] });
+    const tooMany = await call(a.token, 'POST', `/cities/${cid}/troops/train-many`, {
+      orders: [
+        { troopId: 2, count: 1 },
+        { troopId: 3, count: 50_000_000 },
+      ],
+    });
     const after = JSON.stringify(await ok(a.token, 'GET', `/cities/${cid}/troops/queues`));
     check(tooMany.ok !== 1 && queued === after, 'a multi-type order that cannot be paid trains nothing');
     // cancel them again: later checks need the population
     for (const q of (await ok(a.token, 'GET', `/cities/${cid}/troops/queues`)).queues)
       for (const b of [...q.allProduceQueue].reverse()) await ok(a.token, 'DELETE', `/cities/${cid}/troops/queues/${q.positionId}/${b.queueId}`);
+  }
+
+  // ---- Quartermaster's Seal (bought with city gold): troop training cost -25% ----
+  {
+    await ok(a.token, 'POST', `/cities/${cid}/shop/gold`, { itemId: 'player.reduce.troops.cost.1' });
+    await ok(a.token, 'POST', '/player/items/player.reduce.troops.cost.1/use', {});
+    const units = await ok(a.token, 'GET', `/cities/${cid}/troops/trainable`);
+    const forts = await ok(a.token, 'GET', `/cities/${cid}/fortifications/trainable`);
+    check(units.every((u) => u.costShare === 0.75) && forts.every((u) => u.costShare === 1), 'Quartermaster discounts troops, not fortifications');
   }
 
   // ---- flows: a series of actions run on cities, each city all-or-nothing ----

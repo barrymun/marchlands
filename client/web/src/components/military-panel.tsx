@@ -39,6 +39,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TimerBar } from '@/components/countdown';
 import { CostList, Requirements } from '@/components/cost-list';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
+import { useNow } from '@/hooks/use-now';
 import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, realHourly, troopName } from '@/lib/format';
@@ -197,13 +198,17 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
 
   // the amounts entered, and what they cost together
   const countOf = (typeId: number) => Number(counts[typeId] ?? 0);
-  const orders = (trainable.data ?? []).filter((u) => u.permission && countOf(u.typeId) > 0).map((u) => ({ u, count: countOf(u.typeId) }));
+  // costs per unit as paid now (costShare: a Quartermaster item's discount on troops)
+  const units = (trainable.data ?? []).map((u) => ({ ...u, ...Object.fromEntries(RES_KEYS.map((k) => [k, u[k] * u.costShare])) }) as typeof u);
+  const orders = units.filter((u) => u.permission && countOf(u.typeId) > 0).map((u) => ({ u, count: countOf(u.typeId) }));
+  // each order's cost is rounded up, as the server charges it
+  const costOf = (list: typeof orders, k: (typeof RES_KEYS)[number]) => list.reduce((n, o) => n + Math.ceil(o.u[k] * o.count), 0);
   const sumOf = (list: typeof orders) => ({
-    gold: list.reduce((n, o) => n + o.u.gold * o.count, 0),
-    food: list.reduce((n, o) => n + o.u.food * o.count, 0),
-    wood: list.reduce((n, o) => n + o.u.wood * o.count, 0),
-    stone: list.reduce((n, o) => n + o.u.stone * o.count, 0),
-    iron: list.reduce((n, o) => n + o.u.iron * o.count, 0),
+    gold: costOf(list, 'gold'),
+    food: costOf(list, 'food'),
+    wood: costOf(list, 'wood'),
+    stone: costOf(list, 'stone'),
+    iron: costOf(list, 'iron'),
     population: list.reduce((n, o) => n + o.u.population * o.count, 0),
     space: list.reduce((n, o) => n + (BALANCE.fortSpace[o.u.typeId] ?? 1) * o.count, 0),
   });
@@ -249,6 +254,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
       </CardHeader>
       <CardContent className="grid gap-3">
         <MayorTrainingHint city={city} fort={fort} />
+        {!fort && units[0] && units[0].costShare < 1 && <TrainDiscountHint share={units[0].costShare} />}
         <Tabs value={tab} onValueChange={(v) => setTab(v as 'train' | 'queue')}>
           <TabsList>
             <TabsTrigger value="train">{fort ? 'Build' : 'Train'}</TabsTrigger>
@@ -307,7 +313,7 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
               );
             }}
           >
-            {trainable.data?.map((u) => {
+            {units.map((u) => {
               const count = countOf(u.typeId);
               const m = maxTrainable(u, leftFor(u.typeId), idleFor(u.typeId), fort ? wallFor(u.typeId) : Infinity, fort);
               return (
@@ -383,6 +389,18 @@ function Production({ city, fort }: { city: CityBean; fort: boolean }) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/** A Quartermaster item's discount on troop training, while it runs. */
+function TrainDiscountHint({ share }: { share: number }) {
+  const player = usePlayer();
+  const now = useNow(30_000);
+  const end = (player.data?.buffs ?? []).find((b) => b.id === 'TrainCostReduceBuff')?.endTime ?? 0;
+  return (
+    <p className="text-xs text-emerald-600 dark:text-emerald-400">
+      Training cost −{Math.round((1 - share) * 100)}% (Quartermaster){end > now ? ` for ${duration(end - now)}` : ''}: the costs below include it.
+    </p>
   );
 }
 

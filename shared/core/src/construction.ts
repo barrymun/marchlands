@@ -165,19 +165,23 @@ export function researchCost(techId: number, targetLevel: number): Resources {
 }
 
 /** (evony-re) Most units of a troop type the city can pay for now: resources and idle population. */
-export function maxTrainableCount(troopId: number, have: Partial<Resources>, idlePopulation: number): number {
+export function maxTrainableCount(troopId: number, have: Partial<Resources>, idlePopulation: number, costShare = 1): number {
   const cfg = troopConfig(troopId);
   if (!cfg) return 0;
   let max = Infinity;
-  for (const [k, cost] of Object.entries(cfg.cost) as [keyof Resources, number][]) if (cost > 0) max = Math.min(max, Math.floor((have[k] ?? 0) / cost));
+  for (const [k, cost] of Object.entries(cfg.cost) as [keyof Resources, number][])
+    if (cost > 0) max = Math.min(max, Math.floor((have[k] ?? 0) / (cost * costShare)));
   if (cfg.population > 0) max = Math.min(max, Math.floor(idlePopulation / cfg.population));
   return Number.isFinite(max) ? Math.max(0, max) : 0;
 }
 
-export function trainCost(troopId: number, count: number): Resources {
+/** Cost of `count` units; `costShare` < 1 while training is discounted (troopCostShare), rounded up. */
+export function trainCost(troopId: number, count: number, costShare = 1): Resources {
   const cfg = troopConfig(troopId);
   if (!cfg) throw new GameError('Invalid troop type.', -99);
-  return scaleResources(cfg.cost, count);
+  const cost = scaleResources(cfg.cost, count * costShare);
+  if (costShare !== 1) for (const k of Object.keys(cost) as (keyof Resources)[]) cost[k] = Math.ceil(cost[k]);
+  return cost;
 }
 
 export interface NewBuildingCheck {

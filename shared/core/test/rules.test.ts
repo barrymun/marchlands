@@ -60,6 +60,7 @@ import {
   valleyGarrison,
   type EconomyCity,
   type EconomyContext,
+  maxTrainableCount,
 } from '../src/index.ts';
 
 const ctx = (over: Partial<EconomyContext> = {}): EconomyContext => ({
@@ -743,5 +744,16 @@ describe('full demolition', () => {
     const r = fullDemolishRefund(BuildingType.COTTAGE, 3);
     expect(r.wood).toBeCloseTo(sum(3, 'wood') / 3);
     expect(r.food).toBeCloseTo(sum(3, 'food') / 3);
+  });
+});
+
+describe('(evony-re) troop training discount', () => {
+  it('charges the paid share of the cost, rounded up, and counts it in the max', () => {
+    const full = trainCost(3, 3);
+    const paid = trainCost(3, 3, 0.75);
+    for (const k of ['gold', 'food', 'wood', 'stone', 'iron'] as const) expect(paid[k]).toBe(Math.ceil(full[k] * 0.75));
+    const have = { gold: 1e9, food: full.food, wood: 1e9, stone: 1e9, iron: 1e9 };
+    expect(maxTrainableCount(3, have, 1e9)).toBe(3);
+    expect(maxTrainableCount(3, have, 1e9, 0.75)).toBe(4);
   });
 });

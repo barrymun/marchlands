@@ -95,6 +95,9 @@ const EFFECTS: Record<string, ItemEffect> = {
 
   // ---- upkeep ----
   'player.reduce.troops.upkeep.1': buff('UpkeepReduceBuff', 'Troop upkeep -50%', DAY),
+  'player.reduce.troops.upkeep.7': buff('UpkeepReduceBuff', 'Troop upkeep -50%', 7 * DAY),
+  'player.reduce.troops.cost.1': buff('TrainCostReduceBuff', `Troop training cost -${BALANCE.trainCostReduction * 100}%`, DAY),
+  'player.reduce.troops.cost.7': buff('TrainCostReduceBuff', `Troop training cost -${BALANCE.trainCostReduction * 100}%`, 7 * DAY),
   'player.running.shoes': buff('UpkeepReduceBuff', 'Troop upkeep -50%', DAY),
   'player.santa.stoptoopsupkeep': buff('UpkeepReduceBuff', 'Troop upkeep -50%', DAY),
   'player.newyear.stoptoopsupkeep': buff('UpkeepReduceBuff', 'Troop upkeep -50%', DAY),

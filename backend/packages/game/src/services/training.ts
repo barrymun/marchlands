@@ -13,6 +13,7 @@ import {
   requirementsMet,
   trainBatchMs,
   trainCost,
+  troopCostShare,
   troopConfig,
   troopKey,
   troopUnitSeconds,
@@ -115,12 +116,14 @@ async function ownView(ctx: Ctx, playerId: number, cityId: number) {
 export async function trainableList(ctx: Ctx, playerId: number, cityId: number, fort: boolean) {
   const b = await ownView(ctx, playerId, cityId);
   const mayor = mayorStats(b.heroes);
+  const costShare = fort ? 1 : troopCostShare(b.player.buffs, ctx.now);
   return TROOPS.filter((t) => t.inside === (fort ? 2 : 1)).map((t) => {
     const checks = checkRequirements(t.requires, b.city.buildings, b.player.research, b.player.items);
     return {
       typeId: t.troopId,
       key: fort ? FORT_KEYS[t.troopId as keyof typeof FORT_KEYS] : troopKey(t.troopId),
       ...t.cost,
+      costShare,
       population: t.population,
       time: troopUnitSeconds(t.troopId, mayor, b.player.research),
       requirements: checks,
@@ -170,7 +173,8 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
   const pop = cfg.population * count;
   const stats = cityStats(b, ctx.now);
   if (pop > stats.idlePopulation) throw new GameError('Not enough population.', -1);
-  spendResources(b.city, trainCost(troopId, count));
+  const share = fort ? 1 : troopCostShare(b.player.buffs, ctx.now);
+  spendResources(b.city, trainCost(troopId, count, share));
   b.city.population -= pop;
   const ms = trainBatchMs(troopId, count, mayorStats(b.heroes), b.player.research);
   const batch: TrainBatch = {
@@ -178,6 +182,7 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
     troopId,
     count,
     costTime: ms,
+    ...(share !== 1 && { paidShare: share }),
     startTime: queue.length === 0 ? ctx.now : 0,
     endTime: queue.length === 0 ? ctx.now + ms : 0,
   };
@@ -240,7 +245,8 @@ export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, tro
   if (lanes.length === 0) throw new GameError('Every barracks queue is full.', -99);
   const pop = cfg.population * count;
   if (pop > cityStats(b, ctx.now).idlePopulation) throw new GameError('Not enough population.', -1);
-  spendResources(b.city, trainCost(troopId, count));
+  const share = troopCostShare(b.player.buffs, ctx.now);
+  spendResources(b.city, trainCost(troopId, count, share));
   b.city.population -= pop;
 
   const mayor = mayorStats(b.heroes);
@@ -255,6 +261,7 @@ export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, tro
       troopId,
       count: p.count,
       costTime: ms,
+      ...(share !== 1 && { paidShare: share }),
       startTime: queue.length === 0 ? ctx.now : 0,
       endTime: queue.length === 0 ? ctx.now + ms : 0,
     };
@@ -279,7 +286,7 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
   if (idx < 0) throw new GameError('Batch not found.', -99, 404);
   const batch = queue[idx];
   const share = idx === 0 ? BALANCE.cancelTrainInProgressRefund : BALANCE.cancelTrainQueuedRefund;
-  gainResources(b.city, trainCost(batch.troopId, batch.count), share);
+  gainResources(b.city, trainCost(batch.troopId, batch.count, batch.paidShare ?? 1), share);
   b.city.population += (troopConfig(batch.troopId)?.population ?? 1) * batch.count;
   const next = queue.filter((_, i) => i !== idx);
   if (idx === 0 && next[0]) next[0] = { ...next[0], startTime: ctx.now, endTime: ctx.now + next[0].costTime };

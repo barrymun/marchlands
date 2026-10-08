@@ -12453,6 +12453,8 @@ export interface components {
             wood: number;
             stone: number;
             iron: number;
+            /** @description (evony-re) share of the cost above actually paid (below 1 while a Quartermaster item runs) */
+            costShare: number;
             /** @description per unit */
             population: number;
             /** @description seconds per unit */
@@ -14664,6 +14666,8 @@ export interface components {
             wood: number;
             stone: number;
             iron: number;
+            /** @description (evony-re) share of the cost above actually paid (below 1 while a Quartermaster item runs) */
+            costShare: number;
             /** @description per unit */
             population: number;
             /** @description seconds per unit */

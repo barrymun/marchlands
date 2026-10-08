@@ -100,7 +100,33 @@ export const REMOVED_ITEMS: readonly string[] = [
   // Merchant Fleet: halved market shipment time (market trades settle instantly here)
   'consume.transaction.1',
 ];
-export const ITEMS = (itemRows as ItemConfig[]).filter((i) => !REMOVED_ITEMS.includes(i.id));
+/** (evony-re) items this game adds to the legacy ones (sold for city gold, BALANCE.goldShop) */
+const EXTRA_ITEMS: ItemConfig[] = [
+  {
+    legacyId: 0,
+    id: 'player.reduce.troops.upkeep.7',
+    name: "Vesta's Grand Blessing",
+    cost: 0,
+    buyable: false,
+    canGamble: false,
+    type: 4,
+    dayLimit: 0,
+    rarity: 0,
+  },
+  { legacyId: 0, id: 'player.reduce.troops.cost.1', name: "Quartermaster's Seal", cost: 0, buyable: false, canGamble: false, type: 4, dayLimit: 0, rarity: 0 },
+  {
+    legacyId: 0,
+    id: 'player.reduce.troops.cost.7',
+    name: "Quartermaster's Charter",
+    cost: 0,
+    buyable: false,
+    canGamble: false,
+    type: 4,
+    dayLimit: 0,
+    rarity: 0,
+  },
+];
+export const ITEMS = [...(itemRows as ItemConfig[]).filter((i) => !REMOVED_ITEMS.includes(i.id)), ...EXTRA_ITEMS];
 export const QUESTS = questRows as QuestConfig[];
 
 const buildingIndex = new Map<string, BuildingLevelConfig>(BUILDINGS.map((b) => [`${b.typeId}:${b.level}`, b]));

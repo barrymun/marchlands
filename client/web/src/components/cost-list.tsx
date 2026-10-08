@@ -18,7 +18,7 @@ export function CostList({ cost, seconds, have }: { cost: Cost; seconds?: number
     <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs tabular-nums">
       {parts.map((k) => (
         <span key={k} className={have && (have[k] ?? 0) < cost[k] ? 'text-destructive' : 'text-muted-foreground'}>
-          {k === 'wood' ? 'lumber' : k} {fmt(cost[k])}
+          {k === 'wood' ? 'lumber' : k} {cost[k] % 1 && cost[k] < 1000 ? cost[k].toLocaleString('en', { maximumFractionDigits: 1 }) : fmt(cost[k])}
         </span>
       ))}
       {seconds != null && <span className="text-muted-foreground">⏱ {duration(seconds * 1000)}</span>}

@@ -51,6 +51,8 @@ export const TrainBatchSchema = z.object({
   endTime: z.number(),
   /** total production time of the batch, ms */
   costTime: z.number(),
+  /** (evony-re) share of the normal cost paid (troopCostShare; absent = 1): what a cancel refunds from */
+  paidShare: z.number().optional(),
 });
 export type TrainBatch = z.infer<typeof TrainBatchSchema>;
 

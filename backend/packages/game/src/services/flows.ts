@@ -24,6 +24,7 @@ import {
   heroStratagem,
   HeroStatus,
   maxTrainableCount,
+  troopCostShare,
   requirementsMet,
   TROOP_NAMES,
   BUILDING_NAMES,
@@ -367,7 +368,7 @@ async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<
     throw new GameError(`${name} cannot be trained here (needs ${missing.join(', ')}).`, -99);
   }
   const have = { gold: b.city.gold, food: b.city.food, wood: b.city.wood, stone: b.city.stone, iron: b.city.iron };
-  const max = maxTrainableCount(a.troopId, have, cityStats(b, ctx.now).idlePopulation);
+  const max = maxTrainableCount(a.troopId, have, cityStats(b, ctx.now).idlePopulation, troopCostShare(b.player.buffs, ctx.now));
   // what the city cannot do right now is skipped, not failed: as many as it can afford, up to the amount
   if (!hasTrainingRoom(b)) return { detail: 'Skipped: no barracks queue has room', skipped: true };
   const count = a.amount === 'max' ? max : Math.min(a.amount, max);

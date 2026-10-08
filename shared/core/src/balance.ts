@@ -223,6 +223,8 @@ export const BALANCE = {
    * L-3 … L-1 (1 … 9); from level 8 a second (and from 9 a third) low-mid medal of level 1 … ceil(L/2)
    */
   medalDrops: { base: 0.1, perLevel: 0.07, secondFrom: 8, secondPerLevel: 0.25, thirdFrom: 9, thirdPerLevel: 0.2 },
+  /** (evony-re) share of troop training cost saved while a Quartermaster item's buff runs (fortifications pay in full) */
+  trainCostReduction: 0.25,
   /** (evony-re) items that can be bought with city gold, and their price (item id -> gold each) */
   // prices follow the War Ensign's rate (30 cents = 250,000 gold, ~8,333 gold a cent), rounded to 5,000
   goldShop: {
@@ -239,6 +241,12 @@ export const BALANCE = {
     // gold income +25% for 1 day (45 cents) / 7 days (280 cents)
     'player.gold.1.a': 375_000,
     'player.gold.1.b': 2_335_000,
+    // troop upkeep -50% for 1 day (Vesta's Blessing) / 7 days (Vesta's Grand Blessing)
+    'player.reduce.troops.upkeep.1': 150_000,
+    'player.reduce.troops.upkeep.7': 950_000,
+    // troop training cost -trainCostReduction for 1 day (Quartermaster's Seal) / 7 days (Quartermaster's Charter)
+    'player.reduce.troops.cost.1': 250_000,
+    'player.reduce.troops.cost.7': 1_600_000,
   } as Record<string, number>,
   /** (orig) units of resource per cent in shop.buyResource */
   shopResourcePerCent: { food: 100_000, wood: 100_000, stone: 50_000, iron: 40_000 },
