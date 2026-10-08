@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import type { ArmyBean } from '@evony/api-client';
-import { ArmyDirection, Mission } from '@evony/core';
+import type { ArmyBean } from '@marchlands/api-client';
+import { ArmyDirection, Mission } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

@@ -1,4 +1,4 @@
--- (evony-re) 141 legacy items that can no longer be obtained are removed from the game (core
+-- (marchlands) 141 legacy items that can no longer be obtained are removed from the game (core
 -- REMOVED_ITEMS / isRemovedItem): event, promotion and compensation packages, event keys and tokens, the
 -- extra Amulet copies, lockboxes and their keys, the event copies of Vesta's Blessing and a few others.
 -- Drop them from every lord's items.

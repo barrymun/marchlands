@@ -27,16 +27,16 @@ export const BALANCE = {
   /**
    * (evony) production bonus of an occupied valley, indexed by level 1-10 (index 0 unused).
    * Evony: grassland +1%/level from 3%, lake +3%/level from 8%, every other valley +2%/level from 5%
-   * (grass [0, .03 … .12], other [0, .05 … .23]). (evony-re) every valley now uses the lake's table.
+   * (grass [0, .03 … .12], other [0, .05 … .23]). (marchlands) every valley now uses the lake's table.
    */
-  /** (evony-re) gold to raise an unowned valley from level 1 to 2; doubles each level, up to `maxLevel` */
+  /** (marchlands) gold to raise an unowned valley from level 1 to 2; doubles each level, up to `maxLevel` */
   valleyUpgrade: { baseGold: 10_000, maxLevel: 10 },
   valleyBonus: {
     grass: [0, 0.08, 0.11, 0.14, 0.17, 0.2, 0.23, 0.26, 0.29, 0.32, 0.35],
     lake: [0, 0.08, 0.11, 0.14, 0.17, 0.2, 0.23, 0.26, 0.29, 0.32, 0.35],
     other: [0, 0.08, 0.11, 0.14, 0.17, 0.2, 0.23, 0.26, 0.29, 0.32, 0.35],
   },
-  /** (evony-re) multiplies every city's food/lumber/stone/iron storage, after Stockpile (orig 1) */
+  /** (marchlands) multiplies every city's food/lumber/stone/iron storage, after Stockpile (orig 1) */
   storageMultiplier: 100,
   /** (evony) Stockpile: +10% storage per level */
   stockpileStorageBonusPerLevel: 0.1,
@@ -47,45 +47,45 @@ export const BALANCE = {
 
   // population / loyalty drift (orig: every 6 minutes)
   cityTickMs: 6 * MINUTE,
-  /** (evony-re) a city's loyalty drifts 1 point per cityTickMs of real time, unaffected by GAME_SPEED */
+  /** (marchlands) a city's loyalty drifts 1 point per cityTickMs of real time, unaffected by GAME_SPEED */
   cityLoyaltyRealTime: true as boolean,
   populationStep: 0.05,
   startLoyalty: 90,
   startTaxRate: 10,
   startPopulation: 50,
 
-  /** (evony-re) heroes stop levelling here (orig: no limit); they keep growing through gear (gear.ts) */
+  /** (marchlands) heroes stop levelling here (orig: no limit); they keep growing through gear (gear.ts) */
   heroMaxLevel: 100,
   /**
-   * (evony-re) hero gear (Age II Hero Enhancement): piece levels follow the Hero Enhancement research,
+   * (marchlands) hero gear (Age II Hero Enhancement): piece levels follow the Hero Enhancement research,
    * each level adds its number in points (55 per piece at 10); each star adds starPoints; star 10 of a
    * piece costs lastStarMedals Nation Medals (stars 1-9: one medal of that level)
    */
   heroGear: { maxLevel: 10, maxStars: 10, starPoints: 3, lastStarMedals: 3 },
   /**
-   * (evony-re) soft caps for geared heroes (orig: linear). With a toggle on, a hero attribute counts
+   * (marchlands) soft caps for geared heroes (orig: linear). With a toggle on, a hero attribute counts
    * in full up to `knee` and as √(knee × attribute) above it (knee 200: 450 → 300, 800 → 400,
    * 1,250 → 500): `production` for the mayor's production bonus, `battle` for hero attack in battle.
    * Training speed is never capped.
    */
   heroSoftCap: { production: true as boolean, battle: true as boolean, knee: 200 },
   /**
-   * (evony-re) the most a mayor's attribute can cut construction / research times to: at least this
+   * (marchlands) the most a mayor's attribute can cut construction / research times to: at least this
    * share of the time is kept (null: no floor, orig). Training is never floored.
    */
   heroTimeFloor: { building: 0.1 as number | null, research: 0.1 as number | null },
   heroSalaryPerLevel: 20, // (orig) gold per hour per hero level
   /**
-   * (evony-re) hero items bought with the hero's city gold instead of cents: experience books cost
+   * (marchlands) hero items bought with the hero's city gold instead of cents: experience books cost
    * `perExp` gold per experience point they give, attribute boosts a flat price
    */
   heroItemGold: { perExp: 1, attributeBoost: 100_000 },
-  /** (evony-re) on: every hero costs heroSalaryPerLevel gold per hour per level (orig). Off: heroes are free */
+  /** (marchlands) on: every hero costs heroSalaryPerLevel gold per hour per level (orig). Off: heroes are free */
   heroSalaries: true as boolean,
-  /** (evony-re) on: salaries are paid per real hour, unaffected by GAME_SPEED. Off: per game hour (orig) */
+  /** (marchlands) on: salaries are paid per real hour, unaffected by GAME_SPEED. Off: per game hour (orig) */
   salaryPerRealHour: true as boolean,
   heroHireCostPerLevel: 1000, // (orig)
-  /** (evony-re) gold to re-roll the Inn's offers, per Inn level (the Hero Hunting item does it for free) */
+  /** (marchlands) gold to re-roll the Inn's offers, per Inn level (the Hero Hunting item does it for free) */
   tavernRefreshGoldPerInnLevel: 1000,
   heroAwardCostPerLevel: 100, // (orig)
 
@@ -99,7 +99,7 @@ export const BALANCE = {
   techTimeFactor: 0.9, // (orig) per research level
   demolishRefund: 1 / 3, // (orig)
   /**
-   * (evony-re) demolishing removes the whole building at once, instantly, refunding demolishRefund of
+   * (marchlands) demolishing removes the whole building at once, instantly, refunding demolishRefund of
    * every level's cost (what demolishing it level by level returns); orig: one level per timed demolition
    */
   instantDemolish: true as boolean,
@@ -110,13 +110,13 @@ export const BALANCE = {
   disbandRefund: 0, // (evony) disbanding returns nothing
   outerSlotsBase: 10, // (orig intended) field slots = 10 + 3*TownHall
   outerSlotsPerTownHall: 3,
-  /** (evony-re) constructions a city may run at once (orig 1); Bernini's Hammer adds one more */
+  /** (marchlands) constructions a city may run at once (orig 1); Bernini's Hammer adds one more */
   buildQueues: 2,
-  /** (evony-re) floor on a troop's training time per unit, in game seconds (orig 1); 0 lets a strong mayor train instantly */
+  /** (marchlands) floor on a troop's training time per unit, in game seconds (orig 1); 0 lets a strong mayor train instantly */
   minTrainUnitSeconds: 0,
-  /** (evony-re) off: level-10 buildings no longer need (and use up) a Michelangelo's Script (orig on) */
+  /** (marchlands) off: level-10 buildings no longer need (and use up) a Michelangelo's Script (orig on) */
   buildingItemRequirements: false as boolean,
-  /** (evony-re) technologies one city's Academy researches at once (orig 1) */
+  /** (marchlands) technologies one city's Academy researches at once (orig 1) */
   researchQueues: 2,
   freeSpeedupMs: 5 * MINUTE, // (orig) free speed-up threshold & amount
 
@@ -144,10 +144,10 @@ export const BALANCE = {
   npcLoyaltyStart: { low: 80, high: 90 },
   /** (orig) NPC/valley regeneration interval */
   npcRegenMs: 6 * MINUTE,
-  /** (evony-re) barbarian city loyalty recovers +1 per npcRegenMs of real time, not game time */
+  /** (marchlands) barbarian city loyalty recovers +1 per npcRegenMs of real time, not game time */
   npcLoyaltyRegenRealTime: true as boolean,
   /**
-   * (evony-re) barbarian cities hold as much gold as their largest resource (level 10: 19M, like
+   * (marchlands) barbarian cities hold as much gold as their largest resource (level 10: 19M, like
    * their food) and regenerate it like the other resources (orig: the table's gold, never regenerated)
    */
   npcGoldMatchesTopResource: true as boolean,
@@ -156,19 +156,19 @@ export const BALANCE = {
   /** (evony) attacker troops lost in a win that become injured (Relief/Medicine aware) */
   injuredShare: 0.2,
   /**
-   * (evony-re) on: troops eat their upkeep per real hour, unaffected by GAME_SPEED (production still
+   * (marchlands) on: troops eat their upkeep per real hour, unaffected by GAME_SPEED (production still
    * speeds up). Off: per game hour, like every other rate (orig)
    */
   upkeepPerRealHour: true as boolean,
-  /** (evony-re) on: troops desert 10% per game hour while food is at 0 (Evony). Off: food stops at 0 and troops stay */
+  /** (marchlands) on: troops desert 10% per game hour while food is at 0 (Evony). Off: food stops at 0 and troops stay */
   starvationDesertion: false as boolean,
   /** (orig) healing an injured troop costs this share of its training cost */
   healCostShare: 0.25,
   /** (evony) Medicine: +5% of lost defenders recover as injured per level */
   medicinePerLevel: 0.05,
-  /** (evony-re) the Medicine share also applies to an attacking army's fallen: they come home injured */
+  /** (marchlands) the Medicine share also applies to an attacking army's fallen: they come home injured */
   attackersGetInjured: true as boolean,
-  /** (evony-re) healing an injured unit with honor costs its food upkeep x this (the honor killing one earns) */
+  /** (marchlands) healing an injured unit with honor costs its food upkeep x this (the honor killing one earns) */
   healHonorPerUpkeep: 1,
   /** (evony) hero exp per point of experience weight (orig TROOP_EXPS, troops.ts unitExp) of enemy units killed */
   heroExpPerKill: 0.1,
@@ -199,11 +199,11 @@ export const BALANCE = {
 
   // ---- market ----
   marketFee: 0.005, // (evony) 0.5% of gold paid
-  /** (evony-re) market trades are instant (orig Evony: goods travel 60 min / Marketplace level); > 0 restores travel */
+  /** (marchlands) market trades are instant (orig Evony: goods travel 60 min / Marketplace level); > 0 restores travel */
   marketShipmentBaseMs: 0 * MINUTE,
   marketMaxOrdersPerLevel: 2,
   /**
-   * (evony-re) computer merchant: always buys and sells every resource. Its reference price moves
+   * (marchlands) computer merchant: always buys and sells every resource. Its reference price moves
    * with its trades (x e^(qty/depth)) and drifts back to `basePrice` with a half-life of
    * `recoveryHalfLifeMs` (game time). It sells at reference x (1 + spread/2), buys at x (1 - spread/2).
    * When `fixedPrice` is set, all of that is switched off: the merchant buys and sells every
@@ -219,14 +219,14 @@ export const BALANCE = {
     band: 5,
   },
   /**
-   * (evony-re) medals (hero.loyalty.1 Cross … .9 Nation) a won attack on a city can drop, by city
+   * (marchlands) medals (hero.loyalty.1 Cross … .9 Nation) a won attack on a city can drop, by city
    * level L (barbarian level / Town Hall level): one medal with chance base + perLevel x L, of level
    * L-3 … L-1 (1 … 9); from level 8 a second (and from 9 a third) low-mid medal of level 1 … ceil(L/2)
    */
   medalDrops: { base: 0.1, perLevel: 0.07, secondFrom: 8, secondPerLevel: 0.25, thirdFrom: 9, thirdPerLevel: 0.2 },
-  /** (evony-re) share of troop training cost saved while a Quartermaster item's buff runs (fortifications pay in full) */
+  /** (marchlands) share of troop training cost saved while a Quartermaster item's buff runs (fortifications pay in full) */
   trainCostReduction: 0.25,
-  /** (evony-re) items that can be bought with city gold, and their price (item id -> gold each) */
+  /** (marchlands) items that can be bought with city gold, and their price (item id -> gold each) */
   // set prices; every other item the original sold for cents costs goldForCents(its price) (itemGoldPrice)
   goldShop: {
     'player.troop.1.a': 250_000, // War Ensign (30 cents)
@@ -250,13 +250,13 @@ export const BALANCE = {
     'player.reduce.troops.cost.7': 1_600_000,
   } as Record<string, number>,
   /**
-   * (evony-re) there are no cents: everything the original sold for cents costs city gold at this rate
+   * (marchlands) there are no cents: everything the original sold for cents costs city gold at this rate
    * (the War Ensign's: 30 cents = 250,000 gold), rounded to 5,000 (goldForCents)
    */
   goldPerCent: 250_000 / 30,
 } as const;
 
-/** (evony-re) Gold for something the original priced in cents (BALANCE.goldPerCent), rounded to 5,000 (at least 5,000). */
+/** (marchlands) Gold for something the original priced in cents (BALANCE.goldPerCent), rounded to 5,000 (at least 5,000). */
 export function goldForCents(cents: number): number {
   if (cents <= 0) return 0;
   return Math.max(5_000, Math.round((cents * BALANCE.goldPerCent) / 5_000) * 5_000);

@@ -11,7 +11,7 @@ import { expireHeroBuff } from './services/heroes.ts';
 import { deliverShipment } from './services/market.ts';
 import { completeResearch, settleAllCities } from './services/research.ts';
 import { completeTraining } from './services/training.ts';
-import { BALANCE, scaled } from '@evony/core';
+import { BALANCE, scaled } from '@marchlands/core';
 
 export interface EventRow {
   id: number;

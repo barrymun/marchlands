@@ -1,5 +1,5 @@
 ALTER TABLE "heroes" ADD COLUMN "gear_stat" text;--> statement-breakpoint
--- (evony-re) hero gear: the gear boosts each hero's current strongest attribute until the lord picks another
+-- (marchlands) hero gear: the gear boosts each hero's current strongest attribute until the lord picks another
 UPDATE "heroes" SET "gear_stat" = CASE
   WHEN "power" >= "management" AND "power" >= "stratagem" THEN 'power'
   WHEN "management" >= "stratagem" THEN 'management'

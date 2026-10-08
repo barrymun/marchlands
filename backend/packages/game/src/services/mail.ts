@@ -1,8 +1,8 @@
 // mail.* — inbox (1), system (2) and sent (3) folders. Each participant owns a copy.
 
 import { and, count, desc, eq, inArray } from 'drizzle-orm';
-import { GameError } from '@evony/core';
-import { mails } from '@evony/db';
+import { GameError } from '@marchlands/core';
+import { mails } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
 import { escapeHtml } from '../helpers.ts';
 import { findPlayerByName, getPlayer } from '../repo.ts';

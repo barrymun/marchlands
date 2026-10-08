@@ -30,8 +30,8 @@ import {
   syncHeroGear,
   type GearStat,
   type GeneratedHero,
-} from '@evony/core';
-import { heroes } from '@evony/db';
+} from '@marchlands/core';
+import { heroes } from '@marchlands/db';
 import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';
@@ -138,7 +138,7 @@ const HERO_HUNTING = 'consume.refreshtavern.1';
 
 /**
  * hero.refreshHerosListFromTavern: new offers. The original only accepted a Hero Hunting item;
- * evony-re also lets the lord pay gold (BALANCE.tavernRefreshGoldPerInnLevel x Inn level).
+ * Marchlands also lets the lord pay gold (BALANCE.tavernRefreshGoldPerInnLevel x Inn level).
  */
 export async function refreshTavern(ctx: Ctx, playerId: number, cityId: number, payWith: 'gold' | 'item' = 'gold') {
   const b = await openOwnCity(ctx, playerId, cityId);
@@ -283,7 +283,7 @@ export async function assignPoints(ctx: Ctx, playerId: number, heroId: number, v
   return heroBean(h);
 }
 
-/** hero.levelUp; (evony-re) takes every level the experience pays for in one go, up to BALANCE.heroMaxLevel. */
+/** hero.levelUp; (marchlands) takes every level the experience pays for in one go, up to BALANCE.heroMaxLevel. */
 export async function levelUp(ctx: Ctx, playerId: number, heroId: number) {
   const h = await ownHero(ctx, playerId, heroId);
   if (heroAtMaxLevel(h)) throw new GameError(`This hero is already at the maximum level (${BALANCE.heroMaxLevel}).`, -99);
@@ -296,7 +296,7 @@ export async function levelUp(ctx: Ctx, playerId: number, heroId: number) {
   return heroBean(h);
 }
 
-/** (evony-re) Choose the attribute the lord's gear boosts on this hero; free, any time. */
+/** (marchlands) Choose the attribute the lord's gear boosts on this hero; free, any time. */
 export async function setHeroGearStat(ctx: Ctx, playerId: number, heroId: number, stat: GearStat) {
   if (!GEAR_STATS.includes(stat)) throw new GameError('Invalid attribute.', -99);
   const h = await ownHero(ctx, playerId, heroId);
@@ -328,12 +328,12 @@ export async function resyncHeroGear(ctx: Ctx, playerId: number) {
   }
 }
 
-/** (evony-re) The lord's gear: Hero Enhancement level and stars per piece. */
+/** (marchlands) The lord's gear: Hero Enhancement level and stars per piece. */
 export async function gearState(ctx: Ctx, playerId: number) {
   return lordGear(await getPlayer(ctx, playerId));
 }
 
-/** (evony-re) Add a star to one gear piece for every hero, paid in medals (gearStarCost). */
+/** (marchlands) Add a star to one gear piece for every hero, paid in medals (gearStarCost). */
 export async function buyGearStar(ctx: Ctx, playerId: number, pieceId: string) {
   if (!isGearPiece(pieceId)) throw new GameError('Invalid gear piece.', -99);
   const p = await getPlayer(ctx, playerId, { lock: true });

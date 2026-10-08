@@ -4,5 +4,5 @@ export default defineConfig({
   dialect: 'postgresql',
   schema: './src/schema.ts',
   out: './migrations',
-  dbCredentials: { url: process.env.DATABASE_URL ?? 'postgres://evony:evony@localhost:5432/evony' },
+  dbCredentials: { url: process.env.DATABASE_URL ?? 'postgres://marchlands:marchlands@localhost:5432/marchlands' },
 });

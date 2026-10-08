@@ -1,8 +1,8 @@
 // Small shared mutations + their push notifications.
 
 import { count, eq } from 'drizzle-orm';
-import { GameError, hasResources, RESOURCE_KEYS, type BuffState, type Resources } from '@evony/core';
-import { alliances, cities } from '@evony/db';
+import { GameError, hasResources, RESOURCE_KEYS, type BuffState, type Resources } from '@marchlands/core';
+import { alliances, cities } from '@marchlands/db';
 import { cityStats, type CityBundle } from './city.ts';
 import type { Ctx } from './context.ts';
 import { buffsArray, cityBean, playerInfo, resourceBean } from './dto.ts';
@@ -45,7 +45,7 @@ export function consumeItem(ctx: Ctx, p: PlayerRow, id: string, n = 1) {
 }
 
 /**
- * (evony-re) Charge `gold` from a city: there are no cents, so what the original sold for cents costs
+ * (marchlands) Charge `gold` from a city: there are no cents, so what the original sold for cents costs
  * city gold (goldForCents). The caller saves the city and pushes its resources.
  */
 export function spendGold(city: CityRow, gold: number) {

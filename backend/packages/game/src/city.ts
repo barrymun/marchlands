@@ -15,7 +15,7 @@ import {
   type MayorStats,
   type SettleResult,
   type TroopCounts,
-} from '@evony/core';
+} from '@marchlands/core';
 import type { Ctx } from './context.ts';
 import { troopBean } from './dto.ts';
 import { reportDesertion } from './services/reports.ts';

@@ -1,6 +1,6 @@
 # Deviations from the original server
 
-The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bugs included. This file lists where evony-re does something different, and why. Every tunable value lives in `shared/core/src/balance.ts`.
+The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bugs included. This file lists where Marchlands does something different, and why. Every tunable value lives in `shared/core/src/balance.ts`.
 
 ## Ported exactly
 
@@ -23,7 +23,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 
 ## Bugs fixed
 
-| Original behaviour | evony-re |
+| Original behaviour | Marchlands |
 |---|---|
 | Speed-up coin cost used `=` instead of `+=` in the 15-minute tier, so prices were not monotonic | fixed; coin cost uses the **remaining** time, not the total |
 | Negative counts and amounts (training, troops sent, `buyResource`, furlough days) minted resources or cents | all amounts validated as positive integers |

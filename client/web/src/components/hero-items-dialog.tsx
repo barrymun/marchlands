@@ -1,4 +1,4 @@
-import type { HeroBean } from '@evony/api-client';
+import type { HeroBean } from '@marchlands/api-client';
 import {
   BALANCE,
   experienceItemGain,
@@ -10,7 +10,7 @@ import {
   heroItemGoldPrice,
   itemConfig,
   LOYALTY_MEDALS,
-} from '@evony/core';
+} from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';

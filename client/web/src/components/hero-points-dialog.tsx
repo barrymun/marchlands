@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
-import type { HeroBean } from '@evony/api-client';
-import { HeroStatus, heroManagement, itemGoldPrice, mayorProductionBonus } from '@evony/core';
+import type { HeroBean } from '@marchlands/api-client';
+import { HeroStatus, heroManagement, itemGoldPrice, mayorProductionBonus } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';

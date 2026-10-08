@@ -15,7 +15,7 @@ import {
   TITLES,
   TROOPS,
   getGameSpeed,
-} from '@evony/core';
+} from '@marchlands/core';
 import {
   AccountIdParams,
   AdminAddedHero,
@@ -61,8 +61,8 @@ import {
   ShipmentIdParams,
   ShopCategory,
   StaticConfig,
-} from '@evony/contracts';
-import { admin, market, quests, rankings, runGame, shop } from '@evony/game';
+} from '@marchlands/contracts';
+import { admin, market, quests, rankings, runGame, shop } from '@marchlands/game';
 import { doc, anon, authenticate, game, requireAdmin, tags, zCityParams, type Data, type ZApp } from '../http.ts';
 
 export default async function economyRoutes(app: ZApp) {

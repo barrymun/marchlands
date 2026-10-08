@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { CityBean } from '@evony/api-client';
-import { BALANCE, itemConfig, STATE_NAMES } from '@evony/core';
+import type { CityBean } from '@marchlands/api-client';
+import { BALANCE, itemConfig, STATE_NAMES } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';

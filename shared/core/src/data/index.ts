@@ -76,13 +76,13 @@ export interface QuestConfig {
   requires: { buildings: number[]; items: number[]; techs: number[]; quests: number[] };
 }
 
-// (evony-re) the original's level-10 upgrades also need a Michelangelo's Script item; with
+// (marchlands) the original's level-10 upgrades also need a Michelangelo's Script item; with
 // BALANCE.buildingItemRequirements off they need only resources, time and the usual prerequisites
 export const BUILDINGS = (buildingRows as BuildingLevelConfig[]).map((b) =>
   BALANCE.buildingItemRequirements || !b.requires.items.length ? b : { ...b, requires: { ...b.requires, items: [] } },
 );
 /**
- * (evony-re) Hero Enhancement (gear.ts): twice Military Science's cost and time, level N needs Academy level N.
+ * (marchlands) Hero Enhancement (gear.ts): twice Military Science's cost and time, level N needs Academy level N.
  */
 const HERO_ENHANCEMENT_RESEARCH: ResearchLevelConfig[] = (researchRows as ResearchLevelConfig[])
   .filter((r) => r.techId === TechType.MILITARY_SCIENCE)
@@ -95,7 +95,7 @@ const HERO_ENHANCEMENT_RESEARCH: ResearchLevelConfig[] = (researchRows as Resear
   }));
 export const RESEARCH = [...(researchRows as ResearchLevelConfig[]), ...HERO_ENHANCEMENT_RESEARCH];
 export const TROOPS = troopRows as TroopConfig[];
-/** (evony-re) legacy items removed from this game: never sold, won or granted */
+/** (marchlands) legacy items removed from this game: never sold, won or granted */
 export const REMOVED_ITEMS: readonly string[] = [
   // Merchant Fleet: halved market shipment time (market trades settle instantly here)
   'consume.transaction.1',
@@ -122,7 +122,7 @@ export const REMOVED_ITEMS: readonly string[] = [
   'player.box.gambling.medal.10',
 ];
 /**
- * (evony-re) legacy item families removed from this game: event, promotion and compensation packages
+ * (marchlands) legacy item families removed from this game: event, promotion and compensation packages
  * (every gift package but the Newbies Package each new lord gets), event keys and tokens, and the Amulet
  * copies other than the one sold and won (player.box.gambling.3)
  */
@@ -134,7 +134,7 @@ const REMOVED_ITEM_PATTERNS: readonly RegExp[] = [
   /^player\.box\.gambling\.(?!3$)\d+$/,
 ];
 export const isRemovedItem = (id: string) => REMOVED_ITEMS.includes(id) || REMOVED_ITEM_PATTERNS.some((r) => r.test(id));
-/** (evony-re) items this game adds to the legacy ones (sold for city gold, BALANCE.goldShop) */
+/** (marchlands) items this game adds to the legacy ones (sold for city gold, BALANCE.goldShop) */
 const EXTRA_ITEMS: ItemConfig[] = [
   {
     legacyId: 0,

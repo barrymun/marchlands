@@ -1,20 +1,20 @@
-name: evony-re
+name: marchlands
 
 x-backend: &backend
   build:
     context: .
     dockerfile: backend/Dockerfile
-  image: evony-re/backend:dev
+  image: marchlands/backend:dev
   restart: unless-stopped
   env_file:
     - path: .env
       required: false
   environment: &backend-env
-    DATABASE_URL: postgres://${POSTGRES_USER:-evony}:${POSTGRES_PASSWORD:-evony}@postgres:5432/${POSTGRES_DB:-evony}
+    DATABASE_URL: postgres://${POSTGRES_USER:-marchlands}:${POSTGRES_PASSWORD:-marchlands}@postgres:5432/${POSTGRES_DB:-marchlands}
     LOG_LEVEL: ${LOG_LEVEL:-info}
     JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
     WORLD_MAP: ${WORLD_MAP:-generated}
-    WORLD_SEED: ${WORLD_SEED:-evony}
+    WORLD_SEED: ${WORLD_SEED:-marchlands}
     GAME_SPEED: ${GAME_SPEED:-1}
     ADMIN_USERNAMES: ${ADMIN_USERNAMES:-}
   depends_on:
@@ -26,9 +26,9 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-evony}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-evony}
-      POSTGRES_DB: ${POSTGRES_DB:-evony}
+      POSTGRES_USER: ${POSTGRES_USER:-marchlands}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-marchlands}
+      POSTGRES_DB: ${POSTGRES_DB:-marchlands}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -76,7 +76,7 @@ services:
     build:
       context: .
       dockerfile: client/web/Dockerfile
-    image: evony-re/web:dev
+    image: marchlands/web:dev
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-8000}:80"

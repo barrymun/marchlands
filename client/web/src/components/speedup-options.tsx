@@ -1,4 +1,4 @@
-import { BALANCE, itemConfig, scaled, speedupItemGold } from '@evony/core';
+import { BALANCE, itemConfig, scaled, speedupItemGold } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';

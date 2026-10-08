@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { CityBean } from '@evony/api-client';
+import type { CityBean } from '@marchlands/api-client';
 import {
   BALANCE,
   usedWallSpace,
@@ -25,7 +25,7 @@ import {
   TROOP_KEYS,
   type TroopKey,
   unitExp,
-} from '@evony/core';
+} from '@marchlands/core';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

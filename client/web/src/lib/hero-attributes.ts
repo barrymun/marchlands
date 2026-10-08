@@ -1,8 +1,8 @@
 // Hero attributes with their display colours: one place to reference politics = green, attack = red, intelligence = blue.
 // (Running item bonuses are purple: tones.ts.)
 
-import { heroManagement, heroPower, heroStratagem, type GearStat } from '@evony/core';
-import type { HeroBean } from '@evony/api-client';
+import { heroManagement, heroPower, heroStratagem, type GearStat } from '@marchlands/core';
+import type { HeroBean } from '@marchlands/api-client';
 
 /** Badge colours (background + text, light and dark) per attribute. */
 export const ATTRIBUTE_TONE = {

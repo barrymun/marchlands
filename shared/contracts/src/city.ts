@@ -2,7 +2,7 @@
 // (backend/services/api/src/routes/cities.ts).
 
 import { z } from 'zod';
-import { FortKeySchema, RequirementCheckSchema, ResourceKeySchema, TroopKeySchema } from '@evony/core';
+import { FortKeySchema, RequirementCheckSchema, ResourceKeySchema, TroopKeySchema } from '@marchlands/core';
 import { Ms, ResourceAmounts, zCityParams, zId, zTroops } from './common.ts';
 import { BuildingBean } from './beans.ts';
 
@@ -208,7 +208,7 @@ export const TrainableUnit = z
     typeId: int(),
     key: z.union([TroopKeySchema, FortKeySchema]).optional(),
     ...costShape,
-    costShare: z.number().describe('(evony-re) share of the cost above actually paid (below 1 while a Quartermaster item runs)'),
+    costShare: z.number().describe('(marchlands) share of the cost above actually paid (below 1 while a Quartermaster item runs)'),
     population: int().describe('per unit'),
     time: int().describe('seconds per unit'),
     requirements: z.array(RequirementCheck),

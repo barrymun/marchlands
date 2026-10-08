@@ -60,7 +60,7 @@ export const PushSchemas = {
   }),
   'server.FlowUpdate': z
     .object({ flowId: z.string(), status: z.enum(['idle', 'queued', 'running', 'waiting']) })
-    .describe('(evony-re) a flow started, paused or finished'),
+    .describe('(marchlands) a flow started, paused or finished'),
   'server.PlayerBuffsUpdate': z.object({ buffs: z.array(BuffBean) }),
 
   // armies

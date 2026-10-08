@@ -36,7 +36,7 @@ import {
   healCost,
   healHonorCost,
   addHeroExp,
-} from '@evony/core';
+} from '@marchlands/core';
 import { cityStats, mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { fortBean, heroBean, troopBean } from '../dto.ts';
@@ -203,7 +203,7 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
 }
 
 /**
- * (evony-re) Several orders in one go (one per troop type), all or nothing: an order that cannot be
+ * (marchlands) Several orders in one go (one per troop type), all or nothing: an order that cannot be
  * paid for or queued fails the request, undoing the orders before it. Troops go to one barracks or
  * split over all of them (trainSplit); fortifications go to the walls.
  */

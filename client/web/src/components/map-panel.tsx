@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Eye, Medal } from 'lucide-react';
-import type { CityBean, MapCastle } from '@evony/api-client';
-import { itemConfig, medalId, medalOdds, Mission, Relation, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@evony/core';
+import type { CityBean, MapCastle } from '@marchlands/api-client';
+import { itemConfig, medalId, medalOdds, Mission, Relation, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

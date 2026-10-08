@@ -3,13 +3,13 @@
 // transaction (outbox pattern) so they become visible exactly when the state commits.
 
 import { sql } from 'drizzle-orm';
-import { defaultRng, GameError, type Rng } from '@evony/core';
-import type { PushCmd, PushData } from '@evony/contracts';
-import { pgArray, pushMessages, timedEvents, type Db, type Tx } from '@evony/db';
+import { defaultRng, GameError, type Rng } from '@marchlands/core';
+import type { PushCmd, PushData } from '@marchlands/contracts';
+import { pgArray, pushMessages, timedEvents, type Db, type Tx } from '@marchlands/db';
 
-export const PUSH_CHANNEL = 'evony_push';
+export const PUSH_CHANNEL = 'marchlands_push';
 
-/** A push queued for the outbox (frame = `{ cmd, data }`, see PushMessage in @evony/contracts). */
+/** A push queued for the outbox (frame = `{ cmd, data }`, see PushMessage in @marchlands/contracts). */
 export interface QueuedPush {
   /** recipients; empty = everyone online */
   playerIds: number[];

@@ -4,7 +4,7 @@ Connect to `ws://<host>/ws?token=<JWT>` after the lord exists, i.e. after `POST 
 
 Every frame is `{ "cmd": string, "data": object }`, following the original `server.*` messages. Send `{"cmd":"ping"}` to get a `pong` back.
 
-The authoritative types are `PushMessage` (a union discriminated on `cmd`), `PushSchemas` (cmd → zod schema of `data`) and `PushMessageSchema` (runtime validator) in `@evony/contracts` (`shared/contracts/src/push.ts`); the server's `ctx.push` / `ctx.broadcast` are typed against them. The table below is a summary.
+The authoritative types are `PushMessage` (a union discriminated on `cmd`), `PushSchemas` (cmd → zod schema of `data`) and `PushMessageSchema` (runtime validator) in `@marchlands/contracts` (`shared/contracts/src/push.ts`); the server's `ctx.push` / `ctx.broadcast` are typed against them. The table below is a summary.
 
 | cmd | data | when |
 |---|---|---|
@@ -20,7 +20,7 @@ The authoritative types are `PushMessage` (a union discriminated on `cmd`), `Pus
 | `server.TroopQueueUpdate` / `server.FortificationsQueueUpdate` | `{ castleId, positionId, allProduceQueue }` | production queue changed |
 | `server.ResearchUpdate` | `{ castleId, typeId, endTime }` | research sped up |
 | `server.ResearchCompleteUpdate` | `{ castleId, typeId, level }` | research finished |
-| `server.FlowUpdate` | `{ flowId, status }` | (evony-re) a flow started, waited, was held, finished or stopped; refetch `GET /player/flows` |
+| `server.FlowUpdate` | `{ flowId, status }` | (marchlands) a flow started, waited, was held, finished or stopped; refetch `GET /player/flows` |
 | `server.HeroUpdate` | `{ castleId, hero, updateType }` | 0 = hero added, 1 = removed, 2 = changed |
 | `server.PlayerInfoUpdate` | `{ playerInfo }` | prestige, title, alliance or profile changed |
 | `server.CentsUpdate` | `{ cents }` | premium currency changed |

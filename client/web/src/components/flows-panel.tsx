@@ -1,12 +1,12 @@
-// (evony-re) Flows: build a named series of actions (drag to reorder) and run it on any of your cities.
+// (marchlands) Flows: build a named series of actions (drag to reorder) and run it on any of your cities.
 // The server runs each city all-or-nothing between waits; Preview runs up to the first wait and rolls
 // everything back. Repeat runs the flow again after every run; one flow runs at a time, others queue.
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, Check, CirclePlay, Eye, GripVertical, HeartPulse, Hourglass, Plus, Repeat, SkipForward, Square, Trash2, X } from 'lucide-react';
-import type { CityBean, Flow, FlowAction, FlowRunReport } from '@evony/api-client';
-import { describeFlowAction, FLOW_MAX_WAIT_MINUTES, FLOW_STAT_LABEL, FLOW_TROOP_IDS, formatFlowMinutes } from '@evony/core';
+import type { CityBean, Flow, FlowAction, FlowRunReport } from '@marchlands/api-client';
+import { describeFlowAction, FLOW_MAX_WAIT_MINUTES, FLOW_STAT_LABEL, FLOW_TROOP_IDS, formatFlowMinutes } from '@marchlands/core';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';

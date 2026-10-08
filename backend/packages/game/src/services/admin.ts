@@ -12,8 +12,8 @@ import {
   RESOURCE_KEYS,
   type ResourceSet,
   TechType,
-} from '@evony/core';
-import { accounts, heroes } from '@evony/db';
+} from '@marchlands/core';
+import { accounts, heroes } from '@marchlands/db';
 import { openOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { addItem, pushCity, pushPlayerInfo } from '../helpers.ts';

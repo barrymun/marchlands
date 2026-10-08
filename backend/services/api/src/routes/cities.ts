@@ -38,8 +38,8 @@ import {
   TrainSplitBody,
   TrainSplitResult,
   UpdateCityBody,
-} from '@evony/contracts';
-import { buildings, interior, research, training } from '@evony/game';
+} from '@marchlands/contracts';
+import { buildings, interior, research, training } from '@marchlands/game';
 import { doc, authenticate, game, tags, zCityParams, type ZApp } from '../http.ts';
 
 export default async function cityRoutes(app: ZApp) {

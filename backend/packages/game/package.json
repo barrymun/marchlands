@@ -1,5 +1,5 @@
 {
-  "name": "@evony/game",
+  "name": "@marchlands/game",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,9 +8,9 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@evony/contracts": "*",
-    "@evony/core": "*",
-    "@evony/db": "*",
+    "@marchlands/contracts": "*",
+    "@marchlands/core": "*",
+    "@marchlands/db": "*",
     "drizzle-orm": "^0.45.3",
     "pg": "^8.23.1"
   }

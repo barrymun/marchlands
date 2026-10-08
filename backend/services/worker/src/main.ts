@@ -4,9 +4,9 @@
 //  - runs periodic jobs (rankings, zone stats, beginner expiry, merchant sweep, cleanup).
 
 import { sql } from 'drizzle-orm';
-import { setGameSpeed } from '@evony/core';
-import { connect, timedEvents } from '@evony/db';
-import { beginnerJob, cleanupJob, dispatchEvent, merchantJob, rankingsJob, runGame, world, zonesJob, type EventRow } from '@evony/game';
+import { setGameSpeed } from '@marchlands/core';
+import { connect, timedEvents } from '@marchlands/db';
+import { beginnerJob, cleanupJob, dispatchEvent, merchantJob, rankingsJob, runGame, world, zonesJob, type EventRow } from '@marchlands/game';
 
 const log = (level: string, msg: string, extra: Record<string, unknown> = {}) =>
   console.log(JSON.stringify({ time: new Date().toISOString(), level, service: 'worker', msg, ...extra }));
@@ -89,7 +89,7 @@ function every(name: string, ms: number, fn: () => Promise<void>) {
 async function main() {
   const info = await world.ensureWorld(db, {
     source: process.env.WORLD_MAP === 'legacy' ? 'legacy' : 'generated',
-    seed: process.env.WORLD_SEED ?? 'evony',
+    seed: process.env.WORLD_SEED ?? 'marchlands',
     log: (m) => log('info', m),
   });
   log('info', 'world ready', { ...info });

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { CircleCheck } from 'lucide-react';
-import type { CityBean } from '@evony/api-client';
-import { BALANCE, buildingLevel, BuildingType, heroStratagem, HeroStatus, heroTimeMultiplier, researchHeroExp } from '@evony/core';
+import type { CityBean } from '@marchlands/api-client';
+import { BALANCE, buildingLevel, BuildingType, heroStratagem, HeroStatus, heroTimeMultiplier, researchHeroExp } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

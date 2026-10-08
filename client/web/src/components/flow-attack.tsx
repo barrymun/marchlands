@@ -1,11 +1,11 @@
-// (evony-re) The "Attack targets" flow action: a saved army plus each city's own targets, picked by
+// (marchlands) The "Attack targets" flow action: a saved army plus each city's own targets, picked by
 // typing x,y here or with "Add to farming list" on the Map tab.
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Swords, X } from 'lucide-react';
-import type { CityBean, Flow, FlowAction } from '@evony/api-client';
-import { FLOW_MAX_TARGETS_PER_CITY, HeroStatus, tileId as toTileId, tileXY, TROOP_KEYS, type TroopKey } from '@evony/core';
+import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
+import { FLOW_MAX_TARGETS_PER_CITY, HeroStatus, tileId as toTileId, tileXY, TROOP_KEYS, type TroopKey } from '@marchlands/core';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';

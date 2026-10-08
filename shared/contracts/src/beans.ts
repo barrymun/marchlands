@@ -2,7 +2,7 @@
 // backend/packages/game/src/dto.ts and reused across many endpoints and pushes.
 
 import { z } from 'zod';
-import { BuildingStateSchema } from '@evony/core';
+import { BuildingStateSchema } from '@marchlands/core';
 import { FortBean, Ms, ResourceAmounts, TroopBean } from './common.ts';
 import { ArmyRow, HeroRow, PlayerRow, TileRow } from './rows.ts';
 
@@ -36,7 +36,7 @@ export const HeroBean = HeroRow.pick({
   .extend({
     experience: z.number().int(),
     seized: z.boolean().describe('held captive by another lord'),
-    gearStat: z.enum(['power', 'management', 'stratagem']).describe("(evony-re) attribute the lord's gear boosts on this hero"),
+    gearStat: z.enum(['power', 'management', 'stratagem']).describe("(marchlands) attribute the lord's gear boosts on this hero"),
     buffs: z
       .array(
         z.object({
@@ -164,7 +164,7 @@ export const BuffBean = z
     endTime: Ms,
     param: z.number().optional(),
     cityId: z.number().int().optional(),
-    itemId: z.string().optional().describe('(evony-re) the item last used to set or extend it'),
+    itemId: z.string().optional().describe('(marchlands) the item last used to set or extend it'),
   })
   .meta({ id: 'BuffBean' });
 export type BuffBean = z.infer<typeof BuffBean>;

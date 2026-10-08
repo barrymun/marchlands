@@ -1,5 +1,5 @@
 // trade.* — Marketplace (food/wood/stone/iron for gold). The original kept food orders only,
-// had no escrow and never matched. evony-re:
+// had no escrow and never matched. Marchlands:
 // - an order book with escrow, matched at the resting order's price (price-time priority);
 // - a computer merchant (core/merchant.ts) that always buys and sells, so every order can fill;
 // - instant settlement: the lord placing the order is paid in the same transaction; a lord whose
@@ -23,8 +23,8 @@ import {
   scaled,
   type MarketResource,
   type MerchantState,
-} from '@evony/core';
-import { marketOrders, marketShipments, marketTrades, pgArray, worldState } from '@evony/db';
+} from '@marchlands/core';
+import { marketOrders, marketShipments, marketTrades, pgArray, worldState } from '@marchlands/db';
 import { openCity, openOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { gainResources, pushResources, spendGold } from '../helpers.ts';

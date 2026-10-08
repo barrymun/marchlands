@@ -48,8 +48,8 @@ import {
   type ResourceSet,
   type TroopCounts,
   addHeroExp,
-} from '@evony/core';
-import { armies, cities, heroes, tiles } from '@evony/db';
+} from '@marchlands/core';
+import { armies, cities, heroes, tiles } from '@marchlands/db';
 import { openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { fortBean, heroBean, troopBean } from '../dto.ts';

@@ -102,7 +102,7 @@ export const heroTimeMultiplier = (attr: number | undefined, floor: number | nul
 const heroFactor = heroTimeMultiplier;
 const techFactor = (level: number) => Math.pow(BALANCE.techTimeFactor, level);
 
-/** Construction/upgrade time to reach `targetLevel`: mayor management + Construction (orig §3.1); (evony-re) the mayor's cut is floored at BALANCE.heroTimeFloor.building. */
+/** Construction/upgrade time to reach `targetLevel`: mayor management + Construction (orig §3.1); (marchlands) the mayor's cut is floored at BALANCE.heroTimeFloor.building. */
 export function buildTimeMs(typeId: number, targetLevel: number, mayor: MayorStats | null, research: ResearchState): number {
   const cfg = buildingConfig(typeId, targetLevel);
   if (!cfg) throw new GameError('Invalid building.', -99);
@@ -110,7 +110,7 @@ export function buildTimeMs(typeId: number, targetLevel: number, mayor: MayorSta
   return scaled(Math.floor(seconds) * 1000);
 }
 
-/** (evony-re) Resources a full demolition returns: BALANCE.demolishRefund of the cost of every level up to `level`. */
+/** (marchlands) Resources a full demolition returns: BALANCE.demolishRefund of the cost of every level up to `level`. */
 export function fullDemolishRefund(typeId: number, level: number): Resources {
   let total = emptyResources();
   for (let l = 1; l <= level; l++) total = addResources(total, buildingConfig(typeId, l)?.cost ?? {});
@@ -126,7 +126,7 @@ export function demolishTimeMs(typeId: number, currentLevel: number, mayor: Mayo
   return scaled(Math.floor(seconds) * 1000);
 }
 
-/** Research time: mayor stratagem only (orig §3.3); (evony-re) never below BALANCE.heroTimeFloor.research. */
+/** Research time: mayor stratagem only (orig §3.3); (marchlands) never below BALANCE.heroTimeFloor.research. */
 export function researchTimeMs(techId: number, targetLevel: number, mayor: MayorStats | null): number {
   const cfg = researchConfig(techId, targetLevel);
   if (!cfg) throw new GameError('Invalid technology.', -99);
@@ -166,7 +166,7 @@ export function researchCost(techId: number, targetLevel: number): Resources {
   return { ...cfg.cost };
 }
 
-/** (evony-re) Most units of a troop type the city can pay for now: resources and idle population. */
+/** (marchlands) Most units of a troop type the city can pay for now: resources and idle population. */
 export function maxTrainableCount(troopId: number, have: Partial<Resources>, idlePopulation: number, costShare = 1): number {
   const cfg = troopConfig(troopId);
   if (!cfg) return 0;
@@ -347,7 +347,7 @@ export function speedupItemGold(itemId: string): number {
   return itemGoldPrice(itemId) ?? goldForCents(SPEEDUP_ITEMS[itemId]?.cents ?? 0);
 }
 
-/** (evony-re) Gold to finish something with `timeLeftMs` remaining at once: the original's coins (coinsForSpeedup) in gold. */
+/** (marchlands) Gold to finish something with `timeLeftMs` remaining at once: the original's coins (coinsForSpeedup) in gold. */
 export function goldForSpeedup(timeLeftMs: number): number {
   return goldForCents(coinsForSpeedup(timeLeftMs));
 }

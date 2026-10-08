@@ -279,7 +279,7 @@ type BuffedHero = {
 /** Points an attribute boost adds: HERO_ATTRIBUTE_BUFF.bonus of the attribute's points (gear included). */
 export const heroBuffAmount = (attributePoints: number) => Math.ceil(attributePoints * HERO_ATTRIBUTE_BUFF.bonus);
 
-/** The points an attribute boost works on: assigned points plus gear (evony-re: orig only the hero's own points). */
+/** The points an attribute boost works on: assigned points plus gear (marchlands: orig only the hero's own points). */
 export const heroBuffBase = (h: Omit<BuffedHero, 'buffs'>, attr: 'power' | 'management' | 'stratagem') => h[attr] + h[`${attr}Added`];
 
 /**
@@ -347,7 +347,7 @@ export function rollMedalDrops(level: number, rng: Rng): Record<string, number> 
 }
 
 /**
- * (evony-re) Gold price of an item in the shop (bought with a city's gold): its set price
+ * (marchlands) Gold price of an item in the shop (bought with a city's gold): its set price
  * (BALANCE.goldShop), or the original's cents price in gold (goldForCents); null when not for sale.
  */
 export function itemGoldPrice(itemId: string): number | null {

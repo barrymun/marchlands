@@ -1,9 +1,9 @@
-// (evony-re) Hero gear (shared/core gear.ts): the lord's 14 pieces with their level and stars, and
+// (marchlands) Hero gear (shared/core gear.ts): the lord's 14 pieces with their level and stars, and
 // on each hero card the gear bonus and the attribute it boosts.
 
 import { Star } from 'lucide-react';
-import type { HeroBean, LordGear } from '@evony/api-client';
-import { BALANCE, GEAR_PIECES, GEAR_STATS, gearStarCost, gearStarLimit, heroGearBreakdown, itemConfig, TechType } from '@evony/core';
+import type { HeroBean, LordGear } from '@marchlands/api-client';
+import { BALANCE, GEAR_PIECES, GEAR_STATS, gearStarCost, gearStarLimit, heroGearBreakdown, itemConfig, TechType } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';

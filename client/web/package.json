@@ -1,17 +1,17 @@
 {
-  "name": "@evony/web",
+  "name": "@marchlands/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Browser client: Vite + React + Tailwind + shadcn/ui, typed by @evony/api-client.",
+  "description": "Browser client: Vite + React + Tailwind + shadcn/ui, typed by @marchlands/api-client.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -p . --noEmit && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@evony/api-client": "*",
-    "@evony/core": "*",
+    "@marchlands/api-client": "*",
+    "@marchlands/core": "*",
     "@fontsource-variable/geist": "^5.3.0",
     "@tanstack/react-query": "^5.104.1",
     "class-variance-authority": "^0.7.1",

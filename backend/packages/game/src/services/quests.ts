@@ -2,8 +2,8 @@
 // claimed once for their award (orig sent a single hard-coded dummy quest).
 
 import { and, count, eq, inArray } from 'drizzle-orm';
-import { evaluateTarget, GameError, HeroStatus, QUEST_CATALOGUE, questById, questGroups, TROOP_KEY_LIST, FORT_KEY_LIST, type QuestSnapshot } from '@evony/core';
-import { heroes, mails, playerRelations, questProgress, tiles } from '@evony/db';
+import { evaluateTarget, GameError, HeroStatus, QUEST_CATALOGUE, questById, questGroups, TROOP_KEY_LIST, FORT_KEY_LIST, type QuestSnapshot } from '@marchlands/core';
+import { heroes, mails, playerRelations, questProgress, tiles } from '@marchlands/db';
 import { openOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { addItem, gainResources, pushResources } from '../helpers.ts';

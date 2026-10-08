@@ -1,4 +1,4 @@
-// (evony-re) Hero gear, after Age II's Hero Enhancement: 14 pieces that every hero of a lord wears.
+// (marchlands) Hero gear, after Age II's Hero Enhancement: 14 pieces that every hero of a lord wears.
 // The pieces' level is the lord's Hero Enhancement research (1-10); stars (0-10 per piece) are
 // bought with medals and belong to the lord as well. A hero can use gear levels and stars up to its
 // gear tier (from its own level), and all of it boosts the one attribute chosen for that hero.

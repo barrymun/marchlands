@@ -6,10 +6,10 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { GameError } from '@evony/core';
-import { ErrorResponse, Ok } from '@evony/contracts';
-import { accounts, players, type Db } from '@evony/db';
-import { runGame, type Ctx } from '@evony/game';
+import { GameError } from '@marchlands/core';
+import { ErrorResponse, Ok } from '@marchlands/contracts';
+import { accounts, players, type Db } from '@marchlands/db';
+import { runGame, type Ctx } from '@marchlands/game';
 import { verifyToken, type TokenClaims } from './auth/jwt.ts';
 import type { ApiConfig } from './config.ts';
 
@@ -92,9 +92,9 @@ export async function anon<T>(req: FastifyRequest, fn: (ctx: Ctx) => Promise<T>)
   return { ok: 1, data: (data ?? null) as Data<T> };
 }
 
-// ---- common request schemas (defined in @evony/contracts) ----
+// ---- common request schemas (defined in @marchlands/contracts) ----
 
-export { zCityParams, zId, zIds, zPaging, zResources, zTroops } from '@evony/contracts';
+export { zCityParams, zId, zIds, zPaging, zResources, zTroops } from '@marchlands/contracts';
 
 export const tags = {
   auth: ['auth'],
@@ -123,7 +123,7 @@ export const secured = [{ bearerAuth: [] }];
 
 /**
  * Route options with OpenAPI metadata. `data` is the schema of the `data` field of a successful
- * answer (from @evony/contracts); it is wrapped in the `{ ok: 1, data }` envelope, validated on
+ * answer (from @marchlands/contracts); it is wrapped in the `{ ok: 1, data }` envelope, validated on
  * the way out (unknown keys are stripped) and type-checked against the handler's return value.
  */
 export function doc<R extends z.ZodType, T extends object = {}>(tag: string[], summary: string, data: R, extra?: T) {

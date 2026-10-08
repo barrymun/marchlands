@@ -1,5 +1,5 @@
 {
-  "name": "@evony/db",
+  "name": "@marchlands/db",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "migrate": "node --env-file-if-exists=../../../.env src/migrate.ts"
   },
   "dependencies": {
-    "@evony/core": "*",
+    "@marchlands/core": "*",
     "drizzle-orm": "^0.45.3",
     "pg": "^8.23.1"
   },

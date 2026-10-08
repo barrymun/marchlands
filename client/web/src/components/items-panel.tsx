@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { CityBean } from '@evony/api-client';
+import type { CityBean } from '@marchlands/api-client';
 import {
   ITEM_CATEGORIES,
   ITEM_INFO,
@@ -11,7 +11,7 @@ import {
   TROOP_NAMES,
   type ItemInfo,
   type TroopKey,
-} from '@evony/core';
+} from '@marchlands/core';
 import { Medal } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';

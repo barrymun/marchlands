@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient, type QueryClient, type QueryKey } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { BALANCE, scaled, setGameSpeed } from '@evony/core';
-import type { CityBean, HeroBean, PushStatus } from '@evony/api-client';
+import { BALANCE, scaled, setGameSpeed } from '@marchlands/core';
+import type { CityBean, HeroBean, PushStatus } from '@marchlands/api-client';
 import { api, errorMessage, push, unwrap } from '@/lib/api';
 
 export const qk = {

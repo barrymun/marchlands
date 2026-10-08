@@ -17,9 +17,9 @@ What it covers so far: register / log in, founding a city, the city view (inside
 
 Nothing is hand-typed against the API:
 
-- `@evony/api-client` (`shared/api-client`) exposes `createApiClient` (openapi-fetch over the generated `paths`), `unwrap` for the `{ ok, data }` envelope (throws `ApiError` with the game's error code), and `PushClient` for the WebSocket with typed `on('server.X', data => ...)` handlers.
-- Component types (`CityBean`, `HeroBean`, `MapCastle`, …) are exported by name from `@evony/api-client`.
-- `@evony/core` is shared too: building/troop/tech names, enums, balance values and formulas (e.g. `scaled()` for game-speed-aware countdowns).
+- `@marchlands/api-client` (`shared/api-client`) exposes `createApiClient` (openapi-fetch over the generated `paths`), `unwrap` for the `{ ok, data }` envelope (throws `ApiError` with the game's error code), and `PushClient` for the WebSocket with typed `on('server.X', data => ...)` handlers.
+- Component types (`CityBean`, `HeroBean`, `MapCastle`, …) are exported by name from `@marchlands/api-client`.
+- `@marchlands/core` is shared too: building/troop/tech names, enums, balance values and formulas (e.g. `scaled()` for game-speed-aware countdowns).
 
 After a contract change run `npm run gen:api`; `npm run typecheck` then shows every call site that broke.
 

@@ -2,8 +2,8 @@
 // "two alliance-less players count as one alliance" bug fixed).
 
 import { and, eq, inArray } from 'drizzle-orm';
-import { Relation } from '@evony/core';
-import { allianceRelations, players } from '@evony/db';
+import { Relation } from '@marchlands/core';
+import { allianceRelations, players } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
 
 export async function allianceOf(ctx: Ctx, playerId: number): Promise<number | null> {

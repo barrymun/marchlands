@@ -2,9 +2,19 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, Check, CircleCheck, GripVertical, Lock, LockOpen, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
-import type { CityBean, HeroBean } from '@evony/api-client';
+import type { CityBean, HeroBean } from '@marchlands/api-client';
 import { toast } from 'sonner';
-import { BALANCE, BuildingType, HeroStatus, heroAtMaxLevel, heroManagement, mayorProductionBonus, heroPower, heroStratagem, levelsReady } from '@evony/core';
+import {
+  BALANCE,
+  BuildingType,
+  HeroStatus,
+  heroAtMaxLevel,
+  heroManagement,
+  mayorProductionBonus,
+  heroPower,
+  heroStratagem,
+  levelsReady,
+} from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

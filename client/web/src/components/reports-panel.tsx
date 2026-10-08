@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Medal, Trash2 } from 'lucide-react';
-import type { ReportDetail, ReportSummary } from '@evony/api-client';
+import type { ReportDetail, ReportSummary } from '@marchlands/api-client';
 import {
   FORT_ID_BY_KEY,
   getGameSpeed,
@@ -13,7 +13,7 @@ import {
   type FortKey,
   type ReportBody,
   type TroopKey,
-} from '@evony/core';
+} from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';

@@ -20,8 +20,8 @@ import {
   tileXY,
   VALLEY_TYPES,
   valleyUpgradeCost,
-} from '@evony/core';
-import { cities, pgArray, players, tiles, worldState, type Db } from '@evony/db';
+} from '@marchlands/core';
+import { cities, pgArray, players, tiles, worldState, type Db } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
 import { relationBetween } from './relations.ts';
 

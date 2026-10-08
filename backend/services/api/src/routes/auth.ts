@@ -1,8 +1,8 @@
 import { eq, sql } from 'drizzle-orm';
 import type { z } from 'zod';
-import { GameError } from '@evony/core';
-import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody } from '@evony/contracts';
-import { accounts, players } from '@evony/db';
+import { GameError } from '@marchlands/core';
+import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody } from '@marchlands/contracts';
+import { accounts, players } from '@marchlands/db';
 import { hashPassword, verifyPassword } from '../auth/password.ts';
 import { signToken } from '../auth/jwt.ts';
 import { authenticate, secured, tags, type ZApp } from '../http.ts';

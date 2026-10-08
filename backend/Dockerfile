@@ -16,7 +16,7 @@ COPY backend/packages/game/package.json backend/packages/game/
 COPY backend/services/api/package.json backend/services/api/
 COPY backend/services/worker/package.json backend/services/worker/
 COPY client/web/package.json client/web/
-RUN npm ci --omit=dev --ignore-scripts -w @evony/api -w @evony/worker && npm cache clean --force
+RUN npm ci --omit=dev --ignore-scripts -w @marchlands/api -w @marchlands/worker && npm cache clean --force
 
 COPY tsconfig.base.json ./
 COPY shared/core shared/core

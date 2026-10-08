@@ -1,5 +1,5 @@
 // shop.* — buying items with a city's gold (there are no cents: itemGoldPrice) and using items
-// (shop.useGoods / shop.useCastleGoods). Item effects are declared in @evony/core items.ts.
+// (shop.useGoods / shop.useCastleGoods). Item effects are declared in @marchlands/core items.ts.
 
 import {
   amuletDirectPayout,
@@ -16,8 +16,8 @@ import {
   upgradeExpFor,
   addTroops,
   type GrantContents,
-} from '@evony/core';
-import { heroes } from '@evony/db';
+} from '@marchlands/core';
+import { heroes } from '@marchlands/db';
 import { cityStats, openOwnCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { heroBean, troopBean } from '../dto.ts';

@@ -11302,7 +11302,7 @@ export interface components {
             /** @description held captive by another lord */
             seized: boolean;
             /**
-             * @description (evony-re) attribute the lord's gear boosts on this hero
+             * @description (marchlands) attribute the lord's gear boosts on this hero
              * @enum {string}
              */
             gearStat: "power" | "management" | "stratagem";
@@ -11444,7 +11444,7 @@ export interface components {
             endTime: number;
             param?: number;
             cityId?: number;
-            /** @description (evony-re) the item last used to set or extend it */
+            /** @description (marchlands) the item last used to set or extend it */
             itemId?: string;
         };
         ArmyBeanInput: {
@@ -11850,7 +11850,7 @@ export interface components {
                     endTime?: number;
                 };
             };
-            /** @description (evony-re) the lord's hero gear */
+            /** @description (marchlands) the lord's hero gear */
             gear: components["schemas"]["LordGearInput"];
             selfArmys: components["schemas"]["ArmyBeanInput"][];
             friendArmys: components["schemas"]["ArmyBeanInput"][];
@@ -11887,7 +11887,7 @@ export interface components {
                     endTime?: number;
                 };
             };
-            /** @description (evony-re) the lord's hero gear */
+            /** @description (marchlands) the lord's hero gear */
             gear: components["schemas"]["LordGearInput"];
             selfArmys: components["schemas"]["ArmyBeanInput"][];
             friendArmys: components["schemas"]["ArmyBeanInput"][];
@@ -12197,7 +12197,7 @@ export interface components {
             wood: number;
             stone: number;
             iron: number;
-            /** @description (evony-re) share of the cost above actually paid (below 1 while a Quartermaster item runs) */
+            /** @description (marchlands) share of the cost above actually paid (below 1 while a Quartermaster item runs) */
             costShare: number;
             /** @description per unit */
             population: number;
@@ -13494,7 +13494,7 @@ export interface components {
             /** @description held captive by another lord */
             seized: boolean;
             /**
-             * @description (evony-re) attribute the lord's gear boosts on this hero
+             * @description (marchlands) attribute the lord's gear boosts on this hero
              * @enum {string}
              */
             gearStat: "power" | "management" | "stratagem";
@@ -13636,7 +13636,7 @@ export interface components {
             endTime: number;
             param?: number;
             cityId?: number;
-            /** @description (evony-re) the item last used to set or extend it */
+            /** @description (marchlands) the item last used to set or extend it */
             itemId?: string;
         };
         ArmyBean: {
@@ -14042,7 +14042,7 @@ export interface components {
                     endTime?: number;
                 };
             };
-            /** @description (evony-re) the lord's hero gear */
+            /** @description (marchlands) the lord's hero gear */
             gear: components["schemas"]["LordGear"];
             selfArmys: components["schemas"]["ArmyBean"][];
             friendArmys: components["schemas"]["ArmyBean"][];
@@ -14079,7 +14079,7 @@ export interface components {
                     endTime?: number;
                 };
             };
-            /** @description (evony-re) the lord's hero gear */
+            /** @description (marchlands) the lord's hero gear */
             gear: components["schemas"]["LordGear"];
             selfArmys: components["schemas"]["ArmyBean"][];
             friendArmys: components["schemas"]["ArmyBean"][];
@@ -14389,7 +14389,7 @@ export interface components {
             wood: number;
             stone: number;
             iron: number;
-            /** @description (evony-re) share of the cost above actually paid (below 1 while a Quartermaster item runs) */
+            /** @description (marchlands) share of the cost above actually paid (below 1 while a Quartermaster item runs) */
             costShare: number;
             /** @description per unit */
             population: number;

@@ -15,4 +15,4 @@ export type {
   ResourceSet,
   TroopCounts,
   TroopQueueState,
-} from '@evony/core';
+} from '@marchlands/core';

@@ -179,7 +179,7 @@ export const TechType = {
   ENGINEERING: 18,
   MACHINERY: 19,
   PRIVATEERING: 20,
-  /** (evony-re) hero gear level (gear.ts) */
+  /** (marchlands) hero gear level (gear.ts) */
   HERO_ENHANCEMENT: 21,
 } as const;
 export type TechType = (typeof TechType)[keyof typeof TechType];

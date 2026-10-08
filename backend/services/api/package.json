@@ -1,5 +1,5 @@
 {
-  "name": "@evony/api",
+  "name": "@marchlands/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,10 +9,10 @@
     "start": "node src/main.ts"
   },
   "dependencies": {
-    "@evony/contracts": "*",
-    "@evony/core": "*",
-    "@evony/db": "*",
-    "@evony/game": "*",
+    "@marchlands/contracts": "*",
+    "@marchlands/core": "*",
+    "@marchlands/db": "*",
+    "@marchlands/game": "*",
     "@fastify/cors": "^11.3.0",
     "@fastify/swagger": "^9.9.1",
     "@fastify/swagger-ui": "^6.1.1",

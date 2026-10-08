@@ -1,8 +1,8 @@
 // interior.* and city.* — tax, work rates, comfort, levy, city settings and teleporting.
 
 import { and, count, eq, inArray, ne } from 'drizzle-orm';
-import { BALANCE, BASIC_RESOURCES, GameError, scaled, TileType, tileXY, type ResourceSet } from '@evony/core';
-import { armies, tiles } from '@evony/db';
+import { BALANCE, BASIC_RESOURCES, GameError, scaled, TileType, tileXY, type ResourceSet } from '@marchlands/core';
+import { armies, tiles } from '@marchlands/db';
 import { cityStats, openOwnCity, viewCity, viewOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { cityBean } from '../dto.ts';

@@ -19,7 +19,7 @@ export function LoginPage() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Evony</CardTitle>
+          <CardTitle className="text-2xl">Marchlands</CardTitle>
           <CardDescription>Build your city, raise an army, rule the land.</CardDescription>
         </CardHeader>
         <CardContent>

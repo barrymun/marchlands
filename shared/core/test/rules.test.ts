@@ -747,7 +747,7 @@ describe('full demolition', () => {
   });
 });
 
-describe('(evony-re) troop training discount', () => {
+describe('(marchlands) troop training discount', () => {
   it('charges the paid share of the cost, rounded up, and counts it in the max', () => {
     const full = trainCost(3, 3);
     const paid = trainCost(3, 3, 0.75);

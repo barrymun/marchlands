@@ -1,4 +1,4 @@
-// Postgres schema for evony-re. All game timestamps are epoch milliseconds stored as bigint
+// Postgres schema for Marchlands. All game timestamps are epoch milliseconds stored as bigint
 // (read back as JS numbers), matching the original server and client.
 //
 // Design notes
@@ -231,11 +231,11 @@ export const heroes = pgTable(
     buffs: jsonb('buffs').$type<BuffState[]>().notNull().default([]),
     /** player who captured this hero (status SEIZED) */
     capturedByPlayerId: integer('captured_by_player_id'),
-    /** (evony-re) a locked hero cannot be dismissed */
+    /** (marchlands) a locked hero cannot be dismissed */
     locked: boolean('locked').notNull().default(false),
-    /** (evony-re) attribute the lord's gear boosts ('power' | 'management' | 'stratagem'); null: the hero's highest */
+    /** (marchlands) attribute the lord's gear boosts ('power' | 'management' | 'stratagem'); null: the hero's highest */
     gearStat: text('gear_stat'),
-    /** (evony-re) position in the city's hero list, set by the lord (1 = first); 0 = never placed: after the placed ones, oldest first */
+    /** (marchlands) position in the city's hero list, set by the lord (1 = first); 0 = never placed: after the placed ones, oldest first */
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: ms('created_at').notNull(),
   },
@@ -285,7 +285,7 @@ export const armies = pgTable(
 );
 
 // ---------------------------------------------------------------------------------------------
-// Flows (evony-re) — a lord's saved series of actions, plus where its current run is up to
+// Flows (marchlands) — a lord's saved series of actions, plus where its current run is up to
 // ---------------------------------------------------------------------------------------------
 
 export const flows = pgTable(

@@ -1,8 +1,8 @@
 # Architecture
 
-## From Spitfire to evony-re
+## From Spitfire to Marchlands
 
-| | Original (C++ Spitfire) | evony-re |
+| | Original (C++ Spitfire) | Marchlands |
 |---|---|---|
 | Transport | AMF3 objects over TCP, 4-byte length prefix, Flash client | REST/JSON (`/api/v1`) + WebSocket pushes (`/ws`) |
 | State | Everything in memory; written to MySQL by individual handlers and at clean shutdown | Postgres is the source of truth; every command is one transaction |
@@ -14,19 +14,19 @@
 ## Packages
 
 ```
-@evony/core        pure rules + persisted-state zod schemas, no I/O (shared/, also used by the client)
+@marchlands/core        pure rules + persisted-state zod schemas, no I/O (shared/, also used by the client)
      ▲
-@evony/db          Drizzle schema + migrations; jsonb column types come from core
+@marchlands/db          Drizzle schema + migrations; jsonb column types come from core
      ▲
-@evony/contracts   zod schemas of the API surface; row shapes via drizzle-zod (shared/)
+@marchlands/contracts   zod schemas of the API surface; row shapes via drizzle-zod (shared/)
      ▲
-@evony/game        services: (ctx, playerId, ...args) => result, run inside a transaction;
-     ▲                 ▲      DTO builders and ctx.push are typed by the contracts
-@evony/api       @evony/worker
+@marchlands/game        services: (ctx, playerId, ...args) => result, run inside a transaction;
+     ▲                     ▲      DTO builders and ctx.push are typed by the contracts
+@marchlands/api       @marchlands/worker
 
-@evony/api-client  openapi-fetch over types generated from the API's OpenAPI document,
-     ▲             plus a typed WebSocket client (push types from contracts)
-@evony/web         Vite + React client (client/web)
+@marchlands/api-client  openapi-fetch over types generated from the API's OpenAPI document,
+     ▲                  plus a typed WebSocket client (push types from contracts)
+@marchlands/web         Vite + React client (client/web)
 ```
 
 - **core** contains the static data converted from the original `config_*` tables (`src/data/legacy/*.json`). It also holds:
@@ -48,7 +48,7 @@
    - core rules validate the request (slot, limits, prerequisites, queue) and deduct the cost;
    - `ctx.schedule({type:'building', dueAt, refKey:'building:12:0'})` queues the completion;
    - `ctx.push(playerId, 'server.BuildComplate', …)` queues a push.
-4. On commit, the queued events are upserted into `timed_events`. Queued pushes are inserted into `push_messages` and announced with `pg_notify('evony_push', id)`. Both commit atomically with the state.
+4. On commit, the queued events are upserted into `timed_events`. Queued pushes are inserted into `push_messages` and announced with `pg_notify('marchlands_push', id)`. Both commit atomically with the state.
 5. Every API replica `LISTEN`s and forwards the push to the sockets it holds for that player.
 
 ## The game clock
@@ -84,7 +84,7 @@ Whenever something changes a city's rates, the city is settled first. Examples a
 | `player_relations` | friends and blocks |
 | `market_orders`, `market_shipments` | order book with escrow; goods and gold in transit |
 | `quest_progress`, `world_state` | claimed quests; world metadata and cached zone stats |
-| `flows` | (evony-re) a lord's saved flows: actions, cities and the `repeat` switch, plus the current run's state (`status`, `next_action`, `army_ids`, `wait_until`, `held_since`, `last_run`) |
+| `flows` | (marchlands) a lord's saved flows: actions, cities and the `repeat` switch, plus the current run's state (`status`, `next_action`, `army_ids`, `wait_until`, `held_since`, `last_run`) |
 
 ## Consistency rules
 
@@ -95,7 +95,7 @@ Whenever something changes a city's rates, the city is settled first. Examples a
 
 ## Flows
 
-(evony-re; `backend/packages/game/src/services/flows.ts`, rules in [deviations.md](deviations.md).) A flow is a list of actions run on some or all of a lord's cities.
+(marchlands; `backend/packages/game/src/services/flows.ts`, rules in [deviations.md](deviations.md).) A flow is a list of actions run on some or all of a lord's cities.
 
 - **Parts.** Wait actions split a run into parts. A part runs the actions between two waits in every city of the run, in one transaction with a savepoint per city. A city whose action fails is rolled back to the start of the part; the other cities finish it, then the flow stops (`repeat` goes off). Nothing outside the transaction ever sees a part half done (e.g. an Attack mayor swapped in to train and swapped back).
 - **Serialising.** Every flow operation (run, repeat, stop, save, and the worker's flow events) first locks all of the lord's `flows` rows with `SELECT … FOR UPDATE` in `created_at` order. So a lord's flows act one at a time, a part at a time; other flows run during a flow's waits.

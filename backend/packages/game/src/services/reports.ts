@@ -2,8 +2,8 @@
 // wrote XML files to disk).
 
 import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
-import { addTroops, GameError, ReportBodySchema, type DesertionReport, type ReportBody, type TroopCounts } from '@evony/core';
-import { reports } from '@evony/db';
+import { addTroops, GameError, ReportBodySchema, type DesertionReport, type ReportBody, type TroopCounts } from '@marchlands/core';
+import { reports } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
 
 /** Client tabs: 0 trade, 1 army, 2 other. */

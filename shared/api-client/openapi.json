@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "evony-re API",
+    "title": "Marchlands API",
     "version": "0.1.0",
-    "description": "Evony Age 1 game server. Successful calls answer `{ ok: 1, data }`; failures `{ ok: <negative code>, errorMsg }` with a 4xx status. Live updates (`server.*` pushes of the original protocol) arrive on the WebSocket at `/ws?token=...` as `{ cmd, data }`."
+    "description": "Marchlands game server, based on Evony Age 1. Successful calls answer `{ ok: 1, data }`; failures `{ ok: <negative code>, errorMsg }` with a 4xx status. Live updates (`server.*` pushes of the original protocol) arrive on the WebSocket at `/ws?token=...` as `{ cmd, data }`."
   },
   "components": {
     "securitySchemes": {
@@ -309,7 +309,7 @@
               "management",
               "stratagem"
             ],
-            "description": "(evony-re) attribute the lord's gear boosts on this hero"
+            "description": "(marchlands) attribute the lord's gear boosts on this hero"
           },
           "buffs": {
             "type": "array",
@@ -916,7 +916,7 @@
             "maximum": 9007199254740991
           },
           "itemId": {
-            "description": "(evony-re) the item last used to set or extend it",
+            "description": "(marchlands) the item last used to set or extend it",
             "type": "string"
           }
         },
@@ -2617,7 +2617,7 @@
             "description": "techId -> state"
           },
           "gear": {
-            "description": "(evony-re) the lord's hero gear",
+            "description": "(marchlands) the lord's hero gear",
             "$ref": "#/components/schemas/LordGearInput"
           },
           "selfArmys": {
@@ -2792,7 +2792,7 @@
             "description": "techId -> state"
           },
           "gear": {
-            "description": "(evony-re) the lord's hero gear",
+            "description": "(marchlands) the lord's hero gear",
             "$ref": "#/components/schemas/LordGearInput"
           },
           "selfArmys": {
@@ -4144,7 +4144,7 @@
           },
           "costShare": {
             "type": "number",
-            "description": "(evony-re) share of the cost above actually paid (below 1 while a Quartermaster item runs)"
+            "description": "(marchlands) share of the cost above actually paid (below 1 while a Quartermaster item runs)"
           },
           "population": {
             "type": "integer",
@@ -10391,7 +10391,7 @@
               "management",
               "stratagem"
             ],
-            "description": "(evony-re) attribute the lord's gear boosts on this hero"
+            "description": "(marchlands) attribute the lord's gear boosts on this hero"
           },
           "buffs": {
             "type": "array",
@@ -11007,7 +11007,7 @@
             "maximum": 9007199254740991
           },
           "itemId": {
-            "description": "(evony-re) the item last used to set or extend it",
+            "description": "(marchlands) the item last used to set or extend it",
             "type": "string"
           }
         },
@@ -12750,7 +12750,7 @@
             "description": "techId -> state"
           },
           "gear": {
-            "description": "(evony-re) the lord's hero gear",
+            "description": "(marchlands) the lord's hero gear",
             "$ref": "#/components/schemas/LordGear"
           },
           "selfArmys": {
@@ -12927,7 +12927,7 @@
             "description": "techId -> state"
           },
           "gear": {
-            "description": "(evony-re) the lord's hero gear",
+            "description": "(marchlands) the lord's hero gear",
             "$ref": "#/components/schemas/LordGear"
           },
           "selfArmys": {
@@ -14309,7 +14309,7 @@
           },
           "costShare": {
             "type": "number",
-            "description": "(evony-re) share of the cost above actually paid (below 1 while a Quartermaster item runs)"
+            "description": "(marchlands) share of the cost above actually paid (below 1 while a Quartermaster item runs)"
           },
           "population": {
             "type": "integer",

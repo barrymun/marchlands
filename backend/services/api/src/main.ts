@@ -1,5 +1,5 @@
-import { setGameSpeed } from '@evony/core';
-import { connect } from '@evony/db';
+import { setGameSpeed } from '@marchlands/core';
+import { connect } from '@marchlands/db';
 import { buildApp } from './app.ts';
 import { loadConfig } from './config.ts';
 import { PushGateway } from './ws/gateway.ts';

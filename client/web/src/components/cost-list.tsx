@@ -1,6 +1,6 @@
 import { Check, X } from 'lucide-react';
-import type { RequirementCheck } from '@evony/api-client';
-import { BUILDING_NAMES, itemConfig, TECH_NAMES } from '@evony/core';
+import type { RequirementCheck } from '@marchlands/api-client';
+import { BUILDING_NAMES, itemConfig, TECH_NAMES } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { duration, fmt } from '@/lib/format';
 

@@ -31,9 +31,9 @@ import {
   UseItemResult,
   WorldInfo,
   ZoneStats,
-} from '@evony/contracts';
-import { players } from '@evony/db';
-import { flows, player, runGame, shop, world } from '@evony/game';
+} from '@marchlands/contracts';
+import { players } from '@marchlands/db';
+import { flows, player, runGame, shop, world } from '@marchlands/game';
 import { signToken } from '../auth/jwt.ts';
 import { doc, authenticate, game, playerIdOf, tags, type ZApp } from '../http.ts';
 

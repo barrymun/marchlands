@@ -150,7 +150,7 @@ export function hasBuff(buffs: BuffState[], id: string, now: number): boolean {
   return buffs.some((b) => b.id === id && b.endTime > now);
 }
 
-/** (evony-re) Share of the normal cost a lord pays to train troops (fortifications pay in full): lower while a Quartermaster item's buff runs. */
+/** (marchlands) Share of the normal cost a lord pays to train troops (fortifications pay in full): lower while a Quartermaster item's buff runs. */
 export function troopCostShare(buffs: BuffState[], now: number): number {
   return hasBuff(buffs, 'TrainCostReduceBuff', now) ? 1 - BALANCE.trainCostReduction : 1;
 }

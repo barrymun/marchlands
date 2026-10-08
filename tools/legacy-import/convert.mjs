@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Converts the legacy Spitfire MySQL dumps into data files used by evony-re.
+// Converts the legacy Spitfire MySQL dumps into data files used by Marchlands.
 //
 //   node tools/legacy-import/convert.mjs <path-to-evony-private-server/DB>
 //

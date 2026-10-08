@@ -1,6 +1,6 @@
 // Row schemas generated from the Drizzle table definitions (backend/packages/db/src/schema.ts),
 // which are also the source of the SQL migrations. jsonb columns use the persisted-state schemas
-// from @evony/core. Contract shapes below pick and extend these, so a column change flows
+// from @marchlands/core. Contract shapes below pick and extend these, so a column change flows
 // through to the API contract, the OpenAPI document and the generated client.
 //
 // Secrets (accounts.passwordHash) and internal tables (timed_events, push_messages) are not exported.
@@ -21,7 +21,7 @@ import {
   ResourceSetSchema,
   TroopCountsSchema,
   TroopQueueStateSchema,
-} from '@evony/core';
+} from '@marchlands/core';
 import {
   allianceEvents,
   allianceRelations,
@@ -38,7 +38,7 @@ import {
   questProgress,
   reports,
   tiles,
-} from '@evony/db/schema';
+} from '@marchlands/db/schema';
 
 export const PlayerRow = createSelectSchema(players, {
   research: ResearchStateSchema,

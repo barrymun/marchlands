@@ -33,7 +33,7 @@ import {
   ITEMS,
   type BuildingState,
   addHeroExp,
-} from '@evony/core';
+} from '@marchlands/core';
 import { mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { buildingBean, heroBean } from '../dto.ts';
@@ -198,7 +198,7 @@ export async function upgrade(ctx: Ctx, playerId: number, cityId: number, positi
 }
 
 /**
- * castle.destructBuilding: demolish one level (timed); (evony-re) with BALANCE.instantDemolish the whole
+ * castle.destructBuilding: demolish one level (timed); (marchlands) with BALANCE.instantDemolish the whole
  * building goes at once, refunding a third of every level's cost.
  */
 export async function demolish(ctx: Ctx, playerId: number, cityId: number, positionId: number) {

@@ -3,8 +3,8 @@
 // (by id), then tiles, then heroes/armies.
 
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
-import { GameError, HeroStatus, lordGear, syncHeroBuffs, syncHeroGear, type LordGear } from '@evony/core';
-import { armies, cities, heroes, players, tiles } from '@evony/db';
+import { GameError, HeroStatus, lordGear, syncHeroBuffs, syncHeroGear, type LordGear } from '@marchlands/core';
+import { armies, cities, heroes, players, tiles } from '@marchlands/db';
 import type { Ctx } from './context.ts';
 
 export type PlayerRow = typeof players.$inferSelect;

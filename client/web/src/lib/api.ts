@@ -1,8 +1,8 @@
 // One API client, one push socket, and the stored access token.
 
-import { ApiError, PushClient, createApiClient, unwrap } from '@evony/api-client';
+import { ApiError, PushClient, createApiClient, unwrap } from '@marchlands/api-client';
 
-const TOKEN_KEY = 'evony.token';
+const TOKEN_KEY = 'marchlands.token';
 
 function readToken(): string | null {
   try {

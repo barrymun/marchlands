@@ -1,8 +1,8 @@
 // friend.* (friends and block list) and chat (world / beginner / alliance / private).
 
 import { and, desc, eq, gt, or, sql } from 'drizzle-orm';
-import { BALANCE, GameError } from '@evony/core';
-import { chatMessages, playerRelations, players } from '@evony/db';
+import { BALANCE, GameError } from '@marchlands/core';
+import { chatMessages, playerRelations, players } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
 import { activeBuff, consumeItem, escapeHtml, itemCount } from '../helpers.ts';
 import { findPlayerByName, getPlayer, savePlayer } from '../repo.ts';

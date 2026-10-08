@@ -22,7 +22,7 @@ CREATE TABLE "flows" (
 --> statement-breakpoint
 ALTER TABLE "flows" ADD CONSTRAINT "flows_player_id_players_id_fk" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "flows_player_idx" ON "flows" USING btree ("player_id","created_at");--> statement-breakpoint
--- (evony-re) flows move from players.misc.flows into their own table, keeping their order
+-- (marchlands) flows move from players.misc.flows into their own table, keeping their order
 INSERT INTO "flows" ("id", "player_id", "name", "actions", "cities", "created_at")
 SELECT f->>'id', p."id", f->>'name', f->'actions', COALESCE(f->'cities', '"all"'::jsonb), (EXTRACT(EPOCH FROM now()) * 1000)::bigint + t.ord
 FROM "players" p, jsonb_array_elements(p."misc"->'flows') WITH ORDINALITY AS t(f, ord)

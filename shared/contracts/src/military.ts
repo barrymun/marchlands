@@ -1,7 +1,7 @@
 // Heroes, armies, map and valleys (backend/services/api/src/routes/military.ts).
 
 import { z } from 'zod';
-import { STATE_NAMES, TileType } from '@evony/core';
+import { STATE_NAMES, TileType } from '@marchlands/core';
 import { zCityParams, zId, zResources, zTroops } from './common.ts';
 import { ArmyBean, HeroBean } from './beans.ts';
 import { TileRow } from './rows.ts';
@@ -24,7 +24,7 @@ export const HeroOrderBody = z.object({ heroIds: z.array(zId).max(100).describe(
 export const LockHeroBody = z.object({ locked: z.boolean().describe('a locked hero cannot be dismissed') });
 export const HeroGearStatBody = z.object({ stat: z.enum(['power', 'management', 'stratagem']).describe("attribute the lord's gear boosts on this hero") });
 export const GearPieceParams = z.object({ pieceId: z.string().describe('gear piece id (weapon, shield, …)') });
-/** (evony-re) A lord's hero gear: piece level (Hero Enhancement research) and stars per piece. */
+/** (marchlands) A lord's hero gear: piece level (Hero Enhancement research) and stars per piece. */
 export const LordGear = z
   .object({
     level: z.number().int().describe("Hero Enhancement level = every piece's level"),

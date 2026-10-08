@@ -1,5 +1,5 @@
 {
-  "name": "evony-re",
+  "name": "marchlands",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -14,16 +14,16 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p client/web --noEmit",
     "test": "vitest run",
-    "dev:api": "npm run dev -w @evony/api",
-    "dev:worker": "npm run dev -w @evony/worker",
-    "db:generate": "npm run generate -w @evony/db",
-    "db:migrate": "npm run migrate -w @evony/db",
+    "dev:api": "npm run dev -w @marchlands/api",
+    "dev:worker": "npm run dev -w @marchlands/worker",
+    "db:generate": "npm run generate -w @marchlands/db",
+    "db:migrate": "npm run migrate -w @marchlands/db",
     "legacy:convert": "node tools/legacy-import/convert.mjs",
     "smoke": "node tools/smoke/smoke.mjs && node tools/smoke/war.mjs && node tools/smoke/market.mjs",
     "docs:api": "node tools/docs/gen-api-md.mjs",
-    "gen:api": "node backend/services/api/src/openapi.ts && npm run generate -w @evony/api-client && npm run docs:api",
-    "dev:web": "npm run dev -w @evony/web",
-    "build:web": "npm run build -w @evony/web"
+    "gen:api": "node backend/services/api/src/openapi.ts && npm run generate -w @marchlands/api-client && npm run docs:api",
+    "dev:web": "npm run dev -w @marchlands/web",
+    "build:web": "npm run build -w @marchlands/web"
   },
   "devDependencies": {
     "@types/node": "^24.19.1",

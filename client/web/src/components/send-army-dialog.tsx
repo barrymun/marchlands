@@ -1,8 +1,19 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Star, Trash2 } from 'lucide-react';
-import type { CityBean } from '@evony/api-client';
-import { armyLoad, buildingLevel, BuildingType, heroPower, HeroStatus, maxArmyTroops, Mission, TROOP_ID_BY_KEY, TROOP_KEYS, type TroopKey } from '@evony/core';
+import type { CityBean } from '@marchlands/api-client';
+import {
+  armyLoad,
+  buildingLevel,
+  BuildingType,
+  heroPower,
+  HeroStatus,
+  maxArmyTroops,
+  Mission,
+  TROOP_ID_BY_KEY,
+  TROOP_KEYS,
+  type TroopKey,
+} from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';

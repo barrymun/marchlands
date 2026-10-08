@@ -1,6 +1,6 @@
 // Heroes, armies, map and valleys.
 
-import { armies, combat, heroes, world } from '@evony/game';
+import { armies, combat, heroes, world } from '@marchlands/game';
 import {
   ArmyBean,
   ArmyParams,
@@ -33,7 +33,7 @@ import {
   GearPieceParams,
   LordGear,
   ValleyUpgradeResult,
-} from '@evony/contracts';
+} from '@marchlands/contracts';
 import { doc, anon, authenticate, game, playerIdOf, tags, zCityParams, type ZApp } from '../http.ts';
 
 export default async function militaryRoutes(app: ZApp) {

@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="evony-theme">
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="marchlands-theme">
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <TooltipProvider delayDuration={200}>

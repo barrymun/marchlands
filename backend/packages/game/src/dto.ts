@@ -17,8 +17,8 @@ import {
   type FortCounts,
   type TroopCounts,
   heroGearStat,
-} from '@evony/core';
-import type { ArmyBean, BuffBean, BuildingBean, CityBean, FortBean, HeroBean, ItemCount, PlayerInfo, ResourceBean, TroopBean, ValleyBean } from '@evony/contracts';
+} from '@marchlands/core';
+import type { ArmyBean, BuffBean, BuildingBean, CityBean, FortBean, HeroBean, ItemCount, PlayerInfo, ResourceBean, TroopBean, ValleyBean } from '@marchlands/contracts';
 import { cityStats, type CityBundle } from './city.ts';
 import type { ArmyRow, CityRow, HeroRow, PlayerRow, TileRow } from './repo.ts';
 

@@ -4,7 +4,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Db } from '@evony/db';
+import type { Db } from '@marchlands/db';
 import { buildApp } from './app.ts';
 import { loadConfig } from './config.ts';
 

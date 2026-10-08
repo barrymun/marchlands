@@ -2,8 +2,8 @@
 
 import { z } from 'zod';
 import { createSelectSchema } from 'drizzle-zod';
-import { ArmyPresetSchema, CastleSignSchema, FlowActionSchema, FlowSchema, GrantContentsSchema, ResearchStateSchema } from '@evony/core';
-import { accounts } from '@evony/db/schema';
+import { ArmyPresetSchema, CastleSignSchema, FlowActionSchema, FlowSchema, GrantContentsSchema, ResearchStateSchema } from '@marchlands/core';
+import { accounts } from '@marchlands/db/schema';
 import { Ms, zId } from './common.ts';
 import { ArmyBean, BuffBean, CityBean, HeroBean, ItemCount, PlayerInfo } from './beans.ts';
 import { LordGear } from './military.ts';
@@ -175,7 +175,7 @@ export const PlayerState = z
     items: z.array(ItemCount),
     buffs: z.array(BuffBean),
     research: ResearchStateSchema.describe('techId -> state'),
-    gear: LordGear.describe("(evony-re) the lord's hero gear"),
+    gear: LordGear.describe("(marchlands) the lord's hero gear"),
     selfArmys: z.array(ArmyBean),
     friendArmys: z.array(ArmyBean),
     enemyArmys: z.array(ArmyBean),

@@ -1,7 +1,7 @@
 // WebSocket push client: authenticates with the access token, keeps the socket alive,
 // reconnects with backoff and dispatches typed `{ cmd, data }` frames.
 
-import type { PushCmd, PushData, PushMessage } from '@evony/contracts';
+import type { PushCmd, PushData, PushMessage } from '@marchlands/contracts';
 
 export type PushStatus = 'connecting' | 'open' | 'closed';
 

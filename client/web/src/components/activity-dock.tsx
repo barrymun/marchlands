@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, Hammer, FlaskConical, Swords } from 'lucide-react';
-import type { CityBean } from '@evony/api-client';
-import { buildingLevel, BuildingType } from '@evony/core';
+import type { CityBean } from '@marchlands/api-client';
+import { buildingLevel, BuildingType } from '@marchlands/core';
 import { Progress } from '@/components/ui/progress';
 import { qk } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
@@ -35,7 +35,7 @@ const GROUPS: { id: Group; icon: typeof Hammer }[] = [
 ];
 /** rows shown per group before "+N more" */
 const PER_GROUP = 3;
-const STORE_KEY = 'evony-activity-collapsed';
+const STORE_KEY = 'marchlands-activity-collapsed';
 
 function readCollapsed(): boolean {
   try {

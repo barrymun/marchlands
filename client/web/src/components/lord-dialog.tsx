@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { itemConfig, itemGoldPrice, TITLES, titleOf } from '@evony/core';
-import type { CityBean } from '@evony/api-client';
+import { itemConfig, itemGoldPrice, TITLES, titleOf } from '@marchlands/core';
+import type { CityBean } from '@marchlands/api-client';
 import { Check, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

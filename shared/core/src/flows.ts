@@ -1,4 +1,4 @@
-// (evony-re) Flows: a lord's saved series of actions, run on any of their cities (backend services/flows.ts).
+// (marchlands) Flows: a lord's saved series of actions, run on any of their cities (backend services/flows.ts).
 
 import { TROOP_NAMES } from './constants.ts';
 import { TROOPS } from './data/index.ts';

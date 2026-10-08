@@ -51,7 +51,7 @@ export const TrainBatchSchema = z.object({
   endTime: z.number(),
   /** total production time of the batch, ms */
   costTime: z.number(),
-  /** (evony-re) share of the normal cost paid (troopCostShare; absent = 1): what a cancel refunds from */
+  /** (marchlands) share of the normal cost paid (troopCostShare; absent = 1): what a cancel refunds from */
   paidShare: z.number().optional(),
 });
 export type TrainBatch = z.infer<typeof TrainBatchSchema>;
@@ -94,7 +94,7 @@ export const BuffStateSchema = z.object({
   param: z.number().optional(),
   /** city-scoped buffs */
   cityId: z.number().int().optional(),
-  /** (evony-re) the item last used to set or extend it (items sharing a buff, e.g. 1-day and 7-day ones) */
+  /** (marchlands) the item last used to set or extend it (items sharing a buff, e.g. 1-day and 7-day ones) */
   itemId: z.string().optional(),
 });
 export type BuffState = z.infer<typeof BuffStateSchema>;
@@ -130,7 +130,7 @@ export const FLOW_MAX_TARGETS_PER_CITY = 10;
 export const FLOW_MAX_WAIT_MINUTES = 7 * 24 * 60;
 
 /**
- * (evony-re) One action of a flow (flows.ts): appoint the city's best hero by an attribute as mayor,
+ * (marchlands) One action of a flow (flows.ts): appoint the city's best hero by an attribute as mayor,
  * train troops, attack a target list, heal, or wait (the whole flow pauses, every city together).
  */
 export const FlowActionSchema = z.discriminatedUnion('type', [
@@ -159,7 +159,7 @@ export const FlowActionSchema = z.discriminatedUnion('type', [
 ]);
 export type FlowAction = z.infer<typeof FlowActionSchema>;
 
-/** (evony-re) A named series of actions a lord runs on any of their cities. */
+/** (marchlands) A named series of actions a lord runs on any of their cities. */
 export const FlowSchema = z.object({
   id: z.string(),
   name: z.string().min(1).max(40),
@@ -183,9 +183,9 @@ export const PlayerMiscSchema = z.object({
   tutorialStep: z.number().int().optional(),
   dailyGiftDay: z.string().optional(),
   denyChatUntil: z.number().optional(),
-  /** (evony-re) saved army compositions for the send-army dialog */
+  /** (marchlands) saved army compositions for the send-army dialog */
   armyPresets: z.array(ArmyPresetSchema).optional(),
-  /** (evony-re) hero gear stars bought per piece (gear.ts) */
+  /** (marchlands) hero gear stars bought per piece (gear.ts) */
   gearStars: z.record(z.string(), z.number().int()).optional(),
 });
 export type PlayerMisc = z.infer<typeof PlayerMiscSchema>;

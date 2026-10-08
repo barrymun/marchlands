@@ -1,8 +1,8 @@
 // Periodic maintenance run by the worker.
 
 import { and, eq, lt, sql } from 'drizzle-orm';
-import { BALANCE, scaled } from '@evony/core';
-import { players, type Db } from '@evony/db';
+import { BALANCE, scaled } from '@marchlands/core';
+import { players, type Db } from '@marchlands/db';
 import { runGame } from './context.ts';
 import { getPlayer, savePlayer } from './repo.ts';
 import { checkBeginner } from './services/player.ts';

@@ -1,6 +1,6 @@
-# evony-re
+# Marchlands
 
-A from-scratch TypeScript rewrite of the **Evony (Age 1)** game server. It is based on the open-source C++ server *Spitfire* (`../evony-private-server`) and the Age 1 battle calculator (`../EvonyAge1BattleCalc`).
+A browser strategy game based on **Evony (Age 1)**: a from-scratch TypeScript rewrite of its game server that has since grown its own rules (see [docs/deviations.md](docs/deviations.md)). It is based on the open-source C++ server *Spitfire* (`../evony-private-server`) and the Age 1 battle calculator (`../EvonyAge1BattleCalc`).
 
 The original spoke AMF3 over a raw socket to a Flash client. This server instead offers:
 
@@ -46,7 +46,7 @@ curl -s $API/cities/$CITY/buildings -H "authorization: Bearer $TOKEN" -H 'conten
 ## Repository layout
 
 ```
-evony-re/
+marchlands/
 ├── docker-compose.yml        postgres · migrate · worker · api · web · (adminer)
 ├── shared/                   packages used by the backend *and* the client
 │   ├── core/                 pure game rules: static data, persisted-state schemas, economy,
@@ -120,14 +120,14 @@ To rebuild the static game data from the original dumps, run `npm run legacy:con
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `evony` | database credentials |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `marchlands` | database credentials |
 | `POSTGRES_PORT`, `API_PORT`, `WEB_PORT` | 5432, 3000, 8000 | host ports |
 | `DATABASE_URL` | – | for services run outside docker |
 | `JWT_SECRET` | `change-me-in-production` | token signing key (**change it**) |
 | `JWT_TTL` | 604800 | token lifetime, seconds |
 | `GAME_SPEED` | 1 | multiplies the speed of every timer and of production |
 | `WORLD_MAP` | `generated` | `generated` (procedural) or `legacy` (original s2 layout) |
-| `WORLD_SEED` | `evony` | seed of the procedural map |
+| `WORLD_SEED` | `marchlands` | seed of the procedural map |
 | `ADMIN_USERNAMES` | – | comma-separated usernames that are operators |
 | `CORS_ORIGIN` | any | allowed browser origin(s) |
 | `LOG_LEVEL` | `info` | pino log level |

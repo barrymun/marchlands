@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import type { HeroBean } from '@evony/api-client';
+import type { HeroBean } from '@marchlands/api-client';
 import { useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, Crown, Landmark, UserRound } from 'lucide-react';
-import { HeroStatus } from '@evony/core';
+import { HeroStatus } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {

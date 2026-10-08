@@ -2,7 +2,7 @@
 // queries below page over them with optional case-insensitive name search.
 
 import { sql } from 'drizzle-orm';
-import { GameError } from '@evony/core';
+import { GameError } from '@marchlands/core';
 import type { Ctx } from '../context.ts';
 import { refreshAllianceStats, rankName } from './alliance.ts';
 

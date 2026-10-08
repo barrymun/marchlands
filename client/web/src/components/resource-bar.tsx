@@ -1,6 +1,6 @@
 import { Coins, Hammer, Heart, Mountain, Trees, Users, Wheat } from 'lucide-react';
-import type { HeroBean, ResourceBean, ResourceLine } from '@evony/api-client';
-import { getGameSpeed, scaled } from '@evony/core';
+import type { HeroBean, ResourceBean, ResourceLine } from '@marchlands/api-client';
+import { getGameSpeed, scaled } from '@marchlands/core';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNow } from '@/hooks/use-now';
 import { fmt, fmtExact, signedRate } from '@/lib/format';

@@ -27,7 +27,7 @@ import {
   type ResearchState,
   addHeroExp,
   TechType,
-} from '@evony/core';
+} from '@marchlands/core';
 import { loadBundle, mayorOf, mayorStats, openOwnCity, settleAndReport, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';

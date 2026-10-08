@@ -1,4 +1,4 @@
-import { BUILDING_NAMES, getGameSpeed, TROOP_NAMES } from '@evony/core';
+import { BUILDING_NAMES, getGameSpeed, TROOP_NAMES } from '@marchlands/core';
 
 const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
 const whole = new Intl.NumberFormat('en');

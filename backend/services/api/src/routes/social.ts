@@ -45,8 +45,8 @@ import {
   SetAllianceInfoBody,
   SetAllianceRankBody,
   SetAllianceRelationBody,
-} from '@evony/contracts';
-import { alliance, mail, reports, social } from '@evony/game';
+} from '@marchlands/contracts';
+import { alliance, mail, reports, social } from '@marchlands/game';
 import { doc, anon, authenticate, game, tags, zIds, type ZApp } from '../http.ts';
 
 export default async function socialRoutes(app: ZApp) {

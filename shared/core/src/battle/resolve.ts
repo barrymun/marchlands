@@ -57,7 +57,7 @@ const toResearch = (r: ResearchState): Partial<ResearchStats> => ({
 /**
  * Attack multiplier: the simulator ignores hero attack and Military Tradition, so they are folded
  * into attack_modifier as the spec recommends: 1 + power/100 + 5% per Military Tradition level
- * ((evony-re) hero power soft-capped with BALANCE.heroSoftCap.battle).
+ * ((marchlands) hero power soft-capped with BALANCE.heroSoftCap.battle).
  */
 function attackModifier(c: CombatantInput): number {
   const power = c.hero ? heroPower(c.hero) : 0;

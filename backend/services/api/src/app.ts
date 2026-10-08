@@ -5,7 +5,7 @@ import swaggerUi from '@fastify/swagger-ui';
 import websocket from '@fastify/websocket';
 import { jsonSchemaTransform, jsonSchemaTransformObject, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { sql } from 'drizzle-orm';
-import type { Db } from '@evony/db';
+import type { Db } from '@marchlands/db';
 import { verifyToken } from './auth/jwt.ts';
 import type { ApiConfig } from './config.ts';
 import { installErrorHandler, playerIdOf } from './http.ts';
@@ -47,10 +47,10 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     openapi: {
       openapi: '3.1.0',
       info: {
-        title: 'evony-re API',
+        title: 'Marchlands API',
         version: '0.1.0',
         description:
-          'Evony Age 1 game server. Successful calls answer `{ ok: 1, data }`; failures `{ ok: <negative code>, errorMsg }` with a 4xx status. ' +
+          'Marchlands game server, based on Evony Age 1. Successful calls answer `{ ok: 1, data }`; failures `{ ok: <negative code>, errorMsg }` with a 4xx status. ' +
           'Live updates (`server.*` pushes of the original protocol) arrive on the WebSocket at `/ws?token=...` as `{ cmd, data }`.',
       },
       components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } } },

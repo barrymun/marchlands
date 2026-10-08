@@ -17,8 +17,8 @@ import {
   type TroopCounts,
   TROOP_KEY_LIST,
   lordGear,
-} from '@evony/core';
-import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@evony/db';
+} from '@marchlands/core';
+import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@marchlands/db';
 import { openOwnCity, viewOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { buffsArray, cityBean, itemsArray } from '../dto.ts';
@@ -409,7 +409,7 @@ export async function removeCastleSign(ctx: Ctx, playerId: number, tileId: numbe
 }
 
 // ---------------------------------------------------------------------------------------------
-// Army presets (evony-re): named army compositions for the send-army dialog
+// Army presets (marchlands): named army compositions for the send-army dialog
 // ---------------------------------------------------------------------------------------------
 
 const MAX_PRESETS = 30;

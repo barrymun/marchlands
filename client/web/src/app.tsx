@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router';
-import { ApiError } from '@evony/api-client';
+import { ApiError } from '@marchlands/api-client';
 import { useToken } from '@/hooks/use-auth';
 import { usePlayer } from '@/hooks/use-game';
 import { LoginPage } from '@/routes/login';

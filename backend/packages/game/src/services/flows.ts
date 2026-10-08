@@ -1,4 +1,4 @@
-// (evony-re) Flows: a lord's saved series of actions (core FlowSchema, table `flows`), run on any of
+// (marchlands) Flows: a lord's saved series of actions (core FlowSchema, table `flows`), run on any of
 // their cities.
 //
 // A run goes action by action in every city; "wait" actions pause the whole flow (timed event
@@ -43,8 +43,8 @@ import {
   type FlowCityResult,
   type FlowRunLog,
   type FlowStepResult,
-} from '@evony/core';
-import { armies, flows as flowsTable, timedEvents, type Db } from '@evony/db';
+} from '@marchlands/core';
+import { armies, flows as flowsTable, timedEvents, type Db } from '@marchlands/db';
 import { and, asc, eq, gt, inArray, isNotNull, lt, ne } from 'drizzle-orm';
 import { cityStats, openOwnCity } from '../city.ts';
 import { isRetryable, runGame, savepoint, type Ctx } from '../context.ts';

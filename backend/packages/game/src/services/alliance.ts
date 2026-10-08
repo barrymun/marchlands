@@ -2,8 +2,8 @@
 // Ranks: 4 Host, 5 Vice Host, 6 Presbyter, 7 Officer, 8 Member (lower = more power).
 
 import { and, asc, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
-import { ALLIANCE_PACT_ITEMS, AllianceRank, BALANCE, BuildingType, buildingLevel, GameError, Relation, scaled } from '@evony/core';
-import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, players } from '@evony/db';
+import { ALLIANCE_PACT_ITEMS, AllianceRank, BALANCE, BuildingType, buildingLevel, GameError, Relation, scaled } from '@marchlands/core';
+import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, players } from '@marchlands/db';
 import { openOwnCity } from '../city.ts';
 import { sendSystemMail } from './mail.ts';
 import type { Ctx } from '../context.ts';

@@ -1,6 +1,6 @@
-// @evony/contracts: zod schemas for the whole API surface. The API registers them as route
+// @marchlands/contracts: zod schemas for the whole API surface. The API registers them as route
 // schemas (validation, serialization, OpenAPI); clients use the inferred types or the client
-// generated from the OpenAPI document (@evony/api-client).
+// generated from the OpenAPI document (@marchlands/api-client).
 
 export * from './common.ts';
 export * from './rows.ts';
