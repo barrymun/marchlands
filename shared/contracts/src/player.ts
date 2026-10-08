@@ -92,7 +92,47 @@ export const ArmyPresetBody = z.object({ name: z.string().describe('replaces a p
 export const ArmyPresetParams = z.object({ presetId: z.string() });
 export const FlowAction = FlowActionSchema.meta({ id: 'FlowAction' });
 export type FlowAction = z.infer<typeof FlowAction>;
-export const Flow = FlowSchema.extend({ actions: z.array(FlowAction) }).meta({ id: 'Flow' });
+const FlowCityResult = z.object({
+  cityId: zId,
+  cityName: z.string(),
+  ok: z.boolean().describe('false: an action failed and everything the flow did in this city since the last wait was rolled back'),
+  error: z.string().nullable(),
+  steps: z.array(
+    z.object({
+      action: z.string(),
+      ok: z.boolean(),
+      detail: z.string(),
+      skipped: z.boolean().optional().describe('the city could not do it right now (e.g. nothing affordable to train); the run carried on'),
+      items: z
+        .array(z.object({ label: z.string(), ok: z.boolean(), detail: z.string() }))
+        .optional()
+        .describe('per-target outcomes (attack actions)'),
+    }),
+  ),
+});
+export const FlowRunLog = z
+  .object({
+    run: z.number().int().describe('1 for the first run of the flow, counting up'),
+    startedAt: Ms,
+    finishedAt: Ms.nullable().describe('null while the run is still going'),
+    cities: z.array(FlowCityResult),
+  })
+  .meta({ id: 'FlowRunLog' });
+export type FlowRunLog = z.infer<typeof FlowRunLog>;
+export const Flow = FlowSchema.extend({
+  actions: z.array(FlowAction),
+  status: z
+    .enum(['idle', 'queued', 'running', 'waiting'])
+    .describe("'queued': waits for the lord's active flow to finish its run (one flow runs at a time); 'waiting': paused on a wait action"),
+  nextAction: z.number().int().describe('index of the action the run continues with'),
+  runs: z.number().int(),
+  queuedAt: Ms,
+  notBefore: Ms.describe('a queued repeat starts no earlier than this'),
+  waitUntil: Ms.describe('while waiting: when the wait ends (or is checked again)'),
+  heldSince: Ms.describe('while waiting: held before its next actions until every hero of its cities is home, since then (0 = not held)'),
+  stopReason: z.string().nullable().describe('why the flow stopped on its own (a failed run; repeat was switched off)'),
+  lastRun: FlowRunLog.nullable(),
+}).meta({ id: 'Flow' });
 export type Flow = z.infer<typeof Flow>;
 export const FlowBody = z.object({
   id: z.string().nullish().describe('a saved flow to replace; omit to create one'),
@@ -106,30 +146,14 @@ export const FlowBody = z.object({
 export const FlowParams = z.object({ flowId: z.string() });
 export const FlowRunBody = z.object({
   cityIds: z.array(zId).min(1).optional().describe("cities to run the flow on (default: the flow's saved cities)"),
-  preview: z.boolean().default(false).describe('run and roll everything back: shows what would happen'),
+  preview: z.boolean().default(false).describe('run up to the first wait and roll everything back: shows what would happen'),
 });
+export const FlowRepeatBody = z.object({ repeat: z.boolean() });
 export const FlowRunReport = z
   .object({
     preview: z.boolean(),
-    cities: z.array(
-      z.object({
-        cityId: zId,
-        cityName: z.string(),
-        ok: z.boolean().describe('false: an action failed and everything the flow did in this city was rolled back'),
-        error: z.string().nullable(),
-        steps: z.array(
-          z.object({
-            action: z.string(),
-            ok: z.boolean(),
-            detail: z.string(),
-            items: z
-              .array(z.object({ label: z.string(), ok: z.boolean(), detail: z.string() }))
-              .optional()
-              .describe('per-target outcomes (attack actions)'),
-          }),
-        ),
-      }),
-    ),
+    flow: Flow.nullable().describe('the flow after starting it (null for a preview)'),
+    cities: z.array(FlowCityResult).describe('what ran now, up to the first wait (empty when the flow was queued)'),
   })
   .meta({ id: 'FlowRunReport' });
 export type FlowRunReport = z.infer<typeof FlowRunReport>;

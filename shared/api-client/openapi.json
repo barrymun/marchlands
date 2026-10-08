@@ -2179,55 +2179,61 @@
               "presetId",
               "targets"
             ]
-          }
-        ]
-      },
-      "FlowInput": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
           },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 40
-          },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowActionInput"
-            }
-          },
-          "cities": {
-            "default": "all",
-            "anyOf": [
-              {
+          {
+            "type": "object",
+            "properties": {
+              "type": {
                 "type": "string",
-                "const": "all"
+                "const": "wait"
               },
-              {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
+              "until": {
+                "type": "string",
+                "enum": [
+                  "time",
+                  "armiesHome"
+                ],
+                "description": "'time': a number of real minutes; 'armiesHome': until every army this run sent is back"
+              },
+              "minutes": {
+                "default": 10,
+                "description": "real minutes (for until 'time'); not sped up by GAME_SPEED",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10080
               }
+            },
+            "required": [
+              "type",
+              "until"
             ]
           }
-        },
-        "required": [
-          "id",
-          "name",
-          "actions"
         ]
       },
-      "FlowRunReportInput": {
+      "FlowRunLogInput": {
         "type": "object",
         "properties": {
-          "preview": {
-            "type": "boolean"
+          "run": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "1 for the first run of the flow, counting up"
+          },
+          "startedAt": {
+            "type": "number",
+            "description": "epoch milliseconds"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "type": "number",
+                "description": "epoch milliseconds"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null while the run is still going"
           },
           "cities": {
             "type": "array",
@@ -2244,7 +2250,7 @@
                 },
                 "ok": {
                   "type": "boolean",
-                  "description": "false: an action failed and everything the flow did in this city was rolled back"
+                  "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
                 },
                 "error": {
                   "type": [
@@ -2265,6 +2271,10 @@
                       },
                       "detail": {
                         "type": "string"
+                      },
+                      "skipped": {
+                        "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
+                        "type": "boolean"
                       },
                       "items": {
                         "description": "per-target outcomes (attack actions)",
@@ -2309,7 +2319,224 @@
           }
         },
         "required": [
+          "run",
+          "startedAt",
+          "finishedAt",
+          "cities"
+        ]
+      },
+      "FlowInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowActionInput"
+            }
+          },
+          "cities": {
+            "default": "all",
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "all"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              }
+            ]
+          },
+          "repeat": {
+            "default": false,
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "idle",
+              "queued",
+              "running",
+              "waiting"
+            ],
+            "description": "'queued': waits for the lord's active flow to finish its run (one flow runs at a time); 'waiting': paused on a wait action"
+          },
+          "nextAction": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "index of the action the run continues with"
+          },
+          "runs": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "queuedAt": {
+            "type": "number",
+            "description": "epoch milliseconds"
+          },
+          "notBefore": {
+            "type": "number",
+            "description": "a queued repeat starts no earlier than this"
+          },
+          "waitUntil": {
+            "type": "number",
+            "description": "while waiting: when the wait ends (or is checked again)"
+          },
+          "heldSince": {
+            "type": "number",
+            "description": "while waiting: held before its next actions until every hero of its cities is home, since then (0 = not held)"
+          },
+          "stopReason": {
+            "description": "why the flow stopped on its own (a failed run; repeat was switched off)",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastRun": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FlowRunLogInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "actions",
+          "status",
+          "nextAction",
+          "runs",
+          "queuedAt",
+          "notBefore",
+          "waitUntil",
+          "heldSince",
+          "stopReason",
+          "lastRun"
+        ]
+      },
+      "FlowRunReportInput": {
+        "type": "object",
+        "properties": {
+          "preview": {
+            "type": "boolean"
+          },
+          "flow": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FlowInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the flow after starting it (null for a preview)"
+          },
+          "cities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cityId": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "cityName": {
+                  "type": "string"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
+                },
+                "error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "steps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "action": {
+                        "type": "string"
+                      },
+                      "ok": {
+                        "type": "boolean"
+                      },
+                      "detail": {
+                        "type": "string"
+                      },
+                      "skipped": {
+                        "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
+                        "type": "boolean"
+                      },
+                      "items": {
+                        "description": "per-target outcomes (attack actions)",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string"
+                            },
+                            "ok": {
+                              "type": "boolean"
+                            },
+                            "detail": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "label",
+                            "ok",
+                            "detail"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "ok",
+                      "detail"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "cityId",
+                "cityName",
+                "ok",
+                "error",
+                "steps"
+              ]
+            },
+            "description": "what ran now, up to the first wait (empty when the flow was queued)"
+          }
+        },
+        "required": [
           "preview",
+          "flow",
           "cities"
         ]
       },
@@ -12152,57 +12379,63 @@
               "targets"
             ],
             "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "wait"
+              },
+              "until": {
+                "type": "string",
+                "enum": [
+                  "time",
+                  "armiesHome"
+                ],
+                "description": "'time': a number of real minutes; 'armiesHome': until every army this run sent is back"
+              },
+              "minutes": {
+                "default": 10,
+                "description": "real minutes (for until 'time'); not sped up by GAME_SPEED",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10080
+              }
+            },
+            "required": [
+              "type",
+              "until",
+              "minutes"
+            ],
+            "additionalProperties": false
           }
         ]
       },
-      "Flow": {
+      "FlowRunLog": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
+          "run": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "1 for the first run of the flow, counting up"
           },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 40
+          "startedAt": {
+            "type": "number",
+            "description": "epoch milliseconds"
           },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FlowAction"
-            }
-          },
-          "cities": {
-            "default": "all",
+          "finishedAt": {
             "anyOf": [
               {
-                "type": "string",
-                "const": "all"
+                "type": "number",
+                "description": "epoch milliseconds"
               },
               {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
+                "type": "null"
               }
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "actions",
-          "cities"
-        ],
-        "additionalProperties": false
-      },
-      "FlowRunReport": {
-        "type": "object",
-        "properties": {
-          "preview": {
-            "type": "boolean"
+            ],
+            "description": "null while the run is still going"
           },
           "cities": {
             "type": "array",
@@ -12219,7 +12452,7 @@
                 },
                 "ok": {
                   "type": "boolean",
-                  "description": "false: an action failed and everything the flow did in this city was rolled back"
+                  "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
                 },
                 "error": {
                   "type": [
@@ -12240,6 +12473,10 @@
                       },
                       "detail": {
                         "type": "string"
+                      },
+                      "skipped": {
+                        "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
+                        "type": "boolean"
                       },
                       "items": {
                         "description": "per-target outcomes (attack actions)",
@@ -12287,7 +12524,231 @@
           }
         },
         "required": [
+          "run",
+          "startedAt",
+          "finishedAt",
+          "cities"
+        ],
+        "additionalProperties": false
+      },
+      "Flow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowAction"
+            }
+          },
+          "cities": {
+            "default": "all",
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "all"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              }
+            ]
+          },
+          "repeat": {
+            "default": false,
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "idle",
+              "queued",
+              "running",
+              "waiting"
+            ],
+            "description": "'queued': waits for the lord's active flow to finish its run (one flow runs at a time); 'waiting': paused on a wait action"
+          },
+          "nextAction": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "index of the action the run continues with"
+          },
+          "runs": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "queuedAt": {
+            "type": "number",
+            "description": "epoch milliseconds"
+          },
+          "notBefore": {
+            "type": "number",
+            "description": "a queued repeat starts no earlier than this"
+          },
+          "waitUntil": {
+            "type": "number",
+            "description": "while waiting: when the wait ends (or is checked again)"
+          },
+          "heldSince": {
+            "type": "number",
+            "description": "while waiting: held before its next actions until every hero of its cities is home, since then (0 = not held)"
+          },
+          "stopReason": {
+            "description": "why the flow stopped on its own (a failed run; repeat was switched off)",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "lastRun": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FlowRunLog"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "actions",
+          "cities",
+          "repeat",
+          "status",
+          "nextAction",
+          "runs",
+          "queuedAt",
+          "notBefore",
+          "waitUntil",
+          "heldSince",
+          "stopReason",
+          "lastRun"
+        ],
+        "additionalProperties": false
+      },
+      "FlowRunReport": {
+        "type": "object",
+        "properties": {
+          "preview": {
+            "type": "boolean"
+          },
+          "flow": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Flow"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the flow after starting it (null for a preview)"
+          },
+          "cities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cityId": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "cityName": {
+                  "type": "string"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
+                },
+                "error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "steps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "action": {
+                        "type": "string"
+                      },
+                      "ok": {
+                        "type": "boolean"
+                      },
+                      "detail": {
+                        "type": "string"
+                      },
+                      "skipped": {
+                        "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
+                        "type": "boolean"
+                      },
+                      "items": {
+                        "description": "per-target outcomes (attack actions)",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string"
+                            },
+                            "ok": {
+                              "type": "boolean"
+                            },
+                            "detail": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "label",
+                            "ok",
+                            "detail"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "ok",
+                      "detail"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "cityId",
+                "cityName",
+                "ok",
+                "error",
+                "steps"
+              ],
+              "additionalProperties": false
+            },
+            "description": "what ran now, up to the first wait (empty when the flow was queued)"
+          }
+        },
+        "required": [
           "preview",
+          "flow",
           "cities"
         ],
         "additionalProperties": false
@@ -22084,7 +22545,7 @@
                   },
                   "preview": {
                     "default": false,
-                    "description": "run and roll everything back: shows what would happen",
+                    "description": "run up to the first wait and roll everything back: shows what would happen",
                     "type": "boolean"
                   }
                 }
@@ -22123,6 +22584,172 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/FlowRunReport"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/player/flows/{flowId}/repeat": {
+      "post": {
+        "summary": "Switch repeat on (the flow runs again after every run; starts or queues it now) or off (the current run finishes)",
+        "tags": [
+          "player"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "repeat": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "repeat"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Flow"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/player/flows/{flowId}/stop": {
+      "post": {
+        "summary": "Stop a flow now (a run ends where it is; repeat goes off)",
+        "tags": [
+          "player"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "flowId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Flow"
+                      }
                     }
                   },
                   "required": [

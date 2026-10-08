@@ -1,11 +1,12 @@
 // (evony-re) Flows: build a named series of actions (drag to reorder) and run it on any of your cities.
-// The server runs each city all-or-nothing; Preview runs it and rolls everything back.
+// The server runs each city all-or-nothing between waits; Preview runs up to the first wait and rolls
+// everything back. Repeat runs the flow again after every run; one flow runs at a time, others queue.
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, Check, CirclePlay, Eye, GripVertical, HeartPulse, Plus, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Check, CirclePlay, Eye, GripVertical, HeartPulse, Hourglass, Plus, Repeat, SkipForward, Square, Trash2, X } from 'lucide-react';
 import type { CityBean, Flow, FlowAction, FlowRunReport } from '@evony/api-client';
-import { describeFlowAction, FLOW_STAT_LABEL, FLOW_TROOP_IDS } from '@evony/core';
+import { describeFlowAction, FLOW_MAX_WAIT_MINUTES, FLOW_STAT_LABEL, FLOW_TROOP_IDS, formatFlowMinutes } from '@evony/core';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,9 +18,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { qk, usePlayer } from '@/hooks/use-game';
+import { useNow } from '@/hooks/use-now';
 import { api, errorMessage, unwrap } from '@/lib/api';
 import { attributeOfStat } from '@/lib/hero-attributes';
-import { troopName } from '@/lib/format';
+import { duration, troopName } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 type Stat = keyof typeof FLOW_STAT_LABEL;
@@ -91,7 +93,10 @@ export function FlowsPanel({ city }: { city: CityBean }) {
                 f.id === selectedId && !editing && 'border-primary bg-muted/50',
               )}
             >
-              <span className="font-medium">{f.name}</span>
+              <span className="flex items-center justify-between gap-2">
+                <span className="truncate font-medium">{f.name}</span>
+                <StatusBadge flow={f} />
+              </span>
               <span className="truncate text-xs text-muted-foreground">
                 {f.actions.length} action{f.actions.length === 1 ? '' : 's'} · {f.actions.map(describeFlowAction).join(' → ')}
               </span>
@@ -101,7 +106,14 @@ export function FlowsPanel({ city }: { city: CityBean }) {
       </Card>
       <div className="grid content-start gap-4">
         {editing ? (
-          <FlowEditor draft={editing} onChange={setEditing} saving={save.isPending} onSave={() => save.mutate(editing)} onCancel={() => setEditing(null)} />
+          <FlowEditor
+            draft={editing}
+            locked={list.some((f) => f.id === editing.id && (f.status === 'running' || f.status === 'waiting'))}
+            onChange={setEditing}
+            saving={save.isPending}
+            onSave={() => save.mutate(editing)}
+            onCancel={() => setEditing(null)}
+          />
         ) : selected ? (
           <>
             <Card>
@@ -125,12 +137,20 @@ export function FlowsPanel({ city }: { city: CityBean }) {
               <CardContent>
                 <ol className="grid gap-1 text-sm">
                   {selected.actions.map((a, i) => (
-                    <li key={i} className="flex items-center gap-2">
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] tabular-nums">{i + 1}</span>
+                    <li key={i} className={cn('flex items-center gap-2', currentAction(selected) === i && 'font-medium text-primary')}>
+                      <span
+                        className={cn(
+                          'flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] tabular-nums',
+                          currentAction(selected) === i && 'bg-primary text-primary-foreground',
+                        )}
+                      >
+                        {i + 1}
+                      </span>
                       {describeFlowAction(a)}
                     </li>
                   ))}
                 </ol>
+                <StatusLine flow={selected} />
                 <p className="mt-2 text-xs text-muted-foreground">
                   Runs on: <CitiesSummary targets={selected.cities ?? 'all'} />
                 </p>
@@ -155,12 +175,15 @@ export function FlowsPanel({ city }: { city: CityBean }) {
 
 function FlowEditor({
   draft,
+  locked,
   onChange,
   saving,
   onSave,
   onCancel,
 }: {
   draft: EditDraft;
+  /** the flow is running: its actions keep their order (settings can change) */
+  locked: boolean;
   onChange: (d: EditDraft) => void;
   saving: boolean;
   onSave: () => void;
@@ -170,7 +193,7 @@ function FlowEditor({
   const [over, setOver] = useState<number | null>(null);
   const setActions = (actions: Draft[]) => onChange({ ...draft, actions });
   const move = (from: number, to: number) => {
-    if (to < 0 || to >= draft.actions.length || from === to) return;
+    if (locked || to < 0 || to >= draft.actions.length || from === to) return;
     const next = [...draft.actions];
     const [a] = next.splice(from, 1);
     next.splice(to, 0, a);
@@ -187,9 +210,16 @@ function FlowEditor({
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{draft.id ? 'Edit flow' : 'New flow'}</CardTitle>
-        <CardDescription>Actions run top to bottom in each city. Drag them (or use the arrows) to reorder.</CardDescription>
+        <CardDescription>
+          Actions run top to bottom in each city. A wait pauses the whole flow, every city together. Drag actions (or use the arrows) to reorder.
+        </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
+        {locked && (
+          <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
+            This flow is running: you can change its settings (targets, amounts, cities), but stop it to add, remove or reorder actions.
+          </p>
+        )}
         <div className="grid gap-1.5">
           <Label htmlFor="flow-name">Name</Label>
           <Input
@@ -205,7 +235,7 @@ function FlowEditor({
           {draft.actions.map((a, i) => (
             <li
               key={a.key}
-              draggable
+              draggable={!locked}
               onDragStart={(e) => {
                 setDragging(i);
                 e.dataTransfer.effectAllowed = 'move';
@@ -227,17 +257,29 @@ function FlowEditor({
                 over === i && dragging != null && dragging !== i && 'border-primary',
               )}
             >
-              <GripVertical className="size-4 shrink-0 cursor-grab text-muted-foreground" aria-hidden />
+              <GripVertical className={cn('size-4 shrink-0 text-muted-foreground', locked ? 'opacity-30' : 'cursor-grab')} aria-hidden />
               <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] tabular-nums">{i + 1}</span>
               <ActionFields action={a} cities={draft.cities} onChange={(x) => update(i, x)} />
               <div className="ml-auto flex gap-0.5">
-                <Button size="icon-xs" variant="ghost" aria-label="Move up" disabled={i === 0} onClick={() => move(i, i - 1)}>
+                <Button size="icon-xs" variant="ghost" aria-label="Move up" disabled={locked || i === 0} onClick={() => move(i, i - 1)}>
                   <ArrowUp />
                 </Button>
-                <Button size="icon-xs" variant="ghost" aria-label="Move down" disabled={i === draft.actions.length - 1} onClick={() => move(i, i + 1)}>
+                <Button
+                  size="icon-xs"
+                  variant="ghost"
+                  aria-label="Move down"
+                  disabled={locked || i === draft.actions.length - 1}
+                  onClick={() => move(i, i + 1)}
+                >
                   <ArrowDown />
                 </Button>
-                <Button size="icon-xs" variant="ghost" aria-label="Remove action" onClick={() => setActions(draft.actions.filter((_, j) => j !== i))}>
+                <Button
+                  size="icon-xs"
+                  variant="ghost"
+                  aria-label="Remove action"
+                  disabled={locked}
+                  onClick={() => setActions(draft.actions.filter((_, j) => j !== i))}
+                >
                   <X />
                 </Button>
               </div>
@@ -248,7 +290,7 @@ function FlowEditor({
           <Button
             size="sm"
             variant="outline"
-            disabled={draft.actions.length >= 20}
+            disabled={locked || draft.actions.length >= 20}
             onClick={() => setActions([...draft.actions, keyed({ type: 'setMayor', stat: 'management' })])}
           >
             <Plus /> Set mayor
@@ -256,7 +298,7 @@ function FlowEditor({
           <Button
             size="sm"
             variant="outline"
-            disabled={draft.actions.length >= 20}
+            disabled={locked || draft.actions.length >= 20}
             onClick={() =>
               setActions([...draft.actions, keyed({ type: 'trainTroops', troopId: FLOW_TROOP_IDS.includes(7) ? 7 : FLOW_TROOP_IDS[0], amount: 'max' })])
             }
@@ -266,7 +308,7 @@ function FlowEditor({
           <Button
             size="sm"
             variant="outline"
-            disabled={draft.actions.length >= 20}
+            disabled={locked || draft.actions.length >= 20}
             onClick={() => setActions([...draft.actions, keyed({ type: 'attackTargets', presetId: '', targets: {} })])}
           >
             <Plus /> Attack targets
@@ -274,10 +316,18 @@ function FlowEditor({
           <Button
             size="sm"
             variant="outline"
-            disabled={draft.actions.length >= 20}
+            disabled={locked || draft.actions.length >= 20}
             onClick={() => setActions([...draft.actions, keyed({ type: 'healTroops', payWith: 'resources', when: 'armiesHome' })])}
           >
             <Plus /> Heal troops
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={locked || draft.actions.length >= 20}
+            onClick={() => setActions([...draft.actions, keyed({ type: 'wait', until: 'armiesHome', minutes: 10 })])}
+          >
+            <Plus /> Wait
           </Button>
         </div>
         <div className="flex justify-end gap-2">
@@ -321,6 +371,36 @@ function ActionFields({ action, cities, onChange }: { action: Draft; cities: Tar
             <SelectItem value="armiesHome">when the city's armies are home</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+    );
+  }
+  if (action.type === 'wait') {
+    return (
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <Hourglass className="size-4 text-muted-foreground" />
+        <span>Wait</span>
+        <Select value={action.until} onValueChange={(v) => onChange({ ...action, until: v as 'time' | 'armiesHome' })}>
+          <SelectTrigger size="sm" className="w-60">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="armiesHome">until the armies sent are home</SelectItem>
+            <SelectItem value="time">for a set time</SelectItem>
+          </SelectContent>
+        </Select>
+        {action.until === 'time' && (
+          <>
+            <Input
+              className="h-8 w-20"
+              inputMode="numeric"
+              aria-label="Minutes"
+              value={String(action.minutes)}
+              onChange={(e) => onChange({ ...action, minutes: Math.min(FLOW_MAX_WAIT_MINUTES, Math.max(1, Number(e.target.value.replace(/\D/g, '')) || 1)) })}
+            />
+            <span>minutes</span>
+            {action.minutes >= 60 && <span className="text-xs text-muted-foreground">({formatFlowMinutes(action.minutes)})</span>}
+          </>
+        )}
       </div>
     );
   }
@@ -376,7 +456,50 @@ function ActionFields({ action, cities, onChange }: { action: Draft; cities: Tar
   );
 }
 
-/** Pick cities, then preview (run and roll back) or run the flow; shows what happened in each city. */
+const currentAction = (f: Flow) => (f.status === 'waiting' ? f.nextAction - 1 : f.status === 'running' ? f.nextAction : -1);
+
+function StatusBadge({ flow }: { flow: Flow }) {
+  const repeat = flow.repeat && <Repeat className="size-3.5 text-muted-foreground" aria-label="Repeats" />;
+  const badge =
+    flow.status === 'running' ? (
+      <Badge>Running</Badge>
+    ) : flow.status === 'waiting' ? (
+      <Badge>Waiting</Badge>
+    ) : flow.status === 'queued' ? (
+      <Badge variant="secondary">{flow.notBefore > 0 ? 'Repeats' : 'Queued'}</Badge>
+    ) : flow.stopReason ? (
+      <Badge variant="destructive">Stopped</Badge>
+    ) : null;
+  if (!badge && !repeat) return null;
+  return (
+    <span className="flex shrink-0 items-center gap-1">
+      {repeat}
+      {badge}
+    </span>
+  );
+}
+
+/** Where the flow is: running, waiting (and until when), its next repeat, or why it stopped. */
+function StatusLine({ flow }: { flow: Flow }) {
+  const now = useNow();
+  let text: string | null = null;
+  if (flow.status === 'running') text = 'Running now.';
+  else if (flow.status === 'waiting' && flow.heldSince > 0)
+    text = `Waiting for every hero of its cities to come home (and for flows held before it), checking again in ${duration(flow.waitUntil - now)}.`;
+  else if (flow.status === 'waiting') text = `Waiting: carries on in ${duration(flow.waitUntil - now)}.`;
+  else if (flow.status === 'queued') {
+    if (flow.notBefore > now) text = `Next run in ${duration(flow.notBefore - now)}.`;
+    else text = 'Starting…';
+  }
+  return (
+    <div className="mt-2 grid gap-0.5 text-xs">
+      {text && <p className="font-medium text-primary">{text}</p>}
+      {flow.status === 'idle' && flow.stopReason && <p className="text-destructive">Stopped: {flow.stopReason}. Repeat was switched off.</p>}
+    </div>
+  );
+}
+
+/** Pick cities, then preview (up to the first wait, rolled back) or run the flow; repeat; stop; what the latest run did. */
 function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: number }) {
   const qc = useQueryClient();
   const cities = usePlayer().data?.castles ?? [];
@@ -384,62 +507,124 @@ function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: number })
   const [targets, setTargets] = useState<Targets>(flow.cities ?? 'all');
   const own = new Set(cities.map((c) => c.id));
   const picked = targets === 'all' ? cities.map((c) => c.id) : targets.filter((id) => own.has(id));
-  const [report, setReport] = useState<FlowRunReport | null>(null);
+  const [preview, setPreview] = useState<FlowRunReport | null>(null);
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ['flows'] });
+    // heroes, resources, population and queues changed in the cities that ran
+    for (const key of [['city'], qk.player, ['queues'], ['trainable'], ['research'], ['upgrade'], ['available']]) void qc.invalidateQueries({ queryKey: key });
+  };
   const run = useMutation({
-    mutationFn: (preview: boolean) =>
-      unwrap(api.POST('/api/v1/player/flows/{flowId}/run', { params: { path: { flowId: flow.id } }, body: { cityIds: picked, preview } })),
+    mutationFn: (asPreview: boolean) =>
+      unwrap(api.POST('/api/v1/player/flows/{flowId}/run', { params: { path: { flowId: flow.id } }, body: { cityIds: picked, preview: asPreview } })),
     onSuccess: (r) => {
-      setReport(r);
-      if (r.preview) return;
-      // heroes, resources, population and queues changed in the cities that ran
-      for (const key of [['city'], qk.player, ['queues'], ['trainable'], ['research'], ['upgrade'], ['available']])
-        void qc.invalidateQueries({ queryKey: key });
+      if (r.preview) return setPreview(r);
+      setPreview(null);
+      refresh();
       const failed = r.cities.filter((c) => !c.ok).length;
-      if (failed) toast.warning(`${flow.name}: ${r.cities.length - failed} done, ${failed} rolled back`);
+      if (failed) toast.warning(`${flow.name}: failed in ${failed} cit${failed === 1 ? 'y' : 'ies'} and stopped`);
+      else if (r.flow?.status === 'waiting') toast.success(`${flow.name}: started, now waiting`);
       else toast.success(`${flow.name}: done in ${r.cities.length} cit${r.cities.length === 1 ? 'y' : 'ies'}`);
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
+  const repeat = useMutation({
+    mutationFn: (on: boolean) => unwrap(api.POST('/api/v1/player/flows/{flowId}/repeat', { params: { path: { flowId: flow.id } }, body: { repeat: on } })),
+    onSuccess: (list, on) => {
+      qc.setQueryData(['flows'], list);
+      setPreview(null);
+      refresh();
+      toast.success(on ? `${flow.name}: repeats until a run fails or you switch it off` : `${flow.name}: stops after this run`);
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+  const stop = useMutation({
+    mutationFn: () => unwrap(api.POST('/api/v1/player/flows/{flowId}/stop', { params: { path: { flowId: flow.id } } })),
+    onSuccess: (list) => {
+      qc.setQueryData(['flows'], list);
+      toast.success(`${flow.name}: stopped`);
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+  const busy = run.isPending || repeat.isPending || stop.isPending;
+  const idle = flow.status === 'idle';
 
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">Run</CardTitle>
         <CardDescription>
-          Each city runs the whole flow or nothing: if an action fails there, everything the flow did in that city is undone. Preview shows what would happen
-          without changing anything.
+          Each city runs the flow all-or-nothing between waits: if an action fails there, what the flow did in that city since the last wait is undone, and the
+          flow stops. Flows take turns between waits, so other flows run while one waits. Preview shows what would happen up to the first wait, without changing
+          anything.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
         <CityPicker value={targets} onChange={setTargets} currentCityId={currentCityId} />
+        <label className="flex items-start gap-2 text-sm">
+          <Switch className="mt-0.5" checked={flow.repeat} disabled={busy} onCheckedChange={(on) => repeat.mutate(on)} />
+          <span className="grid gap-0.5">
+            <span>Repeat</span>
+            <span className="text-xs text-muted-foreground">
+              Runs again after every run (at most once a minute) on the flow&apos;s cities, until a run fails or you switch it off.
+            </span>
+          </span>
+        </label>
         <div className="flex flex-wrap justify-end gap-2">
-          <Button variant="outline" disabled={!picked.length || run.isPending} onClick={() => run.mutate(true)}>
+          <Button variant="outline" disabled={!picked.length || busy} onClick={() => run.mutate(true)}>
             <Eye /> Preview
           </Button>
-          <Button disabled={!picked.length || run.isPending} onClick={() => run.mutate(false)}>
-            <CirclePlay /> Run on {picked.length} cit{picked.length === 1 ? 'y' : 'ies'}
-          </Button>
+          {idle ? (
+            <Button disabled={!picked.length || busy} onClick={() => run.mutate(false)}>
+              <CirclePlay /> Run on {picked.length} cit{picked.length === 1 ? 'y' : 'ies'}
+            </Button>
+          ) : (
+            <Button variant="destructive" disabled={busy} onClick={() => stop.mutate()}>
+              <Square /> Stop
+            </Button>
+          )}
         </div>
-        {report && <RunReport report={report} />}
+        {preview ? <RunReport title="Preview (nothing was changed)" preview cities={preview.cities} /> : flow.lastRun && <LastRun flow={flow} />}
       </CardContent>
     </Card>
   );
 }
 
-function RunReport({ report }: { report: FlowRunReport }) {
+function LastRun({ flow }: { flow: Flow }) {
+  const now = useNow(10_000);
+  const r = flow.lastRun!;
+  const when = (t: number) => (now - t < 60_000 ? 'just now' : `${duration(now - t).split(' ')[0]} ago`);
+  return (
+    <RunReport
+      title={`Run ${r.run} · started ${when(r.startedAt)}${r.finishedAt == null ? ' · in progress' : ` · ended ${when(r.finishedAt)}`}`}
+      preview={false}
+      cities={r.cities}
+    />
+  );
+}
+
+function RunReport({ title, preview, cities }: { title: string; preview: boolean; cities: FlowRunReport['cities'] }) {
   return (
     <div className="grid gap-2">
-      <div className="text-xs font-medium text-muted-foreground uppercase">{report.preview ? 'Preview (nothing was changed)' : 'Result'}</div>
-      {report.cities.map((c) => (
+      <div className="text-xs font-medium text-muted-foreground uppercase">{title}</div>
+      {cities.map((c) => (
         <div key={c.cityId} className={cn('grid gap-1 rounded-md border p-2 text-sm', !c.ok && 'border-destructive/50 bg-destructive/5')}>
           <div className="flex items-center justify-between gap-2">
             <span className="font-medium">{c.cityName}</span>
-            <Badge variant={c.ok ? 'secondary' : 'destructive'}>{c.ok ? (report.preview ? 'Would run' : 'Done') : 'Rolled back'}</Badge>
+            <Badge variant={c.ok ? 'secondary' : 'destructive'}>{c.ok ? (preview ? 'Would run' : 'OK') : 'Rolled back'}</Badge>
           </div>
           <ol className="grid gap-0.5 text-xs">
             {c.steps.map((s, i) => (
-              <li key={i} className={cn('flex gap-1.5', s.ok ? 'text-muted-foreground' : 'text-destructive')}>
-                {s.ok ? <Check className="mt-0.5 size-3 shrink-0 text-emerald-600" /> : <X className="mt-0.5 size-3 shrink-0" />}
+              <li
+                key={i}
+                className={cn('flex gap-1.5', !s.ok ? 'text-destructive' : s.skipped ? 'text-amber-700 dark:text-amber-400' : 'text-muted-foreground')}
+              >
+                {!s.ok ? (
+                  <X className="mt-0.5 size-3 shrink-0" />
+                ) : s.skipped ? (
+                  <SkipForward className="mt-0.5 size-3 shrink-0" />
+                ) : (
+                  <Check className="mt-0.5 size-3 shrink-0 text-emerald-600" />
+                )}
                 <div className="grid min-w-0 gap-1">
                   <span>
                     <span className="text-foreground">{s.action}:</span> {s.detail}
@@ -448,8 +633,9 @@ function RunReport({ report }: { report: FlowRunReport }) {
                 </div>
               </li>
             ))}
+            {c.steps.length === 0 && <li className="text-muted-foreground">Nothing yet.</li>}
           </ol>
-          {!c.ok && <p className="text-xs text-destructive">Nothing was changed in this city.</p>}
+          {!c.ok && <p className="text-xs text-destructive">What the flow did in this city since the last wait was undone.</p>}
         </div>
       ))}
     </div>

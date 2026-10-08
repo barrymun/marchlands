@@ -114,6 +114,7 @@ export function usePushSync(enabled: boolean): PushStatus {
       }),
       push.on('server.TroopQueueUpdate', () => void qc.invalidateQueries({ queryKey: ['queues'] })),
       push.on('server.FortificationsQueueUpdate', () => void qc.invalidateQueries({ queryKey: ['queues'] })),
+      push.on('server.FlowUpdate', () => void qc.invalidateQueries({ queryKey: ['flows'] })),
       push.on('server.ResearchUpdate', ({ castleId }) => void qc.invalidateQueries({ queryKey: qk.research(castleId) })),
       push.on('server.ResearchCompleteUpdate', ({ castleId, typeId, level }) => {
         void qc.invalidateQueries({ queryKey: ['research'] });

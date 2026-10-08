@@ -122,6 +122,30 @@ async function flush(ctx: CtxInternals) {
 
 const RETRYABLE = new Set(['40001', '40P01']); // serialization failure, deadlock
 
+/** A Postgres error the whole transaction should be retried for (serialization failure, deadlock). */
+export function isRetryable(err: unknown): boolean {
+  const code = (err as { code?: string; cause?: { code?: string } }).code ?? (err as { cause?: { code?: string } }).cause?.code;
+  return !(err instanceof GameError) && !!code && RETRYABLE.has(code);
+}
+
+/**
+ * Run `fn` in a savepoint of the current transaction: if it throws, its writes and the pushes and
+ * events it queued are discarded while the outer transaction carries on.
+ */
+export async function savepoint<T>(ctx: Ctx, fn: (ctx: Ctx) => Promise<T>): Promise<T> {
+  const parent = ctx as CtxInternals;
+  return parent.tx.transaction(async (tx) => {
+    const child = createCtx(tx, parent.now, parent.rng);
+    const r = await fn(child);
+    parent._pushes.push(...child._pushes);
+    for (const key of child._unscheduled) parent.unschedule(key);
+    for (const ev of child._events.values()) parent.schedule(ev);
+    parent._anonymous.push(...child._anonymous);
+    parent._after.push(...child._after);
+    return r;
+  });
+}
+
 export interface RunOptions {
   now?: number;
   rng?: Rng;
@@ -143,8 +167,7 @@ export async function runGame<T>(db: Db, fn: (ctx: Ctx) => Promise<T>, opts: Run
       for (const f of internals?._after ?? []) await f();
       return result;
     } catch (err) {
-      const code = (err as { code?: string; cause?: { code?: string } }).code ?? (err as { cause?: { code?: string } }).cause?.code;
-      if (!(err instanceof GameError) && code && RETRYABLE.has(code) && attempt < retries) continue;
+      if (isRetryable(err) && attempt < retries) continue;
       throw err;
     }
   }

@@ -122,9 +122,12 @@ export type ArmyPreset = z.infer<typeof ArmyPresetSchema>;
 /** Targets one city may attack in a flow action (a level 10 Rally Spot sends 10 armies). */
 export const FLOW_MAX_TARGETS_PER_CITY = 10;
 
+/** Longest a flow's "wait" action can wait (real time). */
+export const FLOW_MAX_WAIT_MINUTES = 7 * 24 * 60;
+
 /**
  * (evony-re) One action of a flow (flows.ts): appoint the city's best hero by an attribute as mayor,
- * or train troops of a type (a number, or as many as the city can afford).
+ * train troops, attack a target list, heal, or wait (the whole flow pauses, every city together).
  */
 export const FlowActionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('setMayor'), stat: z.enum(['power', 'management', 'stratagem']).describe('attribute the new mayor is best at') }),
@@ -144,6 +147,11 @@ export const FlowActionSchema = z.discriminatedUnion('type', [
     /** each city's own targets (city id -> tile ids), attacked in order with its idle heroes, strongest Attack first */
     targets: z.record(z.string(), z.array(z.number().int()).max(FLOW_MAX_TARGETS_PER_CITY)),
   }),
+  z.object({
+    type: z.literal('wait'),
+    until: z.enum(['time', 'armiesHome']).describe("'time': a number of real minutes; 'armiesHome': until every army this run sent is back"),
+    minutes: z.number().int().min(1).max(FLOW_MAX_WAIT_MINUTES).default(10).describe("real minutes (for until 'time'); not sped up by GAME_SPEED"),
+  }),
 ]);
 export type FlowAction = z.infer<typeof FlowActionSchema>;
 
@@ -154,6 +162,8 @@ export const FlowSchema = z.object({
   actions: z.array(FlowActionSchema).min(1).max(20),
   /** cities the flow runs on: 'all' (every city, including ones gained later) or chosen city ids */
   cities: z.union([z.literal('all'), z.array(z.number().int())]).default('all'),
+  /** start the flow again after each run, until it fails or is switched off */
+  repeat: z.boolean().default(false),
 });
 export type Flow = z.infer<typeof FlowSchema>;
 
@@ -173,8 +183,6 @@ export const PlayerMiscSchema = z.object({
   armyPresets: z.array(ArmyPresetSchema).optional(),
   /** (evony-re) hero gear stars bought per piece (gear.ts) */
   gearStars: z.record(z.string(), z.number().int()).optional(),
-  /** (evony-re) saved flows (Flows tab) */
-  flows: z.array(FlowSchema).optional(),
 });
 export type PlayerMisc = z.infer<typeof PlayerMiscSchema>;
 

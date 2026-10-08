@@ -59,6 +59,9 @@ export const PushSchemas = {
     buffBean: z.object({ typeId: z.string(), descName: z.string(), endTime: Ms }),
     updateType: z.literal([0, 1]).describe('0 = added or extended, 1 = expired or removed'),
   }),
+  'server.FlowUpdate': z
+    .object({ flowId: z.string(), status: z.enum(['idle', 'queued', 'running', 'waiting']) })
+    .describe('(evony-re) a flow started, paused or finished'),
   'server.PlayerBuffsUpdate': z.object({ buffs: z.array(BuffBean) }),
 
   // armies

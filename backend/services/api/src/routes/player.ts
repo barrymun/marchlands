@@ -7,6 +7,7 @@ import {
   Flow,
   FlowBody,
   FlowParams,
+  FlowRepeatBody,
   FlowRunBody,
   FlowRunReport,
   BookmarkBody,
@@ -122,6 +123,17 @@ export default async function playerRoutes(app: ZApp) {
       const pid = await playerIdOf(app.deps.db, req);
       return { ok: 1 as const, data: await flows.runFlow(app.deps.db, pid, req.params.flowId, req.body.cityIds, req.body.preview) };
     },
+  );
+  app.post(
+    '/player/flows/:flowId/repeat',
+    s('Switch repeat on (the flow runs again after every run; starts or queues it now) or off (the current run finishes)', z.array(Flow), {
+      params: FlowParams,
+      body: FlowRepeatBody,
+    }),
+    (req) => game(req, (ctx, pid) => flows.setRepeat(ctx, pid, req.params.flowId, req.body.repeat)),
+  );
+  app.post('/player/flows/:flowId/stop', s('Stop a flow now (a run ends where it is; repeat goes off)', z.array(Flow), { params: FlowParams }), (req) =>
+    game(req, (ctx, pid) => flows.stopFlow(ctx, pid, req.params.flowId)),
   );
   app.delete('/player/bookmarks/:tileId', s('Remove a bookmark', z.array(CastleSign), { params: BookmarkParams }), (req) =>
     game(req, (ctx, pid) => player.removeCastleSign(ctx, pid, req.params.tileId)),

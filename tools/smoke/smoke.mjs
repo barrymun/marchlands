@@ -204,6 +204,47 @@ async function main() {
       farmed.cities[0].ok && farmed.cities[0].steps[0].items?.[0]?.ok === false && /skipped/.test(farmed.cities[0].steps[0].items[0].detail),
       'attack target without enough troops is skipped, not failed',
     );
+    // train steps the city cannot afford in full train what it can, or are skipped: the run carries on
+    const lots = (await ok(a.token, 'POST', '/player/flows', { name: 'Smoke lots', actions: [{ type: 'trainTroops', troopId: 3, amount: 50_000_000 }] })).find(
+      (f) => f.name === 'Smoke lots',
+    );
+    const lotsRun = await ok(a.token, 'POST', `/player/flows/${lots.id}/run`, { cityIds: [cid], preview: true });
+    const lotsStep = lotsRun.cities[0].steps[0];
+    check(
+      lotsRun.cities[0].ok && (lotsStep.skipped || /only .* of 50,000,000/.test(lotsStep.detail)),
+      'unaffordable training is trimmed or skipped, not failed',
+    );
+    // waits pause the whole flow; one flow runs at a time; repeat runs again until a run fails
+    const waitActions = [
+      { type: 'setMayor', stat: 'power' },
+      { type: 'wait', until: 'armiesHome' },
+      { type: 'wait', until: 'time', minutes: 5 },
+      { type: 'setMayor', stat: 'management' },
+    ];
+    const paused = (await ok(a.token, 'POST', '/player/flows', { name: 'Smoke wait', actions: waitActions })).find((f) => f.name === 'Smoke wait');
+    const pv = await ok(a.token, 'POST', `/player/flows/${paused.id}/run`, { cityIds: [cid], preview: true });
+    check(pv.cities[0].steps.length === 2 && /not previewed/.test(pv.cities[0].steps[1].detail), 'flow preview stops at the first wait');
+    const started = await ok(a.token, 'POST', `/player/flows/${paused.id}/run`, { cityIds: [cid] });
+    check(
+      started.flow.status === 'waiting' && started.cities[0].steps.length === 3 && /No armies out/.test(started.cities[0].steps[1].detail),
+      'flow runs up to a wait and waits (an armies-home wait with none out carries on)',
+    );
+    const reordered = await call(a.token, 'POST', '/player/flows', { id: paused.id, name: 'Smoke wait', actions: waitActions.slice(0, 3) });
+    check(reordered.ok !== 1, 'a running flow keeps its actions in order');
+    const second = (await ok(a.token, 'POST', '/player/flows', { name: 'Smoke second', actions: [{ type: 'setMayor', stat: 'power' }] })).find(
+      (f) => f.name === 'Smoke second',
+    );
+    const alongside = await ok(a.token, 'POST', `/player/flows/${second.id}/run`, {});
+    check(alongside.flow.status === 'idle' && alongside.cities[0]?.ok, 'another flow runs while one waits');
+    check((await call(a.token, 'POST', `/player/flows/${paused.id}/run`, {})).ok !== 1, 'a running flow cannot be run again');
+    const stopped = (await ok(a.token, 'POST', `/player/flows/${paused.id}/stop`)).find((f) => f.id === paused.id);
+    check(stopped.status === 'idle' && stopped.lastRun.finishedAt > 0, 'stop ends a waiting flow');
+    const rep = (await ok(a.token, 'POST', `/player/flows/${second.id}/repeat`, { repeat: true })).find((f) => f.id === second.id);
+    check(rep.repeat && rep.status === 'queued' && rep.runs === 2 && rep.notBefore > rep.lastRun.startedAt, 'repeat runs the flow now and queues the next run');
+    const off = (await ok(a.token, 'POST', `/player/flows/${second.id}/repeat`, { repeat: false })).find((f) => f.id === second.id);
+    check(!off.repeat && off.status === 'idle', 'repeat off: no next run');
+    const badRep = (await ok(a.token, 'POST', `/player/flows/${bad.id}/repeat`, { repeat: true })).find((f) => f.id === bad.id);
+    check(!badRep.repeat && badRep.status === 'idle' && /failed/.test(badRep.stopReason ?? ''), 'a failed run switches repeat off');
     // put the original mayor back for the rest of the run
     await ok(a.token, 'POST', `/heroes/${hero.id}/mayor`);
   }

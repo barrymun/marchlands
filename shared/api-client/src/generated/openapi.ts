@@ -1560,7 +1560,7 @@ export interface paths {
                         /** @description cities to run the flow on (default: the flow's saved cities) */
                         cityIds?: number[];
                         /**
-                         * @description run and roll everything back: shows what would happen
+                         * @description run up to the first wait and roll everything back: shows what would happen
                          * @default false
                          */
                         preview?: boolean;
@@ -1578,6 +1578,132 @@ export interface paths {
                             /** @enum {number} */
                             ok: 1;
                             data: components["schemas"]["FlowRunReport"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/player/flows/{flowId}/repeat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Switch repeat on (the flow runs again after every run; starts or queues it now) or off (the current run finishes) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    flowId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        repeat: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["Flow"][];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/player/flows/{flowId}/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stop a flow now (a run ends where it is; repeat goes off) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    flowId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["Flow"][];
                         };
                     };
                 };
@@ -11641,6 +11767,47 @@ export interface components {
             targets: {
                 [key: string]: number[];
             };
+        } | {
+            /** @constant */
+            type: "wait";
+            /**
+             * @description 'time': a number of real minutes; 'armiesHome': until every army this run sent is back
+             * @enum {string}
+             */
+            until: "time" | "armiesHome";
+            /**
+             * @description real minutes (for until 'time'); not sped up by GAME_SPEED
+             * @default 10
+             */
+            minutes: number;
+        };
+        FlowRunLogInput: {
+            /** @description 1 for the first run of the flow, counting up */
+            run: number;
+            /** @description epoch milliseconds */
+            startedAt: number;
+            /** @description null while the run is still going */
+            finishedAt: number | null;
+            cities: {
+                cityId: number;
+                cityName: string;
+                /** @description false: an action failed and everything the flow did in this city since the last wait was rolled back */
+                ok: boolean;
+                error: string | null;
+                steps: {
+                    action: string;
+                    ok: boolean;
+                    detail: string;
+                    /** @description the city could not do it right now (e.g. nothing affordable to train); the run carried on */
+                    skipped?: boolean;
+                    /** @description per-target outcomes (attack actions) */
+                    items?: {
+                        label: string;
+                        ok: boolean;
+                        detail: string;
+                    }[];
+                }[];
+            }[];
         };
         FlowInput: {
             id: string;
@@ -11648,19 +11815,45 @@ export interface components {
             actions: components["schemas"]["FlowActionInput"][];
             /** @default all */
             cities: "all" | number[];
+            /** @default false */
+            repeat: boolean;
+            /**
+             * @description 'queued': waits for the lord's active flow to finish its run (one flow runs at a time); 'waiting': paused on a wait action
+             * @enum {string}
+             */
+            status: "idle" | "queued" | "running" | "waiting";
+            /** @description index of the action the run continues with */
+            nextAction: number;
+            runs: number;
+            /** @description epoch milliseconds */
+            queuedAt: number;
+            /** @description a queued repeat starts no earlier than this */
+            notBefore: number;
+            /** @description while waiting: when the wait ends (or is checked again) */
+            waitUntil: number;
+            /** @description while waiting: held before its next actions until every hero of its cities is home, since then (0 = not held) */
+            heldSince: number;
+            /** @description why the flow stopped on its own (a failed run; repeat was switched off) */
+            stopReason: string | null;
+            lastRun: components["schemas"]["FlowRunLogInput"] | null;
         };
         FlowRunReportInput: {
             preview: boolean;
+            /** @description the flow after starting it (null for a preview) */
+            flow: components["schemas"]["FlowInput"] | null;
+            /** @description what ran now, up to the first wait (empty when the flow was queued) */
             cities: {
                 cityId: number;
                 cityName: string;
-                /** @description false: an action failed and everything the flow did in this city was rolled back */
+                /** @description false: an action failed and everything the flow did in this city since the last wait was rolled back */
                 ok: boolean;
                 error: string | null;
                 steps: {
                     action: string;
                     ok: boolean;
                     detail: string;
+                    /** @description the city could not do it right now (e.g. nothing affordable to train); the run carried on */
+                    skipped?: boolean;
                     /** @description per-target outcomes (attack actions) */
                     items?: {
                         label: string;
@@ -13781,6 +13974,47 @@ export interface components {
             targets: {
                 [key: string]: number[];
             };
+        } | {
+            /** @constant */
+            type: "wait";
+            /**
+             * @description 'time': a number of real minutes; 'armiesHome': until every army this run sent is back
+             * @enum {string}
+             */
+            until: "time" | "armiesHome";
+            /**
+             * @description real minutes (for until 'time'); not sped up by GAME_SPEED
+             * @default 10
+             */
+            minutes: number;
+        };
+        FlowRunLog: {
+            /** @description 1 for the first run of the flow, counting up */
+            run: number;
+            /** @description epoch milliseconds */
+            startedAt: number;
+            /** @description null while the run is still going */
+            finishedAt: number | null;
+            cities: {
+                cityId: number;
+                cityName: string;
+                /** @description false: an action failed and everything the flow did in this city since the last wait was rolled back */
+                ok: boolean;
+                error: string | null;
+                steps: {
+                    action: string;
+                    ok: boolean;
+                    detail: string;
+                    /** @description the city could not do it right now (e.g. nothing affordable to train); the run carried on */
+                    skipped?: boolean;
+                    /** @description per-target outcomes (attack actions) */
+                    items?: {
+                        label: string;
+                        ok: boolean;
+                        detail: string;
+                    }[];
+                }[];
+            }[];
         };
         Flow: {
             id: string;
@@ -13788,19 +14022,45 @@ export interface components {
             actions: components["schemas"]["FlowAction"][];
             /** @default all */
             cities: "all" | number[];
+            /** @default false */
+            repeat: boolean;
+            /**
+             * @description 'queued': waits for the lord's active flow to finish its run (one flow runs at a time); 'waiting': paused on a wait action
+             * @enum {string}
+             */
+            status: "idle" | "queued" | "running" | "waiting";
+            /** @description index of the action the run continues with */
+            nextAction: number;
+            runs: number;
+            /** @description epoch milliseconds */
+            queuedAt: number;
+            /** @description a queued repeat starts no earlier than this */
+            notBefore: number;
+            /** @description while waiting: when the wait ends (or is checked again) */
+            waitUntil: number;
+            /** @description while waiting: held before its next actions until every hero of its cities is home, since then (0 = not held) */
+            heldSince: number;
+            /** @description why the flow stopped on its own (a failed run; repeat was switched off) */
+            stopReason: string | null;
+            lastRun: components["schemas"]["FlowRunLog"] | null;
         };
         FlowRunReport: {
             preview: boolean;
+            /** @description the flow after starting it (null for a preview) */
+            flow: components["schemas"]["Flow"] | null;
+            /** @description what ran now, up to the first wait (empty when the flow was queued) */
             cities: {
                 cityId: number;
                 cityName: string;
-                /** @description false: an action failed and everything the flow did in this city was rolled back */
+                /** @description false: an action failed and everything the flow did in this city since the last wait was rolled back */
                 ok: boolean;
                 error: string | null;
                 steps: {
                     action: string;
                     ok: boolean;
                     detail: string;
+                    /** @description the city could not do it right now (e.g. nothing affordable to train); the run carried on */
+                    skipped?: boolean;
                     /** @description per-target outcomes (attack actions) */
                     items?: {
                         label: string;
@@ -15474,6 +15734,7 @@ export type ZoneStatsInput = components['schemas']['ZoneStatsInput'];
 export type WorldInfoInput = components['schemas']['WorldInfoInput'];
 export type ArmyPresetInput = components['schemas']['ArmyPresetInput'];
 export type FlowActionInput = components['schemas']['FlowActionInput'];
+export type FlowRunLogInput = components['schemas']['FlowRunLogInput'];
 export type FlowInput = components['schemas']['FlowInput'];
 export type FlowRunReportInput = components['schemas']['FlowRunReportInput'];
 export type CastleSignInput = components['schemas']['CastleSignInput'];
@@ -15608,6 +15869,7 @@ export type ZoneStats = components['schemas']['ZoneStats'];
 export type WorldInfo = components['schemas']['WorldInfo'];
 export type ArmyPreset = components['schemas']['ArmyPreset'];
 export type FlowAction = components['schemas']['FlowAction'];
+export type FlowRunLog = components['schemas']['FlowRunLog'];
 export type Flow = components['schemas']['Flow'];
 export type FlowRunReport = components['schemas']['FlowRunReport'];
 export type CastleSign = components['schemas']['CastleSign'];

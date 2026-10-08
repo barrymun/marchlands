@@ -1,0 +1,1 @@
+ALTER TABLE "flows" ADD COLUMN "held_since" bigint DEFAULT 0 NOT NULL;

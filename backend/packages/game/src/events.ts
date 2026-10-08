@@ -6,7 +6,7 @@ import { getPlayer, savePlayer } from './repo.ts';
 import { activeBuff, pushPlayerInfo, removeBuff, setBuff } from './helpers.ts';
 import { completeBuilding } from './services/buildings.ts';
 import { processArmy } from './services/combat.ts';
-import { runScheduledHeal } from './services/flows.ts';
+import { resumeFlow, runQueue, runScheduledHeal } from './services/flows.ts';
 import { expireHeroBuff } from './services/heroes.ts';
 import { deliverShipment } from './services/market.ts';
 import { completeResearch, settleAllCities } from './services/research.ts';
@@ -71,6 +71,10 @@ export async function dispatchEvent(ctx: Ctx, ev: EventRow): Promise<void> {
         p.payWith === 'honor' ? 'honor' : 'resources',
         Array.isArray(p.armyIds) ? p.armyIds.map(Number).filter(Number.isInteger) : [],
       );
+    case 'flow.resume':
+      return resumeFlow(ctx, ev.playerId!, String(p.flowId));
+    case 'flow.queue':
+      return runQueue(ctx, ev.playerId!);
     default:
       throw new Error(`unknown timed event type ${ev.type}`);
   }

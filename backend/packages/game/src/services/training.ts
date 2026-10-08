@@ -44,6 +44,11 @@ import { saveCity, saveHero, savePlayer } from '../repo.ts';
 export const WALLS_QUEUE = -2;
 const refKey = (cityId: number, pos: number) => `train:${cityId}:${pos}`;
 
+/** Whether any barracks of the city has room in its queue (a barracks queues as many batches as its level). */
+export function hasTrainingRoom(b: CityBundle): boolean {
+  return b.city.buildings.some((x) => x.typeId === BuildingType.BARRACKS && x.level >= 1 && queueOf(b, x.positionId).queue.length < x.level);
+}
+
 function queueOf(b: CityBundle, positionId: number): { queue: TrainBatch[]; nextQueueId: number } {
   if (positionId === WALLS_QUEUE) return b.city.fortQueue;
   const q = b.city.troopQueues.find((x) => x.positionId === positionId);

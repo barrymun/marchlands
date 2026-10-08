@@ -38,6 +38,9 @@ import type {
   CityMisc,
   PlayerMisc,
   ReportBody,
+  FlowAction,
+  FlowRunLog,
+  FlowStatus,
 } from './types.ts';
 
 const ms = (name: string) => bigint(name, { mode: 'number' });
@@ -62,10 +65,7 @@ export const accounts = pgTable(
     lastLoginAt: ms('last_login_at').notNull().default(0),
     lastLoginIp: text('last_login_ip').notNull().default(''),
   },
-  (t) => [
-    uniqueIndex('accounts_username_lower_idx').on(sql`lower(${t.username})`),
-    uniqueIndex('accounts_email_lower_idx').on(sql`lower(${t.email})`),
-  ],
+  (t) => [uniqueIndex('accounts_username_lower_idx').on(sql`lower(${t.username})`), uniqueIndex('accounts_email_lower_idx').on(sql`lower(${t.email})`)],
 );
 
 /** The in-game lord (original `accounts` table of the world DB / Client class). */
@@ -143,7 +143,9 @@ export const tiles = pgTable(
     updatedAt: ms('updated_at').notNull().default(0),
   },
   (t) => [
-    index('tiles_owner_city_idx').on(t.ownerCityId).where(sql`${t.ownerCityId} is not null`),
+    index('tiles_owner_city_idx')
+      .on(t.ownerCityId)
+      .where(sql`${t.ownerCityId} is not null`),
     index('tiles_type_idx').on(t.type),
   ],
 );
@@ -280,6 +282,54 @@ export const armies = pgTable(
     index('armies_target_tile_idx').on(t.targetTileId),
     index('armies_target_player_idx').on(t.targetPlayerId),
   ],
+);
+
+// ---------------------------------------------------------------------------------------------
+// Flows (evony-re) — a lord's saved series of actions, plus where its current run is up to
+// ---------------------------------------------------------------------------------------------
+
+export const flows = pgTable(
+  'flows',
+  {
+    id: text('id').primaryKey(),
+    playerId: integer('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    actions: jsonb('actions').$type<FlowAction[]>().notNull(),
+    /** 'all' (every city, including ones gained later) or chosen city ids */
+    cities: jsonb('cities')
+      .$type<'all' | number[]>()
+      .notNull()
+      .default(sql`'"all"'::jsonb`),
+    /** run again after each run, until a run fails or the lord switches it off */
+    repeat: boolean('repeat').notNull().default(false),
+    status: text('status').$type<FlowStatus>().notNull().default('idle'),
+    /** index of the action the run continues with */
+    nextAction: integer('next_action').notNull().default(0),
+    /** runs started so far */
+    runs: integer('runs').notNull().default(0),
+    /** cities of the current run */
+    runCities: jsonb('run_cities').$type<number[]>().notNull().default([]),
+    /** cities chosen for this run only (Run on chosen cities); null = the flow's own cities */
+    cityOverride: jsonb('city_override').$type<number[] | null>(),
+    /** armies the current run sent, per city id (for "wait until armies home" and heals) */
+    armyIds: jsonb('army_ids').$type<Record<string, number[]>>().notNull().default({}),
+    /** when it joined the queue (the queue is first come, first served) */
+    queuedAt: ms('queued_at').notNull().default(0),
+    /** a queued repeat starts no earlier than this */
+    notBefore: ms('not_before').notNull().default(0),
+    /** while waiting: when the wait ends (or is checked again) */
+    waitUntil: ms('wait_until').notNull().default(0),
+    runStartedAt: ms('run_started_at').notNull().default(0),
+    /** while held before its next actions until every hero of its cities is home: since when (flows held earlier go first); 0 = not held */
+    heldSince: ms('held_since').notNull().default(0),
+    /** why the flow last stopped on its own (a failed run), or null */
+    stopReason: text('stop_reason'),
+    lastRun: jsonb('last_run').$type<FlowRunLog>(),
+    createdAt: ms('created_at').notNull(),
+  },
+  (t) => [index('flows_player_idx').on(t.playerId, t.createdAt)],
 );
 
 // ---------------------------------------------------------------------------------------------
@@ -546,7 +596,11 @@ export const marketTrades = pgTable(
     sellerPlayerId: integer('seller_player_id'),
     createdAt: ms('created_at').notNull(),
   },
-  (t) => [index('market_trades_res_time_idx').on(t.resType, t.createdAt), index('market_trades_buyer_idx').on(t.buyerPlayerId), index('market_trades_seller_idx').on(t.sellerPlayerId)],
+  (t) => [
+    index('market_trades_res_time_idx').on(t.resType, t.createdAt),
+    index('market_trades_buyer_idx').on(t.buyerPlayerId),
+    index('market_trades_seller_idx').on(t.sellerPlayerId),
+  ],
 );
 
 export const questProgress = pgTable(

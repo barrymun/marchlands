@@ -30,7 +30,9 @@ All paths are relative to the server root. Names in parentheses are the original
 | GET | `/api/v1/player/flows` | Saved flows (series of actions run on cities) |
 | POST | `/api/v1/player/flows` | Create a flow, or replace one by id |
 | DELETE | `/api/v1/player/flows/{flowId}` | Delete a flow |
+| POST | `/api/v1/player/flows/{flowId}/repeat` | Switch repeat on (the flow runs again after every run; starts or queues it now) or off (the current run finishes) |
 | POST | `/api/v1/player/flows/{flowId}/run` | Run a flow on cities, each all-or-nothing (or preview it: run and roll back) |
+| POST | `/api/v1/player/flows/{flowId}/stop` | Stop a flow now (a run ends where it is; repeat goes off) |
 | POST | `/api/v1/player/furlough` | Holiday mode, 10 cents/day (furlough.isFurlought) |
 | DELETE | `/api/v1/player/furlough` | End holiday mode (furlough.cancelFurlought) |
 | POST | `/api/v1/player/items/{itemId}/use` | Use an item (shop.useGoods / shop.useCastleGoods) |
