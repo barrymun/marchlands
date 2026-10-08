@@ -31,7 +31,7 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
   ];
   return (
     // phones: a 4-column grid, the rate under the amount; wider screens: one wrapping row
-    <div className="grid grid-cols-4 gap-x-2 gap-y-1.5 text-sm sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
+    <div className="grid grid-cols-4 gap-x-2 gap-y-1.5 text-sm sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2 lg:gap-x-8">
       {items.map(({ key, label, amount, rate, max, line }) => {
         const Icon = icons[key];
         const full = max != null && amount >= max;

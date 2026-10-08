@@ -77,7 +77,7 @@ export function GamePage() {
       {/* the tab bar sits in the sticky header, so it stays in view while the page scrolls */}
       <Tabs value={tab} onValueChange={(t) => navigate(`/cities/${cityId}/${t}`)} className="contents">
         <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:pt-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="max-w-[60vw] min-w-0 gap-1 px-2 font-semibold sm:max-w-none">
@@ -109,7 +109,7 @@ export function GamePage() {
                 <MayorChip mayor={mayor} onClick={() => navigate(`/cities/${cityId}/heroes`)} />
               </div>
             )}
-            <div className="ml-auto flex min-w-0 items-center justify-end gap-x-3 gap-y-1 text-sm sm:flex-wrap">
+            <div className="ml-auto flex min-w-0 items-center justify-end gap-x-3 gap-y-1 text-sm sm:flex-wrap sm:gap-x-4">
               {info && (
                 <>
                   <Tooltip>
@@ -177,10 +177,10 @@ export function GamePage() {
               </DropdownMenu>
             </div>
           </div>
-          <div className="mx-auto max-w-6xl px-4 pb-2">
+          <div className="mx-auto max-w-6xl px-4 pb-2 sm:pt-1 sm:pb-3">
             {city.data ? <ResourceBar resource={city.data.resource} mayor={mayor} /> : <Skeleton className="h-5 w-2/3" />}
           </div>
-          <nav className="mx-auto max-w-6xl px-4 pb-2" aria-label="City tabs">
+          <nav className="mx-auto max-w-6xl px-4 pb-2 sm:pb-3" aria-label="City tabs">
             <TabsList className="max-w-full justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {TABS.map((t) => (
                 <TabsTrigger key={t.id} value={t.id} className="gap-1.5">
