@@ -17,6 +17,7 @@ export const UseHeroItemBody = z.object({
   payWith: z.enum(['gold']).optional().describe("'gold': buy the item with the hero's city gold instead of using one owned (or cents)"),
 });
 export const RenameHeroBody = z.object({ name: z.string() });
+export const HeroOrderBody = z.object({ heroIds: z.array(zId).max(100).describe("the city's heroes in the new order (first = top)") });
 export const LockHeroBody = z.object({ locked: z.boolean().describe('a locked hero cannot be dismissed') });
 export const HeroGearStatBody = z.object({ stat: z.enum(['power', 'management', 'stratagem']).describe("attribute the lord's gear boosts on this hero") });
 export const GearPieceParams = z.object({ pieceId: z.string().describe('gear piece id (weapon, shield, …)') });

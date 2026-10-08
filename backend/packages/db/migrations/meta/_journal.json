@@ -43,6 +43,13 @@
       "when": 1791418356295,
       "tag": "0005_flow_held",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791422109964,
+      "tag": "0006_hero_order",
+      "breakpoints": true
     }
   ]
 }

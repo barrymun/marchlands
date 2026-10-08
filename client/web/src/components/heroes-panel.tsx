@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
-import { Check, Lock, LockOpen, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowDown, ArrowUp, Check, GripVertical, Lock, LockOpen, Pencil, RefreshCw, Sparkles, X } from 'lucide-react';
 import type { CityBean, HeroBean } from '@evony/api-client';
 import { toast } from 'sonner';
 import { BALANCE, BuildingType, HeroStatus, heroAtMaxLevel, heroManagement, mayorProductionBonus, heroPower, heroStratagem, levelsReady } from '@evony/core';
@@ -18,7 +18,7 @@ import { HeroItemsDialog } from '@/components/hero-items-dialog';
 import { GearCard, HeroGearLine } from '@/components/hero-gear';
 import { qk, useCommand } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
-import { api, unwrap } from '@/lib/api';
+import { api, errorMessage, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, signedRate } from '@/lib/format';
 import { dominantAttribute, heroAttributeValues } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
@@ -72,6 +72,30 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   );
   const [dismissing, setDismissing] = useState<HeroBean | null>(null);
 
+  // the lord's order of the hero list: shown at once, saved on the server
+  const qc = useQueryClient();
+  const reorder = useMutation({
+    mutationFn: (heroIds: number[]) => unwrap(api.PUT('/api/v1/cities/{cityId}/heroes/order', { params: { path: { cityId: city.id } }, body: { heroIds } })),
+    onMutate: (heroIds) =>
+      qc.setQueryData<CityBean>(qk.city(city.id), (c) => (c ? { ...c, heros: [...c.heros].sort((a, b) => heroIds.indexOf(a.id) - heroIds.indexOf(b.id)) } : c)),
+    onError: (err) => {
+      toast.error(errorMessage(err));
+      void qc.invalidateQueries({ queryKey: qk.city(city.id) });
+    },
+  });
+  const moveHero = (from: number, to: number) => {
+    if (to < 0 || to >= city.heros.length || from === to) return;
+    const ids = city.heros.map((h) => h.id);
+    const [id] = ids.splice(from, 1);
+    ids.splice(to, 0, id);
+    reorder.mutate(ids);
+  };
+  // a row drags only from its handle (the rest of the row has buttons and the rename field)
+  const [armed, setArmed] = useState<number | null>(null);
+  const [dragging, setDragging] = useState<number | null>(null);
+  const [over, setOver] = useState<number | null>(null);
+  const endDrag = () => (setArmed(null), setDragging(null), setOver(null));
+
   // the mayor's politics adds a percentage of (efficiency-adjusted) field output to every basic resource
   const fieldOutput = (['food', 'wood', 'stone', 'iron'] as const).reduce((sum, r) => sum + city.resource[r].breakdown.fields, 0);
   // (soft-capped above BALANCE.heroSoftCap.knee when BALANCE.heroSoftCap.production is on)
@@ -114,62 +138,114 @@ export function HeroesPanel({ city }: { city: CityBean }) {
         </CardHeader>
         <CardContent className="grid gap-2">
           {city.heros.length === 0 && <p className="text-sm text-muted-foreground">No heroes yet. Hire one at the Inn.</p>}
-          {city.heros.map((h) => (
-            <HeroRow
+          {city.heros.map((h, i) => (
+            <div
               key={h.id}
-              hero={h}
-              note={mayorNote(h)}
-              showExp
-              gear={<HeroGearLine hero={h} cityId={city.id} />}
-              onRename={h.seized ? undefined : (name) => rename.mutateAsync({ heroId: h.id, name }).then(() => undefined)}
+              draggable={armed === h.id}
+              onDragStart={(e) => {
+                setDragging(i);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
+              onDragOver={(e) => {
+                if (dragging == null) return;
+                e.preventDefault();
+                setOver(i);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (dragging != null) moveHero(dragging, i);
+                endDrag();
+              }}
+              onDragEnd={endDrag}
+              className={cn(
+                'rounded-md transition-opacity',
+                dragging === i && 'opacity-50',
+                over === i && dragging != null && dragging !== i && 'ring-2 ring-primary',
+              )}
             >
-              <Badge variant={h.status === HeroStatus.MAYOR ? 'default' : 'secondary'}>{h.seized ? 'Captive' : (STATUS[h.status] ?? h.status)}</Badge>
-              {!h.seized && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR) && (
-                <Button size="xs" variant={h.remainPoint > 0 ? 'default' : 'outline'} onClick={() => setPointsFor(h.id)}>
-                  Points{h.remainPoint > 0 ? ` (${h.remainPoint})` : ''}
-                </Button>
-              )}
-              {!h.seized && (
-                <Button size="xs" variant="outline" onClick={() => setItemsFor(h.id)}>
-                  Items
-                </Button>
-              )}
-              {!h.seized && (
-                <div className="flex items-center gap-1.5 px-1">
-                  <Switch
-                    id={`lock-${h.id}`}
-                    checked={h.locked}
-                    disabled={lock.isPending}
-                    onCheckedChange={(locked) => lock.mutate({ heroId: h.id, locked })}
-                  />
-                  <Label htmlFor={`lock-${h.id}`} className="gap-1 text-xs font-normal">
-                    {h.locked ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
-                    {h.locked ? 'Locked' : 'Lock'}
-                  </Label>
-                </div>
-              )}
-              {h.experience >= h.upgradeExp && !heroAtMaxLevel(h) && (
-                <Button size="xs" onClick={() => levelUp.mutate(h.id)} disabled={levelUp.isPending}>
-                  {levelsReady(h) > 1 ? `Level up ×${levelsReady(h)} → Lv ${h.level + levelsReady(h)}` : 'Level up'}
-                </Button>
-              )}
-              {h.status === HeroStatus.IDLE && !h.seized && (
-                <>
-                  <Button size="xs" variant="outline" onClick={() => mayor.mutate(h.id)}>
-                    Make mayor
+              <HeroRow
+                hero={h}
+                leading={
+                  city.heros.length > 1 && (
+                    <GripVertical
+                      className="size-4 shrink-0 cursor-grab text-muted-foreground"
+                      aria-hidden
+                      onPointerDown={() => setArmed(h.id)}
+                      onPointerUp={() => setArmed(null)}
+                    />
+                  )
+                }
+                trailing={
+                  city.heros.length > 1 && (
+                    <>
+                      <Button size="icon-xs" variant="ghost" aria-label={`Move ${h.name} up`} disabled={i === 0} onClick={() => moveHero(i, i - 1)}>
+                        <ArrowUp />
+                      </Button>
+                      <Button
+                        size="icon-xs"
+                        variant="ghost"
+                        aria-label={`Move ${h.name} down`}
+                        disabled={i === city.heros.length - 1}
+                        onClick={() => moveHero(i, i + 1)}
+                      >
+                        <ArrowDown />
+                      </Button>
+                    </>
+                  )
+                }
+                note={mayorNote(h)}
+                showExp
+                gear={<HeroGearLine hero={h} cityId={city.id} />}
+                onRename={h.seized ? undefined : (name) => rename.mutateAsync({ heroId: h.id, name }).then(() => undefined)}
+              >
+                <Badge variant={h.status === HeroStatus.MAYOR ? 'default' : 'secondary'}>{h.seized ? 'Captive' : (STATUS[h.status] ?? h.status)}</Badge>
+                {!h.seized && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR) && (
+                  <Button size="xs" variant={h.remainPoint > 0 ? 'default' : 'outline'} onClick={() => setPointsFor(h.id)}>
+                    Points{h.remainPoint > 0 ? ` (${h.remainPoint})` : ''}
                   </Button>
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    disabled={h.locked}
-                    title={h.locked ? 'Locked: unlock the hero to dismiss them' : undefined}
-                    onClick={() => setDismissing(h)}
-                  >
-                    Dismiss
+                )}
+                {!h.seized && (
+                  <Button size="xs" variant="outline" onClick={() => setItemsFor(h.id)}>
+                    Items
                   </Button>
-                </>
-              )}
-            </HeroRow>
+                )}
+                {!h.seized && (
+                  <div className="flex items-center gap-1.5 px-1">
+                    <Switch
+                      id={`lock-${h.id}`}
+                      checked={h.locked}
+                      disabled={lock.isPending}
+                      onCheckedChange={(locked) => lock.mutate({ heroId: h.id, locked })}
+                    />
+                    <Label htmlFor={`lock-${h.id}`} className="gap-1 text-xs font-normal">
+                      {h.locked ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
+                      {h.locked ? 'Locked' : 'Lock'}
+                    </Label>
+                  </div>
+                )}
+                {h.experience >= h.upgradeExp && !heroAtMaxLevel(h) && (
+                  <Button size="xs" onClick={() => levelUp.mutate(h.id)} disabled={levelUp.isPending}>
+                    {levelsReady(h) > 1 ? `Level up ×${levelsReady(h)} → Lv ${h.level + levelsReady(h)}` : 'Level up'}
+                  </Button>
+                )}
+                {h.status === HeroStatus.IDLE && !h.seized && (
+                  <>
+                    <Button size="xs" variant="outline" onClick={() => mayor.mutate(h.id)}>
+                      Make mayor
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      disabled={h.locked}
+                      title={h.locked ? 'Locked: unlock the hero to dismiss them' : undefined}
+                      onClick={() => setDismissing(h)}
+                    >
+                      Dismiss
+                    </Button>
+                  </>
+                )}
+              </HeroRow>
+            </div>
           ))}
         </CardContent>
       </Card>
@@ -234,9 +310,15 @@ function HeroRow({
   showExp = false,
   gear,
   onRename,
+  leading,
+  trailing,
   children,
 }: {
   hero: HeroBean;
+  /** before the name (e.g. a drag handle) */
+  leading?: React.ReactNode;
+  /** at the end of the name line (e.g. move up / down) */
+  trailing?: React.ReactNode;
   note?: React.ReactNode;
   showExp?: boolean;
   gear?: React.ReactNode;
@@ -285,6 +367,7 @@ function HeroRow({
           </form>
         ) : (
           <div className="flex items-center gap-1 text-sm font-medium">
+            {leading}
             {hero.name} <span className="font-normal text-muted-foreground">Lv {hero.level}</span>
             {onRename && (
               <Button
@@ -300,6 +383,7 @@ function HeroRow({
                 <Pencil />
               </Button>
             )}
+            {trailing && <div className="ml-auto flex gap-0.5">{trailing}</div>}
           </div>
         )}
         <HeroAttributes hero={hero} />

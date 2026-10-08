@@ -27,6 +27,7 @@ import {
   UseHeroItemBody,
   VisibleArmies,
   ValleyUpgradeBody,
+  HeroOrderBody,
   LockHeroBody,
   HeroGearStatBody,
   GearPieceParams,
@@ -62,6 +63,11 @@ export default async function militaryRoutes(app: ZApp) {
   );
   app.post('/heroes/:heroId/fire', s(tags.heroes, 'Fire (hero.fireHero)', Empty, { params: HeroParams }), (req) =>
     game(req, (ctx, pid) => heroes.fire(ctx, pid, req.params.heroId)),
+  );
+  app.put(
+    '/cities/:cityId/heroes/order',
+    s(tags.heroes, "Reorder the city's heroes (the order the hero list shows them in)", CityHeroList, { params: zCityParams, body: HeroOrderBody }),
+    (req) => game(req, (ctx, pid) => heroes.reorderHeroes(ctx, pid, req.params.cityId, req.body.heroIds)),
   );
   app.put(
     '/heroes/:heroId/lock',

@@ -74,21 +74,26 @@ export async function saveCity(ctx: Ctx, c: CityRow): Promise<void> {
 
 // ---- heroes ----
 
+/** The lord's order of a city's heroes (sort_order; heroes never placed come after, oldest first). */
+const byHeroOrder = (a: HeroRow, b: HeroRow) => (a.sortOrder || 1e9) - (b.sortOrder || 1e9) || a.id - b.id;
+
+// rows are read (and locked) in id order, then sorted into the lord's order
 export async function heroesOfCity(ctx: Ctx, cityId: number, opts: Opts & { tavern?: boolean } = {}): Promise<HeroRow[]> {
   const q = ctx.tx
     .select()
     .from(heroes)
     .where(and(eq(heroes.cityId, cityId), eq(heroes.inTavern, opts.tavern ?? false)))
     .orderBy(asc(heroes.id));
-  return opts.lock ? await q.for('update') : await q;
+  return (opts.lock ? await q.for('update') : await q).sort(byHeroOrder);
 }
 export async function heroesOfCities(ctx: Ctx, cityIds: number[]): Promise<HeroRow[]> {
   if (!cityIds.length) return [];
-  return ctx.tx
+  const rows = await ctx.tx
     .select()
     .from(heroes)
     .where(and(inArray(heroes.cityId, cityIds), eq(heroes.inTavern, false)))
     .orderBy(asc(heroes.id));
+  return rows.sort(byHeroOrder);
 }
 export async function getHero(ctx: Ctx, id: number, opts: Opts = {}): Promise<HeroRow> {
   const q = ctx.tx.select().from(heroes).where(eq(heroes.id, id));

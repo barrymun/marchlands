@@ -150,6 +150,9 @@ async function main() {
   await ok(a.token, 'POST', `/heroes/${hero.id}/mayor`);
   const h2 = await ok(a.token, 'POST', `/cities/${cid}/tavern/${tav.heros[1].id}/hire`);
   check(!!h2.id, 'hired two heroes, one mayor');
+  const reordered = await ok(a.token, 'PUT', `/cities/${cid}/heroes/order`, { heroIds: [h2.id, hero.id] });
+  const listed = (await ok(a.token, 'GET', `/cities/${cid}`)).heros.map((h) => h.id);
+  check(reordered.heroes[0].id === h2.id && listed[0] === h2.id && listed[1] === hero.id, 'heroes keep the order the lord set');
 
   // ---- flows: a series of actions run on cities, each city all-or-nothing ----
   {

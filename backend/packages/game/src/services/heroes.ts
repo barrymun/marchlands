@@ -96,6 +96,26 @@ export async function listHeroes(ctx: Ctx, playerId: number, cityId: number) {
   return { heroes: b.heroes.map(heroBean), slots: heroSlots(b) };
 }
 
+/**
+ * Put the city's heroes in the lord's order: `heroIds` first, in that order; heroes left out keep their
+ * place after them (e.g. one hired while the list was being dragged).
+ */
+export async function reorderHeroes(ctx: Ctx, playerId: number, cityId: number, heroIds: number[]) {
+  await own(ctx, playerId, cityId);
+  const list = await heroesOfCity(ctx, cityId, { lock: true });
+  const byId = new Map(list.map((h) => [h.id, h]));
+  const first = [...new Set(heroIds)].filter((id) => byId.has(id)).map((id) => byId.get(id)!);
+  const order = [...first, ...list.filter((h) => !first.includes(h))];
+  for (const [i, h] of order.entries()) {
+    if (h.sortOrder !== i + 1)
+      await ctx.tx
+        .update(heroes)
+        .set({ sortOrder: i + 1 })
+        .where(eq(heroes.id, h.id));
+  }
+  return listHeroes(ctx, playerId, cityId);
+}
+
 /** hero.getHerosListFromTavern */
 export async function tavern(ctx: Ctx, playerId: number, cityId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);

@@ -237,6 +237,8 @@ export const heroes = pgTable(
     locked: boolean('locked').notNull().default(false),
     /** (evony-re) attribute the lord's gear boosts ('power' | 'management' | 'stratagem'); null: the hero's highest */
     gearStat: text('gear_stat'),
+    /** (evony-re) position in the city's hero list, set by the lord (1 = first); 0 = never placed: after the placed ones, oldest first */
+    sortOrder: integer('sort_order').notNull().default(0),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [index('heroes_city_idx').on(t.cityId), index('heroes_player_idx').on(t.playerId)],

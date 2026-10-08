@@ -105,6 +105,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | Method | Path | Description |
 |---|---|---|
 | GET | `/api/v1/cities/{cityId}/heroes` | Heroes living in the city |
+| PUT | `/api/v1/cities/{cityId}/heroes/order` | Reorder the city's heroes (the order the hero list shows them in) |
 | DELETE | `/api/v1/cities/{cityId}/mayor` | Dismiss the mayor (hero.dischargeChief) |
 | GET | `/api/v1/cities/{cityId}/tavern` | Inn offers (hero.getHerosListFromTavern) |
 | POST | `/api/v1/cities/{cityId}/tavern/{heroId}/hire` | Hire (hero.hireHero) |
