@@ -57,7 +57,11 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
                 <Breakdown line={line} mayor={mayor} />
               ) : (
                 <Rows
-                  rows={[['Tax income', r.taxIncome], ...(r.herosSalary ? [['Hero salaries', -r.herosSalary] as [string, number]] : [])]}
+                  rows={[
+                    ['Base tax', r.taxIncome - r.taxConverted],
+                    ...(r.taxConverted ? [[`Tax ${r.taxRate}% (sold output)`, r.taxConverted] as Row] : []),
+                    ...(r.herosSalary ? [['Hero salaries', -r.herosSalary] as Row] : []),
+                  ]}
                   total={r.goldRate}
                 />
               )}
@@ -94,6 +98,7 @@ function Breakdown({ line, mayor }: { line: ResourceLine; mayor?: HeroBean }) {
   if (b.valley) rows.push([`Valleys +${b.valleyPercent}%`, b.valley]);
   if (b.buff) rows.push([`Items +${b.buffPercent}%`, b.buff, ITEM_BONUS_TEXT_INVERTED]);
   if (b.upkeep) rows.push(['Troop upkeep', b.upkeep]);
+  if (b.tax) rows.push(['Tax (sold for gold)', b.tax]);
   return <Rows rows={rows} total={line.increaseRate} />;
 }
 

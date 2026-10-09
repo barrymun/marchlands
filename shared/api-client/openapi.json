@@ -413,6 +413,10 @@
             "type": "number",
             "description": "troop food upkeep per game hour (negative; 0 for other resources), 2 decimals"
           },
+          "tax": {
+            "type": "number",
+            "description": "(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals"
+          },
           "techPercent": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -442,6 +446,7 @@
           "valley",
           "buff",
           "upkeep",
+          "tax",
           "techPercent",
           "mayorPercent",
           "valleyPercent",
@@ -520,12 +525,20 @@
           "taxRate": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "(marchlands) share of field output sold to the merchant as it is produced"
           },
           "taxIncome": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "gold per game hour: the base tax on population plus taxConverted"
+          },
+          "taxConverted": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour the tax rate earns from field output"
           },
           "herosSalary": {
             "type": "number"
@@ -573,6 +586,7 @@
           "iron",
           "taxRate",
           "taxIncome",
+          "taxConverted",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -10570,6 +10584,10 @@
             "type": "number",
             "description": "troop food upkeep per game hour (negative; 0 for other resources), 2 decimals"
           },
+          "tax": {
+            "type": "number",
+            "description": "(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals"
+          },
           "techPercent": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -10599,6 +10617,7 @@
           "valley",
           "buff",
           "upkeep",
+          "tax",
           "techPercent",
           "mayorPercent",
           "valleyPercent",
@@ -10679,12 +10698,20 @@
           "taxRate": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "(marchlands) share of field output sold to the merchant as it is produced"
           },
           "taxIncome": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "gold per game hour: the base tax on population plus taxConverted"
+          },
+          "taxConverted": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour the tax rate earns from field output"
           },
           "herosSalary": {
             "type": "number"
@@ -10732,6 +10759,7 @@
           "iron",
           "taxRate",
           "taxIncome",
+          "taxConverted",
           "herosSalary",
           "troopCostFood",
           "curPopulation",

@@ -11256,6 +11256,8 @@ export interface components {
             buff: number;
             /** @description troop food upkeep per game hour (negative; 0 for other resources), 2 decimals */
             upkeep: number;
+            /** @description (marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals */
+            tax: number;
             techPercent: number;
             mayorPercent: number;
             valleyPercent: number;
@@ -11280,8 +11282,12 @@ export interface components {
             wood: components["schemas"]["ResourceLineInput"];
             stone: components["schemas"]["ResourceLineInput"];
             iron: components["schemas"]["ResourceLineInput"];
+            /** @description (marchlands) share of field output sold to the merchant as it is produced */
             taxRate: number;
+            /** @description gold per game hour: the base tax on population plus taxConverted */
             taxIncome: number;
+            /** @description (marchlands) gold per game hour the tax rate earns from field output */
+            taxConverted: number;
             herosSalary: number;
             /** @description troop food upkeep per game hour, 2 decimals */
             troopCostFood: number;
@@ -13474,6 +13480,8 @@ export interface components {
             buff: number;
             /** @description troop food upkeep per game hour (negative; 0 for other resources), 2 decimals */
             upkeep: number;
+            /** @description (marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals */
+            tax: number;
             techPercent: number;
             mayorPercent: number;
             valleyPercent: number;
@@ -13498,8 +13506,12 @@ export interface components {
             wood: components["schemas"]["ResourceLine"];
             stone: components["schemas"]["ResourceLine"];
             iron: components["schemas"]["ResourceLine"];
+            /** @description (marchlands) share of field output sold to the merchant as it is produced */
             taxRate: number;
+            /** @description gold per game hour: the base tax on population plus taxConverted */
             taxIncome: number;
+            /** @description (marchlands) gold per game hour the tax rate earns from field output */
+            taxConverted: number;
             herosSalary: number;
             /** @description troop food upkeep per game hour, 2 decimals */
             troopCostFood: number;

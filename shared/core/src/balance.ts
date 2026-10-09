@@ -48,7 +48,12 @@ export const BALANCE = {
   // population drift (orig: every 6 minutes); (marchlands) lords' cities have no loyalty
   cityTickMs: 6 * MINUTE,
   populationStep: 0.05,
-  startTaxRate: 10,
+  /**
+   * (marchlands) the tax rate (0-100%) sells that share of a city's field output to the merchant as it is
+   * produced; the people always pay this base tax (population x share gold per hour; orig: population x rate)
+   */
+  baseTaxShare: 0.1,
+  startTaxRate: 0,
   startPopulation: 50,
 
   /** (marchlands) heroes stop levelling here (orig: no limit); they keep growing through gear (gear.ts) */

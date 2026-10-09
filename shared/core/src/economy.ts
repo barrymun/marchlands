@@ -8,6 +8,7 @@ import { BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP
 import { troopConfig } from './data/index.ts';
 import type { BuffState, BuildingState, CityMisc, ResearchState, ResourceSet, TroopCounts } from './types.ts';
 import { mayorProductionBonus } from './heroes.ts';
+import { merchantBase } from './merchant.ts';
 
 export type BasicResource = Exclude<ResourceKey, 'gold'>;
 export const BASIC_RESOURCES: readonly BasicResource[] = ['food', 'wood', 'stone', 'iron'];
@@ -115,7 +116,12 @@ export interface CityStats {
   bonusParts: Record<BasicResource, BonusParts>;
   /** net per-hour change of each resource (food includes upkeep, gold includes salaries) */
   rates: ResourceSet;
+  /** gold per hour: the base tax on population plus what the tax rate converts */
   taxIncome: number;
+  /** (marchlands) gold per hour the tax rate converts from field output (part of taxIncome) */
+  taxConverted: number;
+  /** (marchlands) field output per hour the tax rate takes and sells to the merchant */
+  taxed: Record<BasicResource, number>;
   heroSalary: number;
   upkeep: number;
 }
@@ -226,14 +232,24 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   let heroSalary = BALANCE.heroSalaries ? ctx.heroLevels.reduce((s, l) => s + l * BALANCE.heroSalaryPerLevel, 0) : 0;
   // like upkeep: paid per real hour, not per game hour, when salaryPerRealHour is on
   if (BALANCE.salaryPerRealHour) heroSalary /= getGameSpeed();
-  let taxIncome = (population * city.taxRate) / 100;
-  if (hasBuff(ctx.buffs, 'GoldProductionBuff', now)) taxIncome *= 1 + BALANCE.resourceBuffBonus;
+  // (marchlands) the people pay a fixed base tax; the tax rate instead sells that share of the city's
+  // field output to the merchant as it is produced (orig: tax = population x rate, costing loyalty)
+  let baseTax = population * BALANCE.baseTaxShare;
+  if (hasBuff(ctx.buffs, 'GoldProductionBuff', now)) baseTax *= 1 + BALANCE.resourceBuffBonus;
+  const share = Math.min(100, Math.max(0, city.taxRate)) / 100;
+  const taxed = { food: 0, wood: 0, stone: 0, iron: 0 };
+  let taxConverted = 0;
 
-  const rates = { gold: taxIncome - heroSalary, food: 0, wood: 0, stone: 0, iron: 0 };
+  const rates = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
   for (const r of BASIC_RESOURCES) {
-    rates[r] = fieldProduction[r] * efficiency * (1 + bonus[r]) + BALANCE.baseProductionPerHour;
+    const gross = fieldProduction[r] * efficiency * (1 + bonus[r]) + BALANCE.baseProductionPerHour;
+    taxed[r] = gross * share;
+    taxConverted += taxed[r] * merchantBase(r);
+    rates[r] = gross - taxed[r];
   }
   rates.food -= upkeep;
+  const taxIncome = baseTax + taxConverted;
+  rates.gold = taxIncome - heroSalary;
 
   return {
     maxPopulation,
@@ -247,6 +263,8 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
     bonusParts,
     rates,
     taxIncome,
+    taxConverted,
+    taxed,
     heroSalary,
     upkeep,
   };
@@ -266,6 +284,8 @@ export interface SettleFlows {
   produced: ResourceSet;
   /** output lost because storage was full */
   wasted: Record<BasicResource, number>;
+  /** output the tax rate sold for gold (counted in `produced`, not stored) */
+  taxed: Record<BasicResource, number>;
   /** food troops ate */
   upkeep: number;
   /** gold paid to heroes */
@@ -275,6 +295,7 @@ export interface SettleFlows {
 const emptyFlows = (): SettleFlows => ({
   produced: { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 },
   wasted: { food: 0, wood: 0, stone: 0, iron: 0 },
+  taxed: { food: 0, wood: 0, stone: 0, iron: 0 },
   upkeep: 0,
   salaries: 0,
 });
@@ -325,7 +346,8 @@ function integrate(city: EconomyCity, stats: CityStats, dtMs: number, result: Se
     const delta = stats.rates[r] * hours;
     const eat = r === 'food' ? stats.upkeep * hours : 0;
     const cur = city[r];
-    f.produced[r] += delta + eat;
+    f.produced[r] += delta + eat + stats.taxed[r] * hours;
+    f.taxed[r] += stats.taxed[r] * hours;
     if (delta >= 0) {
       // production never pushes a stock above storage, but never removes an over-cap stock either
       if (cur < stats.storage[r]) city[r] = Math.min(stats.storage[r], cur + delta);

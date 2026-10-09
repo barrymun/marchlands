@@ -37,6 +37,7 @@ export function noteSettle(city: object, flows: SettleFlows, deserted: TroopCoun
   const c = settled.get(city) ?? {};
   addCounters(c, prefixed('produced', flows.produced));
   addCounters(c, prefixed('wasted', flows.wasted));
+  addCounters(c, prefixed('taxed', flows.taxed));
   addCounters(c, { 'upkeep.food': flows.upkeep, 'salaries.gold': flows.salaries });
   addCounters(c, prefixed('deserted', deserted));
   settled.set(city, c);

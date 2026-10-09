@@ -8,6 +8,7 @@ import {
   createRandomHero,
   generateMap,
   marchTimeMs,
+  merchantBase,
   plunder,
   prestigeOf,
   randomStat,
@@ -80,7 +81,7 @@ const city = (over: Partial<EconomyCity> = {}): EconomyCity => ({
   iron: 0,
   resourcesAt: 0,
   population: 50,
-  taxRate: 10,
+  taxRate: 0,
   buildings: [{ positionId: -1, typeId: 31, level: 1, status: 0, startTime: 0, endTime: 0 }],
   troops: {},
   workRates: { gold: 100, food: 100, wood: 100, stone: 100, iron: 100 },
@@ -105,6 +106,18 @@ describe('economy', () => {
     expect(s.storage.food).toBe(10_000);
     expect(s.rates.food).toBe(100); // base production only
     expect(s.rates.gold).toBe(5); // 50 pop * 10% tax
+  });
+
+  it('(marchlands) the tax rate sells that share of field output to the merchant; the base tax stays', () => {
+    const c = city({ population: 1000, buildings: [{ positionId: 1001, typeId: 7, level: 3, status: 0, startTime: 0, endTime: 0 }] });
+    const free = computeCityStats(c, ctx(), 0);
+    const taxed = computeCityStats({ ...c, taxRate: 20 }, ctx(), 0);
+    expect(free.taxIncome).toBe(1000 * BALANCE.baseTaxShare);
+    expect(taxed.taxed.food).toBeCloseTo(free.rates.food * 0.2);
+    expect(taxed.rates.food).toBeCloseTo(free.rates.food * 0.8);
+    const sold = (['food', 'wood', 'stone', 'iron'] as const).reduce((g, r) => g + free.rates[r] * 0.2 * merchantBase(r), 0);
+    expect(taxed.taxConverted).toBeCloseTo(sold);
+    expect(taxed.taxIncome).toBeCloseTo(free.taxIncome + taxed.taxConverted);
   });
 
   it('fields add production, storage and workers (F table)', () => {
