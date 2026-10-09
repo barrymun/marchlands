@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Two-lord scenario: scouting, attacking a city (plunder + loyalty), valley occupation,
+// Two-lord scenario: scouting, attacking a city (plunder; lords' cities have no loyalty), valley occupation,
 // recall, alliance transport and a market fill (see market.mjs for the merchant). Needs an operator account (SMOKE_ADMIN listed
 // in ADMIN_USERNAMES) and a fast GAME_SPEED (>= 200 recommended).
 //   API=http://localhost:3100 node tools/smoke/war.mjs
@@ -66,8 +66,10 @@ async function main() {
   // move B next to A with an Adv City Teleporter
   const near = await ok(a.token, 'GET', `/map/search?x=${a.city.x}&y=${a.city.y}&radius=6&type=10`);
   const spot = near.find((t) => t.cityId == null && t.ownerCityId == null && Math.abs(t.x - a.city.x) + Math.abs(t.y - a.city.y) > 1);
-  await ok(gm, 'POST', '/admin/items', { playerName: b.name, items: { 'player.more.castle.1.a': 1 } });
+  await ok(gm, 'POST', '/admin/items', { playerName: b.name, items: { 'consume.move.1': 1 } });
   const moved = await ok(b.token, 'POST', `/cities/${b.city.id}/move`, { targetTileId: spot.id });
+  const again = await call(b.token, 'POST', `/cities/${b.city.id}/move`, { targetTileId: spot.id });
+  check(again.ok !== 1 && /cooldown/i.test(again.errorMsg ?? ''), 'City Teleporter cools down after a move');
   b.city = { ...b.city, ...moved };
   check(moved.fieldId === spot.id, `defender teleported next door (${moved.x},${moved.y})`);
 
@@ -87,7 +89,6 @@ async function main() {
 
   // ---- attack the city ----
   const before = await ok(a.token, 'GET', `/cities/${a.city.id}`);
-  const bBefore = await ok(b.token, 'GET', `/cities/${b.city.id}`);
   const army = await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: b.city.fieldId, mission: 5, troops: { lightCavalry: 3000 }, heroId: hero.id });
   check(army.missionType === 5, 'attack sent');
   const enemyView = await ok(b.token, 'GET', '/armies');
@@ -96,11 +97,11 @@ async function main() {
   const full = await ok(a.token, 'GET', `/reports/${attackRep.id}`);
   const battle = full.content.battle;
   check(battle.result === 'attackerWon', `attack won in ${battle.rounds} rounds, lost ${JSON.stringify(battle.attacker.troops.lost)}`);
-  check(battle.loyaltyDamage >= 10, `loyalty -${battle.loyaltyDamage}`);
+  check(!('loyaltyDamage' in battle) && !('captured' in battle), "no loyalty damage: lords' cities cannot be captured");
   const loot = Object.values(battle.plunder).reduce((s, v) => s + v, 0);
   check(loot > 0, `plundered ${loot} resources`);
   const bAfter = await ok(b.token, 'GET', `/cities/${b.city.id}`);
-  check(bAfter.resource.support < bBefore.resource.support, 'defender loyalty dropped');
+  check(!('support' in bAfter.resource), 'cities report no loyalty');
   check((bAfter.troop.militia ?? 0) < 300, 'defender lost warriors');
   await until(async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.some((r) => r.title === 'Attack Returned'), 'army returned');
   const after = await ok(a.token, 'GET', `/cities/${a.city.id}`);

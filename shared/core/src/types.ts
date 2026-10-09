@@ -108,10 +108,8 @@ export const CastleSignSchema = z.object({
 export type CastleSign = z.infer<typeof CastleSignSchema>;
 
 export const CityMiscSchema = z.object({
-  /** last population/loyalty drift tick boundary (ms) */
+  /** last population drift tick boundary (ms) */
   lastTickAt: z.number().optional(),
-  /** last loyalty drift boundary on real time (BALANCE.cityLoyaltyRealTime) */
-  loyaltyTickAt: z.number().optional(),
   lastComfortAt: z.number().optional(),
   lastLevyAt: z.number().optional(),
   /** food shortfall carried into troop desertion */
@@ -172,7 +170,8 @@ export const FlowSchema = z.object({
 export type Flow = z.infer<typeof FlowSchema>;
 
 export const PlayerMiscSchema = z.object({
-  icon: z.number().int().optional(),
+  /** (marchlands) when the lord last renamed (renaming is free, once per BALANCE.renameCooldownMs) */
+  renamedAt: z.number().optional(),
   changedFace: z.boolean().optional(),
   allianceApply: z.string().optional(),
   allianceApplyAt: z.number().optional(),
@@ -225,15 +224,20 @@ const BattleBaseSchema = z.object({
 });
 const BattlePlunderSchema = z.object({
   plunder: ResourceSetSchema,
-  loyaltyDamage: z.number(),
-  loyaltyLeft: z.number(),
-  captured: z.boolean(),
   /** medals the attacker found (item id -> count) */
   medals: z.record(z.string(), z.number()).optional(),
 });
-/** Extra fields of each battle report variant, by target (player city, NPC city, valley). */
+/**
+ * Extra fields of each battle report variant, by target (player city, NPC city, valley).
+ * (marchlands) lords' cities have no loyalty and cannot be captured; barbarian cities can.
+ */
 export const BattleCityExtraSchema = BattlePlunderSchema.extend({ city: z.string() });
-export const BattleNpcExtraSchema = BattlePlunderSchema.extend({ level: z.number().int() });
+export const BattleNpcExtraSchema = BattlePlunderSchema.extend({
+  loyaltyDamage: z.number(),
+  loyaltyLeft: z.number(),
+  captured: z.boolean(),
+  level: z.number().int(),
+});
 export const BattleValleyExtraSchema = z.object({
   occupied: z.boolean(),
   /** why a won valley was not occupied ('' otherwise) */
@@ -293,7 +297,6 @@ export const ScoutReportSchema = z.union([
         troops: TroopCountsSchema,
         fortifications: FortCountsSchema,
         wallLevel: z.number().int(),
-        loyalty: z.number(),
         population: z.number(),
         /** Informatics 1+ */
         heroes: z.array(ReportHeroBriefSchema).optional(),

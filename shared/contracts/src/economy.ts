@@ -70,7 +70,6 @@ const itemConfig = z.object({
   id: z.string(),
   name: z.string(),
   goldPrice: int().nullable().describe('price in city gold (null: not for sale)'),
-  canGamble: z.boolean(),
   type: int(),
   dayLimit: int(),
   rarity: int(),
@@ -129,7 +128,6 @@ export const ConfigBalance = z
     resourceBuffBonus: z.number(),
     cityTickMs: ms(),
     populationStep: z.number(),
-    startLoyalty: int(),
     startTaxRate: int(),
     startPopulation: int(),
     heroSalaryPerLevel: int(),
@@ -137,7 +135,6 @@ export const ConfigBalance = z
     heroAwardCostPerLevel: int(),
     comfortCooldownMs: ms(),
     levyCooldownMs: ms(),
-    levyLoyaltyCost: int(),
     heroTimeFactor: z.number(),
     techTimeFactor: z.number(),
     demolishRefund: z.number(),
@@ -158,7 +155,7 @@ export const ConfigBalance = z
     horsebackSpeedPerLevel: z.number(),
     logisticsLoadPerLevel: z.number(),
     maxRestTimeMs: ms(),
-    cityLoyaltyDamagePerAttack: z.tuple([int(), int()]).readonly().describe('[min, max]'),
+    npcLoyaltyDamagePerAttack: z.tuple([int(), int()]).readonly().describe('[min, max]'),
     npcLoyaltyStart: z.object({ low: int(), high: int() }),
     npcRegenMs: ms(),
     plunderShare: z.number(),
@@ -177,7 +174,6 @@ export const ConfigBalance = z
     furloughCentsPerDay: int(),
     truceCooldownMs: ms(),
     teleportCooldownMs: ms(),
-    worldChatSpeakerCost: int(),
     allianceCreateGold: int(),
     allianceMaxMembers: int(),
     allianceWarCooldownMs: ms(),
@@ -364,7 +360,9 @@ export const QuestBean = z
   .meta({ id: 'QuestBean' });
 export type QuestBean = z.infer<typeof QuestBean>;
 
-export const QuestDailyGift = z.object({ items: z.record(z.string(), int()).describe('item id -> count') }).meta({ id: 'QuestDailyGift' });
+export const QuestDailyGift = z
+  .object({ resources: zResources.describe('added to the chosen city (BALANCE.dailyGift)') })
+  .meta({ id: 'QuestDailyGift', description: '(marchlands) a fixed bundle of resources once a day' });
 export type QuestDailyGift = z.infer<typeof QuestDailyGift>;
 
 // ---- rankings ----
@@ -448,7 +446,6 @@ export const AdminPlayerFlagsBody = z.object({ playerName: z.string(), beginner:
 export const AdminCityStatsBody = z.object({
   playerId: zId,
   population: z.number().optional(),
-  loyalty: z.number().optional(),
   troops: z.record(z.string(), z.number().int().nonnegative()).optional(),
 });
 

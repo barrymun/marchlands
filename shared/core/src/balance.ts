@@ -45,12 +45,9 @@ export const BALANCE = {
   /** (evony) resinc buff: production +25% */
   resourceBuffBonus: 0.25,
 
-  // population / loyalty drift (orig: every 6 minutes)
+  // population drift (orig: every 6 minutes); (marchlands) lords' cities have no loyalty
   cityTickMs: 6 * MINUTE,
-  /** (marchlands) a city's loyalty drifts 1 point per cityTickMs of real time, unaffected by GAME_SPEED */
-  cityLoyaltyRealTime: true as boolean,
   populationStep: 0.05,
-  startLoyalty: 90,
   startTaxRate: 10,
   startPopulation: 50,
 
@@ -92,7 +89,6 @@ export const BALANCE = {
   // comfort / levy (orig)
   comfortCooldownMs: 15 * MINUTE,
   levyCooldownMs: 15 * MINUTE,
-  levyLoyaltyCost: 20,
 
   // ---- construction ----
   heroTimeFactor: 0.995, // (orig) per point of the relevant mayor attribute
@@ -114,8 +110,6 @@ export const BALANCE = {
   buildQueues: 2,
   /** (marchlands) floor on a troop's training time per unit, in game seconds (orig 1); 0 lets a strong mayor train instantly */
   minTrainUnitSeconds: 0,
-  /** (marchlands) off: level-10 buildings no longer need (and use up) a Michelangelo's Script (orig on) */
-  buildingItemRequirements: false as boolean,
   /** (marchlands) technologies one city's Academy researches at once (orig 1) */
   researchQueues: 2,
   freeSpeedupMs: 5 * MINUTE, // (orig) free speed-up threshold & amount
@@ -138,8 +132,8 @@ export const BALANCE = {
   logisticsLoadPerLevel: 0.1, // (evony) +10% load per level
   /** (evony) reinforcement / scout / transport to own or allied cities move this much faster */
   maxRestTimeMs: 24 * HOUR,
-  /** (evony) loyalty damage per successful attack on a city (before capture) */
-  cityLoyaltyDamagePerAttack: [10, 15],
+  /** (evony) loyalty damage per successful attack on a barbarian city (before capture); lords' cities have no loyalty */
+  npcLoyaltyDamagePerAttack: [10, 15],
   /** (evony) attacking army must kill all defenders and bring this loyalty to 0 to capture */
   npcLoyaltyStart: { low: 80, high: 90 },
   /** (orig) NPC/valley regeneration interval */
@@ -188,9 +182,10 @@ export const BALANCE = {
   furloughCentsPerDay: 10,
   truceCooldownMs: 12 * HOUR, // (orig)
   teleportCooldownMs: 12 * HOUR, // (orig)
+  /** (marchlands) renaming the lord is free, once per this much real time (orig: a New ID item each time) */
+  renameCooldownMs: 24 * HOUR,
 
   // ---- chat ----
-  worldChatSpeakerCost: 1, // (evony) Speakers per world-chat line
 
   // ---- alliance ----
   allianceCreateGold: 10_000, // (orig)
@@ -199,6 +194,8 @@ export const BALANCE = {
 
   // ---- market ----
   marketFee: 0.005, // (evony) 0.5% of gold paid
+  /** (marchlands) the daily gift: resources into a city of the lord's choice, once a day (orig: an Amulet) */
+  dailyGift: { gold: 50_000, food: 100_000, wood: 100_000, stone: 100_000, iron: 100_000 },
   /** (marchlands) market trades are instant (orig Evony: goods travel 60 min / Marketplace level); > 0 restores travel */
   marketShipmentBaseMs: 0 * MINUTE,
   marketMaxOrdersPerLevel: 2,
@@ -230,6 +227,7 @@ export const BALANCE = {
   // set prices; every other item the original sold for cents costs goldForCents(its price) (itemGoldPrice)
   goldShop: {
     'player.troop.1.a': 250_000, // War Ensign (30 cents)
+    'consume.move.1': 750_000, // City Teleporter: picks the tile, like the original's Adv City Teleporter (90 cents)
     // production boosts, +25% for 1 day (8 cents) / 7 days (50 cents)
     'player.resinc.1': 65_000,
     'player.resinc.1.b': 415_000,

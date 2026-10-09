@@ -116,7 +116,6 @@ export const SetAllianceInfoBody = z.object({ note: z.string(), intro: z.string(
 export const SetAllianceRankBody = AllianceUserBody.extend({ rank: z.number().int() });
 export const AllianceMassMailBody = z.object({ title: z.string(), content: z.string() });
 export const SetAllianceRelationBody = z.object({ targetAllianceName: z.string(), type: z.number().int() });
-export const AllianceItemBody = z.object({ itemId: z.string() });
 
 // ---- alliance: responses ----
 
@@ -134,7 +133,7 @@ export const AllianceRelationLists = z
   .meta({ id: 'AllianceRelationLists' });
 export type AllianceRelationLists = z.infer<typeof AllianceRelationLists>;
 
-export const AllianceProfile = AllianceRow.pick({ id: true, motd: true, pactUntil: true })
+export const AllianceProfile = AllianceRow.pick({ id: true, motd: true })
   .extend({
     allianceName: AllianceRow.shape.name,
     creatorName: AllianceRow.shape.founderName,

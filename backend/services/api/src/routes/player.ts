@@ -76,10 +76,10 @@ export default async function playerRoutes(app: ZApp) {
   app.patch('/player/face', s('Set portrait and sex once (common.changeUserFace)', Empty, { body: ChangeFaceBody }), (req) =>
     game(req, (ctx, pid) => player.changeFace(ctx, pid, req.body.faceUrl, req.body.sex)),
   );
-  app.post('/player/flag', s('Change flag with a National Flag (city.modifyFlag)', Empty, { body: ChangeFlagBody }), (req) =>
+  app.post('/player/flag', s('Change the flag, free (city.modifyFlag)', Empty, { body: ChangeFlagBody }), (req) =>
     game(req, (ctx, pid) => player.changeFlag(ctx, pid, req.body.flag)),
   );
-  app.post('/player/rename', s('Rename the lord with a New ID (city.modifyUserName)', Empty, { body: RenamePlayerBody }), (req) =>
+  app.post('/player/rename', s('Rename the lord: free, once a day, if the name is free (city.modifyUserName)', Empty, { body: RenamePlayerBody }), (req) =>
     game(req, (ctx, pid) => player.renamePlayer(ctx, pid, req.body.userName)),
   );
   app.post('/player/title/promote', s('Promote to the next nobility title', TitlePromotion), (req) => game(req, (ctx, pid) => player.promoteTitle(ctx, pid)));

@@ -15,7 +15,6 @@ import {
   researchHeroExp,
   buildingHeroExp,
   PrestigeAction,
-  rollAmulet,
   seededRng,
   settleCity,
   setGameSpeed,
@@ -81,8 +80,6 @@ const city = (over: Partial<EconomyCity> = {}): EconomyCity => ({
   iron: 0,
   resourcesAt: 0,
   population: 50,
-  loyalty: 90,
-  grievance: 0,
   taxRate: 10,
   buildings: [{ positionId: -1, typeId: 31, level: 1, status: 0, startTime: 0, endTime: 0 }],
   troops: {},
@@ -175,8 +172,8 @@ describe('economy', () => {
     expect(f.produced.food - f.upkeep - f.wasted.food).toBeCloseTo(fed.food - 5_000);
   });
 
-  it('population drifts towards loyalty-weighted target every 6 minutes', () => {
-    const c = city({ population: 50, loyalty: 90 });
+  it("population grows towards the maximum every 6 minutes (lords' cities have no loyalty)", () => {
+    const c = city({ population: 50 });
     c.buildings.push({ positionId: 0, typeId: 1, level: 5, status: 0, startTime: 0, endTime: 0 });
     const r = settleCity(c, ctx(), 60 * 60_000);
     expect(r.ticks).toBe(10);
@@ -269,16 +266,6 @@ describe('armies', () => {
     expect(p.stone).toBe(0);
     expect(p.food + p.wood + p.iron + p.gold).toBe(30_100);
   });
-  it('amulet always returns 24 slots and a winner', () => {
-    const rng = seededRng('amulet');
-    for (let i = 0; i < 100; i++) {
-      const { slots, winner } = rollAmulet(rng);
-      expect(slots).toHaveLength(24);
-      expect(winner).toBeGreaterThanOrEqual(0);
-      expect(winner).toBeLessThan(24);
-    }
-  });
-
   it('every valley type gives the same bonus per level (+3%/level from 8%)', () => {
     // 1 forest, 2 desert, 3 hill, 4 swamp, 5 grass, 6 lake, 10 flat
     for (const t of [1, 2, 3, 4, 5, 6]) {
@@ -566,21 +553,6 @@ describe('barbarian loyalty recovery', () => {
       // 6 real minutes: +1 loyalty
       const b = regenerateNpc(10, a.state, a.troops, a.forts, 6 * 60_000);
       expect(b.state.loyalty).toBe(51);
-    } finally {
-      setGameSpeed(1);
-    }
-  });
-});
-
-describe('city loyalty and game speed', () => {
-  it('drifts a point per 6 real minutes while population ticks every 6 game minutes', () => {
-    setGameSpeed(60);
-    try {
-      const c = city({ population: 50, loyalty: 50, taxRate: 10 });
-      settleCity(c, ctx(), 6_000);
-      expect(c.loyalty).toBe(50);
-      settleCity(c, ctx(), 6 * 60_000);
-      expect(c.loyalty).toBe(51);
     } finally {
       setGameSpeed(1);
     }

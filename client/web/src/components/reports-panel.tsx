@@ -307,9 +307,11 @@ function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }) {
             ))}
         </div>
       )}
-      <div className="text-xs text-muted-foreground">
-        Loyalty −{fmtExact(b.loyaltyDamage)} (now {fmtExact(b.loyaltyLeft)}){b.captured && ' · city captured'}
-      </div>
+      {'loyaltyDamage' in b && (
+        <div className="text-xs text-muted-foreground">
+          Loyalty −{fmtExact(b.loyaltyDamage)} (now {fmtExact(b.loyaltyLeft)}){b.captured && ' · city captured'}
+        </div>
+      )}
     </div>
   );
 }
@@ -486,9 +488,7 @@ function ScoutView({ scout: s }: { scout: Extract<ReportBody, { kind: 'scout' }>
           <Line label="Resources">
             <ResourceList res={s.intel.resources} />
           </Line>
-          <Line label="Loyalty / population">
-            {fmtExact(s.intel.loyalty)} / {fmtExact(s.intel.population)}
-          </Line>
+          <Line label="Population">{fmtExact(s.intel.population)}</Line>
           {s.intel.heroes && <Line label="Heroes">{s.intel.heroes.map((h) => `${h.name} Lv ${h.level}`).join(' · ') || 'none'}</Line>}
           {s.intel.stationed.length > 0 && (
             <Line label="Reinforcements">

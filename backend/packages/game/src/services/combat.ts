@@ -3,7 +3,7 @@
 // valley/NPC scouting and a scout-vs-scout fight; everything else follows Evony Age 1 and the
 // recommendations in docs/spec/battle.md §7.3.
 
-import { and, count, eq, sql } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 import {
   ArmyDirection,
   BALANCE,
@@ -589,7 +589,6 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
         troops: def.city.troops,
         fortifications: def.city.forts,
         wallLevel: buildingLevel(def.city.buildings, BuildingType.WALLS),
-        loyalty: Math.floor(def.city.loyalty),
         population: Math.floor(def.city.population),
         heroes: informatics >= 1 ? def.heroes.filter((h) => h.playerId === def.player.id).map((h) => ({ name: h.name, level: h.level })) : undefined,
         buildings: informatics >= 2 ? def.city.buildings.map((x) => ({ typeId: x.typeId, level: x.level })) : undefined,
@@ -850,10 +849,8 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   }
   def.city.forts = r.forts.after;
 
-  // spoils
+  // spoils; (marchlands) lords' cities have no loyalty, so they are plundered but never captured
   let loot: ResourceSet = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
-  let loyaltyDamage = 0;
-  let captured = false;
   if (r.attackerWon) {
     const prot = protectedResources(def.city.buildings, def.city.storePercent);
     const available: ResourceSet = {
@@ -865,10 +862,6 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     };
     loot = plunder(available, lootCapacity(a, r.attacker.after, attacker));
     for (const k of Object.keys(loot) as (keyof ResourceSet)[]) def.city[k] -= loot[k];
-    const [lo, hi] = BALANCE.cityLoyaltyDamagePerAttack;
-    loyaltyDamage = randInt(ctx.rng, lo, hi);
-    def.city.loyalty = Math.max(0, def.city.loyalty - loyaltyDamage);
-    if (def.city.loyalty <= 0) captured = await tryCaptureCity(ctx, a, attacker, def);
   }
 
   attacker.honor += r.attackerHonor;
@@ -878,7 +871,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   await grantHeroExp(ctx, defHero, r.defenderHeroExp);
   await savePlayer(ctx, attacker);
   await savePlayer(ctx, def.player);
-  if (!captured) await saveCity(ctx, def.city);
+  await saveCity(ctx, def.city);
 
   const attackerSide = {
     player: attacker.name,
@@ -899,14 +892,10 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   battleStats(ctx, a, r, 'city', {
     injured: attackerSide.injured,
     loot,
-    captured,
     defender: { playerId: def.player.id, cityId: def.city.id, injured: defenderInjured },
   });
   const body = battleBody(r, attackerSide, defenderSide, {
     plunder: loot,
-    loyaltyDamage,
-    loyaltyLeft: Math.floor(def.city.loyalty),
-    captured,
     city: def.city.name,
     ...(Object.keys(medals).length ? { medals } : {}),
   });
@@ -916,60 +905,14 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   for (const owner of new Set(stationed.map((s) => s.playerId).filter((id) => id !== def.player.id))) {
     await createReport(ctx, { ...reportCommon, playerId: owner, title: 'Reinforcements Fought' });
   }
-  if (!captured) {
-    ctx.push(def.player.id, 'server.TroopUpdate', { castleId: def.city.id, troop: troopBean(def.city.troops) });
-    ctx.push(def.player.id, 'server.FortificationsUpdate', { castleId: def.city.id, fortification: fortBean(def.city.forts) });
-    pushResources(ctx, def);
-  }
+  ctx.push(def.player.id, 'server.TroopUpdate', { castleId: def.city.id, troop: troopBean(def.city.troops) });
+  ctx.push(def.player.id, 'server.FortificationsUpdate', { castleId: def.city.id, fortification: fortBean(def.city.forts) });
+  pushResources(ctx, def);
   if (totalTroops(r.attacker.after) <= 0) {
     await armyWiped(ctx, a, hero, def);
     return;
   }
   await returnWithLoot(ctx, a, r.attacker.after, loot);
-}
-
-/** A city whose loyalty hits 0 changes hands, if the attacker's title allows another city. */
-async function tryCaptureCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, def: CityBundle): Promise<boolean> {
-  const [{ n: mine }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, attacker.id));
-  if (Number(mine) >= maxCitiesFor(attacker.title)) return false;
-  const theirs = await citiesOf(ctx, def.player.id);
-  if (theirs.length <= 1) return false; // a lord's last city cannot be taken
-  const capital = theirs.find((c) => c.id !== def.city.id)!;
-  // the loser's heroes in the city become prisoners; their armies from it re-home to the capital
-  for (const h of def.heroes.filter((x) => x.playerId === def.player.id)) {
-    Object.assign(h, {
-      status: HeroStatus.SEIZED,
-      capturedByPlayerId: attacker.id,
-      buffs: [{ id: 'homeCity', desc: 'home city', endTime: Number.MAX_SAFE_INTEGER, param: capital.id }],
-    });
-    await saveHero(ctx, h);
-  }
-  await ctx.tx
-    .update(armies)
-    .set({ cityId: capital.id })
-    .where(and(eq(armies.cityId, def.city.id), eq(armies.playerId, def.player.id)));
-  await ctx.tx.execute(
-    // pending construction/research/training events follow the city to its new owner
-    sql`update timed_events set player_id = ${attacker.id} where city_id = ${def.city.id}`,
-  );
-  const research = { ...def.player.research };
-  for (const [id, r] of Object.entries(research)) if (r.cityId === def.city.id) research[id] = { level: r.level };
-  def.player.research = research;
-  def.city.playerId = attacker.id;
-  def.city.loyalty = 20;
-  def.city.troopQueues = [];
-  def.city.fortQueue = { nextQueueId: def.city.fortQueue.nextQueueId, queue: [] };
-  def.city.buildings = def.city.buildings
-    .map((b) => (b.status !== BuildingStatus.IDLE && b.level > 0 ? { ...b, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 } : b))
-    .filter((b) => b.level > 0);
-  await ctx.tx.execute(sql`delete from timed_events where city_id = ${def.city.id} and type in ('building','train')`);
-  await saveCity(ctx, def.city);
-  await ctx.tx.update(tiles).set({ ownerPlayerId: attacker.id, updatedAt: ctx.now }).where(eq(tiles.id, def.city.tileId));
-  await ctx.tx.update(tiles).set({ ownerPlayerId: attacker.id, updatedAt: ctx.now }).where(eq(tiles.ownerCityId, def.city.id));
-  ctx.push(def.player.id, 'server.CastleUpdate', { updateType: 1, castleBean: { id: def.city.id } });
-  pushCity(ctx, await viewCity(ctx, def.city.id));
-  addPrestige(attacker, 1000 * buildingLevel(def.city.buildings, BuildingType.TOWN_HALL));
-  return true;
 }
 
 async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
@@ -996,7 +939,7 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   if (r.attackerWon) {
     loot = plunder({ gold: state.gold, food: state.food, wood: state.wood, stone: state.stone, iron: state.iron }, lootCapacity(a, r.attacker.after, attacker));
     for (const k of Object.keys(loot) as (keyof ResourceSet)[]) state[k] -= loot[k];
-    const [lo, hi] = BALANCE.cityLoyaltyDamagePerAttack;
+    const [lo, hi] = BALANCE.npcLoyaltyDamagePerAttack;
     loyaltyDamage = randInt(ctx.rng, lo, hi);
     state.loyalty = Math.max(0, state.loyalty - loyaltyDamage);
   }
@@ -1075,7 +1018,6 @@ async function captureNpc(ctx: Ctx, attacker: PlayerRow, tile: TileRow, state: N
       stone: state.stone,
       iron: state.iron,
       population: state.population,
-      loyalty: 20,
     })
     .returning();
   Object.assign(tile, {

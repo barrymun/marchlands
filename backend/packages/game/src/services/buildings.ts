@@ -30,14 +30,13 @@ import {
   assertCanConstruct,
   assertCanUpgrade,
   scaleResources,
-  ITEMS,
   type BuildingState,
   addHeroExp,
 } from '@marchlands/core';
 import { mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { buildingBean, heroBean } from '../dto.ts';
-import { activeBuff, addItem, addPrestige, gainResources, pushPlayerInfo, pushResources, spendGold, spendResources, useItemOrGold } from '../helpers.ts';
+import { activeBuff, addPrestige, gainResources, pushPlayerInfo, pushResources, spendGold, spendResources, useItemOrGold } from '../helpers.ts';
 import { prefixed } from '../stats.ts';
 import { saveCity, saveHero, savePlayer } from '../repo.ts';
 import { checkBeginner } from './player.ts';
@@ -185,11 +184,6 @@ export async function upgrade(ctx: Ctx, playerId: number, cityId: number, positi
   const cfg = buildingConfig(bld!.typeId, bld!.level + 1)!;
   spendResources(b.city, cfg.cost);
   ctx.stat(playerId, cityId, prefixed('spent.building', cfg.cost));
-  // item prerequisites (Michelangelo's Script for level 10) are consumed
-  for (const req of cfg.requires.items) {
-    const item = ITEMS.find((i) => i.legacyId === req.id);
-    if (item) addItem(ctx, b.player, item.id, -req.level);
-  }
   const ms = buildTimeMs(bld!.typeId, bld!.level + 1, mayorStats(b.heroes), b.player.research);
   const next: BuildingState = { ...bld!, status: BuildingStatus.BUILDING, startTime: ctx.now, endTime: ctx.now + ms };
   b.city.buildings = b.city.buildings.map((x) => (x.positionId === positionId ? next : x));
@@ -271,17 +265,6 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
     spendGold(b.city, gold);
     ctx.stat(playerId, cityId, { 'spent.speedups.gold': gold });
     reduce = left;
-  } else if (itemId === 'player.destroy.1.a') {
-    if (bld.status !== BuildingStatus.DEMOLISHING) throw new GameError('Dynamite can only speed up demolition.', -99);
-    useItemOrGold(ctx, b.player, b.city, itemId, speedupItemGold(itemId));
-    pushResources(ctx, b);
-    // demolish the whole building at once: completion removes it entirely
-    const next: BuildingState = { ...bld, level: 1, endTime: ctx.now };
-    b.city.buildings = b.city.buildings.map((x) => (x.positionId === positionId ? next : x));
-    scheduleBuilding(ctx, b, next);
-    pushBuilding(ctx, b, next);
-    await commit(ctx, b);
-    return buildingBean(next);
   } else {
     const eff = SPEEDUP_ITEMS[itemId];
     if (!eff) throw new GameError('Invalid speed up.', -99);

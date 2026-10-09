@@ -6,19 +6,7 @@ import { BALANCE } from './balance.ts';
 import { TROOP_ID_BY_KEY, TROOP_NAMES, type TroopKey } from './constants.ts';
 import { ITEMS, itemConfig } from './data/index.ts';
 import { LOYALTY_MEDALS } from './heroes.ts';
-import {
-  ALLIANCE_PACT_ITEMS,
-  amuletPrize,
-  CHAT_ICONS,
-  HERO_ATTRIBUTE_BUFF,
-  HERO_ATTRIBUTE_ITEMS,
-  HERO_BOX_QUALITY,
-  itemEffect,
-  itemGoldPrice,
-  medalId,
-  medalOdds,
-  type GrantContents,
-} from './items.ts';
+import { HERO_ATTRIBUTE_BUFF, HERO_ATTRIBUTE_ITEMS, HERO_BOX_QUALITY, itemEffect, itemGoldPrice, medalId, medalOdds, type GrantContents } from './items.ts';
 import { QUEST_CATALOGUE } from './quests.ts';
 import { seededRng } from './rng.ts';
 import { DAY, HOUR } from './time.ts';
@@ -82,7 +70,6 @@ const SPEEDUPS: Record<string, string> = {
   'consume.2.c': 'Cuts 8 hours off a construction or research.',
   'consume.2.c.1': 'Cuts 10–30 hours (random) off a construction or research.',
   'consume.2.d': 'Cuts 30% of the remaining time off a construction or research.',
-  'player.destroy.1.a': 'Finishes a demolition at once and removes the whole building, whatever its level.',
   'player.troop.1.b': 'Cuts 30% off the remaining time of one troop-training batch.',
   'player.fort.1.c': 'Cuts 30% off the remaining time of one fortification batch.',
 };
@@ -91,13 +78,9 @@ const HOW_TO: Record<string, string> = {
   speedup: 'Use from a construction (City tab) or research (Research tab) in progress.',
   'troops.speedup': 'Use on a batch in the Military tab training queue.',
   'fortifications.speedup': 'Use on a batch in the Military tab fortification queue.',
-  'city.move': 'Use from City settings (city name menu), or "Move city here" on a free flat in the Map tab.',
-  'player.flag': 'Use from Lord settings (top-right menu).',
-  'player.rename': 'Use from Lord settings (top-right menu).',
-  'heroes.tavern.refresh': 'Use from the Inn in the Heroes tab.',
+  'city.move': 'Use with "Move city here" on a free flat in the Map tab.',
   'heroes.reset': "Use from a hero's Points dialog in the Heroes tab.",
   'heroes.useItem': "Use from a hero's Items button in the Heroes tab.",
-  'alliance.useItem': 'Used by the alliance leader on the alliance (API only for now: POST /api/v1/alliance/items).',
   'city.truce': 'Use from Lord settings (top-right menu).',
 };
 
@@ -106,10 +89,7 @@ const ATTRIBUTE_NAMES = { power: 'Attack', management: 'Politics', stratagem: 'I
 function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
   const name = (x: string) => itemConfig(x)?.name.trim() ?? x;
   if (SPEEDUPS[id]) {
-    const howTo =
-      id === 'player.destroy.1.a'
-        ? 'Use on a building that is being demolished.'
-        : HOW_TO[id.startsWith('player.troop') ? 'troops.speedup' : id.startsWith('player.fort') ? 'fortifications.speedup' : 'speedup'];
+    const howTo = HOW_TO[id.startsWith('player.troop') ? 'troops.speedup' : id.startsWith('player.fort') ? 'fortifications.speedup' : 'speedup'];
     return { description: SPEEDUPS[id], use: 'elsewhere', howTo };
   }
   if (LOYALTY_MEDALS[id])
@@ -128,45 +108,31 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
     'player.experience.1.c': 'a full level, at least 100,000',
   };
   if (books[id]) return { description: `Gives a hero experience: ${books[id]}.`, use: 'elsewhere', howTo: HOW_TO['heroes.useItem'] };
-  if (ALLIANCE_PACT_ITEMS[id])
-    return {
-      description: `Raises your alliance's member limit to 1,000 ${duration(ALLIANCE_PACT_ITEMS[id])}.`,
-      use: 'elsewhere',
-      howTo: HOW_TO['alliance.useItem'],
-    };
-  if (id === 'consume.1.a')
-    return {
-      description: `Lets you post one message in the World chat channel (${BALANCE.worldChatSpeakerCost} Speaker per message).`,
-      use: 'elsewhere',
-      howTo: 'Used automatically when you chat in World.',
-    };
   const chestFor = ITEMS.find((i) => {
     const e = itemEffect(i.id);
     return e?.kind === 'chest' && e.key === id;
   });
   if (chestFor)
     return { description: `Opens a ${chestFor.name.trim()}.`, use: 'elsewhere', howTo: `Use the ${chestFor.name.trim()}; the key is taken automatically.` };
-  const payout = /^player\.box\.gambling\.(food|wood|stone|iron|gold)$/.exec(id);
-  if (payout) return { description: `Amulet prize, paid straight into your city as ${RES_NAMES[payout[1] as keyof typeof RES_NAMES]}.`, use: 'none' };
 
   const e = itemEffect(id);
   if (!e) return { description: 'Event item with no effect on this server.', use: 'none' };
   switch (e.kind) {
     case 'buff':
       return { description: `${e.desc} ${duration(e.durationMs)}. Using another extends the time.`, use: 'direct' };
-    case 'grant':
-      return { description: `Gives ${contents(e)}${e.resources || e.troops ? ' to the current city' : ''}.`, use: 'direct' };
+    case 'grant': {
+      const description = `Gives ${contents(e)}${e.resources || e.troops ? ' to the current city' : ''}.`;
+      // the Newbies Package is never sold or won: every new lord gets one (player.createPlayer)
+      if (id === 'player.box.present.2') return { description, use: 'direct', howTo: 'Every new lord gets one when they start; it cannot be bought.' };
+      return { description, use: 'direct' };
+    }
     case 'chest':
       return { description: `Locked chest: needs a ${name(e.key)}. Contains ${contents(e.contents())}.`, use: 'direct' };
     case 'box':
       if (MEDAL_BOXES[id]) return { description: `Contains 2–4 each of ${list(MEDAL_BOXES[id].map((l) => name(`hero.loyalty.${l}`)))}.`, use: 'direct' };
       return { description: 'Contains random items.', use: 'direct' };
-    case 'amulet':
-      return { description: 'Spin the Amulet: win one of 24 prizes (items or resources); rarer prizes are less likely.', use: 'direct' };
     case 'special':
       switch (e.handler) {
-        case 'speechText':
-          return { description: "Restores the current city's loyalty to 100 and clears grievance.", use: 'direct' };
         case 'civilCode':
           return { description: 'Adds 20% of the maximum population (at least 100) to the current city.', use: 'direct' };
         case 'cureInjured':
@@ -178,20 +144,11 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
             use: 'direct',
           };
         }
-        case 'chatIcon': {
-          const c = CHAT_ICONS[id];
-          const tier = ['', 'bronze', 'silver', 'gold'][c?.icon ?? 0];
-          return { description: `Shows a ${tier} badge next to your name in chat ${duration(c?.durationMs ?? DAY)}.`, use: 'direct' };
-        }
       }
       break;
     case 'command': {
       const text: Record<string, string> = {
-        'consume.move.1': 'Moves your city to a random free spot in a state you choose.',
-        'player.more.castle.1.a': 'Moves your city to a free flat tile of your choice.',
-        'consume.changeflag.1': 'Changes the flag shown on your cities.',
-        'player.name.1.a': "Changes your lord's name.",
-        'consume.refreshtavern.1': "Replaces the Inn's hero offers for free.",
+        'consume.move.1': `Moves your city to a free flat tile of your choice, then cools down ${duration(BALANCE.teleportCooldownMs)}.`,
         'hero.reset.1': "Un-assigns all of a hero's level points so you can spend them again.",
         'player.peace.1': `Truce: your cities cannot be attacked ${duration(BALANCE.truceDurationMs)}, but you cannot attack either.`,
       };
@@ -209,22 +166,15 @@ export function itemInfo(id: string): ItemInfo | undefined {
   return { id, name: cfg.name.trim(), category: ITEM_CATEGORIES[cfg.type] ?? 'Other', price: itemGoldPrice(id) ?? 0, ...describe(id) };
 }
 
-/** Amulet prizes paid out directly (never held) and the test item are left out. */
-const NOT_HELD = /^player\.box\.(gambling\.(food|wood|stone|iron|gold|medal\.10)|test\.1)$/;
-
 /** Every item a lord can hold, by category and name. */
-export const ITEM_INFO: ItemInfo[] = ITEMS.filter((i) => !NOT_HELD.test(i.id))
-  .map((i) => itemInfo(i.id)!)
-  .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+export const ITEM_INFO: ItemInfo[] = ITEMS.map((i) => itemInfo(i.id)!).sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
 
 /** Where a medal comes from (Items tab): every number is computed from the same rules the server uses. */
 export interface MedalSources {
   /** won attacks: chance per win of getting this medal (expected medals per win), by city level */
   attacks: { cityLevel: number; chance: number }[];
-  /** as an Amulet prize (the daily gift is an Amulet) */
-  amulet: { chance: number; min: number; max: number } | null;
-  /** boxes and chests a lord can get (gold shop or Amulet) that hold it; price in gold */
-  containers: { id: string; name: string; min: number; max: number; always: boolean; price: number; amulet: boolean; key: string | null }[];
+  /** boxes and chests sold for gold that hold it; price in gold */
+  containers: { id: string; name: string; min: number; max: number; always: boolean; price: number; key: string | null }[];
   /** one-off quest rewards */
   quests: { name: string; count: number }[];
 }
@@ -244,7 +194,7 @@ export function medalSources(level: number): MedalSources {
     const e = itemEffect(item.id);
     if (!e || (e.kind !== 'box' && e.kind !== 'chest')) continue;
     const price = itemGoldPrice(item.id) ?? 0;
-    if (!price && !item.canGamble) continue;
+    if (!price) continue;
     // random contents: look at many openings
     const rng = seededRng(`medal-sources:${item.id}`);
     const counts = Array.from({ length: e.kind === 'box' ? 200 : 1 }, () => (e.kind === 'box' ? e.contents(rng) : e.contents())?.items?.[id] ?? 0);
@@ -257,10 +207,9 @@ export function medalSources(level: number): MedalSources {
       max: Math.max(...held),
       always: held.length === counts.length,
       price,
-      amulet: item.canGamble,
       key: e.kind === 'chest' ? (itemConfig(e.key)?.name.trim() ?? e.key) : null,
     });
   }
   const quests = QUEST_CATALOGUE.filter((q) => q.award.items?.[id]).map((q) => ({ name: q.name, count: q.award.items![id] }));
-  return { attacks, amulet: amuletPrize(id), containers, quests };
+  return { attacks, containers, quests };
 }

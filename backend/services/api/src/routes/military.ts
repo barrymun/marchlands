@@ -20,7 +20,6 @@ import {
   SendArmyBody,
   StationedArmyList,
   TavernHireParams,
-  TavernRefreshBody,
   TavernOffers,
   TileParams,
   TroopParams,
@@ -49,11 +48,8 @@ export default async function militaryRoutes(app: ZApp) {
   );
   app.post(
     '/cities/:cityId/tavern/refresh',
-    s(tags.heroes, 'New offers for gold or a Hero Hunting item (hero.refreshHerosListFromTavern)', TavernOffers, {
-      params: zCityParams,
-      body: TavernRefreshBody,
-    }),
-    (req) => game(req, (ctx, pid) => heroes.refreshTavern(ctx, pid, req.params.cityId, req.body.payWith)),
+    s(tags.heroes, 'New offers for gold (hero.refreshHerosListFromTavern)', TavernOffers, { params: zCityParams }),
+    (req) => game(req, (ctx, pid) => heroes.refreshTavern(ctx, pid, req.params.cityId)),
   );
   app.post('/cities/:cityId/tavern/:heroId/hire', s(tags.heroes, 'Hire (hero.hireHero)', HeroBean, { params: TavernHireParams }), (req) =>
     game(req, (ctx, pid) => heroes.hire(ctx, pid, req.params.cityId, req.params.heroId)),

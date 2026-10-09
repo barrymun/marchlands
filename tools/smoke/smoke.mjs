@@ -363,13 +363,16 @@ async function main() {
   const playerNow = await ok(a.token, 'GET', '/player');
   check(!('cents' in playerNow.playerInfo), 'no cents on the lord');
   const goldBefore = (await ok(a.token, 'GET', `/cities/${cid}`)).resource.gold;
-  const amulets = await ok(a.token, 'POST', `/cities/${cid}/shop/gold`, { itemId: 'player.box.gambling.3', amount: 2 });
+  const bought = await ok(a.token, 'POST', `/cities/${cid}/shop/gold`, { itemId: 'player.resinc.1', amount: 2 });
   check(
-    amulets.gold === 80_000 && goldBefore - (await ok(a.token, 'GET', `/cities/${cid}`)).resource.gold >= 79_000,
-    'Amulets bought with city gold (5 cents = 40,000 each)',
+    bought.gold > 0 && goldBefore - (await ok(a.token, 'GET', `/cities/${cid}`)).resource.gold >= bought.gold - 1000,
+    `items bought with city gold (${bought.gold} for 2 Plowshares)`,
   );
-  const amulet = await ok(a.token, 'POST', '/player/items/player.box.gambling.3/use', { cityId: cid });
-  check(amulet.amulet?.slots.length === 24, `amulet won ${amulet.amulet?.prize.count} x ${amulet.amulet?.prize.id}`);
+  // no gambling: the Amulet and its prizes are gone; the daily gift is a fixed bundle of resources
+  const config = await ok(a.token, 'GET', '/config/static');
+  check(!config.items.some((i) => i.id.startsWith('player.box.gambling.')), 'no Amulet in the item list');
+  const gift = await ok(a.token, 'POST', '/quests/daily-gift', { cityId: cid });
+  check(gift.resources.food > 0 && gift.resources.gold > 0, `daily gift: ${JSON.stringify(gift.resources)}`);
   await ok(a.token, 'POST', `/cities/${cid}/shop/gold`, { itemId: 'player.resinc.1', amount: 1 });
   await ok(a.token, 'POST', '/player/items/player.resinc.1/use', {});
   const ps = await ok(a.token, 'GET', '/player');
@@ -386,6 +389,15 @@ async function main() {
     book.sellers.some((x) => x.price === 50),
     'market order on the book',
   );
+
+  // ---- free lord actions: flag any time, rename once a day ----
+  await ok(a.token, 'POST', '/player/flag', { flag: 'NEW' });
+  check((await ok(a.token, 'GET', '/player')).playerInfo.flag === 'NEW', 'flag changed for free');
+  await ok(a.token, 'POST', '/player/rename', { userName: `renamed${suffix}` });
+  const renamed = await ok(a.token, 'GET', '/player');
+  check(renamed.playerInfo.userName === `renamed${suffix}` && renamed.nextRenameAt > Date.now(), 'lord renamed for free');
+  const twice = await call(a.token, 'POST', '/player/rename', { userName: `twice${suffix}` });
+  check(twice.ok !== 1, 'a second rename the same day is refused');
 
   // ---- rankings / quests ----
   const quests = await ok(a.token, 'GET', '/quests');

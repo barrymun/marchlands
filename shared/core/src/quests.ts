@@ -90,13 +90,13 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   q(8, 'Military Science', 'Research Military Science.', [{ name: 'Military Science level 1', target: { kind: 'research', techId: 8, level: 1 } }], { items: { 'consume.2.b': 1 } }),
   // 9 Alliance
   q(9, 'Embassy', 'Build an Embassy.', [{ name: 'Embassy level 1', target: b(28, 1) }], { resources: res(1000, 2000, 500, 300) }),
-  q(9, 'Join an Alliance', 'Create or join an alliance.', [{ name: 'Be in an alliance', target: { kind: 'alliance' } }], { items: { 'player.box.gambling.3': 1 } }),
+  q(9, 'Join an Alliance', 'Create or join an alliance.', [{ name: 'Be in an alliance', target: { kind: 'alliance' } }], { resources: { gold: 50_000 } }),
   // 10 Correspondence
   q(10, 'Correspondence', 'Send a letter to another lord.', [{ name: 'Send a mail', target: { kind: 'mailSent' } }], { resources: res(500, 500, 500, 500) }),
   // 11 Hero Recruitment / Military Service
   q(11, 'Inn', 'Build an Inn to meet heroes.', [{ name: 'Inn level 1', target: b(21, 1) }], { resources: res(500, 2000, 1000, 400) }),
   q(11, 'Feasting Hall', 'Build a Feasting Hall to host heroes.', [{ name: 'Feasting Hall level 1', target: b(27, 1) }], { resources: res(1000, 2500, 1200, 700) }),
-  q(11, 'Recruit a Hero', 'Hire your first hero.', [{ name: 'Own 1 hero', target: { kind: 'heroes', count: 1 } }], { items: { 'consume.refreshtavern.1': 1 } }),
+  q(11, 'Recruit a Hero', 'Hire your first hero.', [{ name: 'Own 1 hero', target: { kind: 'heroes', count: 1 } }], { resources: { gold: 20_000 } }),
   q(11, 'Militia', 'Train 100 Warriors.', [{ name: '100 Warriors', target: { kind: 'troops', key: 'militia', count: 100 } }], { resources: res(5000, 5000, 0, 2500) }),
   // 14 Fortification
   q(14, 'Traps', 'Build 100 traps on your walls.', [{ name: '100 Traps', target: { kind: 'troops', key: 'trap', count: 100 } }], { resources: res(2000, 10000, 2000, 1000) }),

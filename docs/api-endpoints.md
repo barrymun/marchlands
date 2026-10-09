@@ -26,7 +26,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/player/bookmarks` | Bookmark a castle (castle.saveCastleSignList) |
 | DELETE | `/api/v1/player/bookmarks/{tileId}` | Remove a bookmark |
 | PATCH | `/api/v1/player/face` | Set portrait and sex once (common.changeUserFace) |
-| POST | `/api/v1/player/flag` | Change flag with a National Flag (city.modifyFlag) |
+| POST | `/api/v1/player/flag` | Change the flag, free (city.modifyFlag) |
 | GET | `/api/v1/player/flows` | Saved flows (series of actions run on cities) |
 | POST | `/api/v1/player/flows` | Create a flow, or replace one by id |
 | DELETE | `/api/v1/player/flows/{flowId}` | Delete a flow |
@@ -36,7 +36,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/player/furlough` | Holiday mode, paid per day with a city's gold (furlough.isFurlought) |
 | DELETE | `/api/v1/player/furlough` | End holiday mode (furlough.cancelFurlought) |
 | POST | `/api/v1/player/items/{itemId}/use` | Use an item (shop.useGoods / shop.useCastleGoods) |
-| POST | `/api/v1/player/rename` | Rename the lord with a New ID (city.modifyUserName) |
+| POST | `/api/v1/player/rename` | Rename the lord: free, once a day, if the name is free (city.modifyUserName) |
 | POST | `/api/v1/player/restart` | Delete everything and start over (common.deleteUserAndRestart) |
 | GET | `/api/v1/player/statistics` | The lord's statistics: all time, last 7 days and per city (a few minutes behind) |
 | POST | `/api/v1/player/title/promote` | Promote to the next nobility title |
@@ -52,7 +52,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | PATCH | `/api/v1/cities/{cityId}` | Rename / logo / defence settings (city.modifyCastleName, army.setArmyGoOut) |
 | POST | `/api/v1/cities/{cityId}/comfort` | Comfort: 1 relief, 2 prayer, 3 blessing, 4 population raising (interior.pacifyPeople) |
 | POST | `/api/v1/cities/{cityId}/levy` | Levy: 1 gold, 2 food, 3 wood, 4 stone, 5 iron (interior.taxation) |
-| POST | `/api/v1/cities/{cityId}/move` | Teleport: zoneId = City Teleporter, targetTileId = Adv City Teleporter |
+| POST | `/api/v1/cities/{cityId}/move` | Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned) |
 | GET | `/api/v1/cities/{cityId}/production` | Production breakdown (interior.getResourceProduceData) |
 | PUT | `/api/v1/cities/{cityId}/store-percent` | Warehouse protection split, % (city.modifyStorePercent) |
 | PUT | `/api/v1/cities/{cityId}/tax` | Tax rate (interior.modifyTaxRate) |
@@ -112,7 +112,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | DELETE | `/api/v1/cities/{cityId}/mayor` | Dismiss the mayor (hero.dischargeChief) |
 | GET | `/api/v1/cities/{cityId}/tavern` | Inn offers (hero.getHerosListFromTavern) |
 | POST | `/api/v1/cities/{cityId}/tavern/{heroId}/hire` | Hire (hero.hireHero) |
-| POST | `/api/v1/cities/{cityId}/tavern/refresh` | New offers for gold or a Hero Hunting item (hero.refreshHerosListFromTavern) |
+| POST | `/api/v1/cities/{cityId}/tavern/refresh` | New offers for gold (hero.refreshHerosListFromTavern) |
 | GET | `/api/v1/gear` | The lord's hero gear: Hero Enhancement level and stars per piece |
 | POST | `/api/v1/gear/{pieceId}/star` | Add a star to a gear piece for every hero, paid in medals |
 | PATCH | `/api/v1/heroes/{heroId}` | Rename (hero.changeName) |
@@ -181,7 +181,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/chat/alliance` | Alliance channel (common.allianceChat) |
 | POST | `/api/v1/chat/beginner` | Beginner channel (common.channelChat) |
 | POST | `/api/v1/chat/private` | Whisper (common.privateChat) |
-| POST | `/api/v1/chat/world` | World channel, costs 1 Speaker (common.worldChat) |
+| POST | `/api/v1/chat/world` | World channel (common.worldChat) |
 
 ## friends
 
@@ -210,7 +210,6 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/alliance/invites` | Invite (alliance.addUsertoAlliance) |
 | GET | `/api/v1/alliance/invites` | Invitations sent (alliance.addUsertoAllianceList) |
 | POST | `/api/v1/alliance/invites/cancel` | Withdraw (alliance.canceladdUsertoAlliance) |
-| POST | `/api/v1/alliance/items` | Use Ritual of Pact |
 | POST | `/api/v1/alliance/leave` | Leave (alliance.sayByetoAlliance / resignForAlliance) |
 | POST | `/api/v1/alliance/mail` | Circular to all members (alliance.messagesForAllianceMember) |
 | GET | `/api/v1/alliance/members` | Members (alliance.getAllianceMembers) |
@@ -252,7 +251,7 @@ All paths are relative to the server root. Names in parentheses are the original
 |---|---|---|
 | GET | `/api/v1/quests` | Quests with progress (quest.getQuestList) |
 | POST | `/api/v1/quests/{questId}/claim` | Claim the award into a city (quest.award) |
-| POST | `/api/v1/quests/daily-gift` | Daily gift |
+| POST | `/api/v1/quests/daily-gift` | Daily gift: a fixed bundle of resources into a city, once a day |
 | GET | `/api/v1/quests/groups` | Quest groups (quest.getQuestType) |
 
 ## rankings

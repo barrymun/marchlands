@@ -57,7 +57,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
     'Hero hired',
   );
   const reroll = useCommand(
-    (payWith: 'gold' | 'item') => unwrap(api.POST('/api/v1/cities/{cityId}/tavern/refresh', { params: { path: { cityId: city.id } }, body: { payWith } })),
+    () => unwrap(api.POST('/api/v1/cities/{cityId}/tavern/refresh', { params: { path: { cityId: city.id } } })),
     refresh,
     'New heroes at the Inn',
   );
@@ -274,15 +274,10 @@ export function HeroesPanel({ city }: { city: CityBean }) {
                     size="sm"
                     variant="outline"
                     disabled={reroll.isPending || city.resource.gold < tavern.data.refreshCost}
-                    onClick={() => reroll.mutate('gold')}
+                    onClick={() => reroll.mutate()}
                   >
                     <RefreshCw /> New offers ({fmt(tavern.data.refreshCost)} gold)
                   </Button>
-                  {tavern.data.huntingItems > 0 && (
-                    <Button size="sm" variant="outline" disabled={reroll.isPending} onClick={() => reroll.mutate('item')}>
-                      Use Hero Hunting ({tavern.data.huntingItems})
-                    </Button>
-                  )}
                 </div>
               )}
               {tavern.data?.heros.map((h) => (

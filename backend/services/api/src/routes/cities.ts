@@ -94,8 +94,11 @@ export default async function cityRoutes(app: ZApp) {
   );
   app.post(
     '/cities/:cityId/move',
-    s(tags.city, 'Teleport: zoneId = City Teleporter, targetTileId = Adv City Teleporter', CityMoveResult, { params: zCityParams, body: MoveCityBody }),
-    (req) => game(req, (ctx, pid) => interior.moveCity(ctx, pid, req.params.cityId, req.body)),
+    s(tags.city, 'Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned)', CityMoveResult, {
+      params: zCityParams,
+      body: MoveCityBody,
+    }),
+    (req) => game(req, (ctx, pid) => interior.moveCity(ctx, pid, req.params.cityId, req.body.targetTileId)),
   );
 
   // ---- buildings ----

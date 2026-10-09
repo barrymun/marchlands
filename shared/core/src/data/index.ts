@@ -1,7 +1,6 @@
 // Static game configuration converted from the legacy `config_*` tables
 // (tools/legacy-import/convert.mjs). Treat as read-only.
 
-import { BALANCE } from '../balance.ts';
 import { BuildingType, TechType } from '../constants.ts';
 import type { Resources } from '../resources.ts';
 import buildingRows from './legacy/buildings.json' with { type: 'json' };
@@ -76,11 +75,9 @@ export interface QuestConfig {
   requires: { buildings: number[]; items: number[]; techs: number[]; quests: number[] };
 }
 
-// (marchlands) the original's level-10 upgrades also need a Michelangelo's Script item; with
-// BALANCE.buildingItemRequirements off they need only resources, time and the usual prerequisites
-export const BUILDINGS = (buildingRows as BuildingLevelConfig[]).map((b) =>
-  BALANCE.buildingItemRequirements || !b.requires.items.length ? b : { ...b, requires: { ...b.requires, items: [] } },
-);
+// (marchlands) the original's level-10 upgrades also needed a Michelangelo's Script item; here they
+// need only resources, time and the usual prerequisites (the Script is removed)
+export const BUILDINGS = (buildingRows as BuildingLevelConfig[]).map((b) => (!b.requires.items.length ? b : { ...b, requires: { ...b.requires, items: [] } }));
 /**
  * (marchlands) Hero Enhancement (gear.ts): twice Military Science's cost and time, level N needs Academy level N.
  */
@@ -118,20 +115,52 @@ export const REMOVED_ITEMS: readonly string[] = [
   'player.box.troop.1', // Superb Regiments
   'player.box.wood.1', // Wooden Chest
   'player.box.test.1', // Test Item (sold for cents, did nothing)
-  // there are no cents: the Amulet prize that paid them
-  'player.box.gambling.medal.10',
+  // Amulet prizes nothing else gives: hero helms (a random hero) and troop battalions
+  'player.box.hero.a',
+  'player.box.hero.b',
+  'player.box.hero.c',
+  'player.box.hero.d',
+  'player.box.troop.a',
+  'player.box.troop.b',
+  'player.box.troop.c',
+  'player.box.troop.d',
+  // items for things that are free here, or gone: renaming the lord (once a day) and changing the
+  // flag, re-rolling the Inn (gold only), demolishing (always instant), the level-10 building
+  // requirement, chat icons, the alliance member limit, and city loyalty (lords' cities have none)
+  'player.name.1.a', // New ID
+  'consume.changeflag.1', // National Flag
+  'consume.refreshtavern.1', // Hero Hunting
+  'player.destroy.1.a', // Dynamite
+  'consume.blueprint.1', // Michelangelo's Script
+  'player.speak.bronze_publicity_ambassador.permanent',
+  'player.speak.bronze_publicity_ambassador.permanent.15',
+  'player.speak.silver_publicity_ambassador.15',
+  'player.speak.silver_publicity_ambassador.permanent',
+  'player.speak.gold_publicity_ambassador.15',
+  'player.speak.gold_publicity_ambassador.permanent',
+  'consume.hegemony.1', // Ritual of Pact
+  'alliance.ritual_of_pact.advanced',
+  'alliance.ritual_of_pact.premium',
+  'alliance.ritual_of_pact.ultimate',
+  'player.heart.1.a', // Speech Text
+  'hero.reset.1.a', // Holy Water (5 pieces package)
+  'player.more.castle.1.a', // Adv City Teleporter: the City Teleporter now picks the tile
+  // Speakers (and their 10 / 100 packs): World chat is free
+  'consume.1.a',
+  'consume.1.b',
+  'consume.1.c',
 ];
 /**
  * (marchlands) legacy item families removed from this game: event, promotion and compensation packages
  * (every gift package but the Newbies Package each new lord gets), event keys and tokens, and the Amulet
- * copies other than the one sold and won (player.box.gambling.3)
+ * (a gamble) with every copy of it and its prizes (player.box.gambling.*)
  */
 const REMOVED_ITEM_PATTERNS: readonly RegExp[] = [
   /^player\.box\.present\.(?!2$)/,
   /^player\.box\.(compensation|merger|evony|toolbarbonus)/,
   /^player\.key\./,
   /^player\.(halloween|cupid|irish|easter)\./,
-  /^player\.box\.gambling\.(?!3$)\d+$/,
+  /^player\.box\.gambling\./,
 ];
 export const isRemovedItem = (id: string) => REMOVED_ITEMS.includes(id) || REMOVED_ITEM_PATTERNS.some((r) => r.test(id));
 /** (marchlands) items this game adds to the legacy ones (sold for city gold, BALANCE.goldShop) */

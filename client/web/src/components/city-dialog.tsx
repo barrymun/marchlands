@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import type { CityBean } from '@marchlands/api-client';
-import { BALANCE, itemConfig, STATE_NAMES } from '@marchlands/core';
+import { BALANCE, itemConfig, itemGoldPrice } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { qk, useCommand } from '@/hooks/use-game';
+import { Countdown } from '@/components/countdown';
+import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
+import { fmt } from '@/lib/format';
 
 const TELEPORT = 'consume.move.1';
-const ADV_TELEPORT = 'player.more.castle.1.a';
 
-/** City settings: rename, and moving the city with a City Teleporter (random spot in a state) or an Adv City Teleporter (chosen flat). */
+/** City settings: rename, and moving the city to a chosen free flat with a City Teleporter (bought with the city's gold when none is owned). */
 export function CityDialog({ city, open, onClose, target }: { city: CityBean; open: boolean; onClose: () => void; target?: { x: number; y: number } }) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -27,8 +27,8 @@ export function CityDialog({ city, open, onClose, target }: { city: CityBean; op
 
 function CityForm({ city, target, onDone }: { city: CityBean; target?: { x: number; y: number }; onDone: () => void }) {
   const inv = useInventory();
+  const player = usePlayer();
   const [name, setName] = useState('');
-  const [zone, setZone] = useState('0');
   const [x, setX] = useState(target ? String(target.x) : '');
   const [y, setY] = useState(target ? String(target.y) : '');
   const refresh = () => [qk.city(city.id), qk.player, ['map'], ['tile']];
@@ -38,7 +38,7 @@ function CityForm({ city, target, onDone }: { city: CityBean; target?: { x: numb
     'City renamed',
   );
   const move = useCommand(
-    (body: { zoneId?: number; targetTileId?: number }) => unwrap(api.POST('/api/v1/cities/{cityId}/move', { params: { path: { cityId: city.id } }, body })),
+    (body: { targetTileId: number }) => unwrap(api.POST('/api/v1/cities/{cityId}/move', { params: { path: { cityId: city.id } }, body })),
     refresh,
     'City moved',
   );
@@ -46,6 +46,9 @@ function CityForm({ city, target, onDone }: { city: CityBean; target?: { x: numb
   const tx = Number(x);
   const ty = Number(y);
   const validXY = x !== '' && y !== '' && Number.isInteger(tx) && Number.isInteger(ty) && tx >= 0 && ty >= 0 && tx < size && ty < size;
+  const owned = inv.count(TELEPORT);
+  const price = itemGoldPrice(TELEPORT) ?? 0;
+  const cooldown = player.data?.buffs.find((b) => b.id === 'MoveCastleCoolDownBuff' && b.endTime > Date.now());
 
   return (
     <>
@@ -59,7 +62,7 @@ function CityForm({ city, target, onDone }: { city: CityBean; target?: { x: numb
         <WorkRates city={city} />
         <Separator />
         <div className="grid gap-2">
-          <Label htmlFor="city-name">Rename (free)</Label>
+          <Label htmlFor="city-name">Rename</Label>
           <div className="flex gap-2">
             <Input id="city-name" value={name} maxLength={20} placeholder={city.name} onChange={(e) => setName(e.target.value)} />
             <Button disabled={!name.trim() || rename.isPending} onClick={() => rename.mutate(undefined, { onSuccess: () => setName('') })}>
@@ -73,40 +76,24 @@ function CityForm({ city, target, onDone }: { city: CityBean; target?: { x: numb
         </p>
         <div className="grid gap-2">
           <Label>
-            {itemConfig(TELEPORT)?.name} ×{inv.count(TELEPORT)}: random free spot in a state
-          </Label>
-          <div className="flex gap-2">
-            <Select value={zone} onValueChange={setZone}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {STATE_NAMES.map((n, i) => (
-                  <SelectItem key={n} value={String(i)}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button disabled={inv.count(TELEPORT) === 0 || move.isPending} onClick={() => move.mutate({ zoneId: Number(zone) }, { onSuccess: onDone })}>
-              Teleport
-            </Button>
-          </div>
-        </div>
-        <div className="grid gap-2">
-          <Label>
-            {itemConfig(ADV_TELEPORT)?.name} ×{inv.count(ADV_TELEPORT)}: a free flat tile you choose
+            {itemConfig(TELEPORT)?.name} · {owned > 0 ? `×${owned}` : `${fmt(price)} gold`}: a free flat tile you choose
           </Label>
           <div className="flex gap-2">
             <Input inputMode="numeric" placeholder="x" value={x} onChange={(e) => setX(e.target.value.replace(/\D/g, ''))} />
             <Input inputMode="numeric" placeholder="y" value={y} onChange={(e) => setY(e.target.value.replace(/\D/g, ''))} />
             <Button
-              disabled={inv.count(ADV_TELEPORT) === 0 || !validXY || move.isPending}
+              disabled={!validXY || !!cooldown || move.isPending || (owned === 0 && city.resource.gold < price)}
+              title={owned > 0 ? undefined : `Bought with ${city.name}'s gold`}
               onClick={() => move.mutate({ targetTileId: ty * size + tx }, { onSuccess: onDone })}
             >
               Teleport
             </Button>
           </div>
+          {cooldown && (
+            <p className="text-xs text-muted-foreground">
+              Cooling down: next move in <Countdown endTime={cooldown.endTime} />.
+            </p>
+          )}
         </div>
       </div>
     </>

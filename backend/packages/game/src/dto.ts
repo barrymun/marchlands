@@ -119,8 +119,6 @@ export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
     idlePopulation: stats.idlePopulation,
     workPeople: stats.workersNeeded,
     efficiency: Math.round(stats.efficiency * 100),
-    support: Math.floor(c.loyalty),
-    complaint: Math.floor(c.grievance),
     populationDirection: populationDirection(c, stats),
     updatedAt: c.resourcesAt,
   };
@@ -177,7 +175,6 @@ export function playerInfo(p: PlayerRow, extras: { allianceName?: string; cityCo
     population: extras.population ?? p.population,
     beginner: p.beginner,
     status: p.status,
-    icon: p.misc.icon ?? 0,
     changedFace: p.misc.changedFace ?? false,
     createrTime: p.createdAt,
     lastLoginTime: p.lastLoginAt,

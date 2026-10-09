@@ -2,8 +2,6 @@
 // (shop.useGoods / shop.useCastleGoods). Item effects are declared in @marchlands/core items.ts.
 
 import {
-  amuletDirectPayout,
-  CHAT_ICONS,
   createRandomHero,
   GameError,
   HERO_BOX_QUALITY,
@@ -12,7 +10,6 @@ import {
   itemGoldPrice,
   ITEMS,
   randInt,
-  rollAmulet,
   upgradeExpFor,
   addTroops,
   type GrantContents,
@@ -88,7 +85,6 @@ async function grant(ctx: Ctx, p: PlayerRow, b: CityBundle | null, g: GrantConte
 export interface UseItemResult {
   itemId: string;
   granted?: GrantContents;
-  amulet?: { slots: { id: string; count: number; kind: number }[]; winner: number; prize: { id: string; count: number } };
   hero?: ReturnType<typeof heroBean>;
 }
 
@@ -141,40 +137,8 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
       result.granted = contents;
       break;
     }
-    case 'amulet': {
-      const city = needCity();
-      consumeItem(ctx, p, itemId);
-      const { slots, winner } = rollAmulet(ctx.rng);
-      const prize = slots[winner];
-      const direct = amuletDirectPayout(prize.id);
-      if (direct?.resource) {
-        gainResources(city.city, { [direct.resource]: prize.count });
-        pushResources(ctx, city);
-      } else addItem(ctx, p, prize.id, prize.count);
-      result.amulet = { slots, winner, prize: { id: prize.id, count: prize.count } };
-      const cfg = itemConfig(prize.id);
-      const price = itemGoldPrice(prize.id);
-      const worth = price ? ` (worth ${(price * prize.count).toLocaleString('en')} gold)` : '';
-      if (prize.kind <= 2) {
-        ctx.broadcast('server.SystemInfoMsg', {
-          alliance: false,
-          tV: true,
-          noSenderSystemInfo: true,
-          msg: `${p.sex === 1 ? 'Lady' : 'Lord'} <b>${p.name}</b> gained <b>${prize.count} ${cfg?.name ?? prize.id}</b>${worth} from the Amulet!`,
-        });
-      }
-      break;
-    }
     case 'special': {
       switch (effect.handler) {
-        case 'speechText': {
-          const city = needCity();
-          consumeItem(ctx, p, itemId);
-          city.city.loyalty = 100;
-          city.city.grievance = 0;
-          pushCity(ctx, city);
-          break;
-        }
         case 'civilCode': {
           const city = needCity();
           consumeItem(ctx, p, itemId);
@@ -223,13 +187,6 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
             .returning();
           pushHero(ctx, p.id, row, 0);
           result.hero = heroBean(row);
-          break;
-        }
-        case 'chatIcon': {
-          consumeItem(ctx, p, itemId);
-          const icon = CHAT_ICONS[itemId];
-          setBuff(ctx, p, 'ChatIconBuff', 'Publicity Ambassador', ctx.now + icon.durationMs, { param: icon.icon });
-          p.misc = { ...p.misc, icon: icon.icon };
           break;
         }
       }

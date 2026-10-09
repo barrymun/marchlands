@@ -342,7 +342,6 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
           <TimerBar startTime={building.startTime} endTime={building.endTime} />
           <SpeedupOptions
             endTime={building.endTime}
-            demolishing={building.status === 2}
             goldNeed={coins.data?.goldNeed}
             gold={city.resource.gold}
             pending={speedup.isPending}

@@ -1,4 +1,4 @@
-import { Coins, Hammer, Heart, Mountain, Trees, Users, Wheat } from 'lucide-react';
+import { Coins, Hammer, Mountain, Trees, Users, Wheat } from 'lucide-react';
 import type { HeroBean, ResourceBean, ResourceLine } from '@marchlands/api-client';
 import { getGameSpeed, scaled } from '@marchlands/core';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -77,17 +77,6 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
         </TooltipTrigger>
         <TooltipContent>
           Population · {fmt(r.idlePopulation)} idle · {r.efficiency}% labour efficiency
-        </TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center gap-1.5 tabular-nums">
-            <Heart className="size-4 text-muted-foreground" />
-            <span className="font-medium">{r.support}</span>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          Loyalty {r.support} · grievance {r.complaint} · tax {r.taxRate}%
         </TooltipContent>
       </Tooltip>
     </div>

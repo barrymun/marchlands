@@ -194,6 +194,7 @@ export const PlayerState = z
     gameSpeed: z.number(),
     currentTime: Ms,
     tutorialStepId: z.number().int(),
+    nextRenameAt: Ms.describe('(marchlands) when the lord may rename again (0: now)'),
   })
   .meta({ id: 'PlayerState' });
 export type PlayerState = z.infer<typeof PlayerState>;
@@ -219,14 +220,6 @@ export const UseItemResult = z
   .object({
     itemId: z.string(),
     granted: GrantContents.optional().describe('what a grant / box / chest item gave'),
-    amulet: z
-      .object({
-        slots: z.array(z.object({ id: z.string(), count: z.number().int(), kind: z.number().int().describe('rarity tier, 1 best .. 5 common') })),
-        winner: z.number().int().describe('index into slots'),
-        prize: z.object({ id: z.string(), count: z.number().int() }),
-      })
-      .optional()
-      .describe('Amulet gamble result'),
     hero: HeroBean.optional().describe('hero produced by a hero box'),
   })
   .meta({ id: 'UseItemResult' });

@@ -2,12 +2,13 @@
 // claimed once for their award (orig sent a single hard-coded dummy quest).
 
 import { and, count, eq, inArray } from 'drizzle-orm';
-import { evaluateTarget, GameError, HeroStatus, QUEST_CATALOGUE, questById, questGroups, TROOP_KEY_LIST, FORT_KEY_LIST, type QuestSnapshot } from '@marchlands/core';
+import { BALANCE, evaluateTarget, GameError, HeroStatus, QUEST_CATALOGUE, questById, questGroups, TROOP_KEY_LIST, FORT_KEY_LIST, type QuestSnapshot } from '@marchlands/core';
 import { heroes, mails, playerRelations, questProgress, tiles } from '@marchlands/db';
 import { openOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { addItem, gainResources, pushResources } from '../helpers.ts';
 import { citiesOf, getPlayer, saveCity, savePlayer } from '../repo.ts';
+import { prefixed } from '../stats.ts';
 
 async function snapshot(ctx: Ctx, playerId: number): Promise<QuestSnapshot> {
   const p = await getPlayer(ctx, playerId);
@@ -111,13 +112,17 @@ export async function claimQuest(ctx: Ctx, playerId: number, questId: number, ci
   return q.award;
 }
 
-/** Daily gift (quest type 3 in the original client): one Amulet a day. */
-export async function claimDailyGift(ctx: Ctx, playerId: number) {
-  const p = await getPlayer(ctx, playerId, { lock: true });
+/** Daily gift (quest type 3 in the original client); (marchlands) a fixed bundle of resources (BALANCE.dailyGift), not an Amulet. */
+export async function claimDailyGift(ctx: Ctx, playerId: number, cityId: number) {
+  const b = await openOwnCity(ctx, playerId, cityId);
   const day = new Date(ctx.now).toISOString().slice(0, 10);
-  if (p.misc.dailyGiftDay === day) throw new GameError('You already received today’s gift.', -99);
-  p.misc = { ...p.misc, dailyGiftDay: day };
-  addItem(ctx, p, 'player.box.gambling.3', 1);
-  await savePlayer(ctx, p);
-  return { items: { 'player.box.gambling.3': 1 } };
+  if (b.player.misc.dailyGiftDay === day) throw new GameError('You already received today’s gift.', -99);
+  b.player.misc = { ...b.player.misc, dailyGiftDay: day };
+  const resources = { ...BALANCE.dailyGift };
+  gainResources(b.city, resources);
+  ctx.stat(playerId, cityId, prefixed('gained.dailyGift', resources));
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
+  await savePlayer(ctx, b.player);
+  return { resources };
 }

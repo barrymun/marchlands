@@ -14,11 +14,9 @@ import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
 import { fmt } from '@/lib/format';
 
-const NEW_ID = 'player.name.1.a';
-const FLAG = 'consume.changeflag.1';
 const TRUCE = 'player.peace.1';
 
-/** Lord-wide item actions: rename (New ID), change flag (National Flag), truce (bought with `city`'s gold when none is owned). */
+/** Lord-wide actions: rename (free, once a day), change flag (free), truce (bought with `city`'s gold when none is owned). */
 export function LordDialog({ open, onClose, city }: { open: boolean; onClose: () => void; city?: CityBean }) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -45,6 +43,8 @@ function LordForm({ city }: { city?: CityBean }) {
   );
   const truceGold = itemGoldPrice(TRUCE) ?? 0;
   const now = Date.now();
+  const nextRename = player.data?.nextRenameAt ?? 0;
+  const renameWait = nextRename > now;
   const truceBuff = player.data?.buffs.find((b) => b.id === 'PlayerPeaceBuff' && b.endTime > now);
   const truceCooldown = player.data?.buffs.find((b) => b.id === 'PlayerPeaceCoolDownBuff' && b.endTime > now);
 
@@ -60,29 +60,28 @@ function LordForm({ city }: { city?: CityBean }) {
         <TitleSection />
         <Separator />
         <div className="grid gap-2">
-          <Label htmlFor="lord-name">
-            New name · {itemConfig(NEW_ID)?.name} ×{inv.count(NEW_ID)}
-          </Label>
+          <Label htmlFor="lord-name">New name</Label>
           <div className="flex gap-2">
             <Input id="lord-name" value={name} maxLength={20} placeholder={info?.userName} onChange={(e) => setName(e.target.value)} />
-            <Button
-              disabled={!name.trim() || inv.count(NEW_ID) === 0 || rename.isPending}
-              onClick={() => rename.mutate(undefined, { onSuccess: () => setName('') })}
-            >
+            <Button disabled={!name.trim() || renameWait || rename.isPending} onClick={() => rename.mutate(undefined, { onSuccess: () => setName('') })}>
               Rename
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground">
+            {renameWait ? (
+              <>
+                Renaming is free once a day: next in <Countdown endTime={nextRename} />.
+              </>
+            ) : (
+              'Free, once a day, if nobody else has the name.'
+            )}
+          </p>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="lord-flag">
-            New flag · {itemConfig(FLAG)?.name} ×{inv.count(FLAG)}
-          </Label>
+          <Label htmlFor="lord-flag">New flag</Label>
           <div className="flex gap-2">
             <Input id="lord-flag" value={flag} maxLength={5} placeholder={info?.flag} onChange={(e) => setFlag(e.target.value)} />
-            <Button
-              disabled={!flag.trim() || inv.count(FLAG) === 0 || changeFlag.isPending}
-              onClick={() => changeFlag.mutate(undefined, { onSuccess: () => setFlag('') })}
-            >
+            <Button disabled={!flag.trim() || changeFlag.isPending} onClick={() => changeFlag.mutate(undefined, { onSuccess: () => setFlag('') })}>
               Change
             </Button>
           </div>

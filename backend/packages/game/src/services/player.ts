@@ -67,7 +67,6 @@ export function initialCity(playerId: number, tileId: number, name: string, now:
     iron: r,
     resourcesAt: now,
     population: BALANCE.startPopulation,
-    loyalty: BALANCE.startLoyalty,
     taxRate: BALANCE.startTaxRate,
     buildings,
     misc: { lastTickAt: now },
@@ -108,7 +107,7 @@ export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePla
         flag,
         faceUrl,
         sex: input.sex,
-        items: { 'player.box.present.2': 1, 'consume.1.a': 10 },
+        items: { 'player.box.present.2': 1 },
         createdAt: ctx.now,
         lastLoginAt: ctx.now,
       })
@@ -173,6 +172,7 @@ export async function playerState(ctx: Ctx, playerId: number) {
     gameSpeed: Number(process.env.GAME_SPEED ?? 1),
     currentTime: ctx.now,
     tutorialStepId: player.misc.tutorialStep ?? 0,
+    nextRenameAt: nextRenameAt(player, ctx.now),
   };
 }
 
@@ -196,28 +196,34 @@ export async function changeFace(ctx: Ctx, playerId: number, faceUrl: string, se
   await pushPlayerInfo(ctx, p);
 }
 
-/** city.modifyFlag: consumes a National Flag. */
+/** city.modifyFlag; (marchlands) free (orig: a National Flag each time). */
 export async function changeFlag(ctx: Ctx, playerId: number, flag: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   const f = String(flag ?? '').trim();
   if (f.length < 1 || f.length > 5) throw new GameError('Invalid flag.', -87);
-  if (itemCount(p, 'consume.changeflag.1') <= 0) throw new GameError('Not enough item.', -99);
-  consumeItem(ctx, p, 'consume.changeflag.1');
   p.flag = f;
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
 }
 
-/** city.modifyUserName: consumes a New ID. */
+/** When a lord may rename again: free, once per BALANCE.renameCooldownMs of real time (0: now). */
+function nextRenameAt(p: PlayerRow, now: number): number {
+  const at = (p.misc.renamedAt ?? 0) + BALANCE.renameCooldownMs;
+  return at > now ? at : 0;
+}
+
+/** city.modifyUserName; (marchlands) free once a day (orig: a New ID each time). */
 export async function renamePlayer(ctx: Ctx, playerId: number, userName: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   const name = cleanName(userName, 1, 20, 'Lord name');
   assertClean(name);
-  if (itemCount(p, 'player.name.1.a') <= 0) throw new GameError('Not enough item.', -99);
+  if (name === p.name) throw new GameError('That is already your name.', -99);
+  const wait = nextRenameAt(p, ctx.now);
+  if (wait) throw new GameError(`You can rename again in ${Math.ceil((wait - ctx.now) / 3_600_000)} hour(s).`, -99);
   const taken = await findPlayerByName(ctx, name);
   if (taken && taken.id !== p.id) throw new GameError('Player name taken', -88, 409);
-  consumeItem(ctx, p, 'player.name.1.a');
   p.name = name;
+  p.misc = { ...p.misc, renamedAt: ctx.now };
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
 }

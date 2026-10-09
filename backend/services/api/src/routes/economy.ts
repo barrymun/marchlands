@@ -89,7 +89,7 @@ export default async function economyRoutes(app: ZApp) {
         buildings: BUILDINGS,
         research: RESEARCH,
         troops: TROOPS,
-        items: ITEMS.map(({ cost: _cents, buyable: _buyable, ...i }) => {
+        items: ITEMS.map(({ cost: _cents, buyable: _buyable, canGamble: _gamble, ...i }) => {
           const { category, description, use, howTo } = itemInfo(i.id)!;
           return { ...i, goldPrice: itemGoldPrice(i.id), category, description, use, howTo };
         }),
@@ -165,7 +165,11 @@ export default async function economyRoutes(app: ZApp) {
       s(tags.quests, 'Claim the award into a city (quest.award)', QuestAward, { params: QuestIdParams, body: ClaimQuestBody }),
       (req) => game(req, (ctx, pid) => quests.claimQuest(ctx, pid, req.params.questId, req.body.cityId)),
     );
-    secure.post('/quests/daily-gift', s(tags.quests, 'Daily gift', QuestDailyGift), (req) => game(req, (ctx, pid) => quests.claimDailyGift(ctx, pid)));
+    secure.post(
+      '/quests/daily-gift',
+      s(tags.quests, 'Daily gift: a fixed bundle of resources into a city, once a day', QuestDailyGift, { body: ClaimQuestBody }),
+      (req) => game(req, (ctx, pid) => quests.claimDailyGift(ctx, pid, req.body.cityId)),
+    );
 
     // ---- rankings ----
     secure.get(

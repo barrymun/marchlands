@@ -13,7 +13,6 @@ const EFFECT: Record<string, string> = {
   'consume.2.c': '−8 h',
   'consume.2.c.1': '−10–30 h',
   'consume.2.d': '−30%',
-  'player.destroy.1.a': 'finish demolition',
 };
 
 /**
@@ -23,14 +22,12 @@ const EFFECT: Record<string, string> = {
  */
 export function SpeedupOptions({
   endTime,
-  demolishing = false,
   goldNeed,
   gold,
   pending,
   onUse,
 }: {
   endTime: number;
-  demolishing?: boolean;
   /** gold to finish now */
   goldNeed?: number;
   /** the city's gold, which pays */
@@ -42,7 +39,6 @@ export function SpeedupOptions({
   const inv = useInventory();
   const left = endTime - now;
   const free = left <= scaled(BALANCE.freeSpeedupMs);
-  const ids = demolishing ? ['player.destroy.1.a', ...ITEMS] : ITEMS;
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap gap-2">
@@ -57,7 +53,7 @@ export function SpeedupOptions({
       </div>
       {!free && <p className="text-xs text-muted-foreground">Free in the last {duration(scaled(BALANCE.freeSpeedupMs))}.</p>}
       <div className="flex flex-wrap gap-1.5">
-        {ids.map((id) => {
+        {ITEMS.map((id) => {
           const owned = inv.count(id);
           const price = speedupItemGold(id);
           return (

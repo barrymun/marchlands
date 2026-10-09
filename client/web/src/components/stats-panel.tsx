@@ -40,6 +40,7 @@ const RESOURCE_COLUMNS = [
   ['plundered', 'Plundered'],
   ['stolen', 'Lost to plunder'],
   ['gained.levy', 'Levied'],
+  ['gained.dailyGift', 'Daily gift'],
   ['market.bought', 'Bought'],
   ['market.sold', 'Sold'],
 ] as const;

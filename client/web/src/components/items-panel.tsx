@@ -35,7 +35,7 @@ function goldPriceOf(e: { ids: string[] }): { id: string; price: number } | null
   return id ? { id, price: itemGoldPrice(id)! } : null;
 }
 
-/** Items with the same name and effect (e.g. the twelve Amulet ids) are shown as one entry. */
+/** Items with the same name and effect are shown as one entry. */
 interface Entry {
   info: ItemInfo;
   ids: string[];
@@ -86,11 +86,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
     if (!id) return;
     use.mutate(id, {
       onSuccess: (r) => {
-        if (r.amulet)
-          toast.success(
-            `Amulet: ${r.amulet.prize.count > 1 ? `${fmtExact(r.amulet.prize.count)} × ` : ''}${itemConfig(r.amulet.prize.id)?.name ?? r.amulet.prize.id}`,
-          );
-        else if (r.granted) toast.success(`${e.info.name}: received ${describeGrant(r.granted)}`);
+        if (r.granted) toast.success(`${e.info.name}: received ${describeGrant(r.granted)}`);
         else if (r.hero) toast.success(`${r.hero.name} (Lv ${r.hero.level}) joined your city`);
         else toast.success(`${e.info.name} used`);
       },
@@ -225,16 +221,10 @@ function MedalSourcesInfo({ level }: { level: number }) {
             </span>
           </li>
         )}
-        {s.amulet && (
-          <li>
-            <span className="text-foreground">Amulet prize</span> (the daily gift is a free Amulet): {pct(s.amulet.chance)} per Amulet,{' '}
-            {range(s.amulet.min, s.amulet.max)} at a time
-          </li>
-        )}
         {s.containers.map((c) => (
           <li key={c.id}>
-            <span className="text-foreground">{c.name}</span> ({c.always ? range(c.min, c.max) : `sometimes ${range(c.min, c.max)}`}):{' '}
-            {[c.price > 0 && `${fmt(c.price)} gold in the shop`, c.amulet && 'an Amulet prize'].filter(Boolean).join(' or ')}
+            <span className="text-foreground">{c.name}</span> ({c.always ? range(c.min, c.max) : `sometimes ${range(c.min, c.max)}`}): {fmt(c.price)} gold in
+            the shop
             {c.key && ` (opens with a ${c.key})`}
           </li>
         ))}

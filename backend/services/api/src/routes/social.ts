@@ -6,7 +6,6 @@ import {
   AllianceApplication,
   AllianceApplicationStatus,
   AllianceEvent,
-  AllianceItemBody,
   AllianceList,
   AllianceListQuery,
   AllianceMassMailBody,
@@ -81,7 +80,7 @@ export default async function socialRoutes(app: ZApp) {
   app.post('/reports/delete', s(tags.reports, 'Delete (report.deleteReport)', Empty, { body: zIds }), (req) => game(req, (ctx, pid) => reports.deleteReports(ctx, pid, req.body.ids)));
 
   // ---- chat ----
-  app.post('/chat/world', s(tags.chat, 'World channel, costs 1 Speaker (common.worldChat)', Empty, { body: ChatBody }), (req) => game(req, (ctx, pid) => social.worldChat(ctx, pid, req.body.msg, 'world')));
+  app.post('/chat/world', s(tags.chat, 'World channel (common.worldChat)', Empty, { body: ChatBody }), (req) => game(req, (ctx, pid) => social.worldChat(ctx, pid, req.body.msg, 'world')));
   app.post('/chat/beginner', s(tags.chat, 'Beginner channel (common.channelChat)', Empty, { body: ChatBody }), (req) => game(req, (ctx, pid) => social.worldChat(ctx, pid, req.body.msg, 'beginner')));
   app.post('/chat/alliance', s(tags.chat, 'Alliance channel (common.allianceChat)', Empty, { body: ChatBody }), (req) => game(req, (ctx, pid) => social.allianceChat(ctx, pid, req.body.msg)));
   app.post('/chat/private', s(tags.chat, 'Whisper (common.privateChat)', Empty, { body: PrivateChatBody }), (req) =>
@@ -156,5 +155,4 @@ export default async function socialRoutes(app: ZApp) {
   app.delete('/alliance/relations/:name', s(a, 'Drop a relation (alliance.dropAllianceFriendshipRelation)', Empty, { params: AllianceNameParams }), (req) =>
     game(req, (ctx, pid) => alliance.dropRelation(ctx, pid, req.params.name)),
   );
-  app.post('/alliance/items', s(a, 'Use Ritual of Pact', Empty, { body: AllianceItemBody }), (req) => game(req, (ctx, pid) => alliance.usePactItem(ctx, pid, req.body.itemId)));
 }

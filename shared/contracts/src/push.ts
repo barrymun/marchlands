@@ -26,8 +26,7 @@ const ProduceQueue = z.object({
 
 const ArmyList = z.object({ armys: z.array(ArmyBean) });
 
-const ChatMsg = <C extends z.ZodType>(channel: C) =>
-  z.object({ msg: z.string(), languageType: int, ownitemid: int.describe('chat icon item (0 = none)'), fromUser: z.string(), fromId: int, channel, time: Ms });
+const ChatMsg = <C extends z.ZodType>(channel: C) => z.object({ msg: z.string(), languageType: int, fromUser: z.string(), fromId: int, channel, time: Ms });
 
 export const PushSchemas = {
   // sent by the /ws handler itself
@@ -79,7 +78,7 @@ export const PushSchemas = {
   // chat / social
   'server.ChannelChatMsg': ChatMsg(z.enum(['world', 'beginner'])),
   'server.AllianceChatMsg': ChatMsg(z.literal('alliance')),
-  'server.PrivateChatMessage': z.object({ msg: z.string(), chatType: z.literal(0), ownitemid: int, fromUser: z.string(), fromId: int, time: Ms }),
+  'server.PrivateChatMessage': z.object({ msg: z.string(), chatType: z.literal(0), fromUser: z.string(), fromId: int, time: Ms }),
   'server.SystemInfoMsg': z.object({ msg: z.string(), alliance: z.boolean(), sender: z.string().optional(), tV: z.boolean(), noSenderSystemInfo: z.boolean() }),
   'server.AllianceInvite': z.object({ allianceName: z.string(), invitePerson: z.string() }),
 } as const;

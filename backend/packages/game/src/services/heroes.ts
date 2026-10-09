@@ -130,30 +130,21 @@ function tavernBean(b: CityBundle, offers: HeroRow[]) {
     posCount: heroSlots(b) - b.heroes.length,
     heros: offers.map(heroBean),
     refreshCost: tavernRefreshCost(buildingLevel(b.city.buildings, BuildingType.INN)),
-    huntingItems: itemCount(b.player, HERO_HUNTING),
   };
 }
 
-const HERO_HUNTING = 'consume.refreshtavern.1';
-
 /**
  * hero.refreshHerosListFromTavern: new offers. The original only accepted a Hero Hunting item;
- * Marchlands also lets the lord pay gold (BALANCE.tavernRefreshGoldPerInnLevel x Inn level).
+ * (marchlands) the lord pays gold instead (BALANCE.tavernRefreshGoldPerInnLevel x Inn level).
  */
-export async function refreshTavern(ctx: Ctx, playerId: number, cityId: number, payWith: 'gold' | 'item' = 'gold') {
+export async function refreshTavern(ctx: Ctx, playerId: number, cityId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const inn = buildingLevel(b.city.buildings, BuildingType.INN);
   if (inn < 1) throw new GameError('You need an Inn to recruit heroes.', -99);
-  if (payWith === 'item') {
-    if (itemCount(b.player, HERO_HUNTING) <= 0) throw new GameError('You have no Hero Hunting.', -99);
-    addItem(ctx, b.player, HERO_HUNTING, -1);
-    await savePlayer(ctx, b.player);
-  } else {
-    spendResources(b.city, { gold: tavernRefreshCost(inn) }, 'Not enough gold!', -99);
-    ctx.stat(b.player.id, b.city.id, { 'spent.heroes.gold': tavernRefreshCost(inn) });
-    pushResources(ctx, b);
-    await saveCity(ctx, b.city);
-  }
+  spendResources(b.city, { gold: tavernRefreshCost(inn) }, 'Not enough gold!', -99);
+  ctx.stat(b.player.id, b.city.id, { 'spent.heroes.gold': tavernRefreshCost(inn) });
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
   const offers = await fillTavern(ctx, b, true);
   return tavernBean(b, offers);
 }

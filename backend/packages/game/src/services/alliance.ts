@@ -2,12 +2,12 @@
 // Ranks: 4 Host, 5 Vice Host, 6 Presbyter, 7 Officer, 8 Member (lower = more power).
 
 import { and, asc, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
-import { ALLIANCE_PACT_ITEMS, AllianceRank, BALANCE, BuildingType, buildingLevel, GameError, Relation, scaled } from '@marchlands/core';
+import { AllianceRank, BALANCE, BuildingType, buildingLevel, GameError, Relation, scaled } from '@marchlands/core';
 import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, players } from '@marchlands/db';
 import { openOwnCity } from '../city.ts';
 import { sendSystemMail } from './mail.ts';
 import type { Ctx } from '../context.ts';
-import { assertClean, consumeItem, itemCount, pushPlayerInfo, spendResources } from '../helpers.ts';
+import { assertClean, pushPlayerInfo, spendResources } from '../helpers.ts';
 import { citiesOf, findPlayerByName, getPlayer, saveCity, savePlayer, type PlayerRow } from '../repo.ts';
 
 export type AllianceRow = typeof alliances.$inferSelect;
@@ -61,13 +61,9 @@ async function announce(ctx: Ctx, allianceId: number, msg: string, opts: { noSen
   });
 }
 
-async function memberLimit(a: AllianceRow, now: number) {
-  return a.pactUntil > now ? Math.max(a.maxMembers, 1000) : a.maxMembers;
-}
-
 async function joinPlayer(ctx: Ctx, p: PlayerRow, a: AllianceRow, rank: number) {
   const [{ n }] = await ctx.tx.select({ n: count() }).from(players).where(eq(players.allianceId, a.id));
-  if (Number(n) >= (await memberLimit(a, ctx.now))) throw new GameError('The alliance is full.', -99);
+  if (Number(n) >= a.maxMembers) throw new GameError('The alliance is full.', -99);
   p.allianceId = a.id;
   p.allianceRank = rank;
   p.allianceJoinedAt = ctx.now;
@@ -116,10 +112,9 @@ export async function myAlliance(ctx: Ctx, playerId: number) {
       allianceInfo: a.intro,
       motd: a.motd,
       memberCount: Number(n),
-      memberLimit: await memberLimit(a, ctx.now),
+      memberLimit: a.maxMembers,
       prestige: Math.floor(a.prestige),
       rank: a.prestigeRank,
-      pactUntil: a.pactUntil,
     },
   };
 }
@@ -591,20 +586,6 @@ export async function dropRelation(ctx: Ctx, playerId: number, targetName: strin
   requireRank(me, AllianceRank.VICE_HOST);
   const target = await allianceByName(ctx, targetName);
   await ctx.tx.delete(allianceRelations).where(and(eq(allianceRelations.allianceId, me.allianceId!), eq(allianceRelations.targetAllianceId, target.id)));
-}
-
-/** Ritual of Pact items: raise the member limit to 1000 for a while. */
-export async function usePactItem(ctx: Ctx, playerId: number, itemId: string) {
-  const ms = ALLIANCE_PACT_ITEMS[itemId];
-  if (!ms) throw new GameError('Invalid Item.', -99);
-  const p = await getPlayer(ctx, playerId, { lock: true });
-  requireRank(p, AllianceRank.VICE_HOST);
-  if (itemCount(p, itemId) <= 0) throw new GameError('Insufficient items.', -24);
-  consumeItem(ctx, p, itemId);
-  const a = await getAlliance(ctx, p.allianceId!, true);
-  a.pactUntil = Math.max(a.pactUntil, ctx.now) + ms;
-  await saveAlliance(ctx, a);
-  await savePlayer(ctx, p);
 }
 
 /** Ranking job: aggregate members into alliance totals and ranks. */

@@ -96,8 +96,6 @@ export const ResourceBean = z
     idlePopulation: z.number(),
     workPeople: z.number(),
     efficiency: z.number().int().describe('percent'),
-    support: z.number().int().describe('loyalty'),
-    complaint: z.number().int().describe('grievance'),
     populationDirection: z.number().int(),
     updatedAt: Ms,
   })
@@ -146,7 +144,6 @@ export const PlayerInfo = PlayerRow.pick({ id: true, sex: true, flag: true, face
     levelId: z.number().int().describe('alliance rank'),
     castleCount: z.number().int(),
     population: z.number(),
-    icon: z.number().int(),
     changedFace: z.boolean(),
     createrTime: Ms,
     lastLoginTime: Ms,

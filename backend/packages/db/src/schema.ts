@@ -174,8 +174,6 @@ export const cities = pgTable(
     resourcesAt: ms('resources_at').notNull(),
     // population (also integrated lazily)
     population: doublePrecision('population').notNull().default(0),
-    loyalty: doublePrecision('loyalty').notNull().default(100),
-    grievance: doublePrecision('grievance').notNull().default(0),
     taxRate: smallint('tax_rate').notNull().default(10),
     buildings: jsonb('buildings').$type<BuildingState[]>().notNull().default([]),
     troops: jsonb('troops').$type<TroopCounts>().notNull().default({}),
@@ -449,7 +447,6 @@ export const alliances = pgTable(
     motd: text('motd').notNull().default(''),
     maxMembers: integer('max_members').notNull().default(500),
     /** Ritual of Pact: raised member limit valid until (ms) */
-    pactUntil: ms('pact_until').notNull().default(0),
     /** earliest time this alliance may declare war again */
     warCooldownUntil: ms('war_cooldown_until').notNull().default(0),
     // cached ranking aggregates

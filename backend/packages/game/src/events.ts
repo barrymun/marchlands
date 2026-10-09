@@ -40,7 +40,6 @@ async function expireBuff(ctx: Ctx, playerId: number, buffId: string) {
     if (p.status === 2) p.status = 0;
   }
   if (buffId === 'FurloughBuff' && p.status === 5) p.status = 0;
-  if (buffId === 'ChatIconBuff') p.misc = { ...p.misc, icon: 0 };
   await savePlayer(ctx, p);
   if (!activeBuff(p, buffId, ctx.now)) await pushPlayerInfo(ctx, p);
 }

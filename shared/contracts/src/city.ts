@@ -12,7 +12,7 @@ export const BuildingPositionId = z.coerce.number().int().min(-2).max(1040);
 export const CityPositionParams = zCityParams.extend({ positionId: BuildingPositionId });
 export const TrainingQueueParams = zCityParams.extend({ positionId: BuildingPositionId, queueId: zId });
 export const SpeedupBody = z.object({
-  itemId: z.string().describe('free.speed | coins.speed | consume.2.a ... consume.2.d | player.speedup.1 | player.destroy.1.a'),
+  itemId: z.string().describe('free.speed | gold.speed | consume.2.a ... consume.2.d'),
 });
 
 export const UpdateCityBody = z.object({
@@ -23,9 +23,9 @@ export const UpdateCityBody = z.object({
 });
 export const TaxRateBody = z.object({ rate: z.number().int() });
 export const ResourcePercentBody = z.object({ food: z.number().int(), wood: z.number().int(), stone: z.number().int(), iron: z.number().int() }).partial();
-export const ComfortBody = z.object({ typeId: z.number().int() });
+export const ComfortBody = z.object({ typeId: z.number().int().describe('3 blessing (gold for food), 4 population raising (food for people)') });
 export const LevyBody = z.object({ typeId: z.number().int() });
-export const MoveCityBody = z.object({ zoneId: z.number().int().optional(), targetTileId: zId.optional() });
+export const MoveCityBody = z.object({ targetTileId: zId.describe('a free flat') });
 
 export const AvailableBuildingsQuery = z.object({ area: z.enum(['inside', 'outside', 'walls']).default('inside') });
 export const ConstructBody = z.object({ typeId: z.number().int(), positionId: z.number().int() });

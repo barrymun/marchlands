@@ -10,7 +10,6 @@ import { TileRow } from './rows.ts';
 
 export const HeroParams = z.object({ heroId: zId });
 export const TavernHireParams = zCityParams.extend({ heroId: zId });
-export const TavernRefreshBody = z.object({ payWith: z.enum(['gold', 'item']).default('gold').describe('gold, or one Hero Hunting item') });
 export const HeroPointsBody = z.object({ power: z.number().int(), management: z.number().int(), stratagem: z.number().int() });
 export const UseHeroItemBody = z.object({
   itemId: z.string(),
@@ -65,7 +64,6 @@ export const TavernOffers = z
     posCount: z.number().int().describe('free hero slots'),
     heros: z.array(HeroBean),
     refreshCost: z.number().int().describe('gold to re-roll the offers'),
-    huntingItems: z.number().int().describe('Hero Hunting items owned (free re-roll each)'),
   })
   .meta({ id: 'TavernOffers' });
 export type TavernOffers = z.infer<typeof TavernOffers>;

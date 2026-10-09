@@ -554,18 +554,6 @@
             "maximum": 9007199254740991,
             "description": "percent"
           },
-          "support": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "loyalty"
-          },
-          "complaint": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "grievance"
-          },
           "populationDirection": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -592,8 +580,6 @@
           "idlePopulation",
           "workPeople",
           "efficiency",
-          "support",
-          "complaint",
           "populationDirection",
           "updatedAt"
         ]
@@ -835,11 +821,6 @@
           "population": {
             "type": "number"
           },
-          "icon": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "changedFace": {
             "type": "boolean"
           },
@@ -871,7 +852,6 @@
           "levelId",
           "castleCount",
           "population",
-          "icon",
           "changedFace",
           "createrTime",
           "lastLoginTime"
@@ -1120,19 +1100,12 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
             "description": "gold to re-roll the offers"
-          },
-          "huntingItems": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Hero Hunting items owned (free re-roll each)"
           }
         },
         "required": [
           "posCount",
           "heros",
-          "refreshCost",
-          "huntingItems"
+          "refreshCost"
         ]
       },
       "VisibleArmiesInput": {
@@ -2707,6 +2680,10 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "nextRenameAt": {
+            "type": "number",
+            "description": "(marchlands) when the lord may rename again (0: now)"
           }
         },
         "required": [
@@ -2733,7 +2710,8 @@
           "mapSizeY",
           "gameSpeed",
           "currentTime",
-          "tutorialStepId"
+          "tutorialStepId",
+          "nextRenameAt"
         ]
       },
       "PlayerCreatedInput": {
@@ -2883,6 +2861,10 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "nextRenameAt": {
+            "type": "number",
+            "description": "(marchlands) when the lord may rename again (0: now)"
+          },
           "token": {
             "type": "string",
             "description": "fresh bearer token carrying the new lord id"
@@ -2913,6 +2895,7 @@
           "gameSpeed",
           "currentTime",
           "tutorialStepId",
+          "nextRenameAt",
           "token"
         ]
       },
@@ -3003,11 +2986,6 @@
           "population": {
             "type": "number"
           },
-          "icon": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "changedFace": {
             "type": "boolean"
           },
@@ -3084,7 +3062,6 @@
           "levelId",
           "castleCount",
           "population",
-          "icon",
           "changedFace",
           "createrTime",
           "lastLoginTime",
@@ -3179,67 +3156,6 @@
           "granted": {
             "description": "what a grant / box / chest item gave",
             "$ref": "#/components/schemas/GrantContentsInput"
-          },
-          "amulet": {
-            "description": "Amulet gamble result",
-            "type": "object",
-            "properties": {
-              "slots": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "count": {
-                      "type": "integer",
-                      "minimum": -9007199254740991,
-                      "maximum": 9007199254740991
-                    },
-                    "kind": {
-                      "type": "integer",
-                      "minimum": -9007199254740991,
-                      "maximum": 9007199254740991,
-                      "description": "rarity tier, 1 best .. 5 common"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "count",
-                    "kind"
-                  ]
-                }
-              },
-              "winner": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991,
-                "description": "index into slots"
-              },
-              "prize": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "count": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  }
-                },
-                "required": [
-                  "id",
-                  "count"
-                ]
-              }
-            },
-            "required": [
-              "slots",
-              "winner",
-              "prize"
-            ]
           },
           "hero": {
             "description": "hero produced by a hero box",
@@ -5300,15 +5216,6 @@
                               "iron"
                             ]
                           },
-                          "loyaltyDamage": {
-                            "type": "number"
-                          },
-                          "loyaltyLeft": {
-                            "type": "number"
-                          },
-                          "captured": {
-                            "type": "boolean"
-                          },
                           "medals": {
                             "type": "object",
                             "propertyNames": {
@@ -5328,9 +5235,6 @@
                           "attacker",
                           "defender",
                           "plunder",
-                          "loyaltyDamage",
-                          "loyaltyLeft",
-                          "captured",
                           "city"
                         ]
                       },
@@ -5799,15 +5703,6 @@
                               "iron"
                             ]
                           },
-                          "loyaltyDamage": {
-                            "type": "number"
-                          },
-                          "loyaltyLeft": {
-                            "type": "number"
-                          },
-                          "captured": {
-                            "type": "boolean"
-                          },
                           "medals": {
                             "type": "object",
                             "propertyNames": {
@@ -5816,6 +5711,15 @@
                             "additionalProperties": {
                               "type": "number"
                             }
+                          },
+                          "loyaltyDamage": {
+                            "type": "number"
+                          },
+                          "loyaltyLeft": {
+                            "type": "number"
+                          },
+                          "captured": {
+                            "type": "boolean"
                           },
                           "level": {
                             "type": "integer",
@@ -6690,9 +6594,6 @@
                                     "minimum": -9007199254740991,
                                     "maximum": 9007199254740991
                                   },
-                                  "loyalty": {
-                                    "type": "number"
-                                  },
                                   "population": {
                                     "type": "number"
                                   },
@@ -6771,7 +6672,6 @@
                                   "troops",
                                   "fortifications",
                                   "wallLevel",
-                                  "loyalty",
                                   "population",
                                   "stationed"
                                 ]
@@ -7610,11 +7510,6 @@
           "motd": {
             "type": "string"
           },
-          "pactUntil": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "allianceName": {
             "type": "string"
           },
@@ -7654,7 +7549,6 @@
         "required": [
           "id",
           "motd",
-          "pactUntil",
           "allianceName",
           "creatorName",
           "leaderName",
@@ -8381,9 +8275,6 @@
             ],
             "description": "price in city gold (null: not for sale)"
           },
-          "canGamble": {
-            "type": "boolean"
-          },
           "type": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -8423,7 +8314,6 @@
           "id",
           "name",
           "goldPrice",
-          "canGamble",
           "type",
           "dayLimit",
           "rarity",
@@ -8682,11 +8572,6 @@
           "populationStep": {
             "type": "number"
           },
-          "startLoyalty": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "startTaxRate": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -8723,11 +8608,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
             "description": "milliseconds"
-          },
-          "levyLoyaltyCost": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
           },
           "heroTimeFactor": {
             "type": "number"
@@ -8822,7 +8702,7 @@
             "maximum": 9007199254740991,
             "description": "milliseconds"
           },
-          "cityLoyaltyDamagePerAttack": {
+          "npcLoyaltyDamagePerAttack": {
             "readOnly": true,
             "description": "[min, max]",
             "type": "array",
@@ -8953,11 +8833,6 @@
             "maximum": 9007199254740991,
             "description": "milliseconds"
           },
-          "worldChatSpeakerCost": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "allianceCreateGold": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -9072,7 +8947,6 @@
           "resourceBuffBonus",
           "cityTickMs",
           "populationStep",
-          "startLoyalty",
           "startTaxRate",
           "startPopulation",
           "heroSalaryPerLevel",
@@ -9080,7 +8954,6 @@
           "heroAwardCostPerLevel",
           "comfortCooldownMs",
           "levyCooldownMs",
-          "levyLoyaltyCost",
           "heroTimeFactor",
           "techTimeFactor",
           "demolishRefund",
@@ -9101,7 +8974,7 @@
           "horsebackSpeedPerLevel",
           "logisticsLoadPerLevel",
           "maxRestTimeMs",
-          "cityLoyaltyDamagePerAttack",
+          "npcLoyaltyDamagePerAttack",
           "npcLoyaltyStart",
           "npcRegenMs",
           "plunderShare",
@@ -9120,7 +8993,6 @@
           "furloughCentsPerDay",
           "truceCooldownMs",
           "teleportCooldownMs",
-          "worldChatSpeakerCost",
           "allianceCreateGold",
           "allianceMaxMembers",
           "allianceWarCooldownMs",
@@ -9904,22 +9776,37 @@
       "QuestDailyGiftInput": {
         "type": "object",
         "properties": {
-          "items": {
+          "resources": {
             "type": "object",
-            "propertyNames": {
-              "type": "string"
+            "properties": {
+              "gold": {
+                "type": "number",
+                "minimum": 0
+              },
+              "food": {
+                "type": "number",
+                "minimum": 0
+              },
+              "wood": {
+                "type": "number",
+                "minimum": 0
+              },
+              "stone": {
+                "type": "number",
+                "minimum": 0
+              },
+              "iron": {
+                "type": "number",
+                "minimum": 0
+              }
             },
-            "additionalProperties": {
-              "type": "integer",
-              "minimum": -9007199254740991,
-              "maximum": 9007199254740991
-            },
-            "description": "item id -> count"
+            "description": "added to the chosen city (BALANCE.dailyGift)"
           }
         },
         "required": [
-          "items"
-        ]
+          "resources"
+        ],
+        "description": "(marchlands) a fixed bundle of resources once a day"
       },
       "RankingPlayerEntryInput": {
         "type": "object",
@@ -10833,18 +10720,6 @@
             "maximum": 9007199254740991,
             "description": "percent"
           },
-          "support": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "loyalty"
-          },
-          "complaint": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "grievance"
-          },
           "populationDirection": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -10871,8 +10746,6 @@
           "idlePopulation",
           "workPeople",
           "efficiency",
-          "support",
-          "complaint",
           "populationDirection",
           "updatedAt"
         ],
@@ -11117,11 +10990,6 @@
           "population": {
             "type": "number"
           },
-          "icon": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "changedFace": {
             "type": "boolean"
           },
@@ -11153,7 +11021,6 @@
           "levelId",
           "castleCount",
           "population",
-          "icon",
           "changedFace",
           "createrTime",
           "lastLoginTime"
@@ -11408,19 +11275,12 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
             "description": "gold to re-roll the offers"
-          },
-          "huntingItems": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Hero Hunting items owned (free re-roll each)"
           }
         },
         "required": [
           "posCount",
           "heros",
-          "refreshCost",
-          "huntingItems"
+          "refreshCost"
         ],
         "additionalProperties": false
       },
@@ -13033,6 +12893,10 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "nextRenameAt": {
+            "type": "number",
+            "description": "(marchlands) when the lord may rename again (0: now)"
           }
         },
         "required": [
@@ -13059,7 +12923,8 @@
           "mapSizeY",
           "gameSpeed",
           "currentTime",
-          "tutorialStepId"
+          "tutorialStepId",
+          "nextRenameAt"
         ],
         "additionalProperties": false
       },
@@ -13211,6 +13076,10 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "nextRenameAt": {
+            "type": "number",
+            "description": "(marchlands) when the lord may rename again (0: now)"
+          },
           "token": {
             "type": "string",
             "description": "fresh bearer token carrying the new lord id"
@@ -13241,6 +13110,7 @@
           "gameSpeed",
           "currentTime",
           "tutorialStepId",
+          "nextRenameAt",
           "token"
         ],
         "additionalProperties": false
@@ -13332,11 +13202,6 @@
           "population": {
             "type": "number"
           },
-          "icon": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "changedFace": {
             "type": "boolean"
           },
@@ -13414,7 +13279,6 @@
           "levelId",
           "castleCount",
           "population",
-          "icon",
           "changedFace",
           "createrTime",
           "lastLoginTime",
@@ -13513,70 +13377,6 @@
           "granted": {
             "description": "what a grant / box / chest item gave",
             "$ref": "#/components/schemas/GrantContents"
-          },
-          "amulet": {
-            "description": "Amulet gamble result",
-            "type": "object",
-            "properties": {
-              "slots": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "count": {
-                      "type": "integer",
-                      "minimum": -9007199254740991,
-                      "maximum": 9007199254740991
-                    },
-                    "kind": {
-                      "type": "integer",
-                      "minimum": -9007199254740991,
-                      "maximum": 9007199254740991,
-                      "description": "rarity tier, 1 best .. 5 common"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "count",
-                    "kind"
-                  ],
-                  "additionalProperties": false
-                }
-              },
-              "winner": {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991,
-                "description": "index into slots"
-              },
-              "prize": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "count": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  }
-                },
-                "required": [
-                  "id",
-                  "count"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "slots",
-              "winner",
-              "prize"
-            ],
-            "additionalProperties": false
           },
           "hero": {
             "description": "hero produced by a hero box",
@@ -15685,15 +15485,6 @@
                             ],
                             "additionalProperties": false
                           },
-                          "loyaltyDamage": {
-                            "type": "number"
-                          },
-                          "loyaltyLeft": {
-                            "type": "number"
-                          },
-                          "captured": {
-                            "type": "boolean"
-                          },
                           "medals": {
                             "type": "object",
                             "propertyNames": {
@@ -15713,9 +15504,6 @@
                           "attacker",
                           "defender",
                           "plunder",
-                          "loyaltyDamage",
-                          "loyaltyLeft",
-                          "captured",
                           "city"
                         ],
                         "additionalProperties": false
@@ -16195,15 +15983,6 @@
                             ],
                             "additionalProperties": false
                           },
-                          "loyaltyDamage": {
-                            "type": "number"
-                          },
-                          "loyaltyLeft": {
-                            "type": "number"
-                          },
-                          "captured": {
-                            "type": "boolean"
-                          },
                           "medals": {
                             "type": "object",
                             "propertyNames": {
@@ -16212,6 +15991,15 @@
                             "additionalProperties": {
                               "type": "number"
                             }
+                          },
+                          "loyaltyDamage": {
+                            "type": "number"
+                          },
+                          "loyaltyLeft": {
+                            "type": "number"
+                          },
+                          "captured": {
+                            "type": "boolean"
                           },
                           "level": {
                             "type": "integer",
@@ -17109,9 +16897,6 @@
                                     "minimum": -9007199254740991,
                                     "maximum": 9007199254740991
                                   },
-                                  "loyalty": {
-                                    "type": "number"
-                                  },
                                   "population": {
                                     "type": "number"
                                   },
@@ -17192,7 +16977,6 @@
                                   "troops",
                                   "fortifications",
                                   "wallLevel",
-                                  "loyalty",
                                   "population",
                                   "stationed"
                                 ],
@@ -18063,11 +17847,6 @@
           "motd": {
             "type": "string"
           },
-          "pactUntil": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "allianceName": {
             "type": "string"
           },
@@ -18107,7 +17886,6 @@
         "required": [
           "id",
           "motd",
-          "pactUntil",
           "allianceName",
           "creatorName",
           "leaderName",
@@ -18854,9 +18632,6 @@
             ],
             "description": "price in city gold (null: not for sale)"
           },
-          "canGamble": {
-            "type": "boolean"
-          },
           "type": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -18896,7 +18671,6 @@
           "id",
           "name",
           "goldPrice",
-          "canGamble",
           "type",
           "dayLimit",
           "rarity",
@@ -19160,11 +18934,6 @@
           "populationStep": {
             "type": "number"
           },
-          "startLoyalty": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "startTaxRate": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -19201,11 +18970,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
             "description": "milliseconds"
-          },
-          "levyLoyaltyCost": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
           },
           "heroTimeFactor": {
             "type": "number"
@@ -19300,7 +19064,7 @@
             "maximum": 9007199254740991,
             "description": "milliseconds"
           },
-          "cityLoyaltyDamagePerAttack": {
+          "npcLoyaltyDamagePerAttack": {
             "readOnly": true,
             "description": "[min, max]",
             "type": "array",
@@ -19433,11 +19197,6 @@
             "maximum": 9007199254740991,
             "description": "milliseconds"
           },
-          "worldChatSpeakerCost": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
           "allianceCreateGold": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -19554,7 +19313,6 @@
           "resourceBuffBonus",
           "cityTickMs",
           "populationStep",
-          "startLoyalty",
           "startTaxRate",
           "startPopulation",
           "heroSalaryPerLevel",
@@ -19562,7 +19320,6 @@
           "heroAwardCostPerLevel",
           "comfortCooldownMs",
           "levyCooldownMs",
-          "levyLoyaltyCost",
           "heroTimeFactor",
           "techTimeFactor",
           "demolishRefund",
@@ -19583,7 +19340,7 @@
           "horsebackSpeedPerLevel",
           "logisticsLoadPerLevel",
           "maxRestTimeMs",
-          "cityLoyaltyDamagePerAttack",
+          "npcLoyaltyDamagePerAttack",
           "npcLoyaltyStart",
           "npcRegenMs",
           "plunderShare",
@@ -19602,7 +19359,6 @@
           "furloughCentsPerDay",
           "truceCooldownMs",
           "teleportCooldownMs",
-          "worldChatSpeakerCost",
           "allianceCreateGold",
           "allianceMaxMembers",
           "allianceWarCooldownMs",
@@ -20406,23 +20162,39 @@
       "QuestDailyGift": {
         "type": "object",
         "properties": {
-          "items": {
+          "resources": {
             "type": "object",
-            "propertyNames": {
-              "type": "string"
+            "properties": {
+              "gold": {
+                "type": "number",
+                "minimum": 0
+              },
+              "food": {
+                "type": "number",
+                "minimum": 0
+              },
+              "wood": {
+                "type": "number",
+                "minimum": 0
+              },
+              "stone": {
+                "type": "number",
+                "minimum": 0
+              },
+              "iron": {
+                "type": "number",
+                "minimum": 0
+              }
             },
-            "additionalProperties": {
-              "type": "integer",
-              "minimum": -9007199254740991,
-              "maximum": 9007199254740991
-            },
-            "description": "item id -> count"
+            "additionalProperties": false,
+            "description": "added to the chosen city (BALANCE.dailyGift)"
           }
         },
         "required": [
-          "items"
+          "resources"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "(marchlands) a fixed bundle of resources once a day"
       },
       "RankingPlayerEntry": {
         "type": "object",
@@ -21540,7 +21312,7 @@
     },
     "/api/v1/player/flag": {
       "post": {
-        "summary": "Change flag with a National Flag (city.modifyFlag)",
+        "summary": "Change the flag, free (city.modifyFlag)",
         "tags": [
           "player"
         ],
@@ -21619,7 +21391,7 @@
     },
     "/api/v1/player/rename": {
       "post": {
-        "summary": "Rename the lord with a New ID (city.modifyUserName)",
+        "summary": "Rename the lord: free, once a day, if the name is free (city.modifyUserName)",
         "tags": [
           "player"
         ],
@@ -23748,7 +23520,8 @@
                   "typeId": {
                     "type": "integer",
                     "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
+                    "maximum": 9007199254740991,
+                    "description": "3 blessing (gold for food), 4 population raising (food for people)"
                   }
                 },
                 "required": [
@@ -23993,7 +23766,7 @@
     },
     "/api/v1/cities/{cityId}/move": {
       "post": {
-        "summary": "Teleport: zoneId = City Teleporter, targetTileId = Adv City Teleporter",
+        "summary": "Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned)",
         "tags": [
           "city"
         ],
@@ -24004,17 +23777,16 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "zoneId": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
                   "targetTileId": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 9007199254740991
+                    "maximum": 9007199254740991,
+                    "description": "a free flat"
                   }
-                }
+                },
+                "required": [
+                  "targetTileId"
+                ]
               }
             }
           }
@@ -24700,7 +24472,7 @@
                 "properties": {
                   "itemId": {
                     "type": "string",
-                    "description": "free.speed | coins.speed | consume.2.a ... consume.2.d | player.speedup.1 | player.destroy.1.a"
+                    "description": "free.speed | gold.speed | consume.2.a ... consume.2.d"
                   }
                 },
                 "required": [
@@ -25130,7 +24902,7 @@
                 "properties": {
                   "itemId": {
                     "type": "string",
-                    "description": "free.speed | coins.speed | consume.2.a ... consume.2.d | player.speedup.1 | player.destroy.1.a"
+                    "description": "free.speed | gold.speed | consume.2.a ... consume.2.d"
                   },
                   "techId": {
                     "description": "tech to speed up (required when the city researches several)",
@@ -26985,31 +26757,10 @@
     },
     "/api/v1/cities/{cityId}/tavern/refresh": {
       "post": {
-        "summary": "New offers for gold or a Hero Hunting item (hero.refreshHerosListFromTavern)",
+        "summary": "New offers for gold (hero.refreshHerosListFromTavern)",
         "tags": [
           "heroes"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "payWith": {
-                    "default": "gold",
-                    "description": "gold, or one Hero Hunting item",
-                    "type": "string",
-                    "enum": [
-                      "gold",
-                      "item"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
         "parameters": [
           {
             "schema": {
@@ -30399,7 +30150,7 @@
     },
     "/api/v1/chat/world": {
       "post": {
-        "summary": "World channel, costs 1 Speaker (common.worldChat)",
+        "summary": "World channel (common.worldChat)",
         "tags": [
           "chat"
         ],
@@ -33158,85 +32909,6 @@
         }
       }
     },
-    "/api/v1/alliance/items": {
-      "post": {
-        "summary": "Use Ritual of Pact",
-        "tags": [
-          "alliance"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "itemId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "itemId"
-                ]
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ok": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "data": {
-                      "type": "null"
-                    }
-                  },
-                  "required": [
-                    "ok",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/config/static": {
       "get": {
         "summary": "Buildings, research, troops, items, titles and balance constants",
@@ -34342,10 +34014,30 @@
     },
     "/api/v1/quests/daily-gift": {
       "post": {
-        "summary": "Daily gift",
+        "summary": "Daily gift: a fixed bundle of resources into a city, once a day",
         "tags": [
           "quests"
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cityId": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "cityId"
+                ]
+              }
+            }
+          }
+        },
         "security": [
           {
             "bearerAuth": []
@@ -35782,9 +35474,6 @@
                     "maximum": 9007199254740991
                   },
                   "population": {
-                    "type": "number"
-                  },
-                  "loyalty": {
                     "type": "number"
                   },
                   "troops": {

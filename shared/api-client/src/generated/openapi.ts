@@ -615,7 +615,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Change flag with a National Flag (city.modifyFlag) */
+        /** Change the flag, free (city.modifyFlag) */
         post: {
             parameters: {
                 query?: never;
@@ -679,7 +679,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Rename the lord with a New ID (city.modifyUserName) */
+        /** Rename the lord: free, once a day, if the name is free (city.modifyUserName) */
         post: {
             parameters: {
                 query?: never;
@@ -2260,6 +2260,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
+                        /** @description 3 blessing (gold for food), 4 population raising (food for people) */
                         typeId: number;
                     };
                 };
@@ -2439,7 +2440,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Teleport: zoneId = City Teleporter, targetTileId = Adv City Teleporter */
+        /** Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned) */
         post: {
             parameters: {
                 query?: never;
@@ -2452,8 +2453,8 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        zoneId?: number;
-                        targetTileId?: number;
+                        /** @description a free flat */
+                        targetTileId: number;
                     };
                 };
             };
@@ -2938,7 +2939,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        /** @description free.speed | coins.speed | consume.2.a ... consume.2.d | player.speedup.1 | player.destroy.1.a */
+                        /** @description free.speed | gold.speed | consume.2.a ... consume.2.d */
                         itemId: string;
                     };
                 };
@@ -3209,7 +3210,7 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        /** @description free.speed | coins.speed | consume.2.a ... consume.2.d | player.speedup.1 | player.destroy.1.a */
+                        /** @description free.speed | gold.speed | consume.2.a ... consume.2.d */
                         itemId: string;
                         /** @description tech to speed up (required when the city researches several) */
                         techId?: number;
@@ -4506,7 +4507,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** New offers for gold or a Hero Hunting item (hero.refreshHerosListFromTavern) */
+        /** New offers for gold (hero.refreshHerosListFromTavern) */
         post: {
             parameters: {
                 query?: never;
@@ -4516,18 +4517,7 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /**
-                         * @description gold, or one Hero Hunting item
-                         * @default gold
-                         * @enum {string}
-                         */
-                        payWith?: "gold" | "item";
-                    };
-                };
-            };
+            requestBody?: never;
             responses: {
                 /** @description Default Response */
                 200: {
@@ -7072,7 +7062,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** World channel, costs 1 Speaker (common.worldChat) */
+        /** World channel (common.worldChat) */
         post: {
             parameters: {
                 query?: never;
@@ -9256,70 +9246,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/alliance/items": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Use Ritual of Pact */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        itemId: string;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {number} */
-                            ok: 1;
-                            data: null;
-                        };
-                    };
-                };
-                /** @description Default Response */
-                "4XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Default Response */
-                "5XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/config/static": {
         parameters: {
             query?: never;
@@ -10195,7 +10121,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Daily gift */
+        /** Daily gift: a fixed bundle of resources into a city, once a day */
         post: {
             parameters: {
                 query?: never;
@@ -10203,7 +10129,13 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        cityId: number;
+                    };
+                };
+            };
             responses: {
                 /** @description Default Response */
                 200: {
@@ -11191,7 +11123,6 @@ export interface paths {
                     "application/json": {
                         playerId: number;
                         population?: number;
-                        loyalty?: number;
                         troops?: {
                             [key: string]: number;
                         };
@@ -11426,10 +11357,6 @@ export interface components {
             workPeople: number;
             /** @description percent */
             efficiency: number;
-            /** @description loyalty */
-            support: number;
-            /** @description grievance */
-            complaint: number;
             populationDirection: number;
             /** @description epoch milliseconds */
             updatedAt: number;
@@ -11484,7 +11411,6 @@ export interface components {
             levelId: number;
             castleCount: number;
             population: number;
-            icon: number;
             changedFace: boolean;
             /** @description epoch milliseconds */
             createrTime: number;
@@ -11546,8 +11472,6 @@ export interface components {
             heros: components["schemas"]["HeroBeanInput"][];
             /** @description gold to re-roll the offers */
             refreshCost: number;
-            /** @description Hero Hunting items owned (free re-roll each) */
-            huntingItems: number;
         };
         VisibleArmiesInput: {
             self: components["schemas"]["ArmyBeanInput"][];
@@ -11930,6 +11854,8 @@ export interface components {
             /** @description epoch milliseconds */
             currentTime: number;
             tutorialStepId: number;
+            /** @description (marchlands) when the lord may rename again (0: now) */
+            nextRenameAt: number;
         };
         PlayerCreatedInput: {
             playerInfo: components["schemas"]["PlayerInfoInput"];
@@ -11967,6 +11893,8 @@ export interface components {
             /** @description epoch milliseconds */
             currentTime: number;
             tutorialStepId: number;
+            /** @description (marchlands) when the lord may rename again (0: now) */
+            nextRenameAt: number;
             /** @description fresh bearer token carrying the new lord id */
             token: string;
         };
@@ -11990,7 +11918,6 @@ export interface components {
             levelId: number;
             castleCount: number;
             population: number;
-            icon: number;
             changedFace: boolean;
             /** @description epoch milliseconds */
             createrTime: number;
@@ -12031,21 +11958,6 @@ export interface components {
             itemId: string;
             /** @description what a grant / box / chest item gave */
             granted?: components["schemas"]["GrantContentsInput"];
-            /** @description Amulet gamble result */
-            amulet?: {
-                slots: {
-                    id: string;
-                    count: number;
-                    /** @description rarity tier, 1 best .. 5 common */
-                    kind: number;
-                }[];
-                /** @description index into slots */
-                winner: number;
-                prize: {
-                    id: string;
-                    count: number;
-                };
-            };
             /** @description hero produced by a hero box */
             hero?: components["schemas"]["HeroBeanInput"];
         };
@@ -12498,9 +12410,6 @@ export interface components {
                         stone: number;
                         iron: number;
                     };
-                    loyaltyDamage: number;
-                    loyaltyLeft: number;
-                    captured: boolean;
                     medals?: {
                         [key: string]: number;
                     };
@@ -12586,12 +12495,12 @@ export interface components {
                         stone: number;
                         iron: number;
                     };
-                    loyaltyDamage: number;
-                    loyaltyLeft: number;
-                    captured: boolean;
                     medals?: {
                         [key: string]: number;
                     };
+                    loyaltyDamage: number;
+                    loyaltyLeft: number;
+                    captured: boolean;
                     level: number;
                 } | {
                     /** @enum {string} */
@@ -12751,7 +12660,6 @@ export interface components {
                             [key: string]: number;
                         };
                         wallLevel: number;
-                        loyalty: number;
                         population: number;
                         heroes?: {
                             name: string;
@@ -12928,7 +12836,6 @@ export interface components {
         AllianceProfileInput: {
             id: number;
             motd: string;
-            pactUntil: number;
             allianceName: string;
             creatorName: string;
             leaderName: string;
@@ -13095,7 +13002,6 @@ export interface components {
             name: string;
             /** @description price in city gold (null: not for sale) */
             goldPrice: number | null;
-            canGamble: boolean;
             type: number;
             dayLimit: number;
             rarity: number;
@@ -13161,7 +13067,6 @@ export interface components {
             /** @description milliseconds */
             cityTickMs: number;
             populationStep: number;
-            startLoyalty: number;
             startTaxRate: number;
             startPopulation: number;
             heroSalaryPerLevel: number;
@@ -13171,7 +13076,6 @@ export interface components {
             comfortCooldownMs: number;
             /** @description milliseconds */
             levyCooldownMs: number;
-            levyLoyaltyCost: number;
             heroTimeFactor: number;
             techTimeFactor: number;
             demolishRefund: number;
@@ -13199,7 +13103,7 @@ export interface components {
             /** @description milliseconds */
             maxRestTimeMs: number;
             /** @description [min, max] */
-            readonly cityLoyaltyDamagePerAttack: [
+            readonly npcLoyaltyDamagePerAttack: [
                 number,
                 number
             ];
@@ -13234,7 +13138,6 @@ export interface components {
             truceCooldownMs: number;
             /** @description milliseconds */
             teleportCooldownMs: number;
-            worldChatSpeakerCost: number;
             allianceCreateGold: number;
             allianceMaxMembers: number;
             /** @description milliseconds */
@@ -13457,10 +13360,15 @@ export interface components {
             isFinish: boolean;
             claimed: boolean;
         };
+        /** @description (marchlands) a fixed bundle of resources once a day */
         QuestDailyGiftInput: {
-            /** @description item id -> count */
-            items: {
-                [key: string]: number;
+            /** @description added to the chosen city (BALANCE.dailyGift) */
+            resources: {
+                gold?: number;
+                food?: number;
+                wood?: number;
+                stone?: number;
+                iron?: number;
             };
         };
         RankingPlayerEntryInput: {
@@ -13669,10 +13577,6 @@ export interface components {
             workPeople: number;
             /** @description percent */
             efficiency: number;
-            /** @description loyalty */
-            support: number;
-            /** @description grievance */
-            complaint: number;
             populationDirection: number;
             /** @description epoch milliseconds */
             updatedAt: number;
@@ -13727,7 +13631,6 @@ export interface components {
             levelId: number;
             castleCount: number;
             population: number;
-            icon: number;
             changedFace: boolean;
             /** @description epoch milliseconds */
             createrTime: number;
@@ -13789,8 +13692,6 @@ export interface components {
             heros: components["schemas"]["HeroBean"][];
             /** @description gold to re-roll the offers */
             refreshCost: number;
-            /** @description Hero Hunting items owned (free re-roll each) */
-            huntingItems: number;
         };
         VisibleArmies: {
             self: components["schemas"]["ArmyBean"][];
@@ -14173,6 +14074,8 @@ export interface components {
             /** @description epoch milliseconds */
             currentTime: number;
             tutorialStepId: number;
+            /** @description (marchlands) when the lord may rename again (0: now) */
+            nextRenameAt: number;
         };
         PlayerCreated: {
             playerInfo: components["schemas"]["PlayerInfo"];
@@ -14210,6 +14113,8 @@ export interface components {
             /** @description epoch milliseconds */
             currentTime: number;
             tutorialStepId: number;
+            /** @description (marchlands) when the lord may rename again (0: now) */
+            nextRenameAt: number;
             /** @description fresh bearer token carrying the new lord id */
             token: string;
         };
@@ -14233,7 +14138,6 @@ export interface components {
             levelId: number;
             castleCount: number;
             population: number;
-            icon: number;
             changedFace: boolean;
             /** @description epoch milliseconds */
             createrTime: number;
@@ -14274,21 +14178,6 @@ export interface components {
             itemId: string;
             /** @description what a grant / box / chest item gave */
             granted?: components["schemas"]["GrantContents"];
-            /** @description Amulet gamble result */
-            amulet?: {
-                slots: {
-                    id: string;
-                    count: number;
-                    /** @description rarity tier, 1 best .. 5 common */
-                    kind: number;
-                }[];
-                /** @description index into slots */
-                winner: number;
-                prize: {
-                    id: string;
-                    count: number;
-                };
-            };
             /** @description hero produced by a hero box */
             hero?: components["schemas"]["HeroBean"];
         };
@@ -14741,9 +14630,6 @@ export interface components {
                         stone: number;
                         iron: number;
                     };
-                    loyaltyDamage: number;
-                    loyaltyLeft: number;
-                    captured: boolean;
                     medals?: {
                         [key: string]: number;
                     };
@@ -14829,12 +14715,12 @@ export interface components {
                         stone: number;
                         iron: number;
                     };
-                    loyaltyDamage: number;
-                    loyaltyLeft: number;
-                    captured: boolean;
                     medals?: {
                         [key: string]: number;
                     };
+                    loyaltyDamage: number;
+                    loyaltyLeft: number;
+                    captured: boolean;
                     level: number;
                 } | {
                     /** @enum {string} */
@@ -14994,7 +14880,6 @@ export interface components {
                             [key: string]: number;
                         };
                         wallLevel: number;
-                        loyalty: number;
                         population: number;
                         heroes?: {
                             name: string;
@@ -15171,7 +15056,6 @@ export interface components {
         AllianceProfile: {
             id: number;
             motd: string;
-            pactUntil: number;
             allianceName: string;
             creatorName: string;
             leaderName: string;
@@ -15338,7 +15222,6 @@ export interface components {
             name: string;
             /** @description price in city gold (null: not for sale) */
             goldPrice: number | null;
-            canGamble: boolean;
             type: number;
             dayLimit: number;
             rarity: number;
@@ -15404,7 +15287,6 @@ export interface components {
             /** @description milliseconds */
             cityTickMs: number;
             populationStep: number;
-            startLoyalty: number;
             startTaxRate: number;
             startPopulation: number;
             heroSalaryPerLevel: number;
@@ -15414,7 +15296,6 @@ export interface components {
             comfortCooldownMs: number;
             /** @description milliseconds */
             levyCooldownMs: number;
-            levyLoyaltyCost: number;
             heroTimeFactor: number;
             techTimeFactor: number;
             demolishRefund: number;
@@ -15442,7 +15323,7 @@ export interface components {
             /** @description milliseconds */
             maxRestTimeMs: number;
             /** @description [min, max] */
-            readonly cityLoyaltyDamagePerAttack: [
+            readonly npcLoyaltyDamagePerAttack: [
                 number,
                 number
             ];
@@ -15477,7 +15358,6 @@ export interface components {
             truceCooldownMs: number;
             /** @description milliseconds */
             teleportCooldownMs: number;
-            worldChatSpeakerCost: number;
             allianceCreateGold: number;
             allianceMaxMembers: number;
             /** @description milliseconds */
@@ -15700,10 +15580,15 @@ export interface components {
             isFinish: boolean;
             claimed: boolean;
         };
+        /** @description (marchlands) a fixed bundle of resources once a day */
         QuestDailyGift: {
-            /** @description item id -> count */
-            items: {
-                [key: string]: number;
+            /** @description added to the chosen city (BALANCE.dailyGift) */
+            resources: {
+                gold?: number;
+                food?: number;
+                wood?: number;
+                stone?: number;
+                iron?: number;
             };
         };
         RankingPlayerEntry: {

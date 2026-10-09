@@ -104,15 +104,9 @@ export async function setPlayerFlags(ctx: Ctx, playerName: string, flags: { begi
   await pushPlayerInfo(ctx, p);
 }
 
-export async function setCityStats(
-  ctx: Ctx,
-  cityId: number,
-  playerId: number,
-  stats: { population?: number; loyalty?: number; troops?: Record<string, number> },
-) {
+export async function setCityStats(ctx: Ctx, cityId: number, playerId: number, stats: { population?: number; troops?: Record<string, number> }) {
   const b = await openOwnCity(ctx, playerId, cityId);
   if (stats.population != null) b.city.population = Math.max(0, stats.population);
-  if (stats.loyalty != null) b.city.loyalty = Math.max(0, Math.min(100, stats.loyalty));
   if (stats.troops) b.city.troops = { ...b.city.troops, ...stats.troops };
   await saveCity(ctx, b.city);
   pushCity(ctx, b);

@@ -1,11 +1,11 @@
 // friend.* (friends and block list) and chat (world / beginner / alliance / private).
 
 import { and, desc, eq, gt, or, sql } from 'drizzle-orm';
-import { BALANCE, GameError } from '@marchlands/core';
+import { GameError } from '@marchlands/core';
 import { chatMessages, playerRelations, players } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
-import { activeBuff, consumeItem, escapeHtml, itemCount } from '../helpers.ts';
-import { findPlayerByName, getPlayer, savePlayer } from '../repo.ts';
+import { escapeHtml } from '../helpers.ts';
+import { findPlayerByName, getPlayer } from '../repo.ts';
 
 // ---------------------------------------------------------------------------------------------
 // Friends & blocks
@@ -71,21 +71,15 @@ async function decorate(ctx: Ctx, p: { prestigeRank: number; allianceId: number 
   return msg;
 }
 
-/** common.worldChat (costs a Speaker) / common.channelChat (beginner channel, free). */
+/** common.worldChat / common.channelChat (beginner channel); (marchlands) both are free: there are no Speakers. */
 export async function worldChat(ctx: Ctx, playerId: number, rawMsg: string, channel: 'world' | 'beginner' = 'world') {
-  const p = await getPlayer(ctx, playerId, { lock: true });
+  const p = await getPlayer(ctx, playerId);
   assertNotMuted(p, ctx.now);
   const msg = cleanMessage(rawMsg);
-  if (channel === 'world') {
-    if (itemCount(p, 'consume.1.a') < BALANCE.worldChatSpeakerCost) throw new GameError('You need a Speaker to talk in the World channel.', -99);
-    consumeItem(ctx, p, 'consume.1.a', BALANCE.worldChatSpeakerCost);
-    await savePlayer(ctx, p);
-  }
   await ctx.tx.insert(chatMessages).values({ channel, fromPlayerId: p.id, fromName: p.name, message: msg, sentAt: ctx.now });
   ctx.broadcast('server.ChannelChatMsg', {
     msg: await decorate(ctx, p, msg),
     languageType: 0,
-    ownitemid: activeBuff(p, 'ChatIconBuff', ctx.now)?.param ?? 0,
     fromUser: p.name,
     fromId: p.id,
     channel,
@@ -104,7 +98,7 @@ export async function allianceChat(ctx: Ctx, playerId: number, rawMsg: string) {
   ctx.push(
     memberRows.map((r) => r.id),
     'server.AllianceChatMsg',
-    { msg, languageType: 0, ownitemid: activeBuff(p, 'ChatIconBuff', ctx.now)?.param ?? 0, fromUser: p.name, fromId: p.id, channel: 'alliance', time: ctx.now },
+    { msg, languageType: 0, fromUser: p.name, fromId: p.id, channel: 'alliance', time: ctx.now },
   );
 }
 
@@ -118,7 +112,7 @@ export async function privateChat(ctx: Ctx, playerId: number, targetName: string
   const msg = cleanMessage(rawMsg);
   if (await isBlocked(ctx, target.id, p.id)) return; // silently dropped, as if delivered
   await ctx.tx.insert(chatMessages).values({ channel: 'private', fromPlayerId: p.id, fromName: p.name, toPlayerId: target.id, message: msg, sentAt: ctx.now });
-  ctx.push(target.id, 'server.PrivateChatMessage', { msg, chatType: 0, ownitemid: 0, fromUser: p.name, fromId: p.id, time: ctx.now });
+  ctx.push(target.id, 'server.PrivateChatMessage', { msg, chatType: 0, fromUser: p.name, fromId: p.id, time: ctx.now });
 }
 
 /** Recent history of a channel (world / beginner / alliance / private). */
