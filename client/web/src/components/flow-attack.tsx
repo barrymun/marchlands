@@ -8,7 +8,7 @@ import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
 import { FLOW_MAX_TARGETS_PER_CITY, HeroStatus, tileId as toTileId, tileXY, TROOP_KEYS, type TroopKey } from '@marchlands/core';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -237,12 +237,19 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
   const farms = (flows.data ?? []).filter((f) => f.actions.some((a) => a.type === 'attackTargets'));
   const [busy, setBusy] = useState(false);
 
-  const addTo = async (flow: Flow) => {
+  /** true once saved; toasts what happened either way */
+  const addTo = async (flow: Flow): Promise<boolean> => {
     const i = flow.actions.findIndex((a) => a.type === 'attackTargets');
     const action = flow.actions[i] as AttackAction;
     const list = action.targets[String(city.id)] ?? [];
-    if (list.includes(tileId)) return toast.info(`${tileName} is already in "${flow.name}"`);
-    if (list.length >= targetCap(city)) return toast.error(`${city.name} has no idle hero left for another target in "${flow.name}"`);
+    if (list.includes(tileId)) {
+      toast.info(`${tileName} is already in "${flow.name}"`);
+      return false;
+    }
+    if (list.length >= targetCap(city)) {
+      toast.error(`${city.name} has no idle hero left for another target in "${flow.name}"`);
+      return false;
+    }
     const actions = flow.actions.map((a, j) => (j === i ? { ...action, targets: { ...action.targets, [String(city.id)]: [...list, tileId] } } : a));
     // the flow must also run on this city
     const cities = flow.cities === 'all' || flow.cities.includes(city.id) ? flow.cities : [...flow.cities, city.id];
@@ -251,15 +258,17 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
       const saved = await unwrap(api.POST('/api/v1/player/flows', { body: { id: flow.id, name: flow.name, actions, cities } }));
       qc.setQueryData(['flows'], saved);
       toast.success(`Added ${tileName} to "${flow.name}" (${city.name}, target ${list.length + 1})`);
+      return true;
     } catch (err) {
       toast.error(errorMessage(err));
+      return false;
     } finally {
       setBusy(false);
     }
   };
 
   /** No farming flow yet: start one ("Farming list") holding this tile; the saved army is chosen later in the Flows tab. */
-  const createList = async () => {
+  const createList = async (): Promise<boolean> => {
     setBusy(true);
     try {
       const saved = await unwrap(
@@ -269,48 +278,85 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
       );
       qc.setQueryData(['flows'], saved);
       toast.success(`Started "Farming list" with ${tileName}`, { description: 'Choose the saved army to send in the Flows tab.' });
+      return true;
     } catch (err) {
       toast.error(errorMessage(err));
+      return false;
     } finally {
       setBusy(false);
     }
   };
 
-  if (!farms.length) {
-    return (
+  const [open, setOpen] = useState(false);
+  const [chosen, setChosen] = useState('');
+  const flow = farms.find((f) => f.id === chosen) ?? farms[0];
+  const cap = targetCap(city);
+  const targets = flow ? ((flow.actions.find((a) => a.type === 'attackTargets') as AttackAction | undefined)?.targets[String(city.id)] ?? []) : [];
+  const confirm = async () => {
+    if (await (flow ? addTo(flow) : createList())) setOpen(false);
+  };
+
+  return (
+    <>
       <Button
         size="sm"
         variant="outline"
-        disabled={busy || targetCap(city) === 0}
-        title={targetCap(city) === 0 ? 'Each target needs an idle hero in this city' : undefined}
-        onClick={() => void createList()}
+        disabled={busy || (!farms.length && cap === 0)}
+        title={!farms.length && cap === 0 ? 'Each target needs an idle hero in this city' : undefined}
+        onClick={() => {
+          setChosen(farms[0]?.id ?? '');
+          setOpen(true);
+        }}
       >
         <Swords /> Add to farming list
       </Button>
-    );
-  }
-  if (farms.length === 1) {
-    return (
-      <Button size="sm" variant="outline" disabled={busy} title={`Adds to the flow "${farms[0].name}" (${city.name})`} onClick={() => void addTo(farms[0])}>
-        <Swords /> Add to farming list
-      </Button>
-    );
-  }
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button size="sm" variant="outline" disabled={busy}>
-          <Swords /> Add to farming list
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        <DropdownMenuLabel>Which farming list?</DropdownMenuLabel>
-        {farms.map((f) => (
-          <DropdownMenuItem key={f.id} onSelect={() => void addTo(f)}>
-            {f.name}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add to farming list?</DialogTitle>
+            <DialogDescription>
+              {flow
+                ? `${city.name} will attack ${tileName} as part of the flow below.`
+                : `No flow farms yet: this starts a flow called "Farming list" with ${tileName} as ${city.name}'s first target. Choose the saved army to send in the Flows tab.`}
+            </DialogDescription>
+          </DialogHeader>
+          {flow && (
+            <div className="grid gap-2 text-sm">
+              {farms.length > 1 ? (
+                <Select value={flow.id} onValueChange={setChosen}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {farms.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>
+                        {f.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p>
+                  Flow: <span className="font-medium">{flow.name}</span>
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {targets.includes(tileId)
+                  ? `${tileName} is already one of ${city.name}'s targets in this flow.`
+                  : `${city.name} has ${targets.length} of ${cap} targets (one per idle hero).`}
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button disabled={busy || (flow != null && (targets.includes(tileId) || targets.length >= cap))} onClick={() => void confirm()}>
+              {flow ? 'Add target' : 'Start farming list'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
