@@ -2247,7 +2247,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Comfort: 1 relief, 2 prayer, 3 blessing, 4 population raising (interior.pacifyPeople) */
+        /** Comfort: 3 blessing (gold for food), 4 population raising (food for people) (interior.pacifyPeople) */
         post: {
             parameters: {
                 query?: never;
@@ -2276,72 +2276,6 @@ export interface paths {
                             /** @enum {number} */
                             ok: 1;
                             data: components["schemas"]["ComfortResult"];
-                        };
-                    };
-                };
-                /** @description Default Response */
-                "4XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-                /** @description Default Response */
-                "5XX": {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/cities/{cityId}/levy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Levy: 1 gold, 2 food, 3 wood, 4 stone, 5 iron (interior.taxation) */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    cityId: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        typeId: number;
-                    };
-                };
-            };
-            responses: {
-                /** @description Default Response */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @enum {number} */
-                            ok: 1;
-                            data: null;
                         };
                     };
                 };
@@ -13074,8 +13008,6 @@ export interface components {
             heroAwardCostPerLevel: number;
             /** @description milliseconds */
             comfortCooldownMs: number;
-            /** @description milliseconds */
-            levyCooldownMs: number;
             heroTimeFactor: number;
             techTimeFactor: number;
             demolishRefund: number;
@@ -15294,8 +15226,6 @@ export interface components {
             heroAwardCostPerLevel: number;
             /** @description milliseconds */
             comfortCooldownMs: number;
-            /** @description milliseconds */
-            levyCooldownMs: number;
             heroTimeFactor: number;
             techTimeFactor: number;
             demolishRefund: number;

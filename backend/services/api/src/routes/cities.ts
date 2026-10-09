@@ -15,7 +15,6 @@ import {
   Empty,
   InjuredTroopsBody,
   CureInjuredBody,
-  LevyBody,
   MoveCityBody,
   ProduceQueue,
   ProductionBreakdown,
@@ -76,16 +75,11 @@ export default async function cityRoutes(app: ZApp) {
   );
   app.post(
     '/cities/:cityId/comfort',
-    s(tags.city, 'Comfort: 1 relief, 2 prayer, 3 blessing, 4 population raising (interior.pacifyPeople)', ComfortResult, {
+    s(tags.city, 'Comfort: 3 blessing (gold for food), 4 population raising (food for people) (interior.pacifyPeople)', ComfortResult, {
       params: zCityParams,
       body: ComfortBody,
     }),
     (req) => game(req, (ctx, pid) => interior.comfort(ctx, pid, req.params.cityId, req.body.typeId)),
-  );
-  app.post(
-    '/cities/:cityId/levy',
-    s(tags.city, 'Levy: 1 gold, 2 food, 3 wood, 4 stone, 5 iron (interior.taxation)', Empty, { params: zCityParams, body: LevyBody }),
-    (req) => game(req, (ctx, pid) => interior.levy(ctx, pid, req.params.cityId, req.body.typeId)),
   );
   app.get(
     '/cities/:cityId/production',

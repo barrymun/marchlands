@@ -86,9 +86,8 @@ export const BALANCE = {
   tavernRefreshGoldPerInnLevel: 1000,
   heroAwardCostPerLevel: 100, // (orig)
 
-  // comfort / levy (orig)
+  // comfort (orig); (marchlands) the levy is removed
   comfortCooldownMs: 15 * MINUTE,
-  levyCooldownMs: 15 * MINUTE,
 
   // ---- construction ----
   heroTimeFactor: 0.995, // (orig) per point of the relevant mayor attribute

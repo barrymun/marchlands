@@ -39,7 +39,6 @@ const RESOURCE_COLUMNS = [
   ['wasted', 'Wasted (storage full)'],
   ['plundered', 'Plundered'],
   ['stolen', 'Lost to plunder'],
-  ['gained.levy', 'Levied'],
   ['gained.dailyGift', 'Daily gift'],
   ['market.bought', 'Bought'],
   ['market.sold', 'Sold'],

@@ -1,4 +1,4 @@
-// interior.* and city.* — tax, work rates, comfort, levy, city settings and teleporting.
+// interior.* and city.* — tax, work rates, comfort, city settings and teleporting.
 
 import { and, count, eq, inArray, ne } from 'drizzle-orm';
 import { BALANCE, BASIC_RESOURCES, GameError, itemGoldPrice, scaled, TileType, tileXY, type ResourceSet } from '@marchlands/core';
@@ -104,40 +104,6 @@ export async function comfort(ctx: Ctx, playerId: number, cityId: number, typeId
   pushResources(ctx, b);
   await saveCity(ctx, c);
   return { freeBlessing: bonusBlessing };
-}
-
-/** interior.taxation (levy): 1 gold, 2 food, 3 wood, 4 stone, 5 iron; (marchlands) no loyalty cost, as lords' cities have none. */
-export async function levy(ctx: Ctx, playerId: number, cityId: number, typeId: number) {
-  const b = await openOwnCity(ctx, playerId, cityId);
-  const last = b.city.misc.lastLevyAt ?? 0;
-  const cd = scaled(BALANCE.levyCooldownMs);
-  if (ctx.now - last < cd) throw new GameError(cooldownMessage(last + cd - ctx.now, 'levy'), -34);
-  const c = b.city;
-  const pop = Math.floor(c.population);
-  const before = { gold: c.gold, food: c.food, wood: c.wood, stone: c.stone, iron: c.iron };
-  switch (typeId) {
-    case 1:
-      c.gold += Math.floor(pop / 10);
-      break;
-    case 2:
-      c.food += pop;
-      break;
-    case 3:
-      c.wood += pop;
-      break;
-    case 4:
-      c.stone += Math.floor(pop / 2);
-      break;
-    case 5:
-      c.iron += Math.floor(pop * 0.4);
-      break;
-    default:
-      throw new GameError('Invalid levy type.', -99);
-  }
-  for (const r of ['gold', 'food', 'wood', 'stone', 'iron'] as const) ctx.stat(playerId, cityId, { [`gained.levy.${r}`]: c[r] - before[r] });
-  c.misc = { ...c.misc, lastLevyAt: ctx.now };
-  pushResources(ctx, b);
-  await saveCity(ctx, c);
 }
 
 /** interior.getResourceProduceData */

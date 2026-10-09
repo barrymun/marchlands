@@ -134,7 +134,6 @@ export const ConfigBalance = z
     heroHireCostPerLevel: int(),
     heroAwardCostPerLevel: int(),
     comfortCooldownMs: ms(),
-    levyCooldownMs: ms(),
     heroTimeFactor: z.number(),
     techTimeFactor: z.number(),
     demolishRefund: z.number(),

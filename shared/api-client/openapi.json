@@ -8603,12 +8603,6 @@
             "maximum": 9007199254740991,
             "description": "milliseconds"
           },
-          "levyCooldownMs": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "milliseconds"
-          },
           "heroTimeFactor": {
             "type": "number"
           },
@@ -8953,7 +8947,6 @@
           "heroHireCostPerLevel",
           "heroAwardCostPerLevel",
           "comfortCooldownMs",
-          "levyCooldownMs",
           "heroTimeFactor",
           "techTimeFactor",
           "demolishRefund",
@@ -18965,12 +18958,6 @@
             "maximum": 9007199254740991,
             "description": "milliseconds"
           },
-          "levyCooldownMs": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "milliseconds"
-          },
           "heroTimeFactor": {
             "type": "number"
           },
@@ -19319,7 +19306,6 @@
           "heroHireCostPerLevel",
           "heroAwardCostPerLevel",
           "comfortCooldownMs",
-          "levyCooldownMs",
           "heroTimeFactor",
           "techTimeFactor",
           "demolishRefund",
@@ -23506,7 +23492,7 @@
     },
     "/api/v1/cities/{cityId}/comfort": {
       "post": {
-        "summary": "Comfort: 1 relief, 2 prayer, 3 blessing, 4 population raising (interior.pacifyPeople)",
+        "summary": "Comfort: 3 blessing (gold for food), 4 population raising (food for people) (interior.pacifyPeople)",
         "tags": [
           "city"
         ],
@@ -23564,99 +23550,6 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/ComfortResult"
-                    }
-                  },
-                  "required": [
-                    "ok",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/cities/{cityId}/levy": {
-      "post": {
-        "summary": "Levy: 1 gold, 2 food, 3 wood, 4 stone, 5 iron (interior.taxation)",
-        "tags": [
-          "city"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "typeId": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  }
-                },
-                "required": [
-                  "typeId"
-                ]
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
-            },
-            "in": "path",
-            "name": "cityId",
-            "required": true
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ok": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "data": {
-                      "type": "null"
                     }
                   },
                   "required": [

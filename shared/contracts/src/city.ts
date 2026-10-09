@@ -24,7 +24,6 @@ export const UpdateCityBody = z.object({
 export const TaxRateBody = z.object({ rate: z.number().int() });
 export const ResourcePercentBody = z.object({ food: z.number().int(), wood: z.number().int(), stone: z.number().int(), iron: z.number().int() }).partial();
 export const ComfortBody = z.object({ typeId: z.number().int().describe('3 blessing (gold for food), 4 population raising (food for people)') });
-export const LevyBody = z.object({ typeId: z.number().int() });
 export const MoveCityBody = z.object({ targetTileId: zId.describe('a free flat') });
 
 export const AvailableBuildingsQuery = z.object({ area: z.enum(['inside', 'outside', 'walls']).default('inside') });
