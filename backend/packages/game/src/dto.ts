@@ -114,6 +114,8 @@ export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
     taxRate: c.taxRate,
     taxIncome: Math.round(stats.taxIncome),
     taxConverted: Math.round(stats.taxConverted),
+    taxItemBonus: Math.round(stats.taxBuff),
+    taxItemPercent: stats.taxBuff ? Math.round(BALANCE.resourceBuffBonus * 100) : 0,
     herosSalary: round2(stats.heroSalary),
     troopCostFood: round2(stats.upkeep),
     curPopulation: Math.floor(c.population),

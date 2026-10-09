@@ -540,6 +540,18 @@
             "maximum": 9007199254740991,
             "description": "(marchlands) gold per game hour the tax rate earns from field output"
           },
+          "taxItemBonus": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold per game hour the Gold Production item adds to the base tax (part of taxIncome)"
+          },
+          "taxItemPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "that item bonus, percent"
+          },
           "herosSalary": {
             "type": "number"
           },
@@ -587,6 +599,8 @@
           "taxRate",
           "taxIncome",
           "taxConverted",
+          "taxItemBonus",
+          "taxItemPercent",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -10713,6 +10727,18 @@
             "maximum": 9007199254740991,
             "description": "(marchlands) gold per game hour the tax rate earns from field output"
           },
+          "taxItemBonus": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold per game hour the Gold Production item adds to the base tax (part of taxIncome)"
+          },
+          "taxItemPercent": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "that item bonus, percent"
+          },
           "herosSalary": {
             "type": "number"
           },
@@ -10760,6 +10786,8 @@
           "taxRate",
           "taxIncome",
           "taxConverted",
+          "taxItemBonus",
+          "taxItemPercent",
           "herosSalary",
           "troopCostFood",
           "curPopulation",

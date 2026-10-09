@@ -11288,6 +11288,10 @@ export interface components {
             taxIncome: number;
             /** @description (marchlands) gold per game hour the tax rate earns from field output */
             taxConverted: number;
+            /** @description gold per game hour the Gold Production item adds to the base tax (part of taxIncome) */
+            taxItemBonus: number;
+            /** @description that item bonus, percent */
+            taxItemPercent: number;
             herosSalary: number;
             /** @description troop food upkeep per game hour, 2 decimals */
             troopCostFood: number;
@@ -13512,6 +13516,10 @@ export interface components {
             taxIncome: number;
             /** @description (marchlands) gold per game hour the tax rate earns from field output */
             taxConverted: number;
+            /** @description gold per game hour the Gold Production item adds to the base tax (part of taxIncome) */
+            taxItemBonus: number;
+            /** @description that item bonus, percent */
+            taxItemPercent: number;
             herosSalary: number;
             /** @description troop food upkeep per game hour, 2 decimals */
             troopCostFood: number;

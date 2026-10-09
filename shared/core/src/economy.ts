@@ -120,6 +120,8 @@ export interface CityStats {
   taxIncome: number;
   /** (marchlands) gold per hour the tax rate converts from field output (part of taxIncome) */
   taxConverted: number;
+  /** gold per hour the Gold Production item adds to the base tax (part of taxIncome) */
+  taxBuff: number;
   /** (marchlands) field output per hour the tax rate takes and sells to the merchant */
   taxed: Record<BasicResource, number>;
   heroSalary: number;
@@ -234,8 +236,8 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   if (BALANCE.salaryPerRealHour) heroSalary /= getGameSpeed();
   // (marchlands) the people pay a fixed base tax; the tax rate instead sells that share of the city's
   // field output to the merchant as it is produced (orig: tax = population x rate, costing loyalty)
-  let baseTax = population * BALANCE.baseTaxShare;
-  if (hasBuff(ctx.buffs, 'GoldProductionBuff', now)) baseTax *= 1 + BALANCE.resourceBuffBonus;
+  const taxBuff = hasBuff(ctx.buffs, 'GoldProductionBuff', now) ? population * BALANCE.baseTaxShare * BALANCE.resourceBuffBonus : 0;
+  const baseTax = population * BALANCE.baseTaxShare + taxBuff;
   const share = Math.min(100, Math.max(0, city.taxRate)) / 100;
   const taxed = { food: 0, wood: 0, stone: 0, iron: 0 };
   let taxConverted = 0;
@@ -264,6 +266,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
     rates,
     taxIncome,
     taxConverted,
+    taxBuff,
     taxed,
     heroSalary,
     upkeep,

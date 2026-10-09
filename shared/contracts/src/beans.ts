@@ -91,6 +91,8 @@ export const ResourceBean = z
     taxRate: z.number().int().describe('(marchlands) share of field output sold to the merchant as it is produced'),
     taxIncome: z.number().int().describe('gold per game hour: the base tax on population plus taxConverted'),
     taxConverted: z.number().int().describe('(marchlands) gold per game hour the tax rate earns from field output'),
+    taxItemBonus: z.number().int().describe('gold per game hour the Gold Production item adds to the base tax (part of taxIncome)'),
+    taxItemPercent: z.number().int().describe('that item bonus, percent'),
     herosSalary: z.number(),
     troopCostFood: z.number().describe('troop food upkeep per game hour, 2 decimals'),
     curPopulation: z.number().int(),
