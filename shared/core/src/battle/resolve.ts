@@ -10,7 +10,7 @@ import { heroBattleAttackBonus, heroPower, heroStratagem, type HeroStats } from 
 import type { Rng } from '../rng.ts';
 import { arrayToForts, arrayToTroops, fortsToArray, troopsToArray, unitsExp } from '../troops.ts';
 import type { FortCounts, ResearchState, ResourceSet, TroopCounts } from '../types.ts';
-import { simulateBattle, type BattleOutcome, type ResearchStats } from './simulator.ts';
+import { simulateBattle, type BattleOutcome, type ResearchStats, type TraceEvent } from './simulator.ts';
 
 export interface CombatantInput {
   troops: TroopCounts;
@@ -84,7 +84,7 @@ function killHonor(killed: TroopCounts): number {
   return h;
 }
 
-export function resolveCombat(attacker: CombatantInput, defender: DefenderInput, rng: Rng): CombatResult {
+export function resolveCombat(attacker: CombatantInput, defender: DefenderInput, rng: Rng, trace?: (e: TraceEvent) => void): CombatResult {
   const raw = simulateBattle(
     {
       research: toResearch(attacker.research),
@@ -102,7 +102,7 @@ export function resolveCombat(attacker: CombatantInput, defender: DefenderInput,
       attackModifier: attackModifier(defender),
       defenceModifier: 1 + (defender.defenseBonus ?? 0),
     },
-    { rng, fixes: true },
+    { rng, fixes: true, trace },
   );
   const atkAfter = arrayToTroops(raw.attackerTroops);
   const defAfter = arrayToTroops(raw.defenderTroops);

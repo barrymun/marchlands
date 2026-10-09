@@ -53,7 +53,24 @@ export interface BattleOptions {
    * abatis are consumed when they fire; a trebuchet volley big enough to wipe a group kills it.
    */
   fixes?: boolean;
+  /** (marchlands) observe the battle: every kill on an attacking group, and each round's end state (tools/battle-sim) */
+  trace?: (e: TraceEvent) => void;
 }
+
+/** Who killed attacking troops: a defending troop type (battle index), or a fortification. */
+export type KillSource = number | 'trap' | 'abatis' | 'log' | 'trebuchet' | 'tower';
+
+export type TraceEvent =
+  | { kind: 'kill'; round: number; source: KillSource; target: number; killed: number; location: number }
+  | {
+      kind: 'round';
+      round: number;
+      attacker: { location: number; count: number }[];
+      defender: { location: number; count: number }[];
+      towers: number;
+      wallHitPoints: number;
+      forts: number[];
+    };
 
 export interface BattleOutcome {
   attackerTroops: number[];
@@ -188,6 +205,10 @@ const value = (g: Group) => f(g.stat.attack * f(g.eff));
 
 export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleOptions): BattleOutcome {
   const fixes = opts.fixes ?? false;
+  const trace = opts.trace;
+  /** report a kill on an attacking group (before it is applied) */
+  const killed = (round: number, source: KillSource, target: Group, n: number) =>
+    trace?.({ kind: 'kill', round, source, target: target.typeId, killed: Math.min(n, target.eff), location: target.location });
   const atkStats = BASE_STATS.map((s) => ({ ...s }));
   const defStats = BASE_STATS.map((s) => ({ ...s }));
   const atkModA = f(atk.attackModifier ?? 1);
@@ -318,7 +339,11 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
           }
           if (!target) target = fastest(A, (lp) => lp.location >= maxRange);
         }
-        if (target) applyKill(target, troopDamage(pq, target, pq.location - target.location));
+        if (target) {
+          const dmg = troopDamage(pq, target, pq.location - target.location);
+          if (trace) killed(round, i, target, dmg);
+          applyKill(target, dmg);
+        }
       }
 
       // attacker group i
@@ -366,7 +391,11 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
       if (groups > 0) {
         const maxTraps = Math.min(trapCount, trapDieRate);
         const kills = Math.trunc(f(f(maxTraps * 0.5 * trapKillPower) / groups));
-        for (const lp of A) if (inZone(lp)) lp.eff = Math.max(0, lp.eff - kills);
+        for (const lp of A) {
+          if (!inZone(lp)) continue;
+          if (trace) killed(round, 'trap', lp, kills);
+          lp.eff = Math.max(0, lp.eff - kills);
+        }
         trapCount -= maxTraps;
       }
     }
@@ -378,6 +407,7 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
       const target = inZone(A[7]) ? A[7] : inZone(A[8]) ? A[8] : null;
       if (target) {
         const fired = Math.min(abatisCount, abatisDieRate);
+        if (trace) killed(round, 'abatis', target, Math.trunc(fired * 0.535));
         target.eff = Math.max(target.eff - Math.trunc(fired * 0.535), 0);
         if (fixes) abatisCount -= fired;
       }
@@ -402,6 +432,7 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
         const dmg = fixes
           ? Math.floor(f(f(f(fired * logKillPower) * fortStats[3].attack) / f(target.stat.defense * target.stat.life)))
           : Math.floor(f(f(f(fired * logKillPower) * fortStats[3].attack) * target.stat.defense));
+        if (trace) killed(round, 'log', target, dmg);
         target.eff = Math.trunc(Math.max(f(target.eff - dmg), 0));
         logCount -= fired;
       }
@@ -423,12 +454,16 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
         const totalAtk = f(f(maxRockDieRate * rockKillPower) * fortStats[4].attack);
         if (totalDef > totalAtk) {
           rockCount -= maxRockDieRate;
-          const killed = Math.floor(f(f(f(maxRockDieRate * fortStats[4].attack) * rockKillPower) / f(target.stat.defense * target.stat.life)));
-          target.eff = Math.trunc(Math.max(f(target.eff - killed), 0));
+          const n = Math.floor(f(f(f(maxRockDieRate * fortStats[4].attack) * rockKillPower) / f(target.stat.defense * target.stat.life)));
+          if (trace) killed(round, 'trebuchet', target, n);
+          target.eff = Math.trunc(Math.max(f(target.eff - n), 0));
         } else {
           const used = Math.ceil(f(f(f(target.stat.defense * target.stat.life) * target.eff) / f(rockKillPower * fortStats[4].attack)));
           rockCount = Math.max(0, Math.trunc(f(rockCount - used)));
-          if (fixes) target.eff = 0;
+          if (fixes) {
+            if (trace) killed(round, 'trebuchet', target, target.eff);
+            target.eff = 0;
+          }
         }
       }
     }
@@ -450,8 +485,9 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
       if (target) {
         const distance = fieldSize - target.location;
         const mod = distance > f(tower.stat.range / 2) ? f(0.5) : 1;
-        const killed = Math.trunc(f(f(f(tower.stat.attack * f(tower.count)) * mod) / f(target.stat.defense * target.stat.life)));
-        target.eff = killed > target.eff ? 0 : target.eff - killed;
+        const n = Math.trunc(f(f(f(tower.stat.attack * f(tower.count)) * mod) / f(target.stat.defense * target.stat.life)));
+        if (trace) killed(round, 'tower', target, n);
+        target.eff = n > target.eff ? 0 : target.eff - n;
       }
     }
 
@@ -467,6 +503,15 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
       if (g.count > 0) defenderAlive = true;
     }
     if (wallHp > 0) defenderAlive = true;
+    trace?.({
+      kind: 'round',
+      round,
+      attacker: A.map((g) => ({ location: g.location, count: g.count })),
+      defender: D.map((g) => ({ location: g.location, count: g.count })),
+      towers: tower.count,
+      wallHitPoints: wallHp,
+      forts: [trapCount, abatisCount, tower.count, logCount, rockCount],
+    });
     if (!attackerAlive || !defenderAlive) break;
   }
 

@@ -17,6 +17,25 @@ The code and the original game data use different names from the ones the game s
 | Attack | `power` | Army attack: +`power`/100, soft-capped above 200 (`heroBattleAttackBonus`) |
 | Intelligence | `stratagem` | Army defense factor (see [mechanics.md](mechanics.md#the-defense-factor)) |
 
+## Re-running
+
+The scripts are in `tools/battle-sim` (`lib.ts` is the harness, `presets.ts` the named armies):
+
+```bash
+npm run sim -- compare --preset archers-old,archers-best --sources
+```
+
+| Command | What it does |
+|---|---|
+| `compare` | Every preset, or the ones named with `--preset` / `--troops archer=118250,peasants=1500,...`. `--sources` adds what killed each troop type. |
+| `grid --main archer --fodder peasants,militia --from 500 --to 4000 --step 250` | Tries every fodder combination, filling the rest of the 125k cap (`--cap`, after `--carriage` transporters) with the main troop. Shows the cheapest winners. |
+| `trace --preset archers-best --seed 3` | One battle round by round: positions, the towers and wall, and every kill. |
+| `presets` | Lists the named armies |
+
+- **Common options:** `--level` (barbarian city level, default 10) and `--seeds`.
+- **The lord:** `--research`, `--power`, `--stratagem`, `--no-attack-item` and `--defense-item`. The defaults are barrymun on 2026-10-09; see `DEFAULT_LORD` in `lib.ts`.
+- **Seeds:** the scripts use their own seeds, so averages can differ slightly (by about 0.05M) from the figures on these pages.
+
 ## How the simulations are run
 
 - **Attacker:** the lord's real research, hero and active items. Attack bonus = 1 + hero attack bonus + 5% per Military Tradition level + the attack item. Defense = 1 + the defense item.

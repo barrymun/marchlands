@@ -7,6 +7,7 @@
     "backend/packages/*/test/**/*.ts",
     "backend/services/*/src/**/*.ts",
     "backend/services/*/test/**/*.ts",
-    "backend/packages/db/drizzle.config.ts"
+    "backend/packages/db/drizzle.config.ts",
+    "tools/battle-sim/**/*.ts"
   ]
 }
