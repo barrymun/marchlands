@@ -12360,6 +12360,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                     };
                     defender: {
                         player: string;
@@ -12385,6 +12389,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                         forts?: {
                             before: {
                                 [key: string]: number;
@@ -12440,6 +12448,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                     };
                     defender: {
                         player: string;
@@ -12465,6 +12477,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                         forts?: {
                             before: {
                                 [key: string]: number;
@@ -12520,6 +12536,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                     };
                     defender: {
                         player: string;
@@ -12545,6 +12565,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                         forts?: {
                             before: {
                                 [key: string]: number;
@@ -14552,6 +14576,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                     };
                     defender: {
                         player: string;
@@ -14577,6 +14605,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                         forts?: {
                             before: {
                                 [key: string]: number;
@@ -14632,6 +14664,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                     };
                     defender: {
                         player: string;
@@ -14657,6 +14693,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                         forts?: {
                             before: {
                                 [key: string]: number;
@@ -14712,6 +14752,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                     };
                     defender: {
                         player: string;
@@ -14737,6 +14781,10 @@ export interface components {
                         };
                         honor: number;
                         heroExp: number;
+                        bonuses?: {
+                            desc: string;
+                            itemId?: string;
+                        }[];
                         forts?: {
                             before: {
                                 [key: string]: number;

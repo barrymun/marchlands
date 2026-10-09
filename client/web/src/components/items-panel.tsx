@@ -26,7 +26,7 @@ import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { api, unwrap } from '@/lib/api';
 import { fmt, fmtExact } from '@/lib/format';
-import { ITEM_BONUS_OUTLINE, ITEM_BONUS_TONE } from '@/lib/tones';
+import { ITEM_BONUS_TONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 /** Gold price of an entry when one of its items is for sale (itemGoldPrice: there are no cents). */
@@ -107,6 +107,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
           <CardContent className="flex flex-wrap gap-2">
             {buffs.map((b) => (
               <Badge key={b.id} className={cn('gap-1 font-normal', ITEM_BONUS_TONE)}>
+                {b.itemId && <span className="font-medium">{itemConfig(b.itemId)?.name.trim()}:</span>}
                 {b.desc} · <Countdown endTime={b.endTime} />
               </Badge>
             ))}
@@ -265,16 +266,13 @@ function ActiveBonus({ ids, buffs }: { ids: string[]; buffs: { id: string; endTi
       </Badge>
     );
   }
-  // the same bonus, set by another item (or before the item was recorded)
+  // the same bonus, set by another item (or before the item was recorded): plain text, so this card does not read as active
   const source = active.itemId ? itemConfig(active.itemId)?.name.trim() : null;
   const days = effect.durationMs / 86_400_000;
   const adds = days >= 1 ? `${days} day${days === 1 ? '' : 's'}` : `${Math.round(effect.durationMs / 3_600_000)} hours`;
   return (
-    <span className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-      <Badge variant="outline" className={cn('gap-1 tabular-nums', ITEM_BONUS_OUTLINE)} title={`The same bonus is running${source ? ` from ${source}` : ''}`}>
-        {source ? `${source} active` : 'Bonus active'} · <Countdown endTime={active.endTime} />
-      </Badge>
-      using this adds {adds}
-    </span>
+    <p className="text-xs text-muted-foreground tabular-nums">
+      Same bonus already running{source ? ` from ${source}` : ''} (<Countdown endTime={active.endTime} /> left); using this adds {adds}.
+    </p>
   );
 }

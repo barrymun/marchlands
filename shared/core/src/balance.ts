@@ -171,7 +171,7 @@ export const BALANCE = {
   /** (marchlands) healing an injured unit with honor costs its food upkeep x this (the honor killing one earns) */
   healHonorPerUpkeep: 1,
   /** (evony) hero exp per point of experience weight (orig TROOP_EXPS, troops.ts unitExp) of enemy units killed */
-  heroExpPerKill: 0.1,
+  heroExpPerKill: 0.01,
   /** (evony) mayor exp per point of experience weight of troops and fortifications trained in the city */
   heroExpPerTrain: 0.02,
   /** (evony) mayor exp per unit of resources (gold included) a completed research level cost */

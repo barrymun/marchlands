@@ -25,6 +25,7 @@ import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useSticky } from '@/hooks/use-sticky';
 import { api, unwrap } from '@/lib/api';
 import { fmtExact, signedRate } from '@/lib/format';
+import { ITEM_BONUS_TONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 export const rk = {
@@ -351,6 +352,16 @@ function SideView({
           </span>
         )}
       </div>
+      {side.bonuses && side.bonuses.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {side.bonuses.map((b) => (
+            <Badge key={b.desc} className={cn('gap-1 font-normal', ITEM_BONUS_TONE)}>
+              {b.itemId && <span className="font-medium">{itemConfig(b.itemId)?.name.trim()}:</span>}
+              {b.desc}
+            </Badge>
+          ))}
+        </div>
+      )}
       {troopRows.length + fortRows.length === 0 ? (
         <p className="text-xs text-muted-foreground">No troops.</p>
       ) : (

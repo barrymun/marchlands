@@ -4911,6 +4911,23 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ]
+                                }
                               }
                             },
                             "required": [
@@ -5072,6 +5089,23 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ]
+                                }
                               },
                               "forts": {
                                 "type": "object",
@@ -5376,6 +5410,23 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ]
+                                }
                               }
                             },
                             "required": [
@@ -5537,6 +5588,23 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ]
+                                }
                               },
                               "forts": {
                                 "type": "object",
@@ -5843,6 +5911,23 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ]
+                                }
                               }
                             },
                             "required": [
@@ -6004,6 +6089,23 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ]
+                                }
                               },
                               "forts": {
                                 "type": "object",
@@ -15093,6 +15195,24 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ],
+                                  "additionalProperties": false
+                                }
                               }
                             },
                             "required": [
@@ -15257,6 +15377,24 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ],
+                                  "additionalProperties": false
+                                }
                               },
                               "forts": {
                                 "type": "object",
@@ -15567,6 +15705,24 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ],
+                                  "additionalProperties": false
+                                }
                               }
                             },
                             "required": [
@@ -15731,6 +15887,24 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ],
+                                  "additionalProperties": false
+                                }
                               },
                               "forts": {
                                 "type": "object",
@@ -16043,6 +16217,24 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ],
+                                  "additionalProperties": false
+                                }
                               }
                             },
                             "required": [
@@ -16207,6 +16399,24 @@
                               },
                               "heroExp": {
                                 "type": "number"
+                              },
+                              "bonuses": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "desc": {
+                                      "type": "string"
+                                    },
+                                    "itemId": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "desc"
+                                  ],
+                                  "additionalProperties": false
+                                }
                               },
                               "forts": {
                                 "type": "object",

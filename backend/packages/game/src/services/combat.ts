@@ -34,6 +34,8 @@ import {
   addTroops,
   armyLoad,
   heroPower,
+  itemEffect,
+  maxArmyTroops,
   totalResources,
   totalTroops,
   valleyGarrison,
@@ -57,6 +59,7 @@ import { addItem, addPrestige, activeBuff, gainResources, pushCity, pushResource
 import {
   armiesStationedAt,
   citiesOf,
+  findCity,
   getArmy,
   getHero,
   getPlayer,
@@ -202,6 +205,31 @@ async function heroesOfArmies(ctx: Ctx, list: ArmyRow[]): Promise<(HeroRow | nul
 }
 
 const buffBonus = (p: PlayerRow, id: string, now: number) => (activeBuff(p, id, now) ? 0.2 : 0);
+
+/** (marchlands) The attack / defense item bonuses that count in a battle, for its report. */
+function battleBonuses(p: PlayerRow, now: number): { bonuses?: { desc: string; itemId?: string }[] } {
+  const list = ['AttackBuff', 'DefenseBuff']
+    .map((id) => activeBuff(p, id, now))
+    .filter((b) => b != null)
+    .map((b) => ({ desc: b.desc, ...(b.itemId ? { itemId: b.itemId } : {}) }));
+  return list.length ? { bonuses: list } : {};
+}
+
+const WAR_ENSIGN = 'player.troop.1.a';
+
+/**
+ * (marchlands) The attacker's item bonuses for its report: battleBonuses, plus the War Ensign when the army is
+ * larger than its home Rally Spot allows without one (the Ensign let it march that size).
+ */
+async function attackerBonuses(ctx: Ctx, p: PlayerRow, a: ArmyRow): Promise<{ bonuses?: { desc: string; itemId?: string }[] }> {
+  const list = battleBonuses(p, ctx.now).bonuses ?? [];
+  const home = await findCity(ctx, a.cityId);
+  if (home && totalTroops(a.troops) > maxArmyTroops(home.buildings)) {
+    const ensign = itemEffect(WAR_ENSIGN);
+    list.push({ desc: ensign?.kind === 'buff' ? ensign.desc : 'Army +25% troops', itemId: WAR_ENSIGN });
+  }
+  return list.length ? { bonuses: list } : {};
+}
 
 /** Valley/NPC regeneration window. */
 const regenMs = () => Math.max(1000, scaled(BALANCE.npcRegenMs));
@@ -645,6 +673,7 @@ interface BattleSideReport {
   troops: { before: TroopCounts; lost: TroopCounts; after: TroopCounts };
   /** fallen troops that survived injured (Medicine) */
   injured?: TroopCounts;
+  bonuses?: { desc: string; itemId?: string }[];
 }
 
 /** Medals a won attack on a city of `level` drops (BALANCE.medalDrops), added to the attacker's items. */
@@ -807,6 +836,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     hero: heroSummary(hero),
     troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after },
     injured: await woundAttackers(ctx, a, attacker, r.attacker.lost),
+    ...(await attackerBonuses(ctx, attacker, a)),
   };
   const defenderSide = {
     player: def.player.name,
@@ -815,6 +845,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     injured: defenderInjured,
     forts: r.forts,
     wallLevel,
+    ...battleBonuses(def.player, ctx.now),
   };
   const body = battleBody(r, attackerSide, defenderSide, {
     plunder: loot,
@@ -930,7 +961,13 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
   const body = battleBody(
     r,
-    { player: attacker.name, hero: heroSummary(hero), troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after }, injured },
+    {
+      player: attacker.name,
+      hero: heroSummary(hero),
+      troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after },
+      injured,
+      ...(await attackerBonuses(ctx, attacker, a)),
+    },
     {
       player: "Barbarian's City",
       hero: { id: 0, name: guard.name, level: guard.level, logoUrl: guard.logoUrl },
@@ -1029,7 +1066,13 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
       attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now),
       defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now),
     },
-    { troops: defTroops, research: owner?.research ?? {}, hero: guard ?? npcGuard },
+    {
+      troops: defTroops,
+      research: owner?.research ?? {},
+      hero: guard ?? npcGuard,
+      attackBonus: owner ? buffBonus(owner, 'AttackBuff', ctx.now) : 0,
+      defenseBonus: owner ? buffBonus(owner, 'DefenseBuff', ctx.now) : 0,
+    },
     ctx.rng,
   );
   const afterGroups = distributeLosses(groups, defTroops, r.defender.after);
@@ -1073,11 +1116,18 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
   const body = battleBody(
     r,
-    { player: attacker.name, hero: heroSummary(hero), troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after }, injured },
+    {
+      player: attacker.name,
+      hero: heroSummary(hero),
+      troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after },
+      injured,
+      ...(await attackerBonuses(ctx, attacker, a)),
+    },
     {
       player: defenderName,
       hero: g ? { id: 0, name: g.name, level: g.level, logoUrl: g.logoUrl } : null,
       troops: { before: r.defender.before, lost: r.defender.lost, after: r.defender.after },
+      ...(owner ? battleBonuses(owner, ctx.now) : {}),
     },
     { occupied, reason, valley: { type: tile.type, level: tile.level } },
   );

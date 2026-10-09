@@ -16,9 +16,6 @@ export const ITEM_BONUS_TEXT = 'text-violet-700 dark:text-violet-400';
 /** Plain text inside a tooltip, whose colours are inverted (dark in light mode, light in dark mode). */
 export const ITEM_BONUS_TEXT_INVERTED = 'text-violet-300 dark:text-violet-700';
 
-/** An outlined badge for a bonus that is running from another item (items sharing a bonus). */
-export const ITEM_BONUS_OUTLINE = 'border-violet-500/40 text-violet-700 dark:text-violet-300';
-
 /** A gain or a success, as text. */
 export const GAIN_TEXT = 'text-emerald-600 dark:text-emerald-400';
 

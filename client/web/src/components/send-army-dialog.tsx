@@ -8,12 +8,14 @@ import {
   BuildingType,
   heroPower,
   HeroStatus,
+  itemConfig,
   maxArmyTroops,
   Mission,
   TROOP_ID_BY_KEY,
   TROOP_KEYS,
   type TroopKey,
 } from '@marchlands/core';
+import { Countdown } from '@/components/countdown';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -25,6 +27,7 @@ import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, troopName } from '@/lib/format';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
+import { cn } from '@/lib/utils';
 
 export interface SendTarget {
   tileId: number;
@@ -78,6 +81,11 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
   const rally = buildingLevel(city.buildings, BuildingType.RALLY_SPOT);
   const chosen = Object.values(troopBody).reduce<number>((t, n) => t + Number(n), 0);
   const over = chosen > cap;
+  // attack / defense items (Ivory Horn …) that will count in the battle
+  const battleBuffs =
+    Number(mission) === Mission.ATTACK
+      ? (player.data?.buffs ?? []).filter((b) => (b.id === 'AttackBuff' || b.id === 'DefenseBuff') && b.endTime > Date.now())
+      : [];
   const resourceBody = Object.fromEntries(
     Object.entries(resources)
       .map(([k, v]) => [k, Number(v || 0)])
@@ -169,6 +177,12 @@ function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget
               {ensign && <span className={over ? undefined : ITEM_BONUS_TEXT}>, War Ensign +25%</span>})
             </span>
           </div>
+          {battleBuffs.map((b) => (
+            <p key={b.id} className={cn('text-xs tabular-nums', ITEM_BONUS_TEXT)}>
+              {b.itemId ? `${itemConfig(b.itemId)?.name.trim()}: ` : ''}
+              {b.desc} in this battle · <Countdown endTime={b.endTime} /> left
+            </p>
+          ))}
           {available.length === 0 && (
             <p className="text-sm text-muted-foreground">{scouting ? 'No Scouts in the city: train some in the Military tab.' : 'No troops in the city.'}</p>
           )}

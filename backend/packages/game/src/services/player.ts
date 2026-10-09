@@ -280,7 +280,7 @@ export async function startTruce(ctx: Ctx, playerId: number, itemId: string, cit
   useItemOrGold(ctx, p, b.city, itemId, itemGoldPrice(itemId) ?? 0);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
-  setBuff(ctx, p, 'PlayerPeaceBuff', 'Truce Agreement activated', ctx.now + BALANCE.truceDurationMs);
+  setBuff(ctx, p, 'PlayerPeaceBuff', 'Truce Agreement activated', ctx.now + BALANCE.truceDurationMs, { itemId });
   p.status = 2;
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);

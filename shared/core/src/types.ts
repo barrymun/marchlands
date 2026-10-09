@@ -209,6 +209,8 @@ export const BattleSideReportSchema = z.object({
   injured: TroopCountsSchema.optional(),
   honor: z.number(),
   heroExp: z.number(),
+  /** (marchlands) item bonuses that counted in the battle (Ivory Horn …), with the item that set each */
+  bonuses: z.array(z.object({ desc: z.string(), itemId: z.string().optional() })).optional(),
 });
 export const BattleDefenderReportSchema = BattleSideReportSchema.extend({
   forts: BeforeLostAfter(FortCountsSchema).optional(),
