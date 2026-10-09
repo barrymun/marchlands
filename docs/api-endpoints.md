@@ -38,6 +38,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/player/items/{itemId}/use` | Use an item (shop.useGoods / shop.useCastleGoods) |
 | POST | `/api/v1/player/rename` | Rename the lord with a New ID (city.modifyUserName) |
 | POST | `/api/v1/player/restart` | Delete everything and start over (common.deleteUserAndRestart) |
+| GET | `/api/v1/player/statistics` | The lord's statistics: all time, last 7 days and per city (a few minutes behind) |
 | POST | `/api/v1/player/title/promote` | Promote to the next nobility title |
 | POST | `/api/v1/player/truce` | Truce Agreement (city.setStopWarState) |
 | POST | `/api/v1/player/tutorial` | Store tutorial progress (common.step) |

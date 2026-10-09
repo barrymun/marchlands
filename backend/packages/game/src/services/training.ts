@@ -41,6 +41,7 @@ import { cityStats, mayorOf, mayorStats, openCity, openOwnCity, viewCity, type C
 import type { Ctx } from '../context.ts';
 import { fortBean, heroBean, troopBean } from '../dto.ts';
 import { addPrestige, gainResources, pushPlayerInfo, pushResources, spendResources, useItemOrGold } from '../helpers.ts';
+import { prefixed } from '../stats.ts';
 import { saveCity, saveHero, savePlayer } from '../repo.ts';
 
 export const WALLS_QUEUE = -2;
@@ -175,7 +176,9 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
   const stats = cityStats(b, ctx.now);
   if (pop > stats.idlePopulation) throw new GameError('Not enough population.', -1);
   const share = fort ? 1 : troopCostShare(b.player.buffs, ctx.now);
-  spendResources(b.city, trainCost(troopId, count, share));
+  const cost = trainCost(troopId, count, share);
+  spendResources(b.city, cost);
+  ctx.stat(playerId, cityId, prefixed('spent.training', cost));
   b.city.population -= pop;
   const ms = trainBatchMs(troopId, count, mayorStats(b.heroes), b.player.research);
   const batch: TrainBatch = {
@@ -247,7 +250,9 @@ export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, tro
   const pop = cfg.population * count;
   if (pop > cityStats(b, ctx.now).idlePopulation) throw new GameError('Not enough population.', -1);
   const share = troopCostShare(b.player.buffs, ctx.now);
-  spendResources(b.city, trainCost(troopId, count, share));
+  const cost = trainCost(troopId, count, share);
+  spendResources(b.city, cost);
+  ctx.stat(playerId, cityId, prefixed('spent.training', cost));
   b.city.population -= pop;
 
   const mayor = mayorStats(b.heroes);
@@ -287,7 +292,9 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
   if (idx < 0) throw new GameError('Batch not found.', -99, 404);
   const batch = queue[idx];
   const share = idx === 0 ? BALANCE.cancelTrainInProgressRefund : BALANCE.cancelTrainQueuedRefund;
-  gainResources(b.city, trainCost(batch.troopId, batch.count, batch.paidShare ?? 1), share);
+  const paid = trainCost(batch.troopId, batch.count, batch.paidShare ?? 1);
+  gainResources(b.city, paid, share);
+  ctx.stat(playerId, cityId, prefixed('spent.training', paid, -share));
   b.city.population += (troopConfig(batch.troopId)?.population ?? 1) * batch.count;
   const next = queue.filter((_, i) => i !== idx);
   if (idx === 0 && next[0]) next[0] = { ...next[0], startTime: ctx.now, endTime: ctx.now + next[0].costTime };
@@ -331,14 +338,17 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
   let gain = 0;
   let exp = 0;
   let changed = false;
+  const done: Record<string, number> = {};
   while (queue[0] && queue[0].endTime > 0 && queue[0].endTime <= ctx.now) {
     const head = queue[0];
     if (positionId === WALLS_QUEUE) {
       const key = FORT_KEYS[head.troopId as keyof typeof FORT_KEYS] as FortKey | undefined;
       if (key) b.city.forts = addForts(b.city.forts, { [key]: head.count });
+      if (key) done[key] = (done[key] ?? 0) + head.count;
     } else {
       const key = troopKey(head.troopId);
       if (key) b.city.troops = addTroops(b.city.troops, { [key]: head.count });
+      if (key) done[key] = (done[key] ?? 0) + head.count;
     }
     gain += head.count * prestigeOf(PrestigeAction.TRAIN, head.troopId, 1, th);
     exp += head.count * unitExp(head.troopId) * BALANCE.heroExpPerTrain;
@@ -352,6 +362,7 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
   }
   setQueue(b, positionId, queue, nextQueueId);
   scheduleHead(ctx, b, positionId, queue);
+  ctx.stat(b.player.id, cityId, prefixed('trained', done));
   addPrestige(b.player, gain);
   const mayor = mayorOf(b.heroes);
   if (mayor && gain + exp > 0) {
@@ -381,6 +392,7 @@ export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, 
   const stats = cityStats(b, ctx.now);
   b.city.population = Math.min(stats.maxPopulation, b.city.population + (troopConfig(troopId)?.population ?? 1) * count);
   gainResources(b.city, trainCost(troopId, count), BALANCE.disbandRefund);
+  ctx.stat(playerId, cityId, { [`disbanded.${key}`]: count });
   ctx.push(playerId, 'server.TroopUpdate', { castleId: cityId, troop: troopBean(b.city.troops) });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
@@ -393,6 +405,7 @@ export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, f
   const b = await openOwnCity(ctx, playerId, cityId);
   if ((b.city.forts[key] ?? 0) < count) throw new GameError(`You do not have that many ${key}.`, -99);
   b.city.forts = addForts(b.city.forts, { [key]: count }, -1);
+  ctx.stat(playerId, cityId, { [`disbanded.${key}`]: count });
   ctx.push(playerId, 'server.FortificationsUpdate', { castleId: cityId, fortification: fortBean(b.city.forts) });
   await saveCity(ctx, b.city);
 }
@@ -409,9 +422,15 @@ export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, tr
     const honor = healHonorCost(troops);
     if (b.player.honor < honor) throw new GameError(`Not enough honor: ${honor.toLocaleString('en')} needed.`, -99);
     b.player.honor -= honor;
+    ctx.stat(playerId, cityId, { 'spent.healing.honor': honor });
     await savePlayer(ctx, b.player);
     await pushPlayerInfo(ctx, b.player);
-  } else spendResources(b.city, healCost(troops));
+  } else {
+    const cost = healCost(troops);
+    spendResources(b.city, cost);
+    ctx.stat(playerId, cityId, prefixed('spent.healing', cost));
+  }
+  ctx.stat(playerId, cityId, prefixed('healed', troops));
   b.city.injuredTroops = addTroops(b.city.injuredTroops, troops, -1);
   b.city.troops = addTroops(b.city.troops, troops);
   ctx.push(playerId, 'server.TroopUpdate', { castleId: cityId, troop: troopBean(b.city.troops) });
@@ -428,6 +447,7 @@ export async function disbandInjured(ctx: Ctx, playerId: number, cityId: number,
     if ((b.city.injuredTroops[key as keyof typeof b.city.injuredTroops] ?? 0) < n) throw new GameError('Not enough injured troops.', -99);
   }
   b.city.injuredTroops = addTroops(b.city.injuredTroops, troops, -1);
+  ctx.stat(playerId, cityId, prefixed('disbanded', troops));
   ctx.push(playerId, 'server.InjuredTroopUpdate', { castleId: cityId, troop: troopBean(b.city.injuredTroops) });
   await saveCity(ctx, b.city);
 }

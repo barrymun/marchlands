@@ -254,6 +254,7 @@ export async function startFurlough(ctx: Ctx, playerId: number, days: number, ci
   const outgoing = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.playerId, playerId));
   if (Number(outgoing[0].n) > 0) throw new GameError('You must recall all of your troops first.', -77);
   spendGold(b.city, days * goldForCents(BALANCE.furloughCentsPerDay));
+  ctx.stat(playerId, cityId, { 'spent.other.gold': days * goldForCents(BALANCE.furloughCentsPerDay) });
   setBuff(ctx, p, 'FurloughBuff', 'Holiday', ctx.now + days * DAY);
   p.status = 5;
   pushResources(ctx, b);

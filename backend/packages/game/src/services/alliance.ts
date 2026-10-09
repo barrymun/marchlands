@@ -239,6 +239,7 @@ export async function createAlliance(ctx: Ctx, playerId: number, cityId: number,
   if (dupe) throw new GameError(`Alliance already existed: ${name}.`, -12, 409);
   const b = await openOwnCity(ctx, playerId, cityId);
   spendResources(b.city, { gold: BALANCE.allianceCreateGold }, 'Not enough gold.', -99);
+  ctx.stat(playerId, cityId, { 'spent.other.gold': BALANCE.allianceCreateGold });
   await saveCity(ctx, b.city);
   const [a] = await ctx.tx
     .insert(alliances)

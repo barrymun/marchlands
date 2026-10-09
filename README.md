@@ -132,5 +132,6 @@ To rebuild the static game data from the original dumps, run `npm run legacy:con
 | `CORS_ORIGIN` | any | allowed browser origin(s) |
 | `LOG_LEVEL` | `info` | pino log level |
 | `WORKER_BATCH`, `WORKER_IDLE_MS` | 50, 250 | worker tuning |
+| `STATS_FLUSH_MS` | 300000 | how often the API and worker write buffered lord statistics |
 
 Gameplay constants are collected in `shared/core/src/balance.ts`. Values marked `(orig)` come from the original server; values marked `(evony)` fill gaps the original never implemented.

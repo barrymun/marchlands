@@ -161,6 +161,20 @@ describe('economy', () => {
     expect(c.resourcesAt).toBe(3_600_000);
   });
 
+  it('(marchlands) settling reports what it produced, wasted and ate, for lord statistics', () => {
+    const c = city({ food: 9_990 });
+    const r = settleCity(c, ctx(), 3_600_000);
+    // one game hour of base production (100 food), of which storage held 10
+    expect(r.flows.produced.food).toBeCloseTo(100);
+    expect(r.flows.wasted.food).toBeCloseTo(90);
+    expect(r.flows.produced.gold).toBeGreaterThan(0);
+    const fed = city({ food: 5_000, troops: { militia: 100 } });
+    const s = computeCityStats(fed, ctx(), 0);
+    const f = settleCity(fed, ctx(), 3_600_000).flows;
+    expect(f.upkeep).toBeCloseTo(s.upkeep);
+    expect(f.produced.food - f.upkeep - f.wasted.food).toBeCloseTo(fed.food - 5_000);
+  });
+
   it('population drifts towards loyalty-weighted target every 6 minutes', () => {
     const c = city({ population: 50, loyalty: 90 });
     c.buildings.push({ positionId: 0, typeId: 1, level: 5, status: 0, startTime: 0, endTime: 0 });

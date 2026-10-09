@@ -6,7 +6,19 @@
 import { sql } from 'drizzle-orm';
 import { setGameSpeed } from '@marchlands/core';
 import { connect, timedEvents } from '@marchlands/db';
-import { beginnerJob, cleanupJob, dispatchEvent, merchantJob, rankingsJob, runGame, world, zonesJob, type EventRow } from '@marchlands/game';
+import {
+  beginnerJob,
+  cleanupJob,
+  dispatchEvent,
+  merchantJob,
+  rankingsJob,
+  runGame,
+  startStatsFlusher,
+  statsJob,
+  world,
+  zonesJob,
+  type EventRow,
+} from '@marchlands/game';
 
 const log = (level: string, msg: string, extra: Record<string, unknown> = {}) =>
   console.log(JSON.stringify({ time: new Date().toISOString(), level, service: 'worker', msg, ...extra }));
@@ -18,6 +30,8 @@ const MAX_ATTEMPTS = 5;
 setGameSpeed(Number(process.env.GAME_SPEED ?? 1));
 const { db, pool, close } = connect(process.env.DATABASE_URL, Number(process.env.DB_POOL_SIZE ?? 10));
 let stopping = false;
+// lord statistics are buffered in memory and written in batches (game stats.ts)
+const stopStats = startStatsFlusher(db, Number(process.env.STATS_FLUSH_MS ?? 5 * 60_000), (err) => log('error', 'stats flush failed', { error: String(err) }));
 
 /** Claim one due event and process it inside a single transaction. Returns false when idle. */
 async function processOne(): Promise<boolean> {
@@ -101,6 +115,7 @@ async function main() {
   every('beginner', 60_000, () => beginnerJob(db));
   every('merchant', 10_000, () => merchantJob(db));
   every('cleanup', 10 * 60_000, () => cleanupJob(db));
+  every('stats', 60 * 60_000, () => statsJob(db));
   await eventLoop();
 }
 
@@ -109,6 +124,7 @@ async function shutdown(signal: string) {
   stopping = true;
   log('info', `received ${signal}, shutting down`);
   setTimeout(() => process.exit(0), 5000).unref();
+  await stopStats();
   await close().catch(() => {});
   process.exit(0);
 }

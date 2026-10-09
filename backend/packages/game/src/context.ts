@@ -6,6 +6,7 @@ import { sql } from 'drizzle-orm';
 import { defaultRng, GameError, type Rng } from '@marchlands/core';
 import type { PushCmd, PushData } from '@marchlands/contracts';
 import { pgArray, pushMessages, timedEvents, type Db, type Tx } from '@marchlands/db';
+import { addCounters, bufferStats, statDay, type StatCounters } from './stats.ts';
 
 export const PUSH_CHANNEL = 'marchlands_push';
 
@@ -41,6 +42,8 @@ export interface Ctx {
   unschedule(refKey: string): void;
   /** run fn once the transaction committed successfully */
   afterCommit(fn: () => void | Promise<void>): void;
+  /** (marchlands) add lord statistics (city 0: the lord as a whole); kept only if the transaction commits */
+  stat(playerId: number, cityId: number, counters: StatCounters): void;
 }
 
 interface CtxInternals extends Ctx {
@@ -49,6 +52,7 @@ interface CtxInternals extends Ctx {
   _unscheduled: Set<string>;
   _anonymous: ScheduledEvent[];
   _after: (() => void | Promise<void>)[];
+  _stats: Map<string, StatCounters>;
 }
 
 function createCtx(tx: Tx, now: number, rng: Rng): CtxInternals {
@@ -61,6 +65,7 @@ function createCtx(tx: Tx, now: number, rng: Rng): CtxInternals {
     _unscheduled: new Set(),
     _anonymous: [],
     _after: [],
+    _stats: new Map(),
     push(ids, cmd, data) {
       const list = (Array.isArray(ids) ? ids : [ids]).filter((x) => x > 0);
       if (list.length) ctx._pushes.push({ playerIds: [...new Set(list)], cmd, data });
@@ -80,6 +85,11 @@ function createCtx(tx: Tx, now: number, rng: Rng): CtxInternals {
     },
     afterCommit(fn) {
       ctx._after.push(fn);
+    },
+    stat(playerId, cityId, counters) {
+      if (playerId <= 0) return;
+      const key = `${playerId}|${cityId}`;
+      ctx._stats.set(key, addCounters(ctx._stats.get(key) ?? {}, counters));
     },
   };
   return ctx;
@@ -142,6 +152,7 @@ export async function savepoint<T>(ctx: Ctx, fn: (ctx: Ctx) => Promise<T>): Prom
     for (const ev of child._events.values()) parent.schedule(ev);
     parent._anonymous.push(...child._anonymous);
     parent._after.push(...child._after);
+    for (const [key, counters] of child._stats) parent._stats.set(key, addCounters(parent._stats.get(key) ?? {}, counters));
     return r;
   });
 }
@@ -164,6 +175,7 @@ export async function runGame<T>(db: Db, fn: (ctx: Ctx) => Promise<T>, opts: Run
         await flush(internals);
         return r;
       });
+      if (internals?._stats.size) bufferStats(internals._stats, statDay(internals.now));
       for (const f of internals?._after ?? []) await f();
       return result;
     } catch (err) {

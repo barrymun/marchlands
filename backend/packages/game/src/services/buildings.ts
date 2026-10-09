@@ -38,6 +38,7 @@ import { mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle }
 import type { Ctx } from '../context.ts';
 import { buildingBean, heroBean } from '../dto.ts';
 import { activeBuff, addItem, addPrestige, gainResources, pushPlayerInfo, pushResources, spendGold, spendResources, useItemOrGold } from '../helpers.ts';
+import { prefixed } from '../stats.ts';
 import { saveCity, saveHero, savePlayer } from '../repo.ts';
 import { checkBeginner } from './player.ts';
 import { clearTavern } from './heroes.ts';
@@ -165,6 +166,7 @@ export async function construct(ctx: Ctx, playerId: number, cityId: number, type
   });
   const cost = buildCost(typeId, 1);
   spendResources(b.city, cost);
+  ctx.stat(playerId, cityId, prefixed('spent.building', cost));
   const ms = buildTimeMs(typeId, 1, mayorStats(b.heroes), b.player.research);
   const bld: BuildingState = { positionId, typeId, level: 0, status: BuildingStatus.BUILDING, startTime: ctx.now, endTime: ctx.now + ms };
   b.city.buildings = [...b.city.buildings, bld];
@@ -182,6 +184,7 @@ export async function upgrade(ctx: Ctx, playerId: number, cityId: number, positi
   assertCanUpgrade(bld, b.city.buildings, b.player.research, b.player.items, maxConcurrent(b, ctx.now));
   const cfg = buildingConfig(bld!.typeId, bld!.level + 1)!;
   spendResources(b.city, cfg.cost);
+  ctx.stat(playerId, cityId, prefixed('spent.building', cfg.cost));
   // item prerequisites (Michelangelo's Script for level 10) are consumed
   for (const req of cfg.requires.items) {
     const item = ITEMS.find((i) => i.legacyId === req.id);
@@ -210,6 +213,7 @@ export async function demolish(ctx: Ctx, playerId: number, cityId: number, posit
   if (bld.typeId === BuildingType.WALLS) throw new GameError('The Walls cannot be demolished.', -99);
   if (BALANCE.instantDemolish) {
     gainResources(b.city, fullDemolishRefund(bld.typeId, bld.level));
+    ctx.stat(playerId, cityId, { 'levels.demolished': bld.level });
     removeBuilding(b, bld);
     const gone: BuildingState = { positionId, typeId: 0, level: 0, status: 0, startTime: 0, endTime: 0 };
     pushBuilding(ctx, b, gone);
@@ -235,7 +239,9 @@ export async function cancel(ctx: Ctx, playerId: number, cityId: number, positio
   const bld = findBuilding(b.city.buildings, positionId);
   if (!bld || bld.status === BuildingStatus.IDLE) throw new GameError('Not being constructed.', -99);
   if (bld.status === BuildingStatus.BUILDING) {
-    gainResources(b.city, buildingConfig(bld.typeId, bld.level + 1)!.cost, BALANCE.cancelBuildRefund);
+    const paid = buildingConfig(bld.typeId, bld.level + 1)!.cost;
+    gainResources(b.city, paid, BALANCE.cancelBuildRefund);
+    ctx.stat(playerId, cityId, prefixed('spent.building', paid, -BALANCE.cancelBuildRefund));
   }
   let after: BuildingState | null = null;
   if (bld.level === 0) b.city.buildings = b.city.buildings.filter((x) => x.positionId !== positionId);
@@ -261,7 +267,9 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
     if (left > scaled(BALANCE.freeSpeedupMs)) throw new GameError('Free speed-up is only available for the last 5 minutes.', -99);
     reduce = left;
   } else if (itemId === 'gold.speed') {
-    spendGold(b.city, goldForSpeedup(left));
+    const gold = goldForSpeedup(left);
+    spendGold(b.city, gold);
+    ctx.stat(playerId, cityId, { 'spent.speedups.gold': gold });
     reduce = left;
   } else if (itemId === 'player.destroy.1.a') {
     if (bld.status !== BuildingStatus.DEMOLISHING) throw new GameError('Dynamite can only speed up demolition.', -99);
@@ -313,6 +321,7 @@ export async function completeBuilding(ctx: Ctx, cityId: number, positionId: num
   if (bld.status === BuildingStatus.BUILDING) {
     const level = bld.level + 1;
     after = { ...bld, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 };
+    ctx.stat(playerId, cityId, { 'levels.building': 1 });
     const th = bld.typeId === BuildingType.TOWN_HALL ? level : buildingLevel(b.city.buildings, BuildingType.TOWN_HALL);
     const gain = prestigeOf(PrestigeAction.BUILDING, bld.typeId, level, th);
     addPrestige(b.player, gain);
@@ -328,6 +337,7 @@ export async function completeBuilding(ctx: Ctx, cityId: number, positionId: num
     // demolition: drop one level and refund a third of that level's cost
     const level = bld.level - 1;
     gainResources(b.city, buildingConfig(bld.typeId, bld.level)!.cost, BALANCE.demolishRefund);
+    ctx.stat(playerId, cityId, { 'levels.demolished': 1 });
     after = level > 0 ? { ...bld, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 } : null;
     if (!after) removeBuilding(b, bld);
   }

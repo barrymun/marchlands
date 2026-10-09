@@ -1365,6 +1365,64 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/player/statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The lord's statistics: all time, last 7 days and per city (a few minutes behind) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: components["schemas"]["LordStatistics"];
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/player/flows": {
         parameters: {
             query?: never;
@@ -11991,6 +12049,33 @@ export interface components {
             /** @description hero produced by a hero box */
             hero?: components["schemas"]["HeroBeanInput"];
         };
+        /** @description (marchlands) the lord's statistics; written in batches, so up to a few minutes behind */
+        LordStatisticsInput: {
+            /** @description counter key (`group.detail`, see core stats.ts) -> amount */
+            allTime: {
+                [key: string]: number;
+            };
+            /** @description counter key (`group.detail`, see core stats.ts) -> amount */
+            last7Days: {
+                [key: string]: number;
+            };
+            cities: {
+                cityId: number;
+                /** @description the city's name, or 'Former city' when the lord no longer holds it */
+                name: string;
+                owned: boolean;
+                /** @description counter key (`group.detail`, see core stats.ts) -> amount */
+                allTime: {
+                    [key: string]: number;
+                };
+                /** @description counter key (`group.detail`, see core stats.ts) -> amount */
+                last7Days: {
+                    [key: string]: number;
+                };
+            }[];
+            /** @description when counting began (nothing before it is counted) */
+            since: number | null;
+        };
         TrainSplitResultInput: {
             batches: {
                 /** @description barracks */
@@ -14207,6 +14292,33 @@ export interface components {
             /** @description hero produced by a hero box */
             hero?: components["schemas"]["HeroBean"];
         };
+        /** @description (marchlands) the lord's statistics; written in batches, so up to a few minutes behind */
+        LordStatistics: {
+            /** @description counter key (`group.detail`, see core stats.ts) -> amount */
+            allTime: {
+                [key: string]: number;
+            };
+            /** @description counter key (`group.detail`, see core stats.ts) -> amount */
+            last7Days: {
+                [key: string]: number;
+            };
+            cities: {
+                cityId: number;
+                /** @description the city's name, or 'Former city' when the lord no longer holds it */
+                name: string;
+                owned: boolean;
+                /** @description counter key (`group.detail`, see core stats.ts) -> amount */
+                allTime: {
+                    [key: string]: number;
+                };
+                /** @description counter key (`group.detail`, see core stats.ts) -> amount */
+                last7Days: {
+                    [key: string]: number;
+                };
+            }[];
+            /** @description when counting began (nothing before it is counted) */
+            since: number | null;
+        };
         TrainSplitResult: {
             batches: {
                 /** @description barracks */
@@ -15729,6 +15841,7 @@ export type PublicPlayerInfoInput = components['schemas']['PublicPlayerInfoInput
 export type TitlePromotionInput = components['schemas']['TitlePromotionInput'];
 export type GrantContentsInput = components['schemas']['GrantContentsInput'];
 export type UseItemResultInput = components['schemas']['UseItemResultInput'];
+export type LordStatisticsInput = components['schemas']['LordStatisticsInput'];
 export type TrainSplitResultInput = components['schemas']['TrainSplitResultInput'];
 export type TrainManyResultInput = components['schemas']['TrainManyResultInput'];
 export type RequirementCheckInput = components['schemas']['RequirementCheckInput'];
@@ -15863,6 +15976,7 @@ export type PublicPlayerInfo = components['schemas']['PublicPlayerInfo'];
 export type TitlePromotion = components['schemas']['TitlePromotion'];
 export type GrantContents = components['schemas']['GrantContents'];
 export type UseItemResult = components['schemas']['UseItemResult'];
+export type LordStatistics = components['schemas']['LordStatistics'];
 export type TrainSplitResult = components['schemas']['TrainSplitResult'];
 export type TrainManyResult = components['schemas']['TrainManyResult'];
 export type RequirementCheck = components['schemas']['RequirementCheck'];

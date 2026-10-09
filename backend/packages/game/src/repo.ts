@@ -6,6 +6,7 @@ import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import { GameError, HeroStatus, lordGear, syncHeroBuffs, syncHeroGear, type LordGear } from '@marchlands/core';
 import { armies, cities, heroes, players, tiles } from '@marchlands/db';
 import type { Ctx } from './context.ts';
+import { takeSettle } from './stats.ts';
 
 export type PlayerRow = typeof players.$inferSelect;
 export type CityRow = typeof cities.$inferSelect;
@@ -70,6 +71,9 @@ export async function citiesOf(ctx: Ctx, playerId: number, opts: Opts = {}): Pro
 export async function saveCity(ctx: Ctx, c: CityRow): Promise<void> {
   const { id, createdAt: _c, ...rest } = c;
   await ctx.tx.update(cities).set(rest).where(eq(cities.id, id));
+  // what settling produced counts once the settled state is saved
+  const settled = takeSettle(c);
+  if (settled) ctx.stat(c.playerId, c.id, settled);
 }
 
 // ---- heroes ----

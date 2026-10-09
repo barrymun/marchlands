@@ -259,7 +259,27 @@ export interface SettleResult {
   deserted: TroopCounts;
   /** population/loyalty ticks applied */
   ticks: number;
+  /** (marchlands) what the settled span produced and paid, for lord statistics */
+  flows: SettleFlows;
 }
+
+export interface SettleFlows {
+  /** gross output (fields, base, bonuses; gold: tax income), including what storage could not hold */
+  produced: ResourceSet;
+  /** output lost because storage was full */
+  wasted: Record<BasicResource, number>;
+  /** food troops ate */
+  upkeep: number;
+  /** gold paid to heroes */
+  salaries: number;
+}
+
+const emptyFlows = (): SettleFlows => ({
+  produced: { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 },
+  wasted: { food: 0, wood: 0, stone: 0, iron: 0 },
+  upkeep: 0,
+  salaries: 0,
+});
 
 const MAX_TICKS_DETAILED = 5000;
 
@@ -270,7 +290,7 @@ const MAX_TICKS_DETAILED = 5000;
  * resources integrate piecewise between drift ticks.
  */
 export function settleCity(city: EconomyCity, ctx: EconomyContext, now: number): SettleResult {
-  const result: SettleResult = { deserted: {}, ticks: 0 };
+  const result: SettleResult = { deserted: {}, ticks: 0, flows: emptyFlows() };
   if (now <= city.resourcesAt) return result;
   const tickMs = Math.max(1000, scaled(BALANCE.cityTickMs));
   let t = city.resourcesAt;
@@ -315,21 +335,33 @@ export function settleCity(city: EconomyCity, ctx: EconomyContext, now: number):
 function integrate(city: EconomyCity, stats: CityStats, dtMs: number, result: SettleResult) {
   if (dtMs <= 0) return;
   const hours = scaledHours(dtMs);
+  const f = result.flows;
   for (const r of BASIC_RESOURCES) {
     const delta = stats.rates[r] * hours;
+    const eat = r === 'food' ? stats.upkeep * hours : 0;
     const cur = city[r];
+    f.produced[r] += delta + eat;
     if (delta >= 0) {
       // production never pushes a stock above storage, but never removes an over-cap stock either
       if (cur < stats.storage[r]) city[r] = Math.min(stats.storage[r], cur + delta);
+      f.wasted[r] += delta - (city[r] - cur);
+      f.upkeep += eat;
     } else {
       const next = cur + delta;
       if (next < 0 && r === 'food') {
         if (BALANCE.starvationDesertion) starve(city, -next / Math.max(1, stats.upkeep), result);
         city[r] = 0;
-      } else city[r] = Math.max(0, next);
+        f.upkeep += cur + delta + eat; // they ate what there was
+      } else {
+        city[r] = Math.max(0, next);
+        f.upkeep += eat;
+      }
     }
   }
-  city.gold = Math.max(0, city.gold + stats.rates.gold * hours);
+  const gold = city.gold + stats.rates.gold * hours;
+  f.produced.gold += stats.taxIncome * hours;
+  f.salaries += gold < 0 ? Math.max(0, city.gold + stats.taxIncome * hours) : stats.heroSalary * hours;
+  city.gold = Math.max(0, gold);
 }
 
 /** Game-speed aware conversion: production scales with GAME_SPEED like every timer. */

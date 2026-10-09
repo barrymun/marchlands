@@ -56,6 +56,7 @@ import { openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
 import { fortBean, heroBean, troopBean } from '../dto.ts';
 import { addItem, addPrestige, activeBuff, gainResources, pushCity, pushResources } from '../helpers.ts';
+import { prefixed } from '../stats.ts';
 import {
   armiesStationedAt,
   citiesOf,
@@ -571,6 +572,10 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
   }
   await saveCity(ctx, def.city);
   const success = survivors > 0;
+  const scoutsLost = (a.troops.scouter ?? 0) - survivors;
+  const defScoutsLost = defScouts - (result.defender.after.scouter ?? 0);
+  ctx.stat(a.playerId, a.cityId, { 'killed.scouter': defScoutsLost, 'lost.scouter': scoutsLost, [`scouting.${success ? 'won' : 'lost'}`]: 1 });
+  ctx.stat(def.player.id, def.city.id, { 'killed.scouter': scoutsLost, 'lost.scouter': defScoutsLost, [`scouting.${success ? 'lost' : 'won'}Defending`]: 1 });
   const informatics = researchLevel(scoutOwner.research, TechType.INFORMATICS);
   const intel = success
     ? {
@@ -674,6 +679,50 @@ interface BattleSideReport {
   /** fallen troops that survived injured (Medicine) */
   injured?: TroopCounts;
   bonuses?: { desc: string; itemId?: string }[];
+}
+
+/**
+ * (marchlands) Lord statistics of an attack: kills, losses and the result for the attacker's home city
+ * and, when a lord defended, for the defending city. Valleys count `captured` as occupied.
+ */
+function battleStats(
+  ctx: Ctx,
+  a: ArmyRow,
+  r: CombatResult,
+  target: 'city' | 'npc' | 'valley',
+  o: {
+    injured?: TroopCounts;
+    loot?: ResourceSet;
+    captured?: boolean;
+    level?: number;
+    defender?: { playerId: number; cityId: number; injured?: TroopCounts } | null;
+  },
+) {
+  const fortsLost = r.forts?.lost ?? {};
+  const won = r.attackerWon;
+  ctx.stat(a.playerId, a.cityId, {
+    ...prefixed('killed', r.defender.lost),
+    ...prefixed('killed', fortsLost),
+    ...prefixed('lost', r.attacker.lost),
+    ...prefixed('injured', o.injured),
+    ...prefixed('plundered', o.loot),
+    [`attacks.${won ? 'won' : 'lost'}.${target}`]: 1,
+    ...(target === 'npc' && won && o.level ? { [`npcWins.${o.level}`]: 1 } : {}),
+    ...(o.captured ? { [`captured.${target}`]: 1 } : {}),
+    honor: r.attackerHonor,
+  });
+  const d = o.defender;
+  if (!d) return;
+  ctx.stat(d.playerId, d.cityId, {
+    ...prefixed('killed', r.attacker.lost),
+    ...prefixed('lost', r.defender.lost),
+    ...prefixed('lost', fortsLost),
+    ...prefixed('injured', d.injured),
+    ...prefixed('stolen', o.loot),
+    [`defenses.${won ? 'lost' : 'won'}.${target}`]: 1,
+    ...(o.captured ? { [`taken.${target}`]: 1 } : {}),
+    honor: r.defenderHonor,
+  });
 }
 
 /** Medals a won attack on a city of `level` drops (BALANCE.medalDrops), added to the attacker's items. */
@@ -847,6 +896,12 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     wallLevel,
     ...battleBonuses(def.player, ctx.now),
   };
+  battleStats(ctx, a, r, 'city', {
+    injured: attackerSide.injured,
+    loot,
+    captured,
+    defender: { playerId: def.player.id, cityId: def.city.id, injured: defenderInjured },
+  });
   const body = battleBody(r, attackerSide, defenderSide, {
     plunder: loot,
     loyaltyDamage,
@@ -959,6 +1014,7 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   await savePlayer(ctx, attacker);
   await grantHeroExp(ctx, hero, r.attackerHeroExp);
   const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
+  battleStats(ctx, a, r, 'npc', { injured, loot, captured, level: tile.level });
   const body = battleBody(
     r,
     {
@@ -1039,6 +1095,7 @@ async function captureNpc(ctx: Ctx, attacker: PlayerRow, tile: TileRow, state: N
 
 async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const tile = await getTile(ctx, a.targetTileId, { lock: true });
+  const ownerCityId = tile.ownerCityId ?? 0;
   const hero = await heroOf(ctx, a);
   let groups: TroopCounts[];
   let stationed: ArmyRow[] = [];
@@ -1114,6 +1171,7 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   await grantHeroExp(ctx, guard, r.defenderHeroExp);
   const g = guard ?? npcGuard;
   const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
+  battleStats(ctx, a, r, 'valley', { injured, captured: occupied, defender: owner ? { playerId: owner.id, cityId: ownerCityId } : null });
   const body = battleBody(
     r,
     {
@@ -1188,6 +1246,7 @@ export async function upgradeValley(ctx: Ctx, playerId: number, cityId: number, 
   if (cost == null) throw new GameError(`This ${what} is already level ${tile.level}, the highest.`, -99);
   if (b.city.gold < cost) throw new GameError(`Not enough gold: ${cost.toLocaleString('en')} needed.`, -99);
   b.city.gold -= cost;
+  ctx.stat(b.player.id, b.city.id, { 'spent.valleys.gold': cost });
   // the garrison, fortifications, resources and hero start afresh at the new level
   Object.assign(tile, { level: tile.level + 1, troops: null, forts: null, state: null, updatedAt: ctx.now });
   await saveTile(ctx, tile);

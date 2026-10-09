@@ -19,6 +19,7 @@ import {
 import type { Ctx } from './context.ts';
 import { troopBean } from './dto.ts';
 import { reportDesertion } from './services/reports.ts';
+import { noteSettle } from './stats.ts';
 import {
   armiesOfCity,
   findCity,
@@ -82,6 +83,7 @@ export async function loadBundle(ctx: Ctx, city: CityRow, player: PlayerRow): Pr
 /** Settle resources/population to ctx.now (mutates the bundle's city row). */
 export function settle(ctx: Ctx, b: CityBundle): SettleResult {
   const r = settleCity(b.city, economyContext(b), ctx.now);
+  noteSettle(b.city, r.flows, r.deserted);
   if (Object.keys(r.deserted).length) {
     ctx.push(b.player.id, 'server.TroopUpdate', { castleId: b.city.id, troop: troopBean(b.city.troops) });
   }

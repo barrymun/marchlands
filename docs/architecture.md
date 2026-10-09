@@ -73,7 +73,7 @@ Whenever something changes a city's rates, the city is settled first. Examples a
 | Table | Content |
 |---|---|
 | `accounts` | login identities (scrypt password hashes), operator flag, bans |
-| `players` | the lord: profile, prestige/honor, cents, title, alliance rank; `research`, `items`, `buffs`, `misc` as jsonb |
+| `players` | the lord: profile, prestige/honor, title, alliance rank; `research`, `items`, `buffs`, `misc` as jsonb |
 | `cities` | resources and their timestamp, population, loyalty, tax, work rates; `buildings`, `troops`, `forts`, `troop_queues`, `fort_queue`, `injured_troops` as jsonb |
 | `tiles` | 640,000 rows: type, level, city on it, valley owner; NPC/valley garrison and state as jsonb (lazy regeneration) |
 | `heroes` | hired heroes, tavern offers (`in_tavern`), captives (`captured_by_player_id`) |
@@ -84,6 +84,7 @@ Whenever something changes a city's rates, the city is settled first. Examples a
 | `player_relations` | friends and blocks |
 | `market_orders`, `market_shipments` | order book with escrow; goods and gold in transit |
 | `quest_progress`, `world_state` | claimed quests; world metadata and cached zone stats |
+| `player_stats` | (marchlands) lord statistics: one row per lord, city (0 = lord-wide) and day, or month once older than 60 days; `counters` jsonb (see [Statistics](#statistics)) |
 | `flows` | (marchlands) a lord's saved flows: actions, cities and the `repeat` switch, plus the current run's state (`status`, `next_action`, `army_ids`, `wait_until`, `held_since`, `last_run`) |
 
 ## Consistency rules
@@ -103,3 +104,13 @@ Whenever something changes a city's rates, the city is settled first. Examples a
 - **Heroes home.** Before each part, a flow checks the run's cities for armies with a hero that are marching out or coming back (`armies.hero_id is not null and direction in (forward, backward)`). If there are any, the flow is held: `held_since` is set and `flow.resume` is scheduled for the expected return. A flow that is not held also holds while another flow has an earlier `held_since`. A resume of any held flow carries on the held flows oldest first and stops at the first one still blocked, so a repeating farming flow cannot starve the others.
 - **Repeat and queue.** At the end of a run, a repeating flow becomes `queued` with `not_before` set to 1 minute after its run started. `flow.queue` (`ref_key flowqueue:<playerId>`) carries on held flows and then starts every queued flow whose `not_before` has passed.
 - **Updates.** Every change to a flow's row pushes `server.FlowUpdate`. A run that stops on its own also sends a `server.SystemInfoMsg` with the reason.
+
+## Statistics
+
+(marchlands; `backend/packages/game/src/stats.ts`, read by `services/statistics.ts`, shown in the Stats tab.) Lord statistics are counted where things happen and never recomputed. They are written in batches, so they are allowed to be a few minutes behind.
+
+- **Counting.** Game code calls `ctx.stat(playerId, cityId, counters)` with flat keys such as `trained.archer`, `killed.trap`, `produced.food`, `spent.building.wood` or `attacks.won.npc`. City 0 holds lord-wide counters (items). The counters stay on the transaction's context: a rollback or retry discards them; a commit merges them into an in-memory buffer of the process. The hot path does no database work.
+- **Production.** `settleCity()` returns what each settled span produced (gross, gold as tax), wasted (storage full), fed to troops and paid to heroes. `settle()` notes these on the city row, and `saveCity()` counts them, so a settle that is never saved (an in-memory view) is never counted.
+- **Writing.** The API and the worker each flush their buffer every 5 minutes (`STATS_FLUSH_MS`) and on shutdown, in one `insert … on conflict do update` whose counters merge with the `stats_add(a, b)` SQL function. A crash loses at most the last few minutes of counters.
+- **Compaction.** The worker's hourly `stats` job folds daily rows older than 60 days into one row per month.
+- **History.** Nothing before `world_state.statsStartedAt` is counted (migration 0012 cleared the first day's counters and restarted counting, so every counter covers the same span).

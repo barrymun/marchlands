@@ -33,6 +33,7 @@ import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';
 import { resyncHeroGear } from './heroes.ts';
 import { addPrestige, gainResources, pushPlayerInfo, pushResources, spendGold, spendResources, useItemOrGold } from '../helpers.ts';
+import { prefixed } from '../stats.ts';
 import { citiesOf, getPlayer, saveCity, saveHero, savePlayer, type PlayerRow } from '../repo.ts';
 
 const refKey = (playerId: number, techId: number) => `research:${playerId}:${techId}`;
@@ -104,7 +105,9 @@ export async function startResearch(ctx: Ctx, playerId: number, cityId: number, 
   if (research[techId]?.endTime) throw new GameError('This technology is already being researched in another city.', -99);
   assertCanResearch(techId, b.city.buildings, research, b.player.items);
   const level = (research[techId]?.level ?? 0) + 1;
-  spendResources(b.city, researchCost(techId, level), 'Not enough resources.', -99);
+  const cost = researchCost(techId, level);
+  spendResources(b.city, cost, 'Not enough resources.', -99);
+  ctx.stat(playerId, cityId, prefixed('spent.research', cost));
   const ms = researchTimeMs(techId, level, mayorStats(b.heroes));
   b.player.research = { ...research, [techId]: { level: level - 1, cityId, startTime: ctx.now, endTime: ctx.now + ms } };
   ctx.schedule({ type: 'research', dueAt: ctx.now + ms, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
@@ -121,7 +124,9 @@ export async function cancelResearch(ctx: Ctx, playerId: number, cityId: number,
   const b = await openOwnCity(ctx, playerId, cityId);
   const techId = pickResearch(b.player.research, cityId, which);
   const r = b.player.research[techId];
-  gainResources(b.city, researchCost(techId, r.level + 1), BALANCE.cancelResearchRefund);
+  const paid = researchCost(techId, r.level + 1);
+  gainResources(b.city, paid, BALANCE.cancelResearchRefund);
+  ctx.stat(playerId, cityId, prefixed('spent.research', paid, -BALANCE.cancelResearchRefund));
   b.player.research = { ...b.player.research, [techId]: { level: r.level } };
   ctx.unschedule(refKey(playerId, techId));
   ctx.push(playerId, 'server.ResearchUpdate', { castleId: cityId, typeId: techId, endTime: 0 });
@@ -152,7 +157,9 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
     if (left > scaled(BALANCE.freeSpeedupMs)) throw new GameError('Free speed-up is only available for the last 5 minutes.', -99);
     reduce = left;
   } else if (itemId === 'gold.speed') {
-    spendGold(b.city, goldForSpeedup(left));
+    const gold = goldForSpeedup(left);
+    spendGold(b.city, gold);
+    ctx.stat(playerId, cityId, { 'spent.speedups.gold': gold });
     reduce = left;
   } else {
     const eff = SPEEDUP_ITEMS[itemId];
@@ -194,6 +201,7 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
   const bundles = await settleAllCities(ctx, p);
   const level = r.level + 1;
   p.research = { ...p.research, [techId]: { level } };
+  ctx.stat(playerId, r.cityId ?? 0, { 'levels.research': 1 });
   const home = bundles.find((b) => b.city.id === r.cityId) ?? bundles[0];
   const th = home ? buildingLevel(home.city.buildings, BuildingType.TOWN_HALL) : 1;
   const gain = prestigeOf(PrestigeAction.RESEARCH, techId, level, th);

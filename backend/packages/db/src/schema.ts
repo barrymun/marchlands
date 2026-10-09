@@ -617,6 +617,24 @@ export const questProgress = pgTable(
   (t) => [primaryKey({ columns: [t.playerId, t.questId] })],
 );
 
+/**
+ * (marchlands) Lord statistics: counters per lord, city (0: the lord as a whole) and period, a day
+ * ('2026-10-09') or, once the stats job folds old days together, a month ('2026-10'). Written in
+ * batches from an in-memory buffer (game stats.ts), merging counters with stats_add().
+ */
+export const playerStats = pgTable(
+  'player_stats',
+  {
+    playerId: integer('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    cityId: integer('city_id').notNull(),
+    period: text('period').notNull(),
+    counters: jsonb('counters').$type<Record<string, number>>().notNull().default({}),
+  },
+  (t) => [primaryKey({ columns: [t.playerId, t.cityId, t.period] })],
+);
+
 /** Global key/value state (world config, counters). */
 export const worldState = pgTable('world_state', {
   key: text('key').primaryKey(),

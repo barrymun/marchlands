@@ -304,6 +304,15 @@ function shipmentMs(marketLevel: number) {
   return scaled(Math.floor(BALANCE.marketShipmentBaseMs / Math.max(1, marketLevel)));
 }
 
+/** (marchlands) A lord's side of a trade, for their statistics. */
+function tradeStat(ctx: Ctx, playerId: number, cityId: number, bought: boolean, res: string, qty: number, gold: number) {
+  ctx.stat(
+    playerId,
+    cityId,
+    bought ? { [`market.bought.${res}`]: qty, 'market.goldPaid': gold } : { [`market.sold.${res}`]: qty, 'market.goldReceived': gold },
+  );
+}
+
 async function ship(ctx: Ctx, s: { playerId: number; cityId: number; orderId: number; resType: number; amount: number; price: number; ms: number }) {
   const [row] = await ctx.tx
     .insert(marketShipments)
@@ -372,8 +381,10 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
       sellerPlayerId: buy ? (f.other?.playerId ?? null) : playerId,
       createdAt: ctx.now,
     });
+    tradeStat(ctx, playerId, cityId, buy, res, f.qty, gold);
     if (!f.other) continue;
     const other = f.other;
+    tradeStat(ctx, other.playerId, other.cityId, !buy, res, f.qty, gold);
     other.filled += f.qty;
     await ctx.tx.update(marketOrders).set({ filled: other.filled }).where(eq(marketOrders.id, other.id));
     if (buy) {
@@ -475,6 +486,7 @@ export async function merchantSweep(ctx: Ctx) {
           sellerPlayerId: side === Side.BUY ? null : o.playerId,
           createdAt: ctx.now,
         });
+        tradeStat(ctx, o.playerId, o.cityId, side === Side.BUY, res, f.qty, gold);
         ctx.push(o.playerId, 'server.TradesUpdate', { resType, amount: f.qty, price: f.gold / f.qty });
         await createReport(ctx, {
           playerId: o.playerId,
@@ -514,7 +526,9 @@ export async function speedupShipment(ctx: Ctx, playerId: number, shipmentId: nu
   const [s] = await ctx.tx.select().from(marketShipments).where(eq(marketShipments.id, shipmentId)).for('update');
   if (!s || s.playerId !== playerId) throw new GameError('Shipment not found.', -99, 404);
   const b = await openOwnCity(ctx, playerId, s.cityId);
-  spendGold(b.city, goldForSpeedup(Math.max(0, s.endTime - ctx.now)));
+  const gold = goldForSpeedup(Math.max(0, s.endTime - ctx.now));
+  spendGold(b.city, gold);
+  ctx.stat(playerId, s.cityId, { 'spent.speedups.gold': gold });
   await ctx.tx.update(marketShipments).set({ endTime: ctx.now }).where(eq(marketShipments.id, shipmentId));
   ctx.schedule({ type: 'shipment', dueAt: ctx.now, playerId, cityId: s.cityId, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } });
   pushResources(ctx, b);

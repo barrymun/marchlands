@@ -37,6 +37,7 @@ export function addItem(ctx: Ctx, p: PlayerRow, id: string, n: number) {
   else delete items[id];
   p.items = items;
   ctx.push(p.id, 'server.ItemUpdate', { items: [{ id, count: next }] });
+  if (n) ctx.stat(p.id, 0, { [`items.${n < 0 ? 'used' : 'gained'}.${id}`]: Math.abs(n) });
 }
 
 export function consumeItem(ctx: Ctx, p: PlayerRow, id: string, n = 1) {
@@ -57,7 +58,10 @@ export function spendGold(city: CityRow, gold: number) {
 /** Consume one of `itemId` if owned, otherwise buy it on use with the city's gold (orig: cents). */
 export function useItemOrGold(ctx: Ctx, p: PlayerRow, city: CityRow, itemId: string, gold: number) {
   if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
-  else spendGold(city, gold);
+  else {
+    spendGold(city, gold);
+    ctx.stat(p.id, city.id, { 'spent.items.gold': gold, [`items.used.${itemId}`]: 1 });
+  }
 }
 
 // ---- buffs ----

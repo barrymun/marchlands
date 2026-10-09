@@ -150,6 +150,7 @@ export async function refreshTavern(ctx: Ctx, playerId: number, cityId: number, 
     await savePlayer(ctx, b.player);
   } else {
     spendResources(b.city, { gold: tavernRefreshCost(inn) }, 'Not enough gold!', -99);
+    ctx.stat(b.player.id, b.city.id, { 'spent.heroes.gold': tavernRefreshCost(inn) });
     pushResources(ctx, b);
     await saveCity(ctx, b.city);
   }
@@ -164,6 +165,7 @@ export async function hire(ctx: Ctx, playerId: number, cityId: number, heroId: n
   const h = await getHero(ctx, heroId, { lock: true });
   if (!h.inTavern || h.cityId !== cityId) throw new GameError('Hero does not exist!', -99, 404);
   spendResources(b.city, { gold: heroHireCost(h.level) }, 'Not enough gold!', -99);
+  ctx.stat(playerId, cityId, { 'spent.heroes.gold': heroHireCost(h.level), 'heroes.hired': 1 });
   Object.assign(h, { inTavern: false, playerId, status: HeroStatus.IDLE });
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 0);
@@ -243,6 +245,7 @@ export async function resetPoints(ctx: Ctx, playerId: number, heroId: number) {
   else {
     city ??= await openOwnCity(ctx, playerId, h.cityId);
     spendGold(city.city, itemGoldPrice('hero.reset.1') ?? 0);
+    ctx.stat(playerId, city.city.id, { 'spent.items.gold': itemGoldPrice('hero.reset.1') ?? 0, 'items.used.hero.reset.1': 1 });
   }
   Object.assign(h, { power: h.basePower, management: h.baseManagement, stratagem: h.baseStratagem, remainPoint: h.level });
   await saveHero(ctx, h);
@@ -289,7 +292,9 @@ export async function levelUp(ctx: Ctx, playerId: number, heroId: number) {
   if (heroAtMaxLevel(h)) throw new GameError(`This hero is already at the maximum level (${BALANCE.heroMaxLevel}).`, -99);
   // a higher level can unlock more gear (gear tier), which may change a mayor's politics
   const city = await openMayorCity(ctx, h);
-  if (levelUpAll(h) === 0) throw new GameError('Not enough experience.', -99);
+  const levels = levelUpAll(h);
+  if (levels === 0) throw new GameError('Not enough experience.', -99);
+  ctx.stat(playerId, h.cityId ?? 0, { 'levels.hero': levels });
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
   await closeMayorCity(ctx, city, h);
@@ -357,6 +362,7 @@ export async function reward(ctx: Ctx, playerId: number, heroId: number) {
   const b = await openOwnCity(ctx, playerId, pre.cityId);
   const h = b.heroes.find((x) => x.id === heroId)!;
   spendResources(b.city, { gold: heroAwardCost(h.level) }, 'Not enough gold', -99);
+  ctx.stat(playerId, b.city.id, { 'spent.heroes.gold': heroAwardCost(h.level) });
   h.loyalty = Math.min(100, h.loyalty + 5);
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
@@ -378,6 +384,7 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     city ??= await openOwnCity(ctx, playerId, h.cityId);
     if (city.city.gold < price) throw new GameError(`Not enough gold: ${price.toLocaleString('en')} needed.`, -99);
     city.city.gold -= price;
+    ctx.stat(playerId, city.city.id, { 'spent.items.gold': price, [`items.used.${itemId}`]: 1 });
     paidInGold = true;
   }
   if (itemId.startsWith('player.experience.1.')) {

@@ -231,3 +231,25 @@ export const UseItemResult = z
   })
   .meta({ id: 'UseItemResult' });
 export type UseItemResult = z.infer<typeof UseItemResult>;
+
+// ---- statistics ----
+
+const StatCounters = z.record(z.string(), z.number()).describe('counter key (`group.detail`, see core stats.ts) -> amount');
+
+export const LordStatistics = z
+  .object({
+    allTime: StatCounters,
+    last7Days: StatCounters,
+    cities: z.array(
+      z.object({
+        cityId: zId,
+        name: z.string().describe("the city's name, or 'Former city' when the lord no longer holds it"),
+        owned: z.boolean(),
+        allTime: StatCounters,
+        last7Days: StatCounters,
+      }),
+    ),
+    since: Ms.nullable().describe('when counting began (nothing before it is counted)'),
+  })
+  .meta({ id: 'LordStatistics', description: "(marchlands) the lord's statistics; written in batches, so up to a few minutes behind" });
+export type LordStatistics = z.infer<typeof LordStatistics>;

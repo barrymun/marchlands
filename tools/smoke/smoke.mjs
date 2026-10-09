@@ -379,9 +379,13 @@ async function main() {
   );
 
   // ---- market ----
-  await ok(a.token, 'POST', `/cities/${cid}/market/orders`, { resType: 0, side: 1, amount: 1000, price: 0.5 });
+  // priced far above the merchant's ask, so it rests on the book instead of filling at once
+  await ok(a.token, 'POST', `/cities/${cid}/market/orders`, { resType: 0, side: 1, amount: 1000, price: 50 });
   const book = await ok(a.token, 'GET', '/market/0');
-  check(book.sellers.length >= 1, 'market order on the book');
+  check(
+    book.sellers.some((x) => x.price === 50),
+    'market order on the book',
+  );
 
   // ---- rankings / quests ----
   const quests = await ok(a.token, 'GET', '/quests');

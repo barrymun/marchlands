@@ -18,6 +18,7 @@ import {
   CreatePlayerBody,
   Empty,
   FurloughBody,
+  LordStatistics,
   PlayerCreated,
   PlayerNameParams,
   PlayerState,
@@ -33,7 +34,7 @@ import {
   ZoneStats,
 } from '@marchlands/contracts';
 import { players } from '@marchlands/db';
-import { flows, player, runGame, shop, world } from '@marchlands/game';
+import { flows, player, runGame, shop, statistics, world } from '@marchlands/game';
 import { signToken } from '../auth/jwt.ts';
 import { doc, authenticate, game, playerIdOf, tags, type ZApp } from '../http.ts';
 
@@ -108,6 +109,9 @@ export default async function playerRoutes(app: ZApp) {
   );
   app.delete('/player/army-presets/:presetId', s('Delete a saved army composition', z.array(ArmyPreset), { params: ArmyPresetParams }), (req) =>
     game(req, (ctx, pid) => player.deleteArmyPreset(ctx, pid, req.params.presetId)),
+  );
+  app.get('/player/statistics', s("The lord's statistics: all time, last 7 days and per city (a few minutes behind)", LordStatistics), (req) =>
+    game(req, (ctx, pid) => statistics.lordStatistics(ctx, pid)),
   );
   app.get('/player/flows', s('Saved flows (series of actions run on cities)', z.array(Flow)), (req) => game(req, (ctx, pid) => flows.listFlows(ctx, pid)));
   app.post('/player/flows', s('Create a flow, or replace one by id', z.array(Flow), { body: FlowBody }), (req) =>

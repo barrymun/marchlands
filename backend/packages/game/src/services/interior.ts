@@ -71,6 +71,7 @@ export async function comfort(ctx: Ctx, playerId: number, cityId: number, typeId
   const stats = cityStats(b, ctx.now);
   const maxPop = stats.maxPopulation;
   const c = b.city;
+  const before = { gold: c.gold, food: c.food };
   let bonusBlessing = false;
   switch (typeId) {
     case 1:
@@ -105,6 +106,11 @@ export async function comfort(ctx: Ctx, playerId: number, cityId: number, typeId
       throw new GameError('Invalid comfort type.', -99);
   }
   c.misc = { ...c.misc, lastComfortAt: ctx.now };
+  ctx.stat(playerId, cityId, {
+    'spent.comfort.gold': Math.max(0, before.gold - c.gold),
+    'spent.comfort.food': Math.max(0, before.food - c.food),
+    'gained.blessing.food': Math.max(0, c.food - before.food),
+  });
   pushResources(ctx, b);
   await saveCity(ctx, c);
   return { freeBlessing: bonusBlessing };
@@ -119,6 +125,7 @@ export async function levy(ctx: Ctx, playerId: number, cityId: number, typeId: n
   const c = b.city;
   if (c.loyalty <= BALANCE.levyLoyaltyCost) throw new GameError('Loyalty too low. Please comfort first.', -99);
   const pop = Math.floor(c.population);
+  const before = { gold: c.gold, food: c.food, wood: c.wood, stone: c.stone, iron: c.iron };
   switch (typeId) {
     case 1:
       c.gold += Math.floor(pop / 10);
@@ -138,6 +145,7 @@ export async function levy(ctx: Ctx, playerId: number, cityId: number, typeId: n
     default:
       throw new GameError('Invalid levy type.', -99);
   }
+  for (const r of ['gold', 'food', 'wood', 'stone', 'iron'] as const) ctx.stat(playerId, cityId, { [`gained.levy.${r}`]: c[r] - before[r] });
   c.loyalty -= BALANCE.levyLoyaltyCost;
   c.misc = { ...c.misc, lastLevyAt: ctx.now };
   pushResources(ctx, b);

@@ -9,6 +9,7 @@ import { checkBeginner } from './services/player.ts';
 import { merchantSweep } from './services/market.ts';
 import { refreshRankings } from './services/rankings.ts';
 import { refreshZoneStats } from './services/world.ts';
+import { compactStats } from './stats.ts';
 
 export async function rankingsJob(db: Db) {
   await runGame(db, (ctx) => refreshRankings(ctx));
@@ -34,6 +35,11 @@ export async function beginnerJob(db: Db) {
 /** The computer merchant fills resting market orders its price has crossed. */
 export async function merchantJob(db: Db) {
   await runGame(db, (ctx) => merchantSweep(ctx));
+}
+
+/** (marchlands) Fold lord statistics older than 60 days into one row per month (stats.ts). */
+export async function statsJob(db: Db) {
+  await compactStats(db, Date.now());
 }
 
 /** Drop delivered pushes and old chat/reports. */
