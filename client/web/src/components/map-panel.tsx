@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Eye, Medal } from 'lucide-react';
 import type { CityBean, MapCastle } from '@marchlands/api-client';
 import { itemConfig, medalId, medalOdds, Mission, Relation, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
+import { ConfirmButton } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SendArmyDialog, type SendTarget } from '@/components/send-army-dialog';
@@ -11,7 +12,7 @@ import { AddToFarmButton } from '@/components/flow-attack';
 import { CityDialog } from '@/components/city-dialog';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { api, unwrap } from '@/lib/api';
-import { fmt } from '@/lib/format';
+import { fmt, fmtExact } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 const R = 7; // 15x15 view
@@ -204,16 +205,21 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                 {owned.get(info.data.id)?.here && (
                   <div className="flex items-center gap-2">
                     <ConfirmButton
-                      label="Release valley"
-                      confirmLabel="Click again to release"
+                      size="xs"
+                      variant="outline"
                       disabled={release.isPending}
-                      onConfirm={() => release.mutate(info.data!.id)}
-                    />
+                      title="Release this valley?"
+                      description="Troops stationed there march home and its production bonus stops. Taking it back means attacking it again."
+                      confirmLabel="Release valley"
+                      onConfirm={() => release.mutateAsync(info.data!.id)}
+                    >
+                      Release valley
+                    </ConfirmButton>
                     <span className="text-xs text-muted-foreground">Stationed troops march home; the production bonus stops.</span>
                   </div>
                 )}
                 {'upgradeCost' in info.data && !info.data.owner && (VALLEY_TYPES.includes(info.data.type) || info.data.type === TileType.NPC) && (
-                  <ValleyUpgrade city={city} tile={info.data} onUpgrade={(tileId) => upgrade.mutate(tileId)} pending={upgrade.isPending} />
+                  <ValleyUpgrade city={city} tile={info.data} onUpgrade={(tileId) => upgrade.mutateAsync(tileId)} pending={upgrade.isPending} />
                 )}
                 {info.data.type === TileType.FLAT && 'owner' in info.data && !info.data.owner && (
                   <Button size="sm" variant="outline" className="justify-self-start" onClick={() => setMoveTo({ x: info.data!.x, y: info.data!.y })}>
@@ -303,7 +309,17 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                         </span>
                       )}
                     </button>
-                    <ConfirmButton label="Release" confirmLabel="Release?" disabled={release.isPending} onConfirm={() => release.mutate(v.id)} />
+                    <ConfirmButton
+                      size="xs"
+                      variant="outline"
+                      disabled={release.isPending}
+                      title="Release this valley?"
+                      description="Troops stationed there march home and its production bonus stops. Taking it back means attacking it again."
+                      confirmLabel="Release valley"
+                      onConfirm={() => release.mutateAsync(v.id)}
+                    >
+                      Release
+                    </ConfirmButton>
                   </div>
                 );
               })}
@@ -322,30 +338,6 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   );
 }
 
-/** Two-step button: the first click arms it for a few seconds, the second confirms. */
-function ConfirmButton({ label, confirmLabel, disabled, onConfirm }: { label: string; confirmLabel: string; disabled?: boolean; onConfirm: () => void }) {
-  const [armed, setArmed] = useState(false);
-  useEffect(() => {
-    if (!armed) return;
-    const t = setTimeout(() => setArmed(false), 4000);
-    return () => clearTimeout(t);
-  }, [armed]);
-  return (
-    <Button
-      size="xs"
-      variant={armed ? 'destructive' : 'outline'}
-      disabled={disabled}
-      onClick={() => {
-        if (!armed) return setArmed(true);
-        setArmed(false);
-        onConfirm();
-      }}
-    >
-      {armed ? confirmLabel : label}
-    </Button>
-  );
-}
-
 /** Pay gold to raise an unowned valley one level (bigger bonus once held, stronger garrison). */
 function ValleyUpgrade({
   city,
@@ -355,7 +347,7 @@ function ValleyUpgrade({
 }: {
   city: CityBean;
   tile: { id: number; type: number; level: number; upgradeCost: number | null };
-  onUpgrade: (tileId: number) => void;
+  onUpgrade: (tileId: number) => unknown;
   pending: boolean;
 }) {
   if (tile.upgradeCost == null)
@@ -370,11 +362,17 @@ function ValleyUpgrade({
     <div className="grid gap-1">
       <div className="flex flex-wrap items-center gap-2">
         <ConfirmButton
-          label={`Upgrade to Lv ${tile.level + 1} · ${fmt(tile.upgradeCost)} gold`}
-          confirmLabel={`Click again to pay ${fmt(tile.upgradeCost)} gold`}
+          size="xs"
+          variant="outline"
           disabled={pending || short}
+          title={`Upgrade to level ${tile.level + 1}?`}
+          description={`${city.name} pays ${fmtExact(tile.upgradeCost)} gold. Its garrison, fortifications and resources start afresh at the new level.`}
+          confirmLabel={`Pay ${fmt(tile.upgradeCost)} gold`}
+          destructive={false}
           onConfirm={() => onUpgrade(tile.id)}
-        />
+        >
+          Upgrade to Lv {tile.level + 1} · {fmt(tile.upgradeCost)} gold
+        </ConfirmButton>
         {short && <span className="text-xs text-destructive">Not enough gold in {city.name}.</span>}
       </div>
       <span className="text-xs text-muted-foreground">

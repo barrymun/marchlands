@@ -28,6 +28,7 @@ import {
 } from '@marchlands/core';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { ConfirmButton } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -560,11 +561,7 @@ function InjuredCard({ city }: { city: CityBean }) {
   const affordable = (['gold', 'food', 'wood', 'stone', 'iron'] as const).every((k) => have[k] >= cost[k]);
   const total = Object.values(chosen).reduce((s, n) => s + n, 0);
   const path = { cityId: city.id };
-  const [confirming, setConfirming] = useState(false);
-  const done = () => {
-    setAmounts({});
-    setConfirming(false);
-  };
+  const done = () => setAmounts({});
   const heal = useCommand(
     (payWith: 'resources' | 'honor') =>
       unwrap(api.POST('/api/v1/cities/{cityId}/troops/injured/cure', { params: { path }, body: { troops: chosen, payWith } })),
@@ -619,15 +616,17 @@ function InjuredCard({ city }: { city: CityBean }) {
             >
               Heal · {fmt(honorCost)} honor
             </Button>
-            <Button
+            <ConfirmButton
               size="sm"
-              variant={confirming ? 'destructive' : 'outline'}
+              variant="outline"
               disabled={total <= 0 || dismiss.isPending}
-              onBlur={() => setConfirming(false)}
-              onClick={() => (confirming ? dismiss.mutate(undefined, { onSuccess: done }) : setConfirming(true))}
+              title={`Dismiss ${fmtExact(total)} injured troops?`}
+              description="They leave for good instead of being healed. This cannot be undone."
+              confirmLabel="Dismiss"
+              onConfirm={() => dismiss.mutateAsync(undefined).then(done)}
             >
-              {confirming ? `Click again to dismiss ${fmtExact(total)} for good` : 'Dismiss'}
-            </Button>
+              Dismiss
+            </ConfirmButton>
             {!affordable && total > 0 && <span className="self-center text-xs text-destructive">Not enough resources.</span>}
           </div>
         </CardContent>

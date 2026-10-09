@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AttackTargetsFields } from '@/components/flow-attack';
+import { ConfirmButton } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -123,15 +124,18 @@ export function FlowsPanel({ city }: { city: CityBean }) {
                   <Button size="sm" variant="outline" onClick={() => startEdit(selected)}>
                     Edit
                   </Button>
-                  <Button
+                  <ConfirmButton
                     size="sm"
                     variant="ghost"
                     aria-label={`Delete ${selected.name}`}
                     disabled={remove.isPending}
-                    onClick={() => confirm(`Delete the flow "${selected.name}"?`) && remove.mutate(selected.id)}
+                    title={`Delete the flow "${selected.name}"?`}
+                    description="Its actions and settings are removed, and a run in progress stops. This cannot be undone."
+                    confirmLabel="Delete flow"
+                    onConfirm={() => remove.mutateAsync(selected.id)}
                   >
                     <Trash2 />
-                  </Button>
+                  </ConfirmButton>
                 </div>
               </CardHeader>
               <CardContent>

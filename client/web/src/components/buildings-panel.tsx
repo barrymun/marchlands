@@ -5,6 +5,7 @@ import { CircleCheck, Plus } from 'lucide-react';
 import type { BuildingBean, CityBean } from '@marchlands/api-client';
 import { BALANCE, buildingHeroExp, buildingLevel, BuildingType, heroManagement, HeroStatus, heroTimeMultiplier } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
+import { ConfirmButton } from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -286,7 +287,6 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
     refresh,
     BALANCE.instantDemolish ? 'Building demolished' : 'Demolition started',
   );
-  const [confirmDemolish, setConfirmDemolish] = useState(false);
   const cancel = useCommand(
     () =>
       unwrap(
@@ -406,34 +406,26 @@ function BuildingDetail({ city, building, onDone }: { city: CityBean; building: 
                   {info.data && !BALANCE.instantDemolish ? ` (${Math.round(info.data.demolishTime / 60)} min)` : ''}
                   {info.data?.demolishRefund && <> · returns {refundText(info.data.demolishRefund)}</>}
                 </span>
-                {!confirmDemolish && (
-                  <Button size="sm" variant="destructive" disabled={demolish.isPending} onClick={() => setConfirmDemolish(true)}>
-                    Demolish
-                  </Button>
-                )}
+                <ConfirmButton
+                  size="sm"
+                  variant="destructive"
+                  disabled={demolish.isPending}
+                  title={
+                    BALANCE.instantDemolish
+                      ? `Demolish ${buildingName(building.typeId)} (Lv ${building.level})?`
+                      : `Demolish one level of ${buildingName(building.typeId)}?`
+                  }
+                  description={
+                    BALANCE.instantDemolish
+                      ? `The whole building goes at once${info.data?.demolishRefund ? `, returning ${refundText(info.data.demolishRefund)}` : ''}. This cannot be undone.`
+                      : 'The level is removed when the demolition finishes.'
+                  }
+                  confirmLabel="Demolish"
+                  onConfirm={() => demolish.mutateAsync(undefined).then(onDone)}
+                >
+                  Demolish
+                </ConfirmButton>
               </div>
-              {confirmDemolish && (
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-xs">
-                  <span>
-                    {BALANCE.instantDemolish
-                      ? `Remove ${buildingName(building.typeId)} (Lv ${building.level}) for good? This cannot be undone.`
-                      : `Start demolishing one level of ${buildingName(building.typeId)}?`}
-                  </span>
-                  <div className="flex gap-1">
-                    <Button size="xs" variant="outline" onClick={() => setConfirmDemolish(false)}>
-                      Cancel
-                    </Button>
-                    <Button
-                      size="xs"
-                      variant="destructive"
-                      disabled={demolish.isPending}
-                      onClick={() => demolish.mutate(undefined, { onSuccess: () => (setConfirmDemolish(false), onDone()) })}
-                    >
-                      Demolish
-                    </Button>
-                  </div>
-                </div>
-              )}
             </>
           )}
         </div>
