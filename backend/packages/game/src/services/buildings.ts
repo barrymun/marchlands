@@ -272,7 +272,10 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
     reduce = scaled(eff.reduce(total, () => ctx.rng.next()));
   }
   pushResources(ctx, b);
-  const next: BuildingState = { ...bld, endTime: Math.max(ctx.now, bld.endTime - reduce) };
+  // (marchlands) the start moves back by the time saved: the job keeps its length, so its progress bar jumps
+  // forward by the share skipped and percentage speed-ups always cut a share of the original time
+  const endTime = Math.max(ctx.now, bld.endTime - reduce);
+  const next: BuildingState = { ...bld, startTime: bld.startTime - (bld.endTime - endTime), endTime };
   b.city.buildings = b.city.buildings.map((x) => (x.positionId === positionId ? next : x));
   scheduleBuilding(ctx, b, next);
   pushBuilding(ctx, b, next);

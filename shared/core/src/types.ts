@@ -49,8 +49,10 @@ export const TrainBatchSchema = z.object({
   startTime: z.number(),
   /** completion time (0 while waiting) */
   endTime: z.number(),
-  /** total production time of the batch, ms */
+  /** production time of the batch, ms (after speed-ups while it waits) */
   costTime: z.number(),
+  /** (marchlands) the batch's full production time before speed-ups (absent = costTime): a percentage speed-up cuts a share of it */
+  fullTime: z.number().optional(),
   /** (marchlands) share of the normal cost paid (troopCostShare; absent = 1): what a cancel refunds from */
   paidShare: z.number().optional(),
 });

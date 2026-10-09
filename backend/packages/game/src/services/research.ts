@@ -168,7 +168,8 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
     reduce = scaled(eff.reduce(end - (r.startTime ?? ctx.now), () => ctx.rng.next()));
   }
   const newEnd = Math.max(ctx.now, end - reduce);
-  p.research = { ...p.research, [techId]: { ...r, endTime: newEnd } };
+  // (marchlands) the start moves back by the time saved, like construction (buildings.ts speedup)
+  p.research = { ...p.research, [techId]: { ...r, startTime: (r.startTime ?? ctx.now) - (end - newEnd), endTime: newEnd } };
   ctx.schedule({ type: 'research', dueAt: newEnd, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
   ctx.push(playerId, 'server.ResearchUpdate', { castleId: cityId, typeId: techId, endTime: newEnd });
   pushResources(ctx, b);

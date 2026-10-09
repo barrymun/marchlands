@@ -69,9 +69,9 @@ const SPEEDUPS: Record<string, string> = {
   'consume.2.b.1': 'Cuts 2½ hours off a construction or research.',
   'consume.2.c': 'Cuts 8 hours off a construction or research.',
   'consume.2.c.1': 'Cuts 10–30 hours (random) off a construction or research.',
-  'consume.2.d': 'Cuts 30% of the remaining time off a construction or research.',
-  'player.troop.1.b': 'Cuts 30% off the remaining time of one troop-training batch.',
-  'player.fort.1.c': 'Cuts 30% off the remaining time of one fortification batch.',
+  'consume.2.d': 'Cuts 30% of the total time off a construction or research.',
+  'player.troop.1.b': 'Cuts 30% of the total time off one troop-training batch.',
+  'player.fort.1.c': 'Cuts 30% of the total time off one fortification batch.',
 };
 
 const HOW_TO: Record<string, string> = {

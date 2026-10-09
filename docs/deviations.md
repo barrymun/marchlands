@@ -26,6 +26,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 | Original behaviour | Marchlands |
 |---|---|
 | Speed-up coin cost used `=` instead of `+=` in the 15-minute tier, so prices were not monotonic | fixed; coin cost uses the **remaining** time, not the total |
+| A speed-up moves only the end time, so the job's total shrinks: its progress bar barely moves, and each percentage speed-up of the total cuts less than the last | *(design change)* the start moves back by the time saved too. The job keeps its length, so the bar jumps forward by the share skipped, and every percentage speed-up takes its share of the **original** time, so four finish any job: Ultimate Guidelines (construction, research), and Napoleon's Diary and Archimedes' Note (one troop or fortification batch; orig: 30% of the time left). A waiting batch remembers its full time (`fullTime`) and starts part way |
 | Negative counts and amounts (training, troops sent, `buyResource`, furlough days) minted resources or cents | all amounts validated as positive integers |
 | Resources sent with an army were never deducted but were returned on arrival | deducted on departure; load checked against carry capacity |
 | `num = 0` let anyone use any item for free | the item count is checked and the item consumed |

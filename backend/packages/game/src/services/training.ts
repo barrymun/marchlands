@@ -297,7 +297,7 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
   ctx.stat(playerId, cityId, prefixed('spent.training', paid, -share));
   b.city.population += (troopConfig(batch.troopId)?.population ?? 1) * batch.count;
   const next = queue.filter((_, i) => i !== idx);
-  if (idx === 0 && next[0]) next[0] = { ...next[0], startTime: ctx.now, endTime: ctx.now + next[0].costTime };
+  if (idx === 0 && next[0]) next[0] = startBatch(next[0], ctx.now);
   setQueue(b, positionId, next, nextQueueId);
   scheduleHead(ctx, b, positionId, next);
   pushQueues(ctx, b, positionId);
@@ -305,7 +305,23 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
   await saveCity(ctx, b.city);
 }
 
-/** troop.accTroopProduce (Napoleon's Diary) / fortifications.accTroopProduce (Archimedes' Note): -30%. */
+/** Napoleon's Diary / Archimedes' Note: the share of a batch's full time they cut. */
+const BATCH_SPEEDUP = 0.3;
+
+/**
+ * A waiting batch starts producing at `at`. Time already cut by speed-ups counts as done: the start sits that
+ * far back, so its progress bar starts part way.
+ */
+function startBatch(batch: TrainBatch, at: number): TrainBatch {
+  const saved = Math.max(0, (batch.fullTime ?? batch.costTime) - batch.costTime);
+  return { ...batch, startTime: at - saved, endTime: at + batch.costTime };
+}
+
+/**
+ * troop.accTroopProduce (Napoleon's Diary) / fortifications.accTroopProduce (Archimedes' Note): -30% of the batch's
+ * full time ((marchlands) orig: of the time left), so four finish any batch. The start moves back by the time
+ * saved, like construction (buildings.ts speedup).
+ */
 export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number, positionId: number, queueId: number) {
   const fort = positionId === WALLS_QUEUE;
   const itemId = fort ? 'player.fort.1.c' : 'player.troop.1.b';
@@ -317,9 +333,13 @@ export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number
   const batch = queue[idx];
   const next = [...queue];
   if (idx === 0) {
-    const left = Math.max(0, batch.endTime - ctx.now);
-    next[0] = { ...batch, endTime: batch.endTime - Math.floor(left * 0.3), costTime: Math.floor(batch.costTime * 0.7) };
-  } else next[idx] = { ...batch, costTime: Math.floor(batch.costTime * 0.7) };
+    // the head's start already sits back by any earlier cuts, so end - start is its full time
+    const endTime = Math.max(ctx.now, batch.endTime - Math.floor((batch.endTime - batch.startTime) * BATCH_SPEEDUP));
+    next[0] = { ...batch, startTime: batch.startTime - (batch.endTime - endTime), endTime };
+  } else {
+    const fullTime = batch.fullTime ?? batch.costTime;
+    next[idx] = { ...batch, fullTime, costTime: Math.max(0, batch.costTime - Math.floor(fullTime * BATCH_SPEEDUP)) };
+  }
   setQueue(b, positionId, next, nextQueueId);
   scheduleHead(ctx, b, positionId, next);
   pushQueues(ctx, b, positionId);
@@ -353,7 +373,7 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
     gain += head.count * prestigeOf(PrestigeAction.TRAIN, head.troopId, 1, th);
     exp += head.count * unitExp(head.troopId) * BALANCE.heroExpPerTrain;
     queue = queue.slice(1);
-    if (queue[0]) queue[0] = { ...queue[0], startTime: head.endTime, endTime: head.endTime + queue[0].costTime };
+    if (queue[0]) queue[0] = startBatch(queue[0], head.endTime);
     changed = true;
   }
   if (!changed) {
