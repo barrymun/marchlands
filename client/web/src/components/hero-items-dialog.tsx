@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { HeroBean } from '@marchlands/api-client';
 import {
   BALANCE,
@@ -11,13 +12,17 @@ import {
   itemConfig,
   LOYALTY_MEDALS,
 } from '@marchlands/core';
+import { Countdown } from '@/components/countdown';
 import { Button } from '@/components/ui/button';
 import { useSticky } from '@/hooks/use-sticky';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { qk, useCity, useCommand } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
-import { duration, fmt, fmtExact } from '@/lib/format';
+import { fmt, fmtExact } from '@/lib/format';
+import { ATTRIBUTE_BORDER, dominantAttribute } from '@/lib/hero-attributes';
+import { ITEM_BONUS_TEXT } from '@/lib/tones';
+import { cn } from '@/lib/utils';
 
 const ATTR_LABEL = { power: 'Attack', management: 'Politics', stratagem: 'Intelligence' } as const;
 
@@ -44,14 +49,15 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
     () => [qk.city(cityId), qk.player],
     'Bought with gold and used',
   );
-  const row = (itemId: string, effect: string, disabledReason?: string) => {
+  const row = (itemId: string, effect: ReactNode, disabledReason?: string, extra: { className?: string; badge?: ReactNode } = {}) => {
     const owned = inv.count(itemId);
     const price = heroItemGoldPrice(itemId, hero.upgradeExp);
     return (
-      <div key={itemId} className="flex items-center justify-between gap-2 rounded-md border p-2 text-sm">
+      <div key={itemId} className={cn('flex items-center justify-between gap-2 rounded-md border p-2 text-sm', extra.className)}>
         <div>
-          <div className="font-medium">
+          <div className="flex flex-wrap items-center gap-1.5 font-medium">
             {itemConfig(itemId)?.name} <span className="font-normal text-muted-foreground">×{owned}</span>
+            {extra.badge}
           </div>
           <div className="text-xs text-muted-foreground">{disabledReason ?? effect}</div>
         </div>
@@ -81,7 +87,9 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
       </div>
     );
   };
-  const buffed = (attr: keyof typeof ATTR_LABEL) => hero[`${attr}BuffAdded` as const] > 0;
+  const buffEnd = (attr: keyof typeof ATTR_LABEL) => hero.buffs.find((b) => b.id === attr && b.endTime > Date.now())?.endTime;
+  // the boost that suits this hero best: the one for its strongest attribute
+  const best = dominantAttribute(hero);
 
   return (
     <>
@@ -107,15 +115,28 @@ function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
         </section>
         <section className="grid gap-1.5">
           <h3 className="text-sm font-medium">Attribute boosts</h3>
-          {Object.entries(HERO_ATTRIBUTE_ITEMS).map(([id, attr]) =>
-            row(
+          {Object.entries(HERO_ATTRIBUTE_ITEMS).map(([id, attr]) => {
+            const end = buffEnd(attr);
+            const suits = best.stat === attr;
+            return row(
               id,
-              `${ATTR_LABEL[attr]} +${HERO_ATTRIBUTE_BUFF.bonus * 100}% (+${heroBuffAmount(heroBuffBase(hero, attr))}, gear included) for 24 hours`,
-              buffed(attr)
-                ? `${ATTR_LABEL[attr]} boost active, ${duration(Math.max(0, (hero.buffs.find((b) => b.id === attr)?.endTime ?? 0) - Date.now()))} left (using again restarts it)`
-                : undefined,
-            ),
-          )}
+              <>
+                {ATTR_LABEL[attr]} +{HERO_ATTRIBUTE_BUFF.bonus * 100}% (+{heroBuffAmount(heroBuffBase(hero, attr))}, gear included) for 24 hours
+                {end && (
+                  <span className={cn('block', ITEM_BONUS_TEXT)}>
+                    Active, <Countdown endTime={end} /> left; using another adds 24 hours
+                  </span>
+                )}
+              </>,
+              undefined,
+              suits
+                ? {
+                    className: ATTRIBUTE_BORDER[best.key],
+                    badge: <span className={cn('rounded px-1.5 py-px text-[11px] font-normal', best.tone)}>Best for this hero</span>,
+                  }
+                : {},
+            );
+          })}
         </section>
         <section className="grid gap-1.5">
           <h3 className="text-sm font-medium">Loyalty medals</h3>

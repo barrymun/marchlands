@@ -392,7 +392,9 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     const attr = HERO_ATTRIBUTE_ITEMS[itemId];
     if (!paidInGold) consumeItem(ctx, p, itemId);
     const amount = heroBuffAmount(heroBuffBase(h, attr));
-    const endTime = ctx.now + HERO_ATTRIBUTE_BUFF.durationMs;
+    // (marchlands) stacks like the lord's item boosts: another use adds its time to what is left (orig: restarted it)
+    const running = h.buffs.find((x) => x.id === attr && x.endTime > ctx.now);
+    const endTime = (running?.endTime ?? ctx.now) + HERO_ATTRIBUTE_BUFF.durationMs;
     h.buffs = [...h.buffs.filter((x) => x.id !== attr), { id: attr, desc: `${attr} +25%`, endTime, param: amount }];
     if (attr === 'power') h.powerBuffAdded = amount;
     if (attr === 'management') h.managementBuffAdded = amount;

@@ -13,6 +13,13 @@ export const ATTRIBUTE_TONE = {
 
 export type AttributeKey = keyof typeof ATTRIBUTE_TONE;
 
+/** Border colours per attribute, to pick out a card or row (e.g. the boost that suits a hero best). */
+export const ATTRIBUTE_BORDER = {
+  pol: 'border-emerald-500/70',
+  att: 'border-rose-500/70',
+  int: 'border-sky-500/70',
+} as const satisfies Record<AttributeKey, string>;
+
 /** `stat`: the attribute's field name on the hero (and in gear / boost APIs). */
 export const HERO_ATTRIBUTES = [
   { key: 'pol', stat: 'management', label: 'Politics', short: 'pol', value: heroManagement, tone: ATTRIBUTE_TONE.pol },
