@@ -31,7 +31,7 @@ import { useNow } from '@/hooks/use-now';
 import { api, errorMessage, unwrap } from '@/lib/api';
 import { duration, fmt, fmtExact, signedRate } from '@/lib/format';
 import { dominantAttribute, heroAttributeValues } from '@/lib/hero-attributes';
-import { STATUS_DONE } from '@/lib/tones';
+import { ITEM_BONUS_TONE, STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 const STATUS: Record<number, string> = {
@@ -429,8 +429,8 @@ function HeroBuffs({ hero }: { hero: HeroBean }) {
   return (
     <div className="mt-1 flex flex-wrap gap-1">
       {active.map((b) => (
-        <Badge key={b.id} variant="outline" className="gap-1 font-normal tabular-nums">
-          <Sparkles className="size-3 text-amber-500" />
+        <Badge key={b.id} className={cn('gap-1 font-normal tabular-nums', ITEM_BONUS_TONE)}>
+          <Sparkles className="size-3" />
           {BUFF_LABEL[b.id] ?? b.id} +{b.param ?? '25%'} · {duration(b.endTime - now)} left
         </Badge>
       ))}
