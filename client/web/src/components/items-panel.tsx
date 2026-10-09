@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { CityBean } from '@marchlands/api-client';
 import {
   ITEM_CATEGORIES,
@@ -12,15 +12,15 @@ import {
   type ItemInfo,
   type TroopKey,
 } from '@marchlands/core';
-import { Medal } from 'lucide-react';
+import { Medal, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ActiveEffects } from '@/components/active-effects';
 import { Countdown } from '@/components/countdown';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
@@ -49,6 +49,9 @@ export function ItemsPanel({ city }: { city: CityBean }) {
   const [category, setCategory] = useState(ALL);
   const [query, setQuery] = useState('');
   const [ownedOnly, setOwnedOnly] = useState(false);
+  // set by an inactive Active effects slot: only the items that give that bonus
+  const [effectFilter, setEffectFilter] = useState<{ label: string; ids: string[] } | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const counts = useMemo(() => new Map((player.data?.items ?? []).map((i) => [i.id, i.count])), [player.data?.items]);
 
   const entries = useMemo(() => {
@@ -65,13 +68,14 @@ export function ItemsPanel({ city }: { city: CityBean }) {
 
   const q = query.trim().toLowerCase();
   const shown = entries
+    .filter((e) => !effectFilter || e.ids.some((id) => effectFilter.ids.includes(id)))
     .filter((e) => category === ALL || e.info.category === category)
     .filter((e) => !ownedOnly || e.owned > 0)
     .filter((e) => !q || e.info.name.toLowerCase().includes(q) || e.info.description.toLowerCase().includes(q))
     // alphabetical only, so buying or using an item never moves it
     .sort((a, b) => a.info.name.localeCompare(b.info.name));
   const ownedTotal = entries.filter((e) => e.owned > 0).length;
-  const buffs = (player.data?.buffs ?? []).filter((b) => b.endTime > Date.now());
+  const buffs = player.data?.buffs ?? [];
 
   const use = useCommand(
     (itemId: string) => unwrap(api.POST('/api/v1/player/items/{itemId}/use', { params: { path: { itemId } }, body: { cityId: city.id } })),
@@ -95,22 +99,19 @@ export function ItemsPanel({ city }: { city: CityBean }) {
 
   return (
     <div className="grid gap-4">
-      {buffs.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Active effects</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            {buffs.map((b) => (
-              <Badge key={b.id} className={cn('gap-1 font-normal', ITEM_BONUS_TONE)}>
-                {b.itemId && <span className="font-medium">{itemConfig(b.itemId)?.name.trim()}:</span>}
-                {b.desc} · <Countdown endTime={b.endTime} />
-              </Badge>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-      <div className="flex min-w-0 flex-wrap items-center gap-3">
+      <ActiveEffects
+        city={city}
+        buffs={buffs}
+        counts={counts}
+        onFind={(label, ids) => {
+          setEffectFilter({ label, ids });
+          setCategory(ALL);
+          setQuery('');
+          setOwnedOnly(false);
+          listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }}
+      />
+      <div ref={listRef} className="flex min-w-0 scroll-mt-4 flex-wrap items-center gap-3">
         <Tabs value={category} onValueChange={setCategory} className="max-w-full min-w-0">
           <TabsList className="max-w-full justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {[ALL, ...Object.values(ITEM_CATEGORIES)].map((c) => (
@@ -127,6 +128,14 @@ export function ItemsPanel({ city }: { city: CityBean }) {
             Owned only ({ownedTotal})
           </Label>
         </div>
+        {effectFilter && (
+          <Badge variant="secondary" className="gap-1">
+            Items for {effectFilter.label}
+            <button type="button" className="-mr-1 rounded-sm opacity-70 hover:opacity-100" aria-label="Show all items" onClick={() => setEffectFilter(null)}>
+              <X className="size-3" />
+            </button>
+          </Badge>
+        )}
       </div>
       <div className="grid gap-2 md:grid-cols-2">
         {shown.map((e) => (

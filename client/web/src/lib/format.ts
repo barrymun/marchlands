@@ -28,6 +28,11 @@ export function duration(ms: number): string {
   return `${s}s`;
 }
 
+/** The two largest units: 4d 18h, 18h 03m, 5m 09s. */
+export function shortDuration(ms: number): string {
+  return duration(ms).split(' ').slice(0, 2).join(' ');
+}
+
 export const buildingName = (typeId: number) => BUILDING_NAMES[typeId] ?? `Building ${typeId}`;
 export const troopName = (troopId: number) => TROOP_NAMES[troopId] ?? `Unit ${troopId}`;
 
