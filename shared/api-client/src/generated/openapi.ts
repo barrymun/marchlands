@@ -734,6 +734,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/player/gender": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** (marchlands) Change gender: free, once a day */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description 0 male, 1 female */
+                        sex: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            ok: 1;
+                            data: null;
+                        };
+                    };
+                };
+                /** @description Default Response */
+                "4XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Default Response */
+                "5XX": {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/player/title/promote": {
         parameters: {
             query?: never;
@@ -11800,6 +11865,8 @@ export interface components {
             tutorialStepId: number;
             /** @description (marchlands) when the lord may rename again (0: now) */
             nextRenameAt: number;
+            /** @description (marchlands) when the player may change gender again (0: now) */
+            nextGenderChangeAt: number;
         };
         PlayerCreatedInput: {
             playerInfo: components["schemas"]["PlayerInfoInput"];
@@ -11839,6 +11906,8 @@ export interface components {
             tutorialStepId: number;
             /** @description (marchlands) when the lord may rename again (0: now) */
             nextRenameAt: number;
+            /** @description (marchlands) when the player may change gender again (0: now) */
+            nextGenderChangeAt: number;
             /** @description fresh bearer token carrying the new lord id */
             token: string;
         };
@@ -14028,6 +14097,8 @@ export interface components {
             tutorialStepId: number;
             /** @description (marchlands) when the lord may rename again (0: now) */
             nextRenameAt: number;
+            /** @description (marchlands) when the player may change gender again (0: now) */
+            nextGenderChangeAt: number;
         };
         PlayerCreated: {
             playerInfo: components["schemas"]["PlayerInfo"];
@@ -14067,6 +14138,8 @@ export interface components {
             tutorialStepId: number;
             /** @description (marchlands) when the lord may rename again (0: now) */
             nextRenameAt: number;
+            /** @description (marchlands) when the player may change gender again (0: now) */
+            nextGenderChangeAt: number;
             /** @description fresh bearer token carrying the new lord id */
             token: string;
         };

@@ -22,7 +22,7 @@ export function App() {
 
 function LoggedIn() {
   const player = usePlayer();
-  if (player.isPending) return <FullPageMessage title="Loading your lord…" />;
+  if (player.isPending) return <FullPageMessage title="Loading your game…" />;
   const noLord = player.error instanceof ApiError && player.error.code === -4;
   if (player.error && !noLord) return <FullPageMessage title="Could not load the game" detail={player.error.message} retry={() => void player.refetch()} />;
   return (

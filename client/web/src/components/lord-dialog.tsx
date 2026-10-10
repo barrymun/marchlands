@@ -7,16 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Countdown } from '@/components/countdown';
 import { qk, useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { api, unwrap } from '@/lib/api';
 import { fmt } from '@/lib/format';
+import { GENDERS } from '@/lib/genders';
 
 const TRUCE = 'player.peace.1';
 
-/** Lord-wide actions: rename (free, once a day), change flag (free), truce (bought with `city`'s gold when none is owned). */
+/** Player-wide actions: rename and change gender (free, once a day each), change flag (free), truce (bought with `city`'s gold when none is owned). */
 export function LordDialog({ open, onClose, city }: { open: boolean; onClose: () => void; city?: CityBean }) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -33,8 +35,10 @@ function LordForm({ city }: { city?: CityBean }) {
   const info = player.data?.playerInfo;
   const [name, setName] = useState('');
   const [flag, setFlag] = useState('');
+  const [gender, setGender] = useState<string | null>(null);
   const refresh = () => [qk.player];
-  const rename = useCommand(() => unwrap(api.POST('/api/v1/player/rename', { body: { userName: name.trim() } })), refresh, 'Lord renamed');
+  const rename = useCommand(() => unwrap(api.POST('/api/v1/player/rename', { body: { userName: name.trim() } })), refresh, 'Player renamed');
+  const changeGender = useCommand((sex: number) => unwrap(api.POST('/api/v1/player/gender', { body: { sex } })), refresh, 'Gender changed');
   const changeFlag = useCommand(() => unwrap(api.POST('/api/v1/player/flag', { body: { flag: flag.trim() } })), refresh, 'Flag changed');
   const truce = useCommand(
     (itemId: string) => unwrap(api.POST('/api/v1/player/truce', { body: { itemId, cityId: city!.id } })),
@@ -45,13 +49,17 @@ function LordForm({ city }: { city?: CityBean }) {
   const now = Date.now();
   const nextRename = player.data?.nextRenameAt ?? 0;
   const renameWait = nextRename > now;
+  const nextGender = player.data?.nextGenderChangeAt ?? 0;
+  const genderWait = nextGender > now;
+  const currentGender = String(info?.sex ?? 0);
+  const pickedGender = gender ?? currentGender;
   const truceBuff = player.data?.buffs.find((b) => b.id === 'PlayerPeaceBuff' && b.endTime > now);
   const truceCooldown = player.data?.buffs.find((b) => b.id === 'PlayerPeaceCoolDownBuff' && b.endTime > now);
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Lord {info?.userName}</DialogTitle>
+        <DialogTitle>{info?.userName}</DialogTitle>
         <DialogDescription>
           {info?.titleName} · flag {info?.flag}
         </DialogDescription>
@@ -85,6 +93,38 @@ function LordForm({ city }: { city?: CityBean }) {
               Change
             </Button>
           </div>
+        </div>
+        <div className="grid gap-2">
+          <Label>Gender</Label>
+          <div className="flex gap-2">
+            <Select value={pickedGender} onValueChange={setGender}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {GENDERS.map((g) => (
+                  <SelectItem key={g.value} value={String(g.value)}>
+                    {g.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              disabled={pickedGender === currentGender || genderWait || changeGender.isPending}
+              onClick={() => changeGender.mutate(Number(pickedGender), { onSuccess: () => setGender(null) })}
+            >
+              Change
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {genderWait ? (
+              <>
+                Changing gender is free once a day: next in <Countdown endTime={nextGender} />.
+              </>
+            ) : (
+              'Free, once a day.'
+            )}
+          </p>
         </div>
         <Separator />
         <div className="grid gap-2">

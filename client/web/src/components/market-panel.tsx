@@ -133,7 +133,7 @@ function OrderBook({
     <TableRow key={`${s}-${l.price}`} className="cursor-pointer" onClick={() => onLevel(l, s)}>
       <TableCell className={cn('tabular-nums', s === 1 ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400')}>{fmtPrice(l.price)}</TableCell>
       <TableCell className="text-right tabular-nums">{fmtExact(l.amount)}</TableCell>
-      <TableCell className="text-right text-xs text-muted-foreground">lord</TableCell>
+      <TableCell className="text-right text-xs text-muted-foreground">player</TableCell>
     </TableRow>
   );
   const merchantRow = (sells: boolean) =>
@@ -335,7 +335,7 @@ function TradeForm({
                   <span>
                     {q.merchantFilled > 0 && `${fmtExact(q.merchantFilled)} with the merchant`}
                     {q.merchantFilled > 0 && q.playerFilled > 0 && ' · '}
-                    {q.playerFilled > 0 && `${fmtExact(q.playerFilled)} with other lords`}
+                    {q.playerFilled > 0 && `${fmtExact(q.playerFilled)} with other players`}
                   </span>
                   {q.fee > 0 && <span>incl. fee {fmtExact(q.fee)}</span>}
                 </div>
@@ -430,7 +430,7 @@ function PriceHistory({ resType }: { resType: number }) {
                       {fmtPrice(t.price)}
                     </TableCell>
                     <TableCell className="text-right tabular-nums">{fmtExact(t.amount)}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{t.merchant ? 'merchant' : 'lords'}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{t.merchant ? 'merchant' : 'players'}</TableCell>
                     <TableCell className="text-right text-xs text-muted-foreground">{new Date(t.createdAt).toLocaleTimeString()}</TableCell>
                   </TableRow>
                 ))}

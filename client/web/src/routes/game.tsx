@@ -163,7 +163,7 @@ export function GamePage() {
                     </DropdownMenuLabel>
                   )}
                   {info && <DropdownMenuSeparator className="sm:hidden" />}
-                  <DropdownMenuItem onSelect={() => setDialog('lord')}>Lord settings</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDialog('lord')}>Player settings</DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <a href="/docs" target="_blank" rel="noreferrer">
                       API docs

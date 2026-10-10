@@ -2712,6 +2712,10 @@
           "nextRenameAt": {
             "type": "number",
             "description": "(marchlands) when the lord may rename again (0: now)"
+          },
+          "nextGenderChangeAt": {
+            "type": "number",
+            "description": "(marchlands) when the player may change gender again (0: now)"
           }
         },
         "required": [
@@ -2739,7 +2743,8 @@
           "gameSpeed",
           "currentTime",
           "tutorialStepId",
-          "nextRenameAt"
+          "nextRenameAt",
+          "nextGenderChangeAt"
         ]
       },
       "PlayerCreatedInput": {
@@ -2893,6 +2898,10 @@
             "type": "number",
             "description": "(marchlands) when the lord may rename again (0: now)"
           },
+          "nextGenderChangeAt": {
+            "type": "number",
+            "description": "(marchlands) when the player may change gender again (0: now)"
+          },
           "token": {
             "type": "string",
             "description": "fresh bearer token carrying the new lord id"
@@ -2924,6 +2933,7 @@
           "currentTime",
           "tutorialStepId",
           "nextRenameAt",
+          "nextGenderChangeAt",
           "token"
         ]
       },
@@ -12946,6 +12956,10 @@
           "nextRenameAt": {
             "type": "number",
             "description": "(marchlands) when the lord may rename again (0: now)"
+          },
+          "nextGenderChangeAt": {
+            "type": "number",
+            "description": "(marchlands) when the player may change gender again (0: now)"
           }
         },
         "required": [
@@ -12973,7 +12987,8 @@
           "gameSpeed",
           "currentTime",
           "tutorialStepId",
-          "nextRenameAt"
+          "nextRenameAt",
+          "nextGenderChangeAt"
         ],
         "additionalProperties": false
       },
@@ -13129,6 +13144,10 @@
             "type": "number",
             "description": "(marchlands) when the lord may rename again (0: now)"
           },
+          "nextGenderChangeAt": {
+            "type": "number",
+            "description": "(marchlands) when the player may change gender again (0: now)"
+          },
           "token": {
             "type": "string",
             "description": "fresh bearer token carrying the new lord id"
@@ -13160,6 +13179,7 @@
           "currentTime",
           "tutorialStepId",
           "nextRenameAt",
+          "nextGenderChangeAt",
           "token"
         ],
         "additionalProperties": false
@@ -21450,6 +21470,88 @@
                 },
                 "required": [
                   "userName"
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/player/gender": {
+      "post": {
+        "summary": "(marchlands) Change gender: free, once a day",
+        "tags": [
+          "player"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sex": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "0 male, 1 female"
+                  }
+                },
+                "required": [
+                  "sex"
                 ]
               }
             }

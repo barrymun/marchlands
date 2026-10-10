@@ -475,7 +475,7 @@ function ScoutView({ scout: s }: { scout: Extract<ReportBody, { kind: 'scout' }>
   }
   return (
     <div className="grid gap-1.5 text-sm">
-      <Line label="Lord">{s.owner}</Line>
+      <Line label="Player">{s.owner}</Line>
       {fight}
       {s.intel && (
         <>

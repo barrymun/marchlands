@@ -92,7 +92,7 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   q(9, 'Embassy', 'Build an Embassy.', [{ name: 'Embassy level 1', target: b(28, 1) }], { resources: res(1000, 2000, 500, 300) }),
   q(9, 'Join an Alliance', 'Create or join an alliance.', [{ name: 'Be in an alliance', target: { kind: 'alliance' } }], { resources: { gold: 50_000 } }),
   // 10 Correspondence
-  q(10, 'Correspondence', 'Send a letter to another lord.', [{ name: 'Send a mail', target: { kind: 'mailSent' } }], { resources: res(500, 500, 500, 500) }),
+  q(10, 'Correspondence', 'Send a letter to another player.', [{ name: 'Send a mail', target: { kind: 'mailSent' } }], { resources: res(500, 500, 500, 500) }),
   // 11 Hero Recruitment / Military Service
   q(11, 'Inn', 'Build an Inn to meet heroes.', [{ name: 'Inn level 1', target: b(21, 1) }], { resources: res(500, 2000, 1000, 400) }),
   q(11, 'Feasting Hall', 'Build a Feasting Hall to host heroes.', [{ name: 'Feasting Hall level 1', target: b(27, 1) }], { resources: res(1000, 2500, 1200, 700) }),
@@ -103,11 +103,11 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   // 16 City Expansion
   q(16, 'Second City', 'Found or conquer a second city.', [{ name: 'Own 2 cities', target: { kind: 'cities', count: 2 } }], { resources: { gold: 165_000 } }), // (orig 20 cents)
   // 15 Colony
-  q(15, 'Valley Lord', 'Occupy a valley.', [{ name: 'Own 1 valley', target: { kind: 'valleys', count: 1 } }], { resources: res(5000, 5000, 5000, 5000) }),
+  q(15, 'Valley Holder', 'Occupy a valley.', [{ name: 'Own 1 valley', target: { kind: 'valleys', count: 1 } }], { resources: res(5000, 5000, 5000, 5000) }),
   // 20 Population Increase
   q(20, 'Growing Town', 'Reach a population of 1,000.', [{ name: 'Population 1000', target: { kind: 'population', amount: 1000 } }], { items: { 'player.pop.1.a': 1 } }),
   // 21 The Medals / 23 Prestige
-  q(23, 'Rising Lord', 'Reach 10,000 prestige.', [{ name: '10,000 prestige', target: { kind: 'prestige', amount: 10_000 } }], { items: { 'hero.loyalty.3': 1 } }),
+  q(23, 'Rising Star', 'Reach 10,000 prestige.', [{ name: '10,000 prestige', target: { kind: 'prestige', amount: 10_000 } }], { items: { 'hero.loyalty.3': 1 } }),
 ];
 
 export const questGroups = () => QUESTS;

@@ -188,6 +188,8 @@ export const BALANCE = {
   teleportCooldownMs: 12 * HOUR, // (orig)
   /** (marchlands) renaming the lord is free, once per this much real time (orig: a New ID item each time) */
   renameCooldownMs: 24 * HOUR,
+  /** (marchlands) changing gender in Player settings: free, once per this much real time */
+  genderCooldownMs: 24 * HOUR,
 
   // ---- chat ----
 

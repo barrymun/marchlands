@@ -219,7 +219,7 @@ function MedalSourcesInfo({ level }: { level: number }) {
       <ul className="grid gap-1 text-muted-foreground">
         {s.attacks.length > 0 && (
           <li>
-            <span className="text-foreground">Winning attacks</span> on NPC cities of these levels (a lord&apos;s city counts its Town Hall level), chance per
+            <span className="text-foreground">Winning attacks</span> on NPC cities of these levels (a player&apos;s city counts its Town Hall level), chance per
             win:
             <span className="mt-0.5 flex flex-wrap gap-1">
               {s.attacks.map((a) => (

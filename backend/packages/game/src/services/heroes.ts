@@ -459,7 +459,7 @@ export async function releaseCaptive(ctx: Ctx, captorId: number, heroId: number)
 export async function persuadeCaptive(ctx: Ctx, captorId: number, heroId: number) {
   const h = await getHero(ctx, heroId, { lock: true });
   if (h.capturedByPlayerId !== captorId || h.status !== HeroStatus.SEIZED) throw new GameError('Hero is not your prisoner.', -99);
-  if (h.loyalty > 0) throw new GameError('This hero is still loyal to their lord.', -99);
+  if (h.loyalty > 0) throw new GameError('This hero is still loyal to their owner.', -99);
   const b = await openOwnCity(ctx, captorId, h.cityId);
   const hired = b.heroes.filter((x) => x.playerId === captorId).length;
   if (hired >= heroSlots(b)) throw new GameError('Insufficient vacancies in Feasting Hall.', -99);

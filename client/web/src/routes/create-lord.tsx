@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api, errorMessage, tokenStore, unwrap } from '@/lib/api';
+import { GENDERS } from '@/lib/genders';
 import { qk } from '@/hooks/use-game';
 import { ThemeToggle } from '@/components/theme-toggle';
 
@@ -61,7 +62,7 @@ export function CreateLordPage() {
         <CardContent>
           <form className="grid gap-4" onSubmit={submit}>
             <div className="grid gap-2">
-              <Label htmlFor="userName">Lord name</Label>
+              <Label htmlFor="userName">Player name</Label>
               <Input id="userName" name="userName" required maxLength={20} />
             </div>
             <div className="grid gap-2">
@@ -80,8 +81,11 @@ export function CreateLordPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="0">Lord</SelectItem>
-                    <SelectItem value="1">Lady</SelectItem>
+                    {GENDERS.map((g) => (
+                      <SelectItem key={g.value} value={String(g.value)}>
+                        {g.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -96,7 +100,7 @@ export function CreateLordPage() {
                   <SelectItem value="-1">Least crowded (recommended)</SelectItem>
                   {zones.data?.map((z) => (
                     <SelectItem key={z.id} value={String(z.id)} disabled={z.openFlats === 0}>
-                      {z.name} · {z.playerCount} lords · {z.rate}% settled
+                      {z.name} · {z.playerCount} players · {z.rate}% settled
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -81,7 +81,7 @@ const HOW_TO: Record<string, string> = {
   'city.move': 'Use with "Move city here" on a free flat in the Map tab.',
   'heroes.reset': "Use from a hero's Points dialog in the Heroes tab.",
   'heroes.useItem': "Use from a hero's Items button in the Heroes tab.",
-  'city.truce': 'Use from Lord settings (top-right menu).',
+  'city.truce': 'Use from Player settings (top-right menu).',
 };
 
 const ATTRIBUTE_NAMES = { power: 'Attack', management: 'Politics', stratagem: 'Intelligence' };
@@ -123,7 +123,7 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
     case 'grant': {
       const description = `Gives ${contents(e)}${e.resources || e.troops ? ' to the current city' : ''}.`;
       // the Newbies Package is never sold or won: every new lord gets one (player.createPlayer)
-      if (id === 'player.box.present.2') return { description, use: 'direct', howTo: 'Every new lord gets one when they start; it cannot be bought.' };
+      if (id === 'player.box.present.2') return { description, use: 'direct', howTo: 'Every new player gets one when they start; it cannot be bought.' };
       return { description, use: 'direct' };
     }
     case 'chest':

@@ -83,7 +83,7 @@ const TEXT: Record<number, TechText> = {
     effect: (l) => `+${pct(l * BALANCE.logisticsLoadPerLevel)} carrying capacity`,
   },
   [TechType.INFORMATICS]: {
-    summary: "Better scouting of lords' cities: level 1 also reveals their heroes, level 2 also their buildings.",
+    summary: "Better scouting of other players' cities: level 1 also reveals their heroes, level 2 also their buildings.",
     effect: (l) => (l >= 2 ? 'scouts see troops, resources, heroes and buildings' : 'scouts see troops, resources and heroes'),
   },
   [TechType.MACHINERY]: { summary: 'No effect on this server yet.' },

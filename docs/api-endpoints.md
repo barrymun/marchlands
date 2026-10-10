@@ -35,6 +35,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/player/flows/{flowId}/stop` | Stop a flow now (a run ends where it is; repeat goes off) |
 | POST | `/api/v1/player/furlough` | Holiday mode, paid per day with a city's gold (furlough.isFurlought) |
 | DELETE | `/api/v1/player/furlough` | End holiday mode (furlough.cancelFurlought) |
+| POST | `/api/v1/player/gender` | (marchlands) Change gender: free, once a day |
 | POST | `/api/v1/player/items/{itemId}/use` | Use an item (shop.useGoods / shop.useCastleGoods) |
 | POST | `/api/v1/player/rename` | Rename the lord: free, once a day, if the name is free (city.modifyUserName) |
 | POST | `/api/v1/player/restart` | Delete everything and start over (common.deleteUserAndRestart) |

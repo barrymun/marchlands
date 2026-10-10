@@ -82,6 +82,7 @@ export const PlayerNameParams = z.object({ name: z.string() });
 export const ChangeFaceBody = z.object({ faceUrl: z.string(), sex: z.number().int() });
 export const ChangeFlagBody = z.object({ flag: z.string() });
 export const RenamePlayerBody = z.object({ userName: z.string() });
+export const ChangeGenderBody = z.object({ sex: z.number().int().min(0).max(1).describe('0 male, 1 female') });
 export const TutorialStepBody = z.object({ step: z.number().int().min(0) });
 export const FurloughBody = z.object({ days: z.number().int(), cityId: zId.describe('the city whose gold pays') });
 export const TruceBody = z.object({
@@ -195,6 +196,7 @@ export const PlayerState = z
     currentTime: Ms,
     tutorialStepId: z.number().int(),
     nextRenameAt: Ms.describe('(marchlands) when the lord may rename again (0: now)'),
+    nextGenderChangeAt: Ms.describe('(marchlands) when the player may change gender again (0: now)'),
   })
   .meta({ id: 'PlayerState' });
 export type PlayerState = z.infer<typeof PlayerState>;

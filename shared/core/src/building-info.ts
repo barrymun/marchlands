@@ -66,7 +66,7 @@ const TEXT: Record<number, BuildingText> = {
       `${l * BALANCE.rallySpotArmiesPerLevel} arm${l * BALANCE.rallySpotArmiesPerLevel === 1 ? 'y' : 'ies'} out at once, up to ${fmt(l * BALANCE.rallySpotTroopsPerLevel)} troops each`,
   },
   [BuildingType.MARKETPLACE]: {
-    summary: `Trades food, lumber, stone and iron for gold with other lords and the merchant. Each level allows ${BALANCE.marketMaxOrdersPerLevel} more waiting orders.`,
+    summary: `Trades food, lumber, stone and iron for gold with other players and the merchant. Each level allows ${BALANCE.marketMaxOrdersPerLevel} more waiting orders.`,
     effect: (l) => `${l * BALANCE.marketMaxOrdersPerLevel} waiting orders`,
   },
   [BuildingType.RELIEF_STATION]: {

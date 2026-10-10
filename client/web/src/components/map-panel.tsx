@@ -33,7 +33,7 @@ const relationGroup = (r: number): RelationGroup => (r === Relation.ALLIANCE || 
 const RELATION_STYLE: Record<RelationGroup, { label: string; ring: string; dot: string }> = {
   friend: { label: 'Alliance & allies', ring: 'ring-2 ring-emerald-500 ring-inset', dot: 'bg-emerald-500' },
   enemy: { label: 'Enemy', ring: 'ring-2 ring-red-600 ring-inset', dot: 'bg-red-600' },
-  other: { label: 'Other lords', ring: 'ring-2 ring-zinc-900 ring-inset dark:ring-zinc-100', dot: 'bg-zinc-900 dark:bg-zinc-100' },
+  other: { label: 'Other players', ring: 'ring-2 ring-zinc-900 ring-inset dark:ring-zinc-100', dot: 'bg-zinc-900 dark:bg-zinc-100' },
 };
 
 export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number }) {
@@ -192,7 +192,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                 </div>
                 {'userName' in info.data && info.data.userName && (
                   <p>
-                    Lord {info.data.userName}
+                    Player {info.data.userName}
                     {info.data.allianceName ? ` of ${info.data.allianceName}` : ''} · prestige {fmt(info.data.prestige ?? 0)}
                   </p>
                 )}

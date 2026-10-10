@@ -173,6 +173,8 @@ export type Flow = z.infer<typeof FlowSchema>;
 export const PlayerMiscSchema = z.object({
   /** (marchlands) when the lord last renamed (renaming is free, once per BALANCE.renameCooldownMs) */
   renamedAt: z.number().optional(),
+  /** (marchlands) when the player last changed gender (once per BALANCE.genderCooldownMs) */
+  genderChangedAt: z.number().optional(),
   changedFace: z.boolean().optional(),
   allianceApply: z.string().optional(),
   allianceApplyAt: z.number().optional(),

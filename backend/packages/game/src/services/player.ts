@@ -80,7 +80,7 @@ export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePla
     const [{ n }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, existing.id));
     if (Number(n) > 0) throw new GameError('City/Account exists.', -86, 409);
   }
-  const name = cleanName(input.userName, 1, 20, 'Lord name');
+  const name = cleanName(input.userName, 1, 20, 'Player name');
   const castleName = cleanName(input.castleName, 1, 20, 'City name');
   assertClean(name);
   assertClean(castleName);
@@ -173,6 +173,7 @@ export async function playerState(ctx: Ctx, playerId: number) {
     currentTime: ctx.now,
     tutorialStepId: player.misc.tutorialStep ?? 0,
     nextRenameAt: nextRenameAt(player, ctx.now),
+    nextGenderChangeAt: nextGenderChangeAt(player, ctx.now),
   };
 }
 
@@ -215,7 +216,7 @@ function nextRenameAt(p: PlayerRow, now: number): number {
 /** city.modifyUserName; (marchlands) free once a day (orig: a New ID each time). */
 export async function renamePlayer(ctx: Ctx, playerId: number, userName: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  const name = cleanName(userName, 1, 20, 'Lord name');
+  const name = cleanName(userName, 1, 20, 'Player name');
   assertClean(name);
   if (name === p.name) throw new GameError('That is already your name.', -99);
   const wait = nextRenameAt(p, ctx.now);
@@ -224,6 +225,24 @@ export async function renamePlayer(ctx: Ctx, playerId: number, userName: string)
   if (taken && taken.id !== p.id) throw new GameError('Player name taken', -88, 409);
   p.name = name;
   p.misc = { ...p.misc, renamedAt: ctx.now };
+  await savePlayer(ctx, p);
+  await pushPlayerInfo(ctx, p);
+}
+
+function nextGenderChangeAt(p: PlayerRow, now: number): number {
+  const at = (p.misc.genderChangedAt ?? 0) + BALANCE.genderCooldownMs;
+  return at > now ? at : 0;
+}
+
+/** (marchlands) Change gender in Player settings: free, once per BALANCE.genderCooldownMs. */
+export async function changeGender(ctx: Ctx, playerId: number, sex: number) {
+  const p = await getPlayer(ctx, playerId, { lock: true });
+  if (![0, 1].includes(sex)) throw new GameError('Invalid setting.', -99);
+  if (sex === p.sex) throw new GameError('That is already your gender.', -99);
+  const wait = nextGenderChangeAt(p, ctx.now);
+  if (wait) throw new GameError(`You can change your gender again in ${Math.ceil((wait - ctx.now) / 3_600_000)} hour(s).`, -99);
+  p.sex = sex;
+  p.misc = { ...p.misc, genderChangedAt: ctx.now };
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
 }
@@ -312,7 +331,7 @@ export async function checkBeginner(ctx: Ctx, p: PlayerRow, townHallLevel?: numb
       type: 2,
       title: "Beginner's Protection Expired",
       content:
-        "Your Beginner's Protection has expired. Your cities can now be attacked by other lords, and you may attack them. Build your defences and consider joining an alliance.",
+        "Your Beginner's Protection has expired. Your cities can now be attacked by other players, and you may attack them. Build your defences and consider joining an alliance.",
       sentAt: ctx.now,
     });
     await pushMailCounts(ctx, p.id);
