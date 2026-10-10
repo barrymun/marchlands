@@ -27,6 +27,7 @@ import {
   addTroops,
   type ResourceSet,
   type TroopCounts,
+  BuffId,
 } from '@marchlands/core';
 import { armies, cities, heroes, players } from '@marchlands/db';
 import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
@@ -99,7 +100,7 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
   if (Number(out) >= maxArmies(b.city.buildings)) {
     throw new GameError('No more troops are allowed to sent at current level of Rally Spot. Please upgrade the Rally Spot first.', -51);
   }
-  const troopCap = maxArmyTroops(b.city.buildings, !!activeBuff(b.player, 'WarEnsignBuff', ctx.now));
+  const troopCap = maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now));
   if (totalTroops(troops) > troopCap) {
     const level = buildingLevel(b.city.buildings, BuildingType.RALLY_SPOT);
     throw new GameError(`A level ${level} Rally Spot sends at most ${troopCap.toLocaleString('en')} troops in one army.`, -51);
@@ -136,12 +137,13 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
         const why = isProtected(owner, ctx.now);
         if (why) throw new GameError(why, -70);
       }
-      if (activeBuff(b.player, 'PlayerPeaceBuff', ctx.now)) throw new GameError('You cannot attack while under truce.', -70);
+      if (activeBuff(b.player, BuffId.TRUCE, ctx.now)) throw new GameError('You cannot attack while under truce.', -70);
       if (target.type === TileType.FLAT && target.cityId == null) throw new GameError('There is nothing to attack there.', -13);
       break;
     }
     case Mission.BUILD_CITY: {
-      if (target.type !== TileType.FLAT || target.cityId != null || target.ownerCityId != null) throw new GameError('You can only build a city on an empty flat.', -13);
+      if (target.type !== TileType.FLAT || target.cityId != null || target.ownerCityId != null)
+        throw new GameError('You can only build a city on an empty flat.', -13);
       const [{ n: cityCount }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, playerId));
       const [{ n: pending }] = await ctx.tx
         .select({ n: count() })
@@ -149,7 +151,8 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
         .where(and(eq(armies.playerId, playerId), eq(armies.mission, Mission.BUILD_CITY), eq(armies.direction, ArmyDirection.FORWARD)));
       if (Number(cityCount) + Number(pending) >= maxCitiesFor(b.player.title)) throw new GameError('Your title does not allow more cities.', -99);
       const need = { food: 10_000, wood: 10_000, stone: 10_000, iron: 10_000 };
-      for (const [k, v] of Object.entries(need)) if (resources[k as keyof ResourceSet] < v) throw new GameError('A new city needs at least 10,000 food, lumber, stone and iron.', -99);
+      for (const [k, v] of Object.entries(need))
+        if (resources[k as keyof ResourceSet] < v) throw new GameError('A new city needs at least 10,000 food, lumber, stone and iron.', -99);
       break;
     }
   }
@@ -260,7 +263,7 @@ export async function troopParams(ctx: Ctx, playerId: number, cityId: number) {
     driveSkillParam: researchLevel(r, TechType.HORSEBACK_RIDING) * 5,
     transportStationParam: reliefMultiplier(b.city.buildings),
     maxArmies: maxArmies(b.city.buildings),
-    maxTroops: maxArmyTroops(b.city.buildings, !!activeBuff(b.player, 'WarEnsignBuff', ctx.now)),
+    maxTroops: maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now)),
   };
 }
 
@@ -316,4 +319,3 @@ export async function stationedIn(ctx: Ctx, playerId: number, cityId: number) {
     .where(and(eq(armies.targetTileId, c.tileId), eq(armies.direction, ArmyDirection.STAY), ne(armies.playerId, playerId)));
   return rows.map(({ a, heroName, heroLevel, king }) => armyBean(a, { heroName: heroName ?? undefined, heroLevel: heroLevel ?? undefined, king }));
 }
-

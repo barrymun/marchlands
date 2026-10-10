@@ -10,7 +10,9 @@ setGameSpeed(Number(process.env.GAME_SPEED ?? 1));
 const { db, close } = connect(config.databaseUrl);
 
 const logger =
-  process.env.NODE_ENV === 'production' ? { level: config.logLevel } : { level: config.logLevel, transport: { target: 'pino-pretty', options: { singleLine: true } } };
+  process.env.NODE_ENV === 'production'
+    ? { level: config.logLevel }
+    : { level: config.logLevel, transport: { target: 'pino-pretty', options: { singleLine: true } } };
 
 const gateway = new PushGateway(config.databaseUrl, db);
 const app = await buildApp({ db, config, gateway, logger });

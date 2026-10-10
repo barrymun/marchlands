@@ -17,8 +17,29 @@ for (const [p, ops] of Object.entries(spec.paths)) {
     byTag.get(tag).push({ method: method.toUpperCase(), path: p, summary: op.summary ?? '', auth: !!op.security });
   }
 }
-const order = ['auth', 'player', 'city', 'buildings', 'research', 'troops', 'heroes', 'armies', 'map', 'mail', 'reports', 'chat', 'friends', 'alliance', 'market', 'shop', 'quests', 'rankings', 'config', 'admin'];
-const tags = [...byTag.keys()].sort((a, b) => (order.indexOf(a) + 100) % 100 - (order.indexOf(b) + 100) % 100);
+const order = [
+  'auth',
+  'player',
+  'city',
+  'buildings',
+  'research',
+  'troops',
+  'heroes',
+  'armies',
+  'map',
+  'mail',
+  'reports',
+  'chat',
+  'friends',
+  'alliance',
+  'market',
+  'shop',
+  'quests',
+  'rankings',
+  'config',
+  'admin',
+];
+const tags = [...byTag.keys()].sort((a, b) => ((order.indexOf(a) + 100) % 100) - ((order.indexOf(b) + 100) % 100));
 let md = `# API endpoints\n\nGenerated from the OpenAPI document by \`npm run gen:api\` (\`tools/docs/gen-api-md.mjs\`). Interactive docs: \`/docs\`.\n\n`;
 md += 'All paths are relative to the server root. Names in parentheses are the original client commands (`module.command`) each endpoint replaces.\n\n';
 for (const tag of tags) {

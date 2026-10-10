@@ -50,5 +50,11 @@ export const zPaging = z.object({
 export const zIds = z.object({ ids: z.array(z.number().int()).max(500) });
 export const zTroops = z.record(z.string(), z.number().int().nonnegative());
 export const zResources = z
-  .object({ gold: z.number().nonnegative(), food: z.number().nonnegative(), wood: z.number().nonnegative(), stone: z.number().nonnegative(), iron: z.number().nonnegative() })
+  .object({
+    gold: z.number().nonnegative(),
+    food: z.number().nonnegative(),
+    wood: z.number().nonnegative(),
+    stone: z.number().nonnegative(),
+    iron: z.number().nonnegative(),
+  })
   .partial();

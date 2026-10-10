@@ -11,7 +11,7 @@ import { expireHeroBuff } from './services/heroes.ts';
 import { deliverShipment } from './services/market.ts';
 import { completeResearch, settleAllCities } from './services/research.ts';
 import { completeTraining } from './services/training.ts';
-import { BALANCE, scaled } from '@marchlands/core';
+import { BALANCE, BUFF_IDS, BuffId, scaled } from '@marchlands/core';
 
 export interface EventRow {
   id: number;
@@ -24,7 +24,17 @@ export interface EventRow {
 
 const num = (v: unknown) => Number(v);
 
-async function expireBuff(ctx: Ctx, playerId: number, buffId: string) {
+/** Buffs whose expiry changes production: cities bank what they made at the boosted rate first. */
+const SETTLE_ON_EXPIRE: readonly BuffId[] = [
+  BuffId.FOOD_PRODUCTION,
+  BuffId.WOOD_PRODUCTION,
+  BuffId.STONE_PRODUCTION,
+  BuffId.IRON_PRODUCTION,
+  BuffId.GOLD_PRODUCTION,
+  BuffId.UPKEEP_REDUCE,
+];
+
+async function expireBuff(ctx: Ctx, playerId: number, buffId: BuffId) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   const b = p.buffs.find((x) => x.id === buffId);
   if (!b) return;
@@ -33,13 +43,13 @@ async function expireBuff(ctx: Ctx, playerId: number, buffId: string) {
     return;
   }
   // production buffs: bank production at the boosted rate first
-  if (/ProductionBuff$|UpkeepReduceBuff$/.test(buffId)) await settleAllCities(ctx, p);
+  if (SETTLE_ON_EXPIRE.includes(buffId)) await settleAllCities(ctx, p);
   removeBuff(ctx, p, buffId);
-  if (buffId === 'PlayerPeaceBuff') {
-    setBuff(ctx, p, 'PlayerPeaceCoolDownBuff', 'Truce Agreement in cooldown.', ctx.now + scaled(BALANCE.truceCooldownMs));
+  if (buffId === BuffId.TRUCE) {
+    setBuff(ctx, p, BuffId.TRUCE_COOLDOWN, 'Truce Agreement in cooldown.', ctx.now + scaled(BALANCE.truceCooldownMs));
     if (p.status === 2) p.status = 0;
   }
-  if (buffId === 'FurloughBuff' && p.status === 5) p.status = 0;
+  if (buffId === BuffId.HOLIDAY && p.status === 5) p.status = 0;
   await savePlayer(ctx, p);
   if (!activeBuff(p, buffId, ctx.now)) await pushPlayerInfo(ctx, p);
 }
@@ -57,7 +67,7 @@ export async function dispatchEvent(ctx: Ctx, ev: EventRow): Promise<void> {
       await processArmy(ctx, num(p.armyId));
       return;
     case 'buff.expire':
-      return expireBuff(ctx, ev.playerId!, String(p.buffId));
+      return BUFF_IDS.includes(p.buffId as BuffId) ? expireBuff(ctx, ev.playerId!, p.buffId as BuffId) : undefined;
     case 'hero.buff':
       return expireHeroBuff(ctx, num(p.heroId), String(p.attr));
     case 'shipment':

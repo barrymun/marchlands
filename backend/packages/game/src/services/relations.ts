@@ -23,7 +23,10 @@ export async function allianceRelation(ctx: Ctx, a: number, b: number): Promise<
 
 export async function relationBetween(ctx: Ctx, viewer: number, other: number): Promise<number> {
   if (viewer === other) return Relation.SELF;
-  const rows = await ctx.tx.select({ id: players.id, a: players.allianceId }).from(players).where(inArray(players.id, [viewer, other]));
+  const rows = await ctx.tx
+    .select({ id: players.id, a: players.allianceId })
+    .from(players)
+    .where(inArray(players.id, [viewer, other]));
   const av = rows.find((r) => r.id === viewer)?.a ?? null;
   const ao = rows.find((r) => r.id === other)?.a ?? null;
   if (av == null || ao == null) return Relation.NO_RELATION;

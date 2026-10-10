@@ -30,10 +30,11 @@ const TEXT: Record<number, BuildingText> = {
   [BuildingType.WALLS]: {
     summary:
       "Defends the city. Holds fortifications (traps, abatis, archer's towers, rolling logs, trebuchets) and builds them in a queue of one batch per level. In battle the walls absorb damage and extend the range of archer's towers.",
-    effect: (l) => `${fmt(BALANCE.wallSpace[l] ?? 0)} fortification space, ${l} queued batch${l === 1 ? '' : 'es'}, ${fmt(50_000 * l * (l + 1))} wall hit points, +${Math.round(l * 4.5 * 10) / 10}% tower range`,
+    effect: (l) =>
+      `${fmt(BALANCE.wallSpace[l] ?? 0)} fortification space, ${l} queued batch${l === 1 ? '' : 'es'}, ${fmt(50_000 * l * (l + 1))} wall hit points, +${Math.round(l * 4.5 * 10) / 10}% tower range`,
   },
   [BuildingType.COTTAGE]: {
-    summary: 'Houses people: raises the city\'s population limit. Population works the fields, pays tax and is spent to train troops.',
+    summary: "Houses people: raises the city's population limit. Population works the fields, pays tax and is spent to train troops.",
     effect: (l) => `+${fmt(BALANCE.cottagePopulation[l] ?? 0)} population`,
   },
   [BuildingType.FARM]: field('food'),
@@ -71,7 +72,8 @@ const TEXT: Record<number, BuildingText> = {
   },
   [BuildingType.RELIEF_STATION]: {
     summary: 'Speeds up armies (transports and reinforcements) marching between your own cities.',
-    effect: (l) => `marches between your cities ×${reliefMultiplier([{ positionId: 0, typeId: BuildingType.RELIEF_STATION, level: l, status: 0, startTime: 0, endTime: 0 }])} faster`,
+    effect: (l) =>
+      `marches between your cities ×${reliefMultiplier([{ positionId: 0, typeId: BuildingType.RELIEF_STATION, level: l, status: 0, startTime: 0, endTime: 0 }])} faster`,
   },
   [BuildingType.BEACON_TOWER]: {
     summary: 'Watches for enemies: level 1 shows the troops of hostile armies marching on you, level 2 also their hero.',
@@ -101,7 +103,8 @@ function unlocksOf(typeId: number): BuildingInfo['unlocks'] {
     const prev = out.get(key);
     if (!prev || level < prev.level) out.set(key, { kind, name, level });
   };
-  for (const b of BUILDINGS) for (const r of b.requires.buildings) if (r.id === typeId && b.typeId !== typeId && b.level === 1) add('building', BUILDING_NAMES[b.typeId], r.level);
+  for (const b of BUILDINGS)
+    for (const r of b.requires.buildings) if (r.id === typeId && b.typeId !== typeId && b.level === 1) add('building', BUILDING_NAMES[b.typeId], r.level);
   for (const t of TROOPS) for (const r of t.requires.buildings) if (r.id === typeId) add('troop', TROOP_NAMES[t.troopId], r.level);
   for (const t of RESEARCH) for (const r of t.requires.buildings) if (r.id === typeId && t.level === 1) add('tech', TECH_NAMES[t.techId], r.level);
   return [...out.values()].sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));

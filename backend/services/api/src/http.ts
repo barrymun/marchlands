@@ -126,7 +126,7 @@ export const secured = [{ bearerAuth: [] }];
  * answer (from @marchlands/contracts); it is wrapped in the `{ ok: 1, data }` envelope, validated on
  * the way out (unknown keys are stripped) and type-checked against the handler's return value.
  */
-export function doc<R extends z.ZodType, T extends object = {}>(tag: string[], summary: string, data: R, extra?: T) {
+export function doc<R extends z.ZodType, T extends object = object>(tag: string[], summary: string, data: R, extra?: T) {
   return {
     schema: {
       tags: tag,

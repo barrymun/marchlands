@@ -39,3 +39,6 @@ export const troopName = (troopId: number) => TROOP_NAMES[troopId] ?? `Unit ${tr
 export const RESOURCES = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 export type Resource = (typeof RESOURCES)[number];
 export const RESOURCE_LABEL: Record<Resource, string> = { gold: 'Gold', food: 'Food', wood: 'Lumber', stone: 'Stone', iron: 'Iron' };
+
+/** A fraction as a whole percent: 0.25 -> 25%. */
+export const percent = (x: number) => `${Math.round(x * 100)}%`;

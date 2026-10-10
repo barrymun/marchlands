@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { createSelectSchema } from 'drizzle-zod';
 import {
   BuffStateSchema,
+  HeroBuffStateSchema,
   BuildingStateSchema,
   CastleSignSchema,
   CityMiscSchema,
@@ -63,7 +64,7 @@ export const CityRow = createSelectSchema(cities, {
   storePercent: ResourceSetSchema,
   misc: CityMiscSchema,
 });
-export const HeroRow = createSelectSchema(heroes, { buffs: z.array(BuffStateSchema) });
+export const HeroRow = createSelectSchema(heroes, { buffs: z.array(HeroBuffStateSchema) });
 export const ArmyRow = createSelectSchema(armies, { troops: TroopCountsSchema, resources: ResourceSetSchema });
 export const MailRow = createSelectSchema(mails);
 export const ReportRow = createSelectSchema(reports, { body: ReportBodySchema });

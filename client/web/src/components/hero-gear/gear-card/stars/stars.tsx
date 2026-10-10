@@ -1,0 +1,23 @@
+import { Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { maxStars } from '@/components/hero-gear/constants';
+
+export function Stars({ count, used }: { count: number; used?: number }) {
+  return (
+    <div className="flex gap-px" aria-label={`${count} of ${maxStars} stars`}>
+      {Array.from({ length: maxStars }, (_, i) => (
+        <Star
+          key={i}
+          className={cn(
+            'size-3',
+            i < count
+              ? used == null || i < used
+                ? 'fill-amber-400 text-amber-500'
+                : 'fill-amber-200 text-amber-300 dark:fill-amber-900 dark:text-amber-800'
+              : 'text-muted-foreground/40',
+          )}
+        />
+      ))}
+    </div>
+  );
+}

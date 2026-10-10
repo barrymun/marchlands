@@ -9,10 +9,11 @@ import { DAY, HOUR } from './time.ts';
 import { itemConfig } from './data/index.ts';
 import { randInt, type Rng } from './rng.ts';
 import { ResourceSetSchema, TroopCountsSchema, type ResourceSet, type TroopCounts } from './types.ts';
+import { BuffId } from './constants.ts';
 
 export type ItemEffect =
   /** timed player buff (stacks by extending) */
-  | { kind: 'buff'; buff: string; desc: string; durationMs: number }
+  | { kind: 'buff'; buff: BuffId; desc: string; durationMs: number }
   /** immediate grant of items / resources (to the target city) / troops */
   | { kind: 'grant'; items?: Record<string, number>; resources?: Partial<ResourceSet>; troops?: TroopCounts }
   /** box opened with a key item */
@@ -30,34 +31,34 @@ export const GrantContentsSchema = z.object({
 });
 export type GrantContents = z.infer<typeof GrantContentsSchema>;
 
-const buff = (buffId: string, desc: string, durationMs: number): ItemEffect => ({ kind: 'buff', buff: buffId, desc, durationMs });
+const buff = (buffId: BuffId, desc: string, durationMs: number): ItemEffect => ({ kind: 'buff', buff: buffId, desc, durationMs });
 
 const EFFECTS: Record<string, ItemEffect> = {
   // ---- production buffs ----
-  'player.resinc.1': buff('FoodProductionBuff', 'Food production +25%', DAY),
-  'player.resinc.1.b': buff('FoodProductionBuff', 'Food production +25%', 7 * DAY),
-  'player.resinc.2': buff('WoodProductionBuff', 'Lumber production +25%', DAY),
-  'player.resinc.2.b': buff('WoodProductionBuff', 'Lumber production +25%', 7 * DAY),
-  'player.resinc.3': buff('StoneProductionBuff', 'Stone production +25%', DAY),
-  'player.resinc.3.b': buff('StoneProductionBuff', 'Stone production +25%', 7 * DAY),
-  'player.resinc.4': buff('IronProductionBuff', 'Iron production +25%', DAY),
-  'player.resinc.4.b': buff('IronProductionBuff', 'Iron production +25%', 7 * DAY),
-  'player.gold.1.a': buff('GoldProductionBuff', 'Gold income +25%', DAY),
-  'player.gold.1.b': buff('GoldProductionBuff', 'Gold income +25%', 7 * DAY),
+  'player.resinc.1': buff(BuffId.FOOD_PRODUCTION, 'Food production +25%', DAY),
+  'player.resinc.1.b': buff(BuffId.FOOD_PRODUCTION, 'Food production +25%', 7 * DAY),
+  'player.resinc.2': buff(BuffId.WOOD_PRODUCTION, 'Lumber production +25%', DAY),
+  'player.resinc.2.b': buff(BuffId.WOOD_PRODUCTION, 'Lumber production +25%', 7 * DAY),
+  'player.resinc.3': buff(BuffId.STONE_PRODUCTION, 'Stone production +25%', DAY),
+  'player.resinc.3.b': buff(BuffId.STONE_PRODUCTION, 'Stone production +25%', 7 * DAY),
+  'player.resinc.4': buff(BuffId.IRON_PRODUCTION, 'Iron production +25%', DAY),
+  'player.resinc.4.b': buff(BuffId.IRON_PRODUCTION, 'Iron production +25%', 7 * DAY),
+  'player.gold.1.a': buff(BuffId.GOLD_PRODUCTION, 'Gold income +25%', DAY),
+  'player.gold.1.b': buff(BuffId.GOLD_PRODUCTION, 'Gold income +25%', 7 * DAY),
 
   // ---- military buffs ----
-  'player.attackinc.1': buff('AttackBuff', 'Troop attack +20%', DAY),
-  'player.attackinc.1.b': buff('AttackBuff', 'Troop attack +20%', 7 * DAY),
-  'player.defendinc.1': buff('DefenseBuff', 'Troop defense +20%', DAY),
-  'player.defendinc.1.b': buff('DefenseBuff', 'Troop defense +20%', 7 * DAY),
-  'player.troop.1.a': buff('WarEnsignBuff', 'Armies may hold 25% more troops', DAY),
-  'player.queue.building': buff('BuildingQueueBuff', 'One extra construction queue', 7 * DAY),
+  'player.attackinc.1': buff(BuffId.ATTACK, 'Troop attack +20%', DAY),
+  'player.attackinc.1.b': buff(BuffId.ATTACK, 'Troop attack +20%', 7 * DAY),
+  'player.defendinc.1': buff(BuffId.DEFENSE, 'Troop defense +20%', DAY),
+  'player.defendinc.1.b': buff(BuffId.DEFENSE, 'Troop defense +20%', 7 * DAY),
+  'player.troop.1.a': buff(BuffId.WAR_ENSIGN, 'Armies may hold 25% more troops', DAY),
+  'player.queue.building': buff(BuffId.BUILDING_QUEUE, 'One extra construction queue', 7 * DAY),
 
   // ---- upkeep ----
-  'player.reduce.troops.upkeep.1': buff('UpkeepReduceBuff', 'Troop upkeep -50%', DAY),
-  'player.reduce.troops.upkeep.7': buff('UpkeepReduceBuff', 'Troop upkeep -50%', 7 * DAY),
-  'player.reduce.troops.cost.1': buff('TrainCostReduceBuff', `Troop training cost -${BALANCE.trainCostReduction * 100}%`, DAY),
-  'player.reduce.troops.cost.7': buff('TrainCostReduceBuff', `Troop training cost -${BALANCE.trainCostReduction * 100}%`, 7 * DAY),
+  'player.reduce.troops.upkeep.1': buff(BuffId.UPKEEP_REDUCE, 'Troop upkeep -50%', DAY),
+  'player.reduce.troops.upkeep.7': buff(BuffId.UPKEEP_REDUCE, 'Troop upkeep -50%', 7 * DAY),
+  'player.reduce.troops.cost.1': buff(BuffId.TRAIN_COST_REDUCE, `Troop training cost -${BALANCE.trainCostReduction * 100}%`, DAY),
+  'player.reduce.troops.cost.7': buff(BuffId.TRAIN_COST_REDUCE, `Troop training cost -${BALANCE.trainCostReduction * 100}%`, 7 * DAY),
 
   // ---- protection ----
   'player.peace.1': { kind: 'command', command: 'city.truce' },

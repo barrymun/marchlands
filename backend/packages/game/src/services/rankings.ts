@@ -28,7 +28,16 @@ type PlayerRankRow = Paged & {
   alliance: string | null;
   cities: number;
 };
-type AllianceRankRow = Paged & { name: string; member_count: number; prestige: number; honor: number; city_count: number; founder_name: string; intro: string; leader: string | null };
+type AllianceRankRow = Paged & {
+  name: string;
+  member_count: number;
+  prestige: number;
+  honor: number;
+  city_count: number;
+  founder_name: string;
+  intro: string;
+  leader: string | null;
+};
 type HeroRankRow = Paged & { id: number; name: string; level: number; power: number; management: number; stratagem: number; kind: string };
 type CastleRankRow = Paged & { id: number; name: string; population: number; kind: string; alliance: string | null; level: number };
 
@@ -45,7 +54,13 @@ export async function refreshRankings(ctx: Ctx) {
   await refreshAllianceStats(ctx);
 }
 
-const PLAYER_SORT: Record<number, string> = { 1: 'title desc, prestige desc', 2: 'prestige desc', 3: 'honor desc', 4: 'cities desc, prestige desc', 5: 'population desc' };
+const PLAYER_SORT: Record<number, string> = {
+  1: 'title desc, prestige desc',
+  2: 'prestige desc',
+  3: 'honor desc',
+  4: 'cities desc, prestige desc',
+  5: 'population desc',
+};
 
 /** rank.getPlayerRank — sortType 1 title, 2 prestige, 3 honor, 4 cities, 5 population. */
 export async function playerRanking(ctx: Ctx, sortType: number, pageNo: number, pageSize: number, key = '') {
@@ -136,7 +151,15 @@ export async function heroRanking(ctx: Ctx, sortType: number, pageNo: number, pa
     pageNo: page,
     pageSize: size,
     totalPage: Math.ceil(total / size),
-    beans: rows.rows.map((r) => ({ rank: Number(r.rank), name: r.name, grade: Number(r.level), power: Number(r.power), management: Number(r.management), stratagem: Number(r.stratagem), kind: r.kind })),
+    beans: rows.rows.map((r) => ({
+      rank: Number(r.rank),
+      name: r.name,
+      grade: Number(r.level),
+      power: Number(r.power),
+      management: Number(r.management),
+      stratagem: Number(r.stratagem),
+      kind: r.kind,
+    })),
   };
 }
 

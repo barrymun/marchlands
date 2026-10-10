@@ -93,7 +93,9 @@ export async function allianceChat(ctx: Ctx, playerId: number, rawMsg: string) {
   assertNotMuted(p, ctx.now);
   if (!p.allianceId) throw new GameError('To send an alliance message, you must be a member of an alliance', -99);
   const msg = cleanMessage(rawMsg);
-  await ctx.tx.insert(chatMessages).values({ channel: 'alliance', allianceId: p.allianceId, fromPlayerId: p.id, fromName: p.name, message: msg, sentAt: ctx.now });
+  await ctx.tx
+    .insert(chatMessages)
+    .values({ channel: 'alliance', allianceId: p.allianceId, fromPlayerId: p.id, fromName: p.name, message: msg, sentAt: ctx.now });
   const memberRows = await ctx.tx.select({ id: players.id }).from(players).where(eq(players.allianceId, p.allianceId));
   ctx.push(
     memberRows.map((r) => r.id),
@@ -123,8 +125,14 @@ export async function chatHistory(ctx: Ctx, playerId: number, channel: string, s
     if (!p.allianceId) return [];
     where = and(eq(chatMessages.channel, 'alliance'), eq(chatMessages.allianceId, p.allianceId), gt(chatMessages.sentAt, since));
   } else if (channel === 'private') {
-    where = and(eq(chatMessages.channel, 'private'), or(eq(chatMessages.toPlayerId, playerId), eq(chatMessages.fromPlayerId, playerId)), gt(chatMessages.sentAt, since));
+    where = and(
+      eq(chatMessages.channel, 'private'),
+      or(eq(chatMessages.toPlayerId, playerId), eq(chatMessages.fromPlayerId, playerId)),
+      gt(chatMessages.sentAt, since),
+    );
   } else where = and(eq(chatMessages.channel, channel), gt(chatMessages.sentAt, since));
   const rows = await ctx.tx.select().from(chatMessages).where(where).orderBy(desc(chatMessages.sentAt)).limit(100);
-  return rows.reverse().map((r) => ({ id: r.id, channel: r.channel, fromUser: r.fromName, fromId: r.fromPlayerId, toId: r.toPlayerId, msg: r.message, time: r.sentAt }));
+  return rows
+    .reverse()
+    .map((r) => ({ id: r.id, channel: r.channel, fromUser: r.fromName, fromId: r.fromPlayerId, toId: r.toPlayerId, msg: r.message, time: r.sentAt }));
 }

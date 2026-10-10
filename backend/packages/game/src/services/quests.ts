@@ -2,7 +2,18 @@
 // claimed once for their award (orig sent a single hard-coded dummy quest).
 
 import { and, count, eq, inArray } from 'drizzle-orm';
-import { BALANCE, evaluateTarget, GameError, HeroStatus, QUEST_CATALOGUE, questById, questGroups, TROOP_KEY_LIST, FORT_KEY_LIST, type QuestSnapshot } from '@marchlands/core';
+import {
+  BALANCE,
+  evaluateTarget,
+  GameError,
+  HeroStatus,
+  QUEST_CATALOGUE,
+  questById,
+  questGroups,
+  TROOP_KEY_LIST,
+  FORT_KEY_LIST,
+  type QuestSnapshot,
+} from '@marchlands/core';
 import { heroes, mails, playerRelations, questProgress, tiles } from '@marchlands/db';
 import { openOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -32,8 +43,14 @@ async function snapshot(ctx: Ctx, playerId: number): Promise<QuestSnapshot> {
         .where(and(inArray(heroes.cityId, cityIds), eq(heroes.inTavern, false), eq(heroes.playerId, playerId)))
     : [];
   const [{ n: valleys }] = cityIds.length ? await ctx.tx.select({ n: count() }).from(tiles).where(inArray(tiles.ownerCityId, cityIds)) : [{ n: 0 }];
-  const [{ n: sent }] = await ctx.tx.select({ n: count() }).from(mails).where(and(eq(mails.playerId, playerId), eq(mails.type, 3)));
-  const [{ n: friends }] = await ctx.tx.select({ n: count() }).from(playerRelations).where(and(eq(playerRelations.playerId, playerId), eq(playerRelations.kind, 'friend')));
+  const [{ n: sent }] = await ctx.tx
+    .select({ n: count() })
+    .from(mails)
+    .where(and(eq(mails.playerId, playerId), eq(mails.type, 3)));
+  const [{ n: friends }] = await ctx.tx
+    .select({ n: count() })
+    .from(playerRelations)
+    .where(and(eq(playerRelations.playerId, playerId), eq(playerRelations.kind, 'friend')));
   return {
     buildings,
     research: Object.fromEntries(Object.entries(p.research).map(([k, v]) => [Number(k), v.level])),
@@ -96,7 +113,11 @@ export async function claimQuest(ctx: Ctx, playerId: number, questId: number, ci
   const q = questById(questId);
   if (!q) throw new GameError('Quest not found.', -99, 404);
   const b = await openOwnCity(ctx, playerId, cityId);
-  const [done] = await ctx.tx.select().from(questProgress).where(and(eq(questProgress.playerId, playerId), eq(questProgress.questId, questId))).for('update');
+  const [done] = await ctx.tx
+    .select()
+    .from(questProgress)
+    .where(and(eq(questProgress.playerId, playerId), eq(questProgress.questId, questId)))
+    .for('update');
   if (done?.status === 2) throw new GameError('Reward already claimed.', -99);
   const s = await snapshot(ctx, playerId);
   if (!q.targets.every((t) => evaluateTarget(t.target, s))) throw new GameError('Quest not finished yet.', -99);

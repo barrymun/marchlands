@@ -25,7 +25,10 @@ async function getAlliance(ctx: Ctx, id: number, lock = false): Promise<Alliance
   return row;
 }
 async function allianceByName(ctx: Ctx, name: string, lock = false): Promise<AllianceRow> {
-  const q = ctx.tx.select().from(alliances).where(sql`lower(${alliances.name}) = lower(${name})`);
+  const q = ctx.tx
+    .select()
+    .from(alliances)
+    .where(sql`lower(${alliances.name}) = lower(${name})`);
   const [row] = lock ? await q.for('update') : await q;
   if (!row) throw new GameError('Alliance does not exist.', -99, 404);
   return row;
@@ -182,7 +185,13 @@ export async function members(ctx: Ctx, playerId: number) {
     .from(players)
     .where(eq(players.allianceId, allianceId))
     .orderBy(asc(players.allianceRank), desc(players.prestige));
-  return rows.map((r) => ({ ...r, prestige: Math.floor(r.prestige), honor: Math.floor(r.honor), castleCount: Number(r.castleCount), allianceLevel: rankName(r.levelId) }));
+  return rows.map((r) => ({
+    ...r,
+    prestige: Math.floor(r.prestige),
+    honor: Math.floor(r.honor),
+    castleCount: Number(r.castleCount),
+    allianceLevel: rankName(r.levelId),
+  }));
 }
 
 /** alliance.getAllianceEventList */
@@ -230,7 +239,10 @@ export async function createAlliance(ctx: Ctx, playerId: number, cityId: number,
   const name = String(rawName ?? '').trim();
   if (name.length < 2 || name.length > 20 || !/^[\p{L}\p{N} _.-]+$/u.test(name)) throw new GameError('Illegal naming, please choose another name.', -99);
   assertClean(name);
-  const [dupe] = await ctx.tx.select({ id: alliances.id }).from(alliances).where(sql`lower(${alliances.name}) = lower(${name})`);
+  const [dupe] = await ctx.tx
+    .select({ id: alliances.id })
+    .from(alliances)
+    .where(sql`lower(${alliances.name}) = lower(${name})`);
   if (dupe) throw new GameError(`Alliance already existed: ${name}.`, -12, 409);
   const b = await openOwnCity(ctx, playerId, cityId);
   spendResources(b.city, { gold: BALANCE.allianceCreateGold }, 'Not enough gold.', -99);
@@ -313,7 +325,12 @@ export async function invite(ctx: Ctx, playerId: number, userName: string) {
     .values({ allianceId: p.allianceId!, playerId: target.id, kind: 'invite', invitedByName: p.name, createdAt: ctx.now })
     .onConflictDoNothing();
   const a = await getAlliance(ctx, p.allianceId!);
-  ctx.push(target.id, 'server.SystemInfoMsg', { alliance: false, tV: false, noSenderSystemInfo: false, msg: `You have been invited to the alliance ${a.name}` });
+  ctx.push(target.id, 'server.SystemInfoMsg', {
+    alliance: false,
+    tV: false,
+    noSenderSystemInfo: false,
+    msg: `You have been invited to the alliance ${a.name}`,
+  });
   ctx.push(target.id, 'server.AllianceInvite', { allianceName: a.name, invitePerson: p.name });
 }
 
@@ -333,7 +350,13 @@ export async function sentInvites(ctx: Ctx, playerId: number) {
   const p = await getPlayer(ctx, playerId);
   const allianceId = requireMember(p);
   const rows = await ctx.tx
-    .select({ userName: players.name, prestige: players.prestige, rank: players.prestigeRank, invitePerson: allianceRequests.invitedByName, inviteTime: allianceRequests.createdAt })
+    .select({
+      userName: players.name,
+      prestige: players.prestige,
+      rank: players.prestigeRank,
+      invitePerson: allianceRequests.invitedByName,
+      inviteTime: allianceRequests.createdAt,
+    })
     .from(allianceRequests)
     .innerJoin(players, eq(players.id, allianceRequests.playerId))
     .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.kind, 'invite')));
@@ -343,7 +366,13 @@ export async function sentInvites(ctx: Ctx, playerId: number) {
 /** alliance.leaderWantUserInAllianceList: invitations I received. */
 export async function myInvites(ctx: Ctx, playerId: number) {
   const rows = await ctx.tx
-    .select({ allianceName: alliances.name, prestige: alliances.prestige, rank: alliances.prestigeRank, memberCount: alliances.memberCount, invitePerson: allianceRequests.invitedByName })
+    .select({
+      allianceName: alliances.name,
+      prestige: alliances.prestige,
+      rank: alliances.prestigeRank,
+      memberCount: alliances.memberCount,
+      invitePerson: allianceRequests.invitedByName,
+    })
     .from(allianceRequests)
     .innerJoin(alliances, eq(alliances.id, allianceRequests.allianceId))
     .where(and(eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, 'invite')));
@@ -473,7 +502,10 @@ export async function setRank(ctx: Ctx, playerId: number, userName: string, rank
   if (me.allianceRank >= target.allianceRank || me.allianceRank >= rank) throw new GameError('You are not entitled to operate.', -42);
   const limit = RANK_LIMITS[rank];
   if (limit) {
-    const [{ n }] = await ctx.tx.select({ n: count() }).from(players).where(and(eq(players.allianceId, me.allianceId!), eq(players.allianceRank, rank)));
+    const [{ n }] = await ctx.tx
+      .select({ n: count() })
+      .from(players)
+      .where(and(eq(players.allianceId, me.allianceId!), eq(players.allianceRank, rank)));
     if (Number(n) >= limit) throw new GameError(`An alliance may only have ${limit} ${rankName(rank)}.`, -99);
   }
   const verb = rank < target.allianceRank ? 'promotes' : 'demotes';
@@ -577,7 +609,11 @@ export async function setRelation(ctx: Ctx, playerId: number, targetName: string
   } else {
     await upsert(mine.id, target.id, type);
   }
-  await announce(ctx, target.id, `Alliance [${mine.name}] recognizes Diplomatic Relationship with us as ${type === 1 ? 'Ally' : type === 2 ? 'Neutral' : 'Enemy'}.`);
+  await announce(
+    ctx,
+    target.id,
+    `Alliance [${mine.name}] recognizes Diplomatic Relationship with us as ${type === 1 ? 'Ally' : type === 2 ? 'Neutral' : 'Enemy'}.`,
+  );
 }
 
 /** alliance.dropAllianceFriendshipRelation */
@@ -607,4 +643,3 @@ export async function refreshAllianceStats(ctx: Ctx) {
             row_number() over (order by member_count desc, prestige desc, id) mr
           from alliances) r where r.id = a.id`);
 }
-

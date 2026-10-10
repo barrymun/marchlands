@@ -216,13 +216,16 @@ export const AllianceSentInvite = z
 export type AllianceSentInvite = z.infer<typeof AllianceSentInvite>;
 
 export const AllianceReceivedInvite = AllianceRow.pick({ memberCount: true })
-  .extend({ allianceName: AllianceRow.shape.name, prestige: z.number().int(), rank: AllianceRow.shape.prestigeRank, invitePerson: AllianceRequestRow.shape.invitedByName })
+  .extend({
+    allianceName: AllianceRow.shape.name,
+    prestige: z.number().int(),
+    rank: AllianceRow.shape.prestigeRank,
+    invitePerson: AllianceRequestRow.shape.invitedByName,
+  })
   .meta({ id: 'AllianceReceivedInvite' });
 export type AllianceReceivedInvite = z.infer<typeof AllianceReceivedInvite>;
 
-export const AllianceApplicationStatus = z
-  .object({ allianceName: z.string().nullable(), applyTime: Ms.nullable() })
-  .meta({ id: 'AllianceApplicationStatus' });
+export const AllianceApplicationStatus = z.object({ allianceName: z.string().nullable(), applyTime: Ms.nullable() }).meta({ id: 'AllianceApplicationStatus' });
 export type AllianceApplicationStatus = z.infer<typeof AllianceApplicationStatus>;
 
 export const AllianceApplication = z

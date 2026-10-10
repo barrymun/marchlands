@@ -67,11 +67,17 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   // 1 Rebuild
   q(1, 'Town Hall', 'Upgrade your Town Hall to level 2.', [{ name: 'Town Hall level 2', target: b(31, 2) }], { resources: res(2000, 2000, 2000, 2000, 1000) }),
   q(1, 'Cottages', 'Build a Cottage to house more people.', [{ name: 'Cottage level 1', target: b(1, 1) }], { resources: res(1000, 1500, 500, 500) }),
-  q(1, 'Rally Spot', 'Build a Rally Spot to organise your troops.', [{ name: 'Rally Spot level 1', target: b(29, 1) }], { resources: res(1000, 1000, 2000, 500) }),
+  q(1, 'Rally Spot', 'Build a Rally Spot to organise your troops.', [{ name: 'Rally Spot level 1', target: b(29, 1) }], {
+    resources: res(1000, 1000, 2000, 500),
+  }),
   q(1, 'Barracks', 'Build Barracks to train troops.', [{ name: 'Barracks level 1', target: b(2, 1) }], { resources: res(2000, 2000, 2000, 1000) }),
   q(1, 'Warehouse', 'Build a Warehouse to protect your goods.', [{ name: 'Warehouse level 1', target: b(3, 1) }], { resources: res(1000, 2000, 1500, 500) }),
-  q(1, 'Academy', 'Build an Academy to research technologies.', [{ name: 'Academy level 1', target: b(25, 1) }], { resources: res(2000, 3000, 2000, 500, 1000) }),
-  q(1, 'Town Hall III', 'Upgrade your Town Hall to level 3.', [{ name: 'Town Hall level 3', target: b(31, 3) }], { resources: res(5000, 5000, 5000, 5000, 3000) }),
+  q(1, 'Academy', 'Build an Academy to research technologies.', [{ name: 'Academy level 1', target: b(25, 1) }], {
+    resources: res(2000, 3000, 2000, 500, 1000),
+  }),
+  q(1, 'Town Hall III', 'Upgrade your Town Hall to level 3.', [{ name: 'Town Hall level 3', target: b(31, 3) }], {
+    resources: res(5000, 5000, 5000, 5000, 3000),
+  }),
   q(1, 'Walls', 'Build Walls to defend your city.', [{ name: 'Walls level 1', target: b(32, 1) }], { resources: res(4000, 2000, 10000, 1000) }),
   // 2 Domain Expansion
   q(2, 'Farmland', 'Build a Farm outside your city.', [{ name: 'Farm level 1', target: b(7, 1) }], { resources: res(500, 300, 200, 150) }),
@@ -84,10 +90,16 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   q(4, 'Field Network', 'Own five Farms.', [{ name: '5 Farms', target: b(7, 1, 5) }], { items: { 'player.resinc.1': 1 } }),
   // 6 Administration
   q(6, 'Appoint a Mayor', 'Hire a hero and appoint them mayor.', [{ name: 'Appoint a mayor', target: { kind: 'mayor' } }], { items: { 'hero.loyalty.1': 1 } }),
-  q(6, 'Fair Taxes', 'Set your tax rate to 20% or less.', [{ name: 'Tax rate at most 20%', target: { kind: 'taxRate', max: 20 } }], { resources: res(1000, 1000, 1000, 1000, 1000) }),
+  q(6, 'Fair Taxes', 'Set your tax rate to 20% or less.', [{ name: 'Tax rate at most 20%', target: { kind: 'taxRate', max: 20 } }], {
+    resources: res(1000, 1000, 1000, 1000, 1000),
+  }),
   // 8 Scientific Research
-  q(8, 'Agriculture', 'Research Agriculture.', [{ name: 'Agriculture level 1', target: { kind: 'research', techId: 1, level: 1 } }], { resources: res(2000, 1000, 1000, 1000) }),
-  q(8, 'Military Science', 'Research Military Science.', [{ name: 'Military Science level 1', target: { kind: 'research', techId: 8, level: 1 } }], { items: { 'consume.2.b': 1 } }),
+  q(8, 'Agriculture', 'Research Agriculture.', [{ name: 'Agriculture level 1', target: { kind: 'research', techId: 1, level: 1 } }], {
+    resources: res(2000, 1000, 1000, 1000),
+  }),
+  q(8, 'Military Science', 'Research Military Science.', [{ name: 'Military Science level 1', target: { kind: 'research', techId: 8, level: 1 } }], {
+    items: { 'consume.2.b': 1 },
+  }),
   // 9 Alliance
   q(9, 'Embassy', 'Build an Embassy.', [{ name: 'Embassy level 1', target: b(28, 1) }], { resources: res(1000, 2000, 500, 300) }),
   q(9, 'Join an Alliance', 'Create or join an alliance.', [{ name: 'Be in an alliance', target: { kind: 'alliance' } }], { resources: { gold: 50_000 } }),
@@ -95,19 +107,29 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   q(10, 'Correspondence', 'Send a letter to another player.', [{ name: 'Send a mail', target: { kind: 'mailSent' } }], { resources: res(500, 500, 500, 500) }),
   // 11 Hero Recruitment / Military Service
   q(11, 'Inn', 'Build an Inn to meet heroes.', [{ name: 'Inn level 1', target: b(21, 1) }], { resources: res(500, 2000, 1000, 400) }),
-  q(11, 'Feasting Hall', 'Build a Feasting Hall to host heroes.', [{ name: 'Feasting Hall level 1', target: b(27, 1) }], { resources: res(1000, 2500, 1200, 700) }),
+  q(11, 'Feasting Hall', 'Build a Feasting Hall to host heroes.', [{ name: 'Feasting Hall level 1', target: b(27, 1) }], {
+    resources: res(1000, 2500, 1200, 700),
+  }),
   q(11, 'Recruit a Hero', 'Hire your first hero.', [{ name: 'Own 1 hero', target: { kind: 'heroes', count: 1 } }], { resources: { gold: 20_000 } }),
-  q(11, 'Militia', 'Train 100 Warriors.', [{ name: '100 Warriors', target: { kind: 'troops', key: 'militia', count: 100 } }], { resources: res(5000, 5000, 0, 2500) }),
+  q(11, 'Militia', 'Train 100 Warriors.', [{ name: '100 Warriors', target: { kind: 'troops', key: 'militia', count: 100 } }], {
+    resources: res(5000, 5000, 0, 2500),
+  }),
   // 14 Fortification
-  q(14, 'Traps', 'Build 100 traps on your walls.', [{ name: '100 Traps', target: { kind: 'troops', key: 'trap', count: 100 } }], { resources: res(2000, 10000, 2000, 1000) }),
+  q(14, 'Traps', 'Build 100 traps on your walls.', [{ name: '100 Traps', target: { kind: 'troops', key: 'trap', count: 100 } }], {
+    resources: res(2000, 10000, 2000, 1000),
+  }),
   // 16 City Expansion
   q(16, 'Second City', 'Found or conquer a second city.', [{ name: 'Own 2 cities', target: { kind: 'cities', count: 2 } }], { resources: { gold: 165_000 } }), // (orig 20 cents)
   // 15 Colony
   q(15, 'Valley Holder', 'Occupy a valley.', [{ name: 'Own 1 valley', target: { kind: 'valleys', count: 1 } }], { resources: res(5000, 5000, 5000, 5000) }),
   // 20 Population Increase
-  q(20, 'Growing Town', 'Reach a population of 1,000.', [{ name: 'Population 1000', target: { kind: 'population', amount: 1000 } }], { items: { 'player.pop.1.a': 1 } }),
+  q(20, 'Growing Town', 'Reach a population of 1,000.', [{ name: 'Population 1000', target: { kind: 'population', amount: 1000 } }], {
+    items: { 'player.pop.1.a': 1 },
+  }),
   // 21 The Medals / 23 Prestige
-  q(23, 'Rising Star', 'Reach 10,000 prestige.', [{ name: '10,000 prestige', target: { kind: 'prestige', amount: 10_000 } }], { items: { 'hero.loyalty.3': 1 } }),
+  q(23, 'Rising Star', 'Reach 10,000 prestige.', [{ name: '10,000 prestige', target: { kind: 'prestige', amount: 10_000 } }], {
+    items: { 'hero.loyalty.3': 1 },
+  }),
 ];
 
 export const questGroups = () => QUESTS;

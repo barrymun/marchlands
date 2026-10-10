@@ -4,7 +4,7 @@
 // (tech, mayor and valley production bonuses, troop food upkeep, starvation).
 
 import { BALANCE, getGameSpeed, scaled } from './balance.ts';
-import { BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, type ResourceKey } from './constants.ts';
+import { BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, type ResourceKey, BuffId } from './constants.ts';
 import { troopConfig } from './data/index.ts';
 import type { BuffState, BuildingState, CityMisc, ResearchState, ResourceSet, TroopCounts } from './types.ts';
 import { mayorProductionBonus } from './heroes.ts';
@@ -152,13 +152,13 @@ export function effectiveTechLevel(research: ResearchState, buildings: BuildingS
   return Math.min(academyLevel(buildings), researchLevel(research, techId));
 }
 
-export function hasBuff(buffs: BuffState[], id: string, now: number): boolean {
+export function hasBuff(buffs: BuffState[], id: BuffId, now: number): boolean {
   return buffs.some((b) => b.id === id && b.endTime > now);
 }
 
 /** (marchlands) Share of the normal cost a lord pays to train troops (fortifications pay in full): lower while a Quartermaster item's buff runs. */
 export function troopCostShare(buffs: BuffState[], now: number): number {
-  return hasBuff(buffs, 'TrainCostReduceBuff', now) ? 1 - BALANCE.trainCostReduction : 1;
+  return hasBuff(buffs, BuffId.TRAIN_COST_REDUCE, now) ? 1 - BALANCE.trainCostReduction : 1;
 }
 
 /** Food eaten per hour by a set of troops. */
@@ -213,11 +213,11 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
     bonusParts[r].tech = effectiveTechLevel(ctx.research, city.buildings, TECH_FOR_RESOURCE[r]) * BALANCE.resourceTechBonusPerLevel;
   }
   for (const v of ctx.valleys) for (const r of VALLEY_RESOURCE[v.type] ?? []) bonusParts[r].valley += valleyBonus(v.type, v.level);
-  const resBuffs: Record<BasicResource, string> = {
-    food: 'FoodProductionBuff',
-    wood: 'WoodProductionBuff',
-    stone: 'StoneProductionBuff',
-    iron: 'IronProductionBuff',
+  const resBuffs: Record<BasicResource, BuffId> = {
+    food: BuffId.FOOD_PRODUCTION,
+    wood: BuffId.WOOD_PRODUCTION,
+    stone: BuffId.STONE_PRODUCTION,
+    iron: BuffId.IRON_PRODUCTION,
   };
   for (const r of BASIC_RESOURCES) if (hasBuff(ctx.buffs, resBuffs[r], now)) bonusParts[r].buff = BALANCE.resourceBuffBonus;
   const bonus = { food: 0, wood: 0, stone: 0, iron: 0 };
@@ -227,7 +227,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   }
 
   let upkeep = troopUpkeep(city.troops) + troopUpkeep(ctx.awayTroops);
-  if (hasBuff(ctx.buffs, 'UpkeepReduceBuff', now)) upkeep *= 0.5;
+  if (hasBuff(ctx.buffs, BuffId.UPKEEP_REDUCE, now)) upkeep *= 0.5;
   // rates are per game hour; with upkeepPerRealHour troops eat their upkeep per real hour instead,
   // i.e. 1/GAME_SPEED of it per game hour, so a faster game does not make them hungrier
   if (BALANCE.upkeepPerRealHour) upkeep /= getGameSpeed();
@@ -236,7 +236,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   if (BALANCE.salaryPerRealHour) heroSalary /= getGameSpeed();
   // (marchlands) the people pay a fixed base tax; the tax rate instead sells that share of the city's
   // field output to the merchant as it is produced (orig: tax = population x rate, costing loyalty)
-  const taxBuff = hasBuff(ctx.buffs, 'GoldProductionBuff', now) ? population * BALANCE.baseTaxShare * BALANCE.resourceBuffBonus : 0;
+  const taxBuff = hasBuff(ctx.buffs, BuffId.GOLD_PRODUCTION, now) ? population * BALANCE.baseTaxShare * BALANCE.resourceBuffBonus : 0;
   const baseTax = population * BALANCE.baseTaxShare + taxBuff;
   const share = Math.min(100, Math.max(0, city.taxRate)) / 100;
   const taxed = { food: 0, wood: 0, stone: 0, iron: 0 };

@@ -1,7 +1,7 @@
 // Small shared mutations + their push notifications.
 
 import { count, eq } from 'drizzle-orm';
-import { GameError, hasResources, RESOURCE_KEYS, type BuffState, type Resources } from '@marchlands/core';
+import { GameError, hasResources, RESOURCE_KEYS, type BuffId, type BuffState, type Resources } from '@marchlands/core';
 import { alliances, cities } from '@marchlands/db';
 import { cityStats, type CityBundle } from './city.ts';
 import type { Ctx } from './context.ts';
@@ -66,17 +66,10 @@ export function useItemOrGold(ctx: Ctx, p: PlayerRow, city: CityRow, itemId: str
 
 // ---- buffs ----
 
-export const activeBuff = (p: PlayerRow, id: string, now: number): BuffState | undefined => p.buffs.find((b) => b.id === id && b.endTime > now);
+export const activeBuff = (p: PlayerRow, id: BuffId, now: number): BuffState | undefined => p.buffs.find((b) => b.id === id && b.endTime > now);
 
 /** Set (or extend when `extend`) a timed buff, scheduling its expiry. */
-export function setBuff(
-  ctx: Ctx,
-  p: PlayerRow,
-  id: string,
-  desc: string,
-  endTime: number,
-  opts: { extend?: boolean; param?: number; itemId?: string } = {},
-) {
+export function setBuff(ctx: Ctx, p: PlayerRow, id: BuffId, desc: string, endTime: number, opts: { extend?: boolean; param?: number; itemId?: string } = {}) {
   const cur = activeBuff(p, id, ctx.now);
   const end = opts.extend && cur ? cur.endTime + (endTime - ctx.now) : endTime;
   const buff: BuffState = { id, desc, endTime: end, ...(opts.param != null ? { param: opts.param } : {}), ...(opts.itemId ? { itemId: opts.itemId } : {}) };
@@ -85,7 +78,7 @@ export function setBuff(
   ctx.push(p.id, 'server.PlayerBuffUpdate', { buffBean: { typeId: id, descName: desc, endTime: end }, updateType: 0 });
 }
 
-export function removeBuff(ctx: Ctx, p: PlayerRow, id: string) {
+export function removeBuff(ctx: Ctx, p: PlayerRow, id: BuffId) {
   const had = p.buffs.find((b) => b.id === id);
   p.buffs = p.buffs.filter((b) => b.id !== id);
   ctx.unschedule(`buff:${p.id}:${id}`);

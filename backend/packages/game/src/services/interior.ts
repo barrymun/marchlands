@@ -1,7 +1,7 @@
 // interior.* and city.* — tax, work rates, comfort, city settings and teleporting.
 
 import { and, count, eq, inArray, ne } from 'drizzle-orm';
-import { BALANCE, BASIC_RESOURCES, GameError, itemGoldPrice, scaled, TileType, tileXY, type ResourceSet } from '@marchlands/core';
+import { BALANCE, BASIC_RESOURCES, GameError, itemGoldPrice, scaled, TileType, tileXY, type ResourceSet, BuffId } from '@marchlands/core';
 import { armies, tiles } from '@marchlands/db';
 import { cityStats, openOwnCity, viewCity, viewOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -159,7 +159,7 @@ const TELEPORTER = 'consume.move.1';
  */
 export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targetTileId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  if (activeBuff(b.player, 'MoveCastleCoolDownBuff', ctx.now)) throw new GameError('The City Teleporter is in cooldown.', -90);
+  if (activeBuff(b.player, BuffId.TELEPORT_COOLDOWN, ctx.now)) throw new GameError('The City Teleporter is in cooldown.', -90);
   const [{ n: out }] = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId));
   if (Number(out) > 0) throw new GameError('You must recall all of your troops before you teleport your city.', -77);
   const [{ n: guests }] = await ctx.tx
@@ -179,7 +179,7 @@ export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targe
   if (valleyIds.length) await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, updatedAt: ctx.now }).where(inArray(tiles.id, valleyIds));
   b.valleys = [];
   b.city.tileId = target;
-  setBuff(ctx, b.player, 'MoveCastleCoolDownBuff', 'City Teleporter in cooldown.', ctx.now + scaled(BALANCE.teleportCooldownMs));
+  setBuff(ctx, b.player, BuffId.TELEPORT_COOLDOWN, 'City Teleporter in cooldown.', ctx.now + scaled(BALANCE.teleportCooldownMs));
   pushCity(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, b.player);

@@ -27,6 +27,7 @@ import {
 import type {
   BuildingState,
   BuffState,
+  HeroBuffState,
   CastleSign,
   FortCounts,
   ItemCounts,
@@ -226,7 +227,7 @@ export const heroes = pgTable(
     managementBuffAdded: integer('management_buff_added').notNull().default(0),
     stratagemBuffAdded: integer('stratagem_buff_added').notNull().default(0),
     remainPoint: integer('remain_point').notNull().default(0),
-    buffs: jsonb('buffs').$type<BuffState[]>().notNull().default([]),
+    buffs: jsonb('buffs').$type<HeroBuffState[]>().notNull().default([]),
     /** player who captured this hero (status SEIZED) */
     capturedByPlayerId: integer('captured_by_player_id'),
     /** (marchlands) a locked hero cannot be dismissed */

@@ -2,7 +2,7 @@
 // backend/packages/game/src/dto.ts and reused across many endpoints and pushes.
 
 import { z } from 'zod';
-import { BuildingStateSchema } from '@marchlands/core';
+import { BUFF_IDS, BuildingStateSchema, HERO_BUFF_IDS } from '@marchlands/core';
 import { FortBean, Ms, ResourceAmounts, TroopBean } from './common.ts';
 import { ArmyRow, HeroRow, PlayerRow, TileRow } from './rows.ts';
 
@@ -40,7 +40,7 @@ export const HeroBean = HeroRow.pick({
     buffs: z
       .array(
         z.object({
-          id: z.string().describe('power | management | stratagem'),
+          id: z.enum(HERO_BUFF_IDS),
           desc: z.string(),
           endTime: Ms,
           param: z.number().optional().describe('points added'),
@@ -160,7 +160,7 @@ export type ItemCount = z.infer<typeof ItemCount>;
 
 export const BuffBean = z
   .object({
-    id: z.string(),
+    id: z.enum(BUFF_IDS),
     desc: z.string(),
     endTime: Ms,
     param: z.number().optional(),

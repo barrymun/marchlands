@@ -52,7 +52,20 @@ async function lord(name, zone) {
 
 async function setup(gm, l, troops) {
   const cid = l.city.id;
-  const layout = [[-1, 31, 8], [-2, 32, 5], [0, 29, 10], [1, 2, 10], [2, 25, 8], [3, 21, 5], [4, 27, 5], [5, 28, 3], [6, 23, 5], [7, 30, 5], [8, 22, 5], [9, 3, 5]];
+  const layout = [
+    [-1, 31, 8],
+    [-2, 32, 5],
+    [0, 29, 10],
+    [1, 2, 10],
+    [2, 25, 8],
+    [3, 21, 5],
+    [4, 27, 5],
+    [5, 28, 3],
+    [6, 23, 5],
+    [7, 30, 5],
+    [8, 22, 5],
+    [9, 3, 5],
+  ];
   for (const [pos, type, lvl] of layout) await ok(gm, 'PUT', `/admin/cities/${cid}/buildings`, { playerId: l.id, positionId: pos, typeId: type, level: lvl });
   await ok(gm, 'PUT', `/admin/cities/${cid}/resources`, { playerId: l.id, gold: 2e6, food: 2e6, wood: 2e6, stone: 2e6, iron: 2e6 });
   await ok(gm, 'PUT', `/admin/cities/${cid}/stats`, { playerId: l.id, population: 3000, troops });
@@ -89,11 +102,19 @@ async function main() {
 
   // ---- attack the city ----
   const before = await ok(a.token, 'GET', `/cities/${a.city.id}`);
-  const army = await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: b.city.fieldId, mission: 5, troops: { lightCavalry: 3000 }, heroId: hero.id });
+  const army = await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, {
+    targetTileId: b.city.fieldId,
+    mission: 5,
+    troops: { lightCavalry: 3000 },
+    heroId: hero.id,
+  });
   check(army.missionType === 5, 'attack sent');
   const enemyView = await ok(b.token, 'GET', '/armies');
   check(enemyView.enemy.length === 1, 'defender sees the incoming army (beacon tower)');
-  const attackRep = await until(async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.find((r) => r.attack && r.title.startsWith('Attack')), 'attack report');
+  const attackRep = await until(
+    async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.find((r) => r.attack && r.title.startsWith('Attack')),
+    'attack report',
+  );
   const full = await ok(a.token, 'GET', `/reports/${attackRep.id}`);
   const battle = full.content.battle;
   check(battle.result === 'attackerWon', `attack won in ${battle.rounds} rounds, lost ${JSON.stringify(battle.attacker.troops.lost)}`);
@@ -114,16 +135,27 @@ async function main() {
   const v = valleys.find((t) => t.level === 1 && t.ownerCityId == null);
   if (v) {
     await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: v.id, mission: 5, troops: { lightCavalry: 1000 }, heroId: hero.id });
-    const vr = await until(async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.find((r) => r.title.startsWith('Valley') || (r.attack && r.targetPos.includes('Grass'))), 'valley report');
+    const vr = await until(
+      async () =>
+        (await ok(a.token, 'GET', '/reports?type=1')).reports.find((r) => r.title.startsWith('Valley') || (r.attack && r.targetPos.includes('Grass'))),
+      'valley report',
+    );
     check(vr.title === 'Valley Occupied', `valley attack: ${vr.title}`);
     const c = await ok(a.token, 'GET', `/cities/${a.city.id}`);
-    check(c.fields.some((f) => f.id === v.id), 'valley listed under city fields');
+    check(
+      c.fields.some((f) => f.id === v.id),
+      'valley listed under city fields',
+    );
     check(c.resource.food.bonusPercent >= 3, `food bonus ${c.resource.food.bonusPercent}%`);
   } else console.log('  (no level-1 grassland nearby; valley step skipped)');
 
   // ---- recall ----
   await until(async () => (await ok(a.token, 'GET', '/armies')).self.length === 0, 'all armies home');
-  const far = await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: (a.city.fieldId + 300 * 800) % 640000, mission: 3, troops: { scouter: 10 } }).catch(() => null);
+  const far = await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, {
+    targetTileId: (a.city.fieldId + 300 * 800) % 640000,
+    mission: 3,
+    troops: { scouter: 10 },
+  }).catch(() => null);
   if (far) {
     const rec = await ok(a.token, 'POST', `/armies/${far.armyId}/recall`);
     check(rec.direction === 2, 'army recalled (returning)');
@@ -140,7 +172,12 @@ async function main() {
   await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: b.city.fieldId, mission: 1, troops: { carriage: 10 }, resources: { gold: 20000 } });
   await until(async () => (await ok(b.token, 'GET', `/cities/${b.city.id}`)).resource.gold >= bGold + 19000, 'transport delivered', 180_000);
   check(true, 'transport of 20,000 gold delivered to ally');
-  const blocked = await call(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: b.city.fieldId, mission: 5, troops: { lightCavalry: 10 }, heroId: hero.id });
+  const blocked = await call(a.token, 'POST', `/cities/${a.city.id}/armies`, {
+    targetTileId: b.city.fieldId,
+    mission: 5,
+    troops: { lightCavalry: 10 },
+    heroId: hero.id,
+  });
   check(blocked.ok === -13, 'cannot attack an alliance member');
 
   // ---- market ----
@@ -151,7 +188,8 @@ async function main() {
   const ref = Math.round(merchant.reference * 1000) / 1000;
   const offer = await ok(b.token, 'POST', `/cities/${b.city.id}/market/orders`, { resType: 1, side: 1, amount: 5000, price: ref });
   const fill = await ok(a.token, 'POST', `/cities/${a.city.id}/market/orders`, { resType: 1, side: 0, amount: 5000, price: ref });
-  if (fixed) check(offer.merchantFilled === 5000 && fill.filled === 5000 && fill.merchantFilled === 5000, 'fixed-price merchant took the offer and filled the bid');
+  if (fixed)
+    check(offer.merchantFilled === 5000 && fill.filled === 5000 && fill.merchantFilled === 5000, 'fixed-price merchant took the offer and filled the bid');
   else check(fill.filled === 5000 && fill.playerFilled === 5000, 'buy order filled against the offer');
   const left = await ok(a.token, 'GET', '/market/orders/mine');
   check(fill.order === null && left.length === 0, 'fully filled order not left on the book (no refundable escrow left behind)');

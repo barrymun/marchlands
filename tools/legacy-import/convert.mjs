@@ -46,13 +46,9 @@ function idList(s) {
 const cost = (r) => ({ food: r.food, wood: r.wood, stone: r.stone, iron: r.iron, gold: r.gold });
 
 const tables = {};
-await readInserts(
-  configDump,
-  ['config_building', 'config_research', 'config_troops', 'config_items', 'config_quests'],
-  (table, cols, rows) => {
-    (tables[table] ??= []).push(...toObjects(cols, rows));
-  },
-);
+await readInserts(configDump, ['config_building', 'config_research', 'config_troops', 'config_items', 'config_quests'], (table, cols, rows) => {
+  (tables[table] ??= []).push(...toObjects(cols, rows));
+});
 
 const buildings = tables.config_building
   .map((r) => ({

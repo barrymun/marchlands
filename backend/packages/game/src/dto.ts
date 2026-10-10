@@ -18,7 +18,19 @@ import {
   type TroopCounts,
   heroGearStat,
 } from '@marchlands/core';
-import type { ArmyBean, BuffBean, BuildingBean, CityBean, FortBean, HeroBean, ItemCount, PlayerInfo, ResourceBean, TroopBean, ValleyBean } from '@marchlands/contracts';
+import type {
+  ArmyBean,
+  BuffBean,
+  BuildingBean,
+  CityBean,
+  FortBean,
+  HeroBean,
+  ItemCount,
+  PlayerInfo,
+  ResourceBean,
+  TroopBean,
+  ValleyBean,
+} from '@marchlands/contracts';
 import { cityStats, type CityBundle } from './city.ts';
 import type { ArmyRow, CityRow, HeroRow, PlayerRow, TileRow } from './repo.ts';
 

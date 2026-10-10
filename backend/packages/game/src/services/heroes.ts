@@ -30,6 +30,7 @@ import {
   syncHeroGear,
   type GearStat,
   type GeneratedHero,
+  HeroBuffId,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
 import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
@@ -438,7 +439,7 @@ export async function renameHero(ctx: Ctx, playerId: number, heroId: number, nam
 export async function releaseCaptive(ctx: Ctx, captorId: number, heroId: number) {
   const h = await getHero(ctx, heroId, { lock: true });
   if (h.capturedByPlayerId !== captorId || h.status !== HeroStatus.SEIZED) throw new GameError('Hero is not your prisoner.', -99);
-  const home = (h.buffs.find((x) => x.id === 'homeCity')?.param ?? 0) as number;
+  const home = (h.buffs.find((x) => x.id === HeroBuffId.HOME_CITY)?.param ?? 0) as number;
   const homeCity = home ? await findCity(ctx, home) : undefined;
   if (!homeCity || homeCity.playerId !== h.playerId) {
     await ctx.tx.delete(heroes).where(eq(heroes.id, heroId));
@@ -446,7 +447,13 @@ export async function releaseCaptive(ctx: Ctx, captorId: number, heroId: number)
     return;
   }
   const prevCity = h.cityId;
-  Object.assign(h, { cityId: homeCity.id, status: HeroStatus.IDLE, capturedByPlayerId: null, loyalty: 70, buffs: h.buffs.filter((x) => x.id !== 'homeCity') });
+  Object.assign(h, {
+    cityId: homeCity.id,
+    status: HeroStatus.IDLE,
+    capturedByPlayerId: null,
+    loyalty: 70,
+    buffs: h.buffs.filter((x) => x.id !== HeroBuffId.HOME_CITY),
+  });
   await saveHero(ctx, h);
   ctx.push(captorId, 'server.HeroUpdate', { castleId: prevCity, hero: heroBean(h), updateType: 1 });
   if (h.playerId) pushHero(ctx, h.playerId, h, 0);

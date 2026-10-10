@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2024",
-    "lib": [
-      "es2024",
-      "esnext.iterator",
-      "esnext.collection"
-    ],
+    "lib": ["es2024", "esnext.iterator", "esnext.collection"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "strict": true,
@@ -20,9 +16,7 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "noUnusedLocals": true
   }
 }

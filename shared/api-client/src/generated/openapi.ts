@@ -11296,8 +11296,8 @@ export interface components {
             gearStat: "power" | "management" | "stratagem";
             /** @description active attribute boosts (24 real hours each, unaffected by GAME_SPEED) */
             buffs: {
-                /** @description power | management | stratagem */
-                id: string;
+                /** @enum {string} */
+                id: "power" | "management" | "stratagem" | "homeCity";
                 desc: string;
                 /** @description epoch milliseconds */
                 endTime: number;
@@ -11431,7 +11431,8 @@ export interface components {
             count: number;
         };
         BuffBeanInput: {
-            id: string;
+            /** @enum {string} */
+            id: "FoodProductionBuff" | "WoodProductionBuff" | "StoneProductionBuff" | "IronProductionBuff" | "GoldProductionBuff" | "AttackBuff" | "DefenseBuff" | "WarEnsignBuff" | "BuildingQueueBuff" | "UpkeepReduceBuff" | "TrainCostReduceBuff" | "PlayerPeaceBuff" | "PlayerPeaceCoolDownBuff" | "MoveCastleCoolDownBuff" | "FurloughBuff";
             desc: string;
             /** @description epoch milliseconds */
             endTime: number;
@@ -13528,8 +13529,8 @@ export interface components {
             gearStat: "power" | "management" | "stratagem";
             /** @description active attribute boosts (24 real hours each, unaffected by GAME_SPEED) */
             buffs: {
-                /** @description power | management | stratagem */
-                id: string;
+                /** @enum {string} */
+                id: "power" | "management" | "stratagem" | "homeCity";
                 desc: string;
                 /** @description epoch milliseconds */
                 endTime: number;
@@ -13663,7 +13664,8 @@ export interface components {
             count: number;
         };
         BuffBean: {
-            id: string;
+            /** @enum {string} */
+            id: "FoodProductionBuff" | "WoodProductionBuff" | "StoneProductionBuff" | "IronProductionBuff" | "GoldProductionBuff" | "AttackBuff" | "DefenseBuff" | "WarEnsignBuff" | "BuildingQueueBuff" | "UpkeepReduceBuff" | "TrainCostReduceBuff" | "PlayerPeaceBuff" | "PlayerPeaceCoolDownBuff" | "MoveCastleCoolDownBuff" | "FurloughBuff";
             desc: string;
             /** @description epoch milliseconds */
             endTime: number;

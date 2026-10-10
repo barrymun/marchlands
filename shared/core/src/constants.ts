@@ -15,15 +15,7 @@ export const TileType = {
 export type TileType = (typeof TileType)[keyof typeof TileType];
 
 /** Valley tile types (can be occupied by a city for production bonuses). */
-export const VALLEY_TYPES: readonly number[] = [
-  TileType.FOREST,
-  TileType.DESERT,
-  TileType.HILL,
-  TileType.SWAMP,
-  TileType.GRASS,
-  TileType.LAKE,
-  TileType.FLAT,
-];
+export const VALLEY_TYPES: readonly number[] = [TileType.FOREST, TileType.DESERT, TileType.HILL, TileType.SWAMP, TileType.GRASS, TileType.LAKE, TileType.FLAT];
 
 export const BuildingType = {
   COTTAGE: 1,
@@ -121,9 +113,7 @@ export const TROOP_KEYS = {
 } as const;
 export type TroopKey = (typeof TROOP_KEYS)[keyof typeof TROOP_KEYS];
 export const TROOP_KEY_LIST = Object.values(TROOP_KEYS) as TroopKey[];
-export const TROOP_ID_BY_KEY = Object.fromEntries(
-  Object.entries(TROOP_KEYS).map(([id, key]) => [key, Number(id)]),
-) as Record<TroopKey, TroopType>;
+export const TROOP_ID_BY_KEY = Object.fromEntries(Object.entries(TROOP_KEYS).map(([id, key]) => [key, Number(id)])) as Record<TroopKey, TroopType>;
 
 export const FORT_KEYS = {
   14: 'trap',
@@ -134,9 +124,7 @@ export const FORT_KEYS = {
 } as const;
 export type FortKey = (typeof FORT_KEYS)[keyof typeof FORT_KEYS];
 export const FORT_KEY_LIST = Object.values(FORT_KEYS) as FortKey[];
-export const FORT_ID_BY_KEY = Object.fromEntries(
-  Object.entries(FORT_KEYS).map(([id, key]) => [key, Number(id)]),
-) as Record<FortKey, FortType>;
+export const FORT_ID_BY_KEY = Object.fromEntries(Object.entries(FORT_KEYS).map(([id, key]) => [key, Number(id)])) as Record<FortKey, FortType>;
 
 /** Display names by troop / fortification id. */
 export const TROOP_NAMES: Record<number, string> = {
@@ -288,3 +276,38 @@ export const STATE_NAMES = [
 
 export const RESOURCE_KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 export type ResourceKey = (typeof RESOURCE_KEYS)[number];
+
+/** Timed effects on a player (players.buffs[].id). The values are the ids stored and sent to the client. */
+export const BuffId = {
+  FOOD_PRODUCTION: 'FoodProductionBuff',
+  WOOD_PRODUCTION: 'WoodProductionBuff',
+  STONE_PRODUCTION: 'StoneProductionBuff',
+  IRON_PRODUCTION: 'IronProductionBuff',
+  GOLD_PRODUCTION: 'GoldProductionBuff',
+  ATTACK: 'AttackBuff',
+  DEFENSE: 'DefenseBuff',
+  WAR_ENSIGN: 'WarEnsignBuff',
+  BUILDING_QUEUE: 'BuildingQueueBuff',
+  UPKEEP_REDUCE: 'UpkeepReduceBuff',
+  TRAIN_COST_REDUCE: 'TrainCostReduceBuff',
+  /** Truce Agreement */
+  TRUCE: 'PlayerPeaceBuff',
+  TRUCE_COOLDOWN: 'PlayerPeaceCoolDownBuff',
+  /** City Teleporter */
+  TELEPORT_COOLDOWN: 'MoveCastleCoolDownBuff',
+  /** holiday mode */
+  HOLIDAY: 'FurloughBuff',
+} as const;
+export type BuffId = (typeof BuffId)[keyof typeof BuffId];
+export const BUFF_IDS = Object.values(BuffId) as [BuffId, ...BuffId[]];
+
+/** Timed effects on a hero (heroes.buffs[].id): attribute boosts, and where a captured hero goes home to. */
+export const HeroBuffId = {
+  POWER: 'power',
+  MANAGEMENT: 'management',
+  STRATAGEM: 'stratagem',
+  /** param: the city a captured hero returns to when released */
+  HOME_CITY: 'homeCity',
+} as const;
+export type HeroBuffId = (typeof HeroBuffId)[keyof typeof HeroBuffId];
+export const HERO_BUFF_IDS = Object.values(HeroBuffId) as [HeroBuffId, ...HeroBuffId[]];

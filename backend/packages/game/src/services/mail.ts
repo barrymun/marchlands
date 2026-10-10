@@ -48,7 +48,9 @@ export async function sendMail(ctx: Ctx, playerId: number, toName: string, rawTi
   const content = escapeHtml(String(rawContent ?? '').trim()).slice(0, 5000);
   if (!title || !content) throw new GameError('Title and content are required.', -99);
   if (!(await isBlocked(ctx, target.id, sender.id))) {
-    await ctx.tx.insert(mails).values({ playerId: target.id, type: MailFolder.INBOX, otherPlayerId: sender.id, otherPlayerName: sender.name, title, content, sentAt: ctx.now });
+    await ctx.tx
+      .insert(mails)
+      .values({ playerId: target.id, type: MailFolder.INBOX, otherPlayerId: sender.id, otherPlayerName: sender.name, title, content, sentAt: ctx.now });
     await pushMailCounts(ctx, target.id);
   }
   await ctx.tx.insert(mails).values({
@@ -82,14 +84,23 @@ export async function listMail(ctx: Ctx, playerId: number, type: number, pageNo:
   const page = Math.max(1, pageNo || 1);
   const where = and(eq(mails.playerId, playerId), eq(mails.type, type));
   const [{ n }] = await ctx.tx.select({ n: count() }).from(mails).where(where);
-  const rows = await ctx.tx.select().from(mails).where(where).orderBy(desc(mails.sentAt), desc(mails.id)).limit(pageSize).offset((page - 1) * pageSize);
+  const rows = await ctx.tx
+    .select()
+    .from(mails)
+    .where(where)
+    .orderBy(desc(mails.sentAt), desc(mails.id))
+    .limit(pageSize)
+    .offset((page - 1) * pageSize);
   return { pageNo: page, pageSize, totalPage: Math.ceil(Number(n) / pageSize), mails: rows.map((m) => bean(m, me)) };
 }
 
 /** mail.readMail */
 export async function readMail(ctx: Ctx, playerId: number, mailId: number) {
   const me = await getPlayer(ctx, playerId);
-  const [m] = await ctx.tx.select().from(mails).where(and(eq(mails.id, mailId), eq(mails.playerId, playerId)));
+  const [m] = await ctx.tx
+    .select()
+    .from(mails)
+    .where(and(eq(mails.id, mailId), eq(mails.playerId, playerId)));
   if (!m) throw new GameError('Mail not found.', -99, 404);
   if (!m.readAt) {
     await ctx.tx.update(mails).set({ readAt: ctx.now }).where(eq(mails.id, mailId));
@@ -101,7 +112,10 @@ export async function readMail(ctx: Ctx, playerId: number, mailId: number) {
 /** mail.readOverMailList */
 export async function markMailRead(ctx: Ctx, playerId: number, ids: number[]) {
   if (!ids.length) return;
-  await ctx.tx.update(mails).set({ readAt: ctx.now }).where(and(eq(mails.playerId, playerId), inArray(mails.id, ids), eq(mails.readAt, 0)));
+  await ctx.tx
+    .update(mails)
+    .set({ readAt: ctx.now })
+    .where(and(eq(mails.playerId, playerId), inArray(mails.id, ids), eq(mails.readAt, 0)));
   await pushMailCounts(ctx, playerId);
 }
 

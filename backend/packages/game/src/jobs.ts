@@ -22,7 +22,11 @@ export async function zonesJob(db: Db) {
 /** Beginner protection lapses after 7 days even without a Town Hall 5. */
 export async function beginnerJob(db: Db) {
   const cutoff = Date.now() - scaled(BALANCE.beginnerProtectionMs);
-  const due = await db.select({ id: players.id }).from(players).where(and(eq(players.beginner, true), lt(players.createdAt, cutoff))).limit(500);
+  const due = await db
+    .select({ id: players.id })
+    .from(players)
+    .where(and(eq(players.beginner, true), lt(players.createdAt, cutoff)))
+    .limit(500);
   for (const { id } of due) {
     await runGame(db, async (ctx) => {
       const p = await getPlayer(ctx, id, { lock: true });

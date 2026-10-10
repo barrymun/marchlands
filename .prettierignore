@@ -1,0 +1,9 @@
+node_modules
+dist
+package-lock.json
+*.md
+shared/api-client/openapi.json
+shared/api-client/src/generated
+backend/packages/db/migrations
+db
+shared/core/src/data/legacy

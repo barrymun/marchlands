@@ -3,7 +3,7 @@
 // types (`jsonb().$type<...>()`), the API contract and the client all use one definition.
 
 import { z } from 'zod';
-import { FORT_KEY_LIST, RESOURCE_KEYS, TROOP_KEY_LIST, type FortKey, type TroopKey } from './constants.ts';
+import { BUFF_IDS, FORT_KEY_LIST, HERO_BUFF_IDS, RESOURCE_KEYS, TROOP_KEY_LIST, type FortKey, type TroopKey } from './constants.ts';
 
 const count = z.number().nonnegative();
 
@@ -89,7 +89,7 @@ export const ItemCountsSchema = z.record(z.string(), z.number());
 export type ItemCounts = z.infer<typeof ItemCountsSchema>;
 
 export const BuffStateSchema = z.object({
-  id: z.string(),
+  id: z.enum(BUFF_IDS),
   desc: z.string(),
   endTime: z.number(),
   /** optional magnitude (e.g. upkeep reduction) */
@@ -100,6 +100,10 @@ export const BuffStateSchema = z.object({
   itemId: z.string().optional(),
 });
 export type BuffState = z.infer<typeof BuffStateSchema>;
+
+/** A timed effect on a hero (attribute boosts, a captured hero's home city). */
+export const HeroBuffStateSchema = BuffStateSchema.extend({ id: z.enum(HERO_BUFF_IDS) });
+export type HeroBuffState = z.infer<typeof HeroBuffStateSchema>;
 
 export const CastleSignSchema = z.object({
   tileId: z.number().int(),

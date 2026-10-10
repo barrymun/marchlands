@@ -50,6 +50,8 @@ import {
   type ResourceSet,
   type TroopCounts,
   addHeroExp,
+  BuffId,
+  HeroBuffId,
 } from '@marchlands/core';
 import { armies, cities, heroes, tiles } from '@marchlands/db';
 import { openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
@@ -205,11 +207,11 @@ async function heroesOfArmies(ctx: Ctx, list: ArmyRow[]): Promise<(HeroRow | nul
   return out;
 }
 
-const buffBonus = (p: PlayerRow, id: string, now: number) => (activeBuff(p, id, now) ? 0.2 : 0);
+const buffBonus = (p: PlayerRow, id: BuffId, now: number) => (activeBuff(p, id, now) ? 0.2 : 0);
 
 /** (marchlands) The attack / defense item bonuses that count in a battle, for its report. */
 function battleBonuses(p: PlayerRow, now: number): { bonuses?: { desc: string; itemId?: string }[] } {
-  const list = ['AttackBuff', 'DefenseBuff']
+  const list = [BuffId.ATTACK, BuffId.DEFENSE]
     .map((id) => activeBuff(p, id, now))
     .filter((b) => b != null)
     .map((b) => ({ desc: b.desc, ...(b.itemId ? { itemId: b.itemId } : {}) }));
@@ -651,7 +653,7 @@ async function armyWiped(ctx: Ctx, a: ArmyRow, hero: HeroRow | null, captor: Cit
         powerBuffAdded: 0,
         managementBuffAdded: 0,
         stratagemBuffAdded: 0,
-        buffs: [{ id: 'homeCity', desc: 'home city', endTime: Number.MAX_SAFE_INTEGER, param: home }],
+        buffs: [{ id: HeroBuffId.HOME_CITY, desc: 'home city', endTime: Number.MAX_SAFE_INTEGER, param: home }],
       });
       captured = true;
       pushHero(ctx, captor.player.id, hero, 0);
@@ -816,8 +818,8 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
       troops: a.troops,
       research: attacker.research,
       hero,
-      attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now),
-      defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now),
+      attackBonus: buffBonus(attacker, BuffId.ATTACK, ctx.now),
+      defenseBonus: buffBonus(attacker, BuffId.DEFENSE, ctx.now),
     },
     {
       troops: defTroops,
@@ -825,8 +827,8 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
       hero: defHero,
       forts: def.city.forts,
       wallLevel,
-      attackBonus: buffBonus(def.player, 'AttackBuff', ctx.now),
-      defenseBonus: buffBonus(def.player, 'DefenseBuff', ctx.now),
+      attackBonus: buffBonus(def.player, BuffId.ATTACK, ctx.now),
+      defenseBonus: buffBonus(def.player, BuffId.DEFENSE, ctx.now),
     },
     ctx.rng,
   );
@@ -926,8 +928,8 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
       troops: a.troops,
       research: attacker.research,
       hero,
-      attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now),
-      defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now),
+      attackBonus: buffBonus(attacker, BuffId.ATTACK, ctx.now),
+      defenseBonus: buffBonus(attacker, BuffId.DEFENSE, ctx.now),
     },
     { troops: npc.troops, research: {}, hero: guard, forts: npc.forts, wallLevel: tile.level },
     ctx.rng,
@@ -1062,15 +1064,15 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
       troops: a.troops,
       research: attacker.research,
       hero,
-      attackBonus: buffBonus(attacker, 'AttackBuff', ctx.now),
-      defenseBonus: buffBonus(attacker, 'DefenseBuff', ctx.now),
+      attackBonus: buffBonus(attacker, BuffId.ATTACK, ctx.now),
+      defenseBonus: buffBonus(attacker, BuffId.DEFENSE, ctx.now),
     },
     {
       troops: defTroops,
       research: owner?.research ?? {},
       hero: guard ?? npcGuard,
-      attackBonus: owner ? buffBonus(owner, 'AttackBuff', ctx.now) : 0,
-      defenseBonus: owner ? buffBonus(owner, 'DefenseBuff', ctx.now) : 0,
+      attackBonus: owner ? buffBonus(owner, BuffId.ATTACK, ctx.now) : 0,
+      defenseBonus: owner ? buffBonus(owner, BuffId.DEFENSE, ctx.now) : 0,
     },
     ctx.rng,
   );

@@ -17,6 +17,7 @@ import {
   type TroopCounts,
   TROOP_KEY_LIST,
   lordGear,
+  BuffId,
 } from '@marchlands/core';
 import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@marchlands/db';
 import { openOwnCity, viewOwnCity } from '../city.ts';
@@ -146,7 +147,7 @@ export async function playerState(ctx: Ctx, playerId: number) {
   const mailCount = (t: number) => Number(unread.find((u) => u.type === t)?.n ?? 0);
   const reportCount = (t: number) => Number(unreadReports.find((u) => u.type === t)?.n ?? 0);
   const armiesView = await visibleArmies(ctx, playerId);
-  const furlough = activeBuff(player, 'FurloughBuff', ctx.now);
+  const furlough = activeBuff(player, BuffId.HOLIDAY, ctx.now);
   return {
     playerInfo: await playerInfoOf(ctx, player),
     castles,
@@ -280,7 +281,7 @@ export async function startFurlough(ctx: Ctx, playerId: number, days: number, ci
   if (Number(outgoing[0].n) > 0) throw new GameError('You must recall all of your troops first.', -77);
   spendGold(b.city, days * goldForCents(BALANCE.furloughCentsPerDay));
   ctx.stat(playerId, cityId, { 'spent.other.gold': days * goldForCents(BALANCE.furloughCentsPerDay) });
-  setBuff(ctx, p, 'FurloughBuff', 'Holiday', ctx.now + days * DAY);
+  setBuff(ctx, p, BuffId.HOLIDAY, 'Holiday', ctx.now + days * DAY);
   p.status = 5;
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
@@ -290,7 +291,7 @@ export async function startFurlough(ctx: Ctx, playerId: number, days: number, ci
 
 export async function cancelFurlough(ctx: Ctx, playerId: number) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  removeBuff(ctx, p, 'FurloughBuff');
+  removeBuff(ctx, p, BuffId.HOLIDAY);
   if (p.status === 5) p.status = 0;
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
@@ -301,12 +302,12 @@ export async function startTruce(ctx: Ctx, playerId: number, itemId: string, cit
   // without a Truce Agreement, one is bought with the city's gold
   const b = await openOwnCity(ctx, playerId, cityId);
   const p = b.player;
-  if (activeBuff(p, 'PlayerPeaceCoolDownBuff', ctx.now)) throw new GameError('Truce Agreement is in cooldown.', -99);
+  if (activeBuff(p, BuffId.TRUCE_COOLDOWN, ctx.now)) throw new GameError('Truce Agreement is in cooldown.', -99);
   if (itemId !== 'player.peace.1') throw new GameError('Invalid state.', -99);
   useItemOrGold(ctx, p, b.city, itemId, itemGoldPrice(itemId) ?? 0);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
-  setBuff(ctx, p, 'PlayerPeaceBuff', 'Truce Agreement activated', ctx.now + BALANCE.truceDurationMs, { itemId });
+  setBuff(ctx, p, BuffId.TRUCE, 'Truce Agreement activated', ctx.now + BALANCE.truceDurationMs, { itemId });
   p.status = 2;
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
@@ -314,8 +315,8 @@ export async function startTruce(ctx: Ctx, playerId: number, itemId: string, cit
 
 export function isProtected(p: PlayerRow, now: number): string | null {
   if (p.beginner) return "Operation denied. This player is under Beginner's Protection.";
-  if (activeBuff(p, 'PlayerPeaceBuff', now)) return 'Operation denied. This player is under truce.';
-  if (activeBuff(p, 'FurloughBuff', now)) return 'Operation denied. This player is on holiday.';
+  if (activeBuff(p, BuffId.TRUCE, now)) return 'Operation denied. This player is under truce.';
+  if (activeBuff(p, BuffId.HOLIDAY, now)) return 'Operation denied. This player is on holiday.';
   return null;
 }
 

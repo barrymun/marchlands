@@ -32,6 +32,7 @@ import {
   scaleResources,
   type BuildingState,
   addHeroExp,
+  BuffId,
 } from '@marchlands/core';
 import { mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -46,7 +47,7 @@ const refKey = (cityId: number, pos: number) => `building:${cityId}:${pos}`;
 
 /** How many constructions may run at once (Bernini's Hammer adds one more queue). */
 function maxConcurrent(b: CityBundle, now: number) {
-  return BALANCE.buildQueues + (activeBuff(b.player, 'BuildingQueueBuff', now) ? 1 : 0);
+  return BALANCE.buildQueues + (activeBuff(b.player, BuffId.BUILDING_QUEUE, now) ? 1 : 0);
 }
 
 function scheduleBuilding(ctx: Ctx, b: CityBundle, bld: BuildingState) {

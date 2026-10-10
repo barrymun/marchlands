@@ -435,7 +435,10 @@ function mergeResults(into: FlowCityResult[], part: FlowCityResult[]): FlowCityR
     else {
       c.steps.push(...r.steps);
       c.cityName = r.cityName;
-      if (!r.ok) ((c.ok = false), (c.error = r.error));
+      if (!r.ok) {
+        c.ok = false;
+        c.error = r.error;
+      }
     }
   }
   return out;

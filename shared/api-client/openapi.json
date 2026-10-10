@@ -318,7 +318,12 @@
               "properties": {
                 "id": {
                   "type": "string",
-                  "description": "power | management | stratagem"
+                  "enum": [
+                    "power",
+                    "management",
+                    "stratagem",
+                    "homeCity"
+                  ]
                 },
                 "desc": {
                   "type": "string"
@@ -906,7 +911,24 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "FoodProductionBuff",
+              "WoodProductionBuff",
+              "StoneProductionBuff",
+              "IronProductionBuff",
+              "GoldProductionBuff",
+              "AttackBuff",
+              "DefenseBuff",
+              "WarEnsignBuff",
+              "BuildingQueueBuff",
+              "UpkeepReduceBuff",
+              "TrainCostReduceBuff",
+              "PlayerPeaceBuff",
+              "PlayerPeaceCoolDownBuff",
+              "MoveCastleCoolDownBuff",
+              "FurloughBuff"
+            ]
           },
           "desc": {
             "type": "string"
@@ -10511,7 +10533,12 @@
               "properties": {
                 "id": {
                   "type": "string",
-                  "description": "power | management | stratagem"
+                  "enum": [
+                    "power",
+                    "management",
+                    "stratagem",
+                    "homeCity"
+                  ]
                 },
                 "desc": {
                   "type": "string"
@@ -11108,7 +11135,24 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "FoodProductionBuff",
+              "WoodProductionBuff",
+              "StoneProductionBuff",
+              "IronProductionBuff",
+              "GoldProductionBuff",
+              "AttackBuff",
+              "DefenseBuff",
+              "WarEnsignBuff",
+              "BuildingQueueBuff",
+              "UpkeepReduceBuff",
+              "TrainCostReduceBuff",
+              "PlayerPeaceBuff",
+              "PlayerPeaceCoolDownBuff",
+              "MoveCastleCoolDownBuff",
+              "FurloughBuff"
+            ]
           },
           "desc": {
             "type": "string"

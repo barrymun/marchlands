@@ -45,32 +45,50 @@ export default async function authRoutes(app: ZApp) {
     },
   );
 
-  app.post('/auth/login', { schema: { tags: tags.auth, summary: 'Log in (orig `login`)', body: LoginBody, response: responses(AuthSession) } }, async (req, reply) => {
-    const { username, password } = req.body;
-    const [acc] = await db.select().from(accounts).where(sql`lower(${accounts.username}) = lower(${username})`);
-    if (!acc || !(await verifyPassword(password, acc.passwordHash))) {
-      return reply.status(401).send({ ok: -2, errorMsg: 'Incorrect account or password.' });
-    }
-    if (acc.status !== 0) return reply.status(403).send({ ok: -99, errorMsg: `You are banned. Reason: ${acc.banReason}` });
-    const isAdmin = acc.isAdmin || config.adminUsernames.includes(acc.username.toLowerCase());
-    await db.update(accounts).set({ lastLoginAt: Date.now(), lastLoginIp: req.ip, isAdmin }).where(eq(accounts.id, acc.id));
-    await db.update(players).set({ lastLoginAt: Date.now(), lastSeenAt: Date.now() }).where(eq(players.accountId, acc.id));
-    return { ok: 1 as const, data: await issue(acc.id, isAdmin) };
-  });
+  app.post(
+    '/auth/login',
+    { schema: { tags: tags.auth, summary: 'Log in (orig `login`)', body: LoginBody, response: responses(AuthSession) } },
+    async (req, reply) => {
+      const { username, password } = req.body;
+      const [acc] = await db
+        .select()
+        .from(accounts)
+        .where(sql`lower(${accounts.username}) = lower(${username})`);
+      if (!acc || !(await verifyPassword(password, acc.passwordHash))) {
+        return reply.status(401).send({ ok: -2, errorMsg: 'Incorrect account or password.' });
+      }
+      if (acc.status !== 0) return reply.status(403).send({ ok: -99, errorMsg: `You are banned. Reason: ${acc.banReason}` });
+      const isAdmin = acc.isAdmin || config.adminUsernames.includes(acc.username.toLowerCase());
+      await db.update(accounts).set({ lastLoginAt: Date.now(), lastLoginIp: req.ip, isAdmin }).where(eq(accounts.id, acc.id));
+      await db.update(players).set({ lastLoginAt: Date.now(), lastSeenAt: Date.now() }).where(eq(players.accountId, acc.id));
+      return { ok: 1 as const, data: await issue(acc.id, isAdmin) };
+    },
+  );
 
-  app.get('/auth/me', { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Current account and its lord', response: responses(AuthAccount) } }, async (req) => {
-    const [acc] = await db
-      .select({ id: accounts.id, username: accounts.username, email: accounts.email, isAdmin: accounts.isAdmin, createdAt: accounts.createdAt })
-      .from(accounts)
-      .where(eq(accounts.id, req.claims!.sub));
-    if (!acc) throw new GameError('Account not found.', -2, 401);
-    const [p] = await db.select({ id: players.id, name: players.name }).from(players).where(eq(players.accountId, acc.id));
-    return { ok: 1 as const, data: { ...acc, player: p ?? null } };
-  });
+  app.get(
+    '/auth/me',
+    { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Current account and its lord', response: responses(AuthAccount) } },
+    async (req) => {
+      const [acc] = await db
+        .select({ id: accounts.id, username: accounts.username, email: accounts.email, isAdmin: accounts.isAdmin, createdAt: accounts.createdAt })
+        .from(accounts)
+        .where(eq(accounts.id, req.claims!.sub));
+      if (!acc) throw new GameError('Account not found.', -2, 401);
+      const [p] = await db.select({ id: players.id, name: players.name }).from(players).where(eq(players.accountId, acc.id));
+      return { ok: 1 as const, data: { ...acc, player: p ?? null } };
+    },
+  );
 
-  app.post('/auth/refresh', { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Issue a fresh token', response: responses(AuthSession) } }, async (req) => {
-    const [acc] = await db.select({ id: accounts.id, isAdmin: accounts.isAdmin, status: accounts.status }).from(accounts).where(eq(accounts.id, req.claims!.sub));
-    if (!acc || acc.status !== 0) throw new GameError('Not logged in.', -2, 401);
-    return { ok: 1 as const, data: await issue(acc.id, acc.isAdmin) };
-  });
+  app.post(
+    '/auth/refresh',
+    { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Issue a fresh token', response: responses(AuthSession) } },
+    async (req) => {
+      const [acc] = await db
+        .select({ id: accounts.id, isAdmin: accounts.isAdmin, status: accounts.status })
+        .from(accounts)
+        .where(eq(accounts.id, req.claims!.sub));
+      if (!acc || acc.status !== 0) throw new GameError('Not logged in.', -2, 401);
+      return { ok: 1 as const, data: await issue(acc.id, acc.isAdmin) };
+    },
+  );
 }

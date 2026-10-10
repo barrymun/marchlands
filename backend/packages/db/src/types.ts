@@ -1,6 +1,7 @@
 export type {
   BuildingState,
   BuffState,
+  HeroBuffState,
   CastleSign,
   CityMisc,
   FortCounts,
