@@ -310,8 +310,8 @@ export const flows = pgTable(
     runs: integer('runs').notNull().default(0),
     /** cities of the current run */
     runCities: jsonb('run_cities').$type<number[]>().notNull().default([]),
-    /** cities chosen for this run only (Run on chosen cities); null = the flow's own cities */
-    cityOverride: jsonb('city_override').$type<number[] | null>(),
+    /** cities chosen for this run only (Run on chosen cities, or 'all'); null = the flow's own cities */
+    cityOverride: jsonb('city_override').$type<'all' | number[] | null>(),
     /** armies the current run sent, per city id (for "wait until armies home" and heals) */
     armyIds: jsonb('army_ids').$type<Record<string, number[]>>().notNull().default({}),
     /** when it joined the queue (the queue is first come, first served) */

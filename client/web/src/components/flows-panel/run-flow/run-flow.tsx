@@ -29,6 +29,7 @@ import type { Targets } from '@/components/flows-panel/types';
 import { LastRun } from '@/components/flows-panel/run-flow/last-run/last-run';
 import { RunReport } from '@/components/flows-panel/run-flow/run-report/run-report';
 import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
+import { hasHero } from '@/components/flows-panel/utils';
 
 /** Pick cities, then preview (up to the first wait, rolled back) or run the flow; repeat; stop; what the latest run did. */
 export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: number }) {
@@ -37,7 +38,8 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
   // starts from the flow's saved cities; changing them here applies to this run only
   const [targets, setTargets] = useState<Targets>(flow.cities ?? 'all');
   const own = new Set(cities.map((c) => c.id));
-  const picked = targets === 'all' ? cities.map((c) => c.id) : targets.filter((id) => own.has(id));
+  // all cities: those with a hero (the server skips the others)
+  const picked = targets === 'all' ? cities.filter(hasHero).map((c) => c.id) : targets.filter((id) => own.has(id));
   const [preview, setPreview] = useState<FlowRunReport | null>(null);
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: getPlayerFlowsQueryKey() });
@@ -57,7 +59,11 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
   };
   const run = useMutation({
     mutationFn: async (asPreview: boolean) => {
-      const { data } = await postPlayerFlowsRun({ path: { flowId: flow.id }, body: { cityIds: picked, preview: asPreview }, throwOnError: true });
+      const { data } = await postPlayerFlowsRun({
+        path: { flowId: flow.id },
+        body: { cityIds: targets === 'all' ? 'all' : picked, preview: asPreview },
+        throwOnError: true,
+      });
       return data;
     },
     onSuccess: (r) => {
@@ -133,7 +139,11 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
             </Button>
           )}
         </div>
-        {preview ? <RunReport title="Preview (nothing was changed)" preview cities={preview.cities} /> : flow.lastRun && <LastRun flow={flow} />}
+        {preview ? (
+          <RunReport title="Preview (nothing was changed)" preview cities={preview.cities} skipped={preview.skippedCities} />
+        ) : (
+          flow.lastRun && <LastRun flow={flow} />
+        )}
       </CardContent>
     </Card>
   );

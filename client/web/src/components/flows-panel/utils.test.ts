@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { Flow, FlowAction } from '@marchlands/api-client';
+import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
 import { FLOW_TROOP_IDS } from '@marchlands/core';
-import { currentAction, keyed, strip } from '@/components/flows-panel/utils';
+import { currentAction, hasHero, keyed, strip } from '@/components/flows-panel/utils';
 
 const ACTIONS: FlowAction[] = [
   { type: 'setMayor', stat: 'management' },
@@ -90,5 +90,22 @@ describe(currentAction.name, () => {
   it('is -1 when the flow is idle or queued', () => {
     expect(currentAction(flow('idle', 2))).toBe(-1);
     expect(currentAction(flow('queued', 0))).toBe(-1);
+  });
+});
+
+describe(hasHero.name, () => {
+  const city = (...seized: boolean[]) => ({ heros: seized.map((s) => ({ seized: s })) }) as Pick<CityBean, 'heros'>;
+
+  it('is false for a city without heroes (e.g. one just captured)', () => {
+    expect(hasHero(city())).toBe(false);
+  });
+
+  it('is true with at least one hero not held captive', () => {
+    expect(hasHero(city(false))).toBe(true);
+    expect(hasHero(city(true, false))).toBe(true);
+  });
+
+  it('is false when every hero there is held captive', () => {
+    expect(hasHero(city(true, true))).toBe(false);
   });
 });

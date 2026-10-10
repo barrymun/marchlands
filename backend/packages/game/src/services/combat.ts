@@ -79,6 +79,7 @@ import {
   type TileRow,
 } from '../repo.ts';
 import { armyRef, homeMarchMs, notifyArmyParties, posName, sendBack, tileOwner } from './armies.ts';
+import { dropCapturedTarget } from './flows.ts';
 import { heroSlots, pushHero } from './heroes.ts';
 import { initialCity, isProtected } from './player.ts';
 import { isFriendly, relationBetween } from './relations.ts';
@@ -1034,6 +1035,7 @@ async function captureNpc(ctx: Ctx, attacker: PlayerRow, tile: TileRow, state: N
     updatedAt: ctx.now,
   });
   await saveTile(ctx, tile);
+  await dropCapturedTarget(ctx, tile.id);
   pushCity(ctx, await viewCity(ctx, city.id));
   addPrestige(attacker, 1000 * tile.level);
 }

@@ -2225,6 +2225,27 @@
           }
         ]
       },
+      "FlowSkippedCityInput": {
+        "type": "object",
+        "properties": {
+          "cityId": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "cityName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cityId",
+          "cityName",
+          "reason"
+        ]
+      },
       "FlowRunLogInput": {
         "type": "object",
         "properties": {
@@ -2330,6 +2351,13 @@
                 "error",
                 "steps"
               ]
+            }
+          },
+          "skippedCities": {
+            "description": "cities the run left out, e.g. all cities skips a city with no hero",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowSkippedCityInput"
             }
           }
         },
@@ -2547,12 +2575,20 @@
               ]
             },
             "description": "what ran now, up to the first wait (empty when the flow was queued)"
+          },
+          "skippedCities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowSkippedCityInput"
+            },
+            "description": "cities the run leaves out, e.g. all cities skips a city with no hero"
           }
         },
         "required": [
           "preview",
           "flow",
-          "cities"
+          "cities",
+          "skippedCities"
         ]
       },
       "CastleSignInput": {
@@ -12478,6 +12514,28 @@
           }
         ]
       },
+      "FlowSkippedCity": {
+        "type": "object",
+        "properties": {
+          "cityId": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "cityName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cityId",
+          "cityName",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
       "FlowRunLog": {
         "type": "object",
         "properties": {
@@ -12586,6 +12644,13 @@
                 "steps"
               ],
               "additionalProperties": false
+            }
+          },
+          "skippedCities": {
+            "description": "cities the run left out, e.g. all cities skips a city with no hero",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowSkippedCity"
             }
           }
         },
@@ -12810,12 +12875,20 @@
               "additionalProperties": false
             },
             "description": "what ran now, up to the first wait (empty when the flow was queued)"
+          },
+          "skippedCities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowSkippedCity"
+            },
+            "description": "cities the run leaves out, e.g. all cities skips a city with no hero"
           }
         },
         "required": [
           "preview",
           "flow",
-          "cities"
+          "cities",
+          "skippedCities"
         ],
         "additionalProperties": false
       },
@@ -22380,14 +22453,24 @@
                 "type": "object",
                 "properties": {
                   "cityIds": {
-                    "description": "cities to run the flow on (default: the flow's saved cities)",
-                    "minItems": 1,
-                    "type": "array",
-                    "items": {
-                      "type": "integer",
-                      "minimum": 0,
-                      "maximum": 9007199254740991
-                    }
+                    "description": "cities to run the flow on, or 'all' (every city with a hero); default: the flow's saved cities",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "all"
+                        ]
+                      },
+                      {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      }
+                    ]
                   },
                   "preview": {
                     "default": false,

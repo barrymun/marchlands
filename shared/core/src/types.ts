@@ -167,7 +167,7 @@ export const FlowSchema = z.object({
   id: z.string(),
   name: z.string().min(1).max(40),
   actions: z.array(FlowActionSchema).min(1).max(20),
-  /** cities the flow runs on: 'all' (every city, including ones gained later) or chosen city ids */
+  /** cities the flow runs on: 'all' (every city with a hero, including ones gained later) or chosen city ids */
   cities: z.union([z.literal('all'), z.array(z.number().int())]).default('all'),
   /** start the flow again after each run, until it fails or is switched off */
   repeat: z.boolean().default(false),

@@ -30,6 +30,12 @@ export interface FlowCityResult {
   error: string | null;
   steps: FlowStepResult[];
 }
+/** A city a run left out, and why (e.g. "all cities" skips a city with no hero). */
+export interface FlowSkippedCity {
+  cityId: number;
+  cityName: string;
+  reason: string;
+}
 /** What a flow's latest run did, city by city (kept on the flow). */
 export interface FlowRunLog {
   /** 1 for the first run of the flow, counting up with every run */
@@ -37,6 +43,8 @@ export interface FlowRunLog {
   startedAt: number;
   finishedAt: number | null;
   cities: FlowCityResult[];
+  /** cities the run left out (absent in logs from before it was recorded) */
+  skippedCities?: FlowSkippedCity[];
 }
 
 /** One line for an action, e.g. "Set mayor: highest Attack" or "Train max Archer". */

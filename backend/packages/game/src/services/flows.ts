@@ -42,10 +42,11 @@ import {
   type FlowAction,
   type FlowCityResult,
   type FlowRunLog,
+  type FlowSkippedCity,
   type FlowStepResult,
 } from '@marchlands/core';
-import { armies, flows as flowsTable, timedEvents, type Db } from '@marchlands/db';
-import { and, asc, eq, gt, inArray, isNotNull, lt, ne } from 'drizzle-orm';
+import { armies, flows as flowsTable, heroes as heroesTable, timedEvents, type Db } from '@marchlands/db';
+import { and, asc, eq, gt, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
 import { cityStats, openOwnCity } from '../city.ts';
 import { isRetryable, runGame, savepoint, type Ctx } from '../context.ts';
 import { citiesOf, getPlayer } from '../repo.ts';
@@ -380,11 +381,60 @@ async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<
   return `Training ${count.toLocaleString('en')} ${name}${short} in ${r.batches.length} barracks${left > 0 ? `, done in ${Math.ceil(left / 1000).toLocaleString('en')}s` : ', done now'}`;
 }
 
-/** Cities a run starts on: the ones chosen for it, or the flow's own ('all': every city the lord has now). */
-async function runCitiesOf(ctx: Ctx, playerId: number, f: Pick<FlowRow, 'cities' | 'cityOverride'>): Promise<number[]> {
-  const own = (await citiesOf(ctx, playerId)).map((c) => c.id);
-  const wanted = f.cityOverride ?? (f.cities === 'all' || f.cities == null ? own : f.cities);
-  return [...new Set(wanted)].filter((id) => own.includes(id));
+const citiesWanted = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => f.cityOverride ?? f.cities ?? 'all';
+const usesAllCities = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => citiesWanted(f) === 'all';
+
+const NO_HERO = 'No hero in this city (all cities skips it)';
+
+/**
+ * Cities a run starts on: the ones chosen for it, or the flow's own. 'all' is every city the lord has
+ * now that has a hero of theirs (a city just captured has none, and every mayor action would fail
+ * there); the others are `skipped`, with why, for the run's report.
+ */
+async function planCities(ctx: Ctx, playerId: number, f: Pick<FlowRow, 'cities' | 'cityOverride'>): Promise<{ cities: number[]; skipped: FlowSkippedCity[] }> {
+  const own = await citiesOf(ctx, playerId);
+  const wanted = citiesWanted(f);
+  if (wanted === 'all') {
+    const rows = await ctx.tx
+      .selectDistinct({ cityId: heroesTable.cityId })
+      .from(heroesTable)
+      .where(and(eq(heroesTable.playerId, playerId), isNull(heroesTable.capturedByPlayerId)));
+    const withHero = new Set(rows.map((r) => r.cityId));
+    return {
+      cities: own.filter((c) => withHero.has(c.id)).map((c) => c.id),
+      skipped: own.filter((c) => !withHero.has(c.id)).map((c) => ({ cityId: c.id, cityName: c.name, reason: NO_HERO })),
+    };
+  }
+  return { cities: [...new Set(wanted)].filter((id) => own.some((c) => c.id === id)), skipped: [] };
+}
+
+const runCitiesOf = async (ctx: Ctx, playerId: number, f: Pick<FlowRow, 'cities' | 'cityOverride'>) => (await planCities(ctx, playerId, f)).cities;
+
+/** Why a run has no cities. */
+const noCitiesReason = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) =>
+  usesAllCities(f) ? 'none of your cities has a hero' : 'none of its cities are yours any more';
+
+/**
+ * A barbarian city was captured: take its tile off every flow's attack targets (any lord's), so no
+ * farming list goes on attacking what is now a lord's city.
+ */
+export async function dropCapturedTarget(ctx: Ctx, tileId: number) {
+  const listed = await ctx.tx
+    .select()
+    .from(flowsTable)
+    .where(
+      sql`jsonb_path_exists(${flowsTable.actions}, '$[*] ? (@.type == "attackTargets").targets.*[*] ? (@ == $t)', jsonb_build_object('t', ${tileId}::int))`,
+    )
+    .for('update');
+  for (const f of listed) {
+    const actions = f.actions.map((a) =>
+      a.type === 'attackTargets'
+        ? { ...a, targets: Object.fromEntries(Object.entries(a.targets).map(([city, list]) => [city, list.filter((t) => t !== tileId)])) }
+        : a,
+    );
+    await ctx.tx.update(flowsTable).set({ actions }).where(eq(flowsTable.id, f.id));
+    ctx.push(f.playerId, PushCmd.FLOW_UPDATE, { flowId: f.id, status: f.status });
+  }
 }
 
 /**
@@ -522,7 +572,7 @@ async function advance(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCity
 
 /** Start a run of a queued flow on its cities. */
 async function startRun(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCityResult[]> {
-  const cities = await runCitiesOf(ctx, playerId, f);
+  const { cities, skipped } = await planCities(ctx, playerId, f);
   const names = new Map((await citiesOf(ctx, playerId)).map((c) => [c.id, c.name]));
   f.runs += 1;
   f.status = 'running';
@@ -538,9 +588,10 @@ async function startRun(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCit
     startedAt: ctx.now,
     finishedAt: null,
     cities: cities.map((cityId) => ({ cityId, cityName: names.get(cityId)!, ok: true, error: null, steps: [] })),
+    skippedCities: skipped,
   };
   if (!cities.length) {
-    await stopRun(ctx, playerId, f, 'none of its cities are yours any more');
+    await stopRun(ctx, playerId, f, noCitiesReason(f));
     return [];
   }
   return advance(ctx, playerId, f);
@@ -636,26 +687,29 @@ export async function resumeFlow(ctx: Ctx, playerId: number, flowId: string) {
 }
 
 /**
- * Run a flow (Run button): it joins the queue, on `cityIds` for this run (by default the flow's own
- * cities), and starts now when no other flow is running. With `preview`, it runs up to the first wait
+ * Run a flow (Run button): it joins the queue, on `cityIds` for this run ('all', or by default the flow's
+ * own cities), and starts now when no other flow is running. With `preview`, it runs up to the first wait
  * and every city is rolled back: the report shows what would happen.
  */
 export async function runFlow(
   db: Db,
   playerId: number,
   flowId: string,
-  cityIds: number[] | undefined,
+  cityIds: 'all' | number[] | undefined,
   preview: boolean,
-): Promise<{ preview: boolean; flow: FlowView | null; cities: FlowCityResult[] }> {
+): Promise<{ preview: boolean; flow: FlowView | null; cities: FlowCityResult[]; skippedCities: FlowSkippedCity[] }> {
   if (preview) {
     let cities: FlowCityResult[] = [];
+    let skippedCities: FlowSkippedCity[] = [];
     try {
       await runGame(db, async (ctx) => {
         const saved = (await flowsOf(ctx, playerId)).find((x) => x.id === flowId);
         if (!saved) throw new GameError('Flow not found.', -99, 404);
         const f: FlowRow = { ...saved, cityOverride: cityIds ?? null, armyIds: {} };
-        f.runCities = await runCitiesOf(ctx, playerId, f);
-        if (!f.runCities.length) throw new GameError('Choose at least one of your cities.', -99);
+        const plan = await planCities(ctx, playerId, f);
+        f.runCities = plan.cities;
+        skippedCities = plan.skipped;
+        if (!f.runCities.length) throw new GameError(usesAllCities(f) ? 'None of your cities has a hero.' : 'Choose at least one of your cities.', -99);
         const waitAt = f.actions.findIndex((a) => a.type === 'wait');
         cities = await runPart(ctx, playerId, f, 0, waitAt < 0 ? f.actions.length : waitAt);
         if (waitAt >= 0) {
@@ -668,7 +722,7 @@ export async function runFlow(
     } catch (err) {
       if (!(err instanceof PreviewRollback)) throw err;
     }
-    return { preview, flow: null, cities };
+    return { preview, flow: null, cities, skippedCities };
   }
   return runGame(db, async (ctx) => {
     const list = await flowsOf(ctx, playerId, true);
@@ -676,15 +730,17 @@ export async function runFlow(
     if (!f) throw new GameError('Flow not found.', -99, 404);
     if (f.status !== 'idle') throw new GameError(f.status === 'queued' ? 'This flow is already queued.' : 'This flow is already running.', -99);
     queue(ctx, f, cityIds ?? null);
-    if (!(await runCitiesOf(ctx, playerId, f)).length) throw new GameError('Choose at least one of your cities.', -99);
+    if (!(await runCitiesOf(ctx, playerId, f)).length)
+      throw new GameError(usesAllCities(f) ? 'None of your cities has a hero.' : 'Choose at least one of your cities.', -99);
     await saveRow(ctx, f);
     const started = await startNext(ctx, playerId, list);
-    return { preview, flow: view(f), cities: started.get(f.id) ?? [] };
+    const ran = started.get(f.id);
+    return { preview, flow: view(f), cities: ran ?? [], skippedCities: ran ? (f.lastRun?.skippedCities ?? []) : [] };
   });
 }
 
 /** Put an idle flow at the back of the queue. */
-function queue(ctx: Ctx, f: FlowRow, cityOverride: number[] | null) {
+function queue(ctx: Ctx, f: FlowRow, cityOverride: 'all' | number[] | null) {
   f.status = 'queued';
   f.queuedAt = ctx.now;
   f.notBefore = 0;
@@ -703,7 +759,8 @@ export async function setRepeat(ctx: Ctx, playerId: number, flowId: string, repe
   f.repeat = repeat;
   if (repeat && f.status === 'idle') {
     queue(ctx, f, null);
-    if (!(await runCitiesOf(ctx, playerId, f)).length) throw new GameError("None of the flow's cities are yours any more.", -99);
+    if (!(await runCitiesOf(ctx, playerId, f)).length)
+      throw new GameError(usesAllCities(f) ? 'None of your cities has a hero.' : "None of the flow's cities are yours any more.", -99);
   }
   // a repeat waiting in the queue for its next run (notBefore set) does not run again
   if (!repeat && f.status === 'queued' && f.notBefore > 0) {

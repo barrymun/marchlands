@@ -114,12 +114,14 @@ const FlowCityResult = z.object({
     }),
   ),
 });
+const FlowSkippedCity = z.object({ cityId: zId, cityName: z.string(), reason: z.string() }).meta({ id: 'FlowSkippedCity' });
 export const FlowRunLog = z
   .object({
     run: z.number().int().describe('1 for the first run of the flow, counting up'),
     startedAt: Ms,
     finishedAt: Ms.nullable().describe('null while the run is still going'),
     cities: z.array(FlowCityResult),
+    skippedCities: z.array(FlowSkippedCity).optional().describe('cities the run left out, e.g. all cities skips a city with no hero'),
   })
   .meta({ id: 'FlowRunLog' });
 export type FlowRunLog = z.infer<typeof FlowRunLog>;
@@ -149,7 +151,10 @@ export const FlowBody = z.object({
 });
 export const FlowParams = z.object({ flowId: z.string() });
 export const FlowRunBody = z.object({
-  cityIds: z.array(zId).min(1).optional().describe("cities to run the flow on (default: the flow's saved cities)"),
+  cityIds: z
+    .union([z.literal('all'), z.array(zId).min(1)])
+    .optional()
+    .describe("cities to run the flow on, or 'all' (every city with a hero); default: the flow's saved cities"),
   preview: z.boolean().default(false).describe('run up to the first wait and roll everything back: shows what would happen'),
 });
 export const FlowRepeatBody = z.object({ repeat: z.boolean() });
@@ -158,6 +163,7 @@ export const FlowRunReport = z
     preview: z.boolean(),
     flow: Flow.nullable().describe('the flow after starting it (null for a preview)'),
     cities: z.array(FlowCityResult).describe('what ran now, up to the first wait (empty when the flow was queued)'),
+    skippedCities: z.array(FlowSkippedCity).describe('cities the run leaves out, e.g. all cities skips a city with no hero'),
   })
   .meta({ id: 'FlowRunReport' });
 export type FlowRunReport = z.infer<typeof FlowRunReport>;

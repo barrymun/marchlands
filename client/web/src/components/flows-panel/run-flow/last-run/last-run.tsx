@@ -12,6 +12,7 @@ export function LastRun({ flow }: { flow: Flow }) {
       title={`Run ${r.run} · started ${when(r.startedAt)}${r.finishedAt == null ? ' · in progress' : ` · ended ${when(r.finishedAt)}`}`}
       preview={false}
       cities={r.cities}
+      skipped={r.skippedCities}
     />
   );
 }

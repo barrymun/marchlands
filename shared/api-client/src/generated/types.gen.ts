@@ -678,6 +678,12 @@ export type FlowActionInput = {
     minutes?: number;
 };
 
+export type FlowSkippedCityInput = {
+    cityId: number;
+    cityName: string;
+    reason: string;
+};
+
 export type FlowRunLogInput = {
     /**
      * 1 for the first run of the flow, counting up
@@ -717,6 +723,10 @@ export type FlowRunLogInput = {
             }>;
         }>;
     }>;
+    /**
+     * cities the run left out, e.g. all cities skips a city with no hero
+     */
+    skippedCities?: Array<FlowSkippedCityInput>;
 };
 
 export type FlowInput = {
@@ -792,6 +802,10 @@ export type FlowRunReportInput = {
             }>;
         }>;
     }>;
+    /**
+     * cities the run leaves out, e.g. all cities skips a city with no hero
+     */
+    skippedCities: Array<FlowSkippedCityInput>;
 };
 
 export type CastleSignInput = {
@@ -3596,6 +3610,12 @@ export type FlowAction = {
     minutes: number;
 };
 
+export type FlowSkippedCity = {
+    cityId: number;
+    cityName: string;
+    reason: string;
+};
+
 export type FlowRunLog = {
     /**
      * 1 for the first run of the flow, counting up
@@ -3635,6 +3655,10 @@ export type FlowRunLog = {
             }>;
         }>;
     }>;
+    /**
+     * cities the run left out, e.g. all cities skips a city with no hero
+     */
+    skippedCities?: Array<FlowSkippedCity>;
 };
 
 export type Flow = {
@@ -3710,6 +3734,10 @@ export type FlowRunReport = {
             }>;
         }>;
     }>;
+    /**
+     * cities the run leaves out, e.g. all cities skips a city with no hero
+     */
+    skippedCities: Array<FlowSkippedCity>;
 };
 
 export type CastleSign = {
@@ -7064,9 +7092,9 @@ export type DeletePlayerFlowsByFlowIdResponse = DeletePlayerFlowsByFlowIdRespons
 export type PostPlayerFlowsRunData = {
     body: {
         /**
-         * cities to run the flow on (default: the flow's saved cities)
+         * cities to run the flow on, or 'all' (every city with a hero); default: the flow's saved cities
          */
-        cityIds?: Array<number>;
+        cityIds?: 'all' | Array<number>;
         /**
          * run up to the first wait and roll everything back: shows what would happen
          */
