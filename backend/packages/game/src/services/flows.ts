@@ -9,8 +9,10 @@
 // flows take turns a part at a time: a part (e.g. Attack mayor, train, Politics mayor) is one
 // transaction nobody else sees half done, and other flows run during its waits. Before each part a flow
 // is held until every hero of its cities is home (no army with a hero marching out or coming back);
-// flows held earlier go first. A preview runs up to the first wait and rolls everything back.
+// flows held earlier go first. A preview runs up to the first wait and rolls everything back; only its
+// report is kept on the flow (until it runs, is edited or repeat is switched).
 
+import { isDeepStrictEqual } from 'node:util';
 import {
   checkRequirements,
   describeFlowAction,
@@ -41,6 +43,7 @@ import {
   type Flow,
   type FlowAction,
   type FlowCityResult,
+  type FlowPreviewLog,
   type FlowRunLog,
   type FlowSkippedCity,
   type FlowStepResult,
@@ -61,7 +64,10 @@ const REPEAT_MIN_GAP_MS = 60_000;
 
 type FlowRow = typeof flowsTable.$inferSelect;
 export type FlowView = Flow &
-  Pick<FlowRow, 'status' | 'nextAction' | 'runs' | 'queuedAt' | 'notBefore' | 'waitUntil' | 'heldSince' | 'stopReason'> & { lastRun: FlowRunLog | null };
+  Pick<FlowRow, 'status' | 'nextAction' | 'runs' | 'queuedAt' | 'notBefore' | 'waitUntil' | 'heldSince' | 'stopReason'> & {
+    lastRun: FlowRunLog | null;
+    lastPreview: FlowPreviewLog | null;
+  };
 
 const isActive = (f: FlowRow) => f.status === 'running' || f.status === 'waiting';
 const resumeRef = (flowId: string) => `flow:${flowId}`;
@@ -86,6 +92,7 @@ function view(f: FlowRow): FlowView {
     heldSince: f.heldSince,
     stopReason: f.stopReason,
     lastRun: f.lastRun ?? null,
+    lastPreview: f.lastPreview ?? null,
   };
 }
 
@@ -150,7 +157,9 @@ export async function saveFlow(
     // a run in progress continues by action index: its actions may change settings (targets, amounts), not order
     if (isActive(existing) && (existing.actions.length !== actions.length || existing.actions.some((a, i) => a.type !== actions[i].type)))
       throw new GameError('This flow is running: stop it to add, remove or reorder actions.', -99);
-    await saveRow(ctx, { ...existing, name, actions, cities });
+    // a preview of other actions or cities no longer shows what the flow would do
+    const same = isDeepStrictEqual([existing.actions, existing.cities], [actions, cities]);
+    await saveRow(ctx, { ...existing, name, actions, cities, lastPreview: same ? existing.lastPreview : null });
   } else {
     if (list.length >= MAX_FLOWS) throw new GameError(`At most ${MAX_FLOWS} flows.`, -99);
     const id = `${ctx.now.toString(36)}${Math.floor(ctx.rng.next() * 1e6).toString(36)}`;
@@ -583,6 +592,7 @@ async function startRun(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCit
   f.armyIds = {};
   f.runCities = cities;
   f.stopReason = null;
+  f.lastPreview = null;
   f.lastRun = {
     run: f.runs,
     startedAt: ctx.now,
@@ -722,6 +732,16 @@ export async function runFlow(
     } catch (err) {
       if (!(err instanceof PreviewRollback)) throw err;
     }
+    // everything the preview did was rolled back; only its report is kept, so a reload still shows it
+    await runGame(db, async (ctx) => {
+      const lastPreview: FlowPreviewLog = { at: ctx.now, cities, skippedCities };
+      const [f] = await ctx.tx
+        .update(flowsTable)
+        .set({ lastPreview })
+        .where(and(eq(flowsTable.id, flowId), eq(flowsTable.playerId, playerId)))
+        .returning({ status: flowsTable.status });
+      if (f) ctx.push(playerId, PushCmd.FLOW_UPDATE, { flowId, status: f.status });
+    });
     return { preview, flow: null, cities, skippedCities };
   }
   return runGame(db, async (ctx) => {
@@ -757,6 +777,7 @@ export async function setRepeat(ctx: Ctx, playerId: number, flowId: string, repe
   const f = list.find((x) => x.id === flowId);
   if (!f) throw new GameError('Flow not found.', -99, 404);
   f.repeat = repeat;
+  f.lastPreview = null;
   if (repeat && f.status === 'idle') {
     queue(ctx, f, null);
     if (!(await runCitiesOf(ctx, playerId, f)).length)

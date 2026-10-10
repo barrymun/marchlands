@@ -16,7 +16,6 @@ import {
   postPlayerFlowsRun,
   postPlayerFlowsStop,
   type Flow,
-  type FlowRunReport,
 } from '@marchlands/api-client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -27,11 +26,11 @@ import { errorMessage } from '@/lib/api';
 import { allOf } from '@/lib/query-keys';
 import type { Targets } from '@/components/flows-panel/types';
 import { LastRun } from '@/components/flows-panel/run-flow/last-run/last-run';
-import { RunReport } from '@/components/flows-panel/run-flow/run-report/run-report';
+import { LastPreview } from '@/components/flows-panel/run-flow/last-preview/last-preview';
 import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
 import { hasHero } from '@/components/flows-panel/utils';
 
-/** Pick cities, then preview (up to the first wait, rolled back) or run the flow; repeat; stop; what the latest run did. */
+/** Pick cities, then preview (up to the first wait, rolled back) or run the flow; repeat; stop; the latest preview or run. */
 export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: number }) {
   const qc = useQueryClient();
   const cities = usePlayer().data?.castles ?? [];
@@ -40,7 +39,6 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
   const own = new Set(cities.map((c) => c.id));
   // all cities: those with a hero (the server skips the others)
   const picked = targets === 'all' ? cities.filter(hasHero).map((c) => c.id) : targets.filter((id) => own.has(id));
-  const [preview, setPreview] = useState<FlowRunReport | null>(null);
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: getPlayerFlowsQueryKey() });
     // heroes, resources, population and queues changed in the cities that ran
@@ -67,8 +65,13 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
       return data;
     },
     onSuccess: (r) => {
-      if (r.preview) return setPreview(r);
-      setPreview(null);
+      if (r.preview) {
+        // the server keeps the report on the flow (so a reload shows it); show it now, then sync
+        const lastPreview = { at: Date.now(), cities: r.cities, skippedCities: r.skippedCities };
+        qc.setQueryData(getPlayerFlowsQueryKey(), (list: Flow[] | undefined) => list?.map((f) => (f.id === flow.id ? { ...f, lastPreview } : f)));
+        void qc.invalidateQueries({ queryKey: getPlayerFlowsQueryKey() });
+        return;
+      }
       refresh();
       const failed = r.cities.filter((c) => !c.ok).length;
       if (failed) toast.warning(`${flow.name}: failed in ${failed} cit${failed === 1 ? 'y' : 'ies'} and stopped`);
@@ -84,7 +87,6 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
     },
     onSuccess: (list, on) => {
       qc.setQueryData(getPlayerFlowsQueryKey(), list);
-      setPreview(null);
       refresh();
       toast.success(on ? `${flow.name}: repeats until a run fails or you switch it off` : `${flow.name}: stops after this run`);
     },
@@ -139,11 +141,7 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
             </Button>
           )}
         </div>
-        {preview ? (
-          <RunReport title="Preview (nothing was changed)" preview cities={preview.cities} skipped={preview.skippedCities} />
-        ) : (
-          flow.lastRun && <LastRun flow={flow} />
-        )}
+        {flow.lastPreview ? <LastPreview flow={flow} /> : flow.lastRun && <LastRun flow={flow} />}
       </CardContent>
     </Card>
   );

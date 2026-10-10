@@ -26,6 +26,7 @@ const flow = (status: Flow['status'], nextAction: number): Flow => ({
   heldSince: 0,
   stopReason: null,
   lastRun: null,
+  lastPreview: null,
 });
 
 describe(keyed.name, () => {

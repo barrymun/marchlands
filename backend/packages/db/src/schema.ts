@@ -40,6 +40,7 @@ import type {
   PlayerMisc,
   ReportBody,
   FlowAction,
+  FlowPreviewLog,
   FlowRunLog,
   FlowStatus,
 } from './types.ts';
@@ -326,6 +327,8 @@ export const flows = pgTable(
     /** why the flow last stopped on its own (a failed run), or null */
     stopReason: text('stop_reason'),
     lastRun: jsonb('last_run').$type<FlowRunLog>(),
+    /** the latest preview's report; cleared when a run starts, the flow is edited or repeat is switched */
+    lastPreview: jsonb('last_preview').$type<FlowPreviewLog>(),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [index('flows_player_idx').on(t.playerId, t.createdAt)],

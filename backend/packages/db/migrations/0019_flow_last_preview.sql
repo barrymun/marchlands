@@ -1,0 +1,1 @@
+ALTER TABLE "flows" ADD COLUMN "last_preview" jsonb;

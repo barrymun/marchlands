@@ -7,6 +7,7 @@ export type {
   FortCounts,
   FortQueueState,
   FlowAction,
+  FlowPreviewLog,
   FlowRunLog,
   FlowStatus,
   ItemCounts,

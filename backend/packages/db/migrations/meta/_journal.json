@@ -134,6 +134,13 @@
       "when": 1791634000000,
       "tag": "0018_drop_own_city_targets",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791654707397,
+      "tag": "0019_flow_last_preview",
+      "breakpoints": true
     }
   ]
 }

@@ -2368,6 +2368,108 @@
           "cities"
         ]
       },
+      "FlowPreviewLogInput": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "number",
+            "description": "when the preview ran"
+          },
+          "cities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cityId": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "cityName": {
+                  "type": "string"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
+                },
+                "error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "steps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "action": {
+                        "type": "string"
+                      },
+                      "ok": {
+                        "type": "boolean"
+                      },
+                      "detail": {
+                        "type": "string"
+                      },
+                      "skipped": {
+                        "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
+                        "type": "boolean"
+                      },
+                      "items": {
+                        "description": "per-target outcomes (attack actions)",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string"
+                            },
+                            "ok": {
+                              "type": "boolean"
+                            },
+                            "detail": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "label",
+                            "ok",
+                            "detail"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "ok",
+                      "detail"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "cityId",
+                "cityName",
+                "ok",
+                "error",
+                "steps"
+              ]
+            }
+          },
+          "skippedCities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowSkippedCityInput"
+            }
+          }
+        },
+        "required": [
+          "at",
+          "cities",
+          "skippedCities"
+        ]
+      },
       "FlowInput": {
         "type": "object",
         "properties": {
@@ -2459,6 +2561,17 @@
                 "type": "null"
               }
             ]
+          },
+          "lastPreview": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FlowPreviewLogInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the latest preview, until the flow runs, is edited or repeat is switched"
           }
         },
         "required": [
@@ -2473,7 +2586,8 @@
           "waitUntil",
           "heldSince",
           "stopReason",
-          "lastRun"
+          "lastRun",
+          "lastPreview"
         ]
       },
       "FlowRunReportInput": {
@@ -12662,6 +12776,112 @@
         ],
         "additionalProperties": false
       },
+      "FlowPreviewLog": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "number",
+            "description": "when the preview ran"
+          },
+          "cities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cityId": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "cityName": {
+                  "type": "string"
+                },
+                "ok": {
+                  "type": "boolean",
+                  "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
+                },
+                "error": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "steps": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "action": {
+                        "type": "string"
+                      },
+                      "ok": {
+                        "type": "boolean"
+                      },
+                      "detail": {
+                        "type": "string"
+                      },
+                      "skipped": {
+                        "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
+                        "type": "boolean"
+                      },
+                      "items": {
+                        "description": "per-target outcomes (attack actions)",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string"
+                            },
+                            "ok": {
+                              "type": "boolean"
+                            },
+                            "detail": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "label",
+                            "ok",
+                            "detail"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "action",
+                      "ok",
+                      "detail"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "cityId",
+                "cityName",
+                "ok",
+                "error",
+                "steps"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "skippedCities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlowSkippedCity"
+            }
+          }
+        },
+        "required": [
+          "at",
+          "cities",
+          "skippedCities"
+        ],
+        "additionalProperties": false
+      },
       "Flow": {
         "type": "object",
         "properties": {
@@ -12753,6 +12973,17 @@
                 "type": "null"
               }
             ]
+          },
+          "lastPreview": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FlowPreviewLog"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the latest preview, until the flow runs, is edited or repeat is switched"
           }
         },
         "required": [
@@ -12769,7 +13000,8 @@
           "waitUntil",
           "heldSince",
           "stopReason",
-          "lastRun"
+          "lastRun",
+          "lastPreview"
         ],
         "additionalProperties": false
       },

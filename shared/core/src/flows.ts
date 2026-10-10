@@ -46,6 +46,12 @@ export interface FlowRunLog {
   /** cities the run left out (absent in logs from before it was recorded) */
   skippedCities?: FlowSkippedCity[];
 }
+/** The flow's latest preview (kept on the flow until it runs, is edited or repeat is switched). */
+export interface FlowPreviewLog {
+  at: number;
+  cities: FlowCityResult[];
+  skippedCities: FlowSkippedCity[];
+}
 
 /** One line for an action, e.g. "Set mayor: highest Attack" or "Train max Archer". */
 export function describeFlowAction(a: FlowAction): string {

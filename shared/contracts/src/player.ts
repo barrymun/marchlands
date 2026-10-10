@@ -125,6 +125,13 @@ export const FlowRunLog = z
   })
   .meta({ id: 'FlowRunLog' });
 export type FlowRunLog = z.infer<typeof FlowRunLog>;
+export const FlowPreviewLog = z
+  .object({
+    at: Ms.describe('when the preview ran'),
+    cities: z.array(FlowCityResult),
+    skippedCities: z.array(FlowSkippedCity),
+  })
+  .meta({ id: 'FlowPreviewLog' });
 export const Flow = FlowSchema.extend({
   actions: z.array(FlowAction),
   status: z
@@ -138,6 +145,7 @@ export const Flow = FlowSchema.extend({
   heldSince: Ms.describe('while waiting: held before its next actions until every hero of its cities is home, since then (0 = not held)'),
   stopReason: z.string().nullable().describe('why the flow stopped on its own (a failed run; repeat was switched off)'),
   lastRun: FlowRunLog.nullable(),
+  lastPreview: FlowPreviewLog.nullable().describe('the latest preview, until the flow runs, is edited or repeat is switched'),
 }).meta({ id: 'Flow' });
 export type Flow = z.infer<typeof Flow>;
 export const FlowBody = z.object({

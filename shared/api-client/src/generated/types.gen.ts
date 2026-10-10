@@ -729,6 +729,40 @@ export type FlowRunLogInput = {
     skippedCities?: Array<FlowSkippedCityInput>;
 };
 
+export type FlowPreviewLogInput = {
+    /**
+     * when the preview ran
+     */
+    at: number;
+    cities: Array<{
+        cityId: number;
+        cityName: string;
+        /**
+         * false: an action failed and everything the flow did in this city since the last wait was rolled back
+         */
+        ok: boolean;
+        error: string | null;
+        steps: Array<{
+            action: string;
+            ok: boolean;
+            detail: string;
+            /**
+             * the city could not do it right now (e.g. nothing affordable to train); the run carried on
+             */
+            skipped?: boolean;
+            /**
+             * per-target outcomes (attack actions)
+             */
+            items?: Array<{
+                label: string;
+                ok: boolean;
+                detail: string;
+            }>;
+        }>;
+    }>;
+    skippedCities: Array<FlowSkippedCityInput>;
+};
+
 export type FlowInput = {
     id: string;
     name: string;
@@ -765,6 +799,10 @@ export type FlowInput = {
      */
     stopReason: string | null;
     lastRun: FlowRunLogInput | null;
+    /**
+     * the latest preview, until the flow runs, is edited or repeat is switched
+     */
+    lastPreview: FlowPreviewLogInput | null;
 };
 
 export type FlowRunReportInput = {
@@ -3661,6 +3699,40 @@ export type FlowRunLog = {
     skippedCities?: Array<FlowSkippedCity>;
 };
 
+export type FlowPreviewLog = {
+    /**
+     * when the preview ran
+     */
+    at: number;
+    cities: Array<{
+        cityId: number;
+        cityName: string;
+        /**
+         * false: an action failed and everything the flow did in this city since the last wait was rolled back
+         */
+        ok: boolean;
+        error: string | null;
+        steps: Array<{
+            action: string;
+            ok: boolean;
+            detail: string;
+            /**
+             * the city could not do it right now (e.g. nothing affordable to train); the run carried on
+             */
+            skipped?: boolean;
+            /**
+             * per-target outcomes (attack actions)
+             */
+            items?: Array<{
+                label: string;
+                ok: boolean;
+                detail: string;
+            }>;
+        }>;
+    }>;
+    skippedCities: Array<FlowSkippedCity>;
+};
+
 export type Flow = {
     id: string;
     name: string;
@@ -3697,6 +3769,10 @@ export type Flow = {
      */
     stopReason: string | null;
     lastRun: FlowRunLog | null;
+    /**
+     * the latest preview, until the flow runs, is edited or repeat is switched
+     */
+    lastPreview: FlowPreviewLog | null;
 };
 
 export type FlowRunReport = {
