@@ -7,3 +7,4 @@ shared/api-client/src/generated
 backend/packages/db/migrations
 db
 shared/core/src/data/legacy
+shared/api-client/openapi.client.json

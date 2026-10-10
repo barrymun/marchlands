@@ -38,6 +38,7 @@ import { findCity, getArmy, getCity, getPlayer, getTile, saveArmy, saveCity, sav
 import { isFriendly, relationBetween } from './relations.ts';
 import { isProtected } from './player.ts';
 import { pushHero } from './heroes.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 export const armyRef = (id: number) => `army:${id}`;
 
@@ -197,7 +198,7 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
   }
   ctx.schedule({ type: 'army', dueAt: army.reachTime, playerId, cityId, refKey: armyRef(army.id), payload: { armyId: army.id } });
   await saveCity(ctx, b.city);
-  ctx.push(playerId, 'server.TroopUpdate', { castleId: cityId, troop: troopBean(b.city.troops) });
+  ctx.push(playerId, PushCmd.TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.troops) });
   pushResources(ctx, b);
   await notifyArmyParties(ctx, army);
   return armyBean(army, { heroName: hero?.name, heroLevel: hero?.level, king: b.player.name });
@@ -207,9 +208,9 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
 export async function notifyArmyParties(ctx: Ctx, a: Pick<ArmyRow, 'playerId' | 'targetPlayerId'>) {
   for (const id of new Set([a.playerId, a.targetPlayerId].filter((x): x is number => !!x))) {
     const v = await visibleArmies(ctx, id);
-    ctx.push(id, 'server.SelfArmysUpdate', { armys: v.self });
-    ctx.push(id, 'server.FriendArmysUpdate', { armys: v.friend });
-    ctx.push(id, 'server.EnemyArmysUpdate', { armys: v.enemy });
+    ctx.push(id, PushCmd.SELF_ARMIES_UPDATE, { armys: v.self });
+    ctx.push(id, PushCmd.FRIEND_ARMIES_UPDATE, { armys: v.friend });
+    ctx.push(id, PushCmd.ENEMY_ARMIES_UPDATE, { armys: v.enemy });
   }
 }
 

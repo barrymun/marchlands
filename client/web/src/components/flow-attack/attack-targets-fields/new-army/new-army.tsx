@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { getPlayerArmyPresetsQueryKey, postPlayerArmyPresetsMutation } from '@marchlands/api-client';
 import { TROOP_KEYS, type TroopKey } from '@marchlands/core';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
 import { troopName } from '@/lib/format';
 
 /** Save a new army composition on the fly (it joins your saved armies). */
@@ -19,10 +19,7 @@ export function NewArmy({ onSaved }: { onSaved: (id: string) => void }) {
       .map(([k, v]) => [k, Number(v || 0)])
       .filter(([, n]) => Number(n) > 0),
   );
-  const save = useCommand(
-    () => unwrap(api.POST('/api/v1/player/army-presets', { body: { name: name.trim(), troops: body } })),
-    () => [['army-presets']],
-  );
+  const save = useCommand(postPlayerArmyPresetsMutation(), () => [getPlayerArmyPresetsQueryKey()]);
   return (
     <div className="grid gap-2 rounded-md border border-dashed p-2">
       <div className="grid gap-1">
@@ -48,14 +45,17 @@ export function NewArmy({ onSaved }: { onSaved: (id: string) => void }) {
         className="justify-self-end"
         disabled={!name.trim() || !Object.keys(body).length || save.isPending}
         onClick={() =>
-          save.mutate(undefined, {
-            onSuccess: (list) => {
-              const made = list.find((p) => p.name.toLowerCase() === name.trim().toLowerCase());
-              void qc.invalidateQueries({ queryKey: ['army-presets'] });
-              toast.success(`Saved "${name.trim()}"`);
-              if (made) onSaved(made.id);
+          save.mutate(
+            { body: { name: name.trim(), troops: body } },
+            {
+              onSuccess: (list) => {
+                const made = list.find((p) => p.name.toLowerCase() === name.trim().toLowerCase());
+                void qc.invalidateQueries({ queryKey: getPlayerArmyPresetsQueryKey() });
+                toast.success(`Saved "${name.trim()}"`);
+                if (made) onSaved(made.id);
+              },
             },
-          })
+          )
         }
       >
         Save army

@@ -1,6 +1,22 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { CityBean } from '@marchlands/api-client';
+import {
+  deleteCitiesFortificationsQueuesByQueueIdMutation,
+  deleteCitiesTroopsQueuesByQueueIdMutation,
+  getCitiesByCityIdQueryKey,
+  getCitiesFortificationsQueuesOptions,
+  getCitiesFortificationsQueuesQueryKey,
+  getCitiesFortificationsTrainableOptions,
+  getCitiesTroopsQueuesOptions,
+  getCitiesTroopsQueuesQueryKey,
+  getCitiesTroopsTrainableOptions,
+  getPlayerQueryKey,
+  postCitiesFortificationsQueuesSpeedupMutation,
+  postCitiesFortificationsTrainManyMutation,
+  postCitiesTroopsQueuesSpeedupMutation,
+  postCitiesTroopsTrainManyMutation,
+  type CityBean,
+} from '@marchlands/api-client';
 import { BALANCE, usedWallSpace, wallCapacity, researchLevel, TechType, BuildingType, itemConfig, itemGoldPrice } from '@marchlands/core';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -14,9 +30,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TimerBar } from '@/components/timer-bar/timer-bar';
 import { CostList } from '@/components/cost-list/cost-list';
 import { Requirements } from '@/components/requirements/requirements';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
-import { api, unwrap } from '@/lib/api';
 import { fmt, fmtExact, realHourly, troopName } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { TrainDiscountHint } from '@/components/military-panel/production/train-discount-hint/train-discount-hint';
@@ -27,7 +42,6 @@ import { RES_KEYS } from '@/components/military-panel/production/constants';
 import { maxTrainable } from '@/components/military-panel/production/utils';
 
 export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
-  const kind = fort ? 'fortifications' : 'troops';
   const player = usePlayer();
   // carrying capacity per unit, with the Logistics bonus
   const loadFactor = 1 + BALANCE.logisticsLoadPerLevel * researchLevel(player.data?.research ?? {}, TechType.LOGISTICS);
@@ -41,35 +55,23 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const [split, setSplit] = useState(true);
   const splitting = !fort && split && barracks.length > 1;
   const path = { cityId: city.id };
-  const trainable = useQuery({
-    queryKey: qk.trainable(city.id, fort),
-    queryFn: () => unwrap(api.GET(`/api/v1/cities/{cityId}/${kind}/trainable`, { params: { path } })),
-  });
-  const queues = useQuery({
-    queryKey: qk.queues(city.id, fort),
-    queryFn: () => unwrap(api.GET(`/api/v1/cities/{cityId}/${kind}/queues`, { params: { path } })),
-  });
+  const trainable = useQuery(fort ? getCitiesFortificationsTrainableOptions({ path }) : getCitiesTroopsTrainableOptions({ path }));
+  const queuesKey = fort ? getCitiesFortificationsQueuesQueryKey({ path }) : getCitiesTroopsQueuesQueryKey({ path });
+  const queues = useQuery(fort ? getCitiesFortificationsQueuesOptions({ path }) : getCitiesTroopsQueuesOptions({ path }));
+  const cityKey = getCitiesByCityIdQueryKey({ path });
   // every amount entered is ordered in one go, all or nothing; the amounts clear once it is queued
-  const trainAll = useCommand(
-    (orders: { troopId: number; count: number }[]) =>
-      unwrap(
-        api.POST(`/api/v1/cities/{cityId}/${kind}/train-many`, { params: { path }, body: { orders, split: splitting, positionId: fort ? undefined : pos } }),
-      ),
-    () => [qk.city(city.id), qk.queues(city.id, fort)],
-  );
+  const trainAll = useCommand(fort ? postCitiesFortificationsTrainManyMutation() : postCitiesTroopsTrainManyMutation(), () => [cityKey, queuesKey]);
   const inv = useInventory();
   const boostItem = fort ? 'player.fort.1.c' : 'player.troop.1.b';
   const boostGold = itemGoldPrice(boostItem) ?? 0;
   const boost = useCommand(
-    (b: { positionId: number; queueId: number }) =>
-      unwrap(api.POST(`/api/v1/cities/{cityId}/${kind}/queues/{positionId}/{queueId}/speedup`, { params: { path: { ...path, ...b } } })),
-    () => [qk.city(city.id), qk.queues(city.id, fort), qk.player],
+    fort ? postCitiesFortificationsQueuesSpeedupMutation() : postCitiesTroopsQueuesSpeedupMutation(),
+    () => [cityKey, queuesKey, getPlayerQueryKey()],
     `${itemConfig(fort ? 'player.fort.1.c' : 'player.troop.1.b')?.name}: −30%`,
   );
   const cancel = useCommand(
-    (b: { positionId: number; queueId: number }) =>
-      unwrap(api.DELETE(`/api/v1/cities/{cityId}/${kind}/queues/{positionId}/{queueId}`, { params: { path: { ...path, ...b } } })),
-    () => [qk.city(city.id), qk.queues(city.id, fort)],
+    fort ? deleteCitiesFortificationsQueuesByQueueIdMutation() : deleteCitiesTroopsQueuesByQueueIdMutation(),
+    () => [cityKey, queuesKey],
     'Batch cancelled',
   );
 
@@ -191,12 +193,12 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                       size="xs"
                       variant="secondary"
                       disabled={boost.isPending || (inv.count(boostItem) === 0 && city.resource.gold < boostGold)}
-                      onClick={() => boost.mutate({ positionId: b.positionId, queueId: b.queueId })}
+                      onClick={() => boost.mutate({ path: { ...path, positionId: b.positionId, queueId: b.queueId } })}
                     >
                       {itemConfig(boostItem)?.name} −30% · {inv.count(boostItem) > 0 ? `×${inv.count(boostItem)}` : `${fmt(boostGold)} gold`}
                     </Button>
                   )}
-                  <Button size="xs" variant="ghost" onClick={() => cancel.mutate({ positionId: b.positionId, queueId: b.queueId })}>
+                  <Button size="xs" variant="ghost" onClick={() => cancel.mutate({ path: { ...path, positionId: b.positionId, queueId: b.queueId } })}>
                     Cancel
                   </Button>
                 </div>
@@ -211,7 +213,7 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
               e.preventDefault();
               if (!orders.length || overBudget) return;
               trainAll.mutate(
-                orders.map((o) => ({ troopId: o.u.typeId, count: o.count })),
+                { path, body: { orders: orders.map((o) => ({ troopId: o.u.typeId, count: o.count })), split: splitting, positionId: fort ? undefined : pos } },
                 {
                   onSuccess: (r) => {
                     setCounts({});

@@ -1,21 +1,21 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getPlayerQueryKey, getWorldZonesOptions, postPlayer } from '@marchlands/api-client';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { api, errorMessage, tokenStore, unwrap } from '@/lib/api';
+import { errorMessage, tokenStore } from '@/lib/api';
 import { GENDERS } from '@/lib/genders';
-import { qk } from '@/hooks/use-game';
 import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
 
 export function CreateLordPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const zones = useQuery({ queryKey: ['zones'], queryFn: () => unwrap(api.GET('/api/v1/world/zones')) });
+  const zones = useQuery(getWorldZonesOptions());
   const [sex, setSex] = useState('0');
   const [zone, setZone] = useState('-1');
   const [error, setError] = useState<string | null>(null);
@@ -27,20 +27,19 @@ export function CreateLordPage() {
     setBusy(true);
     setError(null);
     try {
-      const created = await unwrap(
-        api.POST('/api/v1/player', {
-          body: {
-            userName: String(form.get('userName')),
-            castleName: String(form.get('castleName')),
-            flag: String(form.get('flag')),
-            sex: Number(sex),
-            zone: Number(zone),
-          },
-        }),
-      );
+      const { data: created } = await postPlayer({
+        body: {
+          userName: String(form.get('userName')),
+          castleName: String(form.get('castleName')),
+          flag: String(form.get('flag')),
+          sex: Number(sex),
+          zone: Number(zone),
+        },
+        throwOnError: true,
+      });
       tokenStore.set(created.token);
       const { token: _token, ...state } = created;
-      qc.setQueryData(qk.player, state);
+      qc.setQueryData(getPlayerQueryKey(), state);
       navigate(`/cities/${state.castles[0]?.id ?? 0}`, { replace: true });
     } catch (err) {
       setError(errorMessage(err));

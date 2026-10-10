@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import type { CityBean } from '@marchlands/api-client';
+import { getArmiesQueryKey, getCitiesByCityIdQueryKey, postCitiesArmies, postCitiesArmiesEstimate, type CityBean } from '@marchlands/api-client';
 import {
   armyLoad,
   buildingLevel,
@@ -22,8 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MISSION_NAMES } from '@/components/armies-panel/constants';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { duration, fmt, fmtExact, troopName } from '@/lib/format';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
@@ -81,24 +80,27 @@ export function SendForm({ city, target, onDone }: { city: CityBean; target: Sen
   };
 
   const estimate = useMutation({
-    mutationFn: () =>
-      unwrap(api.POST('/api/v1/cities/{cityId}/armies/estimate', { params: { path }, body: { targetTileId: target.tileId, troops: troopBody } })),
+    mutationFn: async () => {
+      const { data } = await postCitiesArmiesEstimate({ path, body: { targetTileId: target.tileId, troops: troopBody }, throwOnError: true });
+      return data;
+    },
   });
   const send = useCommand(
-    () =>
-      unwrap(
-        api.POST('/api/v1/cities/{cityId}/armies', {
-          params: { path },
-          body: {
-            targetTileId: target.tileId,
-            mission: Number(mission),
-            troops: troopBody,
-            resources: Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY ? resourceBody : undefined,
-            heroId: heroId === 'none' ? null : Number(heroId),
-          },
-        }),
-      ),
-    () => [qk.armies, qk.city(city.id)],
+    async () => {
+      const { data } = await postCitiesArmies({
+        path,
+        body: {
+          targetTileId: target.tileId,
+          mission: Number(mission),
+          troops: troopBody,
+          resources: Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY ? resourceBody : undefined,
+          heroId: heroId === 'none' ? null : Number(heroId),
+        },
+        throwOnError: true,
+      });
+      return data;
+    },
+    () => [getArmiesQueryKey(), getCitiesByCityIdQueryKey({ path: { cityId: city.id } })],
     'Army dispatched',
   );
   const carriesResources = Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY;

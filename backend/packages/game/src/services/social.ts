@@ -6,6 +6,7 @@ import { chatMessages, playerRelations, players } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
 import { escapeHtml } from '../helpers.ts';
 import { findPlayerByName, getPlayer } from '../repo.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 // ---------------------------------------------------------------------------------------------
 // Friends & blocks
@@ -77,7 +78,7 @@ export async function worldChat(ctx: Ctx, playerId: number, rawMsg: string, chan
   assertNotMuted(p, ctx.now);
   const msg = cleanMessage(rawMsg);
   await ctx.tx.insert(chatMessages).values({ channel, fromPlayerId: p.id, fromName: p.name, message: msg, sentAt: ctx.now });
-  ctx.broadcast('server.ChannelChatMsg', {
+  ctx.broadcast(PushCmd.CHANNEL_CHAT_MESSAGE, {
     msg: await decorate(ctx, p, msg),
     languageType: 0,
     fromUser: p.name,
@@ -99,7 +100,7 @@ export async function allianceChat(ctx: Ctx, playerId: number, rawMsg: string) {
   const memberRows = await ctx.tx.select({ id: players.id }).from(players).where(eq(players.allianceId, p.allianceId));
   ctx.push(
     memberRows.map((r) => r.id),
-    'server.AllianceChatMsg',
+    PushCmd.ALLIANCE_CHAT_MESSAGE,
     { msg, languageType: 0, fromUser: p.name, fromId: p.id, channel: 'alliance', time: ctx.now },
   );
 }
@@ -114,7 +115,7 @@ export async function privateChat(ctx: Ctx, playerId: number, targetName: string
   const msg = cleanMessage(rawMsg);
   if (await isBlocked(ctx, target.id, p.id)) return; // silently dropped, as if delivered
   await ctx.tx.insert(chatMessages).values({ channel: 'private', fromPlayerId: p.id, fromName: p.name, toPlayerId: target.id, message: msg, sentAt: ctx.now });
-  ctx.push(target.id, 'server.PrivateChatMessage', { msg, chatType: 0, fromUser: p.name, fromId: p.id, time: ctx.now });
+  ctx.push(target.id, PushCmd.PRIVATE_CHAT_MESSAGE, { msg, chatType: 0, fromUser: p.name, fromId: p.id, time: ctx.now });
 }
 
 /** Recent history of a channel (world / beginner / alliance / private). */

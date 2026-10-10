@@ -1,21 +1,19 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { getMarketHistoryOptions } from '@marchlands/api-client';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { api, unwrap } from '@/lib/api';
 import { fmtExact } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { mk } from '@/components/market-panel/constants';
 import { fmtPrice, resLabel } from '@/components/market-panel/utils';
 import { chartConfig } from '@/components/market-panel/price-history/constants';
 
 export function PriceHistory({ resType }: { resType: number }) {
   const history = useQuery({
-    queryKey: mk.history(resType),
+    ...getMarketHistoryOptions({ path: { resType } }),
     refetchInterval: 10_000,
     placeholderData: keepPreviousData,
-    queryFn: () => unwrap(api.GET('/api/v1/market/{resType}/history', { params: { path: { resType } } })),
   });
   const h = history.data;
   const data = (h?.candles ?? []).map((c) => ({ ...c, label: new Date(c.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }));

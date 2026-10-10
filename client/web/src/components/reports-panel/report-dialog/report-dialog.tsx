@@ -1,25 +1,30 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
+import {
+  getReportsByReportIdOptions,
+  getReportsByReportIdQueryKey,
+  getReportsQueryKey,
+  getReportsUnreadQueryKey,
+  postReportsDeleteMutation,
+} from '@marchlands/api-client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCommand } from '@/hooks/use-game';
 import { useSticky } from '@/hooks/use-sticky';
-import { api, unwrap } from '@/lib/api';
-import { rk } from '@/components/reports-panel/constants';
+import { allOf } from '@/lib/query-keys';
 import { ReportContent } from '@/components/reports-panel/report-dialog/report-content/report-content';
 
 export function ReportDialog({ reportId, onClose }: { reportId: number | null; onClose: () => void }) {
   const id = useSticky(reportId);
   const detail = useQuery({
-    queryKey: rk.detail(id ?? 0),
+    ...getReportsByReportIdOptions({ path: { reportId: id ?? 0 } }),
     enabled: id != null,
-    queryFn: () => unwrap(api.GET('/api/v1/reports/{reportId}', { params: { path: { reportId: id! } } })),
   });
   const remove = useCommand(
-    (reportId: number) => unwrap(api.POST('/api/v1/reports/delete', { body: { ids: [reportId] } })),
-    () => [['reports']],
+    postReportsDeleteMutation(),
+    () => [allOf(getReportsQueryKey), getReportsUnreadQueryKey(), allOf(getReportsByReportIdQueryKey)],
     'Report deleted',
   );
   // opening a report marks it read on the server: refresh the list and the unread counters
@@ -27,8 +32,8 @@ export function ReportDialog({ reportId, onClose }: { reportId: number | null; o
   const loadedId = detail.data?.id;
   useEffect(() => {
     if (loadedId == null) return;
-    void qc.invalidateQueries({ queryKey: ['reports', 'list'] });
-    void qc.invalidateQueries({ queryKey: rk.unread });
+    void qc.invalidateQueries({ queryKey: allOf(getReportsQueryKey) });
+    void qc.invalidateQueries({ queryKey: getReportsUnreadQueryKey() });
   }, [loadedId, qc]);
   const r = detail.data;
   return (
@@ -56,7 +61,7 @@ export function ReportDialog({ reportId, onClose }: { reportId: number | null; o
               variant="ghost"
               className="text-destructive"
               disabled={remove.isPending}
-              onClick={() => remove.mutate(r.id, { onSuccess: onClose })}
+              onClick={() => remove.mutate({ body: { ids: [r.id] } }, { onSuccess: onClose })}
             >
               <Trash2 /> Delete
             </Button>

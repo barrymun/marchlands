@@ -1,7 +1,19 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Eye } from 'lucide-react';
-import type { CityBean, MapCastle } from '@marchlands/api-client';
+import {
+  deleteValleysByTileIdMutation,
+  getArmiesQueryKey,
+  getCitiesByCityIdQueryKey,
+  getMapOptions,
+  getMapQueryKey,
+  getMapTilesByTileIdOptions,
+  getMapTilesByTileIdQueryKey,
+  getPlayerQueryKey,
+  postValleysUpgradeMutation,
+  type CityBean,
+  type MapCastle,
+} from '@marchlands/api-client';
 import { Mission, Relation, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
@@ -11,8 +23,8 @@ import { SendArmyDialog } from '@/components/send-army-dialog/send-army-dialog';
 import type { SendTarget } from '@/components/send-army-dialog/types';
 import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add-to-farm-button';
 import { CityDialog } from '@/components/city-dialog/city-dialog';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand, usePlayer } from '@/hooks/use-game';
+import { allOf } from '@/lib/query-keys';
 import { fmt } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { relationGroup } from '@/components/map-panel/utils';
@@ -27,14 +39,12 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const [moveTo, setMoveTo] = useState<{ x: number; y: number } | null>(null);
   const wrap = (v: number) => ((v % mapSize) + mapSize) % mapSize;
   const view = useQuery({
-    queryKey: qk.map(center.x, center.y),
+    ...getMapOptions({ query: { x1: center.x - R, y1: center.y - R, x2: center.x + R, y2: center.y + R } }),
     placeholderData: keepPreviousData,
-    queryFn: () => unwrap(api.GET('/api/v1/map', { params: { query: { x1: center.x - R, y1: center.y - R, x2: center.x + R, y2: center.y + R } } })),
   });
   const info = useQuery({
-    queryKey: ['tile', selected],
+    ...getMapTilesByTileIdOptions({ path: { tileId: selected! } }),
     enabled: selected != null,
-    queryFn: () => unwrap(api.GET('/api/v1/map/tiles/{tileId}', { params: { path: { tileId: selected! } } })),
   });
   const castles = new Map<string, MapCastle>((view.data?.castles ?? []).map((c) => [`${c.x},${c.y}`, c]));
   // valleys held by this city, then by the lord's other cities
@@ -45,13 +55,19 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   // other lords' valleys in view, coloured by relation
   const others = new Map((view.data?.valleys ?? []).filter((v) => !owned.has(v.id) && v.relation !== Relation.SELF).map((v) => [v.id, v]));
   const release = useCommand(
-    (tileId: number) => unwrap(api.DELETE('/api/v1/valleys/{tileId}', { params: { path: { tileId } } })),
-    () => [qk.city(city.id), qk.player, ['map'], ['tile'], qk.armies],
+    deleteValleysByTileIdMutation(),
+    () => [
+      getCitiesByCityIdQueryKey({ path: { cityId: city.id } }),
+      getPlayerQueryKey(),
+      allOf(getMapQueryKey),
+      allOf(getMapTilesByTileIdQueryKey),
+      getArmiesQueryKey(),
+    ],
     'Valley released; any troops stationed there are marching home',
   );
   const upgrade = useCommand(
-    (tileId: number) => unwrap(api.POST('/api/v1/valleys/{tileId}/upgrade', { params: { path: { tileId } }, body: { cityId: city.id } })),
-    () => [qk.city(city.id), ['map'], ['tile']],
+    postValleysUpgradeMutation(),
+    () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } }), allOf(getMapQueryKey), allOf(getMapTilesByTileIdQueryKey)],
     'Valley upgraded',
   );
   const goTo = (x: number, y: number) => {
@@ -195,7 +211,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                       title="Release this valley?"
                       description="Troops stationed there march home and its production bonus stops. Taking it back means attacking it again."
                       confirmLabel="Release valley"
-                      onConfirm={() => release.mutateAsync(info.data!.id)}
+                      onConfirm={() => release.mutateAsync({ path: { tileId: info.data!.id } })}
                     >
                       Release valley
                     </ConfirmButton>
@@ -203,7 +219,12 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                   </div>
                 )}
                 {'upgradeCost' in info.data && !info.data.owner && (VALLEY_TYPES.includes(info.data.type) || info.data.type === TileType.NPC) && (
-                  <ValleyUpgrade city={city} tile={info.data} onUpgrade={(tileId) => upgrade.mutateAsync(tileId)} pending={upgrade.isPending} />
+                  <ValleyUpgrade
+                    city={city}
+                    tile={info.data}
+                    onUpgrade={(tileId) => upgrade.mutateAsync({ path: { tileId }, body: { cityId: city.id } })}
+                    pending={upgrade.isPending}
+                  />
                 )}
                 {info.data.type === TileType.FLAT && 'owner' in info.data && !info.data.owner && (
                   <Button size="sm" variant="outline" className="justify-self-start" onClick={() => setMoveTo({ x: info.data!.x, y: info.data!.y })}>
@@ -300,7 +321,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
                       title="Release this valley?"
                       description="Troops stationed there march home and its production bonus stops. Taking it back means attacking it again."
                       confirmLabel="Release valley"
-                      onConfirm={() => release.mutateAsync(v.id)}
+                      onConfirm={() => release.mutateAsync({ path: { tileId: v.id } })}
                     >
                       Release
                     </ConfirmButton>

@@ -5,13 +5,13 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react';
-import type { CityBean, Flow } from '@marchlands/api-client';
+import { deletePlayerFlowsByFlowId, getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows, type CityBean, type Flow } from '@marchlands/api-client';
 import { describeFlowAction } from '@marchlands/core';
 import { toast } from 'sonner';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { api, errorMessage, unwrap } from '@/lib/api';
+import { errorMessage } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import type { EditDraft } from '@/components/flows-panel/types';
 import { currentAction, keyed, strip } from '@/components/flows-panel/utils';
@@ -23,7 +23,7 @@ import { CitiesSummary } from '@/components/flows-panel/cities-summary/cities-su
 
 export function FlowsPanel({ city }: { city: CityBean }) {
   const qc = useQueryClient();
-  const flows = useQuery({ queryKey: ['flows'], queryFn: () => unwrap(api.GET('/api/v1/player/flows')) });
+  const flows = useQuery(getPlayerFlowsOptions());
   const list = flows.data ?? [];
   // the flow being edited: a saved one (id) or a new one (id null)
   const [editing, setEditing] = useState<EditDraft | null>(null);
@@ -31,10 +31,12 @@ export function FlowsPanel({ city }: { city: CityBean }) {
   const selected = list.find((f) => f.id === selectedId) ?? null;
 
   const save = useMutation({
-    mutationFn: (e: NonNullable<typeof editing>) =>
-      unwrap(api.POST('/api/v1/player/flows', { body: { id: e.id, name: e.name.trim(), actions: e.actions.map(strip), cities: e.cities } })),
+    mutationFn: async (e: NonNullable<typeof editing>) => {
+      const { data } = await postPlayerFlows({ body: { id: e.id, name: e.name.trim(), actions: e.actions.map(strip), cities: e.cities }, throwOnError: true });
+      return data;
+    },
     onSuccess: (saved, e) => {
-      qc.setQueryData(['flows'], saved);
+      qc.setQueryData(getPlayerFlowsQueryKey(), saved);
       const flow = e.id ? saved.find((f) => f.id === e.id) : (saved.find((f) => f.name === e.name.trim()) ?? saved[saved.length - 1]);
       setSelectedId(flow?.id ?? null);
       setEditing(null);
@@ -43,9 +45,12 @@ export function FlowsPanel({ city }: { city: CityBean }) {
     onError: (err) => toast.error(errorMessage(err)),
   });
   const remove = useMutation({
-    mutationFn: (id: string) => unwrap(api.DELETE('/api/v1/player/flows/{flowId}', { params: { path: { flowId: id } } })),
+    mutationFn: async (id: string) => {
+      const { data } = await deletePlayerFlowsByFlowId({ path: { flowId: id }, throwOnError: true });
+      return data;
+    },
     onSuccess: (saved) => {
-      qc.setQueryData(['flows'], saved);
+      qc.setQueryData(getPlayerFlowsQueryKey(), saved);
       setSelectedId(null);
       toast.success('Flow deleted');
     },

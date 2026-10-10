@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import websocket from '@fastify/websocket';
+import { operationIdOf } from './operation-id.ts';
 import { jsonSchemaTransform, jsonSchemaTransformObject, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { sql } from 'drizzle-orm';
 import type { Db } from '@marchlands/db';
@@ -16,6 +17,7 @@ import militaryRoutes from './routes/military.ts';
 import playerRoutes from './routes/player.ts';
 import socialRoutes from './routes/social.ts';
 import { sendPush, type PushGateway } from './ws/gateway.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 export interface BuildOptions {
   db: Db;
@@ -55,7 +57,12 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
       },
       components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } } },
     },
-    transform: jsonSchemaTransform,
+    // every operation gets an operationId (the generated client's function names): method + path
+    transform: (input) => {
+      const out = jsonSchemaTransform(input);
+      const method = [input.route.method].flat()[0];
+      return { ...out, schema: { operationId: operationIdOf(String(method), input.url), ...out.schema } };
+    },
     transformObject: jsonSchemaTransformObject,
   });
   await app.register(swaggerUi, { routePrefix: '/docs' });
@@ -71,7 +78,7 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     const token = (req.query as Record<string, string>).token;
     const claims = token ? verifyToken(token, config.jwtSecret) : null;
     if (!claims || !gateway) {
-      sendPush(socket, { cmd: 'server.ConnectionLost', data: { reasonCode: 5, msg: 'Not logged in.' } });
+      sendPush(socket, { cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: 'Not logged in.' } });
       socket.close(4001, 'unauthorized');
       return;
     }
@@ -80,16 +87,16 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     try {
       playerId = await playerIdOf(db, req);
     } catch {
-      sendPush(socket, { cmd: 'server.ConnectionLost', data: { reasonCode: 5, msg: 'need create player' } });
+      sendPush(socket, { cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: 'need create player' } });
       socket.close(4004, 'no player');
       return;
     }
     gateway.add(playerId, socket);
-    sendPush(socket, { cmd: 'server.Connected', data: { playerId, serverTime: Date.now() } });
+    sendPush(socket, { cmd: PushCmd.CONNECTED, data: { playerId, serverTime: Date.now() } });
     socket.on('message', (raw: Buffer) => {
       try {
         const msg = JSON.parse(raw.toString()) as { cmd?: string };
-        if (msg.cmd === 'ping') sendPush(socket, { cmd: 'pong', data: { serverTime: Date.now() } });
+        if (msg.cmd === 'ping') sendPush(socket, { cmd: PushCmd.PONG, data: { serverTime: Date.now() } });
       } catch {
         /* ignore malformed frames */
       }

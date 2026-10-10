@@ -1,9 +1,3 @@
-export const rk = {
-  list: (type: number | null, page: number) => ['reports', 'list', type, page] as const,
-  unread: ['reports', 'unread'] as const,
-  detail: (id: number) => ['reports', 'detail', id] as const,
-};
-
 export const TABS = [
   { id: 'all', label: 'All', type: null, count: 'count' },
   { id: 'army', label: 'Military', type: 1, count: 'army_count' },

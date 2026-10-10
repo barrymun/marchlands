@@ -4,19 +4,19 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Swords } from 'lucide-react';
-import type { CityBean, Flow } from '@marchlands/api-client';
+import { getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows, type CityBean, type Flow } from '@marchlands/api-client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { api, errorMessage, unwrap } from '@/lib/api';
+import { errorMessage } from '@/lib/api';
 import type { AttackAction } from '@/components/flow-attack/types';
 import { targetCap } from '@/components/flow-attack/utils';
 
 /** Map tab: add a tile to this city's targets in a flow that has an "Attack targets" action. */
 export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; tileId: number; tileName: string }) {
   const qc = useQueryClient();
-  const flows = useQuery({ queryKey: ['flows'], queryFn: () => unwrap(api.GET('/api/v1/player/flows')) });
+  const flows = useQuery(getPlayerFlowsOptions());
   const farms = (flows.data ?? []).filter((f) => f.actions.some((a) => a.type === 'attackTargets'));
   const [busy, setBusy] = useState(false);
 
@@ -38,8 +38,8 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
     const cities = flow.cities === 'all' || flow.cities.includes(city.id) ? flow.cities : [...flow.cities, city.id];
     setBusy(true);
     try {
-      const saved = await unwrap(api.POST('/api/v1/player/flows', { body: { id: flow.id, name: flow.name, actions, cities } }));
-      qc.setQueryData(['flows'], saved);
+      const { data: saved } = await postPlayerFlows({ body: { id: flow.id, name: flow.name, actions, cities }, throwOnError: true });
+      qc.setQueryData(getPlayerFlowsQueryKey(), saved);
       toast.success(`Added ${tileName} to "${flow.name}" (${city.name}, target ${list.length + 1})`);
       return true;
     } catch (err) {
@@ -54,12 +54,11 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
   const createList = async (): Promise<boolean> => {
     setBusy(true);
     try {
-      const saved = await unwrap(
-        api.POST('/api/v1/player/flows', {
-          body: { name: 'Farming list', actions: [{ type: 'attackTargets', presetId: '', targets: { [String(city.id)]: [tileId] } }], cities: 'all' },
-        }),
-      );
-      qc.setQueryData(['flows'], saved);
+      const { data: saved } = await postPlayerFlows({
+        body: { name: 'Farming list', actions: [{ type: 'attackTargets', presetId: '', targets: { [String(city.id)]: [tileId] } }], cities: 'all' },
+        throwOnError: true,
+      });
+      qc.setQueryData(getPlayerFlowsQueryKey(), saved);
       toast.success(`Started "Farming list" with ${tileName}`, { description: 'Choose the saved army to send in the Flows tab.' });
       return true;
     } catch (err) {

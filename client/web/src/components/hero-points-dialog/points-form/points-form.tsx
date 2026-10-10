@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
-import type { HeroBean } from '@marchlands/api-client';
+import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postHeroesPointsMutation, postHeroesResetMutation, type HeroBean } from '@marchlands/api-client';
 import { HeroStatus, heroManagement, itemGoldPrice, mayorProductionBonus } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { fmt, signedRate } from '@/lib/format';
 import { HOLY_WATER, STATS } from '@/components/hero-points-dialog/points-form/constants';
 import type { StatKey } from '@/components/hero-points-dialog/points-form/types';
@@ -16,19 +15,9 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
   const [add, setAdd] = useState<Record<StatKey, number>>({ management: 0, power: 0, stratagem: 0 });
   const spent = add.management + add.power + add.stratagem;
   const left = hero.remainPoint - spent;
-  const refresh = () => [qk.city(cityId), qk.player];
-  const assign = useCommand(
-    () =>
-      unwrap(
-        api.POST('/api/v1/heroes/{heroId}/points', {
-          params: { path: { heroId: hero.id } },
-          body: { power: hero.power + add.power, management: hero.management + add.management, stratagem: hero.stratagem + add.stratagem },
-        }),
-      ),
-    refresh,
-    'Points assigned',
-  );
-  const reset = useCommand(() => unwrap(api.POST('/api/v1/heroes/{heroId}/reset', { params: { path: { heroId: hero.id } } })), refresh, 'Points reset');
+  const refresh = () => [getCitiesByCityIdQueryKey({ path: { cityId } }), getPlayerQueryKey()];
+  const assign = useCommand(postHeroesPointsMutation(), refresh, 'Points assigned');
+  const reset = useCommand(postHeroesResetMutation(), refresh, 'Points reset');
 
   const holyWater = player.data?.items.find((i) => i.id === HOLY_WATER)?.count ?? 0;
   // without Holy Water, one is bought with the hero's city gold
@@ -101,7 +90,12 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
           <span className="text-xs text-muted-foreground">
             Reset all {assigned} assigned points · {holyWater > 0 ? `uses 1 Holy Water (${holyWater} owned)` : `${fmt(resetGold)} gold for a Holy Water`}
           </span>
-          <Button size="xs" variant="outline" disabled={!canReset || assigned === 0 || reset.isPending} onClick={() => reset.mutate(undefined)}>
+          <Button
+            size="xs"
+            variant="outline"
+            disabled={!canReset || assigned === 0 || reset.isPending}
+            onClick={() => reset.mutate({ path: { heroId: hero.id } })}
+          >
             Reset
           </Button>
         </div>
@@ -110,7 +104,18 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
         <Button variant="outline" onClick={onDone}>
           Cancel
         </Button>
-        <Button disabled={spent === 0 || assign.isPending} onClick={() => assign.mutate(undefined, { onSuccess: onDone })}>
+        <Button
+          disabled={spent === 0 || assign.isPending}
+          onClick={() =>
+            assign.mutate(
+              {
+                path: { heroId: hero.id },
+                body: { power: hero.power + add.power, management: hero.management + add.management, stratagem: hero.stratagem + add.stratagem },
+              },
+              { onSuccess: onDone },
+            )
+          }
+        >
           Assign {spent > 0 ? spent : ''} point{spent === 1 ? '' : 's'}
         </Button>
       </DialogFooter>

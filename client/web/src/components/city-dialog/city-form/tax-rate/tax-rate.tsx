@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import type { CityBean } from '@marchlands/api-client';
+import { getCitiesByCityIdQueryKey, putCitiesTaxMutation, type CityBean } from '@marchlands/api-client';
 import { merchantBase, merchantFixed } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { qk, useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand } from '@/hooks/use-game';
 import { signedRate } from '@/lib/format';
 import { FIELD_LABEL, FIELD_RES } from '@/components/city-dialog/city-form/constants';
 
@@ -16,11 +15,7 @@ import { FIELD_LABEL, FIELD_RES } from '@/components/city-dialog/city-form/const
 export function TaxRate({ city }: { city: CityBean }) {
   const r = city.resource;
   const [draft, setDraft] = useState<string | null>(null);
-  const save = useCommand(
-    (rate: number) => unwrap(api.PUT('/api/v1/cities/{cityId}/tax', { params: { path: { cityId: city.id } }, body: { rate } })),
-    () => [qk.city(city.id)],
-    'Tax rate saved',
-  );
+  const save = useCommand(putCitiesTaxMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })], 'Tax rate saved');
   const rate = Math.min(100, Math.max(0, Number(draft ?? r.taxRate) || 0));
   // gross output per game hour: the net rate plus what upkeep and the current tax take
   const gross = Object.fromEntries(FIELD_RES.map((k) => [k, r[k].increaseRate - r[k].breakdown.upkeep - r[k].breakdown.tax])) as Record<
@@ -46,7 +41,11 @@ export function TaxRate({ city }: { city: CityBean }) {
           onChange={(e) => setDraft(e.target.value.replace(/\D/g, '').slice(0, 3))}
         />
         <span className="text-sm text-muted-foreground">%</span>
-        <Button size="sm" disabled={rate === r.taxRate || save.isPending} onClick={() => save.mutate(rate, { onSuccess: () => setDraft(null) })}>
+        <Button
+          size="sm"
+          disabled={rate === r.taxRate || save.isPending}
+          onClick={() => save.mutate({ path: { cityId: city.id }, body: { rate } }, { onSuccess: () => setDraft(null) })}
+        >
           Save rate
         </Button>
       </div>

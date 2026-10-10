@@ -1,13 +1,30 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CirclePlay, Eye, Square } from 'lucide-react';
-import type { Flow, FlowRunReport } from '@marchlands/api-client';
+import {
+  getCitiesBuildingsAvailableQueryKey,
+  getCitiesBuildingsByPositionIdQueryKey,
+  getCitiesByCityIdQueryKey,
+  getCitiesFortificationsQueuesQueryKey,
+  getCitiesFortificationsTrainableQueryKey,
+  getCitiesResearchQueryKey,
+  getCitiesTroopsQueuesQueryKey,
+  getCitiesTroopsTrainableQueryKey,
+  getPlayerFlowsQueryKey,
+  getPlayerQueryKey,
+  postPlayerFlowsRepeat,
+  postPlayerFlowsRun,
+  postPlayerFlowsStop,
+  type Flow,
+  type FlowRunReport,
+} from '@marchlands/api-client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { qk, usePlayer } from '@/hooks/use-game';
-import { api, errorMessage, unwrap } from '@/lib/api';
+import { usePlayer } from '@/hooks/use-game';
+import { errorMessage } from '@/lib/api';
+import { allOf } from '@/lib/query-keys';
 import type { Targets } from '@/components/flows-panel/types';
 import { LastRun } from '@/components/flows-panel/run-flow/last-run/last-run';
 import { RunReport } from '@/components/flows-panel/run-flow/run-report/run-report';
@@ -23,13 +40,26 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
   const picked = targets === 'all' ? cities.map((c) => c.id) : targets.filter((id) => own.has(id));
   const [preview, setPreview] = useState<FlowRunReport | null>(null);
   const refresh = () => {
-    void qc.invalidateQueries({ queryKey: ['flows'] });
+    void qc.invalidateQueries({ queryKey: getPlayerFlowsQueryKey() });
     // heroes, resources, population and queues changed in the cities that ran
-    for (const key of [['city'], qk.player, ['queues'], ['trainable'], ['research'], ['upgrade'], ['available']]) void qc.invalidateQueries({ queryKey: key });
+    for (const key of [
+      allOf(getCitiesByCityIdQueryKey),
+      getPlayerQueryKey(),
+      allOf(getCitiesTroopsQueuesQueryKey),
+      allOf(getCitiesFortificationsQueuesQueryKey),
+      allOf(getCitiesTroopsTrainableQueryKey),
+      allOf(getCitiesFortificationsTrainableQueryKey),
+      allOf(getCitiesResearchQueryKey),
+      allOf(getCitiesBuildingsByPositionIdQueryKey),
+      allOf(getCitiesBuildingsAvailableQueryKey),
+    ])
+      void qc.invalidateQueries({ queryKey: key });
   };
   const run = useMutation({
-    mutationFn: (asPreview: boolean) =>
-      unwrap(api.POST('/api/v1/player/flows/{flowId}/run', { params: { path: { flowId: flow.id } }, body: { cityIds: picked, preview: asPreview } })),
+    mutationFn: async (asPreview: boolean) => {
+      const { data } = await postPlayerFlowsRun({ path: { flowId: flow.id }, body: { cityIds: picked, preview: asPreview }, throwOnError: true });
+      return data;
+    },
     onSuccess: (r) => {
       if (r.preview) return setPreview(r);
       setPreview(null);
@@ -42,9 +72,12 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
     onError: (err) => toast.error(errorMessage(err)),
   });
   const repeat = useMutation({
-    mutationFn: (on: boolean) => unwrap(api.POST('/api/v1/player/flows/{flowId}/repeat', { params: { path: { flowId: flow.id } }, body: { repeat: on } })),
+    mutationFn: async (on: boolean) => {
+      const { data } = await postPlayerFlowsRepeat({ path: { flowId: flow.id }, body: { repeat: on }, throwOnError: true });
+      return data;
+    },
     onSuccess: (list, on) => {
-      qc.setQueryData(['flows'], list);
+      qc.setQueryData(getPlayerFlowsQueryKey(), list);
       setPreview(null);
       refresh();
       toast.success(on ? `${flow.name}: repeats until a run fails or you switch it off` : `${flow.name}: stops after this run`);
@@ -52,9 +85,12 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
     onError: (err) => toast.error(errorMessage(err)),
   });
   const stop = useMutation({
-    mutationFn: () => unwrap(api.POST('/api/v1/player/flows/{flowId}/stop', { params: { path: { flowId: flow.id } } })),
+    mutationFn: async () => {
+      const { data } = await postPlayerFlowsStop({ path: { flowId: flow.id }, throwOnError: true });
+      return data;
+    },
     onSuccess: (list) => {
-      qc.setQueryData(['flows'], list);
+      qc.setQueryData(getPlayerFlowsQueryKey(), list);
       toast.success(`${flow.name}: stopped`);
     },
     onError: (err) => toast.error(errorMessage(err)),

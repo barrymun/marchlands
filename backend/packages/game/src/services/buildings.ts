@@ -42,6 +42,7 @@ import { prefixed } from '../stats.ts';
 import { saveCity, saveHero, savePlayer } from '../repo.ts';
 import { checkBeginner } from './player.ts';
 import { clearTavern } from './heroes.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 const refKey = (cityId: number, pos: number) => `building:${cityId}:${pos}`;
 
@@ -62,7 +63,7 @@ function scheduleBuilding(ctx: Ctx, b: CityBundle, bld: BuildingState) {
 }
 
 function pushBuilding(ctx: Ctx, b: CityBundle, bld: BuildingState) {
-  ctx.push(b.player.id, 'server.BuildComplate', { castleId: b.city.id, buildingBean: buildingBean(bld) });
+  ctx.push(b.player.id, PushCmd.BUILD_COMPLETE, { castleId: b.city.id, buildingBean: buildingBean(bld) });
 }
 
 async function commit(ctx: Ctx, b: CityBundle) {
@@ -316,7 +317,7 @@ export async function completeBuilding(ctx: Ctx, cityId: number, positionId: num
     if (mayor) {
       addHeroExp(mayor, buildingHeroExp(bld.typeId, level, th));
       await saveHero(ctx, mayor);
-      ctx.push(playerId, 'server.HeroUpdate', { castleId: cityId, hero: heroBean(mayor), updateType: 2 });
+      ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: cityId, hero: heroBean(mayor), updateType: 2 });
     }
     if (bld.typeId === BuildingType.INN) await clearTavern(ctx, cityId);
     if (bld.typeId === BuildingType.TOWN_HALL) await checkBeginner(ctx, b.player, level);

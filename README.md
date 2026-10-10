@@ -88,13 +88,14 @@ backend/packages/db/src/schema.ts ──► SQL migrations (drizzle-kit)
 shared/contracts  (drizzle-zod row schemas → API responses, requests, pushes)
           │  route schemas: validation, response serialization, compile-time checks
           ▼
-backend/services/api ──► OpenAPI 3.1 (shared/api-client/openapi.json)
-          │                         │  openapi-typescript
+backend/services/api ──► OpenAPI 3.1 (shared/api-client/openapi.json; operationId = method + path)
+          │                         │  Hey API (@hey-api/openapi-ts)
           ▼                         ▼
-       /docs              shared/api-client/src/generated/openapi.ts ──► client/web
+       /docs              shared/api-client/src/generated/  SDK functions, types,
+                                                            TanStack Query options ──► client/web
 ```
 
-Change a column, contract or route, then run `npm run gen:api` (no database or server needed) to refresh the OpenAPI document, the generated client types and `docs/api-endpoints.md`. `npm run typecheck` then flags every backend handler and client call that no longer fits. Responses are validated on the way out and unknown keys are stripped, so the contract is exactly what clients receive.
+Change a column, contract or route, then run `npm run gen:api` (no database or server needed) to refresh the OpenAPI document, the generated client (SDK functions, types and TanStack Query options) and `docs/api-endpoints.md`. `npm run typecheck` then flags every backend handler and client call that no longer fits. Responses are validated on the way out and unknown keys are stripped, so the contract is exactly what clients receive.
 
 ## Development
 

@@ -30,6 +30,7 @@ import type { Ctx } from '../context.ts';
 import { gainResources, pushResources, spendGold } from '../helpers.ts';
 import { citiesOf, saveCity } from '../repo.ts';
 import { createReport, ReportType } from './reports.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 export const RES_TYPES = ['food', 'wood', 'stone', 'iron'] as const;
 const GOLD = 4;
@@ -402,7 +403,7 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
         ms: shipmentMs(await marketLevelOf(ctx, other.cityId)),
       });
     }
-    ctx.push(other.playerId, 'server.TradesUpdate', { resType: o.resType, amount: f.qty, price: other.price });
+    ctx.push(other.playerId, PushCmd.TRADES_UPDATE, { resType: o.resType, amount: f.qty, price: other.price });
     await createReport(ctx, {
       playerId: other.playerId,
       typeId: ReportType.TRADE,
@@ -487,7 +488,7 @@ export async function merchantSweep(ctx: Ctx) {
           createdAt: ctx.now,
         });
         tradeStat(ctx, o.playerId, o.cityId, side === Side.BUY, res, f.qty, gold);
-        ctx.push(o.playerId, 'server.TradesUpdate', { resType, amount: f.qty, price: f.gold / f.qty });
+        ctx.push(o.playerId, PushCmd.TRADES_UPDATE, { resType, amount: f.qty, price: f.gold / f.qty });
         await createReport(ctx, {
           playerId: o.playerId,
           typeId: ReportType.TRADE,
@@ -557,5 +558,5 @@ export async function deliverShipment(ctx: Ctx, shipmentId: number) {
   await ctx.tx.delete(marketShipments).where(eq(marketShipments.id, shipmentId));
   await saveCity(ctx, b.city);
   pushResources(ctx, b);
-  ctx.push(s.playerId, 'server.TransingTradeUpdate', { id: s.id, delivered: true, resType: s.resType, amount: s.amount, castleId: cityId });
+  ctx.push(s.playerId, PushCmd.TRANSIT_TRADE_UPDATE, { id: s.id, delivered: true, resType: s.resType, amount: s.amount, castleId: cityId });
 }

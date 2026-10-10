@@ -1,6 +1,6 @@
 // One API client, one push socket, and the stored access token.
 
-import { ApiError, PushClient, createApiClient, unwrap } from '@marchlands/api-client';
+import { ApiError, PushClient, configureApi } from '@marchlands/api-client';
 
 const TOKEN_KEY = 'marchlands.token';
 
@@ -33,7 +33,8 @@ export const tokenStore = {
   },
 };
 
-export const api = createApiClient({
+// the generated SDK functions and TanStack Query options all use this one configured client
+configureApi({
   baseUrl: import.meta.env.VITE_API_URL ?? '',
   getToken: tokenStore.get,
   onUnauthorized: () => tokenStore.set(null),
@@ -44,7 +45,7 @@ export const push = new PushClient({
   getToken: tokenStore.get,
 });
 
-export { ApiError, unwrap };
+export { ApiError };
 
 export function errorMessage(err: unknown): string {
   if (err instanceof ApiError) return err.message;

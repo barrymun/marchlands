@@ -2,7 +2,21 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, GripVertical, Lock, LockOpen, RefreshCw } from 'lucide-react';
-import type { CityBean, HeroBean } from '@marchlands/api-client';
+import {
+  getCitiesByCityIdQueryKey,
+  getCitiesTavernOptions,
+  getCitiesTavernQueryKey,
+  patchHeroesByHeroIdMutation,
+  postCitiesTavernHireMutation,
+  postCitiesTavernRefreshMutation,
+  postHeroesFireMutation,
+  postHeroesLevelUp,
+  postHeroesMayorMutation,
+  putCitiesHeroesOrder,
+  putHeroesLockMutation,
+  type CityBean,
+  type HeroBean,
+} from '@marchlands/api-client';
 import { toast } from 'sonner';
 import { BuildingType, HeroStatus, heroAtMaxLevel, heroManagement, mayorProductionBonus, levelsReady } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +28,8 @@ import { HeroPointsDialog } from '@/components/hero-points-dialog/hero-points-di
 import { HeroItemsDialog } from '@/components/hero-items-dialog/hero-items-dialog';
 import { GearCard } from '@/components/hero-gear/gear-card/gear-card';
 import { HeroGearLine } from '@/components/hero-gear/hero-gear-line/hero-gear-line';
-import { qk, useCommand } from '@/hooks/use-game';
-import { api, errorMessage, unwrap } from '@/lib/api';
+import { useCommand } from '@/hooks/use-game';
+import { errorMessage } from '@/lib/api';
 import { fmt, signedRate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { HeroRow } from '@/components/heroes-panel/hero-row/hero-row';
@@ -25,53 +39,36 @@ import { STATUS } from '@/components/heroes-panel/constants';
 export function HeroesPanel({ city }: { city: CityBean }) {
   const navigate = useNavigate();
   const hasInn = city.buildings.some((b) => b.typeId === BuildingType.INN && b.level > 0);
-  const tavern = useQuery({
-    queryKey: ['tavern', city.id],
-    enabled: hasInn,
-    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/tavern', { params: { path: { cityId: city.id } } })),
-  });
-  const refresh = () => [qk.city(city.id), ['tavern', city.id]];
-  const hire = useCommand(
-    (heroId: number) => unwrap(api.POST('/api/v1/cities/{cityId}/tavern/{heroId}/hire', { params: { path: { cityId: city.id, heroId } } })),
-    refresh,
-    'Hero hired',
-  );
-  const reroll = useCommand(
-    () => unwrap(api.POST('/api/v1/cities/{cityId}/tavern/refresh', { params: { path: { cityId: city.id } } })),
-    refresh,
-    'New heroes at the Inn',
-  );
-  const mayor = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/mayor', { params: { path: { heroId } } })), refresh, 'Mayor appointed');
+  const cityPath = { path: { cityId: city.id } };
+  const tavern = useQuery({ ...getCitiesTavernOptions(cityPath), enabled: hasInn });
+  const refresh = () => [getCitiesByCityIdQueryKey(cityPath), getCitiesTavernQueryKey(cityPath)];
+  const hire = useCommand(postCitiesTavernHireMutation(), refresh, 'Hero hired');
+  const reroll = useCommand(postCitiesTavernRefreshMutation(), refresh, 'New heroes at the Inn');
+  const mayor = useCommand(postHeroesMayorMutation(), refresh, 'Mayor appointed');
   // one click takes every level the experience pays for
   const levelUp = useCommand(async (heroId: number) => {
     const before = city.heros.find((h) => h.id === heroId)?.level;
-    const h = await unwrap(api.POST('/api/v1/heroes/{heroId}/level-up', { params: { path: { heroId } } }));
+    const { data: h } = await postHeroesLevelUp({ path: { heroId }, throwOnError: true });
     const gained = before != null ? h.level - before : 1;
     toast.success(`${h.name} reached level ${h.level}${gained > 1 ? ` (+${gained} levels, +${gained} points)` : ''}`);
     return h;
   }, refresh);
-  const rename = useCommand(
-    (v: { heroId: number; name: string }) => unwrap(api.PATCH('/api/v1/heroes/{heroId}', { params: { path: { heroId: v.heroId } }, body: { name: v.name } })),
-    refresh,
-    'Hero renamed',
-  );
-  const fire = useCommand((heroId: number) => unwrap(api.POST('/api/v1/heroes/{heroId}/fire', { params: { path: { heroId } } })), refresh, 'Hero dismissed');
-  const lock = useCommand(
-    (v: { heroId: number; locked: boolean }) =>
-      unwrap(api.PUT('/api/v1/heroes/{heroId}/lock', { params: { path: { heroId: v.heroId } }, body: { locked: v.locked } })),
-    () => [qk.city(city.id)],
-  );
+  const rename = useCommand(patchHeroesByHeroIdMutation(), refresh, 'Hero renamed');
+  const fire = useCommand(postHeroesFireMutation(), refresh, 'Hero dismissed');
+  const lock = useCommand(putHeroesLockMutation(), () => [getCitiesByCityIdQueryKey(cityPath)]);
   const [dismissing, setDismissing] = useState<HeroBean | null>(null);
 
   // the lord's order of the hero list: shown at once, saved on the server
   const qc = useQueryClient();
   const reorder = useMutation({
-    mutationFn: (heroIds: number[]) => unwrap(api.PUT('/api/v1/cities/{cityId}/heroes/order', { params: { path: { cityId: city.id } }, body: { heroIds } })),
+    mutationFn: async (heroIds: number[]) => (await putCitiesHeroesOrder({ ...cityPath, body: { heroIds }, throwOnError: true })).data,
     onMutate: (heroIds) =>
-      qc.setQueryData<CityBean>(qk.city(city.id), (c) => (c ? { ...c, heros: [...c.heros].sort((a, b) => heroIds.indexOf(a.id) - heroIds.indexOf(b.id)) } : c)),
+      qc.setQueryData<CityBean>(getCitiesByCityIdQueryKey(cityPath), (c) =>
+        c ? { ...c, heros: [...c.heros].sort((a, b) => heroIds.indexOf(a.id) - heroIds.indexOf(b.id)) } : c,
+      ),
     onError: (err) => {
       toast.error(errorMessage(err));
-      void qc.invalidateQueries({ queryKey: qk.city(city.id) });
+      void qc.invalidateQueries({ queryKey: getCitiesByCityIdQueryKey(cityPath) });
     },
   });
   const moveHero = (from: number, to: number) => {
@@ -187,7 +184,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
                 note={mayorNote(h)}
                 showExp
                 gear={<HeroGearLine hero={h} cityId={city.id} />}
-                onRename={h.seized ? undefined : (name) => rename.mutateAsync({ heroId: h.id, name }).then(() => undefined)}
+                onRename={h.seized ? undefined : (name) => rename.mutateAsync({ path: { heroId: h.id }, body: { name } }).then(() => undefined)}
               >
                 <Badge variant={h.status === HeroStatus.MAYOR ? 'default' : 'secondary'}>{h.seized ? 'Captive' : (STATUS[h.status] ?? h.status)}</Badge>
                 {!h.seized && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR) && (
@@ -206,7 +203,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
                       id={`lock-${h.id}`}
                       checked={h.locked}
                       disabled={lock.isPending}
-                      onCheckedChange={(locked) => lock.mutate({ heroId: h.id, locked })}
+                      onCheckedChange={(locked) => lock.mutate({ path: { heroId: h.id }, body: { locked } })}
                     />
                     <Label htmlFor={`lock-${h.id}`} className="gap-1 text-xs font-normal">
                       {h.locked ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
@@ -221,7 +218,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
                 )}
                 {h.status === HeroStatus.IDLE && !h.seized && (
                   <>
-                    <Button size="xs" variant="outline" onClick={() => mayor.mutate(h.id)}>
+                    <Button size="xs" variant="outline" onClick={() => mayor.mutate({ path: { heroId: h.id } })}>
                       Make mayor
                     </Button>
                     <Button
@@ -254,7 +251,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
                     size="sm"
                     variant="outline"
                     disabled={reroll.isPending || city.resource.gold < tavern.data.refreshCost}
-                    onClick={() => reroll.mutate()}
+                    onClick={() => reroll.mutate(cityPath)}
                   >
                     <RefreshCw /> New offers ({fmt(tavern.data.refreshCost)} gold)
                   </Button>
@@ -263,7 +260,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
               {tavern.data?.heros.map((h) => (
                 <HeroRow key={h.id} hero={h} note={mayorNote(h)}>
                   <span className="text-xs text-muted-foreground tabular-nums">{fmt(h.level * 1000)} gold</span>
-                  <Button size="xs" disabled={hire.isPending} onClick={() => hire.mutate(h.id)}>
+                  <Button size="xs" disabled={hire.isPending} onClick={() => hire.mutate({ path: { cityId: city.id, heroId: h.id } })}>
                     Hire
                   </Button>
                 </HeroRow>
@@ -273,7 +270,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
         </Card>
         <GearCard onResearch={() => navigate(`/cities/${city.id}/research`)} />
       </div>
-      <DismissHeroDialog hero={dismissing} onCancel={() => setDismissing(null)} onConfirm={(h) => fire.mutateAsync(h.id)} />
+      <DismissHeroDialog hero={dismissing} onCancel={() => setDismissing(null)} onConfirm={(h) => fire.mutateAsync({ path: { heroId: h.id } })} />
       <HeroItemsDialog hero={city.heros.find((h) => h.id === itemsFor) ?? null} cityId={city.id} onClose={() => setItemsFor(null)} />
       <HeroPointsDialog
         hero={city.heros.find((h) => h.id === pointsFor) ?? null}

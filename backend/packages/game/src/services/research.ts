@@ -35,6 +35,7 @@ import { resyncHeroGear } from './heroes.ts';
 import { addPrestige, gainResources, pushPlayerInfo, pushResources, spendGold, spendResources, useItemOrGold } from '../helpers.ts';
 import { prefixed } from '../stats.ts';
 import { citiesOf, getPlayer, saveCity, saveHero, savePlayer, type PlayerRow } from '../repo.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 const refKey = (playerId: number, techId: number) => `research:${playerId}:${techId}`;
 
@@ -112,7 +113,7 @@ export async function startResearch(ctx: Ctx, playerId: number, cityId: number, 
   b.player.research = { ...research, [techId]: { level: level - 1, cityId, startTime: ctx.now, endTime: ctx.now + ms } };
   ctx.schedule({ type: 'research', dueAt: ctx.now + ms, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
   // other open clients (e.g. the activity dock on another device) refresh their research list
-  ctx.push(playerId, 'server.ResearchUpdate', { castleId: cityId, typeId: techId, endTime: ctx.now + ms });
+  ctx.push(playerId, PushCmd.RESEARCH_UPDATE, { castleId: cityId, typeId: techId, endTime: ctx.now + ms });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, b.player);
@@ -129,7 +130,7 @@ export async function cancelResearch(ctx: Ctx, playerId: number, cityId: number,
   ctx.stat(playerId, cityId, prefixed('spent.research', paid, -BALANCE.cancelResearchRefund));
   b.player.research = { ...b.player.research, [techId]: { level: r.level } };
   ctx.unschedule(refKey(playerId, techId));
-  ctx.push(playerId, 'server.ResearchUpdate', { castleId: cityId, typeId: techId, endTime: 0 });
+  ctx.push(playerId, PushCmd.RESEARCH_UPDATE, { castleId: cityId, typeId: techId, endTime: 0 });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, b.player);
@@ -171,7 +172,7 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
   // (marchlands) the start moves back by the time saved, like construction (buildings.ts speedup)
   p.research = { ...p.research, [techId]: { ...r, startTime: (r.startTime ?? ctx.now) - (end - newEnd), endTime: newEnd } };
   ctx.schedule({ type: 'research', dueAt: newEnd, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
-  ctx.push(playerId, 'server.ResearchUpdate', { castleId: cityId, typeId: techId, endTime: newEnd });
+  ctx.push(playerId, PushCmd.RESEARCH_UPDATE, { castleId: cityId, typeId: techId, endTime: newEnd });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, p);
@@ -211,10 +212,10 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
   if (mayor) {
     addHeroExp(mayor, researchHeroExp(techId, level, th));
     await saveHero(ctx, mayor);
-    ctx.push(playerId, 'server.HeroUpdate', { castleId: home!.city.id, hero: heroBean(mayor), updateType: 2 });
+    ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: home!.city.id, hero: heroBean(mayor), updateType: 2 });
   }
   await savePlayer(ctx, p);
-  ctx.push(playerId, 'server.ResearchCompleteUpdate', { castleId: r.cityId!, typeId: techId, level });
+  ctx.push(playerId, PushCmd.RESEARCH_COMPLETE_UPDATE, { castleId: r.cityId!, typeId: techId, level });
   for (const b of bundles) pushResources(ctx, b);
   await pushPlayerInfo(ctx, p);
   // Hero Enhancement raises every hero's gear (gear.ts)

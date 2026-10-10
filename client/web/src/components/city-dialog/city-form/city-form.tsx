@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import type { CityBean } from '@marchlands/api-client';
+import {
+  getCitiesByCityIdQueryKey,
+  getMapQueryKey,
+  getMapTilesByTileIdQueryKey,
+  getPlayerQueryKey,
+  patchCitiesByCityIdMutation,
+  postCitiesMoveMutation,
+  type CityBean,
+} from '@marchlands/api-client';
 import { BALANCE, itemConfig, itemGoldPrice, BuffId } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,10 +15,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Countdown } from '@/components/countdown/countdown';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';
-import { api, unwrap } from '@/lib/api';
+import { allOf } from '@/lib/query-keys';
 import { fmt } from '@/lib/format';
 import { TELEPORT } from '@/components/city-dialog/city-form/constants';
 import { WorkRates } from '@/components/city-dialog/city-form/work-rates/work-rates';
@@ -22,17 +30,14 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
   const [name, setName] = useState('');
   const [x, setX] = useState(target ? String(target.x) : '');
   const [y, setY] = useState(target ? String(target.y) : '');
-  const refresh = () => [qk.city(city.id), qk.player, ['map'], ['tile']];
-  const rename = useCommand(
-    () => unwrap(api.PATCH('/api/v1/cities/{cityId}', { params: { path: { cityId: city.id } }, body: { name: name.trim() } })),
-    refresh,
-    'City renamed',
-  );
-  const move = useCommand(
-    (body: { targetTileId: number }) => unwrap(api.POST('/api/v1/cities/{cityId}/move', { params: { path: { cityId: city.id } }, body })),
-    refresh,
-    'City moved',
-  );
+  const refresh = () => [
+    getCitiesByCityIdQueryKey({ path: { cityId: city.id } }),
+    getPlayerQueryKey(),
+    allOf(getMapQueryKey),
+    allOf(getMapTilesByTileIdQueryKey),
+  ];
+  const rename = useCommand(patchCitiesByCityIdMutation(), refresh, 'City renamed');
+  const move = useCommand(postCitiesMoveMutation(), refresh, 'City moved');
   const size = BALANCE.mapSize;
   const tx = Number(x);
   const ty = Number(y);
@@ -59,7 +64,10 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
           <Label htmlFor="city-name">Rename</Label>
           <div className="flex gap-2">
             <Input id="city-name" value={name} maxLength={20} placeholder={city.name} onChange={(e) => setName(e.target.value)} />
-            <Button disabled={!name.trim() || rename.isPending} onClick={() => rename.mutate(undefined, { onSuccess: () => setName('') })}>
+            <Button
+              disabled={!name.trim() || rename.isPending}
+              onClick={() => rename.mutate({ path: { cityId: city.id }, body: { name: name.trim() } }, { onSuccess: () => setName('') })}
+            >
               Rename
             </Button>
           </div>
@@ -78,7 +86,7 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
             <Button
               disabled={!validXY || !!cooldown || move.isPending || (owned === 0 && city.resource.gold < price)}
               title={owned > 0 ? undefined : `Bought with ${city.name}'s gold`}
-              onClick={() => move.mutate({ targetTileId: ty * size + tx }, { onSuccess: onDone })}
+              onClick={() => move.mutate({ path: { cityId: city.id }, body: { targetTileId: ty * size + tx } }, { onSuccess: onDone })}
             >
               Teleport
             </Button>

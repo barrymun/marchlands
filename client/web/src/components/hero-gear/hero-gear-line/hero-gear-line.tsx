@@ -1,11 +1,10 @@
 // (marchlands) Hero gear (shared/core gear.ts): the lord's 14 pieces with their level and stars, and
 // on each hero card the gear bonus and the attribute it boosts.
 
-import type { HeroBean, LordGear } from '@marchlands/api-client';
+import { getCitiesByCityIdQueryKey, putHeroesGearStatMutation, type HeroBean, type LordGear } from '@marchlands/api-client';
 import { GEAR_STATS, heroGearBreakdown } from '@marchlands/core';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { attributeOfStat } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
 import { maxLevel } from '@/components/hero-gear/constants';
@@ -13,10 +12,7 @@ import { maxLevel } from '@/components/hero-gear/constants';
 /** On a hero card: the gear bonus this hero gets, its gear tier, and the attribute the gear boosts (free to change). */
 export function HeroGearLine({ hero, cityId }: { hero: HeroBean; cityId: number }) {
   const gear: LordGear | undefined = usePlayer().data?.gear;
-  const setStat = useCommand(
-    (stat: (typeof GEAR_STATS)[number]) => unwrap(api.PUT('/api/v1/heroes/{heroId}/gear-stat', { params: { path: { heroId: hero.id } }, body: { stat } })),
-    () => [qk.city(cityId)],
-  );
+  const setStat = useCommand(putHeroesGearStatMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId } })]);
   if (!gear || hero.seized) return null;
   const { tier, total } = heroGearBreakdown(hero.level, gear);
   const current = attributeOfStat(hero.gearStat);
@@ -45,7 +41,7 @@ export function HeroGearLine({ hero, cityId }: { hero: HeroBean; cityId: number 
               aria-pressed={on}
               title={on ? `Gear boosts ${a.label}` : `Put the gear on ${a.label}`}
               className={cn('rounded px-1.5 py-px font-medium uppercase', on ? a.tone : 'text-muted-foreground hover:bg-muted')}
-              onClick={() => !on && setStat.mutate(stat)}
+              onClick={() => !on && setStat.mutate({ path: { heroId: hero.id }, body: { stat } })}
             >
               {a.short}
             </button>

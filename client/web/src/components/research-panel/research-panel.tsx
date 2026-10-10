@@ -1,5 +1,5 @@
 import { CircleCheck } from 'lucide-react';
-import type { CityBean } from '@marchlands/api-client';
+import { getCitiesByCityIdQueryKey, getCitiesResearchQueryKey, postCitiesResearchMutation, type CityBean } from '@marchlands/api-client';
 import { BALANCE, buildingLevel, BuildingType, heroStratagem, HeroStatus, heroTimeMultiplier, researchHeroExp } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,8 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { TimerBar } from '@/components/timer-bar/timer-bar';
 import { CostList } from '@/components/cost-list/cost-list';
 import { Requirements } from '@/components/requirements/requirements';
-import { qk, useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand } from '@/hooks/use-game';
 import { STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { useResearchList } from '@/components/research-panel/hooks';
@@ -18,12 +17,8 @@ import { ResearchJob } from '@/components/research-panel/research-job/research-j
 export function ResearchPanel({ city }: { city: CityBean }) {
   const path = { cityId: city.id };
   const list = useResearchList(city.id);
-  const refresh = () => [qk.research(city.id), qk.city(city.id)];
-  const start = useCommand(
-    (techId: number) => unwrap(api.POST('/api/v1/cities/{cityId}/research', { params: { path }, body: { techId } })),
-    refresh,
-    'Research started',
-  );
+  const refresh = () => [getCitiesResearchQueryKey({ path }), getCitiesByCityIdQueryKey({ path })];
+  const start = useCommand(postCitiesResearchMutation(), refresh, 'Research started');
   if (list.isPending) return <Skeleton className="h-64" />;
   if (!list.data) return null;
   if (list.data.academyLevel === 0) {
@@ -111,7 +106,7 @@ export function ResearchPanel({ city }: { city: CityBean }) {
                 {t.effectiveLevel < t.level && <span className="ml-1 text-xs text-muted-foreground">(effective {t.effectiveLevel})</span>}
               </span>
               {t.next && (
-                <Button size="sm" disabled={!t.permission || start.isPending} onClick={() => start.mutate(t.typeId)}>
+                <Button size="sm" disabled={!t.permission || start.isPending} onClick={() => start.mutate({ path, body: { techId: t.typeId } })}>
                   Research
                 </Button>
               )}

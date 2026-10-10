@@ -38,9 +38,10 @@ import type { Ctx } from '../context.ts';
 import { heroBean } from '../dto.ts';
 import { addItem, assertClean, cleanName, consumeItem, itemCount, pushResources, spendGold, spendResources } from '../helpers.ts';
 import { findCity, gearOfHero, getHero, getPlayer, heroesOfCity, saveCity, saveHero, savePlayer, type HeroRow } from '../repo.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 export const pushHero = (ctx: Ctx, playerId: number, h: HeroRow, updateType: 0 | 1 | 2) =>
-  ctx.push(playerId, 'server.HeroUpdate', { castleId: h.cityId, hero: heroBean(h), updateType });
+  ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: h.cityId, hero: heroBean(h), updateType });
 
 /** Hired heroes (incl. captives held) a city has room for: Feasting Hall level. */
 export const heroSlots = (b: CityBundle) => buildingLevel(b.city.buildings, BuildingType.FEASTING_HALL);
@@ -397,9 +398,9 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     const running = h.buffs.find((x) => x.id === attr && x.endTime > ctx.now);
     const endTime = (running?.endTime ?? ctx.now) + HERO_ATTRIBUTE_BUFF.durationMs;
     h.buffs = [...h.buffs.filter((x) => x.id !== attr), { id: attr, desc: `${attr} +25%`, endTime, param: amount }];
-    if (attr === 'power') h.powerBuffAdded = amount;
-    if (attr === 'management') h.managementBuffAdded = amount;
-    if (attr === 'stratagem') h.stratagemBuffAdded = amount;
+    if (attr === HeroBuffId.POWER) h.powerBuffAdded = amount;
+    if (attr === HeroBuffId.MANAGEMENT) h.managementBuffAdded = amount;
+    if (attr === HeroBuffId.STRATAGEM) h.stratagemBuffAdded = amount;
     ctx.schedule({ type: 'hero.buff', dueAt: endTime, playerId, refKey: `herobuff:${h.id}:${attr}`, payload: { heroId: h.id, attr } });
   } else throw new GameError('Invalid Item.', -99);
   await saveHero(ctx, h);
@@ -414,11 +415,11 @@ export async function expireHeroBuff(ctx: Ctx, heroId: number, attr: string) {
   if (!h) return;
   const b = h.buffs.find((x) => x.id === attr);
   if (!b || b.endTime > ctx.now) return;
-  const city = attr === 'management' ? await openMayorCity(ctx, h) : null;
+  const city = attr === HeroBuffId.MANAGEMENT ? await openMayorCity(ctx, h) : null;
   h.buffs = h.buffs.filter((x) => x.id !== attr);
-  if (attr === 'power') h.powerBuffAdded = 0;
-  if (attr === 'management') h.managementBuffAdded = 0;
-  if (attr === 'stratagem') h.stratagemBuffAdded = 0;
+  if (attr === HeroBuffId.POWER) h.powerBuffAdded = 0;
+  if (attr === HeroBuffId.MANAGEMENT) h.managementBuffAdded = 0;
+  if (attr === HeroBuffId.STRATAGEM) h.stratagemBuffAdded = 0;
   await saveHero(ctx, h);
   if (h.playerId) pushHero(ctx, h.playerId, h, 2);
   await closeMayorCity(ctx, city, h);
@@ -443,7 +444,7 @@ export async function releaseCaptive(ctx: Ctx, captorId: number, heroId: number)
   const homeCity = home ? await findCity(ctx, home) : undefined;
   if (!homeCity || homeCity.playerId !== h.playerId) {
     await ctx.tx.delete(heroes).where(eq(heroes.id, heroId));
-    ctx.push(captorId, 'server.HeroUpdate', { castleId: h.cityId, hero: heroBean(h), updateType: 1 });
+    ctx.push(captorId, PushCmd.HERO_UPDATE, { castleId: h.cityId, hero: heroBean(h), updateType: 1 });
     return;
   }
   const prevCity = h.cityId;
@@ -455,7 +456,7 @@ export async function releaseCaptive(ctx: Ctx, captorId: number, heroId: number)
     buffs: h.buffs.filter((x) => x.id !== HeroBuffId.HOME_CITY),
   });
   await saveHero(ctx, h);
-  ctx.push(captorId, 'server.HeroUpdate', { castleId: prevCity, hero: heroBean(h), updateType: 1 });
+  ctx.push(captorId, PushCmd.HERO_UPDATE, { castleId: prevCity, hero: heroBean(h), updateType: 1 });
   if (h.playerId) pushHero(ctx, h.playerId, h, 0);
 }
 
@@ -473,7 +474,7 @@ export async function persuadeCaptive(ctx: Ctx, captorId: number, heroId: number
   const formerOwner = h.playerId;
   Object.assign(h, { playerId: captorId, status: HeroStatus.IDLE, capturedByPlayerId: null, loyalty: 50, buffs: [] });
   await saveHero(ctx, h);
-  if (formerOwner) ctx.push(formerOwner, 'server.HeroUpdate', { castleId: h.cityId, hero: heroBean(h), updateType: 1 });
+  if (formerOwner) ctx.push(formerOwner, PushCmd.HERO_UPDATE, { castleId: h.cityId, hero: heroBean(h), updateType: 1 });
   pushHero(ctx, captorId, h, 0);
   await saveCity(ctx, b.city);
   return heroBean(h);

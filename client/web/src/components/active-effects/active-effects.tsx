@@ -2,7 +2,14 @@
 // so a missing one shows as a gap. A slot's timer turns amber in its last day, and its + button extends it.
 
 import { useState } from 'react';
-import type { CityBean } from '@marchlands/api-client';
+import {
+  getCitiesByCityIdQueryKey,
+  getPlayerQueryKey,
+  postCitiesShopGold,
+  postPlayerItemsUse,
+  postPlayerItemsUseMutation,
+  type CityBean,
+} from '@marchlands/api-client';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -11,9 +18,8 @@ import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog';
 import { GROUPS, OTHER_LABELS, SLOT_BUFFS, STORE_KEY, WARN_MS } from '@/components/active-effects/constants';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
 import { adds, extensionFor, itemName, readCollapsed, slotItems } from '@/components/active-effects/utils';
-import { qk, useCommand } from '@/hooks/use-game';
+import { useCommand } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
-import { api, unwrap } from '@/lib/api';
 import { fmt, fmtExact, shortDuration } from '@/lib/format';
 import { WARN_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
@@ -49,19 +55,20 @@ export function ActiveEffects({
     }
   };
 
-  const refresh = () => [qk.player, qk.city(city.id)];
-  const use = useCommand(
-    (itemId: string) => unwrap(api.POST('/api/v1/player/items/{itemId}/use', { params: { path: { itemId } }, body: { cityId: city.id } })),
-    refresh,
-  );
+  const refresh = () => [getPlayerQueryKey(), getCitiesByCityIdQueryKey({ path: { cityId: city.id } })];
+  const use = useCommand(postPlayerItemsUseMutation(), refresh);
   const buyAndUse = useCommand(async (itemId: string) => {
-    await unwrap(api.POST('/api/v1/cities/{cityId}/shop/gold', { params: { path: { cityId: city.id } }, body: { itemId, amount: 1 } }));
-    return unwrap(api.POST('/api/v1/player/items/{itemId}/use', { params: { path: { itemId } }, body: { cityId: city.id } }));
+    await postCitiesShopGold({ path: { cityId: city.id }, body: { itemId, amount: 1 }, throwOnError: true });
+    const { data } = await postPlayerItemsUse({ path: { itemId }, body: { cityId: city.id }, throwOnError: true });
+    return data;
   }, refresh);
 
   function extend(slot: Slot, ext: NonNullable<Extension>) {
     if (ext.kind === 'buy') return setBuying({ slot, itemId: ext.itemId, price: ext.price });
-    use.mutate(ext.itemId, { onSuccess: () => toast.success(`${slot.label} extended by ${adds(ext.itemId)}`) });
+    use.mutate(
+      { path: { itemId: ext.itemId }, body: { cityId: city.id } },
+      { onSuccess: () => toast.success(`${slot.label} extended by ${adds(ext.itemId)}`) },
+    );
   }
 
   return (

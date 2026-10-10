@@ -1,4 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { api, unwrap } from '@/lib/api';
+import { getPlayerArmyPresetsOptions } from '@marchlands/api-client';
 
-export const usePresets = () => useQuery({ queryKey: ['army-presets'], queryFn: () => unwrap(api.GET('/api/v1/player/army-presets')) });
+export const usePresets = () => useQuery(getPlayerArmyPresetsOptions());

@@ -20,6 +20,7 @@ import { addItem, pushCity, pushPlayerInfo } from '../helpers.ts';
 import { findPlayerByName, getPlayer, saveCity, saveHero, savePlayer } from '../repo.ts';
 import { heroValues, pushHero, resyncHeroGear } from './heroes.ts';
 import { sendSystemMail } from './mail.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 async function target(ctx: Ctx, name: string) {
   const p = await findPlayerByName(ctx, name);
@@ -87,7 +88,7 @@ export async function mute(ctx: Ctx, playerName: string, minutes: number) {
 }
 
 export function broadcast(ctx: Ctx, msg: string, tv = true) {
-  ctx.broadcast('server.SystemInfoMsg', { alliance: false, tV: tv, noSenderSystemInfo: true, msg });
+  ctx.broadcast(PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: tv, noSenderSystemInfo: true, msg });
 }
 
 export async function mailPlayer(ctx: Ctx, playerName: string, title: string, content: string) {

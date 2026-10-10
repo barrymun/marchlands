@@ -34,7 +34,7 @@ import { ReportsPanel } from '@/components/reports-panel/reports-panel';
 import { ResourceBar } from '@/components/resource-bar/resource-bar';
 import { mayorOf } from '@/routes/game/utils';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
-import { tokenStore } from '@/lib/api';
+import { errorMessage, tokenStore } from '@/lib/api';
 import { fmt } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { MayorSummary } from '@/routes/game/mayor-summary/mayor-summary';
@@ -179,7 +179,7 @@ export function GamePage() {
         </header>
         {/* bottom padding leaves room for the floating activity dock */}
         <main className="mx-auto max-w-6xl p-4 pb-24">
-          {city.error && <p className="text-sm text-destructive">{city.error.message}</p>}
+          {city.error && <p className="text-sm text-destructive">{errorMessage(city.error)}</p>}
           {city.isPending && <Skeleton className="h-96" />}
           {city.data && (
             <>

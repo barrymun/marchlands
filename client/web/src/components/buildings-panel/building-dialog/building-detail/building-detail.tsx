@@ -1,6 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { CircleCheck } from 'lucide-react';
-import type { BuildingBean, CityBean } from '@marchlands/api-client';
+import {
+  getCitiesBuildingsByPositionIdOptions,
+  getCitiesBuildingsByPositionIdQueryKey,
+  getCitiesBuildingsSpeedupOptions,
+  getCitiesBuildingsSpeedupQueryKey,
+  getCitiesByCityIdQueryKey,
+  getPlayerQueryKey,
+  postCitiesBuildingsCancelMutation,
+  postCitiesBuildingsDemolishMutation,
+  postCitiesBuildingsSpeedupMutation,
+  postCitiesBuildingsUpgradeMutation,
+  type BuildingBean,
+  type CityBean,
+} from '@marchlands/api-client';
 import { BALANCE } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
@@ -12,8 +25,7 @@ import { TimerBar } from '@/components/timer-bar/timer-bar';
 import { CostList } from '@/components/cost-list/cost-list';
 import { Requirements } from '@/components/requirements/requirements';
 import { SpeedupOptions } from '@/components/speedup-options/speedup-options';
-import { qk, useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand } from '@/hooks/use-game';
 import { buildingName } from '@/lib/format';
 import { STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
@@ -25,67 +37,18 @@ import { Unlocks } from '@/components/buildings-panel/building-dialog/unlocks/un
 export function BuildingDetail({ city, building, onDone }: { city: CityBean; building: BuildingBean; onDone: () => void }) {
   const pos = building.positionId;
   const path = { cityId: city.id, positionId: pos };
-  const info = useQuery({
-    queryKey: qk.upgrade(city.id, pos),
-    queryFn: () =>
-      unwrap(
-        api.GET('/api/v1/cities/{cityId}/buildings/{positionId}', {
-          params: { path },
-        }),
-      ),
-  });
-  const refresh = () => [qk.city(city.id), qk.upgrade(city.id, pos)];
-  const upgrade = useCommand(
-    () =>
-      unwrap(
-        api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/upgrade', {
-          params: { path },
-        }),
-      ),
-    refresh,
-    'Upgrade started',
-  );
-  const demolish = useCommand(
-    () =>
-      unwrap(
-        api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/demolish', {
-          params: { path },
-        }),
-      ),
-    refresh,
-    BALANCE.instantDemolish ? 'Building demolished' : 'Demolition started',
-  );
-  const cancel = useCommand(
-    () =>
-      unwrap(
-        api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/cancel', {
-          params: { path },
-        }),
-      ),
-    refresh,
-    'Cancelled',
-  );
-  const speedup = useCommand(
-    (itemId: string) =>
-      unwrap(
-        api.POST('/api/v1/cities/{cityId}/buildings/{positionId}/speedup', {
-          params: { path },
-          body: { itemId },
-        }),
-      ),
-    () => [...refresh(), qk.player],
-  );
+  const info = useQuery(getCitiesBuildingsByPositionIdOptions({ path }));
+  const refresh = () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } }), getCitiesBuildingsByPositionIdQueryKey({ path })];
+  const upgrade = useCommand(postCitiesBuildingsUpgradeMutation(), refresh, 'Upgrade started');
+  const demolish = useCommand(postCitiesBuildingsDemolishMutation(), refresh, BALANCE.instantDemolish ? 'Building demolished' : 'Demolition started');
+  const cancel = useCommand(postCitiesBuildingsCancelMutation(), refresh, 'Cancelled');
+  // the speed-up cost depends on the time left, so refresh it with the building
+  const speedup = useCommand(postCitiesBuildingsSpeedupMutation(), () => [...refresh(), getPlayerQueryKey(), getCitiesBuildingsSpeedupQueryKey({ path })]);
   const working = building.status !== 0;
   const coins = useQuery({
-    queryKey: ['speedup-cost', city.id, pos, building.endTime],
+    ...getCitiesBuildingsSpeedupOptions({ path }),
     enabled: working,
     refetchInterval: 15_000,
-    queryFn: () =>
-      unwrap(
-        api.GET('/api/v1/cities/{cityId}/buildings/{positionId}/speedup', {
-          params: { path },
-        }),
-      ),
   });
   const have = {
     gold: city.resource.gold,
@@ -113,14 +76,14 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
             goldNeed={coins.data?.goldNeed}
             gold={city.resource.gold}
             pending={speedup.isPending}
-            onUse={(itemId) => speedup.mutate(itemId)}
+            onUse={(itemId) => speedup.mutate({ path, body: { itemId } })}
           />
           <Button
             size="sm"
             variant="outline"
             className="justify-self-start"
             disabled={cancel.isPending}
-            onClick={() => cancel.mutate(undefined, { onSuccess: onDone })}
+            onClick={() => cancel.mutate({ path }, { onSuccess: onDone })}
           >
             Cancel
           </Button>
@@ -145,7 +108,7 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
             <div className="grid gap-2 rounded-md border p-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Upgrade to level {next.level}</span>
-                <Button size="sm" disabled={!next.ok || upgrade.isPending} onClick={() => upgrade.mutate(undefined, { onSuccess: onDone })}>
+                <Button size="sm" disabled={!next.ok || upgrade.isPending} onClick={() => upgrade.mutate({ path }, { onSuccess: onDone })}>
                   Upgrade
                 </Button>
               </div>
@@ -189,7 +152,7 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
                       : 'The level is removed when the demolition finishes.'
                   }
                   confirmLabel="Demolish"
-                  onConfirm={() => demolish.mutateAsync(undefined).then(onDone)}
+                  onConfirm={() => demolish.mutateAsync({ path }).then(onDone)}
                 >
                   Demolish
                 </ConfirmButton>

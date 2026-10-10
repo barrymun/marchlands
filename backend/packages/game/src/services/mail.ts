@@ -7,6 +7,7 @@ import type { Ctx } from '../context.ts';
 import { escapeHtml } from '../helpers.ts';
 import { findPlayerByName, getPlayer } from '../repo.ts';
 import { isBlocked } from './social.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 export const MailFolder = { INBOX: 1, SYSTEM: 2, SENT: 3 } as const;
 
@@ -21,7 +22,7 @@ export async function mailCounts(ctx: Ctx, playerId: number) {
 }
 
 export async function pushMailCounts(ctx: Ctx, playerId: number) {
-  ctx.push(playerId, 'server.NewMail', await mailCounts(ctx, playerId));
+  ctx.push(playerId, PushCmd.NEW_MAIL, await mailCounts(ctx, playerId));
 }
 
 /** System mail (or mail on behalf of a lord, e.g. alliance circulars). */

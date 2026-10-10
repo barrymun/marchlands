@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { itemConfig, itemGoldPrice, BuffId } from '@marchlands/core';
-import type { CityBean } from '@marchlands/api-client';
+import {
+  getCitiesByCityIdQueryKey,
+  getPlayerQueryKey,
+  postPlayerFlagMutation,
+  postPlayerGenderMutation,
+  postPlayerRenameMutation,
+  postPlayerTruceMutation,
+  type CityBean,
+} from '@marchlands/api-client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -9,10 +17,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Countdown } from '@/components/countdown/countdown';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';
-import { api, unwrap } from '@/lib/api';
 import { fmt } from '@/lib/format';
 import { GENDERS } from '@/lib/genders';
 import { TRUCE } from '@/components/lord-dialog/lord-form/constants';
@@ -25,13 +32,13 @@ export function LordForm({ city }: { city?: CityBean }) {
   const [name, setName] = useState('');
   const [flag, setFlag] = useState('');
   const [gender, setGender] = useState<string | null>(null);
-  const refresh = () => [qk.player];
-  const rename = useCommand(() => unwrap(api.POST('/api/v1/player/rename', { body: { userName: name.trim() } })), refresh, 'Player renamed');
-  const changeGender = useCommand((sex: number) => unwrap(api.POST('/api/v1/player/gender', { body: { sex } })), refresh, 'Gender changed');
-  const changeFlag = useCommand(() => unwrap(api.POST('/api/v1/player/flag', { body: { flag: flag.trim() } })), refresh, 'Flag changed');
+  const refresh = () => [getPlayerQueryKey()];
+  const rename = useCommand(postPlayerRenameMutation(), refresh, 'Player renamed');
+  const changeGender = useCommand(postPlayerGenderMutation(), refresh, 'Gender changed');
+  const changeFlag = useCommand(postPlayerFlagMutation(), refresh, 'Flag changed');
   const truce = useCommand(
-    (itemId: string) => unwrap(api.POST('/api/v1/player/truce', { body: { itemId, cityId: city!.id } })),
-    () => [qk.player, ...(city ? [qk.city(city.id)] : [])],
+    postPlayerTruceMutation(),
+    () => [getPlayerQueryKey(), ...(city ? [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })] : [])],
     'Truce in effect',
   );
   const truceGold = itemGoldPrice(TRUCE) ?? 0;
@@ -60,7 +67,10 @@ export function LordForm({ city }: { city?: CityBean }) {
           <Label htmlFor="lord-name">New name</Label>
           <div className="flex gap-2">
             <Input id="lord-name" value={name} maxLength={20} placeholder={info?.userName} onChange={(e) => setName(e.target.value)} />
-            <Button disabled={!name.trim() || renameWait || rename.isPending} onClick={() => rename.mutate(undefined, { onSuccess: () => setName('') })}>
+            <Button
+              disabled={!name.trim() || renameWait || rename.isPending}
+              onClick={() => rename.mutate({ body: { userName: name.trim() } }, { onSuccess: () => setName('') })}
+            >
               Rename
             </Button>
           </div>
@@ -78,7 +88,10 @@ export function LordForm({ city }: { city?: CityBean }) {
           <Label htmlFor="lord-flag">New flag</Label>
           <div className="flex gap-2">
             <Input id="lord-flag" value={flag} maxLength={5} placeholder={info?.flag} onChange={(e) => setFlag(e.target.value)} />
-            <Button disabled={!flag.trim() || changeFlag.isPending} onClick={() => changeFlag.mutate(undefined, { onSuccess: () => setFlag('') })}>
+            <Button
+              disabled={!flag.trim() || changeFlag.isPending}
+              onClick={() => changeFlag.mutate({ body: { flag: flag.trim() } }, { onSuccess: () => setFlag('') })}
+            >
               Change
             </Button>
           </div>
@@ -100,7 +113,7 @@ export function LordForm({ city }: { city?: CityBean }) {
             </Select>
             <Button
               disabled={pickedGender === currentGender || genderWait || changeGender.isPending}
-              onClick={() => changeGender.mutate(Number(pickedGender), { onSuccess: () => setGender(null) })}
+              onClick={() => changeGender.mutate({ body: { sex: Number(pickedGender) } }, { onSuccess: () => setGender(null) })}
             >
               Change
             </Button>
@@ -140,7 +153,7 @@ export function LordForm({ city }: { city?: CityBean }) {
                   variant={owned > 0 ? 'default' : 'outline'}
                   disabled={!city || !!truceBuff || !!truceCooldown || truce.isPending || (owned === 0 && city.resource.gold < truceGold)}
                   title={owned > 0 ? undefined : `Bought with ${city?.name ?? 'the city'}'s gold`}
-                  onClick={() => truce.mutate(TRUCE)}
+                  onClick={() => truce.mutate({ body: { itemId: TRUCE, cityId: city!.id } })}
                 >
                   {itemConfig(TRUCE)?.name} · {owned > 0 ? `×${owned}` : `${fmt(truceGold)} gold`}
                 </Button>

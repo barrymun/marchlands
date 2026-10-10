@@ -7,6 +7,7 @@ import { cityStats, type CityBundle } from './city.ts';
 import type { Ctx } from './context.ts';
 import { buffsArray, cityBean, playerInfo, resourceBean } from './dto.ts';
 import type { CityRow, PlayerRow } from './repo.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 export function assertResources(city: CityRow, cost: Partial<Resources>, message = 'Not enough resources.', code = -1) {
   if (!hasResources(city, cost)) throw new GameError(message, code);
@@ -36,7 +37,7 @@ export function addItem(ctx: Ctx, p: PlayerRow, id: string, n: number) {
   if (next > 0) items[id] = next;
   else delete items[id];
   p.items = items;
-  ctx.push(p.id, 'server.ItemUpdate', { items: [{ id, count: next }] });
+  ctx.push(p.id, PushCmd.ITEM_UPDATE, { items: [{ id, count: next }] });
   if (n) ctx.stat(p.id, 0, { [`items.${n < 0 ? 'used' : 'gained'}.${id}`]: Math.abs(n) });
 }
 
@@ -75,24 +76,24 @@ export function setBuff(ctx: Ctx, p: PlayerRow, id: BuffId, desc: string, endTim
   const buff: BuffState = { id, desc, endTime: end, ...(opts.param != null ? { param: opts.param } : {}), ...(opts.itemId ? { itemId: opts.itemId } : {}) };
   p.buffs = [...p.buffs.filter((b) => b.id !== id && b.endTime > ctx.now), buff];
   ctx.schedule({ type: 'buff.expire', dueAt: end, playerId: p.id, refKey: `buff:${p.id}:${id}`, payload: { buffId: id } });
-  ctx.push(p.id, 'server.PlayerBuffUpdate', { buffBean: { typeId: id, descName: desc, endTime: end }, updateType: 0 });
+  ctx.push(p.id, PushCmd.PLAYER_BUFF_UPDATE, { buffBean: { typeId: id, descName: desc, endTime: end }, updateType: 0 });
 }
 
 export function removeBuff(ctx: Ctx, p: PlayerRow, id: BuffId) {
   const had = p.buffs.find((b) => b.id === id);
   p.buffs = p.buffs.filter((b) => b.id !== id);
   ctx.unschedule(`buff:${p.id}:${id}`);
-  if (had) ctx.push(p.id, 'server.PlayerBuffUpdate', { buffBean: { typeId: id, descName: had.desc, endTime: had.endTime }, updateType: 1 });
+  if (had) ctx.push(p.id, PushCmd.PLAYER_BUFF_UPDATE, { buffBean: { typeId: id, descName: had.desc, endTime: had.endTime }, updateType: 1 });
 }
 
 // ---- pushes ----
 
 export function pushResources(ctx: Ctx, b: CityBundle) {
-  ctx.push(b.player.id, 'server.ResourceUpdate', { castleId: b.city.id, resource: resourceBean(b, cityStats(b, ctx.now)) });
+  ctx.push(b.player.id, PushCmd.RESOURCE_UPDATE, { castleId: b.city.id, resource: resourceBean(b, cityStats(b, ctx.now)) });
 }
 
 export function pushCity(ctx: Ctx, b: CityBundle) {
-  ctx.push(b.player.id, 'server.CastleUpdate', { updateType: 2, castleBean: cityBean(b, ctx.now) });
+  ctx.push(b.player.id, PushCmd.CASTLE_UPDATE, { updateType: 2, castleBean: cityBean(b, ctx.now) });
 }
 
 export async function playerInfoOf(ctx: Ctx, p: PlayerRow) {
@@ -106,11 +107,11 @@ export async function playerInfoOf(ctx: Ctx, p: PlayerRow) {
 }
 
 export async function pushPlayerInfo(ctx: Ctx, p: PlayerRow) {
-  ctx.push(p.id, 'server.PlayerInfoUpdate', { playerInfo: await playerInfoOf(ctx, p) });
+  ctx.push(p.id, PushCmd.PLAYER_INFO_UPDATE, { playerInfo: await playerInfoOf(ctx, p) });
 }
 
 export function pushBuffs(ctx: Ctx, p: PlayerRow) {
-  ctx.push(p.id, 'server.PlayerBuffsUpdate', { buffs: buffsArray(p.buffs, ctx.now) });
+  ctx.push(p.id, PushCmd.PLAYER_BUFFS_UPDATE, { buffs: buffsArray(p.buffs, ctx.now) });
 }
 
 /** Validate a free-text name: length and a conservative character set. */

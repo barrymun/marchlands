@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getReportsByReportIdQueryKey, getReportsOptions, getReportsQueryKey, getReportsUnreadQueryKey, postReportsReadMutation } from '@marchlands/api-client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -8,8 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
-import { PAGE_SIZE, rk, TABS } from '@/components/reports-panel/constants';
+import { allOf } from '@/lib/query-keys';
+import { PAGE_SIZE, TABS } from '@/components/reports-panel/constants';
 import { useUnreadReports } from '@/components/reports-panel/hooks';
 import { ReportRow } from '@/components/reports-panel/report-row/report-row';
 import { ReportDialog } from '@/components/reports-panel/report-dialog/report-dialog';
@@ -21,13 +22,12 @@ export function ReportsPanel() {
   const type = TABS.find((t) => t.id === tab)!.type;
   const unread = useUnreadReports();
   const list = useQuery({
-    queryKey: rk.list(type, page),
+    ...getReportsOptions({ query: { type: type ?? undefined, pageNo: page, pageSize: PAGE_SIZE } }),
     placeholderData: keepPreviousData,
-    queryFn: () => unwrap(api.GET('/api/v1/reports', { params: { query: { type: type ?? undefined, pageNo: page, pageSize: PAGE_SIZE } } })),
   });
   const markAll = useCommand(
-    () => unwrap(api.POST('/api/v1/reports/read', { body: {} })),
-    () => [['reports']],
+    postReportsReadMutation(),
+    () => [allOf(getReportsQueryKey), getReportsUnreadQueryKey(), allOf(getReportsByReportIdQueryKey)],
     'All reports marked as read',
   );
   const reports = list.data?.reports ?? [];
@@ -53,7 +53,7 @@ export function ReportsPanel() {
               ))}
             </TabsList>
           </Tabs>
-          <Button size="sm" variant="outline" disabled={!unread.data?.count || markAll.isPending} onClick={() => markAll.mutate(undefined)}>
+          <Button size="sm" variant="outline" disabled={!unread.data?.count || markAll.isPending} onClick={() => markAll.mutate({ body: {} })}>
             Mark all read
           </Button>
         </div>

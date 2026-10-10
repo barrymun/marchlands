@@ -1,14 +1,19 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Star, Trash2 } from 'lucide-react';
-import type { CityBean } from '@marchlands/api-client';
+import {
+  deletePlayerArmyPresetsByPresetIdMutation,
+  getPlayerArmyPresetsOptions,
+  getPlayerArmyPresetsQueryKey,
+  postPlayerArmyPresetsMutation,
+  type CityBean,
+} from '@marchlands/api-client';
 import { TROOP_ID_BY_KEY, type TroopKey } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
 import { fmtExact, troopName } from '@/lib/format';
 
 /**
@@ -24,21 +29,13 @@ export function ArmyPresets({
   troops: Record<string, number>;
   onLoad: (t: Partial<Record<TroopKey, string>>) => void;
 }) {
-  const presets = useQuery({ queryKey: ['army-presets'], queryFn: () => unwrap(api.GET('/api/v1/player/army-presets')) });
+  const presets = useQuery(getPlayerArmyPresetsOptions());
   const [selected, setSelected] = useState('');
   const [name, setName] = useState('');
   const [short, setShort] = useState('');
   const [managing, setManaging] = useState(false);
-  const save = useCommand(
-    () => unwrap(api.POST('/api/v1/player/army-presets', { body: { name: name.trim(), troops } })),
-    () => [['army-presets']],
-    `Saved "${name.trim()}"`,
-  );
-  const remove = useCommand(
-    (presetId: string) => unwrap(api.DELETE('/api/v1/player/army-presets/{presetId}', { params: { path: { presetId } } })),
-    () => [['army-presets']],
-    'Preset deleted',
-  );
+  const save = useCommand(postPlayerArmyPresetsMutation(), () => [getPlayerArmyPresetsQueryKey()], `Saved "${name.trim()}"`);
+  const remove = useCommand(deletePlayerArmyPresetsByPresetIdMutation(), () => [getPlayerArmyPresetsQueryKey()], 'Preset deleted');
   const list = presets.data ?? [];
   const load = (id: string) => {
     setSelected(id);
@@ -81,12 +78,15 @@ export function ArmyPresets({
                 title="Delete"
                 disabled={remove.isPending}
                 onClick={() =>
-                  remove.mutate(p.id, {
-                    onSuccess: () => {
-                      if (selected === p.id) setSelected('');
-                      if (list.length <= 1) setManaging(false);
+                  remove.mutate(
+                    { path: { presetId: p.id } },
+                    {
+                      onSuccess: () => {
+                        if (selected === p.id) setSelected('');
+                        if (list.length <= 1) setManaging(false);
+                      },
                     },
-                  })
+                  )
                 }
               >
                 <Trash2 />
@@ -114,7 +114,7 @@ export function ArmyPresets({
             variant="ghost"
             aria-label="Delete this saved army"
             disabled={remove.isPending}
-            onClick={() => remove.mutate(selected, { onSuccess: () => (setSelected(''), setShort('')) })}
+            onClick={() => remove.mutate({ path: { presetId: selected } }, { onSuccess: () => (setSelected(''), setShort('')) })}
           >
             <Trash2 />
           </Button>
@@ -127,7 +127,7 @@ export function ArmyPresets({
           size="sm"
           variant="outline"
           disabled={!name.trim() || !hasTroops || save.isPending}
-          onClick={() => save.mutate(undefined, { onSuccess: () => setName('') })}
+          onClick={() => save.mutate({ body: { name: name.trim(), troops } }, { onSuccess: () => setName('') })}
         >
           <Star /> Save
         </Button>

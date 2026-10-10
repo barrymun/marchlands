@@ -1,13 +1,18 @@
 import { useState } from 'react';
-import type { CityBean } from '@marchlands/api-client';
+import {
+  getCitiesByCityIdQueryKey,
+  getPlayerQueryKey,
+  postCitiesTroopsInjuredCureMutation,
+  postCitiesTroopsInjuredDisbandMutation,
+  type CityBean,
+} from '@marchlands/api-client';
 import { BALANCE, healCost, healHonorCost, researchLevel, TechType, TROOP_KEYS, type TroopKey } from '@marchlands/core';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { CostList } from '@/components/cost-list/cost-list';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { fmt, fmtExact } from '@/lib/format';
 import { UnitName } from '@/components/military-panel/unit-name/unit-name';
 
@@ -43,16 +48,15 @@ export function InjuredCard({ city }: { city: CityBean }) {
   const path = { cityId: city.id };
   const done = () => setAmounts({});
   const heal = useCommand(
-    (payWith: 'resources' | 'honor') =>
-      unwrap(api.POST('/api/v1/cities/{cityId}/troops/injured/cure', { params: { path }, body: { troops: chosen, payWith } })),
-    () => [qk.city(city.id), qk.player],
+    postCitiesTroopsInjuredCureMutation(),
+    () => [getCitiesByCityIdQueryKey({ path }), getPlayerQueryKey()],
     `Healed ${fmtExact(total)} troops`,
   );
   const honor = player.data?.playerInfo.honor ?? 0;
   const honorCost = healHonorCost(chosen);
   const dismiss = useCommand(
-    () => unwrap(api.POST('/api/v1/cities/{cityId}/troops/injured/disband', { params: { path }, body: { troops: chosen } })),
-    () => [qk.city(city.id)],
+    postCitiesTroopsInjuredDisbandMutation(),
+    () => [getCitiesByCityIdQueryKey({ path })],
     `Dismissed ${fmtExact(total)} injured troops`,
   );
   return (
@@ -84,7 +88,11 @@ export function InjuredCard({ city }: { city: CityBean }) {
           ))}
           <CostList cost={cost} have={have} />
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" disabled={total <= 0 || !affordable || heal.isPending} onClick={() => heal.mutate('resources', { onSuccess: done })}>
+            <Button
+              size="sm"
+              disabled={total <= 0 || !affordable || heal.isPending}
+              onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: 'resources' } }, { onSuccess: done })}
+            >
               Heal {fmtExact(total)} · resources
             </Button>
             <Button
@@ -92,7 +100,7 @@ export function InjuredCard({ city }: { city: CityBean }) {
               variant="secondary"
               disabled={total <= 0 || honor < honorCost || heal.isPending}
               title={honor < honorCost ? `Not enough honor (${fmtExact(honorCost)} needed)` : undefined}
-              onClick={() => heal.mutate('honor', { onSuccess: done })}
+              onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: 'honor' } }, { onSuccess: done })}
             >
               Heal · {fmt(honorCost)} honor
             </Button>
@@ -103,7 +111,7 @@ export function InjuredCard({ city }: { city: CityBean }) {
               title={`Dismiss ${fmtExact(total)} injured troops?`}
               description="They leave for good instead of being healed. This cannot be undone."
               confirmLabel="Dismiss"
-              onConfirm={() => dismiss.mutateAsync(undefined).then(done)}
+              onConfirm={() => dismiss.mutateAsync({ path, body: { troops: chosen } }).then(done)}
             >
               Dismiss
             </ConfirmButton>

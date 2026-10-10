@@ -22,6 +22,7 @@ import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources
 import { getPlayer, saveCity, savePlayer, type PlayerRow } from '../repo.ts';
 import { heroSlots, heroValues, pushHero } from './heroes.ts';
 import { settleAllCities } from './research.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 const ITEM_TYPE_NAMES: Record<number, string> = { 1: 'Speed up', 2: 'Chest', 3: 'Produce', 4: 'Treasure' };
 
@@ -78,7 +79,7 @@ async function grant(ctx: Ctx, p: PlayerRow, b: CityBundle | null, g: GrantConte
   }
   if (b && g.troops) {
     b.city.troops = addTroops(b.city.troops, g.troops);
-    ctx.push(p.id, 'server.TroopUpdate', { castleId: b.city.id, troop: troopBean(b.city.troops) });
+    ctx.push(p.id, PushCmd.TROOP_UPDATE, { castleId: b.city.id, troop: troopBean(b.city.troops) });
   }
 }
 

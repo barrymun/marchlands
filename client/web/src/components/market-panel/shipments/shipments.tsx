@@ -1,13 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
+import {
+  getCitiesByCityIdQueryKey,
+  getMarketShipmentsOptions,
+  getMarketShipmentsQueryKey,
+  getPlayerQueryKey,
+  postMarketShipmentsSpeedupMutation,
+} from '@marchlands/api-client';
 import { goldForSpeedup } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Countdown } from '@/components/countdown/countdown';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
-import { api, unwrap } from '@/lib/api';
+import { allOf } from '@/lib/query-keys';
 import { fmtExact } from '@/lib/format';
-import { mk } from '@/components/market-panel/constants';
 import { resLabel } from '@/components/market-panel/utils';
 
 /** Only relevant if travel times are re-enabled (BALANCE.marketShipmentBaseMs > 0). */
@@ -15,10 +21,10 @@ export function Shipments() {
   const now = useNow();
   // the receiving city pays to deliver now
   const castles = usePlayer().data?.castles ?? [];
-  const shipments = useQuery({ queryKey: mk.shipments, queryFn: () => unwrap(api.GET('/api/v1/market/shipments')) });
+  const shipments = useQuery(getMarketShipmentsOptions());
   const rush = useCommand(
-    (shipmentId: number) => unwrap(api.POST('/api/v1/market/shipments/{shipmentId}/speedup', { params: { path: { shipmentId } } })),
-    () => [mk.shipments, qk.player, ['city']],
+    postMarketShipmentsSpeedupMutation(),
+    () => [getMarketShipmentsQueryKey(), getPlayerQueryKey(), allOf(getCitiesByCityIdQueryKey)],
     'Delivered',
   );
   const list = (shipments.data ?? []).filter((s) => s.endTime > now + 1000);
@@ -39,7 +45,7 @@ export function Shipments() {
               </span>
               <span className="flex items-center gap-2 text-xs text-muted-foreground">
                 arrives in <Countdown endTime={s.endTime} />
-                <Button size="xs" variant="outline" disabled={rush.isPending || has < gold} onClick={() => rush.mutate(s.id)}>
+                <Button size="xs" variant="outline" disabled={rush.isPending || has < gold} onClick={() => rush.mutate({ path: { shipmentId: s.id } })}>
                   Deliver now · {fmtExact(gold)} gold
                 </Button>
               </span>

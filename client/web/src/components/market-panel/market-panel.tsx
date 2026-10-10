@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import type { CityBean, MarketPriceLevel } from '@marchlands/api-client';
+import { getMarketByResTypeOptions, type CityBean, type MarketPriceLevel } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { api, unwrap } from '@/lib/api';
-import { mk, RESOURCES } from '@/components/market-panel/constants';
+import { RESOURCES } from '@/components/market-panel/constants';
 import type { Mode, Side } from '@/components/market-panel/types';
 import { OrderBook } from '@/components/market-panel/order-book/order-book';
 import { TradeForm } from '@/components/market-panel/trade-form/trade-form';
@@ -20,10 +19,9 @@ export function MarketPanel({ city }: { city: CityBean }) {
   const [mode, setMode] = useState<Mode>('market');
   const [price, setPrice] = useState('');
   const book = useQuery({
-    queryKey: mk.book(resType),
+    ...getMarketByResTypeOptions({ path: { resType } }),
     refetchInterval: 5_000,
     placeholderData: keepPreviousData,
-    queryFn: () => unwrap(api.GET('/api/v1/market/{resType}', { params: { path: { resType } } })),
   });
 
   if (market < 1) {

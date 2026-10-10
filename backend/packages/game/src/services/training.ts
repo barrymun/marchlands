@@ -43,6 +43,7 @@ import { fortBean, heroBean, troopBean } from '../dto.ts';
 import { addPrestige, gainResources, pushPlayerInfo, pushResources, spendResources, useItemOrGold } from '../helpers.ts';
 import { prefixed } from '../stats.ts';
 import { saveCity, saveHero, savePlayer } from '../repo.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 export const WALLS_QUEUE = -2;
 const refKey = (cityId: number, pos: number) => `train:${cityId}:${pos}`;
@@ -98,7 +99,7 @@ function queueBean(positionId: number, queue: TrainBatch[]) {
 }
 
 function pushQueues(ctx: Ctx, b: CityBundle, positionId: number) {
-  ctx.push(b.player.id, positionId === WALLS_QUEUE ? 'server.FortificationsQueueUpdate' : 'server.TroopQueueUpdate', {
+  ctx.push(b.player.id, positionId === WALLS_QUEUE ? PushCmd.FORTIFICATIONS_QUEUE_UPDATE : PushCmd.TROOP_QUEUE_UPDATE, {
     castleId: b.city.id,
     ...queueBean(positionId, queueOf(b, positionId).queue),
   });
@@ -388,10 +389,10 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
   if (mayor && gain + exp > 0) {
     addHeroExp(mayor, gain + exp);
     await saveHero(ctx, mayor);
-    ctx.push(b.player.id, 'server.HeroUpdate', { castleId: cityId, hero: heroBean(mayor), updateType: 2 });
+    ctx.push(b.player.id, PushCmd.HERO_UPDATE, { castleId: cityId, hero: heroBean(mayor), updateType: 2 });
   }
-  if (positionId === WALLS_QUEUE) ctx.push(b.player.id, 'server.FortificationsUpdate', { castleId: cityId, fortification: fortBean(b.city.forts) });
-  else ctx.push(b.player.id, 'server.TroopUpdate', { castleId: cityId, troop: troopBean(b.city.troops) });
+  if (positionId === WALLS_QUEUE) ctx.push(b.player.id, PushCmd.FORTIFICATIONS_UPDATE, { castleId: cityId, fortification: fortBean(b.city.forts) });
+  else ctx.push(b.player.id, PushCmd.TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.troops) });
   pushQueues(ctx, b, positionId);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
@@ -413,7 +414,7 @@ export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, 
   b.city.population = Math.min(stats.maxPopulation, b.city.population + (troopConfig(troopId)?.population ?? 1) * count);
   gainResources(b.city, trainCost(troopId, count), BALANCE.disbandRefund);
   ctx.stat(playerId, cityId, { [`disbanded.${key}`]: count });
-  ctx.push(playerId, 'server.TroopUpdate', { castleId: cityId, troop: troopBean(b.city.troops) });
+  ctx.push(playerId, PushCmd.TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.troops) });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
 }
@@ -426,7 +427,7 @@ export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, f
   if ((b.city.forts[key] ?? 0) < count) throw new GameError(`You do not have that many ${key}.`, -99);
   b.city.forts = addForts(b.city.forts, { [key]: count }, -1);
   ctx.stat(playerId, cityId, { [`disbanded.${key}`]: count });
-  ctx.push(playerId, 'server.FortificationsUpdate', { castleId: cityId, fortification: fortBean(b.city.forts) });
+  ctx.push(playerId, PushCmd.FORTIFICATIONS_UPDATE, { castleId: cityId, fortification: fortBean(b.city.forts) });
   await saveCity(ctx, b.city);
 }
 
@@ -453,8 +454,8 @@ export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, tr
   ctx.stat(playerId, cityId, prefixed('healed', troops));
   b.city.injuredTroops = addTroops(b.city.injuredTroops, troops, -1);
   b.city.troops = addTroops(b.city.troops, troops);
-  ctx.push(playerId, 'server.TroopUpdate', { castleId: cityId, troop: troopBean(b.city.troops) });
-  ctx.push(playerId, 'server.InjuredTroopUpdate', { castleId: cityId, troop: troopBean(b.city.injuredTroops) });
+  ctx.push(playerId, PushCmd.TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.troops) });
+  ctx.push(playerId, PushCmd.INJURED_TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.injuredTroops) });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
 }
@@ -468,6 +469,6 @@ export async function disbandInjured(ctx: Ctx, playerId: number, cityId: number,
   }
   b.city.injuredTroops = addTroops(b.city.injuredTroops, troops, -1);
   ctx.stat(playerId, cityId, prefixed('disbanded', troops));
-  ctx.push(playerId, 'server.InjuredTroopUpdate', { castleId: cityId, troop: troopBean(b.city.injuredTroops) });
+  ctx.push(playerId, PushCmd.INJURED_TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.injuredTroops) });
   await saveCity(ctx, b.city);
 }

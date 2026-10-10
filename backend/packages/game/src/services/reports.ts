@@ -5,6 +5,7 @@ import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
 import { addTroops, GameError, ReportBodySchema, type DesertionReport, type ReportBody, type TroopCounts } from '@marchlands/core';
 import { reports } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 /** Client tabs: 0 trade, 1 army, 2 other. */
 export const ReportType = { TRADE: 0, ARMY: 1, OTHER: 2 } as const;
@@ -102,7 +103,7 @@ export async function reportCounts(ctx: Ctx, playerId: number) {
 }
 
 export async function pushReportCounts(ctx: Ctx, playerId: number) {
-  ctx.push(playerId, 'server.NewReport', await reportCounts(ctx, playerId));
+  ctx.push(playerId, PushCmd.NEW_REPORT, await reportCounts(ctx, playerId));
 }
 
 const listBean = (r: typeof reports.$inferSelect) => ({

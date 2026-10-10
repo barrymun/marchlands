@@ -9,6 +9,7 @@ import { sendSystemMail } from './mail.ts';
 import type { Ctx } from '../context.ts';
 import { assertClean, pushPlayerInfo, spendResources } from '../helpers.ts';
 import { citiesOf, findPlayerByName, getPlayer, saveCity, savePlayer, type PlayerRow } from '../repo.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 export type AllianceRow = typeof alliances.$inferSelect;
 
@@ -55,7 +56,7 @@ async function memberIds(ctx: Ctx, allianceId: number): Promise<number[]> {
 /** Alliance-wide system message + event log entry. */
 async function announce(ctx: Ctx, allianceId: number, msg: string, opts: { noSender?: boolean } = {}) {
   await ctx.tx.insert(allianceEvents).values({ allianceId, message: msg, createdAt: ctx.now });
-  ctx.push(await memberIds(ctx, allianceId), 'server.SystemInfoMsg', {
+  ctx.push(await memberIds(ctx, allianceId), PushCmd.SYSTEM_INFO_MESSAGE, {
     alliance: true,
     sender: 'Alliance Msg',
     tV: false,
@@ -325,13 +326,13 @@ export async function invite(ctx: Ctx, playerId: number, userName: string) {
     .values({ allianceId: p.allianceId!, playerId: target.id, kind: 'invite', invitedByName: p.name, createdAt: ctx.now })
     .onConflictDoNothing();
   const a = await getAlliance(ctx, p.allianceId!);
-  ctx.push(target.id, 'server.SystemInfoMsg', {
+  ctx.push(target.id, PushCmd.SYSTEM_INFO_MESSAGE, {
     alliance: false,
     tV: false,
     noSenderSystemInfo: false,
     msg: `You have been invited to the alliance ${a.name}`,
   });
-  ctx.push(target.id, 'server.AllianceInvite', { allianceName: a.name, invitePerson: p.name });
+  ctx.push(target.id, PushCmd.ALLIANCE_INVITE, { allianceName: a.name, invitePerson: p.name });
 }
 
 /** alliance.canceladdUsertoAlliance */
@@ -600,7 +601,7 @@ export async function setRelation(ctx: Ctx, playerId: number, targetName: string
     target.warCooldownUntil = Math.max(target.warCooldownUntil, until);
     await saveAlliance(ctx, mine);
     await saveAlliance(ctx, target);
-    ctx.broadcast('server.SystemInfoMsg', {
+    ctx.broadcast(PushCmd.SYSTEM_INFO_MESSAGE, {
       alliance: false,
       tV: true,
       noSenderSystemInfo: true,

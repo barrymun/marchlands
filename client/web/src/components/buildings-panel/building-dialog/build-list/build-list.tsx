@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import type { CityBean } from '@marchlands/api-client';
+import { getCitiesBuildingsAvailableOptions, getCitiesByCityIdQueryKey, postCitiesBuildingsMutation, type CityBean } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CostList } from '@/components/cost-list/cost-list';
 import { Requirements } from '@/components/requirements/requirements';
-import { qk, useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand } from '@/hooks/use-game';
 import { buildingName } from '@/lib/format';
 import { areaOf } from '@/components/buildings-panel/building-dialog/build-list/utils';
 import { MayorBuildHint } from '@/components/buildings-panel/building-dialog/mayor-build-hint/mayor-build-hint';
@@ -16,26 +15,8 @@ import { Unlocks } from '@/components/buildings-panel/building-dialog/unlocks/un
 
 export function BuildList({ city, positionId, onDone }: { city: CityBean; positionId: number; onDone: () => void }) {
   const area = areaOf(positionId);
-  const list = useQuery({
-    queryKey: qk.available(city.id, area),
-    queryFn: () =>
-      unwrap(
-        api.GET('/api/v1/cities/{cityId}/buildings/available', {
-          params: { path: { cityId: city.id }, query: { area } },
-        }),
-      ),
-  });
-  const build = useCommand(
-    (typeId: number) =>
-      unwrap(
-        api.POST('/api/v1/cities/{cityId}/buildings', {
-          params: { path: { cityId: city.id } },
-          body: { typeId, positionId },
-        }),
-      ),
-    () => [qk.city(city.id)],
-    'Construction started',
-  );
+  const list = useQuery(getCitiesBuildingsAvailableOptions({ path: { cityId: city.id }, query: { area } }));
+  const build = useCommand(postCitiesBuildingsMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })], 'Construction started');
   const options = (list.data?.buildings ?? []).filter((b) => b != null).filter((b) => (positionId === -1 ? b.typeId === BuildingType.TOWN_HALL : true));
   const have = {
     gold: city.resource.gold,
@@ -57,7 +38,11 @@ export function BuildList({ city, positionId, onDone }: { city: CityBean; positi
           <div key={b.typeId} className="grid gap-2 rounded-md border p-3">
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium">{buildingName(b.typeId)}</span>
-              <Button size="sm" disabled={!b.ok || build.isPending} onClick={() => build.mutate(b.typeId, { onSuccess: onDone })}>
+              <Button
+                size="sm"
+                disabled={!b.ok || build.isPending}
+                onClick={() => build.mutate({ path: { cityId: city.id }, body: { typeId: b.typeId, positionId } }, { onSuccess: onDone })}
+              >
                 Build
               </Button>
             </div>

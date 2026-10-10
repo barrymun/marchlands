@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { rk } from '@/components/reports-panel/constants';
-import { api, unwrap } from '@/lib/api';
+import { getReportsUnreadOptions } from '@marchlands/api-client';
 
 export function useUnreadReports() {
-  return useQuery({ queryKey: rk.unread, queryFn: () => unwrap(api.GET('/api/v1/reports/unread')) });
+  return useQuery(getReportsUnreadOptions());
 }

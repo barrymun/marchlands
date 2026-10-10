@@ -2,13 +2,14 @@
 // on each hero card the gear bonus and the attribute it boosts.
 
 import { Star } from 'lucide-react';
+import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postGearStarMutation } from '@marchlands/api-client';
 import { BALANCE, GEAR_PIECES, gearStarCost, gearStarLimit, itemConfig, TechType } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
-import { api, unwrap } from '@/lib/api';
+import { allOf } from '@/lib/query-keys';
 import { maxLevel, maxStars, starPoints } from '@/components/hero-gear/constants';
 import { Stars } from '@/components/hero-gear/gear-card/stars/stars';
 
@@ -17,11 +18,7 @@ export function GearCard({ onResearch }: { onResearch?: () => void }) {
   const player = usePlayer();
   const inv = useInventory();
   const gear = player.data?.gear;
-  const addStar = useCommand(
-    (pieceId: string) => unwrap(api.POST('/api/v1/gear/{pieceId}/star', { params: { path: { pieceId } } })),
-    () => [qk.player, ['city']],
-    'Star added',
-  );
+  const addStar = useCommand(postGearStarMutation(), () => [getPlayerQueryKey(), allOf(getCitiesByCityIdQueryKey)], 'Star added');
   if (!gear) return null;
   const starLimit = gearStarLimit(gear);
   const research = player.data?.research[TechType.HERO_ENHANCEMENT]?.level ?? 0;
@@ -69,7 +66,12 @@ export function GearCard({ onResearch }: { onResearch?: () => void }) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span>
-                      <Button size="xs" variant="outline" disabled={capped || owned < cost.count || addStar.isPending} onClick={() => addStar.mutate(p.id)}>
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        disabled={capped || owned < cost.count || addStar.isPending}
+                        onClick={() => addStar.mutate({ path: { pieceId: p.id } })}
+                      >
                         <Star className="size-3" /> {capped ? `Needs research ${stars + 1}` : `${cost.count}× ${medal.replace(/ Medal$/, '')}`}
                       </Button>
                     </span>

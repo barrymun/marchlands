@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import type { CityBean } from '@marchlands/api-client';
+import { getCitiesByCityIdQueryKey, putCitiesWorkRatesMutation, type CityBean } from '@marchlands/api-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { qk, useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand } from '@/hooks/use-game';
 import { FIELD_LABEL, FIELD_RES } from '@/components/city-dialog/city-form/constants';
 
 /**
@@ -15,13 +14,10 @@ export function WorkRates({ city }: { city: CityBean }) {
   const current = Object.fromEntries(FIELD_RES.map((r) => [r, city.resource[r].workRate])) as Record<(typeof FIELD_RES)[number], number>;
   const [draft, setDraft] = useState<Record<string, string>>({});
   const value = (r: (typeof FIELD_RES)[number]) => draft[r] ?? String(current[r]);
-  const save = useCommand(
-    (rates: Partial<Record<(typeof FIELD_RES)[number], number>>) =>
-      unwrap(api.PUT('/api/v1/cities/{cityId}/work-rates', { params: { path: { cityId: city.id } }, body: rates })),
-    () => [qk.city(city.id)],
-    'Work rates saved',
-  );
-  const setAll = (n: number) => save.mutate(Object.fromEntries(FIELD_RES.map((r) => [r, n])), { onSuccess: () => setDraft({}) });
+  const save = useCommand(putCitiesWorkRatesMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })], 'Work rates saved');
+  const saveRates = (rates: Partial<Record<(typeof FIELD_RES)[number], number>>) =>
+    save.mutate({ path: { cityId: city.id }, body: rates }, { onSuccess: () => setDraft({}) });
+  const setAll = (n: number) => saveRates(Object.fromEntries(FIELD_RES.map((r) => [r, n])));
   const parsed = Object.fromEntries(FIELD_RES.map((r) => [r, Math.min(100, Math.max(0, Number(value(r)) || 0))])) as Record<(typeof FIELD_RES)[number], number>;
   const dirty = FIELD_RES.some((r) => parsed[r] !== current[r]);
   const workers = FIELD_RES.reduce((t, r) => t + city.resource[r].workPeople, 0);
@@ -46,7 +42,7 @@ export function WorkRates({ city }: { city: CityBean }) {
         ))}
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" disabled={!dirty || save.isPending} onClick={() => save.mutate(parsed, { onSuccess: () => setDraft({}) })}>
+        <Button size="sm" disabled={!dirty || save.isPending} onClick={() => saveRates(parsed)}>
           Save rates
         </Button>
         <Button size="sm" variant="outline" disabled={save.isPending} onClick={() => setAll(0)}>

@@ -1,18 +1,25 @@
 import { useDeferredValue, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { CityBean, MarketMerchant } from '@marchlands/api-client';
+import {
+  getCitiesByCityIdQueryKey,
+  getMarketOrdersMineOptions,
+  getMarketQuoteOptions,
+  postCitiesMarketOrdersMutation,
+  type CityBean,
+  type MarketMerchant,
+} from '@marchlands/api-client';
 import { BALANCE, merchantAffordable } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { qk, useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand } from '@/hooks/use-game';
 import { fmtExact } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { mk, RESOURCES } from '@/components/market-panel/constants';
+import { RESOURCES } from '@/components/market-panel/constants';
+import { allMarketQueries } from '@/lib/query-keys';
 import { fmtPrice } from '@/components/market-panel/utils';
 import type { Mode, Side } from '@/components/market-panel/types';
 
@@ -46,31 +53,16 @@ export function TradeForm({
   const ready = qty >= 1 && (mode === 'market' || unit >= 0.001);
   const deferred = useDeferredValue({ qty, unit, side, mode });
   const quote = useQuery({
-    queryKey: ['market', 'quote', resType, deferred],
+    ...getMarketQuoteOptions({
+      path: { resType },
+      query: { side: deferred.side, amount: deferred.qty, type: deferred.mode, price: deferred.mode === 'limit' ? deferred.unit : undefined },
+    }),
     enabled: ready,
     placeholderData: keepPreviousData,
     refetchInterval: 5_000,
-    queryFn: () =>
-      unwrap(
-        api.GET('/api/v1/market/{resType}/quote', {
-          params: {
-            path: { resType },
-            query: { side: deferred.side, amount: deferred.qty, type: deferred.mode, price: deferred.mode === 'limit' ? deferred.unit : undefined },
-          },
-        }),
-      ),
   });
-  const orders = useQuery({ queryKey: mk.orders, queryFn: () => unwrap(api.GET('/api/v1/market/orders/mine')) });
-  const place = useCommand(
-    () =>
-      unwrap(
-        api.POST('/api/v1/cities/{cityId}/market/orders', {
-          params: { path: { cityId: city.id } },
-          body: { resType, side, amount: qty, type: mode, price: mode === 'limit' ? unit : undefined },
-        }),
-      ),
-    () => [['market'], qk.city(city.id)],
-  );
+  const orders = useQuery(getMarketOrdersMineOptions());
+  const place = useCommand(postCitiesMarketOrdersMutation(), () => [...allMarketQueries(), getCitiesByCityIdQueryKey({ path: { cityId: city.id } })]);
 
   const have = side === 0 ? city.resource.gold : city.resource[res.key].amount;
   const fee = 1 + BALANCE.marketFee;
@@ -183,16 +175,21 @@ export function TradeForm({
         <Button
           disabled={!valid || place.isPending}
           onClick={() =>
-            place.mutate(undefined, {
-              onSuccess: (r) => {
-                setAmount('');
-                const parts = [];
-                if (r.filled > 0)
-                  parts.push(`${side === 0 ? 'Bought' : 'Sold'} ${fmtExact(r.filled)} ${word} for ${fmtExact(r.gold)} gold (avg ${fmtPrice(r.avgPrice ?? 0)})`);
-                if (r.rest > 0) parts.push(`${fmtExact(r.rest)} waiting on the book`);
-                toast.success(parts.join('; '));
+            place.mutate(
+              { path: { cityId: city.id }, body: { resType, side, amount: qty, type: mode, price: mode === 'limit' ? unit : undefined } },
+              {
+                onSuccess: (r) => {
+                  setAmount('');
+                  const parts = [];
+                  if (r.filled > 0)
+                    parts.push(
+                      `${side === 0 ? 'Bought' : 'Sold'} ${fmtExact(r.filled)} ${word} for ${fmtExact(r.gold)} gold (avg ${fmtPrice(r.avgPrice ?? 0)})`,
+                    );
+                  if (r.rest > 0) parts.push(`${fmtExact(r.rest)} waiting on the book`);
+                  toast.success(parts.join('; '));
+                },
               },
-            })
+            )
           }
         >
           {mode === 'market' ? `${side === 0 ? 'Buy' : 'Sell'} now` : `Place ${side === 0 ? 'buy' : 'sell'} order`}

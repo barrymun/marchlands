@@ -83,6 +83,7 @@ import { heroSlots, pushHero } from './heroes.ts';
 import { initialCity, isProtected } from './player.ts';
 import { isFriendly, relationBetween } from './relations.ts';
 import { createReport, ReportType } from './reports.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 // ---------------------------------------------------------------------------------------------
 // Entry point (timed event "army")
@@ -262,7 +263,7 @@ async function returnHome(ctx: Ctx, a: ArmyRow) {
   }
   await deleteArmy(ctx, a);
   await saveCity(ctx, b.city);
-  ctx.push(a.playerId, 'server.TroopUpdate', { castleId: homeId, troop: troopBean(b.city.troops) });
+  ctx.push(a.playerId, PushCmd.TROOP_UPDATE, { castleId: homeId, troop: troopBean(b.city.troops) });
   pushResources(ctx, b);
   await createReport(ctx, {
     playerId: a.playerId,
@@ -345,7 +346,7 @@ async function arriveReinforce(ctx: Ctx, a: ArmyRow, sender: PlayerRow) {
       } else heroLeft = true;
     }
     await saveCity(ctx, t.b.city);
-    ctx.push(a.playerId, 'server.TroopUpdate', { castleId: t.b.city.id, troop: troopBean(t.b.city.troops) });
+    ctx.push(a.playerId, PushCmd.TROOP_UPDATE, { castleId: t.b.city.id, troop: troopBean(t.b.city.troops) });
     pushResources(ctx, t.b);
     await createReport(ctx, {
       playerId: a.playerId,
@@ -611,7 +612,7 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     targetPos: a.targetPosName,
     body: { kind: 'scout', scout: { target: 'city', from: scoutOwner.name, success, battle } },
   });
-  if (cityScouts > 0) ctx.push(def.player.id, 'server.TroopUpdate', { castleId: def.city.id, troop: troopBean(def.city.troops) });
+  if (cityScouts > 0) ctx.push(def.player.id, PushCmd.TROOP_UPDATE, { castleId: def.city.id, troop: troopBean(def.city.troops) });
   if (!success) return armyWiped(ctx, a, hero, def);
   return finishScout(ctx, a, { ...a.troops, scouter: survivors });
 }
@@ -657,7 +658,7 @@ async function armyWiped(ctx: Ctx, a: ArmyRow, hero: HeroRow | null, captor: Cit
       });
       captured = true;
       pushHero(ctx, captor.player.id, hero, 0);
-      ctx.push(a.playerId, 'server.HeroUpdate', { castleId: home, hero: heroBean(hero), updateType: 1 });
+      ctx.push(a.playerId, PushCmd.HERO_UPDATE, { castleId: home, hero: heroBean(hero), updateType: 1 });
     } else {
       hero.status = HeroStatus.IDLE;
       pushHero(ctx, a.playerId, hero, 2);
@@ -745,7 +746,7 @@ async function woundAttackers(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, lost: T
   if (!home) return {};
   home.city.injuredTroops = addTroops(home.city.injuredTroops, injured);
   await saveCity(ctx, home.city);
-  ctx.push(home.player.id, 'server.InjuredTroopUpdate', { castleId: home.city.id, troop: troopBean(home.city.injuredTroops) });
+  ctx.push(home.player.id, PushCmd.INJURED_TROOP_UPDATE, { castleId: home.city.id, troop: troopBean(home.city.injuredTroops) });
   return injured;
 }
 
@@ -907,8 +908,8 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   for (const owner of new Set(stationed.map((s) => s.playerId).filter((id) => id !== def.player.id))) {
     await createReport(ctx, { ...reportCommon, playerId: owner, title: 'Reinforcements Fought' });
   }
-  ctx.push(def.player.id, 'server.TroopUpdate', { castleId: def.city.id, troop: troopBean(def.city.troops) });
-  ctx.push(def.player.id, 'server.FortificationsUpdate', { castleId: def.city.id, fortification: fortBean(def.city.forts) });
+  ctx.push(def.player.id, PushCmd.TROOP_UPDATE, { castleId: def.city.id, troop: troopBean(def.city.troops) });
+  ctx.push(def.player.id, PushCmd.FORTIFICATIONS_UPDATE, { castleId: def.city.id, fortification: fortBean(def.city.forts) });
   pushResources(ctx, def);
   if (totalTroops(r.attacker.after) <= 0) {
     await armyWiped(ctx, a, hero, def);

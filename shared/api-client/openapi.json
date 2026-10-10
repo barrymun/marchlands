@@ -20680,6 +20680,7 @@
   "paths": {
     "/api/v1/auth/register": {
       "post": {
+        "operationId": "postAuthRegister",
         "summary": "Create an account",
         "tags": [
           "auth"
@@ -20770,6 +20771,7 @@
     },
     "/api/v1/auth/login": {
       "post": {
+        "operationId": "postAuthLogin",
         "summary": "Log in (orig `login`)",
         "tags": [
           "auth"
@@ -20853,6 +20855,7 @@
     },
     "/api/v1/auth/me": {
       "get": {
+        "operationId": "getAuthMe",
         "summary": "Current account and its lord",
         "tags": [
           "auth"
@@ -20914,6 +20917,7 @@
     },
     "/api/v1/auth/refresh": {
       "post": {
+        "operationId": "postAuthRefresh",
         "summary": "Issue a fresh token",
         "tags": [
           "auth"
@@ -20975,6 +20979,7 @@
     },
     "/api/v1/world/zones": {
       "get": {
+        "operationId": "getWorldZones",
         "summary": "States with population stats (common.zoneInfo)",
         "tags": [
           "map"
@@ -21039,6 +21044,7 @@
     },
     "/api/v1/world": {
       "get": {
+        "operationId": "getWorld",
         "summary": "World info",
         "tags": [
           "map"
@@ -21100,6 +21106,7 @@
     },
     "/api/v1/player": {
       "post": {
+        "operationId": "postPlayer",
         "summary": "Create the lord and first city (common.createNewPlayer)",
         "tags": [
           "player"
@@ -21201,6 +21208,7 @@
         }
       },
       "get": {
+        "operationId": "getPlayer",
         "summary": "Full lord state: cities, items, buffs, armies, counters (login bean)",
         "tags": [
           "player"
@@ -21262,6 +21270,7 @@
     },
     "/api/v1/players/{name}": {
       "get": {
+        "operationId": "getPlayersByName",
         "summary": "Public profile of a lord",
         "tags": [
           "player"
@@ -21333,6 +21342,7 @@
     },
     "/api/v1/player/face": {
       "patch": {
+        "operationId": "patchPlayerFace",
         "summary": "Set portrait and sex once (common.changeUserFace)",
         "tags": [
           "player"
@@ -21418,6 +21428,7 @@
     },
     "/api/v1/player/flag": {
       "post": {
+        "operationId": "postPlayerFlag",
         "summary": "Change the flag, free (city.modifyFlag)",
         "tags": [
           "player"
@@ -21497,6 +21508,7 @@
     },
     "/api/v1/player/rename": {
       "post": {
+        "operationId": "postPlayerRename",
         "summary": "Rename the lord: free, once a day, if the name is free (city.modifyUserName)",
         "tags": [
           "player"
@@ -21576,6 +21588,7 @@
     },
     "/api/v1/player/gender": {
       "post": {
+        "operationId": "postPlayerGender",
         "summary": "(marchlands) Change gender: free, once a day",
         "tags": [
           "player"
@@ -21658,6 +21671,7 @@
     },
     "/api/v1/player/title/promote": {
       "post": {
+        "operationId": "postPlayerTitlePromote",
         "summary": "Promote to the next nobility title",
         "tags": [
           "player"
@@ -21719,6 +21733,7 @@
     },
     "/api/v1/player/tutorial": {
       "post": {
+        "operationId": "postPlayerTutorial",
         "summary": "Store tutorial progress (common.step)",
         "tags": [
           "player"
@@ -21800,6 +21815,7 @@
     },
     "/api/v1/player/furlough": {
       "post": {
+        "operationId": "postPlayerFurlough",
         "summary": "Holiday mode, paid per day with a city's gold (furlough.isFurlought)",
         "tags": [
           "player"
@@ -21886,6 +21902,7 @@
         }
       },
       "delete": {
+        "operationId": "deletePlayerFurlough",
         "summary": "End holiday mode (furlough.cancelFurlought)",
         "tags": [
           "player"
@@ -21947,6 +21964,7 @@
     },
     "/api/v1/player/truce": {
       "post": {
+        "operationId": "postPlayerTruce",
         "summary": "Truce Agreement (city.setStopWarState)",
         "tags": [
           "player"
@@ -22033,6 +22051,7 @@
     },
     "/api/v1/player/restart": {
       "post": {
+        "operationId": "postPlayerRestart",
         "summary": "Delete everything and start over (common.deleteUserAndRestart)",
         "tags": [
           "player"
@@ -22094,6 +22113,7 @@
     },
     "/api/v1/player/bookmarks": {
       "get": {
+        "operationId": "getPlayerBookmarks",
         "summary": "Map bookmarks (castleSignBean)",
         "tags": [
           "player"
@@ -22156,6 +22176,7 @@
         }
       },
       "post": {
+        "operationId": "postPlayerBookmarks",
         "summary": "Bookmark a castle (castle.saveCastleSignList)",
         "tags": [
           "player"
@@ -22240,6 +22261,7 @@
     },
     "/api/v1/player/army-presets": {
       "get": {
+        "operationId": "getPlayerArmyPresets",
         "summary": "Saved army compositions",
         "tags": [
           "player"
@@ -22302,6 +22324,7 @@
         }
       },
       "post": {
+        "operationId": "postPlayerArmyPresets",
         "summary": "Save an army composition (same name replaces)",
         "tags": [
           "player"
@@ -22397,6 +22420,7 @@
     },
     "/api/v1/player/army-presets/{presetId}": {
       "delete": {
+        "operationId": "deletePlayerArmyPresetsByPresetId",
         "summary": "Delete a saved army composition",
         "tags": [
           "player"
@@ -22471,6 +22495,7 @@
     },
     "/api/v1/player/statistics": {
       "get": {
+        "operationId": "getPlayerStatistics",
         "summary": "The lord's statistics: all time, last 7 days and per city (a few minutes behind)",
         "tags": [
           "player"
@@ -22532,6 +22557,7 @@
     },
     "/api/v1/player/flows": {
       "get": {
+        "operationId": "getPlayerFlows",
         "summary": "Saved flows (series of actions run on cities)",
         "tags": [
           "player"
@@ -22594,6 +22620,7 @@
         }
       },
       "post": {
+        "operationId": "postPlayerFlows",
         "summary": "Create a flow, or replace one by id",
         "tags": [
           "player"
@@ -22713,6 +22740,7 @@
     },
     "/api/v1/player/flows/{flowId}": {
       "delete": {
+        "operationId": "deletePlayerFlowsByFlowId",
         "summary": "Delete a flow",
         "tags": [
           "player"
@@ -22787,6 +22815,7 @@
     },
     "/api/v1/player/flows/{flowId}/run": {
       "post": {
+        "operationId": "postPlayerFlowsRun",
         "summary": "Run a flow on cities, each all-or-nothing (or preview it: run and roll back)",
         "tags": [
           "player"
@@ -22885,6 +22914,7 @@
     },
     "/api/v1/player/flows/{flowId}/repeat": {
       "post": {
+        "operationId": "postPlayerFlowsRepeat",
         "summary": "Switch repeat on (the flow runs again after every run; starts or queues it now) or off (the current run finishes)",
         "tags": [
           "player"
@@ -22977,6 +23007,7 @@
     },
     "/api/v1/player/flows/{flowId}/stop": {
       "post": {
+        "operationId": "postPlayerFlowsStop",
         "summary": "Stop a flow now (a run ends where it is; repeat goes off)",
         "tags": [
           "player"
@@ -23051,6 +23082,7 @@
     },
     "/api/v1/player/bookmarks/{tileId}": {
       "delete": {
+        "operationId": "deletePlayerBookmarksByTileId",
         "summary": "Remove a bookmark",
         "tags": [
           "player"
@@ -23127,6 +23159,7 @@
     },
     "/api/v1/player/items/{itemId}/use": {
       "post": {
+        "operationId": "postPlayerItemsUse",
         "summary": "Use an item (shop.useGoods / shop.useCastleGoods)",
         "tags": [
           "player"
@@ -23223,6 +23256,7 @@
     },
     "/api/v1/cities/{cityId}": {
       "get": {
+        "operationId": "getCitiesByCityId",
         "summary": "City detail (castleBean)",
         "tags": [
           "city"
@@ -23294,6 +23328,7 @@
         }
       },
       "patch": {
+        "operationId": "patchCitiesByCityId",
         "summary": "Rename / logo / defence settings (city.modifyCastleName, army.setArmyGoOut)",
         "tags": [
           "city"
@@ -23391,6 +23426,7 @@
     },
     "/api/v1/cities/{cityId}/tax": {
       "put": {
+        "operationId": "putCitiesTax",
         "summary": "Tax rate (interior.modifyTaxRate)",
         "tags": [
           "city"
@@ -23484,6 +23520,7 @@
     },
     "/api/v1/cities/{cityId}/work-rates": {
       "put": {
+        "operationId": "putCitiesWorkRates",
         "summary": "Labour per resource, % (interior.modifyCommenceRate)",
         "tags": [
           "city"
@@ -23589,6 +23626,7 @@
     },
     "/api/v1/cities/{cityId}/store-percent": {
       "put": {
+        "operationId": "putCitiesStorePercent",
         "summary": "Warehouse protection split, % (city.modifyStorePercent)",
         "tags": [
           "city"
@@ -23694,6 +23732,7 @@
     },
     "/api/v1/cities/{cityId}/comfort": {
       "post": {
+        "operationId": "postCitiesComfort",
         "summary": "Comfort: 3 blessing (gold for food), 4 population raising (food for people) (interior.pacifyPeople)",
         "tags": [
           "city"
@@ -23788,6 +23827,7 @@
     },
     "/api/v1/cities/{cityId}/production": {
       "get": {
+        "operationId": "getCitiesProduction",
         "summary": "Production breakdown (interior.getResourceProduceData)",
         "tags": [
           "city"
@@ -23861,6 +23901,7 @@
     },
     "/api/v1/cities/{cityId}/move": {
       "post": {
+        "operationId": "postCitiesMove",
         "summary": "Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned)",
         "tags": [
           "city"
@@ -23955,6 +23996,7 @@
     },
     "/api/v1/cities/{cityId}/buildings/available": {
       "get": {
+        "operationId": "getCitiesBuildingsAvailable",
         "summary": "Buildable types (castle.getAvailableBuildingList*)",
         "tags": [
           "buildings"
@@ -24042,6 +24084,7 @@
     },
     "/api/v1/cities/{cityId}/buildings/{positionId}": {
       "get": {
+        "operationId": "getCitiesBuildingsByPositionId",
         "summary": "Next-level cost (castle.checkOutUpgrade)",
         "tags": [
           "buildings"
@@ -24125,6 +24168,7 @@
     },
     "/api/v1/cities/{cityId}/buildings": {
       "post": {
+        "operationId": "postCitiesBuildings",
         "summary": "Construct (castle.newBuilding)",
         "tags": [
           "buildings"
@@ -24224,6 +24268,7 @@
     },
     "/api/v1/cities/{cityId}/buildings/{positionId}/upgrade": {
       "post": {
+        "operationId": "postCitiesBuildingsUpgrade",
         "summary": "Upgrade (castle.upgradeBuilding)",
         "tags": [
           "buildings"
@@ -24307,6 +24352,7 @@
     },
     "/api/v1/cities/{cityId}/buildings/{positionId}/demolish": {
       "post": {
+        "operationId": "postCitiesBuildingsDemolish",
         "summary": "Demolish: the whole building at once with BALANCE.instantDemolish, else one level (castle.destructBuilding)",
         "tags": [
           "buildings"
@@ -24390,6 +24436,7 @@
     },
     "/api/v1/cities/{cityId}/buildings/{positionId}/cancel": {
       "post": {
+        "operationId": "postCitiesBuildingsCancel",
         "summary": "Cancel construction (castle.cancleBuildCommand)",
         "tags": [
           "buildings"
@@ -24473,6 +24520,7 @@
     },
     "/api/v1/cities/{cityId}/buildings/{positionId}/speedup": {
       "get": {
+        "operationId": "getCitiesBuildingsSpeedup",
         "summary": "Gold to finish now (castle.getCoinsNeed)",
         "tags": [
           "buildings"
@@ -24554,6 +24602,7 @@
         }
       },
       "post": {
+        "operationId": "postCitiesBuildingsSpeedup",
         "summary": "Speed up (castle.speedUpBuildCommand)",
         "tags": [
           "buildings"
@@ -24656,6 +24705,7 @@
     },
     "/api/v1/cities/{cityId}/research": {
       "get": {
+        "operationId": "getCitiesResearch",
         "summary": "Technologies (tech.getResearchList)",
         "tags": [
           "research"
@@ -24727,6 +24777,7 @@
         }
       },
       "post": {
+        "operationId": "postCitiesResearch",
         "summary": "Start research (tech.research)",
         "tags": [
           "research"
@@ -24818,6 +24869,7 @@
         }
       },
       "delete": {
+        "operationId": "deleteCitiesResearch",
         "summary": "Cancel research (tech.cancelResearch)",
         "tags": [
           "research"
@@ -24902,6 +24954,7 @@
     },
     "/api/v1/cities/{cityId}/research/speedup": {
       "get": {
+        "operationId": "getCitiesResearchSpeedup",
         "summary": "Gold to finish now (tech.getCoinsNeed)",
         "tags": [
           "research"
@@ -24984,6 +25037,7 @@
         }
       },
       "post": {
+        "operationId": "postCitiesResearchSpeedup",
         "summary": "Speed up (tech.speedUpResearch)",
         "tags": [
           "research"
@@ -25082,6 +25136,7 @@
     },
     "/api/v1/cities/{cityId}/troops/trainable": {
       "get": {
+        "operationId": "getCitiesTroopsTrainable",
         "summary": "Trainable troops (troop.getTroopProduceList)",
         "tags": [
           "troops"
@@ -25155,6 +25210,7 @@
     },
     "/api/v1/cities/{cityId}/troops/queues": {
       "get": {
+        "operationId": "getCitiesTroopsQueues",
         "summary": "Production queues (troop.getProduceQueue)",
         "tags": [
           "troops"
@@ -25228,6 +25284,7 @@
     },
     "/api/v1/cities/{cityId}/troops/train": {
       "post": {
+        "operationId": "postCitiesTroopsTrain",
         "summary": "Train troops at a barracks (troop.produceTroop)",
         "tags": [
           "troops"
@@ -25332,6 +25389,7 @@
     },
     "/api/v1/cities/{cityId}/troops/train-many": {
       "post": {
+        "operationId": "postCitiesTroopsTrainMany",
         "summary": "Order several troops at once (one order per type), all or nothing",
         "tags": [
           "troops"
@@ -25456,6 +25514,7 @@
     },
     "/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}": {
       "delete": {
+        "operationId": "deleteCitiesTroopsQueuesByQueueId",
         "summary": "Cancel a batch",
         "tags": [
           "troops"
@@ -25549,6 +25608,7 @@
     },
     "/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}/speedup": {
       "post": {
+        "operationId": "postCitiesTroopsQueuesSpeedup",
         "summary": "Napoleon's Diary: -30% (troop.accTroopProduce)",
         "tags": [
           "troops"
@@ -25642,6 +25702,7 @@
     },
     "/api/v1/cities/{cityId}/fortifications/trainable": {
       "get": {
+        "operationId": "getCitiesFortificationsTrainable",
         "summary": "Trainable fortifications (fortifications.getFortificationsProduceList)",
         "tags": [
           "troops"
@@ -25715,6 +25776,7 @@
     },
     "/api/v1/cities/{cityId}/fortifications/queues": {
       "get": {
+        "operationId": "getCitiesFortificationsQueues",
         "summary": "Production queues (forti.getProduceQueue)",
         "tags": [
           "troops"
@@ -25788,6 +25850,7 @@
     },
     "/api/v1/cities/{cityId}/fortifications/train": {
       "post": {
+        "operationId": "postCitiesFortificationsTrain",
         "summary": "Build fortifications (fortifications.produceWallProtect)",
         "tags": [
           "troops"
@@ -25892,6 +25955,7 @@
     },
     "/api/v1/cities/{cityId}/fortifications/train-many": {
       "post": {
+        "operationId": "postCitiesFortificationsTrainMany",
         "summary": "Order several fortifications at once (one order per type), all or nothing",
         "tags": [
           "troops"
@@ -26016,6 +26080,7 @@
     },
     "/api/v1/cities/{cityId}/fortifications/queues/{positionId}/{queueId}": {
       "delete": {
+        "operationId": "deleteCitiesFortificationsQueuesByQueueId",
         "summary": "Cancel a batch",
         "tags": [
           "troops"
@@ -26109,6 +26174,7 @@
     },
     "/api/v1/cities/{cityId}/fortifications/queues/{positionId}/{queueId}/speedup": {
       "post": {
+        "operationId": "postCitiesFortificationsQueuesSpeedup",
         "summary": "Archimedes' Note: -30% (fortifications.accTroopProduce)",
         "tags": [
           "troops"
@@ -26202,6 +26268,7 @@
     },
     "/api/v1/cities/{cityId}/troops/train-split": {
       "post": {
+        "operationId": "postCitiesTroopsTrainSplit",
         "summary": "Train one order split over all barracks so the batches finish together",
         "tags": [
           "troops"
@@ -26301,6 +26368,7 @@
     },
     "/api/v1/cities/{cityId}/troops/disband": {
       "post": {
+        "operationId": "postCitiesTroopsDisband",
         "summary": "Dismiss troops (troop.disbandTroop)",
         "tags": [
           "troops"
@@ -26400,6 +26468,7 @@
     },
     "/api/v1/cities/{cityId}/fortifications/destroy": {
       "post": {
+        "operationId": "postCitiesFortificationsDestroy",
         "summary": "Destroy fortifications (fortifications.destructWallProtect)",
         "tags": [
           "troops"
@@ -26499,6 +26568,7 @@
     },
     "/api/v1/cities/{cityId}/troops/injured/cure": {
       "post": {
+        "operationId": "postCitiesTroopsInjuredCure",
         "summary": "Heal injured troops with resources or honor (army.cureInjuredTroop)",
         "tags": [
           "troops"
@@ -26607,6 +26677,7 @@
     },
     "/api/v1/cities/{cityId}/troops/injured/disband": {
       "post": {
+        "operationId": "postCitiesTroopsInjuredDisband",
         "summary": "Dismiss injured troops (army.disbandInjuredTroop)",
         "tags": [
           "troops"
@@ -26706,6 +26777,7 @@
     },
     "/api/v1/cities/{cityId}/heroes": {
       "get": {
+        "operationId": "getCitiesHeroes",
         "summary": "Heroes living in the city",
         "tags": [
           "heroes"
@@ -26779,6 +26851,7 @@
     },
     "/api/v1/cities/{cityId}/tavern": {
       "get": {
+        "operationId": "getCitiesTavern",
         "summary": "Inn offers (hero.getHerosListFromTavern)",
         "tags": [
           "heroes"
@@ -26852,6 +26925,7 @@
     },
     "/api/v1/cities/{cityId}/tavern/refresh": {
       "post": {
+        "operationId": "postCitiesTavernRefresh",
         "summary": "New offers for gold (hero.refreshHerosListFromTavern)",
         "tags": [
           "heroes"
@@ -26925,6 +26999,7 @@
     },
     "/api/v1/cities/{cityId}/tavern/{heroId}/hire": {
       "post": {
+        "operationId": "postCitiesTavernHire",
         "summary": "Hire (hero.hireHero)",
         "tags": [
           "heroes"
@@ -27008,6 +27083,7 @@
     },
     "/api/v1/cities/{cityId}/mayor": {
       "delete": {
+        "operationId": "deleteCitiesMayor",
         "summary": "Dismiss the mayor (hero.dischargeChief)",
         "tags": [
           "heroes"
@@ -27081,6 +27157,7 @@
     },
     "/api/v1/heroes/{heroId}/fire": {
       "post": {
+        "operationId": "postHeroesFire",
         "summary": "Fire (hero.fireHero)",
         "tags": [
           "heroes"
@@ -27154,6 +27231,7 @@
     },
     "/api/v1/cities/{cityId}/heroes/order": {
       "put": {
+        "operationId": "putCitiesHeroesOrder",
         "summary": "Reorder the city's heroes (the order the hero list shows them in)",
         "tags": [
           "heroes"
@@ -27252,6 +27330,7 @@
     },
     "/api/v1/heroes/{heroId}/lock": {
       "put": {
+        "operationId": "putHeroesLock",
         "summary": "Lock or unlock a hero (a locked hero cannot be dismissed)",
         "tags": [
           "heroes"
@@ -27344,6 +27423,7 @@
     },
     "/api/v1/heroes/{heroId}/gear-stat": {
       "put": {
+        "operationId": "putHeroesGearStat",
         "summary": "Choose the attribute the lord's gear boosts on this hero (free)",
         "tags": [
           "heroes"
@@ -27441,6 +27521,7 @@
     },
     "/api/v1/gear": {
       "get": {
+        "operationId": "getGear",
         "summary": "The lord's hero gear: Hero Enhancement level and stars per piece",
         "tags": [
           "heroes"
@@ -27502,6 +27583,7 @@
     },
     "/api/v1/gear/{pieceId}/star": {
       "post": {
+        "operationId": "postGearStar",
         "summary": "Add a star to a gear piece for every hero, paid in medals",
         "tags": [
           "heroes"
@@ -27574,6 +27656,7 @@
     },
     "/api/v1/heroes/{heroId}/mayor": {
       "post": {
+        "operationId": "postHeroesMayor",
         "summary": "Appoint mayor (hero.promoteToChief)",
         "tags": [
           "heroes"
@@ -27647,6 +27730,7 @@
     },
     "/api/v1/heroes/{heroId}/reset": {
       "post": {
+        "operationId": "postHeroesReset",
         "summary": "Reset attribute points with Holy Water (hero.resetPoint)",
         "tags": [
           "heroes"
@@ -27720,6 +27804,7 @@
     },
     "/api/v1/heroes/{heroId}/points": {
       "post": {
+        "operationId": "postHeroesPoints",
         "summary": "Assign points: new totals (hero.addPoint)",
         "tags": [
           "heroes"
@@ -27825,6 +27910,7 @@
     },
     "/api/v1/heroes/{heroId}/level-up": {
       "post": {
+        "operationId": "postHeroesLevelUp",
         "summary": "Level up as many times as the experience pays for (hero.levelUp)",
         "tags": [
           "heroes"
@@ -27898,6 +27984,7 @@
     },
     "/api/v1/heroes/{heroId}/reward": {
       "post": {
+        "operationId": "postHeroesReward",
         "summary": "+5 loyalty for gold (hero.awardGold)",
         "tags": [
           "heroes"
@@ -27971,6 +28058,7 @@
     },
     "/api/v1/heroes/{heroId}/items": {
       "post": {
+        "operationId": "postHeroesItems",
         "summary": "Use a hero item (hero.useItem)",
         "tags": [
           "heroes"
@@ -28069,6 +28157,7 @@
     },
     "/api/v1/heroes/{heroId}": {
       "patch": {
+        "operationId": "patchHeroesByHeroId",
         "summary": "Rename (hero.changeName)",
         "tags": [
           "heroes"
@@ -28160,6 +28249,7 @@
     },
     "/api/v1/heroes/{heroId}/release": {
       "post": {
+        "operationId": "postHeroesRelease",
         "summary": "Free a captured enemy hero (hero.releaseHero)",
         "tags": [
           "heroes"
@@ -28233,6 +28323,7 @@
     },
     "/api/v1/heroes/{heroId}/persuade": {
       "post": {
+        "operationId": "postHeroesPersuade",
         "summary": "Recruit a captive whose loyalty is 0",
         "tags": [
           "heroes"
@@ -28306,6 +28397,7 @@
     },
     "/api/v1/armies": {
       "get": {
+        "operationId": "getArmies",
         "summary": "Own, friendly and hostile armies (Self/Friend/EnemyArmysUpdate)",
         "tags": [
           "armies"
@@ -28367,6 +28459,7 @@
     },
     "/api/v1/cities/{cityId}/armies": {
       "post": {
+        "operationId": "postCitiesArmies",
         "summary": "Send an army: mission 1 transport, 2 reinforce, 3 scout, 4 build city, 5 attack (army.newArmy)",
         "tags": [
           "armies"
@@ -28521,6 +28614,7 @@
     },
     "/api/v1/armies/{armyId}/recall": {
       "post": {
+        "operationId": "postArmiesRecall",
         "summary": "Recall (army.callBackArmy)",
         "tags": [
           "armies"
@@ -28594,6 +28688,7 @@
     },
     "/api/v1/armies/{armyId}/dismiss": {
       "post": {
+        "operationId": "postArmiesDismiss",
         "summary": "Send allied troops stationed with you home",
         "tags": [
           "armies"
@@ -28667,6 +28762,7 @@
     },
     "/api/v1/cities/{cityId}/armies/params": {
       "get": {
+        "operationId": "getCitiesArmiesParams",
         "summary": "March/load bonuses and army cap (army.getTroopParam)",
         "tags": [
           "armies"
@@ -28740,6 +28836,7 @@
     },
     "/api/v1/cities/{cityId}/armies/estimate": {
       "post": {
+        "operationId": "postCitiesArmiesEstimate",
         "summary": "March time and carry capacity preview",
         "tags": [
           "armies"
@@ -28845,6 +28942,7 @@
     },
     "/api/v1/cities/{cityId}/stationed": {
       "get": {
+        "operationId": "getCitiesStationed",
         "summary": "Allied troops stationed here (army.getStayAllianceArmys)",
         "tags": [
           "armies"
@@ -28918,6 +29016,7 @@
     },
     "/api/v1/valleys/{tileId}": {
       "delete": {
+        "operationId": "deleteValleysByTileId",
         "summary": "Give up an occupied valley (field.giveUpField)",
         "tags": [
           "map"
@@ -28991,6 +29090,7 @@
     },
     "/api/v1/valleys/{tileId}/upgrade": {
       "post": {
+        "operationId": "postValleysUpgrade",
         "summary": "Raise an unowned valley or barbarian city one level for gold (instant)",
         "tags": [
           "map"
@@ -29085,6 +29185,7 @@
     },
     "/api/v1/map": {
       "get": {
+        "operationId": "getMap",
         "summary": "Up to 21x21 tiles with castles (common.mapInfoSimple)",
         "tags": [
           "map"
@@ -29188,6 +29289,7 @@
     },
     "/api/v1/map/tiles/{tileId}": {
       "get": {
+        "operationId": "getMapTilesByTileId",
         "summary": "Tile details (field.getOtherFieldInfo)",
         "tags": [
           "map"
@@ -29261,6 +29363,7 @@
     },
     "/api/v1/map/search": {
       "get": {
+        "operationId": "getMapSearch",
         "summary": "Find tiles of a type near a point",
         "tags": [
           "map"
@@ -29365,6 +29468,7 @@
     },
     "/api/v1/mail": {
       "get": {
+        "operationId": "getMail",
         "summary": "Folder 1 inbox, 2 system, 3 sent (mail.receiveMailList)",
         "tags": [
           "mail"
@@ -29459,6 +29563,7 @@
         }
       },
       "post": {
+        "operationId": "postMail",
         "summary": "Send (mail.sendMail)",
         "tags": [
           "mail"
@@ -29546,6 +29651,7 @@
     },
     "/api/v1/mail/unread": {
       "get": {
+        "operationId": "getMailUnread",
         "summary": "Unread counters (server.NewMail)",
         "tags": [
           "mail"
@@ -29607,6 +29713,7 @@
     },
     "/api/v1/mail/{mailId}": {
       "get": {
+        "operationId": "getMailByMailId",
         "summary": "Read (mail.readMail)",
         "tags": [
           "mail"
@@ -29680,6 +29787,7 @@
     },
     "/api/v1/mail/read": {
       "post": {
+        "operationId": "postMailRead",
         "summary": "Mark read (mail.readOverMailList)",
         "tags": [
           "mail"
@@ -29765,6 +29873,7 @@
     },
     "/api/v1/mail/delete": {
       "post": {
+        "operationId": "postMailDelete",
         "summary": "Delete (mail.deleteMail)",
         "tags": [
           "mail"
@@ -29850,6 +29959,7 @@
     },
     "/api/v1/reports": {
       "get": {
+        "operationId": "getReports",
         "summary": "Type 0 trade, 1 army, 2 other (report.receiveReportList)",
         "tags": [
           "reports"
@@ -29945,6 +30055,7 @@
     },
     "/api/v1/reports/unread": {
       "get": {
+        "operationId": "getReportsUnread",
         "summary": "Unread counters (server.NewReport)",
         "tags": [
           "reports"
@@ -30006,6 +30117,7 @@
     },
     "/api/v1/reports/{reportId}": {
       "get": {
+        "operationId": "getReportsByReportId",
         "summary": "Open a report (report.markAsRead)",
         "tags": [
           "reports"
@@ -30079,6 +30191,7 @@
     },
     "/api/v1/reports/read": {
       "post": {
+        "operationId": "postReportsRead",
         "summary": "Mark read (report.readOverReport); omit ids for all",
         "tags": [
           "reports"
@@ -30160,6 +30273,7 @@
     },
     "/api/v1/reports/delete": {
       "post": {
+        "operationId": "postReportsDelete",
         "summary": "Delete (report.deleteReport)",
         "tags": [
           "reports"
@@ -30245,6 +30359,7 @@
     },
     "/api/v1/chat/world": {
       "post": {
+        "operationId": "postChatWorld",
         "summary": "World channel (common.worldChat)",
         "tags": [
           "chat"
@@ -30324,6 +30439,7 @@
     },
     "/api/v1/chat/beginner": {
       "post": {
+        "operationId": "postChatBeginner",
         "summary": "Beginner channel (common.channelChat)",
         "tags": [
           "chat"
@@ -30403,6 +30519,7 @@
     },
     "/api/v1/chat/alliance": {
       "post": {
+        "operationId": "postChatAlliance",
         "summary": "Alliance channel (common.allianceChat)",
         "tags": [
           "chat"
@@ -30482,6 +30599,7 @@
     },
     "/api/v1/chat/private": {
       "post": {
+        "operationId": "postChatPrivate",
         "summary": "Whisper (common.privateChat)",
         "tags": [
           "chat"
@@ -30565,6 +30683,7 @@
     },
     "/api/v1/chat/{channel}": {
       "get": {
+        "operationId": "getChatByChannel",
         "summary": "Recent messages",
         "tags": [
           "chat"
@@ -30651,6 +30770,7 @@
     },
     "/api/v1/friends": {
       "get": {
+        "operationId": "getFriends",
         "summary": "Friends and blocked lords",
         "tags": [
           "friends"
@@ -30710,6 +30830,7 @@
         }
       },
       "post": {
+        "operationId": "postFriends",
         "summary": "Add (friend.addFriend)",
         "tags": [
           "friends"
@@ -30789,6 +30910,7 @@
     },
     "/api/v1/friends/{playerId}": {
       "delete": {
+        "operationId": "deleteFriendsByPlayerId",
         "summary": "Remove (friend.deleteFriend)",
         "tags": [
           "friends"
@@ -30862,6 +30984,7 @@
     },
     "/api/v1/blocks": {
       "post": {
+        "operationId": "postBlocks",
         "summary": "Add (friend.addBlock)",
         "tags": [
           "friends"
@@ -30941,6 +31064,7 @@
     },
     "/api/v1/blocks/{playerId}": {
       "delete": {
+        "operationId": "deleteBlocksByPlayerId",
         "summary": "Remove (friend.deleteBlock)",
         "tags": [
           "friends"
@@ -31014,6 +31138,7 @@
     },
     "/api/v1/alliance": {
       "get": {
+        "operationId": "getAlliance",
         "summary": "My alliance with relations (alliance.isHasAlliance); null when not in one",
         "tags": [
           "alliance"
@@ -31080,6 +31205,7 @@
         }
       },
       "post": {
+        "operationId": "postAlliance",
         "summary": "Found an alliance for 10,000 gold (alliance.createAlliance)",
         "tags": [
           "alliance"
@@ -31163,6 +31289,7 @@
         }
       },
       "patch": {
+        "operationId": "patchAlliance",
         "summary": "Note / intro / motd (alliance.setAllInfoForAlliance)",
         "tags": [
           "alliance"
@@ -31245,6 +31372,7 @@
     },
     "/api/v1/alliances": {
       "get": {
+        "operationId": "getAlliances",
         "summary": "Browse / search alliances (alliance.getAllianceList)",
         "tags": [
           "alliance"
@@ -31339,6 +31467,7 @@
     },
     "/api/v1/alliances/{name}": {
       "get": {
+        "operationId": "getAlliancesByName",
         "summary": "Public info (alliance.getAllianceInfo)",
         "tags": [
           "alliance"
@@ -31410,6 +31539,7 @@
     },
     "/api/v1/alliance/leave": {
       "post": {
+        "operationId": "postAllianceLeave",
         "summary": "Leave (alliance.sayByetoAlliance / resignForAlliance)",
         "tags": [
           "alliance"
@@ -31471,6 +31601,7 @@
     },
     "/api/v1/alliance/members": {
       "get": {
+        "operationId": "getAllianceMembers",
         "summary": "Members (alliance.getAllianceMembers)",
         "tags": [
           "alliance"
@@ -31535,6 +31666,7 @@
     },
     "/api/v1/alliance/events": {
       "get": {
+        "operationId": "getAllianceEvents",
         "summary": "Event log (alliance.getAllianceEventList)",
         "tags": [
           "alliance"
@@ -31599,6 +31731,7 @@
     },
     "/api/v1/alliance/military": {
       "get": {
+        "operationId": "getAllianceMilitary",
         "summary": "Members’ armies (alliance.getMilitarySituationList)",
         "tags": [
           "alliance"
@@ -31663,6 +31796,7 @@
     },
     "/api/v1/alliance/invites": {
       "post": {
+        "operationId": "postAllianceInvites",
         "summary": "Invite (alliance.addUsertoAlliance)",
         "tags": [
           "alliance"
@@ -31740,6 +31874,7 @@
         }
       },
       "get": {
+        "operationId": "getAllianceInvites",
         "summary": "Invitations sent (alliance.addUsertoAllianceList)",
         "tags": [
           "alliance"
@@ -31804,6 +31939,7 @@
     },
     "/api/v1/alliance/invites/cancel": {
       "post": {
+        "operationId": "postAllianceInvitesCancel",
         "summary": "Withdraw (alliance.canceladdUsertoAlliance)",
         "tags": [
           "alliance"
@@ -31883,6 +32019,7 @@
     },
     "/api/v1/alliance/my-invites": {
       "get": {
+        "operationId": "getAllianceMyInvites",
         "summary": "Invitations received (alliance.leaderWantUserInAllianceList)",
         "tags": [
           "alliance"
@@ -31947,6 +32084,7 @@
     },
     "/api/v1/alliance/my-invites/accept": {
       "post": {
+        "operationId": "postAllianceMyInvitesAccept",
         "summary": "Accept (alliance.agreeComeinAllianceByUser)",
         "tags": [
           "alliance"
@@ -32026,6 +32164,7 @@
     },
     "/api/v1/alliance/my-invites/reject": {
       "post": {
+        "operationId": "postAllianceMyInvitesReject",
         "summary": "Reject (alliance.rejectComeinAlliance)",
         "tags": [
           "alliance"
@@ -32105,6 +32244,7 @@
     },
     "/api/v1/alliance/apply": {
       "post": {
+        "operationId": "postAllianceApply",
         "summary": "Apply (alliance.userWantInAlliance)",
         "tags": [
           "alliance"
@@ -32182,6 +32322,7 @@
         }
       },
       "delete": {
+        "operationId": "deleteAllianceApply",
         "summary": "Withdraw application (alliance.cancelUserWantInAlliance)",
         "tags": [
           "alliance"
@@ -32241,6 +32382,7 @@
         }
       },
       "get": {
+        "operationId": "getAllianceApply",
         "summary": "My pending application (alliance.getAllianceWanted)",
         "tags": [
           "alliance"
@@ -32302,6 +32444,7 @@
     },
     "/api/v1/alliance/applications": {
       "get": {
+        "operationId": "getAllianceApplications",
         "summary": "Applications to review (alliance.agreeComeinAllianceList)",
         "tags": [
           "alliance"
@@ -32366,6 +32509,7 @@
     },
     "/api/v1/alliance/applications/accept": {
       "post": {
+        "operationId": "postAllianceApplicationsAccept",
         "summary": "Accept (alliance.agreeComeinAllianceByLeader)",
         "tags": [
           "alliance"
@@ -32445,6 +32589,7 @@
     },
     "/api/v1/alliance/applications/decline": {
       "post": {
+        "operationId": "postAllianceApplicationsDecline",
         "summary": "Decline (alliance.cancelagreeComeinAlliance)",
         "tags": [
           "alliance"
@@ -32524,6 +32669,7 @@
     },
     "/api/v1/alliance/members/rank": {
       "post": {
+        "operationId": "postAllianceMembersRank",
         "summary": "Set rank 5-8 (alliance.setPowerForUserByAlliance)",
         "tags": [
           "alliance"
@@ -32609,6 +32755,7 @@
     },
     "/api/v1/alliance/members/host": {
       "post": {
+        "operationId": "postAllianceMembersHost",
         "summary": "Hand over the Host title (alliance.resetTopPowerForAlliance)",
         "tags": [
           "alliance"
@@ -32688,6 +32835,7 @@
     },
     "/api/v1/alliance/members/kick": {
       "post": {
+        "operationId": "postAllianceMembersKick",
         "summary": "Expel (alliance.kickOutMemberfromAlliance)",
         "tags": [
           "alliance"
@@ -32767,6 +32915,7 @@
     },
     "/api/v1/alliance/mail": {
       "post": {
+        "operationId": "postAllianceMail",
         "summary": "Circular to all members (alliance.messagesForAllianceMember)",
         "tags": [
           "alliance"
@@ -32850,6 +32999,7 @@
     },
     "/api/v1/alliance/relations": {
       "put": {
+        "operationId": "putAllianceRelations",
         "summary": "Diplomacy: 1 ally, 2 neutral, 3 enemy (alliance.setAllianceFriendship)",
         "tags": [
           "alliance"
@@ -32935,6 +33085,7 @@
     },
     "/api/v1/alliance/relations/{name}": {
       "delete": {
+        "operationId": "deleteAllianceRelationsByName",
         "summary": "Drop a relation (alliance.dropAllianceFriendshipRelation)",
         "tags": [
           "alliance"
@@ -33006,6 +33157,7 @@
     },
     "/api/v1/config/static": {
       "get": {
+        "operationId": "getConfigStatic",
         "summary": "Buildings, research, troops, items, titles and balance constants",
         "tags": [
           "config"
@@ -33062,6 +33214,7 @@
     },
     "/api/v1/market/{resType}": {
       "get": {
+        "operationId": "getMarketByResType",
         "summary": "Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades)",
         "tags": [
           "market"
@@ -33135,6 +33288,7 @@
     },
     "/api/v1/market/{resType}/quote": {
       "get": {
+        "operationId": "getMarketQuote",
         "summary": "Preview an order: what would trade now, at what average price, and what would rest",
         "tags": [
           "market"
@@ -33249,6 +33403,7 @@
     },
     "/api/v1/market/{resType}/history": {
       "get": {
+        "operationId": "getMarketHistory",
         "summary": "Recent trades and hourly (game time) price candles",
         "tags": [
           "market"
@@ -33322,6 +33477,7 @@
     },
     "/api/v1/market/orders/mine": {
       "get": {
+        "operationId": "getMarketOrdersMine",
         "summary": "My open orders (trade.getMyTradeList)",
         "tags": [
           "market"
@@ -33386,6 +33542,7 @@
     },
     "/api/v1/cities/{cityId}/market/orders": {
       "post": {
+        "operationId": "postCitiesMarketOrders",
         "summary": "Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade)",
         "tags": [
           "market"
@@ -33505,6 +33662,7 @@
     },
     "/api/v1/market/orders/{orderId}": {
       "delete": {
+        "operationId": "deleteMarketOrdersByOrderId",
         "summary": "Cancel (trade.cancelTrade)",
         "tags": [
           "market"
@@ -33578,6 +33736,7 @@
     },
     "/api/v1/market/shipments": {
       "get": {
+        "operationId": "getMarketShipments",
         "summary": "Goods in transit (trade.getTransingTradeList)",
         "tags": [
           "market"
@@ -33642,6 +33801,7 @@
     },
     "/api/v1/market/shipments/{shipmentId}/speedup": {
       "post": {
+        "operationId": "postMarketShipmentsSpeedup",
         "summary": "Instant delivery, paid with the gold of the city receiving it (trade.speedUpTrans)",
         "tags": [
           "market"
@@ -33715,6 +33875,7 @@
     },
     "/api/v1/shop": {
       "get": {
+        "operationId": "getShop",
         "summary": "Items for sale (saleTypeBeans)",
         "tags": [
           "shop"
@@ -33779,6 +33940,7 @@
     },
     "/api/v1/cities/{cityId}/shop/gold": {
       "post": {
+        "operationId": "postCitiesShopGold",
         "summary": "Buy items with the city gold (itemGoldPrice)",
         "tags": [
           "shop"
@@ -33876,6 +34038,7 @@
     },
     "/api/v1/quests/groups": {
       "get": {
+        "operationId": "getQuestsGroups",
         "summary": "Quest groups (quest.getQuestType)",
         "tags": [
           "quests"
@@ -33940,6 +34103,7 @@
     },
     "/api/v1/quests": {
       "get": {
+        "operationId": "getQuests",
         "summary": "Quests with progress (quest.getQuestList)",
         "tags": [
           "quests"
@@ -34016,6 +34180,7 @@
     },
     "/api/v1/quests/{questId}/claim": {
       "post": {
+        "operationId": "postQuestsClaim",
         "summary": "Claim the award into a city (quest.award)",
         "tags": [
           "quests"
@@ -34109,6 +34274,7 @@
     },
     "/api/v1/quests/daily-gift": {
       "post": {
+        "operationId": "postQuestsDailyGift",
         "summary": "Daily gift: a fixed bundle of resources into a city, once a day",
         "tags": [
           "quests"
@@ -34190,6 +34356,7 @@
     },
     "/api/v1/rankings/players": {
       "get": {
+        "operationId": "getRankingsPlayers",
         "summary": "sortType 1 title, 2 prestige, 3 honor, 4 cities, 5 population (rank.getPlayerRank)",
         "tags": [
           "rankings"
@@ -34295,6 +34462,7 @@
     },
     "/api/v1/rankings/alliances": {
       "get": {
+        "operationId": "getRankingsAlliances",
         "summary": "sortType 1 members, 2 prestige, 3 honor (rank.getAllianceRank)",
         "tags": [
           "rankings"
@@ -34400,6 +34568,7 @@
     },
     "/api/v1/rankings/heroes": {
       "get": {
+        "operationId": "getRankingsHeroes",
         "summary": "sortType 1 level, 2 management, 3 power, 4 stratagem (rank.getHeroRank)",
         "tags": [
           "rankings"
@@ -34505,6 +34674,7 @@
     },
     "/api/v1/rankings/castles": {
       "get": {
+        "operationId": "getRankingsCastles",
         "summary": "sortType 1 population, 2 level (rank.getCastleRank)",
         "tags": [
           "rankings"
@@ -34610,6 +34780,7 @@
     },
     "/api/v1/admin/items": {
       "post": {
+        "operationId": "postAdminItems",
         "summary": "Grant items (gamemaster.addItems)",
         "tags": [
           "admin"
@@ -34701,6 +34872,7 @@
     },
     "/api/v1/admin/cities/{cityId}/resources": {
       "put": {
+        "operationId": "putAdminCitiesResources",
         "summary": "Set resources (gamemaster.setResources)",
         "tags": [
           "admin"
@@ -34814,6 +34986,7 @@
     },
     "/api/v1/admin/cities/{cityId}/buildings": {
       "put": {
+        "operationId": "putAdminCitiesBuildings",
         "summary": "Set a building level, 0 removes (gamemaster.addBuilding / removeBuilding)",
         "tags": [
           "admin"
@@ -34925,6 +35098,7 @@
     },
     "/api/v1/admin/research": {
       "put": {
+        "operationId": "putAdminResearch",
         "summary": "Set a technology level (gamemaster.setTechnology)",
         "tags": [
           "admin"
@@ -35016,6 +35190,7 @@
     },
     "/api/v1/admin/cities/{cityId}/heroes": {
       "post": {
+        "operationId": "postAdminCitiesHeroes",
         "summary": "Add a random hero (gamemaster.addHero)",
         "tags": [
           "admin"
@@ -35115,6 +35290,7 @@
     },
     "/api/v1/admin/accounts/{accountId}/ban": {
       "post": {
+        "operationId": "postAdminAccountsBan",
         "summary": "Ban / unban an account",
         "tags": [
           "admin"
@@ -35210,6 +35386,7 @@
     },
     "/api/v1/admin/mute": {
       "post": {
+        "operationId": "postAdminMute",
         "summary": "Mute a lord in chat (common.denyPlayerSpeak)",
         "tags": [
           "admin"
@@ -35295,6 +35472,7 @@
     },
     "/api/v1/admin/broadcast": {
       "post": {
+        "operationId": "postAdminBroadcast",
         "summary": "System message to everyone (\\massmsg)",
         "tags": [
           "admin"
@@ -35378,6 +35556,7 @@
     },
     "/api/v1/admin/mail": {
       "post": {
+        "operationId": "postAdminMail",
         "summary": "System mail to a lord",
         "tags": [
           "admin"
@@ -35465,6 +35644,7 @@
     },
     "/api/v1/admin/players/flags": {
       "put": {
+        "operationId": "putAdminPlayersFlags",
         "summary": "Beginner protection / title",
         "tags": [
           "admin"
@@ -35552,6 +35732,7 @@
     },
     "/api/v1/admin/cities/{cityId}/stats": {
       "put": {
+        "operationId": "putAdminCitiesStats",
         "summary": "Population / loyalty / troops",
         "tags": [
           "admin"
@@ -35659,6 +35840,7 @@
     },
     "/api/v1/admin/online": {
       "get": {
+        "operationId": "getAdminOnline",
         "summary": "Connected lords",
         "tags": [
           "admin"

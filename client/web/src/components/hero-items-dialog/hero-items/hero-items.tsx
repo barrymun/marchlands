@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { HeroBean } from '@marchlands/api-client';
+import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postHeroesItemsMutation, type HeroBean } from '@marchlands/api-client';
 import {
   BALANCE,
   experienceItemGain,
@@ -15,29 +15,23 @@ import {
 import { Countdown } from '@/components/countdown/countdown';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { qk, useCity, useCommand } from '@/hooks/use-game';
+import { useCity, useCommand } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
-import { api, unwrap } from '@/lib/api';
 import { fmt, fmtExact } from '@/lib/format';
 import { ATTRIBUTE_BORDER, dominantAttribute } from '@/lib/hero-attributes';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { ATTR_LABEL } from '@/components/hero-items-dialog/hero-items/constants';
+import { useNow } from '@/hooks/use-now';
 
 export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
+  const now = useNow();
   const inv = useInventory();
   const city = useCity(cityId);
   const gold = city.data?.resource.gold ?? 0;
-  const use = useCommand(
-    (itemId: string) => unwrap(api.POST('/api/v1/heroes/{heroId}/items', { params: { path: { heroId: hero.id } }, body: { itemId } })),
-    () => [qk.city(cityId), qk.player],
-    'Item used',
-  );
-  const buy = useCommand(
-    (itemId: string) => unwrap(api.POST('/api/v1/heroes/{heroId}/items', { params: { path: { heroId: hero.id } }, body: { itemId, payWith: 'gold' } })),
-    () => [qk.city(cityId), qk.player],
-    'Bought with gold and used',
-  );
+  const refresh = () => [getCitiesByCityIdQueryKey({ path: { cityId } }), getPlayerQueryKey()];
+  const use = useCommand(postHeroesItemsMutation(), refresh, 'Item used');
+  const buy = useCommand(postHeroesItemsMutation(), refresh, 'Bought with gold and used');
   const row = (itemId: string, effect: ReactNode, disabledReason?: string, extra: { className?: string; badge?: ReactNode } = {}) => {
     const owned = inv.count(itemId);
     const price = heroItemGoldPrice(itemId, hero.upgradeExp);
@@ -52,7 +46,7 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
         </div>
         <div className="flex shrink-0 flex-wrap justify-end gap-1">
           {owned > 0 && (
-            <Button size="xs" disabled={!!disabledReason || use.isPending} onClick={() => use.mutate(itemId)}>
+            <Button size="xs" disabled={!!disabledReason || use.isPending} onClick={() => use.mutate({ path: { heroId: hero.id }, body: { itemId } })}>
               Use
             </Button>
           )}
@@ -62,7 +56,7 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
               variant={owned > 0 ? 'outline' : 'default'}
               disabled={gold < price || !!disabledReason || buy.isPending}
               title={gold < price ? `Not enough gold in this city (${fmtExact(price)} needed)` : undefined}
-              onClick={() => buy.mutate(itemId)}
+              onClick={() => buy.mutate({ path: { heroId: hero.id }, body: { itemId, payWith: 'gold' } })}
             >
               {fmt(price)} gold
             </Button>
@@ -76,7 +70,7 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
       </div>
     );
   };
-  const buffEnd = (attr: keyof typeof ATTR_LABEL) => hero.buffs.find((b) => b.id === attr && b.endTime > Date.now())?.endTime;
+  const buffEnd = (attr: keyof typeof ATTR_LABEL) => hero.buffs.find((b) => b.id === attr && b.endTime > now)?.endTime;
   // the boost that suits this hero best: the one for its strongest attribute
   const best = dominantAttribute(hero);
 

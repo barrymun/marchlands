@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import type { CityBean } from '@marchlands/api-client';
+import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postCitiesShopGoldMutation, postPlayerItemsUseMutation, type CityBean } from '@marchlands/api-client';
 import { ITEM_CATEGORIES, ITEM_INFO } from '@marchlands/core';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,8 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ActiveEffects } from '@/components/active-effects/active-effects';
 import { describeGrant, goldPriceOf, medalLevelOf } from '@/components/items-panel/utils';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { fmt, fmtExact } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { ALL } from '@/components/items-panel/constants';
@@ -53,24 +52,22 @@ export function ItemsPanel({ city }: { city: CityBean }) {
   const ownedTotal = entries.filter((e) => e.owned > 0).length;
   const buffs = player.data?.buffs ?? [];
 
-  const use = useCommand(
-    (itemId: string) => unwrap(api.POST('/api/v1/player/items/{itemId}/use', { params: { path: { itemId } }, body: { cityId: city.id } })),
-    () => [qk.player, qk.city(city.id)],
-  );
-  const buyGold = useCommand(
-    (itemId: string) => unwrap(api.POST('/api/v1/cities/{cityId}/shop/gold', { params: { path: { cityId: city.id } }, body: { itemId, amount: 1 } })),
-    () => [qk.player, qk.city(city.id)],
-  );
+  const refresh = () => [getPlayerQueryKey(), getCitiesByCityIdQueryKey({ path: { cityId: city.id } })];
+  const use = useCommand(postPlayerItemsUseMutation(), refresh);
+  const buyGold = useCommand(postCitiesShopGoldMutation(), refresh);
   function applyEntry(e: Entry) {
     const id = e.ids.find((x) => (counts.get(x) ?? 0) > 0);
     if (!id) return;
-    use.mutate(id, {
-      onSuccess: (r) => {
-        if (r.granted) toast.success(`${e.info.name}: received ${describeGrant(r.granted)}`);
-        else if (r.hero) toast.success(`${r.hero.name} (Lv ${r.hero.level}) joined your city`);
-        else toast.success(`${e.info.name} used`);
+    use.mutate(
+      { path: { itemId: id }, body: { cityId: city.id } },
+      {
+        onSuccess: (r) => {
+          if (r.granted) toast.success(`${e.info.name}: received ${describeGrant(r.granted)}`);
+          else if (r.hero) toast.success(`${r.hero.name} (Lv ${r.hero.level}) joined your city`);
+          else toast.success(`${e.info.name} used`);
+        },
       },
-    });
+    );
   }
 
   return (
@@ -139,7 +136,12 @@ export function ItemsPanel({ city }: { city: CityBean }) {
                         ? `Not enough gold in ${city.name} (${fmtExact(goldPriceOf(e)!.price)} needed)`
                         : `Buy one with ${city.name}'s gold`
                     }
-                    onClick={() => buyGold.mutate(goldPriceOf(e)!.id, { onSuccess: () => toast.success(`Bought ${e.info.name}`) })}
+                    onClick={() =>
+                      buyGold.mutate(
+                        { path: { cityId: city.id }, body: { itemId: goldPriceOf(e)!.id, amount: 1 } },
+                        { onSuccess: () => toast.success(`Bought ${e.info.name}`) },
+                      )
+                    }
                   >
                     Buy · {fmt(goldPriceOf(e)!.price)} gold
                   </Button>

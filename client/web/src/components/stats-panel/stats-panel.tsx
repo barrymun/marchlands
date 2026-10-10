@@ -4,12 +4,11 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { LordStatistics } from '@marchlands/api-client';
+import { getPlayerStatisticsOptions, type LordStatistics } from '@marchlands/api-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { api, unwrap } from '@/lib/api';
 import type { Counters } from '@/components/stats-panel/types';
 import { Summary } from '@/components/stats-panel/summary/summary';
 import { Units } from '@/components/stats-panel/units/units';
@@ -22,9 +21,8 @@ export function StatsPanel() {
   const [scope, setScope] = useState('all');
   const [period, setPeriod] = useState<'allTime' | 'last7Days'>('allTime');
   const stats = useQuery({
-    queryKey: ['statistics'],
+    ...getPlayerStatisticsOptions(),
     staleTime: 60_000,
-    queryFn: () => unwrap(api.GET('/api/v1/player/statistics')),
   });
   if (stats.isPending) return <Skeleton className="h-64" />;
   if (!stats.data) return <p className="text-sm text-muted-foreground">Statistics could not be loaded.</p>;

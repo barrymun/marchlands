@@ -33,6 +33,7 @@ import {
   type PlayerRow,
   type TileRow,
 } from './repo.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 export interface CityBundle {
   player: PlayerRow;
@@ -85,7 +86,7 @@ export function settle(ctx: Ctx, b: CityBundle): SettleResult {
   const r = settleCity(b.city, economyContext(b), ctx.now);
   noteSettle(b.city, r.flows, r.deserted);
   if (Object.keys(r.deserted).length) {
-    ctx.push(b.player.id, 'server.TroopUpdate', { castleId: b.city.id, troop: troopBean(b.city.troops) });
+    ctx.push(b.player.id, PushCmd.TROOP_UPDATE, { castleId: b.city.id, troop: troopBean(b.city.troops) });
   }
   return r;
 }

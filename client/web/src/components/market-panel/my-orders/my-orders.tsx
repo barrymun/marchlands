@@ -1,20 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
+import { deleteMarketOrdersByOrderIdMutation, getCitiesByCityIdQueryKey, getMarketOrdersMineOptions } from '@marchlands/api-client';
 import { X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCommand } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
+import { allMarketQueries, allOf } from '@/lib/query-keys';
 import { fmtExact } from '@/lib/format';
-import { mk } from '@/components/market-panel/constants';
 import { fmtPrice, resLabel } from '@/components/market-panel/utils';
 
 export function MyOrders() {
-  const orders = useQuery({ queryKey: mk.orders, queryFn: () => unwrap(api.GET('/api/v1/market/orders/mine')) });
+  const orders = useQuery(getMarketOrdersMineOptions());
   const cancel = useCommand(
-    (orderId: number) => unwrap(api.DELETE('/api/v1/market/orders/{orderId}', { params: { path: { orderId } } })),
-    () => [['market'], ['city']],
+    deleteMarketOrdersByOrderIdMutation(),
+    () => [...allMarketQueries(), allOf(getCitiesByCityIdQueryKey)],
     'Order cancelled; held goods or gold returned',
   );
   const list = orders.data ?? [];
@@ -50,7 +50,13 @@ export function MyOrders() {
                 </TableCell>
                 <TableCell className="text-right text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString()}</TableCell>
                 <TableCell className="text-right">
-                  <Button size="icon-xs" variant="ghost" aria-label="Cancel order" disabled={cancel.isPending} onClick={() => cancel.mutate(o.id)}>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    aria-label="Cancel order"
+                    disabled={cancel.isPending}
+                    onClick={() => cancel.mutate({ path: { orderId: o.id } })}
+                  >
                     <X />
                   </Button>
                 </TableCell>

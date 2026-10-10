@@ -52,6 +52,7 @@ import { citiesOf, getPlayer } from '../repo.ts';
 import { appointMayor } from './heroes.ts';
 import { sendArmy } from './armies.ts';
 import { cureInjured, hasTrainingRoom, trainSplit } from './training.ts';
+import { PushCmd } from '@marchlands/contracts';
 
 const MAX_FLOWS = 30;
 /** A repeating flow starts again no sooner than this after its last run started (real time). */
@@ -96,7 +97,7 @@ async function flowsOf(ctx: Ctx, playerId: number, lock = false): Promise<FlowRo
 async function saveRow(ctx: Ctx, f: FlowRow) {
   const { id, playerId, createdAt: _c, ...rest } = f;
   await ctx.tx.update(flowsTable).set(rest).where(eq(flowsTable.id, id));
-  ctx.push(playerId, 'server.FlowUpdate', { flowId: id, status: f.status });
+  ctx.push(playerId, PushCmd.FLOW_UPDATE, { flowId: id, status: f.status });
 }
 
 export async function listFlows(ctx: Ctx, playerId: number): Promise<FlowView[]> {
@@ -333,7 +334,7 @@ export async function runScheduledHeal(ctx: Ctx, playerId: number, cityId: numbe
     if (!(err instanceof GameError)) throw err;
     msg = `${name}: could not heal after the armies came home (${err.message})`;
   }
-  ctx.push(playerId, 'server.SystemInfoMsg', { alliance: false, tV: false, noSenderSystemInfo: false, msg });
+  ctx.push(playerId, PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: false, noSenderSystemInfo: false, msg });
 }
 
 async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<FlowAction, { type: 'wait' }>, run: CityRun): Promise<ActionOutcome> {
@@ -576,7 +577,7 @@ async function stopRun(ctx: Ctx, playerId: number, f: FlowRow, reason: string | 
   ctx.unschedule(resumeRef(f.id));
   await saveRow(ctx, f);
   if (reason)
-    ctx.push(playerId, 'server.SystemInfoMsg', { alliance: false, tV: false, noSenderSystemInfo: false, msg: `Flow "${f.name}" stopped: ${reason}.` });
+    ctx.push(playerId, PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: false, noSenderSystemInfo: false, msg: `Flow "${f.name}" stopped: ${reason}.` });
 }
 
 /** Look at the queue now (timed event 'flow.queue'), in its own transaction. */

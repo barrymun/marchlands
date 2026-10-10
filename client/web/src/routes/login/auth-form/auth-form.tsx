@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { postAuthLogin, postAuthRegister } from '@marchlands/api-client';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { api, errorMessage, tokenStore, unwrap } from '@/lib/api';
+import { errorMessage, tokenStore } from '@/lib/api';
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const navigate = useNavigate();
@@ -21,10 +22,10 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     setBusy(true);
     setError(null);
     try {
-      const session =
+      const { data: session } =
         mode === 'login'
-          ? await unwrap(api.POST('/api/v1/auth/login', { body: { username, password } }))
-          : await unwrap(api.POST('/api/v1/auth/register', { body: { username, password, email: String(form.get('email') ?? '') } }));
+          ? await postAuthLogin({ body: { username, password }, throwOnError: true })
+          : await postAuthRegister({ body: { username, password, email: String(form.get('email') ?? '') }, throwOnError: true });
       qc.clear();
       tokenStore.set(session.token);
       navigate(session.hasPlayer ? '/' : '/create', { replace: true });

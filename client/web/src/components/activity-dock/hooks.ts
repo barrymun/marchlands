@@ -1,35 +1,21 @@
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import type { CityBean } from '@marchlands/api-client';
+import { getCitiesFortificationsQueuesOptions, getCitiesResearchOptions, getCitiesTroopsQueuesOptions, type CityBean } from '@marchlands/api-client';
 import { buildingLevel, BuildingType } from '@marchlands/core';
 import type { Job } from '@/components/activity-dock/types';
-import { qk } from '@/hooks/use-game';
-import { api, unwrap } from '@/lib/api';
 import { fmtExact, troopName } from '@/lib/format';
 
 /** Everything running in the city: construction, research here, and the batch each barracks / the walls is producing. */
 export function useJobs(city: CityBean): Job[] {
   const navigate = useNavigate();
   const go = (tab: string, search = '') => navigate(`/cities/${city.id}/${tab}${search}`);
-  const path = { params: { path: { cityId: city.id } } };
+  const path = { path: { cityId: city.id } };
   const hasAcademy = buildingLevel(city.buildings, BuildingType.ACADEMY) > 0;
   const hasBarracks = city.buildings.some((b) => b.typeId === BuildingType.BARRACKS && b.level > 0);
   const hasWalls = buildingLevel(city.buildings, BuildingType.WALLS) > 0;
-  const research = useQuery({
-    queryKey: qk.research(city.id),
-    enabled: hasAcademy,
-    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/research', path)),
-  });
-  const troops = useQuery({
-    queryKey: qk.queues(city.id, false),
-    enabled: hasBarracks,
-    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/troops/queues', path)),
-  });
-  const forts = useQuery({
-    queryKey: qk.queues(city.id, true),
-    enabled: hasWalls,
-    queryFn: () => unwrap(api.GET('/api/v1/cities/{cityId}/fortifications/queues', path)),
-  });
+  const research = useQuery({ ...getCitiesResearchOptions(path), enabled: hasAcademy });
+  const troops = useQuery({ ...getCitiesTroopsQueuesOptions(path), enabled: hasBarracks });
+  const forts = useQuery({ ...getCitiesFortificationsQueuesOptions(path), enabled: hasWalls });
 
   const jobs: Job[] = [];
   for (const b of city.buildings) {

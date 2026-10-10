@@ -1,10 +1,10 @@
 import { itemConfig, TITLES, titleOf } from '@marchlands/core';
 import { Check, X } from 'lucide-react';
+import { getPlayerQueryKey, postPlayerTitlePromoteMutation } from '@marchlands/api-client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { qk, useCommand, usePlayer } from '@/hooks/use-game';
+import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
-import { api, unwrap } from '@/lib/api';
 
 /**
  * Nobility titles: each raises how many cities the lord may own (Civilian 1 … Prince 10) and needs
@@ -14,11 +14,7 @@ export function TitleSection() {
   const player = usePlayer();
   const inv = useInventory();
   const info = player.data?.playerInfo;
-  const promote = useCommand(
-    () => unwrap(api.POST('/api/v1/player/title/promote')),
-    () => [qk.player],
-    'Promoted',
-  );
+  const promote = useCommand(postPlayerTitlePromoteMutation(), () => [getPlayerQueryKey()], 'Promoted');
   if (!info) return null;
   const current = titleOf(info.titleId);
   const next = TITLES[info.titleId + 1];
@@ -58,7 +54,7 @@ export function TitleSection() {
               </li>
             ))}
           </ul>
-          <Button size="sm" className="justify-self-start" disabled={!req.every((r) => r.ok) || promote.isPending} onClick={() => promote.mutate(undefined)}>
+          <Button size="sm" className="justify-self-start" disabled={!req.every((r) => r.ok) || promote.isPending} onClick={() => promote.mutate({})}>
             Promote to {next.name}
           </Button>
         </>
