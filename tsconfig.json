@@ -8,7 +8,8 @@
     "backend/services/*/src/**/*.ts",
     "backend/services/*/test/**/*.ts",
     "backend/packages/db/drizzle.config.ts",
-    "tools/battle-sim/**/*.ts"
+    "tools/battle-sim/**/*.ts",
+    "tools/dev/**/*.ts"
   ],
   "exclude": ["shared/api-client/src/**"]
 }

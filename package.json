@@ -26,6 +26,7 @@
     "smoke": "node tools/smoke/smoke.mjs && node tools/smoke/war.mjs && node tools/smoke/market.mjs",
     "docs:api": "node tools/docs/gen-api-md.mjs",
     "sim": "node tools/battle-sim/sim.ts",
+    "delete-player": "node --env-file-if-exists=.env tools/dev/delete-player.ts",
     "gen:api": "node backend/services/api/src/openapi.ts && npm run generate -w @marchlands/api-client && npm run docs:api",
     "dev:web": "npm run dev -w @marchlands/web",
     "build:web": "npm run build -w @marchlands/web"

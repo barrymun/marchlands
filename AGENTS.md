@@ -21,6 +21,7 @@ Run from the repo root.
 | `npm run format` / `npm run format:check` | Prettier (all formatting) |
 | `npm run gen:api` | regenerate the OpenAPI spec, the generated client (Hey API) and `docs/api-endpoints.md`. Run it after changing anything in `shared/contracts` or an API route. |
 | `npm run sim -- …` | battle simulations, see [docs/battle-sims](docs/battle-sims/README.md) |
+| `npm run delete-player -- <username>… [--yes]` | delete test accounts the way the game does (their valleys released, castles back to flat land); lists what it would delete until run with `--yes`. Never deletes admin accounts. |
 | `API=http://localhost:3100 node tools/smoke/smoke.mjs` (also `war.mjs`, `market.mjs`) | end-to-end checks against the running stack |
 
 Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and `npm run format:check` all pass.
@@ -29,7 +30,7 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 
 - Rebuild after a change: `docker compose up -d --build api worker web`, or only the services you touched.
 - If the change adds a migration: `docker compose stop api worker` first, then rebuild, so the one-shot `migrate` service runs before they start.
-- Testing with the API creates players. Use temporary accounts and delete them, and any alliances left empty, when done. Never touch the maintainer's own player.
+- Testing with the API creates players. Use temporary accounts and delete them with `npm run delete-player` when done (it also disbands alliances they leave empty), never with hand-written SQL. Never touch the maintainer's own player.
 
 ## Formatting and linting
 

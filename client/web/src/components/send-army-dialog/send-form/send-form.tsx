@@ -30,17 +30,17 @@ import type { SendTarget } from '@/components/send-army-dialog/types';
 import { RES } from '@/components/send-army-dialog/send-form/constants';
 import { ScoutNote } from '@/components/send-army-dialog/send-form/scout-note/scout-note';
 import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
+import { capTroops, defaultHero } from '@/components/send-army-dialog/send-form/utils';
 
-export function SendForm({ city, target, onDone }: { city: CityBean; target: SendTarget; onDone: () => void }) {
+/** Send an army to the target. The dialog stays open after sending, so more waves can follow. */
+export function SendForm({ city, target }: { city: CityBean; target: SendTarget }) {
   const [mission, setMission] = useState(String(target.mission ?? target.missions[0]));
-  // the strongest idle hero (by Attack) leads by default
-  const [heroId, setHeroId] = useState(() => {
-    const best = city.heros
-      .filter((h) => h.status === HeroStatus.IDLE && !h.seized)
-      .reduce<CityBean['heros'][number] | null>((top, h) => (!top || heroPower(h) > heroPower(top) ? h : top), null);
-    return best ? String(best.id) : 'none';
-  });
-  const [troops, setTroops] = useState<Partial<Record<TroopKey, string>>>(target.troops ?? {});
+  // an attack is led by the strongest idle hero (by Attack) unless the player picks one; other missions go without
+  const [heroId, setHeroId] = useState(() => defaultHero(Number(mission), city.heros));
+  const [heroPicked, setHeroPicked] = useState(false);
+  const [entered, setTroops] = useState<Partial<Record<TroopKey, string>>>(target.troops ?? {});
+  // never more than the city has (it has fewer after each wave)
+  const troops = capTroops(entered, city.troop);
   const scouting = Number(mission) === Mission.SCOUT;
   const [resources, setResources] = useState<Partial<Record<(typeof RES)[number], string>>>({});
   // only scouts go on a scouting mission
@@ -117,7 +117,13 @@ export function SendForm({ city, target, onDone }: { city: CityBean; target: Sen
         <div className="grid grid-cols-2 gap-3">
           <div className="grid gap-2">
             <Label>Mission</Label>
-            <Select value={mission} onValueChange={setMission}>
+            <Select
+              value={mission}
+              onValueChange={(m) => {
+                setMission(m);
+                if (!heroPicked) setHeroId(defaultHero(Number(m), city.heros));
+              }}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -132,7 +138,13 @@ export function SendForm({ city, target, onDone }: { city: CityBean; target: Sen
           </div>
           <div className="grid gap-2">
             <Label>Hero</Label>
-            <Select value={heroId} onValueChange={setHeroId}>
+            <Select
+              value={heroId}
+              onValueChange={(h) => {
+                setHeroId(h);
+                setHeroPicked(true);
+              }}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -177,7 +189,7 @@ export function SendForm({ city, target, onDone }: { city: CityBean; target: Sen
                   inputMode="numeric"
                   value={troops[key] ?? ''}
                   placeholder="0"
-                  onChange={(e) => setTroops({ ...troops, [key]: e.target.value.replace(/\D/g, '') })}
+                  onChange={(e) => setTroops(capTroops({ ...troops, [key]: e.target.value.replace(/\D/g, '') }, city.troop))}
                 />
                 <Button
                   size="xs"
@@ -236,7 +248,17 @@ export function SendForm({ city, target, onDone }: { city: CityBean; target: Sen
         </Button>
         <Button
           disabled={!Object.keys(troopBody).length || over || (carriesResources && overloaded) || send.isPending}
-          onClick={() => send.mutate(undefined, { onSuccess: onDone })}
+          onClick={() =>
+            send.mutate(undefined, {
+              // stay open for the next wave: the hero just sent is busy now (an attack picks the next strongest), and the
+              // resources it carried are gone; troop amounts are capped to what is left once the city refreshes
+              onSuccess: () => {
+                setHeroId(defaultHero(Number(mission), city.heros, heroId === 'none' ? undefined : Number(heroId)));
+                setHeroPicked(false);
+                setResources({});
+              },
+            })
+          }
         >
           Send
         </Button>

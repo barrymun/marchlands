@@ -12,6 +12,7 @@ import { sql } from 'drizzle-orm';
 import {
   bigint,
   bigserial,
+  type AnyPgColumn,
   boolean,
   doublePrecision,
   index,
@@ -130,11 +131,13 @@ export const tiles = pgTable(
     /** TileType */
     type: smallint('type').notNull(),
     level: smallint('level').notNull(),
+    // (marchlands) deleting a city or player releases its tiles in the database too (the game's own deletes
+    // release them first, and turn the castle back into flat land)
     /** player castle on this tile */
-    cityId: integer('city_id'),
+    cityId: integer('city_id').references((): AnyPgColumn => cities.id, { onDelete: 'set null' }),
     /** owner of an occupied valley or captured NPC city: the controlling city */
-    ownerCityId: integer('owner_city_id'),
-    ownerPlayerId: integer('owner_player_id'),
+    ownerCityId: integer('owner_city_id').references((): AnyPgColumn => cities.id, { onDelete: 'set null' }),
+    ownerPlayerId: integer('owner_player_id').references((): AnyPgColumn => players.id, { onDelete: 'set null' }),
     /** NPC city / valley defenders (null = full strength, regenerated lazily) */
     troops: jsonb('troops').$type<TroopCounts>(),
     forts: jsonb('forts').$type<FortCounts>(),
@@ -147,6 +150,13 @@ export const tiles = pgTable(
       .on(t.ownerCityId)
       .where(sql`${t.ownerCityId} is not null`),
     index('tiles_type_idx').on(t.type),
+    // for the foreign keys: deleting a city or player finds its tiles without a full scan
+    index('tiles_city_idx')
+      .on(t.cityId)
+      .where(sql`${t.cityId} is not null`),
+    index('tiles_owner_player_idx')
+      .on(t.ownerPlayerId)
+      .where(sql`${t.ownerPlayerId} is not null`),
   ],
 );
 

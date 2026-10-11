@@ -1,0 +1,19 @@
+import type { CityBean } from '@marchlands/api-client';
+import { heroPower, HeroStatus, Mission, type TroopKey } from '@marchlands/core';
+
+/** The strongest idle hero (by Attack) to lead the army, leaving out `exclude` (e.g. one just sent): its id, or 'none'. */
+export function bestIdleHero(heros: CityBean['heros'], exclude?: number): string {
+  const best = heros
+    .filter((h) => h.status === HeroStatus.IDLE && !h.seized && h.id !== exclude)
+    .reduce<CityBean['heros'][number] | null>((top, h) => (!top || heroPower(h) > heroPower(top) ? h : top), null);
+  return best ? String(best.id) : 'none';
+}
+
+/** The hero chosen for a mission: the strongest idle one for an attack (where Attack counts), none otherwise. */
+export const defaultHero = (mission: number, heros: CityBean['heros'], exclude?: number) =>
+  mission === Mission.ATTACK ? bestIdleHero(heros, exclude) : 'none';
+
+/** Troop amounts as entered, each capped to what the city has (an empty field stays empty). */
+export function capTroops(troops: Partial<Record<TroopKey, string>>, inCity: Partial<Record<TroopKey, number>>): Partial<Record<TroopKey, string>> {
+  return Object.fromEntries(Object.entries(troops).map(([k, v]) => [k, v ? String(Math.min(Number(v), inCity[k as TroopKey] ?? 0)) : v]));
+}
