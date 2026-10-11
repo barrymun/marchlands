@@ -15,8 +15,8 @@
   },
   "boosts": {
     "title": "Attribute boosts",
-    "effect": "{{label}} +{{pct}}% (+{{amount}}, gear included) for 24 hours",
-    "active": "Active, <countdown /> left; using another adds 24 hours",
+    "effect": "{{label}} +{{bonus}} (+{{amount}}, gear included) for {{period}}",
+    "active": "Active, <countdown /> left; using another adds {{period}}",
     "best": "Best for this hero"
   },
   "loyalty": {

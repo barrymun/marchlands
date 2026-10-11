@@ -8,21 +8,16 @@ import { FortType, TechType, TroopType } from './constants.ts';
 import { isFortType, SIEGE } from './construction.ts';
 import { BUILDINGS, RESEARCH, TROOPS } from './data/index.ts';
 import { GEAR_PIECES, gearLevelPoints } from './gear.ts';
-import { msg, ref, type Message } from './messages/index.ts';
+import { msg, ref, share, type Message } from './messages/index.ts';
 
-/** A fraction as a percentage, to one decimal (0.125 → 12.5). */
-const pct = (x: number) => Math.round(x * 1000) / 10;
+/** A share param (0.125, shown as 12.5%). */
+const pct = share;
+/** A per-level battle bonus of BALANCE.battle.researchPct (whole percents, for the simulator's parity) as a share param. */
+const battlePct = (percent: number) => share(percent / 100);
 const timeCut = (level: number) => pct(1 - Math.pow(BALANCE.techTimeFactor, level));
 
 // Battle bonuses per level, as the battle simulator applies them (battle/simulator.ts, battle/resolve.ts).
-const BATTLE_ATTACK_PCT = 5;
-const BATTLE_DEFENCE_PCT = 5;
-const BATTLE_LIFE_PCT = 5;
-const BATTLE_RANGE_PCT = 5;
-const BATTLE_FOOT_SPEED_PCT = 10;
-const BATTLE_MOUNTED_SPEED_PCT = 5;
-/** Most of the fallen troops Medicine can save (troops.ts injuredShare). */
-const MEDICINE_MAX = 0.5;
+const BATTLE = BALANCE.battle.researchPct;
 
 interface TechText {
   /** what one level does */
@@ -73,37 +68,38 @@ const TEXT: Record<number, TechText> = {
     effect: (l) => msg('techInfo.effect.heroEnhancement', { level: l, points: GEAR_PIECES.length * gearLevelPoints(l) }),
   },
   [TechType.MILITARY_TRADITION]: {
-    summary: msg('techInfo.summary.militaryTradition', { pct: BATTLE_ATTACK_PCT }),
-    effect: (l) => msg('techInfo.effect.militaryTradition', { pct: l * BATTLE_ATTACK_PCT }),
+    summary: msg('techInfo.summary.militaryTradition', { pct: battlePct(BATTLE.attack) }),
+    effect: (l) => msg('techInfo.effect.militaryTradition', { pct: battlePct(l * BATTLE.attack) }),
   },
   [TechType.IRON_WORKING]: {
-    summary: msg('techInfo.summary.ironWorking', { tower: ref.troop(FortType.ARCHER_TOWER), pct: BATTLE_DEFENCE_PCT }),
-    effect: (l) => msg('techInfo.effect.ironWorking', { pct: l * BATTLE_DEFENCE_PCT }),
+    summary: msg('techInfo.summary.ironWorking', { tower: ref.troop(FortType.ARCHER_TOWER), pct: battlePct(BATTLE.defence) }),
+    effect: (l) => msg('techInfo.effect.ironWorking', { pct: battlePct(l * BATTLE.defence) }),
   },
   [TechType.MEDICINE]: {
     summary: msg('techInfo.summary.medicine', {
       from: ref.troop(TroopType.WORKER),
       to: ref.troop(TroopType.ARCHER),
       tower: ref.troop(FortType.ARCHER_TOWER),
-      pct: BATTLE_LIFE_PCT,
+      pct: battlePct(BATTLE.life),
       injured: pct(BALANCE.medicinePerLevel),
-      max: pct(MEDICINE_MAX),
+      max: pct(BALANCE.medicineMaxShare),
     }),
-    effect: (l) => msg('techInfo.effect.medicine', { life: l * BATTLE_LIFE_PCT, injured: pct(Math.min(MEDICINE_MAX, l * BALANCE.medicinePerLevel)) }),
+    effect: (l) =>
+      msg('techInfo.effect.medicine', { life: battlePct(l * BATTLE.life), injured: pct(Math.min(BALANCE.medicineMaxShare, l * BALANCE.medicinePerLevel)) }),
   },
   [TechType.ARCHERY]: {
     summary: msg('techInfo.summary.archery', {
       troops: [TroopType.ARCHER, TroopType.BALLISTA, TroopType.CATAPULT, FortType.ARCHER_TOWER].map(ref.troop),
-      pct: BATTLE_RANGE_PCT,
+      pct: battlePct(BATTLE.range),
     }),
-    effect: (l) => msg('techInfo.effect.archery', { pct: l * BATTLE_RANGE_PCT }),
+    effect: (l) => msg('techInfo.effect.archery', { pct: battlePct(l * BATTLE.range) }),
   },
   [TechType.COMPASS]: {
-    summary: msg('techInfo.summary.compass', { march: pct(BALANCE.compassSpeedPerLevel), battle: BATTLE_FOOT_SPEED_PCT }),
+    summary: msg('techInfo.summary.compass', { march: pct(BALANCE.compassSpeedPerLevel), battle: battlePct(BATTLE.footSpeed) }),
     effect: (l) => msg('techInfo.effect.compass', { pct: pct(l * BALANCE.compassSpeedPerLevel) }),
   },
   [TechType.HORSEBACK_RIDING]: {
-    summary: msg('techInfo.summary.horsebackRiding', { march: pct(BALANCE.horsebackSpeedPerLevel), battle: BATTLE_MOUNTED_SPEED_PCT }),
+    summary: msg('techInfo.summary.horsebackRiding', { march: pct(BALANCE.horsebackSpeedPerLevel), battle: battlePct(BATTLE.mountedSpeed) }),
     effect: (l) => msg('techInfo.effect.horsebackRiding', { pct: pct(l * BALANCE.horsebackSpeedPerLevel) }),
   },
   [TechType.LOGISTICS]: {

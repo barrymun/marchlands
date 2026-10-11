@@ -56,7 +56,7 @@
     "title": "Valleys held by {{city}}",
     "none": "None yet: attack a valley to occupy it (up to your Town Hall level).",
     "row": "{{type}} Lv {{level}}",
-    "bonus": "+{{bonus}}% {{resource}}"
+    "bonus": "+{{bonus}} {{resource}}"
   },
   "medalOdds": {
     "one": "Win: {{chance}} chance of a {{medal}} medal.",
@@ -72,6 +72,6 @@
     "button": "Upgrade to Lv {{level}} · {{gold}} gold",
     "notEnoughGold": "Not enough gold in {{city}}.",
     "npcHint": "Its troops, fortifications, walls, hero and the resources you can plunder all grow to level {{level}}, and it starts afresh at full strength.",
-    "valleyHint": "Once held: +{{from}}% → +{{to}}% production. Its defenders grow stronger with the level too."
+    "valleyHint": "Once held: +{{from}} → +{{to}} production. Its defenders grow stronger with the level too."
   }
 }

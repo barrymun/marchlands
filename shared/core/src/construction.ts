@@ -4,7 +4,7 @@
 import { z } from 'zod';
 import { BALANCE, goldForCents, scaled } from './balance.ts';
 import { itemGoldPrice } from './items.ts';
-import { coinsForSpeedup } from './time.ts';
+import { coinsForSpeedup, HOUR } from './time.ts';
 import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEYS, TroopType } from './constants.ts';
 import { buildingConfig, buildingMaxLevel, ITEMS, researchConfig, researchMaxLevel, troopConfig, type Requirements } from './data/index.ts';
 import { buildingCount, buildingLevel, researchLevel, type MayorStats } from './economy.ts';
@@ -36,7 +36,7 @@ export function isValidPosition(pos: number): boolean {
 
 /** Number of field slots unlocked outside the walls (10 + 3 per Town Hall level). */
 export function unlockedOuterSlots(townHallLevel: number): number {
-  return Math.min(40, BALANCE.outerSlotsBase + BALANCE.outerSlotsPerTownHall * townHallLevel);
+  return Math.min(OUTER_POSITIONS.max - OUTER_POSITIONS.min + 1, BALANCE.outerSlotsBase + BALANCE.outerSlotsPerTownHall * townHallLevel);
 }
 
 /** Which building types may stand on a position. */
@@ -332,16 +332,36 @@ export interface SpeedupEffect {
   reduce(totalMs: number, rng: () => number): number;
 }
 
-const H = 3_600_000;
-export const SPEEDUP_ITEMS: Record<string, SpeedupEffect> = {
-  'consume.2.a': { cents: 5, reduce: () => 15 * 60_000 },
-  'consume.2.b': { cents: 10, reduce: () => H },
-  'consume.2.b.1': { cents: 20, reduce: () => 2.5 * H },
-  'consume.2.c': { cents: 50, reduce: () => 8 * H },
-  'consume.2.c.1': { cents: 80, reduce: (_t, rng) => (10 + Math.floor(rng() * 21)) * H },
-  'consume.2.d': { cents: 120, reduce: (t) => t * 0.3 },
-  'player.speedup.1': { cents: 175, reduce: (t) => t * 0.5 },
-};
+/** The speed-up items (BALANCE.items.speedups). */
+export const SPEEDUP_ITEMS: Record<string, SpeedupEffect> = Object.fromEntries(
+  Object.entries(BALANCE.items.speedups).map(([id, s]): [string, SpeedupEffect] => {
+    const { cutMs, cutHours, cutShare } = s;
+    const reduce: SpeedupEffect['reduce'] =
+      cutShare != null
+        ? (t) => t * cutShare
+        : cutHours
+          ? (_t, rng) => (cutHours[0] + Math.floor(rng() * (cutHours[1] - cutHours[0] + 1))) * HOUR
+          : () => cutMs ?? 0;
+    return [id, { cents: s.cents, reduce }];
+  }),
+);
+
+/**
+ * A training batch after Napoleon's Diary / Archimedes' Note: BALANCE.items.batchSpeedupShare of its full
+ * time ((marchlands) orig: of the time left), so four finish any batch. The head of the queue ends sooner
+ * (never before `now`), its start moving back by the time saved, so its progress bar jumps forward; a
+ * waiting batch gets shorter.
+ */
+export function speedUpTrainBatch(batch: TrainBatch, head: boolean, now: number): TrainBatch {
+  const share = BALANCE.items.batchSpeedupShare;
+  if (head) {
+    // the head's start already sits back by any earlier cuts, so end - start is its full time
+    const endTime = Math.max(now, batch.endTime - Math.floor((batch.endTime - batch.startTime) * share));
+    return { ...batch, startTime: batch.startTime - (batch.endTime - endTime), endTime };
+  }
+  const fullTime = batch.fullTime ?? batch.costTime;
+  return { ...batch, fullTime, costTime: Math.max(0, batch.costTime - Math.floor(fullTime * share)) };
+}
 
 /** Gold charged for a speed-up item the player has none of (its gold price). */
 export function speedupItemGold(itemId: string): number {

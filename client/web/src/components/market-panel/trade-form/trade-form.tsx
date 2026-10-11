@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand } from '@/hooks/use-game';
-import { fmtExact } from '@/lib/format';
+import { fmtExact, percent } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { RESOURCES } from '@/components/market-panel/constants';
 import { allMarketQueries } from '@/lib/query-keys';
@@ -92,7 +92,7 @@ export function TradeForm({
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{t('tradeForm.title', { resource: word })}</CardTitle>
-        <CardDescription>{t('tradeForm.description', { fee: BALANCE.marketFee * 100, level: market, open: openHere, cap })}</CardDescription>
+        <CardDescription>{t('tradeForm.description', { fee: percent(BALANCE.marketFee, 1), level: market, open: openHere, cap })}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
         <div className="grid grid-cols-2 gap-2">

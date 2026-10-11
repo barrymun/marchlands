@@ -21,6 +21,7 @@ import {
   msg,
   type Message,
   type CastleSign,
+  ItemId,
 } from '@marchlands/core';
 import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@marchlands/db';
 import { openOwnCity, viewOwnCity } from '../city.ts';
@@ -111,7 +112,7 @@ export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePla
         flag,
         faceUrl,
         sex: input.sex,
-        items: { 'player.box.present.2': 1 },
+        items: { [ItemId.NEWBIES_PACKAGE]: 1 },
         createdAt: ctx.now,
         lastLoginAt: ctx.now,
       })
@@ -308,7 +309,7 @@ export async function startTruce(ctx: Ctx, playerId: number, itemId: string, cit
   const b = await openOwnCity(ctx, playerId, cityId);
   const p = b.player;
   if (activeBuff(p, BuffId.TRUCE_COOLDOWN, ctx.now)) throw new GameError(msg('player.truce.cooldown'), -99);
-  if (itemId !== 'player.peace.1') throw new GameError(msg('common.invalidData'), -99);
+  if (itemId !== ItemId.TRUCE_AGREEMENT) throw new GameError(msg('common.invalidData'), -99);
   useItemOrGold(ctx, p, b.city, itemId, itemGoldPrice(itemId) ?? 0);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);

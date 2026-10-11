@@ -7,9 +7,12 @@ import {
   TroopType,
   buildingEffect,
   buildingInfo,
+  innHeroMaxLevel,
+  innOffers,
   msgParamNames,
   ref,
   unlockedOuterSlots,
+  wallHitPoints,
   type Message,
 } from '../src/index.ts';
 
@@ -96,5 +99,23 @@ describe('buildingEffect', () => {
     });
     expect(buildingEffect(BuildingType.BEACON_TOWER, 1)?.code).toBe('buildingInfo.effect.beaconTroops');
     expect(buildingEffect(BuildingType.BEACON_TOWER, 2)?.code).toBe('buildingInfo.effect.beaconHeroes');
+  });
+
+  it('quotes the walls hit points and archer tower range from the battle rules', () => {
+    expect(buildingEffect(BuildingType.WALLS, 3)?.params).toMatchObject({
+      space: BALANCE.wallSpace[3],
+      count: 3,
+      hitPoints: wallHitPoints(3),
+      percent: { share: 0.135 },
+    });
+    expect(buildingEffect(BuildingType.WALLS, 10)?.params).toMatchObject({
+      hitPoints: 5_500_000,
+      percent: { share: (10 * BALANCE.battle.wallTowerRangePct) / 100 },
+    });
+  });
+
+  it('quotes the Inn offers and their highest hero level', () => {
+    expect(buildingEffect(BuildingType.INN, 4)?.params).toEqual({ count: innOffers(4), level: innHeroMaxLevel(4) });
+    expect(buildingEffect(BuildingType.INN, 10)?.params).toEqual({ count: BALANCE.inn.maxOffers, level: 10 * BALANCE.inn.heroLevelsPerInnLevel });
   });
 });

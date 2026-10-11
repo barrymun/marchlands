@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { CostList } from '@/components/cost-list/cost-list';
 import { useCommand, usePlayer } from '@/hooks/use-game';
-import { fmt, fmtExact } from '@/lib/format';
+import { fmt, fmtExact, percent } from '@/lib/format';
 import { UnitName } from '@/components/military-panel/unit-name/unit-name';
 
 /**
@@ -66,8 +66,8 @@ export function InjuredCard({ city }: { city: CityBean }) {
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{t('injured.title')}</CardTitle>
         <CardDescription>
-          {medicine > 0 ? t('injured.medicine', { level: medicine, percent: Math.round(share * 100) }) : t('injured.noMedicine')}{' '}
-          {t('injured.healInfo', { percent: Math.round(BALANCE.healCostShare * 100), honor: fmtExact(honor) })}
+          {medicine > 0 ? t('injured.medicine', { level: medicine, percent: percent(share) }) : t('injured.noMedicine')}{' '}
+          {t('injured.healInfo', { percent: percent(BALANCE.healCostShare), honor: fmtExact(honor) })}
         </CardDescription>
       </CardHeader>
       {injured.length > 0 && (

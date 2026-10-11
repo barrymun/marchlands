@@ -6,6 +6,9 @@ import {
   coinsForSpeedup,
   computeCityStats,
   createRandomHero,
+  innHeroMaxLevel,
+  innOffers,
+  unlockedOuterSlots,
   generateMap,
   marchTimeMs,
   merchantBase,
@@ -62,6 +65,8 @@ import {
   type EconomyCity,
   type EconomyContext,
   maxTrainableCount,
+  ItemId,
+  medalId,
 } from '../src/index.ts';
 
 const ctx = (over: Partial<EconomyContext> = {}): EconomyContext => ({
@@ -240,6 +245,24 @@ describe('heroes & world', () => {
       expect(h.power + h.management + h.stratagem).toBe(h.basePower + h.baseManagement + h.baseStratagem + h.level);
       expect(h.level).toBeLessThanOrEqual(50);
     }
+  });
+  it('the Inn offers one hero per level, up to BALANCE.inn.maxOffers', () => {
+    expect(innOffers(0)).toBe(0);
+    expect(innOffers(3)).toBe(3);
+    expect(innOffers(BALANCE.inn.maxOffers)).toBe(BALANCE.inn.maxOffers);
+    expect(innOffers(BALANCE.inn.maxOffers + 2)).toBe(BALANCE.inn.maxOffers);
+  });
+  it('Inn heroes reach BALANCE.inn.heroLevelsPerInnLevel levels per Inn level', () => {
+    expect(innHeroMaxLevel(1)).toBe(BALANCE.inn.heroLevelsPerInnLevel);
+    expect(innHeroMaxLevel(10)).toBe(50);
+    const rng = seededRng('inn-3');
+    for (let i = 0; i < 200; i++) expect(createRandomHero(3, rng).level).toBeLessThanOrEqual(innHeroMaxLevel(3));
+  });
+  it('field slots: outerSlotsBase plus outerSlotsPerTownHall per Town Hall level, up to the 40 positions', () => {
+    expect(unlockedOuterSlots(0)).toBe(BALANCE.outerSlotsBase);
+    expect(unlockedOuterSlots(5)).toBe(BALANCE.outerSlotsBase + 5 * BALANCE.outerSlotsPerTownHall);
+    expect(unlockedOuterSlots(10)).toBe(40);
+    expect(unlockedOuterSlots(20)).toBe(40);
   });
   it('map generation is deterministic with flats, valleys and NPCs', () => {
     const a = generateMap('x', 100);
@@ -445,10 +468,10 @@ describe('storage multiplier', () => {
 
 describe('hero items for gold', () => {
   it('price experience books by the experience they give, boosts at a flat price, medals not at all', () => {
-    expect(heroItemGoldPrice('player.experience.1.a', 1600)).toBe(Math.ceil(1000 * BALANCE.heroItemGold.perExp));
-    expect(heroItemGoldPrice('player.experience.1.c', 1_000_000)).toBe(Math.ceil(1_000_000 * BALANCE.heroItemGold.perExp));
-    expect(heroItemGoldPrice('hero.power.1', 1600)).toBe(BALANCE.heroItemGold.attributeBoost);
-    expect(heroItemGoldPrice('hero.loyalty.1', 1600)).toBeNull();
+    expect(heroItemGoldPrice(ItemId.ANABASIS, 1600)).toBe(Math.ceil(1000 * BALANCE.heroItemGold.perExp));
+    expect(heroItemGoldPrice(ItemId.ON_WAR, 1_000_000)).toBe(Math.ceil(1_000_000 * BALANCE.heroItemGold.perExp));
+    expect(heroItemGoldPrice(ItemId.EXCALIBUR, 1600)).toBe(BALANCE.heroItemGold.attributeBoost);
+    expect(heroItemGoldPrice(ItemId.CROSS_MEDAL, 1600)).toBeNull();
   });
 });
 
@@ -550,7 +573,7 @@ describe('medal drops', () => {
     const rng = seededRng('medals-every-level');
     const seen = new Set<string>();
     for (let i = 0; i < 20000; i++) for (const id of Object.keys(rollMedalDrops(10, rng))) seen.add(id);
-    expect([...seen].sort()).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9].map((l) => `hero.loyalty.${l}`));
+    expect([...seen].sort()).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9].map(medalId));
   });
 });
 
@@ -646,10 +669,10 @@ describe('hero gear', () => {
   });
 
   it('prices stars 1-9 at one medal of that level and star 10 at three Nation Medals', () => {
-    expect(gearStarCost(1)).toEqual({ itemId: 'hero.loyalty.1', count: 1 });
-    expect(gearStarCost(6)).toEqual({ itemId: 'hero.loyalty.6', count: 1 });
-    expect(gearStarCost(9)).toEqual({ itemId: 'hero.loyalty.9', count: 1 });
-    expect(gearStarCost(10)).toEqual({ itemId: 'hero.loyalty.9', count: 3 });
+    expect(gearStarCost(1)).toEqual({ itemId: ItemId.CROSS_MEDAL, count: 1 });
+    expect(gearStarCost(6)).toEqual({ itemId: ItemId.WISDOM_MEDAL, count: 1 });
+    expect(gearStarCost(9)).toEqual({ itemId: ItemId.NATION_MEDAL, count: 1 });
+    expect(gearStarCost(10)).toEqual({ itemId: ItemId.NATION_MEDAL, count: 3 });
   });
 
   it('reads the lord gear from Hero Enhancement and the stars bought', () => {

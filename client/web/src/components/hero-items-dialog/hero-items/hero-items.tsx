@@ -1,28 +1,19 @@
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postHeroesItemsMutation, type HeroBean } from '@marchlands/api-client';
-import {
-  BALANCE,
-  experienceItemGain,
-  HERO_ATTRIBUTE_BUFF,
-  HERO_ATTRIBUTE_ITEMS,
-  heroAtMaxLevel,
-  heroBuffAmount,
-  heroBuffBase,
-  heroItemGoldPrice,
-  LOYALTY_MEDALS,
-} from '@marchlands/core';
+import { BALANCE, experienceItemGain, HERO_ATTRIBUTE_ITEMS, heroAtMaxLevel, heroBuffAmount, heroBuffBase, heroItemGoldPrice } from '@marchlands/core';
 import { Countdown } from '@/components/countdown/countdown';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCity, useCommand } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
-import { fmt, fmtExact } from '@/lib/format';
+import { fmt, fmtExact, percent, period } from '@/lib/format';
 import { itemName } from '@/lib/game-data';
 import { ATTRIBUTE_BORDER, dominantAttribute } from '@/lib/hero-attributes';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { ATTR_LABEL, EXPERIENCE_ITEMS } from '@/components/hero-items-dialog/hero-items/constants';
+import { ATTR_LABEL } from '@/components/hero-items-dialog/hero-items/constants';
+import { experienceItems, isLoyaltyFull, loyaltyMedals } from '@/components/hero-items-dialog/hero-items/utils';
 import { useNow } from '@/hooks/use-now';
 
 export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
@@ -93,7 +84,7 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
       <div className="grid gap-4">
         <section className="grid gap-1.5">
           <h3 className="text-sm font-medium">{t('experience.title')}</h3>
-          {EXPERIENCE_ITEMS.map((id) =>
+          {experienceItems().map((id) =>
             row(
               id,
               t('experience.gain', { amount: fmtExact(experienceItemGain(id, hero.upgradeExp)) }),
@@ -109,10 +100,20 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
             return row(
               id,
               <>
-                {t('boosts.effect', { label: ATTR_LABEL[attr], pct: HERO_ATTRIBUTE_BUFF.bonus * 100, amount: heroBuffAmount(heroBuffBase(hero, attr)) })}
+                {t('boosts.effect', {
+                  label: ATTR_LABEL[attr],
+                  bonus: percent(BALANCE.items.heroAttributeBuff.bonus),
+                  period: period(BALANCE.items.heroAttributeBuff.durationMs),
+                  amount: heroBuffAmount(heroBuffBase(hero, attr)),
+                })}
                 {end && (
                   <span className={cn('block', ITEM_BONUS_TEXT)}>
-                    <Trans t={t} i18nKey="boosts.active" components={{ countdown: <Countdown endTime={end} /> }} />
+                    <Trans
+                      t={t}
+                      i18nKey="boosts.active"
+                      values={{ period: period(BALANCE.items.heroAttributeBuff.durationMs) }}
+                      components={{ countdown: <Countdown endTime={end} /> }}
+                    />
                   </span>
                 )}
               </>,
@@ -128,7 +129,9 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
         </section>
         <section className="grid gap-1.5">
           <h3 className="text-sm font-medium">{t('loyalty.title')}</h3>
-          {Object.entries(LOYALTY_MEDALS).map(([id, n]) => row(id, t('loyalty.gain', { amount: n }), hero.loyalty >= 100 ? t('loyalty.full') : undefined))}
+          {loyaltyMedals().map(({ id, loyalty }) =>
+            row(id, t('loyalty.gain', { amount: loyalty }), isLoyaltyFull(hero.loyalty) ? t('loyalty.full') : undefined),
+          )}
         </section>
       </div>
     </>

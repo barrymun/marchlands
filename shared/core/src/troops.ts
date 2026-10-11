@@ -205,9 +205,9 @@ export function unitsExp(troops: TroopCounts, forts: FortCounts = {}): number {
   return exp;
 }
 
-/** Medicine: share of fallen troops that survive injured (BALANCE.medicinePerLevel per level, up to 50%). */
+/** Medicine: share of fallen troops that survive injured (BALANCE.medicinePerLevel per level, up to BALANCE.medicineMaxShare). */
 export function medicineShare(research: ResearchState): number {
-  return Math.min(0.5, researchLevel(research, TechType.MEDICINE) * BALANCE.medicinePerLevel);
+  return Math.min(BALANCE.medicineMaxShare, researchLevel(research, TechType.MEDICINE) * BALANCE.medicinePerLevel);
 }
 
 /** The part of `lost` that survives injured under the Medicine share. */

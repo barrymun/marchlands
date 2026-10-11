@@ -10,7 +10,7 @@
   },
   "remove": "{{label}}を減らす",
   "add": "{{label}}を増やす",
-  "asMayor": "市長なら: 生産 {{rate}}（+{{pct}}%）",
+  "asMayor": "市長なら: 生産 {{rate}}（+{{pct}}）",
   "usesHolyWater": "聖水を 1 個使用（所持 {{owned}}）",
   "holyWaterGold": "聖水 1 個分の {{gold}} 金",
   "reset": "リセット",

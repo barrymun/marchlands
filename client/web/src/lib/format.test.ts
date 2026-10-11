@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { setGameSpeed } from '@marchlands/core';
-import { clockTime, dateTime, duration, fmt, fmtDecimal, fmtExact, percent, resourceLabel, shortDuration, signed, signedRate } from '@/lib/format';
+import { DAY, HOUR, setGameSpeed } from '@marchlands/core';
+import { clockTime, dateTime, duration, fmt, fmtDecimal, fmtExact, percent, period, resourceLabel, shortDuration, signed, signedRate } from '@/lib/format';
 import { buildingName, troopName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 
@@ -10,12 +10,42 @@ afterEach(async () => {
   await i18n.changeLanguage('en-GB');
 });
 
+describe(period.name, () => {
+  it('says whole days from a day up', () => {
+    expect(period(DAY)).toBe('1 day');
+    expect(period(7 * DAY)).toBe('7 days');
+  });
+  it('says hours below a day, rounded', () => {
+    expect(period(HOUR)).toBe('1 hour');
+    expect(period(12 * HOUR)).toBe('12 hours');
+    expect(period(5.6 * HOUR)).toBe('6 hours');
+  });
+});
+
 describe(percent.name, () => {
   it('rounds a fraction to a whole percent', () => {
     expect(percent(0.25)).toBe('25%');
     expect(percent(0.256)).toBe('26%');
     expect(percent(0.004)).toBe('0%');
     expect(percent(1)).toBe('100%');
+  });
+
+  it('shows up to `max` decimals', () => {
+    expect(percent(0.005, 1)).toBe('0.5%');
+    expect(percent(0.123, 1)).toBe('12.3%');
+    expect(percent(0.12, 1)).toBe('12%');
+  });
+
+  it('shows at least `min` decimals', () => {
+    expect(percent(0.05, 1, 1)).toBe('5.0%');
+    expect(percent(0, 1, 1)).toBe('0.0%');
+  });
+
+  it('follows the locale', async () => {
+    await i18n.changeLanguage('ja-JP');
+    expect(percent(0.25)).toBe('25%');
+    await i18n.changeLanguage('en-US');
+    expect(percent(0.005, 1)).toBe('0.5%');
   });
 });
 

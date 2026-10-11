@@ -1,4 +1,4 @@
-import { BALANCE, BuffId } from '@marchlands/core';
+import { BALANCE, BuffId, ItemId } from '@marchlands/core';
 import type { Slot } from '@/components/active-effects/types';
 import { percent, resourceLabel } from '@/lib/format';
 import { i18n } from '@/lib/i18n';
@@ -112,7 +112,7 @@ export const GROUPS: { label: string; slots: Slot[] }[] = [
           return i18n.t('active-effects:on');
         },
         extend: false,
-        items: ['player.peace.1'],
+        items: [ItemId.TRUCE_AGREEMENT],
       },
     ],
   },

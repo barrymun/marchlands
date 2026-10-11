@@ -12,9 +12,9 @@
   },
   "injured": {
     "title": "Injured troops",
-    "medicine": "Medicine Lv {{level}}: {{percent}}% of the troops this city loses, defending or attacking, survive injured.",
+    "medicine": "Medicine Lv {{level}}: {{percent}} of the troops this city loses, defending or attacking, survive injured.",
     "noMedicine": "Research Medicine so that some of the troops this city loses, defending or attacking, survive injured (5% per level, up to 50%).",
-    "healInfo": "Heal them for {{percent}}% of their training cost, or for honour ({{honor}} available).",
+    "healInfo": "Heal them for {{percent}} of their training cost, or for honour ({{honor}} available).",
     "allPlaceholder": "all {{n}}",
     "healResources": "Heal {{n}} · resources",
     "healHonor": "Heal · {{n}} honour",
@@ -81,12 +81,12 @@
   "mayorTraining": {
     "noMayorTrain": "No mayor: appoint one with high {{stat}} in the Heroes tab to train faster.",
     "noMayorBuild": "No mayor: appoint one with high {{stat}} in the Heroes tab to build fortifications faster.",
-    "train": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}}% (new batches). A mayor with higher {{stat}} trains faster.",
-    "build": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}}% (new batches). A mayor with higher {{stat}} builds them faster."
+    "train": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}} (new batches). A mayor with higher {{stat}} trains faster.",
+    "build": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}} (new batches). A mayor with higher {{stat}} builds them faster."
   },
   "trainDiscount": {
-    "active": "Training cost −{{percent}}% (Quartermaster): the costs below include it.",
-    "timed": "Training cost −{{percent}}% (Quartermaster) for {{time}}: the costs below include it."
+    "active": "Training cost −{{percent}} (Quartermaster): the costs below include it.",
+    "timed": "Training cost −{{percent}} (Quartermaster) for {{time}}: the costs below include it."
   },
   "trainEstimate": {
     "instant": "instant (mayor and Military Science fast enough)",

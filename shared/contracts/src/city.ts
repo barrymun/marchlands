@@ -88,7 +88,7 @@ export const ResourceProductionLine = z
     resource: ResourceKeySchema.exclude(['gold']),
     basicOutput: int().describe('per hour, regardless of fields'),
     fieldOutput: int().describe('per hour, after work rate and efficiency'),
-    bonusPercent: int(),
+    bonus: z.number().describe('production bonus as a share (0.25 = +25%)'),
     armyConsumption: int().describe('food upkeep per hour (0 for other resources)'),
     totalOutput: int().describe('net per hour'),
     commenceRate: int().describe('work rate, %'),

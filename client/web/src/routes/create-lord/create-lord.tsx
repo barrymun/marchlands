@@ -13,6 +13,7 @@ import { errorMessage, tokenStore } from '@/lib/api';
 import { zoneName } from '@/lib/game-data';
 import { GENDERS } from '@/lib/genders';
 import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
+import { percent } from '@/lib/format';
 
 export function CreateLordPage() {
   const { t } = useTranslation(['create-lord', 'common']);
@@ -102,7 +103,7 @@ export function CreateLordPage() {
                   <SelectItem value="-1">{t('leastCrowded')}</SelectItem>
                   {zones.data?.map((z) => (
                     <SelectItem key={z.id} value={String(z.id)} disabled={z.openFlats === 0}>
-                      {t('zone', { name: zoneName(z.id), count: z.playerCount, rate: z.rate })}
+                      {t('zone', { name: zoneName(z.id), count: z.playerCount, settled: percent(z.settled) })}
                     </SelectItem>
                   ))}
                 </SelectContent>

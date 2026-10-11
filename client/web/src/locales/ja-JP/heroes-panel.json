@@ -9,8 +9,8 @@
     "levelUpMulti": "{{name}} がレベル {{level}} に到達しました（+{{levels}} レベル、+{{levels}} ポイント）"
   },
   "mayor": {
-    "bonus": "市長ボーナス 生産 +{{pct}}% · {{rate}}",
-    "asMayor": "市長なら: 生産 +{{pct}}% · {{rate}}",
+    "bonus": "市長ボーナス 生産 +{{pct}} · {{rate}}",
+    "asMayor": "市長なら: 生産 +{{pct}} · {{rate}}",
     "versus": "（{{name}} 比 {{diff}}）"
   },
   "status": {

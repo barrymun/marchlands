@@ -10,7 +10,7 @@ import {
   msg,
   QUEST_CATALOGUE,
   questById,
-  questGroups,
+  questGroupsWithQuests,
   questTargetMessage,
   TROOP_KEY_LIST,
   FORT_KEY_LIST,
@@ -78,13 +78,11 @@ async function progressMap(ctx: Ctx, playerId: number) {
 /** quest.getQuestType: quest groups with counts of finished-but-unclaimed quests (named by the client, `data-quests` by group id). */
 export async function questTypes(ctx: Ctx, playerId: number) {
   const list = await questList(ctx, playerId);
-  return questGroups()
-    .filter((g) => QUEST_CATALOGUE.some((q) => q.groupId === g.typeId))
-    .map((g) => ({
-      id: g.id,
-      typeId: g.typeId,
-      isFinish: list.some((q) => q.groupId === g.typeId && q.isFinish && !q.claimed),
-    }));
+  return questGroupsWithQuests().map((g) => ({
+    id: g.id,
+    typeId: g.typeId,
+    isFinish: list.some((q) => q.groupId === g.id && q.isFinish && !q.claimed),
+  }));
 }
 
 /** quest.getQuestList: quests are named by the client (`data-quests` by quest id); descriptions and targets are messages. */

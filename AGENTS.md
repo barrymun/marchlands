@@ -54,6 +54,7 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 - **Ids with a fixed set of values are typed, never plain strings.**
   - Player buffs use `BuffId` and hero buffs use `HeroBuffId`. Their schemas use `z.enum(BUFF_IDS)` and `z.enum(HERO_BUFF_IDS)`.
   - Add a new buff to `BuffId` first. Everything else (items, helpers such as `setBuff` / `activeBuff` / `hasBuff`, the client) only accepts a `BuffId`.
+  - Items use `ItemId` (`shared/core/src/item-ids.ts`), named after the item: `ItemId.NAPOLEONS_DIARY`, never `'player.troop.1.b'`. Medals by level use `medalId(level)`. Speed-ups that are not items use `SpeedupId`. A new item gets its `ItemId` entry; a test checks `ItemId` lists exactly the game's items. Removed items (`REMOVED_ITEMS`) and migrations keep the original id strings.
 - **`shared/contracts` is the API's single source of types.** Changing it means running `npm run gen:api`, then using the generated types in the client (`@marchlands/api-client`).
 
 ## API client (`shared/api-client`)
@@ -181,7 +182,8 @@ The client never writes player-facing text in code: every string comes from `src
 - **Outside components** (utils, constants, push handlers): `i18n.t('<ns>:key')` from `@/lib/i18n`. A constant that holds a label uses a getter (see `lib/hero-attributes.ts`). Changing the locale re-renders the app from its root (`LocaleRoot`), so these update too.
 - **Keys** are camelCase, nested by sub-component. Use `{{placeholders}}` and `<Trans>` for text with markup inside. Write whole sentences: never glue fragments together, since word order differs between languages.
 - **Plurals:** any number followed by a countable noun is a plural key: `_one` and `_other` in English, `_other` alone in ja-JP. Pass the raw number as `count`; to show it formatted, pass that too under another name: `t('common:troops', { count: total, n: fmtExact(total) })` with `"troops_one": "{{n}} troop"`. A sentence with two counts uses a nested key for the second (`cityTargets.idleHeroes`).
-- **Numbers, dates and durations** follow the locale through `lib/format.ts`: `fmt`, `fmtExact`, `fmtDecimal`, `duration`, `signedRate`, `dateTime` and `clockTime`. Never call `toLocaleString` / `toLocaleTimeString` directly.
+- **Numbers, dates and durations** follow the locale through `lib/format.ts`: `fmt`, `fmtExact`, `fmtDecimal`, `percent`, `duration`, `period`, `signedRate`, `dateTime` and `clockTime`. Never call `toLocaleString` / `toLocaleTimeString` directly.
+- **Percentages are shares** (0.25) everywhere until they are shown: in BALANCE, in the API, in message params. The client shows them with `percent(share)` (`percent(0.005, 1)` for decimals), and the text holds no `%` of its own (`"+{{bonus}} production"`). Never multiply by 100 to display. The exceptions are settings the player types in as whole percents (tax rate, field work rates, warehouse store percent), which the API takes and returns as typed.
 - **Game data names** (troops and fortifications, buildings, research, items, quests, titles, tiles, zones, alliance ranks, gear pieces, item categories) live in `data-<kind>` namespaces keyed by the game's id (`data-troops.json`: `"7": "Archer"`; `data-items.json` is flat because item ids contain dots). Look them up with `lib/game-data.ts` (`troopName(id)`, `itemName(id)`, `itemShortName(id)` …). Core holds no display names, and the API sends ids, never names. A new troop, building, item and so on needs its name in every locale; each data namespace has a test that it covers every id the game defines.
 - **Game data descriptions** (building, research, troop, item and quest text) are messages built by core's info functions (`buildingInfo`, `techInfo`, `troopDescription`, `itemInfo`, quest descriptions) in the `*Info` message areas, with numbers taken from `BALANCE`.
 - **Not translated:** names players or the game give to things (player, city and hero names, including generated ones like "X the Bold" or "X Keep"). Symbols and separators with no words in them (`—`, ` · `, `×3`, coordinates) and the game's name stay in code.
@@ -202,6 +204,7 @@ The server never sends or stores English for players. Everything it tells a play
   - **Text a player wrote** (names) goes as a string.
   - **Game data** goes as a reference: `ref.troop(id)`, `ref.building(id)`, `ref.tech(id)`, `ref.item(id)`, `ref.title(id)`, `ref.tile(type)`, `ref.zone(id)`, `ref.rank(rank)`, `ref.gear(piece)`, `ref.itemCategory(type)`, `ref.resource('wood')`, `ref.stat('power')`. Never put a name into a message.
   - **Lengths of time** go as `dur(ms)` (real milliseconds), shown as a duration.
+  - **Percentages** go as `share(x)` (0.25 for 25%), shown as a percent. Never send a percent number (25); a core test checks the descriptions never do.
   - **A varying phrase** goes as a nested message. A **list** goes as an array.
   - **A number quoted from `BALANCE`** is passed from `BALANCE`, never written into the text.
 - **Client side:** `errorMessage(err)` and `translateMessage(m)` (`lib/messages.ts`) word any message. Show server text only through them.

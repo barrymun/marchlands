@@ -1,11 +1,11 @@
 // Words what the server tells the player (a message: code + params, see shared/core/src/messages) in the
 // current locale. A code `<area>.<name>` is the key `<name>` in the namespace `msg-<area>`
 // (src/locales/<locale>/msg-<area>.json). Params are worded first: numbers in the locale's format, game data
-// by name, durations by their two largest units ("1h 30m"), nested messages recursively, lists joined; `count` stays a number so the plural form can be chosen
+// by name, durations by their two largest units ("1h 30m"), shares as percents ("12.5%"), nested messages recursively, lists joined; `count` stays a number so the plural form can be chosen
 // (write it as `{{count, number}}`).
 
 import type { GameRef } from '@marchlands/core';
-import { fmtDecimal, fmtExact, shortDuration } from '@/lib/format';
+import { fmtDecimal, fmtExact, percent, shortDuration } from '@/lib/format';
 import { buildingName, gearName, itemCategoryName, itemName, rankName, techName, tileName, titleName, troopName, zoneName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 
@@ -23,6 +23,7 @@ const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'obj
 const isMessage = (v: unknown): v is AnyMessage => isObject(v) && typeof v.code === 'string';
 const isRef = (v: unknown): v is AnyRef => isObject(v) && typeof v.ref === 'string';
 const isDuration = (v: unknown): v is { duration: number } => isObject(v) && typeof v.duration === 'number';
+const isShare = (v: unknown): v is { share: number } => isObject(v) && typeof v.share === 'number';
 
 /** The name of a piece of game data, in the current locale. */
 export function gameRefName(r: AnyRef): string {
@@ -66,6 +67,7 @@ export function paramText(v: unknown): string {
   if (isMessage(v)) return translateMessage(v);
   if (isRef(v)) return gameRefName(v);
   if (isDuration(v)) return shortDuration(v.duration);
+  if (isShare(v)) return percent(v.share, 1);
   return '';
 }
 

@@ -157,7 +157,7 @@ async function main() {
       c.fields.some((f) => f.id === v.id),
       'valley listed under city fields',
     );
-    check(c.resource.food.bonusPercent >= 3, `food bonus ${c.resource.food.bonusPercent}%`);
+    check(c.resource.food.bonus >= 0.03, `food bonus ${c.resource.food.bonus}`);
   } else console.log('  (no level-1 grassland nearby; valley step skipped)');
 
   // ---- recall ----

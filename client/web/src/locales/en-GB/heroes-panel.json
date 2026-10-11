@@ -9,8 +9,8 @@
     "levelUpMulti": "{{name}} reached level {{level}} (+{{levels}} levels, +{{levels}} points)"
   },
   "mayor": {
-    "bonus": "Mayor bonus +{{pct}}% production · {{rate}}",
-    "asMayor": "As mayor: +{{pct}}% production · {{rate}}",
+    "bonus": "Mayor bonus +{{pct}} production · {{rate}}",
+    "asMayor": "As mayor: +{{pct}} production · {{rate}}",
     "versus": "({{diff}} vs {{name}})"
   },
   "status": {

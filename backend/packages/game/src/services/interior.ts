@@ -1,7 +1,21 @@
 // interior.* and city.* — tax, work rates, comfort, city settings and teleporting.
 
 import { and, count, eq, inArray, ne } from 'drizzle-orm';
-import { BALANCE, BASIC_RESOURCES, GameError, itemGoldPrice, scaled, TileType, tileXY, type ResourceSet, BuffId, msg, ref, dur } from '@marchlands/core';
+import {
+  BALANCE,
+  BASIC_RESOURCES,
+  GameError,
+  itemGoldPrice,
+  scaled,
+  TileType,
+  tileXY,
+  type ResourceSet,
+  BuffId,
+  msg,
+  ref,
+  dur,
+  ItemId,
+} from '@marchlands/core';
 import { armies, tiles } from '@marchlands/db';
 import { cityStats, openOwnCity, viewCity, viewOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -115,7 +129,7 @@ export async function productionBreakdown(ctx: Ctx, playerId: number, cityId: nu
     resource: r,
     basicOutput: BALANCE.baseProductionPerHour,
     fieldOutput: Math.round(s.fieldProduction[r] * s.efficiency),
-    bonusPercent: Math.round(s.bonus[r] * 100),
+    bonus: s.bonus[r],
     armyConsumption: r === 'food' ? Math.round(s.upkeep) : 0,
     totalOutput: Math.round(s.rates[r]),
     commenceRate: b.city.workRates[r],
@@ -148,7 +162,7 @@ export async function setCityFlags(ctx: Ctx, playerId: number, cityId: number, f
   await saveCity(ctx, b.city);
 }
 
-const TELEPORTER = 'consume.move.1';
+const TELEPORTER = ItemId.CITY_TELEPORTER;
 
 /**
  * city.advMoveCastle: the City Teleporter moves the city to a free flat of the lord's choice, then

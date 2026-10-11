@@ -31,7 +31,7 @@ import { GearCard } from '@/components/hero-gear/gear-card/gear-card';
 import { HeroGearLine } from '@/components/hero-gear/hero-gear-line/hero-gear-line';
 import { useCommand } from '@/hooks/use-game';
 import { errorMessage } from '@/lib/api';
-import { fmt, signedRate } from '@/lib/format';
+import { fmt, signedRate, percent } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { HeroRow } from '@/components/heroes-panel/hero-row/hero-row';
 import { DismissHeroDialog } from '@/components/heroes-panel/dismiss-hero-dialog/dismiss-hero-dialog';
@@ -91,7 +91,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   // the mayor's politics adds a percentage of (efficiency-adjusted) field output to every basic resource
   const fieldOutput = BASIC_RESOURCES.reduce((sum, r) => sum + city.resource[r].breakdown.fields, 0);
   // (soft-capped above BALANCE.heroSoftCap.knee when BALANCE.heroSoftCap.production is on)
-  const mayorPct = (h: HeroBean) => Math.round(mayorProductionBonus(heroManagement(h)) * 100);
+  const mayorPct = (h: HeroBean) => percent(mayorProductionBonus(heroManagement(h)));
   const mayorGain = (h: HeroBean) => Math.round(fieldOutput * mayorProductionBonus(heroManagement(h)));
   const currentMayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
   const [pointsFor, setPointsFor] = useState<number | null>(null);

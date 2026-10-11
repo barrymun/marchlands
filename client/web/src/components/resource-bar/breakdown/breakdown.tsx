@@ -3,6 +3,7 @@ import type { HeroBean, ResourceLine } from '@marchlands/api-client';
 import { ITEM_BONUS_TEXT_INVERTED } from '@/lib/tones';
 import { Rows } from '@/components/resource-bar/rows/rows';
 import type { Row } from '@/components/resource-bar/types';
+import { percent } from '@/lib/format';
 
 export function Breakdown({ line, mayor }: { line: ResourceLine; mayor?: HeroBean }) {
   const { t } = useTranslation(['resource-bar', 'common']);
@@ -12,10 +13,10 @@ export function Breakdown({ line, mayor }: { line: ResourceLine; mayor?: HeroBea
     [line.workRate !== 100 ? t('breakdown.fieldsWorkRate', { rate: line.workRate }) : t('breakdown.fields'), b.fields],
   ];
   // a bonus row shows whenever the bonus is active, even on a resource with no fields (+0/h), like the mayor's
-  if (b.techPercent) rows.push([t('breakdown.technology', { percent: b.techPercent }), b.tech]);
-  rows.push([mayor ? t('breakdown.mayor', { name: mayor.name, percent: b.mayorPercent }) : t('common:noMayor'), b.mayor]);
-  if (b.valleyPercent) rows.push([t('breakdown.valleys', { percent: b.valleyPercent }), b.valley]);
-  if (b.buffPercent) rows.push([t('itemBonus', { percent: b.buffPercent }), b.buff, ITEM_BONUS_TEXT_INVERTED]);
+  if (b.techBonus) rows.push([t('breakdown.technology', { percent: percent(b.techBonus) }), b.tech]);
+  rows.push([mayor ? t('breakdown.mayor', { name: mayor.name, percent: percent(b.mayorBonus) }) : t('common:noMayor'), b.mayor]);
+  if (b.valleyBonus) rows.push([t('breakdown.valleys', { percent: percent(b.valleyBonus) }), b.valley]);
+  if (b.buffBonus) rows.push([t('itemBonus', { percent: percent(b.buffBonus) }), b.buff, ITEM_BONUS_TEXT_INVERTED]);
   if (b.upkeep) rows.push([t('breakdown.upkeep'), b.upkeep]);
   if (b.tax) rows.push([t('breakdown.tax'), b.tax]);
   return <Rows rows={rows} total={line.increaseRate} />;

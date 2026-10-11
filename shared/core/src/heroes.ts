@@ -172,13 +172,23 @@ export function randomHeroName(rng: Rng): string {
   return `${pick(rng, FIRST_NAMES)} ${pick(rng, EPITHETS)}`;
 }
 
+/** Heroes the Inn offers at `innLevel`: one per level, up to BALANCE.inn.maxOffers. */
+export function innOffers(innLevel: number): number {
+  return Math.min(BALANCE.inn.maxOffers, innLevel);
+}
+
+/** Highest level of a hero the Inn offers at `innLevel`. */
+export function innHeroMaxLevel(innLevel: number): number {
+  return BALANCE.inn.heroLevelsPerInnLevel * innLevel;
+}
+
 /**
  * Tavern hero for an Inn of `innLevel` (orig CreateRandomHero): level 1..5*inn, `level`
  * attribute points spread randomly over power/management/stratagem on top of base rolls.
  * Fixes the original's bug where base stratagem could be dropped.
  */
 export function createRandomHero(innLevel: number, rng: Rng): GeneratedHero {
-  const level = randInt(rng, 1, Math.max(1, innLevel * 5));
+  const level = randInt(rng, 1, Math.max(1, innHeroMaxLevel(innLevel)));
   const baseManagement = randomStat(rng);
   const baseStratagem = randomStat(rng);
   const basePower = randomStat(rng);
@@ -238,6 +248,11 @@ export function createGuardHero(maxLevel: number, rng: Rng): GeneratedHero {
   };
 }
 
+/** A hero's loyalty after a medal (BALANCE.items.medalLoyalty), never above BALANCE.heroMaxLoyalty. */
+export function loyaltyAfterMedal(loyalty: number, itemId: string): number {
+  return Math.min(BALANCE.heroMaxLoyalty, loyalty + (BALANCE.items.medalLoyalty[itemId] ?? 0));
+}
+
 export const heroHireCost = (level: number) => level * BALANCE.heroHireCostPerLevel;
 export const tavernRefreshCost = (innLevel: number) => Math.max(1, innLevel) * BALANCE.tavernRefreshGoldPerInnLevel;
 export const heroAwardCost = (level: number) => level * BALANCE.heroAwardCostPerLevel;
@@ -245,29 +260,8 @@ export const heroAwardCost = (level: number) => level * BALANCE.heroAwardCostPer
 /** Attribute cap: base stats + one point per level (invariant enforced by hero.addPoint). */
 export const heroPointCap = (h: HeroStats) => h.basePower + h.baseManagement + h.baseStratagem + h.level;
 
-/** Experience granted by the original's experience books. */
+/** Experience an experience book gives a hero whose next level needs `upgradeExp` (BALANCE.items.experienceBooks; 0 for other items). */
 export function experienceItemGain(itemId: string, upgradeExp: number): number {
-  switch (itemId) {
-    case 'player.experience.1.a':
-      return Math.max(1000, Math.floor(upgradeExp * 0.08));
-    case 'player.experience.1.b':
-      return Math.max(10_000, Math.floor(upgradeExp * 0.3));
-    case 'player.experience.1.c':
-      return Math.max(100_000, Math.floor(upgradeExp));
-    default:
-      return 0;
-  }
+  const book = BALANCE.items.experienceBooks[itemId];
+  return book ? Math.max(book.min, Math.floor(upgradeExp * book.share)) : 0;
 }
-
-/** Loyalty medals hero.loyalty.1..9 */
-export const LOYALTY_MEDALS: Record<string, number> = {
-  'hero.loyalty.1': 5,
-  'hero.loyalty.2': 10,
-  'hero.loyalty.3': 15,
-  'hero.loyalty.4': 20,
-  'hero.loyalty.5': 25,
-  'hero.loyalty.6': 30,
-  'hero.loyalty.7': 40,
-  'hero.loyalty.8': 50,
-  'hero.loyalty.9': 60,
-};

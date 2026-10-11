@@ -57,6 +57,17 @@
           "duration"
         ]
       },
+      "MsgShareInput": {
+        "type": "object",
+        "properties": {
+          "share": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "share"
+        ]
+      },
       "MsgParamInput": {
         "anyOf": [
           {
@@ -73,6 +84,9 @@
           },
           {
             "$ref": "#/components/schemas/MsgDurationInput"
+          },
+          {
+            "$ref": "#/components/schemas/MsgShareInput"
           },
           {
             "$ref": "#/components/schemas/MessageInput"
@@ -1017,25 +1031,21 @@
             "type": "number",
             "description": "(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals"
           },
-          "techPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "techBonus": {
+            "type": "number",
+            "description": "bonus share from research"
           },
-          "mayorPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "mayorBonus": {
+            "type": "number",
+            "description": "bonus share from the mayor's politics"
           },
-          "valleyPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "valleyBonus": {
+            "type": "number",
+            "description": "bonus share from occupied valleys"
           },
-          "buffPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "buffBonus": {
+            "type": "number",
+            "description": "bonus share from production items"
           }
         },
         "required": [
@@ -1047,10 +1057,10 @@
           "buff",
           "upkeep",
           "tax",
-          "techPercent",
-          "mayorPercent",
-          "valleyPercent",
-          "buffPercent"
+          "techBonus",
+          "mayorBonus",
+          "valleyBonus",
+          "buffBonus"
         ],
         "description": "per-hour amounts by source; they sum to increaseRate (up to rounding)"
       },
@@ -1078,10 +1088,9 @@
             "type": "number",
             "description": "net change per game hour (food is after troop upkeep), 2 decimals"
           },
-          "bonusPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "bonus": {
+            "type": "number",
+            "description": "production bonus as a share (0.25 = +25%)"
           },
           "breakdown": {
             "$ref": "#/components/schemas/ProductionSourcesInput"
@@ -1094,7 +1103,7 @@
           "workRate",
           "workPeople",
           "increaseRate",
-          "bonusPercent",
+          "bonus",
           "breakdown"
         ]
       },
@@ -1146,11 +1155,9 @@
             "maximum": 9007199254740991,
             "description": "gold per game hour the Gold Production item adds to the base tax (part of taxIncome)"
           },
-          "taxItemPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "that item bonus, percent"
+          "taxItemShare": {
+            "type": "number",
+            "description": "that item bonus, as a share of the base tax (0.25 = +25%)"
           },
           "herosSalary": {
             "type": "number"
@@ -1174,10 +1181,8 @@
             "type": "number"
           },
           "efficiency": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "percent"
+            "type": "number",
+            "description": "labour efficiency as a share (1: every field fully staffed)"
           },
           "populationDirection": {
             "type": "integer",
@@ -1200,7 +1205,7 @@
           "taxIncome",
           "taxConverted",
           "taxItemBonus",
-          "taxItemPercent",
+          "taxItemShare",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -1796,22 +1801,16 @@
         "type": "object",
         "properties": {
           "marchSkillParam": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Compass bonus percent"
+            "type": "number",
+            "description": "Compass march speed bonus, a share"
           },
           "loadSkillParam": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Logistics bonus percent"
+            "type": "number",
+            "description": "Logistics load bonus, a share"
           },
           "driveSkillParam": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Horseback Riding bonus percent"
+            "type": "number",
+            "description": "Horseback Riding march speed bonus, a share"
           },
           "transportStationParam": {
             "type": "integer",
@@ -2566,11 +2565,9 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "rate": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "percent of occupiable tiles that are taken"
+          "settled": {
+            "type": "number",
+            "description": "share of occupiable tiles that are taken (0-1)"
           }
         },
         "required": [
@@ -2578,7 +2575,7 @@
           "playerCount",
           "castleCount",
           "openFlats",
-          "rate"
+          "settled"
         ]
       },
       "WorldInfoInput": {
@@ -4243,10 +4240,9 @@
             "maximum": 9007199254740991,
             "description": "per hour, after work rate and efficiency"
           },
-          "bonusPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "bonus": {
+            "type": "number",
+            "description": "production bonus as a share (0.25 = +25%)"
           },
           "armyConsumption": {
             "type": "integer",
@@ -4282,7 +4278,7 @@
           "resource",
           "basicOutput",
           "fieldOutput",
-          "bonusPercent",
+          "bonus",
           "armyConsumption",
           "totalOutput",
           "commenceRate",
@@ -10603,7 +10599,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "QuestGroupStatus.typeId"
+            "description": "QuestGroupStatus.id"
           },
           "description": {
             "description": "`questInfo.description.*`, worded by the client (the quest is named by its id)",
@@ -11102,6 +11098,18 @@
         ],
         "additionalProperties": false
       },
+      "MsgShare": {
+        "type": "object",
+        "properties": {
+          "share": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "share"
+        ],
+        "additionalProperties": false
+      },
       "MsgParam": {
         "anyOf": [
           {
@@ -11118,6 +11126,9 @@
           },
           {
             "$ref": "#/components/schemas/MsgDuration"
+          },
+          {
+            "$ref": "#/components/schemas/MsgShare"
           },
           {
             "$ref": "#/components/schemas/Message"
@@ -12069,25 +12080,21 @@
             "type": "number",
             "description": "(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals"
           },
-          "techPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "techBonus": {
+            "type": "number",
+            "description": "bonus share from research"
           },
-          "mayorPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "mayorBonus": {
+            "type": "number",
+            "description": "bonus share from the mayor's politics"
           },
-          "valleyPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "valleyBonus": {
+            "type": "number",
+            "description": "bonus share from occupied valleys"
           },
-          "buffPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "buffBonus": {
+            "type": "number",
+            "description": "bonus share from production items"
           }
         },
         "required": [
@@ -12099,10 +12106,10 @@
           "buff",
           "upkeep",
           "tax",
-          "techPercent",
-          "mayorPercent",
-          "valleyPercent",
-          "buffPercent"
+          "techBonus",
+          "mayorBonus",
+          "valleyBonus",
+          "buffBonus"
         ],
         "additionalProperties": false,
         "description": "per-hour amounts by source; they sum to increaseRate (up to rounding)"
@@ -12131,10 +12138,9 @@
             "type": "number",
             "description": "net change per game hour (food is after troop upkeep), 2 decimals"
           },
-          "bonusPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "bonus": {
+            "type": "number",
+            "description": "production bonus as a share (0.25 = +25%)"
           },
           "breakdown": {
             "$ref": "#/components/schemas/ProductionSources"
@@ -12147,7 +12153,7 @@
           "workRate",
           "workPeople",
           "increaseRate",
-          "bonusPercent",
+          "bonus",
           "breakdown"
         ],
         "additionalProperties": false
@@ -12200,11 +12206,9 @@
             "maximum": 9007199254740991,
             "description": "gold per game hour the Gold Production item adds to the base tax (part of taxIncome)"
           },
-          "taxItemPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "that item bonus, percent"
+          "taxItemShare": {
+            "type": "number",
+            "description": "that item bonus, as a share of the base tax (0.25 = +25%)"
           },
           "herosSalary": {
             "type": "number"
@@ -12228,10 +12232,8 @@
             "type": "number"
           },
           "efficiency": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "percent"
+            "type": "number",
+            "description": "labour efficiency as a share (1: every field fully staffed)"
           },
           "populationDirection": {
             "type": "integer",
@@ -12254,7 +12256,7 @@
           "taxIncome",
           "taxConverted",
           "taxItemBonus",
-          "taxItemPercent",
+          "taxItemShare",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -12861,22 +12863,16 @@
         "type": "object",
         "properties": {
           "marchSkillParam": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Compass bonus percent"
+            "type": "number",
+            "description": "Compass march speed bonus, a share"
           },
           "loadSkillParam": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Logistics bonus percent"
+            "type": "number",
+            "description": "Logistics load bonus, a share"
           },
           "driveSkillParam": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Horseback Riding bonus percent"
+            "type": "number",
+            "description": "Horseback Riding march speed bonus, a share"
           },
           "transportStationParam": {
             "type": "integer",
@@ -13644,11 +13640,9 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "rate": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "percent of occupiable tiles that are taken"
+          "settled": {
+            "type": "number",
+            "description": "share of occupiable tiles that are taken (0-1)"
           }
         },
         "required": [
@@ -13656,7 +13650,7 @@
           "playerCount",
           "castleCount",
           "openFlats",
-          "rate"
+          "settled"
         ],
         "additionalProperties": false
       },
@@ -15366,10 +15360,9 @@
             "maximum": 9007199254740991,
             "description": "per hour, after work rate and efficiency"
           },
-          "bonusPercent": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+          "bonus": {
+            "type": "number",
+            "description": "production bonus as a share (0.25 = +25%)"
           },
           "armyConsumption": {
             "type": "integer",
@@ -15405,7 +15398,7 @@
           "resource",
           "basicOutput",
           "fieldOutput",
-          "bonusPercent",
+          "bonus",
           "armyConsumption",
           "totalOutput",
           "commenceRate",
@@ -21880,7 +21873,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "QuestGroupStatus.typeId"
+            "description": "QuestGroupStatus.id"
           },
           "description": {
             "description": "`questInfo.description.*`, worded by the client (the quest is named by its id)",
@@ -33191,7 +33184,8 @@
             },
             "in": "query",
             "name": "groupId",
-            "required": false
+            "required": false,
+            "description": "QuestGroupStatus.id: only that group"
           }
         ],
         "security": [

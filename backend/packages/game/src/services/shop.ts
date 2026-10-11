@@ -2,23 +2,19 @@
 // (shop.useGoods / shop.useCastleGoods). Item effects are declared in @marchlands/core items.ts.
 
 import {
-  createRandomHero,
   GameError,
-  HERO_BOX_QUALITY,
   itemConfig,
   itemEffect,
   itemGoldPrice,
   ITEMS,
-  randInt,
-  upgradeExpFor,
   addTroops,
   BuildingType,
-  CIVIL_CODE,
   msg,
   ref,
   type GrantContents,
   type Message,
-  BALANCE,
+  civilCodePopulation,
+  createBoxHero,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
 import { cityStats, openOwnCity, type CityBundle } from '../city.ts';
@@ -155,7 +151,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
           const city = needCity();
           consumeItem(ctx, p, itemId);
           const max = cityStats(city, ctx.now).maxPopulation;
-          city.city.population = Math.min(max, city.city.population + Math.max(CIVIL_CODE.min, Math.floor(max * CIVIL_CODE.share)));
+          city.city.population = civilCodePopulation(city.city.population, max);
           pushCity(ctx, city);
           break;
         }
@@ -171,26 +167,10 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
           const city = needCity();
           if (city.heroes.length >= heroSlots(city)) throw new GameError(msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }), -99);
           consumeItem(ctx, p, itemId);
-          const q = HERO_BOX_QUALITY[itemId] ?? { level: 10, minStat: 40 };
-          const g = createRandomHero(1, ctx.rng);
-          const bump = (v: number) => Math.max(v, q.minStat + randInt(ctx.rng, 0, 10));
-          const basePower = bump(g.basePower);
-          const baseManagement = bump(g.baseManagement);
-          const baseStratagem = bump(g.baseStratagem);
           const [row] = await ctx.tx
             .insert(heroes)
             .values({
-              ...heroValues(g),
-              level: q.level,
-              upgradeExp: upgradeExpFor(q.level),
-              basePower,
-              baseManagement,
-              baseStratagem,
-              power: basePower,
-              management: baseManagement,
-              stratagem: baseStratagem,
-              remainPoint: q.level,
-              loyalty: BALANCE.heroMaxLoyalty,
+              ...heroValues(createBoxHero(itemId, ctx.rng)),
               playerId: p.id,
               cityId: city.city.id,
               inTavern: false,

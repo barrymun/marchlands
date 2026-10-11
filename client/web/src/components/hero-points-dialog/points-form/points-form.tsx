@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { useCommand, usePlayer } from '@/hooks/use-game';
-import { fmt, signedRate } from '@/lib/format';
+import { fmt, signedRate, percent } from '@/lib/format';
 import { HOLY_WATER, STATS } from '@/components/hero-points-dialog/points-form/constants';
 import type { StatKey } from '@/components/hero-points-dialog/points-form/types';
 
@@ -82,7 +82,7 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
         ))}
         {isMayor && add.management > 0 && (
           <p className="text-xs text-emerald-600 dark:text-emerald-400">
-            {t('asMayor', { rate: signedRate(mayorGain(add.management)), pct: Math.round(bonusGain(add.management) * 100) })}
+            {t('asMayor', { rate: signedRate(mayorGain(add.management)), pct: percent(bonusGain(add.management)) })}
           </p>
         )}
         <Separator />

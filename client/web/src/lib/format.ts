@@ -1,11 +1,17 @@
-import { getGameSpeed } from '@marchlands/core';
+import { DAY, getGameSpeed, HOUR } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /**
  * Number formats for the current locale (made again when the locale changes). English locales share plain
  * 'en' (en-GB alone would write 1.2m for 1.2M); others use their own (ja-JP: 12万).
  */
-let formats: { lng: string; compact: Intl.NumberFormat; whole: Intl.NumberFormat; decimals: Map<string, Intl.NumberFormat> } | null = null;
+let formats: {
+  lng: string;
+  compact: Intl.NumberFormat;
+  whole: Intl.NumberFormat;
+  decimals: Map<string, Intl.NumberFormat>;
+  percents: Map<string, Intl.NumberFormat>;
+} | null = null;
 const numberLocale = () => (i18n.language.startsWith('en') ? 'en' : i18n.language);
 function numberFormats() {
   if (formats?.lng !== i18n.language) {
@@ -15,6 +21,7 @@ function numberFormats() {
       compact: new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }),
       whole: new Intl.NumberFormat(locale),
       decimals: new Map(),
+      percents: new Map(),
     };
   }
   return formats;
@@ -65,6 +72,12 @@ export function duration(ms: number): string {
   return seconds(s);
 }
 
+/** A length of time in words: whole days when it is a day or more ("7 days"), else hours ("6 hours"). */
+export function period(ms: number): string {
+  const days = ms / DAY;
+  return days >= 1 ? i18n.t('common:durations.days', { count: days }) : i18n.t('common:durations.hours', { count: Math.round(ms / HOUR) });
+}
+
 /** The two largest units: 4d 18h, 18h 03m, 5m 09s. */
 export function shortDuration(ms: number): string {
   return duration(ms).split(' ').slice(0, 2).join(' ');
@@ -75,5 +88,14 @@ export type Resource = (typeof RESOURCES)[number];
 /** A resource's name as a label ("Lumber"). */
 export const resourceLabel = (r: Resource) => i18n.t(`common:resources.${r}`);
 
-/** A fraction as a whole percent: 0.25 -> 25%. */
-export const percent = (x: number) => `${Math.round(x * 100)}%`;
+/**
+ * A fraction (a share, 0.25) as a percent in the current locale, with up to `max` decimals (at least `min`):
+ * percent(0.25) -> 25%, percent(0.005, 1) -> 0.5%, percent(0.05, 1, 1) -> 5.0%.
+ */
+export function percent(x: number, max = 0, min = 0): string {
+  const { percents } = numberFormats();
+  const key = `${min}-${max}`;
+  let f = percents.get(key);
+  if (!f) percents.set(key, (f = new Intl.NumberFormat(numberLocale(), { style: 'percent', minimumFractionDigits: min, maximumFractionDigits: max })));
+  return f.format(x);
+}

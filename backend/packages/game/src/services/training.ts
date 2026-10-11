@@ -40,7 +40,8 @@ import {
   addHeroExp,
   msg,
   ref,
-  BATCH_SPEEDUP_SHARE,
+  speedUpTrainBatch,
+  ItemId,
 } from '@marchlands/core';
 import { cityStats, mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -318,9 +319,6 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
   await saveCity(ctx, b.city);
 }
 
-/** Napoleon's Diary / Archimedes' Note: the share of a batch's full time they cut. */
-const BATCH_SPEEDUP = BATCH_SPEEDUP_SHARE;
-
 /**
  * A waiting batch starts producing at `at`. Time already cut by speed-ups counts as done: the start sits that
  * far back, so its progress bar starts part way.
@@ -330,29 +328,17 @@ function startBatch(batch: TrainBatch, at: number): TrainBatch {
   return { ...batch, startTime: at - saved, endTime: at + batch.costTime };
 }
 
-/**
- * troop.accTroopProduce (Napoleon's Diary) / fortifications.accTroopProduce (Archimedes' Note): -30% of the batch's
- * full time ((marchlands) orig: of the time left), so four finish any batch. The start moves back by the time
- * saved, like construction (buildings.ts speedup).
- */
+/** troop.accTroopProduce (Napoleon's Diary) / fortifications.accTroopProduce (Archimedes' Note): see speedUpTrainBatch. */
 export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number, positionId: number, queueId: number) {
   const fort = positionId === WALLS_QUEUE;
-  const itemId = fort ? 'player.fort.1.c' : 'player.troop.1.b';
+  const itemId = fort ? ItemId.ARCHIMEDES_NOTE : ItemId.NAPOLEONS_DIARY;
   const b = await openOwnCity(ctx, playerId, cityId);
   const { queue, nextQueueId } = queueOf(b, positionId);
   const idx = queue.findIndex((q) => q.queueId === queueId);
   if (idx < 0) throw new GameError(msg('training.batchNotFound'), -99, 404);
   useItemOrGold(ctx, b.player, b.city, itemId, itemGoldPrice(itemId) ?? 0);
-  const batch = queue[idx];
   const next = [...queue];
-  if (idx === 0) {
-    // the head's start already sits back by any earlier cuts, so end - start is its full time
-    const endTime = Math.max(ctx.now, batch.endTime - Math.floor((batch.endTime - batch.startTime) * BATCH_SPEEDUP));
-    next[0] = { ...batch, startTime: batch.startTime - (batch.endTime - endTime), endTime };
-  } else {
-    const fullTime = batch.fullTime ?? batch.costTime;
-    next[idx] = { ...batch, fullTime, costTime: Math.max(0, batch.costTime - Math.floor(fullTime * BATCH_SPEEDUP)) };
-  }
+  next[idx] = speedUpTrainBatch(queue[idx], idx === 0, ctx.now);
   setQueue(b, positionId, next, nextQueueId);
   scheduleHead(ctx, b, positionId, next);
   pushQueues(ctx, b, positionId);

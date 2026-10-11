@@ -1,16 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { itemGoldPrice } from '@marchlands/core';
+import { itemGoldPrice, ItemId } from '@marchlands/core';
 import { describeGrant, goldPriceOf, medalLevelOf } from '@/components/items-panel/utils';
 
 describe(goldPriceOf.name, () => {
   it('returns the first item of the entry that is for sale, with its gold price', () => {
-    expect(goldPriceOf({ ids: ['player.resinc.1'] })).toEqual({ id: 'player.resinc.1', price: itemGoldPrice('player.resinc.1') });
-    expect(goldPriceOf({ ids: ['player.resinc.1.b', 'player.resinc.1'] })).toEqual({ id: 'player.resinc.1.b', price: itemGoldPrice('player.resinc.1.b') });
+    expect(goldPriceOf({ ids: [ItemId.PLOWSHARES] })).toEqual({ id: ItemId.PLOWSHARES, price: itemGoldPrice(ItemId.PLOWSHARES) });
+    expect(goldPriceOf({ ids: [ItemId.IRON_RAKE, ItemId.PLOWSHARES] })).toEqual({ id: ItemId.IRON_RAKE, price: itemGoldPrice(ItemId.IRON_RAKE) });
   });
 
   it('skips items that are not for sale', () => {
     expect(itemGoldPrice('unknown.item')).toBeNull();
-    expect(goldPriceOf({ ids: ['unknown.item', 'player.peace.1'] })).toEqual({ id: 'player.peace.1', price: itemGoldPrice('player.peace.1') });
+    expect(goldPriceOf({ ids: ['unknown.item', ItemId.TRUCE_AGREEMENT] })).toEqual({
+      id: ItemId.TRUCE_AGREEMENT,
+      price: itemGoldPrice(ItemId.TRUCE_AGREEMENT),
+    });
   });
 
   it('returns null when nothing in the entry is for sale', () => {
@@ -21,7 +24,7 @@ describe(goldPriceOf.name, () => {
 
 describe(describeGrant.name, () => {
   it('lists items by their name, falling back to the id', () => {
-    expect(describeGrant({ items: { 'consume.2.a': 5, 'unknown.item': 2 } })).toBe('5 × Beginner Guidelines, 2 × unknown.item');
+    expect(describeGrant({ items: { [ItemId.BEGINNER_GUIDELINES]: 5, 'unknown.item': 2 } })).toBe('5 × Beginner Guidelines, 2 × unknown.item');
   });
 
   it('lists resources with grouped numbers, calls wood lumber and skips zero or missing amounts', () => {
@@ -33,7 +36,7 @@ describe(describeGrant.name, () => {
   });
 
   it('joins items, then resources, then troops', () => {
-    expect(describeGrant({ troops: { militia: 10 }, resources: { gold: 2.9 }, items: { 'consume.2.b': 3 } })).toBe(
+    expect(describeGrant({ troops: { militia: 10 }, resources: { gold: 2.9 }, items: { [ItemId.PRIMARY_GUIDELINES]: 3 } })).toBe(
       '3 × Primary Guidelines, 2 gold, 10 Warrior',
     );
   });
@@ -46,17 +49,17 @@ describe(describeGrant.name, () => {
 
 describe(medalLevelOf.name, () => {
   it('reads the level of a medal item', () => {
-    expect(medalLevelOf(['hero.loyalty.1'])).toBe(1);
-    expect(medalLevelOf(['hero.loyalty.9'])).toBe(9);
+    expect(medalLevelOf([ItemId.CROSS_MEDAL])).toBe(1);
+    expect(medalLevelOf([ItemId.NATION_MEDAL])).toBe(9);
   });
 
   it('uses the first medal among the ids', () => {
-    expect(medalLevelOf(['player.resinc.1', 'hero.loyalty.4', 'hero.loyalty.7'])).toBe(4);
+    expect(medalLevelOf([ItemId.PLOWSHARES, ItemId.HONOUR_MEDAL, ItemId.FREEDOM_MEDAL])).toBe(4);
   });
 
   it('returns null for other items and out-of-range or malformed ids', () => {
     expect(medalLevelOf([])).toBeNull();
-    expect(medalLevelOf(['player.resinc.1'])).toBeNull();
+    expect(medalLevelOf([ItemId.PLOWSHARES])).toBeNull();
     expect(medalLevelOf(['hero.loyalty.0', 'hero.loyalty.10', 'hero.loyalty.1.b', 'xhero.loyalty.1'])).toBeNull();
   });
 });

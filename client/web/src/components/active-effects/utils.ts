@@ -1,6 +1,6 @@
 import { ITEMS, itemEffect, itemGoldPrice } from '@marchlands/core';
 import { STORE_KEY } from '@/components/active-effects/constants';
-import { i18n } from '@/lib/i18n';
+import { period } from '@/lib/format';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
 
 export function readCollapsed(): boolean {
@@ -33,8 +33,7 @@ export function slotItems(slot: Slot): string[] {
 export function adds(id: string) {
   const e = itemEffect(id);
   if (e?.kind !== 'buff') return '';
-  const days = e.durationMs / 86_400_000;
-  return days >= 1 ? i18n.t('common:durations.days', { count: days }) : i18n.t('common:durations.hours', { count: Math.round(e.durationMs / 3_600_000) });
+  return period(e.durationMs);
 }
 
 export function extensionFor(slot: Slot, active: Buff | undefined, counts: Map<string, number>): Extension {

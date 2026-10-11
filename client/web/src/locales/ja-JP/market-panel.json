@@ -47,7 +47,7 @@
   },
   "tradeForm": {
     "title": "{{resource}}を取引",
-    "description": "取引は即時に成立します。購入時に{{fee}}%の手数料がかかります。市場 Lv {{level}}：この都市の待機注文 {{open}}/{{cap}}。",
+    "description": "取引は即時に成立します。購入時に{{fee}}の手数料がかかります。市場 Lv {{level}}：この都市の待機注文 {{open}}/{{cap}}。",
     "instant": "即時",
     "limit": "価格を指定",
     "amount": "数量",

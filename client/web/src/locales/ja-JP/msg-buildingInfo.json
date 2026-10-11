@@ -9,7 +9,7 @@
     "academy": "技術を研究します（同時に{{queues}}件まで）。技術の効果はこの都市の{{building}}のレベルまでしか発揮されません。",
     "inn": "雇用できる英雄を紹介します。レベルが高いほど、より多く強い英雄が現れます。新しい候補の呼び込みにはレベルごとに{{gold}}金かかります。",
     "feastingHall": "英雄を住まわせます。レベルごとに英雄（雇用・捕虜を含む）を1人置けます。",
-    "rallySpot_other": "部隊を出撃させます。出撃には必須で、レベルが1上がるごとに同時に出撃できる部隊が{{count, number}}部隊、各部隊の兵数上限が{{troops}}増えます（{{item}}を使うとさらに{{percent}}%増加）。",
+    "rallySpot_other": "部隊を出撃させます。出撃には必須で、レベルが1上がるごとに同時に出撃できる部隊が{{count, number}}部隊、各部隊の兵数上限が{{troops}}増えます（{{item}}を使うとさらに{{percent}}増加）。",
     "marketplace_other": "食料・木材・石材・鉄を、他のプレイヤーや商人と金で取引します。レベルが1上がるごとに出せる注文が{{count, number}}件増えます。",
     "reliefStation": "自分の都市間を移動する部隊（輸送と援軍）を速くします。",
     "beaconTower": "敵の接近を見張ります。レベル1では向かってくる敵部隊の兵種と兵数が、レベル2ではさらにその英雄がわかります。",
@@ -25,7 +25,7 @@
   },
   "effect": {
     "townHall_other": "資源地スロット{{slots}}個、領地は最大{{count, number}}か所",
-    "walls_other": "防御施設スペース{{space}}、待ち行列{{count, number}}バッチ、城壁耐久力{{hitPoints}}、塔の射程+{{percent}}%",
+    "walls_other": "防御施設スペース{{space}}、待ち行列{{count, number}}バッチ、城壁耐久力{{hitPoints}}、塔の射程+{{percent}}",
     "cottage": "人口+{{population}}",
     "field_other": "フル稼働で{{resource}} {{amount}}/時、貯蔵量+{{storage}}、労働者{{count, number}}人",
     "warehouse": "各資源を最大{{amount}}まで保護",

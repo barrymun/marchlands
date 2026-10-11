@@ -5,7 +5,7 @@ import type { HeroBean, ResourceBean } from '@marchlands/api-client';
 import { live } from '@/components/resource-bar/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNow } from '@/hooks/use-now';
-import { fmt, fmtExact, resourceLabel, signedRate } from '@/lib/format';
+import { fmt, fmtExact, percent, resourceLabel, signedRate } from '@/lib/format';
 import { ITEM_BONUS_TEXT_INVERTED } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { Breakdown } from '@/components/resource-bar/breakdown/breakdown';
@@ -65,7 +65,7 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
                 <Rows
                   rows={[
                     [t('gold.baseTax'), r.taxIncome - r.taxConverted - r.taxItemBonus],
-                    ...(r.taxItemBonus ? [[t('itemBonus', { percent: r.taxItemPercent }), r.taxItemBonus, ITEM_BONUS_TEXT_INVERTED] as Row] : []),
+                    ...(r.taxItemBonus ? [[t('itemBonus', { percent: percent(r.taxItemShare) }), r.taxItemBonus, ITEM_BONUS_TEXT_INVERTED] as Row] : []),
                     ...(r.taxConverted ? [[t('gold.taxSold', { rate: r.taxRate }), r.taxConverted] as Row] : []),
                     ...(r.herosSalary ? [[t('gold.heroSalaries'), -r.herosSalary] as Row] : []),
                   ]}
@@ -86,7 +86,7 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
             </span>
           </div>
         </TooltipTrigger>
-        <TooltipContent>{t('population', { idle: fmt(r.idlePopulation), efficiency: r.efficiency })}</TooltipContent>
+        <TooltipContent>{t('population', { idle: fmt(r.idlePopulation), efficiency: percent(r.efficiency) })}</TooltipContent>
       </Tooltip>
     </div>
   );

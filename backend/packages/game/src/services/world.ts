@@ -96,8 +96,8 @@ export interface ZoneStats {
   playerCount: number;
   castleCount: number;
   openFlats: number;
-  /** percent of occupiable tiles that are taken */
-  rate: number;
+  /** share of occupiable tiles that are taken (0-1) */
+  settled: number;
 }
 
 /** Recompute zone statistics (worker job, cached in world_state). */
@@ -111,7 +111,7 @@ export async function refreshZoneStats(db: Db): Promise<ZoneStats[]> {
            count(*) filter (where type = ${TileType.NPC}) as npc,
            count(*) filter (where city_id is not null) as castles
     from tiles group by 1 order by 1`);
-  const stats: ZoneStats[] = Array.from({ length: BALANCE.stateGrid ** 2 }, (_, id) => ({ id, playerCount: 0, castleCount: 0, openFlats: 0, rate: 0 }));
+  const stats: ZoneStats[] = Array.from({ length: BALANCE.stateGrid ** 2 }, (_, id) => ({ id, playerCount: 0, castleCount: 0, openFlats: 0, settled: 0 }));
   for (const r of rows.rows) {
     const s = stats[Number(r.state)];
     if (!s) continue;
@@ -120,7 +120,7 @@ export async function refreshZoneStats(db: Db): Promise<ZoneStats[]> {
     s.playerCount = castles;
     s.castleCount = castles + Number(r.npc);
     s.openFlats = Number(r.open);
-    s.rate = occupiable ? Math.floor(((occupiable - Number(r.open)) / occupiable) * 100) : 100;
+    s.settled = occupiable ? (occupiable - Number(r.open)) / occupiable : 1;
   }
   await db
     .insert(worldState)

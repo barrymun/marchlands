@@ -15,8 +15,8 @@
   },
   "boosts": {
     "title": "能力強化",
-    "effect": "{{label}} +{{pct}}%（+{{amount}}、装備込み）24時間",
-    "active": "有効、残り <countdown />。追加で使うと 24 時間延長",
+    "effect": "{{label}} +{{bonus}}（+{{amount}}、装備込み）{{period}}",
+    "active": "有効、残り <countdown />。追加で使うと {{period}}延長",
     "best": "この英雄に最適"
   },
   "loyalty": {

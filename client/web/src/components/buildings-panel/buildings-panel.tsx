@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 import { INSIDE, OUTSIDE } from '@/components/buildings-panel/constants';
+import { fieldSlots } from '@/components/buildings-panel/utils';
 import { Slot } from '@/components/buildings-panel/slot/slot';
 import { BuildingDialog } from '@/components/buildings-panel/building-dialog/building-dialog';
 
@@ -26,8 +27,7 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
     if (requested != null) setSearch((s) => (s.delete('building'), s), { replace: true });
   }, [requested, setSearch]);
   const byPos = new Map(city.buildings.map((b) => [b.positionId, b]));
-  const townHall = byPos.get(-1)?.level ?? 0;
-  const outerSlots = 10 + 3 * townHall;
+  const { townHall, unlocked: outerSlots } = fieldSlots(city.buildings);
   // tag filter: one tag per building type present; with tags selected only those buildings show
   const [tags, setTags] = useState<number[]>([]);
   const typeCounts = new Map<number, number>();

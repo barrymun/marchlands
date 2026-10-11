@@ -2,7 +2,8 @@
 // server; values marked (evony) fill gaps the original never implemented, chosen to match
 // Evony Age 1 as closely as is known. Keep every magic number here.
 
-import { HOUR, MINUTE } from './time.ts';
+import { DAY, HOUR, MINUTE } from './time.ts';
+import { ItemId, SpeedupId } from './item-ids.ts';
 
 export const BALANCE = {
   // ---- world ----
@@ -91,6 +92,8 @@ export const BALANCE = {
   heroHireCostPerLevel: 1000, // (orig)
   /** (marchlands) gold to re-roll the Inn's offers, per Inn level (the Hero Hunting item does it for free) */
   tavernRefreshGoldPerInnLevel: 1000,
+  /** (orig) the Inn offers one hero per level, up to `maxOffers`, each of level 1 to `heroLevelsPerInnLevel` x Inn level */
+  inn: { maxOffers: 10, heroLevelsPerInnLevel: 5 },
   heroAwardCostPerLevel: 100, // (orig)
 
   // comfort (orig); (marchlands) the levy is removed
@@ -125,6 +128,29 @@ export const BALANCE = {
   wallSpace: [0, 1_000, 3_000, 6_000, 10_000, 15_000, 21_000, 28_000, 36_000, 45_000, 55_000],
   /** (evony) wall space used per fort unit */
   fortSpace: { 14: 1, 15: 1, 16: 2, 17: 3, 18: 4 } as Record<number, number>,
+
+  // ---- battle ----
+  /**
+   * (orig) battle simulator rules (battle/simulator.ts, battle/resolve.ts). The simulator is a bit-exact
+   * port of the original, so changing any of these breaks parity with the original's regression data.
+   */
+  battle: {
+    /** damage multipliers: pikemen vs cavalry and cataphracts, swordsmen vs pikemen, cavalry and cataphracts vs archers */
+    damage: { pikemanVsMounted: 1.8, swordsmanVsPikeman: 1.1, mountedVsArcher: 1.2 },
+    /** share of the damage aimed at an archer tower that it takes */
+    towerDamageTaken: 0.3,
+    /** wall hit points: this x level x (level + 1) */
+    wallHitPointsFactor: 50_000,
+    /** archer tower range +this % per wall level */
+    wallTowerRangePct: 4.5,
+    /**
+     * research bonuses in %, per level: Military Tradition attack, Iron Working defence, Medicine life,
+     * Archery range, Compass foot speed and Horseback Riding mounted and siege speed
+     */
+    researchPct: { attack: 5, defence: 5, life: 5, range: 5, footSpeed: 10, mountedSpeed: 5 },
+    /** kill power of traps, rolling logs and trebuchets (the defender's fortifications) */
+    fortKillPower: { trap: 1.25, rollingLog: 1.25, trebuchet: 1.25 },
+  },
 
   // ---- army ----
   /** (evony) a settler army must carry at least this much of each basic resource (food, lumber, stone, iron) to found a city */
@@ -168,6 +194,8 @@ export const BALANCE = {
   healCostShare: 0.25,
   /** (evony) Medicine: +5% of lost defenders recover as injured per level */
   medicinePerLevel: 0.05,
+  /** (evony) the most of the fallen troops Medicine can save */
+  medicineMaxShare: 0.5,
   /** (marchlands) the Medicine share also applies to an attacking army's fallen: they come home injured */
   attackersGetInjured: true as boolean,
   /** (marchlands) healing an injured unit with honor costs its food upkeep x this (the honor killing one earns) */
@@ -239,29 +267,89 @@ export const BALANCE = {
   battleBuffBonus: 0.2,
   /** (evony) upkeep item: troop food upkeep -50% */
   upkeepBuffReduction: 0.5,
+  /** item effects (items.ts, construction.ts, heroes.ts) */
+  items: {
+    /** (evony) how long the 1-day and 7-day buff items last */
+    buffDurationMs: { short: DAY, long: 7 * DAY },
+    /**
+     * (orig) construction and research speed-ups: their price in cents, and what they cut from the time
+     * left: a fixed time (`cutMs`), a random whole number of hours from `cutHours[0]` to `cutHours[1]`,
+     * or a share of the total time (`cutShare`)
+     */
+    speedups: {
+      [ItemId.BEGINNER_GUIDELINES]: { cents: 5, cutMs: 15 * MINUTE },
+      [ItemId.PRIMARY_GUIDELINES]: { cents: 10, cutMs: HOUR },
+      [ItemId.INTERMEDIATE_GUIDELINES]: { cents: 20, cutMs: 2.5 * HOUR },
+      [ItemId.SENIOR_GUIDELINES]: { cents: 50, cutMs: 8 * HOUR },
+      [ItemId.MASTER_GUIDELINES]: { cents: 80, cutHours: [10, 30] },
+      [ItemId.ULTIMATE_GUIDELINES]: { cents: 120, cutShare: 0.3 },
+      [SpeedupId.HALF_TIME]: { cents: 175, cutShare: 0.5 },
+    } as Record<string, { cents: number; cutMs?: number; cutHours?: readonly [number, number]; cutShare?: number }>,
+    /** (evony) Napoleon's Diary / Archimedes' Note: the share of a troop or fortification batch's total time they cut */
+    batchSpeedupShare: 0.3,
+    /** (evony) Civil Code: adds this share of the city's maximum population, at least `min` people (capped at the maximum) */
+    civilCode: { share: 0.2, min: 100 },
+    /** (evony) medal boxes: the medal levels each holds, `medalBoxCount.min`-`max` of each */
+    medalBoxes: {
+      [ItemId.JUNIOR_MEDAL_BOX]: [1, 2, 3],
+      [ItemId.MEDIUM_MEDAL_BOX]: [4, 5, 6],
+      [ItemId.SENIOR_MEDAL_BOX]: [7, 8, 9],
+    } as Record<string, readonly number[]>,
+    medalBoxCount: { min: 2, max: 4 },
+    /** (evony) the Newbies Package every new player gets */
+    newbiesPackage: {
+      items: { [ItemId.BEGINNER_GUIDELINES]: 5, [ItemId.PRIMARY_GUIDELINES]: 3 } as Record<string, number>,
+      resources: { food: 50_000, wood: 50_000, stone: 50_000, iron: 50_000 },
+    },
+    /** (evony) hero attribute items (Excalibur etc.): +bonus of the attribute for durationMs */
+    heroAttributeBuff: { bonus: 0.25, durationMs: DAY },
+    /** (evony) hero boxes: the level of the hero inside and its lowest base attribute (`fallback`: a box not listed) */
+    heroBoxes: { [ItemId.HERO_PACKAGE]: { level: 30, minStat: 55 } } as Record<string, { level: number; minStat: number }>,
+    heroBoxFallback: { level: 10, minStat: 40 },
+    /** (marchlands) a hero box hero's base attributes are each at least minStat + 0 … this */
+    heroBoxStatSpread: 10,
+    /** (orig) experience books: `share` of the experience the hero's next level needs, at least `min` */
+    experienceBooks: {
+      [ItemId.ANABASIS]: { share: 0.08, min: 1_000 },
+      [ItemId.EPITOME_OF_MILITARY_SCIENCE]: { share: 0.3, min: 10_000 },
+      [ItemId.ON_WAR]: { share: 1, min: 100_000 },
+    } as Record<string, { share: number; min: number }>,
+    /** (orig) loyalty each medal (hero.loyalty.1 Cross … .9 Nation) gives a hero */
+    medalLoyalty: {
+      [ItemId.CROSS_MEDAL]: 5,
+      [ItemId.ROSE_MEDAL]: 10,
+      [ItemId.LION_MEDAL]: 15,
+      [ItemId.HONOUR_MEDAL]: 20,
+      [ItemId.COURAGE_MEDAL]: 25,
+      [ItemId.WISDOM_MEDAL]: 30,
+      [ItemId.FREEDOM_MEDAL]: 40,
+      [ItemId.JUSTICE_MEDAL]: 50,
+      [ItemId.NATION_MEDAL]: 60,
+    } as Record<string, number>,
+  },
   /** (marchlands) items that can be bought with city gold, and their price (item id -> gold each) */
   // set prices; every other item the original sold for cents costs goldForCents(its price) (itemGoldPrice)
   goldShop: {
-    'player.troop.1.a': 250_000, // War Ensign (30 cents)
-    'consume.move.1': 750_000, // City Teleporter: picks the tile, like the original's Adv City Teleporter (90 cents)
+    [ItemId.WAR_ENSIGN]: 250_000, // War Ensign (30 cents)
+    [ItemId.CITY_TELEPORTER]: 750_000, // City Teleporter: picks the tile, like the original's Adv City Teleporter (90 cents)
     // production boosts, +25% for 1 day (8 cents) / 7 days (50 cents)
-    'player.resinc.1': 65_000,
-    'player.resinc.1.b': 415_000,
-    'player.resinc.2': 65_000,
-    'player.resinc.2.b': 415_000,
-    'player.resinc.3': 65_000,
-    'player.resinc.3.b': 415_000,
-    'player.resinc.4': 65_000,
-    'player.resinc.4.b': 415_000,
+    [ItemId.PLOWSHARES]: 65_000,
+    [ItemId.IRON_RAKE]: 415_000,
+    [ItemId.ARCH_SAW]: 65_000,
+    [ItemId.DOUBLE_SAW]: 415_000,
+    [ItemId.QUARRYING_TOOLS]: 65_000,
+    [ItemId.ADV_QUARRYING_TOOLS]: 415_000,
+    [ItemId.BLOWER]: 65_000,
+    [ItemId.BLAST_FURNACE]: 415_000,
     // gold income +25% for 1 day (45 cents) / 7 days (280 cents)
-    'player.gold.1.a': 375_000,
-    'player.gold.1.b': 2_335_000,
+    [ItemId.TAX_POLICY]: 375_000,
+    [ItemId.ADV_TAX_POLICY]: 2_335_000,
     // troop upkeep -50% for 1 day (Vesta's Blessing) / 7 days (Vesta's Grand Blessing)
-    'player.reduce.troops.upkeep.1': 150_000,
-    'player.reduce.troops.upkeep.7': 950_000,
+    [ItemId.VESTAS_BLESSING]: 150_000,
+    [ItemId.VESTAS_GRAND_BLESSING]: 950_000,
     // troop training cost -trainCostReduction for 1 day (Quartermaster's Seal) / 7 days (Quartermaster's Charter)
-    'player.reduce.troops.cost.1': 250_000,
-    'player.reduce.troops.cost.7': 1_600_000,
+    [ItemId.QUARTERMASTERS_SEAL]: 250_000,
+    [ItemId.QUARTERMASTERS_CHARTER]: 1_600_000,
   } as Record<string, number>,
   /**
    * (marchlands) there are no cents: everything the original sold for cents costs city gold at this rate

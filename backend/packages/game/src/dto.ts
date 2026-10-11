@@ -89,10 +89,10 @@ function productionBreakdownOf(stats: CityStats, r: (typeof BASIC_RESOURCES)[num
     buff: Math.round(fields * p.buff),
     upkeep: r === 'food' ? -round2(stats.upkeep) : 0,
     tax: -round2(stats.taxed[r]),
-    techPercent: Math.round(p.tech * 100),
-    mayorPercent: Math.round(p.mayor * 100),
-    valleyPercent: Math.round(p.valley * 100),
-    buffPercent: Math.round(p.buff * 100),
+    techBonus: p.tech,
+    mayorBonus: p.mayor,
+    valleyBonus: p.valley,
+    buffBonus: p.buff,
   };
 }
 
@@ -109,7 +109,7 @@ export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
     workPeople: stats.workers[r],
     /** net change per hour (food is after troop upkeep) */
     increaseRate: round2(stats.rates[r]),
-    bonusPercent: Math.round(stats.bonus[r] * 100),
+    bonus: stats.bonus[r],
     breakdown: productionBreakdownOf(stats, r),
   });
   return {
@@ -123,14 +123,14 @@ export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
     taxIncome: Math.round(stats.taxIncome),
     taxConverted: Math.round(stats.taxConverted),
     taxItemBonus: Math.round(stats.taxBuff),
-    taxItemPercent: stats.taxBuff ? Math.round(BALANCE.resourceBuffBonus * 100) : 0,
+    taxItemShare: stats.taxBuff ? BALANCE.resourceBuffBonus : 0,
     herosSalary: round2(stats.heroSalary),
     troopCostFood: round2(stats.upkeep),
     curPopulation: Math.floor(c.population),
     maxPopulation: stats.maxPopulation,
     idlePopulation: stats.idlePopulation,
     workPeople: stats.workersNeeded,
-    efficiency: Math.round(stats.efficiency * 100),
+    efficiency: stats.efficiency,
     populationDirection: populationDirection(c, stats),
     updatedAt: c.resourcesAt,
   };

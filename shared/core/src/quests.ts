@@ -7,6 +7,7 @@ import { FORT_ID_BY_KEY, TROOP_ID_BY_KEY, type FortKey, type TroopKey } from './
 import { QUESTS } from './data/index.ts';
 import { msg, ref, type Message } from './messages/index.ts';
 import type { ResourceSet } from './types.ts';
+import { ItemId } from './item-ids.ts';
 
 export type QuestTarget =
   | { kind: 'building'; typeId: number; level: number; count?: number }
@@ -29,7 +30,10 @@ export type QuestTarget =
  */
 export interface QuestDef {
   id: number;
-  /** quest group: the typeId of its config_quests rows (their names are `data-quests` `group.<row id>`) */
+  /**
+   * quest group: the id of its config_quests row (named by `data-quests` `group.<id>`). Not the row's typeId:
+   * several rows share one (Rebuild, The Medals and Prestige Building are all typeId 1).
+   */
   groupId: number;
   description: Message;
   targets: QuestTarget[];
@@ -102,31 +106,32 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   q(2, b(4, 1), field, { resources: res(100, 200, 250, 300) }), // Sawmill
   q(2, b(5, 1), field, { resources: res(200, 500, 150, 400) }), // Quarry
   q(2, b(6, 1), field, { resources: res(250, 600, 500, 200) }), // Ironmine
-  // 4 Commodity Gathering
-  q(4, b(7, 3), upgradeAny, { resources: res(3000, 2000, 1000, 1000) }), // Bountiful Fields
-  q(4, b(4, 3), upgradeAny, { resources: res(1000, 3000, 1000, 1000) }), // Lumber Industry
-  q(4, b(7, 1, 5), (t) => t.kind === 'building' && msg('questInfo.description.ownFields', { building: ref.building(t.typeId), count: t.count ?? 1 }), {
-    items: { 'player.resinc.1': 1 },
+  // 3 Commodity Gathering
+  q(3, b(7, 3), upgradeAny, { resources: res(3000, 2000, 1000, 1000) }), // Bountiful Fields
+  q(3, b(4, 3), upgradeAny, { resources: res(1000, 3000, 1000, 1000) }), // Lumber Industry
+  q(3, b(7, 1, 5), (t) => t.kind === 'building' && msg('questInfo.description.ownFields', { building: ref.building(t.typeId), count: t.count ?? 1 }), {
+    items: { [ItemId.PLOWSHARES]: 1 },
   }), // Field Network
   // 6 Administration
-  q(6, { kind: 'mayor' }, fixed(msg('questInfo.description.appointMayor')), { items: { 'hero.loyalty.1': 1 } }), // Appoint a Mayor
+  q(6, { kind: 'mayor' }, fixed(msg('questInfo.description.appointMayor')), { items: { [ItemId.CROSS_MEDAL]: 1 } }), // Appoint a Mayor
   q(6, { kind: 'taxRate', max: 20 }, (t) => t.kind === 'taxRate' && msg('questInfo.description.taxRate', { max: t.max }), {
     resources: res(1000, 1000, 1000, 1000, 1000),
   }), // Fair Taxes
   // 8 Scientific Research
   q(8, { kind: 'research', techId: 1, level: 1 }, research, { resources: res(2000, 1000, 1000, 1000) }), // Agriculture
-  q(8, { kind: 'research', techId: 8, level: 1 }, research, { items: { 'consume.2.b': 1 } }), // Military Science
+  q(8, { kind: 'research', techId: 8, level: 1 }, research, { items: { [ItemId.PRIMARY_GUIDELINES]: 1 } }), // Military Science
   // 9 Alliance
   q(9, b(28, 1), build('questInfo.description.embassy'), { resources: res(1000, 2000, 500, 300) }), // Embassy
   q(9, { kind: 'alliance' }, fixed(msg('questInfo.description.joinAlliance')), { resources: { gold: 50_000 } }), // Join an Alliance
   // 10 Correspondence
   q(10, { kind: 'mailSent' }, fixed(msg('questInfo.description.sendMail')), { resources: res(500, 500, 500, 500) }), // Correspondence
-  // 11 Hero Recruitment / Military Service
+  // 11 Hero Recruitment
   q(11, b(21, 1), build('questInfo.description.inn'), { resources: res(500, 2000, 1000, 400) }), // Inn
   q(11, b(27, 1), build('questInfo.description.feastingHall'), { resources: res(1000, 2500, 1200, 700) }), // Feasting Hall
   q(11, { kind: 'heroes', count: 1 }, fixed(msg('questInfo.description.recruitHero')), { resources: { gold: 20_000 } }), // Recruit a Hero
+  // 12 Military Service
   q(
-    11,
+    12,
     { kind: 'troops', key: 'militia', count: 100 },
     (t) => t.kind === 'troops' && msg('questInfo.description.train', { troop: ref.troop(troopId(t.key)), count: t.count }),
     { resources: res(5000, 5000, 0, 2500) },
@@ -144,11 +149,11 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   q(15, { kind: 'valleys', count: 1 }, fixed(msg('questInfo.description.occupyValley')), { resources: res(5000, 5000, 5000, 5000) }), // Valley Holder
   // 20 Population Increase
   q(20, { kind: 'population', amount: 1000 }, (t) => t.kind === 'population' && msg('questInfo.description.population', { amount: t.amount }), {
-    items: { 'player.pop.1.a': 1 },
+    items: { [ItemId.CIVIL_CODE]: 1 },
   }), // Growing Town
-  // 21 The Medals / 23 Prestige
+  // 23 Prestige Building
   q(23, { kind: 'prestige', amount: 10_000 }, (t) => t.kind === 'prestige' && msg('questInfo.description.prestige', { amount: t.amount }), {
-    items: { 'hero.loyalty.3': 1 },
+    items: { [ItemId.LION_MEDAL]: 1 },
   }), // Rising Star
 ];
 
@@ -187,6 +192,9 @@ export function questTargetMessage(t: QuestTarget): Message {
 }
 
 export const questGroups = () => QUESTS;
+
+/** The quest groups that have quests, in config order. */
+export const questGroupsWithQuests = () => QUESTS.filter((g) => QUEST_CATALOGUE.some((q) => q.groupId === g.id));
 
 export function evaluateTarget(t: QuestTarget, s: QuestSnapshot): boolean {
   switch (t.kind) {

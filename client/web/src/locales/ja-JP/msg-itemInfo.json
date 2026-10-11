@@ -7,14 +7,14 @@
   "speedup": {
     "time": "建設または研究の残り時間を{{time}}短縮します。",
     "hours_other": "建設または研究の残り時間を{{min}}～{{count, number}}時間（ランダム）短縮します。",
-    "percent": "建設または研究の所要時間の{{percent}}%を短縮します。",
-    "troopBatch": "部隊訓練1バッチの所要時間の{{percent}}%を短縮します。",
-    "fortBatch": "防衛施設建設1バッチの所要時間の{{percent}}%を短縮します。"
+    "percent": "建設または研究の所要時間の{{percent}}を短縮します。",
+    "troopBatch": "部隊訓練1バッチの所要時間の{{percent}}を短縮します。",
+    "fortBatch": "防衛施設建設1バッチの所要時間の{{percent}}を短縮します。"
   },
   "loyalty": "英雄の忠誠度を{{amount}}上げます（最大{{max}}）。",
-  "heroStat": "{{period}}、英雄1人の{{stat}}を{{percent}}%上げます。",
+  "heroStat": "{{period}}、英雄1人の{{stat}}を{{percent}}上げます。",
   "experience": {
-    "share": "英雄に経験値を与えます：次のレベルまでの{{percent}}%（最低{{min}}）。",
+    "share": "英雄に経験値を与えます：次のレベルまでの{{percent}}（最低{{min}}）。",
     "level": "英雄に経験値を与えます：1レベル分（最低{{min}}）。"
   },
   "holyWater": "英雄に割り振ったポイントをすべて戻し、もう一度割り振れるようにします。",
@@ -29,7 +29,7 @@
   "key": "{{chest}}を開けます。",
   "medalBox": "{{medals}}がそれぞれ{{min}}～{{max}}個入っています。",
   "randomBox": "ランダムなアイテムが入っています。",
-  "civilCode": "現在の都市に最大人口の{{percent}}%（最低{{min}}人）を追加します。",
+  "civilCode": "現在の都市に最大人口の{{percent}}（最低{{min}}人）を追加します。",
   "cureInjured": "現在の都市の負傷兵をすべて即座に回復します。",
   "heroBox": "全基本能力値が{{minStat}}以上のレベル{{level}}の英雄を登用します。{{building}}に空きが必要です。",
   "teleporter": "都市を好きな空き平地へ移転します。その後{{period}}のクールダウンがあります。",

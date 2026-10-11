@@ -47,7 +47,7 @@
   },
   "tradeForm": {
     "title": "Trade {{resource}}",
-    "description": "Trades settle instantly. {{fee}}% fee on purchases. Marketplace Lv {{level}}: {{open}}/{{cap}} resting orders here.",
+    "description": "Trades settle instantly. {{fee}} fee on purchases. Marketplace Lv {{level}}: {{open}}/{{cap}} resting orders here.",
     "instant": "Instant",
     "limit": "Set my price",
     "amount": "Amount",

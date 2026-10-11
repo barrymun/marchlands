@@ -25,7 +25,7 @@ export const BUFF_MESSAGES = {
   teleportCooldown: [],
   /** holiday mode */
   holiday: [],
-  /** hero attribute item (`stat`), `percent`: HERO_ATTRIBUTE_BUFF.bonus */
+  /** hero attribute item (`stat`), `percent`: BALANCE.items.heroAttributeBuff.bonus */
   heroStat: ['stat', 'percent'],
   /** a captured hero's home city (param: the city) */
   homeCity: [],

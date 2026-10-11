@@ -1,6 +1,7 @@
 import { i18n } from '@/lib/i18n';
+import { ItemId } from '@marchlands/core';
 
-export const TELEPORT = 'consume.move.1';
+export const TELEPORT = ItemId.CITY_TELEPORTER;
 
 /** Field resource labels ("Lumber"), in the current locale. */
 export const FIELD_LABEL = {

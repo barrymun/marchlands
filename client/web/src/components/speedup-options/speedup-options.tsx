@@ -1,21 +1,28 @@
 import { useTranslation } from 'react-i18next';
-import { BALANCE, scaled, speedupItemGold } from '@marchlands/core';
+import { BALANCE, scaled, speedupItemGold, ItemId, SpeedupId } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';
 import { duration, fmt, fmtExact } from '@/lib/format';
 import { itemName } from '@/lib/game-data';
 
-const ITEMS = ['consume.2.a', 'consume.2.b', 'consume.2.b.1', 'consume.2.c', 'consume.2.c.1', 'consume.2.d'] as const;
+const ITEMS = [
+  ItemId.BEGINNER_GUIDELINES,
+  ItemId.PRIMARY_GUIDELINES,
+  ItemId.INTERMEDIATE_GUIDELINES,
+  ItemId.SENIOR_GUIDELINES,
+  ItemId.MASTER_GUIDELINES,
+  ItemId.ULTIMATE_GUIDELINES,
+] as const;
 
 /** Each item's reduction, as its key under `effects` in the speedup-options locale files. */
 const EFFECT = {
-  'consume.2.a': 'minutes15',
-  'consume.2.b': 'hour1',
-  'consume.2.b.1': 'hours2Half',
-  'consume.2.c': 'hours8',
-  'consume.2.c.1': 'hours10To30',
-  'consume.2.d': 'percent30',
+  [ItemId.BEGINNER_GUIDELINES]: 'minutes15',
+  [ItemId.PRIMARY_GUIDELINES]: 'hour1',
+  [ItemId.INTERMEDIATE_GUIDELINES]: 'hours2Half',
+  [ItemId.SENIOR_GUIDELINES]: 'hours8',
+  [ItemId.MASTER_GUIDELINES]: 'hours10To30',
+  [ItemId.ULTIMATE_GUIDELINES]: 'percent30',
 } as const satisfies Record<(typeof ITEMS)[number], string>;
 
 /**
@@ -46,7 +53,7 @@ export function SpeedupOptions({
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap gap-2">
-        <Button size="xs" disabled={!free || pending} onClick={() => onUse('free.speed')}>
+        <Button size="xs" disabled={!free || pending} onClick={() => onUse(SpeedupId.FREE)}>
           {t('finishFree')}
         </Button>
         {goldNeed != null && (
@@ -55,7 +62,7 @@ export function SpeedupOptions({
             variant="outline"
             disabled={pending || gold < goldNeed}
             title={t('common:gold', { gold: fmtExact(goldNeed) })}
-            onClick={() => onUse('gold.speed')}
+            onClick={() => onUse(SpeedupId.GOLD)}
           >
             {t('finishNow', { gold: fmt(goldNeed) })}
           </Button>

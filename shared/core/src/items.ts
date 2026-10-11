@@ -4,13 +4,13 @@
 
 import { z } from 'zod';
 import { BALANCE, goldForCents } from './balance.ts';
-import { experienceItemGain } from './heroes.ts';
-import { DAY, HOUR } from './time.ts';
+import { createRandomHero, experienceItemGain, upgradeExpFor, type GeneratedHero } from './heroes.ts';
 import { itemConfig } from './data/index.ts';
 import { randInt, type Rng } from './rng.ts';
 import { ResourceSetSchema, TroopCountsSchema, type ResourceSet, type TroopCounts } from './types.ts';
 import { BuffId } from './constants.ts';
-import { msg, ref, type Message } from './messages/index.ts';
+import { msg, ref, share, type Message } from './messages/index.ts';
+import { ItemId } from './item-ids.ts';
 
 export type ItemEffect =
   /** timed player buff (stacks by extending). `desc`: what it does, stored in the buff and worded by the client */
@@ -32,7 +32,7 @@ export const GrantContentsSchema = z.object({
 });
 export type GrantContents = z.infer<typeof GrantContentsSchema>;
 
-const pct = (share: number) => Math.round(share * 100);
+const pct = share;
 const BATTLE_BUFF_PERCENT = pct(BALANCE.battleBuffBonus);
 const UPKEEP_BUFF_PERCENT = pct(BALANCE.upkeepBuffReduction);
 
@@ -55,88 +55,76 @@ const BUFF_TEXT = {
 
 const buff = (buffId: BuffId, desc: Message, durationMs: number): ItemEffect => ({ kind: 'buff', buff: buffId, desc, durationMs });
 
-/** Medal boxes: the medal levels each holds, and how many of each (inclusive). */
-export const MEDAL_BOXES: Record<string, readonly number[]> = {
-  'player.box.special.1': [1, 2, 3],
-  'player.box.special.2': [4, 5, 6],
-  'player.box.special.3': [7, 8, 9],
-};
-export const MEDAL_BOX_COUNT = { min: 2, max: 4 };
-
-/** Napoleon's Diary / Archimedes' Note: the share of a troop or fortification batch's total time they cut. */
-export const BATCH_SPEEDUP_SHARE = 0.3;
-
-/** Civil Code: adds this share of the city's maximum population, at least `min` people (capped at the maximum). */
-export const CIVIL_CODE = { share: 0.2, min: 100 };
+const { buffDurationMs: BUFF_MS, medalBoxes: MEDAL_BOXES } = BALANCE.items;
 
 const EFFECTS: Record<string, ItemEffect> = {
   // ---- production buffs ----
-  'player.resinc.1': buff(BuffId.FOOD_PRODUCTION, BUFF_TEXT.food, DAY),
-  'player.resinc.1.b': buff(BuffId.FOOD_PRODUCTION, BUFF_TEXT.food, 7 * DAY),
-  'player.resinc.2': buff(BuffId.WOOD_PRODUCTION, BUFF_TEXT.wood, DAY),
-  'player.resinc.2.b': buff(BuffId.WOOD_PRODUCTION, BUFF_TEXT.wood, 7 * DAY),
-  'player.resinc.3': buff(BuffId.STONE_PRODUCTION, BUFF_TEXT.stone, DAY),
-  'player.resinc.3.b': buff(BuffId.STONE_PRODUCTION, BUFF_TEXT.stone, 7 * DAY),
-  'player.resinc.4': buff(BuffId.IRON_PRODUCTION, BUFF_TEXT.iron, DAY),
-  'player.resinc.4.b': buff(BuffId.IRON_PRODUCTION, BUFF_TEXT.iron, 7 * DAY),
-  'player.gold.1.a': buff(BuffId.GOLD_PRODUCTION, BUFF_TEXT.gold, DAY),
-  'player.gold.1.b': buff(BuffId.GOLD_PRODUCTION, BUFF_TEXT.gold, 7 * DAY),
+  [ItemId.PLOWSHARES]: buff(BuffId.FOOD_PRODUCTION, BUFF_TEXT.food, BUFF_MS.short),
+  [ItemId.IRON_RAKE]: buff(BuffId.FOOD_PRODUCTION, BUFF_TEXT.food, BUFF_MS.long),
+  [ItemId.ARCH_SAW]: buff(BuffId.WOOD_PRODUCTION, BUFF_TEXT.wood, BUFF_MS.short),
+  [ItemId.DOUBLE_SAW]: buff(BuffId.WOOD_PRODUCTION, BUFF_TEXT.wood, BUFF_MS.long),
+  [ItemId.QUARRYING_TOOLS]: buff(BuffId.STONE_PRODUCTION, BUFF_TEXT.stone, BUFF_MS.short),
+  [ItemId.ADV_QUARRYING_TOOLS]: buff(BuffId.STONE_PRODUCTION, BUFF_TEXT.stone, BUFF_MS.long),
+  [ItemId.BLOWER]: buff(BuffId.IRON_PRODUCTION, BUFF_TEXT.iron, BUFF_MS.short),
+  [ItemId.BLAST_FURNACE]: buff(BuffId.IRON_PRODUCTION, BUFF_TEXT.iron, BUFF_MS.long),
+  [ItemId.TAX_POLICY]: buff(BuffId.GOLD_PRODUCTION, BUFF_TEXT.gold, BUFF_MS.short),
+  [ItemId.ADV_TAX_POLICY]: buff(BuffId.GOLD_PRODUCTION, BUFF_TEXT.gold, BUFF_MS.long),
 
   // ---- military buffs ----
-  'player.attackinc.1': buff(BuffId.ATTACK, BUFF_TEXT.attack, DAY),
-  'player.attackinc.1.b': buff(BuffId.ATTACK, BUFF_TEXT.attack, 7 * DAY),
-  'player.defendinc.1': buff(BuffId.DEFENSE, BUFF_TEXT.defense, DAY),
-  'player.defendinc.1.b': buff(BuffId.DEFENSE, BUFF_TEXT.defense, 7 * DAY),
-  'player.troop.1.a': buff(BuffId.WAR_ENSIGN, BUFF_TEXT.ensign, DAY),
-  'player.queue.building': buff(BuffId.BUILDING_QUEUE, BUFF_TEXT.queue, 7 * DAY),
+  [ItemId.WAR_HORN]: buff(BuffId.ATTACK, BUFF_TEXT.attack, BUFF_MS.short),
+  [ItemId.IVORY_HORN]: buff(BuffId.ATTACK, BUFF_TEXT.attack, BUFF_MS.long),
+  [ItemId.CORSELET]: buff(BuffId.DEFENSE, BUFF_TEXT.defense, BUFF_MS.short),
+  [ItemId.ULTRA_CORSELET]: buff(BuffId.DEFENSE, BUFF_TEXT.defense, BUFF_MS.long),
+  [ItemId.WAR_ENSIGN]: buff(BuffId.WAR_ENSIGN, BUFF_TEXT.ensign, BUFF_MS.short),
+  [ItemId.BERNINIS_HAMMER]: buff(BuffId.BUILDING_QUEUE, BUFF_TEXT.queue, BUFF_MS.long),
 
   // ---- upkeep ----
-  'player.reduce.troops.upkeep.1': buff(BuffId.UPKEEP_REDUCE, BUFF_TEXT.upkeep, DAY),
-  'player.reduce.troops.upkeep.7': buff(BuffId.UPKEEP_REDUCE, BUFF_TEXT.upkeep, 7 * DAY),
-  'player.reduce.troops.cost.1': buff(BuffId.TRAIN_COST_REDUCE, BUFF_TEXT.trainCost, DAY),
-  'player.reduce.troops.cost.7': buff(BuffId.TRAIN_COST_REDUCE, BUFF_TEXT.trainCost, 7 * DAY),
+  [ItemId.VESTAS_BLESSING]: buff(BuffId.UPKEEP_REDUCE, BUFF_TEXT.upkeep, BUFF_MS.short),
+  [ItemId.VESTAS_GRAND_BLESSING]: buff(BuffId.UPKEEP_REDUCE, BUFF_TEXT.upkeep, BUFF_MS.long),
+  [ItemId.QUARTERMASTERS_SEAL]: buff(BuffId.TRAIN_COST_REDUCE, BUFF_TEXT.trainCost, BUFF_MS.short),
+  [ItemId.QUARTERMASTERS_CHARTER]: buff(BuffId.TRAIN_COST_REDUCE, BUFF_TEXT.trainCost, BUFF_MS.long),
 
   // ---- protection ----
-  'player.peace.1': { kind: 'command', command: 'city.truce' },
+  [ItemId.TRUCE_AGREEMENT]: { kind: 'command', command: 'city.truce' },
 
   // ---- city items ----
-  'player.pop.1.a': { kind: 'special', handler: 'civilCode' },
-  'player.relive.1': { kind: 'special', handler: 'cureInjured' },
+  [ItemId.CIVIL_CODE]: { kind: 'special', handler: 'civilCode' },
+  [ItemId.PENICILLIN]: { kind: 'special', handler: 'cureInjured' },
 
   // ---- boxes ----
-  'player.box.special.1': { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES['player.box.special.1']) },
-  'player.box.special.2': { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES['player.box.special.2']) },
-  'player.box.special.3': { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES['player.box.special.3']) },
-  'player.box.currently.1': { kind: 'special', handler: 'heroBox' },
-  'player.box.present.2': {
+  [ItemId.JUNIOR_MEDAL_BOX]: { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.JUNIOR_MEDAL_BOX]) },
+  [ItemId.MEDIUM_MEDAL_BOX]: { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.MEDIUM_MEDAL_BOX]) },
+  [ItemId.SENIOR_MEDAL_BOX]: { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.SENIOR_MEDAL_BOX]) },
+  [ItemId.HERO_PACKAGE]: { kind: 'special', handler: 'heroBox' },
+  [ItemId.NEWBIES_PACKAGE]: {
     kind: 'grant',
-    items: { 'consume.2.a': 5, 'consume.2.b': 3 },
-    resources: { food: 50_000, wood: 50_000, stone: 50_000, iron: 50_000 },
+    items: { ...BALANCE.items.newbiesPackage.items },
+    resources: { ...BALANCE.items.newbiesPackage.resources },
   },
 
   // ---- used through dedicated commands ----
-  'consume.2.a': { kind: 'command', command: 'speedup' },
-  'consume.2.b': { kind: 'command', command: 'speedup' },
-  'consume.2.b.1': { kind: 'command', command: 'speedup' },
-  'consume.2.c': { kind: 'command', command: 'speedup' },
-  'consume.2.c.1': { kind: 'command', command: 'speedup' },
-  'consume.2.d': { kind: 'command', command: 'speedup' },
-  'player.troop.1.b': { kind: 'command', command: 'troops.speedup' },
-  'player.fort.1.c': { kind: 'command', command: 'fortifications.speedup' },
-  'consume.move.1': { kind: 'command', command: 'city.move' },
-  'hero.reset.1': { kind: 'command', command: 'heroes.reset' },
-  'hero.power.1': { kind: 'command', command: 'heroes.useItem' },
-  'hero.management.1': { kind: 'command', command: 'heroes.useItem' },
-  'hero.intelligence.1': { kind: 'command', command: 'heroes.useItem' },
-  'player.experience.1.a': { kind: 'command', command: 'heroes.useItem' },
-  'player.experience.1.b': { kind: 'command', command: 'heroes.useItem' },
-  'player.experience.1.c': { kind: 'command', command: 'heroes.useItem' },
+  [ItemId.BEGINNER_GUIDELINES]: { kind: 'command', command: 'speedup' },
+  [ItemId.PRIMARY_GUIDELINES]: { kind: 'command', command: 'speedup' },
+  [ItemId.INTERMEDIATE_GUIDELINES]: { kind: 'command', command: 'speedup' },
+  [ItemId.SENIOR_GUIDELINES]: { kind: 'command', command: 'speedup' },
+  [ItemId.MASTER_GUIDELINES]: { kind: 'command', command: 'speedup' },
+  [ItemId.ULTIMATE_GUIDELINES]: { kind: 'command', command: 'speedup' },
+  [ItemId.NAPOLEONS_DIARY]: { kind: 'command', command: 'troops.speedup' },
+  [ItemId.ARCHIMEDES_NOTE]: { kind: 'command', command: 'fortifications.speedup' },
+  [ItemId.CITY_TELEPORTER]: { kind: 'command', command: 'city.move' },
+  [ItemId.HOLY_WATER]: { kind: 'command', command: 'heroes.reset' },
+  [ItemId.EXCALIBUR]: { kind: 'command', command: 'heroes.useItem' },
+  [ItemId.WEALTH_OF_NATIONS]: { kind: 'command', command: 'heroes.useItem' },
+  [ItemId.ART_OF_WAR]: { kind: 'command', command: 'heroes.useItem' },
+  [ItemId.ANABASIS]: { kind: 'command', command: 'heroes.useItem' },
+  [ItemId.EPITOME_OF_MILITARY_SCIENCE]: { kind: 'command', command: 'heroes.useItem' },
+  [ItemId.ON_WAR]: { kind: 'command', command: 'heroes.useItem' },
 };
-for (const l of [1, 2, 3, 4, 5, 6, 7, 8, 9]) EFFECTS[`hero.loyalty.${l}`] = { kind: 'command', command: 'heroes.useItem' };
+for (const l of [1, 2, 3, 4, 5, 6, 7, 8, 9]) EFFECTS[medalId(l)] = { kind: 'command', command: 'heroes.useItem' };
 
 function medals(rng: Rng, levels: readonly number[]): GrantContents {
   const items: Record<string, number> = {};
-  for (const l of levels.slice(0, 3)) items[`hero.loyalty.${l}`] = randInt(rng, MEDAL_BOX_COUNT.min, MEDAL_BOX_COUNT.max);
+  for (const l of levels.slice(0, 3)) items[medalId(l)] = randInt(rng, BALANCE.items.medalBoxCount.min, BALANCE.items.medalBoxCount.max);
   return { items };
 }
 
@@ -145,25 +133,57 @@ export function itemEffect(itemId: string): ItemEffect | undefined {
   return EFFECTS[itemId];
 }
 
-/** Hero-attribute items (Excalibur etc.): +25% of the attribute for 24h as a buff bonus. */
+/** Hero-attribute items (Excalibur etc.): +BALANCE.items.heroAttributeBuff.bonus of the attribute as a buff bonus. */
 export const HERO_ATTRIBUTE_ITEMS: Record<string, 'power' | 'management' | 'stratagem'> = {
-  'hero.power.1': 'power',
-  'hero.management.1': 'management',
-  'hero.intelligence.1': 'stratagem',
+  [ItemId.EXCALIBUR]: 'power',
+  [ItemId.WEALTH_OF_NATIONS]: 'management',
+  [ItemId.ART_OF_WAR]: 'stratagem',
 };
-export const HERO_ATTRIBUTE_BUFF = { bonus: 0.25, durationMs: DAY };
 /** What a hero attribute boost does (heroes.buffs[].desc). */
 export const heroBuffDesc = (attr: 'power' | 'management' | 'stratagem') =>
-  msg('buff.heroStat', { stat: ref.stat(attr), percent: pct(HERO_ATTRIBUTE_BUFF.bonus) });
+  msg('buff.heroStat', { stat: ref.stat(attr), percent: pct(BALANCE.items.heroAttributeBuff.bonus) });
 /** The army-size boost of the War Ensign (for battle reports). */
 export const WAR_ENSIGN_DESC = BUFF_TEXT.ensign;
 
-/** Hero box quality -> hero level and minimum base stat. */
-export const HERO_BOX_QUALITY: Record<string, { level: number; minStat: number }> = {
-  'player.box.currently.1': { level: 30, minStat: 55 },
-};
+/** The hero inside a hero box: its level and lowest base attribute (BALANCE.items.heroBoxes). */
+export const heroBoxQuality = (itemId: string) => BALANCE.items.heroBoxes[itemId] ?? BALANCE.items.heroBoxFallback;
 
-export const TRUCE_DURATION_MS = 12 * HOUR;
+/**
+ * The hero in a hero box: a random hero at the box's level with full loyalty and its level in unspent
+ * points, each base attribute raised to at least minStat + 0 … heroBoxStatSpread.
+ */
+export function createBoxHero(itemId: string, rng: Rng): GeneratedHero {
+  const q = heroBoxQuality(itemId);
+  const g = createRandomHero(1, rng);
+  const bump = (v: number) => Math.max(v, q.minStat + randInt(rng, 0, BALANCE.items.heroBoxStatSpread));
+  const basePower = bump(g.basePower);
+  const baseManagement = bump(g.baseManagement);
+  const baseStratagem = bump(g.baseStratagem);
+  return {
+    ...g,
+    level: q.level,
+    upgradeExp: upgradeExpFor(q.level),
+    basePower,
+    baseManagement,
+    baseStratagem,
+    power: basePower,
+    management: baseManagement,
+    stratagem: baseStratagem,
+    remainPoint: q.level,
+    loyalty: BALANCE.heroMaxLoyalty,
+  };
+}
+
+/** A city's population after a Civil Code (BALANCE.items.civilCode), never above its maximum. */
+export function civilCodePopulation(population: number, maxPopulation: number): number {
+  const { share, min } = BALANCE.items.civilCode;
+  return Math.min(maxPopulation, population + Math.max(min, Math.floor(maxPopulation * share)));
+}
+
+/** When a hero attribute boost used at `now` ends: another use adds its time to a boost still running (`runningEnd`). */
+export function heroAttributeBuffEnd(now: number, runningEnd?: number): number {
+  return (runningEnd ?? now) + BALANCE.items.heroAttributeBuff.durationMs;
+}
 
 /** Gold price of a hero item bought on use (BALANCE.heroItemGold), or null when it cannot be bought with gold. */
 export function heroItemGoldPrice(itemId: string, upgradeExp: number): number | null {
@@ -186,8 +206,8 @@ type BuffedHero = {
   buffs: { id: string; desc: Message; endTime: number; param?: number }[];
 };
 
-/** Points an attribute boost adds: HERO_ATTRIBUTE_BUFF.bonus of the attribute's points (gear included). */
-export const heroBuffAmount = (attributePoints: number) => Math.ceil(attributePoints * HERO_ATTRIBUTE_BUFF.bonus);
+/** Points an attribute boost adds: BALANCE.items.heroAttributeBuff.bonus of the attribute's points (gear included). */
+export const heroBuffAmount = (attributePoints: number) => Math.ceil(attributePoints * BALANCE.items.heroAttributeBuff.bonus);
 
 /** The points an attribute boost works on: assigned points plus gear (marchlands: orig only the hero's own points). */
 export const heroBuffBase = (h: Omit<BuffedHero, 'buffs'>, attr: 'power' | 'management' | 'stratagem') => h[attr] + h[`${attr}Added`];
@@ -214,7 +234,9 @@ export function syncHeroBuffs(h: BuffedHero): boolean {
 }
 
 /** Medal item id of a level 1 (Cross) … 9 (Nation). */
-export const medalId = (level: number) => `hero.loyalty.${Math.min(9, Math.max(1, level))}`;
+export function medalId(level: number): string {
+  return `hero.loyalty.${Math.min(9, Math.max(1, level))}`;
+}
 
 /** Medal drop odds for a won attack on a city of `level` (BALANCE.medalDrops). */
 export function medalOdds(level: number) {

@@ -274,9 +274,9 @@ export async function troopParams(ctx: Ctx, playerId: number, cityId: number) {
   if (b.city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   const r = b.player.research;
   return {
-    marchSkillParam: researchLevel(r, TechType.COMPASS) * 10,
-    loadSkillParam: researchLevel(r, TechType.LOGISTICS) * 10,
-    driveSkillParam: researchLevel(r, TechType.HORSEBACK_RIDING) * 5,
+    marchSkillParam: researchLevel(r, TechType.COMPASS) * BALANCE.compassSpeedPerLevel,
+    loadSkillParam: researchLevel(r, TechType.LOGISTICS) * BALANCE.logisticsLoadPerLevel,
+    driveSkillParam: researchLevel(r, TechType.HORSEBACK_RIDING) * BALANCE.horsebackSpeedPerLevel,
     transportStationParam: reliefMultiplier(b.city.buildings),
     maxArmies: maxArmies(b.city.buildings),
     maxTroops: maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now)),

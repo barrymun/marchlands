@@ -59,7 +59,7 @@ export const ResourceLine = z
     workRate: z.number(),
     workPeople: z.number(),
     increaseRate: z.number().describe('net change per game hour (food is after troop upkeep), 2 decimals'),
-    bonusPercent: z.number().int(),
+    bonus: z.number().describe('production bonus as a share (0.25 = +25%)'),
     breakdown: z
       .object({
         base: z.number().int().describe('flat output per hour, regardless of fields'),
@@ -70,10 +70,10 @@ export const ResourceLine = z
         buff: z.number().int().describe('from production items'),
         upkeep: z.number().describe('troop food upkeep per game hour (negative; 0 for other resources), 2 decimals'),
         tax: z.number().describe('(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals'),
-        techPercent: z.number().int(),
-        mayorPercent: z.number().int(),
-        valleyPercent: z.number().int(),
-        buffPercent: z.number().int(),
+        techBonus: z.number().describe('bonus share from research'),
+        mayorBonus: z.number().describe("bonus share from the mayor's politics"),
+        valleyBonus: z.number().describe('bonus share from occupied valleys'),
+        buffBonus: z.number().describe('bonus share from production items'),
       })
       .meta({ id: 'ProductionSources', description: 'per-hour amounts by source; they sum to increaseRate (up to rounding)' }),
   })
@@ -92,14 +92,14 @@ export const ResourceBean = z
     taxIncome: z.number().int().describe('gold per game hour: the base tax on population plus taxConverted'),
     taxConverted: z.number().int().describe('(marchlands) gold per game hour the tax rate earns from field output'),
     taxItemBonus: z.number().int().describe('gold per game hour the Gold Production item adds to the base tax (part of taxIncome)'),
-    taxItemPercent: z.number().int().describe('that item bonus, percent'),
+    taxItemShare: z.number().describe('that item bonus, as a share of the base tax (0.25 = +25%)'),
     herosSalary: z.number(),
     troopCostFood: z.number().describe('troop food upkeep per game hour, 2 decimals'),
     curPopulation: z.number().int(),
     maxPopulation: z.number(),
     idlePopulation: z.number(),
     workPeople: z.number(),
-    efficiency: z.number().int().describe('percent'),
+    efficiency: z.number().describe('labour efficiency as a share (1: every field fully staffed)'),
     populationDirection: z.number().int(),
     updatedAt: Ms,
   })

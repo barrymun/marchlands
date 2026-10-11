@@ -6,13 +6,9 @@
 import { BALANCE } from './balance.ts';
 import { BuildingType, TechType } from './constants.ts';
 import { troopConfig } from './data/index.ts';
-import { msg, ref, type Message } from './messages/index.ts';
+import { msg, ref, share, type Message } from './messages/index.ts';
 
-/** Damage multipliers and the tower's damage taken, as in battle/simulator.ts damageModifier. */
-const PIKEMAN_VS_HORSE = 1.8;
-const SWORDSMAN_VS_PIKEMAN = 1.1;
-const HORSE_VS_ARCHER = 1.2;
-const TOWER_DAMAGE_TAKEN_PERCENT = 30;
+const { damage } = BALANCE.battle;
 /** Ranged units archers and siege engines shoot first (battle/simulator.ts RANGED, plus the tower). */
 const RANGED_IDS = [7, 11, 13, 16];
 
@@ -23,12 +19,12 @@ const TEXT: Record<number, () => Message> = {
   2: () => msg('troopInfo.worker', { count: load(2) }),
   3: () => msg('troopInfo.warrior'),
   4: () => msg('troopInfo.scout'),
-  5: () => msg('troopInfo.pikeman', { multiplier: PIKEMAN_VS_HORSE, cavalry: ref.troop(9), cataphract: ref.troop(10) }),
-  6: () => msg('troopInfo.swordsman', { multiplier: SWORDSMAN_VS_PIKEMAN, target: ref.troop(5) }),
+  5: () => msg('troopInfo.pikeman', { multiplier: damage.pikemanVsMounted, cavalry: ref.troop(9), cataphract: ref.troop(10) }),
+  6: () => msg('troopInfo.swordsman', { multiplier: damage.swordsmanVsPikeman, target: ref.troop(5) }),
   7: () => msg('troopInfo.archer', { targets: RANGED_IDS.map(ref.troop) }),
   8: () => msg('troopInfo.transporter', { count: load(8) }),
-  9: () => msg('troopInfo.cavalry', { multiplier: HORSE_VS_ARCHER, target: ref.troop(7), abatis: ref.troop(15) }),
-  10: () => msg('troopInfo.cataphract', { multiplier: HORSE_VS_ARCHER, target: ref.troop(7), abatis: ref.troop(15) }),
+  9: () => msg('troopInfo.cavalry', { multiplier: damage.mountedVsArcher, target: ref.troop(7), abatis: ref.troop(15) }),
+  10: () => msg('troopInfo.cataphract', { multiplier: damage.mountedVsArcher, target: ref.troop(7), abatis: ref.troop(15) }),
   11: () => msg('troopInfo.ballista'),
   12: () => msg('troopInfo.batteringRam'),
   13: () => msg('troopInfo.catapult'),
@@ -37,7 +33,7 @@ const TEXT: Record<number, () => Message> = {
   16: () =>
     msg('troopInfo.archerTower', {
       walls: ref.building(BuildingType.WALLS),
-      percent: TOWER_DAMAGE_TAKEN_PERCENT,
+      percent: share(BALANCE.battle.towerDamageTaken),
       techs: [ref.tech(TechType.ARCHERY), ref.tech(TechType.MEDICINE), ref.tech(TechType.IRON_WORKING)],
       space: space(16),
     }),

@@ -11,14 +11,14 @@
     "time": "Cuts {{time}} off a construction or research.",
     "hours_one": "Cuts {{min}}–{{count, number}} hour (at random) off a construction or research.",
     "hours_other": "Cuts {{min}}–{{count, number}} hours (at random) off a construction or research.",
-    "percent": "Cuts {{percent}}% of the total time off a construction or research.",
-    "troopBatch": "Cuts {{percent}}% of the total time off one troop training batch.",
-    "fortBatch": "Cuts {{percent}}% of the total time off one fortification batch."
+    "percent": "Cuts {{percent}} of the total time off a construction or research.",
+    "troopBatch": "Cuts {{percent}} of the total time off one troop training batch.",
+    "fortBatch": "Cuts {{percent}} of the total time off one fortification batch."
   },
   "loyalty": "Raises a hero's loyalty by {{amount}} (up to {{max}}).",
-  "heroStat": "Raises one hero's {{stat}} by {{percent}}% for {{period}}.",
+  "heroStat": "Raises one hero's {{stat}} by {{percent}} for {{period}}.",
   "experience": {
-    "share": "Gives a hero experience: {{percent}}% of the next level, at least {{min}}.",
+    "share": "Gives a hero experience: {{percent}} of the next level, at least {{min}}.",
     "level": "Gives a hero experience: a full level, at least {{min}}."
   },
   "holyWater": "Clears all of a hero's assigned points so they can be assigned again.",
@@ -33,7 +33,7 @@
   "key": "Opens a {{chest}}.",
   "medalBox": "Contains {{min}}–{{max}} each of {{medals}}.",
   "randomBox": "Contains random items.",
-  "civilCode": "Adds {{percent}}% of the maximum population (at least {{min}}) to the current city.",
+  "civilCode": "Adds {{percent}} of the maximum population (at least {{min}}) to the current city.",
   "cureInjured": "Heals every injured troop in the current city at once.",
   "heroBox": "Recruits a level {{level}} hero with every base stat at least {{minStat}}. Needs a free {{building}} slot.",
   "teleporter": "Moves your city to a free flat tile of your choice, then cools down for {{period}}.",

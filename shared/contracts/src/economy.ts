@@ -325,7 +325,7 @@ export type ShopCategory = z.infer<typeof ShopCategory>;
 
 // ---- quests ----
 
-export const QuestListQuery = z.object({ groupId: z.coerce.number().int().optional() });
+export const QuestListQuery = z.object({ groupId: z.coerce.number().int().optional().describe('QuestGroupStatus.id: only that group') });
 export const QuestIdParams = z.object({ questId: zId });
 export const ClaimQuestBody = z.object({ cityId: zId });
 
@@ -342,7 +342,7 @@ export type QuestGroupStatus = z.infer<typeof QuestGroupStatus>;
 export const QuestBean = z
   .object({
     questId: QuestProgressRow.shape.questId,
-    groupId: int().describe('QuestGroupStatus.typeId'),
+    groupId: int().describe('QuestGroupStatus.id'),
     description: MessageSchema.describe('`questInfo.description.*`, worded by the client (the quest is named by its id)'),
     targets: z.array(z.object({ text: MessageSchema.describe('`questInfo.target.*`, worded by the client'), finished: z.boolean() })),
     award: QuestAward,

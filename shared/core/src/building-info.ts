@@ -6,12 +6,15 @@ import { BALANCE, getGameSpeed } from './balance.ts';
 import { BuildingType, FortType } from './constants.ts';
 import { isFortType, unlockedOuterSlots } from './construction.ts';
 import { BUILDINGS, RESEARCH, TROOPS, buildingConfig } from './data/index.ts';
-import { msg, ref, type Message } from './messages/index.ts';
+import { innHeroMaxLevel, innOffers } from './heroes.ts';
+import { wallHitPoints } from './battle/simulator.ts';
+import { msg, ref, share, type Message } from './messages/index.ts';
 import { reliefMultiplier } from './troops.ts';
+import { ItemId } from './item-ids.ts';
 
 const F = (l: number) => BALANCE.fieldFactor[l] ?? 0;
 /** the item that lets armies hold more troops (BALANCE.warEnsignTroopBonus) */
-const WAR_ENSIGN = 'player.troop.1.a';
+const WAR_ENSIGN = ItemId.WAR_ENSIGN;
 
 interface BuildingText {
   summary: () => Message;
@@ -49,9 +52,8 @@ const TEXT: Record<number, BuildingText> = {
       msg('buildingInfo.effect.walls', {
         space: BALANCE.wallSpace[l] ?? 0,
         count: l,
-        // battle/simulator.ts: wall hit points and the archer's tower range bonus
-        hitPoints: 50_000 * l * (l + 1),
-        percent: Math.round(l * 4.5 * 10) / 10,
+        hitPoints: wallHitPoints(l),
+        percent: share((l * BALANCE.battle.wallTowerRangePct) / 100),
       }),
   },
   [BuildingType.COTTAGE]: {
@@ -76,8 +78,7 @@ const TEXT: Record<number, BuildingText> = {
   },
   [BuildingType.INN]: {
     summary: () => msg('buildingInfo.summary.inn', { gold: BALANCE.tavernRefreshGoldPerInnLevel }),
-    // services/heroes.ts: one offer per level (at most 10), heroes up to 5 levels per Inn level
-    effect: (l) => msg('buildingInfo.effect.inn', { count: Math.min(10, l), level: 5 * l }),
+    effect: (l) => msg('buildingInfo.effect.inn', { count: innOffers(l), level: innHeroMaxLevel(l) }),
   },
   [BuildingType.FEASTING_HALL]: {
     summary: () => msg('buildingInfo.summary.feastingHall'),
@@ -89,7 +90,7 @@ const TEXT: Record<number, BuildingText> = {
         count: BALANCE.rallySpotArmiesPerLevel,
         troops: BALANCE.rallySpotTroopsPerLevel,
         item: ref.item(WAR_ENSIGN),
-        percent: Math.round(BALANCE.warEnsignTroopBonus * 100),
+        percent: share(BALANCE.warEnsignTroopBonus),
       }),
     effect: (l) => msg('buildingInfo.effect.rallySpot', { count: l * BALANCE.rallySpotArmiesPerLevel, troops: l * BALANCE.rallySpotTroopsPerLevel }),
   },

@@ -24,4 +24,13 @@ describe(troopDescription.name, () => {
   it('refers to other troops by id', () => {
     expect(troopDescription(9)?.params).toMatchObject({ target: { ref: 'troop', id: 7 }, abatis: { ref: 'troop', id: 15 } });
   });
+
+  it('quotes the damage multipliers and the tower damage taken from BALANCE.battle', () => {
+    const { damage, towerDamageTaken } = BALANCE.battle;
+    expect(troopDescription(5)?.params?.multiplier).toBe(damage.pikemanVsMounted);
+    expect(troopDescription(6)?.params?.multiplier).toBe(damage.swordsmanVsPikeman);
+    expect(troopDescription(9)?.params?.multiplier).toBe(damage.mountedVsArcher);
+    expect(troopDescription(10)?.params?.multiplier).toBe(damage.mountedVsArcher);
+    expect(troopDescription(16)?.params?.percent).toEqual({ share: towerDamageTaken });
+  });
 });

@@ -2,7 +2,16 @@
 
 import { z } from 'zod';
 import { createSelectSchema } from 'drizzle-zod';
-import { ArmyPresetSchema, CastleSignSchema, FlowActionSchema, FlowSchema, GrantContentsSchema, MessageSchema, ResearchStateSchema } from '@marchlands/core';
+import {
+  ArmyPresetSchema,
+  CastleSignSchema,
+  FlowActionSchema,
+  FlowSchema,
+  GrantContentsSchema,
+  MessageSchema,
+  ResearchStateSchema,
+  ItemId,
+} from '@marchlands/core';
 import { accounts } from '@marchlands/db/schema';
 import { Ms, zId } from './common.ts';
 import { ArmyBean, BuffBean, CityBean, HeroBean, ItemCount, PlayerInfo } from './beans.ts';
@@ -50,7 +59,7 @@ export const ZoneStats = z
     playerCount: z.number().int(),
     castleCount: z.number().int(),
     openFlats: z.number().int(),
-    rate: z.number().int().describe('percent of occupiable tiles that are taken'),
+    settled: z.number().describe('share of occupiable tiles that are taken (0-1)'),
   })
   .meta({ id: 'ZoneStats' });
 export type ZoneStats = z.infer<typeof ZoneStats>;
@@ -85,7 +94,7 @@ export const ChangeGenderBody = z.object({ sex: z.number().int().min(0).max(1).d
 export const TutorialStepBody = z.object({ step: z.number().int().min(0) });
 export const FurloughBody = z.object({ days: z.number().int(), cityId: zId.describe('the city whose gold pays') });
 export const TruceBody = z.object({
-  itemId: z.string().default('player.peace.1'),
+  itemId: z.string().default(ItemId.TRUCE_AGREEMENT),
   cityId: zId.describe('the city whose gold pays when no Truce Agreement is owned'),
 });
 export const BookmarkBody = z.object({ tileId: zId });

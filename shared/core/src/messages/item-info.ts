@@ -5,7 +5,7 @@ export const ITEM_INFO_MESSAGES = {
   'period.hours': ['count'],
   'period.minutes': ['count'],
 
-  // ---- speed-ups (construction.ts SPEEDUP_ITEMS) ----
+  // ---- speed-ups (BALANCE.items.speedups) ----
   /** a fixed cut, `time`: a period */
   'speedup.time': ['time'],
   /** a random cut between `min` and `count` hours */
@@ -20,9 +20,9 @@ export const ITEM_INFO_MESSAGES = {
   // ---- hero items ----
   /** loyalty medal: `amount` loyalty, up to `max` */
   loyalty: ['amount', 'max'],
-  /** attribute item (HERO_ATTRIBUTE_BUFF): `stat`, `percent`, `period` */
+  /** attribute item (BALANCE.items.heroAttributeBuff): `stat`, `percent`, `period` */
   heroStat: ['stat', 'percent', 'period'],
-  /** experience book: `percent` of the next level, at least `min` (experienceItemGain) */
+  /** experience book: `percent` of the next level, at least `min` (BALANCE.items.experienceBooks) */
   'experience.share': ['percent', 'min'],
   /** experience book worth a full level, at least `min` */
   'experience.level': ['min'],
@@ -44,13 +44,13 @@ export const ITEM_INFO_MESSAGES = {
   chest: ['key', 'contents'],
   /** chest key: `chest` (item) */
   key: ['chest'],
-  /** medal box: `min`–`max` of each of `medals` (items) (MEDAL_BOXES) */
+  /** medal box: `min`–`max` of each of `medals` (items) (BALANCE.items.medalBoxes) */
   medalBox: ['min', 'max', 'medals'],
   randomBox: [],
-  /** Civil Code (CIVIL_CODE): `percent` of the maximum population, at least `min` */
+  /** Civil Code (BALANCE.items.civilCode): `percent` of the maximum population, at least `min` */
   civilCode: ['percent', 'min'],
   cureInjured: [],
-  /** hero box (HERO_BOX_QUALITY): `level`, `minStat`, `building`: the Feasting Hall */
+  /** hero box (BALANCE.items.heroBoxes): `level`, `minStat`, `building`: the Feasting Hall */
   heroBox: ['level', 'minStat', 'building'],
   /** City Teleporter, `period`: BALANCE.teleportCooldownMs */
   teleporter: ['period'],

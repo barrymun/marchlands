@@ -8,25 +8,13 @@ import { BALANCE } from './balance.ts';
 import { BuildingType, TROOP_ID_BY_KEY, type TroopKey } from './constants.ts';
 import { SPEEDUP_ITEMS } from './construction.ts';
 import { ITEMS, itemConfig } from './data/index.ts';
-import { experienceItemGain, LOYALTY_MEDALS } from './heroes.ts';
-import {
-  BATCH_SPEEDUP_SHARE,
-  CIVIL_CODE,
-  HERO_ATTRIBUTE_BUFF,
-  HERO_ATTRIBUTE_ITEMS,
-  HERO_BOX_QUALITY,
-  itemEffect,
-  itemGoldPrice,
-  MEDAL_BOX_COUNT,
-  MEDAL_BOXES,
-  medalId,
-  medalOdds,
-  type GrantContents,
-} from './items.ts';
-import { msg, ref, type Message } from './messages/index.ts';
+import { experienceItemGain } from './heroes.ts';
+import { HERO_ATTRIBUTE_ITEMS, heroBoxQuality, itemEffect, itemGoldPrice, medalId, medalOdds, type GrantContents } from './items.ts';
+import { msg, ref, share, type Message } from './messages/index.ts';
 import { QUEST_CATALOGUE } from './quests.ts';
 import { seededRng } from './rng.ts';
 import { DAY, HOUR, MINUTE } from './time.ts';
+import { ItemId } from './item-ids.ts';
 
 export interface ItemInfo {
   id: string;
@@ -43,7 +31,8 @@ export interface ItemInfo {
   price: number;
 }
 
-const pct = (share: number) => Math.round(share * 100);
+/** A share param (0.3, shown as 30%). */
+const pct = share;
 
 /** A length of time as a phrase: whole days, else hours, else minutes. */
 function period(ms: number): Message {
@@ -89,8 +78,8 @@ function experienceDescription(id: string): Message | undefined {
   const min = experienceItemGain(id, 0);
   if (!min) return undefined;
   const big = 1e9;
-  const share = experienceItemGain(id, big) / big;
-  return share >= 1 ? msg('itemInfo.experience.level', { min }) : msg('itemInfo.experience.share', { percent: pct(share), min });
+  const fraction = experienceItemGain(id, big) / big;
+  return fraction >= 1 ? msg('itemInfo.experience.level', { min }) : msg('itemInfo.experience.share', { percent: pct(fraction), min });
 }
 
 const noEffect = (): Pick<ItemInfo, 'description' | 'use' | 'howTo'> => ({ description: msg('itemInfo.noEffect'), use: 'none' });
@@ -101,19 +90,19 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
   if (speedup) return { description: speedup, use: 'elsewhere', howTo: HOW_TO.speedup };
   if (e?.kind === 'command' && (e.command === 'troops.speedup' || e.command === 'fortifications.speedup')) {
     const code = e.command === 'troops.speedup' ? 'itemInfo.speedup.troopBatch' : 'itemInfo.speedup.fortBatch';
-    return { description: msg(code, { percent: pct(BATCH_SPEEDUP_SHARE) }), use: 'elsewhere', howTo: howToFor(e.command) };
+    return { description: msg(code, { percent: pct(BALANCE.items.batchSpeedupShare) }), use: 'elsewhere', howTo: howToFor(e.command) };
   }
-  if (LOYALTY_MEDALS[id])
+  if (BALANCE.items.medalLoyalty[id])
     return {
-      description: msg('itemInfo.loyalty', { amount: LOYALTY_MEDALS[id], max: BALANCE.heroMaxLoyalty }),
+      description: msg('itemInfo.loyalty', { amount: BALANCE.items.medalLoyalty[id], max: BALANCE.heroMaxLoyalty }),
       use: 'elsewhere',
       howTo: HOW_TO['heroes.useItem'],
     };
   if (HERO_ATTRIBUTE_ITEMS[id]) {
     const description = msg('itemInfo.heroStat', {
       stat: ref.stat(HERO_ATTRIBUTE_ITEMS[id]),
-      percent: pct(HERO_ATTRIBUTE_BUFF.bonus),
-      period: period(HERO_ATTRIBUTE_BUFF.durationMs),
+      percent: pct(BALANCE.items.heroAttributeBuff.bonus),
+      period: period(BALANCE.items.heroAttributeBuff.durationMs),
     });
     return { description, use: 'elsewhere', howTo: HOW_TO['heroes.useItem'] };
   }
@@ -138,18 +127,18 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
       const toCity = !!(e.resources || e.troops);
       const description = msg(toCity ? 'itemInfo.grantCity' : 'itemInfo.grant', { contents: contents(e) });
       // the Newbies Package is never sold or won: every new player gets one (player.createPlayer)
-      if (id === 'player.box.present.2') return { description, use: 'direct', howTo: msg('itemInfo.howTo.newbies') };
+      if (id === ItemId.NEWBIES_PACKAGE) return { description, use: 'direct', howTo: msg('itemInfo.howTo.newbies') };
       return { description, use: 'direct' };
     }
     case 'chest':
       return { description: msg('itemInfo.chest', { key: ref.item(e.key), contents: contents(e.contents()) }), use: 'direct' };
     case 'box':
-      if (MEDAL_BOXES[id])
+      if (BALANCE.items.medalBoxes[id])
         return {
           description: msg('itemInfo.medalBox', {
-            min: MEDAL_BOX_COUNT.min,
-            max: MEDAL_BOX_COUNT.max,
-            medals: MEDAL_BOXES[id].map((l) => ref.item(medalId(l))),
+            min: BALANCE.items.medalBoxCount.min,
+            max: BALANCE.items.medalBoxCount.max,
+            medals: BALANCE.items.medalBoxes[id].map((l) => ref.item(medalId(l))),
           }),
           use: 'direct',
         };
@@ -157,11 +146,11 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
     case 'special':
       switch (e.handler) {
         case 'civilCode':
-          return { description: msg('itemInfo.civilCode', { percent: pct(CIVIL_CODE.share), min: CIVIL_CODE.min }), use: 'direct' };
+          return { description: msg('itemInfo.civilCode', { percent: pct(BALANCE.items.civilCode.share), min: BALANCE.items.civilCode.min }), use: 'direct' };
         case 'cureInjured':
           return { description: msg('itemInfo.cureInjured'), use: 'direct' };
         case 'heroBox': {
-          const q = HERO_BOX_QUALITY[id] ?? { level: 10, minStat: 40 };
+          const q = heroBoxQuality(id);
           return {
             description: msg('itemInfo.heroBox', { level: q.level, minStat: q.minStat, building: ref.building(BuildingType.FEASTING_HALL) }),
             use: 'direct',
@@ -171,9 +160,9 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
       break;
     case 'command': {
       const text: Record<string, Message> = {
-        'consume.move.1': msg('itemInfo.teleporter', { period: period(BALANCE.teleportCooldownMs) }),
-        'hero.reset.1': msg('itemInfo.holyWater'),
-        'player.peace.1': msg('itemInfo.truce', { period: period(BALANCE.truceDurationMs) }),
+        [ItemId.CITY_TELEPORTER]: msg('itemInfo.teleporter', { period: period(BALANCE.teleportCooldownMs) }),
+        [ItemId.HOLY_WATER]: msg('itemInfo.holyWater'),
+        [ItemId.TRUCE_AGREEMENT]: msg('itemInfo.truce', { period: period(BALANCE.truceDurationMs) }),
       };
       if (text[id]) return { description: text[id], use: 'elsewhere', howTo: howToFor(e.command) };
       return { description: msg('itemInfo.notUsable'), use: 'none' };

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { msg, ref } from '@marchlands/core';
+import { msg, ref, share } from '@marchlands/core';
 import { gameRefName, paramText, translateMessage } from '@/lib/messages';
 import { i18n } from '@/lib/i18n';
 
@@ -36,6 +36,19 @@ describe(paramText.name, () => {
     expect(paramText(['a', 2, ref.resource('wood')])).toBe('a, 2, lumber');
     await i18n.changeLanguage('ja-JP');
     expect(paramText(['a', 'b'])).toBe('a、b');
+  });
+
+  it('shows a share as a percent with up to one decimal, in the locale', async () => {
+    expect(paramText(share(0.25))).toBe('25%');
+    expect(paramText(share(0.125))).toBe('12.5%');
+    expect(paramText(share(0.18999999999999995))).toBe('19%');
+    await i18n.changeLanguage('ja-JP');
+    expect(paramText(share(0.25))).toBe('25%');
+  });
+
+  it('words a message with a share param', () => {
+    expect(translateMessage(msg('buff.troopAttack', { percent: share(0.2) }))).toBe('+20% troop attack');
+    expect(translateMessage(msg('techInfo.effect.construction', { pct: share(0.19) }))).toBe('−19% build, demolish and fortification time');
   });
 
   it('shows a duration by its two largest units, in the locale', async () => {

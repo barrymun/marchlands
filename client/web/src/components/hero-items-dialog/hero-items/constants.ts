@@ -12,6 +12,3 @@ export const ATTR_LABEL = {
     return i18n.t('common:heroAttributes.intelligence');
   },
 };
-
-/** The experience items, smallest first. */
-export const EXPERIENCE_ITEMS = ['player.experience.1.a', 'player.experience.1.b', 'player.experience.1.c'];

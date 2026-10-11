@@ -29,6 +29,7 @@ import {
   msg,
   ref,
   dur,
+  SpeedupId,
 } from '@marchlands/core';
 import { loadBundle, mayorOf, mayorStats, openOwnCity, settleAndReport, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -156,10 +157,10 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
   const end = r.endTime!;
   const left = Math.max(0, end - ctx.now);
   let reduce: number;
-  if (itemId === 'free.speed') {
+  if (itemId === SpeedupId.FREE) {
     if (left > scaled(BALANCE.freeSpeedupMs)) throw new GameError(msg('common.freeSpeedupTooEarly', { time: dur(scaled(BALANCE.freeSpeedupMs)) }), -99);
     reduce = left;
-  } else if (itemId === 'gold.speed') {
+  } else if (itemId === SpeedupId.GOLD) {
     const gold = goldForSpeedup(left);
     spendGold(b.city, gold);
     ctx.stat(playerId, cityId, { 'spent.speedups.gold': gold });

@@ -55,6 +55,7 @@ import {
   ref,
   type Message,
   WAR_ENSIGN_DESC,
+  ItemId,
 } from '@marchlands/core';
 import { armies, cities, heroes, tiles } from '@marchlands/db';
 import { openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
@@ -223,7 +224,7 @@ function battleBonuses(p: PlayerRow, now: number): { bonuses?: { desc: Message; 
   return list.length ? { bonuses: list } : {};
 }
 
-const WAR_ENSIGN = 'player.troop.1.a';
+const WAR_ENSIGN = ItemId.WAR_ENSIGN;
 
 /**
  * (marchlands) The attacker's item bonuses for its report: battleBonuses, plus the War Ensign when the army is

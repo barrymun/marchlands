@@ -10,7 +10,7 @@ import { TimerBar } from '@/components/timer-bar/timer-bar';
 import { CostList } from '@/components/cost-list/cost-list';
 import { Requirements } from '@/components/requirements/requirements';
 import { useCommand } from '@/hooks/use-game';
-import { fmtExact } from '@/lib/format';
+import { fmtExact, percent } from '@/lib/format';
 import { techName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { STATUS_DONE } from '@/lib/tones';
@@ -39,7 +39,7 @@ export function ResearchPanel({ city }: { city: CityBean }) {
   }
   const mayor = city.heros.find((h) => h.status === HeroStatus.MAYOR);
   const townHall = buildingLevel(city.buildings, BuildingType.TOWN_HALL);
-  const mayorCut = mayor ? Math.round((1 - heroTimeMultiplier(heroStratagem(mayor), BALANCE.heroTimeFloor.research)) * 1000) / 10 : 0;
+  const mayorCut = mayor ? percent(1 - heroTimeMultiplier(heroStratagem(mayor), BALANCE.heroTimeFloor.research), 1) : '';
   const have = {
     gold: city.resource.gold,
     food: city.resource.food.amount,

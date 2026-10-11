@@ -8,6 +8,7 @@ import researchRows from './legacy/research.json' with { type: 'json' };
 import troopRows from './legacy/troops.json' with { type: 'json' };
 import itemRows from './legacy/items.json' with { type: 'json' };
 import questRows from './legacy/quests.json' with { type: 'json' };
+import { ItemId } from '../item-ids.ts';
 
 export interface Prereq {
   id: number;
@@ -167,7 +168,7 @@ export const isRemovedItem = (id: string) => REMOVED_ITEMS.includes(id) || REMOV
 const EXTRA_ITEMS: ItemConfig[] = [
   {
     legacyId: 0,
-    id: 'player.reduce.troops.upkeep.7',
+    id: ItemId.VESTAS_GRAND_BLESSING,
     name: "Vesta's Grand Blessing",
     cost: 0,
     buyable: false,
@@ -176,10 +177,10 @@ const EXTRA_ITEMS: ItemConfig[] = [
     dayLimit: 0,
     rarity: 0,
   },
-  { legacyId: 0, id: 'player.reduce.troops.cost.1', name: "Quartermaster's Seal", cost: 0, buyable: false, canGamble: false, type: 4, dayLimit: 0, rarity: 0 },
+  { legacyId: 0, id: ItemId.QUARTERMASTERS_SEAL, name: "Quartermaster's Seal", cost: 0, buyable: false, canGamble: false, type: 4, dayLimit: 0, rarity: 0 },
   {
     legacyId: 0,
-    id: 'player.reduce.troops.cost.7',
+    id: ItemId.QUARTERMASTERS_CHARTER,
     name: "Quartermaster's Charter",
     cost: 0,
     buyable: false,

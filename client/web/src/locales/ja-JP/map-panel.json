@@ -56,7 +56,7 @@
     "title": "{{city}} の保有領地",
     "none": "まだありません。領地を攻撃して占領しましょう（市役所レベルまで）。",
     "row": "{{type}} Lv {{level}}",
-    "bonus": "{{resource}} +{{bonus}}%"
+    "bonus": "{{resource}} +{{bonus}}"
   },
   "medalOdds": {
     "one": "勝利時: {{chance}}の確率で{{medal}} メダル。",
@@ -72,6 +72,6 @@
     "button": "Lv {{level}}にアップグレード · {{gold}} 金",
     "notEnoughGold": "{{city}} の金が足りません。",
     "npcHint": "部隊・防御施設・城壁・英雄・略奪できる資源がすべてレベル{{level}}に成長し、全戦力で初期化されます。",
-    "valleyHint": "保有時: 生産 +{{from}}% → +{{to}}%。レベルに応じて守備隊も強くなります。"
+    "valleyHint": "保有時: 生産 +{{from}} → +{{to}}。レベルに応じて守備隊も強くなります。"
   }
 }

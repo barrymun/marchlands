@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { CityBean } from '@marchlands/api-client';
 import { TileType, valleyBonus } from '@marchlands/core';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
-import { fmt, fmtExact } from '@/lib/format';
+import { fmt, fmtExact, percent } from '@/lib/format';
 
 /** Pay gold to raise an unowned valley one level (bigger bonus once held, stronger garrison). */
 export function ValleyUpgrade({
@@ -23,7 +23,7 @@ export function ValleyUpgrade({
         {t(tile.type === TileType.NPC ? 'valleyUpgrade.maxNpc' : 'valleyUpgrade.maxValley', { level: tile.level })}
       </p>
     );
-  const pct = (l: number) => Math.round(valleyBonus(tile.type, l) * 100);
+  const pct = (l: number) => percent(valleyBonus(tile.type, l));
   const short = city.resource.gold < tile.upgradeCost;
   return (
     <div className="grid gap-1">

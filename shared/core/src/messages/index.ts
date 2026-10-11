@@ -8,7 +8,7 @@
 //
 // A param is a number, a string (names the player chose, coordinates), a nested message, a reference to game
 // data the client names itself (troops, buildings, items …), a length of time (`dur(ms)`, real milliseconds, which
-// the client shows as a duration), or a list of these.
+// the client shows as a duration), a share (`share(0.25)`, which the client shows as a percent: 25%), or a list of these.
 
 import { AUTH_MESSAGES } from './auth.ts';
 import { COMMON_MESSAGES } from './common.ts';
@@ -96,7 +96,12 @@ export interface MsgDuration {
   duration: number;
 }
 
-export type MsgParam = string | number | boolean | Message | GameRef | MsgDuration | MsgParam[];
+/** A share (0.25); the client shows it as a percent in the player's locale (25%). */
+export interface MsgShare {
+  share: number;
+}
+
+export type MsgParam = string | number | boolean | Message | GameRef | MsgDuration | MsgShare | MsgParam[];
 export interface Message {
   code: MsgCode;
   params?: Record<string, MsgParam>;
@@ -122,6 +127,9 @@ export const msgLogText = (m: Message) => (m.params ? `${m.code} ${JSON.stringif
 
 /** A length of time (real milliseconds) as a param. */
 export const dur = (ms: number): MsgDuration => ({ duration: Math.max(0, Math.round(ms)) });
+
+/** A share (0.25 for 25%) as a param, shown by the client as a percent. Never send a percent number (25). */
+export const share = (x: number): MsgShare => ({ share: x });
 
 /** Game data references. */
 export const ref = {

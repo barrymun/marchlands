@@ -5,6 +5,7 @@
 // Math.fround in the same left-to-right order so results match the original regression data.
 // Troop indices are troop type id - 2 (0 worker ... 11 catapult); fort indices are id - 14.
 
+import { BALANCE } from '../balance.ts';
 import type { Rng } from '../rng.ts';
 
 const f = Math.fround;
@@ -146,10 +147,11 @@ const TOWER_TYPE_ID = 14;
 
 /** damageModifiers[actor][target]; 0 means x1. Column 14 is the archer tower. */
 function damageModifier(actor: number, target: number): number {
-  if (target === TOWER_TYPE_ID) return f(0.3);
-  if (actor === 3 && (target === 7 || target === 8)) return f(1.8);
-  if (actor === 4 && target === 3) return f(1.1);
-  if ((actor === 7 || actor === 8) && target === 5) return f(1.2);
+  const { damage, towerDamageTaken } = BALANCE.battle;
+  if (target === TOWER_TYPE_ID) return f(towerDamageTaken);
+  if (actor === 3 && (target === 7 || target === 8)) return f(damage.pikemanVsMounted);
+  if (actor === 4 && target === 3) return f(damage.swordsmanVsPikeman);
+  if ((actor === 7 || actor === 8) && target === 5) return f(damage.mountedVsArcher);
   return 0;
 }
 
@@ -168,11 +170,12 @@ function research(r: Partial<ResearchStats>): ResearchStats {
 const cdiv = (a: number, b: number) => Math.trunc(a / b); // C integer division
 
 function modifyStats(base: TroopStat[], r: ResearchStats, intel: number, atkMod: number, defMod: number, lifeMod: number, fixes: boolean) {
+  const pct = BALANCE.battle.researchPct;
   for (let i = 0; i < 12; i++) {
     // max((float)(1000 - ((iw*5+100)/100)*((100+intel)/100)*defense*defMod)/1000, 0.5)
     // the original truncates (integer division), so Iron Working has no effect below level 20;
     // with `fixes` it gives the intended +5% per level
-    const iwFactor = fixes ? f((r.ironWorking * 5 + 100) / 100) : cdiv(r.ironWorking * 5 + 100, 100);
+    const iwFactor = fixes ? f((r.ironWorking * pct.defence + 100) / 100) : cdiv(r.ironWorking * pct.defence + 100, 100);
     const intelFactor = f(f(100 + intel) / 100);
     let v = f(iwFactor * intelFactor);
     v = f(v * base[i].defense);
@@ -182,23 +185,28 @@ function modifyStats(base: TroopStat[], r: ResearchStats, intel: number, atkMod:
     base[i].defense = f(v > 0.5 ? v : 0.5);
   }
   for (const i of GROUND) {
-    base[i].life = f(f(f(base[i].life * (r.medicine * 5 + 100)) * lifeMod) / 100);
+    base[i].life = f(f(f(base[i].life * (r.medicine * pct.life + 100)) * lifeMod) / 100);
     base[i].attack = f(base[i].attack * atkMod);
-    base[i].speed = f(f(base[i].speed * (r.compass * 10 + 100)) / 100);
+    base[i].speed = f(f(base[i].speed * (r.compass * pct.footSpeed + 100)) / 100);
   }
   for (const i of MECH) {
     base[i].life = f(base[i].life * lifeMod);
     base[i].attack = f(base[i].attack * atkMod);
-    base[i].speed = f(f(base[i].speed * (r.horsebackRiding * 5 + 100)) / 100);
+    base[i].speed = f(f(base[i].speed * (r.horsebackRiding * pct.mountedSpeed + 100)) / 100);
   }
   for (const i of RANGED) {
-    base[i].range = f(f(base[i].range * (r.archery * 5 + 100)) / 100);
+    base[i].range = f(f(base[i].range * (r.archery * pct.range + 100)) / 100);
   }
   for (const i of MOUNTED) {
     base[i].life = f(base[i].life * lifeMod);
     base[i].attack = f(base[i].attack * atkMod);
-    base[i].speed = f(f(base[i].speed * (r.horsebackRiding * 5 + 100)) / 100);
+    base[i].speed = f(f(base[i].speed * (r.horsebackRiding * pct.mountedSpeed + 100)) / 100);
   }
+}
+
+/** A wall's hit points at `level`. */
+export function wallHitPoints(level: number): number {
+  return BALANCE.battle.wallHitPointsFactor * level * (level + 1);
 }
 
 const value = (g: Group) => f(g.stat.attack * f(g.eff));
@@ -229,19 +237,20 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
   const fortStats = BASE_FORT_STATS.map((s) => ({ ...s }));
   {
     const t = fortStats[2];
-    t.life = f(f((defResearch.medicine * 5 + 100) * t.life) / 100);
+    const pct = BALANCE.battle.researchPct;
+    t.life = f(f((defResearch.medicine * pct.life + 100) * t.life) / 100);
     t.attack = f(t.attack * defModA);
     // max(1 - (iw*5+100)*(100+intel)*defense*defMod/10000000, 0.5)
-    let v = f((defResearch.ironWorking * 5 + 100) * f(100 + defIntel));
+    let v = f((defResearch.ironWorking * pct.defence + 100) * f(100 + defIntel));
     v = f(v * t.defense);
     v = f(v * defModD);
     v = f(v / 10_000_000);
     v = f(1 - v);
     t.defense = f(v > 0.5 ? v : 0.5);
-    t.range = f((t.range * (defResearch.archery * 5 + wallLevel * 4.5 + 100)) / 100);
+    t.range = f((t.range * (defResearch.archery * pct.range + wallLevel * BALANCE.battle.wallTowerRangePct + 100)) / 100);
   }
 
-  let wallHp = 50_000 * wallLevel * (wallLevel + 1);
+  let wallHp = wallHitPoints(wallLevel);
   let fieldSize = 0;
   const atkTroops = troopArray(atk.troops);
   const defTroops = troopArray(def.troops);
@@ -262,9 +271,9 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
   const abatisDieRate = cdiv(abatisCount, 10);
   const logDieRate = cdiv(logCount, 10);
   const maxRockDieRate = cdiv(rockCount, 10);
-  const trapKillPower = f(def.trapKillPower ?? 1.25);
-  const logKillPower = f(def.logKillPower ?? 1.25);
-  const rockKillPower = f(def.rockKillPower ?? 1.25);
+  const trapKillPower = f(def.trapKillPower ?? BALANCE.battle.fortKillPower.trap);
+  const logKillPower = f(def.logKillPower ?? BALANCE.battle.fortKillPower.rollingLog);
+  const rockKillPower = f(def.rockKillPower ?? BALANCE.battle.fortKillPower.trebuchet);
 
   let attackerAlive = false;
   let defenderAlive = false;

@@ -1,5 +1,6 @@
 export * from './balance.ts';
 export * from './constants.ts';
+export * from './item-ids.ts';
 export * from './construction.ts';
 export * from './data/index.ts';
 export * from './economy.ts';

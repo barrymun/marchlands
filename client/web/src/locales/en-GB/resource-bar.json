@@ -2,8 +2,8 @@
   "amount": "{{resource}}: {{amount}}",
   "amountMax": "{{resource}}: {{amount}} / {{max}}",
   "storageFull": "(storage full: production paused)",
-  "itemBonus": "Items +{{percent}}%",
-  "population": "Population · {{idle}} idle · {{efficiency}}% labour efficiency",
+  "itemBonus": "Items +{{percent}}",
+  "population": "Population · {{idle}} idle · {{efficiency}} labour efficiency",
   "gold": {
     "baseTax": "Base tax",
     "taxSold": "Tax {{rate}}% (sold output)",
@@ -13,9 +13,9 @@
     "base": "Base",
     "fields": "Fields",
     "fieldsWorkRate": "Fields ({{rate}}% work rate)",
-    "technology": "Technology +{{percent}}%",
-    "mayor": "Mayor {{name}} +{{percent}}%",
-    "valleys": "Valleys +{{percent}}%",
+    "technology": "Technology +{{percent}}",
+    "mayor": "Mayor {{name}} +{{percent}}",
+    "valleys": "Valleys +{{percent}}",
     "upkeep": "Troop upkeep",
     "tax": "Tax (sold for gold)"
   },

@@ -15,7 +15,7 @@
   "catapult": "The longest-range, hardest-hitting siege engine; devastating against walls and ranged units, but slow and fragile up close.",
   "trap": "Hidden pits: when attackers reach the last stretch before the walls, traps kill some of every group there and are used up. Takes {{space}} wall space.",
   "abatis": "Spiked barricades that only hit {{cavalry}} and {{cataphract}} units approaching the walls. Takes {{space}} wall space.",
-  "archerTower": "Archers on the walls: they shoot attackers from range (the range grows with the {{walls}} level) and take only {{percent}}% damage. Improved by the research {{techs}}. Takes {{space}} wall space.",
+  "archerTower": "Archers on the walls: they shoot attackers from range (the range grows with the {{walls}} level) and take only {{percent}} damage. Improved by the research {{techs}}. Takes {{space}} wall space.",
   "rollingLog": "Logs rolled down on the strongest group of foot troops near the walls; used up. Takes {{space}} wall space.",
   "trebuchet": "Hurls rocks at the strongest attacking group within long range; used up. Takes {{space}} wall space."
 }

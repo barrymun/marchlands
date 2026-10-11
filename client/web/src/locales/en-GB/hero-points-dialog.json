@@ -10,7 +10,7 @@
   },
   "remove": "Remove {{label}}",
   "add": "Add {{label}}",
-  "asMayor": "As mayor: {{rate}} production (+{{pct}}%)",
+  "asMayor": "As mayor: {{rate}} production (+{{pct}})",
   "usesHolyWater": "uses 1 Holy Water ({{owned}} owned)",
   "holyWaterGold": "{{gold}} gold for a Holy Water",
   "reset": "Reset",

@@ -10,14 +10,12 @@ import {
   itemGoldPrice,
   heroBuffAmount,
   GameError,
-  HERO_ATTRIBUTE_BUFF,
   HERO_ATTRIBUTE_ITEMS,
   heroAwardCost,
   heroHireCost,
   tavernRefreshCost,
   heroPointCap,
   HeroStatus,
-  LOYALTY_MEDALS,
   levelUpAll,
   heroAtMaxLevel,
   heroBuffBase,
@@ -32,9 +30,13 @@ import {
   type GeneratedHero,
   HeroBuffId,
   heroBuffDesc,
+  innOffers,
   msg,
   ref,
   TechType,
+  loyaltyAfterMedal,
+  heroAttributeBuffEnd,
+  ItemId,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
 import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
@@ -72,16 +74,24 @@ export async function clearTavern(ctx: Ctx, cityId: number) {
   await ctx.tx.delete(heroes).where(and(eq(heroes.cityId, cityId), eq(heroes.inTavern, true)));
 }
 
+/**
+ * The Inn's offers at `innLevel`, given the heroes it offers now: the ones it keeps, the ones it drops
+ * (it shrank), how many new heroes it adds, and the Inn level they are generated at (capped like the offers).
+ */
+export function tavernRefill<T>(current: readonly T[], innLevel: number) {
+  const offers = innOffers(innLevel);
+  const keep = current.slice(0, offers);
+  return { keep, drop: current.slice(offers), add: offers - keep.length, heroInnLevel: offers };
+}
+
 async function fillTavern(ctx: Ctx, b: CityBundle, regenerate: boolean) {
-  const inn = Math.min(10, buildingLevel(b.city.buildings, BuildingType.INN));
   if (regenerate) await clearTavern(ctx, b.city.id);
   const current = regenerate ? [] : await heroesOfCity(ctx, b.city.id, { tavern: true });
-  const keep = current.slice(0, inn);
-  const extra = current.slice(inn);
-  for (const h of extra) await ctx.tx.delete(heroes).where(eq(heroes.id, h.id));
-  const out = [...keep];
-  for (let i = keep.length; i < inn; i++) {
-    const g = createRandomHero(inn, ctx.rng);
+  const plan = tavernRefill(current, buildingLevel(b.city.buildings, BuildingType.INN));
+  for (const h of plan.drop) await ctx.tx.delete(heroes).where(eq(heroes.id, h.id));
+  const out = [...plan.keep];
+  for (let i = 0; i < plan.add; i++) {
+    const g = createRandomHero(plan.heroInnLevel, ctx.rng);
     const [row] = await ctx.tx
       .insert(heroes)
       .values({ ...heroValues(g), playerId: null, cityId: b.city.id, inTavern: true, createdAt: ctx.now })
@@ -238,11 +248,11 @@ export async function resetPoints(ctx: Ctx, playerId: number, heroId: number) {
   if (h.status !== HeroStatus.IDLE && h.status !== HeroStatus.MAYOR) throw new GameError(msg('hero.notIdle'), -80);
   const p = await getPlayer(ctx, playerId, { lock: true });
   let city = await openMayorCity(ctx, h);
-  if (itemCount(p, 'hero.reset.1') > 0) addItem(ctx, p, 'hero.reset.1', -1);
+  if (itemCount(p, ItemId.HOLY_WATER) > 0) addItem(ctx, p, ItemId.HOLY_WATER, -1);
   else {
     city ??= await openOwnCity(ctx, playerId, h.cityId);
-    spendGold(city.city, itemGoldPrice('hero.reset.1') ?? 0);
-    ctx.stat(playerId, city.city.id, { 'spent.items.gold': itemGoldPrice('hero.reset.1') ?? 0, 'items.used.hero.reset.1': 1 });
+    spendGold(city.city, itemGoldPrice(ItemId.HOLY_WATER) ?? 0);
+    ctx.stat(playerId, city.city.id, { 'spent.items.gold': itemGoldPrice(ItemId.HOLY_WATER) ?? 0, 'items.used.hero.reset.1': 1 });
   }
   Object.assign(h, { power: h.basePower, management: h.baseManagement, stratagem: h.baseStratagem, remainPoint: h.level });
   await saveHero(ctx, h);
@@ -384,23 +394,23 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     ctx.stat(playerId, city.city.id, { 'spent.items.gold': price, [`items.used.${itemId}`]: 1 });
     paidInGold = true;
   }
-  if (itemId.startsWith('player.experience.1.')) {
+  if (BALANCE.items.experienceBooks[itemId]) {
     if (heroAtMaxLevel(h)) throw new GameError(msg('hero.maxLevelNoExperience', { level: BALANCE.heroMaxLevel }), -99);
     const gain = experienceItemGain(itemId, h.upgradeExp);
     if (!gain) throw new GameError(msg('hero.invalidItem'), -99);
     if (!paidInGold) consumeItem(ctx, p, itemId);
     h.experience += gain;
-  } else if (LOYALTY_MEDALS[itemId]) {
+  } else if (BALANCE.items.medalLoyalty[itemId]) {
     if (itemCount(p, itemId) <= 0) throw new GameError(msg('common.insufficientItems'), -99);
     addItem(ctx, p, itemId, -1);
-    h.loyalty = Math.min(BALANCE.heroMaxLoyalty, h.loyalty + LOYALTY_MEDALS[itemId]);
+    h.loyalty = loyaltyAfterMedal(h.loyalty, itemId);
   } else if (HERO_ATTRIBUTE_ITEMS[itemId]) {
     const attr = HERO_ATTRIBUTE_ITEMS[itemId];
     if (!paidInGold) consumeItem(ctx, p, itemId);
     const amount = heroBuffAmount(heroBuffBase(h, attr));
     // (marchlands) stacks like the lord's item boosts: another use adds its time to what is left (orig: restarted it)
     const running = h.buffs.find((x) => x.id === attr && x.endTime > ctx.now);
-    const endTime = (running?.endTime ?? ctx.now) + HERO_ATTRIBUTE_BUFF.durationMs;
+    const endTime = heroAttributeBuffEnd(ctx.now, running?.endTime);
     h.buffs = [...h.buffs.filter((x) => x.id !== attr), { id: attr, desc: heroBuffDesc(attr), endTime, param: amount }];
     if (attr === HeroBuffId.POWER) h.powerBuffAdded = amount;
     if (attr === HeroBuffId.MANAGEMENT) h.managementBuffAdded = amount;

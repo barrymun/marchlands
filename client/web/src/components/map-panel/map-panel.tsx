@@ -26,7 +26,7 @@ import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add
 import { CityDialog } from '@/components/city-dialog/city-dialog';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { allOf } from '@/lib/query-keys';
-import { fmt } from '@/lib/format';
+import { fmt, percent } from '@/lib/format';
 import { tileName, zoneName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 import { placeName, relationGroup } from '@/components/map-panel/utils';
@@ -305,7 +305,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
             {[...city.fields]
               .sort((a, b) => b.level - a.level || a.type - b.type)
               .map((v) => {
-                const bonus = Math.round(valleyBonus(v.type, v.level) * 100);
+                const bonus = percent(valleyBonus(v.type, v.level));
                 const res = VALLEY_RESOURCE[v.type]?.[0];
                 return (
                   <div key={v.id} className="flex items-center justify-between gap-2 rounded-md px-2 py-1 hover:bg-muted">

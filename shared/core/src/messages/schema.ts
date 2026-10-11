@@ -9,9 +9,12 @@ export const GameRefSchema = z.object({ ref: z.enum(GAME_REF_KINDS), id: z.union
 /** A length of time in real milliseconds, shown by the client as a duration. */
 export const MsgDurationSchema = z.object({ duration: z.number() }).meta({ id: 'MsgDuration' });
 
-/** A value inside a message: text the player wrote, a number, game data, a duration, another message, or a list of these. */
+/** A share (0.25), shown by the client as a percent (25%). */
+export const MsgShareSchema = z.object({ share: z.number() }).meta({ id: 'MsgShare' });
+
+/** A value inside a message: text the player wrote, a number, game data, a duration, a share, another message, or a list of these. */
 export const MsgParamSchema: z.ZodType<MsgParam> = z
-  .lazy(() => z.union([z.string(), z.number(), z.boolean(), GameRefSchema, MsgDurationSchema, MessageSchema, z.array(MsgParamSchema)]))
+  .lazy(() => z.union([z.string(), z.number(), z.boolean(), GameRefSchema, MsgDurationSchema, MsgShareSchema, MessageSchema, z.array(MsgParamSchema)]))
   .meta({ id: 'MsgParam' }) as z.ZodType<MsgParam>;
 
 /** What the server tells a player: a code (`hero.locked`) and its params; the client words it in the player's language. */

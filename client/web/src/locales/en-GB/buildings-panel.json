@@ -48,6 +48,6 @@
   },
   "mayor": {
     "none": "No mayor: appoint one with high Politics in the Heroes tab to build faster.",
-    "hint": "Times include mayor {{name}}'s Politics {{politics}}: −{{cut}}%. A mayor with higher Politics builds faster."
+    "hint": "Times include mayor {{name}}'s Politics {{politics}}: −{{cut}}. A mayor with higher Politics builds faster."
   }
 }

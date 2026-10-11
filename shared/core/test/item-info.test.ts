@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, HOUR, ITEM_CATEGORY_IDS, ITEM_INFO, ITEMS, itemInfo, medalSources } from '../src/index.ts';
+import { BALANCE, HOUR, ITEM_CATEGORY_IDS, ITEM_INFO, ITEMS, itemInfo, medalSources, ItemId } from '../src/index.ts';
 
 describe(itemInfo.name, () => {
   it('describes every item with an itemInfo message, and its category by id', () => {
@@ -17,31 +17,33 @@ describe(itemInfo.name, () => {
   });
 
   it('nests the buff description and the period', () => {
-    expect(itemInfo('player.resinc.1.b')!.description).toEqual({
+    expect(itemInfo(ItemId.IRON_RAKE)!.description).toEqual({
       code: 'itemInfo.buff',
       params: {
-        effect: { code: 'buff.production', params: { resource: { ref: 'resource', id: 'food' }, percent: Math.round(BALANCE.resourceBuffBonus * 100) } },
+        effect: { code: 'buff.production', params: { resource: { ref: 'resource', id: 'food' }, percent: { share: BALANCE.resourceBuffBonus } } },
         period: { code: 'itemInfo.period.days', params: { count: 7 } },
       },
     });
   });
 
   it('derives speed-ups from what they cut', () => {
-    expect(itemInfo('consume.2.a')!.description).toEqual({
+    expect(itemInfo(ItemId.BEGINNER_GUIDELINES)!.description).toEqual({
       code: 'itemInfo.speedup.time',
       params: { time: { code: 'itemInfo.period.minutes', params: { count: 15 } } },
     });
-    expect(itemInfo('consume.2.c.1')!.description).toEqual({ code: 'itemInfo.speedup.hours', params: { min: 10, count: 30 } });
-    expect(itemInfo('consume.2.d')!.description).toEqual({ code: 'itemInfo.speedup.percent', params: { percent: 30 } });
-    expect(itemInfo('player.troop.1.b')!.description).toEqual({ code: 'itemInfo.speedup.troopBatch', params: { percent: 30 } });
+    expect(itemInfo(ItemId.MASTER_GUIDELINES)!.description).toEqual({ code: 'itemInfo.speedup.hours', params: { min: 10, count: 30 } });
+    expect(itemInfo(ItemId.ULTIMATE_GUIDELINES)!.description).toEqual({ code: 'itemInfo.speedup.percent', params: { percent: { share: 0.3 } } });
+    expect(itemInfo(ItemId.NAPOLEONS_DIARY)!.description).toEqual({ code: 'itemInfo.speedup.troopBatch', params: { percent: { share: 0.3 } } });
   });
 
   it('quotes cooldowns from BALANCE and refers to items by id', () => {
-    expect(itemInfo('consume.move.1')!.description.params?.period).toEqual({
+    expect(itemInfo(ItemId.CITY_TELEPORTER)!.description.params?.period).toEqual({
       code: 'itemInfo.period.hours',
       params: { count: BALANCE.teleportCooldownMs / HOUR },
     });
-    expect(itemInfo('player.box.special.2')!.description.params?.medals).toEqual([4, 5, 6].map((l) => ({ ref: 'item', id: `hero.loyalty.${l}` })));
+    expect(itemInfo(ItemId.MEDIUM_MEDAL_BOX)!.description.params?.medals).toEqual(
+      [ItemId.HONOUR_MEDAL, ItemId.COURAGE_MEDAL, ItemId.WISDOM_MEDAL].map((id) => ({ ref: 'item', id })),
+    );
   });
 });
 
@@ -60,6 +62,6 @@ describe(medalSources.name, () => {
       expect(ITEMS.some((i) => i.id === c.id)).toBe(true);
       expect(c).not.toHaveProperty('name');
     }
-    expect(medalSources(1).containers.map((c) => c.id)).toContain('player.box.special.1');
+    expect(medalSources(1).containers.map((c) => c.id)).toContain(ItemId.JUNIOR_MEDAL_BOX);
   });
 });

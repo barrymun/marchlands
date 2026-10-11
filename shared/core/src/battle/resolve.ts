@@ -56,12 +56,14 @@ const toResearch = (r: ResearchState): Partial<ResearchStats> => ({
 
 /**
  * Attack multiplier: the simulator ignores hero attack and Military Tradition, so they are folded
- * into attack_modifier as the spec recommends: 1 + power/100 + 5% per Military Tradition level
+ * into attack_modifier as the spec recommends: 1 + power/100 + 5% per Military Tradition level (BALANCE.battle.researchPct.attack)
  * ((marchlands) hero power soft-capped with BALANCE.heroSoftCap.battle).
  */
 function attackModifier(c: CombatantInput): number {
   const power = c.hero ? heroPower(c.hero) : 0;
-  return 1 + heroBattleAttackBonus(power) + 0.05 * researchLevel(c.research, TechType.MILITARY_TRADITION) + (c.attackBonus ?? 0);
+  return (
+    1 + heroBattleAttackBonus(power) + (BALANCE.battle.researchPct.attack / 100) * researchLevel(c.research, TechType.MILITARY_TRADITION) + (c.attackBonus ?? 0)
+  );
 }
 
 const sub = (a: TroopCounts, b: TroopCounts): TroopCounts => {

@@ -1,4 +1,5 @@
 import { i18n } from '@/lib/i18n';
+import { ItemId } from '@marchlands/core';
 
 /** The attributes points go to; `label` and `hint` are in the current locale. */
 export const STATS = [
@@ -37,4 +38,4 @@ export const STATS = [
   },
 ] as const;
 
-export const HOLY_WATER = 'hero.reset.1';
+export const HOLY_WATER = ItemId.HOLY_WATER;

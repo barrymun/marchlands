@@ -9,6 +9,6 @@
   "state": "State",
   "leastCrowded": "Least crowded (recommended)",
   "submit": "Found city",
-  "zone_one": "{{name}} · {{count}} player · {{rate}}% settled",
-  "zone_other": "{{name}} · {{count}} players · {{rate}}% settled"
+  "zone_one": "{{name}} · {{count}} player · {{settled}} settled",
+  "zone_other": "{{name}} · {{count}} players · {{settled}} settled"
 }

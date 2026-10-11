@@ -18,7 +18,7 @@ import {
   postCitiesTroopsTrainManyMutation,
   type CityBean,
 } from '@marchlands/api-client';
-import { BALANCE, usedWallSpace, wallCapacity, researchLevel, TechType, BuildingType, itemGoldPrice } from '@marchlands/core';
+import { BALANCE, usedWallSpace, wallCapacity, researchLevel, TechType, BuildingType, itemGoldPrice, ItemId } from '@marchlands/core';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -67,12 +67,12 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   // every amount entered is ordered in one go, all or nothing; the amounts clear once it is queued
   const trainAll = useCommand(fort ? postCitiesFortificationsTrainManyMutation() : postCitiesTroopsTrainManyMutation(), () => [cityKey, queuesKey]);
   const inv = useInventory();
-  const boostItem = fort ? 'player.fort.1.c' : 'player.troop.1.b';
+  const boostItem = fort ? ItemId.ARCHIMEDES_NOTE : ItemId.NAPOLEONS_DIARY;
   const boostGold = itemGoldPrice(boostItem) ?? 0;
   const boost = useCommand(
     fort ? postCitiesFortificationsQueuesSpeedupMutation() : postCitiesTroopsQueuesSpeedupMutation(),
     () => [cityKey, queuesKey, getPlayerQueryKey()],
-    t('production.boosted', { item: itemName(fort ? 'player.fort.1.c' : 'player.troop.1.b') }),
+    t('production.boosted', { item: itemName(fort ? ItemId.ARCHIMEDES_NOTE : ItemId.NAPOLEONS_DIARY) }),
   );
   const cancel = useCommand(
     fort ? deleteCitiesFortificationsQueuesByQueueIdMutation() : deleteCitiesTroopsQueuesByQueueIdMutation(),

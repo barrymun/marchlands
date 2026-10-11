@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
+import type { BattleSide, DefenderSide } from '../src/battle/simulator.ts';
 
 export interface BattleCase {
   file: string;
@@ -48,4 +49,39 @@ export function loadBattleCases(): BattleCase[] {
     });
   }
   return cases;
+}
+
+export interface BattleGolden {
+  atk: BattleSide;
+  def: DefenderSide;
+  fixes: boolean;
+  /** seed of the test's random number generator (`fixtureRng`) */
+  rngSeed: number;
+  rounds: number;
+  attacker: number[];
+  defender: number[];
+  forts: number[];
+  wall: number;
+  result: number;
+}
+
+/**
+ * Random battles with research, hero stratagem, fortifications and walls, and their outcome as the
+ * simulator gave it when every battle rule was a number written into it (before BALANCE.battle). The
+ * original's regression data has no research or walls, so this pins those rules.
+ */
+export function loadBattleGoldens(): BattleGolden[] {
+  const file = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures/battle-research-walls.jsonl.gz');
+  return zlib
+    .gunzipSync(fs.readFileSync(file))
+    .toString('utf8')
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as BattleGolden);
+}
+
+/** The random number generator the golden battles were run with. */
+export function fixtureRng(seed: number) {
+  let x = seed;
+  return { next: () => ((x = (x * 69069 + 1) % 4294967296), x / 4294967296) };
 }
