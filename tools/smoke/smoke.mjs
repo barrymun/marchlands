@@ -200,7 +200,7 @@ async function main() {
     const before = await ok(a.token, 'GET', `/cities/${cid}`);
     const preview = await ok(a.token, 'POST', `/player/flows/${fid}/run`, { cityIds: [cid], preview: true });
     check(preview.cities[0].ok && preview.cities[0].steps.length === 4, 'flow preview runs every action');
-    check(preview.cities[0].steps[3].detail === 'No injured troops', 'heal action passes when nothing is injured');
+    check(preview.cities[0].steps[3].detail.code === 'flow.step.noInjured', 'heal action passes when nothing is injured');
     const saved1 = (await ok(a.token, 'GET', '/player/flows')).find((f) => f.id === fid);
     check(saved1.cities === 'all', 'a flow runs on all cities unless cities are chosen');
     const viaSaved = await ok(a.token, 'POST', `/player/flows/${fid}/run`, { preview: true });
@@ -235,7 +235,9 @@ async function main() {
     ).find((f) => f.name === 'Smoke farm');
     const farmed = await ok(a.token, 'POST', `/player/flows/${farm.id}/run`, { preview: true });
     check(
-      farmed.cities[0].ok && farmed.cities[0].steps[0].items?.[0]?.ok === false && /skipped/.test(farmed.cities[0].steps[0].items[0].detail),
+      farmed.cities[0].ok &&
+        farmed.cities[0].steps[0].items?.[0]?.ok === false &&
+        /^flow\.target\.(noIdleHero|notEnoughTroops|refused)$/.test(farmed.cities[0].steps[0].items[0].detail.code),
       'attack target without enough troops is skipped, not failed',
     );
     // train steps the city cannot afford in full train what it can, or are skipped: the run carries on
@@ -245,7 +247,8 @@ async function main() {
     const lotsRun = await ok(a.token, 'POST', `/player/flows/${lots.id}/run`, { cityIds: [cid], preview: true });
     const lotsStep = lotsRun.cities[0].steps[0];
     check(
-      lotsRun.cities[0].ok && (lotsStep.skipped || /only .* of 50,000,000/.test(lotsStep.detail)),
+      lotsRun.cities[0].ok &&
+        (lotsStep.skipped || (lotsStep.detail.code.startsWith('flow.step.trainingPartial') && lotsStep.detail.params?.requested === 50_000_000)),
       'unaffordable training is trimmed or skipped, not failed',
     );
     // waits pause the whole flow; one flow runs at a time; repeat runs again until a run fails
@@ -257,10 +260,10 @@ async function main() {
     ];
     const paused = (await ok(a.token, 'POST', '/player/flows', { name: 'Smoke wait', actions: waitActions })).find((f) => f.name === 'Smoke wait');
     const pv = await ok(a.token, 'POST', `/player/flows/${paused.id}/run`, { cityIds: [cid], preview: true });
-    check(pv.cities[0].steps.length === 2 && /not previewed/.test(pv.cities[0].steps[1].detail), 'flow preview stops at the first wait');
+    check(pv.cities[0].steps.length === 2 && pv.cities[0].steps[1].detail.code === 'flow.step.moreActions', 'flow preview stops at the first wait');
     const started = await ok(a.token, 'POST', `/player/flows/${paused.id}/run`, { cityIds: [cid] });
     check(
-      started.flow.status === 'waiting' && started.cities[0].steps.length === 3 && /No armies out/.test(started.cities[0].steps[1].detail),
+      started.flow.status === 'waiting' && started.cities[0].steps.length === 3 && started.cities[0].steps[1].detail.code === 'flow.step.noArmiesOut',
       'flow runs up to a wait and waits (an armies-home wait with none out carries on)',
     );
     const reordered = await call(a.token, 'POST', '/player/flows', { id: paused.id, name: 'Smoke wait', actions: waitActions.slice(0, 3) });
@@ -278,7 +281,7 @@ async function main() {
     const off = (await ok(a.token, 'POST', `/player/flows/${second.id}/repeat`, { repeat: false })).find((f) => f.id === second.id);
     check(!off.repeat && off.status === 'idle', 'repeat off: no next run');
     const badRep = (await ok(a.token, 'POST', `/player/flows/${bad.id}/repeat`, { repeat: true })).find((f) => f.id === bad.id);
-    check(!badRep.repeat && badRep.status === 'idle' && /failed/.test(badRep.stopReason ?? ''), 'a failed run switches repeat off');
+    check(!badRep.repeat && badRep.status === 'idle' && badRep.stopReason?.code === 'flow.runFailed', 'a failed run switches repeat off');
     // put the original mayor back for the rest of the run
     await ok(a.token, 'POST', `/heroes/${hero.id}/mayor`);
   }
@@ -342,7 +345,7 @@ async function main() {
     await until(async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.some((r) => r.attack), 'battle report', 120_000);
     const rep = (await ok(a.token, 'GET', '/reports?type=1')).reports.find((r) => r.attack);
     const full = await ok(a.token, 'GET', `/reports/${rep.id}`);
-    check(full.content.kind === 'battle', `battle report: ${full.title}, rounds ${full.content.battle.rounds}`);
+    check(full.content.kind === 'battle', `battle report: ${full.title.code}, rounds ${full.content.battle.rounds}`);
   } else console.log('  (no low-level NPC near the city; attack skipped)');
 
   // ---- social ----

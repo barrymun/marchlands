@@ -1,0 +1,29 @@
+{
+  "title": {
+    "missionAborted": "任務中止",
+    "scoutReturned": "偵察隊帰還",
+    "attackReturned": "攻撃部隊帰還",
+    "returned": "帰還",
+    "transportReport": "輸送報告",
+    "transportReceived": "輸送物資受領",
+    "reinforcementArrived": "援軍到着",
+    "reinforcementsFrom": "{{name}} からの援軍",
+    "newCityFounded": "新都市建設",
+    "scoutReport": "偵察報告",
+    "enemyScouts": "敵の偵察",
+    "scoutsRepelled": "偵察を撃退",
+    "attackSucceeded": "攻撃成功",
+    "attackFailed": "攻撃失敗",
+    "cityAttacked": "都市が攻撃された",
+    "attackRepelled": "攻撃を撃退",
+    "reinforcementsFought": "援軍が交戦",
+    "valleyOccupied": "領地を占領",
+    "valleyLost": "領地を失った",
+    "valleyDefended": "領地を防衛",
+    "tradeCompleted": "取引完了",
+    "troopsDeserted": "兵が脱走"
+  },
+  "notFound": "報告書が見つかりません。",
+  "oldFormat": "この報告書は古い形式で保存されているため表示できません。",
+  "cityFounded": "{{name}}が建設されました。"
+}

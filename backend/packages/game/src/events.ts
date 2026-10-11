@@ -11,7 +11,7 @@ import { expireHeroBuff } from './services/heroes.ts';
 import { deliverShipment } from './services/market.ts';
 import { completeResearch, settleAllCities } from './services/research.ts';
 import { completeTraining } from './services/training.ts';
-import { BALANCE, BUFF_IDS, BuffId, scaled } from '@marchlands/core';
+import { BALANCE, BUFF_IDS, BuffId, msg, scaled } from '@marchlands/core';
 
 export interface EventRow {
   id: number;
@@ -46,7 +46,7 @@ async function expireBuff(ctx: Ctx, playerId: number, buffId: BuffId) {
   if (SETTLE_ON_EXPIRE.includes(buffId)) await settleAllCities(ctx, p);
   removeBuff(ctx, p, buffId);
   if (buffId === BuffId.TRUCE) {
-    setBuff(ctx, p, BuffId.TRUCE_COOLDOWN, 'Truce Agreement in cooldown.', ctx.now + scaled(BALANCE.truceCooldownMs));
+    setBuff(ctx, p, BuffId.TRUCE_COOLDOWN, msg('buff.truceCooldown'), ctx.now + scaled(BALANCE.truceCooldownMs));
     if (p.status === 2) p.status = 0;
   }
   if (buffId === BuffId.HOLIDAY && p.status === 5) p.status = 0;

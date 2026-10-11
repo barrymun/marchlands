@@ -1,0 +1,11 @@
+{
+  "noOpenFlat": "There's no free land to build a city on.",
+  "invalidArea": "This map area isn't valid.",
+  "areaTooLarge": "This map area is too large (at most {{max}} × {{max}}).",
+  "invalidTile": "This tile doesn't exist.",
+  "position": {
+    "city": "{{name}} ({{x}},{{y}})",
+    "tile": "{{tile}} Lv.{{level}} ({{x}},{{y}})",
+    "place": "{{tile}} ({{x}},{{y}})"
+  }
+}

@@ -20,7 +20,6 @@ import {
   researchLevel,
   sanitizeTroops,
   TechType,
-  TILE_NAMES,
   TileType,
   tileXY,
   totalResources,
@@ -28,6 +27,12 @@ import {
   type ResourceSet,
   type TroopCounts,
   BuffId,
+  DAY,
+  msg,
+  ref,
+  type Message,
+  TroopType,
+  BASIC_RESOURCES,
 } from '@marchlands/core';
 import { armies, cities, heroes, players } from '@marchlands/db';
 import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
@@ -42,17 +47,22 @@ import { PushCmd } from '@marchlands/contracts';
 
 export const armyRef = (id: number) => `army:${id}`;
 
-export function posName(name: string, tileId: number) {
-  const { x, y } = tileXY(tileId);
-  return `${name} (${x},${y})`;
+/** Where a city stands, as a message (army and report positions). */
+export function cityPosition(name: string, tileId: number): Message {
+  return msg('world.position.city', { name, ...tileXY(tileId) });
 }
 
-export async function tileDisplayName(ctx: Ctx, t: TileRow): Promise<string> {
+/** Where an army is headed, as a message: the city standing there, or the tile's type and level (flat land has none). */
+export async function tilePosition(ctx: Ctx, t: TileRow): Promise<Message> {
+  const { x, y } = tileXY(t.id);
   if (t.cityId != null) {
     const c = await findCity(ctx, t.cityId);
-    return posName(c?.name ?? 'City', t.id);
+    if (c) return cityPosition(c.name, t.id);
   }
-  return posName(`${TILE_NAMES[t.type] ?? 'Land'}${t.type !== TileType.FLAT ? ` Lv.${t.level}` : ''}`, t.id);
+  const tile = ref.tile(t.cityId != null ? TileType.CASTLE : t.type);
+  return t.type === TileType.FLAT || t.cityId != null
+    ? msg('world.position.place', { tile, x, y })
+    : msg('world.position.tile', { tile, level: t.level, x, y });
 }
 
 /** Owner player of whatever stands on a tile (city or occupied valley). */
@@ -75,7 +85,7 @@ function cleanResources(r: Partial<ResourceSet> | undefined): ResourceSet {
   const out: ResourceSet = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
   for (const k of Object.keys(out) as (keyof ResourceSet)[]) {
     const v = Number(r?.[k] ?? 0);
-    if (!Number.isFinite(v) || v < 0) throw new GameError('Invalid resource amount.', -99);
+    if (!Number.isFinite(v) || v < 0) throw new GameError(msg('common.invalidAmount'), -99);
     out[k] = Math.floor(v);
   }
   return out;
@@ -91,69 +101,74 @@ export function armyMarchMs(b: CityBundle, fromTile: number, toTile: number, tro
 export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input: SendArmyInput) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const mission = input.mission;
-  if (![1, 2, 3, 4, 5].includes(mission)) throw new GameError('Invalid mission.', -99);
+  if (![1, 2, 3, 4, 5].includes(mission)) throw new GameError(msg('army.invalidMission'), -99);
   const troops = sanitizeTroops(input.troops);
   const resources = cleanResources(input.resources);
-  if (!hasTroops(b.city.troops, troops)) throw new GameError('You have insufficient troops.', -29);
-  if (totalResources(resources) > armyLoad(troops, b.player.research)) throw new GameError('Your troops cannot carry that much.', -99);
-  if (buildingLevel(b.city.buildings, BuildingType.RALLY_SPOT) < 1) throw new GameError('You need a Rally Spot to send troops.', -51);
+  if (!hasTroops(b.city.troops, troops)) throw new GameError(msg('army.insufficientTroops'), -29);
+  if (totalResources(resources) > armyLoad(troops, b.player.research)) throw new GameError(msg('army.overloaded'), -99);
+  if (buildingLevel(b.city.buildings, BuildingType.RALLY_SPOT) < 1)
+    throw new GameError(msg('army.rallySpotRequired', { building: ref.building(BuildingType.RALLY_SPOT) }), -51);
   const [{ n: out }] = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId));
-  if (Number(out) >= maxArmies(b.city.buildings)) {
-    throw new GameError('No more troops are allowed to sent at current level of Rally Spot. Please upgrade the Rally Spot first.', -51);
-  }
+  const armyCap = maxArmies(b.city.buildings);
+  if (Number(out) >= armyCap) throw new GameError(msg('army.armyLimit', { building: ref.building(BuildingType.RALLY_SPOT), count: armyCap }), -51);
   const troopCap = maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now));
   if (totalTroops(troops) > troopCap) {
     const level = buildingLevel(b.city.buildings, BuildingType.RALLY_SPOT);
-    throw new GameError(`A level ${level} Rally Spot sends at most ${troopCap.toLocaleString('en')} troops in one army.`, -51);
+    throw new GameError(msg('army.troopLimit', { building: ref.building(BuildingType.RALLY_SPOT), level, count: troopCap }), -51);
   }
   const target = await getTile(ctx, input.targetTileId);
-  if (target.id === b.city.tileId) throw new GameError("You can't perform this operation against this target.", -13);
+  if (target.id === b.city.tileId) throw new GameError(msg('army.invalidTarget'), -13);
   const ownerId = await tileOwner(ctx, target);
   const relation = ownerId ? await relationBetween(ctx, playerId, ownerId) : null;
   const ownTarget = ownerId === playerId;
 
   switch (mission) {
     case Mission.TRANSPORT:
-      if (target.cityId == null || relation == null || !isFriendly(relation)) throw new GameError('You can only transport to your own or allied cities.', -13);
-      if (totalResources(resources) <= 0) throw new GameError('Choose resources to transport.', -99);
+      if (target.cityId == null || relation == null || !isFriendly(relation)) throw new GameError(msg('army.transportTarget'), -13);
+      if (totalResources(resources) <= 0) throw new GameError(msg('army.noResources'), -99);
       break;
     case Mission.REINFORCE: {
       const toValley = target.cityId == null && target.ownerCityId != null;
-      if (relation == null || !isFriendly(relation) || (toValley && !ownTarget)) throw new GameError('You can only reinforce your own or allied cities.', -13);
+      if (relation == null || !isFriendly(relation) || (toValley && !ownTarget)) throw new GameError(msg('army.reinforceTarget'), -13);
       if (target.cityId != null && !ownTarget) {
         const host = await getCity(ctx, target.cityId);
-        if (!host.allowAlliance) throw new GameError('This city does not accept allied troops.', -13);
+        if (!host.allowAlliance) throw new GameError(msg('army.alliedTroopsRefused'), -13);
       }
       break;
     }
     case Mission.SCOUT:
     case Mission.ATTACK: {
-      if (mission === Mission.SCOUT && (troops.scouter ?? 0) <= 0) throw new GameError('Scouts are required for this mission.', -61);
-      if (relation != null && isFriendly(relation)) throw new GameError("You can't perform this operation against this target.", -13);
+      if (mission === Mission.SCOUT && (troops.scouter ?? 0) <= 0) throw new GameError(msg('army.scoutsRequired', { troop: ref.troop(TroopType.SCOUT) }), -61);
+      if (relation != null && isFriendly(relation)) throw new GameError(msg('army.invalidTarget'), -13);
       if (target.cityId != null && b.player.beginner) {
-        throw new GameError("Beginner's Protection will automatically expired 7 days after registration or Town Hall reaches level 5.", -69);
+        throw new GameError(
+          msg('army.beginnerProtection', {
+            count: Math.round(BALANCE.beginnerProtectionMs / DAY),
+            building: ref.building(BuildingType.TOWN_HALL),
+            level: BALANCE.beginnerTownHallLevel,
+          }),
+          -69,
+        );
       }
       if (ownerId && target.cityId != null) {
         const owner = await getPlayer(ctx, ownerId);
         const why = isProtected(owner, ctx.now);
         if (why) throw new GameError(why, -70);
       }
-      if (activeBuff(b.player, BuffId.TRUCE, ctx.now)) throw new GameError('You cannot attack while under truce.', -70);
-      if (target.type === TileType.FLAT && target.cityId == null) throw new GameError('There is nothing to attack there.', -13);
+      if (activeBuff(b.player, BuffId.TRUCE, ctx.now)) throw new GameError(msg('army.truce'), -70);
+      if (target.type === TileType.FLAT && target.cityId == null) throw new GameError(msg('army.nothingToAttack'), -13);
       break;
     }
     case Mission.BUILD_CITY: {
-      if (target.type !== TileType.FLAT || target.cityId != null || target.ownerCityId != null)
-        throw new GameError('You can only build a city on an empty flat.', -13);
+      if (target.type !== TileType.FLAT || target.cityId != null || target.ownerCityId != null) throw new GameError(msg('army.buildOnFlat'), -13);
       const [{ n: cityCount }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, playerId));
       const [{ n: pending }] = await ctx.tx
         .select({ n: count() })
         .from(armies)
         .where(and(eq(armies.playerId, playerId), eq(armies.mission, Mission.BUILD_CITY), eq(armies.direction, ArmyDirection.FORWARD)));
-      if (Number(cityCount) + Number(pending) >= maxCitiesFor(b.player.title)) throw new GameError('Your title does not allow more cities.', -99);
-      const need = { food: 10_000, wood: 10_000, stone: 10_000, iron: 10_000 };
-      for (const [k, v] of Object.entries(need))
-        if (resources[k as keyof ResourceSet] < v) throw new GameError('A new city needs at least 10,000 food, lumber, stone and iron.', -99);
+      if (Number(cityCount) + Number(pending) >= maxCitiesFor(b.player.title)) throw new GameError(msg('army.cityLimit'), -99);
+      if (BASIC_RESOURCES.some((k) => resources[k] < BALANCE.newCityMinResource))
+        throw new GameError(msg('army.newCityResources', { amount: BALANCE.newCityMinResource, resources: BASIC_RESOURCES.map((k) => ref.resource(k)) }), -99);
       break;
     }
   }
@@ -161,12 +176,12 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
   let hero = null;
   if (input.heroId != null && input.heroId >= 0) {
     hero = b.heroes.find((h) => h.id === input.heroId && h.playerId === playerId);
-    if (!hero) throw new GameError('Hero does not exist.', -80);
-    if (hero.status !== HeroStatus.IDLE) throw new GameError('Status of this hero is not Idle.', -80);
-  } else if (mission === Mission.ATTACK) throw new GameError('You must appoint a hero to lead the attack.', -71);
-  if (mission === Mission.BUILD_CITY && !hero) throw new GameError('A hero must lead the settlers to the new city.', -71);
+    if (!hero) throw new GameError(msg('common.heroNotFound'), -80);
+    if (hero.status !== HeroStatus.IDLE) throw new GameError(msg('hero.notIdle'), -80);
+  } else if (mission === Mission.ATTACK) throw new GameError(msg('army.heroRequiredAttack'), -71);
+  if (mission === Mission.BUILD_CITY && !hero) throw new GameError(msg('army.heroRequiredSettlers'), -71);
 
-  spendResources(b.city, resources, 'Not enough resources.', -1);
+  spendResources(b.city, resources, msg('common.notEnoughResources'), -1);
   b.city.troops = addTroops(b.city.troops, troops, -1);
   const ms = armyMarchMs(b, b.city.tileId, target.id, troops, ownTarget);
   const restTime = Math.min(BALANCE.maxRestTimeMs, Math.max(0, Math.floor(Number(input.restTime ?? 0)) * 1000));
@@ -186,8 +201,8 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
       startTime: ctx.now,
       reachTime: ctx.now + ms,
       restTime,
-      startPosName: posName(b.city.name, b.city.tileId),
-      targetPosName: await tileDisplayName(ctx, target),
+      startPosName: cityPosition(b.city.name, b.city.tileId),
+      targetPosName: await tilePosition(ctx, target),
       createdAt: ctx.now,
     })
     .returning();
@@ -236,8 +251,8 @@ export async function homeMarchMs(ctx: Ctx, a: ArmyRow, fromTile: number): Promi
 /** army.callBackArmy: marching armies turn around, stationed armies start home. */
 export async function recallArmy(ctx: Ctx, playerId: number, armyId: number) {
   const a = await getArmy(ctx, armyId, { lock: true });
-  if (!a || a.playerId !== playerId) throw new GameError('Army not found.', -99, 404);
-  if (a.direction === ArmyDirection.BACKWARD) throw new GameError('The army is already returning.', -99);
+  if (!a || a.playerId !== playerId) throw new GameError(msg('army.notFound'), -99, 404);
+  if (a.direction === ArmyDirection.BACKWARD) throw new GameError(msg('army.alreadyReturning'), -99);
   // marching armies walk back the way they came; stationed ones march home from the target
   const ms = a.direction === ArmyDirection.FORWARD ? ctx.now - a.startTime : await homeMarchMs(ctx, a, a.targetTileId);
   await sendBack(ctx, a, ms);
@@ -248,7 +263,7 @@ export async function recallArmy(ctx: Ctx, playerId: number, armyId: number) {
 /** A host sends allied troops stationed in their city back home. */
 export async function dismissGuest(ctx: Ctx, hostId: number, armyId: number) {
   const a = await getArmy(ctx, armyId, { lock: true });
-  if (!a || a.direction !== ArmyDirection.STAY || a.targetPlayerId !== hostId || a.playerId === hostId) throw new GameError('Army not found.', -99, 404);
+  if (!a || a.direction !== ArmyDirection.STAY || a.targetPlayerId !== hostId || a.playerId === hostId) throw new GameError(msg('army.notFound'), -99, 404);
   await sendBack(ctx, a, await homeMarchMs(ctx, a, a.targetTileId));
   await notifyArmyParties(ctx, a);
 }
@@ -256,7 +271,7 @@ export async function dismissGuest(ctx: Ctx, hostId: number, armyId: number) {
 /** army.getTroopParam */
 export async function troopParams(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewCity(ctx, cityId);
-  if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (b.city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   const r = b.player.research;
   return {
     marchSkillParam: researchLevel(r, TechType.COMPASS) * 10,
@@ -271,7 +286,7 @@ export async function troopParams(ctx: Ctx, playerId: number, cityId: number) {
 /** March time / load preview for the send-army dialog. */
 export async function marchEstimate(ctx: Ctx, playerId: number, cityId: number, targetTileId: number, troopsIn: Record<string, unknown>) {
   const b = await viewCity(ctx, cityId);
-  if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (b.city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   const troops = sanitizeTroops(troopsIn);
   const target = await getTile(ctx, targetTileId);
   const own = (await tileOwner(ctx, target)) === playerId;
@@ -311,7 +326,7 @@ export async function visibleArmies(ctx: Ctx, playerId: number) {
 /** army.getStayAllianceArmys: foreign troops stationed in one of my cities. */
 export async function stationedIn(ctx: Ctx, playerId: number, cityId: number) {
   const c = await getCity(ctx, cityId);
-  if (c.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (c.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   const rows = await ctx.tx
     .select({ a: armies, heroName: heroes.name, heroLevel: heroes.level, king: players.name })
     .from(armies)

@@ -9,13 +9,11 @@ import {
   BALANCE,
   GameError,
   generateMap,
+  msg,
   randInt,
   Relation,
   stateBounds,
-  stateName,
   stateOf,
-  STATE_NAMES,
-  TILE_NAMES,
   TileType,
   tileXY,
   VALLEY_TYPES,
@@ -93,8 +91,8 @@ export async function ensureWorld(db: Db, opts: { source: 'generated' | 'legacy'
 // ---------------------------------------------------------------------------------------------
 
 export interface ZoneStats {
+  /** zone (state) id; the client names it */
   id: number;
-  name: string;
   playerCount: number;
   castleCount: number;
   openFlats: number;
@@ -113,7 +111,7 @@ export async function refreshZoneStats(db: Db): Promise<ZoneStats[]> {
            count(*) filter (where type = ${TileType.NPC}) as npc,
            count(*) filter (where city_id is not null) as castles
     from tiles group by 1 order by 1`);
-  const stats: ZoneStats[] = STATE_NAMES.map((name, id) => ({ id, name, playerCount: 0, castleCount: 0, openFlats: 0, rate: 0 }));
+  const stats: ZoneStats[] = Array.from({ length: BALANCE.stateGrid ** 2 }, (_, id) => ({ id, playerCount: 0, castleCount: 0, openFlats: 0, rate: 0 }));
   for (const r of rows.rows) {
     const s = stats[Number(r.state)];
     if (!s) continue;
@@ -152,7 +150,7 @@ export async function pickOpenFlat(ctx: Ctx, zone: number): Promise<number> {
       .for('update', { skipLocked: true });
     if (row) return row.id;
   }
-  throw new GameError('No open flats exist.', -25);
+  throw new GameError(msg('world.noOpenFlat'), -25);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -165,7 +163,8 @@ export interface MapCastle {
   id: number;
   x: number;
   y: number;
-  name: string;
+  /** the city's name; absent for a barbarian city (the client names it by its tile type) */
+  name?: string;
   npc: boolean;
   level: number;
   cityId?: number;
@@ -179,7 +178,7 @@ export interface MapCastle {
   relation?: number;
   state?: number;
   furlough?: boolean;
-  zoneName: string;
+  zoneId: number;
   canLoot: boolean;
   canOccupy: boolean;
   canScout: boolean;
@@ -202,8 +201,8 @@ export function permissions(relation: number) {
  */
 export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1: number, x2: number, y2: number) {
   const size = BALANCE.mapSize;
-  if (x2 < x1 || y2 < y1) throw new GameError('Error retrieving results.', -1);
-  if (x2 - x1 + 1 > MAP_VIEW_MAX || y2 - y1 + 1 > MAP_VIEW_MAX) throw new GameError('Out of range.', -1);
+  if (x2 < x1 || y2 < y1) throw new GameError(msg('world.invalidArea'), -1);
+  if (x2 - x1 + 1 > MAP_VIEW_MAX || y2 - y1 + 1 > MAP_VIEW_MAX) throw new GameError(msg('world.areaTooLarge', { max: MAP_VIEW_MAX }), -1);
   const ids: number[] = [];
   for (let y = y1; y <= y2; y++) for (let x = x1; x <= x2; x++) ids.push((((y % size) + size) % size) * size + (((x % size) + size) % size));
   const rows = await ctx.tx.select().from(tiles).where(inArray(tiles.id, ids));
@@ -244,7 +243,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
       continue;
     }
     const { x, y } = tileXY(id);
-    const zoneName = stateName(stateOf(id));
+    const zoneId = stateOf(id);
     if (t.cityId != null) {
       const c = cityById.get(t.cityId);
       const level = c ? Math.max(1, c.buildings.find((b) => b.typeId === 31)?.level ?? 1) : 1;
@@ -269,14 +268,14 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
           relation,
           state: c.pstatus,
           furlough: c.beginner,
-          zoneName,
+          zoneId,
           ...permissions(relation),
         });
       }
     } else {
       mapStr += hex(t.type) + hex(t.level);
       if (t.type === TileType.NPC) {
-        castles.push({ id, x, y, name: TILE_NAMES[12], npc: true, level: t.level, zoneName, ...permissions(Relation.NO_RELATION) });
+        castles.push({ id, x, y, npc: true, level: t.level, zoneId, ...permissions(Relation.NO_RELATION) });
       }
     }
   }
@@ -332,11 +331,11 @@ async function allianceNameMap(ctx: Ctx, ids: (number | null)[]) {
 
 /** Details of a single tile (field.getOtherFieldInfo). */
 export async function fieldInfo(ctx: Ctx, viewerId: number | null, tileId: number) {
-  if (!Number.isInteger(tileId) || tileId < 0 || tileId >= BALANCE.mapSize ** 2) throw new GameError('Invalid field.', -99);
+  if (!Number.isInteger(tileId) || tileId < 0 || tileId >= BALANCE.mapSize ** 2) throw new GameError(msg('world.invalidTile'), -99);
   const [t] = await ctx.tx.select().from(tiles).where(eq(tiles.id, tileId));
-  if (!t) throw new GameError('Invalid field.', -99);
+  if (!t) throw new GameError(msg('world.invalidTile'), -99);
   const { x, y } = tileXY(tileId);
-  const base = { id: tileId, x, y, type: t.type, level: t.level, zoneName: stateName(stateOf(tileId)), name: TILE_NAMES[t.type] ?? 'Unknown' };
+  const base = { id: tileId, x, y, type: t.type, level: t.level, zoneId: stateOf(tileId) };
   if (t.cityId != null) {
     const view = await mapView(ctx, viewerId, x, y, x, y);
     return { ...base, ...view.castles[0], type: TileType.CASTLE };

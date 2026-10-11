@@ -2,6 +2,7 @@
 // browser's confirm() or a click-twice button.
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ConfirmProps } from '@/components/confirm-dialog/types';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -13,10 +14,11 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
-  cancelLabel = 'Cancel',
+  cancelLabel,
   destructive = true,
   onConfirm,
 }: ConfirmProps & { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { t } = useTranslation('common');
   const [busy, setBusy] = useState(false);
   const confirm = async () => {
     setBusy(true);
@@ -38,7 +40,7 @@ export function ConfirmDialog({
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" disabled={busy} onClick={() => onOpenChange(false)}>
-            {cancelLabel}
+            {cancelLabel ?? t('actions.cancel')}
           </Button>
           <Button variant={destructive ? 'destructive' : 'default'} disabled={busy} onClick={() => void confirm()}>
             {confirmLabel}

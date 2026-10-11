@@ -1,0 +1,78 @@
+{
+  "noMarketplace": {
+    "title": "Marketplace",
+    "description": "Build a Marketplace in the city to trade food, lumber, stone and iron for gold."
+  },
+  "side": {
+    "buy": "Buy",
+    "sell": "Sell"
+  },
+  "columns": {
+    "order": "Order",
+    "price": "Price",
+    "filled": "Filled",
+    "placed": "Placed",
+    "amount": "Amount",
+    "from": "From"
+  },
+  "myOrders": {
+    "title": "My waiting orders",
+    "cancelled": "Order cancelled; held goods or gold returned",
+    "cancel": "Cancel order"
+  },
+  "orderBook": {
+    "title": "Order book · {{resource}}",
+    "fixedPrice": "Gold per unit. The merchant always buys and sells any amount at a fixed {{price}}, so you can always sell for at least that. Click a row to trade at it.",
+    "floatingPrice": "Gold per unit. The merchant always trades; its price rises as people buy and falls as they sell, then drifts back to {{price}}. Click a row to trade at it.",
+    "player": "player",
+    "unlimited": "unlimited",
+    "merchant": "merchant",
+    "divider": "sellers above · buyers below",
+    "reference": " · reference {{price}}"
+  },
+  "priceHistory": {
+    "title": "Price · {{resource}}",
+    "description": "Closing price of each game hour (last 24).",
+    "chartLabel": "Price",
+    "noTrades": "No trades yet.",
+    "recentTrades": "Recent trades",
+    "merchant": "merchant",
+    "players": "players"
+  },
+  "shipments": {
+    "title": "Goods in transit",
+    "delivered": "Delivered",
+    "arrivesIn": "arrives in <countdown/>",
+    "deliverNow": "Deliver now · {{gold}} gold"
+  },
+  "tradeForm": {
+    "title": "Trade {{resource}}",
+    "description": "Trades settle instantly. {{fee}}% fee on purchases. Marketplace Lv {{level}}: {{open}}/{{cap}} resting orders here.",
+    "instant": "Instant",
+    "limit": "Set my price",
+    "amount": "Amount",
+    "highestPrice": "Highest price (gold each)",
+    "lowestPrice": "Lowest price (gold each)",
+    "enterAmount": "Enter an amount to see a quote.",
+    "enterAmountAndPrice": "Enter an amount and a price to see a quote.",
+    "buyNowQuote": "Buy {{amount}} now · avg {{price}}",
+    "sellNowQuote": "Sell {{amount}} now · avg {{price}}",
+    "goldSpent": "−{{gold}} gold",
+    "goldEarned": "+{{gold}} gold",
+    "nothingTrades": "Nothing trades at this price right now.",
+    "withMerchant": "{{amount}} with the merchant",
+    "withPlayers": "{{amount}} with other players",
+    "inclFee": "incl. fee {{fee}}",
+    "waits": "{{amount}} waits on the book at {{price}}",
+    "holds": "holds {{amount}} {{resource}}",
+    "available": "{{resource}} available",
+    "limitReached": "Resting-order limit reached: upgrade the Marketplace or cancel an order.",
+    "bought": "Bought {{amount}} {{resource}} for {{gold}} gold (avg {{price}})",
+    "sold": "Sold {{amount}} {{resource}} for {{gold}} gold (avg {{price}})",
+    "waiting": "{{amount}} waiting on the book",
+    "buyNow": "Buy now",
+    "sellNow": "Sell now",
+    "placeBuy": "Place buy order",
+    "placeSell": "Place sell order"
+  }
+}

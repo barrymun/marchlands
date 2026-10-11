@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { Check, SkipForward, X } from 'lucide-react';
 import type { FlowRunReport } from '@marchlands/api-client';
 import { Badge } from '@/components/ui/badge';
 import { WARN_TEXT } from '@/lib/tones';
+import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
 import { StepItems } from '@/components/flows-panel/run-flow/run-report/step-items/step-items';
 
@@ -16,6 +18,7 @@ export function RunReport({
   cities: FlowRunReport['cities'];
   skipped?: FlowRunReport['skippedCities'];
 }) {
+  const { t } = useTranslation(['flows-panel', 'common']);
   return (
     <div className="grid gap-2">
       <div className="text-xs font-medium text-muted-foreground uppercase">{title}</div>
@@ -23,7 +26,9 @@ export function RunReport({
         <div key={c.cityId} className={cn('grid gap-1 rounded-md border p-2 text-sm', !c.ok && 'border-destructive/50 bg-destructive/5')}>
           <div className="flex items-center justify-between gap-2">
             <span className="font-medium">{c.cityName}</span>
-            <Badge variant={c.ok ? 'secondary' : 'destructive'}>{c.ok ? (preview ? 'Would run' : 'OK') : 'Rolled back'}</Badge>
+            <Badge variant={c.ok ? 'secondary' : 'destructive'}>
+              {c.ok ? (preview ? t('runFlow.report.wouldRun') : t('runFlow.report.ok')) : t('runFlow.report.rolledBack')}
+            </Badge>
           </div>
           <ol className="grid gap-0.5 text-xs">
             {c.steps.map((s, i) => (
@@ -37,26 +42,26 @@ export function RunReport({
                 )}
                 <div className="grid min-w-0 gap-1">
                   <span>
-                    <span className="text-foreground">{s.action}:</span> {s.detail}
+                    <span className="text-foreground">{translateMessage(s.action)}:</span> {translateMessage(s.detail)}
                   </span>
                   {s.items && s.items.length > 0 && <StepItems items={s.items} />}
                 </div>
               </li>
             ))}
-            {c.steps.length === 0 && <li className="text-muted-foreground">Nothing yet.</li>}
+            {c.steps.length === 0 && <li className="text-muted-foreground">{t('common:nothingYet')}</li>}
           </ol>
-          {!c.ok && <p className="text-xs text-destructive">What the flow did in this city since the last wait was undone.</p>}
+          {!c.ok && <p className="text-xs text-destructive">{t('runFlow.report.undone')}</p>}
         </div>
       ))}
       {skipped.map((c) => (
         <div key={c.cityId} className="grid gap-1 rounded-md border border-dashed p-2 text-sm">
           <div className="flex items-center justify-between gap-2">
             <span className="font-medium text-muted-foreground">{c.cityName}</span>
-            <Badge variant="outline">{preview ? 'Would skip' : 'Skipped'}</Badge>
+            <Badge variant="outline">{preview ? t('runFlow.report.wouldSkip') : t('runFlow.report.skipped')}</Badge>
           </div>
           <p className={cn('flex gap-1.5 text-xs', WARN_TEXT)}>
             <SkipForward className="mt-0.5 size-3 shrink-0" />
-            {c.reason}
+            {translateMessage(c.reason)}
           </p>
         </div>
       ))}

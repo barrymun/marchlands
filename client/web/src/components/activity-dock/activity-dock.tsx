@@ -2,6 +2,7 @@
 // city's construction, research and training, so in-page status cards no longer pop in and out.
 
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { CityBean } from '@marchlands/api-client';
 import { GROUPS, PER_GROUP, STORE_KEY } from '@/components/activity-dock/constants';
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { JobRow } from '@/components/activity-dock/job-row/job-row';
 
 export function ActivityDock({ city }: { city: CityBean }) {
+  const { t } = useTranslation('activity-dock');
   const jobs = useJobs(city);
   const now = useNow();
   const [collapsed, setCollapsed] = useState(readCollapsed);
@@ -31,7 +33,7 @@ export function ActivityDock({ city }: { city: CityBean }) {
 
   return (
     <aside
-      aria-label="In progress"
+      aria-label={t('title')}
       aria-hidden={!visible}
       className={cn(
         'fixed inset-x-2 bottom-[calc(0.5rem+env(safe-area-inset-bottom))] z-40 sm:inset-x-auto sm:bottom-4 sm:left-4 sm:w-80',
@@ -51,29 +53,29 @@ export function ActivityDock({ city }: { city: CityBean }) {
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-60" />
             <span className="relative inline-flex size-2 rounded-full bg-amber-500" />
           </span>
-          <span className="font-medium">In progress</span>
+          <span className="font-medium">{t('title')}</span>
           <span className="truncate text-muted-foreground tabular-nums">
-            {shown.length} · next {next ? (next.endTime > now ? duration(next.endTime - now) : 'finishing…') : '—'}
+            {t('summary', { jobs: shown.length, next: next ? (next.endTime > now ? duration(next.endTime - now) : t('finishing')) : '—' })}
           </span>
         </span>
         {collapsed ? <ChevronUp className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
       </button>
       {!collapsed && (
         <div className="grid max-h-[45svh] gap-2 overflow-y-auto px-3 pb-3 sm:max-h-[60svh]">
-          {GROUPS.map(({ id, icon: Icon }) => {
+          {GROUPS.map(({ id, icon: Icon, label }) => {
             const list = shown.filter((j) => j.group === id);
             if (!list.length) return null;
             return (
               <section key={id} className="grid gap-1.5">
                 <h3 className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  <Icon className="size-3" /> {id}
+                  <Icon className="size-3" /> {label}
                 </h3>
                 {list.slice(0, PER_GROUP).map((j) => (
                   <JobRow key={j.key} job={j} now={now} />
                 ))}
                 {list.length > PER_GROUP && (
                   <button type="button" className="text-left text-[11px] text-muted-foreground hover:underline" onClick={list[PER_GROUP].open}>
-                    +{list.length - PER_GROUP} more
+                    {t('more', { n: list.length - PER_GROUP })}
                   </button>
                 )}
               </section>

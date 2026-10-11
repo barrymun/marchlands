@@ -1,0 +1,98 @@
+{
+  "garrison": {
+    "title": "Garrison",
+    "ready": "Ready",
+    "injured": "Injured"
+  },
+  "defenses": {
+    "title": "City defences",
+    "wallSpace": "Wall space {{used}} / {{cap}}",
+    "defense": "Defence",
+    "built": "Built"
+  },
+  "injured": {
+    "title": "Injured troops",
+    "medicine": "Medicine Lv {{level}}: {{percent}}% of the troops this city loses, defending or attacking, survive injured.",
+    "noMedicine": "Research Medicine so that some of the troops this city loses, defending or attacking, survive injured (5% per level, up to 50%).",
+    "healInfo": "Heal them for {{percent}}% of their training cost, or for honour ({{honor}} available).",
+    "allPlaceholder": "all {{n}}",
+    "healResources": "Heal {{n}} · resources",
+    "healHonor": "Heal · {{n}} honour",
+    "notEnoughHonor": "Not enough honour ({{n}} needed)",
+    "dismissDescription": "They leave for good instead of being healed. This cannot be undone.",
+    "dismiss": "Dismiss",
+    "notEnoughResources": "Not enough resources.",
+    "healed_one": "Healed {{n}} troop",
+    "healed_other": "Healed {{n}} troops",
+    "dismissed_one": "Dismissed {{n}} injured troop",
+    "dismissed_other": "Dismissed {{n}} injured troops",
+    "dismissTitle_one": "Dismiss {{n}} injured troop?",
+    "dismissTitle_other": "Dismiss {{n}} injured troops?"
+  },
+  "production": {
+    "training": "Training",
+    "fortifications": "Fortifications",
+    "noBarracks": "Build a Barracks to train troops.",
+    "noWalls": "Build Walls to construct fortifications.",
+    "boosted": "{{item}}: −30%",
+    "batchCancelled": "Batch cancelled",
+    "split": "Split across {{n}} barracks",
+    "barracksOption": "Barracks Lv {{level}} (slot {{slot}})",
+    "train": "Train",
+    "build": "Build",
+    "inProgress": "In progress",
+    "nothingTraining": "Nothing in training right now.",
+    "nothingBuilding": "Nothing being built right now.",
+    "queueBarracks": "barracks {{slot}}",
+    "boost": "{{item}} −30% · {{price}}",
+    "waiting": "Waiting",
+    "queuedTrain_one": "Training {{units}} units of {{count}} type",
+    "queuedTrain_other": "Training {{units}} units of {{count}} types",
+    "queuedBuild_one": "Building {{units}} units of {{count}} type",
+    "queuedBuild_other": "Building {{units}} units of {{count}} types",
+    "stats": "atk {{attack}} · def {{defense}} · hp {{life}}",
+    "troopStats": "speed {{speed}} · range {{range}} · carries {{load}} · {{upkeep}} food/h",
+    "range": "range {{range}}",
+    "population": "{{n}} pop",
+    "toTrain": "{{unit}} to train",
+    "toBuild": "{{unit}} to build",
+    "maxLimited": "{{n}}: limited by {{limit}}",
+    "maxNone": "None: not enough {{limit}}",
+    "maxAfterOthers": " (after the other amounts entered)",
+    "maxFreeWorkers": " (lower the work rates in City settings to free workers)",
+    "order": "{{n}} {{unit}}",
+    "populationUsed": "population {{used}} of {{idle}} idle",
+    "clear": "Clear",
+    "trainAll": "Train all {{n}}",
+    "buildAll": "Build all {{n}}",
+    "overBudget": "Not enough {{limit}}: lower some amounts.",
+    "units_one": "{{n}} unit",
+    "units_other": "{{n}} units"
+  },
+  "limits": {
+    "idlePopulation": "idle population",
+    "wallSpace": "wall space",
+    "resources": "resources"
+  },
+  "mayorExp": {
+    "perUnit": "Mayor {{name}} gains {{exp}} exp per unit",
+    "total": "<b>+{{exp}} exp</b> for {{n}}"
+  },
+  "mayorTraining": {
+    "noMayorTrain": "No mayor: appoint one with high {{stat}} in the Heroes tab to train faster.",
+    "noMayorBuild": "No mayor: appoint one with high {{stat}} in the Heroes tab to build fortifications faster.",
+    "train": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}}% (new batches). A mayor with higher {{stat}} trains faster.",
+    "build": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}}% (new batches). A mayor with higher {{stat}} builds them faster."
+  },
+  "trainDiscount": {
+    "active": "Training cost −{{percent}}% (Quartermaster): the costs below include it.",
+    "timed": "Training cost −{{percent}}% (Quartermaster) for {{time}}: the costs below include it."
+  },
+  "trainEstimate": {
+    "instant": "instant (mayor and Military Science fast enough)",
+    "perUnit": "{{time}} per unit",
+    "readyIn": "{{perUnit}} · {{n}} ready in {{time}}",
+    "split": "{{perUnit}} · {{n}} ready in <b>{{time}}</b> across {{lanes}} barracks ({{shares}}) instead of {{single}} in one",
+    "queuesFull": "Every barracks queue is full."
+  }
+}

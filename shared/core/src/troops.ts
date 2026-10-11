@@ -15,6 +15,7 @@ import {
 import { troopConfig } from './data/index.ts';
 import { buildingLevel, researchLevel } from './economy.ts';
 import { GameError } from './errors.ts';
+import { msg } from './messages/index.ts';
 import type { BuildingState, FortCounts, ResearchState, TroopCounts } from './types.ts';
 
 /** Battle/legacy order: index = troop id - 2. */
@@ -72,12 +73,12 @@ export function hasTroops(have: TroopCounts, need: TroopCounts): boolean {
 export function sanitizeTroops(input: Record<string, unknown>, allowEmpty = false): TroopCounts {
   const out: TroopCounts = {};
   for (const [k, v] of Object.entries(input ?? {})) {
-    if (!(TROOP_KEY_LIST as string[]).includes(k)) throw new GameError(`Unknown troop type ${k}.`, -99);
+    if (!(TROOP_KEY_LIST as string[]).includes(k)) throw new GameError(msg('common.unknownTroopType', { key: k }), -99);
     const n = Number(v ?? 0);
-    if (!Number.isInteger(n) || n < 0) throw new GameError('Invalid troop count.', -99);
+    if (!Number.isInteger(n) || n < 0) throw new GameError(msg('common.invalidTroopCount'), -99);
     if (n > 0) out[k as TroopKey] = n;
   }
-  if (!allowEmpty && totalTroops(out) <= 0) throw new GameError('No troops selected.', -99);
+  if (!allowEmpty && totalTroops(out) <= 0) throw new GameError(msg('common.noTroopsSelected'), -99);
   return out;
 }
 

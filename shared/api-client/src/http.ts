@@ -5,6 +5,7 @@
 // (thrown as ApiError).
 
 import { client } from './generated/client.gen.ts';
+import type { Message } from './generated/types.gen.ts';
 
 export interface ApiClientOptions {
   /** API origin, e.g. `http://localhost:3000`; '' for same-origin (behind a proxy) */
@@ -16,23 +17,29 @@ export interface ApiClientOptions {
   fetch?: typeof globalThis.fetch;
 }
 
-/** A failed call: `code` is the game's (negative) error code, `status` the HTTP status. */
+/**
+ * A failed call: `code` is the game's (negative) error code, `status` the HTTP status, and `error` what to tell the
+ * player, as a message code + params (null when no answer came back, e.g. the network failed). `message` is
+ * the code, for logs.
+ */
 export class ApiError extends Error {
   readonly code: number;
   readonly status: number;
+  readonly error: Message | null;
   readonly issues?: { path: string; message?: string }[];
-  constructor(code: number, message: string, status: number, issues?: { path: string; message?: string }[]) {
-    super(message);
+  constructor(code: number, error: Message | null, status: number, issues?: { path: string; message?: string }[]) {
+    super(error?.code ?? `HTTP ${status}`);
     this.name = 'ApiError';
     this.code = code;
     this.status = status;
+    this.error = error;
     this.issues = issues;
   }
 }
 
 interface ErrorBody {
   ok: number;
-  errorMsg: string;
+  error: Message;
   issues?: { path: string; message?: string }[];
 }
 
@@ -56,6 +63,6 @@ export function configureApi(opts: ApiClientOptions = {}) {
   client.interceptors.error.use((error, response) => {
     if (error instanceof ApiError) return error;
     const body = error as Partial<ErrorBody> | undefined;
-    return new ApiError(body?.ok ?? -99, body?.errorMsg ?? (response?.statusText || 'Request failed'), response?.status ?? 0, body?.issues);
+    return new ApiError(body?.ok ?? -99, body?.error ?? null, response?.status ?? 0, body?.issues);
   });
 }

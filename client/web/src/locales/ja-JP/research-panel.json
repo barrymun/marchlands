@@ -1,0 +1,29 @@
+{
+  "title": "研究",
+  "needsAcademy": "技術を研究するには学院を建設してください。",
+  "started": "研究を開始しました",
+  "allDone": {
+    "title": "すべての研究が完了",
+    "description": "{{total}} 種類の技術がすべて最大レベルに達しています。"
+  },
+  "academy": {
+    "title": "学院・研究中 {{busy}}/{{slots}}",
+    "full": "研究枠がすべて使用中です。完了を待つか加速してください。",
+    "slots_other": "この都市では同時に {{count}} 件の技術を研究できます。"
+  },
+  "job": {
+    "progress": "{{name}} → Lv {{level}}",
+    "elsewhere": "（他の都市で研究中）",
+    "cancelled": "{{name}} の研究をキャンセルしました"
+  },
+  "mayor": {
+    "hint": "研究時間には市長 {{name}} の知力 {{intelligence}} による −{{cut}}% が反映されています。知力の高い市長ほど研究が速くなります。",
+    "none": "市長がいません: 英雄タブで知力の高い英雄を市長に任命すると研究が速くなります。"
+  },
+  "tech": {
+    "effective": "（実効 {{level}}）",
+    "research": "研究",
+    "capped": "（学院 Lv {{level}} により上限あり）",
+    "needsAcademy": "（効果の発揮には学院 Lv {{level}} が必要）"
+  }
+}

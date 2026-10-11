@@ -58,6 +58,8 @@ export const BALANCE = {
 
   /** (marchlands) heroes stop levelling here (orig: no limit); they keep growing through gear (gear.ts) */
   heroMaxLevel: 100,
+  /** (evony) the highest loyalty a hero can have; new heroes start at it */
+  heroMaxLoyalty: 100,
   /**
    * (marchlands) hero gear (Age II Hero Enhancement): piece levels follow the Hero Enhancement research,
    * each level adds its number in points (55 per piece at 10); each star adds starPoints; star 10 of a
@@ -125,6 +127,8 @@ export const BALANCE = {
   fortSpace: { 14: 1, 15: 1, 16: 2, 17: 3, 18: 4 } as Record<number, number>,
 
   // ---- army ----
+  /** (evony) a settler army must carry at least this much of each basic resource (food, lumber, stone, iron) to found a city */
+  newCityMinResource: 10_000,
   /** (orig) slowest unit of each group decides speed; values are tiles per 1000 minutes */
   rallySpotArmiesPerLevel: 1,
   /** (evony) troops one army may hold: 10,000 per Rally Spot level (100,000 at level 10) */
@@ -197,6 +201,8 @@ export const BALANCE = {
   allianceCreateGold: 10_000, // (orig)
   allianceMaxMembers: 500, // (orig)
   allianceWarCooldownMs: 24 * HOUR, // (orig)
+  /** (orig) game hours before a player may rejoin the alliance they left */
+  allianceRejoinCooldownHours: 23,
 
   // ---- market ----
   marketFee: 0.005, // (evony) 0.5% of gold paid
@@ -229,6 +235,10 @@ export const BALANCE = {
   medalDrops: { base: 0.1, perLevel: 0.07, secondFrom: 8, secondPerLevel: 0.25, thirdFrom: 9, thirdPerLevel: 0.2 },
   /** (marchlands) share of troop training cost saved while a Quartermaster item's buff runs (fortifications pay in full) */
   trainCostReduction: 0.25,
+  /** (evony) attack / defence items: the army's attack or defence +20% in battle */
+  battleBuffBonus: 0.2,
+  /** (evony) upkeep item: troop food upkeep -50% */
+  upkeepBuffReduction: 0.5,
   /** (marchlands) items that can be bought with city gold, and their price (item id -> gold each) */
   // set prices; every other item the original sold for cents costs goldForCents(its price) (itemGoldPrice)
   goldShop: {

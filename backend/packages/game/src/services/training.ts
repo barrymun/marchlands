@@ -6,6 +6,8 @@ import {
   BuildingType,
   buildingLevel,
   FORT_KEYS,
+  FORT_ID_BY_KEY,
+  TROOP_ID_BY_KEY,
   GameError,
   prestigeOf,
   PrestigeAction,
@@ -36,6 +38,9 @@ import {
   healCost,
   healHonorCost,
   addHeroExp,
+  msg,
+  ref,
+  BATCH_SPEEDUP_SHARE,
 } from '@marchlands/core';
 import { cityStats, mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -47,6 +52,8 @@ import { PushCmd } from '@marchlands/contracts';
 
 export const WALLS_QUEUE = -2;
 const refKey = (cityId: number, pos: number) => `train:${cityId}:${pos}`;
+/** trainMany: the most unit types one request may order. */
+const MAX_ORDERS = 20;
 
 /** Whether any barracks of the city has room in its queue (a barracks queues as many batches as its level). */
 export function hasTrainingRoom(b: CityBundle): boolean {
@@ -107,7 +114,7 @@ function pushQueues(ctx: Ctx, b: CityBundle, positionId: number) {
 
 async function ownView(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewCity(ctx, cityId);
-  if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (b.city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   return b;
 }
 
@@ -164,18 +171,23 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
   assertCanTrain(troopId, count, b.city.buildings, b.player.research, b.player.items, fort);
   const building = fort ? findBuilding(b.city.buildings, -2) : findBuilding(b.city.buildings, positionId);
   if (!building || building.typeId !== (fort ? BuildingType.WALLS : BuildingType.BARRACKS) || building.level < 1) {
-    throw new GameError(fort ? 'You need Walls to build fortifications.' : 'Invalid barracks.', -99);
+    throw new GameError(
+      fort
+        ? msg('training.wallsNeeded', { building: ref.building(BuildingType.WALLS) })
+        : msg('training.invalidBarracks', { building: ref.building(BuildingType.BARRACKS) }),
+      -99,
+    );
   }
   const { queue, nextQueueId } = queueOf(b, positionId);
-  if (queue.length >= building.level) throw new GameError('Troops could not be trained: the queue is full.', -99);
+  if (queue.length >= building.level) throw new GameError(msg('training.queueFull'), -99);
   const cfg = troopConfig(troopId)!;
   if (fort) {
     const space = usedWallSpace(b.city.forts, queue) + count * (BALANCE.fortSpace[troopId] ?? 1);
-    if (space > wallCapacity(b.city.buildings)) throw new GameError('Not enough space on the walls.', -99);
+    if (space > wallCapacity(b.city.buildings)) throw new GameError(msg('training.wallSpaceFull'), -99);
   }
   const pop = cfg.population * count;
   const stats = cityStats(b, ctx.now);
-  if (pop > stats.idlePopulation) throw new GameError('Not enough population.', -1);
+  if (pop > stats.idlePopulation) throw new GameError(msg('training.notEnoughPopulation'), -1);
   const share = fort ? 1 : troopCostShare(b.player.buffs, ctx.now);
   const cost = trainCost(troopId, count, share);
   spendResources(b.city, cost);
@@ -218,10 +230,10 @@ export async function trainMany(
   orders: { troopId: number; count: number }[],
   opts: { fort: boolean; split: boolean; positionId?: number },
 ): Promise<{ orders: number; units: number }> {
-  if (!orders.length || orders.length > 20) throw new GameError('Order 1 to 20 unit types at a time.', -99);
-  if (new Set(orders.map((o) => o.troopId)).size !== orders.length) throw new GameError('Each unit type can be ordered once.', -99);
+  if (!orders.length || orders.length > MAX_ORDERS) throw new GameError(msg('training.orderLimit', { max: MAX_ORDERS }), -99);
+  if (new Set(orders.map((o) => o.troopId)).size !== orders.length) throw new GameError(msg('training.duplicateOrder'), -99);
   for (const o of orders) {
-    if (!Number.isInteger(o.count) || o.count < 1) throw new GameError('Invalid amount.', -99);
+    if (!Number.isInteger(o.count) || o.count < 1) throw new GameError(msg('common.invalidAmount'), -99);
     if (opts.fort) await train(ctx, playerId, cityId, o.troopId, o.count, WALLS_QUEUE);
     else if (opts.split) await trainSplit(ctx, playerId, cityId, o.troopId, o.count);
     else await train(ctx, playerId, cityId, o.troopId, o.count, opts.positionId ?? -999);
@@ -237,7 +249,7 @@ export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, tro
   const b = await openOwnCity(ctx, playerId, cityId);
   assertCanTrain(troopId, count, b.city.buildings, b.player.research, b.player.items, false);
   const cfg = troopConfig(troopId)!;
-  if (cfg.inside === 2) throw new GameError('Fortifications are built at the walls.', -99);
+  if (cfg.inside === 2) throw new GameError(msg('training.fortsAtWalls'), -99);
   const lanes: SplitLane[] = [];
   for (const x of b.city.buildings) {
     if (x.typeId !== BuildingType.BARRACKS || x.level < 1) continue;
@@ -247,9 +259,9 @@ export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, tro
     const busyUntil = head ? Math.max(ctx.now, head.endTime || ctx.now + head.costTime) + queue.slice(1).reduce((t, q) => t + q.costTime, 0) : ctx.now;
     lanes.push({ positionId: x.positionId, freeAt: busyUntil });
   }
-  if (lanes.length === 0) throw new GameError('Every barracks queue is full.', -99);
+  if (lanes.length === 0) throw new GameError(msg('training.allQueuesFull', { building: ref.building(BuildingType.BARRACKS) }), -99);
   const pop = cfg.population * count;
-  if (pop > cityStats(b, ctx.now).idlePopulation) throw new GameError('Not enough population.', -1);
+  if (pop > cityStats(b, ctx.now).idlePopulation) throw new GameError(msg('training.notEnoughPopulation'), -1);
   const share = troopCostShare(b.player.buffs, ctx.now);
   const cost = trainCost(troopId, count, share);
   spendResources(b.city, cost);
@@ -290,7 +302,7 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
   const b = await openOwnCity(ctx, playerId, cityId);
   const { queue, nextQueueId } = queueOf(b, positionId);
   const idx = queue.findIndex((q) => q.queueId === queueId);
-  if (idx < 0) throw new GameError('Batch not found.', -99, 404);
+  if (idx < 0) throw new GameError(msg('training.batchNotFound'), -99, 404);
   const batch = queue[idx];
   const share = idx === 0 ? BALANCE.cancelTrainInProgressRefund : BALANCE.cancelTrainQueuedRefund;
   const paid = trainCost(batch.troopId, batch.count, batch.paidShare ?? 1);
@@ -307,7 +319,7 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
 }
 
 /** Napoleon's Diary / Archimedes' Note: the share of a batch's full time they cut. */
-const BATCH_SPEEDUP = 0.3;
+const BATCH_SPEEDUP = BATCH_SPEEDUP_SHARE;
 
 /**
  * A waiting batch starts producing at `at`. Time already cut by speed-ups counts as done: the start sits that
@@ -329,7 +341,7 @@ export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number
   const b = await openOwnCity(ctx, playerId, cityId);
   const { queue, nextQueueId } = queueOf(b, positionId);
   const idx = queue.findIndex((q) => q.queueId === queueId);
-  if (idx < 0) throw new GameError('Batch not found.', -99, 404);
+  if (idx < 0) throw new GameError(msg('training.batchNotFound'), -99, 404);
   useItemOrGold(ctx, b.player, b.city, itemId, itemGoldPrice(itemId) ?? 0);
   const batch = queue[idx];
   const next = [...queue];
@@ -406,9 +418,10 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
 /** troop.disbandTroop: dismissed troops return to the population. */
 export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, troopId: number, count: number) {
   const key = troopKey(troopId);
-  if (!key || !Number.isInteger(count) || count < 1) throw new GameError('Invalid troops', -99);
+  if (!key) throw new GameError(msg('common.invalidTroopType'), -99);
+  if (!Number.isInteger(count) || count < 1) throw new GameError(msg('common.invalidTroopCount'), -99);
   const b = await openOwnCity(ctx, playerId, cityId);
-  if ((b.city.troops[key] ?? 0) < count) throw new GameError(`You do not have that many ${key}.`, -99);
+  if ((b.city.troops[key] ?? 0) < count) throw new GameError(msg('training.notEnoughUnits', { unit: ref.troop(TROOP_ID_BY_KEY[key]) }), -99);
   b.city.troops = addTroops(b.city.troops, { [key]: count }, -1);
   const stats = cityStats(b, ctx.now);
   b.city.population = Math.min(stats.maxPopulation, b.city.population + (troopConfig(troopId)?.population ?? 1) * count);
@@ -422,9 +435,10 @@ export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, 
 /** fortifications.destructWallProtect */
 export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, fortId: number, count: number) {
   const key = FORT_KEYS[fortId as keyof typeof FORT_KEYS];
-  if (!key || !Number.isInteger(count) || count < 1) throw new GameError('Invalid trap', -99);
+  if (!key) throw new GameError(msg('training.invalidFort'), -99);
+  if (!Number.isInteger(count) || count < 1) throw new GameError(msg('common.invalidAmount'), -99);
   const b = await openOwnCity(ctx, playerId, cityId);
-  if ((b.city.forts[key] ?? 0) < count) throw new GameError(`You do not have that many ${key}.`, -99);
+  if ((b.city.forts[key] ?? 0) < count) throw new GameError(msg('training.notEnoughUnits', { unit: ref.troop(FORT_ID_BY_KEY[key]) }), -99);
   b.city.forts = addForts(b.city.forts, { [key]: count }, -1);
   ctx.stat(playerId, cityId, { [`disbanded.${key}`]: count });
   ctx.push(playerId, PushCmd.FORTIFICATIONS_UPDATE, { castleId: cityId, fortification: fortBean(b.city.forts) });
@@ -435,13 +449,13 @@ export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, f
 export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, troops: Record<string, number>, payWith: 'resources' | 'honor' = 'resources') {
   const b = await openOwnCity(ctx, playerId, cityId);
   for (const [key, n] of Object.entries(troops)) {
-    if (!Number.isInteger(n) || n < 0) throw new GameError('Invalid troop count.', -99);
-    if ((b.city.injuredTroops[key as keyof typeof b.city.injuredTroops] ?? 0) < n) throw new GameError('Not enough injured troops.', -99);
+    if (!Number.isInteger(n) || n < 0) throw new GameError(msg('common.invalidTroopCount'), -99);
+    if ((b.city.injuredTroops[key as keyof typeof b.city.injuredTroops] ?? 0) < n) throw new GameError(msg('training.notEnoughInjured'), -99);
   }
   if (payWith === 'honor') {
     // honor earned by killing pays to heal: each unit costs its food upkeep x BALANCE.healHonorPerUpkeep
     const honor = healHonorCost(troops);
-    if (b.player.honor < honor) throw new GameError(`Not enough honor: ${honor.toLocaleString('en')} needed.`, -99);
+    if (b.player.honor < honor) throw new GameError(msg('training.notEnoughHonor', { amount: honor }), -99);
     b.player.honor -= honor;
     ctx.stat(playerId, cityId, { 'spent.healing.honor': honor });
     await savePlayer(ctx, b.player);
@@ -464,8 +478,8 @@ export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, tr
 export async function disbandInjured(ctx: Ctx, playerId: number, cityId: number, troops: Record<string, number>) {
   const b = await openOwnCity(ctx, playerId, cityId);
   for (const [key, n] of Object.entries(troops)) {
-    if (!Number.isInteger(n) || n < 0) throw new GameError('Invalid troop count.', -99);
-    if ((b.city.injuredTroops[key as keyof typeof b.city.injuredTroops] ?? 0) < n) throw new GameError('Not enough injured troops.', -99);
+    if (!Number.isInteger(n) || n < 0) throw new GameError(msg('common.invalidTroopCount'), -99);
+    if ((b.city.injuredTroops[key as keyof typeof b.city.injuredTroops] ?? 0) < n) throw new GameError(msg('training.notEnoughInjured'), -99);
   }
   b.city.injuredTroops = addTroops(b.city.injuredTroops, troops, -1);
   ctx.stat(playerId, cityId, prefixed('disbanded', troops));

@@ -1,0 +1,29 @@
+{
+  "title": {
+    "missionAborted": "Mission aborted",
+    "scoutReturned": "Scout Returned",
+    "attackReturned": "Attack Returned",
+    "returned": "Returned",
+    "transportReport": "Transport Report",
+    "transportReceived": "Transport Received",
+    "reinforcementArrived": "Reinforcement Arrived",
+    "reinforcementsFrom": "Reinforcements from {{name}}",
+    "newCityFounded": "New City Founded",
+    "scoutReport": "Scout Report",
+    "enemyScouts": "Enemy Scouts",
+    "scoutsRepelled": "Scouts Repelled",
+    "attackSucceeded": "Attack Succeeded",
+    "attackFailed": "Attack Failed",
+    "cityAttacked": "City Attacked",
+    "attackRepelled": "Attack Repelled",
+    "reinforcementsFought": "Reinforcements Fought",
+    "valleyOccupied": "Valley Occupied",
+    "valleyLost": "Valley Lost",
+    "valleyDefended": "Valley Defended",
+    "tradeCompleted": "Trade Completed",
+    "troopsDeserted": "Troops Deserted"
+  },
+  "notFound": "Report not found.",
+  "oldFormat": "This report was saved in an older format and cannot be shown.",
+  "cityFounded": "{{name}} has been founded."
+}

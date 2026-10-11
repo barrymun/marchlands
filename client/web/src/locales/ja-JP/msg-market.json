@@ -1,0 +1,11 @@
+{
+  "invalidResource": "この資源は取引できません。",
+  "invalidSide": "売るか買うかを選んでください。",
+  "invalidPrice": "価格が正しくありません。",
+  "needMarketplace": "取引するには{{building}}が必要です。",
+  "nothingToTrade": "現在、取引できるものがありません。",
+  "tooManyOrders": "さらに注文を出すには{{building}}をアップグレードしてください。",
+  "notEnoughResource": "{{resource}}が足りません。",
+  "orderNotFound": "注文が見つかりません。",
+  "shipmentNotFound": "輸送が見つかりません。"
+}

@@ -22,6 +22,7 @@ import {
   ResourceSetSchema,
   TroopCountsSchema,
   TroopQueueStateSchema,
+  MessageSchema,
 } from '@marchlands/core';
 import {
   allianceEvents,
@@ -65,14 +66,24 @@ export const CityRow = createSelectSchema(cities, {
   misc: CityMiscSchema,
 });
 export const HeroRow = createSelectSchema(heroes, { buffs: z.array(HeroBuffStateSchema) });
-export const ArmyRow = createSelectSchema(armies, { troops: TroopCountsSchema, resources: ResourceSetSchema });
-export const MailRow = createSelectSchema(mails);
-export const ReportRow = createSelectSchema(reports, { body: ReportBodySchema });
+export const ArmyRow = createSelectSchema(armies, {
+  troops: TroopCountsSchema,
+  resources: ResourceSetSchema,
+  startPosName: MessageSchema.describe('where the army set out from (`world.position.*`)'),
+  targetPosName: MessageSchema.describe('where the army is headed (`world.position.*`)'),
+});
+export const MailRow = createSelectSchema(mails, { system: z.object({ title: MessageSchema, content: MessageSchema }).nullable() });
+export const ReportRow = createSelectSchema(reports, {
+  title: MessageSchema,
+  startPos: MessageSchema.nullable().describe('where the army set out from (`world.position.*`); null when the report has none'),
+  targetPos: MessageSchema.nullable().describe('where the army went (`world.position.*`); null when the report has none'),
+  body: ReportBodySchema,
+});
 export const ChatMessageRow = createSelectSchema(chatMessages);
 export const AllianceRow = createSelectSchema(alliances);
 export const AllianceRelationRow = createSelectSchema(allianceRelations);
 export const AllianceRequestRow = createSelectSchema(allianceRequests);
-export const AllianceEventRow = createSelectSchema(allianceEvents);
+export const AllianceEventRow = createSelectSchema(allianceEvents, { message: MessageSchema });
 export const MarketOrderRow = createSelectSchema(marketOrders);
 export const MarketShipmentRow = createSelectSchema(marketShipments);
 export const QuestProgressRow = createSelectSchema(questProgress);

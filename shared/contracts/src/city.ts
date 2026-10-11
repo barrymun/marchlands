@@ -2,7 +2,7 @@
 // (backend/services/api/src/routes/cities.ts).
 
 import { z } from 'zod';
-import { FortKeySchema, RequirementCheckSchema, ResourceKeySchema, TroopKeySchema } from '@marchlands/core';
+import { FortKeySchema, MessageSchema, RequirementCheckSchema, ResourceKeySchema, TroopKeySchema } from '@marchlands/core';
 import { Ms, ResourceAmounts, zCityParams, zId, zTroops } from './common.ts';
 import { BuildingBean } from './beans.ts';
 
@@ -115,19 +115,24 @@ export const BuildingLevelInfo = z
     ...costShape,
     requirements: z.array(RequirementCheck),
     ok: z.boolean().describe('all requirements met'),
-    effect: z.string().describe('what the building gives at this level ("" when nothing measurable)'),
+    effect: MessageSchema.nullable().describe('what the building gives at this level (`buildingInfo.effect.*`); null when nothing measurable'),
   })
   .meta({ id: 'BuildingLevelInfo' });
 
 export const BuildingDescription = z
   .object({
     typeId: int(),
-    name: z.string(),
-    summary: z.string().describe('what the building does'),
-    placement: z.string().describe('where it can be built and how many'),
+    summary: MessageSchema.nullable().describe('what the building does (`buildingInfo.summary.*`); null for an unknown type'),
+    placement: MessageSchema.nullable().describe('where it can be built and how many (`buildingInfo.placement.*`); null for an unknown type'),
     unlocks: z
-      .array(z.object({ kind: z.enum(['building', 'troop', 'tech']), name: z.string(), level: int().describe('level of this building required') }))
-      .describe('buildings, troops and technologies that need this building'),
+      .array(
+        z.object({
+          kind: z.enum(['building', 'troop', 'tech']),
+          id: int().describe('building type, troop or technology id'),
+          level: int().describe('level of this building required'),
+        }),
+      )
+      .describe('buildings, troops and technologies that need this building, by level needed'),
   })
   .meta({ id: 'BuildingDescription' });
 export type BuildingDescription = z.infer<typeof BuildingDescription>;
@@ -142,7 +147,7 @@ export const BuildingUpgradeInfo = z
   .object({
     building: BuildingBean,
     info: BuildingDescription,
-    effect: z.string().describe('what the building gives at its current level'),
+    effect: MessageSchema.nullable().describe('what the building gives at its current level (`buildingInfo.effect.*`); null when nothing measurable'),
     maxLevel: int(),
     next: BuildingLevelInfo.nullable().describe('null at max level'),
     demolishTime: int().describe('seconds (0: demolition is instant, BALANCE.instantDemolish)'),
@@ -158,7 +163,6 @@ export type BuildingUpgradeInfo = z.infer<typeof BuildingUpgradeInfo>;
 export const TechBean = z
   .object({
     typeId: int(),
-    name: z.string(),
     level: int(),
     maxLevel: int(),
     effectiveLevel: int().describe('level usable in this city (capped by the Academy level)'),
@@ -167,11 +171,19 @@ export const TechBean = z
     startTime: Ms.describe('0 when idle'),
     endTime: Ms.describe('0 when idle'),
     permission: z.boolean().describe('can be researched here now'),
-    description: z.string().describe('what the technology does'),
-    effect: z.string().describe('total effect at the effective level ("" at 0 or when it has no measurable effect)'),
-    nextEffect: z.string().describe('total effect after the next level ("" at max level)'),
+    description: MessageSchema.describe('what the technology does (`techInfo.summary.*`), worded by the client'),
+    effect: MessageSchema.nullable().describe('total effect at the effective level (`techInfo.effect.*`; null at 0 or when it has no measurable effect)'),
+    nextEffect: MessageSchema.nullable().describe(
+      'total effect after the next level (`techInfo.effect.*`; null at max level or when it has no measurable effect)',
+    ),
     unlocks: z
-      .array(z.object({ kind: z.enum(['building', 'troop', 'tech']), name: z.string(), level: int().describe('level of this technology required') }))
+      .array(
+        z.object({
+          kind: z.enum(['building', 'troop', 'tech']),
+          id: int().describe('building type, troop or technology id'),
+          level: int().describe('level of this technology required'),
+        }),
+      )
       .describe('buildings, troops and technologies that need this technology'),
     next: z
       .object({ time: int().describe('seconds'), requirements: z.array(RequirementCheck), ...costShape })
@@ -212,7 +224,7 @@ export const TrainableUnit = z
     time: int().describe('seconds per unit'),
     requirements: z.array(RequirementCheck),
     permission: z.boolean(),
-    description: z.string().describe('role and special battle rules'),
+    description: MessageSchema.optional().describe('role and special battle rules (`troopInfo.*`), worded by the client'),
     stats: z.object({ life: int(), attack: int(), defense: int(), speed: int(), range: int(), load: int(), upkeep: int().describe('food per hour') }),
   })
   .meta({ id: 'TrainableUnit' });

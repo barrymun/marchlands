@@ -3,15 +3,17 @@
 // everything back. Repeat runs the flow again after every run; one flow runs at a time, others queue.
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react';
 import { deletePlayerFlowsByFlowId, getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows, type CityBean, type Flow } from '@marchlands/api-client';
-import { describeFlowAction } from '@marchlands/core';
+import { flowActionMessage } from '@marchlands/core';
 import { toast } from 'sonner';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { errorMessage } from '@/lib/api';
+import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
 import type { EditDraft } from '@/components/flows-panel/types';
 import { currentAction, keyed, strip } from '@/components/flows-panel/utils';
@@ -22,6 +24,7 @@ import { RunFlow } from '@/components/flows-panel/run-flow/run-flow';
 import { CitiesSummary } from '@/components/flows-panel/cities-summary/cities-summary';
 
 export function FlowsPanel({ city }: { city: CityBean }) {
+  const { t } = useTranslation(['flows-panel', 'common']);
   const qc = useQueryClient();
   const flows = useQuery(getPlayerFlowsOptions());
   const list = flows.data ?? [];
@@ -40,7 +43,7 @@ export function FlowsPanel({ city }: { city: CityBean }) {
       const flow = e.id ? saved.find((f) => f.id === e.id) : (saved.find((f) => f.name === e.name.trim()) ?? saved[saved.length - 1]);
       setSelectedId(flow?.id ?? null);
       setEditing(null);
-      toast.success(`Saved "${e.name.trim()}"`);
+      toast.success(t('common:savedName', { name: e.name.trim() }));
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
@@ -52,7 +55,7 @@ export function FlowsPanel({ city }: { city: CityBean }) {
     onSuccess: (saved) => {
       qc.setQueryData(getPlayerFlowsQueryKey(), saved);
       setSelectedId(null);
-      toast.success('Flow deleted');
+      toast.success(t('toasts.deleted'));
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
@@ -65,15 +68,15 @@ export function FlowsPanel({ city }: { city: CityBean }) {
       <Card className="content-start self-start">
         <CardHeader className="flex flex-row items-start justify-between gap-2 pb-2">
           <div className="grid gap-1">
-            <CardTitle className="text-sm">Flows</CardTitle>
-            <CardDescription>A series of actions you run on any of your cities at once.</CardDescription>
+            <CardTitle className="text-sm">{t('list.title')}</CardTitle>
+            <CardDescription>{t('list.description')}</CardDescription>
           </div>
           <Button size="sm" onClick={startNew}>
-            <Plus /> New
+            <Plus /> {t('list.new')}
           </Button>
         </CardHeader>
         <CardContent className="grid gap-1.5">
-          {list.length === 0 && <p className="text-sm text-muted-foreground">No flows yet.</p>}
+          {list.length === 0 && <p className="text-sm text-muted-foreground">{t('list.empty')}</p>}
           {list.map((f) => (
             <button
               key={f.id}
@@ -89,7 +92,7 @@ export function FlowsPanel({ city }: { city: CityBean }) {
                 <StatusBadge flow={f} />
               </span>
               <span className="truncate text-xs text-muted-foreground">
-                {f.actions.length} action{f.actions.length === 1 ? '' : 's'} · {f.actions.map(describeFlowAction).join(' → ')}
+                {t('list.actions', { count: f.actions.length })} · {f.actions.map((a) => translateMessage(flowActionMessage(a))).join(' → ')}
               </span>
             </button>
           ))}
@@ -112,16 +115,16 @@ export function FlowsPanel({ city }: { city: CityBean }) {
                 <CardTitle className="text-sm">{selected.name}</CardTitle>
                 <div className="flex gap-1">
                   <Button size="sm" variant="outline" onClick={() => startEdit(selected)}>
-                    Edit
+                    {t('common:actions.edit')}
                   </Button>
                   <ConfirmButton
                     size="sm"
                     variant="ghost"
-                    aria-label={`Delete ${selected.name}`}
+                    aria-label={t('detail.deleteLabel', { name: selected.name })}
                     disabled={remove.isPending}
-                    title={`Delete the flow "${selected.name}"?`}
-                    description="Its actions and settings are removed, and a run in progress stops. This cannot be undone."
-                    confirmLabel="Delete flow"
+                    title={t('detail.deleteTitle', { name: selected.name })}
+                    description={t('detail.deleteDescription')}
+                    confirmLabel={t('detail.deleteConfirm')}
                     onConfirm={() => remove.mutateAsync(selected.id)}
                   >
                     <Trash2 />
@@ -140,18 +143,16 @@ export function FlowsPanel({ city }: { city: CityBean }) {
                       >
                         {i + 1}
                       </span>
-                      {describeFlowAction(a)}
+                      {translateMessage(flowActionMessage(a))}
                     </li>
                   ))}
                 </ol>
                 <StatusLine flow={selected} />
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Runs on: <CitiesSummary targets={selected.cities ?? 'all'} />
+                  {t('detail.runsOn')} <CitiesSummary targets={selected.cities ?? 'all'} />
                 </p>
                 {selected.actions.some((a) => a.type === 'attackTargets' && !a.presetId) && (
-                  <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
-                    Choose a saved army for the attack (Edit): until then its targets are skipped.
-                  </p>
+                  <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">{t('detail.noArmy')}</p>
                 )}
               </CardContent>
             </Card>
@@ -159,7 +160,7 @@ export function FlowsPanel({ city }: { city: CityBean }) {
           </>
         ) : (
           <Card>
-            <CardContent className="py-8 text-center text-sm text-muted-foreground">Pick a flow, or create a new one.</CardContent>
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">{t('detail.pickFlow')}</CardContent>
           </Card>
         )}
       </div>

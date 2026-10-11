@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import type { Job } from '@/components/activity-dock/types';
 import { Progress } from '@/components/ui/progress';
 import { duration } from '@/lib/format';
 
 export function JobRow({ job, now }: { job: Job; now: number }) {
+  const { t } = useTranslation('activity-dock');
   const total = job.endTime - job.startTime;
   const pct = total > 0 ? Math.min(100, Math.max(0, ((now - job.startTime) / total) * 100)) : 100;
   const left = job.endTime - now;
@@ -17,7 +19,7 @@ export function JobRow({ job, now }: { job: Job; now: number }) {
           {job.label}
           {job.note && <span className="text-muted-foreground"> · {job.note}</span>}
         </span>
-        <span className="shrink-0 text-muted-foreground tabular-nums">{left > 0 ? duration(left) : 'finishing…'}</span>
+        <span className="shrink-0 text-muted-foreground tabular-nums">{left > 0 ? duration(left) : t('finishing')}</span>
       </span>
       <Progress value={pct} className="h-1" />
     </button>

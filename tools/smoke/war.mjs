@@ -82,7 +82,7 @@ async function main() {
   await ok(gm, 'POST', '/admin/items', { playerName: b.name, items: { 'consume.move.1': 1 } });
   const moved = await ok(b.token, 'POST', `/cities/${b.city.id}/move`, { targetTileId: spot.id });
   const again = await call(b.token, 'POST', `/cities/${b.city.id}/move`, { targetTileId: spot.id });
-  check(again.ok !== 1 && /cooldown/i.test(again.errorMsg ?? ''), 'City Teleporter cools down after a move');
+  check(again.ok !== 1 && again.error?.code === 'city.teleportCooldown', 'City Teleporter cools down after a move');
   b.city = { ...b.city, ...moved };
   check(moved.fieldId === spot.id, `defender teleported next door (${moved.x},${moved.y})`);
 
@@ -93,10 +93,16 @@ async function main() {
 
   // ---- scouting ----
   await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: b.city.fieldId, mission: 3, troops: { scouter: 200 } });
-  const scout = await until(async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.find((r) => r.title === 'Scout Report'), 'scout report');
+  const scout = await until(
+    async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.find((r) => r.title.code === 'report.title.scoutReport'),
+    'scout report',
+  );
   const scoutFull = await ok(a.token, 'GET', `/reports/${scout.id}`);
   check(scoutFull.content.scout.success === true && scoutFull.content.scout.intel.troops.militia === 300, 'scouts saw 300 warriors');
-  const defRep = await until(async () => (await ok(b.token, 'GET', '/reports?type=1')).reports.find((r) => r.title === 'Enemy Scouts'), 'defender notified');
+  const defRep = await until(
+    async () => (await ok(b.token, 'GET', '/reports?type=1')).reports.find((r) => r.title.code === 'report.title.enemyScouts'),
+    'defender notified',
+  );
   check(!!defRep, 'defender got an "Enemy Scouts" report');
   await until(async () => (await ok(a.token, 'GET', '/armies')).self.length === 0, 'scouts back home');
 
@@ -112,7 +118,10 @@ async function main() {
   const enemyView = await ok(b.token, 'GET', '/armies');
   check(enemyView.enemy.length === 1, 'defender sees the incoming army (beacon tower)');
   const attackRep = await until(
-    async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.find((r) => r.attack && r.title.startsWith('Attack')),
+    async () =>
+      (await ok(a.token, 'GET', '/reports?type=1')).reports.find(
+        (r) => r.attack && ['report.title.attackSucceeded', 'report.title.attackFailed'].includes(r.title.code),
+      ),
     'attack report',
   );
   const full = await ok(a.token, 'GET', `/reports/${attackRep.id}`);
@@ -124,7 +133,7 @@ async function main() {
   const bAfter = await ok(b.token, 'GET', `/cities/${b.city.id}`);
   check(!('support' in bAfter.resource), 'cities report no loyalty');
   check((bAfter.troop.militia ?? 0) < 300, 'defender lost warriors');
-  await until(async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.some((r) => r.title === 'Attack Returned'), 'army returned');
+  await until(async () => (await ok(a.token, 'GET', '/reports?type=1')).reports.some((r) => r.title.code === 'report.title.attackReturned'), 'army returned');
   const after = await ok(a.token, 'GET', `/cities/${a.city.id}`);
   check(after.resource.food.amount > before.resource.food.amount - 1, 'loot delivered home');
   const heroAfter = after.heros.find((h) => h.id === hero.id);
@@ -137,10 +146,12 @@ async function main() {
     await ok(a.token, 'POST', `/cities/${a.city.id}/armies`, { targetTileId: v.id, mission: 5, troops: { lightCavalry: 1000 }, heroId: hero.id });
     const vr = await until(
       async () =>
-        (await ok(a.token, 'GET', '/reports?type=1')).reports.find((r) => r.title.startsWith('Valley') || (r.attack && r.targetPos.includes('Grass'))),
+        (await ok(a.token, 'GET', '/reports?type=1')).reports.find(
+          (r) => r.title.code.startsWith('report.title.valley') || (r.attack && r.targetPos?.params?.tile?.id === 5) /* a grassland tile */,
+        ),
       'valley report',
     );
-    check(vr.title === 'Valley Occupied', `valley attack: ${vr.title}`);
+    check(vr.title.code === 'report.title.valleyOccupied', `valley attack: ${vr.title.code}`);
     const c = await ok(a.token, 'GET', `/cities/${a.city.id}`);
     check(
       c.fields.some((f) => f.id === v.id),

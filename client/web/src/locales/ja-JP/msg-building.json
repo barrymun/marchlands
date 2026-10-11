@@ -1,0 +1,22 @@
+{
+  "invalidBuilding": "無効な建物です。",
+  "notFound": "建物が見つかりません。",
+  "invalidPosition": "無効な建設位置です。",
+  "cannotBuild": "この建物は建設できません。",
+  "cannotBuildHere": "{{building}}はここに建設できません。",
+  "positionTaken": "その位置にはすでに建物があります。",
+  "limitReached": "この都市にはこれ以上{{building}}を建設できません。",
+  "slotLocked": "その区画はまだ解放されていません。",
+  "queuesBusy": "建設キューがすべて使用中です。",
+  "requirementsNotMet": "この建物の建設条件を満たしていません。",
+  "statusChanged": "ネットワークの遅延などにより、この建物の状態が変わりました。このメッセージが続く場合は、ページを再読み込みしてください。",
+  "maxLevel": "{{building}}はすでに最大レベルです。",
+  "busy": "この建物は作業中です。",
+  "nothingToDemolish": "ここには取り壊せる建物がありません。",
+  "cannotDemolish": "{{building}}は取り壊せません。",
+  "notInProgress": "ここでは建設も取り壊しも行われていません。",
+  "invalidTech": "無効な技術です。",
+  "academyNeeded": "研究するには、まず{{building}}を建設してください。",
+  "techRequirementsNotMet": "この研究の条件を満たしていません。",
+  "troopRequirementsNotMet": "このユニットの条件を満たしていません。"
+}

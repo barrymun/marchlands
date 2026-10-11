@@ -27,6 +27,7 @@ import {
   healCost,
   heroItemGoldPrice,
   syncHeroBuffs,
+  heroBuffDesc,
   upgradeExpFor,
   levelUpAll,
   fullDemolishRefund,
@@ -463,7 +464,7 @@ describe('hero attribute boosts', () => {
       powerBuffAdded: 32,
       managementBuffAdded: 0,
       stratagemBuffAdded: 0,
-      buffs: [{ id: 'power', desc: 'power +25%', endTime: 1, param: 32 }],
+      buffs: [{ id: 'power', desc: heroBuffDesc('power'), endTime: 1, param: 32 }],
     };
     expect(syncHeroBuffs(h)).toBe(false);
     h.power = 161;
@@ -672,7 +673,7 @@ describe('hero gear', () => {
       powerBuffAdded: 0,
       managementBuffAdded: 0,
       stratagemBuffAdded: 0,
-      buffs: [{ id: 'power', desc: '', endTime: 1, param: 0 }],
+      buffs: [{ id: 'power', desc: heroBuffDesc('power'), endTime: 1, param: 0 }],
     };
     syncHeroBuffs(h);
     expect(h.power + h.powerAdded + h.powerBuffAdded).toBe(1_219);

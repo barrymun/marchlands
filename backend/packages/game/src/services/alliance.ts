@@ -2,7 +2,7 @@
 // Ranks: 4 Host, 5 Vice Host, 6 Presbyter, 7 Officer, 8 Member (lower = more power).
 
 import { and, asc, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
-import { AllianceRank, BALANCE, BuildingType, buildingLevel, GameError, Relation, scaled } from '@marchlands/core';
+import { AllianceRank, BALANCE, BuildingType, buildingLevel, GameError, msg, ref, Relation, scaled, type Message, HOUR } from '@marchlands/core';
 import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, players } from '@marchlands/db';
 import { openOwnCity } from '../city.ts';
 import { sendSystemMail } from './mail.ts';
@@ -13,8 +13,17 @@ import { PushCmd } from '@marchlands/contracts';
 
 export type AllianceRow = typeof alliances.$inferSelect;
 
-export const RANK_NAMES: Record<number, string> = { 4: 'Host', 5: 'Vice Host', 6: 'Presbyter', 7: 'Officer', 8: 'Member' };
-export const rankName = (r: number) => RANK_NAMES[r] ?? 'No Rank';
+/** A relation's name as a message (1 ally, 2 neutral, 3 enemy). */
+const RELATION_MSGS: Record<number, Message> = {
+  [Relation.ALLY]: msg('alliance.relation.ally'),
+  [Relation.NEUTRAL]: msg('alliance.relation.neutral'),
+  [Relation.ENEMY]: msg('alliance.relation.enemy'),
+};
+
+/** Alliance names: length and allowed characters. */
+const NAME_MIN = 2;
+const NAME_MAX = 20;
+/** Hours (game time) before a player may rejoin the alliance they left (orig). */
 
 /** Max members of a rank (Evony limits); Host is unique. */
 const RANK_LIMITS: Record<number, number> = { 4: 1, 5: 2, 6: 4, 7: 10 };
@@ -22,7 +31,7 @@ const RANK_LIMITS: Record<number, number> = { 4: 1, 5: 2, 6: 4, 7: 10 };
 async function getAlliance(ctx: Ctx, id: number, lock = false): Promise<AllianceRow> {
   const q = ctx.tx.select().from(alliances).where(eq(alliances.id, id));
   const [row] = lock ? await q.for('update') : await q;
-  if (!row) throw new GameError('Alliance does not exist.', -99, 404);
+  if (!row) throw new GameError(msg('alliance.notFound'), -99, 404);
   return row;
 }
 async function allianceByName(ctx: Ctx, name: string, lock = false): Promise<AllianceRow> {
@@ -31,7 +40,7 @@ async function allianceByName(ctx: Ctx, name: string, lock = false): Promise<All
     .from(alliances)
     .where(sql`lower(${alliances.name}) = lower(${name})`);
   const [row] = lock ? await q.for('update') : await q;
-  if (!row) throw new GameError('Alliance does not exist.', -99, 404);
+  if (!row) throw new GameError(msg('alliance.namedNotFound', { name }), -99, 404);
   return row;
 }
 async function saveAlliance(ctx: Ctx, a: AllianceRow) {
@@ -40,12 +49,12 @@ async function saveAlliance(ctx: Ctx, a: AllianceRow) {
 }
 
 function requireMember(p: PlayerRow): number {
-  if (!p.allianceId) throw new GameError('Not a member of an alliance.', -99);
+  if (!p.allianceId) throw new GameError(msg('alliance.notMember'), -99);
   return p.allianceId;
 }
 function requireRank(p: PlayerRow, maxRank: number) {
   requireMember(p);
-  if (p.allianceRank > maxRank) throw new GameError('You are not entitled to operate.', -42);
+  if (p.allianceRank > maxRank) throw new GameError(msg('alliance.rankTooLow'), -42);
 }
 
 async function memberIds(ctx: Ctx, allianceId: number): Promise<number[]> {
@@ -54,20 +63,19 @@ async function memberIds(ctx: Ctx, allianceId: number): Promise<number[]> {
 }
 
 /** Alliance-wide system message + event log entry. */
-async function announce(ctx: Ctx, allianceId: number, msg: string, opts: { noSender?: boolean } = {}) {
-  await ctx.tx.insert(allianceEvents).values({ allianceId, message: msg, createdAt: ctx.now });
+async function announce(ctx: Ctx, allianceId: number, message: Message, opts: { noSender?: boolean } = {}) {
+  await ctx.tx.insert(allianceEvents).values({ allianceId, message, createdAt: ctx.now });
   ctx.push(await memberIds(ctx, allianceId), PushCmd.SYSTEM_INFO_MESSAGE, {
     alliance: true,
-    sender: 'Alliance Msg',
     tV: false,
     noSenderSystemInfo: opts.noSender ?? false,
-    msg,
+    msg: message,
   });
 }
 
 async function joinPlayer(ctx: Ctx, p: PlayerRow, a: AllianceRow, rank: number) {
   const [{ n }] = await ctx.tx.select({ n: count() }).from(players).where(eq(players.allianceId, a.id));
-  if (Number(n) >= a.maxMembers) throw new GameError('The alliance is full.', -99);
+  if (Number(n) >= a.maxMembers) throw new GameError(msg('alliance.full'), -99);
   p.allianceId = a.id;
   p.allianceRank = rank;
   p.allianceJoinedAt = ctx.now;
@@ -78,8 +86,8 @@ async function joinPlayer(ctx: Ctx, p: PlayerRow, a: AllianceRow, rank: number) 
 }
 
 function assertRejoinCooldown(p: PlayerRow, allianceId: number, now: number) {
-  if (p.misc.lastAllianceLeftId === allianceId && now - (p.misc.lastAllianceLeftAt ?? 0) < scaled(23 * 3_600_000)) {
-    throw new GameError('Can not join the same Alliance again in 23 hours.', -301);
+  if (p.misc.lastAllianceLeftId === allianceId && now - (p.misc.lastAllianceLeftAt ?? 0) < scaled(BALANCE.allianceRejoinCooldownHours * HOUR)) {
+    throw new GameError(msg('alliance.rejoinCooldown', { count: BALANCE.allianceRejoinCooldownHours }), -301);
   }
 }
 
@@ -106,7 +114,6 @@ export async function myAlliance(ctx: Ctx, playerId: number) {
   return {
     ...(await relationLists(ctx, a.id)),
     myRank: p.allianceRank,
-    myRankName: rankName(p.allianceRank),
     alliance: {
       id: a.id,
       allianceName: a.name,
@@ -191,7 +198,6 @@ export async function members(ctx: Ctx, playerId: number) {
     prestige: Math.floor(r.prestige),
     honor: Math.floor(r.honor),
     castleCount: Number(r.castleCount),
-    allianceLevel: rankName(r.levelId),
   }));
 }
 
@@ -236,17 +242,20 @@ export async function militarySituation(ctx: Ctx, playerId: number) {
 /** alliance.createAlliance: 10,000 gold from the given city. */
 export async function createAlliance(ctx: Ctx, playerId: number, cityId: number, rawName: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  if (p.allianceId) throw new GameError('Already a member of an alliance.', -99);
+  if (p.allianceId) throw new GameError(msg('alliance.alreadyMember'), -99);
   const name = String(rawName ?? '').trim();
-  if (name.length < 2 || name.length > 20 || !/^[\p{L}\p{N} _.-]+$/u.test(name)) throw new GameError('Illegal naming, please choose another name.', -99);
+  if (name.length < NAME_MIN || name.length > NAME_MAX) {
+    throw new GameError(msg('common.nameLength', { what: msg('alliance.name'), min: NAME_MIN, max: NAME_MAX }), -99);
+  }
+  if (!/^[\p{L}\p{N} _.-]+$/u.test(name)) throw new GameError(msg('common.nameInvalid', { what: msg('alliance.name') }), -99);
   assertClean(name);
   const [dupe] = await ctx.tx
     .select({ id: alliances.id })
     .from(alliances)
     .where(sql`lower(${alliances.name}) = lower(${name})`);
-  if (dupe) throw new GameError(`Alliance already existed: ${name}.`, -12, 409);
+  if (dupe) throw new GameError(msg('alliance.nameTaken', { name }), -12, 409);
   const b = await openOwnCity(ctx, playerId, cityId);
-  spendResources(b.city, { gold: BALANCE.allianceCreateGold }, 'Not enough gold.', -99);
+  spendResources(b.city, { gold: BALANCE.allianceCreateGold }, msg('common.notEnoughGold'), -99);
   ctx.stat(playerId, cityId, { 'spent.other.gold': BALANCE.allianceCreateGold });
   await saveCity(ctx, b.city);
   const [a] = await ctx.tx
@@ -254,8 +263,8 @@ export async function createAlliance(ctx: Ctx, playerId: number, cityId: number,
     .values({ name, founderName: p.name, leaderPlayerId: p.id, maxMembers: BALANCE.allianceMaxMembers, memberCount: 1, createdAt: ctx.now })
     .returning();
   await joinPlayer(ctx, p, a, AllianceRank.HOST);
-  await announce(ctx, a.id, `Establish alliance ${name} successfully.`);
-  return { id: a.id, msg: `Establish alliance ${name} successfully.` };
+  await announce(ctx, a.id, msg('alliance.event.created', { name }));
+  return { id: a.id, msg: msg('alliance.event.created', { name }) };
 }
 
 /** alliance.setAllInfoForAlliance (Host / Vice Host) */
@@ -285,7 +294,7 @@ export async function leaveAlliance(ctx: Ctx, playerId: number, opts: { force?: 
   const a = await getAlliance(ctx, allianceId, true);
   const [{ n }] = await ctx.tx.select({ n: count() }).from(players).where(eq(players.allianceId, allianceId));
   if (p.allianceRank === AllianceRank.HOST && Number(n) > 1 && !opts.force) {
-    throw new GameError('Resignation refused. Please transfer your host title to other before you resign.', -99);
+    throw new GameError(msg('alliance.hostMustTransfer'), -99);
   }
   p.allianceId = null;
   p.allianceRank = 0;
@@ -307,7 +316,7 @@ export async function leaveAlliance(ctx: Ctx, playerId: number, opts: { force?: 
       await saveAlliance(ctx, a);
     }
   }
-  await announce(ctx, allianceId, `${p.name} has left the alliance`, { noSender: true });
+  await announce(ctx, allianceId, msg('alliance.event.left', { name: p.name }), { noSender: true });
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -319,8 +328,8 @@ export async function invite(ctx: Ctx, playerId: number, userName: string) {
   const p = await getPlayer(ctx, playerId);
   requireRank(p, AllianceRank.PRESIDENT);
   const target = await findPlayerByName(ctx, userName);
-  if (!target) throw new GameError(`Player ${userName} doesn't exist.`, -41, 404);
-  if (target.allianceId) throw new GameError(`${userName} is already a member of other alliance.`, -99);
+  if (!target) throw new GameError(msg('common.playerNamedNotFound', { name: userName }), -41, 404);
+  if (target.allianceId) throw new GameError(msg('alliance.playerInOtherAlliance', { name: userName }), -99);
   await ctx.tx
     .insert(allianceRequests)
     .values({ allianceId: p.allianceId!, playerId: target.id, kind: 'invite', invitedByName: p.name, createdAt: ctx.now })
@@ -330,7 +339,7 @@ export async function invite(ctx: Ctx, playerId: number, userName: string) {
     alliance: false,
     tV: false,
     noSenderSystemInfo: false,
-    msg: `You have been invited to the alliance ${a.name}`,
+    msg: msg('alliance.invited', { name: a.name }),
   });
   ctx.push(target.id, PushCmd.ALLIANCE_INVITE, { allianceName: a.name, invitePerson: p.name });
 }
@@ -340,7 +349,7 @@ export async function cancelInvite(ctx: Ctx, playerId: number, userName: string)
   const p = await getPlayer(ctx, playerId);
   requireRank(p, AllianceRank.PRESIDENT);
   const target = await findPlayerByName(ctx, userName);
-  if (!target) throw new GameError(`Player ${userName} doesn't exist.`, -41, 404);
+  if (!target) throw new GameError(msg('common.playerNamedNotFound', { name: userName }), -41, 404);
   await ctx.tx
     .delete(allianceRequests)
     .where(and(eq(allianceRequests.allianceId, p.allianceId!), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, 'invite')));
@@ -383,17 +392,17 @@ export async function myInvites(ctx: Ctx, playerId: number) {
 /** alliance.agreeComeinAllianceByUser: accept an invitation (needs an Embassy). */
 export async function acceptInvite(ctx: Ctx, playerId: number, allianceName: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  if (p.allianceId) throw new GameError('Already a member of an alliance.', -99);
+  if (p.allianceId) throw new GameError(msg('alliance.alreadyMember'), -99);
   await requireEmbassy(ctx, playerId);
   const a = await allianceByName(ctx, allianceName, true);
   const [inv] = await ctx.tx
     .select()
     .from(allianceRequests)
     .where(and(eq(allianceRequests.allianceId, a.id), eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, 'invite')));
-  if (!inv) throw new GameError('Invite no longer exists.', -99);
+  if (!inv) throw new GameError(msg('alliance.inviteNotFound'), -99);
   assertRejoinCooldown(p, a.id, ctx.now);
   await joinPlayer(ctx, p, a, AllianceRank.MEMBER);
-  await announce(ctx, a.id, `${p.name} has joined the alliance.`);
+  await announce(ctx, a.id, msg('alliance.event.joined', { name: p.name }));
 }
 
 /** alliance.rejectComeinAlliance */
@@ -406,13 +415,14 @@ export async function rejectInvite(ctx: Ctx, playerId: number, allianceName: str
 
 async function requireEmbassy(ctx: Ctx, playerId: number) {
   const list = await citiesOf(ctx, playerId);
-  if (!list.some((c) => buildingLevel(c.buildings, BuildingType.EMBASSY) >= 1)) throw new GameError('You need to build an embassy first.', -99);
+  if (!list.some((c) => buildingLevel(c.buildings, BuildingType.EMBASSY) >= 1))
+    throw new GameError(msg('alliance.buildingRequired', { building: ref.building(BuildingType.EMBASSY) }), -99);
 }
 
 /** alliance.userWantInAlliance: apply (one application at a time). */
 export async function apply(ctx: Ctx, playerId: number, allianceName: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  if (p.allianceId) throw new GameError('Already a member of an alliance.', -99);
+  if (p.allianceId) throw new GameError(msg('alliance.alreadyMember'), -99);
   await requireEmbassy(ctx, playerId);
   const a = await allianceByName(ctx, allianceName);
   assertRejoinCooldown(p, a.id, ctx.now);
@@ -420,13 +430,13 @@ export async function apply(ctx: Ctx, playerId: number, allianceName: string) {
   await ctx.tx.insert(allianceRequests).values({ allianceId: a.id, playerId, kind: 'apply', createdAt: ctx.now });
   p.misc = { ...p.misc, allianceApply: a.name, allianceApplyAt: ctx.now };
   await savePlayer(ctx, p);
-  await announce(ctx, a.id, `${p.name} has applied to join your alliance`);
+  await announce(ctx, a.id, msg('alliance.event.applied', { name: p.name }));
 }
 
 /** alliance.cancelUserWantInAlliance */
 export async function cancelApplication(ctx: Ctx, playerId: number) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  if (!p.misc.allianceApply) throw new GameError('Not applied.', -99);
+  if (!p.misc.allianceApply) throw new GameError(msg('alliance.notApplied'), -99);
   await ctx.tx.delete(allianceRequests).where(and(eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, 'apply')));
   p.misc = { ...p.misc, allianceApply: undefined, allianceApplyAt: undefined };
   await savePlayer(ctx, p);
@@ -461,17 +471,17 @@ export async function acceptApplication(ctx: Ctx, playerId: number, userName: st
   const officer = await getPlayer(ctx, playerId);
   requireRank(officer, AllianceRank.PRESIDENT);
   const target0 = await findPlayerByName(ctx, userName);
-  if (!target0) throw new GameError(`Player ${userName} doesn't exist.`, -41, 404);
+  if (!target0) throw new GameError(msg('common.playerNamedNotFound', { name: userName }), -41, 404);
   const target = await getPlayer(ctx, target0.id, { lock: true });
-  if (target.allianceId) throw new GameError(`${userName} is already a member of other alliance.`, -99);
+  if (target.allianceId) throw new GameError(msg('alliance.playerInOtherAlliance', { name: userName }), -99);
   const [req] = await ctx.tx
     .select()
     .from(allianceRequests)
     .where(and(eq(allianceRequests.allianceId, officer.allianceId!), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, 'apply')));
-  if (!req) throw new GameError('Application no longer exists.', -99);
+  if (!req) throw new GameError(msg('alliance.applicationNotFound'), -99);
   const a = await getAlliance(ctx, officer.allianceId!, true);
   await joinPlayer(ctx, target, a, AllianceRank.MEMBER);
-  await announce(ctx, a.id, `${target.name} has joined the alliance.`);
+  await announce(ctx, a.id, msg('alliance.event.joined', { name: target.name }));
 }
 
 /** alliance.cancelagreeComeinAlliance: decline an application. */
@@ -479,7 +489,7 @@ export async function declineApplication(ctx: Ctx, playerId: number, userName: s
   const officer = await getPlayer(ctx, playerId);
   requireRank(officer, AllianceRank.PRESIDENT);
   const target = await findPlayerByName(ctx, userName);
-  if (!target) throw new GameError(`Player ${userName} doesn't exist.`, -41, 404);
+  if (!target) throw new GameError(msg('common.playerNamedNotFound', { name: userName }), -41, 404);
   await ctx.tx
     .delete(allianceRequests)
     .where(and(eq(allianceRequests.allianceId, officer.allianceId!), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, 'apply')));
@@ -493,39 +503,39 @@ export async function declineApplication(ctx: Ctx, playerId: number, userName: s
 
 /** alliance.setPowerForUserByAlliance: actor must outrank both the old and the new rank. */
 export async function setRank(ctx: Ctx, playerId: number, userName: string, rank: number) {
-  if (![5, 6, 7, 8].includes(rank)) throw new GameError('Invalid rank.', -99);
+  if (![5, 6, 7, 8].includes(rank)) throw new GameError(msg('alliance.invalidRank'), -99);
   const me = await getPlayer(ctx, playerId);
   requireMember(me);
   const t0 = await findPlayerByName(ctx, userName);
-  if (!t0 || t0.allianceId !== me.allianceId) throw new GameError('Member does not exist.', -99);
-  if (t0.id === me.id) throw new GameError('You cannot change your own rank.', -99);
+  if (!t0 || t0.allianceId !== me.allianceId) throw new GameError(msg('alliance.memberNotFound'), -99);
+  if (t0.id === me.id) throw new GameError(msg('alliance.ownRank'), -99);
   const target = await getPlayer(ctx, t0.id, { lock: true });
-  if (me.allianceRank >= target.allianceRank || me.allianceRank >= rank) throw new GameError('You are not entitled to operate.', -42);
+  if (me.allianceRank >= target.allianceRank || me.allianceRank >= rank) throw new GameError(msg('alliance.rankTooLow'), -42);
   const limit = RANK_LIMITS[rank];
   if (limit) {
     const [{ n }] = await ctx.tx
       .select({ n: count() })
       .from(players)
       .where(and(eq(players.allianceId, me.allianceId!), eq(players.allianceRank, rank)));
-    if (Number(n) >= limit) throw new GameError(`An alliance may only have ${limit} ${rankName(rank)}.`, -99);
+    if (Number(n) >= limit) throw new GameError(msg('alliance.rankLimit', { count: limit, rank: ref.rank(rank) }), -99);
   }
-  const verb = rank < target.allianceRank ? 'promotes' : 'demotes';
+  const code = rank < target.allianceRank ? 'alliance.event.promoted' : 'alliance.event.demoted';
   target.allianceRank = rank;
   await savePlayer(ctx, target);
   await pushPlayerInfo(ctx, target);
-  await announce(ctx, me.allianceId!, `${me.name} ${verb} ${target.name} to ${rankName(rank)}.`);
+  await announce(ctx, me.allianceId!, msg(code, { actor: me.name, name: target.name, rank: ref.rank(rank) }));
 }
 
 /** alliance.resetTopPowerForAlliance: Host hands over to a Vice Host. */
 export async function transferHost(ctx: Ctx, playerId: number, userName: string) {
   const me = await getPlayer(ctx, playerId, { lock: true });
   requireMember(me);
-  if (me.allianceRank !== AllianceRank.HOST) throw new GameError('You are not entitled to operate.', -42);
+  if (me.allianceRank !== AllianceRank.HOST) throw new GameError(msg('alliance.rankTooLow'), -42);
   const t0 = await findPlayerByName(ctx, userName);
-  if (!t0 || t0.allianceId !== me.allianceId) throw new GameError(`Player ${userName} doesn't exist.`, -41);
+  if (!t0 || t0.allianceId !== me.allianceId) throw new GameError(msg('common.playerNamedNotFound', { name: userName }), -41);
   const target = await getPlayer(ctx, t0.id, { lock: true });
   if (target.allianceRank !== AllianceRank.VICE_HOST) {
-    throw new GameError('The Host title of the Alliance can only be transferred to Vice Host. You need to promote this player first.', -88);
+    throw new GameError(msg('alliance.hostToViceHostOnly'), -88);
   }
   const a = await getAlliance(ctx, me.allianceId!, true);
   target.allianceRank = AllianceRank.HOST;
@@ -536,7 +546,7 @@ export async function transferHost(ctx: Ctx, playerId: number, userName: string)
   await saveAlliance(ctx, a);
   await pushPlayerInfo(ctx, target);
   await pushPlayerInfo(ctx, me);
-  await announce(ctx, a.id, `${target.name} is now the Host of the alliance.`);
+  await announce(ctx, a.id, msg('alliance.event.newHost', { name: target.name }));
 }
 
 /** alliance.kickOutMemberfromAlliance */
@@ -544,9 +554,9 @@ export async function kick(ctx: Ctx, playerId: number, userName: string) {
   const me = await getPlayer(ctx, playerId);
   requireMember(me);
   const t0 = await findPlayerByName(ctx, userName);
-  if (!t0 || t0.allianceId !== me.allianceId) throw new GameError('Member does not exist.', -99);
-  if (t0.id === me.id) throw new GameError('Cannot kick yourself.', -99);
-  if (me.allianceRank >= t0.allianceRank) throw new GameError('Cannot kick someone higher ranking than you.', -99);
+  if (!t0 || t0.allianceId !== me.allianceId) throw new GameError(msg('alliance.memberNotFound'), -99);
+  if (t0.id === me.id) throw new GameError(msg('alliance.kickSelf'), -99);
+  if (me.allianceRank >= t0.allianceRank) throw new GameError(msg('alliance.kickHigherRank'), -99);
   const target = await getPlayer(ctx, t0.id, { lock: true });
   const allianceId = target.allianceId!;
   target.allianceId = null;
@@ -554,7 +564,7 @@ export async function kick(ctx: Ctx, playerId: number, userName: string) {
   target.misc = { ...target.misc, lastAllianceLeftAt: ctx.now, lastAllianceLeftId: allianceId };
   await savePlayer(ctx, target);
   await pushPlayerInfo(ctx, target);
-  await announce(ctx, allianceId, `${target.name} was removed from the alliance by ${me.name}.`);
+  await announce(ctx, allianceId, msg('alliance.event.removed', { name: target.name, actor: me.name }));
 }
 
 /** alliance.messagesForAllianceMember: mail every member (Officer or above). */
@@ -575,25 +585,24 @@ export async function massMail(ctx: Ctx, playerId: number, title: string, conten
  * neutrality are one-sided; war is mutual, announced to everyone and has a 24h cooldown.
  */
 export async function setRelation(ctx: Ctx, playerId: number, targetName: string, type: number) {
-  if (![1, 2, 3].includes(type)) throw new GameError('Invalid relation.', -99);
+  if (![1, 2, 3].includes(type)) throw new GameError(msg('alliance.invalidRelation'), -99);
   const me = await getPlayer(ctx, playerId);
   requireRank(me, AllianceRank.VICE_HOST);
   const mine = await getAlliance(ctx, me.allianceId!, true);
   const target = await allianceByName(ctx, targetName, true);
-  if (target.id === mine.id) throw new GameError('Invalid target alliance.', -99);
+  if (target.id === mine.id) throw new GameError(msg('alliance.invalidTarget'), -99);
   const [cur] = await ctx.tx
     .select()
     .from(allianceRelations)
     .where(and(eq(allianceRelations.allianceId, mine.id), eq(allianceRelations.targetAllianceId, target.id)));
-  const labels: Record<number, string> = { 1: 'an ally', 2: 'neutral', 3: 'an enemy' };
-  if (cur?.relation === type) throw new GameError(`Alliance is already ${labels[type]}.`, -99);
+  if (cur?.relation === type) throw new GameError(msg('alliance.alreadyRelation', { relation: RELATION_MSGS[type] }), -99);
   const upsert = async (from: number, to: number, relation: number) =>
     ctx.tx
       .insert(allianceRelations)
       .values({ allianceId: from, targetAllianceId: to, relation, createdAt: ctx.now })
       .onConflictDoUpdate({ target: [allianceRelations.allianceId, allianceRelations.targetAllianceId], set: { relation, createdAt: ctx.now } });
   if (type === Relation.ENEMY) {
-    if (ctx.now < mine.warCooldownUntil) throw new GameError('You have already declared war recently.', -99);
+    if (ctx.now < mine.warCooldownUntil) throw new GameError(msg('alliance.warCooldown'), -99);
     const until = ctx.now + scaled(BALANCE.allianceWarCooldownMs);
     await upsert(mine.id, target.id, Relation.ENEMY);
     await upsert(target.id, mine.id, Relation.ENEMY);
@@ -605,16 +614,12 @@ export async function setRelation(ctx: Ctx, playerId: number, targetName: string
       alliance: false,
       tV: true,
       noSenderSystemInfo: true,
-      msg: `Alliance ${mine.name} declares war against alliance ${target.name}. Diplomatic Relationship between each other alters to Hostile automatically.`,
+      msg: msg('alliance.warDeclared', { name: mine.name, target: target.name }),
     });
   } else {
     await upsert(mine.id, target.id, type);
   }
-  await announce(
-    ctx,
-    target.id,
-    `Alliance [${mine.name}] recognizes Diplomatic Relationship with us as ${type === 1 ? 'Ally' : type === 2 ? 'Neutral' : 'Enemy'}.`,
-  );
+  await announce(ctx, target.id, msg('alliance.event.relationSet', { name: mine.name, relation: RELATION_MSGS[type] }));
 }
 
 /** alliance.dropAllianceFriendshipRelation */

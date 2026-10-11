@@ -1,10 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { maxStars } from '@/components/hero-gear/constants';
 
 export function Stars({ count, used }: { count: number; used?: number }) {
+  const { t } = useTranslation('hero-gear');
   return (
-    <div className="flex gap-px" aria-label={`${count} of ${maxStars} stars`}>
+    <div className="flex gap-px" aria-label={t('stars.label', { n: count, count: maxStars })}>
       {Array.from({ length: maxStars }, (_, i) => (
         <Star
           key={i}

@@ -1,0 +1,38 @@
+{
+  "title": "発動中の効果",
+  "active": "{{n}} 件発動中",
+  "expiring": "{{n}} 件が24時間以内に終了",
+  "show": "表示",
+  "hide": "隠す",
+  "extended": "{{slot}}を{{adds}}延長しました",
+  "groups": {
+    "production": "生産",
+    "military": "軍事",
+    "other": "その他"
+  },
+  "slots": {
+    "attack": "攻撃",
+    "defense": "防御",
+    "training": "訓練",
+    "upkeep": "維持費",
+    "army": "軍勢",
+    "buildQueue": "建設枠",
+    "truce": "休戦"
+  },
+  "on": "有効",
+  "buy": {
+    "title": "{{slot}}を延長しますか？",
+    "description": "{{item}}を持っていません。{{city}}の金 {{price}} で1個購入してすぐに使用し、{{adds}}延長します。",
+    "confirm": "購入して使用 · {{price}} 金"
+  },
+  "slotCell": {
+    "off": "なし",
+    "find": "アイテムを探す",
+    "findDetail": "{{label}} {{boost}} のアイテムを表示",
+    "running": "{{desc}} · 残り {{time}}",
+    "runningItem": "{{item}}：{{desc}} · 残り {{time}}",
+    "extend": "延長",
+    "useDetail": "{{item}}を使用（所持 ×{{owned}}）：+{{adds}}",
+    "buyDetail": "{{item}}を {{price}} 金で購入して使用：+{{adds}}"
+  }
+}

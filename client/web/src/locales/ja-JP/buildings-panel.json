@@ -1,0 +1,52 @@
+{
+  "filter": {
+    "label": "種類で建物を絞り込む",
+    "showAll": "すべて表示",
+    "summary_other": "（{{count}} 棟・レベル {{min}}〜{{max}}）"
+  },
+  "inside": {
+    "title": "城壁内"
+  },
+  "fields": {
+    "title": "資源地",
+    "unlocked": "（{{total}} 区画中 {{unlocked}} 区画が解放済み・市役所 Lv {{level}}）"
+  },
+  "slot": {
+    "build": "区画 {{pos}} に建設"
+  },
+  "buildList": {
+    "title": "建設",
+    "outside": "城壁外の資源地。",
+    "inside": "城壁内の建物。",
+    "build": "建設",
+    "firstLevel": "Lv 1:",
+    "nothing": "現在ここに建設できるものはありません。",
+    "started": "建設を開始しました"
+  },
+  "detail": {
+    "slot": "区画 {{pos}}",
+    "demolishing": "レベル {{level}} へ解体中",
+    "upgrading": "レベル {{level}} へ強化中",
+    "upgradeTo": "レベル {{level}} へ強化",
+    "upgrade": "強化",
+    "maxLevel": "最大レベルに達しています。",
+    "upgradeStarted": "強化を開始しました",
+    "demolished": "建物を解体しました",
+    "demolitionStarted": "解体を開始しました",
+    "cancelled": "キャンセルしました",
+    "demolishAll": "建物全体を即座に解体",
+    "demolishOne": "1 レベル解体",
+    "demolishTime": "（{{minutes}} 分）",
+    "returns": "・{{refund}} が戻ります",
+    "demolish": "解体",
+    "confirmAllTitle": "{{name}}（Lv {{level}}）を解体しますか？",
+    "confirmOneTitle": "{{name}} を 1 レベル解体しますか？",
+    "confirmAll": "建物全体が一度に失われます。この操作は取り消せません。",
+    "confirmAllRefund": "建物全体が一度に失われ、{{refund}} が戻ります。この操作は取り消せません。",
+    "confirmOne": "解体が完了するとレベルが 1 下がります。"
+  },
+  "mayor": {
+    "none": "市長がいません: 英雄タブで政治の高い英雄を市長に任命すると建設が速くなります。",
+    "hint": "時間には市長 {{name}} の政治 {{politics}} による −{{cut}}% が反映されています。政治の高い市長ほど建設が速くなります。"
+  }
+}

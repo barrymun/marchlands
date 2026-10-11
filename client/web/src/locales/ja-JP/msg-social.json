@@ -1,0 +1,7 @@
+{
+  "selfTarget": "自分自身は選べません。",
+  "emptyMessage": "メッセージが空です。",
+  "messageTooLong_other": "メッセージは{{count, number}}文字までです。",
+  "muted": "現在チャットできません。",
+  "notInAlliance": "同盟メッセージを送るには同盟に加入している必要があります。"
+}

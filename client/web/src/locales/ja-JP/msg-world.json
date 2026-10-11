@@ -1,0 +1,11 @@
+{
+  "noOpenFlat": "都市を建てられる空き地がありません。",
+  "invalidArea": "このマップ範囲は無効です。",
+  "areaTooLarge": "マップ範囲が広すぎます（最大 {{max}} × {{max}}）。",
+  "invalidTile": "このマスは存在しません。",
+  "position": {
+    "city": "{{name}} ({{x}},{{y}})",
+    "tile": "{{tile}} Lv.{{level}} ({{x}},{{y}})",
+    "place": "{{tile}} ({{x}},{{y}})"
+  }
+}

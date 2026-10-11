@@ -1,0 +1,29 @@
+{
+  "cityForm": {
+    "renamed": "City renamed",
+    "moved": "City moved",
+    "moveRules": "Moving needs every army of this city at home and no foreign troops on the way. Occupied valleys are released.",
+    "teleportOwned": "{{item}} · ×{{owned}}: a free flat tile you choose",
+    "teleportPrice": "{{item}} · {{price}} gold: a free flat tile you choose",
+    "teleport": "Teleport",
+    "cooldown": "Cooling down: next move in <countdown />."
+  },
+  "taxRate": {
+    "label": "Tax rate",
+    "description": "This share of each hour's new food, lumber, stone and iron is sold to the merchant as it is produced. Stored resources are never sold. The base tax ({{baseTax}} gold) is paid at any rate.",
+    "descriptionFixed": "This share of each hour's new food, lumber, stone and iron is sold to the merchant at {{price}} gold each as it is produced. Stored resources are never sold. The base tax ({{baseTax}} gold) is paid at any rate.",
+    "save": "Save rate",
+    "saved": "Tax rate saved",
+    "preview": "At {{rate}}%: {{sold}} gold from sold output.",
+    "previewFor": "At {{rate}}%: {{sold}} gold from sold output for {{list}}."
+  },
+  "workRates": {
+    "label": "Production work rates",
+    "description": "Lower a rate to free that field type's workers: they become idle population you can train troops from. At 0% the fields produce nothing. Idle now: {{idle}} · in the fields: {{workers}}.",
+    "field": "{{resource}} %",
+    "save": "Save rates",
+    "allIdle": "All 0% (everyone idle)",
+    "allFull": "All 100%",
+    "saved": "Work rates saved"
+  }
+}

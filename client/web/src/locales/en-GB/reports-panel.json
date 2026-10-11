@@ -1,0 +1,112 @@
+{
+  "tabs": {
+    "all": "All",
+    "army": "Military",
+    "trade": "Trade",
+    "other": "Other"
+  },
+  "markAllRead": "Mark all read",
+  "markedAllRead": "All reports marked as read",
+  "noReports": "No reports.",
+  "previousPage": "Previous page",
+  "nextPage": "Next page",
+  "keptFor": "Reports are kept for 30 days.",
+  "unread": "unread",
+  "dialog": {
+    "title": "Report",
+    "deleted": "Report deleted"
+  },
+  "none": "none",
+  "walls": "· walls Lv {{level}}",
+  "barbarianCity": "Barbarian city Lv {{level}}",
+  "labels": {
+    "from": "From",
+    "to": "To",
+    "hero": "Hero",
+    "heroes": "Heroes",
+    "troops": "Troops",
+    "resources": "Resources",
+    "broughtHome": "Brought home",
+    "target": "Target",
+    "guardHero": "Guard hero",
+    "fortifications": "Fortifications",
+    "loyalty": "Loyalty",
+    "population": "Population",
+    "heldBy": "Held by",
+    "defenders": "Defenders",
+    "scouts": "Scouts",
+    "scoutedBy": "Scouted by",
+    "player": "Player",
+    "reinforcements": "Reinforcements",
+    "bought": "Bought",
+    "sold": "Sold",
+    "gold": "Gold",
+    "goods": "Goods",
+    "deserted": "Deserted",
+    "between": "Between",
+    "food": "Food"
+  },
+  "battle": {
+    "victory": "Victory",
+    "defeat": "Defeat",
+    "result": {
+      "attackerWon": "Attacker won",
+      "defenderWon": "Defender won",
+      "draw": "Draw"
+    },
+    "rounds_one": "{{count}} round",
+    "rounds_other": "{{count}} rounds",
+    "valley": "{{name}} Lv {{level}}: {{status}}",
+    "occupied": "occupied",
+    "notOccupied": "not occupied",
+    "notOccupiedReason": "not occupied ({{reason}})",
+    "attacker": "Attacker",
+    "defender": "Defender",
+    "valleyDefenders": "Valley defenders"
+  },
+  "side": {
+    "title": "{{side}}: {{player}}",
+    "noTroops": "No troops.",
+    "before": "Before",
+    "lost": "Lost",
+    "after": "After",
+    "injured": "Survived injured (Medicine): ",
+    "healHint": "· heal them in the Military tab",
+    "honor": "+{{value}} honour",
+    "heroExp": "hero +{{value}} exp",
+    "walls": "walls Lv {{level}}"
+  },
+  "loot": {
+    "title": "Loot",
+    "valleyNothing": "Nothing: valleys hold no resources to take.",
+    "valleyNothingOccupied": "Nothing: valleys hold no resources to take (holding it raises your production instead).",
+    "taken": "Loot taken",
+    "lost": "Resources lost to the attacker",
+    "nothingWon": "Nothing (nothing left unprotected, or no room to carry it).",
+    "nothingFailed": "Nothing: the attack failed.",
+    "medalsFound": "Medals found:",
+    "medalsAttackerFound": "Medals the attacker found:",
+    "loyalty": "Loyalty −{{damage}} (now {{left}})",
+    "captured": " · city captured"
+  },
+  "desertion": {
+    "intro": "{{city}} ran out of food, so troops deserted: 10% of every troop type for each game hour the upkeep went unpaid (a game hour is {{gameHour}}).",
+    "gameHourReal": "an hour",
+    "gameHourScaled": "1/{{speed}} of a real hour",
+    "between": "{{from}} and {{to}}",
+    "food": "produced {{produced}}, troop upkeep {{upkeep}}, <net>net {{net}}</net>",
+    "stillRunningOut": "Food is still running out: buy food at the Market, build or upgrade Farms, hold grassland or lake valleys, or keep fewer troops."
+  },
+  "movement": {
+    "heroReturned": "No free Feasting Hall slot: the hero returned home."
+  },
+  "scout": {
+    "nobody": "nobody",
+    "gotThrough": "got through",
+    "repelled": "were repelled",
+    "fight": "{{outcome}} · ours {{ourBefore}} → {{ourAfter}}, theirs {{theirBefore}} → {{theirAfter}}"
+  },
+  "trade": {
+    "order": "{{amount}} {{resource}} at {{price}}"
+  }
+}

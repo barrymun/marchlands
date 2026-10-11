@@ -221,7 +221,7 @@ export function createGuardHero(maxLevel: number, rng: Rng): GeneratedHero {
     level,
     experience: 0,
     upgradeExp: upgradeExpFor(level),
-    loyalty: 100,
+    loyalty: BALANCE.heroMaxLoyalty,
     basePower: power,
     baseManagement: 30,
     baseStratagem: 30,

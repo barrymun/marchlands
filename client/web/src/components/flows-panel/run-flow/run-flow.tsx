@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CirclePlay, Eye, Square } from 'lucide-react';
 import {
@@ -26,12 +27,14 @@ import { errorMessage } from '@/lib/api';
 import { allOf } from '@/lib/query-keys';
 import type { Targets } from '@/components/flows-panel/types';
 import { LastRun } from '@/components/flows-panel/run-flow/last-run/last-run';
+import { withPreview } from '@/components/flows-panel/run-flow/utils';
 import { LastPreview } from '@/components/flows-panel/run-flow/last-preview/last-preview';
 import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
 import { hasHero } from '@/components/flows-panel/utils';
 
 /** Pick cities, then preview (up to the first wait, rolled back) or run the flow; repeat; stop; the latest preview or run. */
 export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: number }) {
+  const { t } = useTranslation('flows-panel');
   const qc = useQueryClient();
   const cities = usePlayer().data?.castles ?? [];
   // starts from the flow's saved cities; changing them here applies to this run only
@@ -67,16 +70,15 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
     onSuccess: (r) => {
       if (r.preview) {
         // the server keeps the report on the flow (so a reload shows it); show it now, then sync
-        const lastPreview = { at: Date.now(), cities: r.cities, skippedCities: r.skippedCities };
-        qc.setQueryData(getPlayerFlowsQueryKey(), (list: Flow[] | undefined) => list?.map((f) => (f.id === flow.id ? { ...f, lastPreview } : f)));
+        qc.setQueryData(getPlayerFlowsQueryKey(), (list: Flow[] | undefined) => withPreview(list, flow.id, r));
         void qc.invalidateQueries({ queryKey: getPlayerFlowsQueryKey() });
         return;
       }
       refresh();
       const failed = r.cities.filter((c) => !c.ok).length;
-      if (failed) toast.warning(`${flow.name}: failed in ${failed} cit${failed === 1 ? 'y' : 'ies'} and stopped`);
-      else if (r.flow?.status === 'waiting') toast.success(`${flow.name}: started, now waiting`);
-      else toast.success(`${flow.name}: done in ${r.cities.length} cit${r.cities.length === 1 ? 'y' : 'ies'}`);
+      if (failed) toast.warning(t('runFlow.toasts.failed', { name: flow.name, count: failed }));
+      else if (r.flow?.status === 'waiting') toast.success(t('runFlow.toasts.waiting', { name: flow.name }));
+      else toast.success(t('runFlow.toasts.done', { name: flow.name, count: r.cities.length }));
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
@@ -88,7 +90,7 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
     onSuccess: (list, on) => {
       qc.setQueryData(getPlayerFlowsQueryKey(), list);
       refresh();
-      toast.success(on ? `${flow.name}: repeats until a run fails or you switch it off` : `${flow.name}: stops after this run`);
+      toast.success(on ? t('runFlow.toasts.repeatOn', { name: flow.name }) : t('runFlow.toasts.repeatOff', { name: flow.name }));
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
@@ -99,7 +101,7 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
     },
     onSuccess: (list) => {
       qc.setQueryData(getPlayerFlowsQueryKey(), list);
-      toast.success(`${flow.name}: stopped`);
+      toast.success(t('runFlow.toasts.stopped', { name: flow.name }));
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
@@ -109,35 +111,29 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Run</CardTitle>
-        <CardDescription>
-          Each city runs the flow all-or-nothing between waits: if an action fails there, what the flow did in that city since the last wait is undone, and the
-          flow stops. Flows take turns between waits, so other flows run while one waits. Preview shows what would happen up to the first wait, without changing
-          anything.
-        </CardDescription>
+        <CardTitle className="text-sm">{t('runFlow.title')}</CardTitle>
+        <CardDescription>{t('runFlow.description')}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
         <CityPicker value={targets} onChange={setTargets} currentCityId={currentCityId} />
         <label className="flex items-start gap-2 text-sm">
           <Switch className="mt-0.5" checked={flow.repeat} disabled={busy} onCheckedChange={(on) => repeat.mutate(on)} />
           <span className="grid gap-0.5">
-            <span>Repeat</span>
-            <span className="text-xs text-muted-foreground">
-              Runs again after every run (at most once a minute) on the flow&apos;s cities, until a run fails or you switch it off.
-            </span>
+            <span>{t('runFlow.repeat')}</span>
+            <span className="text-xs text-muted-foreground">{t('runFlow.repeatHint')}</span>
           </span>
         </label>
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="outline" disabled={!picked.length || busy} onClick={() => run.mutate(true)}>
-            <Eye /> Preview
+            <Eye /> {t('runFlow.preview')}
           </Button>
           {idle ? (
             <Button disabled={!picked.length || busy} onClick={() => run.mutate(false)}>
-              <CirclePlay /> Run on {picked.length} cit{picked.length === 1 ? 'y' : 'ies'}
+              <CirclePlay /> {t('runFlow.run', { count: picked.length })}
             </Button>
           ) : (
             <Button variant="destructive" disabled={busy} onClick={() => stop.mutate()}>
-              <Square /> Stop
+              <Square /> {t('runFlow.stop')}
             </Button>
           )}
         </div>

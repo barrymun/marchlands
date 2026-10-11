@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { HeroBean } from '@marchlands/api-client';
 import { Landmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { DominantBadge } from '@/routes/game/dominant-badge/dominant-badge';
 
 /** The current city's mayor at a glance; opens the Heroes tab. */
 export function MayorChip({ mayor, onClick }: { mayor?: HeroBean; onClick: () => void }) {
+  const { t } = useTranslation(['game', 'common']);
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -20,13 +22,13 @@ export function MayorChip({ mayor, onClick }: { mayor?: HeroBean; onClick: () =>
           <Landmark className="size-3.5" />
           {mayor ? (
             <>
-              <span className="text-muted-foreground">Mayor</span>
+              <span className="text-muted-foreground">{t('mayor.label')}</span>
               <span className="font-medium">{mayor.name}</span>
-              <span className="text-muted-foreground tabular-nums">Lv {mayor.level}</span>
+              <span className="text-muted-foreground tabular-nums">{t('common:level.short', { level: mayor.level })}</span>
               <DominantBadge hero={mayor} />
             </>
           ) : (
-            'No mayor'
+            t('common:noMayor')
           )}
         </Button>
       </TooltipTrigger>
@@ -38,10 +40,10 @@ export function MayorChip({ mayor, onClick }: { mayor?: HeroBean; onClick: () =>
                 {a.label} {a.v}
               </span>
             ))}
-            <span>Politics: production and build speed · Attack: training · Intelligence: research</span>
+            <span>{t('mayor.attributesHint')}</span>
           </span>
         ) : (
-          'Appoint a mayor in the Heroes tab to speed up production, building, training and research.'
+          t('mayor.appointHint')
         )}
       </TooltipContent>
     </Tooltip>

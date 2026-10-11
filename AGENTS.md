@@ -35,7 +35,7 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 ## Formatting and linting
 
 - **Prettier owns formatting:** single quotes, 160-character lines (`.prettierrc.json`). Generated files, migrations, the original game's data JSON and Markdown are ignored (`.prettierignore`).
-- **ESLint owns code quality** (`eslint.config.js`): the JS and TypeScript recommended rules, plus react-hooks and react-refresh in the client. Its style rules are off (`eslint-config-prettier`), so the two never disagree.
+- **ESLint owns code quality** (`eslint.config.js`): the JS and TypeScript recommended rules, plus react-hooks, react-refresh and i18next (no hard-coded text, see Translations) in the client. Its style rules are off (`eslint-config-prettier`), so the two never disagree.
 - An unused name prefixed with `_` is allowed.
 - **Don't read the time during render:** use the `useNow()` hook (`client/web/src/hooks/use-now.ts`).
 - **Don't call setState synchronously in an effect.** Derive the value while rendering instead, or use `useSyncExternalStore`.
@@ -115,7 +115,10 @@ components/
 routes/
   <name>/<name>.tsx            same rules as components (e.g. routes/game/mayor-chip/)
 hooks/                         app-wide hooks (use-game, use-now, use-inventory, …)
-lib/                           app-wide helpers (api, format, tones, genders, utils) and their tests
+lib/                           app-wide helpers (api, format, i18n, tones, genders, utils) and their tests
+locales/
+  <locale>/<namespace>.json    all text the client shows (en-GB, en-US, ja-JP), see Translations
+i18next.d.ts                   types translation keys against en-GB
 ```
 
 Worked examples: `components/military-panel/`, `components/buildings-panel/`, `components/reports-panel/`.
@@ -148,6 +151,66 @@ Worked examples: `components/military-panel/`, `components/buildings-panel/`, `c
   - Set game speed with `setGameSpeed` from core, and reset it afterwards.
 - **Prefer real game data** from `@marchlands/core` (item effects and prices, troop names, `BuffId`) over invented fixtures.
 - **Assert behaviour you've read in the code** or confirmed by running it. Locale-formatted numbers in particular are best confirmed by running.
+
+### Translations
+
+The client never writes player-facing text in code: every string comes from `src/locales/<locale>/<namespace>.json` through react-i18next (`src/lib/i18n.ts`). This applies to every change: new text, reworded text and removed text all happen in the locale files, in every locale, in the same change.
+
+- **Locales:** `en-GB` is the source, the default and the fallback: it is used when the player has chosen nothing and the browser's language isn't supported, and for any key a locale lacks. It uses British spelling (honour, defence, cancelled, labour).
+  - `en-US` is an override locale (`OVERRIDE_LOCALES`): it holds only the keys whose spelling differs (honor, defense, canceled, labor).
+  - `ja-JP` is a full translation: every en-GB key.
+- **No text in code:** `npm run lint` rejects words written in client JSX, in the attributes a player reads (`title`, `placeholder`, `aria-label`, `alt`, `label`, `description`), and in `toast(…)` and `useCommand(…)` messages (`eslint.config.js`). Strings with no letters, single letters and the game's name pass. Text built outside JSX (labels in `constants.ts`, sentences in `utils.ts`) isn't linted, so it relies on this section being followed.
+- **Keeping locales in step:** `src/locales/locales.test.ts` (part of `npm test`) fails when they drift. It checks that:
+  - every locale has the same namespace files, each registered in `src/i18next.d.ts`;
+  - a full locale has exactly the en-GB keys, with the plural forms its language uses (from `Intl.PluralRules`: `_one` and `_other` for English, `_other` alone for Japanese);
+  - an override locale holds only keys that exist in en-GB;
+  - every translation keeps the en-GB `{{placeholders}}` and `<tags>`, and no text is empty.
+- **Changing text:**
+  1. **Add** a key to en-GB, then to every full locale (ja-JP), and to en-US if the spelling differs.
+  2. **Reword** the en-GB text and update the translations to match. Don't leave an old translation that no longer says the same thing.
+  3. **Remove** a key from every locale once no code uses it.
+  4. **A new namespace** needs its file in every locale and an entry in `src/i18next.d.ts`.
+  5. Keys are typed against en-GB, so code using a missing or misspelled key fails `npm run typecheck`.
+- **Adding a locale:** add it to `LOCALES` in `lib/i18n.ts` (and to `OVERRIDE_LOCALES` if it only differs in spelling), create every namespace file for it, and add its name to `language.names` in each locale's `common.json`.
+- **Namespaces:** one per top-level component folder or route, named after it (`flows-panel`, `login`), plus `common` for text that means the same everywhere: actions (Cancel, Save, Log out), resources, units and durations, levels (`level.short` is "Lv {{level}}"), "{{gold}} gold", troop counts, list separators, genders, hero attributes. Use a `common` key rather than repeating its text in a namespace; a word that only looks the same (the Research tab and the Research button) keeps its own key.
+- **Adding text:**
+  1. Add the key to the en-GB file of the namespace, then to `ja-JP` (and to `en-US` if the spelling differs).
+  2. A new namespace needs its file in each locale and an entry in `src/i18next.d.ts`.
+  3. Keys are typed against en-GB, so a missing or misspelled key fails `npm run typecheck`.
+- **In a component:** `const { t } = useTranslation('<ns>')`, or `useTranslation(['<ns>', 'common'])` to also use `t('common:actions.cancel')`.
+- **Outside components** (utils, constants, push handlers): `i18n.t('<ns>:key')` from `@/lib/i18n`. A constant that holds a label uses a getter (see `lib/hero-attributes.ts`). Changing the locale re-renders the app from its root (`LocaleRoot`), so these update too.
+- **Keys** are camelCase, nested by sub-component. Use `{{placeholders}}` and `<Trans>` for text with markup inside. Write whole sentences: never glue fragments together, since word order differs between languages.
+- **Plurals:** any number followed by a countable noun is a plural key: `_one` and `_other` in English, `_other` alone in ja-JP. Pass the raw number as `count`; to show it formatted, pass that too under another name: `t('common:troops', { count: total, n: fmtExact(total) })` with `"troops_one": "{{n}} troop"`. A sentence with two counts uses a nested key for the second (`cityTargets.idleHeroes`).
+- **Numbers, dates and durations** follow the locale through `lib/format.ts`: `fmt`, `fmtExact`, `fmtDecimal`, `duration`, `signedRate`, `dateTime` and `clockTime`. Never call `toLocaleString` / `toLocaleTimeString` directly.
+- **Game data names** (troops and fortifications, buildings, research, items, quests, titles, tiles, zones, alliance ranks, gear pieces, item categories) live in `data-<kind>` namespaces keyed by the game's id (`data-troops.json`: `"7": "Archer"`; `data-items.json` is flat because item ids contain dots). Look them up with `lib/game-data.ts` (`troopName(id)`, `itemName(id)`, `itemShortName(id)` …). Core holds no display names, and the API sends ids, never names. A new troop, building, item and so on needs its name in every locale; each data namespace has a test that it covers every id the game defines.
+- **Game data descriptions** (building, research, troop, item and quest text) are messages built by core's info functions (`buildingInfo`, `techInfo`, `troopDescription`, `itemInfo`, quest descriptions) in the `*Info` message areas, with numbers taken from `BALANCE`.
+- **Not translated:** names players or the game give to things (player, city and hero names, including generated ones like "X the Bold" or "X Keep"). Symbols and separators with no words in them (`—`, ` · `, `×3`, coordinates) and the game's name stay in code.
+- **The player's choice** is in Player settings and is kept in `localStorage` (`marchlands-locale`). Without one, the browser's language picks the locale, and failing that, en-GB.
+- **Tests** run in en-GB, so they assert English text.
+
+### Server messages
+
+The server never sends or stores English for players. Everything it tells a player is a **message**: a code plus params (`shared/core/src/messages/`), worded by the client in the player's language.
+
+- **Codes** are `<area>.<name>` (`hero.locked`, `report.title.attackSucceeded`). Each area has a registry file (`messages/<area>.ts`) listing its codes and their param names, and a locale namespace `msg-<area>` worded in every locale.
+- **Server side:**
+  - Build a message with `msg('hero.locked', { name })`, which checks the code and its params at compile time.
+  - Errors are `new GameError(msg(...), legacyCode, status)`; GameError takes no strings. They reach the client as `{ ok, error: <message> }`.
+  - Flow logs, report titles and texts, boost descriptions, alliance events, system mail and system pushes hold messages too.
+- **Params:**
+  - **Numbers** are sent raw, and the client formats them. A plural count is `count`, written `{{count, number}}`, with plural keys.
+  - **Text a player wrote** (names) goes as a string.
+  - **Game data** goes as a reference: `ref.troop(id)`, `ref.building(id)`, `ref.tech(id)`, `ref.item(id)`, `ref.title(id)`, `ref.tile(type)`, `ref.zone(id)`, `ref.rank(rank)`, `ref.gear(piece)`, `ref.itemCategory(type)`, `ref.resource('wood')`, `ref.stat('power')`. Never put a name into a message.
+  - **Lengths of time** go as `dur(ms)` (real milliseconds), shown as a duration.
+  - **A varying phrase** goes as a nested message. A **list** goes as an array.
+  - **A number quoted from `BALANCE`** is passed from `BALANCE`, never written into the text.
+- **Client side:** `errorMessage(err)` and `translateMessage(m)` (`lib/messages.ts`) word any message. Show server text only through them.
+- **Adding a message:**
+  1. Add the code to its area file (or `common.ts` when any area can send it; reuse an existing code with the same meaning).
+  2. Word it in `msg-<area>.json` for en-GB and ja-JP (and en-US if the spelling differs).
+  3. The locale test fails if a code has no text, if its placeholders don't match its params, or if text is left for a code that no longer exists.
+- **Positions** of armies and reports are messages too (`world.position.city`, `.tile`, `.place`).
+- **Stored data:** a stored message must keep meaning the same thing. If a code changes or is removed while rows still hold it, convert those rows in a migration.
 
 ### UI conventions
 

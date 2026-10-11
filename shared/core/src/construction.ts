@@ -9,6 +9,7 @@ import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEY
 import { buildingConfig, buildingMaxLevel, ITEMS, researchConfig, researchMaxLevel, troopConfig, type Requirements } from './data/index.ts';
 import { buildingCount, buildingLevel, researchLevel, type MayorStats } from './economy.ts';
 import { GameError } from './errors.ts';
+import { msg, ref } from './messages/index.ts';
 import { addResources, emptyResources, scaleResources, type Resources } from './resources.ts';
 import type { BuildingState, FortCounts, ItemCounts, ResearchState, TrainBatch } from './types.ts';
 
@@ -105,7 +106,7 @@ const techFactor = (level: number) => Math.pow(BALANCE.techTimeFactor, level);
 /** Construction/upgrade time to reach `targetLevel`: mayor management + Construction (orig §3.1); (marchlands) the mayor's cut is floored at BALANCE.heroTimeFloor.building. */
 export function buildTimeMs(typeId: number, targetLevel: number, mayor: MayorStats | null, research: ResearchState): number {
   const cfg = buildingConfig(typeId, targetLevel);
-  if (!cfg) throw new GameError('Invalid building.', -99);
+  if (!cfg) throw new GameError(msg('building.invalidBuilding'), -99);
   const seconds = cfg.buildTime * heroFactor(mayor?.management, BALANCE.heroTimeFloor.building) * techFactor(researchLevel(research, TechType.CONSTRUCTION));
   return scaled(Math.floor(seconds) * 1000);
 }
@@ -120,7 +121,7 @@ export function fullDemolishRefund(typeId: number, level: number): Resources {
 /** Demolishing one level takes half the time it took to build it (orig §3.2). */
 export function demolishTimeMs(typeId: number, currentLevel: number, mayor: MayorStats | null, research: ResearchState): number {
   const cfg = buildingConfig(typeId, currentLevel);
-  if (!cfg) throw new GameError('Invalid building.', -99);
+  if (!cfg) throw new GameError(msg('building.invalidBuilding'), -99);
   const seconds =
     (cfg.buildTime / 2) * heroFactor(mayor?.management, BALANCE.heroTimeFloor.building) * techFactor(researchLevel(research, TechType.CONSTRUCTION));
   return scaled(Math.floor(seconds) * 1000);
@@ -129,16 +130,17 @@ export function demolishTimeMs(typeId: number, currentLevel: number, mayor: Mayo
 /** Research time: mayor stratagem only (orig §3.3); (marchlands) never below BALANCE.heroTimeFloor.research. */
 export function researchTimeMs(techId: number, targetLevel: number, mayor: MayorStats | null): number {
   const cfg = researchConfig(techId, targetLevel);
-  if (!cfg) throw new GameError('Invalid technology.', -99);
+  if (!cfg) throw new GameError(msg('building.invalidTech'), -99);
   return scaled(Math.floor(cfg.buildTime * heroFactor(mayor?.stratagem, BALANCE.heroTimeFloor.research)) * 1000);
 }
 
-const SIEGE: readonly number[] = [TroopType.CATAPULT, TroopType.RAM, TroopType.TRANSPORTER, TroopType.BALLISTA];
+/** Siege units: Metal Casting cuts their training time, Military Science every other troop's. */
+export const SIEGE: readonly number[] = [TroopType.CATAPULT, TroopType.RAM, TroopType.TRANSPORTER, TroopType.BALLISTA];
 
 /** Per-unit training seconds (displayed formula of the original, without its fall-through bug). */
 export function troopUnitSeconds(troopId: number, mayor: MayorStats | null, research: ResearchState): number {
   const cfg = troopConfig(troopId);
-  if (!cfg) throw new GameError('Invalid troop type.', -99);
+  if (!cfg) throw new GameError(msg('common.invalidTroopType'), -99);
   if (cfg.inside === 2) {
     return Math.floor(cfg.buildTime * heroFactor(mayor?.management) * techFactor(researchLevel(research, TechType.CONSTRUCTION)));
   }
@@ -156,13 +158,13 @@ export function trainBatchMs(troopId: number, count: number, mayor: MayorStats |
 
 export function buildCost(typeId: number, targetLevel: number): Resources {
   const cfg = buildingConfig(typeId, targetLevel);
-  if (!cfg) throw new GameError('Invalid building.', -99);
+  if (!cfg) throw new GameError(msg('building.invalidBuilding'), -99);
   return { ...cfg.cost };
 }
 
 export function researchCost(techId: number, targetLevel: number): Resources {
   const cfg = researchConfig(techId, targetLevel);
-  if (!cfg) throw new GameError('Invalid technology.', -99);
+  if (!cfg) throw new GameError(msg('building.invalidTech'), -99);
   return { ...cfg.cost };
 }
 
@@ -180,7 +182,7 @@ export function maxTrainableCount(troopId: number, have: Partial<Resources>, idl
 /** Cost of `count` units; `costShare` < 1 while training is discounted (troopCostShare), rounded up. */
 export function trainCost(troopId: number, count: number, costShare = 1): Resources {
   const cfg = troopConfig(troopId);
-  if (!cfg) throw new GameError('Invalid troop type.', -99);
+  if (!cfg) throw new GameError(msg('common.invalidTroopType'), -99);
   const cost = scaleResources(cfg.cost, count * costShare);
   if (costShare !== 1) for (const k of Object.keys(cost) as (keyof Resources)[]) cost[k] = Math.ceil(cost[k]);
   return cost;
@@ -197,56 +199,55 @@ export interface NewBuildingCheck {
 
 /** Throws a GameError when a new building may not be placed. Mirrors castle.newBuilding. */
 export function assertCanConstruct({ typeId, positionId, buildings, research, items, maxConcurrent = 1 }: NewBuildingCheck): void {
-  if (!isValidPosition(positionId)) throw new GameError('Position invalid.', -99);
+  if (!isValidPosition(positionId)) throw new GameError(msg('building.invalidPosition'), -99);
   const cfg = buildingConfig(typeId, 1);
-  if (!cfg || cfg.inside === 3) throw new GameError("Can't build building.", -99);
-  if (!canPlace(typeId, positionId)) throw new GameError("Can't build building here.", -99);
-  if (findBuilding(buildings, positionId)) throw new GameError("Can't build building.", -99);
-  if (cfg.limit > 0 && buildingCount(buildings, typeId) >= cfg.limit) throw new GameError("Can't build building.", -99);
+  if (!cfg || cfg.inside === 3) throw new GameError(msg('building.cannotBuild'), -99);
+  if (!canPlace(typeId, positionId)) throw new GameError(msg('building.cannotBuildHere', { building: ref.building(typeId) }), -99);
+  if (findBuilding(buildings, positionId)) throw new GameError(msg('building.positionTaken'), -99);
+  if (cfg.limit > 0 && buildingCount(buildings, typeId) >= cfg.limit)
+    throw new GameError(msg('building.limitReached', { building: ref.building(typeId) }), -99);
   if (isOuterPosition(positionId)) {
     const th = buildingLevel(buildings, BuildingType.TOWN_HALL);
-    if (positionId - 1000 > unlockedOuterSlots(th)) throw new GameError('Out of bounds.', -99);
+    if (positionId - 1000 > unlockedOuterSlots(th)) throw new GameError(msg('building.slotLocked'), -99);
   }
-  if (isConstructing(buildings, maxConcurrent)) throw new GameError('All construction queues are busy.', -48);
+  if (isConstructing(buildings, maxConcurrent)) throw new GameError(msg('building.queuesBusy'), -48);
   if (!requirementsMet(checkRequirements(cfg.requires, buildings, research, items))) {
-    throw new GameError('Building Prerequisites not met.', -99);
+    throw new GameError(msg('building.requirementsNotMet'), -99);
   }
 }
 
 export function assertCanUpgrade(b: BuildingState | undefined, buildings: BuildingState[], research: ResearchState, items: ItemCounts, maxConcurrent = 1) {
-  if (!b) throw new GameError('Building not found.', -99, 404);
+  if (!b) throw new GameError(msg('building.notFound'), -99, 404);
   if (b.status !== 0) {
-    throw new GameError(
-      'Invalid building status: Your network connection might have experienced delay or congestion. If this error message persists, please refresh or reload this page to login to the game again.',
-      -45,
-    );
+    throw new GameError(msg('building.statusChanged'), -45);
   }
-  if (isConstructing(buildings, maxConcurrent)) throw new GameError('All construction queues are busy.', -48);
-  if (b.level >= buildingMaxLevel(b.typeId)) throw new GameError('Building is already at its maximum level.', -99);
+  if (isConstructing(buildings, maxConcurrent)) throw new GameError(msg('building.queuesBusy'), -48);
+  if (b.level >= buildingMaxLevel(b.typeId)) throw new GameError(msg('building.maxLevel', { building: ref.building(b.typeId) }), -99);
   const cfg = buildingConfig(b.typeId, b.level + 1);
-  if (!cfg) throw new GameError('Building Prerequisites not met.', -99);
+  if (!cfg) throw new GameError(msg('building.requirementsNotMet'), -99);
   if (!requirementsMet(checkRequirements(cfg.requires, buildings, research, items))) {
-    throw new GameError('Building Prerequisites not met.', -99);
+    throw new GameError(msg('building.requirementsNotMet'), -99);
   }
 }
 
 export function assertCanResearch(techId: number, buildings: BuildingState[], research: ResearchState, items: ItemCounts) {
   const level = researchLevel(research, techId);
-  if (level >= researchMaxLevel(techId)) throw new GameError('Invalid technology.', -99);
+  if (level >= researchMaxLevel(techId)) throw new GameError(msg('building.invalidTech'), -99);
   const cfg = researchConfig(techId, level + 1);
-  if (!cfg) throw new GameError('Invalid technology.', -99);
-  if (buildingLevel(buildings, BuildingType.ACADEMY) < 1) throw new GameError('You need an Academy to research.', -99);
+  if (!cfg) throw new GameError(msg('building.invalidTech'), -99);
+  if (buildingLevel(buildings, BuildingType.ACADEMY) < 1)
+    throw new GameError(msg('building.academyNeeded', { building: ref.building(BuildingType.ACADEMY) }), -99);
   if (!requirementsMet(checkRequirements(cfg.requires, buildings, research, items))) {
-    throw new GameError('Research Prerequisites not met.', -99);
+    throw new GameError(msg('building.techRequirementsNotMet'), -99);
   }
 }
 
 export function assertCanTrain(troopId: number, count: number, buildings: BuildingState[], research: ResearchState, items: ItemCounts, fort: boolean) {
-  if (!Number.isInteger(count) || count < 1) throw new GameError('Invalid amount.', -99);
+  if (!Number.isInteger(count) || count < 1) throw new GameError(msg('common.invalidAmount'), -99);
   const cfg = troopConfig(troopId);
-  if (!cfg || cfg.inside !== (fort ? 2 : 1)) throw new GameError('Invalid troop type.', -99);
+  if (!cfg || cfg.inside !== (fort ? 2 : 1)) throw new GameError(msg('common.invalidTroopType'), -99);
   if (!requirementsMet(checkRequirements(cfg.requires, buildings, research, items))) {
-    throw new GameError('Prerequisites not met.', -99);
+    throw new GameError(msg('building.troopRequirementsNotMet'), -99);
   }
 }
 
@@ -413,7 +414,7 @@ export function healCost(troops: Partial<Record<string, number>>): Resources {
   for (const [key, n] of Object.entries(troops)) {
     if (!n) continue;
     const id = TROOP_ID_BY_KEY[key as keyof typeof TROOP_ID_BY_KEY];
-    if (!id) throw new GameError('Invalid troop type.', -99);
+    if (!id) throw new GameError(msg('common.invalidTroopType'), -99);
     const c = scaleResources(trainCost(id, n), BALANCE.healCostShare);
     cost = { gold: cost.gold + c.gold, food: cost.food + c.food, wood: cost.wood + c.wood, stone: cost.stone + c.stone, iron: cost.iron + c.iron };
   }

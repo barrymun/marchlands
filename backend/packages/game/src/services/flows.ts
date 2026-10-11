@@ -15,8 +15,7 @@
 import { isDeepStrictEqual } from 'node:util';
 import {
   checkRequirements,
-  describeFlowAction,
-  FLOW_STAT_LABEL,
+  flowActionMessage,
   FLOW_TROOP_IDS,
   FlowActionSchema,
   FlowSchema,
@@ -28,9 +27,6 @@ import {
   maxTrainableCount,
   troopCostShare,
   requirementsMet,
-  TROOP_NAMES,
-  BUILDING_NAMES,
-  TECH_NAMES,
   troopConfig,
   BALANCE,
   hasTroops,
@@ -39,7 +35,9 @@ import {
   ArmyDirection,
   healCost,
   healHonorCost,
-  formatFlowMinutes,
+  dur,
+  msg,
+  ref,
   type Flow,
   type FlowAction,
   type FlowCityResult,
@@ -47,6 +45,7 @@ import {
   type FlowRunLog,
   type FlowSkippedCity,
   type FlowStepResult,
+  type Message,
 } from '@marchlands/core';
 import { armies, flows as flowsTable, heroes as heroesTable, timedEvents, type Db } from '@marchlands/db';
 import { and, asc, eq, gt, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
@@ -59,6 +58,9 @@ import { cureInjured, hasTrainingRoom, trainSplit } from './training.ts';
 import { PushCmd } from '@marchlands/contracts';
 
 const MAX_FLOWS = 30;
+const MAX_NAME = 40;
+const MIN_ACTIONS = 1;
+const MAX_ACTIONS = 20;
 /** A repeating flow starts again no sooner than this after its last run started (real time). */
 const REPEAT_MIN_GAP_MS = 60_000;
 
@@ -119,12 +121,13 @@ export async function saveFlow(
   input: { id?: string | null; name: string; actions: unknown[]; cities?: 'all' | number[] },
 ): Promise<FlowView[]> {
   const name = input.name.trim();
-  if (!name || name.length > 40) throw new GameError('Give the flow a name of up to 40 characters.', -99);
-  if (!input.actions.length || input.actions.length > 20) throw new GameError('A flow needs 1 to 20 actions.', -99);
+  if (!name || name.length > MAX_NAME) throw new GameError(msg('flow.nameLength', { max: MAX_NAME }), -99);
+  if (input.actions.length < MIN_ACTIONS || input.actions.length > MAX_ACTIONS)
+    throw new GameError(msg('flow.actionCount', { min: MIN_ACTIONS, max: MAX_ACTIONS }), -99);
   const actions = input.actions.map((a) => {
     const parsed = FlowActionSchema.safeParse(a);
-    if (!parsed.success) throw new GameError('Invalid action.', -99);
-    if (parsed.data.type === 'trainTroops' && !FLOW_TROOP_IDS.includes(parsed.data.troopId)) throw new GameError('Invalid troop type.', -99);
+    if (!parsed.success) throw new GameError(msg('flow.invalidAction'), -99);
+    if (parsed.data.type === 'trainTroops' && !FLOW_TROOP_IDS.includes(parsed.data.troopId)) throw new GameError(msg('common.invalidTroopType'), -99);
     return parsed.data;
   });
   // attack actions: a saved army, and targets on the map listed under the lord's own cities
@@ -135,10 +138,10 @@ export async function saveFlow(
     const tiles = BALANCE.mapSize * BALANCE.mapSize;
     for (const a of attacks) {
       // no army yet is allowed (a farming list started from the map); it is skipped until one is chosen
-      if (a.presetId && !(p.misc.armyPresets ?? []).some((x) => x.id === a.presetId)) throw new GameError('Choose a saved army for the attack.', -99);
+      if (a.presetId && !(p.misc.armyPresets ?? []).some((x) => x.id === a.presetId)) throw new GameError(msg('flow.chooseArmy'), -99);
       for (const [city, list] of Object.entries(a.targets)) {
-        if (!own.has(city)) throw new GameError('Targets can only be listed under your own cities.', -99);
-        if (list.some((t) => !Number.isInteger(t) || t < 0 || t >= tiles)) throw new GameError('Invalid target coordinates.', -99);
+        if (!own.has(city)) throw new GameError(msg('flow.targetsOwnCities'), -99);
+        if (list.some((t) => !Number.isInteger(t) || t < 0 || t >= tiles)) throw new GameError(msg('common.invalidCoordinates'), -99);
         a.targets[city] = [...new Set(list)];
       }
     }
@@ -148,20 +151,20 @@ export async function saveFlow(
   if (Array.isArray(input.cities)) {
     const own = new Set((await citiesOf(ctx, playerId)).map((c) => c.id));
     cities = [...new Set(input.cities)].filter((id) => own.has(id));
-    if (!cities.length) throw new GameError('Choose at least one of your cities, or all cities.', -99);
+    if (!cities.length) throw new GameError(msg('flow.chooseCities'), -99);
   }
   const list = await flowsOf(ctx, playerId, true);
   const existing = input.id ? list.find((f) => f.id === input.id) : undefined;
-  if (input.id && !existing) throw new GameError('Flow not found.', -99, 404);
+  if (input.id && !existing) throw new GameError(msg('flow.notFound'), -99, 404);
   if (existing) {
     // a run in progress continues by action index: its actions may change settings (targets, amounts), not order
     if (isActive(existing) && (existing.actions.length !== actions.length || existing.actions.some((a, i) => a.type !== actions[i].type)))
-      throw new GameError('This flow is running: stop it to add, remove or reorder actions.', -99);
+      throw new GameError(msg('flow.runningLocked'), -99);
     // a preview of other actions or cities no longer shows what the flow would do
     const same = isDeepStrictEqual([existing.actions, existing.cities], [actions, cities]);
     await saveRow(ctx, { ...existing, name, actions, cities, lastPreview: same ? existing.lastPreview : null });
   } else {
-    if (list.length >= MAX_FLOWS) throw new GameError(`At most ${MAX_FLOWS} flows.`, -99);
+    if (list.length >= MAX_FLOWS) throw new GameError(msg('flow.tooMany', { count: MAX_FLOWS }), -99);
     const id = `${ctx.now.toString(36)}${Math.floor(ctx.rng.next() * 1e6).toString(36)}`;
     await ctx.tx.insert(flowsTable).values({ id, playerId, name, actions, cities, createdAt: ctx.now });
   }
@@ -182,7 +185,7 @@ export async function deleteFlow(ctx: Ctx, playerId: number, flowId: string): Pr
 // ---------------------------------------------------------------------------------------------
 
 /** What an action did: a line, plus per-item outcomes for actions over several targets. */
-type ActionOutcome = string | { detail: string; items: NonNullable<FlowStepResult['items']> } | { detail: string; skipped: true };
+type ActionOutcome = Message | { detail: Message; items: NonNullable<FlowStepResult['items']> } | { detail: Message; skipped: true };
 
 const STAT_VALUE = { power: heroPower, management: heroManagement, stratagem: heroStratagem } as const;
 
@@ -207,9 +210,9 @@ async function attackTargets(
   run: CityRun,
 ): Promise<ActionOutcome> {
   const targets = a.targets[String(cityId)] ?? [];
-  if (!targets.length) return 'No targets listed for this city';
+  if (!targets.length) return msg('flow.step.noTargets');
   const preset = ((await getPlayer(ctx, playerId)).misc.armyPresets ?? []).find((x) => x.id === a.presetId);
-  if (!preset) return a.presetId ? 'Skipped: the saved army no longer exists' : 'Skipped: choose a saved army for this action in the Flows tab';
+  if (!preset) return msg(a.presetId ? 'flow.step.armyGone' : 'flow.step.noArmy');
   const start = await openOwnCity(ctx, playerId, cityId);
   const heroes = start.heroes
     .filter((h) => h.playerId === playerId && h.capturedByPlayerId == null && h.status === HeroStatus.IDLE)
@@ -221,12 +224,12 @@ async function attackTargets(
     const at = `(${x},${y})`;
     const hero = heroes[next];
     if (!hero) {
-      items.push({ label: at, ok: false, detail: 'skipped: no idle hero left' });
+      items.push({ label: at, ok: false, detail: msg('flow.target.noIdleHero') });
       continue;
     }
     const b = await openOwnCity(ctx, playerId, cityId);
     if (!hasTroops(b.city.troops, preset.troops)) {
-      items.push({ label: at, ok: false, detail: `skipped: not enough troops for "${preset.name}"` });
+      items.push({ label: at, ok: false, detail: msg('flow.target.notEnoughTroops', { army: preset.name }) });
       continue;
     }
     try {
@@ -234,30 +237,27 @@ async function attackTargets(
       const sent = await sendArmy(ctx, playerId, cityId, { targetTileId: tileId, mission: Mission.ATTACK, troops: preset.troops, heroId: hero.id });
       run.armyIds.push(sent.armyId);
       next++;
-      items.push({ label: at, ok: true, detail: `sent with ${hero.name}` });
+      items.push({ label: at, ok: true, detail: msg('flow.target.sent', { hero: hero.name }) });
     } catch (err) {
       if (!(err instanceof GameError)) throw err;
-      items.push({ label: at, ok: false, detail: `skipped: ${err.message}` });
+      items.push({ label: at, ok: false, detail: msg('flow.target.refused', { reason: err.msg }) });
     }
   }
-  return { detail: `Sent ${next} of ${targets.length} with "${preset.name}"`, items };
+  return { detail: msg('flow.step.sent', { sent: next, total: targets.length, army: preset.name }), items };
 }
 
 /** Heal every injured troop in the city (resources or honor); fails, rolling the city back, if it cannot pay for all of them. */
-async function healAll(ctx: Ctx, playerId: number, cityId: number, payWith: 'resources' | 'honor'): Promise<string> {
+async function healAll(ctx: Ctx, playerId: number, cityId: number, payWith: 'resources' | 'honor'): Promise<Message> {
   const b = await openOwnCity(ctx, playerId, cityId);
   const injured = Object.fromEntries(Object.entries(b.city.injuredTroops).filter(([, n]) => (n ?? 0) > 0)) as Record<string, number>;
   const total = Object.values(injured).reduce((s, n) => s + n, 0);
-  if (!total) return 'No injured troops';
+  if (!total) return msg('flow.step.noInjured');
   await cureInjured(ctx, playerId, cityId, injured, payWith);
-  const cost =
-    payWith === 'honor'
-      ? `${healHonorCost(injured).toLocaleString('en')} honor`
-      : Object.entries(healCost(injured))
-          .filter(([, v]) => v > 0)
-          .map(([k, v]) => `${Math.ceil(v).toLocaleString('en')} ${k === 'wood' ? 'lumber' : k}`)
-          .join(', ');
-  return `Healed ${total.toLocaleString('en')} troops for ${cost}`;
+  if (payWith === 'honor') return msg('flow.step.healedHonour', { count: total, honour: healHonorCost(injured) });
+  const cost = (Object.entries(healCost(injured)) as [Parameters<typeof ref.resource>[0], number][])
+    .filter(([, v]) => v > 0)
+    .map(([k, v]) => msg('flow.resourceAmount', { amount: Math.ceil(v), resource: ref.resource(k) }));
+  return msg('flow.step.healed', { count: total, cost });
 }
 
 /** Which of `armyIds` are still out (marching or coming home), and when the last is expected back. */
@@ -307,7 +307,7 @@ const scheduleHeal = (ctx: Ctx, playerId: number, cityId: number, payWith: 'reso
  * Heal once the armies this flow sent from the city are home (event 'flow.heal'), or now if it sent
  * none. A heal still waiting from an earlier run keeps waiting for that run's armies as well.
  */
-async function healWhenHome(ctx: Ctx, playerId: number, cityId: number, payWith: 'resources' | 'honor', run: CityRun): Promise<string> {
+async function healWhenHome(ctx: Ctx, playerId: number, cityId: number, payWith: 'resources' | 'honor', run: CityRun): Promise<Message> {
   const [pending] = await ctx.tx
     .select({ payload: timedEvents.payload })
     .from(timedEvents)
@@ -320,8 +320,7 @@ async function healWhenHome(ctx: Ctx, playerId: number, cityId: number, payWith:
     return healAll(ctx, playerId, cityId, payWith);
   }
   scheduleHeal(ctx, playerId, cityId, payWith, ids, away.homeBy);
-  const mins = Math.max(1, Math.ceil((away.homeBy - ctx.now) / 60_000));
-  return `Scheduled: heals when the ${away.count} arm${away.count === 1 ? 'y' : 'ies'} this flow sent ${away.count === 1 ? 'is' : 'are'} home (~${mins.toLocaleString('en')}m)`;
+  return msg('flow.step.healScheduled', { count: away.count, time: aboutFrom(ctx, away.homeBy) });
 }
 
 /** Timed event 'flow.heal': heal once the flow's armies are all home (waiting longer if some are still out). */
@@ -337,14 +336,14 @@ export async function runScheduledHeal(ctx: Ctx, playerId: number, cityId: numbe
     scheduleHeal(ctx, playerId, cityId, payWith, armyIds, Math.max(away.homeBy, ctx.now + 5_000));
     return;
   }
-  let msg: string;
+  let told: Message;
   try {
-    msg = `${name}: ${await healAll(ctx, playerId, cityId, payWith)}`;
+    told = msg('flow.healDone', { city: name, result: await healAll(ctx, playerId, cityId, payWith) });
   } catch (err) {
     if (!(err instanceof GameError)) throw err;
-    msg = `${name}: could not heal after the armies came home (${err.message})`;
+    told = msg('flow.healFailed', { city: name, error: err.msg });
   }
-  ctx.push(playerId, PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: false, noSenderSystemInfo: false, msg });
+  ctx.push(playerId, PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: false, noSenderSystemInfo: false, msg: told });
 }
 
 async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<FlowAction, { type: 'wait' }>, run: CityRun): Promise<ActionOutcome> {
@@ -353,47 +352,55 @@ async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<
   if (a.type === 'setMayor') {
     const b = await openOwnCity(ctx, playerId, cityId);
     const value = STAT_VALUE[a.stat];
-    const label = FLOW_STAT_LABEL[a.stat];
+    const stat = ref.stat(a.stat);
     // heroes at home and free: idle ones and the current mayor
     const candidates = b.heroes.filter(
       (h) => h.playerId === playerId && h.capturedByPlayerId == null && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR),
     );
-    if (!candidates.length) throw new GameError('No hero in the city can be mayor.', -99);
+    if (!candidates.length) throw new GameError(msg('flow.noMayorHero'), -99);
     const best = candidates.reduce((top, h) => (value(h) > value(top) ? h : top));
-    if (best.status === HeroStatus.MAYOR) return `${best.name} is already mayor (${label} ${value(best)})`;
+    if (best.status === HeroStatus.MAYOR) return msg('flow.step.alreadyMayor', { hero: best.name, stat, value: value(best) });
     await appointMayor(ctx, playerId, best.id);
-    return `Mayor: ${best.name} (${label} ${value(best)})`;
+    return msg('flow.step.mayor', { hero: best.name, stat, value: value(best) });
   }
   const cfg = troopConfig(a.troopId);
-  const name = TROOP_NAMES[a.troopId] ?? `Unit ${a.troopId}`;
-  if (!cfg || cfg.inside !== 1) throw new GameError('Invalid troop type.', -99);
+  const troop = ref.troop(a.troopId);
+  if (!cfg || cfg.inside !== 1) throw new GameError(msg('common.invalidTroopType'), -99);
   const b = await openOwnCity(ctx, playerId, cityId);
   const checks = checkRequirements(cfg.requires, b.city.buildings, b.player.research, b.player.items);
   if (!requirementsMet(checks)) {
     const missing = checks
       .filter((c) => !c.ok)
-      .map(
-        (c) =>
-          `${c.kind === 'building' ? BUILDING_NAMES[Number(c.id)] : c.kind === 'tech' ? TECH_NAMES[Number(c.id)] : c.id} ${c.kind === 'item' ? `×${c.required}` : `Lv ${c.required}`}`,
+      .map((c) =>
+        c.kind === 'item'
+          ? msg('flow.req.item', { name: ref.item(String(c.id)), amount: c.required })
+          : msg('flow.req.level', { name: c.kind === 'building' ? ref.building(Number(c.id)) : ref.tech(Number(c.id)), level: c.required }),
       );
-    throw new GameError(`${name} cannot be trained here (needs ${missing.join(', ')}).`, -99);
+    throw new GameError(msg('flow.cannotTrain', { troop, missing }), -99);
   }
   const have = { gold: b.city.gold, food: b.city.food, wood: b.city.wood, stone: b.city.stone, iron: b.city.iron };
   const max = maxTrainableCount(a.troopId, have, cityStats(b, ctx.now).idlePopulation, troopCostShare(b.player.buffs, ctx.now));
   // what the city cannot do right now is skipped, not failed: as many as it can afford, up to the amount
-  if (!hasTrainingRoom(b)) return { detail: 'Skipped: no barracks queue has room', skipped: true };
+  if (!hasTrainingRoom(b)) return { detail: msg('flow.step.noBarracksRoom'), skipped: true };
   const count = a.amount === 'max' ? max : Math.min(a.amount, max);
-  if (count < 1) return { detail: `Skipped: cannot afford any ${name} (resources or idle population)`, skipped: true };
+  if (count < 1) return { detail: msg('flow.step.cannotAfford', { troop }), skipped: true };
   const r = await trainSplit(ctx, playerId, cityId, a.troopId, count);
   const left = Math.max(0, r.finishAt - ctx.now);
-  const short = a.amount !== 'max' && count < a.amount ? ` (only ${count.toLocaleString('en')} of ${a.amount.toLocaleString('en')} affordable)` : '';
-  return `Training ${count.toLocaleString('en')} ${name}${short} in ${r.batches.length} barracks${left > 0 ? `, done in ${Math.ceil(left / 1000).toLocaleString('en')}s` : ', done now'}`;
+  const barracks = r.batches.length;
+  const time = dur(Math.ceil(left / 1000) * 1000);
+  if (a.amount !== 'max' && count < a.amount) {
+    const requested = a.amount;
+    return left > 0
+      ? msg('flow.step.trainingPartial', { amount: count, requested, troop, count: barracks, time })
+      : msg('flow.step.trainingPartialDone', { amount: count, requested, troop, count: barracks });
+  }
+  return left > 0
+    ? msg('flow.step.training', { amount: count, troop, count: barracks, time })
+    : msg('flow.step.trainingDone', { amount: count, troop, count: barracks });
 }
 
 const citiesWanted = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => f.cityOverride ?? f.cities ?? 'all';
 const usesAllCities = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => citiesWanted(f) === 'all';
-
-const NO_HERO = 'No hero in this city (all cities skips it)';
 
 /**
  * Cities a run starts on: the ones chosen for it, or the flow's own. 'all' is every city the lord has
@@ -411,7 +418,7 @@ async function planCities(ctx: Ctx, playerId: number, f: Pick<FlowRow, 'cities' 
     const withHero = new Set(rows.map((r) => r.cityId));
     return {
       cities: own.filter((c) => withHero.has(c.id)).map((c) => c.id),
-      skipped: own.filter((c) => !withHero.has(c.id)).map((c) => ({ cityId: c.id, cityName: c.name, reason: NO_HERO })),
+      skipped: own.filter((c) => !withHero.has(c.id)).map((c) => ({ cityId: c.id, cityName: c.name, reason: msg('flow.skipNoHero') })),
     };
   }
   return { cities: [...new Set(wanted)].filter((id) => own.some((c) => c.id === id)), skipped: [] };
@@ -420,8 +427,7 @@ async function planCities(ctx: Ctx, playerId: number, f: Pick<FlowRow, 'cities' 
 const runCitiesOf = async (ctx: Ctx, playerId: number, f: Pick<FlowRow, 'cities' | 'cityOverride'>) => (await planCities(ctx, playerId, f)).cities;
 
 /** Why a run has no cities. */
-const noCitiesReason = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) =>
-  usesAllCities(f) ? 'none of your cities has a hero' : 'none of its cities are yours any more';
+const noCitiesReason = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.noOwnCities');
 
 /**
  * A barbarian city was captured: take its tile off every flow's attack targets (any lord's), so no
@@ -457,19 +463,19 @@ async function runPart(ctx: Ctx, playerId: number, f: FlowRow, from: number, to:
     if (!names.has(cityId)) continue;
     const key = String(cityId);
     let steps: FlowStepResult[] = [];
-    let error: string | null = null;
+    let error: Message | null = null;
     try {
       await savepoint(ctx, async (sp) => {
         steps = [];
         const run: CityRun = { armyIds: [...(f.armyIds[key] ?? [])] };
         for (const a of f.actions.slice(from, to)) {
           if (a.type === 'wait') continue;
-          const action = describeFlowAction(a);
+          const action = flowActionMessage(a);
           try {
             const res = await runAction(sp, playerId, cityId, a, run);
-            steps.push(typeof res === 'string' ? { action, ok: true, detail: res } : { action, ok: true, ...res });
+            steps.push('code' in res ? { action, ok: true, detail: res } : { action, ok: true, ...res });
           } catch (err) {
-            steps.push({ action, ok: false, detail: err instanceof Error ? err.message : String(err) });
+            steps.push({ action, ok: false, detail: err instanceof GameError ? err.msg : msg('common.serverError') });
             throw err;
           }
         }
@@ -478,7 +484,7 @@ async function runPart(ctx: Ctx, playerId: number, f: FlowRow, from: number, to:
     } catch (err) {
       if (isRetryable(err)) throw err;
       // any failure (game rule or not) undoes the city's part
-      error = err instanceof GameError ? err.message : 'Something went wrong; nothing was changed in this city.';
+      error = err instanceof GameError ? err.msg : msg('flow.cityFailed');
       if (!(err instanceof GameError)) console.error('flow run failed', err);
     }
     out.push({ cityId, cityName: names.get(cityId)!, ok: error == null, error, steps });
@@ -505,7 +511,7 @@ function mergeResults(into: FlowCityResult[], part: FlowCityResult[]): FlowCityR
 }
 
 /** A wait step, shown in every city of the run. */
-const waitStep = (a: FlowAction, detail: string): FlowStepResult => ({ action: describeFlowAction(a), ok: true, detail });
+const waitStep = (a: FlowAction, detail: Message): FlowStepResult => ({ action: flowActionMessage(a), ok: true, detail });
 
 /**
  * When a wait action ends: after its minutes, or once every army the run sent is home (null: none
@@ -517,7 +523,8 @@ async function waitEnd(ctx: Ctx, f: FlowRow, a: Extract<FlowAction, { type: 'wai
   return away.count ? Math.max(away.homeBy, ctx.now + 5_000) : null;
 }
 
-const minutesFrom = (ctx: Ctx, at: number) => `~${formatFlowMinutes(Math.max(1, Math.ceil((at - ctx.now) / 60_000)))}`;
+/** About how long until `at`, in whole minutes (at least one). */
+const aboutFrom = (ctx: Ctx, at: number) => dur(Math.max(1, Math.ceil((at - ctx.now) / 60_000)) * 60_000);
 
 /**
  * Carry a run on from its next action: parts run in every city, waits pause the flow (timed event
@@ -548,7 +555,8 @@ async function advance(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCity
       log(part);
       const failed = part.filter((c) => !c.ok);
       if (failed.length) {
-        await stopRun(ctx, playerId, f, `failed in ${failed.map((c) => `${c.cityName} (${c.error})`).join(', ')}`);
+        const cities = failed.map((c) => msg('flow.failedCity', { city: c.cityName, error: c.error ?? msg('flow.cityFailed') }));
+        await stopRun(ctx, playerId, f, msg('flow.runFailed', { cities }));
         return ran;
       }
     }
@@ -559,7 +567,7 @@ async function advance(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCity
     const w = f.actions[waitAt] as Extract<FlowAction, { type: 'wait' }>;
     const until = await waitEnd(ctx, f, w);
     f.nextAction = waitAt + 1;
-    const step = waitStep(w, until == null ? 'No armies out: carried on' : `Waiting ${minutesFrom(ctx, until)}`);
+    const step = waitStep(w, until == null ? msg('flow.step.noArmiesOut') : msg('flow.step.waiting', { time: aboutFrom(ctx, until) }));
     log(
       f.runCities.map((cityId) => ({
         cityId,
@@ -626,7 +634,7 @@ async function finishRun(ctx: Ctx, playerId: number, f: FlowRow) {
 }
 
 /** End the run now. With a reason, the flow stopped on its own: repeat goes off and the lord is told why. */
-async function stopRun(ctx: Ctx, playerId: number, f: FlowRow, reason: string | null) {
+async function stopRun(ctx: Ctx, playerId: number, f: FlowRow, reason: Message | null) {
   if (f.lastRun && f.lastRun.finishedAt == null) f.lastRun = { ...f.lastRun, finishedAt: ctx.now };
   f.status = 'idle';
   f.repeat = false;
@@ -638,7 +646,12 @@ async function stopRun(ctx: Ctx, playerId: number, f: FlowRow, reason: string | 
   ctx.unschedule(resumeRef(f.id));
   await saveRow(ctx, f);
   if (reason)
-    ctx.push(playerId, PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: false, noSenderSystemInfo: false, msg: `Flow "${f.name}" stopped: ${reason}.` });
+    ctx.push(playerId, PushCmd.SYSTEM_INFO_MESSAGE, {
+      alliance: false,
+      tV: false,
+      noSenderSystemInfo: false,
+      msg: msg('flow.stopped', { name: f.name, reason }),
+    });
 }
 
 /** Look at the queue now (timed event 'flow.queue'), in its own transaction. */
@@ -714,17 +727,17 @@ export async function runFlow(
     try {
       await runGame(db, async (ctx) => {
         const saved = (await flowsOf(ctx, playerId)).find((x) => x.id === flowId);
-        if (!saved) throw new GameError('Flow not found.', -99, 404);
+        if (!saved) throw new GameError(msg('flow.notFound'), -99, 404);
         const f: FlowRow = { ...saved, cityOverride: cityIds ?? null, armyIds: {} };
         const plan = await planCities(ctx, playerId, f);
         f.runCities = plan.cities;
         skippedCities = plan.skipped;
-        if (!f.runCities.length) throw new GameError(usesAllCities(f) ? 'None of your cities has a hero.' : 'Choose at least one of your cities.', -99);
+        if (!f.runCities.length) throw new GameError(msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.chooseCity'), -99);
         const waitAt = f.actions.findIndex((a) => a.type === 'wait');
         cities = await runPart(ctx, playerId, f, 0, waitAt < 0 ? f.actions.length : waitAt);
         if (waitAt >= 0) {
           const rest = f.actions.length - waitAt - 1;
-          const note = waitStep(f.actions[waitAt], rest ? `then ${rest} more action${rest === 1 ? '' : 's'} (not previewed)` : 'then the run ends');
+          const note = waitStep(f.actions[waitAt], rest ? msg('flow.step.moreActions', { count: rest }) : msg('flow.step.runEnds'));
           cities = cities.map((c) => (c.ok ? { ...c, steps: [...c.steps, note] } : c));
         }
         throw new PreviewRollback();
@@ -747,11 +760,10 @@ export async function runFlow(
   return runGame(db, async (ctx) => {
     const list = await flowsOf(ctx, playerId, true);
     const f = list.find((x) => x.id === flowId);
-    if (!f) throw new GameError('Flow not found.', -99, 404);
-    if (f.status !== 'idle') throw new GameError(f.status === 'queued' ? 'This flow is already queued.' : 'This flow is already running.', -99);
+    if (!f) throw new GameError(msg('flow.notFound'), -99, 404);
+    if (f.status !== 'idle') throw new GameError(msg(f.status === 'queued' ? 'flow.alreadyQueued' : 'flow.alreadyRunning'), -99);
     queue(ctx, f, cityIds ?? null);
-    if (!(await runCitiesOf(ctx, playerId, f)).length)
-      throw new GameError(usesAllCities(f) ? 'None of your cities has a hero.' : 'Choose at least one of your cities.', -99);
+    if (!(await runCitiesOf(ctx, playerId, f)).length) throw new GameError(msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.chooseCity'), -99);
     await saveRow(ctx, f);
     const started = await startNext(ctx, playerId, list);
     const ran = started.get(f.id);
@@ -775,13 +787,12 @@ function queue(ctx: Ctx, f: FlowRow, cityOverride: 'all' | number[] | null) {
 export async function setRepeat(ctx: Ctx, playerId: number, flowId: string, repeat: boolean): Promise<FlowView[]> {
   const list = await flowsOf(ctx, playerId, true);
   const f = list.find((x) => x.id === flowId);
-  if (!f) throw new GameError('Flow not found.', -99, 404);
+  if (!f) throw new GameError(msg('flow.notFound'), -99, 404);
   f.repeat = repeat;
   f.lastPreview = null;
   if (repeat && f.status === 'idle') {
     queue(ctx, f, null);
-    if (!(await runCitiesOf(ctx, playerId, f)).length)
-      throw new GameError(usesAllCities(f) ? 'None of your cities has a hero.' : "None of the flow's cities are yours any more.", -99);
+    if (!(await runCitiesOf(ctx, playerId, f)).length) throw new GameError(msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.noOwnCities'), -99);
   }
   // a repeat waiting in the queue for its next run (notBefore set) does not run again
   if (!repeat && f.status === 'queued' && f.notBefore > 0) {
@@ -796,7 +807,7 @@ export async function setRepeat(ctx: Ctx, playerId: number, flowId: string, repe
 /** Stop a flow now: a run in progress ends where it is (nothing is undone), a queued flow leaves the queue, repeat goes off. */
 export async function stopFlow(ctx: Ctx, playerId: number, flowId: string): Promise<FlowView[]> {
   const f = (await flowsOf(ctx, playerId, true)).find((x) => x.id === flowId);
-  if (!f) throw new GameError('Flow not found.', -99, 404);
+  if (!f) throw new GameError(msg('flow.notFound'), -99, 404);
   await stopRun(ctx, playerId, f, null);
   return listFlows(ctx, playerId);
 }

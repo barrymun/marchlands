@@ -1,0 +1,5 @@
+{
+  "toSelf": "自分自身にメールは送れません。",
+  "titleAndContentRequired": "メールには件名と本文が必要です。",
+  "notFound": "メールが見つかりません。"
+}

@@ -1,0 +1,32 @@
+{
+  "received": "{{item}}: received {{grant}}",
+  "heroJoined": "{{hero}} (Lv {{level}}) joined your city",
+  "used": "{{item}} used",
+  "bought": "Bought {{item}}",
+  "search": "Search items",
+  "ownedOnly": "Owned only ({{n}})",
+  "itemsFor": "Items for {{label}}",
+  "showAll": "Show all items",
+  "notEnoughGold": "Not enough gold in {{city}} ({{price}} needed)",
+  "buyWithGold": "Buy one with {{city}}'s gold",
+  "buyFor": "Buy · {{price}} gold",
+  "noMatch": "No items match.",
+  "grant": {
+    "amount": "{{amount}} {{name}}"
+  },
+  "activeBonus": {
+    "runningHint": "This bonus is running now; using another extends it",
+    "active": "Active · <countdown/>",
+    "sameBonus": "Same bonus already running (<countdown/> left); using this adds {{adds}}.",
+    "sameBonusFrom": "Same bonus already running from {{source}} (<countdown/> left); using this adds {{adds}}."
+  },
+  "medals": {
+    "title": "Where to get it",
+    "attacks": "<hl>Winning attacks</hl> on NPC cities of these levels (a player's city counts its Town Hall level), chance per win:",
+    "attackChance": "Lv {{level}} · {{chance}}",
+    "sometimes": "sometimes {{range}}",
+    "container": "<hl>{{name}}</hl> ({{amount}}): {{price}} gold in the shop",
+    "containerKey": "<hl>{{name}}</hl> ({{amount}}): {{price}} gold in the shop (opens with a {{opener}})",
+    "quest": "<hl>Quest “{{name}}”</hl>: {{n}} (once)"
+  }
+}

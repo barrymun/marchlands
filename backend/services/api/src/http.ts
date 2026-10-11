@@ -6,7 +6,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { GameError } from '@marchlands/core';
+import { GameError, msg } from '@marchlands/core';
 import { ErrorResponse, Ok } from '@marchlands/contracts';
 import { accounts, players, type Db } from '@marchlands/db';
 import { runGame, type Ctx } from '@marchlands/game';
@@ -30,22 +30,22 @@ declare module 'fastify' {
 
 export type ZApp = FastifyInstance<RawServerDefault, IncomingMessage, ServerResponse, FastifyBaseLogger, ZodTypeProvider>;
 
-/** `{ ok: 1, data }` on success; GameErrors become `{ ok: <code>, errorMsg }` with a 4xx status. */
+/** `{ ok: 1, data }` on success; failures `{ ok: <code>, error: <message> }` (a message code + params, worded by the client) with a 4xx/5xx status. */
 export function installErrorHandler(app: FastifyInstance) {
   app.setErrorHandler((err, req, reply) => {
-    if (err instanceof GameError) return reply.status(err.status).send({ ok: err.code, errorMsg: err.message });
+    if (err instanceof GameError) return reply.status(err.status).send({ ok: err.code, error: err.msg });
     if (hasZodFastifySchemaValidationErrors(err)) {
       return reply.status(400).send({
         ok: -87,
-        errorMsg: 'Invalid data sent.',
+        error: msg('common.invalidRequest'),
         issues: err.validation.map((v) => ({ path: v.instancePath, message: v.message })),
       });
     }
     const status = (err as { statusCode?: number }).statusCode ?? 500;
     if (status >= 500) req.log.error(err);
-    return reply.status(status).send({ ok: -99, errorMsg: status >= 500 ? 'Internal server error.' : (err as Error).message });
+    return reply.status(status).send({ ok: -99, error: status >= 500 ? msg('common.serverError') : msg('common.requestFailed', { status }) });
   });
-  app.setNotFoundHandler((req, reply) => reply.status(404).send({ ok: -99, errorMsg: `Route ${req.method} ${req.url} not found.` }));
+  app.setNotFoundHandler((req, reply) => reply.status(404).send({ ok: -99, error: msg('common.routeNotFound', { method: req.method, url: req.url }) }));
 }
 
 export function bearer(req: FastifyRequest): string | null {
@@ -58,7 +58,7 @@ export function bearer(req: FastifyRequest): string | null {
 export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   const token = bearer(req);
   const claims = token ? verifyToken(token, req.server.deps.config.jwtSecret) : null;
-  if (!claims) return reply.status(401).send({ ok: -2, errorMsg: 'Not logged in.' });
+  if (!claims) return reply.status(401).send({ ok: -2, error: msg('auth.notLoggedIn') });
   req.claims = claims;
 }
 
@@ -66,13 +66,13 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
 export async function playerIdOf(db: Db, req: FastifyRequest): Promise<number> {
   const accountId = req.claims!.sub;
   const [row] = await db.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
-  if (!row) throw new GameError('need create player', -4, 404);
+  if (!row) throw new GameError(msg('auth.needPlayer'), -4, 404);
   return row.id;
 }
 
 export async function requireAdmin(req: FastifyRequest) {
   const [row] = await req.server.deps.db.select({ admin: accounts.isAdmin }).from(accounts).where(eq(accounts.id, req.claims!.sub));
-  if (!row?.admin) throw new GameError('Administrators only.', -42, 403);
+  if (!row?.admin) throw new GameError(msg('common.adminsOnly'), -42, 403);
 }
 
 /** `void` commands answer `data: null`. */

@@ -1,0 +1,14 @@
+{
+  "taxRateRange": "税率は0から100の間で指定してください。",
+  "workRateRange": "労働率は0から100の間で指定してください。",
+  "invalidStorePercent": "無効な保管割合です。",
+  "storePercentTotal": "保管割合の合計は100%以下にしてください。",
+  "comfortCooldown": "次に民を慰撫できるまであと{{time}}です。",
+  "notEnoughFood": "食糧が足りません。",
+  "invalidComfortType": "無効な慰撫の種類です。",
+  "invalidLogo": "無効な都市ロゴです。",
+  "teleportCooldown": "{{item}}はクールダウン中です。",
+  "recallTroopsFirst": "都市を移動する前に、すべての部隊を帰還させてください。",
+  "foreignTroops": "他のプレイヤーの部隊がこの都市へ進軍中、または駐留しています。",
+  "notFreeFlat": "そのタイルは空いている平地ではありません。"
+}

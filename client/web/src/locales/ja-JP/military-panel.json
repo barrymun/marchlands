@@ -1,0 +1,92 @@
+{
+  "garrison": {
+    "title": "駐屯部隊",
+    "ready": "待機中",
+    "injured": "負傷"
+  },
+  "defenses": {
+    "title": "都市防衛",
+    "wallSpace": "城壁の空き {{used}} / {{cap}}",
+    "defense": "防衛施設",
+    "built": "建設済み"
+  },
+  "injured": {
+    "title": "負傷兵",
+    "medicine": "医学 Lv {{level}}: この都市が防衛や攻撃で失う兵の{{percent}}%が負傷兵として生き残ります。",
+    "noMedicine": "医学を研究すると、この都市が防衛や攻撃で失う兵の一部が負傷兵として生き残ります(1レベルごとに5%、最大50%)。",
+    "healInfo": "訓練コストの{{percent}}%、または名誉(所持 {{honor}})で治療できます。",
+    "allPlaceholder": "全員 {{n}}",
+    "healResources": "{{n}}人を治療 · 資源",
+    "healHonor": "治療 · 名誉 {{n}}",
+    "notEnoughHonor": "名誉が足りません(必要 {{n}})",
+    "dismissDescription": "治療されずに永久に去ります。元に戻せません。",
+    "dismiss": "解雇",
+    "notEnoughResources": "資源が足りません。",
+    "healed_other": "{{n}}人の兵を治療しました",
+    "dismissed_other": "{{n}}人の負傷兵を解雇しました",
+    "dismissTitle_other": "{{n}}人の負傷兵を解雇しますか?"
+  },
+  "production": {
+    "training": "訓練",
+    "fortifications": "防衛施設",
+    "noBarracks": "兵舎を建てると兵を訓練できます。",
+    "noWalls": "城壁を建てると防衛施設を建設できます。",
+    "boosted": "{{item}}: −30%",
+    "batchCancelled": "バッチを取り消しました",
+    "split": "{{n}}つの兵舎に分配",
+    "barracksOption": "兵舎 Lv {{level}}(区画 {{slot}})",
+    "train": "訓練",
+    "build": "建設",
+    "inProgress": "進行中",
+    "nothingTraining": "現在訓練中のものはありません。",
+    "nothingBuilding": "現在建設中のものはありません。",
+    "queueBarracks": "兵舎 {{slot}}",
+    "boost": "{{item}} −30% · {{price}}",
+    "waiting": "待機中",
+    "queuedTrain_other": "{{count}}種類・{{units}}ユニットを訓練中",
+    "queuedBuild_other": "{{count}}種類・{{units}}ユニットを建設中",
+    "stats": "攻 {{attack}} · 防 {{defense}} · HP {{life}}",
+    "troopStats": "速度 {{speed}} · 射程 {{range}} · 積載 {{load}} · 食料 {{upkeep}}/時",
+    "range": "射程 {{range}}",
+    "population": "人口 {{n}}",
+    "toTrain": "訓練する{{unit}}の数",
+    "toBuild": "建設する{{unit}}の数",
+    "maxLimited": "{{n}}: {{limit}}による上限",
+    "maxNone": "なし: {{limit}}が足りません",
+    "maxAfterOthers": "(他に入力した数を差し引いた後)",
+    "maxFreeWorkers": "(都市設定で労働率を下げると労働者を空けられます)",
+    "order": "{{unit}} {{n}}",
+    "populationUsed": "人口 {{used}} / 空き {{idle}}",
+    "clear": "クリア",
+    "trainAll": "{{n}}件すべて訓練",
+    "buildAll": "{{n}}件すべて建設",
+    "overBudget": "{{limit}}が足りません: 数を減らしてください。",
+    "units_other": "{{n}}ユニット"
+  },
+  "limits": {
+    "idlePopulation": "空き人口",
+    "wallSpace": "城壁の空き",
+    "resources": "資源"
+  },
+  "mayorExp": {
+    "perUnit": "市長{{name}}は1ユニットごとに経験値{{exp}}を得ます",
+    "total": "{{n}}ユニットで<b>経験値 +{{exp}}</b>"
+  },
+  "mayorTraining": {
+    "noMayorTrain": "市長がいません: 英雄タブで{{stat}}の高い英雄を任命すると訓練が速くなります。",
+    "noMayorBuild": "市長がいません: 英雄タブで{{stat}}の高い英雄を任命すると防衛施設の建設が速くなります。",
+    "train": "時間には市長{{name}}の{{stat}} {{value}}が反映されています: −{{cut}}%(新しいバッチ)。{{stat}}の高い市長ほど訓練が速くなります。",
+    "build": "時間には市長{{name}}の{{stat}} {{value}}が反映されています: −{{cut}}%(新しいバッチ)。{{stat}}の高い市長ほど建設が速くなります。"
+  },
+  "trainDiscount": {
+    "active": "訓練コスト −{{percent}}%(補給係): 以下のコストに反映済みです。",
+    "timed": "訓練コスト −{{percent}}%(補給係、残り{{time}}): 以下のコストに反映済みです。"
+  },
+  "trainEstimate": {
+    "instant": "即時(市長と軍事科学が十分に速いため)",
+    "perUnit": "1ユニットあたり{{time}}",
+    "readyIn": "{{perUnit}} · {{n}}ユニットが{{time}}後に完成",
+    "split": "{{perUnit}} · {{n}}ユニットが{{lanes}}つの兵舎({{shares}})で<b>{{time}}</b>後に完成(1つの兵舎なら{{single}})",
+    "queuesFull": "すべての兵舎のキューが満杯です。"
+  }
+}

@@ -8,24 +8,22 @@
 // With BALANCE.merchant.fixedPrice set, the merchant instead trades everything at that one price.
 
 import { BALANCE, scaled } from './balance.ts';
-
-export const MARKET_RESOURCES = ['food', 'wood', 'stone', 'iron'] as const;
-export type MarketResource = (typeof MARKET_RESOURCES)[number];
+import type { BasicResource } from './constants.ts';
 
 export interface MerchantPrice {
   /** reference price (gold per unit) at `at` */
   price: number;
   at: number;
 }
-export type MerchantState = Record<MarketResource, MerchantPrice>;
+export type MerchantState = Record<BasicResource, MerchantPrice>;
 
 const cfg = () => BALANCE.merchant;
 /** the merchant's fixed price, or null when it uses the curve */
 export const merchantFixed = (): number | null => cfg().fixedPrice;
-export const merchantBase = (r: MarketResource) => merchantFixed() ?? cfg().basePrice[r];
+export const merchantBase = (r: BasicResource) => merchantFixed() ?? cfg().basePrice[r];
 
 /** Reference price now: `state` decayed towards the base price. */
-export function merchantReference(r: MarketResource, state: MerchantPrice | undefined, now: number): number {
+export function merchantReference(r: BasicResource, state: MerchantPrice | undefined, now: number): number {
   const base = merchantBase(r);
   if (merchantFixed() != null) return base;
   if (!state || !(state.price > 0)) return base;

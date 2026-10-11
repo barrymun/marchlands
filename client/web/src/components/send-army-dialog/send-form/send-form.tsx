@@ -1,19 +1,8 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { getArmiesQueryKey, getCitiesByCityIdQueryKey, postCitiesArmies, postCitiesArmiesEstimate, type CityBean } from '@marchlands/api-client';
-import {
-  armyLoad,
-  buildingLevel,
-  BuildingType,
-  heroPower,
-  HeroStatus,
-  itemConfig,
-  maxArmyTroops,
-  Mission,
-  TROOP_KEYS,
-  type TroopKey,
-  BuffId,
-} from '@marchlands/core';
+import { armyLoad, buildingLevel, BuildingType, heroPower, HeroStatus, maxArmyTroops, Mission, TROOP_KEYS, type TroopKey, BuffId } from '@marchlands/core';
 import { Countdown } from '@/components/countdown/countdown';
 import { Button } from '@/components/ui/button';
 import { useNow } from '@/hooks/use-now';
@@ -23,7 +12,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MISSION_NAMES } from '@/components/armies-panel/constants';
 import { useCommand, usePlayer } from '@/hooks/use-game';
-import { duration, fmt, fmtExact, troopName } from '@/lib/format';
+import { duration, fmt, fmtExact, resourceLabel } from '@/lib/format';
+import { troopName, itemName } from '@/lib/game-data';
+import { translateMessage } from '@/lib/messages';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import type { SendTarget } from '@/components/send-army-dialog/types';
@@ -34,6 +25,7 @@ import { capTroops, defaultHero } from '@/components/send-army-dialog/send-form/
 
 /** Send an army to the target. The dialog stays open after sending, so more waves can follow. */
 export function SendForm({ city, target }: { city: CityBean; target: SendTarget }) {
+  const { t } = useTranslation(['send-army-dialog', 'common']);
   const [mission, setMission] = useState(String(target.mission ?? target.missions[0]));
   // an attack is led by the strongest idle hero (by Attack) unless the player picks one; other missions go without
   const [heroId, setHeroId] = useState(() => defaultHero(Number(mission), city.heros));
@@ -101,22 +93,20 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
       return data;
     },
     () => [getArmiesQueryKey(), getCitiesByCityIdQueryKey({ path: { cityId: city.id } })],
-    'Army dispatched',
+    t('form.dispatched'),
   );
   const carriesResources = Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY;
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Send army</DialogTitle>
-        <DialogDescription>
-          From {city.name} to {target.name}
-        </DialogDescription>
+        <DialogTitle>{t('form.title')}</DialogTitle>
+        <DialogDescription>{t('form.description', { from: city.name, to: target.name })}</DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
         <div className="grid grid-cols-2 gap-3">
           <div className="grid gap-2">
-            <Label>Mission</Label>
+            <Label>{t('form.mission')}</Label>
             <Select
               value={mission}
               onValueChange={(m) => {
@@ -137,7 +127,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label>Hero</Label>
+            <Label>{t('form.hero')}</Label>
             <Select
               value={heroId}
               onValueChange={(h) => {
@@ -149,10 +139,10 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No hero</SelectItem>
+                <SelectItem value="none">{t('common:noHero')}</SelectItem>
                 {idleHeroes.map((h) => (
                   <SelectItem key={h.id} value={String(h.id)}>
-                    {h.name} (Lv {h.level}, att {heroPower(h)})
+                    {t('form.heroOption', { name: h.name, level: h.level, attack: heroPower(h) })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -162,21 +152,27 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
         {!scouting && <ArmyPresets city={city} troops={troopBody} onLoad={setTroops} />}
         <div className="grid gap-2">
           <div className="flex items-baseline justify-between gap-2">
-            <Label>Troops</Label>
+            <Label>{t('form.troops')}</Label>
             <span className={over ? 'text-xs font-medium text-destructive tabular-nums' : 'text-xs text-muted-foreground tabular-nums'}>
-              {fmtExact(chosen)} / {fmtExact(cap)} (Rally Spot Lv {rally}
-              {ensign && <span className={over ? undefined : ITEM_BONUS_TEXT}>, War Ensign +25%</span>})
+              {ensign ? (
+                <Trans
+                  t={t}
+                  i18nKey="form.capacityEnsign"
+                  values={{ chosen: fmtExact(chosen), cap: fmtExact(cap), rally }}
+                  components={{ b: <span className={over ? undefined : ITEM_BONUS_TEXT} /> }}
+                />
+              ) : (
+                t('form.capacity', { chosen: fmtExact(chosen), cap: fmtExact(cap), rally })
+              )}
             </span>
           </div>
           {battleBuffs.map((b) => (
             <p key={b.id} className={cn('text-xs tabular-nums', ITEM_BONUS_TEXT)}>
-              {b.itemId ? `${itemConfig(b.itemId)?.name.trim()}: ` : ''}
-              {b.desc} in this battle · <Countdown endTime={b.endTime} /> left
+              {b.itemId ? `${itemName(b.itemId)}: ` : ''}
+              <Trans t={t} i18nKey="form.battleBuff" values={{ desc: translateMessage(b.desc) }} components={{ timer: <Countdown endTime={b.endTime} /> }} />
             </p>
           ))}
-          {available.length === 0 && (
-            <p className="text-sm text-muted-foreground">{scouting ? 'No Scouts in the city: train some in the Military tab.' : 'No troops in the city.'}</p>
-          )}
+          {available.length === 0 && <p className="text-sm text-muted-foreground">{scouting ? t('form.noScouts') : t('form.noTroops')}</p>}
           {scouting && <ScoutNote kind={target.kind} />}
           {available.map(([id, key]) => (
             <div key={key} className="flex items-center justify-between gap-2 text-sm">
@@ -194,14 +190,14 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
                 <Button
                   size="xs"
                   variant="ghost"
-                  title="As many as fit in the army"
+                  title={t('form.allTitle')}
                   onClick={() => {
                     // room left in the army without this type, so "All" never goes over the Rally Spot limit
                     const others = chosen - Number(troopBody[key] ?? 0);
                     setTroops({ ...troops, [key]: String(Math.max(0, Math.min(city.troop[key], cap - others))) });
                   }}
                 >
-                  All
+                  {t('common:actions.all')}
                 </Button>
               </div>
             </div>
@@ -210,15 +206,15 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
         {carriesResources && (
           <div className="grid gap-2">
             <div className="flex items-baseline justify-between gap-2">
-              <Label>Resources</Label>
+              <Label>{t('form.resources')}</Label>
               <span className={overloaded ? 'text-xs font-medium text-destructive tabular-nums' : 'text-xs text-muted-foreground tabular-nums'}>
-                {capacity > 0 ? `${fmtExact(loaded)} / ${fmtExact(capacity)} carried` : 'Choose troops to carry resources'}
+                {capacity > 0 ? t('form.carried', { loaded: fmtExact(loaded), capacity: fmtExact(capacity) }) : t('form.chooseTroops')}
               </span>
             </div>
             {RES.map((r) => (
               <div key={r} className="flex items-center justify-between gap-2 text-sm">
                 <span className="capitalize">
-                  {r === 'wood' ? 'lumber' : r} <span className="text-muted-foreground">({fmtExact(inCity(r))})</span>
+                  {resourceLabel(r)} <span className="text-muted-foreground">({fmtExact(inCity(r))})</span>
                 </span>
                 <div className="flex items-center gap-1">
                   <Input
@@ -228,8 +224,8 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
                     value={resources[r] ?? ''}
                     onChange={(e) => setResources({ ...resources, [r]: e.target.value.replace(/\D/g, '') })}
                   />
-                  <Button size="xs" variant="ghost" disabled={capacity <= 0} title="As much as the troops can still carry" onClick={() => maxOf(r)}>
-                    Max
+                  <Button size="xs" variant="ghost" disabled={capacity <= 0} title={t('form.maxTitle')} onClick={() => maxOf(r)}>
+                    {t('common:actions.max')}
                   </Button>
                 </div>
               </div>
@@ -237,14 +233,12 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
           </div>
         )}
         {estimate.data && (
-          <p className="text-sm text-muted-foreground">
-            March {duration(estimate.data.marchTime)} · carries {fmt(estimate.data.load)}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('form.estimate', { time: duration(estimate.data.marchTime), load: fmt(estimate.data.load) })}</p>
         )}
       </div>
       <DialogFooter>
         <Button variant="outline" disabled={!Object.keys(troopBody).length} onClick={() => estimate.mutate()}>
-          Estimate
+          {t('form.estimateButton')}
         </Button>
         <Button
           disabled={!Object.keys(troopBody).length || over || (carriesResources && overloaded) || send.isPending}
@@ -260,7 +254,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
             })
           }
         >
-          Send
+          {t('common:actions.send')}
         </Button>
       </DialogFooter>
     </>

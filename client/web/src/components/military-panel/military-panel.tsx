@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { CityBean } from '@marchlands/api-client';
 import { usedWallSpace, wallCapacity, FORT_KEYS, TROOP_KEYS } from '@marchlands/core';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,7 @@ import { InjuredCard } from '@/components/military-panel/injured-card/injured-ca
 import { UnitName } from '@/components/military-panel/unit-name/unit-name';
 
 export function MilitaryPanel({ city }: { city: CityBean }) {
+  const { t } = useTranslation(['military-panel', 'common']);
   const garrison = Object.entries(TROOP_KEYS).map(([id, key]) => ({ id: Number(id), count: city.troop[key], injured: city.injuredTroop[key] }));
   const forts = Object.entries(FORT_KEYS).map(([id, key]) => ({ id: Number(id), count: city.fortification[key] }));
   const wallCap = wallCapacity(city.buildings);
@@ -17,15 +19,15 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
       <div className="grid content-start gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Garrison</CardTitle>
+            <CardTitle className="text-sm">{t('garrison.title')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Unit</TableHead>
-                  <TableHead className="text-right">Ready</TableHead>
-                  <TableHead className="text-right">Injured</TableHead>
+                  <TableHead>{t('common:table.unit')}</TableHead>
+                  <TableHead className="text-right">{t('garrison.ready')}</TableHead>
+                  <TableHead className="text-right">{t('garrison.injured')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -44,17 +46,15 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-            <CardTitle className="text-sm">City defenses</CardTitle>
-            <span className="text-xs text-muted-foreground tabular-nums">
-              Wall space {fmtExact(wallUsed)} / {fmtExact(wallCap)}
-            </span>
+            <CardTitle className="text-sm">{t('defenses.title')}</CardTitle>
+            <span className="text-xs text-muted-foreground tabular-nums">{t('defenses.wallSpace', { used: fmtExact(wallUsed), cap: fmtExact(wallCap) })}</span>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Defense</TableHead>
-                  <TableHead className="text-right">Built</TableHead>
+                  <TableHead>{t('defenses.defense')}</TableHead>
+                  <TableHead className="text-right">{t('defenses.built')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -2,21 +2,10 @@
 // Port of Map.cpp / NpcCity.cpp / Valley.cpp.
 
 import { BALANCE, scaled } from './balance.ts';
-import { STATE_NAMES, TileType, TROOP_ID_BY_KEY, VALLEY_TYPES } from './constants.ts';
+import { BASIC_RESOURCES, RESOURCE_KEYS, TileType, TROOP_ID_BY_KEY, VALLEY_TYPES } from './constants.ts';
 import { randInt, seededRng, type Rng } from './rng.ts';
 import { unitExp } from './troops.ts';
 import type { FortCounts, ResourceSet, TroopCounts } from './types.ts';
-
-export const TILE_NAMES: Record<number, string> = {
-  1: 'Forest',
-  2: 'Desert',
-  3: 'Hill',
-  4: 'Swamp',
-  5: 'Grass',
-  6: 'Lake',
-  10: 'Flat',
-  12: "Barbarian's City",
-};
 
 export function stateOf(tileId: number, mapSize: number = BALANCE.mapSize): number {
   const x = tileId % mapSize;
@@ -24,7 +13,6 @@ export function stateOf(tileId: number, mapSize: number = BALANCE.mapSize): numb
   const cell = mapSize / BALANCE.stateGrid;
   return Math.floor(y / cell) * BALANCE.stateGrid + Math.floor(x / cell);
 }
-export const stateName = (state: number) => STATE_NAMES[state] ?? 'UNKNOWN';
 
 /** Inclusive tile-coordinate bounds of a state. */
 export function stateBounds(state: number, mapSize: number = BALANCE.mapSize) {
@@ -180,7 +168,7 @@ export function regenerateNpc(level: number, state: NpcState, troops: TroopCount
   const s = { ...state, regenAt: state.regenAt + Math.max(0, ticks) * tick, loyaltyAt: loyaltyFrom + loyaltyTicks * loyaltyTick };
   s.loyalty = Math.min(t.loyalty, s.loyalty + loyaltyTicks);
   if (ticks <= 0) return { state: s, troops, forts };
-  const regen = BALANCE.npcGoldMatchesTopResource ? (['gold', 'food', 'wood', 'stone', 'iron'] as const) : (['food', 'wood', 'stone', 'iron'] as const);
+  const regen = BALANCE.npcGoldMatchesTopResource ? RESOURCE_KEYS : BASIC_RESOURCES;
   for (const r of regen) s[r] = Math.min(t.resources[r], (s[r] ?? 0) + (t.resources[r] / 80) * ticks);
   const tr: TroopCounts = { ...troops };
   for (const [k, max] of Object.entries(t.troops) as [keyof TroopCounts, number][]) {

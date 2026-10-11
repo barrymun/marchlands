@@ -1,0 +1,16 @@
+{
+  "weapon": "Weaponry",
+  "shield": "Shield",
+  "mount": "Mount",
+  "necklace": "Necklace",
+  "charm": "Charm",
+  "ring": "Ring",
+  "head": "Head Gear",
+  "shoulder": "Shoulder Gear",
+  "chest": "Chest Gear",
+  "back": "Back Gear",
+  "gauntlets": "Gauntlets",
+  "belt": "Belt",
+  "legs": "Leg Gear",
+  "feet": "Foot Gear"
+}

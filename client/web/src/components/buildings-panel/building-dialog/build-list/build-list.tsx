@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { getCitiesBuildingsAvailableOptions, getCitiesByCityIdQueryKey, postCitiesBuildingsMutation, type CityBean } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
@@ -7,16 +8,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { CostList } from '@/components/cost-list/cost-list';
 import { Requirements } from '@/components/requirements/requirements';
 import { useCommand } from '@/hooks/use-game';
-import { buildingName } from '@/lib/format';
+import { buildingName } from '@/lib/game-data';
+import { translateMessage } from '@/lib/messages';
 import { areaOf } from '@/components/buildings-panel/building-dialog/build-list/utils';
 import { MayorBuildHint } from '@/components/buildings-panel/building-dialog/mayor-build-hint/mayor-build-hint';
 import { MayorBuildExp } from '@/components/buildings-panel/building-dialog/mayor-build-exp/mayor-build-exp';
 import { Unlocks } from '@/components/buildings-panel/building-dialog/unlocks/unlocks';
 
 export function BuildList({ city, positionId, onDone }: { city: CityBean; positionId: number; onDone: () => void }) {
+  const { t } = useTranslation('buildings-panel');
   const area = areaOf(positionId);
   const list = useQuery(getCitiesBuildingsAvailableOptions({ path: { cityId: city.id }, query: { area } }));
-  const build = useCommand(postCitiesBuildingsMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })], 'Construction started');
+  const build = useCommand(postCitiesBuildingsMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })], t('buildList.started'));
   const options = (list.data?.buildings ?? []).filter((b) => b != null).filter((b) => (positionId === -1 ? b.typeId === BuildingType.TOWN_HALL : true));
   const have = {
     gold: city.resource.gold,
@@ -28,8 +31,8 @@ export function BuildList({ city, positionId, onDone }: { city: CityBean; positi
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Build</DialogTitle>
-        <DialogDescription>{area === 'outside' ? 'Resource fields outside the walls.' : 'Buildings inside the walls.'}</DialogDescription>
+        <DialogTitle>{t('buildList.title')}</DialogTitle>
+        <DialogDescription>{area === 'outside' ? t('buildList.outside') : t('buildList.inside')}</DialogDescription>
       </DialogHeader>
       <MayorBuildHint city={city} />
       {list.isPending && <Skeleton className="h-32" />}
@@ -43,13 +46,14 @@ export function BuildList({ city, positionId, onDone }: { city: CityBean; positi
                 disabled={!b.ok || build.isPending}
                 onClick={() => build.mutate({ path: { cityId: city.id }, body: { typeId: b.typeId, positionId } }, { onSuccess: onDone })}
               >
-                Build
+                {t('buildList.build')}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground">{b.info.summary}</p>
+            {b.info.summary && <p className="text-sm text-muted-foreground">{translateMessage(b.info.summary)}</p>}
             {b.effect && (
               <p className="text-xs">
-                <span className="text-muted-foreground">Lv 1:</span> <span className="text-emerald-600 dark:text-emerald-400">{b.effect}</span>
+                <span className="text-muted-foreground">{t('buildList.firstLevel')}</span>{' '}
+                <span className="text-emerald-600 dark:text-emerald-400">{translateMessage(b.effect)}</span>
               </p>
             )}
             <Unlocks list={b.info.unlocks} />
@@ -58,7 +62,7 @@ export function BuildList({ city, positionId, onDone }: { city: CityBean; positi
             <Requirements list={b.requirements.filter((r) => !r.ok)} />
           </div>
         ))}
-        {list.data && options.length === 0 && <p className="text-sm text-muted-foreground">Nothing can be built here right now.</p>}
+        {list.data && options.length === 0 && <p className="text-sm text-muted-foreground">{t('buildList.nothing')}</p>}
       </div>
     </>
   );

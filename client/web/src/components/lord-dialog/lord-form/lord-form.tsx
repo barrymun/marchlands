@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { itemConfig, itemGoldPrice, BuffId } from '@marchlands/core';
+import { Trans, useTranslation } from 'react-i18next';
+import { itemGoldPrice, BuffId } from '@marchlands/core';
 import {
   getCitiesByCityIdQueryKey,
   getPlayerQueryKey,
@@ -24,8 +25,11 @@ import { fmt } from '@/lib/format';
 import { GENDERS } from '@/lib/genders';
 import { TRUCE } from '@/components/lord-dialog/lord-form/constants';
 import { TitleSection } from '@/components/lord-dialog/lord-form/title-section/title-section';
+import { LanguageSelect } from '@/components/lord-dialog/lord-form/language-select/language-select';
+import { itemName, titleName } from '@/lib/game-data';
 
 export function LordForm({ city }: { city?: CityBean }) {
+  const { t } = useTranslation(['lord-dialog', 'common']);
   const player = usePlayer();
   const inv = useInventory();
   const info = player.data?.playerInfo;
@@ -33,13 +37,13 @@ export function LordForm({ city }: { city?: CityBean }) {
   const [flag, setFlag] = useState('');
   const [gender, setGender] = useState<string | null>(null);
   const refresh = () => [getPlayerQueryKey()];
-  const rename = useCommand(postPlayerRenameMutation(), refresh, 'Player renamed');
-  const changeGender = useCommand(postPlayerGenderMutation(), refresh, 'Gender changed');
-  const changeFlag = useCommand(postPlayerFlagMutation(), refresh, 'Flag changed');
+  const rename = useCommand(postPlayerRenameMutation(), refresh, t('toast.renamed'));
+  const changeGender = useCommand(postPlayerGenderMutation(), refresh, t('toast.genderChanged'));
+  const changeFlag = useCommand(postPlayerFlagMutation(), refresh, t('toast.flagChanged'));
   const truce = useCommand(
     postPlayerTruceMutation(),
     () => [getPlayerQueryKey(), ...(city ? [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })] : [])],
-    'Truce in effect',
+    t('toast.truce'),
   );
   const truceGold = itemGoldPrice(TRUCE) ?? 0;
   const now = useNow();
@@ -56,48 +60,40 @@ export function LordForm({ city }: { city?: CityBean }) {
     <>
       <DialogHeader>
         <DialogTitle>{info?.userName}</DialogTitle>
-        <DialogDescription>
-          {info?.titleName} · flag {info?.flag}
-        </DialogDescription>
+        <DialogDescription>{t('summary', { title: info ? titleName(info.titleId) : '', flag: info?.flag ?? '' })}</DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
         <TitleSection />
         <Separator />
         <div className="grid gap-2">
-          <Label htmlFor="lord-name">New name</Label>
+          <Label htmlFor="lord-name">{t('name.label')}</Label>
           <div className="flex gap-2">
             <Input id="lord-name" value={name} maxLength={20} placeholder={info?.userName} onChange={(e) => setName(e.target.value)} />
             <Button
               disabled={!name.trim() || renameWait || rename.isPending}
               onClick={() => rename.mutate({ body: { userName: name.trim() } }, { onSuccess: () => setName('') })}
             >
-              Rename
+              {t('common:actions.rename')}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            {renameWait ? (
-              <>
-                Renaming is free once a day: next in <Countdown endTime={nextRename} />.
-              </>
-            ) : (
-              'Free, once a day, if nobody else has the name.'
-            )}
+            {renameWait ? <Trans t={t} i18nKey="name.wait" components={{ countdown: <Countdown endTime={nextRename} /> }} /> : t('name.free')}
           </p>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="lord-flag">New flag</Label>
+          <Label htmlFor="lord-flag">{t('flag.label')}</Label>
           <div className="flex gap-2">
             <Input id="lord-flag" value={flag} maxLength={5} placeholder={info?.flag} onChange={(e) => setFlag(e.target.value)} />
             <Button
               disabled={!flag.trim() || changeFlag.isPending}
               onClick={() => changeFlag.mutate({ body: { flag: flag.trim() } }, { onSuccess: () => setFlag('') })}
             >
-              Change
+              {t('change')}
             </Button>
           </div>
         </div>
         <div className="grid gap-2">
-          <Label>Gender</Label>
+          <Label>{t('gender.label')}</Label>
           <div className="flex gap-2">
             <Select value={pickedGender} onValueChange={setGender}>
               <SelectTrigger className="w-full">
@@ -115,35 +111,30 @@ export function LordForm({ city }: { city?: CityBean }) {
               disabled={pickedGender === currentGender || genderWait || changeGender.isPending}
               onClick={() => changeGender.mutate({ body: { sex: Number(pickedGender) } }, { onSuccess: () => setGender(null) })}
             >
-              Change
+              {t('change')}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            {genderWait ? (
-              <>
-                Changing gender is free once a day: next in <Countdown endTime={nextGender} />.
-              </>
-            ) : (
-              'Free, once a day.'
-            )}
+            {genderWait ? <Trans t={t} i18nKey="gender.wait" components={{ countdown: <Countdown endTime={nextGender} /> }} /> : t('gender.free')}
           </p>
         </div>
+        <LanguageSelect />
         <Separator />
         <div className="grid gap-2">
           <div className="flex items-center gap-2 text-sm font-medium">
-            Truce
+            {t('truce.title')}
             {truceBuff && (
               <Badge variant="secondary">
-                active · <Countdown endTime={truceBuff.endTime} />
+                <Trans t={t} i18nKey="truce.active" components={{ countdown: <Countdown endTime={truceBuff.endTime} /> }} />
               </Badge>
             )}
             {!truceBuff && truceCooldown && (
               <Badge variant="outline">
-                cooldown · <Countdown endTime={truceCooldown.endTime} />
+                <Trans t={t} i18nKey="truce.cooldown" components={{ countdown: <Countdown endTime={truceCooldown.endTime} /> }} />
               </Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">Your cities cannot be attacked for 12 hours, and you cannot attack either. A cooldown follows.</p>
+          <p className="text-xs text-muted-foreground">{t('truce.description')}</p>
           <div className="flex flex-wrap gap-2">
             {(() => {
               const owned = inv.count(TRUCE);
@@ -152,10 +143,10 @@ export function LordForm({ city }: { city?: CityBean }) {
                   size="sm"
                   variant={owned > 0 ? 'default' : 'outline'}
                   disabled={!city || !!truceBuff || !!truceCooldown || truce.isPending || (owned === 0 && city.resource.gold < truceGold)}
-                  title={owned > 0 ? undefined : `Bought with ${city?.name ?? 'the city'}'s gold`}
+                  title={owned > 0 ? undefined : city ? t('common:boughtWithCityGold', { city: city.name }) : t('truce.boughtWithAny')}
                   onClick={() => truce.mutate({ body: { itemId: TRUCE, cityId: city!.id } })}
                 >
-                  {itemConfig(TRUCE)?.name} · {owned > 0 ? `×${owned}` : `${fmt(truceGold)} gold`}
+                  {itemName(TRUCE)} · {owned > 0 ? t('truce.owned', { n: owned }) : t('common:gold', { gold: fmt(truceGold) })}
                 </Button>
               );
             })()}

@@ -2,7 +2,7 @@
 // wrote XML files to disk).
 
 import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
-import { addTroops, GameError, ReportBodySchema, type DesertionReport, type ReportBody, type TroopCounts } from '@marchlands/core';
+import { addTroops, GameError, msg, ReportBodySchema, type DesertionReport, type Message, type ReportBody, type TroopCounts } from '@marchlands/core';
 import { reports } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
 import { PushCmd } from '@marchlands/contracts';
@@ -13,12 +13,13 @@ export const ReportType = { TRADE: 0, ARMY: 1, OTHER: 2 } as const;
 export interface NewReport {
   playerId: number;
   typeId?: number;
-  title: string;
+  title: Message;
   armyType?: number;
   isAttack?: boolean;
   isBack?: boolean;
-  startPos?: string;
-  targetPos?: string;
+  /** where the army set out from and went to (`world.position.*`) */
+  startPos?: Message;
+  targetPos?: Message;
   body: ReportBody;
 }
 
@@ -32,8 +33,8 @@ export async function createReport(ctx: Ctx, r: NewReport): Promise<number> {
       armyType: r.armyType ?? 0,
       isAttack: r.isAttack ?? false,
       isBack: r.isBack ?? false,
-      startPos: r.startPos ?? '',
-      targetPos: r.targetPos ?? '',
+      startPos: r.startPos ?? null,
+      targetPos: r.targetPos ?? null,
       body: r.body,
       eventTime: ctx.now,
     })
@@ -50,7 +51,7 @@ export async function createReport(ctx: Ctx, r: NewReport): Promise<number> {
  */
 export async function reportDesertion(
   ctx: Ctx,
-  r: { playerId: number; cityId: number; city: string; from: number; troops: TroopCounts; food: DesertionReport['food']; position: string },
+  r: { playerId: number; cityId: number; city: string; from: number; troops: TroopCounts; food: DesertionReport['food']; position: Message },
 ) {
   const [prev] = await ctx.tx
     .select()
@@ -82,7 +83,7 @@ export async function reportDesertion(
   return createReport(ctx, {
     playerId: r.playerId,
     typeId: ReportType.ARMY,
-    title: 'Troops Deserted',
+    title: msg('report.title.troopsDeserted'),
     startPos: r.position,
     targetPos: r.position,
     body: {
@@ -121,7 +122,7 @@ const listBean = (r: typeof reports.$inferSelect) => ({
 
 /** report.receiveReportList */
 export async function listReports(ctx: Ctx, playerId: number, type: number | null, pageNo: number, pageSize: number) {
-  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) throw new GameError('Invalid data.', -99);
+  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) throw new GameError(msg('common.invalidData'), -99);
   const page = Math.max(1, pageNo || 1);
   const where = type == null ? eq(reports.playerId, playerId) : and(eq(reports.playerId, playerId), eq(reports.typeId, type));
   const [{ n }] = await ctx.tx.select({ n: count() }).from(reports).where(where);
@@ -141,14 +142,14 @@ export async function readReport(ctx: Ctx, playerId: number, id: number) {
     .select()
     .from(reports)
     .where(and(eq(reports.id, id), eq(reports.playerId, playerId)));
-  if (!r) throw new GameError('Invalid report id.', -99, 404);
+  if (!r) throw new GameError(msg('report.notFound'), -99, 404);
   if (!r.isRead) {
     await ctx.tx.update(reports).set({ isRead: true }).where(eq(reports.id, id));
     await pushReportCounts(ctx, playerId);
   }
   // rows written before the report format was typed may not match it: show a notice instead of failing
   const parsed = ReportBodySchema.safeParse(r.body);
-  const content: ReportBody = parsed.success ? parsed.data : { kind: 'text', text: 'This report was saved in an older format and cannot be shown.' };
+  const content: ReportBody = parsed.success ? parsed.data : { kind: 'text', text: msg('report.oldFormat') };
   return { ...listBean(r), isRead: r.isRead, content };
 }
 

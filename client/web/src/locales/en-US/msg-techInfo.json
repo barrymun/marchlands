@@ -1,0 +1,9 @@
+{
+  "summary": {
+    "ironWorking": "Troops and {{tower}} take less damage: defense +{{pct}}% per level in battle.",
+    "medicine": "Life of foot troops ({{from}} to {{to}}) and {{tower}} +{{pct}}% per level in battle. {{injured}}% per level of the troops you lose (up to {{max}}%), defending your city or attacking, survive as injured troops you can heal with resources or honor."
+  },
+  "effect": {
+    "ironWorking": "+{{pct}}% troop defense"
+  }
+}

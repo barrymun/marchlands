@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes } from 'react-router';
 import { ApiError } from '@marchlands/api-client';
 import { useToken } from '@/hooks/use-auth';
@@ -21,10 +22,11 @@ export function App() {
 }
 
 function LoggedIn() {
+  const { t } = useTranslation('game');
   const player = usePlayer();
-  if (player.isPending) return <FullPageMessage title="Loading your game…" />;
+  if (player.isPending) return <FullPageMessage title={t('loading')} />;
   const noLord = player.error instanceof ApiError && player.error.code === -4;
-  if (player.error && !noLord) return <FullPageMessage title="Could not load the game" detail={player.error.message} retry={() => void player.refetch()} />;
+  if (player.error && !noLord) return <FullPageMessage title={t('loadError')} detail={player.error.message} retry={() => void player.refetch()} />;
   return (
     <Routes>
       <Route path="/create" element={noLord ? <CreateLordPage /> : <Navigate to="/" replace />} />

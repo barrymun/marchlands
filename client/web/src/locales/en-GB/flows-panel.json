@@ -1,0 +1,126 @@
+{
+  "list": {
+    "title": "Flows",
+    "description": "A series of actions you run on any of your cities at once.",
+    "new": "New",
+    "empty": "No flows yet.",
+    "actions_one": "{{count}} action",
+    "actions_other": "{{count}} actions"
+  },
+  "detail": {
+    "deleteLabel": "Delete {{name}}",
+    "deleteTitle": "Delete the flow \"{{name}}\"?",
+    "deleteDescription": "Its actions and settings are removed, and a run in progress stops. This cannot be undone.",
+    "deleteConfirm": "Delete flow",
+    "runsOn": "Runs on:",
+    "noArmy": "Choose a saved army for the attack (Edit): until then its targets are skipped.",
+    "pickFlow": "Pick a flow, or create a new one."
+  },
+  "toasts": {
+    "deleted": "Flow deleted"
+  },
+  "citiesSummary": {
+    "all": "all cities",
+    "none": "none of your current cities"
+  },
+  "cityPicker": {
+    "label": "Cities",
+    "all": "All cities",
+    "allHint": "({{cities}}, and any you gain later)",
+    "allHintSkipped": "({{cities}}, and any you gain later; {{skipped}} with no hero skipped)",
+    "here": "here",
+    "chooseOne": "Choose at least one city."
+  },
+  "flowEditor": {
+    "editTitle": "Edit flow",
+    "newTitle": "New flow",
+    "description": "Actions run top to bottom in each city. A wait pauses the whole flow, every city together. Drag actions (or use the arrows) to reorder.",
+    "locked": "This flow is running: you can change its settings (targets, amounts, cities), but stop it to add, remove or reorder actions.",
+    "name": "Name",
+    "namePlaceholder": "e.g. Instant archers",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "removeAction": "Remove action",
+    "add": {
+      "setMayor": "Set mayor",
+      "trainTroops": "Train troops",
+      "attackTargets": "Attack targets",
+      "healTroops": "Heal troops",
+      "wait": "Wait"
+    }
+  },
+  "actionFields": {
+    "heal": {
+      "label": "Heal all injured troops with",
+      "resources": "Resources",
+      "honor": "Honour",
+      "now": "right away",
+      "armiesHome": "when the city's armies are home"
+    },
+    "wait": {
+      "label": "Wait",
+      "armiesHome": "until the armies sent are home",
+      "time": "for a set time",
+      "minutesLabel": "Minutes",
+      "minutes": "minutes"
+    },
+    "setMayor": "Set mayor: highest",
+    "train": {
+      "label": "Train",
+      "amount": "Amount"
+    }
+  },
+  "runFlow": {
+    "title": "Run",
+    "description": "Each city runs the flow all-or-nothing between waits: if an action fails there, what the flow did in that city since the last wait is undone, and the flow stops. Flows take turns between waits, so other flows run while one waits. Preview shows what would happen up to the first wait, without changing anything.",
+    "repeat": "Repeat",
+    "repeatHint": "Runs again after every run (at most once a minute) on the flow's cities, until a run fails or you switch it off.",
+    "preview": "Preview",
+    "run_one": "Run on {{count}} city",
+    "run_other": "Run on {{count}} cities",
+    "stop": "Stop",
+    "toasts": {
+      "failed_one": "{{name}}: failed in {{count}} city and stopped",
+      "failed_other": "{{name}}: failed in {{count}} cities and stopped",
+      "waiting": "{{name}}: started, now waiting",
+      "done_one": "{{name}}: done in {{count}} city",
+      "done_other": "{{name}}: done in {{count}} cities",
+      "repeatOn": "{{name}}: repeats until a run fails or you switch it off",
+      "repeatOff": "{{name}}: stops after this run",
+      "stopped": "{{name}}: stopped"
+    },
+    "lastPreview": "Preview · {{ago}} (nothing was changed)",
+    "lastRun": {
+      "inProgress": "Run {{run}} · started {{started}} · in progress",
+      "ended": "Run {{run}} · started {{started}} · ended {{ended}}"
+    },
+    "report": {
+      "wouldRun": "Would run",
+      "ok": "OK",
+      "rolledBack": "Rolled back",
+      "undone": "What the flow did in this city since the last wait was undone.",
+      "wouldSkip": "Would skip",
+      "skipped": "Skipped",
+      "allItems": "All {{n}} {{detail}}"
+    }
+  },
+  "statusBadge": {
+    "repeats": "Repeats",
+    "running": "Running",
+    "held": "Held until every hero of its cities is home",
+    "heroesOut": "Heroes out",
+    "waiting": "Waiting",
+    "repeatsIn": "Repeats in {{time}}",
+    "queued": "Queued",
+    "stopped": "Stopped",
+    "due": "due"
+  },
+  "statusLine": {
+    "running": "Running now.",
+    "held": "Waiting for every hero of its cities to come home (and for flows held before it), checking again in {{time}}.",
+    "waiting": "Waiting: carries on in {{time}}.",
+    "nextRun": "Next run in {{time}}.",
+    "starting": "Starting…",
+    "stopped": "Stopped. {{reason}} Repeat was switched off."
+  }
+}

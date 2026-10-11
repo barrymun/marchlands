@@ -1,0 +1,53 @@
+{
+  "filter": {
+    "label": "Filter buildings by type",
+    "showAll": "Show all",
+    "summary_one": "({{count}} building · levels {{min}}–{{max}})",
+    "summary_other": "({{count}} buildings · levels {{min}}–{{max}})"
+  },
+  "inside": {
+    "title": "Inside the walls"
+  },
+  "fields": {
+    "title": "Fields",
+    "unlocked": "({{unlocked}} of {{total}} unlocked by Town Hall Lv {{level}})"
+  },
+  "slot": {
+    "build": "Build at slot {{pos}}"
+  },
+  "buildList": {
+    "title": "Build",
+    "outside": "Resource fields outside the walls.",
+    "inside": "Buildings inside the walls.",
+    "build": "Build",
+    "firstLevel": "Lv 1:",
+    "nothing": "Nothing can be built here right now.",
+    "started": "Construction started"
+  },
+  "detail": {
+    "slot": "Slot {{pos}}",
+    "demolishing": "Demolishing to level {{level}}",
+    "upgrading": "Upgrading to level {{level}}",
+    "upgradeTo": "Upgrade to level {{level}}",
+    "upgrade": "Upgrade",
+    "maxLevel": "Maximum level reached.",
+    "upgradeStarted": "Upgrade started",
+    "demolished": "Building demolished",
+    "demolitionStarted": "Demolition started",
+    "cancelled": "Cancelled",
+    "demolishAll": "Demolish the whole building, instantly",
+    "demolishOne": "Demolish one level",
+    "demolishTime": " ({{minutes}} min)",
+    "returns": " · returns {{refund}}",
+    "demolish": "Demolish",
+    "confirmAllTitle": "Demolish {{name}} (Lv {{level}})?",
+    "confirmOneTitle": "Demolish one level of {{name}}?",
+    "confirmAll": "The whole building goes at once. This cannot be undone.",
+    "confirmAllRefund": "The whole building goes at once, returning {{refund}}. This cannot be undone.",
+    "confirmOne": "The level is removed when the demolition finishes."
+  },
+  "mayor": {
+    "none": "No mayor: appoint one with high Politics in the Heroes tab to build faster.",
+    "hint": "Times include mayor {{name}}'s Politics {{politics}}: −{{cut}}%. A mayor with higher Politics builds faster."
+  }
+}

@@ -1,6 +1,6 @@
 import { eq, sql } from 'drizzle-orm';
 import type { z } from 'zod';
-import { GameError } from '@marchlands/core';
+import { GameError, msg } from '@marchlands/core';
 import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody } from '@marchlands/contracts';
 import { accounts, players } from '@marchlands/db';
 import { hashPassword, verifyPassword } from '../auth/password.ts';
@@ -33,7 +33,7 @@ export default async function authRoutes(app: ZApp) {
         .select({ id: accounts.id })
         .from(accounts)
         .where(sql`lower(${accounts.username}) = lower(${username}) or lower(${accounts.email}) = lower(${email})`);
-      if (dupe) throw new GameError('Account or email already registered.', -12, 409);
+      if (dupe) throw new GameError(msg('auth.alreadyRegistered'), -12, 409);
       // the very first account, and any listed in ADMIN_USERNAMES, are server operators
       const [{ n }] = await db.select({ n: sql<number>`count(*)` }).from(accounts);
       const isAdmin = Number(n) === 0 || config.adminUsernames.includes(username.toLowerCase());
@@ -55,9 +55,9 @@ export default async function authRoutes(app: ZApp) {
         .from(accounts)
         .where(sql`lower(${accounts.username}) = lower(${username})`);
       if (!acc || !(await verifyPassword(password, acc.passwordHash))) {
-        return reply.status(401).send({ ok: -2, errorMsg: 'Incorrect account or password.' });
+        return reply.status(401).send({ ok: -2, error: msg('auth.wrongPassword') });
       }
-      if (acc.status !== 0) return reply.status(403).send({ ok: -99, errorMsg: `You are banned. Reason: ${acc.banReason}` });
+      if (acc.status !== 0) return reply.status(403).send({ ok: -99, error: msg('auth.banned', { reason: acc.banReason ?? '' }) });
       const isAdmin = acc.isAdmin || config.adminUsernames.includes(acc.username.toLowerCase());
       await db.update(accounts).set({ lastLoginAt: Date.now(), lastLoginIp: req.ip, isAdmin }).where(eq(accounts.id, acc.id));
       await db.update(players).set({ lastLoginAt: Date.now(), lastSeenAt: Date.now() }).where(eq(players.accountId, acc.id));
@@ -73,7 +73,7 @@ export default async function authRoutes(app: ZApp) {
         .select({ id: accounts.id, username: accounts.username, email: accounts.email, isAdmin: accounts.isAdmin, createdAt: accounts.createdAt })
         .from(accounts)
         .where(eq(accounts.id, req.claims!.sub));
-      if (!acc) throw new GameError('Account not found.', -2, 401);
+      if (!acc) throw new GameError(msg('auth.accountNotFound'), -2, 401);
       const [p] = await db.select({ id: players.id, name: players.name }).from(players).where(eq(players.accountId, acc.id));
       return { ok: 1 as const, data: { ...acc, player: p ?? null } };
     },
@@ -87,7 +87,7 @@ export default async function authRoutes(app: ZApp) {
         .select({ id: accounts.id, isAdmin: accounts.isAdmin, status: accounts.status })
         .from(accounts)
         .where(eq(accounts.id, req.claims!.sub));
-      if (!acc || acc.status !== 0) throw new GameError('Not logged in.', -2, 401);
+      if (!acc || acc.status !== 0) throw new GameError(msg('auth.notLoggedIn'), -2, 401);
       return { ok: 1 as const, data: await issue(acc.id, acc.isAdmin) };
     },
   );

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { CityBean } from '@marchlands/api-client';
 import { TileType, valleyBonus } from '@marchlands/core';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
@@ -15,10 +16,11 @@ export function ValleyUpgrade({
   onUpgrade: (tileId: number) => unknown;
   pending: boolean;
 }) {
+  const { t } = useTranslation('map-panel');
   if (tile.upgradeCost == null)
     return (
       <p className="text-xs text-muted-foreground">
-        Level {tile.level}: the highest {tile.type === TileType.NPC ? 'a barbarian city' : 'a valley'} can reach.
+        {t(tile.type === TileType.NPC ? 'valleyUpgrade.maxNpc' : 'valleyUpgrade.maxValley', { level: tile.level })}
       </p>
     );
   const pct = (l: number) => Math.round(valleyBonus(tile.type, l) * 100);
@@ -30,20 +32,20 @@ export function ValleyUpgrade({
           size="xs"
           variant="outline"
           disabled={pending || short}
-          title={`Upgrade to level ${tile.level + 1}?`}
-          description={`${city.name} pays ${fmtExact(tile.upgradeCost)} gold. Its garrison, fortifications and resources start afresh at the new level.`}
-          confirmLabel={`Pay ${fmt(tile.upgradeCost)} gold`}
+          title={t('valleyUpgrade.title', { level: tile.level + 1 })}
+          description={t('valleyUpgrade.description', { city: city.name, gold: fmtExact(tile.upgradeCost) })}
+          confirmLabel={t('valleyUpgrade.confirm', { gold: fmt(tile.upgradeCost) })}
           destructive={false}
           onConfirm={() => onUpgrade(tile.id)}
         >
-          Upgrade to Lv {tile.level + 1} · {fmt(tile.upgradeCost)} gold
+          {t('valleyUpgrade.button', { level: tile.level + 1, gold: fmt(tile.upgradeCost) })}
         </ConfirmButton>
-        {short && <span className="text-xs text-destructive">Not enough gold in {city.name}.</span>}
+        {short && <span className="text-xs text-destructive">{t('valleyUpgrade.notEnoughGold', { city: city.name })}</span>}
       </div>
       <span className="text-xs text-muted-foreground">
         {tile.type === TileType.NPC
-          ? `Its troops, fortifications, walls, hero and the resources you can plunder all grow to level ${tile.level + 1}, and it starts afresh at full strength.`
-          : `Once held: +${pct(tile.level)}% → +${pct(tile.level + 1)}% production. Its defenders grow stronger with the level too.`}
+          ? t('valleyUpgrade.npcHint', { level: tile.level + 1 })
+          : t('valleyUpgrade.valleyHint', { from: pct(tile.level), to: pct(tile.level + 1) })}
       </span>
     </div>
   );

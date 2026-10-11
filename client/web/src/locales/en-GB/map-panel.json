@@ -1,0 +1,77 @@
+{
+  "title": "Map ({{x}}, {{y}})",
+  "pan": {
+    "west": "West",
+    "north": "North",
+    "south": "South",
+    "east": "East",
+    "home": "Home"
+  },
+  "relations": {
+    "friend": "Alliance & allies",
+    "enemy": "Enemy",
+    "other": "Other players"
+  },
+  "relationsInline": {
+    "friend": "alliance & allies",
+    "enemy": "enemy",
+    "other": "other players"
+  },
+  "tile": {
+    "castle": "{{name}} ({{player}})",
+    "summary": "{{type}} Lv {{level}} ({{x}},{{y}})",
+    "heldByYou": "held by your city {{city}}",
+    "heldBy": "held by {{city}} ({{player}})",
+    "heldByAlliance": "held by {{city}} ({{player}}, {{alliance}})",
+    "foreignValley": "{{relation}} valley",
+    "yourValley": "your valley"
+  },
+  "info": {
+    "selectTile": "Select a tile",
+    "player": "Player {{player}} · prestige {{prestige}}",
+    "playerAlliance": "Player {{player}} of {{alliance}} · prestige {{prestige}}",
+    "heldBy": "Held by {{city}} ({{player}})",
+    "moveCityHere": "Move city here…",
+    "sendArmy": "Send army",
+    "scout": "Scout",
+    "noScouts": "No Scouts in this city: train some in the Military tab.",
+    "upgraded": "Valley upgraded"
+  },
+  "release": {
+    "title": "Release this valley?",
+    "description": "Troops stationed there march home and its production bonus stops. Taking it back means attacking it again.",
+    "confirm": "Release valley",
+    "button": "Release valley",
+    "short": "Release",
+    "hint": "Stationed troops march home; the production bonus stops.",
+    "success": "Valley released; any troops stationed there are marching home"
+  },
+  "legend": {
+    "thisCityValleys": "This city's valleys",
+    "otherCitiesValleys": "Your other cities' valleys",
+    "thisCity": "This city",
+    "relationValleys": "{{relation}} valleys"
+  },
+  "held": {
+    "title": "Valleys held by {{city}}",
+    "none": "None yet: attack a valley to occupy it (up to your Town Hall level).",
+    "row": "{{type}} Lv {{level}}",
+    "bonus": "+{{bonus}}% {{resource}}"
+  },
+  "medalOdds": {
+    "one": "Win: {{chance}} chance of a {{medal}} medal.",
+    "two": "Win: {{chance}} chance of a {{medal}} medal; then {{second}} of a second ({{medals}}).",
+    "three": "Win: {{chance}} chance of a {{medal}} medal; then {{second}} of a second ({{medals}}) and {{third}} of a third."
+  },
+  "valleyUpgrade": {
+    "maxNpc": "Level {{level}}: the highest a barbarian city can reach.",
+    "maxValley": "Level {{level}}: the highest a valley can reach.",
+    "title": "Upgrade to level {{level}}?",
+    "description": "{{city}} pays {{gold}} gold. Its garrison, fortifications and resources start afresh at the new level.",
+    "confirm": "Pay {{gold}} gold",
+    "button": "Upgrade to Lv {{level}} · {{gold}} gold",
+    "notEnoughGold": "Not enough gold in {{city}}.",
+    "npcHint": "Its troops, fortifications, walls, hero and the resources you can plunder all grow to level {{level}}, and it starts afresh at full strength.",
+    "valleyHint": "Once held: +{{from}}% → +{{to}}% production. Its defenders grow stronger with the level too."
+  }
+}

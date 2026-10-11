@@ -1,0 +1,21 @@
+{
+  "toast": {
+    "assigned": "ポイントを割り振りました",
+    "reset": "ポイントをリセットしました"
+  },
+  "hints": {
+    "politics": "市長: 生産と建設速度",
+    "attack": "軍の攻撃力、市長: 訓練速度",
+    "intelligence": "市長: 研究速度"
+  },
+  "remove": "{{label}}を減らす",
+  "add": "{{label}}を増やす",
+  "asMayor": "市長なら: 生産 {{rate}}（+{{pct}}%）",
+  "usesHolyWater": "聖水を 1 個使用（所持 {{owned}}）",
+  "holyWaterGold": "聖水 1 個分の {{gold}} 金",
+  "reset": "リセット",
+  "assignNone": "ポイントを割り振る",
+  "assign_other": "{{count}} ポイントを割り振る",
+  "pointsLeft_other": "割り振り可能なポイント: {{count}} 中 残り {{left}}。英雄はレベルごとに 1 ポイント獲得します。",
+  "resetInfo_other": "割り振り済みの {{count}} ポイントをすべてリセット · {{cost}}"
+}

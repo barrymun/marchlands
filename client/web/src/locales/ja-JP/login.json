@@ -1,0 +1,14 @@
+{
+  "tagline": "都市を築き、軍を興し、大地を治めよ。",
+  "tabs": {
+    "login": "ログイン",
+    "register": "新規登録"
+  },
+  "form": {
+    "username": "ユーザー名",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "logIn": "ログイン",
+    "createAccount": "アカウント作成"
+  }
+}

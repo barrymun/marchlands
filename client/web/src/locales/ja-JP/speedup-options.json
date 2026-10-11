@@ -1,0 +1,14 @@
+{
+  "finishFree": "無料で完了",
+  "finishNow": "今すぐ完了 · {{gold}} 金",
+  "freeIn": "残り{{time}}になると無料。",
+  "boughtFor": "{{name}}：{{gold}} 金で購入",
+  "effects": {
+    "minutes15": "−15分",
+    "hour1": "−1時間",
+    "hours2Half": "−2.5時間",
+    "hours8": "−8時間",
+    "hours10To30": "−10〜30時間",
+    "percent30": "−30%"
+  }
+}

@@ -1,6 +1,7 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { BALANCE, getGameSpeed, splitTraining } from '@marchlands/core';
 import { useNow } from '@/hooks/use-now';
-import { duration, fmtExact } from '@/lib/format';
+import { duration, fmtExact, fmtDecimal } from '@/lib/format';
 import type { Queue } from '@/components/military-panel/production/train-estimate/types';
 
 /** Real time per unit, and (when an amount is entered) when the order would finish: in one barracks, or split. */
@@ -21,6 +22,7 @@ export function TrainEstimate({
   splitting: boolean;
   fort: boolean;
 }) {
+  const { t } = useTranslation(['military-panel', 'common']);
   const now = useNow();
   const unitMs = (Math.max(BALANCE.minTrainUnitSeconds, unitSeconds) * 1000) / getGameSpeed();
   const freeAt = (q?: Queue) => {
@@ -31,28 +33,37 @@ export function TrainEstimate({
   };
   const perUnit =
     unitMs <= 0
-      ? 'instant (mayor and Military Science fast enough)'
-      : `${unitMs < 10_000 ? `${(unitMs / 1000).toLocaleString('en', { maximumFractionDigits: 2 })}s` : duration(unitMs)} per unit`;
+      ? t('trainEstimate.instant')
+      : t('trainEstimate.perUnit', {
+          time: unitMs < 10_000 ? t('common:units.seconds', { value: fmtDecimal(unitMs / 1000, 2) }) : duration(unitMs),
+        });
   const each = <span className="text-xs text-muted-foreground">{perUnit}</span>;
   if (count <= 0 || fort) return each;
   const single = freeAt(queues.find((q) => q.positionId === pos)) + count * unitMs - now;
   if (!splitting) {
-    return (
-      <span className="text-xs text-muted-foreground">
-        {perUnit} · {fmtExact(count)} ready in {duration(single)}
-      </span>
-    );
+    return <span className="text-xs text-muted-foreground">{t('trainEstimate.readyIn', { perUnit, n: fmtExact(count), time: duration(single) })}</span>;
   }
   const lanes = barracks
     .filter((b) => (queues.find((q) => q.positionId === b.positionId)?.allProduceQueue.length ?? 0) < b.level)
     .map((b) => ({ positionId: b.positionId, freeAt: freeAt(queues.find((q) => q.positionId === b.positionId)) }));
   const plan = splitTraining(lanes, count, unitMs);
-  if (!plan.length) return <span className="text-xs text-destructive">Every barracks queue is full.</span>;
+  if (!plan.length) return <span className="text-xs text-destructive">{t('trainEstimate.queuesFull')}</span>;
   const finish = Math.max(...plan.map((p) => p.finishAt)) - now;
   return (
     <span className="text-xs text-muted-foreground">
-      {perUnit} · {fmtExact(count)} ready in <span className="font-medium text-foreground">{duration(finish)}</span> across {plan.length} barracks (
-      {plan.map((p) => fmtExact(p.count)).join(' / ')}) instead of {duration(count * unitMs)} in one
+      <Trans
+        t={t}
+        i18nKey="trainEstimate.split"
+        values={{
+          perUnit,
+          n: fmtExact(count),
+          time: duration(finish),
+          lanes: plan.length,
+          shares: plan.map((p) => fmtExact(p.count)).join(' / '),
+          single: duration(count * unitMs),
+        }}
+        components={{ b: <span className="font-medium text-foreground" /> }}
+      />
     </span>
   );
 }

@@ -25,7 +25,7 @@ The authoritative types are `PushMessage` (a union discriminated on `cmd`), `Pus
 | `server.PlayerInfoUpdate` | `{ playerInfo }` | prestige, title, alliance or profile changed |
 | `server.CentsUpdate` | `{ cents }` | premium currency changed |
 | `server.ItemUpdate` | `{ items: [{ id, count }] }` | one item's count changed |
-| `server.PlayerBuffUpdate` | `{ buffBean: { typeId, descName, endTime }, updateType }` | 0 = buff added or extended, 1 = expired or removed |
+| `server.PlayerBuffUpdate` | `{ buffBean: { typeId, desc, endTime }, updateType }` (`desc`: a `buff.*` message) | 0 = buff added or extended, 1 = expired or removed |
 | `server.PlayerBuffsUpdate` | `{ buffs: [{ id, desc, endTime, param?, cityId? }] }` | full list of active buffs (helper exists, currently not sent) |
 | `server.SelfArmysUpdate` / `server.FriendArmysUpdate` / `server.EnemyArmysUpdate` | `{ armys: [...] }` | any army involving the lord changed (enemy troop details need a Beacon Tower) |
 | `server.NewMail` | `{ count, count_inbox, count_system }` | unread mail counts |

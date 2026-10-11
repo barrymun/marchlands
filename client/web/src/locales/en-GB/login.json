@@ -1,0 +1,14 @@
+{
+  "tagline": "Build your city, raise an army, rule the land.",
+  "tabs": {
+    "login": "Log in",
+    "register": "Register"
+  },
+  "form": {
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "logIn": "Log in",
+    "createAccount": "Create account"
+  }
+}

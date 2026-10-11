@@ -10,6 +10,7 @@ export type {
   FlowPreviewLog,
   FlowRunLog,
   FlowStatus,
+  Message,
   ItemCounts,
   PlayerMisc,
   ReportBody,

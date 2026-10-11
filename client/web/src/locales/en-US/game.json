@@ -1,0 +1,7 @@
+{
+  "playerStats": "Prestige {{prestige}} · rank {{rank}} · honor {{honor}}",
+  "account": {
+    "stats": "Prestige {{prestige}} · honor {{honor}}",
+    "statsBeginner": "Prestige {{prestige}} · honor {{honor}} · beginner protection"
+  }
+}

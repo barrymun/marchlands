@@ -12,7 +12,13 @@ import {
   randInt,
   upgradeExpFor,
   addTroops,
+  BuildingType,
+  CIVIL_CODE,
+  msg,
+  ref,
   type GrantContents,
+  type Message,
+  BALANCE,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
 import { cityStats, openOwnCity, type CityBundle } from '../city.ts';
@@ -24,19 +30,24 @@ import { heroSlots, heroValues, pushHero } from './heroes.ts';
 import { settleAllCities } from './research.ts';
 import { PushCmd } from '@marchlands/contracts';
 
-const ITEM_TYPE_NAMES: Record<number, string> = { 1: 'Speed up', 2: 'Chest', 3: 'Produce', 4: 'Treasure' };
-
-/** Shop catalogue (orig saleTypeBeans): items for sale grouped by type, priced in city gold. */
+/** Shop catalogue (orig saleTypeBeans): items for sale grouped by type (item category id), priced in city gold; the client names both by id. */
 export function catalogue() {
-  const groups = new Map<number, { typeId: number; typeName: string; items: { id: string; name: string; price: number; dayLimit: number }[] }>();
+  const groups = new Map<number, { typeId: number; items: { id: string; price: number; dayLimit: number }[] }>();
   for (const i of ITEMS) {
     const price = itemGoldPrice(i.id);
     if (price == null) continue;
-    const g = groups.get(i.type) ?? { typeId: i.type, typeName: ITEM_TYPE_NAMES[i.type] ?? 'Other', items: [] };
-    g.items.push({ id: i.id, name: i.name, price, dayLimit: i.dayLimit });
+    const g = groups.get(i.type) ?? { typeId: i.type, items: [] };
+    g.items.push({ id: i.id, price, dayLimit: i.dayLimit });
     groups.set(i.type, g);
   }
   return [...groups.values()].sort((a, b) => a.typeId - b.typeId);
+}
+
+/** Where an item used through another action is used, for a player (by the action's command). */
+function useFromMessage(command: string): Message {
+  if (command === 'speedup' || command.endsWith('.speedup')) return msg('item.useFrom.speedup');
+  if (command.startsWith('heroes.')) return msg('item.useFrom.hero');
+  return msg('item.useFrom.elsewhere');
 }
 
 const today = (now: number) => new Date(now).toISOString().slice(0, 10);
@@ -44,8 +55,8 @@ const today = (now: number) => new Date(now).toISOString().slice(0, 10);
 /** shop.buy: buy items with a city's gold (itemGoldPrice); they go to the lord's inventory. */
 export async function buyItemWithGold(ctx: Ctx, playerId: number, cityId: number, itemId: string, amount: number) {
   const price = itemGoldPrice(itemId);
-  if (price == null) throw new GameError('This item is not for sale.', -99);
-  if (!Number.isInteger(amount) || amount < 1 || amount > 1000) throw new GameError('Not going to happen.', -28);
+  if (price == null) throw new GameError(msg('item.notForSale'), -99);
+  if (!Number.isInteger(amount) || amount < 1 || amount > 1000) throw new GameError(msg('common.invalidAmount'), -28);
   const b = await openOwnCity(ctx, playerId, cityId);
   // dayLimit on items with a short validity is a per-day purchase cap (orig: unenforced)
   const cfg = itemConfig(itemId)!;
@@ -53,11 +64,11 @@ export async function buyItemWithGold(ctx: Ctx, playerId: number, cityId: number
     const day = today(ctx.now);
     const rec = b.player.misc.dailyLimits?.[itemId];
     const used = rec?.day === day ? rec.count : 0;
-    if (used + amount > cfg.dayLimit) throw new GameError('Daily purchase limit reached.', -99);
+    if (used + amount > cfg.dayLimit) throw new GameError(msg('item.dailyLimit'), -99);
     b.player.misc = { ...b.player.misc, dailyLimits: { ...(b.player.misc.dailyLimits ?? {}), [itemId]: { day, count: used + amount } } };
   }
   const gold = price * amount;
-  if (b.city.gold < gold) throw new GameError(`Not enough gold: ${gold.toLocaleString('en')} needed.`, -99);
+  if (b.city.gold < gold) throw new GameError(msg('common.notEnoughGoldFor', { amount: gold }), -99);
   b.city.gold -= gold;
   ctx.stat(b.player.id, b.city.id, { 'spent.items.gold': gold });
   addItem(ctx, b.player, itemId, amount);
@@ -95,13 +106,13 @@ export interface UseItemResult {
  */
 export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId: number | null): Promise<UseItemResult> {
   const effect = itemEffect(itemId);
-  if (!effect) throw new GameError('This item cannot be used here.', -99);
-  if (effect.kind === 'command') throw new GameError(`Use this item through ${effect.command}.`, -99);
+  if (!effect) throw new GameError(msg('item.cannotUse'), -99);
+  if (effect.kind === 'command') throw new GameError(useFromMessage(effect.command), -99);
   const b = cityId != null ? await openOwnCity(ctx, playerId, cityId) : null;
   const p = b ? b.player : await getPlayer(ctx, playerId, { lock: true });
-  if (itemCount(p, itemId) < 1) throw new GameError('Insufficient items.', -24);
+  if (itemCount(p, itemId) < 1) throw new GameError(msg('common.insufficientItems'), -24);
   const needCity = () => {
-    if (!b) throw new GameError('Choose a city to use this item in.', -99);
+    if (!b) throw new GameError(msg('item.chooseCity'), -99);
     return b;
   };
   const result: UseItemResult = { itemId };
@@ -130,7 +141,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
       break;
     }
     case 'chest': {
-      if (itemCount(p, effect.key) < 1) throw new GameError(`You need a ${itemConfig(effect.key)?.name ?? 'key'} to open this.`, -99);
+      if (itemCount(p, effect.key) < 1) throw new GameError(msg('item.needKey', { key: ref.item(effect.key) }), -99);
       const contents = effect.contents();
       consumeItem(ctx, p, itemId);
       consumeItem(ctx, p, effect.key);
@@ -144,7 +155,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
           const city = needCity();
           consumeItem(ctx, p, itemId);
           const max = cityStats(city, ctx.now).maxPopulation;
-          city.city.population = Math.min(max, city.city.population + Math.max(100, Math.floor(max * 0.2)));
+          city.city.population = Math.min(max, city.city.population + Math.max(CIVIL_CODE.min, Math.floor(max * CIVIL_CODE.share)));
           pushCity(ctx, city);
           break;
         }
@@ -158,7 +169,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
         }
         case 'heroBox': {
           const city = needCity();
-          if (city.heroes.length >= heroSlots(city)) throw new GameError('Insufficient vacancies in Feasting Hall.', -99);
+          if (city.heroes.length >= heroSlots(city)) throw new GameError(msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }), -99);
           consumeItem(ctx, p, itemId);
           const q = HERO_BOX_QUALITY[itemId] ?? { level: 10, minStat: 40 };
           const g = createRandomHero(1, ctx.rng);
@@ -179,7 +190,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
               management: baseManagement,
               stratagem: baseStratagem,
               remainPoint: q.level,
-              loyalty: 100,
+              loyalty: BALANCE.heroMaxLoyalty,
               playerId: p.id,
               cityId: city.city.id,
               inTavern: false,

@@ -1,0 +1,14 @@
+{
+  "title": "Found your city",
+  "description": "Choose your name, banner and where to settle.",
+  "playerName": "Player name",
+  "cityName": "City name",
+  "flag": "Flag",
+  "flagPlaceholder": "e.g. EV",
+  "gender": "Gender",
+  "state": "State",
+  "leastCrowded": "Least crowded (recommended)",
+  "submit": "Found city",
+  "zone_one": "{{name}} · {{count}} player · {{rate}}% settled",
+  "zone_other": "{{name}} · {{count}} players · {{rate}}% settled"
+}

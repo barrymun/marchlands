@@ -1,0 +1,5 @@
+{
+  "toSelf": "You can't send mail to yourself.",
+  "titleAndContentRequired": "Mail needs a title and a message.",
+  "notFound": "Mail not found."
+}

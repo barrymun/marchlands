@@ -1,50 +1,51 @@
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { fmt } from '@/lib/format';
+import { fmt, RESOURCES, resourceLabel } from '@/lib/format';
 import type { Counters } from '@/components/stats-panel/types';
 import { sumPrefix } from '@/components/stats-panel/utils';
-import { RESOURCES } from '@/components/stats-panel/constants';
 import { Num } from '@/components/stats-panel/num/num';
 import { SPENDING } from '@/components/stats-panel/spending/constants';
 
 export function Spending({ c }: { c: Counters }) {
-  const rows = SPENDING.filter(([g]) => sumPrefix(c, `spent.${g}.`) !== 0);
+  const { t } = useTranslation(['stats-panel', 'common']);
+  const rows = SPENDING.filter(({ group }) => sumPrefix(c, `spent.${group}.`) !== 0);
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Spending</CardTitle>
+        <CardTitle className="text-sm">{t('spending.title')}</CardTitle>
         <CardDescription>
-          After refunds for cancelled orders.{c['spent.healing.honor'] ? ` Healing also cost ${fmt(c['spent.healing.honor'])} honor.` : ''}
+          {c['spent.healing.honor'] ? t('spending.descriptionHonor', { honor: fmt(c['spent.healing.honor']) }) : t('spending.description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nothing yet.</p>
+          <p className="text-sm text-muted-foreground">{t('common:nothingYet')}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>On</TableHead>
-                {RESOURCES.map(([r, label]) => (
+                <TableHead>{t('spending.on')}</TableHead>
+                {RESOURCES.map((r) => (
                   <TableHead key={r} className="text-right">
-                    {label}
+                    {resourceLabel(r)}
                   </TableHead>
                 ))}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map(([g, label]) => (
-                <TableRow key={g}>
+              {rows.map(({ group, label }) => (
+                <TableRow key={group}>
                   <TableCell>{label}</TableCell>
-                  {RESOURCES.map(([r]) => (
-                    <Num key={r} v={c[`spent.${g}.${r}`]} />
+                  {RESOURCES.map((r) => (
+                    <Num key={r} v={c[`spent.${group}.${r}`]} />
                   ))}
                 </TableRow>
               ))}
               <TableRow className="font-medium">
-                <TableCell>Total</TableCell>
-                {RESOURCES.map(([r]) => (
-                  <Num key={r} v={SPENDING.reduce((s, [g]) => s + (c[`spent.${g}.${r}`] ?? 0), 0)} />
+                <TableCell>{t('common:table.total')}</TableCell>
+                {RESOURCES.map((r) => (
+                  <Num key={r} v={SPENDING.reduce((s, { group }) => s + (c[`spent.${group}.${r}`] ?? 0), 0)} />
                 ))}
               </TableRow>
             </TableBody>

@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { createSelectSchema } from 'drizzle-zod';
-import { ArmyPresetSchema, CastleSignSchema, FlowActionSchema, FlowSchema, GrantContentsSchema, ResearchStateSchema } from '@marchlands/core';
+import { ArmyPresetSchema, CastleSignSchema, FlowActionSchema, FlowSchema, GrantContentsSchema, MessageSchema, ResearchStateSchema } from '@marchlands/core';
 import { accounts } from '@marchlands/db/schema';
 import { Ms, zId } from './common.ts';
 import { ArmyBean, BuffBean, CityBean, HeroBean, ItemCount, PlayerInfo } from './beans.ts';
@@ -46,8 +46,7 @@ export type AuthAccount = z.infer<typeof AuthAccount>;
 
 export const ZoneStats = z
   .object({
-    id: z.number().int(),
-    name: z.string(),
+    id: z.number().int().describe('zone (state) id; the client names it'),
     playerCount: z.number().int(),
     castleCount: z.number().int(),
     openFlats: z.number().int(),
@@ -100,21 +99,21 @@ const FlowCityResult = z.object({
   cityId: zId,
   cityName: z.string(),
   ok: z.boolean().describe('false: an action failed and everything the flow did in this city since the last wait was rolled back'),
-  error: z.string().nullable(),
+  error: MessageSchema.nullable().describe("the failure that rolled back this city's part of the run"),
   steps: z.array(
     z.object({
-      action: z.string(),
+      action: MessageSchema,
       ok: z.boolean(),
-      detail: z.string(),
+      detail: MessageSchema.describe('what happened, or why it failed'),
       skipped: z.boolean().optional().describe('the city could not do it right now (e.g. nothing affordable to train); the run carried on'),
       items: z
-        .array(z.object({ label: z.string(), ok: z.boolean(), detail: z.string() }))
+        .array(z.object({ label: z.string().describe('the target, as "(x,y)"'), ok: z.boolean(), detail: MessageSchema }))
         .optional()
         .describe('per-target outcomes (attack actions)'),
     }),
   ),
 });
-const FlowSkippedCity = z.object({ cityId: zId, cityName: z.string(), reason: z.string() }).meta({ id: 'FlowSkippedCity' });
+const FlowSkippedCity = z.object({ cityId: zId, cityName: z.string(), reason: MessageSchema }).meta({ id: 'FlowSkippedCity' });
 export const FlowRunLog = z
   .object({
     run: z.number().int().describe('1 for the first run of the flow, counting up'),
@@ -143,7 +142,7 @@ export const Flow = FlowSchema.extend({
   notBefore: Ms.describe('a queued repeat starts no earlier than this'),
   waitUntil: Ms.describe('while waiting: when the wait ends (or is checked again)'),
   heldSince: Ms.describe('while waiting: held before its next actions until every hero of its cities is home, since then (0 = not held)'),
-  stopReason: z.string().nullable().describe('why the flow stopped on its own (a failed run; repeat was switched off)'),
+  stopReason: MessageSchema.nullable().describe('why the flow stopped on its own (a failed run; repeat was switched off)'),
   lastRun: FlowRunLog.nullable(),
   lastPreview: FlowPreviewLog.nullable().describe('the latest preview, until the flow runs, is edited or repeat is switched'),
 }).meta({ id: 'Flow' });
@@ -224,7 +223,7 @@ export const PublicPlayerInfo = PlayerInfo.extend({
 }).meta({ id: 'PublicPlayerInfo' });
 export type PublicPlayerInfo = z.infer<typeof PublicPlayerInfo>;
 
-export const TitlePromotion = PlayerInfo.pick({ titleId: true, titleName: true }).meta({ id: 'TitlePromotion' });
+export const TitlePromotion = PlayerInfo.pick({ titleId: true }).meta({ id: 'TitlePromotion' });
 export type TitlePromotion = z.infer<typeof TitlePromotion>;
 
 // ---- items ----
@@ -252,7 +251,7 @@ export const LordStatistics = z
     cities: z.array(
       z.object({
         cityId: zId,
-        name: z.string().describe("the city's name, or 'Former city' when the lord no longer holds it"),
+        name: z.string().nullable().describe("the city's name; null when the player no longer holds it"),
         owned: z.boolean(),
         allTime: StatCounters,
         last7Days: StatCounters,

@@ -8,20 +8,20 @@ import { TechType } from './constants.ts';
 import { medalId } from './items.ts';
 
 export const GEAR_PIECES = [
-  { id: 'weapon', name: 'Weaponry' },
-  { id: 'shield', name: 'Shield' },
-  { id: 'mount', name: 'Mount' },
-  { id: 'necklace', name: 'Necklace' },
-  { id: 'charm', name: 'Charm' },
-  { id: 'ring', name: 'Ring' },
-  { id: 'head', name: 'Head Gear' },
-  { id: 'shoulder', name: 'Shoulder Gear' },
-  { id: 'chest', name: 'Chest Gear' },
-  { id: 'back', name: 'Back Gear' },
-  { id: 'gauntlets', name: 'Gauntlets' },
-  { id: 'belt', name: 'Belt' },
-  { id: 'legs', name: 'Leg Gear' },
-  { id: 'feet', name: 'Foot Gear' },
+  { id: 'weapon' },
+  { id: 'shield' },
+  { id: 'mount' },
+  { id: 'necklace' },
+  { id: 'charm' },
+  { id: 'ring' },
+  { id: 'head' },
+  { id: 'shoulder' },
+  { id: 'chest' },
+  { id: 'back' },
+  { id: 'gauntlets' },
+  { id: 'belt' },
+  { id: 'legs' },
+  { id: 'feet' },
 ] as const;
 
 export type GearPieceId = (typeof GEAR_PIECES)[number]['id'];
@@ -60,8 +60,8 @@ export const gearStarLimit = (gear: LordGear) => Math.min(gear.level, BALANCE.he
 export const gearLevelPoints = (level: number) => (level * (level + 1)) / 2;
 
 export interface GearPieceBonus {
+  /** named by the client (`data-gear`) */
   id: GearPieceId;
-  name: string;
   /** the lord's level and stars for this piece */
   level: number;
   stars: number;
@@ -79,7 +79,7 @@ export function heroGearBreakdown(heroLevel: number, gear: LordGear): { tier: nu
     const stars = Math.min(gear.stars[p.id] ?? 0, BALANCE.heroGear.maxStars);
     const usedLevel = Math.min(level, tier);
     const usedStars = Math.min(stars, tier, gearStarLimit(gear));
-    return { id: p.id, name: p.name, level, stars, usedLevel, usedStars, points: gearLevelPoints(usedLevel) + usedStars * BALANCE.heroGear.starPoints };
+    return { id: p.id, level, stars, usedLevel, usedStars, points: gearLevelPoints(usedLevel) + usedStars * BALANCE.heroGear.starPoints };
   });
   return { tier, pieces, total: pieces.reduce((s, p) => s + p.points, 0) };
 }

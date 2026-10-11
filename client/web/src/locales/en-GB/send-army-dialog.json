@@ -1,0 +1,44 @@
+{
+  "form": {
+    "title": "Send army",
+    "description": "From {{from}} to {{to}}",
+    "dispatched": "Army dispatched",
+    "mission": "Mission",
+    "hero": "Hero",
+    "heroOption": "{{name}} (Lv {{level}}, att {{attack}})",
+    "troops": "Troops",
+    "capacity": "{{chosen}} / {{cap}} (Rally Spot Lv {{rally}})",
+    "capacityEnsign": "{{chosen}} / {{cap}} (Rally Spot Lv {{rally}}<b>, War Ensign +25%</b>)",
+    "battleBuff": "{{desc}} in this battle · <timer/> left",
+    "noScouts": "No Scouts in the city: train some in the Military tab.",
+    "noTroops": "No troops in the city.",
+    "allTitle": "As many as fit in the army",
+    "resources": "Resources",
+    "carried": "{{loaded}} / {{capacity}} carried",
+    "chooseTroops": "Choose troops to carry resources",
+    "maxTitle": "As much as the troops can still carry",
+    "estimate": "March {{time}} · carries {{load}}",
+    "estimateButton": "Estimate"
+  },
+  "presets": {
+    "deleted": "Preset deleted",
+    "shortItem": "{{n}} {{unit}}",
+    "short": "Short of {{list}}: loaded what the city has.",
+    "label": "Saved armies",
+    "done": "Done",
+    "manage": "Manage",
+    "deleteNamed": "Delete saved army {{name}}",
+    "loadPlaceholder": "Load a saved army…",
+    "emptyPlaceholder": "No saved armies yet",
+    "deleteSelected": "Delete this saved army",
+    "namePlaceholder": "Name this army, e.g. Layered L10",
+    "option_one": "{{name}} · {{n}} troop",
+    "option_other": "{{name}} · {{n}} troops"
+  },
+  "scoutNote": {
+    "city": "Your scouts fight the city's scouts (a hero helps). If any survive, the report shows its resources, troops, fortifications and loyalty; Informatics adds heroes (level 1) and buildings (level 2). If none survive, you learn nothing.",
+    "npc": "Barbarian cities never stop scouts: one is enough. The report shows their troops, fortifications, walls, resources, loyalty, buildings and hero.",
+    "valley": "Valleys never stop scouts: one is enough. The report shows the troops guarding it and who holds it.",
+    "other": "Only scouts go on a scouting mission."
+  }
+}

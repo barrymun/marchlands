@@ -1,0 +1,27 @@
+{
+  "toast": {
+    "used": "アイテムを使用しました",
+    "bought": "金で購入して使用しました"
+  },
+  "notEnoughGold": "この都市の金が足りません（{{gold}} 必要）",
+  "title": "{{name}} のアイテム",
+  "maxLevel": "最大レベル",
+  "experienceProgress": "経験値 {{exp}} / {{needed}}",
+  "summary": "{{progress}} · 忠誠 {{loyalty}} · この都市の金 {{gold}}",
+  "experience": {
+    "title": "経験値",
+    "gain": "経験値 +{{amount}}",
+    "atMax": "レベル {{level}} が上限です: これ以上経験値は得られません"
+  },
+  "boosts": {
+    "title": "能力強化",
+    "effect": "{{label}} +{{pct}}%（+{{amount}}、装備込み）24時間",
+    "active": "有効、残り <countdown />。追加で使うと 24 時間延長",
+    "best": "この英雄に最適"
+  },
+  "loyalty": {
+    "title": "忠誠メダル",
+    "gain": "忠誠 +{{amount}}（最大 100）",
+    "full": "忠誠はすでに 100 です"
+  }
+}

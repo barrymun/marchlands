@@ -3,7 +3,7 @@
   "info": {
     "title": "Marchlands API",
     "version": "0.1.0",
-    "description": "Marchlands game server, based on Evony Age 1. Successful calls answer `{ ok: 1, data }`; failures `{ ok: <negative code>, errorMsg }` with a 4xx status. Live updates (`server.*` pushes of the original protocol) arrive on the WebSocket at `/ws?token=...` as `{ cmd, data }`."
+    "description": "Marchlands game server, based on Evony Age 1. Successful calls answer `{ ok: 1, data }`; failures `{ ok: <negative code>, error: { code, params } }` with a 4xx status: a message code the client words in the language the player chose. Live updates (`server.*` pushes of the original protocol) arrive on the WebSocket at `/ws?token=...` as `{ cmd, data }`."
   },
   "components": {
     "securitySchemes": {
@@ -14,6 +14,604 @@
       }
     },
     "schemas": {
+      "GameRefInput": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "troop",
+              "building",
+              "tech",
+              "item",
+              "title",
+              "tile",
+              "resource",
+              "stat",
+              "zone",
+              "rank",
+              "gear",
+              "itemCategory"
+            ]
+          },
+          "id": {
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "ref",
+          "id"
+        ]
+      },
+      "MsgDurationInput": {
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "duration"
+        ]
+      },
+      "MsgParamInput": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "$ref": "#/components/schemas/GameRefInput"
+          },
+          {
+            "$ref": "#/components/schemas/MsgDurationInput"
+          },
+          {
+            "$ref": "#/components/schemas/MessageInput"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MsgParamInput"
+            }
+          }
+        ]
+      },
+      "MessageInput": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "common.legacyText",
+              "common.invalidRequest",
+              "common.serverError",
+              "common.requestFailed",
+              "common.routeNotFound",
+              "common.notAllowed",
+              "common.adminsOnly",
+              "common.invalidData",
+              "common.invalidAmount",
+              "common.invalidCastle",
+              "common.invalidCoordinates",
+              "common.invalidTroopType",
+              "common.invalidTroopCount",
+              "common.unknownTroopType",
+              "common.noTroopsSelected",
+              "common.notEnoughResources",
+              "common.notEnoughGold",
+              "common.notEnoughGoldFor",
+              "common.insufficientItems",
+              "common.playerNotFound",
+              "common.playerNamedNotFound",
+              "common.cityNotFound",
+              "common.heroNotFound",
+              "common.playerName",
+              "common.cityName",
+              "common.heroName",
+              "common.name",
+              "common.nameLength",
+              "common.nameInvalid",
+              "common.nameNotAllowed",
+              "common.freeSpeedupTooEarly",
+              "common.invalidSpeedup",
+              "auth.notLoggedIn",
+              "auth.needPlayer",
+              "auth.wrongPassword",
+              "auth.alreadyRegistered",
+              "auth.accountNotFound",
+              "auth.banned",
+              "questInfo.description.upgrade",
+              "questInfo.description.upgradeAny",
+              "questInfo.description.field",
+              "questInfo.description.ownFields",
+              "questInfo.description.cottage",
+              "questInfo.description.rallySpot",
+              "questInfo.description.barracks",
+              "questInfo.description.warehouse",
+              "questInfo.description.academy",
+              "questInfo.description.walls",
+              "questInfo.description.embassy",
+              "questInfo.description.inn",
+              "questInfo.description.feastingHall",
+              "questInfo.description.research",
+              "questInfo.description.appointMayor",
+              "questInfo.description.taxRate",
+              "questInfo.description.joinAlliance",
+              "questInfo.description.sendMail",
+              "questInfo.description.recruitHero",
+              "questInfo.description.train",
+              "questInfo.description.fortify",
+              "questInfo.description.secondCity",
+              "questInfo.description.occupyValley",
+              "questInfo.description.population",
+              "questInfo.description.prestige",
+              "questInfo.target.building",
+              "questInfo.target.buildings",
+              "questInfo.target.research",
+              "questInfo.target.troops",
+              "questInfo.target.heroes",
+              "questInfo.target.mayor",
+              "questInfo.target.alliance",
+              "questInfo.target.cities",
+              "questInfo.target.valleys",
+              "questInfo.target.prestige",
+              "questInfo.target.population",
+              "questInfo.target.taxRate",
+              "questInfo.target.mailSent",
+              "questInfo.target.friend",
+              "itemInfo.period.days",
+              "itemInfo.period.hours",
+              "itemInfo.period.minutes",
+              "itemInfo.speedup.time",
+              "itemInfo.speedup.hours",
+              "itemInfo.speedup.percent",
+              "itemInfo.speedup.troopBatch",
+              "itemInfo.speedup.fortBatch",
+              "itemInfo.loyalty",
+              "itemInfo.heroStat",
+              "itemInfo.experience.share",
+              "itemInfo.experience.level",
+              "itemInfo.holyWater",
+              "itemInfo.buff",
+              "itemInfo.grant",
+              "itemInfo.grantCity",
+              "itemInfo.contents.item",
+              "itemInfo.contents.amount",
+              "itemInfo.chest",
+              "itemInfo.key",
+              "itemInfo.medalBox",
+              "itemInfo.randomBox",
+              "itemInfo.civilCode",
+              "itemInfo.cureInjured",
+              "itemInfo.heroBox",
+              "itemInfo.teleporter",
+              "itemInfo.truce",
+              "itemInfo.notUsable",
+              "itemInfo.noEffect",
+              "itemInfo.howTo.speedup",
+              "itemInfo.howTo.troopsSpeedup",
+              "itemInfo.howTo.fortificationsSpeedup",
+              "itemInfo.howTo.cityMove",
+              "itemInfo.howTo.heroesReset",
+              "itemInfo.howTo.heroesUseItem",
+              "itemInfo.howTo.cityTruce",
+              "itemInfo.howTo.key",
+              "itemInfo.howTo.newbies",
+              "troopInfo.worker",
+              "troopInfo.warrior",
+              "troopInfo.scout",
+              "troopInfo.pikeman",
+              "troopInfo.swordsman",
+              "troopInfo.archer",
+              "troopInfo.transporter",
+              "troopInfo.cavalry",
+              "troopInfo.cataphract",
+              "troopInfo.ballista",
+              "troopInfo.batteringRam",
+              "troopInfo.catapult",
+              "troopInfo.trap",
+              "troopInfo.abatis",
+              "troopInfo.archerTower",
+              "troopInfo.rollingLog",
+              "troopInfo.trebuchet",
+              "techInfo.summary.resource",
+              "techInfo.summary.stockpile",
+              "techInfo.summary.construction",
+              "techInfo.summary.militaryScience",
+              "techInfo.summary.metalCasting",
+              "techInfo.summary.heroEnhancement",
+              "techInfo.summary.militaryTradition",
+              "techInfo.summary.ironWorking",
+              "techInfo.summary.medicine",
+              "techInfo.summary.archery",
+              "techInfo.summary.compass",
+              "techInfo.summary.horsebackRiding",
+              "techInfo.summary.logistics",
+              "techInfo.summary.informatics",
+              "techInfo.summary.none",
+              "techInfo.effect.resource",
+              "techInfo.effect.stockpile",
+              "techInfo.effect.construction",
+              "techInfo.effect.militaryScience",
+              "techInfo.effect.metalCasting",
+              "techInfo.effect.heroEnhancement",
+              "techInfo.effect.militaryTradition",
+              "techInfo.effect.ironWorking",
+              "techInfo.effect.medicine",
+              "techInfo.effect.archery",
+              "techInfo.effect.compass",
+              "techInfo.effect.horsebackRiding",
+              "techInfo.effect.logistics",
+              "techInfo.effect.informaticsHeroes",
+              "techInfo.effect.informaticsBuildings",
+              "buildingInfo.summary.townHall",
+              "buildingInfo.summary.walls",
+              "buildingInfo.summary.cottage",
+              "buildingInfo.summary.field",
+              "buildingInfo.summary.warehouse",
+              "buildingInfo.summary.barracks",
+              "buildingInfo.summary.academy",
+              "buildingInfo.summary.inn",
+              "buildingInfo.summary.feastingHall",
+              "buildingInfo.summary.rallySpot",
+              "buildingInfo.summary.marketplace",
+              "buildingInfo.summary.reliefStation",
+              "buildingInfo.summary.beaconTower",
+              "buildingInfo.summary.embassy",
+              "buildingInfo.summary.prerequisite",
+              "buildingInfo.placement.unique",
+              "buildingInfo.placement.inside",
+              "buildingInfo.placement.insideLimited",
+              "buildingInfo.placement.outside",
+              "buildingInfo.placement.outsideLimited",
+              "buildingInfo.effect.townHall",
+              "buildingInfo.effect.walls",
+              "buildingInfo.effect.cottage",
+              "buildingInfo.effect.field",
+              "buildingInfo.effect.warehouse",
+              "buildingInfo.effect.barracks",
+              "buildingInfo.effect.academy",
+              "buildingInfo.effect.inn",
+              "buildingInfo.effect.feastingHall",
+              "buildingInfo.effect.rallySpot",
+              "buildingInfo.effect.marketplace",
+              "buildingInfo.effect.reliefStation",
+              "buildingInfo.effect.beaconTroops",
+              "buildingInfo.effect.beaconHeroes",
+              "buff.production",
+              "buff.goldIncome",
+              "buff.troopAttack",
+              "buff.troopDefense",
+              "buff.armySize",
+              "buff.buildingQueue",
+              "buff.upkeep",
+              "buff.trainingCost",
+              "buff.truce",
+              "buff.truceCooldown",
+              "buff.teleportCooldown",
+              "buff.holiday",
+              "buff.heroStat",
+              "buff.homeCity",
+              "flow.nameLength",
+              "flow.actionCount",
+              "flow.invalidAction",
+              "flow.chooseArmy",
+              "flow.targetsOwnCities",
+              "flow.chooseCities",
+              "flow.notFound",
+              "flow.runningLocked",
+              "flow.tooMany",
+              "flow.noMayorHero",
+              "flow.cannotTrain",
+              "flow.req.level",
+              "flow.req.item",
+              "flow.alreadyQueued",
+              "flow.alreadyRunning",
+              "flow.noHeroCities",
+              "flow.chooseCity",
+              "flow.noOwnCities",
+              "flow.cityFailed",
+              "flow.runFailed",
+              "flow.failedCity",
+              "flow.stopped",
+              "flow.healDone",
+              "flow.healFailed",
+              "flow.action.setMayor",
+              "flow.action.healResources",
+              "flow.action.healHonour",
+              "flow.action.healResourcesHome",
+              "flow.action.healHonourHome",
+              "flow.action.waitArmiesHome",
+              "flow.action.wait",
+              "flow.action.attack",
+              "flow.action.attackFrom",
+              "flow.action.train",
+              "flow.action.trainMax",
+              "flow.cityCount",
+              "flow.resourceAmount",
+              "flow.step.noTargets",
+              "flow.step.armyGone",
+              "flow.step.noArmy",
+              "flow.step.sent",
+              "flow.step.noInjured",
+              "flow.step.healed",
+              "flow.step.healedHonour",
+              "flow.step.healScheduled",
+              "flow.step.alreadyMayor",
+              "flow.step.mayor",
+              "flow.step.noBarracksRoom",
+              "flow.step.cannotAfford",
+              "flow.step.training",
+              "flow.step.trainingDone",
+              "flow.step.trainingPartial",
+              "flow.step.trainingPartialDone",
+              "flow.step.noArmiesOut",
+              "flow.step.waiting",
+              "flow.step.moreActions",
+              "flow.step.runEnds",
+              "flow.target.sent",
+              "flow.target.noIdleHero",
+              "flow.target.notEnoughTroops",
+              "flow.target.refused",
+              "flow.skipNoHero",
+              "quest.notFound",
+              "quest.alreadyClaimed",
+              "quest.notFinished",
+              "quest.dailyGiftClaimed",
+              "world.noOpenFlat",
+              "world.invalidArea",
+              "world.areaTooLarge",
+              "world.invalidTile",
+              "world.position.city",
+              "world.position.tile",
+              "world.position.place",
+              "mail.toSelf",
+              "mail.titleAndContentRequired",
+              "mail.notFound",
+              "social.selfTarget",
+              "social.emptyMessage",
+              "social.messageTooLong",
+              "social.muted",
+              "social.notInAlliance",
+              "item.notForSale",
+              "item.dailyLimit",
+              "item.cannotUse",
+              "item.useFrom.speedup",
+              "item.useFrom.hero",
+              "item.useFrom.elsewhere",
+              "item.chooseCity",
+              "item.needKey",
+              "market.invalidResource",
+              "market.invalidSide",
+              "market.invalidPrice",
+              "market.needMarketplace",
+              "market.nothingToTrade",
+              "market.tooManyOrders",
+              "market.notEnoughResource",
+              "market.orderNotFound",
+              "market.shipmentNotFound",
+              "research.notResearching",
+              "research.noResearch",
+              "research.chooseResearch",
+              "research.queueFull",
+              "research.alreadyResearching",
+              "training.wallsNeeded",
+              "training.invalidBarracks",
+              "training.queueFull",
+              "training.allQueuesFull",
+              "training.wallSpaceFull",
+              "training.notEnoughPopulation",
+              "training.orderLimit",
+              "training.duplicateOrder",
+              "training.fortsAtWalls",
+              "training.batchNotFound",
+              "training.invalidFort",
+              "training.notEnoughUnits",
+              "training.notEnoughInjured",
+              "training.notEnoughHonor",
+              "admin.broadcast",
+              "admin.unknownItem",
+              "admin.invalidLevel",
+              "player.accountExists",
+              "player.nameTaken",
+              "player.sameName",
+              "player.renameCooldown",
+              "player.sameGender",
+              "player.genderCooldown",
+              "player.invalidSetting",
+              "player.invalidFlag",
+              "player.title.highest",
+              "player.title.prestigeRequired",
+              "player.title.notEnoughMedals",
+              "player.holiday.invalidDays",
+              "player.holiday.troopsOut",
+              "player.truce.cooldown",
+              "player.protected.beginner",
+              "player.protected.truce",
+              "player.protected.holiday",
+              "player.bookmark.tooMany",
+              "player.preset.nameLength",
+              "player.preset.tooMany",
+              "player.mail.protectionExpired.title",
+              "player.mail.protectionExpired.content",
+              "city.taxRateRange",
+              "city.workRateRange",
+              "city.invalidStorePercent",
+              "city.storePercentTotal",
+              "city.comfortCooldown",
+              "city.notEnoughFood",
+              "city.invalidComfortType",
+              "city.invalidLogo",
+              "city.teleportCooldown",
+              "city.recallTroopsFirst",
+              "city.foreignTroops",
+              "city.notFreeFlat",
+              "building.invalidBuilding",
+              "building.notFound",
+              "building.invalidPosition",
+              "building.cannotBuild",
+              "building.cannotBuildHere",
+              "building.positionTaken",
+              "building.limitReached",
+              "building.slotLocked",
+              "building.queuesBusy",
+              "building.requirementsNotMet",
+              "building.statusChanged",
+              "building.maxLevel",
+              "building.busy",
+              "building.nothingToDemolish",
+              "building.cannotDemolish",
+              "building.notInProgress",
+              "building.invalidTech",
+              "building.academyNeeded",
+              "building.techRequirementsNotMet",
+              "building.troopRequirementsNotMet",
+              "hero.needInn",
+              "hero.noVacancy",
+              "hero.notIdle",
+              "hero.locked",
+              "hero.noMayor",
+              "hero.invalidPoints",
+              "hero.maxLevel",
+              "hero.maxLevelNoExperience",
+              "hero.notEnoughExperience",
+              "hero.invalidAttribute",
+              "hero.invalidGearPiece",
+              "hero.gearMaxStars",
+              "hero.gearStarLimit",
+              "hero.notEnoughMedals",
+              "hero.fullyLoyal",
+              "hero.itemNotForGold",
+              "hero.invalidItem",
+              "hero.notPrisoner",
+              "hero.stillLoyal",
+              "report.title.missionAborted",
+              "report.title.scoutReturned",
+              "report.title.attackReturned",
+              "report.title.returned",
+              "report.title.transportReport",
+              "report.title.transportReceived",
+              "report.title.reinforcementArrived",
+              "report.title.reinforcementsFrom",
+              "report.title.newCityFounded",
+              "report.title.scoutReport",
+              "report.title.enemyScouts",
+              "report.title.scoutsRepelled",
+              "report.title.attackSucceeded",
+              "report.title.attackFailed",
+              "report.title.cityAttacked",
+              "report.title.attackRepelled",
+              "report.title.reinforcementsFought",
+              "report.title.valleyOccupied",
+              "report.title.valleyLost",
+              "report.title.valleyDefended",
+              "report.title.tradeCompleted",
+              "report.title.troopsDeserted",
+              "report.notFound",
+              "report.oldFormat",
+              "report.cityFounded",
+              "army.invalidMission",
+              "army.insufficientTroops",
+              "army.overloaded",
+              "army.rallySpotRequired",
+              "army.armyLimit",
+              "army.troopLimit",
+              "army.invalidTarget",
+              "army.transportTarget",
+              "army.noResources",
+              "army.reinforceTarget",
+              "army.alliedTroopsRefused",
+              "army.scoutsRequired",
+              "army.beginnerProtection",
+              "army.truce",
+              "army.nothingToAttack",
+              "army.buildOnFlat",
+              "army.cityLimit",
+              "army.newCityResources",
+              "army.heroRequiredAttack",
+              "army.heroRequiredSettlers",
+              "army.notFound",
+              "army.alreadyReturning",
+              "army.unknownMission",
+              "army.destinationNotFriendly",
+              "army.valleyNoLongerHeld",
+              "army.landNotFree",
+              "army.cityGone",
+              "army.cityNowFriendly",
+              "army.valleyAlreadyHeld",
+              "army.valleyNowFriendly",
+              "army.homeCityGone",
+              "army.valleyLimit",
+              "army.valleyNotHeld",
+              "army.upgradeTarget",
+              "army.upgradeHeld",
+              "army.valleyMaxLevel",
+              "army.barbarianCityMaxLevel",
+              "alliance.name",
+              "alliance.notFound",
+              "alliance.namedNotFound",
+              "alliance.nameTaken",
+              "alliance.notMember",
+              "alliance.alreadyMember",
+              "alliance.rankTooLow",
+              "alliance.full",
+              "alliance.rejoinCooldown",
+              "alliance.hostMustTransfer",
+              "alliance.playerInOtherAlliance",
+              "alliance.inviteNotFound",
+              "alliance.applicationNotFound",
+              "alliance.notApplied",
+              "alliance.buildingRequired",
+              "alliance.invalidRank",
+              "alliance.memberNotFound",
+              "alliance.ownRank",
+              "alliance.rankLimit",
+              "alliance.hostToViceHostOnly",
+              "alliance.kickSelf",
+              "alliance.kickHigherRank",
+              "alliance.invalidRelation",
+              "alliance.invalidTarget",
+              "alliance.alreadyRelation",
+              "alliance.warCooldown",
+              "alliance.invited",
+              "alliance.warDeclared",
+              "alliance.event.created",
+              "alliance.event.joined",
+              "alliance.event.left",
+              "alliance.event.applied",
+              "alliance.event.promoted",
+              "alliance.event.demoted",
+              "alliance.event.newHost",
+              "alliance.event.removed",
+              "alliance.event.relationSet",
+              "alliance.relation.ally",
+              "alliance.relation.neutral",
+              "alliance.relation.enemy"
+            ]
+          },
+          "params": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MsgParamInput"
+            }
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
       "ErrorResponseInput": {
         "type": "object",
         "properties": {
@@ -23,8 +621,8 @@
             "maximum": 9007199254740991,
             "description": "negative error code (the original server codes)"
           },
-          "errorMsg": {
-            "type": "string"
+          "error": {
+            "$ref": "#/components/schemas/MessageInput"
           },
           "issues": {
             "type": "array",
@@ -46,7 +644,7 @@
         },
         "required": [
           "ok",
-          "errorMsg"
+          "error"
         ]
       },
       "ResourceAmountsInput": {
@@ -171,9 +769,6 @@
           },
           "endTime": {
             "type": "number"
-          },
-          "name": {
-            "type": "string"
           }
         },
         "required": [
@@ -182,8 +777,7 @@
           "level",
           "status",
           "startTime",
-          "endTime",
-          "name"
+          "endTime"
         ]
       },
       "HeroBeanInput": {
@@ -326,7 +920,8 @@
                   ]
                 },
                 "desc": {
-                  "type": "string"
+                  "description": "what the boost does (`buff.*`), worded by the client",
+                  "$ref": "#/components/schemas/MessageInput"
                 },
                 "endTime": {
                   "type": "number",
@@ -697,8 +1292,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "zoneName": {
-            "type": "string"
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "status": {
             "type": "integer",
@@ -753,7 +1351,7 @@
           "fieldId",
           "x",
           "y",
-          "zoneName",
+          "zoneId",
           "status",
           "allowAlliance",
           "goOutForBattle",
@@ -822,10 +1420,8 @@
           "titleId": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "titleName": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "nobility title (named by the client)"
           },
           "ranking": {
             "type": "integer",
@@ -878,7 +1474,6 @@
           "prestige",
           "honor",
           "titleId",
-          "titleName",
           "ranking",
           "honorRank",
           "alliance",
@@ -931,7 +1526,8 @@
             ]
           },
           "desc": {
-            "type": "string"
+            "description": "what the buff does (`buff.*`), worded by the client",
+            "$ref": "#/components/schemas/MessageInput"
           },
           "endTime": {
             "type": "number",
@@ -997,10 +1593,12 @@
             "maximum": 9007199254740991
           },
           "startPosName": {
-            "type": "string"
+            "description": "where the army set out from (`world.position.*`)",
+            "$ref": "#/components/schemas/MessageInput"
           },
           "targetPosName": {
-            "type": "string"
+            "description": "where the army is headed (`world.position.*`)",
+            "$ref": "#/components/schemas/MessageInput"
           },
           "armyId": {
             "type": "integer",
@@ -1283,6 +1881,7 @@
             "maximum": 9007199254740991
           },
           "name": {
+            "description": "the city's name; absent for a barbarian city (named by the client from its tile type)",
             "type": "string"
           },
           "npc": {
@@ -1341,8 +1940,11 @@
             "description": "beginner protection",
             "type": "boolean"
           },
-          "zoneName": {
-            "type": "string"
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "canLoot": {
             "type": "boolean"
@@ -1364,10 +1966,9 @@
           "id",
           "x",
           "y",
-          "name",
           "npc",
           "level",
-          "zoneName",
+          "zoneId",
           "canLoot",
           "canOccupy",
           "canScout",
@@ -1550,30 +2151,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "zoneName": {
-            "type": "string",
-            "enum": [
-              "FRIESLAND",
-              "SAXONY",
-              "NORTH MARCH",
-              "BOHEMIA",
-              "LOWER LORRAINE",
-              "FRANCONIA",
-              "THURINGIA",
-              "MORAVIA",
-              "UPPER LORRAINE",
-              "SWABIA",
-              "BAVARIA",
-              "CARINTHIA",
-              "BURGUNDY",
-              "LOMBARDY",
-              "TUSCANY",
-              "ROMAGNA",
-              "UNKNOWN"
-            ]
-          },
-          "name": {
-            "type": "string"
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "npc": {
             "type": "boolean"
@@ -1624,8 +2206,7 @@
           "level",
           "x",
           "y",
-          "zoneName",
-          "name",
+          "zoneId",
           "npc",
           "owner",
           "relation",
@@ -1657,6 +2238,7 @@
             "maximum": 9007199254740991
           },
           "name": {
+            "description": "the city's name; absent for a barbarian city (named by the client from its tile type)",
             "type": "string"
           },
           "npc": {
@@ -1715,8 +2297,11 @@
             "description": "beginner protection",
             "type": "boolean"
           },
-          "zoneName": {
-            "type": "string"
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "canLoot": {
             "type": "boolean"
@@ -1742,10 +2327,9 @@
           "id",
           "x",
           "y",
-          "name",
           "npc",
           "level",
-          "zoneName",
+          "zoneId",
           "canLoot",
           "canOccupy",
           "canScout",
@@ -1964,10 +2548,8 @@
           "id": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "name": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "playerCount": {
             "type": "integer",
@@ -1993,7 +2575,6 @@
         },
         "required": [
           "id",
-          "name",
           "playerCount",
           "castleCount",
           "openFlats",
@@ -2237,7 +2818,7 @@
             "type": "string"
           },
           "reason": {
-            "type": "string"
+            "$ref": "#/components/schemas/MessageInput"
           }
         },
         "required": [
@@ -2289,10 +2870,15 @@
                   "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
                 },
                 "error": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MessageInput"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "the failure that rolled back this city's part of the run"
                 },
                 "steps": {
                   "type": "array",
@@ -2300,13 +2886,14 @@
                     "type": "object",
                     "properties": {
                       "action": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/MessageInput"
                       },
                       "ok": {
                         "type": "boolean"
                       },
                       "detail": {
-                        "type": "string"
+                        "description": "what happened, or why it failed",
+                        "$ref": "#/components/schemas/MessageInput"
                       },
                       "skipped": {
                         "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
@@ -2319,13 +2906,14 @@
                           "type": "object",
                           "properties": {
                             "label": {
-                              "type": "string"
+                              "type": "string",
+                              "description": "the target, as \"(x,y)\""
                             },
                             "ok": {
                               "type": "boolean"
                             },
                             "detail": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/MessageInput"
                             }
                           },
                           "required": [
@@ -2393,10 +2981,15 @@
                   "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
                 },
                 "error": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MessageInput"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "the failure that rolled back this city's part of the run"
                 },
                 "steps": {
                   "type": "array",
@@ -2404,13 +2997,14 @@
                     "type": "object",
                     "properties": {
                       "action": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/MessageInput"
                       },
                       "ok": {
                         "type": "boolean"
                       },
                       "detail": {
-                        "type": "string"
+                        "description": "what happened, or why it failed",
+                        "$ref": "#/components/schemas/MessageInput"
                       },
                       "skipped": {
                         "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
@@ -2423,13 +3017,14 @@
                           "type": "object",
                           "properties": {
                             "label": {
-                              "type": "string"
+                              "type": "string",
+                              "description": "the target, as \"(x,y)\""
                             },
                             "ok": {
                               "type": "boolean"
                             },
                             "detail": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/MessageInput"
                             }
                           },
                           "required": [
@@ -2546,11 +3141,15 @@
             "description": "while waiting: held before its next actions until every hero of its cities is home, since then (0 = not held)"
           },
           "stopReason": {
-            "description": "why the flow stopped on its own (a failed run; repeat was switched off)",
-            "type": [
-              "string",
-              "null"
-            ]
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "why the flow stopped on its own (a failed run; repeat was switched off)"
           },
           "lastRun": {
             "anyOf": [
@@ -2625,10 +3224,15 @@
                   "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
                 },
                 "error": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MessageInput"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "the failure that rolled back this city's part of the run"
                 },
                 "steps": {
                   "type": "array",
@@ -2636,13 +3240,14 @@
                     "type": "object",
                     "properties": {
                       "action": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/MessageInput"
                       },
                       "ok": {
                         "type": "boolean"
                       },
                       "detail": {
-                        "type": "string"
+                        "description": "what happened, or why it failed",
+                        "$ref": "#/components/schemas/MessageInput"
                       },
                       "skipped": {
                         "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
@@ -2655,13 +3260,14 @@
                           "type": "object",
                           "properties": {
                             "label": {
-                              "type": "string"
+                              "type": "string",
+                              "description": "the target, as \"(x,y)\""
                             },
                             "ok": {
                               "type": "boolean"
                             },
                             "detail": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/MessageInput"
                             }
                           },
                           "required": [
@@ -2713,6 +3319,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "type": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "name": {
             "type": "string"
           },
@@ -2729,7 +3340,7 @@
         },
         "required": [
           "tileId",
-          "name",
+          "type",
           "x",
           "y"
         ]
@@ -3164,10 +3775,8 @@
           "titleId": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "titleName": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "nobility title (named by the client)"
           },
           "ranking": {
             "type": "integer",
@@ -3265,7 +3874,6 @@
           "prestige",
           "honor",
           "titleId",
-          "titleName",
           "ranking",
           "honorRank",
           "alliance",
@@ -3285,15 +3893,12 @@
           "titleId": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "titleName": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "nobility title (named by the client)"
           }
         },
         "required": [
-          "titleId",
-          "titleName"
+          "titleId"
         ]
       },
       "GrantContentsInput": {
@@ -3410,8 +4015,11 @@
                   "maximum": 9007199254740991
                 },
                 "name": {
-                  "type": "string",
-                  "description": "the city's name, or 'Former city' when the lord no longer holds it"
+                  "description": "the city's name; null when the player no longer holds it",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "owned": {
                   "type": "boolean"
@@ -3776,8 +4384,15 @@
             "description": "all requirements met"
           },
           "effect": {
-            "type": "string",
-            "description": "what the building gives at this level (\"\" when nothing measurable)"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "what the building gives at this level (`buildingInfo.effect.*`); null when nothing measurable"
           }
         },
         "required": [
@@ -3803,16 +4418,27 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "name": {
-            "type": "string"
-          },
           "summary": {
-            "type": "string",
-            "description": "what the building does"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "what the building does (`buildingInfo.summary.*`); null for an unknown type"
           },
           "placement": {
-            "type": "string",
-            "description": "where it can be built and how many"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where it can be built and how many (`buildingInfo.placement.*`); null for an unknown type"
           },
           "unlocks": {
             "type": "array",
@@ -3827,8 +4453,11 @@
                     "tech"
                   ]
                 },
-                "name": {
-                  "type": "string"
+                "id": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "building type, troop or technology id"
                 },
                 "level": {
                   "type": "integer",
@@ -3839,16 +4468,15 @@
               },
               "required": [
                 "kind",
-                "name",
+                "id",
                 "level"
               ]
             },
-            "description": "buildings, troops and technologies that need this building"
+            "description": "buildings, troops and technologies that need this building, by level needed"
           }
         },
         "required": [
           "typeId",
-          "name",
           "summary",
           "placement",
           "unlocks"
@@ -3923,8 +4551,15 @@
                       "description": "all requirements met"
                     },
                     "effect": {
-                      "type": "string",
-                      "description": "what the building gives at this level (\"\" when nothing measurable)"
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/MessageInput"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "what the building gives at this level (`buildingInfo.effect.*`); null when nothing measurable"
                     },
                     "info": {
                       "$ref": "#/components/schemas/BuildingDescriptionInput"
@@ -3973,8 +4608,15 @@
             "$ref": "#/components/schemas/BuildingDescriptionInput"
           },
           "effect": {
-            "type": "string",
-            "description": "what the building gives at its current level"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "what the building gives at its current level (`buildingInfo.effect.*`); null when nothing measurable"
           },
           "maxLevel": {
             "type": "integer",
@@ -4028,9 +4670,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "name": {
-            "type": "string"
-          },
           "level": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -4076,16 +4715,30 @@
             "description": "can be researched here now"
           },
           "description": {
-            "type": "string",
-            "description": "what the technology does"
+            "description": "what the technology does (`techInfo.summary.*`), worded by the client",
+            "$ref": "#/components/schemas/MessageInput"
           },
           "effect": {
-            "type": "string",
-            "description": "total effect at the effective level (\"\" at 0 or when it has no measurable effect)"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "total effect at the effective level (`techInfo.effect.*`; null at 0 or when it has no measurable effect)"
           },
           "nextEffect": {
-            "type": "string",
-            "description": "total effect after the next level (\"\" at max level)"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "total effect after the next level (`techInfo.effect.*`; null at max level or when it has no measurable effect)"
           },
           "unlocks": {
             "type": "array",
@@ -4100,8 +4753,11 @@
                     "tech"
                   ]
                 },
-                "name": {
-                  "type": "string"
+                "id": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "building type, troop or technology id"
                 },
                 "level": {
                   "type": "integer",
@@ -4112,7 +4768,7 @@
               },
               "required": [
                 "kind",
-                "name",
+                "id",
                 "level"
               ]
             },
@@ -4180,7 +4836,6 @@
         },
         "required": [
           "typeId",
-          "name",
           "level",
           "maxLevel",
           "effectiveLevel",
@@ -4385,8 +5040,8 @@
             "type": "boolean"
           },
           "description": {
-            "type": "string",
-            "description": "role and special battle rules"
+            "description": "role and special battle rules (`troopInfo.*`), worded by the client",
+            "$ref": "#/components/schemas/MessageInput"
           },
           "stats": {
             "type": "object",
@@ -4451,7 +5106,6 @@
           "time",
           "requirements",
           "permission",
-          "description",
           "stats"
         ]
       },
@@ -4659,7 +5313,11 @@
             "description": "folder: 1 inbox, 2 system, 3 sent"
           },
           "sender": {
-            "type": "string"
+            "description": "null for mail the game sent (the client labels it)",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "receiver": {
             "type": "string"
@@ -4684,6 +5342,17 @@
           },
           "isRead": {
             "type": "boolean"
+          },
+          "systemTitle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "mail the game sent: its title as a message (then `title` is empty)"
           }
         },
         "required": [
@@ -4694,7 +5363,8 @@
           "receiver",
           "playerId",
           "receiveTime",
-          "isRead"
+          "isRead",
+          "systemTitle"
         ]
       },
       "MailListInput": {
@@ -4747,7 +5417,11 @@
             "description": "folder: 1 inbox, 2 system, 3 sent"
           },
           "sender": {
-            "type": "string"
+            "description": "null for mail the game sent (the client labels it)",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "receiver": {
             "type": "string"
@@ -4773,8 +5447,30 @@
           "isRead": {
             "type": "boolean"
           },
+          "systemTitle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "mail the game sent: its title as a message (then `title` is empty)"
+          },
           "content": {
             "type": "string"
+          },
+          "systemContent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "mail the game sent: its content as a message (then `content` is empty)"
           }
         },
         "required": [
@@ -4786,7 +5482,9 @@
           "playerId",
           "receiveTime",
           "isRead",
-          "content"
+          "systemTitle",
+          "content",
+          "systemContent"
         ]
       },
       "ReportCountsInput": {
@@ -4829,7 +5527,7 @@
             "maximum": 2147483647
           },
           "title": {
-            "type": "string"
+            "$ref": "#/components/schemas/MessageInput"
           },
           "armyType": {
             "type": "integer",
@@ -4837,10 +5535,26 @@
             "maximum": 32767
           },
           "startPos": {
-            "type": "string"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where the army set out from (`world.position.*`); null when the report has none"
           },
           "targetPos": {
-            "type": "string"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where the army went (`world.position.*`); null when the report has none"
           },
           "eventTime": {
             "type": "integer",
@@ -4917,7 +5631,7 @@
             "maximum": 2147483647
           },
           "title": {
-            "type": "string"
+            "$ref": "#/components/schemas/MessageInput"
           },
           "armyType": {
             "type": "integer",
@@ -4925,10 +5639,26 @@
             "maximum": 32767
           },
           "startPos": {
-            "type": "string"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where the army set out from (`world.position.*`); null when the report has none"
           },
           "targetPos": {
-            "type": "string"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where the army went (`world.position.*`); null when the report has none"
           },
           "eventTime": {
             "type": "integer",
@@ -5135,7 +5865,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/MessageInput"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -5313,7 +6044,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/MessageInput"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -5622,7 +6354,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/MessageInput"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -5800,7 +6533,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/MessageInput"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -6123,7 +6857,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/MessageInput"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -6301,7 +7036,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/MessageInput"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -6391,7 +7127,14 @@
                             "type": "boolean"
                           },
                           "reason": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "$ref": "#/components/schemas/MessageInput"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "valley": {
                             "type": "object",
@@ -7362,7 +8105,7 @@
                     "const": "text"
                   },
                   "text": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/MessageInput"
                   }
                 },
                 "required": [
@@ -7800,9 +8543,6 @@
             "maximum": 32767,
             "description": "4 Host, 5 Vice Host, 6 Presbyter, 7 Officer, 8 Member"
           },
-          "myRankName": {
-            "type": "string"
-          },
           "alliance": {
             "$ref": "#/components/schemas/AllianceProfileInput"
           }
@@ -7812,7 +8552,6 @@
           "middleList",
           "enemyList",
           "myRank",
-          "myRankName",
           "alliance"
         ]
       },
@@ -7904,7 +8643,7 @@
             "maximum": 2147483647
           },
           "msg": {
-            "type": "string"
+            "$ref": "#/components/schemas/MessageInput"
           }
         },
         "required": [
@@ -7933,10 +8672,6 @@
             "minimum": -32768,
             "maximum": 32767,
             "description": "alliance rank: 4 Host … 8 Member"
-          },
-          "allianceLevel": {
-            "type": "string",
-            "description": "rank name"
           },
           "prestige": {
             "type": "integer",
@@ -7974,7 +8709,6 @@
           "population",
           "userName",
           "levelId",
-          "allianceLevel",
           "prestige",
           "honor",
           "ranking",
@@ -7987,7 +8721,7 @@
         "type": "object",
         "properties": {
           "message": {
-            "type": "string"
+            "$ref": "#/components/schemas/MessageInput"
           },
           "time": {
             "type": "integer",
@@ -8009,10 +8743,12 @@
             "maximum": 32767
           },
           "startPosName": {
-            "type": "string"
+            "description": "where the army set out from (`world.position.*`)",
+            "$ref": "#/components/schemas/MessageInput"
           },
           "targetPosName": {
-            "type": "string"
+            "description": "where the army is headed (`world.position.*`)",
+            "$ref": "#/components/schemas/MessageInput"
           },
           "reachTime": {
             "type": "integer",
@@ -8467,10 +9203,8 @@
             "maximum": 9007199254740991
           },
           "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
+            "type": "string",
+            "description": "item id; the client names it (data-items)"
           },
           "goldPrice": {
             "anyOf": [
@@ -8488,7 +9222,8 @@
           "type": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "shop category id; the client names it (data-item-categories)"
           },
           "dayLimit": {
             "type": "integer",
@@ -8500,11 +9235,9 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "category": {
-            "type": "string"
-          },
           "description": {
-            "type": "string"
+            "description": "what the item does (`itemInfo.*`), worded by the client",
+            "$ref": "#/components/schemas/MessageInput"
           },
           "use": {
             "type": "string",
@@ -8516,18 +9249,17 @@
             "description": "direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect"
           },
           "howTo": {
-            "type": "string"
+            "description": "where to use an item consumed by another action (`itemInfo.howTo.*`)",
+            "$ref": "#/components/schemas/MessageInput"
           }
         },
         "required": [
           "legacyId",
           "id",
-          "name",
           "goldPrice",
           "type",
           "dayLimit",
           "rarity",
-          "category",
           "description",
           "use"
         ]
@@ -8547,12 +9279,6 @@
           },
           "isFinish": {
             "type": "boolean"
-          },
-          "description": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
           },
           "typeId": {
             "type": "integer",
@@ -8607,8 +9333,6 @@
           "id",
           "mainId",
           "isFinish",
-          "description",
-          "name",
           "typeId",
           "requires"
         ]
@@ -8619,10 +9343,8 @@
           "id": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "name": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "title id; the client names it (data-titles)"
           },
           "maxCities": {
             "type": "integer",
@@ -8651,7 +9373,6 @@
         },
         "required": [
           "id",
-          "name",
           "maxCities",
           "prestige",
           "medals"
@@ -9218,36 +9939,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "states": {
-            "readOnly": true,
-            "description": "state (zone) names by zone id",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "buildingNames": {
-            "type": "object",
-            "propertyNames": {
-              "type": "string",
-              "pattern": "^-?\\d+$"
-            },
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "by building typeId"
-          },
-          "techNames": {
-            "type": "object",
-            "propertyNames": {
-              "type": "string",
-              "pattern": "^-?\\d+$"
-            },
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "by techId"
-          },
           "buildings": {
             "type": "array",
             "items": {
@@ -9293,9 +9984,6 @@
         "required": [
           "gameSpeed",
           "mapSize",
-          "states",
-          "buildingNames",
-          "techNames",
           "buildings",
           "research",
           "troops",
@@ -9432,10 +10120,6 @@
             "maximum": 32767,
             "description": "0 buy, 1 sell"
           },
-          "tradeTypeName": {
-            "type": "string",
-            "description": "Bid | Offer"
-          },
           "dealedTotal": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -9452,7 +10136,6 @@
           "cityId",
           "resourceName",
           "tradeType",
-          "tradeTypeName",
           "dealedTotal"
         ]
       },
@@ -9795,10 +10478,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
+            "type": "string",
+            "description": "item id; the client names it (data-items)"
           },
           "dayLimit": {
             "type": "integer",
@@ -9814,7 +10495,6 @@
         },
         "required": [
           "id",
-          "name",
           "dayLimit",
           "price"
         ]
@@ -9825,10 +10505,8 @@
           "typeId": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "typeName": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "item category id; the client names it (data-item-categories)"
           },
           "items": {
             "type": "array",
@@ -9839,7 +10517,6 @@
         },
         "required": [
           "typeId",
-          "typeName",
           "items"
         ]
       },
@@ -9893,16 +10570,15 @@
       "QuestGroupStatusInput": {
         "type": "object",
         "properties": {
-          "typeId": {
+          "id": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
+          "typeId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "isFinish": {
             "type": "boolean",
@@ -9910,9 +10586,8 @@
           }
         },
         "required": [
+          "id",
           "typeId",
-          "name",
-          "description",
           "isFinish"
         ]
       },
@@ -9930,26 +10605,25 @@
             "maximum": 9007199254740991,
             "description": "QuestGroupStatus.typeId"
           },
-          "name": {
-            "type": "string"
-          },
           "description": {
-            "type": "string"
+            "description": "`questInfo.description.*`, worded by the client (the quest is named by its id)",
+            "$ref": "#/components/schemas/MessageInput"
           },
           "targets": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "name": {
-                  "type": "string"
+                "text": {
+                  "description": "`questInfo.target.*`, worded by the client",
+                  "$ref": "#/components/schemas/MessageInput"
                 },
                 "finished": {
                   "type": "boolean"
                 }
               },
               "required": [
-                "name",
+                "text",
                 "finished"
               ]
             }
@@ -9968,7 +10642,6 @@
         "required": [
           "questId",
           "groupId",
-          "name",
           "description",
           "targets",
           "award",
@@ -10062,9 +10735,18 @@
             "type": "string",
             "description": "alliance name, empty when none"
           },
-          "allianceLevel": {
-            "type": "string",
-            "description": "rank name inside the alliance, empty when none"
+          "allianceRank": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "rank inside the alliance (4 Host … 8 Member), null when none"
           }
         },
         "required": [
@@ -10079,7 +10761,7 @@
           "population",
           "castleCount",
           "alliance",
-          "allianceLevel"
+          "allianceRank"
         ]
       },
       "RankingPlayerPageInput": {
@@ -10375,6 +11057,607 @@
           "online"
         ]
       },
+      "GameRef": {
+        "type": "object",
+        "properties": {
+          "ref": {
+            "type": "string",
+            "enum": [
+              "troop",
+              "building",
+              "tech",
+              "item",
+              "title",
+              "tile",
+              "resource",
+              "stat",
+              "zone",
+              "rank",
+              "gear",
+              "itemCategory"
+            ]
+          },
+          "id": {
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "ref",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "MsgDuration": {
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "duration"
+        ],
+        "additionalProperties": false
+      },
+      "MsgParam": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "$ref": "#/components/schemas/GameRef"
+          },
+          {
+            "$ref": "#/components/schemas/MsgDuration"
+          },
+          {
+            "$ref": "#/components/schemas/Message"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MsgParam"
+            }
+          }
+        ]
+      },
+      "Message": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "common.legacyText",
+              "common.invalidRequest",
+              "common.serverError",
+              "common.requestFailed",
+              "common.routeNotFound",
+              "common.notAllowed",
+              "common.adminsOnly",
+              "common.invalidData",
+              "common.invalidAmount",
+              "common.invalidCastle",
+              "common.invalidCoordinates",
+              "common.invalidTroopType",
+              "common.invalidTroopCount",
+              "common.unknownTroopType",
+              "common.noTroopsSelected",
+              "common.notEnoughResources",
+              "common.notEnoughGold",
+              "common.notEnoughGoldFor",
+              "common.insufficientItems",
+              "common.playerNotFound",
+              "common.playerNamedNotFound",
+              "common.cityNotFound",
+              "common.heroNotFound",
+              "common.playerName",
+              "common.cityName",
+              "common.heroName",
+              "common.name",
+              "common.nameLength",
+              "common.nameInvalid",
+              "common.nameNotAllowed",
+              "common.freeSpeedupTooEarly",
+              "common.invalidSpeedup",
+              "auth.notLoggedIn",
+              "auth.needPlayer",
+              "auth.wrongPassword",
+              "auth.alreadyRegistered",
+              "auth.accountNotFound",
+              "auth.banned",
+              "questInfo.description.upgrade",
+              "questInfo.description.upgradeAny",
+              "questInfo.description.field",
+              "questInfo.description.ownFields",
+              "questInfo.description.cottage",
+              "questInfo.description.rallySpot",
+              "questInfo.description.barracks",
+              "questInfo.description.warehouse",
+              "questInfo.description.academy",
+              "questInfo.description.walls",
+              "questInfo.description.embassy",
+              "questInfo.description.inn",
+              "questInfo.description.feastingHall",
+              "questInfo.description.research",
+              "questInfo.description.appointMayor",
+              "questInfo.description.taxRate",
+              "questInfo.description.joinAlliance",
+              "questInfo.description.sendMail",
+              "questInfo.description.recruitHero",
+              "questInfo.description.train",
+              "questInfo.description.fortify",
+              "questInfo.description.secondCity",
+              "questInfo.description.occupyValley",
+              "questInfo.description.population",
+              "questInfo.description.prestige",
+              "questInfo.target.building",
+              "questInfo.target.buildings",
+              "questInfo.target.research",
+              "questInfo.target.troops",
+              "questInfo.target.heroes",
+              "questInfo.target.mayor",
+              "questInfo.target.alliance",
+              "questInfo.target.cities",
+              "questInfo.target.valleys",
+              "questInfo.target.prestige",
+              "questInfo.target.population",
+              "questInfo.target.taxRate",
+              "questInfo.target.mailSent",
+              "questInfo.target.friend",
+              "itemInfo.period.days",
+              "itemInfo.period.hours",
+              "itemInfo.period.minutes",
+              "itemInfo.speedup.time",
+              "itemInfo.speedup.hours",
+              "itemInfo.speedup.percent",
+              "itemInfo.speedup.troopBatch",
+              "itemInfo.speedup.fortBatch",
+              "itemInfo.loyalty",
+              "itemInfo.heroStat",
+              "itemInfo.experience.share",
+              "itemInfo.experience.level",
+              "itemInfo.holyWater",
+              "itemInfo.buff",
+              "itemInfo.grant",
+              "itemInfo.grantCity",
+              "itemInfo.contents.item",
+              "itemInfo.contents.amount",
+              "itemInfo.chest",
+              "itemInfo.key",
+              "itemInfo.medalBox",
+              "itemInfo.randomBox",
+              "itemInfo.civilCode",
+              "itemInfo.cureInjured",
+              "itemInfo.heroBox",
+              "itemInfo.teleporter",
+              "itemInfo.truce",
+              "itemInfo.notUsable",
+              "itemInfo.noEffect",
+              "itemInfo.howTo.speedup",
+              "itemInfo.howTo.troopsSpeedup",
+              "itemInfo.howTo.fortificationsSpeedup",
+              "itemInfo.howTo.cityMove",
+              "itemInfo.howTo.heroesReset",
+              "itemInfo.howTo.heroesUseItem",
+              "itemInfo.howTo.cityTruce",
+              "itemInfo.howTo.key",
+              "itemInfo.howTo.newbies",
+              "troopInfo.worker",
+              "troopInfo.warrior",
+              "troopInfo.scout",
+              "troopInfo.pikeman",
+              "troopInfo.swordsman",
+              "troopInfo.archer",
+              "troopInfo.transporter",
+              "troopInfo.cavalry",
+              "troopInfo.cataphract",
+              "troopInfo.ballista",
+              "troopInfo.batteringRam",
+              "troopInfo.catapult",
+              "troopInfo.trap",
+              "troopInfo.abatis",
+              "troopInfo.archerTower",
+              "troopInfo.rollingLog",
+              "troopInfo.trebuchet",
+              "techInfo.summary.resource",
+              "techInfo.summary.stockpile",
+              "techInfo.summary.construction",
+              "techInfo.summary.militaryScience",
+              "techInfo.summary.metalCasting",
+              "techInfo.summary.heroEnhancement",
+              "techInfo.summary.militaryTradition",
+              "techInfo.summary.ironWorking",
+              "techInfo.summary.medicine",
+              "techInfo.summary.archery",
+              "techInfo.summary.compass",
+              "techInfo.summary.horsebackRiding",
+              "techInfo.summary.logistics",
+              "techInfo.summary.informatics",
+              "techInfo.summary.none",
+              "techInfo.effect.resource",
+              "techInfo.effect.stockpile",
+              "techInfo.effect.construction",
+              "techInfo.effect.militaryScience",
+              "techInfo.effect.metalCasting",
+              "techInfo.effect.heroEnhancement",
+              "techInfo.effect.militaryTradition",
+              "techInfo.effect.ironWorking",
+              "techInfo.effect.medicine",
+              "techInfo.effect.archery",
+              "techInfo.effect.compass",
+              "techInfo.effect.horsebackRiding",
+              "techInfo.effect.logistics",
+              "techInfo.effect.informaticsHeroes",
+              "techInfo.effect.informaticsBuildings",
+              "buildingInfo.summary.townHall",
+              "buildingInfo.summary.walls",
+              "buildingInfo.summary.cottage",
+              "buildingInfo.summary.field",
+              "buildingInfo.summary.warehouse",
+              "buildingInfo.summary.barracks",
+              "buildingInfo.summary.academy",
+              "buildingInfo.summary.inn",
+              "buildingInfo.summary.feastingHall",
+              "buildingInfo.summary.rallySpot",
+              "buildingInfo.summary.marketplace",
+              "buildingInfo.summary.reliefStation",
+              "buildingInfo.summary.beaconTower",
+              "buildingInfo.summary.embassy",
+              "buildingInfo.summary.prerequisite",
+              "buildingInfo.placement.unique",
+              "buildingInfo.placement.inside",
+              "buildingInfo.placement.insideLimited",
+              "buildingInfo.placement.outside",
+              "buildingInfo.placement.outsideLimited",
+              "buildingInfo.effect.townHall",
+              "buildingInfo.effect.walls",
+              "buildingInfo.effect.cottage",
+              "buildingInfo.effect.field",
+              "buildingInfo.effect.warehouse",
+              "buildingInfo.effect.barracks",
+              "buildingInfo.effect.academy",
+              "buildingInfo.effect.inn",
+              "buildingInfo.effect.feastingHall",
+              "buildingInfo.effect.rallySpot",
+              "buildingInfo.effect.marketplace",
+              "buildingInfo.effect.reliefStation",
+              "buildingInfo.effect.beaconTroops",
+              "buildingInfo.effect.beaconHeroes",
+              "buff.production",
+              "buff.goldIncome",
+              "buff.troopAttack",
+              "buff.troopDefense",
+              "buff.armySize",
+              "buff.buildingQueue",
+              "buff.upkeep",
+              "buff.trainingCost",
+              "buff.truce",
+              "buff.truceCooldown",
+              "buff.teleportCooldown",
+              "buff.holiday",
+              "buff.heroStat",
+              "buff.homeCity",
+              "flow.nameLength",
+              "flow.actionCount",
+              "flow.invalidAction",
+              "flow.chooseArmy",
+              "flow.targetsOwnCities",
+              "flow.chooseCities",
+              "flow.notFound",
+              "flow.runningLocked",
+              "flow.tooMany",
+              "flow.noMayorHero",
+              "flow.cannotTrain",
+              "flow.req.level",
+              "flow.req.item",
+              "flow.alreadyQueued",
+              "flow.alreadyRunning",
+              "flow.noHeroCities",
+              "flow.chooseCity",
+              "flow.noOwnCities",
+              "flow.cityFailed",
+              "flow.runFailed",
+              "flow.failedCity",
+              "flow.stopped",
+              "flow.healDone",
+              "flow.healFailed",
+              "flow.action.setMayor",
+              "flow.action.healResources",
+              "flow.action.healHonour",
+              "flow.action.healResourcesHome",
+              "flow.action.healHonourHome",
+              "flow.action.waitArmiesHome",
+              "flow.action.wait",
+              "flow.action.attack",
+              "flow.action.attackFrom",
+              "flow.action.train",
+              "flow.action.trainMax",
+              "flow.cityCount",
+              "flow.resourceAmount",
+              "flow.step.noTargets",
+              "flow.step.armyGone",
+              "flow.step.noArmy",
+              "flow.step.sent",
+              "flow.step.noInjured",
+              "flow.step.healed",
+              "flow.step.healedHonour",
+              "flow.step.healScheduled",
+              "flow.step.alreadyMayor",
+              "flow.step.mayor",
+              "flow.step.noBarracksRoom",
+              "flow.step.cannotAfford",
+              "flow.step.training",
+              "flow.step.trainingDone",
+              "flow.step.trainingPartial",
+              "flow.step.trainingPartialDone",
+              "flow.step.noArmiesOut",
+              "flow.step.waiting",
+              "flow.step.moreActions",
+              "flow.step.runEnds",
+              "flow.target.sent",
+              "flow.target.noIdleHero",
+              "flow.target.notEnoughTroops",
+              "flow.target.refused",
+              "flow.skipNoHero",
+              "quest.notFound",
+              "quest.alreadyClaimed",
+              "quest.notFinished",
+              "quest.dailyGiftClaimed",
+              "world.noOpenFlat",
+              "world.invalidArea",
+              "world.areaTooLarge",
+              "world.invalidTile",
+              "world.position.city",
+              "world.position.tile",
+              "world.position.place",
+              "mail.toSelf",
+              "mail.titleAndContentRequired",
+              "mail.notFound",
+              "social.selfTarget",
+              "social.emptyMessage",
+              "social.messageTooLong",
+              "social.muted",
+              "social.notInAlliance",
+              "item.notForSale",
+              "item.dailyLimit",
+              "item.cannotUse",
+              "item.useFrom.speedup",
+              "item.useFrom.hero",
+              "item.useFrom.elsewhere",
+              "item.chooseCity",
+              "item.needKey",
+              "market.invalidResource",
+              "market.invalidSide",
+              "market.invalidPrice",
+              "market.needMarketplace",
+              "market.nothingToTrade",
+              "market.tooManyOrders",
+              "market.notEnoughResource",
+              "market.orderNotFound",
+              "market.shipmentNotFound",
+              "research.notResearching",
+              "research.noResearch",
+              "research.chooseResearch",
+              "research.queueFull",
+              "research.alreadyResearching",
+              "training.wallsNeeded",
+              "training.invalidBarracks",
+              "training.queueFull",
+              "training.allQueuesFull",
+              "training.wallSpaceFull",
+              "training.notEnoughPopulation",
+              "training.orderLimit",
+              "training.duplicateOrder",
+              "training.fortsAtWalls",
+              "training.batchNotFound",
+              "training.invalidFort",
+              "training.notEnoughUnits",
+              "training.notEnoughInjured",
+              "training.notEnoughHonor",
+              "admin.broadcast",
+              "admin.unknownItem",
+              "admin.invalidLevel",
+              "player.accountExists",
+              "player.nameTaken",
+              "player.sameName",
+              "player.renameCooldown",
+              "player.sameGender",
+              "player.genderCooldown",
+              "player.invalidSetting",
+              "player.invalidFlag",
+              "player.title.highest",
+              "player.title.prestigeRequired",
+              "player.title.notEnoughMedals",
+              "player.holiday.invalidDays",
+              "player.holiday.troopsOut",
+              "player.truce.cooldown",
+              "player.protected.beginner",
+              "player.protected.truce",
+              "player.protected.holiday",
+              "player.bookmark.tooMany",
+              "player.preset.nameLength",
+              "player.preset.tooMany",
+              "player.mail.protectionExpired.title",
+              "player.mail.protectionExpired.content",
+              "city.taxRateRange",
+              "city.workRateRange",
+              "city.invalidStorePercent",
+              "city.storePercentTotal",
+              "city.comfortCooldown",
+              "city.notEnoughFood",
+              "city.invalidComfortType",
+              "city.invalidLogo",
+              "city.teleportCooldown",
+              "city.recallTroopsFirst",
+              "city.foreignTroops",
+              "city.notFreeFlat",
+              "building.invalidBuilding",
+              "building.notFound",
+              "building.invalidPosition",
+              "building.cannotBuild",
+              "building.cannotBuildHere",
+              "building.positionTaken",
+              "building.limitReached",
+              "building.slotLocked",
+              "building.queuesBusy",
+              "building.requirementsNotMet",
+              "building.statusChanged",
+              "building.maxLevel",
+              "building.busy",
+              "building.nothingToDemolish",
+              "building.cannotDemolish",
+              "building.notInProgress",
+              "building.invalidTech",
+              "building.academyNeeded",
+              "building.techRequirementsNotMet",
+              "building.troopRequirementsNotMet",
+              "hero.needInn",
+              "hero.noVacancy",
+              "hero.notIdle",
+              "hero.locked",
+              "hero.noMayor",
+              "hero.invalidPoints",
+              "hero.maxLevel",
+              "hero.maxLevelNoExperience",
+              "hero.notEnoughExperience",
+              "hero.invalidAttribute",
+              "hero.invalidGearPiece",
+              "hero.gearMaxStars",
+              "hero.gearStarLimit",
+              "hero.notEnoughMedals",
+              "hero.fullyLoyal",
+              "hero.itemNotForGold",
+              "hero.invalidItem",
+              "hero.notPrisoner",
+              "hero.stillLoyal",
+              "report.title.missionAborted",
+              "report.title.scoutReturned",
+              "report.title.attackReturned",
+              "report.title.returned",
+              "report.title.transportReport",
+              "report.title.transportReceived",
+              "report.title.reinforcementArrived",
+              "report.title.reinforcementsFrom",
+              "report.title.newCityFounded",
+              "report.title.scoutReport",
+              "report.title.enemyScouts",
+              "report.title.scoutsRepelled",
+              "report.title.attackSucceeded",
+              "report.title.attackFailed",
+              "report.title.cityAttacked",
+              "report.title.attackRepelled",
+              "report.title.reinforcementsFought",
+              "report.title.valleyOccupied",
+              "report.title.valleyLost",
+              "report.title.valleyDefended",
+              "report.title.tradeCompleted",
+              "report.title.troopsDeserted",
+              "report.notFound",
+              "report.oldFormat",
+              "report.cityFounded",
+              "army.invalidMission",
+              "army.insufficientTroops",
+              "army.overloaded",
+              "army.rallySpotRequired",
+              "army.armyLimit",
+              "army.troopLimit",
+              "army.invalidTarget",
+              "army.transportTarget",
+              "army.noResources",
+              "army.reinforceTarget",
+              "army.alliedTroopsRefused",
+              "army.scoutsRequired",
+              "army.beginnerProtection",
+              "army.truce",
+              "army.nothingToAttack",
+              "army.buildOnFlat",
+              "army.cityLimit",
+              "army.newCityResources",
+              "army.heroRequiredAttack",
+              "army.heroRequiredSettlers",
+              "army.notFound",
+              "army.alreadyReturning",
+              "army.unknownMission",
+              "army.destinationNotFriendly",
+              "army.valleyNoLongerHeld",
+              "army.landNotFree",
+              "army.cityGone",
+              "army.cityNowFriendly",
+              "army.valleyAlreadyHeld",
+              "army.valleyNowFriendly",
+              "army.homeCityGone",
+              "army.valleyLimit",
+              "army.valleyNotHeld",
+              "army.upgradeTarget",
+              "army.upgradeHeld",
+              "army.valleyMaxLevel",
+              "army.barbarianCityMaxLevel",
+              "alliance.name",
+              "alliance.notFound",
+              "alliance.namedNotFound",
+              "alliance.nameTaken",
+              "alliance.notMember",
+              "alliance.alreadyMember",
+              "alliance.rankTooLow",
+              "alliance.full",
+              "alliance.rejoinCooldown",
+              "alliance.hostMustTransfer",
+              "alliance.playerInOtherAlliance",
+              "alliance.inviteNotFound",
+              "alliance.applicationNotFound",
+              "alliance.notApplied",
+              "alliance.buildingRequired",
+              "alliance.invalidRank",
+              "alliance.memberNotFound",
+              "alliance.ownRank",
+              "alliance.rankLimit",
+              "alliance.hostToViceHostOnly",
+              "alliance.kickSelf",
+              "alliance.kickHigherRank",
+              "alliance.invalidRelation",
+              "alliance.invalidTarget",
+              "alliance.alreadyRelation",
+              "alliance.warCooldown",
+              "alliance.invited",
+              "alliance.warDeclared",
+              "alliance.event.created",
+              "alliance.event.joined",
+              "alliance.event.left",
+              "alliance.event.applied",
+              "alliance.event.promoted",
+              "alliance.event.demoted",
+              "alliance.event.newHost",
+              "alliance.event.removed",
+              "alliance.event.relationSet",
+              "alliance.relation.ally",
+              "alliance.relation.neutral",
+              "alliance.relation.enemy"
+            ]
+          },
+          "params": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MsgParam"
+            }
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "additionalProperties": false
+      },
       "ErrorResponse": {
         "type": "object",
         "properties": {
@@ -10384,8 +11667,8 @@
             "maximum": 9007199254740991,
             "description": "negative error code (the original server codes)"
           },
-          "errorMsg": {
-            "type": "string"
+          "error": {
+            "$ref": "#/components/schemas/Message"
           },
           "issues": {
             "type": "array",
@@ -10408,7 +11691,7 @@
         },
         "required": [
           "ok",
-          "errorMsg"
+          "error"
         ],
         "additionalProperties": false
       },
@@ -10535,9 +11818,6 @@
           },
           "endTime": {
             "type": "number"
-          },
-          "name": {
-            "type": "string"
           }
         },
         "required": [
@@ -10546,8 +11826,7 @@
           "level",
           "status",
           "startTime",
-          "endTime",
-          "name"
+          "endTime"
         ],
         "additionalProperties": false
       },
@@ -10691,7 +11970,8 @@
                   ]
                 },
                 "desc": {
-                  "type": "string"
+                  "description": "what the boost does (`buff.*`), worded by the client",
+                  "$ref": "#/components/schemas/Message"
                 },
                 "endTime": {
                   "type": "number",
@@ -11068,8 +12348,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "zoneName": {
-            "type": "string"
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "status": {
             "type": "integer",
@@ -11124,7 +12407,7 @@
           "fieldId",
           "x",
           "y",
-          "zoneName",
+          "zoneId",
           "status",
           "allowAlliance",
           "goOutForBattle",
@@ -11194,10 +12477,8 @@
           "titleId": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "titleName": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "nobility title (named by the client)"
           },
           "ranking": {
             "type": "integer",
@@ -11250,7 +12531,6 @@
           "prestige",
           "honor",
           "titleId",
-          "titleName",
           "ranking",
           "honorRank",
           "alliance",
@@ -11305,7 +12585,8 @@
             ]
           },
           "desc": {
-            "type": "string"
+            "description": "what the buff does (`buff.*`), worded by the client",
+            "$ref": "#/components/schemas/Message"
           },
           "endTime": {
             "type": "number",
@@ -11372,10 +12653,12 @@
             "maximum": 9007199254740991
           },
           "startPosName": {
-            "type": "string"
+            "description": "where the army set out from (`world.position.*`)",
+            "$ref": "#/components/schemas/Message"
           },
           "targetPosName": {
-            "type": "string"
+            "description": "where the army is headed (`world.position.*`)",
+            "$ref": "#/components/schemas/Message"
           },
           "armyId": {
             "type": "integer",
@@ -11665,6 +12948,7 @@
             "maximum": 9007199254740991
           },
           "name": {
+            "description": "the city's name; absent for a barbarian city (named by the client from its tile type)",
             "type": "string"
           },
           "npc": {
@@ -11723,8 +13007,11 @@
             "description": "beginner protection",
             "type": "boolean"
           },
-          "zoneName": {
-            "type": "string"
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "canLoot": {
             "type": "boolean"
@@ -11746,10 +13033,9 @@
           "id",
           "x",
           "y",
-          "name",
           "npc",
           "level",
-          "zoneName",
+          "zoneId",
           "canLoot",
           "canOccupy",
           "canScout",
@@ -11936,30 +13222,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "zoneName": {
-            "type": "string",
-            "enum": [
-              "FRIESLAND",
-              "SAXONY",
-              "NORTH MARCH",
-              "BOHEMIA",
-              "LOWER LORRAINE",
-              "FRANCONIA",
-              "THURINGIA",
-              "MORAVIA",
-              "UPPER LORRAINE",
-              "SWABIA",
-              "BAVARIA",
-              "CARINTHIA",
-              "BURGUNDY",
-              "LOMBARDY",
-              "TUSCANY",
-              "ROMAGNA",
-              "UNKNOWN"
-            ]
-          },
-          "name": {
-            "type": "string"
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "npc": {
             "type": "boolean"
@@ -12010,8 +13277,7 @@
           "level",
           "x",
           "y",
-          "zoneName",
-          "name",
+          "zoneId",
           "npc",
           "owner",
           "relation",
@@ -12044,6 +13310,7 @@
             "maximum": 9007199254740991
           },
           "name": {
+            "description": "the city's name; absent for a barbarian city (named by the client from its tile type)",
             "type": "string"
           },
           "npc": {
@@ -12102,8 +13369,11 @@
             "description": "beginner protection",
             "type": "boolean"
           },
-          "zoneName": {
-            "type": "string"
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "canLoot": {
             "type": "boolean"
@@ -12129,10 +13399,9 @@
           "id",
           "x",
           "y",
-          "name",
           "npc",
           "level",
-          "zoneName",
+          "zoneId",
           "canLoot",
           "canOccupy",
           "canScout",
@@ -12357,10 +13626,8 @@
           "id": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "name": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "zone (state) id; the client names it"
           },
           "playerCount": {
             "type": "integer",
@@ -12386,7 +13653,6 @@
         },
         "required": [
           "id",
-          "name",
           "playerCount",
           "castleCount",
           "openFlats",
@@ -12640,7 +13906,7 @@
             "type": "string"
           },
           "reason": {
-            "type": "string"
+            "$ref": "#/components/schemas/Message"
           }
         },
         "required": [
@@ -12693,10 +13959,15 @@
                   "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
                 },
                 "error": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/Message"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "the failure that rolled back this city's part of the run"
                 },
                 "steps": {
                   "type": "array",
@@ -12704,13 +13975,14 @@
                     "type": "object",
                     "properties": {
                       "action": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/Message"
                       },
                       "ok": {
                         "type": "boolean"
                       },
                       "detail": {
-                        "type": "string"
+                        "description": "what happened, or why it failed",
+                        "$ref": "#/components/schemas/Message"
                       },
                       "skipped": {
                         "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
@@ -12723,13 +13995,14 @@
                           "type": "object",
                           "properties": {
                             "label": {
-                              "type": "string"
+                              "type": "string",
+                              "description": "the target, as \"(x,y)\""
                             },
                             "ok": {
                               "type": "boolean"
                             },
                             "detail": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/Message"
                             }
                           },
                           "required": [
@@ -12801,10 +14074,15 @@
                   "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
                 },
                 "error": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/Message"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "the failure that rolled back this city's part of the run"
                 },
                 "steps": {
                   "type": "array",
@@ -12812,13 +14090,14 @@
                     "type": "object",
                     "properties": {
                       "action": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/Message"
                       },
                       "ok": {
                         "type": "boolean"
                       },
                       "detail": {
-                        "type": "string"
+                        "description": "what happened, or why it failed",
+                        "$ref": "#/components/schemas/Message"
                       },
                       "skipped": {
                         "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
@@ -12831,13 +14110,14 @@
                           "type": "object",
                           "properties": {
                             "label": {
-                              "type": "string"
+                              "type": "string",
+                              "description": "the target, as \"(x,y)\""
                             },
                             "ok": {
                               "type": "boolean"
                             },
                             "detail": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/Message"
                             }
                           },
                           "required": [
@@ -12958,11 +14238,15 @@
             "description": "while waiting: held before its next actions until every hero of its cities is home, since then (0 = not held)"
           },
           "stopReason": {
-            "description": "why the flow stopped on its own (a failed run; repeat was switched off)",
-            "type": [
-              "string",
-              "null"
-            ]
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "why the flow stopped on its own (a failed run; repeat was switched off)"
           },
           "lastRun": {
             "anyOf": [
@@ -13040,10 +14324,15 @@
                   "description": "false: an action failed and everything the flow did in this city since the last wait was rolled back"
                 },
                 "error": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/Message"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "the failure that rolled back this city's part of the run"
                 },
                 "steps": {
                   "type": "array",
@@ -13051,13 +14340,14 @@
                     "type": "object",
                     "properties": {
                       "action": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/Message"
                       },
                       "ok": {
                         "type": "boolean"
                       },
                       "detail": {
-                        "type": "string"
+                        "description": "what happened, or why it failed",
+                        "$ref": "#/components/schemas/Message"
                       },
                       "skipped": {
                         "description": "the city could not do it right now (e.g. nothing affordable to train); the run carried on",
@@ -13070,13 +14360,14 @@
                           "type": "object",
                           "properties": {
                             "label": {
-                              "type": "string"
+                              "type": "string",
+                              "description": "the target, as \"(x,y)\""
                             },
                             "ok": {
                               "type": "boolean"
                             },
                             "detail": {
-                              "type": "string"
+                              "$ref": "#/components/schemas/Message"
                             }
                           },
                           "required": [
@@ -13132,6 +14423,11 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "type": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "name": {
             "type": "string"
           },
@@ -13148,7 +14444,7 @@
         },
         "required": [
           "tileId",
-          "name",
+          "type",
           "x",
           "y"
         ],
@@ -13588,10 +14884,8 @@
           "titleId": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "titleName": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "nobility title (named by the client)"
           },
           "ranking": {
             "type": "integer",
@@ -13690,7 +14984,6 @@
           "prestige",
           "honor",
           "titleId",
-          "titleName",
           "ranking",
           "honorRank",
           "alliance",
@@ -13711,15 +15004,12 @@
           "titleId": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "titleName": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "nobility title (named by the client)"
           }
         },
         "required": [
-          "titleId",
-          "titleName"
+          "titleId"
         ],
         "additionalProperties": false
       },
@@ -13840,8 +15130,11 @@
                   "maximum": 9007199254740991
                 },
                 "name": {
-                  "type": "string",
-                  "description": "the city's name, or 'Former city' when the lord no longer holds it"
+                  "description": "the city's name; null when the player no longer holds it",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "owned": {
                   "type": "boolean"
@@ -14216,8 +15509,15 @@
             "description": "all requirements met"
           },
           "effect": {
-            "type": "string",
-            "description": "what the building gives at this level (\"\" when nothing measurable)"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "what the building gives at this level (`buildingInfo.effect.*`); null when nothing measurable"
           }
         },
         "required": [
@@ -14244,16 +15544,27 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "name": {
-            "type": "string"
-          },
           "summary": {
-            "type": "string",
-            "description": "what the building does"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "what the building does (`buildingInfo.summary.*`); null for an unknown type"
           },
           "placement": {
-            "type": "string",
-            "description": "where it can be built and how many"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where it can be built and how many (`buildingInfo.placement.*`); null for an unknown type"
           },
           "unlocks": {
             "type": "array",
@@ -14268,8 +15579,11 @@
                     "tech"
                   ]
                 },
-                "name": {
-                  "type": "string"
+                "id": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "building type, troop or technology id"
                 },
                 "level": {
                   "type": "integer",
@@ -14280,17 +15594,16 @@
               },
               "required": [
                 "kind",
-                "name",
+                "id",
                 "level"
               ],
               "additionalProperties": false
             },
-            "description": "buildings, troops and technologies that need this building"
+            "description": "buildings, troops and technologies that need this building, by level needed"
           }
         },
         "required": [
           "typeId",
-          "name",
           "summary",
           "placement",
           "unlocks"
@@ -14366,8 +15679,15 @@
                       "description": "all requirements met"
                     },
                     "effect": {
-                      "type": "string",
-                      "description": "what the building gives at this level (\"\" when nothing measurable)"
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Message"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "what the building gives at this level (`buildingInfo.effect.*`); null when nothing measurable"
                     },
                     "info": {
                       "$ref": "#/components/schemas/BuildingDescription"
@@ -14418,8 +15738,15 @@
             "$ref": "#/components/schemas/BuildingDescription"
           },
           "effect": {
-            "type": "string",
-            "description": "what the building gives at its current level"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "what the building gives at its current level (`buildingInfo.effect.*`); null when nothing measurable"
           },
           "maxLevel": {
             "type": "integer",
@@ -14474,9 +15801,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "name": {
-            "type": "string"
-          },
           "level": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -14522,16 +15846,30 @@
             "description": "can be researched here now"
           },
           "description": {
-            "type": "string",
-            "description": "what the technology does"
+            "description": "what the technology does (`techInfo.summary.*`), worded by the client",
+            "$ref": "#/components/schemas/Message"
           },
           "effect": {
-            "type": "string",
-            "description": "total effect at the effective level (\"\" at 0 or when it has no measurable effect)"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "total effect at the effective level (`techInfo.effect.*`; null at 0 or when it has no measurable effect)"
           },
           "nextEffect": {
-            "type": "string",
-            "description": "total effect after the next level (\"\" at max level)"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "total effect after the next level (`techInfo.effect.*`; null at max level or when it has no measurable effect)"
           },
           "unlocks": {
             "type": "array",
@@ -14546,8 +15884,11 @@
                     "tech"
                   ]
                 },
-                "name": {
-                  "type": "string"
+                "id": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "description": "building type, troop or technology id"
                 },
                 "level": {
                   "type": "integer",
@@ -14558,7 +15899,7 @@
               },
               "required": [
                 "kind",
-                "name",
+                "id",
                 "level"
               ],
               "additionalProperties": false
@@ -14628,7 +15969,6 @@
         },
         "required": [
           "typeId",
-          "name",
           "level",
           "maxLevel",
           "effectiveLevel",
@@ -14837,8 +16177,8 @@
             "type": "boolean"
           },
           "description": {
-            "type": "string",
-            "description": "role and special battle rules"
+            "description": "role and special battle rules (`troopInfo.*`), worded by the client",
+            "$ref": "#/components/schemas/Message"
           },
           "stats": {
             "type": "object",
@@ -14904,7 +16244,6 @@
           "time",
           "requirements",
           "permission",
-          "description",
           "stats"
         ],
         "additionalProperties": false
@@ -15120,7 +16459,11 @@
             "description": "folder: 1 inbox, 2 system, 3 sent"
           },
           "sender": {
-            "type": "string"
+            "description": "null for mail the game sent (the client labels it)",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "receiver": {
             "type": "string"
@@ -15145,6 +16488,17 @@
           },
           "isRead": {
             "type": "boolean"
+          },
+          "systemTitle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "mail the game sent: its title as a message (then `title` is empty)"
           }
         },
         "required": [
@@ -15155,7 +16509,8 @@
           "receiver",
           "playerId",
           "receiveTime",
-          "isRead"
+          "isRead",
+          "systemTitle"
         ],
         "additionalProperties": false
       },
@@ -15210,7 +16565,11 @@
             "description": "folder: 1 inbox, 2 system, 3 sent"
           },
           "sender": {
-            "type": "string"
+            "description": "null for mail the game sent (the client labels it)",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "receiver": {
             "type": "string"
@@ -15236,8 +16595,30 @@
           "isRead": {
             "type": "boolean"
           },
+          "systemTitle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "mail the game sent: its title as a message (then `title` is empty)"
+          },
           "content": {
             "type": "string"
+          },
+          "systemContent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "mail the game sent: its content as a message (then `content` is empty)"
           }
         },
         "required": [
@@ -15249,7 +16630,9 @@
           "playerId",
           "receiveTime",
           "isRead",
-          "content"
+          "systemTitle",
+          "content",
+          "systemContent"
         ],
         "additionalProperties": false
       },
@@ -15294,7 +16677,7 @@
             "maximum": 2147483647
           },
           "title": {
-            "type": "string"
+            "$ref": "#/components/schemas/Message"
           },
           "armyType": {
             "type": "integer",
@@ -15302,10 +16685,26 @@
             "maximum": 32767
           },
           "startPos": {
-            "type": "string"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where the army set out from (`world.position.*`); null when the report has none"
           },
           "targetPos": {
-            "type": "string"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where the army went (`world.position.*`); null when the report has none"
           },
           "eventTime": {
             "type": "integer",
@@ -15384,7 +16783,7 @@
             "maximum": 2147483647
           },
           "title": {
-            "type": "string"
+            "$ref": "#/components/schemas/Message"
           },
           "armyType": {
             "type": "integer",
@@ -15392,10 +16791,26 @@
             "maximum": 32767
           },
           "startPos": {
-            "type": "string"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where the army set out from (`world.position.*`); null when the report has none"
           },
           "targetPos": {
-            "type": "string"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Message"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "where the army went (`world.position.*`); null when the report has none"
           },
           "eventTime": {
             "type": "integer",
@@ -15604,7 +17019,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/Message"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -15786,7 +17202,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/Message"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -16102,7 +17519,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/Message"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -16284,7 +17702,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/Message"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -16614,7 +18033,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/Message"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -16796,7 +18216,8 @@
                                   "type": "object",
                                   "properties": {
                                     "desc": {
-                                      "type": "string"
+                                      "description": "what the bonus does (`buff.*`)",
+                                      "$ref": "#/components/schemas/Message"
                                     },
                                     "itemId": {
                                       "type": "string"
@@ -16889,7 +18310,14 @@
                             "type": "boolean"
                           },
                           "reason": {
-                            "type": "string"
+                            "anyOf": [
+                              {
+                                "$ref": "#/components/schemas/Message"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
                           },
                           "valley": {
                             "type": "object",
@@ -17895,7 +19323,7 @@
                     "const": "text"
                   },
                   "text": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/Message"
                   }
                 },
                 "required": [
@@ -18346,9 +19774,6 @@
             "maximum": 32767,
             "description": "4 Host, 5 Vice Host, 6 Presbyter, 7 Officer, 8 Member"
           },
-          "myRankName": {
-            "type": "string"
-          },
           "alliance": {
             "$ref": "#/components/schemas/AllianceProfile"
           }
@@ -18358,7 +19783,6 @@
           "middleList",
           "enemyList",
           "myRank",
-          "myRankName",
           "alliance"
         ],
         "additionalProperties": false
@@ -18453,7 +19877,7 @@
             "maximum": 2147483647
           },
           "msg": {
-            "type": "string"
+            "$ref": "#/components/schemas/Message"
           }
         },
         "required": [
@@ -18483,10 +19907,6 @@
             "minimum": -32768,
             "maximum": 32767,
             "description": "alliance rank: 4 Host … 8 Member"
-          },
-          "allianceLevel": {
-            "type": "string",
-            "description": "rank name"
           },
           "prestige": {
             "type": "integer",
@@ -18524,7 +19944,6 @@
           "population",
           "userName",
           "levelId",
-          "allianceLevel",
           "prestige",
           "honor",
           "ranking",
@@ -18538,7 +19957,7 @@
         "type": "object",
         "properties": {
           "message": {
-            "type": "string"
+            "$ref": "#/components/schemas/Message"
           },
           "time": {
             "type": "integer",
@@ -18561,10 +19980,12 @@
             "maximum": 32767
           },
           "startPosName": {
-            "type": "string"
+            "description": "where the army set out from (`world.position.*`)",
+            "$ref": "#/components/schemas/Message"
           },
           "targetPosName": {
-            "type": "string"
+            "description": "where the army is headed (`world.position.*`)",
+            "$ref": "#/components/schemas/Message"
           },
           "reachTime": {
             "type": "integer",
@@ -19032,10 +20453,8 @@
             "maximum": 9007199254740991
           },
           "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
+            "type": "string",
+            "description": "item id; the client names it (data-items)"
           },
           "goldPrice": {
             "anyOf": [
@@ -19053,7 +20472,8 @@
           "type": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "shop category id; the client names it (data-item-categories)"
           },
           "dayLimit": {
             "type": "integer",
@@ -19065,11 +20485,9 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "category": {
-            "type": "string"
-          },
           "description": {
-            "type": "string"
+            "description": "what the item does (`itemInfo.*`), worded by the client",
+            "$ref": "#/components/schemas/Message"
           },
           "use": {
             "type": "string",
@@ -19081,18 +20499,17 @@
             "description": "direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect"
           },
           "howTo": {
-            "type": "string"
+            "description": "where to use an item consumed by another action (`itemInfo.howTo.*`)",
+            "$ref": "#/components/schemas/Message"
           }
         },
         "required": [
           "legacyId",
           "id",
-          "name",
           "goldPrice",
           "type",
           "dayLimit",
           "rarity",
-          "category",
           "description",
           "use"
         ],
@@ -19113,12 +20530,6 @@
           },
           "isFinish": {
             "type": "boolean"
-          },
-          "description": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
           },
           "typeId": {
             "type": "integer",
@@ -19174,8 +20585,6 @@
           "id",
           "mainId",
           "isFinish",
-          "description",
-          "name",
           "typeId",
           "requires"
         ],
@@ -19187,10 +20596,8 @@
           "id": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "name": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "title id; the client names it (data-titles)"
           },
           "maxCities": {
             "type": "integer",
@@ -19219,7 +20626,6 @@
         },
         "required": [
           "id",
-          "name",
           "maxCities",
           "prestige",
           "medals"
@@ -19793,36 +21199,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "states": {
-            "readOnly": true,
-            "description": "state (zone) names by zone id",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "buildingNames": {
-            "type": "object",
-            "propertyNames": {
-              "type": "string",
-              "pattern": "^-?\\d+$"
-            },
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "by building typeId"
-          },
-          "techNames": {
-            "type": "object",
-            "propertyNames": {
-              "type": "string",
-              "pattern": "^-?\\d+$"
-            },
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "by techId"
-          },
           "buildings": {
             "type": "array",
             "items": {
@@ -19868,9 +21244,6 @@
         "required": [
           "gameSpeed",
           "mapSize",
-          "states",
-          "buildingNames",
-          "techNames",
           "buildings",
           "research",
           "troops",
@@ -20011,10 +21384,6 @@
             "maximum": 32767,
             "description": "0 buy, 1 sell"
           },
-          "tradeTypeName": {
-            "type": "string",
-            "description": "Bid | Offer"
-          },
           "dealedTotal": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -20031,7 +21400,6 @@
           "cityId",
           "resourceName",
           "tradeType",
-          "tradeTypeName",
           "dealedTotal"
         ],
         "additionalProperties": false
@@ -20382,10 +21750,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
+            "type": "string",
+            "description": "item id; the client names it (data-items)"
           },
           "dayLimit": {
             "type": "integer",
@@ -20401,7 +21767,6 @@
         },
         "required": [
           "id",
-          "name",
           "dayLimit",
           "price"
         ],
@@ -20413,10 +21778,8 @@
           "typeId": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "typeName": {
-            "type": "string"
+            "maximum": 9007199254740991,
+            "description": "item category id; the client names it (data-item-categories)"
           },
           "items": {
             "type": "array",
@@ -20427,7 +21790,6 @@
         },
         "required": [
           "typeId",
-          "typeName",
           "items"
         ],
         "additionalProperties": false
@@ -20484,16 +21846,15 @@
       "QuestGroupStatus": {
         "type": "object",
         "properties": {
-          "typeId": {
+          "id": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
+          "typeId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "isFinish": {
             "type": "boolean",
@@ -20501,9 +21862,8 @@
           }
         },
         "required": [
+          "id",
           "typeId",
-          "name",
-          "description",
           "isFinish"
         ],
         "additionalProperties": false
@@ -20522,26 +21882,25 @@
             "maximum": 9007199254740991,
             "description": "QuestGroupStatus.typeId"
           },
-          "name": {
-            "type": "string"
-          },
           "description": {
-            "type": "string"
+            "description": "`questInfo.description.*`, worded by the client (the quest is named by its id)",
+            "$ref": "#/components/schemas/Message"
           },
           "targets": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
-                "name": {
-                  "type": "string"
+                "text": {
+                  "description": "`questInfo.target.*`, worded by the client",
+                  "$ref": "#/components/schemas/Message"
                 },
                 "finished": {
                   "type": "boolean"
                 }
               },
               "required": [
-                "name",
+                "text",
                 "finished"
               ],
               "additionalProperties": false
@@ -20561,7 +21920,6 @@
         "required": [
           "questId",
           "groupId",
-          "name",
           "description",
           "targets",
           "award",
@@ -20658,9 +22016,18 @@
             "type": "string",
             "description": "alliance name, empty when none"
           },
-          "allianceLevel": {
-            "type": "string",
-            "description": "rank name inside the alliance, empty when none"
+          "allianceRank": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "rank inside the alliance (4 Host … 8 Member), null when none"
           }
         },
         "required": [
@@ -20675,7 +22042,7 @@
           "population",
           "castleCount",
           "alliance",
-          "allianceLevel"
+          "allianceRank"
         ],
         "additionalProperties": false
       },

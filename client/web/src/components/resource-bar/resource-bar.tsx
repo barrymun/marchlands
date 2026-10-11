@@ -1,9 +1,11 @@
+import { BASIC_RESOURCES } from '@marchlands/core';
+import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 import type { HeroBean, ResourceBean } from '@marchlands/api-client';
 import { live } from '@/components/resource-bar/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNow } from '@/hooks/use-now';
-import { fmt, fmtExact, signedRate } from '@/lib/format';
+import { fmt, fmtExact, resourceLabel, signedRate } from '@/lib/format';
 import { ITEM_BONUS_TEXT_INVERTED } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { Breakdown } from '@/components/resource-bar/breakdown/breakdown';
@@ -12,13 +14,21 @@ import { Rows } from '@/components/resource-bar/rows/rows';
 import type { Row } from '@/components/resource-bar/types';
 
 export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor?: HeroBean }) {
+  const { t } = useTranslation('resource-bar');
   const now = useNow();
   const r = resource;
   const items = [
-    { key: 'gold' as const, label: 'Gold', amount: live(r.gold, r.goldRate, Infinity, r.updatedAt, now), rate: r.goldRate, max: null, line: null },
-    ...(['food', 'wood', 'stone', 'iron'] as const).map((k) => ({
+    {
+      key: 'gold' as const,
+      label: resourceLabel('gold'),
+      amount: live(r.gold, r.goldRate, Infinity, r.updatedAt, now),
+      rate: r.goldRate,
+      max: null,
+      line: null,
+    },
+    ...BASIC_RESOURCES.map((k) => ({
       key: k,
-      label: k === 'wood' ? 'Lumber' : k[0].toUpperCase() + k.slice(1),
+      label: resourceLabel(k),
       amount: live(r[k].amount, r[k].increaseRate, r[k].max, r.updatedAt, now),
       rate: r[k].increaseRate,
       max: r[k].max,
@@ -44,19 +54,20 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
             </TooltipTrigger>
             <TooltipContent className="grid gap-1.5">
               <div className="font-medium">
-                {label}: {fmtExact(amount)}
-                {max != null && ` / ${fmtExact(max)}`}
-                {full && ' (storage full: production paused)'}
+                {max != null
+                  ? t('amountMax', { resource: label, amount: fmtExact(amount), max: fmtExact(max) })
+                  : t('amount', { resource: label, amount: fmtExact(amount) })}
+                {full && ` ${t('storageFull')}`}
               </div>
               {line ? (
                 <Breakdown line={line} mayor={mayor} />
               ) : (
                 <Rows
                   rows={[
-                    ['Base tax', r.taxIncome - r.taxConverted - r.taxItemBonus],
-                    ...(r.taxItemBonus ? [[`Items +${r.taxItemPercent}%`, r.taxItemBonus, ITEM_BONUS_TEXT_INVERTED] as Row] : []),
-                    ...(r.taxConverted ? [[`Tax ${r.taxRate}% (sold output)`, r.taxConverted] as Row] : []),
-                    ...(r.herosSalary ? [['Hero salaries', -r.herosSalary] as Row] : []),
+                    [t('gold.baseTax'), r.taxIncome - r.taxConverted - r.taxItemBonus],
+                    ...(r.taxItemBonus ? [[t('itemBonus', { percent: r.taxItemPercent }), r.taxItemBonus, ITEM_BONUS_TEXT_INVERTED] as Row] : []),
+                    ...(r.taxConverted ? [[t('gold.taxSold', { rate: r.taxRate }), r.taxConverted] as Row] : []),
+                    ...(r.herosSalary ? [[t('gold.heroSalaries'), -r.herosSalary] as Row] : []),
                   ]}
                   total={r.goldRate}
                 />
@@ -75,9 +86,7 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
             </span>
           </div>
         </TooltipTrigger>
-        <TooltipContent>
-          Population · {fmt(r.idlePopulation)} idle · {r.efficiency}% labour efficiency
-        </TooltipContent>
+        <TooltipContent>{t('population', { idle: fmt(r.idlePopulation), efficiency: r.efficiency })}</TooltipContent>
       </Tooltip>
     </div>
   );

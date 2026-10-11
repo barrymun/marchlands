@@ -1,0 +1,53 @@
+{
+  "summary": {
+    "townHall_one": "The heart of the city. Each level unlocks {{count, number}} more field slot outside the walls (from {{base}}) and lets the city hold one more valley. Beginner protection ends when the {{building}} reaches level {{level}}. It cannot be demolished.",
+    "townHall_other": "The heart of the city. Each level unlocks {{count, number}} more field slots outside the walls (from {{base}}) and lets the city hold one more valley. Beginner protection ends when the {{building}} reaches level {{level}}. It cannot be demolished.",
+    "walls": "Defends the city. Holds fortifications ({{forts}}) and builds them in a queue of one batch per level. In battle the walls absorb damage and extend the range of the {{tower}}.",
+    "cottage": "Houses people: raises the city's population limit. Population works the fields, pays tax and is spent to train troops.",
+    "field": "Produces {{resource}} and adds {{resource}} storage. Output and storage grow faster at higher levels; it needs workers from your idle population.",
+    "warehouse": "Hides resources from plunder. Each resource is protected up to the warehouse amount times the share you set for it (store percent).",
+    "barracks": "Trains troops. Each barracks has its own queue of one batch per level, and several barracks train in parallel.",
+    "academy": "Researches technologies, up to {{queues}} at a time. A technology only counts up to the {{building}} level in this city.",
+    "inn": "Offers heroes for hire. Higher levels offer more and stronger heroes; new offers cost {{gold}} gold per level.",
+    "feastingHall": "Houses heroes: one hero (hired or captured) per level.",
+    "rallySpot_one": "Sends armies out. Needed to march at all; each level allows {{count, number}} more army away at a time and {{troops}} more troops in each army (a {{item}} adds {{percent}}%).",
+    "rallySpot_other": "Sends armies out. Needed to march at all; each level allows {{count, number}} more armies away at a time and {{troops}} more troops in each army (a {{item}} adds {{percent}}%).",
+    "marketplace_one": "Trades food, lumber, stone and iron for gold with other players and the merchant. Each level allows {{count, number}} more waiting order.",
+    "marketplace_other": "Trades food, lumber, stone and iron for gold with other players and the merchant. Each level allows {{count, number}} more waiting orders.",
+    "reliefStation": "Speeds up armies (transports and reinforcements) marching between your own cities.",
+    "beaconTower": "Watches for enemies: level 1 shows the troops of hostile armies marching on you, level 2 also their hero.",
+    "embassy": "Needed to join an alliance (accept an invitation or apply).",
+    "prerequisite": "Needed for what it unlocks below; it has no other effect yet."
+  },
+  "placement": {
+    "unique": "One per city, in its own slot.",
+    "inside": "Inside the walls; as many as you like.",
+    "insideLimited": "Inside the walls; at most {{limit}} per city.",
+    "outside": "Outside the walls (field slots); as many as you like.",
+    "outsideLimited": "Outside the walls (field slots); at most {{limit}} per city."
+  },
+  "effect": {
+    "townHall_one": "{{slots}} field slots, up to {{count, number}} valley",
+    "townHall_other": "{{slots}} field slots, up to {{count, number}} valleys",
+    "walls_one": "{{space}} fortification space, {{count, number}} queued batch, {{hitPoints}} wall hit points, +{{percent}}% tower range",
+    "walls_other": "{{space}} fortification space, {{count, number}} queued batches, {{hitPoints}} wall hit points, +{{percent}}% tower range",
+    "cottage": "+{{population}} population",
+    "field_one": "{{amount}} {{resource}}/h at full labour, +{{storage}} storage, employs {{count, number}} worker",
+    "field_other": "{{amount}} {{resource}}/h at full labour, +{{storage}} storage, employs {{count, number}} workers",
+    "warehouse": "protects up to {{amount}} of each resource",
+    "barracks_one": "{{count, number}} queued batch",
+    "barracks_other": "{{count, number}} queued batches",
+    "academy": "technologies count up to level {{level}}",
+    "inn_one": "{{count, number}} hero offer, heroes up to level {{level}}",
+    "inn_other": "{{count, number}} hero offers, heroes up to level {{level}}",
+    "feastingHall_one": "{{count, number}} hero slot",
+    "feastingHall_other": "{{count, number}} hero slots",
+    "rallySpot_one": "{{count, number}} army out at once, up to {{troops}} troops each",
+    "rallySpot_other": "{{count, number}} armies out at once, up to {{troops}} troops each",
+    "marketplace_one": "{{count, number}} waiting order",
+    "marketplace_other": "{{count, number}} waiting orders",
+    "reliefStation": "marches between your cities ×{{multiplier}} faster",
+    "beaconTroops": "see incoming troops",
+    "beaconHeroes": "see incoming troops and heroes"
+  }
+}

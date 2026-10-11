@@ -3,6 +3,7 @@
 import {
   computeCityStats,
   GameError,
+  msg,
   heroManagement,
   heroPower,
   heroStratagem,
@@ -107,7 +108,7 @@ export async function settleAndReport(ctx: Ctx, b: CityBundle): Promise<SettleRe
       from,
       troops: r.deserted,
       food: { production: r2(stats.rates.food + stats.upkeep), upkeep: r2(stats.upkeep), net: r2(stats.rates.food) },
-      position: `${b.city.name} (${x},${y})`,
+      position: msg('world.position.city', { name: b.city.name, x, y }),
     });
   }
   return r;
@@ -120,7 +121,7 @@ export async function settleAndReport(ctx: Ctx, b: CityBundle): Promise<SettleRe
 export async function openOwnCity(ctx: Ctx, playerId: number, cityId: number): Promise<CityBundle> {
   const player = await getPlayer(ctx, playerId, { lock: true });
   const city = await getCity(ctx, cityId, { lock: true });
-  if (city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   const b = await loadBundle(ctx, city, player);
   await settleAndReport(ctx, b);
   return b;

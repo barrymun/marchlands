@@ -1,0 +1,16 @@
+{
+  "weapon": "武器",
+  "shield": "盾",
+  "mount": "乗騎",
+  "necklace": "首飾り",
+  "charm": "護符",
+  "ring": "指輪",
+  "head": "頭部装備",
+  "shoulder": "肩装備",
+  "chest": "胴装備",
+  "back": "背装備",
+  "gauntlets": "篭手",
+  "belt": "ベルト",
+  "legs": "脚装備",
+  "feet": "足装備"
+}

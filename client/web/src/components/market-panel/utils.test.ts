@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RESOURCES } from '@/components/market-panel/constants';
-import { fmtPrice, resLabel } from '@/components/market-panel/utils';
+import { fmtPrice, resInline, resLabel } from '@/components/market-panel/utils';
 
 describe(resLabel.name, () => {
   it('labels every tradeable resource by its type', () => {
@@ -15,6 +15,21 @@ describe(resLabel.name, () => {
   it('falls back to "#<type>" for unknown types', () => {
     expect(resLabel(5)).toBe('#5');
     expect(resLabel(-1)).toBe('#-1');
+  });
+});
+
+describe(resInline.name, () => {
+  it('names every tradeable resource in lower case, wood as lumber', () => {
+    expect(RESOURCES.map((r) => resInline(r.type))).toEqual(['food', 'lumber', 'stone', 'iron']);
+  });
+
+  it('names type 4 gold', () => {
+    expect(resInline(4)).toBe('gold');
+  });
+
+  it('falls back to "#<type>" for unknown types', () => {
+    expect(resInline(5)).toBe('#5');
+    expect(resInline(-1)).toBe('#-1');
   });
 });
 

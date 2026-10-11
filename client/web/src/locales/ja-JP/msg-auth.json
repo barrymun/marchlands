@@ -1,0 +1,8 @@
+{
+  "notLoggedIn": "ログインしていません。",
+  "needPlayer": "先にプレイヤーを作成してください。",
+  "wrongPassword": "ユーザー名またはパスワードが違います。",
+  "alreadyRegistered": "このユーザー名またはメールアドレスは登録済みです。",
+  "accountNotFound": "アカウントが見つかりません。",
+  "banned": "アカウントは停止されています。理由: {{reason}}"
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { itemConfig, itemGoldPrice } from '@marchlands/core';
+import { itemGoldPrice } from '@marchlands/core';
 import { describeGrant, goldPriceOf, medalLevelOf } from '@/components/items-panel/utils';
 
 describe(goldPriceOf.name, () => {
@@ -20,9 +20,8 @@ describe(goldPriceOf.name, () => {
 });
 
 describe(describeGrant.name, () => {
-  it('lists items by their trimmed name, falling back to the id', () => {
-    const name = itemConfig('consume.2.a')!.name.trim();
-    expect(describeGrant({ items: { 'consume.2.a': 5, 'unknown.item': 2 } })).toBe(`5 × ${name}, 2 × unknown.item`);
+  it('lists items by their name, falling back to the id', () => {
+    expect(describeGrant({ items: { 'consume.2.a': 5, 'unknown.item': 2 } })).toBe('5 × Beginner Guidelines, 2 × unknown.item');
   });
 
   it('lists resources with grouped numbers, calls wood lumber and skips zero or missing amounts', () => {
@@ -34,8 +33,9 @@ describe(describeGrant.name, () => {
   });
 
   it('joins items, then resources, then troops', () => {
-    const name = itemConfig('consume.2.b')!.name.trim();
-    expect(describeGrant({ troops: { militia: 10 }, resources: { gold: 2.9 }, items: { 'consume.2.b': 3 } })).toBe(`3 × ${name}, 2 gold, 10 Warrior`);
+    expect(describeGrant({ troops: { militia: 10 }, resources: { gold: 2.9 }, items: { 'consume.2.b': 3 } })).toBe(
+      '3 × Primary Guidelines, 2 gold, 10 Warrior',
+    );
   });
 
   it('says nothing for an empty grant', () => {

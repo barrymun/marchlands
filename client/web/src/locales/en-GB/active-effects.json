@@ -1,0 +1,38 @@
+{
+  "title": "Active effects",
+  "active": "{{n}} active",
+  "expiring": "{{n}} expiring within 24h",
+  "show": "Show",
+  "hide": "Hide",
+  "extended": "{{slot}} extended by {{adds}}",
+  "groups": {
+    "production": "Production",
+    "military": "Military",
+    "other": "Other"
+  },
+  "slots": {
+    "attack": "Attack",
+    "defense": "Defence",
+    "training": "Training",
+    "upkeep": "Upkeep",
+    "army": "Army",
+    "buildQueue": "Build queue",
+    "truce": "Truce"
+  },
+  "on": "On",
+  "buy": {
+    "title": "Extend {{slot}}?",
+    "description": "You have no {{item}}. Buy one for {{price}} gold from {{city}} and use it now, adding {{adds}}.",
+    "confirm": "Buy and use · {{price}} gold"
+  },
+  "slotCell": {
+    "off": "off",
+    "find": "Find items",
+    "findDetail": "Show the items that give {{label}} {{boost}}",
+    "running": "{{desc}} · {{time}} left",
+    "runningItem": "{{item}}: {{desc}} · {{time}} left",
+    "extend": "Extend",
+    "useDetail": "Use a {{item}} (×{{owned}} owned): +{{adds}}",
+    "buyDetail": "Buy a {{item}} for {{price}} gold and use it: +{{adds}}"
+  }
+}

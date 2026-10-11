@@ -1,0 +1,54 @@
+{
+  "period": {
+    "days_one": "{{count, number}} day",
+    "days_other": "{{count, number}} days",
+    "hours_one": "{{count, number}} hour",
+    "hours_other": "{{count, number}} hours",
+    "minutes_one": "{{count, number}} minute",
+    "minutes_other": "{{count, number}} minutes"
+  },
+  "speedup": {
+    "time": "Cuts {{time}} off a construction or research.",
+    "hours_one": "Cuts {{min}}–{{count, number}} hour (at random) off a construction or research.",
+    "hours_other": "Cuts {{min}}–{{count, number}} hours (at random) off a construction or research.",
+    "percent": "Cuts {{percent}}% of the total time off a construction or research.",
+    "troopBatch": "Cuts {{percent}}% of the total time off one troop training batch.",
+    "fortBatch": "Cuts {{percent}}% of the total time off one fortification batch."
+  },
+  "loyalty": "Raises a hero's loyalty by {{amount}} (up to {{max}}).",
+  "heroStat": "Raises one hero's {{stat}} by {{percent}}% for {{period}}.",
+  "experience": {
+    "share": "Gives a hero experience: {{percent}}% of the next level, at least {{min}}.",
+    "level": "Gives a hero experience: a full level, at least {{min}}."
+  },
+  "holyWater": "Clears all of a hero's assigned points so they can be assigned again.",
+  "buff": "{{effect}} for {{period}}. Using another extends the time.",
+  "grant": "Gives {{contents}}.",
+  "grantCity": "Gives {{contents}} to the current city.",
+  "contents": {
+    "item": "{{amount}} × {{item}}",
+    "amount": "{{amount}} {{name}}"
+  },
+  "chest": "Locked chest: needs a {{key}}. Contains {{contents}}.",
+  "key": "Opens a {{chest}}.",
+  "medalBox": "Contains {{min}}–{{max}} each of {{medals}}.",
+  "randomBox": "Contains random items.",
+  "civilCode": "Adds {{percent}}% of the maximum population (at least {{min}}) to the current city.",
+  "cureInjured": "Heals every injured troop in the current city at once.",
+  "heroBox": "Recruits a level {{level}} hero with every base stat at least {{minStat}}. Needs a free {{building}} slot.",
+  "teleporter": "Moves your city to a free flat tile of your choice, then cools down for {{period}}.",
+  "truce": "Truce: your cities cannot be attacked for {{period}}, but you cannot attack either.",
+  "notUsable": "Not usable on this server yet.",
+  "noEffect": "Event item with no effect on this server.",
+  "howTo": {
+    "speedup": "Use from a construction (City tab) or research (Research tab) in progress.",
+    "troopsSpeedup": "Use on a batch in the Military tab's training queue.",
+    "fortificationsSpeedup": "Use on a batch in the Military tab's fortification queue.",
+    "cityMove": "Use with \"Move city here\" on a free flat tile in the Map tab.",
+    "heroesReset": "Use from a hero's Points dialog in the Heroes tab.",
+    "heroesUseItem": "Use from a hero's Items button in the Heroes tab.",
+    "cityTruce": "Use from Player settings (top-right menu).",
+    "key": "Use the {{chest}}; the key is taken automatically.",
+    "newbies": "Every new player gets one when they start; it cannot be bought."
+  }
+}

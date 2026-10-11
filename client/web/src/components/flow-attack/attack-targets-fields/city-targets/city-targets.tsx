@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, X } from 'lucide-react';
 import type { CityBean } from '@marchlands/api-client';
 import { tileId as toTileId } from '@marchlands/core';
@@ -10,16 +11,17 @@ import { idleHeroes, targetCap } from '@/components/flow-attack/utils';
 import { TileLabel } from '@/components/flow-attack/attack-targets-fields/city-targets/tile-label/tile-label';
 
 export function CityTargets({ city, list, onChange }: { city: CityBean; list: number[]; onChange: (list: number[]) => void }) {
+  const { t } = useTranslation('flow-attack');
   const mapSize = usePlayer().data?.mapSizeX ?? 800;
   const [text, setText] = useState('');
   const cap = targetCap(city);
   const add = () => {
     const m = text.match(/^\s*\(?\s*(\d+)\s*[,\s]\s*(\d+)\s*\)?\s*$/);
-    if (!m) return toast.error('Type coordinates as x,y');
+    if (!m) return toast.error(t('cityTargets.badFormat'));
     const [x, y] = [Number(m[1]), Number(m[2])];
-    if (x >= mapSize || y >= mapSize) return toast.error(`Coordinates go from 0 to ${mapSize - 1}`);
+    if (x >= mapSize || y >= mapSize) return toast.error(t('cityTargets.outOfRange', { max: mapSize - 1 }));
     const id = toTileId(x, y, mapSize);
-    if (list.includes(id)) return toast.error('Already in the list');
+    if (list.includes(id)) return toast.error(t('cityTargets.duplicate'));
     onChange([...list, id]);
     setText('');
   };
@@ -33,18 +35,18 @@ export function CityTargets({ city, list, onChange }: { city: CityBean; list: nu
           </span>
         </span>
         <span className="text-xs text-muted-foreground tabular-nums">
-          {list.length} / {cap} targets ({idleHeroes(city)} idle heroes)
+          {t('cityTargets.count', { n: list.length, count: cap, heroes: t('cityTargets.idleHeroes', { count: idleHeroes(city) }) })}
         </span>
       </div>
       {list.length > 0 && (
         <ol className="grid gap-1">
-          {list.map((t, i) => (
-            <li key={t} className="flex items-center justify-between gap-2 text-xs">
+          {list.map((target, i) => (
+            <li key={target} className="flex items-center justify-between gap-2 text-xs">
               <span className="flex items-center gap-2">
                 <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] tabular-nums">{i + 1}</span>
-                <TileLabel tileId={t} />
+                <TileLabel tileId={target} />
               </span>
-              <Button size="icon-xs" variant="ghost" aria-label="Remove target" onClick={() => onChange(list.filter((x) => x !== t))}>
+              <Button size="icon-xs" variant="ghost" aria-label={t('cityTargets.remove')} onClick={() => onChange(list.filter((x) => x !== target))}>
                 <X />
               </Button>
             </li>
@@ -59,15 +61,19 @@ export function CityTargets({ city, list, onChange }: { city: CityBean; list: nu
             add();
           }}
         >
-          <Input className="h-8 w-32" placeholder="x,y" value={text} onChange={(e) => setText(e.target.value)} aria-label={`Add a target for ${city.name}`} />
+          <Input
+            className="h-8 w-32"
+            placeholder={t('cityTargets.placeholder')}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            aria-label={t('cityTargets.addFor', { city: city.name })}
+          />
           <Button type="submit" size="sm" variant="outline" disabled={!text.trim()}>
-            <Plus /> Add
+            <Plus /> {t('cityTargets.add')}
           </Button>
         </form>
       ) : (
-        <p className="text-xs text-muted-foreground">
-          {cap === 0 ? 'No idle heroes in this city: targets need a hero each.' : 'One target per idle hero: this city is full.'}
-        </p>
+        <p className="text-xs text-muted-foreground">{cap === 0 ? t('cityTargets.noIdle') : t('cityTargets.full')}</p>
       )}
     </div>
   );

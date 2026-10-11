@@ -1,0 +1,7 @@
+{
+  "notResearching": "この都市では{{tech}}を研究していません。",
+  "noResearch": "研究中の技術はありません。",
+  "chooseResearch": "複数の技術を研究中です。1つを選んでください。",
+  "queueFull_other": "この都市ではすでに{{count, number}}件の技術を研究中です。",
+  "alreadyResearching": "{{tech}}はすでに別の都市で研究中です。"
+}

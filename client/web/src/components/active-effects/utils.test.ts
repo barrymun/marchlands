@@ -1,23 +1,31 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { BuffId, ITEM_INFO, itemConfig, itemEffect, itemGoldPrice } from '@marchlands/core';
-import { adds, extensionFor, itemName, readCollapsed, slotItems } from '@/components/active-effects/utils';
+import { BuffId, ITEMS, itemEffect, itemGoldPrice, msg, ref } from '@marchlands/core';
+import { adds, extensionFor, readCollapsed, slotItems } from '@/components/active-effects/utils';
 import { GROUPS, STORE_KEY } from '@/components/active-effects/constants';
 import type { Buff, Slot } from '@/components/active-effects/types';
 
-// real game data, plus two made-up items for branches no real item reaches (a buff shorter than a day, a padded name)
+// real game data, plus made-up items for branches no real item reaches (buffs shorter than a day)
 vi.mock('@marchlands/core', async (importOriginal) => {
   const core = await importOriginal<typeof import('@marchlands/core')>();
   return {
     ...core,
     itemEffect: (id: string) =>
-      id === 'test.hourly' ? { kind: 'buff', buff: core.BuffId.ATTACK, desc: 'test', durationMs: 5.6 * 3_600_000 } : core.itemEffect(id),
-    itemConfig: (id: string) => (id === 'test.padded' ? { ...core.itemConfig('player.resinc.1')!, name: '  Padded Name ' } : core.itemConfig(id)),
+      id === 'test.hourly'
+        ? { kind: 'buff', buff: core.BuffId.ATTACK, desc: core.msg('buff.troopAttack', { percent: 20 }), durationMs: 5.6 * 3_600_000 }
+        : id === 'test.hour'
+          ? { kind: 'buff', buff: core.BuffId.ATTACK, desc: core.msg('buff.troopAttack', { percent: 20 }), durationMs: 3_600_000 }
+          : core.itemEffect(id),
   };
 });
 
 const food: Slot = { buff: BuffId.FOOD_PRODUCTION, label: 'Food', boost: '+25%' };
 const truce = GROUPS.flatMap((g) => g.slots).find((s) => s.buff === BuffId.TRUCE)!;
-const buff = (itemId?: string): Buff => ({ id: BuffId.FOOD_PRODUCTION, desc: 'Food production +25%', endTime: 0, itemId });
+const buff = (itemId?: string): Buff => ({
+  id: BuffId.FOOD_PRODUCTION,
+  desc: msg('buff.production', { resource: ref.resource('food'), percent: 25 }),
+  endTime: 0,
+  itemId,
+});
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -81,7 +89,7 @@ describe(slotItems.name, () => {
     for (const slot of GROUPS.flatMap((g) => g.slots).filter((s) => !s.items)) {
       const ids = slotItems(slot);
       expect(ids.length).toBeGreaterThan(0);
-      const expected = ITEM_INFO.filter((i) => {
+      const expected = ITEMS.filter((i) => {
         const e = itemEffect(i.id);
         return e?.kind === 'buff' && e.buff === slot.buff;
       }).map((i) => i.id);
@@ -104,21 +112,6 @@ describe(slotItems.name, () => {
   });
 });
 
-describe(itemName.name, () => {
-  it('returns the item’s name', () => {
-    expect(itemName('player.resinc.1')).toBe(itemConfig('player.resinc.1')!.name.trim());
-    expect(itemName('player.peace.1')).toBe('Truce Agreement');
-  });
-
-  it('trims the name', () => {
-    expect(itemName('test.padded')).toBe('Padded Name');
-  });
-
-  it('falls back to the id for unknown items', () => {
-    expect(itemName('unknown.item')).toBe('unknown.item');
-  });
-});
-
 describe(adds.name, () => {
   it('says how many days a buff item adds', () => {
     expect(adds('player.resinc.1')).toBe('1 day');
@@ -127,6 +120,7 @@ describe(adds.name, () => {
 
   it('says hours for a buff shorter than a day', () => {
     expect(adds('test.hourly')).toBe('6 hours');
+    expect(adds('test.hour')).toBe('1 hour');
   });
 
   it('is empty for items that give no buff', () => {

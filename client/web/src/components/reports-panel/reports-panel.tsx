@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { getReportsByReportIdQueryKey, getReportsOptions, getReportsQueryKey, getReportsUnreadQueryKey, postReportsReadMutation } from '@marchlands/api-client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,10 +17,11 @@ import { ReportRow } from '@/components/reports-panel/report-row/report-row';
 import { ReportDialog } from '@/components/reports-panel/report-dialog/report-dialog';
 
 export function ReportsPanel() {
+  const { t } = useTranslation('reports-panel');
   const [tab, setTab] = useState<(typeof TABS)[number]['id']>('all');
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState<number | null>(null);
-  const type = TABS.find((t) => t.id === tab)!.type;
+  const type = TABS.find((tb) => tb.id === tab)!.type;
   const unread = useUnreadReports();
   const list = useQuery({
     ...getReportsOptions({ query: { type: type ?? undefined, pageNo: page, pageSize: PAGE_SIZE } }),
@@ -28,7 +30,7 @@ export function ReportsPanel() {
   const markAll = useCommand(
     postReportsReadMutation(),
     () => [allOf(getReportsQueryKey), getReportsUnreadQueryKey(), allOf(getReportsByReportIdQueryKey)],
-    'All reports marked as read',
+    t('markedAllRead'),
   );
   const reports = list.data?.reports ?? [];
   const totalPage = Math.max(1, list.data?.totalPage ?? 1);
@@ -45,22 +47,22 @@ export function ReportsPanel() {
             }}
           >
             <TabsList>
-              {TABS.map((t) => (
-                <TabsTrigger key={t.id} value={t.id} className="gap-1.5">
-                  {t.label}
-                  {(unread.data?.[t.count] ?? 0) > 0 && <Badge className="h-4 min-w-4 px-1 text-[10px] tabular-nums">{unread.data?.[t.count]}</Badge>}
+              {TABS.map((tb) => (
+                <TabsTrigger key={tb.id} value={tb.id} className="gap-1.5">
+                  {tb.label}
+                  {(unread.data?.[tb.count] ?? 0) > 0 && <Badge className="h-4 min-w-4 px-1 text-[10px] tabular-nums">{unread.data?.[tb.count]}</Badge>}
                 </TabsTrigger>
               ))}
             </TabsList>
           </Tabs>
           <Button size="sm" variant="outline" disabled={!unread.data?.count || markAll.isPending} onClick={() => markAll.mutate({ body: {} })}>
-            Mark all read
+            {t('markAllRead')}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="grid gap-2">
         {list.isPending && <Skeleton className="h-40" />}
-        {list.data && reports.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">No reports.</p>}
+        {list.data && reports.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">{t('noReports')}</p>}
         {reports.length > 0 && (
           <Table>
             <TableBody>
@@ -72,18 +74,18 @@ export function ReportsPanel() {
         )}
         {totalPage > 1 && (
           <div className="flex items-center justify-end gap-2 text-sm">
-            <Button size="icon-sm" variant="outline" disabled={page <= 1} onClick={() => setPage(page - 1)} aria-label="Previous page">
+            <Button size="icon-sm" variant="outline" disabled={page <= 1} onClick={() => setPage(page - 1)} aria-label={t('previousPage')}>
               <ChevronLeft />
             </Button>
             <span className="tabular-nums text-muted-foreground">
               {page} / {totalPage}
             </span>
-            <Button size="icon-sm" variant="outline" disabled={page >= totalPage} onClick={() => setPage(page + 1)} aria-label="Next page">
+            <Button size="icon-sm" variant="outline" disabled={page >= totalPage} onClick={() => setPage(page + 1)} aria-label={t('nextPage')}>
               <ChevronRight />
             </Button>
           </div>
         )}
-        <p className="text-xs text-muted-foreground">Reports are kept for 30 days.</p>
+        <p className="text-xs text-muted-foreground">{t('keptFor')}</p>
       </CardContent>
       <ReportDialog reportId={open} onClose={() => setOpen(null)} />
     </Card>

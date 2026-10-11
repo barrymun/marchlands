@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { usePlayer } from '@/hooks/use-game';
@@ -6,6 +7,7 @@ import { hasHero } from '@/components/flows-panel/utils';
 
 /** All cities (including ones gained later; a city with no hero is skipped), or a selection of one or more cities. */
 export function CityPicker({ value, onChange, currentCityId }: { value: Targets; onChange: (t: Targets) => void; currentCityId?: number }) {
+  const { t } = useTranslation('flows-panel');
   const cities = usePlayer().data?.castles ?? [];
   const all = value === 'all';
   const chosen = new Set(all ? [] : value);
@@ -13,15 +15,15 @@ export function CityPicker({ value, onChange, currentCityId }: { value: Targets;
   const noHero = cities.filter((c) => !hasHero(c)).length;
   return (
     <div className="grid gap-1.5">
-      <Label className="text-xs">Cities</Label>
+      <Label className="text-xs">{t('cityPicker.label')}</Label>
       <label className="flex items-center gap-2 text-sm">
         <Checkbox
           checked={all}
           onCheckedChange={(on) => onChange(on === true ? 'all' : currentCityId != null ? [currentCityId] : cities.slice(0, 1).map((c) => c.id))}
         />
-        All cities{' '}
+        {t('cityPicker.all')}{' '}
         <span className="text-xs text-muted-foreground">
-          ({cities.length}, and any you gain later{noHero ? `; ${noHero} with no hero skipped` : ''})
+          {noHero ? t('cityPicker.allHintSkipped', { cities: cities.length, skipped: noHero }) : t('cityPicker.allHint', { cities: cities.length })}
         </span>
       </label>
       {!all && (
@@ -32,14 +34,14 @@ export function CityPicker({ value, onChange, currentCityId }: { value: Targets;
               <span className="truncate">
                 {c.name}{' '}
                 <span className="text-xs text-muted-foreground tabular-nums">
-                  ({c.x},{c.y}){c.id === currentCityId ? ' · here' : ''}
+                  ({c.x},{c.y}){c.id === currentCityId ? ` · ${t('cityPicker.here')}` : ''}
                 </span>
               </span>
             </label>
           ))}
         </div>
       )}
-      {!all && chosen.size === 0 && <p className="text-xs text-destructive">Choose at least one city.</p>}
+      {!all && chosen.size === 0 && <p className="text-xs text-destructive">{t('cityPicker.chooseOne')}</p>}
     </div>
   );
 }

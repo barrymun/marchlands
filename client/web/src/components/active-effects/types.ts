@@ -1,8 +1,10 @@
 import type { BuffId } from '@marchlands/core';
+import type { AnyMessage } from '@/lib/messages';
 
 export interface Buff {
   id: BuffId;
-  desc: string;
+  /** what the buff does (`buff.*`) */
+  desc: AnyMessage;
   endTime: number;
   itemId?: string;
 }

@@ -1,6 +1,8 @@
 // One API client, one push socket, and the stored access token.
 
 import { ApiError, PushClient, configureApi } from '@marchlands/api-client';
+import { i18n } from '@/lib/i18n';
+import { translateMessage } from '@/lib/messages';
 
 const TOKEN_KEY = 'marchlands.token';
 
@@ -47,8 +49,8 @@ export const push = new PushClient({
 
 export { ApiError };
 
+/** What went wrong, in the player's language: the server's message, or a generic one when none came back. */
 export function errorMessage(err: unknown): string {
-  if (err instanceof ApiError) return err.message;
-  if (err instanceof Error) return err.message;
-  return String(err);
+  if (err instanceof ApiError) return err.error ? translateMessage(err.error) : i18n.t('common:errors.network');
+  return i18n.t('common:errors.unexpected');
 }

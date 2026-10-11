@@ -148,6 +148,20 @@
       "when": 1791719601738,
       "tag": "0020_tile_foreign_keys",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791725443121,
+      "tag": "0021_server_messages",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791731286172,
+      "tag": "0022_game_data_ids",
+      "breakpoints": true
     }
   ]
 }

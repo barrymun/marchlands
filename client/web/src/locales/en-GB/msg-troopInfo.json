@@ -1,0 +1,21 @@
+{
+  "worker_one": "Cheap, weak labourers; each carries {{count, number}} resource. Good for padding an army or hauling plunder, not for fighting.",
+  "worker_other": "Cheap, weak labourers; each carries {{count, number}} resources. Good for padding an army or hauling plunder, not for fighting.",
+  "warrior": "Basic foot soldiers: cheap melee troops that fight whatever is closest.",
+  "scout": "The fastest unit, needed for scouting (scouting battles are fought between scouts only). In a battle they hang back while other troops are still fighting.",
+  "pikeman": "Melee spearmen built to stop horses: they deal ×{{multiplier}} damage to {{cavalry}} and {{cataphract}} units.",
+  "swordsman": "Sturdy melee infantry with high defence; they deal ×{{multiplier}} damage to {{target}} units.",
+  "archer": "Ranged foot troops with long reach; they shoot enemy ranged units ({{targets}}) first.",
+  "transporter_one": "Supply wagons: each carries {{count, number}} resource, by far the most. They stay out of the fight while other troops remain, so pair them with an escort.",
+  "transporter_other": "Supply wagons: each carries {{count, number}} resources, by far the most. They stay out of the fight while other troops remain, so pair them with an escort.",
+  "cavalry": "Fast mounted troops; they deal ×{{multiplier}} damage to {{target}} units. Hurt by enemy {{abatis}}.",
+  "cataphract": "Heavy armoured cavalry: tough and hard-hitting, they deal ×{{multiplier}} damage to {{target}} units. Hurt by enemy {{abatis}}.",
+  "ballista": "Siege engine with long range and high attack; it shoots ranged units first and batters the walls when nothing else is in reach.",
+  "batteringRam": "Siege engine with enormous life (it soaks up damage) that smashes the walls; slow.",
+  "catapult": "The longest-range, hardest-hitting siege engine; devastating against walls and ranged units, but slow and fragile up close.",
+  "trap": "Hidden pits: when attackers reach the last stretch before the walls, traps kill some of every group there and are used up. Takes {{space}} wall space.",
+  "abatis": "Spiked barricades that only hit {{cavalry}} and {{cataphract}} units approaching the walls. Takes {{space}} wall space.",
+  "archerTower": "Archers on the walls: they shoot attackers from range (the range grows with the {{walls}} level) and take only {{percent}}% damage. Improved by the research {{techs}}. Takes {{space}} wall space.",
+  "rollingLog": "Logs rolled down on the strongest group of foot troops near the walls; used up. Takes {{space}} wall space.",
+  "trebuchet": "Hurls rocks at the strongest attacking group within long range; used up. Takes {{space}} wall space."
+}

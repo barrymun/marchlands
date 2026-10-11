@@ -1,0 +1,45 @@
+{
+  "accountExists": "This account already has a city.",
+  "nameTaken": "That player name is already taken.",
+  "sameName": "That is already your name.",
+  "renameCooldown_one": "You can rename again in {{count, number}} hour.",
+  "renameCooldown_other": "You can rename again in {{count, number}} hours.",
+  "sameGender": "That is already your gender.",
+  "genderCooldown_one": "You can change your gender again in {{count, number}} hour.",
+  "genderCooldown_other": "You can change your gender again in {{count, number}} hours.",
+  "invalidSetting": "Invalid setting.",
+  "invalidFlag": "Invalid flag.",
+  "title": {
+    "highest": "You already hold the highest title.",
+    "prestigeRequired": "{{prestige}} prestige is required.",
+    "notEnoughMedals": "Not enough medals."
+  },
+  "holiday": {
+    "invalidDays": "A holiday lasts from 1 to {{max}} days.",
+    "troopsOut": "You must recall all of your troops first."
+  },
+  "truce": {
+    "cooldown": "Your truce is still cooling down."
+  },
+  "protected": {
+    "beginner": "This player is under Beginner's Protection.",
+    "truce": "This player is under a truce.",
+    "holiday": "This player is on holiday."
+  },
+  "bookmark": {
+    "tooMany_one": "You can keep at most {{count, number}} bookmark.",
+    "tooMany_other": "You can keep at most {{count, number}} bookmarks."
+  },
+  "preset": {
+    "nameLength_one": "Give the preset a name of up to {{count, number}} character.",
+    "nameLength_other": "Give the preset a name of up to {{count, number}} characters.",
+    "tooMany_one": "You can keep at most {{count, number}} preset.",
+    "tooMany_other": "You can keep at most {{count, number}} presets."
+  },
+  "mail": {
+    "protectionExpired": {
+      "title": "Beginner's Protection has ended",
+      "content": "Your Beginner's Protection has ended. Your cities can now be attacked by other players, and you may attack theirs. Build your defences and consider joining an alliance."
+    }
+  }
+}

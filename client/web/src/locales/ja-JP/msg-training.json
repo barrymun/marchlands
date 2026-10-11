@@ -1,0 +1,16 @@
+{
+  "wallsNeeded": "防御施設を建設するには{{building}}が必要です。",
+  "invalidBarracks": "部隊は建設済みの{{building}}でのみ訓練できます。",
+  "queueFull": "この訓練キューは満杯です。",
+  "allQueuesFull": "すべての{{building}}のキューが満杯です。",
+  "wallSpaceFull": "城壁の空きが足りません。",
+  "notEnoughPopulation": "空いている人口が足りません。",
+  "orderLimit": "一度に注文できるのは1～{{max}}種類のユニットです。",
+  "duplicateOrder": "各ユニットの種類は一度しか注文できません。",
+  "fortsAtWalls": "防御施設は城壁で建設します。",
+  "batchNotFound": "訓練バッチが見つかりません。",
+  "invalidFort": "無効な防御施設の種類です。",
+  "notEnoughUnits": "{{unit}}の数が足りません。",
+  "notEnoughInjured": "負傷兵が足りません。",
+  "notEnoughHonor": "名誉が足りません：{{amount}}必要です。"
+}

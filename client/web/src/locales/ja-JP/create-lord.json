@@ -1,0 +1,13 @@
+{
+  "title": "都市を建設",
+  "description": "名前、旗印、入植する場所を選んでください。",
+  "playerName": "プレイヤー名",
+  "cityName": "都市名",
+  "flag": "旗",
+  "flagPlaceholder": "例: EV",
+  "gender": "性別",
+  "state": "州",
+  "leastCrowded": "最も空いている州（おすすめ）",
+  "submit": "都市を建設",
+  "zone_other": "{{name}} · プレイヤー {{count}}人 · 入植率 {{rate}}%"
+}

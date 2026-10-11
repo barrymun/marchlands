@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPlayerQueryKey, getWorldZonesOptions, postPlayer } from '@marchlands/api-client';
@@ -9,10 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { errorMessage, tokenStore } from '@/lib/api';
+import { zoneName } from '@/lib/game-data';
 import { GENDERS } from '@/lib/genders';
 import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
 
 export function CreateLordPage() {
+  const { t } = useTranslation(['create-lord', 'common']);
   const navigate = useNavigate();
   const qc = useQueryClient();
   const zones = useQuery(getWorldZonesOptions());
@@ -55,26 +58,26 @@ export function CreateLordPage() {
       </div>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Found your city</CardTitle>
-          <CardDescription>Choose your name, banner and where to settle.</CardDescription>
+          <CardTitle className="text-2xl">{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4" onSubmit={submit}>
             <div className="grid gap-2">
-              <Label htmlFor="userName">Player name</Label>
+              <Label htmlFor="userName">{t('playerName')}</Label>
               <Input id="userName" name="userName" required maxLength={20} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="castleName">City name</Label>
+              <Label htmlFor="castleName">{t('cityName')}</Label>
               <Input id="castleName" name="castleName" required maxLength={20} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="flag">Flag</Label>
-                <Input id="flag" name="flag" required maxLength={4} placeholder="e.g. EV" />
+                <Label htmlFor="flag">{t('flag')}</Label>
+                <Input id="flag" name="flag" required maxLength={4} placeholder={t('flagPlaceholder')} />
               </div>
               <div className="grid gap-2">
-                <Label>Gender</Label>
+                <Label>{t('gender')}</Label>
                 <Select value={sex} onValueChange={setSex}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -90,16 +93,16 @@ export function CreateLordPage() {
               </div>
             </div>
             <div className="grid gap-2">
-              <Label>State</Label>
+              <Label>{t('state')}</Label>
               <Select value={zone} onValueChange={setZone}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="-1">Least crowded (recommended)</SelectItem>
+                  <SelectItem value="-1">{t('leastCrowded')}</SelectItem>
                   {zones.data?.map((z) => (
                     <SelectItem key={z.id} value={String(z.id)} disabled={z.openFlats === 0}>
-                      {z.name} · {z.playerCount} players · {z.rate}% settled
+                      {t('zone', { name: zoneName(z.id), count: z.playerCount, rate: z.rate })}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -112,10 +115,10 @@ export function CreateLordPage() {
             )}
             <div className="flex gap-2">
               <Button type="button" variant="ghost" onClick={() => tokenStore.set(null)}>
-                Log out
+                {t('common:actions.logOut')}
               </Button>
               <Button type="submit" className="flex-1" disabled={busy}>
-                Found city
+                {t('submit')}
               </Button>
             </div>
           </form>

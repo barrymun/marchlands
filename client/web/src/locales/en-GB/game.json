@@ -1,0 +1,45 @@
+{
+  "loading": "Loading your game…",
+  "loadError": "Could not load the game",
+  "tabs": {
+    "buildings": "City",
+    "military": "Military",
+    "heroes": "Heroes",
+    "research": "Research",
+    "items": "Items",
+    "market": "Market",
+    "armies": "Armies",
+    "reports": "Reports",
+    "map": "Map",
+    "flows": "Flows",
+    "stats": "Stats"
+  },
+  "cityTabs": "City tabs",
+  "cityFallback": "City",
+  "yourCities": "Your cities",
+  "citySettings": "City settings",
+  "playerStats": "Prestige {{prestige}} · rank {{rank}} · honour {{honor}}",
+  "beginnerProtection": "Beginner protection",
+  "titledName": "{{title}} {{name}}",
+  "liveUpdates": {
+    "aria": "live updates {{status}}",
+    "tooltip": "Live updates: {{status}}",
+    "status": {
+      "open": "open",
+      "connecting": "connecting",
+      "closed": "closed"
+    }
+  },
+  "account": {
+    "label": "Account",
+    "stats": "Prestige {{prestige}} · honour {{honor}}",
+    "statsBeginner": "Prestige {{prestige}} · honour {{honor}} · beginner protection",
+    "playerSettings": "Player settings",
+    "apiDocs": "API docs"
+  },
+  "mayor": {
+    "label": "Mayor",
+    "attributesHint": "Politics: production and build speed · Attack: training · Intelligence: research",
+    "appointHint": "Appoint a mayor in the Heroes tab to speed up production, building, training and research."
+  }
+}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowUp, Check, GripVertical, Plus, X } from 'lucide-react';
 import { FLOW_TROOP_IDS } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ export function FlowEditor({
   onSave: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation(['flows-panel', 'common']);
   const [dragging, setDragging] = useState<number | null>(null);
   const [over, setOver] = useState<number | null>(null);
   const setActions = (actions: Draft[]) => onChange({ ...draft, actions });
@@ -47,23 +49,19 @@ export function FlowEditor({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">{draft.id ? 'Edit flow' : 'New flow'}</CardTitle>
-        <CardDescription>
-          Actions run top to bottom in each city. A wait pauses the whole flow, every city together. Drag actions (or use the arrows) to reorder.
-        </CardDescription>
+        <CardTitle className="text-sm">{draft.id ? t('flowEditor.editTitle') : t('flowEditor.newTitle')}</CardTitle>
+        <CardDescription>{t('flowEditor.description')}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
         {locked && (
-          <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
-            This flow is running: you can change its settings (targets, amounts, cities), but stop it to add, remove or reorder actions.
-          </p>
+          <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">{t('flowEditor.locked')}</p>
         )}
         <div className="grid gap-1.5">
-          <Label htmlFor="flow-name">Name</Label>
+          <Label htmlFor="flow-name">{t('flowEditor.name')}</Label>
           <Input
             id="flow-name"
             maxLength={40}
-            placeholder="e.g. Instant archers"
+            placeholder={t('flowEditor.namePlaceholder')}
             value={draft.name}
             onChange={(e) => onChange({ ...draft, name: e.target.value })}
           />
@@ -99,13 +97,13 @@ export function FlowEditor({
               <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] tabular-nums">{i + 1}</span>
               <ActionFields action={a} cities={draft.cities} onChange={(x) => update(i, x)} />
               <div className="ml-auto flex gap-0.5">
-                <Button size="icon-xs" variant="ghost" aria-label="Move up" disabled={locked || i === 0} onClick={() => move(i, i - 1)}>
+                <Button size="icon-xs" variant="ghost" aria-label={t('flowEditor.moveUp')} disabled={locked || i === 0} onClick={() => move(i, i - 1)}>
                   <ArrowUp />
                 </Button>
                 <Button
                   size="icon-xs"
                   variant="ghost"
-                  aria-label="Move down"
+                  aria-label={t('flowEditor.moveDown')}
                   disabled={locked || i === draft.actions.length - 1}
                   onClick={() => move(i, i + 1)}
                 >
@@ -114,7 +112,7 @@ export function FlowEditor({
                 <Button
                   size="icon-xs"
                   variant="ghost"
-                  aria-label="Remove action"
+                  aria-label={t('flowEditor.removeAction')}
                   disabled={locked}
                   onClick={() => setActions(draft.actions.filter((_, j) => j !== i))}
                 >
@@ -131,7 +129,7 @@ export function FlowEditor({
             disabled={locked || draft.actions.length >= 20}
             onClick={() => setActions([...draft.actions, keyed({ type: 'setMayor', stat: 'management' })])}
           >
-            <Plus /> Set mayor
+            <Plus /> {t('flowEditor.add.setMayor')}
           </Button>
           <Button
             size="sm"
@@ -141,7 +139,7 @@ export function FlowEditor({
               setActions([...draft.actions, keyed({ type: 'trainTroops', troopId: FLOW_TROOP_IDS.includes(7) ? 7 : FLOW_TROOP_IDS[0], amount: 'max' })])
             }
           >
-            <Plus /> Train troops
+            <Plus /> {t('flowEditor.add.trainTroops')}
           </Button>
           <Button
             size="sm"
@@ -149,7 +147,7 @@ export function FlowEditor({
             disabled={locked || draft.actions.length >= 20}
             onClick={() => setActions([...draft.actions, keyed({ type: 'attackTargets', presetId: '', targets: {} })])}
           >
-            <Plus /> Attack targets
+            <Plus /> {t('flowEditor.add.attackTargets')}
           </Button>
           <Button
             size="sm"
@@ -157,7 +155,7 @@ export function FlowEditor({
             disabled={locked || draft.actions.length >= 20}
             onClick={() => setActions([...draft.actions, keyed({ type: 'healTroops', payWith: 'resources', when: 'armiesHome' })])}
           >
-            <Plus /> Heal troops
+            <Plus /> {t('flowEditor.add.healTroops')}
           </Button>
           <Button
             size="sm"
@@ -165,15 +163,15 @@ export function FlowEditor({
             disabled={locked || draft.actions.length >= 20}
             onClick={() => setActions([...draft.actions, keyed({ type: 'wait', until: 'armiesHome', minutes: 10 })])}
           >
-            <Plus /> Wait
+            <Plus /> {t('flowEditor.add.wait')}
           </Button>
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onCancel}>
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
           <Button disabled={!valid || saving} onClick={onSave}>
-            <Check /> Save
+            <Check /> {t('common:actions.save')}
           </Button>
         </div>
       </CardContent>

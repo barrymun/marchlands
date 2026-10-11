@@ -1,0 +1,14 @@
+{
+  "production": {
+    "batchCancelled": "Batch canceled"
+  },
+  "defenses": {
+    "title": "City defenses",
+    "defense": "Defense"
+  },
+  "injured": {
+    "healInfo": "Heal them for {{percent}}% of their training cost, or for honor ({{honor}} available).",
+    "healHonor": "Heal · {{n}} honor",
+    "notEnoughHonor": "Not enough honor ({{n}} needed)"
+  }
+}

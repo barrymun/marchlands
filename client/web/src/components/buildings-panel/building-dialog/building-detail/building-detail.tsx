@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { CircleCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   getCitiesBuildingsByPositionIdOptions,
   getCitiesBuildingsByPositionIdQueryKey,
@@ -26,7 +27,8 @@ import { CostList } from '@/components/cost-list/cost-list';
 import { Requirements } from '@/components/requirements/requirements';
 import { SpeedupOptions } from '@/components/speedup-options/speedup-options';
 import { useCommand } from '@/hooks/use-game';
-import { buildingName } from '@/lib/format';
+import { buildingName } from '@/lib/game-data';
+import { translateMessage } from '@/lib/messages';
 import { STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { refundText } from '@/components/buildings-panel/building-dialog/building-detail/utils';
@@ -35,13 +37,14 @@ import { MayorBuildExp } from '@/components/buildings-panel/building-dialog/mayo
 import { Unlocks } from '@/components/buildings-panel/building-dialog/unlocks/unlocks';
 
 export function BuildingDetail({ city, building, onDone }: { city: CityBean; building: BuildingBean; onDone: () => void }) {
+  const { t } = useTranslation(['buildings-panel', 'common']);
   const pos = building.positionId;
   const path = { cityId: city.id, positionId: pos };
   const info = useQuery(getCitiesBuildingsByPositionIdOptions({ path }));
   const refresh = () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } }), getCitiesBuildingsByPositionIdQueryKey({ path })];
-  const upgrade = useCommand(postCitiesBuildingsUpgradeMutation(), refresh, 'Upgrade started');
-  const demolish = useCommand(postCitiesBuildingsDemolishMutation(), refresh, BALANCE.instantDemolish ? 'Building demolished' : 'Demolition started');
-  const cancel = useCommand(postCitiesBuildingsCancelMutation(), refresh, 'Cancelled');
+  const upgrade = useCommand(postCitiesBuildingsUpgradeMutation(), refresh, t('detail.upgradeStarted'));
+  const demolish = useCommand(postCitiesBuildingsDemolishMutation(), refresh, BALANCE.instantDemolish ? t('detail.demolished') : t('detail.demolitionStarted'));
+  const cancel = useCommand(postCitiesBuildingsCancelMutation(), refresh, t('detail.cancelled'));
   // the speed-up cost depends on the time left, so refresh it with the building
   const speedup = useCommand(postCitiesBuildingsSpeedupMutation(), () => [...refresh(), getPlayerQueryKey(), getCitiesBuildingsSpeedupQueryKey({ path })]);
   const working = building.status !== 0;
@@ -63,13 +66,15 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
     <>
       <DialogHeader>
         <DialogTitle>
-          {building.name} <Badge variant="secondary">Lv {building.level}</Badge>
+          {buildingName(building.typeId)} <Badge variant="secondary">{t('common:level.short', { level: building.level })}</Badge>
         </DialogTitle>
-        <DialogDescription>Slot {pos}</DialogDescription>
+        <DialogDescription>{t('detail.slot', { pos })}</DialogDescription>
       </DialogHeader>
       {working ? (
         <div className="grid gap-3">
-          <p className="text-sm">{building.status === 2 ? `Demolishing to level ${building.level - 1}` : `Upgrading to level ${building.level + 1}`}</p>
+          <p className="text-sm">
+            {building.status === 2 ? t('detail.demolishing', { level: building.level - 1 }) : t('detail.upgrading', { level: building.level + 1 })}
+          </p>
           <TimerBar startTime={building.startTime} endTime={building.endTime} />
           <SpeedupOptions
             endTime={building.endTime}
@@ -85,7 +90,7 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
             disabled={cancel.isPending}
             onClick={() => cancel.mutate({ path }, { onSuccess: onDone })}
           >
-            Cancel
+            {t('common:actions.cancel')}
           </Button>
         </div>
       ) : (
@@ -93,28 +98,29 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
           {info.isPending && <Skeleton className="h-20" />}
           {info.data && (
             <div className="grid gap-1">
-              <p className="text-sm text-muted-foreground">{info.data.info.summary}</p>
+              {info.data.info.summary && <p className="text-sm text-muted-foreground">{translateMessage(info.data.info.summary)}</p>}
               {info.data.effect && (
                 <p className="text-xs">
-                  <span className="text-muted-foreground">Now:</span> {info.data.effect}
+                  <span className="text-muted-foreground">{t('common:level.now')}</span> {translateMessage(info.data.effect)}
                 </p>
               )}
               <Unlocks list={info.data.info.unlocks} />
-              <p className="text-xs text-muted-foreground">{info.data.info.placement}</p>
+              {info.data.info.placement && <p className="text-xs text-muted-foreground">{translateMessage(info.data.info.placement)}</p>}
             </div>
           )}
           {next && <MayorBuildHint city={city} />}
           {next ? (
             <div className="grid gap-2 rounded-md border p-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Upgrade to level {next.level}</span>
+                <span className="text-sm font-medium">{t('detail.upgradeTo', { level: next.level })}</span>
                 <Button size="sm" disabled={!next.ok || upgrade.isPending} onClick={() => upgrade.mutate({ path }, { onSuccess: onDone })}>
-                  Upgrade
+                  {t('detail.upgrade')}
                 </Button>
               </div>
               {next.effect && (
                 <p className="text-xs">
-                  <span className="text-muted-foreground">Lv {next.level}:</span> <span className="text-emerald-600 dark:text-emerald-400">{next.effect}</span>
+                  <span className="text-muted-foreground">{t('common:level.next', { level: next.level })}</span>{' '}
+                  <span className="text-emerald-600 dark:text-emerald-400">{translateMessage(next.effect)}</span>
                 </p>
               )}
               <CostList cost={next} seconds={next.time} have={have} />
@@ -124,7 +130,7 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
           ) : (
             info.data && (
               <p className={cn('flex items-center gap-1.5 text-sm', STATUS_DONE)}>
-                <CircleCheck className="size-4" aria-hidden /> Maximum level reached.
+                <CircleCheck className="size-4" aria-hidden /> {t('detail.maxLevel')}
               </p>
             )
           )}
@@ -133,9 +139,9 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
               <Separator />
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs text-muted-foreground">
-                  {BALANCE.instantDemolish ? 'Demolish the whole building, instantly' : 'Demolish one level'}
-                  {info.data && !BALANCE.instantDemolish ? ` (${Math.round(info.data.demolishTime / 60)} min)` : ''}
-                  {info.data?.demolishRefund && <> · returns {refundText(info.data.demolishRefund)}</>}
+                  {BALANCE.instantDemolish ? t('detail.demolishAll') : t('detail.demolishOne')}
+                  {info.data && !BALANCE.instantDemolish ? t('detail.demolishTime', { minutes: Math.round(info.data.demolishTime / 60) }) : ''}
+                  {info.data?.demolishRefund && t('detail.returns', { refund: refundText(info.data.demolishRefund) })}
                 </span>
                 <ConfirmButton
                   size="sm"
@@ -143,18 +149,20 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
                   disabled={demolish.isPending}
                   title={
                     BALANCE.instantDemolish
-                      ? `Demolish ${buildingName(building.typeId)} (Lv ${building.level})?`
-                      : `Demolish one level of ${buildingName(building.typeId)}?`
+                      ? t('detail.confirmAllTitle', { name: buildingName(building.typeId), level: building.level })
+                      : t('detail.confirmOneTitle', { name: buildingName(building.typeId) })
                   }
                   description={
                     BALANCE.instantDemolish
-                      ? `The whole building goes at once${info.data?.demolishRefund ? `, returning ${refundText(info.data.demolishRefund)}` : ''}. This cannot be undone.`
-                      : 'The level is removed when the demolition finishes.'
+                      ? info.data?.demolishRefund
+                        ? t('detail.confirmAllRefund', { refund: refundText(info.data.demolishRefund) })
+                        : t('detail.confirmAll')
+                      : t('detail.confirmOne')
                   }
-                  confirmLabel="Demolish"
+                  confirmLabel={t('detail.demolish')}
                   onConfirm={() => demolish.mutateAsync({ path }).then(onDone)}
                 >
-                  Demolish
+                  {t('detail.demolish')}
                 </ConfirmButton>
               </div>
             </>

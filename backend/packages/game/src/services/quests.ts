@@ -7,9 +7,11 @@ import {
   evaluateTarget,
   GameError,
   HeroStatus,
+  msg,
   QUEST_CATALOGUE,
   questById,
   questGroups,
+  questTargetMessage,
   TROOP_KEY_LIST,
   FORT_KEY_LIST,
   type QuestSnapshot,
@@ -73,32 +75,30 @@ async function progressMap(ctx: Ctx, playerId: number) {
   return new Map(rows.map((r) => [r.questId, r.status]));
 }
 
-/** quest.getQuestType: quest groups with counts of finished-but-unclaimed quests. */
+/** quest.getQuestType: quest groups with counts of finished-but-unclaimed quests (named by the client, `data-quests` by group id). */
 export async function questTypes(ctx: Ctx, playerId: number) {
   const list = await questList(ctx, playerId);
   return questGroups()
     .filter((g) => QUEST_CATALOGUE.some((q) => q.groupId === g.typeId))
     .map((g) => ({
+      id: g.id,
       typeId: g.typeId,
-      name: g.name,
-      description: g.description,
       isFinish: list.some((q) => q.groupId === g.typeId && q.isFinish && !q.claimed),
     }));
 }
 
-/** quest.getQuestList */
+/** quest.getQuestList: quests are named by the client (`data-quests` by quest id); descriptions and targets are messages. */
 export async function questList(ctx: Ctx, playerId: number, groupId?: number) {
   const s = await snapshot(ctx, playerId);
   const progress = await progressMap(ctx, playerId);
   return QUEST_CATALOGUE.filter((q) => groupId == null || q.groupId === groupId)
     .filter((q) => (q.after ?? []).every((id) => progress.get(id) === 2))
     .map((q) => {
-      const targets = q.targets.map((t) => ({ name: t.name, finished: evaluateTarget(t.target, s) }));
+      const targets = q.targets.map((t) => ({ text: questTargetMessage(t), finished: evaluateTarget(t, s) }));
       const claimed = progress.get(q.id) === 2;
       return {
         questId: q.id,
         groupId: q.groupId,
-        name: q.name,
         description: q.description,
         targets,
         award: q.award,
@@ -111,16 +111,16 @@ export async function questList(ctx: Ctx, playerId: number, groupId?: number) {
 /** quest.award: claim a finished quest's reward into a city. */
 export async function claimQuest(ctx: Ctx, playerId: number, questId: number, cityId: number) {
   const q = questById(questId);
-  if (!q) throw new GameError('Quest not found.', -99, 404);
+  if (!q) throw new GameError(msg('quest.notFound'), -99, 404);
   const b = await openOwnCity(ctx, playerId, cityId);
   const [done] = await ctx.tx
     .select()
     .from(questProgress)
     .where(and(eq(questProgress.playerId, playerId), eq(questProgress.questId, questId)))
     .for('update');
-  if (done?.status === 2) throw new GameError('Reward already claimed.', -99);
+  if (done?.status === 2) throw new GameError(msg('quest.alreadyClaimed'), -99);
   const s = await snapshot(ctx, playerId);
-  if (!q.targets.every((t) => evaluateTarget(t.target, s))) throw new GameError('Quest not finished yet.', -99);
+  if (!q.targets.every((t) => evaluateTarget(t, s))) throw new GameError(msg('quest.notFinished'), -99);
   if (q.award.resources) gainResources(b.city, q.award.resources);
   for (const [id, n] of Object.entries(q.award.items ?? {})) addItem(ctx, b.player, id, n);
   await ctx.tx
@@ -137,7 +137,7 @@ export async function claimQuest(ctx: Ctx, playerId: number, questId: number, ci
 export async function claimDailyGift(ctx: Ctx, playerId: number, cityId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const day = new Date(ctx.now).toISOString().slice(0, 10);
-  if (b.player.misc.dailyGiftDay === day) throw new GameError('You already received today’s gift.', -99);
+  if (b.player.misc.dailyGiftDay === day) throw new GameError(msg('quest.dailyGiftClaimed'), -99);
   b.player.misc = { ...b.player.misc, dailyGiftDay: day };
   const resources = { ...BALANCE.dailyGift };
   gainResources(b.city, resources);

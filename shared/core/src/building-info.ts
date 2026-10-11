@@ -1,136 +1,178 @@
-// Player-facing building descriptions. Each effect mirrors the rule that uses the building
-// (economy, construction, training, heroes, armies, market, alliance), with numbers from BALANCE,
-// so the text follows the rules. "Unlocks" is derived from the requirement data.
+// Player-facing building descriptions, as messages (area `buildingInfo`, worded by the client). Each effect mirrors
+// the rule that uses the building (economy, construction, training, heroes, armies, market, alliance), with numbers
+// from BALANCE, so the text follows the rules. "Unlocks" is derived from the requirement data.
 
 import { BALANCE, getGameSpeed } from './balance.ts';
-import { BUILDING_NAMES, BuildingType, TECH_NAMES, TROOP_NAMES } from './constants.ts';
+import { BuildingType, FortType } from './constants.ts';
+import { isFortType, unlockedOuterSlots } from './construction.ts';
 import { BUILDINGS, RESEARCH, TROOPS, buildingConfig } from './data/index.ts';
+import { msg, ref, type Message } from './messages/index.ts';
 import { reliefMultiplier } from './troops.ts';
 
-const fmt = (n: number) => n.toLocaleString('en');
 const F = (l: number) => BALANCE.fieldFactor[l] ?? 0;
+/** the item that lets armies hold more troops (BALANCE.warEnsignTroopBonus) */
+const WAR_ENSIGN = 'player.troop.1.a';
 
 interface BuildingText {
-  summary: string;
+  summary: () => Message;
   /** what the building gives at `level` (level > 0) */
-  effect?: (level: number) => string;
+  effect?: (level: number) => Message;
 }
 
-const field = (res: string): BuildingText => ({
-  summary: `Produces ${res} and adds ${res} storage. Output and storage grow faster at higher levels; it needs workers from your idle population.`,
+const field = (resource: 'food' | 'wood' | 'stone' | 'iron'): BuildingText => ({
+  summary: () => msg('buildingInfo.summary.field', { resource: ref.resource(resource) }),
   effect: (l) =>
-    `${fmt(BALANCE.fieldProductionPerF * F(l) * getGameSpeed())} ${res}/h at full labour, +${fmt(BALANCE.fieldStoragePerF * F(l) * BALANCE.storageMultiplier)} storage, employs ${fmt(BALANCE.fieldWorkersPerF * F(l))} workers`,
+    msg('buildingInfo.effect.field', {
+      resource: ref.resource(resource),
+      amount: BALANCE.fieldProductionPerF * F(l) * getGameSpeed(),
+      storage: BALANCE.fieldStoragePerF * F(l) * BALANCE.storageMultiplier,
+      count: BALANCE.fieldWorkersPerF * F(l),
+    }),
 });
+
+const prerequisite: BuildingText = { summary: () => msg('buildingInfo.summary.prerequisite') };
 
 const TEXT: Record<number, BuildingText> = {
   [BuildingType.TOWN_HALL]: {
-    summary: `The heart of the city. Each level unlocks 3 more field slots outside the walls (from 10) and lets the city hold one more valley. Beginner protection ends at level ${BALANCE.beginnerTownHallLevel}. It cannot be demolished.`,
-    effect: (l) => `${10 + 3 * l} field slots, up to ${l} valley${l === 1 ? '' : 's'}`,
+    summary: () =>
+      msg('buildingInfo.summary.townHall', {
+        count: BALANCE.outerSlotsPerTownHall,
+        base: BALANCE.outerSlotsBase,
+        level: BALANCE.beginnerTownHallLevel,
+        building: ref.building(BuildingType.TOWN_HALL),
+      }),
+    effect: (l) => msg('buildingInfo.effect.townHall', { slots: unlockedOuterSlots(l), count: l }),
   },
   [BuildingType.WALLS]: {
-    summary:
-      "Defends the city. Holds fortifications (traps, abatis, archer's towers, rolling logs, trebuchets) and builds them in a queue of one batch per level. In battle the walls absorb damage and extend the range of archer's towers.",
+    summary: () => msg('buildingInfo.summary.walls', { forts: Object.values(FortType).map((id) => ref.troop(id)), tower: ref.troop(FortType.ARCHER_TOWER) }),
     effect: (l) =>
-      `${fmt(BALANCE.wallSpace[l] ?? 0)} fortification space, ${l} queued batch${l === 1 ? '' : 'es'}, ${fmt(50_000 * l * (l + 1))} wall hit points, +${Math.round(l * 4.5 * 10) / 10}% tower range`,
+      msg('buildingInfo.effect.walls', {
+        space: BALANCE.wallSpace[l] ?? 0,
+        count: l,
+        // battle/simulator.ts: wall hit points and the archer's tower range bonus
+        hitPoints: 50_000 * l * (l + 1),
+        percent: Math.round(l * 4.5 * 10) / 10,
+      }),
   },
   [BuildingType.COTTAGE]: {
-    summary: "Houses people: raises the city's population limit. Population works the fields, pays tax and is spent to train troops.",
-    effect: (l) => `+${fmt(BALANCE.cottagePopulation[l] ?? 0)} population`,
+    summary: () => msg('buildingInfo.summary.cottage'),
+    effect: (l) => msg('buildingInfo.effect.cottage', { population: BALANCE.cottagePopulation[l] ?? 0 }),
   },
   [BuildingType.FARM]: field('food'),
-  [BuildingType.SAWMILL]: field('lumber'),
+  [BuildingType.SAWMILL]: field('wood'),
   [BuildingType.QUARRY]: field('stone'),
   [BuildingType.IRONMINE]: field('iron'),
   [BuildingType.WAREHOUSE]: {
-    summary: 'Hides resources from plunder. Each resource is protected up to the warehouse amount times the share you set for it (store percent).',
-    effect: (l) => `protects up to ${fmt(BALANCE.warehouseProtectPerLevel[l] ?? 0)} of each resource`,
+    summary: () => msg('buildingInfo.summary.warehouse'),
+    effect: (l) => msg('buildingInfo.effect.warehouse', { amount: BALANCE.warehouseProtectPerLevel[l] ?? 0 }),
   },
   [BuildingType.BARRACKS]: {
-    summary: 'Trains troops. Each barracks has its own queue of one batch per level, and several barracks train in parallel.',
-    effect: (l) => `${l} queued batch${l === 1 ? '' : 'es'}`,
+    summary: () => msg('buildingInfo.summary.barracks'),
+    effect: (l) => msg('buildingInfo.effect.barracks', { count: l }),
   },
   [BuildingType.ACADEMY]: {
-    summary: `Researches technologies, up to ${BALANCE.researchQueues} at a time. A technology only counts up to the Academy level in this city.`,
-    effect: (l) => `technologies count up to level ${l}`,
+    summary: () => msg('buildingInfo.summary.academy', { queues: BALANCE.researchQueues, building: ref.building(BuildingType.ACADEMY) }),
+    effect: (l) => msg('buildingInfo.effect.academy', { level: l }),
   },
   [BuildingType.INN]: {
-    summary: `Offers heroes for hire. Higher levels offer more and stronger heroes; new offers cost ${fmt(BALANCE.tavernRefreshGoldPerInnLevel)} gold per level.`,
-    effect: (l) => `${Math.min(10, l)} hero offer${l === 1 ? '' : 's'}, heroes up to level ${5 * l}`,
+    summary: () => msg('buildingInfo.summary.inn', { gold: BALANCE.tavernRefreshGoldPerInnLevel }),
+    // services/heroes.ts: one offer per level (at most 10), heroes up to 5 levels per Inn level
+    effect: (l) => msg('buildingInfo.effect.inn', { count: Math.min(10, l), level: 5 * l }),
   },
   [BuildingType.FEASTING_HALL]: {
-    summary: 'Houses heroes: one hero (hired or captured) per level.',
-    effect: (l) => `${l} hero slot${l === 1 ? '' : 's'}`,
+    summary: () => msg('buildingInfo.summary.feastingHall'),
+    effect: (l) => msg('buildingInfo.effect.feastingHall', { count: l }),
   },
   [BuildingType.RALLY_SPOT]: {
-    summary: `Sends armies out. Needed to march at all; each level allows one more army away at a time and ${fmt(BALANCE.rallySpotTroopsPerLevel)} more troops in each army (a War Ensign adds ${BALANCE.warEnsignTroopBonus * 100}%).`,
-    effect: (l) =>
-      `${l * BALANCE.rallySpotArmiesPerLevel} arm${l * BALANCE.rallySpotArmiesPerLevel === 1 ? 'y' : 'ies'} out at once, up to ${fmt(l * BALANCE.rallySpotTroopsPerLevel)} troops each`,
+    summary: () =>
+      msg('buildingInfo.summary.rallySpot', {
+        count: BALANCE.rallySpotArmiesPerLevel,
+        troops: BALANCE.rallySpotTroopsPerLevel,
+        item: ref.item(WAR_ENSIGN),
+        percent: Math.round(BALANCE.warEnsignTroopBonus * 100),
+      }),
+    effect: (l) => msg('buildingInfo.effect.rallySpot', { count: l * BALANCE.rallySpotArmiesPerLevel, troops: l * BALANCE.rallySpotTroopsPerLevel }),
   },
   [BuildingType.MARKETPLACE]: {
-    summary: `Trades food, lumber, stone and iron for gold with other players and the merchant. Each level allows ${BALANCE.marketMaxOrdersPerLevel} more waiting orders.`,
-    effect: (l) => `${l * BALANCE.marketMaxOrdersPerLevel} waiting orders`,
+    summary: () => msg('buildingInfo.summary.marketplace', { count: BALANCE.marketMaxOrdersPerLevel }),
+    effect: (l) => msg('buildingInfo.effect.marketplace', { count: l * BALANCE.marketMaxOrdersPerLevel }),
   },
   [BuildingType.RELIEF_STATION]: {
-    summary: 'Speeds up armies (transports and reinforcements) marching between your own cities.',
+    summary: () => msg('buildingInfo.summary.reliefStation'),
     effect: (l) =>
-      `marches between your cities ×${reliefMultiplier([{ positionId: 0, typeId: BuildingType.RELIEF_STATION, level: l, status: 0, startTime: 0, endTime: 0 }])} faster`,
+      msg('buildingInfo.effect.reliefStation', {
+        multiplier: reliefMultiplier([{ positionId: 0, typeId: BuildingType.RELIEF_STATION, level: l, status: 0, startTime: 0, endTime: 0 }]),
+      }),
   },
   [BuildingType.BEACON_TOWER]: {
-    summary: 'Watches for enemies: level 1 shows the troops of hostile armies marching on you, level 2 also their hero.',
-    effect: (l) => (l >= 2 ? 'see incoming troops and heroes' : 'see incoming troops'),
+    summary: () => msg('buildingInfo.summary.beaconTower'),
+    effect: (l) => (l >= 2 ? msg('buildingInfo.effect.beaconHeroes') : msg('buildingInfo.effect.beaconTroops')),
   },
-  [BuildingType.EMBASSY]: { summary: 'Needed to join an alliance (accept an invitation or apply).' },
-  [BuildingType.STABLE]: { summary: 'A prerequisite for what it unlocks below; no other effect on this server yet.' },
-  [BuildingType.FORGE]: { summary: 'A prerequisite for what it unlocks below; no other effect on this server yet.' },
-  [BuildingType.WORKSHOP]: { summary: 'A prerequisite for what it unlocks below; no other effect on this server yet.' },
+  [BuildingType.EMBASSY]: { summary: () => msg('buildingInfo.summary.embassy') },
+  [BuildingType.STABLE]: prerequisite,
+  [BuildingType.FORGE]: prerequisite,
+  [BuildingType.WORKSHOP]: prerequisite,
 };
+
+export type UnlockKind = 'building' | 'troop' | 'tech';
+/** Something that needs a building or technology: a building type, troop or technology id and the level it needs. */
+export interface Unlock {
+  kind: UnlockKind;
+  id: number;
+  level: number;
+}
 
 export interface BuildingInfo {
   typeId: number;
-  name: string;
-  summary: string;
-  /** where it can be built and how many */
-  placement: string;
+  /** what the building does (null for an unknown type) */
+  summary: Message | null;
+  /** where it can be built and how many (null for an unknown type) */
+  placement: Message | null;
   /** buildings, troops and technologies that require this building, with the level they need */
-  unlocks: { kind: 'building' | 'troop' | 'tech'; name: string; level: number }[];
+  unlocks: Unlock[];
 }
 
-function unlocksOf(typeId: number): BuildingInfo['unlocks'] {
-  const out = new Map<string, BuildingInfo['unlocks'][number]>();
-  const add = (kind: 'building' | 'troop' | 'tech', name: string | undefined, level: number) => {
-    if (!name) return;
-    const key = `${kind}:${name}`;
+const KIND_ORDER: Record<UnlockKind, number> = { building: 0, troop: 1, tech: 2 };
+
+function unlocksOf(typeId: number): Unlock[] {
+  const out = new Map<string, Unlock>();
+  const add = (kind: UnlockKind, id: number, level: number) => {
+    const key = `${kind}:${id}`;
     const prev = out.get(key);
-    if (!prev || level < prev.level) out.set(key, { kind, name, level });
+    if (!prev || level < prev.level) out.set(key, { kind, id, level });
   };
+  // fortifications share the building data but are troops: they are listed from TROOPS
   for (const b of BUILDINGS)
-    for (const r of b.requires.buildings) if (r.id === typeId && b.typeId !== typeId && b.level === 1) add('building', BUILDING_NAMES[b.typeId], r.level);
-  for (const t of TROOPS) for (const r of t.requires.buildings) if (r.id === typeId) add('troop', TROOP_NAMES[t.troopId], r.level);
-  for (const t of RESEARCH) for (const r of t.requires.buildings) if (r.id === typeId && t.level === 1) add('tech', TECH_NAMES[t.techId], r.level);
-  return [...out.values()].sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+    for (const r of b.requires.buildings)
+      if (r.id === typeId && b.typeId !== typeId && b.level === 1 && !isFortType(b.typeId)) add('building', b.typeId, r.level);
+  for (const t of TROOPS) for (const r of t.requires.buildings) if (r.id === typeId) add('troop', t.troopId, r.level);
+  for (const t of RESEARCH) for (const r of t.requires.buildings) if (r.id === typeId && t.level === 1) add('tech', t.techId, r.level);
+  return [...out.values()].sort((a, b) => a.level - b.level || KIND_ORDER[a.kind] - KIND_ORDER[b.kind] || a.id - b.id);
 }
 
-function placementOf(typeId: number): string {
-  if (typeId === BuildingType.TOWN_HALL || typeId === BuildingType.WALLS) return 'One per city, in its own slot.';
+const FIELDS: number[] = [BuildingType.FARM, BuildingType.SAWMILL, BuildingType.QUARRY, BuildingType.IRONMINE];
+
+function placementOf(typeId: number): Message | null {
+  if (typeId === BuildingType.TOWN_HALL || typeId === BuildingType.WALLS) return msg('buildingInfo.placement.unique');
   const cfg = buildingConfig(typeId, 1);
-  if (!cfg) return '';
-  const fields: number[] = [BuildingType.FARM, BuildingType.SAWMILL, BuildingType.QUARRY, BuildingType.IRONMINE];
-  const where = fields.includes(typeId) ? 'Outside the walls (field slots)' : 'Inside the walls';
-  return cfg.limit > 0 ? `${where}; at most ${cfg.limit} per city.` : `${where}; as many as you like.`;
+  if (!cfg || isFortType(typeId)) return null; // fortifications are built at the walls, not in slots
+  const outside = FIELDS.includes(typeId);
+  if (cfg.limit > 0)
+    return outside ? msg('buildingInfo.placement.outsideLimited', { limit: cfg.limit }) : msg('buildingInfo.placement.insideLimited', { limit: cfg.limit });
+  return outside ? msg('buildingInfo.placement.outside') : msg('buildingInfo.placement.inside');
 }
 
 export function buildingInfo(typeId: number): BuildingInfo {
   return {
     typeId,
-    name: BUILDING_NAMES[typeId] ?? `Building ${typeId}`,
-    summary: TEXT[typeId]?.summary ?? '',
+    summary: TEXT[typeId]?.summary() ?? null,
     placement: placementOf(typeId),
     unlocks: unlocksOf(typeId),
   };
 }
 
-/** What a building gives at `level` ('' when it has no measurable effect). */
-export function buildingEffect(typeId: number, level: number): string {
-  if (level <= 0) return '';
-  return TEXT[typeId]?.effect?.(level) ?? '';
+/** What a building gives at `level` (null when it has no measurable effect). */
+export function buildingEffect(typeId: number, level: number): Message | null {
+  if (level <= 0) return null;
+  return TEXT[typeId]?.effect?.(level) ?? null;
 }

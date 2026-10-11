@@ -2,12 +2,12 @@
 // queries below page over them with optional case-insensitive name search.
 
 import { sql } from 'drizzle-orm';
-import { GameError } from '@marchlands/core';
+import { GameError, msg } from '@marchlands/core';
 import type { Ctx } from '../context.ts';
-import { refreshAllianceStats, rankName } from './alliance.ts';
+import { refreshAllianceStats } from './alliance.ts';
 
 function paging(pageNo: number, pageSize: number) {
-  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new GameError('Invalid data.', -99);
+  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new GameError(msg('common.invalidData'), -99);
   const page = Math.max(1, Math.floor(pageNo || 1));
   return { page, size: pageSize, offset: (page - 1) * pageSize };
 }
@@ -92,7 +92,7 @@ export async function playerRanking(ctx: Ctx, sortType: number, pageNo: number, 
       population: Number(r.population),
       castleCount: Number(r.cities),
       alliance: r.alliance ?? '',
-      allianceLevel: r.alliance ? rankName(Number(r.alliance_rank)) : '',
+      allianceRank: r.alliance ? Number(r.alliance_rank) : null,
       flag: r.flag,
       faceUrl: r.face_url,
     })),

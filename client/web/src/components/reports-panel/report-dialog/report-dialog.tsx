@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   getReportsByReportIdOptions,
   getReportsByReportIdQueryKey,
@@ -15,8 +16,11 @@ import { useCommand } from '@/hooks/use-game';
 import { useSticky } from '@/hooks/use-sticky';
 import { allOf } from '@/lib/query-keys';
 import { ReportContent } from '@/components/reports-panel/report-dialog/report-content/report-content';
+import { dateTime } from '@/lib/format';
+import { translateMessage } from '@/lib/messages';
 
 export function ReportDialog({ reportId, onClose }: { reportId: number | null; onClose: () => void }) {
+  const { t } = useTranslation(['reports-panel', 'common']);
   const id = useSticky(reportId);
   const detail = useQuery({
     ...getReportsByReportIdOptions({ path: { reportId: id ?? 0 } }),
@@ -25,7 +29,7 @@ export function ReportDialog({ reportId, onClose }: { reportId: number | null; o
   const remove = useCommand(
     postReportsDeleteMutation(),
     () => [allOf(getReportsQueryKey), getReportsUnreadQueryKey(), allOf(getReportsByReportIdQueryKey)],
-    'Report deleted',
+    t('dialog.deleted'),
   );
   // opening a report marks it read on the server: refresh the list and the unread counters
   const qc = useQueryClient();
@@ -40,15 +44,15 @@ export function ReportDialog({ reportId, onClose }: { reportId: number | null; o
     <Dialog open={reportId != null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{r?.title ?? 'Report'}</DialogTitle>
+          <DialogTitle>{r ? translateMessage(r.title) : t('dialog.title')}</DialogTitle>
           <DialogDescription>
             {r && (
               <>
-                {r.startPos}
+                {r.startPos && translateMessage(r.startPos)}
                 {r.startPos && r.targetPos && ' → '}
-                {r.targetPos}
+                {r.targetPos && translateMessage(r.targetPos)}
                 {(r.startPos || r.targetPos) && ' · '}
-                {new Date(r.eventTime).toLocaleString()}
+                {dateTime(r.eventTime)}
               </>
             )}
           </DialogDescription>
@@ -63,7 +67,7 @@ export function ReportDialog({ reportId, onClose }: { reportId: number | null; o
               disabled={remove.isPending}
               onClick={() => remove.mutate({ body: { ids: [r.id] } }, { onSuccess: onClose })}
             >
-              <Trash2 /> Delete
+              <Trash2 /> {t('common:actions.delete')}
             </Button>
           </div>
         )}

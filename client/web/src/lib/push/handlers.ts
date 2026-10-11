@@ -27,6 +27,10 @@ import {
   PushCmd,
   type PushData,
 } from '@marchlands/api-client';
+import { fmtExact } from '@/lib/format';
+import { buildingName, techName } from '@/lib/game-data';
+import { i18n } from '@/lib/i18n';
+import { translateMessage } from '@/lib/messages';
 import { patchHeroes, patchPlayerHeroes, resourceName } from '@/lib/push/utils';
 import { allMarketQueries, allOf } from '@/lib/query-keys';
 
@@ -47,7 +51,8 @@ export const PUSH_HANDLERS: { [K in PushCmd]?: Handler<K> } = {
   [PushCmd.BUILD_COMPLETE]: ({ castleId, buildingBean }, qc) => {
     const path = { path: { cityId: castleId } };
     invalidate(qc, cityKey(castleId), allOf(getCitiesBuildingsByPositionIdQueryKey, path), allOf(getCitiesBuildingsAvailableQueryKey, path));
-    if (buildingBean.typeId && buildingBean.status === 0) toast(`${buildingBean.name} reached level ${buildingBean.level}`);
+    if (buildingBean.typeId && buildingBean.status === 0)
+      toast(i18n.t('common:push.buildingComplete', { name: buildingName(buildingBean.typeId), level: buildingBean.level }));
   },
 
   [PushCmd.CASTLE_UPDATE]: (d, qc) => {
@@ -79,7 +84,7 @@ export const PUSH_HANDLERS: { [K in PushCmd]?: Handler<K> } = {
   [PushCmd.RESEARCH_UPDATE]: ({ castleId }, qc) => invalidate(qc, getCitiesResearchQueryKey({ path: { cityId: castleId } })),
   [PushCmd.RESEARCH_COMPLETE_UPDATE]: ({ castleId, typeId, level }, qc) => {
     invalidate(qc, allOf(getCitiesResearchQueryKey), getPlayerQueryKey(), cityKey(castleId));
-    toast(`Research ${typeId} reached level ${level}`);
+    toast(i18n.t('common:push.researchComplete', { name: techName(typeId), level }));
   },
 
   [PushCmd.PLAYER_INFO_UPDATE]: ({ playerInfo }, qc) => patchPlayer(qc, (p) => ({ ...p, playerInfo })),
@@ -89,16 +94,16 @@ export const PUSH_HANDLERS: { [K in PushCmd]?: Handler<K> } = {
   [PushCmd.FRIEND_ARMIES_UPDATE]: (_d, qc) => invalidate(qc, getArmiesQueryKey()),
   [PushCmd.ENEMY_ARMIES_UPDATE]: ({ armys }, qc) => {
     invalidate(qc, getArmiesQueryKey());
-    if (armys.length) toast.warning(`${armys.length} hostile ${armys.length === 1 ? 'army' : 'armies'} approaching`);
+    if (armys.length) toast.warning(i18n.t('common:push.hostileArmies', { count: armys.length }));
   },
 
   [PushCmd.TRADES_UPDATE]: ({ resType, amount, price }, qc) => {
     invalidate(qc, ...allMarketQueries());
-    toast.success(`Trade: ${amount.toLocaleString('en')} ${resourceName(resType)} at ${price} gold`);
+    toast.success(i18n.t('common:push.trade', { amount: fmtExact(amount), resource: resourceName(resType), price }));
   },
   [PushCmd.TRANSIT_TRADE_UPDATE]: ({ resType, amount }, qc) => {
     invalidate(qc, getMarketShipmentsQueryKey());
-    if (resType !== 4) toast(`Market delivery: ${amount.toLocaleString('en')} ${resourceName(resType)} arrived`);
+    if (resType !== 4) toast(i18n.t('common:push.delivery', { amount: fmtExact(amount), resource: resourceName(resType) }));
   },
 
   [PushCmd.NEW_REPORT]: (counts, qc) => {
@@ -106,13 +111,13 @@ export const PUSH_HANDLERS: { [K in PushCmd]?: Handler<K> } = {
     qc.setQueryData(getReportsUnreadQueryKey(), counts);
     invalidate(qc, allOf(getReportsQueryKey));
     if (counts.count > before) {
-      toast('New report', { description: 'See the Reports tab.' });
+      toast(i18n.t('common:push.newReport'), { description: i18n.t('common:push.newReportHint') });
       // a battle can change who holds valleys and cities (no push carries that): refresh them
       invalidate(qc, allOf(getCitiesByCityIdQueryKey), getPlayerQueryKey(), allOf(getMapQueryKey), allOf(getMapTilesByTileIdQueryKey));
     }
   },
 
-  [PushCmd.SYSTEM_INFO_MESSAGE]: ({ msg }) => toast.info(msg),
+  [PushCmd.SYSTEM_INFO_MESSAGE]: ({ msg }) => toast.info(translateMessage(msg)),
 };
 
 /** Subscribe every handler to `client`; returns the unsubscribe functions. */

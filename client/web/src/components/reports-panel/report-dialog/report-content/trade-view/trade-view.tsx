@@ -1,26 +1,31 @@
+import { useTranslation } from 'react-i18next';
 import type { ReportBody } from '@marchlands/core';
-import { fmtExact } from '@/lib/format';
-import { RES_LABEL } from '@/components/reports-panel/report-dialog/report-content/constants';
+import { fmtExact, fmtDecimal } from '@/lib/format';
 import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
 import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
 
-export function TradeView({ trade: t }: { trade: Extract<ReportBody, { kind: 'trade' }>['trade'] }) {
-  if ('side' in t) {
+export function TradeView({ trade }: { trade: Extract<ReportBody, { kind: 'trade' }>['trade'] }) {
+  const { t } = useTranslation(['reports-panel', 'common']);
+  if ('side' in trade) {
     return (
       <div className="grid gap-1.5 text-sm">
-        <Line label={t.side === 'buy' ? 'Bought' : 'Sold'}>
-          {fmtExact(t.amount)} {RES_LABEL[t.resource]?.toLowerCase()} at {t.price.toLocaleString('en', { maximumFractionDigits: 3 })}
+        <Line label={trade.side === 'buy' ? t('labels.bought') : t('labels.sold')}>
+          {t('trade.order', {
+            amount: fmtExact(trade.amount),
+            resource: t(`common:resourcesInline.${trade.resource}`),
+            price: fmtDecimal(trade.price, 3),
+          })}
         </Line>
-        <Line label="Gold">{fmtExact(t.gold)}</Line>
+        <Line label={t('labels.gold')}>{fmtExact(trade.gold)}</Line>
       </div>
     );
   }
   return (
     <div className="grid gap-1.5 text-sm">
-      <Line label="From">{t.from}</Line>
-      <Line label="To">{t.to}</Line>
-      <Line label="Goods">
-        <ResourceList res={t.resources} />
+      <Line label={t('labels.from')}>{trade.from}</Line>
+      <Line label={t('labels.to')}>{trade.to}</Line>
+      <Line label={t('labels.goods')}>
+        <ResourceList res={trade.resources} />
       </Line>
     </div>
   );

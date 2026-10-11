@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import type { CityBean } from '@marchlands/api-client';
+import { BuildingType } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { buildingName } from '@/lib/format';
+import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 import { INSIDE, OUTSIDE } from '@/components/buildings-panel/constants';
 import { Slot } from '@/components/buildings-panel/slot/slot';
 import { BuildingDialog } from '@/components/buildings-panel/building-dialog/building-dialog';
 
 export function BuildingsPanel({ city }: { city: CityBean }) {
+  const { t } = useTranslation(['buildings-panel', 'common']);
   const [selected, setSelected] = useState<number | null>(null);
   // ?building=<position> (from the activity dock) opens that building's dialog
   const [search, setSearch] = useSearchParams();
@@ -38,9 +41,9 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
 
   return (
     <div className="grid gap-4">
-      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter buildings by type">
+      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t('filter.label')}>
         <Button size="xs" variant={active.length === 0 ? 'default' : 'outline'} onClick={() => setTags([])}>
-          Show all
+          {t('filter.showAll')}
         </Button>
         {typeList.map(([typeId, n]) => {
           const on = active.includes(typeId);
@@ -56,10 +59,13 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">
-              {active.map(buildingName).join(', ')}{' '}
+              {active.map(buildingName).join(t('common:list.separator'))}{' '}
               <span className="font-normal text-muted-foreground">
-                ({filtered.length} building{filtered.length === 1 ? '' : 's'} · levels {Math.min(...filtered.map((b) => b.level))}–
-                {Math.max(...filtered.map((b) => b.level))})
+                {t('filter.summary', {
+                  count: filtered.length,
+                  min: Math.min(...filtered.map((b) => b.level)),
+                  max: Math.max(...filtered.map((b) => b.level)),
+                })}
               </span>
             </CardTitle>
           </CardHeader>
@@ -73,11 +79,17 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
       {active.length === 0 && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Inside the walls</CardTitle>
+            <CardTitle className="text-sm">{t('inside.title')}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
             {[-1, -2].map((pos) => (
-              <Slot key={pos} pos={pos} building={byPos.get(pos)} onClick={() => setSelected(pos)} fixedName={pos === -1 ? 'Town Hall' : 'Walls'} />
+              <Slot
+                key={pos}
+                pos={pos}
+                building={byPos.get(pos)}
+                onClick={() => setSelected(pos)}
+                fixedName={buildingName(pos === -1 ? BuildingType.TOWN_HALL : BuildingType.WALLS)}
+              />
             ))}
             {INSIDE.map((pos) => (
               <Slot key={pos} pos={pos} building={byPos.get(pos)} onClick={() => setSelected(pos)} />
@@ -89,9 +101,9 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">
-              Fields{' '}
+              {t('fields.title')}{' '}
               <span className="font-normal text-muted-foreground">
-                ({outerSlots} of 40 unlocked by Town Hall Lv {townHall})
+                {t('fields.unlocked', { unlocked: outerSlots, total: OUTSIDE.length, level: townHall })}
               </span>
             </CardTitle>
           </CardHeader>

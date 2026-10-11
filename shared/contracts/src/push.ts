@@ -3,6 +3,7 @@
 // clients switch on PushMessage['cmd'] or validate frames with PushMessageSchema.
 
 import { z } from 'zod';
+import { MessageSchema } from '@marchlands/core';
 import { FortBean, Ms, TroopBean } from './common.ts';
 import { ArmyBean, BuffBean, BuildingBean, CityBean, HeroBean, ItemCount, PlayerInfo, ResourceBean } from './beans.ts';
 
@@ -71,7 +72,7 @@ export type PushCmd = (typeof PushCmd)[keyof typeof PushCmd];
 export const PushSchemas = {
   // sent by the /ws handler itself
   [PushCmd.CONNECTED]: z.object({ playerId: int, serverTime: Ms }),
-  [PushCmd.CONNECTION_LOST]: z.object({ reasonCode: int, msg: z.string() }),
+  [PushCmd.CONNECTION_LOST]: z.object({ reasonCode: int, msg: MessageSchema }),
   [PushCmd.PONG]: z.object({ serverTime: Ms }),
 
   // city
@@ -94,7 +95,7 @@ export const PushSchemas = {
   [PushCmd.PLAYER_INFO_UPDATE]: z.object({ playerInfo: PlayerInfo }),
   [PushCmd.ITEM_UPDATE]: z.object({ items: z.array(ItemCount) }),
   [PushCmd.PLAYER_BUFF_UPDATE]: z.object({
-    buffBean: z.object({ typeId: z.string(), descName: z.string(), endTime: Ms }),
+    buffBean: z.object({ typeId: z.string(), desc: MessageSchema.describe('what the buff does (`buff.*`), worded by the client'), endTime: Ms }),
     updateType: z.literal([0, 1]).describe('0 = added or extended, 1 = expired or removed'),
   }),
   [PushCmd.FLOW_UPDATE]: z
@@ -120,7 +121,7 @@ export const PushSchemas = {
   [PushCmd.ALLIANCE_CHAT_MESSAGE]: ChatMsg(z.literal('alliance')),
   [PushCmd.PRIVATE_CHAT_MESSAGE]: z.object({ msg: z.string(), chatType: z.literal(0), fromUser: z.string(), fromId: int, time: Ms }),
   [PushCmd.SYSTEM_INFO_MESSAGE]: z.object({
-    msg: z.string(),
+    msg: MessageSchema.describe('what to tell the player, worded by the client'),
     alliance: z.boolean(),
     sender: z.string().optional(),
     tV: z.boolean(),

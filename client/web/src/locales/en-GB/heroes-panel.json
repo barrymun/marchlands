@@ -1,0 +1,75 @@
+{
+  "toast": {
+    "hired": "Hero hired",
+    "rerolled": "New heroes at the Inn",
+    "mayorAppointed": "Mayor appointed",
+    "renamed": "Hero renamed",
+    "dismissed": "Hero dismissed",
+    "levelUp": "{{name}} reached level {{level}}",
+    "levelUpMulti": "{{name}} reached level {{level}} (+{{levels}} levels, +{{levels}} points)"
+  },
+  "mayor": {
+    "bonus": "Mayor bonus +{{pct}}% production · {{rate}}",
+    "asMayor": "As mayor: +{{pct}}% production · {{rate}}",
+    "versus": "({{diff}} vs {{name}})"
+  },
+  "status": {
+    "idle": "Idle",
+    "mayor": "Mayor",
+    "marching": "Marching",
+    "captive": "Captive",
+    "returning": "Returning"
+  },
+  "heroes": {
+    "title": "Your heroes",
+    "description": "A Feasting Hall raises how many heroes the city can keep.",
+    "empty": "No heroes yet. Hire one at the Inn.",
+    "moveUp": "Move {{name}} up",
+    "moveDown": "Move {{name}} down",
+    "points": "Points",
+    "pointsCount": "Points ({{points}})",
+    "items": "Items",
+    "locked": "Locked",
+    "lock": "Lock",
+    "levelUp": "Level up",
+    "levelUpMulti": "Level up ×{{times}} → Lv {{level}}",
+    "makeMayor": "Make mayor",
+    "dismiss": "Dismiss",
+    "lockedHint": "Locked: unlock the hero to dismiss them"
+  },
+  "inn": {
+    "title": "Inn",
+    "noInn": "Build an Inn to recruit heroes.",
+    "newOffers": "New offers ({{gold}} gold)",
+    "hire": "Hire",
+    "freeSlots_one": "{{count}} free hero slot.",
+    "freeSlots_other": "{{count}} free hero slots."
+  },
+  "heroRow": {
+    "nameLabel": "Hero name",
+    "saveName": "Save name",
+    "rename": "Rename {{name}}"
+  },
+  "attributes": {
+    "strongest": "Strongest attribute: {{label}}",
+    "loyalty": "loyalty {{loyalty}}",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points"
+  },
+  "expBar": {
+    "maxLevel": "Max level {{level}}: grows through gear now",
+    "label": "Experience",
+    "ready": "Ready to level up",
+    "readyMulti": "Ready to level up {{times}} times",
+    "progress": "XP {{exp}} / {{needed}} · {{left}} to Lv {{next}}"
+  },
+  "buffs": {
+    "active": "{{label}} +{{amount}} · {{time}} left"
+  },
+  "dismissDialog": {
+    "title": "Dismiss {{name}}?",
+    "description": "{{name}} (Lv {{level}}, att {{att}} · pol {{pol}} · int {{int}}) will leave your city for good. This cannot be undone.",
+    "keep": "Keep {{name}}",
+    "confirm": "Dismiss"
+  }
+}

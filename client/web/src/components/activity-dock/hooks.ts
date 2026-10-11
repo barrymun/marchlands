@@ -3,7 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getCitiesFortificationsQueuesOptions, getCitiesResearchOptions, getCitiesTroopsQueuesOptions, type CityBean } from '@marchlands/api-client';
 import { buildingLevel, BuildingType } from '@marchlands/core';
 import type { Job } from '@/components/activity-dock/types';
-import { fmtExact, troopName } from '@/lib/format';
+import { fmtExact } from '@/lib/format';
+import { buildingName, techName, troopName } from '@/lib/game-data';
+import { i18n } from '@/lib/i18n';
 
 /** Everything running in the city: construction, research here, and the batch each barracks / the walls is producing. */
 export function useJobs(city: CityBean): Job[] {
@@ -24,8 +26,8 @@ export function useJobs(city: CityBean): Job[] {
     jobs.push({
       key: `b${b.positionId}`,
       group: 'Building',
-      label: `${b.name} → Lv ${demolishing ? b.level - 1 : b.level + 1}`,
-      note: demolishing ? 'demolishing' : undefined,
+      label: i18n.t('activity-dock:job.level', { name: buildingName(b.typeId), level: demolishing ? b.level - 1 : b.level + 1 }),
+      note: demolishing ? i18n.t('activity-dock:job.demolishing') : undefined,
       startTime: b.startTime,
       endTime: b.endTime,
       open: () => go('buildings', `?building=${b.positionId}`),
@@ -36,7 +38,7 @@ export function useJobs(city: CityBean): Job[] {
     jobs.push({
       key: `r${t.typeId}`,
       group: 'Research',
-      label: `${t.name} → Lv ${t.level + 1}`,
+      label: i18n.t('activity-dock:job.level', { name: techName(t.typeId), level: t.level + 1 }),
       startTime: t.startTime,
       endTime: t.endTime,
       open: () => go('research'),
@@ -49,8 +51,8 @@ export function useJobs(city: CityBean): Job[] {
     jobs.push({
       key: `t${q.positionId}:${running.queueId}`,
       group: 'Training',
-      label: `${troopName(running.type)} ×${fmtExact(running.num)}`,
-      note: waiting > 0 ? `+${waiting} queued` : undefined,
+      label: i18n.t('activity-dock:job.troops', { troop: troopName(running.type), amount: fmtExact(running.num) }),
+      note: waiting > 0 ? i18n.t('activity-dock:job.queued', { n: waiting }) : undefined,
       startTime: running.startTime,
       endTime: running.endTime,
       open: () => go('military'),

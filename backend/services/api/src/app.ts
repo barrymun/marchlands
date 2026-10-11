@@ -6,6 +6,7 @@ import websocket from '@fastify/websocket';
 import { operationIdOf } from './operation-id.ts';
 import { jsonSchemaTransform, jsonSchemaTransformObject, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { sql } from 'drizzle-orm';
+import { msg } from '@marchlands/core';
 import type { Db } from '@marchlands/db';
 import { verifyToken } from './auth/jwt.ts';
 import type { ApiConfig } from './config.ts';
@@ -52,7 +53,7 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
         title: 'Marchlands API',
         version: '0.1.0',
         description:
-          'Marchlands game server, based on Evony Age 1. Successful calls answer `{ ok: 1, data }`; failures `{ ok: <negative code>, errorMsg }` with a 4xx status. ' +
+          'Marchlands game server, based on Evony Age 1. Successful calls answer `{ ok: 1, data }`; failures `{ ok: <negative code>, error: { code, params } }` with a 4xx status: a message code the client words in the language the player chose. ' +
           'Live updates (`server.*` pushes of the original protocol) arrive on the WebSocket at `/ws?token=...` as `{ cmd, data }`.',
       },
       components: { securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' } } },
@@ -78,7 +79,7 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     const token = (req.query as Record<string, string>).token;
     const claims = token ? verifyToken(token, config.jwtSecret) : null;
     if (!claims || !gateway) {
-      sendPush(socket, { cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: 'Not logged in.' } });
+      sendPush(socket, { cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: msg('auth.notLoggedIn') } });
       socket.close(4001, 'unauthorized');
       return;
     }
@@ -87,7 +88,7 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     try {
       playerId = await playerIdOf(db, req);
     } catch {
-      sendPush(socket, { cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: 'need create player' } });
+      sendPush(socket, { cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: msg('auth.needPlayer') } });
       socket.close(4004, 'no player');
       return;
     }

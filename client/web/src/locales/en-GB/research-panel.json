@@ -1,0 +1,30 @@
+{
+  "title": "Research",
+  "needsAcademy": "Build an Academy to research technologies.",
+  "started": "Research started",
+  "allDone": {
+    "title": "All research complete",
+    "description": "Every one of the {{total}} technologies is at its maximum level."
+  },
+  "academy": {
+    "title": "Academy · researching {{busy}}/{{slots}}",
+    "full": "Every research slot is busy: wait for one to finish or speed it up.",
+    "slots_one": "This city can research {{count}} technology at a time.",
+    "slots_other": "This city can research {{count}} technologies at the same time."
+  },
+  "job": {
+    "progress": "{{name}} → Lv {{level}}",
+    "elsewhere": "(in another city)",
+    "cancelled": "{{name}} research cancelled"
+  },
+  "mayor": {
+    "hint": "Research times include mayor {{name}}'s Intelligence {{intelligence}}: −{{cut}}%. A mayor with higher Intelligence researches faster.",
+    "none": "No mayor: appoint one with high Intelligence in the Heroes tab to research faster."
+  },
+  "tech": {
+    "effective": "(effective {{level}})",
+    "research": "Research",
+    "capped": " (capped by Academy Lv {{level}})",
+    "needsAcademy": " (needs Academy Lv {{level}} to take effect)"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "toast": {
+    "hired": "英雄を雇用しました",
+    "rerolled": "酒場に新しい英雄が来ました",
+    "mayorAppointed": "市長を任命しました",
+    "renamed": "英雄の名前を変更しました",
+    "dismissed": "英雄を解雇しました",
+    "levelUp": "{{name}} がレベル {{level}} に到達しました",
+    "levelUpMulti": "{{name}} がレベル {{level}} に到達しました（+{{levels}} レベル、+{{levels}} ポイント）"
+  },
+  "mayor": {
+    "bonus": "市長ボーナス 生産 +{{pct}}% · {{rate}}",
+    "asMayor": "市長なら: 生産 +{{pct}}% · {{rate}}",
+    "versus": "（{{name}} 比 {{diff}}）"
+  },
+  "status": {
+    "idle": "待機中",
+    "mayor": "市長",
+    "marching": "行軍中",
+    "captive": "捕虜",
+    "returning": "帰還中"
+  },
+  "heroes": {
+    "title": "英雄一覧",
+    "description": "宴会場を建てると、都市に置ける英雄の数が増えます。",
+    "empty": "英雄はまだいません。酒場で雇用しましょう。",
+    "moveUp": "{{name}} を上へ移動",
+    "moveDown": "{{name}} を下へ移動",
+    "points": "ポイント",
+    "pointsCount": "ポイント（{{points}}）",
+    "items": "アイテム",
+    "locked": "ロック中",
+    "lock": "ロック",
+    "levelUp": "レベルアップ",
+    "levelUpMulti": "レベルアップ ×{{times}} → Lv {{level}}",
+    "makeMayor": "市長に任命",
+    "dismiss": "解雇",
+    "lockedHint": "ロック中: 解雇するにはロックを解除してください"
+  },
+  "inn": {
+    "title": "酒場",
+    "noInn": "英雄を雇うには酒場を建設してください。",
+    "newOffers": "新しい候補（{{gold}} 金）",
+    "hire": "雇用",
+    "freeSlots_other": "英雄枠の空き: {{count}}"
+  },
+  "heroRow": {
+    "nameLabel": "英雄の名前",
+    "saveName": "名前を保存",
+    "rename": "{{name}} の名前を変更"
+  },
+  "attributes": {
+    "strongest": "最も高い能力: {{label}}",
+    "loyalty": "忠誠 {{loyalty}}",
+    "points_other": "{{count}} ポイント"
+  },
+  "expBar": {
+    "maxLevel": "最大レベル {{level}}: 今後は装備で成長します",
+    "label": "経験値",
+    "ready": "レベルアップ可能",
+    "readyMulti": "{{times}} 回レベルアップ可能",
+    "progress": "経験値 {{exp}} / {{needed}} · Lv {{next}} まで {{left}}"
+  },
+  "buffs": {
+    "active": "{{label}} +{{amount}} · 残り {{time}}"
+  },
+  "dismissDialog": {
+    "title": "{{name}} を解雇しますか？",
+    "description": "{{name}}（Lv {{level}}、攻 {{att}} · 政 {{pol}} · 知 {{int}}）は都市を永久に去ります。この操作は取り消せません。",
+    "keep": "{{name}} を残す",
+    "confirm": "解雇"
+  }
+}

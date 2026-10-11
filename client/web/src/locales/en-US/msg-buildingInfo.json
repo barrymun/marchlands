@@ -1,0 +1,6 @@
+{
+  "effect": {
+    "field_one": "{{amount}} {{resource}}/h at full labor, +{{storage}} storage, employs {{count, number}} worker",
+    "field_other": "{{amount}} {{resource}}/h at full labor, +{{storage}} storage, employs {{count, number}} workers"
+  }
+}

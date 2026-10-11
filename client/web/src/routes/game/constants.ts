@@ -1,13 +1,25 @@
+import { i18n } from '@/lib/i18n';
+
+const tab = <const Id extends 'buildings' | 'military' | 'heroes' | 'research' | 'items' | 'market' | 'armies' | 'reports' | 'map' | 'flows' | 'stats'>(
+  id: Id,
+) => ({
+  id,
+  /** in the current locale */
+  get label() {
+    return i18n.t(`game:tabs.${id}`);
+  },
+});
+
 export const TABS = [
-  { id: 'buildings', label: 'City' },
-  { id: 'military', label: 'Military' },
-  { id: 'heroes', label: 'Heroes' },
-  { id: 'research', label: 'Research' },
-  { id: 'items', label: 'Items' },
-  { id: 'market', label: 'Market' },
-  { id: 'armies', label: 'Armies' },
-  { id: 'reports', label: 'Reports' },
-  { id: 'map', label: 'Map' },
-  { id: 'flows', label: 'Flows' },
-  { id: 'stats', label: 'Stats' },
+  tab('buildings'),
+  tab('military'),
+  tab('heroes'),
+  tab('research'),
+  tab('items'),
+  tab('market'),
+  tab('armies'),
+  tab('reports'),
+  tab('map'),
+  tab('flows'),
+  tab('stats'),
 ] as const;

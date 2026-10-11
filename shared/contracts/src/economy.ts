@@ -1,6 +1,7 @@
 // Market, shop, quests, rankings, static game configuration and operator tools:
 // /config/static, /market*, /shop*, /quests*, /rankings/*, /admin/*.
 
+import { MessageSchema } from '@marchlands/core';
 import { z } from 'zod';
 import { Ms, zId, zPaging, zResources } from './common.ts';
 import { AllianceRow, CityRow, HeroRow, MarketOrderRow, MarketShipmentRow, PlayerRow, QuestProgressRow } from './rows.ts';
@@ -67,18 +68,16 @@ export type ConfigTroop = z.infer<typeof ConfigTroop>;
 
 const itemConfig = z.object({
   legacyId: int(),
-  id: z.string(),
-  name: z.string(),
+  id: z.string().describe('item id; the client names it (data-items)'),
   goldPrice: int().nullable().describe('price in city gold (null: not for sale)'),
-  type: int(),
+  type: int().describe('shop category id; the client names it (data-item-categories)'),
   dayLimit: int(),
   rarity: int(),
-  category: z.string(),
-  description: z.string(),
+  description: MessageSchema.describe('what the item does (`itemInfo.*`), worded by the client'),
   use: z
     .enum(['direct', 'elsewhere', 'none'])
     .describe('direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect'),
-  howTo: z.string().optional(),
+  howTo: MessageSchema.optional().describe('where to use an item consumed by another action (`itemInfo.howTo.*`)'),
 });
 
 export const ConfigItem = itemConfig.meta({ id: 'ConfigItem' });
@@ -89,8 +88,6 @@ export const ConfigQuestGroup = z
     id: int(),
     mainId: int(),
     isFinish: z.boolean(),
-    description: z.string(),
-    name: z.string(),
     typeId: int(),
     requires: z.object({ buildings: z.array(int()), items: z.array(int()), techs: z.array(int()), quests: z.array(int()) }),
   })
@@ -99,8 +96,7 @@ export type ConfigQuestGroup = z.infer<typeof ConfigQuestGroup>;
 
 export const ConfigTitle = z
   .object({
-    id: int(),
-    name: z.string(),
+    id: int().describe('title id; the client names it (data-titles)'),
     maxCities: int().describe('cities a lord with this title may own'),
     prestige: int().describe('prestige required to be promoted to this title'),
     medals: z.record(z.string(), int()).describe('medals consumed by the promotion (item id -> count)'),
@@ -196,9 +192,6 @@ export const StaticConfig = z
   .object({
     gameSpeed: z.number().describe('timer multiplier (GAME_SPEED)'),
     mapSize: int(),
-    states: z.array(z.string()).readonly().describe('state (zone) names by zone id'),
-    buildingNames: z.record(z.number().int(), z.string()).describe('by building typeId'),
-    techNames: z.record(z.number().int(), z.string()).describe('by techId'),
     buildings: z.array(ConfigBuildingLevel).describe('one row per typeId and level'),
     research: z.array(ConfigResearchLevel).describe('one row per techId and level'),
     troops: z.array(ConfigTroop),
@@ -258,7 +251,6 @@ export const MarketOrder = MarketOrderRow.pick({ id: true, resType: true, price:
   .extend({
     resourceName,
     tradeType: MarketOrderRow.shape.side.describe('0 buy, 1 sell'),
-    tradeTypeName: z.string().describe('Bid | Offer'),
     dealedTotal: MarketOrderRow.shape.filled.describe('amount filled so far'),
   })
   .meta({ id: 'MarketOrder' });
@@ -321,12 +313,14 @@ export const GoldShopBuyResult = z
   .meta({ id: 'GoldShopBuyResult' });
 
 export const ShopItem = itemConfig
-  .pick({ id: true, name: true, dayLimit: true })
+  .pick({ id: true, dayLimit: true })
   .extend({ price: int().describe('city gold') })
   .meta({ id: 'ShopItem' });
 export type ShopItem = z.infer<typeof ShopItem>;
 
-export const ShopCategory = z.object({ typeId: int(), typeName: z.string(), items: z.array(ShopItem) }).meta({ id: 'ShopCategory' });
+export const ShopCategory = z
+  .object({ typeId: int().describe('item category id; the client names it (data-item-categories)'), items: z.array(ShopItem) })
+  .meta({ id: 'ShopCategory' });
 export type ShopCategory = z.infer<typeof ShopCategory>;
 
 // ---- quests ----
@@ -340,7 +334,7 @@ export const QuestAward = z
   .meta({ id: 'QuestAward' });
 export type QuestAward = z.infer<typeof QuestAward>;
 
-export const QuestGroupStatus = ConfigQuestGroup.pick({ typeId: true, name: true, description: true })
+export const QuestGroupStatus = ConfigQuestGroup.pick({ id: true, typeId: true })
   .extend({ isFinish: z.boolean().describe('the group has finished quests whose award is not claimed yet') })
   .meta({ id: 'QuestGroupStatus' });
 export type QuestGroupStatus = z.infer<typeof QuestGroupStatus>;
@@ -349,9 +343,8 @@ export const QuestBean = z
   .object({
     questId: QuestProgressRow.shape.questId,
     groupId: int().describe('QuestGroupStatus.typeId'),
-    name: z.string(),
-    description: z.string(),
-    targets: z.array(z.object({ name: z.string(), finished: z.boolean() })),
+    description: MessageSchema.describe('`questInfo.description.*`, worded by the client (the quest is named by its id)'),
+    targets: z.array(z.object({ text: MessageSchema.describe('`questInfo.target.*`, worded by the client'), finished: z.boolean() })),
     award: QuestAward,
     isFinish: z.boolean().describe('all targets met (or already claimed)'),
     claimed: z.boolean(),
@@ -380,7 +373,7 @@ export const RankingPlayerEntry = PlayerRow.pick({ id: true, flag: true, faceUrl
     population: PlayerRow.shape.population,
     castleCount: int(),
     alliance: z.string().describe('alliance name, empty when none'),
-    allianceLevel: z.string().describe('rank name inside the alliance, empty when none'),
+    allianceRank: int().nullable().describe('rank inside the alliance (4 Host … 8 Member), null when none'),
   })
   .meta({ id: 'RankingPlayerEntry' });
 export type RankingPlayerEntry = z.infer<typeof RankingPlayerEntry>;

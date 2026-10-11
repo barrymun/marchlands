@@ -4,12 +4,30 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type GameRefInput = {
+    ref: 'troop' | 'building' | 'tech' | 'item' | 'title' | 'tile' | 'resource' | 'stat' | 'zone' | 'rank' | 'gear' | 'itemCategory';
+    id: number | string;
+};
+
+export type MsgDurationInput = {
+    duration: number;
+};
+
+export type MsgParamInput = string | number | boolean | GameRefInput | MsgDurationInput | MessageInput | Array<MsgParamInput>;
+
+export type MessageInput = {
+    code: 'common.legacyText' | 'common.invalidRequest' | 'common.serverError' | 'common.requestFailed' | 'common.routeNotFound' | 'common.notAllowed' | 'common.adminsOnly' | 'common.invalidData' | 'common.invalidAmount' | 'common.invalidCastle' | 'common.invalidCoordinates' | 'common.invalidTroopType' | 'common.invalidTroopCount' | 'common.unknownTroopType' | 'common.noTroopsSelected' | 'common.notEnoughResources' | 'common.notEnoughGold' | 'common.notEnoughGoldFor' | 'common.insufficientItems' | 'common.playerNotFound' | 'common.playerNamedNotFound' | 'common.cityNotFound' | 'common.heroNotFound' | 'common.playerName' | 'common.cityName' | 'common.heroName' | 'common.name' | 'common.nameLength' | 'common.nameInvalid' | 'common.nameNotAllowed' | 'common.freeSpeedupTooEarly' | 'common.invalidSpeedup' | 'auth.notLoggedIn' | 'auth.needPlayer' | 'auth.wrongPassword' | 'auth.alreadyRegistered' | 'auth.accountNotFound' | 'auth.banned' | 'questInfo.description.upgrade' | 'questInfo.description.upgradeAny' | 'questInfo.description.field' | 'questInfo.description.ownFields' | 'questInfo.description.cottage' | 'questInfo.description.rallySpot' | 'questInfo.description.barracks' | 'questInfo.description.warehouse' | 'questInfo.description.academy' | 'questInfo.description.walls' | 'questInfo.description.embassy' | 'questInfo.description.inn' | 'questInfo.description.feastingHall' | 'questInfo.description.research' | 'questInfo.description.appointMayor' | 'questInfo.description.taxRate' | 'questInfo.description.joinAlliance' | 'questInfo.description.sendMail' | 'questInfo.description.recruitHero' | 'questInfo.description.train' | 'questInfo.description.fortify' | 'questInfo.description.secondCity' | 'questInfo.description.occupyValley' | 'questInfo.description.population' | 'questInfo.description.prestige' | 'questInfo.target.building' | 'questInfo.target.buildings' | 'questInfo.target.research' | 'questInfo.target.troops' | 'questInfo.target.heroes' | 'questInfo.target.mayor' | 'questInfo.target.alliance' | 'questInfo.target.cities' | 'questInfo.target.valleys' | 'questInfo.target.prestige' | 'questInfo.target.population' | 'questInfo.target.taxRate' | 'questInfo.target.mailSent' | 'questInfo.target.friend' | 'itemInfo.period.days' | 'itemInfo.period.hours' | 'itemInfo.period.minutes' | 'itemInfo.speedup.time' | 'itemInfo.speedup.hours' | 'itemInfo.speedup.percent' | 'itemInfo.speedup.troopBatch' | 'itemInfo.speedup.fortBatch' | 'itemInfo.loyalty' | 'itemInfo.heroStat' | 'itemInfo.experience.share' | 'itemInfo.experience.level' | 'itemInfo.holyWater' | 'itemInfo.buff' | 'itemInfo.grant' | 'itemInfo.grantCity' | 'itemInfo.contents.item' | 'itemInfo.contents.amount' | 'itemInfo.chest' | 'itemInfo.key' | 'itemInfo.medalBox' | 'itemInfo.randomBox' | 'itemInfo.civilCode' | 'itemInfo.cureInjured' | 'itemInfo.heroBox' | 'itemInfo.teleporter' | 'itemInfo.truce' | 'itemInfo.notUsable' | 'itemInfo.noEffect' | 'itemInfo.howTo.speedup' | 'itemInfo.howTo.troopsSpeedup' | 'itemInfo.howTo.fortificationsSpeedup' | 'itemInfo.howTo.cityMove' | 'itemInfo.howTo.heroesReset' | 'itemInfo.howTo.heroesUseItem' | 'itemInfo.howTo.cityTruce' | 'itemInfo.howTo.key' | 'itemInfo.howTo.newbies' | 'troopInfo.worker' | 'troopInfo.warrior' | 'troopInfo.scout' | 'troopInfo.pikeman' | 'troopInfo.swordsman' | 'troopInfo.archer' | 'troopInfo.transporter' | 'troopInfo.cavalry' | 'troopInfo.cataphract' | 'troopInfo.ballista' | 'troopInfo.batteringRam' | 'troopInfo.catapult' | 'troopInfo.trap' | 'troopInfo.abatis' | 'troopInfo.archerTower' | 'troopInfo.rollingLog' | 'troopInfo.trebuchet' | 'techInfo.summary.resource' | 'techInfo.summary.stockpile' | 'techInfo.summary.construction' | 'techInfo.summary.militaryScience' | 'techInfo.summary.metalCasting' | 'techInfo.summary.heroEnhancement' | 'techInfo.summary.militaryTradition' | 'techInfo.summary.ironWorking' | 'techInfo.summary.medicine' | 'techInfo.summary.archery' | 'techInfo.summary.compass' | 'techInfo.summary.horsebackRiding' | 'techInfo.summary.logistics' | 'techInfo.summary.informatics' | 'techInfo.summary.none' | 'techInfo.effect.resource' | 'techInfo.effect.stockpile' | 'techInfo.effect.construction' | 'techInfo.effect.militaryScience' | 'techInfo.effect.metalCasting' | 'techInfo.effect.heroEnhancement' | 'techInfo.effect.militaryTradition' | 'techInfo.effect.ironWorking' | 'techInfo.effect.medicine' | 'techInfo.effect.archery' | 'techInfo.effect.compass' | 'techInfo.effect.horsebackRiding' | 'techInfo.effect.logistics' | 'techInfo.effect.informaticsHeroes' | 'techInfo.effect.informaticsBuildings' | 'buildingInfo.summary.townHall' | 'buildingInfo.summary.walls' | 'buildingInfo.summary.cottage' | 'buildingInfo.summary.field' | 'buildingInfo.summary.warehouse' | 'buildingInfo.summary.barracks' | 'buildingInfo.summary.academy' | 'buildingInfo.summary.inn' | 'buildingInfo.summary.feastingHall' | 'buildingInfo.summary.rallySpot' | 'buildingInfo.summary.marketplace' | 'buildingInfo.summary.reliefStation' | 'buildingInfo.summary.beaconTower' | 'buildingInfo.summary.embassy' | 'buildingInfo.summary.prerequisite' | 'buildingInfo.placement.unique' | 'buildingInfo.placement.inside' | 'buildingInfo.placement.insideLimited' | 'buildingInfo.placement.outside' | 'buildingInfo.placement.outsideLimited' | 'buildingInfo.effect.townHall' | 'buildingInfo.effect.walls' | 'buildingInfo.effect.cottage' | 'buildingInfo.effect.field' | 'buildingInfo.effect.warehouse' | 'buildingInfo.effect.barracks' | 'buildingInfo.effect.academy' | 'buildingInfo.effect.inn' | 'buildingInfo.effect.feastingHall' | 'buildingInfo.effect.rallySpot' | 'buildingInfo.effect.marketplace' | 'buildingInfo.effect.reliefStation' | 'buildingInfo.effect.beaconTroops' | 'buildingInfo.effect.beaconHeroes' | 'buff.production' | 'buff.goldIncome' | 'buff.troopAttack' | 'buff.troopDefense' | 'buff.armySize' | 'buff.buildingQueue' | 'buff.upkeep' | 'buff.trainingCost' | 'buff.truce' | 'buff.truceCooldown' | 'buff.teleportCooldown' | 'buff.holiday' | 'buff.heroStat' | 'buff.homeCity' | 'flow.nameLength' | 'flow.actionCount' | 'flow.invalidAction' | 'flow.chooseArmy' | 'flow.targetsOwnCities' | 'flow.chooseCities' | 'flow.notFound' | 'flow.runningLocked' | 'flow.tooMany' | 'flow.noMayorHero' | 'flow.cannotTrain' | 'flow.req.level' | 'flow.req.item' | 'flow.alreadyQueued' | 'flow.alreadyRunning' | 'flow.noHeroCities' | 'flow.chooseCity' | 'flow.noOwnCities' | 'flow.cityFailed' | 'flow.runFailed' | 'flow.failedCity' | 'flow.stopped' | 'flow.healDone' | 'flow.healFailed' | 'flow.action.setMayor' | 'flow.action.healResources' | 'flow.action.healHonour' | 'flow.action.healResourcesHome' | 'flow.action.healHonourHome' | 'flow.action.waitArmiesHome' | 'flow.action.wait' | 'flow.action.attack' | 'flow.action.attackFrom' | 'flow.action.train' | 'flow.action.trainMax' | 'flow.cityCount' | 'flow.resourceAmount' | 'flow.step.noTargets' | 'flow.step.armyGone' | 'flow.step.noArmy' | 'flow.step.sent' | 'flow.step.noInjured' | 'flow.step.healed' | 'flow.step.healedHonour' | 'flow.step.healScheduled' | 'flow.step.alreadyMayor' | 'flow.step.mayor' | 'flow.step.noBarracksRoom' | 'flow.step.cannotAfford' | 'flow.step.training' | 'flow.step.trainingDone' | 'flow.step.trainingPartial' | 'flow.step.trainingPartialDone' | 'flow.step.noArmiesOut' | 'flow.step.waiting' | 'flow.step.moreActions' | 'flow.step.runEnds' | 'flow.target.sent' | 'flow.target.noIdleHero' | 'flow.target.notEnoughTroops' | 'flow.target.refused' | 'flow.skipNoHero' | 'quest.notFound' | 'quest.alreadyClaimed' | 'quest.notFinished' | 'quest.dailyGiftClaimed' | 'world.noOpenFlat' | 'world.invalidArea' | 'world.areaTooLarge' | 'world.invalidTile' | 'world.position.city' | 'world.position.tile' | 'world.position.place' | 'mail.toSelf' | 'mail.titleAndContentRequired' | 'mail.notFound' | 'social.selfTarget' | 'social.emptyMessage' | 'social.messageTooLong' | 'social.muted' | 'social.notInAlliance' | 'item.notForSale' | 'item.dailyLimit' | 'item.cannotUse' | 'item.useFrom.speedup' | 'item.useFrom.hero' | 'item.useFrom.elsewhere' | 'item.chooseCity' | 'item.needKey' | 'market.invalidResource' | 'market.invalidSide' | 'market.invalidPrice' | 'market.needMarketplace' | 'market.nothingToTrade' | 'market.tooManyOrders' | 'market.notEnoughResource' | 'market.orderNotFound' | 'market.shipmentNotFound' | 'research.notResearching' | 'research.noResearch' | 'research.chooseResearch' | 'research.queueFull' | 'research.alreadyResearching' | 'training.wallsNeeded' | 'training.invalidBarracks' | 'training.queueFull' | 'training.allQueuesFull' | 'training.wallSpaceFull' | 'training.notEnoughPopulation' | 'training.orderLimit' | 'training.duplicateOrder' | 'training.fortsAtWalls' | 'training.batchNotFound' | 'training.invalidFort' | 'training.notEnoughUnits' | 'training.notEnoughInjured' | 'training.notEnoughHonor' | 'admin.broadcast' | 'admin.unknownItem' | 'admin.invalidLevel' | 'player.accountExists' | 'player.nameTaken' | 'player.sameName' | 'player.renameCooldown' | 'player.sameGender' | 'player.genderCooldown' | 'player.invalidSetting' | 'player.invalidFlag' | 'player.title.highest' | 'player.title.prestigeRequired' | 'player.title.notEnoughMedals' | 'player.holiday.invalidDays' | 'player.holiday.troopsOut' | 'player.truce.cooldown' | 'player.protected.beginner' | 'player.protected.truce' | 'player.protected.holiday' | 'player.bookmark.tooMany' | 'player.preset.nameLength' | 'player.preset.tooMany' | 'player.mail.protectionExpired.title' | 'player.mail.protectionExpired.content' | 'city.taxRateRange' | 'city.workRateRange' | 'city.invalidStorePercent' | 'city.storePercentTotal' | 'city.comfortCooldown' | 'city.notEnoughFood' | 'city.invalidComfortType' | 'city.invalidLogo' | 'city.teleportCooldown' | 'city.recallTroopsFirst' | 'city.foreignTroops' | 'city.notFreeFlat' | 'building.invalidBuilding' | 'building.notFound' | 'building.invalidPosition' | 'building.cannotBuild' | 'building.cannotBuildHere' | 'building.positionTaken' | 'building.limitReached' | 'building.slotLocked' | 'building.queuesBusy' | 'building.requirementsNotMet' | 'building.statusChanged' | 'building.maxLevel' | 'building.busy' | 'building.nothingToDemolish' | 'building.cannotDemolish' | 'building.notInProgress' | 'building.invalidTech' | 'building.academyNeeded' | 'building.techRequirementsNotMet' | 'building.troopRequirementsNotMet' | 'hero.needInn' | 'hero.noVacancy' | 'hero.notIdle' | 'hero.locked' | 'hero.noMayor' | 'hero.invalidPoints' | 'hero.maxLevel' | 'hero.maxLevelNoExperience' | 'hero.notEnoughExperience' | 'hero.invalidAttribute' | 'hero.invalidGearPiece' | 'hero.gearMaxStars' | 'hero.gearStarLimit' | 'hero.notEnoughMedals' | 'hero.fullyLoyal' | 'hero.itemNotForGold' | 'hero.invalidItem' | 'hero.notPrisoner' | 'hero.stillLoyal' | 'report.title.missionAborted' | 'report.title.scoutReturned' | 'report.title.attackReturned' | 'report.title.returned' | 'report.title.transportReport' | 'report.title.transportReceived' | 'report.title.reinforcementArrived' | 'report.title.reinforcementsFrom' | 'report.title.newCityFounded' | 'report.title.scoutReport' | 'report.title.enemyScouts' | 'report.title.scoutsRepelled' | 'report.title.attackSucceeded' | 'report.title.attackFailed' | 'report.title.cityAttacked' | 'report.title.attackRepelled' | 'report.title.reinforcementsFought' | 'report.title.valleyOccupied' | 'report.title.valleyLost' | 'report.title.valleyDefended' | 'report.title.tradeCompleted' | 'report.title.troopsDeserted' | 'report.notFound' | 'report.oldFormat' | 'report.cityFounded' | 'army.invalidMission' | 'army.insufficientTroops' | 'army.overloaded' | 'army.rallySpotRequired' | 'army.armyLimit' | 'army.troopLimit' | 'army.invalidTarget' | 'army.transportTarget' | 'army.noResources' | 'army.reinforceTarget' | 'army.alliedTroopsRefused' | 'army.scoutsRequired' | 'army.beginnerProtection' | 'army.truce' | 'army.nothingToAttack' | 'army.buildOnFlat' | 'army.cityLimit' | 'army.newCityResources' | 'army.heroRequiredAttack' | 'army.heroRequiredSettlers' | 'army.notFound' | 'army.alreadyReturning' | 'army.unknownMission' | 'army.destinationNotFriendly' | 'army.valleyNoLongerHeld' | 'army.landNotFree' | 'army.cityGone' | 'army.cityNowFriendly' | 'army.valleyAlreadyHeld' | 'army.valleyNowFriendly' | 'army.homeCityGone' | 'army.valleyLimit' | 'army.valleyNotHeld' | 'army.upgradeTarget' | 'army.upgradeHeld' | 'army.valleyMaxLevel' | 'army.barbarianCityMaxLevel' | 'alliance.name' | 'alliance.notFound' | 'alliance.namedNotFound' | 'alliance.nameTaken' | 'alliance.notMember' | 'alliance.alreadyMember' | 'alliance.rankTooLow' | 'alliance.full' | 'alliance.rejoinCooldown' | 'alliance.hostMustTransfer' | 'alliance.playerInOtherAlliance' | 'alliance.inviteNotFound' | 'alliance.applicationNotFound' | 'alliance.notApplied' | 'alliance.buildingRequired' | 'alliance.invalidRank' | 'alliance.memberNotFound' | 'alliance.ownRank' | 'alliance.rankLimit' | 'alliance.hostToViceHostOnly' | 'alliance.kickSelf' | 'alliance.kickHigherRank' | 'alliance.invalidRelation' | 'alliance.invalidTarget' | 'alliance.alreadyRelation' | 'alliance.warCooldown' | 'alliance.invited' | 'alliance.warDeclared' | 'alliance.event.created' | 'alliance.event.joined' | 'alliance.event.left' | 'alliance.event.applied' | 'alliance.event.promoted' | 'alliance.event.demoted' | 'alliance.event.newHost' | 'alliance.event.removed' | 'alliance.event.relationSet' | 'alliance.relation.ally' | 'alliance.relation.neutral' | 'alliance.relation.enemy';
+    params?: {
+        [key: string]: MsgParamInput;
+    };
+};
+
 export type ErrorResponseInput = {
     /**
      * negative error code (the original server codes)
      */
     ok: number;
-    errorMsg: string;
+    error: MessageInput;
     issues?: Array<{
         path: string;
         message?: string;
@@ -39,7 +57,6 @@ export type BuildingBeanInput = {
     status: 0 | 1 | 2;
     startTime: number;
     endTime: number;
-    name: string;
 };
 
 export type HeroBeanInput = {
@@ -79,7 +96,10 @@ export type HeroBeanInput = {
      */
     buffs: Array<{
         id: 'power' | 'management' | 'stratagem' | 'homeCity';
-        desc: string;
+        /**
+         * what the boost does (`buff.*`), worded by the client
+         */
+        desc: MessageInput;
         /**
          * epoch milliseconds
          */
@@ -216,7 +236,10 @@ export type CityBeanInput = {
     fieldId: number;
     x: number;
     y: number;
-    zoneName: string;
+    /**
+     * zone (state) id; the client names it
+     */
+    zoneId: number;
     status: number;
     allowAlliance: boolean;
     goOutForBattle: boolean;
@@ -244,8 +267,10 @@ export type PlayerInfoInput = {
     userName: string;
     prestige: number;
     honor: number;
+    /**
+     * nobility title (named by the client)
+     */
     titleId: number;
-    titleName: string;
     ranking: number;
     honorRank: number;
     alliance: string;
@@ -273,7 +298,10 @@ export type ItemCountInput = {
 
 export type BuffBeanInput = {
     id: 'FoodProductionBuff' | 'WoodProductionBuff' | 'StoneProductionBuff' | 'IronProductionBuff' | 'GoldProductionBuff' | 'AttackBuff' | 'DefenseBuff' | 'WarEnsignBuff' | 'BuildingQueueBuff' | 'UpkeepReduceBuff' | 'TrainCostReduceBuff' | 'PlayerPeaceBuff' | 'PlayerPeaceCoolDownBuff' | 'MoveCastleCoolDownBuff' | 'FurloughBuff';
-    desc: string;
+    /**
+     * what the buff does (`buff.*`), worded by the client
+     */
+    desc: MessageInput;
     /**
      * epoch milliseconds
      */
@@ -293,8 +321,14 @@ export type ArmyBeanInput = {
     startTime: number;
     reachTime: number;
     restTime: number;
-    startPosName: string;
-    targetPosName: string;
+    /**
+     * where the army set out from (`world.position.*`)
+     */
+    startPosName: MessageInput;
+    /**
+     * where the army is headed (`world.position.*`)
+     */
+    targetPosName: MessageInput;
     armyId: number;
     king: string;
     hero: string;
@@ -402,7 +436,10 @@ export type MapCastleInput = {
     id: number;
     x: number;
     y: number;
-    name: string;
+    /**
+     * the city's name; absent for a barbarian city (named by the client from its tile type)
+     */
+    name?: string;
     npc: boolean;
     level: number;
     cityId?: number;
@@ -425,7 +462,10 @@ export type MapCastleInput = {
      * beginner protection
      */
     furlough?: boolean;
-    zoneName: string;
+    /**
+     * zone (state) id; the client names it
+     */
+    zoneId: number;
     canLoot: boolean;
     canOccupy: boolean;
     canScout: boolean;
@@ -482,8 +522,10 @@ export type MapFieldTileInfoInput = {
     level: number;
     x: number;
     y: number;
-    zoneName: 'FRIESLAND' | 'SAXONY' | 'NORTH MARCH' | 'BOHEMIA' | 'LOWER LORRAINE' | 'FRANCONIA' | 'THURINGIA' | 'MORAVIA' | 'UPPER LORRAINE' | 'SWABIA' | 'BAVARIA' | 'CARINTHIA' | 'BURGUNDY' | 'LOMBARDY' | 'TUSCANY' | 'ROMAGNA' | 'UNKNOWN';
-    name: string;
+    /**
+     * zone (state) id; the client names it
+     */
+    zoneId: number;
     npc: boolean;
     /**
      * controlling city of an occupied valley / captured NPC city
@@ -511,7 +553,10 @@ export type MapFieldCastleInfoInput = {
     id: number;
     x: number;
     y: number;
-    name: string;
+    /**
+     * the city's name; absent for a barbarian city (named by the client from its tile type)
+     */
+    name?: string;
     npc: boolean;
     level: number;
     cityId?: number;
@@ -534,7 +579,10 @@ export type MapFieldCastleInfoInput = {
      * beginner protection
      */
     furlough?: boolean;
-    zoneName: string;
+    /**
+     * zone (state) id; the client names it
+     */
+    zoneId: number;
     canLoot: boolean;
     canOccupy: boolean;
     canScout: boolean;
@@ -595,8 +643,10 @@ export type AuthAccountInput = {
 };
 
 export type ZoneStatsInput = {
+    /**
+     * zone (state) id; the client names it
+     */
     id: number;
-    name: string;
     playerCount: number;
     castleCount: number;
     openFlats: number;
@@ -681,7 +731,7 @@ export type FlowActionInput = {
 export type FlowSkippedCityInput = {
     cityId: number;
     cityName: string;
-    reason: string;
+    reason: MessageInput;
 };
 
 export type FlowRunLogInput = {
@@ -704,11 +754,17 @@ export type FlowRunLogInput = {
          * false: an action failed and everything the flow did in this city since the last wait was rolled back
          */
         ok: boolean;
-        error: string | null;
+        /**
+         * the failure that rolled back this city's part of the run
+         */
+        error: MessageInput | null;
         steps: Array<{
-            action: string;
+            action: MessageInput;
             ok: boolean;
-            detail: string;
+            /**
+             * what happened, or why it failed
+             */
+            detail: MessageInput;
             /**
              * the city could not do it right now (e.g. nothing affordable to train); the run carried on
              */
@@ -717,9 +773,12 @@ export type FlowRunLogInput = {
              * per-target outcomes (attack actions)
              */
             items?: Array<{
+                /**
+                 * the target, as "(x,y)"
+                 */
                 label: string;
                 ok: boolean;
-                detail: string;
+                detail: MessageInput;
             }>;
         }>;
     }>;
@@ -741,11 +800,17 @@ export type FlowPreviewLogInput = {
          * false: an action failed and everything the flow did in this city since the last wait was rolled back
          */
         ok: boolean;
-        error: string | null;
+        /**
+         * the failure that rolled back this city's part of the run
+         */
+        error: MessageInput | null;
         steps: Array<{
-            action: string;
+            action: MessageInput;
             ok: boolean;
-            detail: string;
+            /**
+             * what happened, or why it failed
+             */
+            detail: MessageInput;
             /**
              * the city could not do it right now (e.g. nothing affordable to train); the run carried on
              */
@@ -754,9 +819,12 @@ export type FlowPreviewLogInput = {
              * per-target outcomes (attack actions)
              */
             items?: Array<{
+                /**
+                 * the target, as "(x,y)"
+                 */
                 label: string;
                 ok: boolean;
-                detail: string;
+                detail: MessageInput;
             }>;
         }>;
     }>;
@@ -797,7 +865,7 @@ export type FlowInput = {
     /**
      * why the flow stopped on its own (a failed run; repeat was switched off)
      */
-    stopReason: string | null;
+    stopReason: MessageInput | null;
     lastRun: FlowRunLogInput | null;
     /**
      * the latest preview, until the flow runs, is edited or repeat is switched
@@ -821,11 +889,17 @@ export type FlowRunReportInput = {
          * false: an action failed and everything the flow did in this city since the last wait was rolled back
          */
         ok: boolean;
-        error: string | null;
+        /**
+         * the failure that rolled back this city's part of the run
+         */
+        error: MessageInput | null;
         steps: Array<{
-            action: string;
+            action: MessageInput;
             ok: boolean;
-            detail: string;
+            /**
+             * what happened, or why it failed
+             */
+            detail: MessageInput;
             /**
              * the city could not do it right now (e.g. nothing affordable to train); the run carried on
              */
@@ -834,9 +908,12 @@ export type FlowRunReportInput = {
              * per-target outcomes (attack actions)
              */
             items?: Array<{
+                /**
+                 * the target, as "(x,y)"
+                 */
                 label: string;
                 ok: boolean;
-                detail: string;
+                detail: MessageInput;
             }>;
         }>;
     }>;
@@ -848,7 +925,8 @@ export type FlowRunReportInput = {
 
 export type CastleSignInput = {
     tileId: number;
-    name: string;
+    type: number;
+    name?: string;
     x: number;
     y: number;
 };
@@ -976,8 +1054,10 @@ export type PublicPlayerInfoInput = {
     userName: string;
     prestige: number;
     honor: number;
+    /**
+     * nobility title (named by the client)
+     */
     titleId: number;
-    titleName: string;
     ranking: number;
     honorRank: number;
     alliance: string;
@@ -1013,8 +1093,10 @@ export type PublicPlayerInfoInput = {
 };
 
 export type TitlePromotionInput = {
+    /**
+     * nobility title (named by the client)
+     */
     titleId: number;
-    titleName: string;
 };
 
 export type GrantContentsInput = {
@@ -1067,9 +1149,9 @@ export type LordStatisticsInput = {
     cities: Array<{
         cityId: number;
         /**
-         * the city's name, or 'Former city' when the lord no longer holds it
+         * the city's name; null when the player no longer holds it
          */
-        name: string;
+        name: string | null;
         owned: boolean;
         /**
          * counter key (`group.detail`, see core stats.ts) -> amount
@@ -1212,28 +1294,30 @@ export type BuildingLevelInfoInput = {
      */
     ok: boolean;
     /**
-     * what the building gives at this level ("" when nothing measurable)
+     * what the building gives at this level (`buildingInfo.effect.*`); null when nothing measurable
      */
-    effect: string;
+    effect: MessageInput | null;
 };
 
 export type BuildingDescriptionInput = {
     typeId: number;
-    name: string;
     /**
-     * what the building does
+     * what the building does (`buildingInfo.summary.*`); null for an unknown type
      */
-    summary: string;
+    summary: MessageInput | null;
     /**
-     * where it can be built and how many
+     * where it can be built and how many (`buildingInfo.placement.*`); null for an unknown type
      */
-    placement: string;
+    placement: MessageInput | null;
     /**
-     * buildings, troops and technologies that need this building
+     * buildings, troops and technologies that need this building, by level needed
      */
     unlocks: Array<{
         kind: 'building' | 'troop' | 'tech';
-        name: string;
+        /**
+         * building type, troop or technology id
+         */
+        id: number;
         /**
          * level of this building required
          */
@@ -1267,9 +1351,9 @@ export type AvailableBuildingsInput = {
          */
         ok: boolean;
         /**
-         * what the building gives at this level ("" when nothing measurable)
+         * what the building gives at this level (`buildingInfo.effect.*`); null when nothing measurable
          */
-        effect: string;
+        effect: MessageInput | null;
         info: BuildingDescriptionInput;
     } | null>;
     unlockedOuterSlots: number;
@@ -1279,9 +1363,9 @@ export type BuildingUpgradeInfoInput = {
     building: BuildingBeanInput;
     info: BuildingDescriptionInput;
     /**
-     * what the building gives at its current level
+     * what the building gives at its current level (`buildingInfo.effect.*`); null when nothing measurable
      */
-    effect: string;
+    effect: MessageInput | null;
     maxLevel: number;
     /**
      * null at max level
@@ -1299,7 +1383,6 @@ export type BuildingUpgradeInfoInput = {
 
 export type TechBeanInput = {
     typeId: number;
-    name: string;
     level: number;
     maxLevel: number;
     /**
@@ -1324,23 +1407,26 @@ export type TechBeanInput = {
      */
     permission: boolean;
     /**
-     * what the technology does
+     * what the technology does (`techInfo.summary.*`), worded by the client
      */
-    description: string;
+    description: MessageInput;
     /**
-     * total effect at the effective level ("" at 0 or when it has no measurable effect)
+     * total effect at the effective level (`techInfo.effect.*`; null at 0 or when it has no measurable effect)
      */
-    effect: string;
+    effect: MessageInput | null;
     /**
-     * total effect after the next level ("" at max level)
+     * total effect after the next level (`techInfo.effect.*`; null at max level or when it has no measurable effect)
      */
-    nextEffect: string;
+    nextEffect: MessageInput | null;
     /**
      * buildings, troops and technologies that need this technology
      */
     unlocks: Array<{
         kind: 'building' | 'troop' | 'tech';
-        name: string;
+        /**
+         * building type, troop or technology id
+         */
+        id: number;
         /**
          * level of this technology required
          */
@@ -1427,9 +1513,9 @@ export type TrainableUnitInput = {
     requirements: Array<RequirementCheckInput>;
     permission: boolean;
     /**
-     * role and special battle rules
+     * role and special battle rules (`troopInfo.*`), worded by the client
      */
-    description: string;
+    description?: MessageInput;
     stats: {
         life: number;
         attack: number;
@@ -1519,7 +1605,10 @@ export type MailSummaryInput = {
      * folder: 1 inbox, 2 system, 3 sent
      */
     type_id: number;
-    sender: string;
+    /**
+     * null for mail the game sent (the client labels it)
+     */
+    sender: string | null;
     receiver: string;
     /**
      * the other lord (sender for inbox, receiver for sent); null for system mail
@@ -1527,6 +1616,10 @@ export type MailSummaryInput = {
     playerId: number | null;
     receiveTime: number;
     isRead: boolean;
+    /**
+     * mail the game sent: its title as a message (then `title` is empty)
+     */
+    systemTitle: MessageInput | null;
 };
 
 export type MailListInput = {
@@ -1543,7 +1636,10 @@ export type MailDetailInput = {
      * folder: 1 inbox, 2 system, 3 sent
      */
     type_id: number;
-    sender: string;
+    /**
+     * null for mail the game sent (the client labels it)
+     */
+    sender: string | null;
     receiver: string;
     /**
      * the other lord (sender for inbox, receiver for sent); null for system mail
@@ -1551,7 +1647,15 @@ export type MailDetailInput = {
     playerId: number | null;
     receiveTime: number;
     isRead: boolean;
+    /**
+     * mail the game sent: its title as a message (then `title` is empty)
+     */
+    systemTitle: MessageInput | null;
     content: string;
+    /**
+     * mail the game sent: its content as a message (then `content` is empty)
+     */
+    systemContent: MessageInput | null;
 };
 
 export type ReportCountsInput = {
@@ -1563,10 +1667,16 @@ export type ReportCountsInput = {
 
 export type ReportSummaryInput = {
     id: number;
-    title: string;
+    title: MessageInput;
     armyType: number;
-    startPos: string;
-    targetPos: string;
+    /**
+     * where the army set out from (`world.position.*`); null when the report has none
+     */
+    startPos: MessageInput | null;
+    /**
+     * where the army went (`world.position.*`); null when the report has none
+     */
+    targetPos: MessageInput | null;
     eventTime: number;
     isRead: boolean;
     /**
@@ -1586,10 +1696,16 @@ export type ReportListInput = {
 
 export type ReportDetailInput = {
     id: number;
-    title: string;
+    title: MessageInput;
     armyType: number;
-    startPos: string;
-    targetPos: string;
+    /**
+     * where the army set out from (`world.position.*`); null when the report has none
+     */
+    startPos: MessageInput | null;
+    /**
+     * where the army went (`world.position.*`); null when the report has none
+     */
+    targetPos: MessageInput | null;
     eventTime: number;
     isRead: boolean;
     /**
@@ -1628,7 +1744,10 @@ export type ReportDetailInput = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: MessageInput;
                     itemId?: string;
                 }>;
             };
@@ -1657,7 +1776,10 @@ export type ReportDetailInput = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: MessageInput;
                     itemId?: string;
                 }>;
                 forts?: {
@@ -1712,7 +1834,10 @@ export type ReportDetailInput = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: MessageInput;
                     itemId?: string;
                 }>;
             };
@@ -1741,7 +1866,10 @@ export type ReportDetailInput = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: MessageInput;
                     itemId?: string;
                 }>;
                 forts?: {
@@ -1799,7 +1927,10 @@ export type ReportDetailInput = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: MessageInput;
                     itemId?: string;
                 }>;
             };
@@ -1828,7 +1959,10 @@ export type ReportDetailInput = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: MessageInput;
                     itemId?: string;
                 }>;
                 forts?: {
@@ -1845,7 +1979,7 @@ export type ReportDetailInput = {
                 wallLevel?: number;
             };
             occupied: boolean;
-            reason: string;
+            reason: MessageInput | null;
             valley: {
                 type: number;
                 level: number;
@@ -2023,7 +2157,7 @@ export type ReportDetailInput = {
         };
     } | {
         kind: 'text';
-        text: string;
+        text: MessageInput;
     } | {
         kind: 'desertion';
         desertion: {
@@ -2139,7 +2273,6 @@ export type MyAllianceInput = {
      * 4 Host, 5 Vice Host, 6 Presbyter, 7 Officer, 8 Member
      */
     myRank: number;
-    myRankName: string;
     alliance: AllianceProfileInput;
 };
 
@@ -2163,7 +2296,7 @@ export type AllianceListInput = {
 
 export type CreateAllianceResultInput = {
     id: number;
-    msg: string;
+    msg: MessageInput;
 };
 
 export type AllianceMemberInput = {
@@ -2174,10 +2307,6 @@ export type AllianceMemberInput = {
      * alliance rank: 4 Host … 8 Member
      */
     levelId: number;
-    /**
-     * rank name
-     */
-    allianceLevel: string;
     prestige: number;
     honor: number;
     ranking: number;
@@ -2187,14 +2316,20 @@ export type AllianceMemberInput = {
 };
 
 export type AllianceEventInput = {
-    message: string;
+    message: MessageInput;
     time: number;
 };
 
 export type AllianceMilitaryEntryInput = {
     direction: number;
-    startPosName: string;
-    targetPosName: string;
+    /**
+     * where the army set out from (`world.position.*`)
+     */
+    startPosName: MessageInput;
+    /**
+     * where the army is headed (`world.position.*`)
+     */
+    targetPosName: MessageInput;
     reachTime: number;
     armyId: number;
     king: string;
@@ -2326,30 +2461,38 @@ export type ConfigTroopInput = {
 
 export type ConfigItemInput = {
     legacyId: number;
+    /**
+     * item id; the client names it (data-items)
+     */
     id: string;
-    name: string;
     /**
      * price in city gold (null: not for sale)
      */
     goldPrice: number | null;
+    /**
+     * shop category id; the client names it (data-item-categories)
+     */
     type: number;
     dayLimit: number;
     rarity: number;
-    category: string;
-    description: string;
+    /**
+     * what the item does (`itemInfo.*`), worded by the client
+     */
+    description: MessageInput;
     /**
      * direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect
      */
     use: 'direct' | 'elsewhere' | 'none';
-    howTo?: string;
+    /**
+     * where to use an item consumed by another action (`itemInfo.howTo.*`)
+     */
+    howTo?: MessageInput;
 };
 
 export type ConfigQuestGroupInput = {
     id: number;
     mainId: number;
     isFinish: boolean;
-    description: string;
-    name: string;
     typeId: number;
     requires: {
         buildings: Array<number>;
@@ -2360,8 +2503,10 @@ export type ConfigQuestGroupInput = {
 };
 
 export type ConfigTitleInput = {
+    /**
+     * title id; the client names it (data-titles)
+     */
     id: number;
-    name: string;
     /**
      * cities a lord with this title may own
      */
@@ -2548,22 +2693,6 @@ export type StaticConfigInput = {
     gameSpeed: number;
     mapSize: number;
     /**
-     * state (zone) names by zone id
-     */
-    readonly states: Array<string>;
-    /**
-     * by building typeId
-     */
-    buildingNames: {
-        [key: string]: string;
-    };
-    /**
-     * by techId
-     */
-    techNames: {
-        [key: string]: string;
-    };
-    /**
      * one row per typeId and level
      */
     buildings: Array<ConfigBuildingLevelInput>;
@@ -2633,10 +2762,6 @@ export type MarketOrderInput = {
      * 0 buy, 1 sell
      */
     tradeType: number;
-    /**
-     * Bid | Offer
-     */
-    tradeTypeName: string;
     /**
      * amount filled so far
      */
@@ -2786,8 +2911,10 @@ export type GoldShopBuyResultInput = {
 };
 
 export type ShopItemInput = {
+    /**
+     * item id; the client names it (data-items)
+     */
     id: string;
-    name: string;
     dayLimit: number;
     /**
      * city gold
@@ -2796,8 +2923,10 @@ export type ShopItemInput = {
 };
 
 export type ShopCategoryInput = {
+    /**
+     * item category id; the client names it (data-item-categories)
+     */
     typeId: number;
-    typeName: string;
     items: Array<ShopItemInput>;
 };
 
@@ -2818,9 +2947,8 @@ export type QuestAwardInput = {
 };
 
 export type QuestGroupStatusInput = {
+    id: number;
     typeId: number;
-    name: string;
-    description: string;
     /**
      * the group has finished quests whose award is not claimed yet
      */
@@ -2833,10 +2961,15 @@ export type QuestBeanInput = {
      * QuestGroupStatus.typeId
      */
     groupId: number;
-    name: string;
-    description: string;
+    /**
+     * `questInfo.description.*`, worded by the client (the quest is named by its id)
+     */
+    description: MessageInput;
     targets: Array<{
-        name: string;
+        /**
+         * `questInfo.target.*`, worded by the client
+         */
+        text: MessageInput;
         finished: boolean;
     }>;
     award: QuestAwardInput;
@@ -2879,9 +3012,9 @@ export type RankingPlayerEntryInput = {
      */
     alliance: string;
     /**
-     * rank name inside the alliance, empty when none
+     * rank inside the alliance (4 Host … 8 Member), null when none
      */
-    allianceLevel: string;
+    allianceRank: number | null;
 };
 
 export type RankingPlayerPageInput = {
@@ -2974,12 +3107,30 @@ export type AdminOnlineInput = {
     online: number;
 };
 
+export type GameRef = {
+    ref: 'troop' | 'building' | 'tech' | 'item' | 'title' | 'tile' | 'resource' | 'stat' | 'zone' | 'rank' | 'gear' | 'itemCategory';
+    id: number | string;
+};
+
+export type MsgDuration = {
+    duration: number;
+};
+
+export type MsgParam = string | number | boolean | GameRef | MsgDuration | Message | Array<MsgParam>;
+
+export type Message = {
+    code: 'common.legacyText' | 'common.invalidRequest' | 'common.serverError' | 'common.requestFailed' | 'common.routeNotFound' | 'common.notAllowed' | 'common.adminsOnly' | 'common.invalidData' | 'common.invalidAmount' | 'common.invalidCastle' | 'common.invalidCoordinates' | 'common.invalidTroopType' | 'common.invalidTroopCount' | 'common.unknownTroopType' | 'common.noTroopsSelected' | 'common.notEnoughResources' | 'common.notEnoughGold' | 'common.notEnoughGoldFor' | 'common.insufficientItems' | 'common.playerNotFound' | 'common.playerNamedNotFound' | 'common.cityNotFound' | 'common.heroNotFound' | 'common.playerName' | 'common.cityName' | 'common.heroName' | 'common.name' | 'common.nameLength' | 'common.nameInvalid' | 'common.nameNotAllowed' | 'common.freeSpeedupTooEarly' | 'common.invalidSpeedup' | 'auth.notLoggedIn' | 'auth.needPlayer' | 'auth.wrongPassword' | 'auth.alreadyRegistered' | 'auth.accountNotFound' | 'auth.banned' | 'questInfo.description.upgrade' | 'questInfo.description.upgradeAny' | 'questInfo.description.field' | 'questInfo.description.ownFields' | 'questInfo.description.cottage' | 'questInfo.description.rallySpot' | 'questInfo.description.barracks' | 'questInfo.description.warehouse' | 'questInfo.description.academy' | 'questInfo.description.walls' | 'questInfo.description.embassy' | 'questInfo.description.inn' | 'questInfo.description.feastingHall' | 'questInfo.description.research' | 'questInfo.description.appointMayor' | 'questInfo.description.taxRate' | 'questInfo.description.joinAlliance' | 'questInfo.description.sendMail' | 'questInfo.description.recruitHero' | 'questInfo.description.train' | 'questInfo.description.fortify' | 'questInfo.description.secondCity' | 'questInfo.description.occupyValley' | 'questInfo.description.population' | 'questInfo.description.prestige' | 'questInfo.target.building' | 'questInfo.target.buildings' | 'questInfo.target.research' | 'questInfo.target.troops' | 'questInfo.target.heroes' | 'questInfo.target.mayor' | 'questInfo.target.alliance' | 'questInfo.target.cities' | 'questInfo.target.valleys' | 'questInfo.target.prestige' | 'questInfo.target.population' | 'questInfo.target.taxRate' | 'questInfo.target.mailSent' | 'questInfo.target.friend' | 'itemInfo.period.days' | 'itemInfo.period.hours' | 'itemInfo.period.minutes' | 'itemInfo.speedup.time' | 'itemInfo.speedup.hours' | 'itemInfo.speedup.percent' | 'itemInfo.speedup.troopBatch' | 'itemInfo.speedup.fortBatch' | 'itemInfo.loyalty' | 'itemInfo.heroStat' | 'itemInfo.experience.share' | 'itemInfo.experience.level' | 'itemInfo.holyWater' | 'itemInfo.buff' | 'itemInfo.grant' | 'itemInfo.grantCity' | 'itemInfo.contents.item' | 'itemInfo.contents.amount' | 'itemInfo.chest' | 'itemInfo.key' | 'itemInfo.medalBox' | 'itemInfo.randomBox' | 'itemInfo.civilCode' | 'itemInfo.cureInjured' | 'itemInfo.heroBox' | 'itemInfo.teleporter' | 'itemInfo.truce' | 'itemInfo.notUsable' | 'itemInfo.noEffect' | 'itemInfo.howTo.speedup' | 'itemInfo.howTo.troopsSpeedup' | 'itemInfo.howTo.fortificationsSpeedup' | 'itemInfo.howTo.cityMove' | 'itemInfo.howTo.heroesReset' | 'itemInfo.howTo.heroesUseItem' | 'itemInfo.howTo.cityTruce' | 'itemInfo.howTo.key' | 'itemInfo.howTo.newbies' | 'troopInfo.worker' | 'troopInfo.warrior' | 'troopInfo.scout' | 'troopInfo.pikeman' | 'troopInfo.swordsman' | 'troopInfo.archer' | 'troopInfo.transporter' | 'troopInfo.cavalry' | 'troopInfo.cataphract' | 'troopInfo.ballista' | 'troopInfo.batteringRam' | 'troopInfo.catapult' | 'troopInfo.trap' | 'troopInfo.abatis' | 'troopInfo.archerTower' | 'troopInfo.rollingLog' | 'troopInfo.trebuchet' | 'techInfo.summary.resource' | 'techInfo.summary.stockpile' | 'techInfo.summary.construction' | 'techInfo.summary.militaryScience' | 'techInfo.summary.metalCasting' | 'techInfo.summary.heroEnhancement' | 'techInfo.summary.militaryTradition' | 'techInfo.summary.ironWorking' | 'techInfo.summary.medicine' | 'techInfo.summary.archery' | 'techInfo.summary.compass' | 'techInfo.summary.horsebackRiding' | 'techInfo.summary.logistics' | 'techInfo.summary.informatics' | 'techInfo.summary.none' | 'techInfo.effect.resource' | 'techInfo.effect.stockpile' | 'techInfo.effect.construction' | 'techInfo.effect.militaryScience' | 'techInfo.effect.metalCasting' | 'techInfo.effect.heroEnhancement' | 'techInfo.effect.militaryTradition' | 'techInfo.effect.ironWorking' | 'techInfo.effect.medicine' | 'techInfo.effect.archery' | 'techInfo.effect.compass' | 'techInfo.effect.horsebackRiding' | 'techInfo.effect.logistics' | 'techInfo.effect.informaticsHeroes' | 'techInfo.effect.informaticsBuildings' | 'buildingInfo.summary.townHall' | 'buildingInfo.summary.walls' | 'buildingInfo.summary.cottage' | 'buildingInfo.summary.field' | 'buildingInfo.summary.warehouse' | 'buildingInfo.summary.barracks' | 'buildingInfo.summary.academy' | 'buildingInfo.summary.inn' | 'buildingInfo.summary.feastingHall' | 'buildingInfo.summary.rallySpot' | 'buildingInfo.summary.marketplace' | 'buildingInfo.summary.reliefStation' | 'buildingInfo.summary.beaconTower' | 'buildingInfo.summary.embassy' | 'buildingInfo.summary.prerequisite' | 'buildingInfo.placement.unique' | 'buildingInfo.placement.inside' | 'buildingInfo.placement.insideLimited' | 'buildingInfo.placement.outside' | 'buildingInfo.placement.outsideLimited' | 'buildingInfo.effect.townHall' | 'buildingInfo.effect.walls' | 'buildingInfo.effect.cottage' | 'buildingInfo.effect.field' | 'buildingInfo.effect.warehouse' | 'buildingInfo.effect.barracks' | 'buildingInfo.effect.academy' | 'buildingInfo.effect.inn' | 'buildingInfo.effect.feastingHall' | 'buildingInfo.effect.rallySpot' | 'buildingInfo.effect.marketplace' | 'buildingInfo.effect.reliefStation' | 'buildingInfo.effect.beaconTroops' | 'buildingInfo.effect.beaconHeroes' | 'buff.production' | 'buff.goldIncome' | 'buff.troopAttack' | 'buff.troopDefense' | 'buff.armySize' | 'buff.buildingQueue' | 'buff.upkeep' | 'buff.trainingCost' | 'buff.truce' | 'buff.truceCooldown' | 'buff.teleportCooldown' | 'buff.holiday' | 'buff.heroStat' | 'buff.homeCity' | 'flow.nameLength' | 'flow.actionCount' | 'flow.invalidAction' | 'flow.chooseArmy' | 'flow.targetsOwnCities' | 'flow.chooseCities' | 'flow.notFound' | 'flow.runningLocked' | 'flow.tooMany' | 'flow.noMayorHero' | 'flow.cannotTrain' | 'flow.req.level' | 'flow.req.item' | 'flow.alreadyQueued' | 'flow.alreadyRunning' | 'flow.noHeroCities' | 'flow.chooseCity' | 'flow.noOwnCities' | 'flow.cityFailed' | 'flow.runFailed' | 'flow.failedCity' | 'flow.stopped' | 'flow.healDone' | 'flow.healFailed' | 'flow.action.setMayor' | 'flow.action.healResources' | 'flow.action.healHonour' | 'flow.action.healResourcesHome' | 'flow.action.healHonourHome' | 'flow.action.waitArmiesHome' | 'flow.action.wait' | 'flow.action.attack' | 'flow.action.attackFrom' | 'flow.action.train' | 'flow.action.trainMax' | 'flow.cityCount' | 'flow.resourceAmount' | 'flow.step.noTargets' | 'flow.step.armyGone' | 'flow.step.noArmy' | 'flow.step.sent' | 'flow.step.noInjured' | 'flow.step.healed' | 'flow.step.healedHonour' | 'flow.step.healScheduled' | 'flow.step.alreadyMayor' | 'flow.step.mayor' | 'flow.step.noBarracksRoom' | 'flow.step.cannotAfford' | 'flow.step.training' | 'flow.step.trainingDone' | 'flow.step.trainingPartial' | 'flow.step.trainingPartialDone' | 'flow.step.noArmiesOut' | 'flow.step.waiting' | 'flow.step.moreActions' | 'flow.step.runEnds' | 'flow.target.sent' | 'flow.target.noIdleHero' | 'flow.target.notEnoughTroops' | 'flow.target.refused' | 'flow.skipNoHero' | 'quest.notFound' | 'quest.alreadyClaimed' | 'quest.notFinished' | 'quest.dailyGiftClaimed' | 'world.noOpenFlat' | 'world.invalidArea' | 'world.areaTooLarge' | 'world.invalidTile' | 'world.position.city' | 'world.position.tile' | 'world.position.place' | 'mail.toSelf' | 'mail.titleAndContentRequired' | 'mail.notFound' | 'social.selfTarget' | 'social.emptyMessage' | 'social.messageTooLong' | 'social.muted' | 'social.notInAlliance' | 'item.notForSale' | 'item.dailyLimit' | 'item.cannotUse' | 'item.useFrom.speedup' | 'item.useFrom.hero' | 'item.useFrom.elsewhere' | 'item.chooseCity' | 'item.needKey' | 'market.invalidResource' | 'market.invalidSide' | 'market.invalidPrice' | 'market.needMarketplace' | 'market.nothingToTrade' | 'market.tooManyOrders' | 'market.notEnoughResource' | 'market.orderNotFound' | 'market.shipmentNotFound' | 'research.notResearching' | 'research.noResearch' | 'research.chooseResearch' | 'research.queueFull' | 'research.alreadyResearching' | 'training.wallsNeeded' | 'training.invalidBarracks' | 'training.queueFull' | 'training.allQueuesFull' | 'training.wallSpaceFull' | 'training.notEnoughPopulation' | 'training.orderLimit' | 'training.duplicateOrder' | 'training.fortsAtWalls' | 'training.batchNotFound' | 'training.invalidFort' | 'training.notEnoughUnits' | 'training.notEnoughInjured' | 'training.notEnoughHonor' | 'admin.broadcast' | 'admin.unknownItem' | 'admin.invalidLevel' | 'player.accountExists' | 'player.nameTaken' | 'player.sameName' | 'player.renameCooldown' | 'player.sameGender' | 'player.genderCooldown' | 'player.invalidSetting' | 'player.invalidFlag' | 'player.title.highest' | 'player.title.prestigeRequired' | 'player.title.notEnoughMedals' | 'player.holiday.invalidDays' | 'player.holiday.troopsOut' | 'player.truce.cooldown' | 'player.protected.beginner' | 'player.protected.truce' | 'player.protected.holiday' | 'player.bookmark.tooMany' | 'player.preset.nameLength' | 'player.preset.tooMany' | 'player.mail.protectionExpired.title' | 'player.mail.protectionExpired.content' | 'city.taxRateRange' | 'city.workRateRange' | 'city.invalidStorePercent' | 'city.storePercentTotal' | 'city.comfortCooldown' | 'city.notEnoughFood' | 'city.invalidComfortType' | 'city.invalidLogo' | 'city.teleportCooldown' | 'city.recallTroopsFirst' | 'city.foreignTroops' | 'city.notFreeFlat' | 'building.invalidBuilding' | 'building.notFound' | 'building.invalidPosition' | 'building.cannotBuild' | 'building.cannotBuildHere' | 'building.positionTaken' | 'building.limitReached' | 'building.slotLocked' | 'building.queuesBusy' | 'building.requirementsNotMet' | 'building.statusChanged' | 'building.maxLevel' | 'building.busy' | 'building.nothingToDemolish' | 'building.cannotDemolish' | 'building.notInProgress' | 'building.invalidTech' | 'building.academyNeeded' | 'building.techRequirementsNotMet' | 'building.troopRequirementsNotMet' | 'hero.needInn' | 'hero.noVacancy' | 'hero.notIdle' | 'hero.locked' | 'hero.noMayor' | 'hero.invalidPoints' | 'hero.maxLevel' | 'hero.maxLevelNoExperience' | 'hero.notEnoughExperience' | 'hero.invalidAttribute' | 'hero.invalidGearPiece' | 'hero.gearMaxStars' | 'hero.gearStarLimit' | 'hero.notEnoughMedals' | 'hero.fullyLoyal' | 'hero.itemNotForGold' | 'hero.invalidItem' | 'hero.notPrisoner' | 'hero.stillLoyal' | 'report.title.missionAborted' | 'report.title.scoutReturned' | 'report.title.attackReturned' | 'report.title.returned' | 'report.title.transportReport' | 'report.title.transportReceived' | 'report.title.reinforcementArrived' | 'report.title.reinforcementsFrom' | 'report.title.newCityFounded' | 'report.title.scoutReport' | 'report.title.enemyScouts' | 'report.title.scoutsRepelled' | 'report.title.attackSucceeded' | 'report.title.attackFailed' | 'report.title.cityAttacked' | 'report.title.attackRepelled' | 'report.title.reinforcementsFought' | 'report.title.valleyOccupied' | 'report.title.valleyLost' | 'report.title.valleyDefended' | 'report.title.tradeCompleted' | 'report.title.troopsDeserted' | 'report.notFound' | 'report.oldFormat' | 'report.cityFounded' | 'army.invalidMission' | 'army.insufficientTroops' | 'army.overloaded' | 'army.rallySpotRequired' | 'army.armyLimit' | 'army.troopLimit' | 'army.invalidTarget' | 'army.transportTarget' | 'army.noResources' | 'army.reinforceTarget' | 'army.alliedTroopsRefused' | 'army.scoutsRequired' | 'army.beginnerProtection' | 'army.truce' | 'army.nothingToAttack' | 'army.buildOnFlat' | 'army.cityLimit' | 'army.newCityResources' | 'army.heroRequiredAttack' | 'army.heroRequiredSettlers' | 'army.notFound' | 'army.alreadyReturning' | 'army.unknownMission' | 'army.destinationNotFriendly' | 'army.valleyNoLongerHeld' | 'army.landNotFree' | 'army.cityGone' | 'army.cityNowFriendly' | 'army.valleyAlreadyHeld' | 'army.valleyNowFriendly' | 'army.homeCityGone' | 'army.valleyLimit' | 'army.valleyNotHeld' | 'army.upgradeTarget' | 'army.upgradeHeld' | 'army.valleyMaxLevel' | 'army.barbarianCityMaxLevel' | 'alliance.name' | 'alliance.notFound' | 'alliance.namedNotFound' | 'alliance.nameTaken' | 'alliance.notMember' | 'alliance.alreadyMember' | 'alliance.rankTooLow' | 'alliance.full' | 'alliance.rejoinCooldown' | 'alliance.hostMustTransfer' | 'alliance.playerInOtherAlliance' | 'alliance.inviteNotFound' | 'alliance.applicationNotFound' | 'alliance.notApplied' | 'alliance.buildingRequired' | 'alliance.invalidRank' | 'alliance.memberNotFound' | 'alliance.ownRank' | 'alliance.rankLimit' | 'alliance.hostToViceHostOnly' | 'alliance.kickSelf' | 'alliance.kickHigherRank' | 'alliance.invalidRelation' | 'alliance.invalidTarget' | 'alliance.alreadyRelation' | 'alliance.warCooldown' | 'alliance.invited' | 'alliance.warDeclared' | 'alliance.event.created' | 'alliance.event.joined' | 'alliance.event.left' | 'alliance.event.applied' | 'alliance.event.promoted' | 'alliance.event.demoted' | 'alliance.event.newHost' | 'alliance.event.removed' | 'alliance.event.relationSet' | 'alliance.relation.ally' | 'alliance.relation.neutral' | 'alliance.relation.enemy';
+    params?: {
+        [key: string]: MsgParam;
+    };
+};
+
 export type ErrorResponse = {
     /**
      * negative error code (the original server codes)
      */
     ok: number;
-    errorMsg: string;
+    error: Message;
     issues?: Array<{
         path: string;
         message?: string;
@@ -3009,7 +3160,6 @@ export type BuildingBean = {
     status: 0 | 1 | 2;
     startTime: number;
     endTime: number;
-    name: string;
 };
 
 export type HeroBean = {
@@ -3049,7 +3199,10 @@ export type HeroBean = {
      */
     buffs: Array<{
         id: 'power' | 'management' | 'stratagem' | 'homeCity';
-        desc: string;
+        /**
+         * what the boost does (`buff.*`), worded by the client
+         */
+        desc: Message;
         /**
          * epoch milliseconds
          */
@@ -3186,7 +3339,10 @@ export type CityBean = {
     fieldId: number;
     x: number;
     y: number;
-    zoneName: string;
+    /**
+     * zone (state) id; the client names it
+     */
+    zoneId: number;
     status: number;
     allowAlliance: boolean;
     goOutForBattle: boolean;
@@ -3214,8 +3370,10 @@ export type PlayerInfo = {
     userName: string;
     prestige: number;
     honor: number;
+    /**
+     * nobility title (named by the client)
+     */
     titleId: number;
-    titleName: string;
     ranking: number;
     honorRank: number;
     alliance: string;
@@ -3243,7 +3401,10 @@ export type ItemCount = {
 
 export type BuffBean = {
     id: 'FoodProductionBuff' | 'WoodProductionBuff' | 'StoneProductionBuff' | 'IronProductionBuff' | 'GoldProductionBuff' | 'AttackBuff' | 'DefenseBuff' | 'WarEnsignBuff' | 'BuildingQueueBuff' | 'UpkeepReduceBuff' | 'TrainCostReduceBuff' | 'PlayerPeaceBuff' | 'PlayerPeaceCoolDownBuff' | 'MoveCastleCoolDownBuff' | 'FurloughBuff';
-    desc: string;
+    /**
+     * what the buff does (`buff.*`), worded by the client
+     */
+    desc: Message;
     /**
      * epoch milliseconds
      */
@@ -3263,8 +3424,14 @@ export type ArmyBean = {
     startTime: number;
     reachTime: number;
     restTime: number;
-    startPosName: string;
-    targetPosName: string;
+    /**
+     * where the army set out from (`world.position.*`)
+     */
+    startPosName: Message;
+    /**
+     * where the army is headed (`world.position.*`)
+     */
+    targetPosName: Message;
     armyId: number;
     king: string;
     hero: string;
@@ -3372,7 +3539,10 @@ export type MapCastle = {
     id: number;
     x: number;
     y: number;
-    name: string;
+    /**
+     * the city's name; absent for a barbarian city (named by the client from its tile type)
+     */
+    name?: string;
     npc: boolean;
     level: number;
     cityId?: number;
@@ -3395,7 +3565,10 @@ export type MapCastle = {
      * beginner protection
      */
     furlough?: boolean;
-    zoneName: string;
+    /**
+     * zone (state) id; the client names it
+     */
+    zoneId: number;
     canLoot: boolean;
     canOccupy: boolean;
     canScout: boolean;
@@ -3452,8 +3625,10 @@ export type MapFieldTileInfo = {
     level: number;
     x: number;
     y: number;
-    zoneName: 'FRIESLAND' | 'SAXONY' | 'NORTH MARCH' | 'BOHEMIA' | 'LOWER LORRAINE' | 'FRANCONIA' | 'THURINGIA' | 'MORAVIA' | 'UPPER LORRAINE' | 'SWABIA' | 'BAVARIA' | 'CARINTHIA' | 'BURGUNDY' | 'LOMBARDY' | 'TUSCANY' | 'ROMAGNA' | 'UNKNOWN';
-    name: string;
+    /**
+     * zone (state) id; the client names it
+     */
+    zoneId: number;
     npc: boolean;
     /**
      * controlling city of an occupied valley / captured NPC city
@@ -3481,7 +3656,10 @@ export type MapFieldCastleInfo = {
     id: number;
     x: number;
     y: number;
-    name: string;
+    /**
+     * the city's name; absent for a barbarian city (named by the client from its tile type)
+     */
+    name?: string;
     npc: boolean;
     level: number;
     cityId?: number;
@@ -3504,7 +3682,10 @@ export type MapFieldCastleInfo = {
      * beginner protection
      */
     furlough?: boolean;
-    zoneName: string;
+    /**
+     * zone (state) id; the client names it
+     */
+    zoneId: number;
     canLoot: boolean;
     canOccupy: boolean;
     canScout: boolean;
@@ -3565,8 +3746,10 @@ export type AuthAccount = {
 };
 
 export type ZoneStats = {
+    /**
+     * zone (state) id; the client names it
+     */
     id: number;
-    name: string;
     playerCount: number;
     castleCount: number;
     openFlats: number;
@@ -3651,7 +3834,7 @@ export type FlowAction = {
 export type FlowSkippedCity = {
     cityId: number;
     cityName: string;
-    reason: string;
+    reason: Message;
 };
 
 export type FlowRunLog = {
@@ -3674,11 +3857,17 @@ export type FlowRunLog = {
          * false: an action failed and everything the flow did in this city since the last wait was rolled back
          */
         ok: boolean;
-        error: string | null;
+        /**
+         * the failure that rolled back this city's part of the run
+         */
+        error: Message | null;
         steps: Array<{
-            action: string;
+            action: Message;
             ok: boolean;
-            detail: string;
+            /**
+             * what happened, or why it failed
+             */
+            detail: Message;
             /**
              * the city could not do it right now (e.g. nothing affordable to train); the run carried on
              */
@@ -3687,9 +3876,12 @@ export type FlowRunLog = {
              * per-target outcomes (attack actions)
              */
             items?: Array<{
+                /**
+                 * the target, as "(x,y)"
+                 */
                 label: string;
                 ok: boolean;
-                detail: string;
+                detail: Message;
             }>;
         }>;
     }>;
@@ -3711,11 +3903,17 @@ export type FlowPreviewLog = {
          * false: an action failed and everything the flow did in this city since the last wait was rolled back
          */
         ok: boolean;
-        error: string | null;
+        /**
+         * the failure that rolled back this city's part of the run
+         */
+        error: Message | null;
         steps: Array<{
-            action: string;
+            action: Message;
             ok: boolean;
-            detail: string;
+            /**
+             * what happened, or why it failed
+             */
+            detail: Message;
             /**
              * the city could not do it right now (e.g. nothing affordable to train); the run carried on
              */
@@ -3724,9 +3922,12 @@ export type FlowPreviewLog = {
              * per-target outcomes (attack actions)
              */
             items?: Array<{
+                /**
+                 * the target, as "(x,y)"
+                 */
                 label: string;
                 ok: boolean;
-                detail: string;
+                detail: Message;
             }>;
         }>;
     }>;
@@ -3767,7 +3968,7 @@ export type Flow = {
     /**
      * why the flow stopped on its own (a failed run; repeat was switched off)
      */
-    stopReason: string | null;
+    stopReason: Message | null;
     lastRun: FlowRunLog | null;
     /**
      * the latest preview, until the flow runs, is edited or repeat is switched
@@ -3791,11 +3992,17 @@ export type FlowRunReport = {
          * false: an action failed and everything the flow did in this city since the last wait was rolled back
          */
         ok: boolean;
-        error: string | null;
+        /**
+         * the failure that rolled back this city's part of the run
+         */
+        error: Message | null;
         steps: Array<{
-            action: string;
+            action: Message;
             ok: boolean;
-            detail: string;
+            /**
+             * what happened, or why it failed
+             */
+            detail: Message;
             /**
              * the city could not do it right now (e.g. nothing affordable to train); the run carried on
              */
@@ -3804,9 +4011,12 @@ export type FlowRunReport = {
              * per-target outcomes (attack actions)
              */
             items?: Array<{
+                /**
+                 * the target, as "(x,y)"
+                 */
                 label: string;
                 ok: boolean;
-                detail: string;
+                detail: Message;
             }>;
         }>;
     }>;
@@ -3818,7 +4028,8 @@ export type FlowRunReport = {
 
 export type CastleSign = {
     tileId: number;
-    name: string;
+    type: number;
+    name?: string;
     x: number;
     y: number;
 };
@@ -3946,8 +4157,10 @@ export type PublicPlayerInfo = {
     userName: string;
     prestige: number;
     honor: number;
+    /**
+     * nobility title (named by the client)
+     */
     titleId: number;
-    titleName: string;
     ranking: number;
     honorRank: number;
     alliance: string;
@@ -3983,8 +4196,10 @@ export type PublicPlayerInfo = {
 };
 
 export type TitlePromotion = {
+    /**
+     * nobility title (named by the client)
+     */
     titleId: number;
-    titleName: string;
 };
 
 export type GrantContents = {
@@ -4037,9 +4252,9 @@ export type LordStatistics = {
     cities: Array<{
         cityId: number;
         /**
-         * the city's name, or 'Former city' when the lord no longer holds it
+         * the city's name; null when the player no longer holds it
          */
-        name: string;
+        name: string | null;
         owned: boolean;
         /**
          * counter key (`group.detail`, see core stats.ts) -> amount
@@ -4182,28 +4397,30 @@ export type BuildingLevelInfo = {
      */
     ok: boolean;
     /**
-     * what the building gives at this level ("" when nothing measurable)
+     * what the building gives at this level (`buildingInfo.effect.*`); null when nothing measurable
      */
-    effect: string;
+    effect: Message | null;
 };
 
 export type BuildingDescription = {
     typeId: number;
-    name: string;
     /**
-     * what the building does
+     * what the building does (`buildingInfo.summary.*`); null for an unknown type
      */
-    summary: string;
+    summary: Message | null;
     /**
-     * where it can be built and how many
+     * where it can be built and how many (`buildingInfo.placement.*`); null for an unknown type
      */
-    placement: string;
+    placement: Message | null;
     /**
-     * buildings, troops and technologies that need this building
+     * buildings, troops and technologies that need this building, by level needed
      */
     unlocks: Array<{
         kind: 'building' | 'troop' | 'tech';
-        name: string;
+        /**
+         * building type, troop or technology id
+         */
+        id: number;
         /**
          * level of this building required
          */
@@ -4237,9 +4454,9 @@ export type AvailableBuildings = {
          */
         ok: boolean;
         /**
-         * what the building gives at this level ("" when nothing measurable)
+         * what the building gives at this level (`buildingInfo.effect.*`); null when nothing measurable
          */
-        effect: string;
+        effect: Message | null;
         info: BuildingDescription;
     } | null>;
     unlockedOuterSlots: number;
@@ -4249,9 +4466,9 @@ export type BuildingUpgradeInfo = {
     building: BuildingBean;
     info: BuildingDescription;
     /**
-     * what the building gives at its current level
+     * what the building gives at its current level (`buildingInfo.effect.*`); null when nothing measurable
      */
-    effect: string;
+    effect: Message | null;
     maxLevel: number;
     /**
      * null at max level
@@ -4269,7 +4486,6 @@ export type BuildingUpgradeInfo = {
 
 export type TechBean = {
     typeId: number;
-    name: string;
     level: number;
     maxLevel: number;
     /**
@@ -4294,23 +4510,26 @@ export type TechBean = {
      */
     permission: boolean;
     /**
-     * what the technology does
+     * what the technology does (`techInfo.summary.*`), worded by the client
      */
-    description: string;
+    description: Message;
     /**
-     * total effect at the effective level ("" at 0 or when it has no measurable effect)
+     * total effect at the effective level (`techInfo.effect.*`; null at 0 or when it has no measurable effect)
      */
-    effect: string;
+    effect: Message | null;
     /**
-     * total effect after the next level ("" at max level)
+     * total effect after the next level (`techInfo.effect.*`; null at max level or when it has no measurable effect)
      */
-    nextEffect: string;
+    nextEffect: Message | null;
     /**
      * buildings, troops and technologies that need this technology
      */
     unlocks: Array<{
         kind: 'building' | 'troop' | 'tech';
-        name: string;
+        /**
+         * building type, troop or technology id
+         */
+        id: number;
         /**
          * level of this technology required
          */
@@ -4397,9 +4616,9 @@ export type TrainableUnit = {
     requirements: Array<RequirementCheck>;
     permission: boolean;
     /**
-     * role and special battle rules
+     * role and special battle rules (`troopInfo.*`), worded by the client
      */
-    description: string;
+    description?: Message;
     stats: {
         life: number;
         attack: number;
@@ -4489,7 +4708,10 @@ export type MailSummary = {
      * folder: 1 inbox, 2 system, 3 sent
      */
     type_id: number;
-    sender: string;
+    /**
+     * null for mail the game sent (the client labels it)
+     */
+    sender: string | null;
     receiver: string;
     /**
      * the other lord (sender for inbox, receiver for sent); null for system mail
@@ -4497,6 +4719,10 @@ export type MailSummary = {
     playerId: number | null;
     receiveTime: number;
     isRead: boolean;
+    /**
+     * mail the game sent: its title as a message (then `title` is empty)
+     */
+    systemTitle: Message | null;
 };
 
 export type MailList = {
@@ -4513,7 +4739,10 @@ export type MailDetail = {
      * folder: 1 inbox, 2 system, 3 sent
      */
     type_id: number;
-    sender: string;
+    /**
+     * null for mail the game sent (the client labels it)
+     */
+    sender: string | null;
     receiver: string;
     /**
      * the other lord (sender for inbox, receiver for sent); null for system mail
@@ -4521,7 +4750,15 @@ export type MailDetail = {
     playerId: number | null;
     receiveTime: number;
     isRead: boolean;
+    /**
+     * mail the game sent: its title as a message (then `title` is empty)
+     */
+    systemTitle: Message | null;
     content: string;
+    /**
+     * mail the game sent: its content as a message (then `content` is empty)
+     */
+    systemContent: Message | null;
 };
 
 export type ReportCounts = {
@@ -4533,10 +4770,16 @@ export type ReportCounts = {
 
 export type ReportSummary = {
     id: number;
-    title: string;
+    title: Message;
     armyType: number;
-    startPos: string;
-    targetPos: string;
+    /**
+     * where the army set out from (`world.position.*`); null when the report has none
+     */
+    startPos: Message | null;
+    /**
+     * where the army went (`world.position.*`); null when the report has none
+     */
+    targetPos: Message | null;
     eventTime: number;
     isRead: boolean;
     /**
@@ -4556,10 +4799,16 @@ export type ReportList = {
 
 export type ReportDetail = {
     id: number;
-    title: string;
+    title: Message;
     armyType: number;
-    startPos: string;
-    targetPos: string;
+    /**
+     * where the army set out from (`world.position.*`); null when the report has none
+     */
+    startPos: Message | null;
+    /**
+     * where the army went (`world.position.*`); null when the report has none
+     */
+    targetPos: Message | null;
     eventTime: number;
     isRead: boolean;
     /**
@@ -4598,7 +4847,10 @@ export type ReportDetail = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: Message;
                     itemId?: string;
                 }>;
             };
@@ -4627,7 +4879,10 @@ export type ReportDetail = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: Message;
                     itemId?: string;
                 }>;
                 forts?: {
@@ -4682,7 +4937,10 @@ export type ReportDetail = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: Message;
                     itemId?: string;
                 }>;
             };
@@ -4711,7 +4969,10 @@ export type ReportDetail = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: Message;
                     itemId?: string;
                 }>;
                 forts?: {
@@ -4769,7 +5030,10 @@ export type ReportDetail = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: Message;
                     itemId?: string;
                 }>;
             };
@@ -4798,7 +5062,10 @@ export type ReportDetail = {
                 honor: number;
                 heroExp: number;
                 bonuses?: Array<{
-                    desc: string;
+                    /**
+                     * what the bonus does (`buff.*`)
+                     */
+                    desc: Message;
                     itemId?: string;
                 }>;
                 forts?: {
@@ -4815,7 +5082,7 @@ export type ReportDetail = {
                 wallLevel?: number;
             };
             occupied: boolean;
-            reason: string;
+            reason: Message | null;
             valley: {
                 type: number;
                 level: number;
@@ -4993,7 +5260,7 @@ export type ReportDetail = {
         };
     } | {
         kind: 'text';
-        text: string;
+        text: Message;
     } | {
         kind: 'desertion';
         desertion: {
@@ -5109,7 +5376,6 @@ export type MyAlliance = {
      * 4 Host, 5 Vice Host, 6 Presbyter, 7 Officer, 8 Member
      */
     myRank: number;
-    myRankName: string;
     alliance: AllianceProfile;
 };
 
@@ -5133,7 +5399,7 @@ export type AllianceList = {
 
 export type CreateAllianceResult = {
     id: number;
-    msg: string;
+    msg: Message;
 };
 
 export type AllianceMember = {
@@ -5144,10 +5410,6 @@ export type AllianceMember = {
      * alliance rank: 4 Host … 8 Member
      */
     levelId: number;
-    /**
-     * rank name
-     */
-    allianceLevel: string;
     prestige: number;
     honor: number;
     ranking: number;
@@ -5157,14 +5419,20 @@ export type AllianceMember = {
 };
 
 export type AllianceEvent = {
-    message: string;
+    message: Message;
     time: number;
 };
 
 export type AllianceMilitaryEntry = {
     direction: number;
-    startPosName: string;
-    targetPosName: string;
+    /**
+     * where the army set out from (`world.position.*`)
+     */
+    startPosName: Message;
+    /**
+     * where the army is headed (`world.position.*`)
+     */
+    targetPosName: Message;
     reachTime: number;
     armyId: number;
     king: string;
@@ -5296,30 +5564,38 @@ export type ConfigTroop = {
 
 export type ConfigItem = {
     legacyId: number;
+    /**
+     * item id; the client names it (data-items)
+     */
     id: string;
-    name: string;
     /**
      * price in city gold (null: not for sale)
      */
     goldPrice: number | null;
+    /**
+     * shop category id; the client names it (data-item-categories)
+     */
     type: number;
     dayLimit: number;
     rarity: number;
-    category: string;
-    description: string;
+    /**
+     * what the item does (`itemInfo.*`), worded by the client
+     */
+    description: Message;
     /**
      * direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect
      */
     use: 'direct' | 'elsewhere' | 'none';
-    howTo?: string;
+    /**
+     * where to use an item consumed by another action (`itemInfo.howTo.*`)
+     */
+    howTo?: Message;
 };
 
 export type ConfigQuestGroup = {
     id: number;
     mainId: number;
     isFinish: boolean;
-    description: string;
-    name: string;
     typeId: number;
     requires: {
         buildings: Array<number>;
@@ -5330,8 +5606,10 @@ export type ConfigQuestGroup = {
 };
 
 export type ConfigTitle = {
+    /**
+     * title id; the client names it (data-titles)
+     */
     id: number;
-    name: string;
     /**
      * cities a lord with this title may own
      */
@@ -5518,22 +5796,6 @@ export type StaticConfig = {
     gameSpeed: number;
     mapSize: number;
     /**
-     * state (zone) names by zone id
-     */
-    readonly states: Array<string>;
-    /**
-     * by building typeId
-     */
-    buildingNames: {
-        [key: string]: string;
-    };
-    /**
-     * by techId
-     */
-    techNames: {
-        [key: string]: string;
-    };
-    /**
      * one row per typeId and level
      */
     buildings: Array<ConfigBuildingLevel>;
@@ -5603,10 +5865,6 @@ export type MarketOrder = {
      * 0 buy, 1 sell
      */
     tradeType: number;
-    /**
-     * Bid | Offer
-     */
-    tradeTypeName: string;
     /**
      * amount filled so far
      */
@@ -5756,8 +6014,10 @@ export type GoldShopBuyResult = {
 };
 
 export type ShopItem = {
+    /**
+     * item id; the client names it (data-items)
+     */
     id: string;
-    name: string;
     dayLimit: number;
     /**
      * city gold
@@ -5766,8 +6026,10 @@ export type ShopItem = {
 };
 
 export type ShopCategory = {
+    /**
+     * item category id; the client names it (data-item-categories)
+     */
     typeId: number;
-    typeName: string;
     items: Array<ShopItem>;
 };
 
@@ -5788,9 +6050,8 @@ export type QuestAward = {
 };
 
 export type QuestGroupStatus = {
+    id: number;
     typeId: number;
-    name: string;
-    description: string;
     /**
      * the group has finished quests whose award is not claimed yet
      */
@@ -5803,10 +6064,15 @@ export type QuestBean = {
      * QuestGroupStatus.typeId
      */
     groupId: number;
-    name: string;
-    description: string;
+    /**
+     * `questInfo.description.*`, worded by the client (the quest is named by its id)
+     */
+    description: Message;
     targets: Array<{
-        name: string;
+        /**
+         * `questInfo.target.*`, worded by the client
+         */
+        text: Message;
         finished: boolean;
     }>;
     award: QuestAward;
@@ -5849,9 +6115,9 @@ export type RankingPlayerEntry = {
      */
     alliance: string;
     /**
-     * rank name inside the alliance, empty when none
+     * rank inside the alliance (4 Host … 8 Member), null when none
      */
-    allianceLevel: string;
+    allianceRank: number | null;
 };
 
 export type RankingPlayerPage = {
@@ -6086,18 +6352,6 @@ export type StaticConfigInputWritable = {
     gameSpeed: number;
     mapSize: number;
     /**
-     * by building typeId
-     */
-    buildingNames: {
-        [key: string]: string;
-    };
-    /**
-     * by techId
-     */
-    techNames: {
-        [key: string]: string;
-    };
-    /**
      * one row per typeId and level
      */
     buildings: Array<ConfigBuildingLevelInput>;
@@ -6259,18 +6513,6 @@ export type StaticConfigWritable = {
      */
     gameSpeed: number;
     mapSize: number;
-    /**
-     * by building typeId
-     */
-    buildingNames: {
-        [key: string]: string;
-    };
-    /**
-     * by techId
-     */
-    techNames: {
-        [key: string]: string;
-    };
     /**
      * one row per typeId and level
      */

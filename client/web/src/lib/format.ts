@@ -1,16 +1,49 @@
-import { BUILDING_NAMES, getGameSpeed, TROOP_NAMES } from '@marchlands/core';
+import { getGameSpeed } from '@marchlands/core';
+import { i18n } from '@/lib/i18n';
 
-const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
-const whole = new Intl.NumberFormat('en');
+/**
+ * Number formats for the current locale (made again when the locale changes). English locales share plain
+ * 'en' (en-GB alone would write 1.2m for 1.2M); others use their own (ja-JP: 12万).
+ */
+let formats: { lng: string; compact: Intl.NumberFormat; whole: Intl.NumberFormat; decimals: Map<string, Intl.NumberFormat> } | null = null;
+const numberLocale = () => (i18n.language.startsWith('en') ? 'en' : i18n.language);
+function numberFormats() {
+  if (formats?.lng !== i18n.language) {
+    const locale = numberLocale();
+    formats = {
+      lng: i18n.language,
+      compact: new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }),
+      whole: new Intl.NumberFormat(locale),
+      decimals: new Map(),
+    };
+  }
+  return formats;
+}
 
-export const fmt = (n: number) => (Math.abs(n) >= 100_000 ? compact.format(n) : whole.format(Math.floor(n)));
-export const fmtExact = (n: number) => whole.format(Math.floor(n));
+/** A number with up to `max` decimals (at least `min`), not abbreviated: 1,234.57. */
+export function fmtDecimal(n: number, max: number, min = 0): string {
+  const { decimals } = numberFormats();
+  const key = `${min}-${max}`;
+  let f = decimals.get(key);
+  if (!f) decimals.set(key, (f = new Intl.NumberFormat(numberLocale(), { minimumFractionDigits: min, maximumFractionDigits: max })));
+  return f.format(n);
+}
+
+/** A date and time in the current locale (11/10/2026, 13:14:10 in en-GB). */
+export const dateTime = (ms: number) => new Date(ms).toLocaleString(i18n.language);
+
+/** A time of day in the current locale; `short` leaves out the seconds. */
+export const clockTime = (ms: number, short = false) =>
+  new Date(ms).toLocaleTimeString(i18n.language, short ? { hour: '2-digit', minute: '2-digit' } : undefined);
+
+export const fmt = (n: number) => (Math.abs(n) >= 100_000 ? numberFormats().compact.format(n) : numberFormats().whole.format(Math.floor(n)));
+export const fmtExact = (n: number) => numberFormats().whole.format(Math.floor(n));
 export const signed = (n: number) => (n >= 0 ? `+${fmt(n)}` : `-${fmt(-n)}`);
 
 /** A per-game-hour rate (as the server computes it) per real hour: game time runs GAME_SPEED times faster. */
 export const realHourly = (perGameHour: number) => perGameHour * getGameSpeed();
 /** "+1.2M/h": a per-game-hour rate shown per real hour. */
-export const signedRate = (perGameHour: number) => `${signed(realHourly(perGameHour))}/h`;
+export const signedRate = (perGameHour: number) => i18n.t('common:units.perHour', { value: signed(realHourly(perGameHour)) });
 
 /** 1h 02m 03s */
 export function duration(ms: number): string {
@@ -22,10 +55,14 @@ export function duration(ms: number): string {
   const m = Math.floor(s / 60);
   s -= m * 60;
   const pad = (v: number) => String(v).padStart(2, '0');
-  if (d) return `${d}d ${h}h ${pad(m)}m`;
-  if (h) return `${h}h ${pad(m)}m ${pad(s)}s`;
-  if (m) return `${m}m ${pad(s)}s`;
-  return `${s}s`;
+  const days = (v: number) => i18n.t('common:units.days', { value: v });
+  const hours = (v: number) => i18n.t('common:units.hours', { value: v });
+  const minutes = (v: number | string) => i18n.t('common:units.minutes', { value: v });
+  const seconds = (v: number | string) => i18n.t('common:units.seconds', { value: v });
+  if (d) return `${days(d)} ${hours(h)} ${minutes(pad(m))}`;
+  if (h) return `${hours(h)} ${minutes(pad(m))} ${seconds(pad(s))}`;
+  if (m) return `${minutes(m)} ${seconds(pad(s))}`;
+  return seconds(s);
 }
 
 /** The two largest units: 4d 18h, 18h 03m, 5m 09s. */
@@ -33,12 +70,10 @@ export function shortDuration(ms: number): string {
   return duration(ms).split(' ').slice(0, 2).join(' ');
 }
 
-export const buildingName = (typeId: number) => BUILDING_NAMES[typeId] ?? `Building ${typeId}`;
-export const troopName = (troopId: number) => TROOP_NAMES[troopId] ?? `Unit ${troopId}`;
-
 export const RESOURCES = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 export type Resource = (typeof RESOURCES)[number];
-export const RESOURCE_LABEL: Record<Resource, string> = { gold: 'Gold', food: 'Food', wood: 'Lumber', stone: 'Stone', iron: 'Iron' };
+/** A resource's name as a label ("Lumber"). */
+export const resourceLabel = (r: Resource) => i18n.t(`common:resources.${r}`);
 
 /** A fraction as a whole percent: 0.25 -> 25%. */
 export const percent = (x: number) => `${Math.round(x * 100)}%`;

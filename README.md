@@ -65,7 +65,7 @@ marchlands/
 │       └── worker/           game clock: timed events (builds, research, training, marches,
 │                             battles, deliveries, buff expiry) + periodic jobs
 ├── client/
-│   └── web/                  Vite + React + Tailwind + shadcn/ui browser client
+│   └── web/                  Vite + React + Tailwind + shadcn/ui browser client (react-i18next: en-GB, en-US, ja-JP)
 ├── db/                       postgres config, init scripts, seed data (legacy map)
 ├── docs/
 │   ├── architecture.md       how it fits together (incl. the type pipeline)

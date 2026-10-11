@@ -1,16 +1,16 @@
 // Envelope and primitives shared by every endpoint.
 
 import { z } from 'zod';
-import { FortKeySchema, TroopKeySchema, type FortKey, type TroopKey } from '@marchlands/core';
+import { FortKeySchema, MessageSchema, TroopKeySchema, type FortKey, type TroopKey } from '@marchlands/core';
 
 /** Every successful call answers `{ ok: 1, data }`. */
 export const Ok = <T extends z.ZodType>(data: T) => z.object({ ok: z.literal(1), data });
 
-/** Failures answer `{ ok: <negative code>, errorMsg }` with a 4xx/5xx status. */
+/** Failures answer `{ ok: <negative code>, error: <message> }` with a 4xx/5xx status. */
 export const ErrorResponse = z
   .object({
     ok: z.number().int().describe('negative error code (the original server codes)'),
-    errorMsg: z.string(),
+    error: MessageSchema,
     issues: z.array(z.object({ path: z.string(), message: z.string().optional() })).optional(),
   })
   .meta({ id: 'ErrorResponse' });

@@ -4,14 +4,11 @@
 // (tech, mayor and valley production bonuses, troop food upkeep, starvation).
 
 import { BALANCE, getGameSpeed, scaled } from './balance.ts';
-import { BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, type ResourceKey, BuffId } from './constants.ts';
+import { BASIC_RESOURCES, BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, type BasicResource, BuffId } from './constants.ts';
 import { troopConfig } from './data/index.ts';
 import type { BuffState, BuildingState, CityMisc, ResearchState, ResourceSet, TroopCounts } from './types.ts';
 import { mayorProductionBonus } from './heroes.ts';
 import { merchantBase } from './merchant.ts';
-
-export type BasicResource = Exclude<ResourceKey, 'gold'>;
-export const BASIC_RESOURCES: readonly BasicResource[] = ['food', 'wood', 'stone', 'iron'];
 
 /** Field building that produces each basic resource. */
 export const FIELD_FOR_RESOURCE: Record<BasicResource, number> = {
@@ -227,7 +224,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   }
 
   let upkeep = troopUpkeep(city.troops) + troopUpkeep(ctx.awayTroops);
-  if (hasBuff(ctx.buffs, BuffId.UPKEEP_REDUCE, now)) upkeep *= 0.5;
+  if (hasBuff(ctx.buffs, BuffId.UPKEEP_REDUCE, now)) upkeep *= 1 - BALANCE.upkeepBuffReduction;
   // rates are per game hour; with upkeepPerRealHour troops eat their upkeep per real hour instead,
   // i.e. 1/GAME_SPEED of it per game hour, so a faster game does not make them hungrier
   if (BALANCE.upkeepPerRealHour) upkeep /= getGameSpeed();

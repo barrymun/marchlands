@@ -1,5 +1,6 @@
-import { ITEM_INFO, itemConfig, itemEffect, itemGoldPrice } from '@marchlands/core';
+import { ITEMS, itemEffect, itemGoldPrice } from '@marchlands/core';
 import { STORE_KEY } from '@/components/active-effects/constants';
+import { i18n } from '@/lib/i18n';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
 
 export function readCollapsed(): boolean {
@@ -20,7 +21,7 @@ export function slotItems(slot: Slot): string[] {
     const e = itemEffect(id);
     return e?.kind === 'buff' ? e.durationMs : 0;
   };
-  return ITEM_INFO.filter((i) => {
+  return ITEMS.filter((i) => {
     const e = itemEffect(i.id);
     return e?.kind === 'buff' && e.buff === slot.buff;
   })
@@ -28,13 +29,12 @@ export function slotItems(slot: Slot): string[] {
     .sort((a, b) => durationOf(b) - durationOf(a));
 }
 
-export const itemName = (id: string) => itemConfig(id)?.name.trim() ?? id;
-
+/** How long using an item extends its bonus ("7 days", "6 hours"), or '' for an item that gives no timed bonus. */
 export function adds(id: string) {
   const e = itemEffect(id);
   if (e?.kind !== 'buff') return '';
   const days = e.durationMs / 86_400_000;
-  return days >= 1 ? `${days} day${days === 1 ? '' : 's'}` : `${Math.round(e.durationMs / 3_600_000)} hours`;
+  return days >= 1 ? i18n.t('common:durations.days', { count: days }) : i18n.t('common:durations.hours', { count: Math.round(e.durationMs / 3_600_000) });
 }
 
 export function extensionFor(slot: Slot, active: Buff | undefined, counts: Map<string, number>): Extension {

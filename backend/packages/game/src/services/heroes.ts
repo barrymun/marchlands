@@ -31,6 +31,10 @@ import {
   type GearStat,
   type GeneratedHero,
   HeroBuffId,
+  heroBuffDesc,
+  msg,
+  ref,
+  TechType,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
 import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
@@ -89,7 +93,7 @@ async function fillTavern(ctx: Ctx, b: CityBundle, regenerate: boolean) {
 
 async function own(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewCity(ctx, cityId);
-  if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (b.city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   return b;
 }
 
@@ -122,7 +126,7 @@ export async function reorderHeroes(ctx: Ctx, playerId: number, cityId: number, 
 /** hero.getHerosListFromTavern */
 export async function tavern(ctx: Ctx, playerId: number, cityId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  if (buildingLevel(b.city.buildings, BuildingType.INN) < 1) throw new GameError('You need an Inn to recruit heroes.', -1);
+  if (buildingLevel(b.city.buildings, BuildingType.INN) < 1) throw new GameError(msg('hero.needInn', { building: ref.building(BuildingType.INN) }), -1);
   const offers = await fillTavern(ctx, b, false);
   return tavernBean(b, offers);
 }
@@ -142,8 +146,8 @@ function tavernBean(b: CityBundle, offers: HeroRow[]) {
 export async function refreshTavern(ctx: Ctx, playerId: number, cityId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const inn = buildingLevel(b.city.buildings, BuildingType.INN);
-  if (inn < 1) throw new GameError('You need an Inn to recruit heroes.', -99);
-  spendResources(b.city, { gold: tavernRefreshCost(inn) }, 'Not enough gold!', -99);
+  if (inn < 1) throw new GameError(msg('hero.needInn', { building: ref.building(BuildingType.INN) }), -99);
+  spendResources(b.city, { gold: tavernRefreshCost(inn) }, msg('common.notEnoughGold'), -99);
   ctx.stat(b.player.id, b.city.id, { 'spent.heroes.gold': tavernRefreshCost(inn) });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
@@ -154,10 +158,10 @@ export async function refreshTavern(ctx: Ctx, playerId: number, cityId: number) 
 /** hero.hireHero (by offer id rather than the original's name matching). */
 export async function hire(ctx: Ctx, playerId: number, cityId: number, heroId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  if (heroSlots(b) <= b.heroes.length) throw new GameError('Insufficient vacancies in Feasting Hall.', -99);
+  if (heroSlots(b) <= b.heroes.length) throw new GameError(msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }), -99);
   const h = await getHero(ctx, heroId, { lock: true });
-  if (!h.inTavern || h.cityId !== cityId) throw new GameError('Hero does not exist!', -99, 404);
-  spendResources(b.city, { gold: heroHireCost(h.level) }, 'Not enough gold!', -99);
+  if (!h.inTavern || h.cityId !== cityId) throw new GameError(msg('common.heroNotFound'), -99, 404);
+  spendResources(b.city, { gold: heroHireCost(h.level) }, msg('common.notEnoughGold'), -99);
   ctx.stat(playerId, cityId, { 'spent.heroes.gold': heroHireCost(h.level), 'heroes.hired': 1 });
   Object.assign(h, { inTavern: false, playerId, status: HeroStatus.IDLE });
   await saveHero(ctx, h);
@@ -169,7 +173,7 @@ export async function hire(ctx: Ctx, playerId: number, cityId: number, heroId: n
 
 async function ownHero(ctx: Ctx, playerId: number, heroId: number) {
   const h = await getHero(ctx, heroId, { lock: true });
-  if (h.playerId !== playerId || h.inTavern) throw new GameError('Hero does not exist!', -99, 404);
+  if (h.playerId !== playerId || h.inTavern) throw new GameError(msg('common.heroNotFound'), -99, 404);
   return h;
 }
 
@@ -178,8 +182,8 @@ export async function fire(ctx: Ctx, playerId: number, heroId: number) {
   const pre = await ownHero(ctx, playerId, heroId);
   const b = await openOwnCity(ctx, playerId, pre.cityId);
   const h = await getHero(ctx, heroId, { lock: true });
-  if (h.status !== HeroStatus.IDLE) throw new GameError('Status of this hero is not Idle!', -80);
-  if (h.locked) throw new GameError(`${h.name} is locked: unlock the hero before dismissing them.`, -80);
+  if (h.status !== HeroStatus.IDLE) throw new GameError(msg('hero.notIdle'), -80);
+  if (h.locked) throw new GameError(msg('hero.locked', { name: h.name }), -80);
   await ctx.tx.delete(heroes).where(eq(heroes.id, heroId));
   b.heroes = b.heroes.filter((x) => x.id !== heroId);
   pushHero(ctx, playerId, h, 1);
@@ -201,7 +205,7 @@ export async function appointMayor(ctx: Ctx, playerId: number, heroId: number) {
   const pre = await ownHero(ctx, playerId, heroId);
   const b = await openOwnCity(ctx, playerId, pre.cityId);
   const h = b.heroes.find((x) => x.id === heroId)!;
-  if (h.status !== HeroStatus.IDLE && h.status !== HeroStatus.MAYOR) throw new GameError('Status of this hero is not Idle!', -80);
+  if (h.status !== HeroStatus.IDLE && h.status !== HeroStatus.MAYOR) throw new GameError(msg('hero.notIdle'), -80);
   for (const other of b.heroes) {
     if (other.status === HeroStatus.MAYOR && other.id !== heroId) {
       other.status = HeroStatus.IDLE;
@@ -220,7 +224,7 @@ export async function appointMayor(ctx: Ctx, playerId: number, heroId: number) {
 export async function dischargeMayor(ctx: Ctx, playerId: number, cityId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const m = b.heroes.find((x) => x.status === HeroStatus.MAYOR);
-  if (!m) throw new GameError('Castellan is not appointed yet.', -99);
+  if (!m) throw new GameError(msg('hero.noMayor'), -99);
   m.status = HeroStatus.IDLE;
   await saveHero(ctx, m);
   pushHero(ctx, playerId, m, 2);
@@ -231,7 +235,7 @@ export async function dischargeMayor(ctx: Ctx, playerId: number, cityId: number)
 /** hero.resetPoint: consumes Holy Water, or buys one with the hero's city gold (the original never charged for it). */
 export async function resetPoints(ctx: Ctx, playerId: number, heroId: number) {
   const h = await ownHero(ctx, playerId, heroId);
-  if (h.status !== HeroStatus.IDLE && h.status !== HeroStatus.MAYOR) throw new GameError('Status of this hero is not Idle!', -80);
+  if (h.status !== HeroStatus.IDLE && h.status !== HeroStatus.MAYOR) throw new GameError(msg('hero.notIdle'), -80);
   const p = await getPlayer(ctx, playerId, { lock: true });
   let city = await openMayorCity(ctx, h);
   if (itemCount(p, 'hero.reset.1') > 0) addItem(ctx, p, 'hero.reset.1', -1);
@@ -269,7 +273,7 @@ export async function assignPoints(ctx: Ctx, playerId: number, heroId: number, v
   const cap = heroPointCap(h);
   const ints = [v.power, v.management, v.stratagem].every((n) => Number.isInteger(n));
   if (!ints || v.power + v.management + v.stratagem > cap || v.power < h.power || v.management < h.management || v.stratagem < h.stratagem) {
-    throw new GameError('Invalid action.', -99);
+    throw new GameError(msg('hero.invalidPoints'), -99);
   }
   const city = await openMayorCity(ctx, h);
   Object.assign(h, { power: v.power, management: v.management, stratagem: v.stratagem, remainPoint: cap - (v.power + v.management + v.stratagem) });
@@ -282,11 +286,11 @@ export async function assignPoints(ctx: Ctx, playerId: number, heroId: number, v
 /** hero.levelUp; (marchlands) takes every level the experience pays for in one go, up to BALANCE.heroMaxLevel. */
 export async function levelUp(ctx: Ctx, playerId: number, heroId: number) {
   const h = await ownHero(ctx, playerId, heroId);
-  if (heroAtMaxLevel(h)) throw new GameError(`This hero is already at the maximum level (${BALANCE.heroMaxLevel}).`, -99);
+  if (heroAtMaxLevel(h)) throw new GameError(msg('hero.maxLevel', { level: BALANCE.heroMaxLevel }), -99);
   // a higher level can unlock more gear (gear tier), which may change a mayor's politics
   const city = await openMayorCity(ctx, h);
   const levels = levelUpAll(h);
-  if (levels === 0) throw new GameError('Not enough experience.', -99);
+  if (levels === 0) throw new GameError(msg('hero.notEnoughExperience'), -99);
   ctx.stat(playerId, h.cityId ?? 0, { 'levels.hero': levels });
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
@@ -296,7 +300,7 @@ export async function levelUp(ctx: Ctx, playerId: number, heroId: number) {
 
 /** (marchlands) Choose the attribute the lord's gear boosts on this hero; free, any time. */
 export async function setHeroGearStat(ctx: Ctx, playerId: number, heroId: number, stat: GearStat) {
-  if (!GEAR_STATS.includes(stat)) throw new GameError('Invalid attribute.', -99);
+  if (!GEAR_STATS.includes(stat)) throw new GameError(msg('hero.invalidAttribute'), -99);
   const h = await ownHero(ctx, playerId, heroId);
   const city = await openMayorCity(ctx, h);
   h.gearStat = stat;
@@ -333,14 +337,14 @@ export async function gearState(ctx: Ctx, playerId: number) {
 
 /** (marchlands) Add a star to one gear piece for every hero, paid in medals (gearStarCost). */
 export async function buyGearStar(ctx: Ctx, playerId: number, pieceId: string) {
-  if (!isGearPiece(pieceId)) throw new GameError('Invalid gear piece.', -99);
+  if (!isGearPiece(pieceId)) throw new GameError(msg('hero.invalidGearPiece'), -99);
   const p = await getPlayer(ctx, playerId, { lock: true });
   const stars = p.misc.gearStars?.[pieceId] ?? 0;
-  if (stars >= BALANCE.heroGear.maxStars) throw new GameError('This piece already has every star.', -99);
+  if (stars >= BALANCE.heroGear.maxStars) throw new GameError(msg('hero.gearMaxStars'), -99);
   const limit = gearStarLimit(lordGear(p));
-  if (stars >= limit) throw new GameError(`Stars cannot go beyond your Hero Enhancement level (${limit}): research level ${stars + 1} first.`, -99);
+  if (stars >= limit) throw new GameError(msg('hero.gearStarLimit', { tech: ref.tech(TechType.HERO_ENHANCEMENT), limit, level: stars + 1 }), -99);
   const cost = gearStarCost(stars + 1);
-  if (itemCount(p, cost.itemId) < cost.count) throw new GameError(`Not enough medals: ${cost.count} needed.`, -99);
+  if (itemCount(p, cost.itemId) < cost.count) throw new GameError(msg('hero.notEnoughMedals', { item: ref.item(cost.itemId), amount: cost.count }), -99);
   addItem(ctx, p, cost.itemId, -cost.count);
   p.misc = { ...p.misc, gearStars: { ...p.misc.gearStars, [pieceId]: stars + 1 } };
   await savePlayer(ctx, p);
@@ -351,12 +355,12 @@ export async function buyGearStar(ctx: Ctx, playerId: number, pieceId: string) {
 /** hero.awardGold: +5 loyalty for level x 100 gold. */
 export async function reward(ctx: Ctx, playerId: number, heroId: number) {
   const pre = await ownHero(ctx, playerId, heroId);
-  if (pre.loyalty >= 100) throw new GameError('This hero is already completely loyal.', -99);
+  if (pre.loyalty >= BALANCE.heroMaxLoyalty) throw new GameError(msg('hero.fullyLoyal'), -99);
   const b = await openOwnCity(ctx, playerId, pre.cityId);
   const h = b.heroes.find((x) => x.id === heroId)!;
-  spendResources(b.city, { gold: heroAwardCost(h.level) }, 'Not enough gold', -99);
+  spendResources(b.city, { gold: heroAwardCost(h.level) }, msg('common.notEnoughGold'), -99);
   ctx.stat(playerId, b.city.id, { 'spent.heroes.gold': heroAwardCost(h.level) });
-  h.loyalty = Math.min(100, h.loyalty + 5);
+  h.loyalty = Math.min(BALANCE.heroMaxLoyalty, h.loyalty + 5);
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
   pushResources(ctx, b);
@@ -372,24 +376,24 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
   // buying with gold (asked for, or the item is not owned): the hero's city pays (BALANCE.heroItemGold)
   let paidInGold = false;
   const price = heroItemGoldPrice(itemId, h.upgradeExp);
-  if (payWith === 'gold' && price == null) throw new GameError('This item cannot be bought with gold.', -99);
+  if (payWith === 'gold' && price == null) throw new GameError(msg('hero.itemNotForGold'), -99);
   if (price != null && (payWith === 'gold' || itemCount(p, itemId) <= 0)) {
     city ??= await openOwnCity(ctx, playerId, h.cityId);
-    if (city.city.gold < price) throw new GameError(`Not enough gold: ${price.toLocaleString('en')} needed.`, -99);
+    if (city.city.gold < price) throw new GameError(msg('common.notEnoughGoldFor', { amount: price }), -99);
     city.city.gold -= price;
     ctx.stat(playerId, city.city.id, { 'spent.items.gold': price, [`items.used.${itemId}`]: 1 });
     paidInGold = true;
   }
   if (itemId.startsWith('player.experience.1.')) {
-    if (heroAtMaxLevel(h)) throw new GameError(`This hero is at the maximum level (${BALANCE.heroMaxLevel}) and gains no more experience.`, -99);
+    if (heroAtMaxLevel(h)) throw new GameError(msg('hero.maxLevelNoExperience', { level: BALANCE.heroMaxLevel }), -99);
     const gain = experienceItemGain(itemId, h.upgradeExp);
-    if (!gain) throw new GameError('Invalid Item.', -99);
+    if (!gain) throw new GameError(msg('hero.invalidItem'), -99);
     if (!paidInGold) consumeItem(ctx, p, itemId);
     h.experience += gain;
   } else if (LOYALTY_MEDALS[itemId]) {
-    if (itemCount(p, itemId) <= 0) throw new GameError('No Item.', -99);
+    if (itemCount(p, itemId) <= 0) throw new GameError(msg('common.insufficientItems'), -99);
     addItem(ctx, p, itemId, -1);
-    h.loyalty = Math.min(100, h.loyalty + LOYALTY_MEDALS[itemId]);
+    h.loyalty = Math.min(BALANCE.heroMaxLoyalty, h.loyalty + LOYALTY_MEDALS[itemId]);
   } else if (HERO_ATTRIBUTE_ITEMS[itemId]) {
     const attr = HERO_ATTRIBUTE_ITEMS[itemId];
     if (!paidInGold) consumeItem(ctx, p, itemId);
@@ -397,12 +401,12 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     // (marchlands) stacks like the lord's item boosts: another use adds its time to what is left (orig: restarted it)
     const running = h.buffs.find((x) => x.id === attr && x.endTime > ctx.now);
     const endTime = (running?.endTime ?? ctx.now) + HERO_ATTRIBUTE_BUFF.durationMs;
-    h.buffs = [...h.buffs.filter((x) => x.id !== attr), { id: attr, desc: `${attr} +25%`, endTime, param: amount }];
+    h.buffs = [...h.buffs.filter((x) => x.id !== attr), { id: attr, desc: heroBuffDesc(attr), endTime, param: amount }];
     if (attr === HeroBuffId.POWER) h.powerBuffAdded = amount;
     if (attr === HeroBuffId.MANAGEMENT) h.managementBuffAdded = amount;
     if (attr === HeroBuffId.STRATAGEM) h.stratagemBuffAdded = amount;
     ctx.schedule({ type: 'hero.buff', dueAt: endTime, playerId, refKey: `herobuff:${h.id}:${attr}`, payload: { heroId: h.id, attr } });
-  } else throw new GameError('Invalid Item.', -99);
+  } else throw new GameError(msg('hero.invalidItem'), -99);
   await saveHero(ctx, h);
   await savePlayer(ctx, p);
   pushHero(ctx, playerId, h, 2);
@@ -428,7 +432,7 @@ export async function expireHeroBuff(ctx: Ctx, heroId: number, attr: string) {
 /** hero.changeName */
 export async function renameHero(ctx: Ctx, playerId: number, heroId: number, name: string) {
   const h = await ownHero(ctx, playerId, heroId);
-  const n = cleanName(name, 1, 20, 'Hero name');
+  const n = cleanName(name, 1, 20, msg('common.heroName'));
   assertClean(n);
   h.name = n;
   await saveHero(ctx, h);
@@ -439,7 +443,7 @@ export async function renameHero(ctx: Ctx, playerId: number, heroId: number, nam
 /** hero.releaseHero: the captor frees a seized hero; it walks home idle with loyalty 70. */
 export async function releaseCaptive(ctx: Ctx, captorId: number, heroId: number) {
   const h = await getHero(ctx, heroId, { lock: true });
-  if (h.capturedByPlayerId !== captorId || h.status !== HeroStatus.SEIZED) throw new GameError('Hero is not your prisoner.', -99);
+  if (h.capturedByPlayerId !== captorId || h.status !== HeroStatus.SEIZED) throw new GameError(msg('hero.notPrisoner'), -99);
   const home = (h.buffs.find((x) => x.id === HeroBuffId.HOME_CITY)?.param ?? 0) as number;
   const homeCity = home ? await findCity(ctx, home) : undefined;
   if (!homeCity || homeCity.playerId !== h.playerId) {
@@ -466,11 +470,11 @@ export async function releaseCaptive(ctx: Ctx, captorId: number, heroId: number)
  */
 export async function persuadeCaptive(ctx: Ctx, captorId: number, heroId: number) {
   const h = await getHero(ctx, heroId, { lock: true });
-  if (h.capturedByPlayerId !== captorId || h.status !== HeroStatus.SEIZED) throw new GameError('Hero is not your prisoner.', -99);
-  if (h.loyalty > 0) throw new GameError('This hero is still loyal to their owner.', -99);
+  if (h.capturedByPlayerId !== captorId || h.status !== HeroStatus.SEIZED) throw new GameError(msg('hero.notPrisoner'), -99);
+  if (h.loyalty > 0) throw new GameError(msg('hero.stillLoyal'), -99);
   const b = await openOwnCity(ctx, captorId, h.cityId);
   const hired = b.heroes.filter((x) => x.playerId === captorId).length;
-  if (hired >= heroSlots(b)) throw new GameError('Insufficient vacancies in Feasting Hall.', -99);
+  if (hired >= heroSlots(b)) throw new GameError(msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }), -99);
   const formerOwner = h.playerId;
   Object.assign(h, { playerId: captorId, status: HeroStatus.IDLE, capturedByPlayerId: null, loyalty: 50, buffs: [] });
   await saveHero(ctx, h);

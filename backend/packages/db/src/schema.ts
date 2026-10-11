@@ -44,6 +44,7 @@ import type {
   FlowPreviewLog,
   FlowRunLog,
   FlowStatus,
+  Message,
 } from './types.ts';
 
 const ms = (name: string) => bigint(name, { mode: 'number' });
@@ -281,9 +282,9 @@ export const armies = pgTable(
     reachTime: ms('reach_time').notNull(),
     /** requested camping time (ms) at the target */
     restTime: ms('rest_time').notNull().default(0),
-    /** human readable names captured at send time */
-    startPosName: text('start_pos_name').notNull(),
-    targetPosName: text('target_pos_name').notNull(),
+    /** where the army set out from and is headed, as messages (`world.position.*`) captured at send time */
+    startPosName: jsonb('start_pos_name').$type<Message>().notNull(),
+    targetPosName: jsonb('target_pos_name').$type<Message>().notNull(),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [
@@ -335,7 +336,7 @@ export const flows = pgTable(
     /** while held before its next actions until every hero of its cities is home: since when (flows held earlier go first); 0 = not held */
     heldSince: ms('held_since').notNull().default(0),
     /** why the flow last stopped on its own (a failed run), or null */
-    stopReason: text('stop_reason'),
+    stopReason: jsonb('stop_reason').$type<Message>(),
     lastRun: jsonb('last_run').$type<FlowRunLog>(),
     /** the latest preview's report; cleared when a run starts, the flow is edited or repeat is switched */
     lastPreview: jsonb('last_preview').$type<FlowPreviewLog>(),
@@ -386,6 +387,8 @@ export const mails = pgTable(
     otherPlayerName: text('other_player_name').notNull().default(''),
     title: text('title').notNull(),
     content: text('content').notNull(),
+    /** mail the game itself sends: its title and content as messages (the client words them); `title` and `content` stay empty */
+    system: jsonb('system').$type<{ title: Message; content: Message }>(),
     sentAt: ms('sent_at').notNull(),
     readAt: ms('read_at').notNull().default(0),
   },
@@ -405,9 +408,11 @@ export const reports = pgTable(
     armyType: smallint('army_type').notNull().default(0),
     isAttack: boolean('is_attack').notNull().default(false),
     isBack: boolean('is_back').notNull().default(false),
-    title: text('title').notNull(),
-    startPos: text('start_pos').notNull().default(''),
-    targetPos: text('target_pos').notNull().default(''),
+    /** what the report is, as a message (core messages; the client words it) */
+    title: jsonb('title').$type<Message>().notNull(),
+    /** where the army set out from and went to, as messages (`world.position.*`); null when the report has none */
+    startPos: jsonb('start_pos').$type<Message>(),
+    targetPos: jsonb('target_pos').$type<Message>(),
     body: jsonb('body').$type<ReportBody>().notNull(),
     eventTime: ms('event_time').notNull(),
     isRead: boolean('is_read').notNull().default(false),
@@ -519,7 +524,8 @@ export const allianceEvents = pgTable(
     allianceId: integer('alliance_id')
       .notNull()
       .references(() => alliances.id, { onDelete: 'cascade' }),
-    message: text('message').notNull(),
+    /** what happened, as a message (core messages; the client words it) */
+    message: jsonb('message').$type<Message>().notNull(),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [index('alliance_events_idx').on(t.allianceId, t.createdAt)],

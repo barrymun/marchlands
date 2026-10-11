@@ -1,126 +1,158 @@
-// Player-facing technology descriptions. Each effect mirrors where the tech is used (economy,
-// construction, troops/marching, the battle simulator in `fixes` mode, scouting), with numbers
-// taken from BALANCE, so the text follows the rules. "Unlocks" is derived from the requirement data.
+// Player-facing technology descriptions, as messages (`techInfo.*`, worded by the client). Each effect mirrors
+// where the tech is used (economy, construction, troops/marching, the battle simulator in `fixes` mode,
+// scouting), with numbers taken from BALANCE, so the text follows the rules. "Unlocks" is derived from the
+// requirement data and names nothing: the client names each entry by its id.
 
 import { BALANCE } from './balance.ts';
-import { BUILDING_NAMES, TECH_NAMES, TechType, TROOP_NAMES } from './constants.ts';
+import { FortType, TechType, TroopType } from './constants.ts';
+import { isFortType, SIEGE } from './construction.ts';
 import { BUILDINGS, RESEARCH, TROOPS } from './data/index.ts';
 import { GEAR_PIECES, gearLevelPoints } from './gear.ts';
+import { msg, ref, type Message } from './messages/index.ts';
 
-const pct = (x: number) => `${Math.round(x * 1000) / 10}%`;
+/** A fraction as a percentage, to one decimal (0.125 → 12.5). */
+const pct = (x: number) => Math.round(x * 1000) / 10;
 const timeCut = (level: number) => pct(1 - Math.pow(BALANCE.techTimeFactor, level));
 
+// Battle bonuses per level, as the battle simulator applies them (battle/simulator.ts, battle/resolve.ts).
+const BATTLE_ATTACK_PCT = 5;
+const BATTLE_DEFENCE_PCT = 5;
+const BATTLE_LIFE_PCT = 5;
+const BATTLE_RANGE_PCT = 5;
+const BATTLE_FOOT_SPEED_PCT = 10;
+const BATTLE_MOUNTED_SPEED_PCT = 5;
+/** Most of the fallen troops Medicine can save (troops.ts injuredShare). */
+const MEDICINE_MAX = 0.5;
+
 interface TechText {
-  /** what one level does, in a sentence */
-  summary: string;
+  /** what one level does */
+  summary: Message;
   /** the total effect at `level` (level > 0) */
-  effect?: (level: number) => string;
+  effect?: (level: number) => Message;
 }
 
-const RES_TECH: Record<number, string> = {
+const RES_TECH = {
   [TechType.AGRICULTURE]: 'food',
-  [TechType.LUMBERING]: 'lumber',
+  [TechType.LUMBERING]: 'wood',
   [TechType.MASONRY]: 'stone',
   [TechType.MINING]: 'iron',
-};
+} as const;
 
 const TEXT: Record<number, TechText> = {
   ...Object.fromEntries(
     Object.entries(RES_TECH).map(([id, res]) => [
       Number(id),
       {
-        summary: `+${pct(BALANCE.resourceTechBonusPerLevel)} ${res} production per level (on field output).`,
-        effect: (l: number) => `+${pct(l * BALANCE.resourceTechBonusPerLevel)} ${res} production`,
+        summary: msg('techInfo.summary.resource', { resource: ref.resource(res), pct: pct(BALANCE.resourceTechBonusPerLevel) }),
+        effect: (l: number) => msg('techInfo.effect.resource', { resource: ref.resource(res), pct: pct(l * BALANCE.resourceTechBonusPerLevel) }),
       },
     ]),
   ),
   [TechType.STOCKPILE]: {
-    summary: `+${pct(BALANCE.stockpileStorageBonusPerLevel)} storage for food, lumber, stone and iron per level.`,
-    effect: (l) => `+${pct(l * BALANCE.stockpileStorageBonusPerLevel)} storage`,
+    summary: msg('techInfo.summary.stockpile', { pct: pct(BALANCE.stockpileStorageBonusPerLevel) }),
+    effect: (l) => msg('techInfo.effect.stockpile', { pct: pct(l * BALANCE.stockpileStorageBonusPerLevel) }),
   },
   [TechType.CONSTRUCTION]: {
-    summary: `Building, demolition and fortification times ×${BALANCE.techTimeFactor} per level.`,
-    effect: (l) => `−${timeCut(l)} build, demolish and fortification time`,
+    summary: msg('techInfo.summary.construction', { factor: BALANCE.techTimeFactor }),
+    effect: (l) => msg('techInfo.effect.construction', { pct: timeCut(l) }),
   },
   [TechType.MILITARY_SCIENCE]: {
-    summary: `Training time of every troop except siege units ×${BALANCE.techTimeFactor} per level.`,
-    effect: (l) => `−${timeCut(l)} troop training time`,
+    summary: msg('techInfo.summary.militaryScience', { factor: BALANCE.techTimeFactor }),
+    effect: (l) => msg('techInfo.effect.militaryScience', { pct: timeCut(l) }),
   },
   [TechType.METAL_CASTING]: {
-    summary: `Training time of siege units (ballistas, battering rams, catapults) ×${BALANCE.techTimeFactor} per level.`,
-    effect: (l) => `−${timeCut(l)} siege training time`,
+    summary: msg('techInfo.summary.metalCasting', { troops: [...SIEGE].sort((a, b) => a - b).map(ref.troop), factor: BALANCE.techTimeFactor }),
+    effect: (l) => msg('techInfo.effect.metalCasting', { pct: timeCut(l) }),
   },
   [TechType.HERO_ENHANCEMENT]: {
-    summary: `Raises all ${GEAR_PIECES.length} pieces of every hero's gear one level: a piece at level L adds 1 + 2 + … + L points to the hero's gear attribute. Heroes use gear levels up to their gear tier (none at hero levels 1-9, 1 at 10-19, … 9 at 90-99, 10 at level ${BALANCE.heroMaxLevel}).`,
-    effect: (l) => `gear level ${l}: up to +${GEAR_PIECES.length * gearLevelPoints(l)} hero attribute`,
+    summary: msg('techInfo.summary.heroEnhancement', {
+      count: GEAR_PIECES.length,
+      maxTier: BALANCE.heroGear.maxLevel,
+      heroMaxLevel: BALANCE.heroMaxLevel,
+    }),
+    effect: (l) => msg('techInfo.effect.heroEnhancement', { level: l, points: GEAR_PIECES.length * gearLevelPoints(l) }),
   },
   [TechType.MILITARY_TRADITION]: {
-    summary: 'Troop attack +5% per level in battle.',
-    effect: (l) => `+${l * 5}% troop attack`,
+    summary: msg('techInfo.summary.militaryTradition', { pct: BATTLE_ATTACK_PCT }),
+    effect: (l) => msg('techInfo.effect.militaryTradition', { pct: l * BATTLE_ATTACK_PCT }),
   },
   [TechType.IRON_WORKING]: {
-    summary: "Troops and Archer's Towers take less damage: defence +5% per level in battle.",
-    effect: (l) => `+${l * 5}% troop defence`,
+    summary: msg('techInfo.summary.ironWorking', { tower: ref.troop(FortType.ARCHER_TOWER), pct: BATTLE_DEFENCE_PCT }),
+    effect: (l) => msg('techInfo.effect.ironWorking', { pct: l * BATTLE_DEFENCE_PCT }),
   },
   [TechType.MEDICINE]: {
-    summary: `Life of foot troops (workers to archers) and Archer's Towers +5% per level in battle. ${pct(BALANCE.medicinePerLevel)} per level of the troops you lose (up to 50%), defending your city or attacking, survive as injured troops you can heal with resources or honor.`,
-    effect: (l) => `+${l * 5}% foot troop life, ${pct(Math.min(0.5, l * BALANCE.medicinePerLevel))} of fallen troops recover injured`,
+    summary: msg('techInfo.summary.medicine', {
+      from: ref.troop(TroopType.WORKER),
+      to: ref.troop(TroopType.ARCHER),
+      tower: ref.troop(FortType.ARCHER_TOWER),
+      pct: BATTLE_LIFE_PCT,
+      injured: pct(BALANCE.medicinePerLevel),
+      max: pct(MEDICINE_MAX),
+    }),
+    effect: (l) => msg('techInfo.effect.medicine', { life: l * BATTLE_LIFE_PCT, injured: pct(Math.min(MEDICINE_MAX, l * BALANCE.medicinePerLevel)) }),
   },
   [TechType.ARCHERY]: {
-    summary: "Range of archers, ballistas, catapults and Archer's Towers +5% per level in battle.",
-    effect: (l) => `+${l * 5}% range`,
+    summary: msg('techInfo.summary.archery', {
+      troops: [TroopType.ARCHER, TroopType.BALLISTA, TroopType.CATAPULT, FortType.ARCHER_TOWER].map(ref.troop),
+      pct: BATTLE_RANGE_PCT,
+    }),
+    effect: (l) => msg('techInfo.effect.archery', { pct: l * BATTLE_RANGE_PCT }),
   },
   [TechType.COMPASS]: {
-    summary: `Foot troops march +${pct(BALANCE.compassSpeedPerLevel)} faster per level, and move +10% faster per level in battle.`,
-    effect: (l) => `+${pct(l * BALANCE.compassSpeedPerLevel)} foot troop speed`,
+    summary: msg('techInfo.summary.compass', { march: pct(BALANCE.compassSpeedPerLevel), battle: BATTLE_FOOT_SPEED_PCT }),
+    effect: (l) => msg('techInfo.effect.compass', { pct: pct(l * BALANCE.compassSpeedPerLevel) }),
   },
   [TechType.HORSEBACK_RIDING]: {
-    summary: `Mounted and siege units march +${pct(BALANCE.horsebackSpeedPerLevel)} faster per level, and move +5% faster per level in battle.`,
-    effect: (l) => `+${pct(l * BALANCE.horsebackSpeedPerLevel)} mounted and siege speed`,
+    summary: msg('techInfo.summary.horsebackRiding', { march: pct(BALANCE.horsebackSpeedPerLevel), battle: BATTLE_MOUNTED_SPEED_PCT }),
+    effect: (l) => msg('techInfo.effect.horsebackRiding', { pct: pct(l * BALANCE.horsebackSpeedPerLevel) }),
   },
   [TechType.LOGISTICS]: {
-    summary: `Armies carry +${pct(BALANCE.logisticsLoadPerLevel)} more resources per level (plunder and transport).`,
-    effect: (l) => `+${pct(l * BALANCE.logisticsLoadPerLevel)} carrying capacity`,
+    summary: msg('techInfo.summary.logistics', { pct: pct(BALANCE.logisticsLoadPerLevel) }),
+    effect: (l) => msg('techInfo.effect.logistics', { pct: pct(l * BALANCE.logisticsLoadPerLevel) }),
   },
   [TechType.INFORMATICS]: {
-    summary: "Better scouting of other players' cities: level 1 also reveals their heroes, level 2 also their buildings.",
-    effect: (l) => (l >= 2 ? 'scouts see troops, resources, heroes and buildings' : 'scouts see troops, resources and heroes'),
+    summary: msg('techInfo.summary.informatics', { heroes: 1, buildings: 2 }),
+    effect: (l) => (l >= 2 ? msg('techInfo.effect.informaticsBuildings') : msg('techInfo.effect.informaticsHeroes')),
   },
-  [TechType.MACHINERY]: { summary: 'No effect on this server yet.' },
-  [TechType.ENGINEERING]: { summary: 'No effect on this server yet.' },
-  [TechType.PRIVATEERING]: { summary: 'No effect on this server yet.' },
+  [TechType.MACHINERY]: { summary: msg('techInfo.summary.none') },
+  [TechType.ENGINEERING]: { summary: msg('techInfo.summary.none') },
+  [TechType.PRIVATEERING]: { summary: msg('techInfo.summary.none') },
 };
+
+export type TechUnlockKind = 'building' | 'troop' | 'tech';
 
 export interface TechInfo {
   id: number;
-  name: string;
-  summary: string;
-  /** buildings, troops and technologies that require this tech, with the level they need */
-  unlocks: { kind: 'building' | 'troop' | 'tech'; name: string; level: number }[];
+  summary: Message;
+  /** buildings, troops and technologies (by id) that require this tech, with the level they need */
+  unlocks: { kind: TechUnlockKind; id: number; level: number }[];
 }
 
 /** Lowest required level of `techId` for each building, troop and technology that needs it. */
 function unlocksOf(techId: number): TechInfo['unlocks'] {
   const out = new Map<string, TechInfo['unlocks'][number]>();
-  const add = (kind: 'building' | 'troop' | 'tech', name: string | undefined, level: number) => {
-    if (!name) return;
-    const key = `${kind}:${name}`;
+  const add = (kind: TechUnlockKind, id: number, level: number) => {
+    const key = `${kind}:${id}`;
     const prev = out.get(key);
-    if (!prev || level < prev.level) out.set(key, { kind, name, level });
+    if (!prev || level < prev.level) out.set(key, { kind, id, level });
   };
-  for (const b of BUILDINGS) for (const t of b.requires.techs) if (t.id === techId && b.level === 1) add('building', BUILDING_NAMES[b.typeId], t.level);
-  for (const tr of TROOPS) for (const t of tr.requires.techs) if (t.id === techId) add('troop', TROOP_NAMES[tr.troopId], t.level);
-  for (const r of RESEARCH)
-    for (const t of r.requires.techs) if (t.id === techId && r.techId !== techId && r.level === 1) add('tech', TECH_NAMES[r.techId], t.level);
-  return [...out.values()].sort((a, b) => a.level - b.level || a.name.localeCompare(b.name));
+  // fortifications have building configs too, but are listed as the troops they are
+  for (const b of BUILDINGS) {
+    if (b.level !== 1 || isFortType(b.typeId)) continue;
+    for (const t of b.requires.techs) if (t.id === techId) add('building', b.typeId, t.level);
+  }
+  for (const tr of TROOPS) for (const t of tr.requires.techs) if (t.id === techId) add('troop', tr.troopId, t.level);
+  for (const r of RESEARCH) for (const t of r.requires.techs) if (t.id === techId && r.techId !== techId && r.level === 1) add('tech', r.techId, t.level);
+  const order: TechUnlockKind[] = ['building', 'troop', 'tech'];
+  return [...out.values()].sort((a, b) => a.level - b.level || order.indexOf(a.kind) - order.indexOf(b.kind) || a.id - b.id);
 }
 
 export function techInfo(techId: number): TechInfo {
-  return { id: techId, name: TECH_NAMES[techId] ?? `Tech ${techId}`, summary: TEXT[techId]?.summary ?? '', unlocks: unlocksOf(techId) };
+  return { id: techId, summary: TEXT[techId]?.summary ?? msg('techInfo.summary.none'), unlocks: unlocksOf(techId) };
 }
 
-/** The total effect of a tech at `level` ('' when it has no measurable effect). */
-export function techEffect(techId: number, level: number): string {
-  if (level <= 0) return '';
-  return TEXT[techId]?.effect?.(level) ?? '';
+/** The total effect of a tech at `level` (null when it has no measurable effect). */
+export function techEffect(techId: number, level: number): Message | null {
+  if (level <= 0) return null;
+  return TEXT[techId]?.effect?.(level) ?? null;
 }

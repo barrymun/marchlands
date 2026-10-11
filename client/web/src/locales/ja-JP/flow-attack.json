@@ -1,0 +1,47 @@
+{
+  "addToFarm": {
+    "button": "略奪リストに追加",
+    "needsHero": "目標ごとにこの都市の待機中の英雄が1人必要です",
+    "defaultName": "略奪リスト",
+    "dialogTitle": "略奪リストに追加しますか？",
+    "willAttack": "{{city}}は下のフローの一部として{{tile}}を攻撃します。",
+    "noFlow": "略奪用のフローはまだありません。「{{name}}」というフローを作成し、{{tile}}を{{city}}の最初の目標にします。派遣する保存済み部隊はフロータブで選んでください。",
+    "flow": "フロー：<b>{{name}}</b>",
+    "alreadyTarget": "{{tile}}はすでにこのフローの{{city}}の目標です。",
+    "addTarget": "目標を追加",
+    "start": "略奪リストを作成",
+    "toasts": {
+      "alreadyIn": "{{tile}}はすでに「{{flow}}」にあります",
+      "noIdleHero": "{{city}}には「{{flow}}」の目標を追加できる待機中の英雄がいません",
+      "added": "{{tile}}を「{{flow}}」に追加しました（{{city}}、目標{{n}}）",
+      "started": "{{tile}}で「{{name}}」を作成しました",
+      "startedHint": "派遣する保存済み部隊はフロータブで選んでください。"
+    },
+    "targetCount_other": "{{city}}の目標：{{n}} / {{count}}（待機中の英雄1人につき1つ）"
+  },
+  "attackTargets": {
+    "attackWith": "保存済み部隊で攻撃",
+    "choose": "保存済み部隊を選択",
+    "noArmies": "保存済み部隊なし",
+    "newArmy": "+ 新規部隊",
+    "hint": "各都市は自分の目標を順番に攻撃します。待機中の英雄が攻撃力の高い順に率います。部隊・英雄・集結地の空きが足りない目標はスキップされます（フローは続行）。"
+  },
+  "cityTargets": {
+    "badFormat": "座標を x,y の形式で入力してください",
+    "outOfRange": "座標は0から{{max}}までです",
+    "duplicate": "すでにリストにあります",
+    "remove": "目標を削除",
+    "placeholder": "x,y",
+    "addFor": "{{city}}の目標を追加",
+    "add": "追加",
+    "noIdle": "この都市には待機中の英雄がいません。目標ごとに英雄が1人必要です。",
+    "full": "待機中の英雄1人につき目標1つ：この都市は上限です。",
+    "count_other": "目標 {{n}} / {{count}}（{{heroes}}）",
+    "idleHeroes_other": "待機中の英雄 {{count}}人"
+  },
+  "newArmy": {
+    "label": "新しい保存済み部隊",
+    "placeholder": "名前（例：多層L10）",
+    "save": "部隊を保存"
+  }
+}

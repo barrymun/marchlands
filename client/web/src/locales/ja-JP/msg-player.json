@@ -1,0 +1,40 @@
+{
+  "accountExists": "このアカウントにはすでに都市があります。",
+  "nameTaken": "そのプレイヤー名はすでに使われています。",
+  "sameName": "すでにその名前です。",
+  "renameCooldown_other": "あと{{count, number}}時間で再び名前を変更できます。",
+  "sameGender": "すでにその性別です。",
+  "genderCooldown_other": "あと{{count, number}}時間で再び性別を変更できます。",
+  "invalidSetting": "無効な設定です。",
+  "invalidFlag": "無効な旗です。",
+  "title": {
+    "highest": "すでに最高の爵位です。",
+    "prestigeRequired": "名声が{{prestige}}必要です。",
+    "notEnoughMedals": "メダルが足りません。"
+  },
+  "holiday": {
+    "invalidDays": "休暇は1日から{{max}}日までです。",
+    "troopsOut": "先にすべての部隊を呼び戻してください。"
+  },
+  "truce": {
+    "cooldown": "休戦はまだクールダウン中です。"
+  },
+  "protected": {
+    "beginner": "このプレイヤーは初心者保護中です。",
+    "truce": "このプレイヤーは休戦中です。",
+    "holiday": "このプレイヤーは休暇中です。"
+  },
+  "bookmark": {
+    "tooMany_other": "ブックマークは最大{{count, number}}件までです。"
+  },
+  "preset": {
+    "nameLength_other": "編成名は{{count, number}}文字以内で入力してください。",
+    "tooMany_other": "保存できる編成は最大{{count, number}}件までです。"
+  },
+  "mail": {
+    "protectionExpired": {
+      "title": "初心者保護が終了しました",
+      "content": "初心者保護が終了しました。他のプレイヤーがあなたの都市を攻撃できるようになり、あなたも他のプレイヤーを攻撃できます。防衛を固め、同盟への加入も検討しましょう。"
+    }
+  }
+}

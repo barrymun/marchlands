@@ -1,7 +1,7 @@
 // interior.* and city.* — tax, work rates, comfort, city settings and teleporting.
 
 import { and, count, eq, inArray, ne } from 'drizzle-orm';
-import { BALANCE, BASIC_RESOURCES, GameError, itemGoldPrice, scaled, TileType, tileXY, type ResourceSet, BuffId } from '@marchlands/core';
+import { BALANCE, BASIC_RESOURCES, GameError, itemGoldPrice, scaled, TileType, tileXY, type ResourceSet, BuffId, msg, ref, dur } from '@marchlands/core';
 import { armies, tiles } from '@marchlands/db';
 import { cityStats, openOwnCity, viewCity, viewOwnCity } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -11,13 +11,13 @@ import { saveCity, savePlayer } from '../repo.ts';
 
 export async function getCity(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewOwnCity(ctx, playerId, cityId);
-  if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (b.city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   return cityBean(b, ctx.now);
 }
 
 /** interior.modifyTaxRate */
 export async function setTaxRate(ctx: Ctx, playerId: number, cityId: number, rate: number) {
-  if (!Number.isInteger(rate) || rate < 0 || rate > 100) throw new GameError('Tax rate must be between 0 and 100.', -99);
+  if (!Number.isInteger(rate) || rate < 0 || rate > 100) throw new GameError(msg('city.taxRateRange'), -99);
   const b = await openOwnCity(ctx, playerId, cityId);
   b.city.taxRate = rate;
   pushResources(ctx, b);
@@ -31,7 +31,7 @@ export async function setWorkRates(ctx: Ctx, playerId: number, cityId: number, r
   for (const r of BASIC_RESOURCES) {
     const v = rates[r];
     if (v == null) continue;
-    if (!Number.isInteger(v) || v < 0 || v > 100) throw new GameError('Work rates must be between 0 and 100.', -99);
+    if (!Number.isInteger(v) || v < 0 || v > 100) throw new GameError(msg('city.workRateRange'), -99);
     next[r] = v;
   }
   b.city.workRates = next;
@@ -46,19 +46,18 @@ export async function setStorePercent(ctx: Ctx, playerId: number, cityId: number
   for (const r of BASIC_RESOURCES) {
     const v = pct[r];
     if (v == null) continue;
-    if (!Number.isInteger(v) || v < 0 || v > 100) throw new GameError('Invalid store percent.', -99);
+    if (!Number.isInteger(v) || v < 0 || v > 100) throw new GameError(msg('city.invalidStorePercent'), -99);
     next[r] = v;
   }
-  if (BASIC_RESOURCES.reduce((s, r) => s + next[r], 0) > 100) throw new GameError('Store percentages may total at most 100.', -99);
+  if (BASIC_RESOURCES.reduce((s, r) => s + next[r], 0) > 100) throw new GameError(msg('city.storePercentTotal'), -99);
   b.city.storePercent = next;
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
 }
 
-function cooldownMessage(left: number, what: string) {
-  const min = Math.floor(left / 60000);
-  const sec = Math.floor((left % 60000) / 1000);
-  return `${min}m ${sec}s interval needed for next ${what}.`;
+/** The comfort cooldown, with the time left (ms) as minutes and seconds. */
+function cooldownMessage(left: number) {
+  return msg('city.comfortCooldown', { time: dur(left) });
 }
 
 /**
@@ -69,7 +68,7 @@ export async function comfort(ctx: Ctx, playerId: number, cityId: number, typeId
   const b = await openOwnCity(ctx, playerId, cityId);
   const last = b.city.misc.lastComfortAt ?? 0;
   const cd = scaled(BALANCE.comfortCooldownMs);
-  if (ctx.now - last < cd) throw new GameError(cooldownMessage(last + cd - ctx.now, 'comforting'), -34);
+  if (ctx.now - last < cd) throw new GameError(cooldownMessage(last + cd - ctx.now), -34);
   const stats = cityStats(b, ctx.now);
   const maxPop = stats.maxPopulation;
   const c = b.city;
@@ -78,7 +77,7 @@ export async function comfort(ctx: Ctx, playerId: number, cityId: number, typeId
   switch (typeId) {
     case 3: {
       const gold = Math.floor(maxPop / 10);
-      if (c.gold < gold) throw new GameError('Not enough gold.', -99);
+      if (c.gold < gold) throw new GameError(msg('common.notEnoughGold'), -99);
       c.gold -= gold;
       c.food += maxPop;
       if (Math.floor(ctx.rng.next() * 10) === 1) {
@@ -88,12 +87,12 @@ export async function comfort(ctx: Ctx, playerId: number, cityId: number, typeId
       break;
     }
     case 4:
-      if (c.food < maxPop * 5) throw new GameError('Not enough food.', -99);
+      if (c.food < maxPop * 5) throw new GameError(msg('city.notEnoughFood'), -99);
       c.food -= maxPop * 5;
       c.population = Math.min(maxPop, c.population + Math.floor(maxPop / 20));
       break;
     default:
-      throw new GameError('Invalid comfort type.', -99);
+      throw new GameError(msg('city.invalidComfortType'), -99);
   }
   c.misc = { ...c.misc, lastComfortAt: ctx.now };
   ctx.stat(playerId, cityId, {
@@ -109,7 +108,7 @@ export async function comfort(ctx: Ctx, playerId: number, cityId: number, typeId
 /** interior.getResourceProduceData */
 export async function productionBreakdown(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewCity(ctx, cityId);
-  if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (b.city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   const s = cityStats(b, ctx.now);
   return BASIC_RESOURCES.map((r, i) => ({
     typeid: i + 1,
@@ -129,12 +128,12 @@ export async function productionBreakdown(ctx: Ctx, playerId: number, cityId: nu
 export async function renameCity(ctx: Ctx, playerId: number, cityId: number, name?: string, logoUrl?: string) {
   const b = await openOwnCity(ctx, playerId, cityId);
   if (name != null) {
-    const n = cleanName(name, 1, 20, 'City name');
+    const n = cleanName(name, 1, 20, msg('common.cityName'));
     assertClean(n);
     b.city.name = n;
   }
   if (logoUrl != null) {
-    if (!/^images\/icon\/cityLogo\/[\w.-]+$/.test(logoUrl)) throw new GameError('Invalid city logo.', -99);
+    if (!/^images\/icon\/cityLogo\/[\w.-]+$/.test(logoUrl)) throw new GameError(msg('city.invalidLogo'), -99);
     b.city.logoUrl = logoUrl;
   }
   pushCity(ctx, b);
@@ -159,18 +158,18 @@ const TELEPORTER = 'consume.move.1';
  */
 export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targetTileId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  if (activeBuff(b.player, BuffId.TELEPORT_COOLDOWN, ctx.now)) throw new GameError('The City Teleporter is in cooldown.', -90);
+  if (activeBuff(b.player, BuffId.TELEPORT_COOLDOWN, ctx.now)) throw new GameError(msg('city.teleportCooldown', { item: ref.item(TELEPORTER) }), -90);
   const [{ n: out }] = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId));
-  if (Number(out) > 0) throw new GameError('You must recall all of your troops before you teleport your city.', -77);
+  if (Number(out) > 0) throw new GameError(msg('city.recallTroopsFirst'), -77);
   const [{ n: guests }] = await ctx.tx
     .select({ n: count() })
     .from(armies)
     .where(and(eq(armies.targetTileId, b.city.tileId), ne(armies.playerId, playerId)));
-  if (Number(guests) > 0) throw new GameError('Foreign troops are marching to or stationed in this city.', -77);
+  if (Number(guests) > 0) throw new GameError(msg('city.foreignTroops'), -77);
 
   const target = targetTileId;
   const [t] = await ctx.tx.select().from(tiles).where(eq(tiles.id, target)).for('update');
-  if (!t || t.type !== TileType.FLAT || t.cityId != null || t.ownerCityId != null) throw new GameError('That tile is not a free flat.', -25);
+  if (!t || t.type !== TileType.FLAT || t.cityId != null || t.ownerCityId != null) throw new GameError(msg('city.notFreeFlat'), -25);
   useItemOrGold(ctx, b.player, b.city, TELEPORTER, itemGoldPrice(TELEPORTER) ?? 0);
   await ctx.tx.update(tiles).set({ cityId: null, type: TileType.FLAT, ownerPlayerId: null, updatedAt: ctx.now }).where(eq(tiles.id, b.city.tileId));
   await ctx.tx.update(tiles).set({ cityId, type: TileType.CASTLE, ownerPlayerId: playerId, ownerCityId: null, updatedAt: ctx.now }).where(eq(tiles.id, target));
@@ -179,7 +178,7 @@ export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targe
   if (valleyIds.length) await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, updatedAt: ctx.now }).where(inArray(tiles.id, valleyIds));
   b.valleys = [];
   b.city.tileId = target;
-  setBuff(ctx, b.player, BuffId.TELEPORT_COOLDOWN, 'City Teleporter in cooldown.', ctx.now + scaled(BALANCE.teleportCooldownMs));
+  setBuff(ctx, b.player, BuffId.TELEPORT_COOLDOWN, msg('buff.teleportCooldown'), ctx.now + scaled(BALANCE.teleportCooldownMs));
   pushCity(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, b.player);

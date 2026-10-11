@@ -1,0 +1,42 @@
+{
+  "summary": {
+    "townHall_other": "都市の中心です。レベルが1上がるごとに城壁の外の資源地スロットが{{count, number}}個増え（初期{{base}}個）、保有できる領地が1つ増えます。{{building}}がレベル{{level}}になると初心者保護が終わります。取り壊すことはできません。",
+    "walls": "都市を守ります。防御施設（{{forts}}）を収容し、レベルと同じ数のバッチを待ち行列に並べて建設できます。戦闘では城壁がダメージを吸収し、{{tower}}の射程を伸ばします。",
+    "cottage": "人々が暮らす家で、都市の人口上限を増やします。人口は資源地で働き、税を納め、部隊の訓練に使われます。",
+    "field": "{{resource}}を生産し、{{resource}}の貯蔵量を増やします。レベルが上がるほど生産量と貯蔵量の伸びが大きくなります。稼働には余剰人口から労働者が必要です。",
+    "warehouse": "資源を略奪から隠します。各資源は、倉庫の保護量にその資源に設定した割合（保管率）を掛けた量まで守られます。",
+    "barracks": "部隊を訓練します。兵舎ごとにレベルと同じ数のバッチを並べられる待ち行列があり、複数の兵舎で同時に訓練できます。",
+    "academy": "技術を研究します（同時に{{queues}}件まで）。技術の効果はこの都市の{{building}}のレベルまでしか発揮されません。",
+    "inn": "雇用できる英雄を紹介します。レベルが高いほど、より多く強い英雄が現れます。新しい候補の呼び込みにはレベルごとに{{gold}}金かかります。",
+    "feastingHall": "英雄を住まわせます。レベルごとに英雄（雇用・捕虜を含む）を1人置けます。",
+    "rallySpot_other": "部隊を出撃させます。出撃には必須で、レベルが1上がるごとに同時に出撃できる部隊が{{count, number}}部隊、各部隊の兵数上限が{{troops}}増えます（{{item}}を使うとさらに{{percent}}%増加）。",
+    "marketplace_other": "食料・木材・石材・鉄を、他のプレイヤーや商人と金で取引します。レベルが1上がるごとに出せる注文が{{count, number}}件増えます。",
+    "reliefStation": "自分の都市間を移動する部隊（輸送と援軍）を速くします。",
+    "beaconTower": "敵の接近を見張ります。レベル1では向かってくる敵部隊の兵種と兵数が、レベル2ではさらにその英雄がわかります。",
+    "embassy": "同盟への加入（招待の承諾や加入申請）に必要です。",
+    "prerequisite": "下記の建設・研究に必要です。それ以外の効果はまだありません。"
+  },
+  "placement": {
+    "unique": "各都市に1つ、専用のスロットに建設します。",
+    "inside": "城壁の内側に建設します。数に制限はありません。",
+    "insideLimited": "城壁の内側に建設します。1都市につき最大{{limit}}棟までです。",
+    "outside": "城壁の外側（資源地スロット）に建設します。数に制限はありません。",
+    "outsideLimited": "城壁の外側（資源地スロット）に建設します。1都市につき最大{{limit}}棟までです。"
+  },
+  "effect": {
+    "townHall_other": "資源地スロット{{slots}}個、領地は最大{{count, number}}か所",
+    "walls_other": "防御施設スペース{{space}}、待ち行列{{count, number}}バッチ、城壁耐久力{{hitPoints}}、塔の射程+{{percent}}%",
+    "cottage": "人口+{{population}}",
+    "field_other": "フル稼働で{{resource}} {{amount}}/時、貯蔵量+{{storage}}、労働者{{count, number}}人",
+    "warehouse": "各資源を最大{{amount}}まで保護",
+    "barracks_other": "待ち行列{{count, number}}バッチ",
+    "academy": "技術はレベル{{level}}まで有効",
+    "inn_other": "英雄候補{{count, number}}人、英雄はレベル{{level}}まで",
+    "feastingHall_other": "英雄枠{{count, number}}人",
+    "rallySpot_other": "同時出撃{{count, number}}部隊、各部隊最大{{troops}}兵",
+    "marketplace_other": "出せる注文{{count, number}}件",
+    "reliefStation": "自分の都市間の行軍速度×{{multiplier}}",
+    "beaconTroops": "接近する部隊の兵種と兵数がわかる",
+    "beaconHeroes": "接近する部隊の兵種・兵数と英雄がわかる"
+  }
+}

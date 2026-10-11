@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { postAuthLogin, postAuthRegister } from '@marchlands/api-client';
@@ -9,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { errorMessage, tokenStore } from '@/lib/api';
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
+  const { t } = useTranslation('login');
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
@@ -39,17 +41,17 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   return (
     <form className="grid gap-4" onSubmit={submit}>
       <div className="grid gap-2">
-        <Label htmlFor={`${mode}-username`}>Username</Label>
+        <Label htmlFor={`${mode}-username`}>{t('form.username')}</Label>
         <Input id={`${mode}-username`} name="username" autoComplete="username" required />
       </div>
       {mode === 'register' && (
         <div className="grid gap-2">
-          <Label htmlFor="register-email">Email</Label>
+          <Label htmlFor="register-email">{t('form.email')}</Label>
           <Input id="register-email" name="email" type="email" autoComplete="email" required />
         </div>
       )}
       <div className="grid gap-2">
-        <Label htmlFor={`${mode}-password`}>Password</Label>
+        <Label htmlFor={`${mode}-password`}>{t('form.password')}</Label>
         <Input id={`${mode}-password`} name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required />
       </div>
       {error && (
@@ -58,7 +60,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         </Alert>
       )}
       <Button type="submit" disabled={busy}>
-        {mode === 'login' ? 'Log in' : 'Create account'}
+        {mode === 'login' ? t('form.logIn') : t('form.createAccount')}
       </Button>
     </form>
   );

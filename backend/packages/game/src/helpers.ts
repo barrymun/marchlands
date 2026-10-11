@@ -1,7 +1,7 @@
 // Small shared mutations + their push notifications.
 
 import { count, eq } from 'drizzle-orm';
-import { GameError, hasResources, RESOURCE_KEYS, type BuffId, type BuffState, type Resources } from '@marchlands/core';
+import { GameError, hasResources, msg, RESOURCE_KEYS, type BuffId, type BuffState, type Message, type Resources } from '@marchlands/core';
 import { alliances, cities } from '@marchlands/db';
 import { cityStats, type CityBundle } from './city.ts';
 import type { Ctx } from './context.ts';
@@ -9,11 +9,11 @@ import { buffsArray, cityBean, playerInfo, resourceBean } from './dto.ts';
 import type { CityRow, PlayerRow } from './repo.ts';
 import { PushCmd } from '@marchlands/contracts';
 
-export function assertResources(city: CityRow, cost: Partial<Resources>, message = 'Not enough resources.', code = -1) {
+export function assertResources(city: CityRow, cost: Partial<Resources>, message: Message = msg('common.notEnoughResources'), code = -1) {
   if (!hasResources(city, cost)) throw new GameError(message, code);
 }
 
-export function spendResources(city: CityRow, cost: Partial<Resources>, message?: string, code?: number) {
+export function spendResources(city: CityRow, cost: Partial<Resources>, message?: Message, code?: number) {
   assertResources(city, cost, message, code);
   for (const k of RESOURCE_KEYS) city[k] -= cost[k] ?? 0;
 }
@@ -42,7 +42,7 @@ export function addItem(ctx: Ctx, p: PlayerRow, id: string, n: number) {
 }
 
 export function consumeItem(ctx: Ctx, p: PlayerRow, id: string, n = 1) {
-  if (itemCount(p, id) < n) throw new GameError('Insufficient items.', -24);
+  if (itemCount(p, id) < n) throw new GameError(msg('common.insufficientItems'), -24);
   addItem(ctx, p, id, -n);
 }
 
@@ -52,7 +52,7 @@ export function consumeItem(ctx: Ctx, p: PlayerRow, id: string, n = 1) {
  */
 export function spendGold(city: CityRow, gold: number) {
   if (gold <= 0) return;
-  if (city.gold < gold) throw new GameError(`Not enough gold: ${Math.ceil(gold).toLocaleString('en')} needed.`, -99);
+  if (city.gold < gold) throw new GameError(msg('common.notEnoughGoldFor', { amount: Math.ceil(gold) }), -99);
   city.gold -= gold;
 }
 
@@ -69,21 +69,21 @@ export function useItemOrGold(ctx: Ctx, p: PlayerRow, city: CityRow, itemId: str
 
 export const activeBuff = (p: PlayerRow, id: BuffId, now: number): BuffState | undefined => p.buffs.find((b) => b.id === id && b.endTime > now);
 
-/** Set (or extend when `extend`) a timed buff, scheduling its expiry. */
-export function setBuff(ctx: Ctx, p: PlayerRow, id: BuffId, desc: string, endTime: number, opts: { extend?: boolean; param?: number; itemId?: string } = {}) {
+/** Set (or extend when `extend`) a timed buff, scheduling its expiry. `desc`: what it does (`buff.*`). */
+export function setBuff(ctx: Ctx, p: PlayerRow, id: BuffId, desc: Message, endTime: number, opts: { extend?: boolean; param?: number; itemId?: string } = {}) {
   const cur = activeBuff(p, id, ctx.now);
   const end = opts.extend && cur ? cur.endTime + (endTime - ctx.now) : endTime;
   const buff: BuffState = { id, desc, endTime: end, ...(opts.param != null ? { param: opts.param } : {}), ...(opts.itemId ? { itemId: opts.itemId } : {}) };
   p.buffs = [...p.buffs.filter((b) => b.id !== id && b.endTime > ctx.now), buff];
   ctx.schedule({ type: 'buff.expire', dueAt: end, playerId: p.id, refKey: `buff:${p.id}:${id}`, payload: { buffId: id } });
-  ctx.push(p.id, PushCmd.PLAYER_BUFF_UPDATE, { buffBean: { typeId: id, descName: desc, endTime: end }, updateType: 0 });
+  ctx.push(p.id, PushCmd.PLAYER_BUFF_UPDATE, { buffBean: { typeId: id, desc, endTime: end }, updateType: 0 });
 }
 
 export function removeBuff(ctx: Ctx, p: PlayerRow, id: BuffId) {
   const had = p.buffs.find((b) => b.id === id);
   p.buffs = p.buffs.filter((b) => b.id !== id);
   ctx.unschedule(`buff:${p.id}:${id}`);
-  if (had) ctx.push(p.id, PushCmd.PLAYER_BUFF_UPDATE, { buffBean: { typeId: id, descName: had.desc, endTime: had.endTime }, updateType: 1 });
+  if (had) ctx.push(p.id, PushCmd.PLAYER_BUFF_UPDATE, { buffBean: { typeId: id, desc: had.desc, endTime: had.endTime }, updateType: 1 });
 }
 
 // ---- pushes ----
@@ -115,19 +115,20 @@ export function pushBuffs(ctx: Ctx, p: PlayerRow) {
 }
 
 /** Validate a free-text name: length and a conservative character set. */
-export function cleanName(raw: unknown, min: number, max: number, what = 'Name'): string {
+/** `what` names the thing being named in the messages (common.playerName, cityName, heroName). */
+export function cleanName(raw: unknown, min: number, max: number, what: Message = msg('common.name')): string {
   const s = String(raw ?? '')
     .trim()
     .replace(/\s+/g, ' ');
-  if (s.length < min || s.length > max) throw new GameError(`${what} must be ${min}-${max} characters.`, -87);
-  if (!/^[\p{L}\p{N} _.'-]+$/u.test(s)) throw new GameError(`${what} contains invalid characters.`, -87);
+  if (s.length < min || s.length > max) throw new GameError(msg('common.nameLength', { what, min, max }), -87);
+  if (!/^[\p{L}\p{N} _.'-]+$/u.test(s)) throw new GameError(msg('common.nameInvalid', { what }), -87);
   return s;
 }
 
 const BAD_WORDS = ['penis', 'cock', 'dick', 'asshole', 'fuck', 'shit', 'bitch', 'tits', 'cunt', 'testicle', 'whore', 'nigger', 'fag'];
 export function assertClean(s: string) {
   const l = s.toLowerCase();
-  if (BAD_WORDS.some((w) => l.includes(w))) throw new GameError('Illegal naming, please choose another name.', -99);
+  if (BAD_WORDS.some((w) => l.includes(w))) throw new GameError(msg('common.nameNotAllowed'), -99);
 }
 
 /** Escape text shown to other players (chat/mail rendered by HTML-capable clients). */

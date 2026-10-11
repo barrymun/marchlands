@@ -1,0 +1,14 @@
+{
+  "taxRateRange": "The tax rate must be between 0 and 100.",
+  "workRateRange": "Work rates must be between 0 and 100.",
+  "invalidStorePercent": "Invalid storage share.",
+  "storePercentTotal": "Storage shares may total at most 100%.",
+  "comfortCooldown": "You can comfort the people again in {{time}}.",
+  "notEnoughFood": "Not enough food.",
+  "invalidComfortType": "Invalid way of comforting.",
+  "invalidLogo": "Invalid city logo.",
+  "teleportCooldown": "The {{item}} is cooling down.",
+  "recallTroopsFirst": "Recall all of your troops before you move your city.",
+  "foreignTroops": "Troops from other players are marching to or stationed in this city.",
+  "notFreeFlat": "That tile is not a free flat."
+}

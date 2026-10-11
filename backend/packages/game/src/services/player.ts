@@ -9,15 +9,18 @@ import {
   BuildingStatus,
   DAY,
   GameError,
+  HOUR,
   TileType,
   TITLES,
-  titleOf,
   tileXY,
   type BuildingState,
   type TroopCounts,
   TROOP_KEY_LIST,
   lordGear,
   BuffId,
+  msg,
+  type Message,
+  type CastleSign,
 } from '@marchlands/core';
 import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@marchlands/db';
 import { openOwnCity, viewOwnCity } from '../city.ts';
@@ -79,19 +82,19 @@ export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePla
   const [existing] = await ctx.tx.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
   if (existing) {
     const [{ n }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, existing.id));
-    if (Number(n) > 0) throw new GameError('City/Account exists.', -86, 409);
+    if (Number(n) > 0) throw new GameError(msg('player.accountExists'), -86, 409);
   }
-  const name = cleanName(input.userName, 1, 20, 'Player name');
-  const castleName = cleanName(input.castleName, 1, 20, 'City name');
+  const name = cleanName(input.userName, 1, 20, msg('common.playerName'));
+  const castleName = cleanName(input.castleName, 1, 20, msg('common.cityName'));
   assertClean(name);
   assertClean(castleName);
   const flag = String(input.flag ?? '').trim();
-  if (flag.length < 1 || flag.length > 5) throw new GameError('Invalid data sent.', -87);
-  if (![0, 1].includes(input.sex)) throw new GameError('Invalid data sent.', -87);
+  if (flag.length < 1 || flag.length > 5) throw new GameError(msg('common.invalidData'), -87);
+  if (![0, 1].includes(input.sex)) throw new GameError(msg('common.invalidData'), -87);
   const faceUrl = String(input.faceUrl ?? '').slice(0, 100);
-  if (!Number.isInteger(input.zone) || input.zone < -1 || input.zone > 15) throw new GameError('Invalid data sent.', -87);
+  if (!Number.isInteger(input.zone) || input.zone < -1 || input.zone > 15) throw new GameError(msg('common.invalidData'), -87);
   const taken = await findPlayerByName(ctx, name);
-  if (taken && taken.id !== existing?.id) throw new GameError('Player name taken', -88, 409);
+  if (taken && taken.id !== existing?.id) throw new GameError(msg('player.nameTaken'), -88, 409);
 
   const tileId = await pickOpenFlat(ctx, input.zone);
   let player: PlayerRow;
@@ -189,8 +192,8 @@ export async function touchLogin(ctx: Ctx, playerId: number) {
 /** common.changeUserFace: only once per lord. */
 export async function changeFace(ctx: Ctx, playerId: number, faceUrl: string, sex: number) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  if (p.misc.changedFace) throw new GameError('Invalid setting.', -99);
-  if (!faceUrl || faceUrl.length > 100 || ![0, 1].includes(sex)) throw new GameError('Invalid setting.', -99);
+  if (p.misc.changedFace) throw new GameError(msg('player.invalidSetting'), -99);
+  if (!faceUrl || faceUrl.length > 100 || ![0, 1].includes(sex)) throw new GameError(msg('player.invalidSetting'), -99);
   p.faceUrl = faceUrl;
   p.sex = sex;
   p.misc = { ...p.misc, changedFace: true };
@@ -202,7 +205,7 @@ export async function changeFace(ctx: Ctx, playerId: number, faceUrl: string, se
 export async function changeFlag(ctx: Ctx, playerId: number, flag: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   const f = String(flag ?? '').trim();
-  if (f.length < 1 || f.length > 5) throw new GameError('Invalid flag.', -87);
+  if (f.length < 1 || f.length > 5) throw new GameError(msg('player.invalidFlag'), -87);
   p.flag = f;
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
@@ -217,13 +220,13 @@ function nextRenameAt(p: PlayerRow, now: number): number {
 /** city.modifyUserName; (marchlands) free once a day (orig: a New ID each time). */
 export async function renamePlayer(ctx: Ctx, playerId: number, userName: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  const name = cleanName(userName, 1, 20, 'Player name');
+  const name = cleanName(userName, 1, 20, msg('common.playerName'));
   assertClean(name);
-  if (name === p.name) throw new GameError('That is already your name.', -99);
+  if (name === p.name) throw new GameError(msg('player.sameName'), -99);
   const wait = nextRenameAt(p, ctx.now);
-  if (wait) throw new GameError(`You can rename again in ${Math.ceil((wait - ctx.now) / 3_600_000)} hour(s).`, -99);
+  if (wait) throw new GameError(msg('player.renameCooldown', { count: Math.ceil((wait - ctx.now) / HOUR) }), -99);
   const taken = await findPlayerByName(ctx, name);
-  if (taken && taken.id !== p.id) throw new GameError('Player name taken', -88, 409);
+  if (taken && taken.id !== p.id) throw new GameError(msg('player.nameTaken'), -88, 409);
   p.name = name;
   p.misc = { ...p.misc, renamedAt: ctx.now };
   await savePlayer(ctx, p);
@@ -238,10 +241,10 @@ function nextGenderChangeAt(p: PlayerRow, now: number): number {
 /** (marchlands) Change gender in Player settings: free, once per BALANCE.genderCooldownMs. */
 export async function changeGender(ctx: Ctx, playerId: number, sex: number) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  if (![0, 1].includes(sex)) throw new GameError('Invalid setting.', -99);
-  if (sex === p.sex) throw new GameError('That is already your gender.', -99);
+  if (![0, 1].includes(sex)) throw new GameError(msg('player.invalidSetting'), -99);
+  if (sex === p.sex) throw new GameError(msg('player.sameGender'), -99);
   const wait = nextGenderChangeAt(p, ctx.now);
-  if (wait) throw new GameError(`You can change your gender again in ${Math.ceil((wait - ctx.now) / 3_600_000)} hour(s).`, -99);
+  if (wait) throw new GameError(msg('player.genderCooldown', { count: Math.ceil((wait - ctx.now) / HOUR) }), -99);
   p.sex = sex;
   p.misc = { ...p.misc, genderChangedAt: ctx.now };
   await savePlayer(ctx, p);
@@ -252,14 +255,14 @@ export async function changeGender(ctx: Ctx, playerId: number, sex: number) {
 export async function promoteTitle(ctx: Ctx, playerId: number) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   const next = TITLES[p.title + 1];
-  if (!next) throw new GameError('You already hold the highest title.', -99);
-  if (p.prestige < next.prestige) throw new GameError(`${next.prestige} prestige is required.`, -99);
-  for (const [id, n] of Object.entries(next.medals)) if (itemCount(p, id) < n) throw new GameError('Not enough medals.', -99);
+  if (!next) throw new GameError(msg('player.title.highest'), -99);
+  if (p.prestige < next.prestige) throw new GameError(msg('player.title.prestigeRequired', { prestige: next.prestige }), -99);
+  for (const [id, n] of Object.entries(next.medals)) if (itemCount(p, id) < n) throw new GameError(msg('player.title.notEnoughMedals'), -99);
   for (const [id, n] of Object.entries(next.medals)) consumeItem(ctx, p, id, n);
   p.title = next.id;
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
-  return { titleId: p.title, titleName: titleOf(p.title).name };
+  return { titleId: p.title };
 }
 
 export async function saveTutorialStep(ctx: Ctx, playerId: number, step: number) {
@@ -272,16 +275,18 @@ export async function saveTutorialStep(ctx: Ctx, playerId: number, step: number)
 // Protection
 // ---------------------------------------------------------------------------------------------
 
+const MAX_HOLIDAY_DAYS = 30;
+
 /** furlough.isFurlought: holiday mode, max 30 days, paid per day with a city's gold (orig: 10 cents a day). */
 export async function startFurlough(ctx: Ctx, playerId: number, days: number, cityId: number) {
-  if (!Number.isInteger(days) || days < 1 || days > 30) throw new GameError('Invalid number of days.', -99);
+  if (!Number.isInteger(days) || days < 1 || days > MAX_HOLIDAY_DAYS) throw new GameError(msg('player.holiday.invalidDays', { max: MAX_HOLIDAY_DAYS }), -99);
   const b = await openOwnCity(ctx, playerId, cityId);
   const p = b.player;
   const outgoing = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.playerId, playerId));
-  if (Number(outgoing[0].n) > 0) throw new GameError('You must recall all of your troops first.', -77);
+  if (Number(outgoing[0].n) > 0) throw new GameError(msg('player.holiday.troopsOut'), -77);
   spendGold(b.city, days * goldForCents(BALANCE.furloughCentsPerDay));
   ctx.stat(playerId, cityId, { 'spent.other.gold': days * goldForCents(BALANCE.furloughCentsPerDay) });
-  setBuff(ctx, p, BuffId.HOLIDAY, 'Holiday', ctx.now + days * DAY);
+  setBuff(ctx, p, BuffId.HOLIDAY, msg('buff.holiday'), ctx.now + days * DAY);
   p.status = 5;
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
@@ -302,21 +307,22 @@ export async function startTruce(ctx: Ctx, playerId: number, itemId: string, cit
   // without a Truce Agreement, one is bought with the city's gold
   const b = await openOwnCity(ctx, playerId, cityId);
   const p = b.player;
-  if (activeBuff(p, BuffId.TRUCE_COOLDOWN, ctx.now)) throw new GameError('Truce Agreement is in cooldown.', -99);
-  if (itemId !== 'player.peace.1') throw new GameError('Invalid state.', -99);
+  if (activeBuff(p, BuffId.TRUCE_COOLDOWN, ctx.now)) throw new GameError(msg('player.truce.cooldown'), -99);
+  if (itemId !== 'player.peace.1') throw new GameError(msg('common.invalidData'), -99);
   useItemOrGold(ctx, p, b.city, itemId, itemGoldPrice(itemId) ?? 0);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
-  setBuff(ctx, p, BuffId.TRUCE, 'Truce Agreement activated', ctx.now + BALANCE.truceDurationMs, { itemId });
+  setBuff(ctx, p, BuffId.TRUCE, msg('buff.truce'), ctx.now + BALANCE.truceDurationMs, { itemId });
   p.status = 2;
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
 }
 
-export function isProtected(p: PlayerRow, now: number): string | null {
-  if (p.beginner) return "Operation denied. This player is under Beginner's Protection.";
-  if (activeBuff(p, BuffId.TRUCE, now)) return 'Operation denied. This player is under truce.';
-  if (activeBuff(p, BuffId.HOLIDAY, now)) return 'Operation denied. This player is on holiday.';
+/** Why a player can't be attacked (null: they can). */
+export function isProtected(p: PlayerRow, now: number): Message | null {
+  if (p.beginner) return msg('player.protected.beginner');
+  if (activeBuff(p, BuffId.TRUCE, now)) return msg('player.protected.truce');
+  if (activeBuff(p, BuffId.HOLIDAY, now)) return msg('player.protected.holiday');
   return null;
 }
 
@@ -330,9 +336,9 @@ export async function checkBeginner(ctx: Ctx, p: PlayerRow, townHallLevel?: numb
     await ctx.tx.insert(mails).values({
       playerId: p.id,
       type: 2,
-      title: "Beginner's Protection Expired",
-      content:
-        "Your Beginner's Protection has expired. Your cities can now be attacked by other players, and you may attack them. Build your defences and consider joining an alliance.",
+      title: '',
+      content: '',
+      system: { title: msg('player.mail.protectionExpired.title'), content: msg('player.mail.protectionExpired.content') },
       sentAt: ctx.now,
     });
     await pushMailCounts(ctx, p.id);
@@ -346,7 +352,7 @@ export async function checkBeginner(ctx: Ctx, p: PlayerRow, townHallLevel?: numb
 
 export async function publicPlayerInfo(ctx: Ctx, viewerId: number, name: string) {
   const p = await findPlayerByName(ctx, name);
-  if (!p) throw new GameError(`Player ${name} doesn't exist.`, -41, 404);
+  if (!p) throw new GameError(msg('common.playerNamedNotFound', { name }), -41, 404);
   const cityRows = await citiesOf(ctx, p.id);
   const info = await playerInfoOf(ctx, p);
   return {
@@ -415,15 +421,21 @@ export async function restartPlayer(ctx: Ctx, playerId: number) {
   await savePlayer(ctx, p);
 }
 
+const MAX_BOOKMARKS = 100;
+
 /** Bookmark a castle on the map (castle.saveCastleSignList). */
 export async function addCastleSign(ctx: Ctx, playerId: number, tileId: number) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   const [t] = await ctx.tx.select().from(tiles).where(eq(tiles.id, tileId));
-  if (!t || (t.cityId == null && t.type !== TileType.NPC)) throw new GameError('Invalid coordinates', -99);
-  const name = t.cityId != null ? (await getCity(ctx, t.cityId)).name : "Barbarian's City";
+  if (!t || (t.cityId == null && t.type !== TileType.NPC)) throw new GameError(msg('common.invalidCoordinates'), -99);
   if (p.castleSigns.some((s) => s.tileId === tileId)) return p.castleSigns;
-  if (p.castleSigns.length >= 100) throw new GameError('Too many bookmarks.', -99);
-  p.castleSigns = [...p.castleSigns, { tileId, name, ...tileXY(tileId) }];
+  if (p.castleSigns.length >= MAX_BOOKMARKS) throw new GameError(msg('player.bookmark.tooMany', { count: MAX_BOOKMARKS }), -99);
+  // a lord's city by its name; a barbarian city by its tile type only (the client names it)
+  const sign: CastleSign =
+    t.cityId != null
+      ? { tileId, type: TileType.CASTLE, name: (await getCity(ctx, t.cityId)).name, ...tileXY(tileId) }
+      : { tileId, type: t.type, ...tileXY(tileId) };
+  p.castleSigns = [...p.castleSigns, sign];
   await savePlayer(ctx, p);
   return p.castleSigns;
 }
@@ -440,6 +452,7 @@ export async function removeCastleSign(ctx: Ctx, playerId: number, tileId: numbe
 // ---------------------------------------------------------------------------------------------
 
 const MAX_PRESETS = 30;
+const MAX_PRESET_NAME = 30;
 
 export async function armyPresets(ctx: Ctx, playerId: number) {
   const p = await getPlayer(ctx, playerId);
@@ -449,18 +462,18 @@ export async function armyPresets(ctx: Ctx, playerId: number) {
 /** Save a preset; a preset with the same name (any case) is replaced. */
 export async function saveArmyPreset(ctx: Ctx, playerId: number, name: string, troopsIn: Record<string, unknown>) {
   const clean = name.trim();
-  if (!clean || clean.length > 30) throw new GameError('Give the preset a name of up to 30 characters.', -99);
+  if (!clean || clean.length > MAX_PRESET_NAME) throw new GameError(msg('player.preset.nameLength', { count: MAX_PRESET_NAME }), -99);
   const troops: TroopCounts = {};
   for (const k of TROOP_KEY_LIST) {
     const n = Number(troopsIn[k] ?? 0);
-    if (!Number.isInteger(n) || n < 0) throw new GameError('Invalid troop count.', -99);
+    if (!Number.isInteger(n) || n < 0) throw new GameError(msg('common.invalidTroopCount'), -99);
     if (n > 0) troops[k] = n;
   }
-  if (!Object.keys(troops).length) throw new GameError('Choose some troops to save.', -99);
+  if (!Object.keys(troops).length) throw new GameError(msg('common.noTroopsSelected'), -99);
   const p = await getPlayer(ctx, playerId, { lock: true });
   const list = p.misc.armyPresets ?? [];
   const existing = list.find((x) => x.name.toLowerCase() === clean.toLowerCase());
-  if (!existing && list.length >= MAX_PRESETS) throw new GameError(`At most ${MAX_PRESETS} presets.`, -99);
+  if (!existing && list.length >= MAX_PRESETS) throw new GameError(msg('player.preset.tooMany', { count: MAX_PRESETS }), -99);
   const preset = { id: existing?.id ?? `${ctx.now.toString(36)}${Math.floor(ctx.rng.next() * 1e6).toString(36)}`, name: clean, troops };
   p.misc = { ...p.misc, armyPresets: existing ? list.map((x) => (x.id === existing.id ? preset : x)) : [...list, preset] };
   await savePlayer(ctx, p);

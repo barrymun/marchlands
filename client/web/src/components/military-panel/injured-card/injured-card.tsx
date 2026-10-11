@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   getCitiesByCityIdQueryKey,
   getPlayerQueryKey,
@@ -22,6 +23,7 @@ import { UnitName } from '@/components/military-panel/unit-name/unit-name';
  * training cost, or dismiss them.
  */
 export function InjuredCard({ city }: { city: CityBean }) {
+  const { t } = useTranslation('military-panel');
   const player = usePlayer();
   const [amounts, setAmounts] = useState<Partial<Record<TroopKey, string>>>({});
   const injured = Object.entries(TROOP_KEYS)
@@ -50,39 +52,37 @@ export function InjuredCard({ city }: { city: CityBean }) {
   const heal = useCommand(
     postCitiesTroopsInjuredCureMutation(),
     () => [getCitiesByCityIdQueryKey({ path }), getPlayerQueryKey()],
-    `Healed ${fmtExact(total)} troops`,
+    t('injured.healed', { count: total, n: fmtExact(total) }),
   );
   const honor = player.data?.playerInfo.honor ?? 0;
   const honorCost = healHonorCost(chosen);
   const dismiss = useCommand(
     postCitiesTroopsInjuredDisbandMutation(),
     () => [getCitiesByCityIdQueryKey({ path })],
-    `Dismissed ${fmtExact(total)} injured troops`,
+    t('injured.dismissed', { count: total, n: fmtExact(total) }),
   );
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Injured troops</CardTitle>
+        <CardTitle className="text-sm">{t('injured.title')}</CardTitle>
         <CardDescription>
-          {medicine > 0
-            ? `Medicine Lv ${medicine}: ${Math.round(share * 100)}% of the troops this city loses, defending or attacking, survive injured.`
-            : 'Research Medicine so that some of the troops this city loses, defending or attacking, survive injured (5% per level, up to 50%).'}{' '}
-          Heal them for {Math.round(BALANCE.healCostShare * 100)}% of their training cost, or for honor ({fmtExact(honor)} available).
+          {medicine > 0 ? t('injured.medicine', { level: medicine, percent: Math.round(share * 100) }) : t('injured.noMedicine')}{' '}
+          {t('injured.healInfo', { percent: Math.round(BALANCE.healCostShare * 100), honor: fmtExact(honor) })}
         </CardDescription>
       </CardHeader>
       {injured.length > 0 && (
         <CardContent className="grid gap-3">
-          {injured.map((t) => (
-            <div key={t.key} className="flex items-center justify-between gap-2 text-sm">
+          {injured.map((u) => (
+            <div key={u.key} className="flex items-center justify-between gap-2 text-sm">
               <span>
-                <UnitName id={t.id} /> <span className="text-muted-foreground">({fmtExact(t.count)})</span>
+                <UnitName id={u.id} /> <span className="text-muted-foreground">({fmtExact(u.count)})</span>
               </span>
               <Input
                 className="h-8 w-24"
                 inputMode="numeric"
-                placeholder={`all ${fmtExact(t.count)}`}
-                value={amounts[t.key] ?? ''}
-                onChange={(e) => setAmounts({ ...amounts, [t.key]: e.target.value.replace(/\D/g, '') })}
+                placeholder={t('injured.allPlaceholder', { n: fmtExact(u.count) })}
+                value={amounts[u.key] ?? ''}
+                onChange={(e) => setAmounts({ ...amounts, [u.key]: e.target.value.replace(/\D/g, '') })}
               />
             </div>
           ))}
@@ -93,29 +93,29 @@ export function InjuredCard({ city }: { city: CityBean }) {
               disabled={total <= 0 || !affordable || heal.isPending}
               onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: 'resources' } }, { onSuccess: done })}
             >
-              Heal {fmtExact(total)} · resources
+              {t('injured.healResources', { n: fmtExact(total) })}
             </Button>
             <Button
               size="sm"
               variant="secondary"
               disabled={total <= 0 || honor < honorCost || heal.isPending}
-              title={honor < honorCost ? `Not enough honor (${fmtExact(honorCost)} needed)` : undefined}
+              title={honor < honorCost ? t('injured.notEnoughHonor', { n: fmtExact(honorCost) }) : undefined}
               onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: 'honor' } }, { onSuccess: done })}
             >
-              Heal · {fmt(honorCost)} honor
+              {t('injured.healHonor', { n: fmt(honorCost) })}
             </Button>
             <ConfirmButton
               size="sm"
               variant="outline"
               disabled={total <= 0 || dismiss.isPending}
-              title={`Dismiss ${fmtExact(total)} injured troops?`}
-              description="They leave for good instead of being healed. This cannot be undone."
-              confirmLabel="Dismiss"
+              title={t('injured.dismissTitle', { count: total, n: fmtExact(total) })}
+              description={t('injured.dismissDescription')}
+              confirmLabel={t('injured.dismiss')}
               onConfirm={() => dismiss.mutateAsync({ path, body: { troops: chosen } }).then(done)}
             >
-              Dismiss
+              {t('injured.dismiss')}
             </ConfirmButton>
-            {!affordable && total > 0 && <span className="self-center text-xs text-destructive">Not enough resources.</span>}
+            {!affordable && total > 0 && <span className="self-center text-xs text-destructive">{t('injured.notEnoughResources')}</span>}
           </div>
         </CardContent>
       )}

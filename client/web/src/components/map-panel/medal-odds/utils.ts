@@ -1,3 +1,5 @@
-import { itemConfig, medalId } from '@marchlands/core';
+import { medalId } from '@marchlands/core';
+import { itemShortName } from '@/lib/game-data';
 
-export const medalName = (level: number) => (itemConfig(medalId(level))?.name ?? `Medal ${level}`).replace(/ Medal$/, '');
+/** A medal level's short name ("Cross"), from the item's short name (data-items `<id>.short`). */
+export const medalName = (level: number) => itemShortName(medalId(level));

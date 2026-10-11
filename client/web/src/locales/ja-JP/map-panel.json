@@ -1,0 +1,77 @@
+{
+  "title": "マップ ({{x}}, {{y}})",
+  "pan": {
+    "west": "西",
+    "north": "北",
+    "south": "南",
+    "east": "東",
+    "home": "自都市"
+  },
+  "relations": {
+    "friend": "同盟・友好",
+    "enemy": "敵対",
+    "other": "その他のプレイヤー"
+  },
+  "relationsInline": {
+    "friend": "同盟・友好",
+    "enemy": "敵対",
+    "other": "その他のプレイヤー"
+  },
+  "tile": {
+    "castle": "{{name}}（{{player}}）",
+    "summary": "{{type}} Lv {{level}} ({{x}},{{y}})",
+    "heldByYou": "自分の都市 {{city}} が保有",
+    "heldBy": "{{city}}（{{player}}）が保有",
+    "heldByAlliance": "{{city}}（{{player}}、{{alliance}}）が保有",
+    "foreignValley": "{{relation}}の領地",
+    "yourValley": "自分の領地"
+  },
+  "info": {
+    "selectTile": "タイルを選択",
+    "player": "プレイヤー {{player}} · 名声 {{prestige}}",
+    "playerAlliance": "プレイヤー {{player}}（{{alliance}}）· 名声 {{prestige}}",
+    "heldBy": "保有: {{city}}（{{player}}）",
+    "moveCityHere": "ここへ都市を移転…",
+    "sendArmy": "軍を派遣",
+    "scout": "偵察",
+    "noScouts": "この都市に斥候がいません。軍事タブで訓練してください。",
+    "upgraded": "領地をアップグレードしました"
+  },
+  "release": {
+    "title": "この領地を放棄しますか？",
+    "description": "駐留部隊は帰還し、生産ボーナスは停止します。取り戻すには再び攻撃する必要があります。",
+    "confirm": "領地を放棄",
+    "button": "領地を放棄",
+    "short": "放棄",
+    "hint": "駐留部隊は帰還し、生産ボーナスは停止します。",
+    "success": "領地を放棄しました。駐留部隊は帰還中です"
+  },
+  "legend": {
+    "thisCityValleys": "この都市の領地",
+    "otherCitiesValleys": "他の自都市の領地",
+    "thisCity": "この都市",
+    "relationValleys": "{{relation}}の領地"
+  },
+  "held": {
+    "title": "{{city}} の保有領地",
+    "none": "まだありません。領地を攻撃して占領しましょう（市役所レベルまで）。",
+    "row": "{{type}} Lv {{level}}",
+    "bonus": "{{resource}} +{{bonus}}%"
+  },
+  "medalOdds": {
+    "one": "勝利時: {{chance}}の確率で{{medal}} メダル。",
+    "two": "勝利時: {{chance}}の確率で{{medal}} メダル、さらに{{second}}で2個目（{{medals}}）。",
+    "three": "勝利時: {{chance}}の確率で{{medal}} メダル、さらに{{second}}で2個目（{{medals}}）、{{third}}で3個目。"
+  },
+  "valleyUpgrade": {
+    "maxNpc": "レベル{{level}}: 蛮族の都市の最大レベルです。",
+    "maxValley": "レベル{{level}}: 領地の最大レベルです。",
+    "title": "レベル{{level}}にアップグレードしますか？",
+    "description": "{{city}} が {{gold}} 金を支払います。守備隊・防御施設・資源は新しいレベルで初期化されます。",
+    "confirm": "{{gold}} 金を支払う",
+    "button": "Lv {{level}}にアップグレード · {{gold}} 金",
+    "notEnoughGold": "{{city}} の金が足りません。",
+    "npcHint": "部隊・防御施設・城壁・英雄・略奪できる資源がすべてレベル{{level}}に成長し、全戦力で初期化されます。",
+    "valleyHint": "保有時: 生産 +{{from}}% → +{{to}}%。レベルに応じて守備隊も強くなります。"
+  }
+}

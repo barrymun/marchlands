@@ -1,0 +1,10 @@
+{
+  "action": {
+    "healHonour": "Heal all troops with honor",
+    "healHonourHome": "Heal all troops with honor when the armies are home"
+  },
+  "step": {
+    "healedHonour_one": "Healed {{count, number}} troop for {{honour}} honor",
+    "healedHonour_other": "Healed {{count, number}} troops for {{honour}} honor"
+  }
+}

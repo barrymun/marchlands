@@ -1,19 +1,22 @@
-import { BALANCE, itemConfig, scaled, speedupItemGold } from '@marchlands/core';
+import { useTranslation } from 'react-i18next';
+import { BALANCE, scaled, speedupItemGold } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';
 import { duration, fmt, fmtExact } from '@/lib/format';
+import { itemName } from '@/lib/game-data';
 
-const ITEMS = ['consume.2.a', 'consume.2.b', 'consume.2.b.1', 'consume.2.c', 'consume.2.c.1', 'consume.2.d'];
+const ITEMS = ['consume.2.a', 'consume.2.b', 'consume.2.b.1', 'consume.2.c', 'consume.2.c.1', 'consume.2.d'] as const;
 
-const EFFECT: Record<string, string> = {
-  'consume.2.a': '−15 min',
-  'consume.2.b': '−1 h',
-  'consume.2.b.1': '−2½ h',
-  'consume.2.c': '−8 h',
-  'consume.2.c.1': '−10–30 h',
-  'consume.2.d': '−30%',
-};
+/** Each item's reduction, as its key under `effects` in the speedup-options locale files. */
+const EFFECT = {
+  'consume.2.a': 'minutes15',
+  'consume.2.b': 'hour1',
+  'consume.2.b.1': 'hours2Half',
+  'consume.2.c': 'hours8',
+  'consume.2.c.1': 'hours10To30',
+  'consume.2.d': 'percent30',
+} as const satisfies Record<(typeof ITEMS)[number], string>;
 
 /**
  * Speed-up choices for a running construction, demolition or research: free (last 5 minutes),
@@ -35,6 +38,7 @@ export function SpeedupOptions({
   pending: boolean;
   onUse: (itemId: string) => void;
 }) {
+  const { t } = useTranslation(['speedup-options', 'common']);
   const now = useNow();
   const inv = useInventory();
   const left = endTime - now;
@@ -43,15 +47,21 @@ export function SpeedupOptions({
     <div className="grid gap-2">
       <div className="flex flex-wrap gap-2">
         <Button size="xs" disabled={!free || pending} onClick={() => onUse('free.speed')}>
-          Finish free
+          {t('finishFree')}
         </Button>
         {goldNeed != null && (
-          <Button size="xs" variant="outline" disabled={pending || gold < goldNeed} title={`${fmtExact(goldNeed)} gold`} onClick={() => onUse('gold.speed')}>
-            Finish now · {fmt(goldNeed)} gold
+          <Button
+            size="xs"
+            variant="outline"
+            disabled={pending || gold < goldNeed}
+            title={t('common:gold', { gold: fmtExact(goldNeed) })}
+            onClick={() => onUse('gold.speed')}
+          >
+            {t('finishNow', { gold: fmt(goldNeed) })}
           </Button>
         )}
       </div>
-      {!free && <p className="text-xs text-muted-foreground">Free in the last {duration(scaled(BALANCE.freeSpeedupMs))}.</p>}
+      {!free && <p className="text-xs text-muted-foreground">{t('freeIn', { time: duration(scaled(BALANCE.freeSpeedupMs)) })}</p>}
       <div className="flex flex-wrap gap-1.5">
         {ITEMS.map((id) => {
           const owned = inv.count(id);
@@ -62,10 +72,10 @@ export function SpeedupOptions({
               size="xs"
               variant={owned > 0 ? 'secondary' : 'outline'}
               disabled={pending || (owned === 0 && gold < price)}
-              title={owned > 0 ? itemConfig(id)?.name : `${itemConfig(id)?.name}: bought for ${fmtExact(price)} gold`}
+              title={owned > 0 ? itemName(id) : t('boughtFor', { name: itemName(id), gold: fmtExact(price) })}
               onClick={() => onUse(id)}
             >
-              {itemConfig(id)?.name} ({EFFECT[id]}) · {owned > 0 ? `×${owned}` : `${fmt(price)} gold`}
+              {itemName(id)} ({t(`effects.${EFFECT[id]}`)}) · {owned > 0 ? `×${owned}` : t('common:gold', { gold: fmt(price) })}
             </Button>
           );
         })}

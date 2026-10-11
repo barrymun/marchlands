@@ -1,0 +1,27 @@
+{
+  "toast": {
+    "used": "Item used",
+    "bought": "Bought with gold and used"
+  },
+  "notEnoughGold": "Not enough gold in this city ({{gold}} needed)",
+  "title": "Items for {{name}}",
+  "maxLevel": "Max level",
+  "experienceProgress": "Experience {{exp}} / {{needed}}",
+  "summary": "{{progress}} · loyalty {{loyalty}} · {{gold}} gold in this city",
+  "experience": {
+    "title": "Experience",
+    "gain": "+{{amount}} experience",
+    "atMax": "Level {{level}} is the maximum: no more experience"
+  },
+  "boosts": {
+    "title": "Attribute boosts",
+    "effect": "{{label}} +{{pct}}% (+{{amount}}, gear included) for 24 hours",
+    "active": "Active, <countdown /> left; using another adds 24 hours",
+    "best": "Best for this hero"
+  },
+  "loyalty": {
+    "title": "Loyalty medals",
+    "gain": "+{{amount}} loyalty (max 100)",
+    "full": "Loyalty is already 100"
+  }
+}

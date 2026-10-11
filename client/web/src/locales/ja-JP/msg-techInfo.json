@@ -1,0 +1,36 @@
+{
+  "summary": {
+    "resource": "レベルごとに{{resource}}の生産量 +{{pct}}%（資源地の産出に適用）。",
+    "stockpile": "レベルごとに食料・木材・石材・鉄の保管量 +{{pct}}%。",
+    "construction": "レベルごとに建設・解体・防衛施設の建造時間 ×{{factor}}。",
+    "militaryScience": "レベルごとに攻城兵器を除く全部隊の訓練時間 ×{{factor}}。",
+    "metalCasting": "レベルごとに攻城兵器（{{troops}}）の訓練時間 ×{{factor}}。",
+    "heroEnhancement_other": "すべての英雄の装備{{count, number}}部位をすべて1レベル上げます。レベルLの部位は英雄の装備能力に 1 + 2 + … + L ポイントを加えます。英雄は装備ティアまでの装備レベルを使えます（英雄レベル 1-9 はなし、10-19 は 1、… 90-99 は 9、レベル {{heroMaxLevel}} で {{maxTier}}）。",
+    "militaryTradition": "戦闘時、レベルごとに部隊の攻撃力 +{{pct}}%。",
+    "ironWorking": "部隊と{{tower}}の被ダメージを軽減します。戦闘時、レベルごとに防御力 +{{pct}}%。",
+    "medicine": "戦闘時、レベルごとに歩兵（{{from}}〜{{to}}）と{{tower}}のHP +{{pct}}%。また、都市の防衛でも攻撃でも、失った部隊のうちレベルごとに{{injured}}%（最大{{max}}%）が負傷兵として生き残り、資源または名誉で治療できます。",
+    "archery": "戦闘時、レベルごとに{{troops}}の射程 +{{pct}}%。",
+    "compass": "レベルごとに歩兵の行軍速度 +{{march}}%、戦闘時の移動速度 +{{battle}}%。",
+    "horsebackRiding": "レベルごとに騎兵と攻城兵器の行軍速度 +{{march}}%、戦闘時の移動速度 +{{battle}}%。",
+    "logistics": "レベルごとに軍隊が運べる資源 +{{pct}}%（略奪と輸送）。",
+    "informatics": "他のプレイヤーの都市をより詳しく偵察できます。レベル{{heroes}}で英雄も、レベル{{buildings}}で建物も判明します。",
+    "none": "このサーバーではまだ効果がありません。"
+  },
+  "effect": {
+    "resource": "{{resource}}の生産量 +{{pct}}%",
+    "stockpile": "保管量 +{{pct}}%",
+    "construction": "建設・解体・防衛施設の建造時間 −{{pct}}%",
+    "militaryScience": "部隊の訓練時間 −{{pct}}%",
+    "metalCasting": "攻城兵器の訓練時間 −{{pct}}%",
+    "heroEnhancement": "装備レベル{{level}}：英雄の能力 最大 +{{points}}",
+    "militaryTradition": "部隊の攻撃力 +{{pct}}%",
+    "ironWorking": "部隊の防御力 +{{pct}}%",
+    "medicine": "歩兵のHP +{{life}}%、戦死した部隊の{{injured}}%が負傷兵として生還",
+    "archery": "射程 +{{pct}}%",
+    "compass": "歩兵の速度 +{{pct}}%",
+    "horsebackRiding": "騎兵と攻城兵器の速度 +{{pct}}%",
+    "logistics": "積載量 +{{pct}}%",
+    "informaticsHeroes": "偵察で部隊・資源・英雄が判明",
+    "informaticsBuildings": "偵察で部隊・資源・英雄・建物が判明"
+  }
+}

@@ -3,6 +3,7 @@
 
 import { heroManagement, heroPower, heroStratagem, type GearStat } from '@marchlands/core';
 import type { HeroBean } from '@marchlands/api-client';
+import { i18n } from '@/lib/i18n';
 
 /** Badge colours (background + text, light and dark) per attribute. */
 export const ATTRIBUTE_TONE = {
@@ -20,11 +21,44 @@ export const ATTRIBUTE_BORDER = {
   int: 'border-sky-500/70',
 } as const satisfies Record<AttributeKey, string>;
 
-/** `stat`: the attribute's field name on the hero (and in gear / boost APIs). */
+/** `stat`: the attribute's field name on the hero (and in gear / boost APIs); `label` and `short` are in the current locale. */
 export const HERO_ATTRIBUTES = [
-  { key: 'pol', stat: 'management', label: 'Politics', short: 'pol', value: heroManagement, tone: ATTRIBUTE_TONE.pol },
-  { key: 'att', stat: 'power', label: 'Attack', short: 'att', value: heroPower, tone: ATTRIBUTE_TONE.att },
-  { key: 'int', stat: 'stratagem', label: 'Intelligence', short: 'int', value: heroStratagem, tone: ATTRIBUTE_TONE.int },
+  {
+    key: 'pol',
+    stat: 'management',
+    get label() {
+      return i18n.t('common:heroAttributes.politics');
+    },
+    get short() {
+      return i18n.t('common:heroAttributes.politicsShort');
+    },
+    value: heroManagement,
+    tone: ATTRIBUTE_TONE.pol,
+  },
+  {
+    key: 'att',
+    stat: 'power',
+    get label() {
+      return i18n.t('common:heroAttributes.attack');
+    },
+    get short() {
+      return i18n.t('common:heroAttributes.attackShort');
+    },
+    value: heroPower,
+    tone: ATTRIBUTE_TONE.att,
+  },
+  {
+    key: 'int',
+    stat: 'stratagem',
+    get label() {
+      return i18n.t('common:heroAttributes.intelligence');
+    },
+    get short() {
+      return i18n.t('common:heroAttributes.intelligenceShort');
+    },
+    value: heroStratagem,
+    tone: ATTRIBUTE_TONE.int,
+  },
 ] as const satisfies readonly { key: AttributeKey; stat: GearStat; label: string; short: string; value: (h: HeroBean) => number; tone: string }[];
 
 /** The attribute entry for a field name ('power' | 'management' | 'stratagem'). */

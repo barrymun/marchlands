@@ -1,0 +1,78 @@
+{
+  "noMarketplace": {
+    "title": "市場",
+    "description": "都市に市場を建設すると、食料・木材・石材・鉄を金と交換できます。"
+  },
+  "side": {
+    "buy": "買い",
+    "sell": "売り"
+  },
+  "columns": {
+    "order": "注文",
+    "price": "価格",
+    "filled": "約定",
+    "placed": "発注日時",
+    "amount": "数量",
+    "from": "相手"
+  },
+  "myOrders": {
+    "title": "待機中の注文",
+    "cancelled": "注文を取り消しました。預けていた資源または金を返却しました",
+    "cancel": "注文を取り消す"
+  },
+  "orderBook": {
+    "title": "板情報 · {{resource}}",
+    "fixedPrice": "1単位あたりの金。商人はどんな量でも固定価格 {{price}} で売買するので、少なくともその価格で必ず売れます。行をクリックするとその価格で取引します。",
+    "floatingPrice": "1単位あたりの金。商人は常に取引に応じます。買われると価格が上がり、売られると下がり、やがて {{price}} に戻ります。行をクリックするとその価格で取引します。",
+    "player": "プレイヤー",
+    "unlimited": "無制限",
+    "merchant": "商人",
+    "divider": "上：売り注文 · 下：買い注文",
+    "reference": " · 基準 {{price}}"
+  },
+  "priceHistory": {
+    "title": "価格 · {{resource}}",
+    "description": "ゲーム内1時間ごとの終値（直近24件）。",
+    "chartLabel": "価格",
+    "noTrades": "まだ取引がありません。",
+    "recentTrades": "最近の取引",
+    "merchant": "商人",
+    "players": "プレイヤー"
+  },
+  "shipments": {
+    "title": "輸送中の物資",
+    "delivered": "配達しました",
+    "arrivesIn": "到着まで <countdown/>",
+    "deliverNow": "今すぐ配達 · {{gold}} 金"
+  },
+  "tradeForm": {
+    "title": "{{resource}}を取引",
+    "description": "取引は即時に成立します。購入時に{{fee}}%の手数料がかかります。市場 Lv {{level}}：この都市の待機注文 {{open}}/{{cap}}。",
+    "instant": "即時",
+    "limit": "価格を指定",
+    "amount": "数量",
+    "highestPrice": "上限価格（1単位あたりの金）",
+    "lowestPrice": "下限価格（1単位あたりの金）",
+    "enterAmount": "数量を入力すると見積もりが表示されます。",
+    "enterAmountAndPrice": "数量と価格を入力すると見積もりが表示されます。",
+    "buyNowQuote": "今すぐ {{amount}} 購入 · 平均 {{price}}",
+    "sellNowQuote": "今すぐ {{amount}} 売却 · 平均 {{price}}",
+    "goldSpent": "−{{gold}} 金",
+    "goldEarned": "+{{gold}} 金",
+    "nothingTrades": "現在この価格で成立する取引はありません。",
+    "withMerchant": "商人と {{amount}}",
+    "withPlayers": "他のプレイヤーと {{amount}}",
+    "inclFee": "手数料 {{fee}} 込み",
+    "waits": "{{amount}} を {{price}} で板に出します",
+    "holds": "{{resource}} {{amount}} を預けます",
+    "available": "所持{{resource}}",
+    "limitReached": "待機注文の上限に達しました。市場を強化するか、注文を取り消してください。",
+    "bought": "{{resource}} {{amount}} を {{gold}} 金で購入しました（平均 {{price}}）",
+    "sold": "{{resource}} {{amount}} を {{gold}} 金で売却しました（平均 {{price}}）",
+    "waiting": "{{amount}} を板で待機中",
+    "buyNow": "今すぐ購入",
+    "sellNow": "今すぐ売却",
+    "placeBuy": "買い注文を出す",
+    "placeSell": "売り注文を出す"
+  }
+}

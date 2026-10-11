@@ -1,0 +1,79 @@
+{
+  "couldNotLoad": "Statistics could not be loaded.",
+  "title": "Statistics",
+  "description": "Saved every few minutes, so your latest actions can take a few minutes to show up.",
+  "descriptionSince": "Counted since {{date}}. Saved every few minutes, so your latest actions can take a few minutes to show up.",
+  "allCities": "All cities",
+  "formerCity": "Former city",
+  "allTime": "All time",
+  "last7Days": "Last 7 days",
+  "summary": {
+    "title": "Overview",
+    "attacksWon": "Attacks won",
+    "attacksLost": "Attacks lost",
+    "defensesWon": "Defences won",
+    "defensesLost": "Defences lost",
+    "barbarianCitiesBeaten": "Barbarian cities beaten",
+    "citiesCaptured": "Cities captured",
+    "valleysOccupied": "Valleys occupied",
+    "honorGained": "Honour gained",
+    "buildingLevels": "Building levels",
+    "researchLevels": "Research levels",
+    "heroLevels": "Hero levels",
+    "heroesHired": "Heroes hired",
+    "itemsUsed": "Items used"
+  },
+  "units": {
+    "title": "Troops and fortifications",
+    "description": "Killed counts the enemy units of that type your armies and defences destroyed. Of your own fallen, Died never came back and Injured came home to be healed.",
+    "columns": {
+      "trained": "Trained",
+      "killed": "Killed (enemy)",
+      "died": "Died",
+      "injured": "Injured",
+      "healed": "Healed",
+      "deserted": "Deserted",
+      "disbanded": "Disbanded"
+    }
+  },
+  "resources": {
+    "title": "Resources",
+    "description": "Produced is gross output (gold: taxes). Troops ate {{food}} food; heroes were paid {{salaries}} gold. Market: {{paid}} gold paid, {{received}} gold received.",
+    "resource": "Resource",
+    "columns": {
+      "produced": "Produced",
+      "wasted": "Wasted (storage full)",
+      "taxed": "Sold as tax",
+      "plundered": "Plundered",
+      "stolen": "Lost to plunder",
+      "dailyGift": "Daily gift",
+      "bought": "Bought",
+      "sold": "Sold"
+    }
+  },
+  "spending": {
+    "title": "Spending",
+    "description": "After refunds for cancelled orders.",
+    "descriptionHonor": "After refunds for cancelled orders. Healing also cost {{honor}} honour.",
+    "on": "On",
+    "groups": {
+      "building": "Buildings",
+      "research": "Research",
+      "training": "Troops and fortifications",
+      "healing": "Healing",
+      "speedups": "Speed-ups",
+      "items": "Items",
+      "heroes": "Heroes (hire, refresh, reward)",
+      "valleys": "Valley upgrades",
+      "comfort": "Comforting",
+      "other": "Other (truce, holiday, alliance)"
+    }
+  },
+  "npcWins": {
+    "title": "Barbarian cities beaten, by level",
+    "level": "Level {{level}}"
+  },
+  "itemsUsed": {
+    "title": "Items used"
+  }
+}

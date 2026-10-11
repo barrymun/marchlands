@@ -13,7 +13,7 @@ const j = async (m, p, b, t) =>
   ).json();
 const ok = async (...a) => {
   const r = await j(...a);
-  if (r.ok !== 1) throw new Error(`${a[1]}: ${r.errorMsg}`);
+  if (r.ok !== 1) throw new Error(`${a[1]}: ${JSON.stringify(r.error)}`);
   return r.data;
 };
 let fails = 0;

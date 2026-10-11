@@ -2,11 +2,11 @@
 // backend/packages/game/src/dto.ts and reused across many endpoints and pushes.
 
 import { z } from 'zod';
-import { BUFF_IDS, BuildingStateSchema, HERO_BUFF_IDS } from '@marchlands/core';
+import { BUFF_IDS, BuildingStateSchema, HERO_BUFF_IDS, MessageSchema } from '@marchlands/core';
 import { FortBean, Ms, ResourceAmounts, TroopBean } from './common.ts';
 import { ArmyRow, HeroRow, PlayerRow, TileRow } from './rows.ts';
 
-export const BuildingBean = BuildingStateSchema.extend({ name: z.string() }).meta({ id: 'BuildingBean' });
+export const BuildingBean = BuildingStateSchema.extend({}).meta({ id: 'BuildingBean' });
 export type BuildingBean = z.infer<typeof BuildingBean>;
 
 export const HeroBean = HeroRow.pick({
@@ -41,7 +41,7 @@ export const HeroBean = HeroRow.pick({
       .array(
         z.object({
           id: z.enum(HERO_BUFF_IDS),
-          desc: z.string(),
+          desc: MessageSchema.describe('what the boost does (`buff.*`), worded by the client'),
           endTime: Ms,
           param: z.number().optional().describe('points added'),
         }),
@@ -119,7 +119,7 @@ export const CityBean = z
     fieldId: z.number().int().describe('tile id'),
     x: z.number().int(),
     y: z.number().int(),
-    zoneName: z.string(),
+    zoneId: z.number().int().describe('zone (state) id; the client names it'),
     status: z.number().int(),
     allowAlliance: z.boolean(),
     goOutForBattle: z.boolean(),
@@ -140,8 +140,7 @@ export const PlayerInfo = PlayerRow.pick({ id: true, sex: true, flag: true, face
     userName: z.string(),
     prestige: z.number().int(),
     honor: z.number().int(),
-    titleId: z.number().int(),
-    titleName: z.string(),
+    titleId: z.number().int().describe('nobility title (named by the client)'),
     ranking: z.number().int(),
     honorRank: z.number().int(),
     alliance: z.string(),
@@ -161,7 +160,7 @@ export type ItemCount = z.infer<typeof ItemCount>;
 export const BuffBean = z
   .object({
     id: z.enum(BUFF_IDS),
-    desc: z.string(),
+    desc: MessageSchema.describe('what the buff does (`buff.*`), worded by the client'),
     endTime: Ms,
     param: z.number().optional(),
     cityId: z.number().int().optional(),

@@ -1,0 +1,22 @@
+{
+  "invalidBuilding": "Invalid building.",
+  "notFound": "Building not found.",
+  "invalidPosition": "Invalid building position.",
+  "cannotBuild": "This building cannot be built.",
+  "cannotBuildHere": "{{building}} cannot be built here.",
+  "positionTaken": "There is already a building in that position.",
+  "limitReached": "This city cannot have another {{building}}.",
+  "slotLocked": "That slot is not unlocked yet.",
+  "queuesBusy": "All construction queues are busy.",
+  "requirementsNotMet": "The requirements for this building are not met.",
+  "statusChanged": "This building's status has changed, perhaps because of a network delay. If this message persists, please reload the page.",
+  "maxLevel": "{{building}} is already at its maximum level.",
+  "busy": "This building is busy.",
+  "nothingToDemolish": "There is no building to demolish here.",
+  "cannotDemolish": "The {{building}} cannot be demolished.",
+  "notInProgress": "Nothing is being built or demolished here.",
+  "invalidTech": "Invalid technology.",
+  "academyNeeded": "You need to build the {{building}} before you can research.",
+  "techRequirementsNotMet": "The requirements for this research are not met.",
+  "troopRequirementsNotMet": "The requirements for this unit are not met."
+}

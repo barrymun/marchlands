@@ -1,0 +1,8 @@
+{
+  "notResearching": "{{tech}} is not being researched in this city.",
+  "noResearch": "No research in progress.",
+  "chooseResearch": "Several technologies are being researched: choose one.",
+  "queueFull_one": "This city is already researching {{count, number}} technology.",
+  "queueFull_other": "This city is already researching {{count, number}} technologies.",
+  "alreadyResearching": "{{tech}} is already being researched in another city."
+}

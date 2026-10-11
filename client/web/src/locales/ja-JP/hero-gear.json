@@ -1,0 +1,28 @@
+{
+  "line": {
+    "summary": "装備 <bonus>+{{total}}</bonus> · ティア {{tier}}/{{max}}",
+    "nextTier": "（レベル {{level}} でティア {{tier}}）",
+    "attributeGroup": "装備で強化する能力",
+    "boosts": "装備は{{label}}を強化中",
+    "putOn": "装備で{{label}}を強化する",
+    "uses_other": "装備レベル {{level}}、各部位の星 {{count}} 個までが有効"
+  },
+  "card": {
+    "starAdded": "星を追加しました",
+    "title": "英雄の装備",
+    "description": "すべての英雄が {{pieces}} 部位すべての装備を身に着けます。装備のレベルは英雄強化の研究レベルです（{{research}}/{{max}}、アカデミーで研究）。星はメダルで購入します。英雄は装備ティアまでの装備レベルと星を使えます: 英雄レベル 1-9 はなし、10-19 は 1、… 90-99 は 9、レベル {{heroMaxLevel}} ですべての {{max}}。レベル L の部位は 1 + … + L ポイント、星 1 つにつき +{{starPoints}}。",
+    "levelZero": "装備はレベル 0 です: アカデミーで英雄強化を研究するまでは星のみが有効です（レベル N にはアカデミー レベル N が必要）。",
+    "goToResearch": "研究へ",
+    "needsResearch": "研究 {{level}} が必要",
+    "medalCost": "{{n}}× {{medal}}",
+    "starNeedsResearch": "星 {{star}} には英雄強化レベル {{star}} が必要です（現在 {{level}}）",
+    "starCost_other": "星 {{star}}: {{medal}} ×{{count}}（所持 {{owned}}）",
+    "starsAboveHint": "英雄強化レベルを超える星は、研究すると有効になります",
+    "starsCount": "{{stars}} 個中 {{used}} 個有効",
+    "allStars": "星はすべて取得済み",
+    "starNeedsResearchWaiting_other": "星 {{star}} には英雄強化レベル {{star}} が必要です（現在 {{level}}）。それまでは星 {{count}} 個のうち {{used}} 個のみ有効"
+  },
+  "stars": {
+    "label_other": "星 {{n}}/{{count}}"
+  }
+}

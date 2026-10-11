@@ -1,4 +1,6 @@
+import { BASIC_RESOURCES } from '@marchlands/core';
 import type { GetPlayerResponse, HeroBean } from '@marchlands/api-client';
+import { i18n } from '@/lib/i18n';
 
 /** Apply a HeroUpdate push to a city's hero list (updateType 1 = the hero left). */
 export function patchHeroes(heros: HeroBean[], hero: HeroBean, updateType: number): HeroBean[] {
@@ -13,4 +15,7 @@ export function patchPlayerHeroes(player: GetPlayerResponse, castleId: number, h
 }
 
 /** Name of a market resource type (0 food … 3 iron) for messages. */
-export const resourceName = (resType: number) => ['food', 'lumber', 'stone', 'iron'][resType] ?? 'goods';
+export const resourceName = (resType: number) => {
+  const key = BASIC_RESOURCES[resType] ?? 'goods';
+  return i18n.t(`common:resourcesInline.${key}`);
+};

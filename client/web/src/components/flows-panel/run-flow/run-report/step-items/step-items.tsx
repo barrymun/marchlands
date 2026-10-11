@@ -1,14 +1,17 @@
+import { useTranslation } from 'react-i18next';
+import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
 import type { StepItem } from '@/components/flows-panel/run-flow/run-report/step-items/types';
 
 /** Per-target outcomes; when every target was skipped for the same reason, the reason is shown once. */
 export function StepItems({ items }: { items: StepItem[] }) {
-  const reasons = new Set(items.map((i) => i.detail));
+  const { t } = useTranslation('flows-panel');
+  const reasons = new Set(items.map((i) => JSON.stringify(i.detail)));
   if (items.length > 1 && reasons.size === 1 && !items[0].ok) {
     return (
       <div className="grid gap-1">
         <span className="text-amber-700 dark:text-amber-400">
-          All {items.length} {items[0].detail}
+          {t('runFlow.report.allItems', { n: items.length, detail: translateMessage(items[0].detail) })}
         </span>
         <span className="flex flex-wrap gap-1">
           {items.map((i) => (
@@ -26,7 +29,8 @@ export function StepItems({ items }: { items: StepItem[] }) {
         <li key={i.label} className="flex gap-1.5">
           <span className={cn('mt-1.5 size-1.5 shrink-0 rounded-full', i.ok ? 'bg-emerald-500' : 'bg-amber-500')} aria-hidden />
           <span>
-            <span className="text-foreground tabular-nums">{i.label}</span> <span className={i.ok ? '' : 'text-amber-700 dark:text-amber-400'}>{i.detail}</span>
+            <span className="text-foreground tabular-nums">{i.label}</span>{' '}
+            <span className={i.ok ? '' : 'text-amber-700 dark:text-amber-400'}>{translateMessage(i.detail)}</span>
           </span>
         </li>
       ))}

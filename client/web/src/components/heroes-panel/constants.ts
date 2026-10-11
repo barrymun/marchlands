@@ -1,9 +1,21 @@
 import { HeroStatus } from '@marchlands/core';
+import { i18n } from '@/lib/i18n';
 
+/** A hero's status as a label, in the current locale. */
 export const STATUS: Record<number, string> = {
-  [HeroStatus.IDLE]: 'Idle',
-  [HeroStatus.MAYOR]: 'Mayor',
-  [HeroStatus.ATTACK]: 'Marching',
-  [HeroStatus.SEIZED]: 'Captive',
-  [HeroStatus.RETURN]: 'Returning',
+  get [HeroStatus.IDLE]() {
+    return i18n.t('heroes-panel:status.idle');
+  },
+  get [HeroStatus.MAYOR]() {
+    return i18n.t('heroes-panel:status.mayor');
+  },
+  get [HeroStatus.ATTACK]() {
+    return i18n.t('heroes-panel:status.marching');
+  },
+  get [HeroStatus.SEIZED]() {
+    return i18n.t('heroes-panel:status.captive');
+  },
+  get [HeroStatus.RETURN]() {
+    return i18n.t('heroes-panel:status.returning');
+  },
 };

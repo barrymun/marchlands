@@ -1,0 +1,32 @@
+{
+  "received": "{{item}}：{{grant}}を受け取りました",
+  "heroJoined": "{{hero}}（Lv {{level}}）が都市に加わりました",
+  "used": "{{item}}を使用しました",
+  "bought": "{{item}}を購入しました",
+  "search": "アイテムを検索",
+  "ownedOnly": "所持品のみ（{{n}}）",
+  "itemsFor": "{{label}}のアイテム",
+  "showAll": "すべてのアイテムを表示",
+  "notEnoughGold": "{{city}}の金が足りません（{{price}} 必要）",
+  "buyWithGold": "{{city}}の金で1個購入",
+  "buyFor": "購入 · {{price}} 金",
+  "noMatch": "該当するアイテムはありません。",
+  "grant": {
+    "amount": "{{name}} {{amount}}"
+  },
+  "activeBonus": {
+    "runningHint": "この効果は発動中です。別のアイテムを使うと延長されます",
+    "active": "発動中 · <countdown/>",
+    "sameBonus": "同じ効果が発動中です（残り <countdown/>）。使用すると{{adds}}延長されます。",
+    "sameBonusFrom": "{{source}}による同じ効果が発動中です（残り <countdown/>）。使用すると{{adds}}延長されます。"
+  },
+  "medals": {
+    "title": "入手方法",
+    "attacks": "以下のレベルのNPC都市への<hl>攻撃勝利</hl>（プレイヤーの都市は市役所のレベルで判定）。勝利ごとの確率：",
+    "attackChance": "Lv {{level}} · {{chance}}",
+    "sometimes": "時々 {{range}}",
+    "container": "<hl>{{name}}</hl>（{{amount}}）：ショップで {{price}} 金",
+    "containerKey": "<hl>{{name}}</hl>（{{amount}}）：ショップで {{price}} 金（{{opener}}で開封）",
+    "quest": "<hl>クエスト「{{name}}」</hl>：{{n}}（1回のみ）"
+  }
+}

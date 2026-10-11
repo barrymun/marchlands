@@ -1,0 +1,5 @@
+{
+  "broadcast": "{{text}}",
+  "unknownItem": "不明なアイテムです：{{id}}。",
+  "invalidLevel": "レベルは0から{{max}}の間で指定してください。"
+}

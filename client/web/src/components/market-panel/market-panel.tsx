@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { getMarketByResTypeOptions, type CityBean, type MarketPriceLevel } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
@@ -13,6 +14,7 @@ import { MyOrders } from '@/components/market-panel/my-orders/my-orders';
 import { Shipments } from '@/components/market-panel/shipments/shipments';
 
 export function MarketPanel({ city }: { city: CityBean }) {
+  const { t } = useTranslation('market-panel');
   const market = city.buildings.filter((b) => b.typeId === BuildingType.MARKETPLACE).reduce((m, b) => Math.max(m, b.level), 0);
   const [resType, setResType] = useState(0);
   const [side, setSide] = useState<Side>(0);
@@ -28,8 +30,8 @@ export function MarketPanel({ city }: { city: CityBean }) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Marketplace</CardTitle>
-          <CardDescription>Build a Marketplace in the city to trade food, lumber, stone and iron for gold.</CardDescription>
+          <CardTitle className="text-sm">{t('noMarketplace.title')}</CardTitle>
+          <CardDescription>{t('noMarketplace.description')}</CardDescription>
         </CardHeader>
       </Card>
     );

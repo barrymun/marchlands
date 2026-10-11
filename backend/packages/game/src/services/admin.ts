@@ -12,6 +12,7 @@ import {
   RESOURCE_KEYS,
   type ResourceSet,
   TechType,
+  msg,
 } from '@marchlands/core';
 import { accounts, heroes } from '@marchlands/db';
 import { openOwnCity } from '../city.ts';
@@ -24,15 +25,15 @@ import { PushCmd } from '@marchlands/contracts';
 
 async function target(ctx: Ctx, name: string) {
   const p = await findPlayerByName(ctx, name);
-  if (!p) throw new GameError(`Player ${name} doesn't exist.`, -41, 404);
+  if (!p) throw new GameError(msg('common.playerNamedNotFound', { name }), -41, 404);
   return getPlayer(ctx, p.id, { lock: true });
 }
 
 export async function grantItems(ctx: Ctx, playerName: string, items: Record<string, number>) {
   const p = await target(ctx, playerName);
   for (const [id, n] of Object.entries(items)) {
-    if (!itemConfig(id)) throw new GameError(`Unknown item ${id}.`, -99);
-    if (!Number.isInteger(n) || n === 0) throw new GameError('Invalid amount.', -99);
+    if (!itemConfig(id)) throw new GameError(msg('admin.unknownItem', { id }), -99);
+    if (!Number.isInteger(n) || n === 0) throw new GameError(msg('common.invalidAmount'), -99);
     addItem(ctx, p, id, n);
   }
   await savePlayer(ctx, p);
@@ -47,7 +48,7 @@ export async function setResources(ctx: Ctx, cityId: number, playerId: number, r
 
 export async function setBuilding(ctx: Ctx, cityId: number, playerId: number, positionId: number, typeId: number, level: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  if (level < 0 || level > buildingMaxLevel(typeId)) throw new GameError('Invalid level.', -99);
+  if (level < 0 || level > buildingMaxLevel(typeId)) throw new GameError(msg('admin.invalidLevel', { max: buildingMaxLevel(typeId) }), -99);
   const rest = b.city.buildings.filter((x) => x.positionId !== positionId);
   b.city.buildings = level === 0 ? rest : [...rest, { positionId, typeId, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 }];
   await saveCity(ctx, b.city);
@@ -56,7 +57,7 @@ export async function setBuilding(ctx: Ctx, cityId: number, playerId: number, po
 
 export async function setTechnology(ctx: Ctx, playerName: string, techId: number, level: number) {
   const p = await target(ctx, playerName);
-  if (level < 0 || level > researchMaxLevel(techId)) throw new GameError('Invalid level.', -99);
+  if (level < 0 || level > researchMaxLevel(techId)) throw new GameError(msg('admin.invalidLevel', { max: researchMaxLevel(techId) }), -99);
   p.research = { ...p.research, [techId]: { level } };
   await savePlayer(ctx, p);
   if (techId === TechType.HERO_ENHANCEMENT) await resyncHeroGear(ctx, p.id);
@@ -87,8 +88,8 @@ export async function mute(ctx: Ctx, playerName: string, minutes: number) {
   await savePlayer(ctx, p);
 }
 
-export function broadcast(ctx: Ctx, msg: string, tv = true) {
-  ctx.broadcast(PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: tv, noSenderSystemInfo: true, msg });
+export function broadcast(ctx: Ctx, text: string, tv = true) {
+  ctx.broadcast(PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: tv, noSenderSystemInfo: true, msg: msg('admin.broadcast', { text }) });
 }
 
 export async function mailPlayer(ctx: Ctx, playerName: string, title: string, content: string) {

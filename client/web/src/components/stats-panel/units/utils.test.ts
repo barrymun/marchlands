@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { FORT_KEY_LIST, FORT_KEYS, TROOP_KEY_LIST, TROOP_KEYS, TROOP_NAMES } from '@marchlands/core';
+import { FORT_KEY_LIST, FORT_KEYS, TROOP_KEY_LIST, TROOP_KEYS } from '@marchlands/core';
 import { unitCount, unitName } from '@/components/stats-panel/units/utils';
+import { troopName } from '@/lib/game-data';
 
 describe(unitCount.name, () => {
   it('reads the `group.unit` counter', () => {
@@ -37,13 +38,13 @@ describe(unitCount.name, () => {
 
 describe(unitName.name, () => {
   it('names every troop key by its troop id', () => {
-    for (const [id, key] of Object.entries(TROOP_KEYS)) expect(unitName(key)).toBe(TROOP_NAMES[Number(id)]);
+    for (const [id, key] of Object.entries(TROOP_KEYS)) expect(unitName(key)).toBe(troopName(Number(id)));
     expect(unitName('archer')).toBe('Archer');
     expect(unitName('lightCavalry')).toBe('Cavalry');
   });
 
   it('names every fortification key by its fort id', () => {
-    for (const [id, key] of Object.entries(FORT_KEYS)) expect(unitName(key)).toBe(TROOP_NAMES[Number(id)]);
+    for (const [id, key] of Object.entries(FORT_KEYS)) expect(unitName(key)).toBe(troopName(Number(id)));
     expect(unitName('rockfall')).toBe('Trebuchet');
   });
 
@@ -54,5 +55,6 @@ describe(unitName.name, () => {
   it('falls back to the key when the unit is unknown', () => {
     expect(unitName('dragon')).toBe('dragon');
     expect(unitName('')).toBe('');
+    expect(unitName('toString')).toBe('toString');
   });
 });

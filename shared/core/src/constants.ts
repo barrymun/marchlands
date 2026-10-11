@@ -46,29 +46,6 @@ export const BuildingType = {
 } as const;
 export type BuildingType = (typeof BuildingType)[keyof typeof BuildingType];
 
-export const BUILDING_NAMES: Record<number, string> = {
-  1: 'Cottage',
-  2: 'Barracks',
-  3: 'Warehouse',
-  4: 'Sawmill',
-  5: 'Quarry',
-  6: 'Ironmine',
-  7: 'Farm',
-  20: 'Stable',
-  21: 'Inn',
-  22: 'Forge',
-  23: 'Marketplace',
-  24: 'Relief Station',
-  25: 'Academy',
-  26: 'Workshop',
-  27: 'Feasting Hall',
-  28: 'Embassy',
-  29: 'Rally Spot',
-  30: 'Beacon Tower',
-  31: 'Town Hall',
-  32: 'Walls',
-};
-
 /** Troop type ids (config_troops.troopid). */
 export const TroopType = {
   WORKER: 2,
@@ -126,27 +103,6 @@ export type FortKey = (typeof FORT_KEYS)[keyof typeof FORT_KEYS];
 export const FORT_KEY_LIST = Object.values(FORT_KEYS) as FortKey[];
 export const FORT_ID_BY_KEY = Object.fromEntries(Object.entries(FORT_KEYS).map(([id, key]) => [key, Number(id)])) as Record<FortKey, FortType>;
 
-/** Display names by troop / fortification id. */
-export const TROOP_NAMES: Record<number, string> = {
-  2: 'Worker',
-  3: 'Warrior',
-  4: 'Scout',
-  5: 'Pikeman',
-  6: 'Swordsman',
-  7: 'Archer',
-  8: 'Transporter',
-  9: 'Cavalry',
-  10: 'Cataphract',
-  11: 'Ballista',
-  12: 'Battering Ram',
-  13: 'Catapult',
-  14: 'Trap',
-  15: 'Abatis',
-  16: "Archer's Tower",
-  17: 'Rolling Log',
-  18: 'Trebuchet',
-};
-
 export const TechType = {
   AGRICULTURE: 1,
   LUMBERING: 2,
@@ -171,29 +127,6 @@ export const TechType = {
   HERO_ENHANCEMENT: 21,
 } as const;
 export type TechType = (typeof TechType)[keyof typeof TechType];
-
-export const TECH_NAMES: Record<number, string> = {
-  1: 'Agriculture',
-  2: 'Lumbering',
-  3: 'Masonry',
-  4: 'Mining',
-  5: 'Metal Casting',
-  7: 'Informatics',
-  8: 'Military Science',
-  9: 'Military Tradition',
-  10: 'Iron Working',
-  11: 'Logistics',
-  12: 'Compass',
-  13: 'Horseback Riding',
-  14: 'Archery',
-  15: 'Stockpile',
-  16: 'Medicine',
-  17: 'Construction',
-  18: 'Engineering',
-  19: 'Machinery',
-  20: 'Privateering',
-  21: 'Hero Enhancement',
-};
 
 /** Player state flags (playerInfo.status). */
 export const PlayerStatus = {
@@ -255,27 +188,15 @@ export const MailType = {
 } as const;
 export type MailType = (typeof MailType)[keyof typeof MailType];
 
-export const STATE_NAMES = [
-  'FRIESLAND',
-  'SAXONY',
-  'NORTH MARCH',
-  'BOHEMIA',
-  'LOWER LORRAINE',
-  'FRANCONIA',
-  'THURINGIA',
-  'MORAVIA',
-  'UPPER LORRAINE',
-  'SWABIA',
-  'BAVARIA',
-  'CARINTHIA',
-  'BURGUNDY',
-  'LOMBARDY',
-  'TUSCANY',
-  'ROMAGNA',
-] as const;
-
 export const RESOURCE_KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 export type ResourceKey = (typeof RESOURCE_KEYS)[number];
+
+/**
+ * The four basic resources (everything but gold), produced by fields and traded on the market. The order is the
+ * original protocol's: the market numbers them by their index here (resType 0 food, 1 lumber, 2 stone, 3 iron).
+ */
+export const BASIC_RESOURCES = ['food', 'wood', 'stone', 'iron'] as const;
+export type BasicResource = (typeof BASIC_RESOURCES)[number];
 
 /** Timed effects on a player (players.buffs[].id). The values are the ids stored and sent to the client. */
 export const BuffId = {

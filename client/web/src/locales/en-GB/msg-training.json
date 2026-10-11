@@ -1,0 +1,16 @@
+{
+  "wallsNeeded": "You need {{building}} to build fortifications.",
+  "invalidBarracks": "Troops can only be trained in a built {{building}}.",
+  "queueFull": "This training queue is full.",
+  "allQueuesFull": "Every {{building}} queue is full.",
+  "wallSpaceFull": "Not enough space on the walls.",
+  "notEnoughPopulation": "Not enough idle population.",
+  "orderLimit": "Order 1 to {{max}} unit types at a time.",
+  "duplicateOrder": "Each unit type can only be ordered once.",
+  "fortsAtWalls": "Fortifications are built at the walls.",
+  "batchNotFound": "Training batch not found.",
+  "invalidFort": "Invalid fortification type.",
+  "notEnoughUnits": "You do not have that many {{unit}} units.",
+  "notEnoughInjured": "Not enough injured troops.",
+  "notEnoughHonor": "Not enough honour: {{amount}} needed."
+}

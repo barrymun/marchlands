@@ -1,9 +1,12 @@
 import { Plus, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { WARN_MS } from '@/components/active-effects/constants';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
-import { adds, itemName } from '@/components/active-effects/utils';
+import { adds } from '@/components/active-effects/utils';
+import { itemName } from '@/lib/game-data';
 import { duration, fmt, fmtExact, shortDuration } from '@/lib/format';
+import { translateMessage } from '@/lib/messages';
 import { ITEM_BONUS_TEXT, WARN_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 import { IconButton } from '@/components/active-effects/slot-cell/icon-button/icon-button';
@@ -25,12 +28,13 @@ export function SlotCell({
   onExtend: (slot: Slot, ext: NonNullable<Extension>) => void;
   onFind: () => void;
 }) {
+  const { t } = useTranslation('active-effects');
   if (!active) {
     return (
       <div className="flex min-w-0 items-center gap-1.5 rounded-md border border-dashed py-0.5 pr-0.5 pl-2 text-xs text-muted-foreground">
         <span className="truncate">{slot.label}</span>
-        <span className="ml-auto">off</span>
-        <IconButton label="Find items" detail={`Show the items that give ${slot.label.toLowerCase()} ${slot.boost}`} onClick={onFind}>
+        <span className="ml-auto">{t('slotCell.off')}</span>
+        <IconButton label={t('slotCell.find')} detail={t('slotCell.findDetail', { label: slot.label.toLowerCase(), boost: slot.boost })} onClick={onFind}>
           <Search />
         </IconButton>
       </div>
@@ -47,8 +51,9 @@ export function SlotCell({
           </span>
         </TooltipTrigger>
         <TooltipContent>
-          {active.itemId ? `${itemName(active.itemId)}: ` : ''}
-          {active.desc} · {duration(left)} left
+          {active.itemId
+            ? t('slotCell.runningItem', { item: itemName(active.itemId), desc: translateMessage(active.desc), time: duration(left) })
+            : t('slotCell.running', { desc: translateMessage(active.desc), time: duration(left) })}
         </TooltipContent>
       </Tooltip>
       <span className={cn('ml-auto whitespace-nowrap tabular-nums', left < WARN_MS ? cn('font-medium', WARN_TEXT) : 'text-muted-foreground')}>
@@ -56,11 +61,11 @@ export function SlotCell({
       </span>
       {extension ? (
         <IconButton
-          label="Extend"
+          label={t('slotCell.extend')}
           detail={
             extension.kind === 'use'
-              ? `Use a ${itemName(extension.itemId)} (×${fmtExact(extension.owned)} owned): +${adds(extension.itemId)}`
-              : `Buy a ${itemName(extension.itemId)} for ${fmt(extension.price)} gold and use it: +${adds(extension.itemId)}`
+              ? t('slotCell.useDetail', { item: itemName(extension.itemId), owned: fmtExact(extension.owned), adds: adds(extension.itemId) })
+              : t('slotCell.buyDetail', { item: itemName(extension.itemId), price: fmt(extension.price), adds: adds(extension.itemId) })
           }
           disabled={busy}
           onClick={() => onExtend(slot, extension)}

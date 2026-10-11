@@ -1,4 +1,5 @@
 import { Bot } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { MarketMerchant, MarketPriceLevel } from '@marchlands/api-client';
 import { BALANCE } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
@@ -24,11 +25,12 @@ export function OrderBook({
   onLevel: (level: MarketPriceLevel, side: Side) => void;
   onMerchant: (merchantSells: boolean) => void;
 }) {
+  const { t } = useTranslation('market-panel');
   const row = (l: MarketPriceLevel, s: Side) => (
     <TableRow key={`${s}-${l.price}`} className="cursor-pointer" onClick={() => onLevel(l, s)}>
       <TableCell className={cn('tabular-nums', s === 1 ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400')}>{fmtPrice(l.price)}</TableCell>
       <TableCell className="text-right tabular-nums">{fmtExact(l.amount)}</TableCell>
-      <TableCell className="text-right text-xs text-muted-foreground">player</TableCell>
+      <TableCell className="text-right text-xs text-muted-foreground">{t('orderBook.player')}</TableCell>
     </TableRow>
   );
   const merchantRow = (sells: boolean) =>
@@ -37,10 +39,10 @@ export function OrderBook({
         <TableCell className={cn('tabular-nums font-medium', sells ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400')}>
           {fmtPrice(sells ? merchant.ask : merchant.bid)}
         </TableCell>
-        <TableCell className="text-right text-muted-foreground">unlimited</TableCell>
+        <TableCell className="text-right text-muted-foreground">{t('orderBook.unlimited')}</TableCell>
         <TableCell className="text-right">
           <Badge variant="outline" className="gap-1 font-normal">
-            <Bot className="size-3" /> merchant
+            <Bot className="size-3" /> {t('orderBook.merchant')}
           </Badge>
         </TableCell>
       </TableRow>
@@ -48,28 +50,20 @@ export function OrderBook({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Order book · {resLabel(resType)}</CardTitle>
+        <CardTitle className="text-sm">{t('orderBook.title', { resource: resLabel(resType) })}</CardTitle>
         <CardDescription>
-          {BALANCE.merchant.fixedPrice != null ? (
-            <>
-              Gold per unit. The merchant always buys and sells any amount at a fixed {fmtPrice(BALANCE.merchant.fixedPrice)}, so you can always sell for at
-              least that. Click a row to trade at it.
-            </>
-          ) : (
-            <>
-              Gold per unit. The merchant always trades; its price rises as people buy and falls as they sell, then drifts back to{' '}
-              {merchant ? fmtPrice(merchant.base) : '…'}. Click a row to trade at it.
-            </>
-          )}
+          {BALANCE.merchant.fixedPrice != null
+            ? t('orderBook.fixedPrice', { price: fmtPrice(BALANCE.merchant.fixedPrice) })
+            : t('orderBook.floatingPrice', { price: merchant ? fmtPrice(merchant.base) : '…' })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Price</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-right">From</TableHead>
+              <TableHead>{t('columns.price')}</TableHead>
+              <TableHead className="text-right">{t('columns.amount')}</TableHead>
+              <TableHead className="text-right">{t('columns.from')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -77,7 +71,8 @@ export function OrderBook({
             {[...sellers].reverse().map((l) => row(l, 1))}
             <TableRow className="bg-muted/50 hover:bg-muted/50">
               <TableCell colSpan={3} className="text-center text-xs text-muted-foreground">
-                sellers above · buyers below{merchant && ` · reference ${fmtPrice(merchant.reference)}`}
+                {t('orderBook.divider')}
+                {merchant && t('orderBook.reference', { price: fmtPrice(merchant.reference) })}
               </TableCell>
             </TableRow>
             {buyers.map((l) => row(l, 0))}

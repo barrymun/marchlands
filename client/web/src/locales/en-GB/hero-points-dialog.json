@@ -1,0 +1,24 @@
+{
+  "toast": {
+    "assigned": "Points assigned",
+    "reset": "Points reset"
+  },
+  "hints": {
+    "politics": "mayor: production and build speed",
+    "attack": "army attack; mayor: training speed",
+    "intelligence": "mayor: research speed"
+  },
+  "remove": "Remove {{label}}",
+  "add": "Add {{label}}",
+  "asMayor": "As mayor: {{rate}} production (+{{pct}}%)",
+  "usesHolyWater": "uses 1 Holy Water ({{owned}} owned)",
+  "holyWaterGold": "{{gold}} gold for a Holy Water",
+  "reset": "Reset",
+  "assignNone": "Assign points",
+  "assign_one": "Assign {{count}} point",
+  "assign_other": "Assign {{count}} points",
+  "pointsLeft_one": "{{left}} of {{count}} point left to assign. Heroes gain one point per level.",
+  "pointsLeft_other": "{{left}} of {{count}} points left to assign. Heroes gain one point per level.",
+  "resetInfo_one": "Reset the {{count}} assigned point · {{cost}}",
+  "resetInfo_other": "Reset all {{count}} assigned points · {{cost}}"
+}

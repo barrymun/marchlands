@@ -1,0 +1,47 @@
+{
+  "toast": {
+    "renamed": "Player renamed",
+    "genderChanged": "Gender changed",
+    "flagChanged": "Flag changed",
+    "truce": "Truce in effect",
+    "promoted": "Promoted"
+  },
+  "summary": "{{title}} · flag {{flag}}",
+  "name": {
+    "label": "New name",
+    "wait": "Renaming is free once a day: next in <countdown />.",
+    "free": "Free, once a day, if nobody else has the name."
+  },
+  "flag": {
+    "label": "New flag"
+  },
+  "gender": {
+    "label": "Gender",
+    "wait": "Changing gender is free once a day: next in <countdown />.",
+    "free": "Free, once a day."
+  },
+  "change": "Change",
+  "truce": {
+    "title": "Truce",
+    "active": "active · <countdown />",
+    "cooldown": "cooldown · <countdown />",
+    "description": "Your cities cannot be attacked for 12 hours, and you cannot attack either. A cooldown follows.",
+    "boughtWithAny": "Bought with the city's gold",
+    "owned": "×{{n}}"
+  },
+  "title": {
+    "prestige": "{{amount}} prestige",
+    "medals": "{{n}} × {{name}}",
+    "current": "Title: {{name}}",
+    "cities_one": "{{cities}} / {{count}} city",
+    "cities_other": "{{cities}} / {{count}} cities",
+    "next": "{{name}} raises your city limit to {{max}}. The medals are used up.",
+    "have": "(have {{have}})",
+    "promote": "Promote to {{name}}",
+    "all": "All titles",
+    "highest_one": "The highest title: up to {{count}} city.",
+    "highest_other": "The highest title: up to {{count}} cities.",
+    "maxCities_one": "{{count}} city",
+    "maxCities_other": "{{count}} cities"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "amount": "{{resource}}: {{amount}}",
+  "amountMax": "{{resource}}: {{amount}} / {{max}}",
+  "storageFull": "（倉庫が満杯: 生産停止中）",
+  "itemBonus": "アイテム +{{percent}}%",
+  "population": "人口 · 待機 {{idle}} · 労働効率 {{efficiency}}%",
+  "gold": {
+    "baseTax": "基本税収",
+    "taxSold": "税 {{rate}}%（生産物を売却）",
+    "heroSalaries": "英雄の給料"
+  },
+  "breakdown": {
+    "base": "基本",
+    "fields": "資源地",
+    "fieldsWorkRate": "資源地（稼働率 {{rate}}%）",
+    "technology": "技術 +{{percent}}%",
+    "mayor": "市長 {{name}} +{{percent}}%",
+    "valleys": "領地 +{{percent}}%",
+    "upkeep": "部隊維持費",
+    "tax": "税（金で売却）"
+  },
+  "rows": {
+    "perRealHour": "実時間1時間あたり（ゲーム速度 {{speed}}×）"
+  }
+}

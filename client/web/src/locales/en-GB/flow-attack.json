@@ -1,0 +1,50 @@
+{
+  "addToFarm": {
+    "button": "Add to farming list",
+    "needsHero": "Each target needs an idle hero in this city",
+    "defaultName": "Farming list",
+    "dialogTitle": "Add to farming list?",
+    "willAttack": "{{city}} will attack {{tile}} as part of the flow below.",
+    "noFlow": "No flow farms yet: this starts a flow called \"{{name}}\" with {{tile}} as {{city}}'s first target. Choose the saved army to send in the Flows tab.",
+    "flow": "Flow: <b>{{name}}</b>",
+    "alreadyTarget": "{{tile}} is already one of {{city}}'s targets in this flow.",
+    "addTarget": "Add target",
+    "start": "Start farming list",
+    "toasts": {
+      "alreadyIn": "{{tile}} is already in \"{{flow}}\"",
+      "noIdleHero": "{{city}} has no idle hero left for another target in \"{{flow}}\"",
+      "added": "Added {{tile}} to \"{{flow}}\" ({{city}}, target {{n}})",
+      "started": "Started \"{{name}}\" with {{tile}}",
+      "startedHint": "Choose the saved army to send in the Flows tab."
+    },
+    "targetCount_one": "{{city}} has {{n}} of {{count}} target (one per idle hero).",
+    "targetCount_other": "{{city}} has {{n}} of {{count}} targets (one per idle hero)."
+  },
+  "attackTargets": {
+    "attackWith": "Attack with saved army",
+    "choose": "Choose a saved army",
+    "noArmies": "No saved armies",
+    "newArmy": "+ New army",
+    "hint": "Each city attacks its own targets in order; its idle heroes lead, strongest Attack first. A target is skipped (the flow carries on) when the city lacks the troops, a hero or Rally Spot room."
+  },
+  "cityTargets": {
+    "badFormat": "Type coordinates as x,y",
+    "outOfRange": "Coordinates go from 0 to {{max}}",
+    "duplicate": "Already in the list",
+    "remove": "Remove target",
+    "placeholder": "x,y",
+    "addFor": "Add a target for {{city}}",
+    "add": "Add",
+    "noIdle": "No idle heroes in this city: targets need a hero each.",
+    "full": "One target per idle hero: this city is full.",
+    "count_one": "{{n}} / {{count}} target ({{heroes}})",
+    "count_other": "{{n}} / {{count}} targets ({{heroes}})",
+    "idleHeroes_one": "{{count}} idle hero",
+    "idleHeroes_other": "{{count}} idle heroes"
+  },
+  "newArmy": {
+    "label": "New saved army",
+    "placeholder": "Name, e.g. Layered L10",
+    "save": "Save army"
+  }
+}

@@ -20,13 +20,15 @@ import {
   scaled,
   SPEEDUP_ITEMS,
   TECH_IDS,
-  TECH_NAMES,
   techEffect,
   techInfo,
   assertCanResearch,
   type ResearchState,
   addHeroExp,
   TechType,
+  msg,
+  ref,
+  dur,
 } from '@marchlands/core';
 import { loadBundle, mayorOf, mayorStats, openOwnCity, settleAndReport, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -50,18 +52,18 @@ export function researchesInCity(research: ResearchState, cityId: number): numbe
 function pickResearch(research: ResearchState, cityId: number, techId?: number): number {
   const busy = researchesInCity(research, cityId);
   if (techId != null) {
-    if (!busy.includes(techId)) throw new GameError('That technology is not being researched in this city.', -99);
+    if (!busy.includes(techId)) throw new GameError(msg('research.notResearching', { tech: ref.tech(techId) }), -99);
     return techId;
   }
-  if (busy.length === 0) throw new GameError('No research in progress.', -99);
-  if (busy.length > 1) throw new GameError('Several researches are running: choose one.', -99);
+  if (busy.length === 0) throw new GameError(msg('research.noResearch'), -99);
+  if (busy.length > 1) throw new GameError(msg('research.chooseResearch'), -99);
   return busy[0];
 }
 
 /** tech.getResearchList */
 export async function researchList(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewCity(ctx, cityId);
-  if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (b.city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   const academy = buildingLevel(b.city.buildings, BuildingType.ACADEMY);
   const busy = researchesInCity(b.player.research, cityId);
   const full = busy.length >= BALANCE.researchQueues;
@@ -75,9 +77,9 @@ export async function researchList(ctx: Ctx, playerId: number, cityId: number) {
       const max = researchMaxLevel(techId);
       const next = r.level < max ? researchConfig(techId, r.level + 1) : undefined;
       const checks = next ? checkRequirements(next.requires, b.city.buildings, b.player.research, b.player.items) : [];
+      const info = techInfo(techId);
       return {
         typeId: techId,
-        name: TECH_NAMES[techId],
         level: r.level,
         maxLevel: max,
         effectiveLevel: Math.min(academy, r.level),
@@ -86,10 +88,10 @@ export async function researchList(ctx: Ctx, playerId: number, cityId: number) {
         startTime: r.startTime ?? 0,
         endTime: r.endTime ?? 0,
         permission: !full && !r.endTime && !!next && requirementsMet(checks),
-        description: techInfo(techId).summary,
+        description: info.summary,
         effect: techEffect(techId, Math.min(academy, r.level)),
-        nextEffect: next ? techEffect(techId, r.level + 1) : '',
-        unlocks: techInfo(techId).unlocks,
+        nextEffect: next ? techEffect(techId, r.level + 1) : null,
+        unlocks: info.unlocks,
         next: next ? { ...next.cost, time: Math.ceil(researchTimeMs(techId, r.level + 1, mayorStats(b.heroes)) / 1000), requirements: checks } : null,
       };
     }),
@@ -101,13 +103,13 @@ export async function startResearch(ctx: Ctx, playerId: number, cityId: number, 
   const b = await openOwnCity(ctx, playerId, cityId);
   const research = b.player.research;
   if (researchesInCity(research, cityId).length >= BALANCE.researchQueues) {
-    throw new GameError(`This city already researches ${BALANCE.researchQueues} technologies at once.`, -99);
+    throw new GameError(msg('research.queueFull', { count: BALANCE.researchQueues }), -99);
   }
-  if (research[techId]?.endTime) throw new GameError('This technology is already being researched in another city.', -99);
+  if (research[techId]?.endTime) throw new GameError(msg('research.alreadyResearching', { tech: ref.tech(techId) }), -99);
   assertCanResearch(techId, b.city.buildings, research, b.player.items);
   const level = (research[techId]?.level ?? 0) + 1;
   const cost = researchCost(techId, level);
-  spendResources(b.city, cost, 'Not enough resources.', -99);
+  spendResources(b.city, cost, msg('common.notEnoughResources'), -99);
   ctx.stat(playerId, cityId, prefixed('spent.research', cost));
   const ms = researchTimeMs(techId, level, mayorStats(b.heroes));
   b.player.research = { ...research, [techId]: { level: level - 1, cityId, startTime: ctx.now, endTime: ctx.now + ms } };
@@ -155,7 +157,7 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
   const left = Math.max(0, end - ctx.now);
   let reduce: number;
   if (itemId === 'free.speed') {
-    if (left > scaled(BALANCE.freeSpeedupMs)) throw new GameError('Free speed-up is only available for the last 5 minutes.', -99);
+    if (left > scaled(BALANCE.freeSpeedupMs)) throw new GameError(msg('common.freeSpeedupTooEarly', { time: dur(scaled(BALANCE.freeSpeedupMs)) }), -99);
     reduce = left;
   } else if (itemId === 'gold.speed') {
     const gold = goldForSpeedup(left);
@@ -164,7 +166,7 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
     reduce = left;
   } else {
     const eff = SPEEDUP_ITEMS[itemId];
-    if (!eff) throw new GameError('Invalid speed up.', -99);
+    if (!eff) throw new GameError(msg('common.invalidSpeedup'), -99);
     useItemOrGold(ctx, p, b.city, itemId, speedupItemGold(itemId));
     reduce = scaled(eff.reduce(end - (r.startTime ?? ctx.now), () => ctx.rng.next()));
   }

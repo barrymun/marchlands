@@ -1,0 +1,44 @@
+{
+  "toast": {
+    "renamed": "プレイヤー名を変更しました",
+    "genderChanged": "性別を変更しました",
+    "flagChanged": "旗を変更しました",
+    "truce": "休戦が有効になりました",
+    "promoted": "昇格しました"
+  },
+  "summary": "{{title}} · 旗 {{flag}}",
+  "name": {
+    "label": "新しい名前",
+    "wait": "名前の変更は 1 日 1 回無料です: 次回まで <countdown />。",
+    "free": "1 日 1 回無料。他の人が使っていない名前に限ります。"
+  },
+  "flag": {
+    "label": "新しい旗"
+  },
+  "gender": {
+    "label": "性別",
+    "wait": "性別の変更は 1 日 1 回無料です: 次回まで <countdown />。",
+    "free": "1 日 1 回無料。"
+  },
+  "change": "変更",
+  "truce": {
+    "title": "休戦",
+    "active": "有効 · <countdown />",
+    "cooldown": "クールダウン · <countdown />",
+    "description": "12 時間、あなたの都市は攻撃されなくなりますが、あなたも攻撃できません。その後クールダウンがあります。",
+    "boughtWithAny": "都市の金で購入",
+    "owned": "×{{n}}"
+  },
+  "title": {
+    "prestige": "名声 {{amount}}",
+    "medals": "{{name}} × {{n}}",
+    "current": "爵位: {{name}}",
+    "cities_other": "{{cities}} / {{count}} 都市",
+    "next": "{{name}} になると都市の上限が {{max}} に増えます。メダルは消費されます。",
+    "have": "（所持 {{have}}）",
+    "promote": "{{name}} に昇格",
+    "all": "すべての爵位",
+    "highest_other": "最高位の爵位: 都市は {{count}} まで。",
+    "maxCities_other": "{{count}} 都市"
+  }
+}

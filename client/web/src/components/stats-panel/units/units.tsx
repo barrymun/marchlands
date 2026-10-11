@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { FORT_KEY_LIST, TROOP_KEY_LIST } from '@marchlands/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,28 +8,26 @@ import { unitCount, unitName } from '@/components/stats-panel/units/utils';
 import { UNIT_COLUMNS } from '@/components/stats-panel/units/constants';
 
 export function Units({ c }: { c: Counters }) {
+  const { t } = useTranslation(['stats-panel', 'common']);
   const units = [...TROOP_KEY_LIST, ...FORT_KEY_LIST];
-  const rows = units.filter((k) => UNIT_COLUMNS.some(([g]) => unitCount(c, g, k)));
+  const rows = units.filter((k) => UNIT_COLUMNS.some(({ group }) => unitCount(c, group, k)));
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Troops and fortifications</CardTitle>
-        <CardDescription>
-          Killed counts the enemy units of that type your armies and defenses destroyed. Of your own fallen, Died never came back and Injured came home to be
-          healed.
-        </CardDescription>
+        <CardTitle className="text-sm">{t('units.title')}</CardTitle>
+        <CardDescription>{t('units.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nothing yet.</p>
+          <p className="text-sm text-muted-foreground">{t('common:nothingYet')}</p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Unit</TableHead>
-                {UNIT_COLUMNS.map(([g, label]) => (
-                  <TableHead key={g} className="text-right">
-                    {label}
+                <TableHead>{t('common:table.unit')}</TableHead>
+                {UNIT_COLUMNS.map((col) => (
+                  <TableHead key={col.group} className="text-right">
+                    {col.label}
                   </TableHead>
                 ))}
               </TableRow>
@@ -37,15 +36,15 @@ export function Units({ c }: { c: Counters }) {
               {rows.map((k) => (
                 <TableRow key={k}>
                   <TableCell>{unitName(k)}</TableCell>
-                  {UNIT_COLUMNS.map(([g]) => (
-                    <Num key={g} v={unitCount(c, g, k)} />
+                  {UNIT_COLUMNS.map(({ group }) => (
+                    <Num key={group} v={unitCount(c, group, k)} />
                   ))}
                 </TableRow>
               ))}
               <TableRow className="font-medium">
-                <TableCell>Total</TableCell>
-                {UNIT_COLUMNS.map(([g]) => (
-                  <Num key={g} v={units.reduce((s, k) => s + unitCount(c, g, k), 0)} />
+                <TableCell>{t('common:table.total')}</TableCell>
+                {UNIT_COLUMNS.map(({ group }) => (
+                  <Num key={group} v={units.reduce((s, k) => s + unitCount(c, group, k), 0)} />
                 ))}
               </TableRow>
             </TableBody>

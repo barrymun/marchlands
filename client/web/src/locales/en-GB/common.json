@@ -1,0 +1,120 @@
+{
+  "actions": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "send": "Send",
+    "edit": "Edit",
+    "max": "Max",
+    "all": "All",
+    "none": "None",
+    "back": "Back",
+    "remove": "Remove",
+    "use": "Use",
+    "buy": "Buy",
+    "rename": "Rename",
+    "logOut": "Log out"
+  },
+  "resources": {
+    "gold": "Gold",
+    "food": "Food",
+    "wood": "Lumber",
+    "stone": "Stone",
+    "iron": "Iron"
+  },
+  "resourcesInline": {
+    "gold": "gold",
+    "food": "food",
+    "wood": "lumber",
+    "stone": "stone",
+    "iron": "iron",
+    "goods": "goods"
+  },
+  "units": {
+    "days": "{{value}}d",
+    "hours": "{{value}}h",
+    "minutes": "{{value}}m",
+    "seconds": "{{value}}s",
+    "perHour": "{{value}}/h"
+  },
+  "time": {
+    "justNow": "just now",
+    "ago": "{{time}} ago"
+  },
+  "fallback": {
+    "building": "Building {{id}}",
+    "unit": "Unit {{id}}",
+    "tech": "Research {{id}}",
+    "tile": "Tile {{id}}"
+  },
+  "genders": {
+    "male": "Male",
+    "female": "Female"
+  },
+  "heroAttributes": {
+    "politics": "Politics",
+    "attack": "Attack",
+    "intelligence": "Intelligence",
+    "politicsShort": "pol",
+    "attackShort": "att",
+    "intelligenceShort": "int"
+  },
+  "push": {
+    "buildingComplete": "{{name}} reached level {{level}}",
+    "researchComplete": "{{name}} reached level {{level}}",
+    "hostileArmies_one": "{{count}} hostile army approaching",
+    "hostileArmies_other": "{{count}} hostile armies approaching",
+    "trade": "Trade: {{amount}} {{resource}} at {{price}} gold",
+    "delivery": "Market delivery: {{amount}} {{resource}} arrived",
+    "newReport": "New report",
+    "newReportHint": "See the Reports tab."
+  },
+  "language": {
+    "label": "Language",
+    "names": {
+      "en-GB": "English (UK)",
+      "en-US": "English (US)",
+      "ja-JP": "日本語"
+    }
+  },
+  "list": {
+    "separator": ", "
+  },
+  "level": {
+    "short": "Lv {{level}}",
+    "ofMax": "Lv {{level}}/{{max}}",
+    "named": "{{name}} Lv {{level}}",
+    "namedParens": "{{name}} (Lv {{level}})",
+    "next": "Lv {{level}}:",
+    "now": "Now:",
+    "unlocks": "Unlocks: {{list}}",
+    "mayorExp": "Mayor {{name}} gains {{exp}} exp when it completes"
+  },
+  "gold": "{{gold}} gold",
+  "amountOf": "{{amount}} {{resource}}",
+  "nothing": "nothing",
+  "savedName": "Saved \"{{name}}\"",
+  "durations": {
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "hours_one": "{{count}} hour",
+    "hours_other": "{{count}} hours"
+  },
+  "noMayor": "No mayor",
+  "noHero": "no hero",
+  "table": {
+    "total": "Total",
+    "unit": "Unit"
+  },
+  "boughtWithCityGold": "Bought with {{city}}'s gold",
+  "nothingYet": "Nothing yet.",
+  "noneYet": "None yet.",
+  "troops_one": "{{n}} troop",
+  "troops_other": "{{n}} troops",
+  "errors": {
+    "network": "Couldn't reach the server. Check your connection and try again.",
+    "unexpected": "Something went wrong. Please try again."
+  }
+}

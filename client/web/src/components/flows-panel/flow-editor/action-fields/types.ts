@@ -1,3 +1,3 @@
-import type { FLOW_STAT_LABEL } from '@marchlands/core';
+import type { FlowAction } from '@marchlands/core';
 
-export type Stat = keyof typeof FLOW_STAT_LABEL;
+export type Stat = Extract<FlowAction, { type: 'setMayor' }>['stat'];

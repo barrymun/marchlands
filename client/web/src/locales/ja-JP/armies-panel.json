@@ -1,0 +1,22 @@
+{
+  "recalled": "部隊を呼び戻しました",
+  "sections": {
+    "hostile": "敵対部隊",
+    "own": "自軍",
+    "allied": "同盟部隊"
+  },
+  "none": "なし。",
+  "missions": {
+    "transport": "輸送",
+    "reinforce": "援軍",
+    "scout": "偵察",
+    "buildCity": "都市建設",
+    "attack": "攻撃"
+  },
+  "row": {
+    "returning": "帰還中",
+    "stationed": "駐留中",
+    "marching": "行軍中",
+    "recall": "呼び戻す"
+  }
+}

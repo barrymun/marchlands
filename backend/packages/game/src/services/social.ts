@@ -1,7 +1,7 @@
 // friend.* (friends and block list) and chat (world / beginner / alliance / private).
 
 import { and, desc, eq, gt, or, sql } from 'drizzle-orm';
-import { GameError } from '@marchlands/core';
+import { GameError, msg } from '@marchlands/core';
 import { chatMessages, playerRelations, players } from '@marchlands/db';
 import type { Ctx } from '../context.ts';
 import { escapeHtml } from '../helpers.ts';
@@ -24,8 +24,8 @@ export async function listRelations(ctx: Ctx, playerId: number) {
 
 export async function addRelation(ctx: Ctx, playerId: number, name: string, kind: 'friend' | 'block') {
   const other = await findPlayerByName(ctx, name);
-  if (!other) throw new GameError(`Player ${name} doesn't exist.`, -41, 404);
-  if (other.id === playerId) throw new GameError('Invalid target.', -99);
+  if (!other) throw new GameError(msg('common.playerNamedNotFound', { name }), -41, 404);
+  if (other.id === playerId) throw new GameError(msg('social.selfTarget'), -99);
   await ctx.tx.insert(playerRelations).values({ playerId, otherPlayerId: other.id, kind, createdAt: ctx.now }).onConflictDoNothing();
   return { id: other.id, name: other.name };
 }
@@ -52,34 +52,34 @@ export async function isBlocked(ctx: Ctx, receiverId: number, senderId: number):
 const MAX_CHAT = 300;
 
 function cleanMessage(raw: unknown): string {
-  const msg = String(raw ?? '').trim();
-  if (!msg) throw new GameError('Empty message.', -99);
-  if (msg.length > MAX_CHAT) throw new GameError('Message too long.', -99);
-  return escapeHtml(msg);
+  const text = String(raw ?? '').trim();
+  if (!text) throw new GameError(msg('social.emptyMessage'), -99);
+  if (text.length > MAX_CHAT) throw new GameError(msg('social.messageTooLong', { count: MAX_CHAT }), -99);
+  return escapeHtml(text);
 }
 
 function assertNotMuted(p: { misc: { denyChatUntil?: number } }, now: number) {
-  if ((p.misc.denyChatUntil ?? 0) > now) throw new GameError('You are not allowed to speak right now.', -99);
+  if ((p.misc.denyChatUntil ?? 0) > now) throw new GameError(msg('social.muted'), -99);
 }
 
 /** Colour the message of the top lord / top alliance (orig). */
-async function decorate(ctx: Ctx, p: { prestigeRank: number; allianceId: number | null }, msg: string) {
-  if (p.prestigeRank === 1) return `<font color="#FF0000">${msg}</font>`;
+async function decorate(ctx: Ctx, p: { prestigeRank: number; allianceId: number | null }, text: string) {
+  if (p.prestigeRank === 1) return `<font color="#FF0000">${text}</font>`;
   if (p.allianceId) {
     const rows = await ctx.tx.execute<{ r: number }>(sql`select prestige_rank r from alliances where id = ${p.allianceId}`);
-    if (Number(rows.rows[0]?.r) === 1) return `<font color="#0066FF">${msg}</font>`;
+    if (Number(rows.rows[0]?.r) === 1) return `<font color="#0066FF">${text}</font>`;
   }
-  return msg;
+  return text;
 }
 
 /** common.worldChat / common.channelChat (beginner channel); (marchlands) both are free: there are no Speakers. */
 export async function worldChat(ctx: Ctx, playerId: number, rawMsg: string, channel: 'world' | 'beginner' = 'world') {
   const p = await getPlayer(ctx, playerId);
   assertNotMuted(p, ctx.now);
-  const msg = cleanMessage(rawMsg);
-  await ctx.tx.insert(chatMessages).values({ channel, fromPlayerId: p.id, fromName: p.name, message: msg, sentAt: ctx.now });
+  const text = cleanMessage(rawMsg);
+  await ctx.tx.insert(chatMessages).values({ channel, fromPlayerId: p.id, fromName: p.name, message: text, sentAt: ctx.now });
   ctx.broadcast(PushCmd.CHANNEL_CHAT_MESSAGE, {
-    msg: await decorate(ctx, p, msg),
+    msg: await decorate(ctx, p, text),
     languageType: 0,
     fromUser: p.name,
     fromId: p.id,
@@ -92,16 +92,16 @@ export async function worldChat(ctx: Ctx, playerId: number, rawMsg: string, chan
 export async function allianceChat(ctx: Ctx, playerId: number, rawMsg: string) {
   const p = await getPlayer(ctx, playerId);
   assertNotMuted(p, ctx.now);
-  if (!p.allianceId) throw new GameError('To send an alliance message, you must be a member of an alliance', -99);
-  const msg = cleanMessage(rawMsg);
+  if (!p.allianceId) throw new GameError(msg('social.notInAlliance'), -99);
+  const text = cleanMessage(rawMsg);
   await ctx.tx
     .insert(chatMessages)
-    .values({ channel: 'alliance', allianceId: p.allianceId, fromPlayerId: p.id, fromName: p.name, message: msg, sentAt: ctx.now });
+    .values({ channel: 'alliance', allianceId: p.allianceId, fromPlayerId: p.id, fromName: p.name, message: text, sentAt: ctx.now });
   const memberRows = await ctx.tx.select({ id: players.id }).from(players).where(eq(players.allianceId, p.allianceId));
   ctx.push(
     memberRows.map((r) => r.id),
     PushCmd.ALLIANCE_CHAT_MESSAGE,
-    { msg, languageType: 0, fromUser: p.name, fromId: p.id, channel: 'alliance', time: ctx.now },
+    { msg: text, languageType: 0, fromUser: p.name, fromId: p.id, channel: 'alliance', time: ctx.now },
   );
 }
 
@@ -110,12 +110,12 @@ export async function privateChat(ctx: Ctx, playerId: number, targetName: string
   const p = await getPlayer(ctx, playerId);
   assertNotMuted(p, ctx.now);
   const target = await findPlayerByName(ctx, targetName);
-  if (!target) throw new GameError(`Player ${targetName} doesn't exist.`, -41, 404);
-  if (target.id === p.id) throw new GameError('Invalid target.', -99);
-  const msg = cleanMessage(rawMsg);
+  if (!target) throw new GameError(msg('common.playerNamedNotFound', { name: targetName }), -41, 404);
+  if (target.id === p.id) throw new GameError(msg('social.selfTarget'), -99);
+  const text = cleanMessage(rawMsg);
   if (await isBlocked(ctx, target.id, p.id)) return; // silently dropped, as if delivered
-  await ctx.tx.insert(chatMessages).values({ channel: 'private', fromPlayerId: p.id, fromName: p.name, toPlayerId: target.id, message: msg, sentAt: ctx.now });
-  ctx.push(target.id, PushCmd.PRIVATE_CHAT_MESSAGE, { msg, chatType: 0, fromUser: p.name, fromId: p.id, time: ctx.now });
+  await ctx.tx.insert(chatMessages).values({ channel: 'private', fromPlayerId: p.id, fromName: p.name, toPlayerId: target.id, message: text, sentAt: ctx.now });
+  ctx.push(target.id, PushCmd.PRIVATE_CHAT_MESSAGE, { msg: text, chatType: 0, fromUser: p.name, fromId: p.id, time: ctx.now });
 }
 
 /** Recent history of a channel (world / beginner / alliance / private). */

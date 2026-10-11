@@ -3,7 +3,7 @@
 // (by id), then tiles, then heroes/armies.
 
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
-import { GameError, HeroStatus, lordGear, syncHeroBuffs, syncHeroGear, type LordGear } from '@marchlands/core';
+import { GameError, HeroStatus, lordGear, msg, syncHeroBuffs, syncHeroGear, type LordGear } from '@marchlands/core';
 import { armies, cities, heroes, players, tiles } from '@marchlands/db';
 import type { Ctx } from './context.ts';
 import { takeSettle } from './stats.ts';
@@ -27,7 +27,7 @@ export async function findPlayer(ctx: Ctx, id: number, opts: Opts = {}): Promise
 }
 export async function getPlayer(ctx: Ctx, id: number, opts: Opts = {}): Promise<PlayerRow> {
   const row = await findPlayer(ctx, id, opts);
-  if (!row) throw new GameError('Player not found.', -41, 404);
+  if (!row) throw new GameError(msg('common.playerNotFound'), -41, 404);
   return row;
 }
 export async function findPlayerByName(ctx: Ctx, name: string): Promise<PlayerRow | undefined> {
@@ -61,7 +61,7 @@ export async function findCity(ctx: Ctx, id: number, opts: Opts = {}): Promise<C
 }
 export async function getCity(ctx: Ctx, id: number, opts: Opts = {}): Promise<CityRow> {
   const row = await findCity(ctx, id, opts);
-  if (!row) throw new GameError('City not found.', -99, 404);
+  if (!row) throw new GameError(msg('common.cityNotFound'), -99, 404);
   return row;
 }
 export async function citiesOf(ctx: Ctx, playerId: number, opts: Opts = {}): Promise<CityRow[]> {
@@ -102,7 +102,7 @@ export async function heroesOfCities(ctx: Ctx, cityIds: number[]): Promise<HeroR
 export async function getHero(ctx: Ctx, id: number, opts: Opts = {}): Promise<HeroRow> {
   const q = ctx.tx.select().from(heroes).where(eq(heroes.id, id));
   const [row] = opts.lock ? await q.for('update') : await q;
-  if (!row) throw new GameError('Hero does not exist!', -99, 404);
+  if (!row) throw new GameError(msg('common.heroNotFound'), -99, 404);
   return row;
 }
 /** The gear a hero wears: its lord's (gear.ts); none in a tavern or while held captive. */
@@ -126,7 +126,7 @@ export async function saveHero(ctx: Ctx, h: HeroRow): Promise<void> {
 export async function getTile(ctx: Ctx, id: number, opts: Opts = {}): Promise<TileRow> {
   const q = ctx.tx.select().from(tiles).where(eq(tiles.id, id));
   const [row] = opts.lock ? await q.for('update') : await q;
-  if (!row) throw new GameError('Invalid map coordinates.', -99, 404);
+  if (!row) throw new GameError(msg('common.invalidCoordinates'), -99, 404);
   return row;
 }
 export async function saveTile(ctx: Ctx, t: TileRow): Promise<void> {

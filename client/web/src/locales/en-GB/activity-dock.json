@@ -1,0 +1,17 @@
+{
+  "title": "In progress",
+  "summary": "{{jobs}} · next {{next}}",
+  "finishing": "finishing…",
+  "more": "+{{n}} more",
+  "groups": {
+    "building": "Building",
+    "research": "Research",
+    "training": "Training"
+  },
+  "job": {
+    "level": "{{name}} → Lv {{level}}",
+    "demolishing": "demolishing",
+    "troops": "{{troop}} ×{{amount}}",
+    "queued": "+{{n}} queued"
+  }
+}

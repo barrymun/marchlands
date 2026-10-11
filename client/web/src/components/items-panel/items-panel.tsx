@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postCitiesShopGoldMutation, postPlayerItemsUseMutation, type CityBean } from '@marchlands/api-client';
-import { ITEM_CATEGORIES, ITEM_INFO } from '@marchlands/core';
+import { ITEM_CATEGORY_IDS, ITEM_INFO } from '@marchlands/core';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +14,8 @@ import { ActiveEffects } from '@/components/active-effects/active-effects';
 import { describeGrant, goldPriceOf, medalLevelOf } from '@/components/items-panel/utils';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { fmt, fmtExact } from '@/lib/format';
+import { itemCategoryName, itemName } from '@/lib/game-data';
+import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
 import { ALL } from '@/components/items-panel/constants';
 import type { Entry } from '@/components/items-panel/types';
@@ -20,6 +23,7 @@ import { MedalSourcesInfo } from '@/components/items-panel/medal-sources-info/me
 import { ActiveBonus } from '@/components/items-panel/active-bonus/active-bonus';
 
 export function ItemsPanel({ city }: { city: CityBean }) {
+  const { t } = useTranslation(['items-panel', 'common']);
   const player = usePlayer();
   const [category, setCategory] = useState(ALL);
   const [query, setQuery] = useState('');
@@ -32,7 +36,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
   const entries = useMemo(() => {
     const byKey = new Map<string, Entry>();
     for (const info of ITEM_INFO) {
-      const key = `${info.name}|${info.description}`;
+      const key = `${itemName(info.id)}|${JSON.stringify(info.description)}`;
       const e = byKey.get(key) ?? { info, ids: [], owned: 0 };
       e.ids.push(info.id);
       e.owned += counts.get(info.id) ?? 0;
@@ -42,13 +46,14 @@ export function ItemsPanel({ city }: { city: CityBean }) {
   }, [counts]);
 
   const q = query.trim().toLowerCase();
+  const nameOf = (e: Entry) => itemName(e.info.id);
   const shown = entries
     .filter((e) => !effectFilter || e.ids.some((id) => effectFilter.ids.includes(id)))
-    .filter((e) => category === ALL || e.info.category === category)
+    .filter((e) => category === ALL || String(e.info.category) === category)
     .filter((e) => !ownedOnly || e.owned > 0)
-    .filter((e) => !q || e.info.name.toLowerCase().includes(q) || e.info.description.toLowerCase().includes(q))
+    .filter((e) => !q || nameOf(e).toLowerCase().includes(q) || translateMessage(e.info.description).toLowerCase().includes(q))
     // alphabetical only, so buying or using an item never moves it
-    .sort((a, b) => a.info.name.localeCompare(b.info.name));
+    .sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
   const ownedTotal = entries.filter((e) => e.owned > 0).length;
   const buffs = player.data?.buffs ?? [];
 
@@ -62,9 +67,9 @@ export function ItemsPanel({ city }: { city: CityBean }) {
       { path: { itemId: id }, body: { cityId: city.id } },
       {
         onSuccess: (r) => {
-          if (r.granted) toast.success(`${e.info.name}: received ${describeGrant(r.granted)}`);
-          else if (r.hero) toast.success(`${r.hero.name} (Lv ${r.hero.level}) joined your city`);
-          else toast.success(`${e.info.name} used`);
+          if (r.granted) toast.success(t('received', { item: nameOf(e), grant: describeGrant(r.granted) }));
+          else if (r.hero) toast.success(t('heroJoined', { hero: r.hero.name, level: r.hero.level }));
+          else toast.success(t('used', { item: nameOf(e) }));
         },
       },
     );
@@ -87,24 +92,25 @@ export function ItemsPanel({ city }: { city: CityBean }) {
       <div ref={listRef} className="flex min-w-0 scroll-mt-4 flex-wrap items-center gap-3">
         <Tabs value={category} onValueChange={setCategory} className="max-w-full min-w-0">
           <TabsList className="max-w-full justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {[ALL, ...Object.values(ITEM_CATEGORIES)].map((c) => (
-              <TabsTrigger key={c} value={c}>
-                {c}
+            <TabsTrigger value={ALL}>{t('common:actions.all')}</TabsTrigger>
+            {ITEM_CATEGORY_IDS.map((c) => (
+              <TabsTrigger key={c} value={String(c)}>
+                {itemCategoryName(c)}
               </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
-        <Input className="h-8 min-w-0 flex-1 sm:w-48 sm:flex-none" placeholder="Search items" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <Input className="h-8 min-w-0 flex-1 sm:w-48 sm:flex-none" placeholder={t('search')} value={query} onChange={(e) => setQuery(e.target.value)} />
         <div className="flex items-center gap-2">
           <Switch id="owned-only" checked={ownedOnly} onCheckedChange={setOwnedOnly} />
           <Label htmlFor="owned-only" className="text-sm font-normal">
-            Owned only ({ownedTotal})
+            {t('ownedOnly', { n: ownedTotal })}
           </Label>
         </div>
         {effectFilter && (
           <Badge variant="secondary" className="gap-1">
-            Items for {effectFilter.label}
-            <button type="button" className="-mr-1 rounded-sm opacity-70 hover:opacity-100" aria-label="Show all items" onClick={() => setEffectFilter(null)}>
+            {t('itemsFor', { label: effectFilter.label })}
+            <button type="button" className="-mr-1 rounded-sm opacity-70 hover:opacity-100" aria-label={t('showAll')} onClick={() => setEffectFilter(null)}>
               <X className="size-3" />
             </button>
           </Badge>
@@ -117,11 +123,11 @@ export function ItemsPanel({ city }: { city: CityBean }) {
               <div className="flex flex-wrap items-center gap-2">
                 {/* items not owned are dimmed, but never their buttons (a Buy button must not look disabled) or the active bonus */}
                 <div className={cn('flex flex-wrap items-center gap-2', e.owned === 0 && 'opacity-60')}>
-                  <span className="font-medium">{e.info.name}</span>
+                  <span className="font-medium">{nameOf(e)}</span>
                   <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
                     ×{fmtExact(e.owned)}
                   </Badge>
-                  {category === ALL && <span className="text-xs text-muted-foreground">{e.info.category}</span>}
+                  {category === ALL && <span className="text-xs text-muted-foreground">{itemCategoryName(e.info.category)}</span>}
                 </div>
                 <ActiveBonus ids={e.ids} buffs={player.data?.buffs ?? []} />
               </div>
@@ -133,34 +139,34 @@ export function ItemsPanel({ city }: { city: CityBean }) {
                     disabled={city.resource.gold < goldPriceOf(e)!.price || buyGold.isPending}
                     title={
                       city.resource.gold < goldPriceOf(e)!.price
-                        ? `Not enough gold in ${city.name} (${fmtExact(goldPriceOf(e)!.price)} needed)`
-                        : `Buy one with ${city.name}'s gold`
+                        ? t('notEnoughGold', { city: city.name, price: fmtExact(goldPriceOf(e)!.price) })
+                        : t('buyWithGold', { city: city.name })
                     }
                     onClick={() =>
                       buyGold.mutate(
                         { path: { cityId: city.id }, body: { itemId: goldPriceOf(e)!.id, amount: 1 } },
-                        { onSuccess: () => toast.success(`Bought ${e.info.name}`) },
+                        { onSuccess: () => toast.success(t('bought', { item: nameOf(e) })) },
                       )
                     }
                   >
-                    Buy · {fmt(goldPriceOf(e)!.price)} gold
+                    {t('buyFor', { price: fmt(goldPriceOf(e)!.price) })}
                   </Button>
                 )}
                 {e.info.use === 'direct' && (
                   <Button size="xs" disabled={e.owned === 0 || use.isPending} onClick={() => applyEntry(e)}>
-                    Use
+                    {t('common:actions.use')}
                   </Button>
                 )}
               </div>
             </div>
             <div className={cn('grid gap-1.5', e.owned === 0 && 'opacity-60')}>
-              <p className="text-sm text-muted-foreground">{e.info.description}</p>
-              {e.info.howTo && <p className="text-xs text-muted-foreground italic">{e.info.howTo}</p>}
+              <p className="text-sm text-muted-foreground">{translateMessage(e.info.description)}</p>
+              {e.info.howTo && <p className="text-xs text-muted-foreground italic">{translateMessage(e.info.howTo)}</p>}
               {medalLevelOf(e.ids) != null && <MedalSourcesInfo level={medalLevelOf(e.ids)!} />}
             </div>
           </div>
         ))}
-        {shown.length === 0 && <p className="text-sm text-muted-foreground">No items match.</p>}
+        {shown.length === 0 && <p className="text-sm text-muted-foreground">{t('noMatch')}</p>}
       </div>
     </div>
   );

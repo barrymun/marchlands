@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   getCitiesByCityIdQueryKey,
   getMapQueryKey,
@@ -8,7 +9,7 @@ import {
   postCitiesMoveMutation,
   type CityBean,
 } from '@marchlands/api-client';
-import { BALANCE, itemConfig, itemGoldPrice, BuffId } from '@marchlands/core';
+import { BALANCE, itemGoldPrice, BuffId } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -23,8 +24,10 @@ import { fmt } from '@/lib/format';
 import { TELEPORT } from '@/components/city-dialog/city-form/constants';
 import { WorkRates } from '@/components/city-dialog/city-form/work-rates/work-rates';
 import { TaxRate } from '@/components/city-dialog/city-form/tax-rate/tax-rate';
+import { itemName, zoneName } from '@/lib/game-data';
 
 export function CityForm({ city, target, onDone }: { city: CityBean; target?: { x: number; y: number }; onDone: () => void }) {
+  const { t } = useTranslation(['city-dialog', 'common']);
   const inv = useInventory();
   const player = usePlayer();
   const [name, setName] = useState('');
@@ -36,8 +39,8 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
     allOf(getMapQueryKey),
     allOf(getMapTilesByTileIdQueryKey),
   ];
-  const rename = useCommand(patchCitiesByCityIdMutation(), refresh, 'City renamed');
-  const move = useCommand(postCitiesMoveMutation(), refresh, 'City moved');
+  const rename = useCommand(patchCitiesByCityIdMutation(), refresh, t('cityForm.renamed'));
+  const move = useCommand(postCitiesMoveMutation(), refresh, t('cityForm.moved'));
   const size = BALANCE.mapSize;
   const tx = Number(x);
   const ty = Number(y);
@@ -52,7 +55,7 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
       <DialogHeader>
         <DialogTitle>{city.name}</DialogTitle>
         <DialogDescription>
-          ({city.x},{city.y}) · {city.zoneName}
+          ({city.x},{city.y}) · {zoneName(city.zoneId)}
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
@@ -61,39 +64,39 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
         <TaxRate city={city} />
         <Separator />
         <div className="grid gap-2">
-          <Label htmlFor="city-name">Rename</Label>
+          <Label htmlFor="city-name">{t('common:actions.rename')}</Label>
           <div className="flex gap-2">
             <Input id="city-name" value={name} maxLength={20} placeholder={city.name} onChange={(e) => setName(e.target.value)} />
             <Button
               disabled={!name.trim() || rename.isPending}
               onClick={() => rename.mutate({ path: { cityId: city.id }, body: { name: name.trim() } }, { onSuccess: () => setName('') })}
             >
-              Rename
+              {t('common:actions.rename')}
             </Button>
           </div>
         </div>
         <Separator />
-        <p className="text-xs text-muted-foreground">
-          Moving needs every army of this city at home and no foreign troops on the way. Occupied valleys are released.
-        </p>
+        <p className="text-xs text-muted-foreground">{t('cityForm.moveRules')}</p>
         <div className="grid gap-2">
           <Label>
-            {itemConfig(TELEPORT)?.name} · {owned > 0 ? `×${owned}` : `${fmt(price)} gold`}: a free flat tile you choose
+            {owned > 0
+              ? t('cityForm.teleportOwned', { item: itemName(TELEPORT), owned })
+              : t('cityForm.teleportPrice', { item: itemName(TELEPORT), price: fmt(price) })}
           </Label>
           <div className="flex gap-2">
             <Input inputMode="numeric" placeholder="x" value={x} onChange={(e) => setX(e.target.value.replace(/\D/g, ''))} />
             <Input inputMode="numeric" placeholder="y" value={y} onChange={(e) => setY(e.target.value.replace(/\D/g, ''))} />
             <Button
               disabled={!validXY || !!cooldown || move.isPending || (owned === 0 && city.resource.gold < price)}
-              title={owned > 0 ? undefined : `Bought with ${city.name}'s gold`}
+              title={owned > 0 ? undefined : t('common:boughtWithCityGold', { city: city.name })}
               onClick={() => move.mutate({ path: { cityId: city.id }, body: { targetTileId: ty * size + tx } }, { onSuccess: onDone })}
             >
-              Teleport
+              {t('cityForm.teleport')}
             </Button>
           </div>
           {cooldown && (
             <p className="text-xs text-muted-foreground">
-              Cooling down: next move in <Countdown endTime={cooldown.endTime} />.
+              <Trans t={t} i18nKey="cityForm.cooldown" components={{ countdown: <Countdown endTime={cooldown.endTime} /> }} />
             </p>
           )}
         </div>

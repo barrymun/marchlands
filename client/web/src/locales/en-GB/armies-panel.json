@@ -1,0 +1,22 @@
+{
+  "recalled": "Army recalled",
+  "sections": {
+    "hostile": "Hostile armies",
+    "own": "Your armies",
+    "allied": "Allied armies"
+  },
+  "none": "None.",
+  "missions": {
+    "transport": "Transport",
+    "reinforce": "Reinforce",
+    "scout": "Scout",
+    "buildCity": "Build city",
+    "attack": "Attack"
+  },
+  "row": {
+    "returning": "Returning",
+    "stationed": "Stationed",
+    "marching": "Marching",
+    "recall": "Recall"
+  }
+}

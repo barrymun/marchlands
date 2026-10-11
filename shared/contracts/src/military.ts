@@ -1,7 +1,7 @@
 // Heroes, armies, map and valleys (backend/services/api/src/routes/military.ts).
 
 import { z } from 'zod';
-import { STATE_NAMES, TileType } from '@marchlands/core';
+import { TileType } from '@marchlands/core';
 import { zCityParams, zId, zResources, zTroops } from './common.ts';
 import { ArmyBean, HeroBean } from './beans.ts';
 import { TileRow } from './rows.ts';
@@ -110,7 +110,7 @@ export const MapCastle = z
     id: z.number().int().describe('tile id'),
     x: z.number().int(),
     y: z.number().int(),
-    name: z.string(),
+    name: z.string().optional().describe("the city's name; absent for a barbarian city (named by the client from its tile type)"),
     npc: z.boolean(),
     level: z.number().int(),
     cityId: z.number().int().optional(),
@@ -124,7 +124,7 @@ export const MapCastle = z
     relation: relation.optional(),
     state: z.number().int().optional().describe('player status'),
     furlough: z.boolean().optional().describe('beginner protection'),
-    zoneName: z.string(),
+    zoneId: z.number().int().describe('zone (state) id; the client names it'),
   })
   .extend(MapPermissions.shape)
   .meta({ id: 'MapCastle' });
@@ -167,8 +167,7 @@ export const MapFieldTileInfo = TileRow.pick({ id: true, type: true, level: true
   .extend({
     x: z.number().int(),
     y: z.number().int(),
-    zoneName: z.enum([...STATE_NAMES, 'UNKNOWN']),
-    name: z.string(),
+    zoneId: z.number().int().describe('zone (state) id; the client names it'),
     npc: z.boolean(),
     owner: MapTileOwner.nullable().describe('controlling city of an occupied valley / captured NPC city'),
     relation,

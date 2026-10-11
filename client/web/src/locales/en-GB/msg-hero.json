@@ -1,0 +1,21 @@
+{
+  "needInn": "Heroes are recruited at the {{building}}: build one first.",
+  "noVacancy": "The {{building}} has no room for another hero.",
+  "notIdle": "This hero is not idle.",
+  "locked": "{{name}} is locked: unlock the hero before dismissing them.",
+  "noMayor": "This city has no mayor.",
+  "invalidPoints": "Invalid attribute points.",
+  "maxLevel": "This hero is already at the maximum level ({{level}}).",
+  "maxLevelNoExperience": "This hero is at the maximum level ({{level}}) and gains no more experience.",
+  "notEnoughExperience": "Not enough experience.",
+  "invalidAttribute": "Invalid attribute.",
+  "invalidGearPiece": "Invalid gear piece.",
+  "gearMaxStars": "This piece already has every star.",
+  "gearStarLimit": "Stars cannot go beyond your {{tech}} level ({{limit}}): research level {{level}} first.",
+  "notEnoughMedals": "Not enough {{item}}: {{amount}} needed.",
+  "fullyLoyal": "This hero is already completely loyal.",
+  "itemNotForGold": "This item cannot be bought with gold.",
+  "invalidItem": "This item cannot be used on a hero.",
+  "notPrisoner": "This hero is not your prisoner.",
+  "stillLoyal": "This hero is still loyal to their owner."
+}

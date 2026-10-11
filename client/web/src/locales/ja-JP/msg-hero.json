@@ -1,0 +1,21 @@
+{
+  "needInn": "英雄を雇うには{{building}}を建設してください。",
+  "noVacancy": "{{building}}に英雄の空きがありません。",
+  "notIdle": "この英雄は待機中ではありません。",
+  "locked": "{{name}}はロック中です。解雇する前にロックを解除してください。",
+  "noMayor": "この都市には市長がいません。",
+  "invalidPoints": "能力ポイントの割り振りが無効です。",
+  "maxLevel": "この英雄はすでに最大レベル（{{level}}）です。",
+  "maxLevelNoExperience": "この英雄は最大レベル（{{level}}）に達しているため、これ以上経験値を獲得できません。",
+  "notEnoughExperience": "経験値が足りません。",
+  "invalidAttribute": "無効な能力です。",
+  "invalidGearPiece": "無効な装備です。",
+  "gearMaxStars": "この装備の星はすでに最大です。",
+  "gearStarLimit": "星は{{tech}}レベル（{{limit}}）を超えられません。先にレベル{{level}}を研究してください。",
+  "notEnoughMedals": "{{item}}が足りません。{{amount}}個必要です。",
+  "fullyLoyal": "この英雄の忠誠はすでに最大です。",
+  "itemNotForGold": "このアイテムはゴールドで購入できません。",
+  "invalidItem": "このアイテムは英雄に使用できません。",
+  "notPrisoner": "この英雄はあなたの捕虜ではありません。",
+  "stillLoyal": "この英雄はまだ主君に忠誠を誓っています。"
+}

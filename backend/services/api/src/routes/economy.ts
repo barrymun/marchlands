@@ -1,21 +1,7 @@
 // Market, shop, quests, rankings, static game configuration and operator tools.
 
 import { z } from 'zod';
-import {
-  BALANCE,
-  BUILDINGS,
-  BUILDING_NAMES,
-  ITEMS,
-  itemGoldPrice,
-  itemInfo,
-  QUESTS,
-  RESEARCH,
-  STATE_NAMES,
-  TECH_NAMES,
-  TITLES,
-  TROOPS,
-  getGameSpeed,
-} from '@marchlands/core';
+import { BALANCE, BUILDINGS, ITEMS, itemGoldPrice, itemInfo, QUESTS, RESEARCH, TITLES, TROOPS, getGameSpeed } from '@marchlands/core';
 import {
   AccountIdParams,
   AdminAddedHero,
@@ -83,17 +69,15 @@ export default async function economyRoutes(app: ZApp) {
       data: {
         gameSpeed: getGameSpeed(),
         mapSize: BALANCE.mapSize,
-        states: STATE_NAMES,
-        buildingNames: BUILDING_NAMES,
-        techNames: TECH_NAMES,
         buildings: BUILDINGS,
         research: RESEARCH,
         troops: TROOPS,
-        items: ITEMS.map(({ cost: _cents, buyable: _buyable, canGamble: _gamble, ...i }) => {
-          const { category, description, use, howTo } = itemInfo(i.id)!;
-          return { ...i, goldPrice: itemGoldPrice(i.id), category, description, use, howTo };
+        // names are not sent: the client names items, quests and titles by id in the player's language
+        items: ITEMS.map(({ cost: _cents, buyable: _buyable, canGamble: _gamble, name: _name, ...i }) => {
+          const { description, use, howTo } = itemInfo(i.id)!;
+          return { ...i, goldPrice: itemGoldPrice(i.id), description, use, howTo };
         }),
-        questGroups: QUESTS,
+        questGroups: QUESTS.map(({ name: _name, description: _description, ...q }) => q),
         titles: TITLES,
         balance: BALANCE,
       },

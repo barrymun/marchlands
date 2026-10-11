@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Minus, Plus } from 'lucide-react';
 import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postHeroesPointsMutation, postHeroesResetMutation, type HeroBean } from '@marchlands/api-client';
 import { HeroStatus, heroManagement, itemGoldPrice, mayorProductionBonus } from '@marchlands/core';
@@ -11,13 +12,14 @@ import { HOLY_WATER, STATS } from '@/components/hero-points-dialog/points-form/c
 import type { StatKey } from '@/components/hero-points-dialog/points-form/types';
 
 export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBean; cityId: number; fieldOutput: number; onDone: () => void }) {
+  const { t } = useTranslation(['hero-points-dialog', 'common']);
   const player = usePlayer();
   const [add, setAdd] = useState<Record<StatKey, number>>({ management: 0, power: 0, stratagem: 0 });
   const spent = add.management + add.power + add.stratagem;
   const left = hero.remainPoint - spent;
   const refresh = () => [getCitiesByCityIdQueryKey({ path: { cityId } }), getPlayerQueryKey()];
-  const assign = useCommand(postHeroesPointsMutation(), refresh, 'Points assigned');
-  const reset = useCommand(postHeroesResetMutation(), refresh, 'Points reset');
+  const assign = useCommand(postHeroesPointsMutation(), refresh, t('toast.assigned'));
+  const reset = useCommand(postHeroesResetMutation(), refresh, t('toast.reset'));
 
   const holyWater = player.data?.items.find((i) => i.id === HOLY_WATER)?.count ?? 0;
   // without Holy Water, one is bought with the hero's city gold
@@ -38,11 +40,9 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
     <>
       <DialogHeader>
         <DialogTitle>
-          {hero.name} <span className="font-normal text-muted-foreground">Lv {hero.level}</span>
+          {hero.name} <span className="font-normal text-muted-foreground">{t('common:level.short', { level: hero.level })}</span>
         </DialogTitle>
-        <DialogDescription>
-          {left} of {hero.remainPoint} points left to assign. Heroes gain one point per level.
-        </DialogDescription>
+        <DialogDescription>{t('pointsLeft', { left, count: hero.remainPoint })}</DialogDescription>
       </DialogHeader>
       <div className="grid gap-3">
         {STATS.map((s) => (
@@ -57,7 +57,7 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
                 variant="outline"
                 disabled={add[s.key] === 0}
                 onClick={() => setAdd({ ...add, [s.key]: add[s.key] - 1 })}
-                aria-label={`Remove ${s.label}`}
+                aria-label={t('remove', { label: s.label })}
               >
                 <Minus />
               </Button>
@@ -70,25 +70,28 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
                 variant="outline"
                 disabled={left === 0}
                 onClick={() => setAdd({ ...add, [s.key]: add[s.key] + 1 })}
-                aria-label={`Add ${s.label}`}
+                aria-label={t('add', { label: s.label })}
               >
                 <Plus />
               </Button>
               <Button size="xs" variant="ghost" disabled={left === 0} onClick={() => setAdd({ ...add, [s.key]: add[s.key] + left })}>
-                All
+                {t('common:actions.all')}
               </Button>
             </div>
           </div>
         ))}
         {isMayor && add.management > 0 && (
           <p className="text-xs text-emerald-600 dark:text-emerald-400">
-            As mayor: {signedRate(mayorGain(add.management))} production (+{Math.round(bonusGain(add.management) * 100)}%)
+            {t('asMayor', { rate: signedRate(mayorGain(add.management)), pct: Math.round(bonusGain(add.management) * 100) })}
           </p>
         )}
         <Separator />
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs text-muted-foreground">
-            Reset all {assigned} assigned points · {holyWater > 0 ? `uses 1 Holy Water (${holyWater} owned)` : `${fmt(resetGold)} gold for a Holy Water`}
+            {t('resetInfo', {
+              count: assigned,
+              cost: holyWater > 0 ? t('usesHolyWater', { owned: holyWater }) : t('holyWaterGold', { gold: fmt(resetGold) }),
+            })}
           </span>
           <Button
             size="xs"
@@ -96,13 +99,13 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
             disabled={!canReset || assigned === 0 || reset.isPending}
             onClick={() => reset.mutate({ path: { heroId: hero.id } })}
           >
-            Reset
+            {t('reset')}
           </Button>
         </div>
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={onDone}>
-          Cancel
+          {t('common:actions.cancel')}
         </Button>
         <Button
           disabled={spent === 0 || assign.isPending}
@@ -116,7 +119,7 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
             )
           }
         >
-          Assign {spent > 0 ? spent : ''} point{spent === 1 ? '' : 's'}
+          {spent > 0 ? t('assign', { count: spent }) : t('assignNone')}
         </Button>
       </DialogFooter>
     </>

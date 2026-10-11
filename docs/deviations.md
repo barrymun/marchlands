@@ -92,7 +92,7 @@ The original either stubbed these or never answered them.
   - honor and hero experience from kills; injured troops through Medicine;
   - hero capture when the attacking army is wiped out;
   - battle reports for every party involved.
-- **Other missions.** Transport (to own or allied cities); reinforcement (merge into your own city, or station with an ally or on your own valley); scouting with intel (more detail with Informatics); founding a new city (needs a hero and 10,000 of each resource).
+- **Other missions.** Transport (to own or allied cities); reinforcement (merge into your own city, or station with an ally or on your own valley); scouting with intel (more detail with Informatics); founding a new city (needs a hero and `BALANCE.newCityMinResource`, 10,000, of each resource).
 - **Recalling armies**, and sending home allied armies stationed with you.
 - **Production bonuses.**
   - Agriculture, Lumbering, Masonry and Mining: +10% per effective level.

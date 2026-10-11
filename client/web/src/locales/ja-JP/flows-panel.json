@@ -1,0 +1,122 @@
+{
+  "list": {
+    "title": "フロー",
+    "description": "複数の都市でまとめて実行する一連のアクションです。",
+    "new": "新規",
+    "empty": "フローはまだありません。",
+    "actions_other": "{{count}}アクション"
+  },
+  "detail": {
+    "deleteLabel": "{{name}}を削除",
+    "deleteTitle": "フロー「{{name}}」を削除しますか？",
+    "deleteDescription": "アクションと設定が削除され、実行中の処理は停止します。この操作は取り消せません。",
+    "deleteConfirm": "フローを削除",
+    "runsOn": "実行対象：",
+    "noArmy": "攻撃に使う保存済み部隊を選んでください（編集）。選ぶまで、その目標はスキップされます。",
+    "pickFlow": "フローを選ぶか、新しく作成してください。"
+  },
+  "toasts": {
+    "deleted": "フローを削除しました"
+  },
+  "citiesSummary": {
+    "all": "全都市",
+    "none": "現在の都市はありません"
+  },
+  "cityPicker": {
+    "label": "都市",
+    "all": "全都市",
+    "allHint": "（{{cities}}都市、今後獲得する都市も含む）",
+    "allHintSkipped": "（{{cities}}都市、今後獲得する都市も含む。英雄のいない{{skipped}}都市はスキップ）",
+    "here": "現在地",
+    "chooseOne": "都市を1つ以上選んでください。"
+  },
+  "flowEditor": {
+    "editTitle": "フローを編集",
+    "newTitle": "新規フロー",
+    "description": "アクションは各都市で上から順に実行されます。待機はフロー全体を全都市まとめて一時停止します。ドラッグ（または矢印）で並べ替えできます。",
+    "locked": "このフローは実行中です。設定（目標・数量・都市）は変更できますが、アクションの追加・削除・並べ替えは停止してから行ってください。",
+    "name": "名前",
+    "namePlaceholder": "例：弓兵即時訓練",
+    "moveUp": "上へ移動",
+    "moveDown": "下へ移動",
+    "removeAction": "アクションを削除",
+    "add": {
+      "setMayor": "市長を任命",
+      "trainTroops": "部隊を訓練",
+      "attackTargets": "目標を攻撃",
+      "healTroops": "部隊を治療",
+      "wait": "待機"
+    }
+  },
+  "actionFields": {
+    "heal": {
+      "label": "負傷兵をすべて治療：",
+      "resources": "資源",
+      "honor": "名誉",
+      "now": "すぐに",
+      "armiesHome": "都市の部隊が帰還したら"
+    },
+    "wait": {
+      "label": "待機",
+      "armiesHome": "派遣した部隊が帰還するまで",
+      "time": "指定時間",
+      "minutesLabel": "分",
+      "minutes": "分"
+    },
+    "setMayor": "市長を任命：最も高い",
+    "train": {
+      "label": "訓練",
+      "amount": "数量"
+    }
+  },
+  "runFlow": {
+    "title": "実行",
+    "description": "各都市は待機と待機の間をまとめて実行します。ある都市でアクションが失敗すると、直前の待機以降にその都市で行った処理は取り消され、フローは停止します。フローは待機の間に順番に実行されるため、あるフローが待機中でも他のフローは実行されます。プレビューでは、何も変更せずに最初の待機までの結果を確認できます。",
+    "repeat": "繰り返し",
+    "repeatHint": "実行のたびに（最大で1分に1回）フローの都市で再実行します。実行が失敗するか、オフにするまで続きます。",
+    "preview": "プレビュー",
+    "run_other": "{{count}}都市で実行",
+    "stop": "停止",
+    "toasts": {
+      "failed_other": "{{name}}：{{count}}都市で失敗し、停止しました",
+      "waiting": "{{name}}：開始し、待機中です",
+      "done_other": "{{name}}：{{count}}都市で完了しました",
+      "repeatOn": "{{name}}：実行が失敗するか、オフにするまで繰り返します",
+      "repeatOff": "{{name}}：今回の実行後に停止します",
+      "stopped": "{{name}}：停止しました"
+    },
+    "lastPreview": "プレビュー · {{ago}}（変更なし）",
+    "lastRun": {
+      "inProgress": "第{{run}}回 · 開始 {{started}} · 実行中",
+      "ended": "第{{run}}回 · 開始 {{started}} · 終了 {{ended}}"
+    },
+    "report": {
+      "wouldRun": "実行予定",
+      "ok": "成功",
+      "rolledBack": "取り消し",
+      "undone": "直前の待機以降にこの都市でフローが行った処理は取り消されました。",
+      "wouldSkip": "スキップ予定",
+      "skipped": "スキップ",
+      "allItems": "全{{n}}件：{{detail}}"
+    }
+  },
+  "statusBadge": {
+    "repeats": "繰り返し",
+    "running": "実行中",
+    "held": "都市の英雄が全員帰還するまで保留中",
+    "heroesOut": "英雄出撃中",
+    "waiting": "待機中",
+    "repeatsIn": "{{time}}後に再実行",
+    "queued": "順番待ち",
+    "stopped": "停止",
+    "due": "まもなく"
+  },
+  "statusLine": {
+    "running": "実行中です。",
+    "held": "都市の英雄全員の帰還（および先に保留中のフロー）を待っています。{{time}}後に再確認します。",
+    "waiting": "待機中：{{time}}後に再開します。",
+    "nextRun": "次の実行まで{{time}}。",
+    "starting": "開始中…",
+    "stopped": "停止しました。{{reason}}繰り返しはオフになりました。"
+  }
+}

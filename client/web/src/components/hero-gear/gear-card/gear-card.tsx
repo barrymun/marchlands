@@ -1,42 +1,43 @@
 // (marchlands) Hero gear (shared/core gear.ts): the lord's 14 pieces with their level and stars, and
 // on each hero card the gear bonus and the attribute it boosts.
 
+import { useTranslation } from 'react-i18next';
 import { Star } from 'lucide-react';
 import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postGearStarMutation } from '@marchlands/api-client';
-import { BALANCE, GEAR_PIECES, gearStarCost, gearStarLimit, itemConfig, TechType } from '@marchlands/core';
+import { BALANCE, GEAR_PIECES, gearStarCost, gearStarLimit, TechType } from '@marchlands/core';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
+import { gearName, itemName, itemShortName } from '@/lib/game-data';
 import { allOf } from '@/lib/query-keys';
 import { maxLevel, maxStars, starPoints } from '@/components/hero-gear/constants';
 import { Stars } from '@/components/hero-gear/gear-card/stars/stars';
 
 /** The lord's gear: every piece's level (Hero Enhancement) and stars, with a button to add a star. */
 export function GearCard({ onResearch }: { onResearch?: () => void }) {
+  const { t } = useTranslation(['hero-gear', 'common']);
   const player = usePlayer();
   const inv = useInventory();
   const gear = player.data?.gear;
-  const addStar = useCommand(postGearStarMutation(), () => [getPlayerQueryKey(), allOf(getCitiesByCityIdQueryKey)], 'Star added');
+  const addStar = useCommand(postGearStarMutation(), () => [getPlayerQueryKey(), allOf(getCitiesByCityIdQueryKey)], t('card.starAdded'));
   if (!gear) return null;
   const starLimit = gearStarLimit(gear);
   const research = player.data?.research[TechType.HERO_ENHANCEMENT]?.level ?? 0;
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Hero gear</CardTitle>
+        <CardTitle className="text-sm">{t('card.title')}</CardTitle>
         <CardDescription>
-          Every hero wears all {GEAR_PIECES.length} pieces. Their level is your Hero Enhancement research ({research}/{maxLevel}, in the Academy); stars are
-          bought with medals. A hero uses gear levels and stars up to its gear tier: none at hero levels 1-9, 1 at 10-19, … 9 at 90-99, all {maxLevel} at level{' '}
-          {BALANCE.heroMaxLevel}. A piece at level L adds 1 + … + L points, each star +{starPoints}.
+          {t('card.description', { pieces: GEAR_PIECES.length, research, max: maxLevel, heroMaxLevel: BALANCE.heroMaxLevel, starPoints })}
         </CardDescription>
         {gear.level === 0 && (
           <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-1.5 text-xs text-amber-800 dark:text-amber-300">
-            <span>Your gear is level 0: only stars count until you research Hero Enhancement in the Academy (level N needs Academy level N).</span>
+            <span>{t('card.levelZero')}</span>
             {onResearch && (
               <Button size="xs" variant="outline" onClick={onResearch}>
-                Go to Research
+                {t('card.goToResearch')}
               </Button>
             )}
           </div>
@@ -48,17 +49,15 @@ export function GearCard({ onResearch }: { onResearch?: () => void }) {
           const full = stars >= maxStars;
           const cost = full ? null : gearStarCost(stars + 1);
           const owned = cost ? inv.count(cost.itemId) : 0;
-          const medal = cost ? (itemConfig(cost.itemId)?.name ?? cost.itemId) : '';
+          const medal = cost ? itemName(cost.itemId) : '';
           // stars cannot go beyond the Hero Enhancement level; any bought above it wait, unused
           const capped = !full && stars >= starLimit;
           return (
             <div key={p.id} className="flex items-center justify-between gap-2 rounded-md border p-2 text-sm">
               <div className="min-w-0">
                 <div className="font-medium">
-                  {p.name}{' '}
-                  <span className="font-normal text-muted-foreground tabular-nums">
-                    Lv {gear.level}/{maxLevel}
-                  </span>
+                  {gearName(p.id)}{' '}
+                  <span className="font-normal text-muted-foreground tabular-nums">{t('common:level.ofMax', { level: gear.level, max: maxLevel })}</span>
                 </div>
                 <Stars count={stars} used={starLimit} />
               </div>
@@ -72,27 +71,22 @@ export function GearCard({ onResearch }: { onResearch?: () => void }) {
                         disabled={capped || owned < cost.count || addStar.isPending}
                         onClick={() => addStar.mutate({ path: { pieceId: p.id } })}
                       >
-                        <Star className="size-3" /> {capped ? `Needs research ${stars + 1}` : `${cost.count}× ${medal.replace(/ Medal$/, '')}`}
+                        <Star className="size-3" />{' '}
+                        {capped ? t('card.needsResearch', { level: stars + 1 }) : t('card.medalCost', { n: cost.count, medal: itemShortName(cost.itemId) })}
                       </Button>
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {capped ? (
-                      `Star ${stars + 1} needs Hero Enhancement level ${stars + 1} (now ${gear.level})${stars > starLimit ? `; only ${starLimit} of the ${stars} stars count until then` : ''}`
-                    ) : (
-                      <>
-                        Star {stars + 1}: {cost.count} {medal}
-                        {cost.count > 1 ? 's' : ''} (you have {owned})
-                      </>
-                    )}
+                    {capped
+                      ? stars > starLimit
+                        ? t('card.starNeedsResearchWaiting', { star: stars + 1, level: gear.level, used: starLimit, count: stars })
+                        : t('card.starNeedsResearch', { star: stars + 1, level: gear.level })
+                      : t('card.starCost', { star: stars + 1, count: cost.count, medal, owned })}
                   </TooltipContent>
                 </Tooltip>
               ) : (
-                <span
-                  className="text-xs text-muted-foreground"
-                  title={stars > starLimit ? 'Stars above your Hero Enhancement level count once you research it' : undefined}
-                >
-                  {stars > starLimit ? `${starLimit} of ${stars} count` : 'All stars'}
+                <span className="text-xs text-muted-foreground" title={stars > starLimit ? t('card.starsAboveHint') : undefined}>
+                  {stars > starLimit ? t('card.starsCount', { used: starLimit, stars }) : t('card.allStars')}
                 </span>
               )}
             </div>

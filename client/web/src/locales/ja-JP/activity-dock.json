@@ -1,0 +1,17 @@
+{
+  "title": "進行中",
+  "summary": "{{jobs}} · 次 {{next}}",
+  "finishing": "まもなく完了…",
+  "more": "他 {{n}} 件",
+  "groups": {
+    "building": "建設",
+    "research": "研究",
+    "training": "訓練"
+  },
+  "job": {
+    "level": "{{name}} → Lv {{level}}",
+    "demolishing": "解体中",
+    "troops": "{{troop}} ×{{amount}}",
+    "queued": "待機 {{n}} 件"
+  }
+}

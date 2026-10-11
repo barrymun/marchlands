@@ -1,0 +1,43 @@
+{
+  "form": {
+    "title": "部隊を派遣",
+    "description": "{{from}}から{{to}}へ",
+    "dispatched": "部隊を派遣しました",
+    "mission": "任務",
+    "hero": "英雄",
+    "heroOption": "{{name}}(Lv {{level}}、攻撃 {{attack}})",
+    "troops": "兵",
+    "capacity": "{{chosen}} / {{cap}}(集結地 Lv {{rally}})",
+    "capacityEnsign": "{{chosen}} / {{cap}}(集結地 Lv {{rally}}<b>、戦旗 +25%</b>)",
+    "battleBuff": "この戦闘で{{desc}} · 残り<timer/>",
+    "noScouts": "都市に斥候がいません: 軍事タブで訓練してください。",
+    "noTroops": "都市に兵がいません。",
+    "allTitle": "部隊に入るだけ",
+    "resources": "資源",
+    "carried": "{{loaded}} / {{capacity}} 積載",
+    "chooseTroops": "資源を運ぶ兵を選んでください",
+    "maxTitle": "兵がまだ運べるだけ",
+    "estimate": "行軍 {{time}} · 積載 {{load}}",
+    "estimateButton": "見積もり"
+  },
+  "presets": {
+    "deleted": "プリセットを削除しました",
+    "shortItem": "{{unit}} {{n}}",
+    "short": "{{list}}が不足しています: 都市にある分だけ読み込みました。",
+    "label": "保存した編成",
+    "done": "完了",
+    "manage": "管理",
+    "deleteNamed": "保存した編成「{{name}}」を削除",
+    "loadPlaceholder": "保存した編成を読み込む…",
+    "emptyPlaceholder": "保存した編成はまだありません",
+    "deleteSelected": "この編成を削除",
+    "namePlaceholder": "編成名(例: 多層 L10)",
+    "option_other": "{{name}} · 兵 {{n}}"
+  },
+  "scoutNote": {
+    "city": "斥候は都市の斥候と戦います(英雄がいると有利)。生き残れば、報告に資源・兵・防衛施設・忠誠度が表示されます。情報学で英雄(レベル1)と建物(レベル2)も加わります。全滅した場合は何もわかりません。",
+    "npc": "蛮族の都市は斥候を阻止しません: 1人で十分です。報告に兵・防衛施設・城壁・資源・忠誠度・建物・英雄が表示されます。",
+    "valley": "渓谷は斥候を阻止しません: 1人で十分です。報告に守備兵と所有者が表示されます。",
+    "other": "偵察任務には斥候だけが向かいます。"
+  }
+}

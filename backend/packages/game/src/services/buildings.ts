@@ -33,6 +33,9 @@ import {
   type BuildingState,
   addHeroExp,
   BuffId,
+  msg,
+  ref,
+  dur,
 } from '@marchlands/core';
 import { mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
 import type { Ctx } from '../context.ts';
@@ -117,7 +120,7 @@ export async function availableBuildings(ctx: Ctx, playerId: number, cityId: num
 export async function upgradeInfo(ctx: Ctx, playerId: number, cityId: number, positionId: number) {
   const b = await ownView(ctx, playerId, cityId);
   const bld = findBuilding(b.city.buildings, positionId);
-  if (!bld) throw new GameError('Building not found.', -99, 404);
+  if (!bld) throw new GameError(msg('building.notFound'), -99, 404);
   const max = buildingMaxLevel(bld.typeId);
   return {
     building: buildingBean(bld),
@@ -138,7 +141,7 @@ export async function upgradeInfo(ctx: Ctx, playerId: number, cityId: number, po
 
 async function ownView(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewCity(ctx, cityId);
-  if (b.city.playerId !== playerId) throw new GameError('Invalid castle.', -99, 403);
+  if (b.city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   return b;
 }
 
@@ -146,7 +149,7 @@ async function ownView(ctx: Ctx, playerId: number, cityId: number) {
 export async function speedupCost(ctx: Ctx, playerId: number, cityId: number, positionId: number) {
   const b = await ownView(ctx, playerId, cityId);
   const bld = findBuilding(b.city.buildings, positionId);
-  if (!bld || bld.status === BuildingStatus.IDLE || bld.endTime < ctx.now) throw new GameError('Invalid position id.', -99);
+  if (!bld || bld.status === BuildingStatus.IDLE || bld.endTime < ctx.now) throw new GameError(msg('building.notInProgress'), -99);
   return { goldNeed: goldForSpeedup(bld.endTime - ctx.now), timeLeft: bld.endTime - ctx.now };
 }
 
@@ -203,10 +206,11 @@ export async function upgrade(ctx: Ctx, playerId: number, cityId: number, positi
 export async function demolish(ctx: Ctx, playerId: number, cityId: number, positionId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const bld = findBuilding(b.city.buildings, positionId);
-  if (!bld || bld.level <= 0) throw new GameError("Can't destroy building.", -99);
-  if (bld.status !== BuildingStatus.IDLE) throw new GameError('Building is busy.', -45);
-  if (bld.typeId === BuildingType.TOWN_HALL) throw new GameError('The Town Hall cannot be demolished.', -99);
-  if (bld.typeId === BuildingType.WALLS) throw new GameError('The Walls cannot be demolished.', -99);
+  if (!bld || bld.level <= 0) throw new GameError(msg('building.nothingToDemolish'), -99);
+  if (bld.status !== BuildingStatus.IDLE) throw new GameError(msg('building.busy'), -45);
+  if (bld.typeId === BuildingType.TOWN_HALL || bld.typeId === BuildingType.WALLS) {
+    throw new GameError(msg('building.cannotDemolish', { building: ref.building(bld.typeId) }), -99);
+  }
   if (BALANCE.instantDemolish) {
     gainResources(b.city, fullDemolishRefund(bld.typeId, bld.level));
     ctx.stat(playerId, cityId, { 'levels.demolished': bld.level });
@@ -218,7 +222,7 @@ export async function demolish(ctx: Ctx, playerId: number, cityId: number, posit
     return buildingBean(gone);
   }
   if (b.city.buildings.filter((x) => x.status !== BuildingStatus.IDLE).length >= maxConcurrent(b, ctx.now)) {
-    throw new GameError('All construction queues are busy.', -48);
+    throw new GameError(msg('building.queuesBusy'), -48);
   }
   const ms = demolishTimeMs(bld.typeId, bld.level, mayorStats(b.heroes), b.player.research);
   const next: BuildingState = { ...bld, status: BuildingStatus.DEMOLISHING, startTime: ctx.now, endTime: ctx.now + ms };
@@ -233,7 +237,7 @@ export async function demolish(ctx: Ctx, playerId: number, cityId: number, posit
 export async function cancel(ctx: Ctx, playerId: number, cityId: number, positionId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const bld = findBuilding(b.city.buildings, positionId);
-  if (!bld || bld.status === BuildingStatus.IDLE) throw new GameError('Not being constructed.', -99);
+  if (!bld || bld.status === BuildingStatus.IDLE) throw new GameError(msg('building.notInProgress'), -99);
   if (bld.status === BuildingStatus.BUILDING) {
     const paid = buildingConfig(bld.typeId, bld.level + 1)!.cost;
     gainResources(b.city, paid, BALANCE.cancelBuildRefund);
@@ -255,12 +259,13 @@ export async function cancel(ctx: Ctx, playerId: number, cityId: number, positio
 export async function speedup(ctx: Ctx, playerId: number, cityId: number, positionId: number, itemId: string) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const bld = findBuilding(b.city.buildings, positionId);
-  if (!bld || bld.status === BuildingStatus.IDLE) throw new GameError('Not being constructed.', -99);
+  if (!bld || bld.status === BuildingStatus.IDLE) throw new GameError(msg('building.notInProgress'), -99);
   const left = Math.max(0, bld.endTime - ctx.now);
   const total = bld.endTime - bld.startTime;
   let reduce: number;
   if (itemId === 'free.speed') {
-    if (left > scaled(BALANCE.freeSpeedupMs)) throw new GameError('Free speed-up is only available for the last 5 minutes.', -99);
+    const freeMs = scaled(BALANCE.freeSpeedupMs);
+    if (left > freeMs) throw new GameError(msg('common.freeSpeedupTooEarly', { time: dur(freeMs) }), -99);
     reduce = left;
   } else if (itemId === 'gold.speed') {
     const gold = goldForSpeedup(left);
@@ -269,7 +274,7 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
     reduce = left;
   } else {
     const eff = SPEEDUP_ITEMS[itemId];
-    if (!eff) throw new GameError('Invalid speed up.', -99);
+    if (!eff) throw new GameError(msg('common.invalidSpeedup'), -99);
     useItemOrGold(ctx, b.player, b.city, itemId, speedupItemGold(itemId));
     reduce = scaled(eff.reduce(total, () => ctx.rng.next()));
   }

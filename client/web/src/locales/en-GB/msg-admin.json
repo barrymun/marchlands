@@ -1,0 +1,5 @@
+{
+  "broadcast": "{{text}}",
+  "unknownItem": "Unknown item: {{id}}.",
+  "invalidLevel": "The level must be from 0 to {{max}}."
+}

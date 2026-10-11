@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, Crown, UserRound } from 'lucide-react';
@@ -36,17 +37,19 @@ import { mayorOf } from '@/routes/game/utils';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
 import { errorMessage, tokenStore } from '@/lib/api';
 import { fmt } from '@/lib/format';
+import { titleName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 import { MayorSummary } from '@/routes/game/mayor-summary/mayor-summary';
 import { MayorChip } from '@/routes/game/mayor-chip/mayor-chip';
 import { TABS } from '@/routes/game/constants';
 
 export function GamePage() {
+  const { t } = useTranslation(['game', 'common']);
   const params = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const cityId = Number(params.cityId);
-  const tab = TABS.some((t) => t.id === params['*']) ? params['*']! : 'buildings';
+  const tab = TABS.some((x) => x.id === params['*']) ? params['*']! : 'buildings';
   const player = usePlayer();
   const city = useCity(cityId);
   const status = usePushSync(true);
@@ -65,19 +68,19 @@ export function GamePage() {
   return (
     <div className="min-h-svh bg-muted/30">
       {/* the tab bar sits in the sticky header, so it stays in view while the page scrolls */}
-      <Tabs value={tab} onValueChange={(t) => navigate(`/cities/${cityId}/${t}`)} className="contents">
+      <Tabs value={tab} onValueChange={(v) => navigate(`/cities/${cityId}/${v}`)} className="contents">
         <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:pt-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="max-w-[60vw] min-w-0 gap-1 px-2 font-semibold sm:max-w-none">
-                  <span className="truncate">{city.data?.name ?? cities.find((c) => c.id === cityId)?.name ?? 'City'}</span>
+                  <span className="truncate">{city.data?.name ?? cities.find((c) => c.id === cityId)?.name ?? t('cityFallback')}</span>
                   <span className="font-normal text-muted-foreground tabular-nums">{city.data && `(${city.data.x},${city.data.y})`}</span>
                   <ChevronDown className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-60">
-                <DropdownMenuLabel>Your cities</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('yourCities')}</DropdownMenuLabel>
                 {cities.map((c) => (
                   <DropdownMenuItem key={c.id} className="flex-col items-start gap-0.5" onSelect={() => navigate(`/cities/${c.id}/${tab}`)}>
                     <span className={cn(c.id === cityId && 'font-semibold')}>
@@ -90,7 +93,7 @@ export function GamePage() {
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setDialog('city')}>City settings</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDialog('city')}>{t('citySettings')}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             {/* phones: the mayor gets its own row under the city and the account controls */}
@@ -106,16 +109,14 @@ export function GamePage() {
                     <TooltipTrigger asChild>
                       <span className="hidden items-center gap-1 sm:flex">
                         <Crown className="size-4 text-amber-500" />
-                        {info.titleName} {info.userName}
+                        {t('titledName', { title: titleName(info.titleId), name: info.userName })}
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      Prestige {fmt(info.prestige)} · rank {info.ranking || '—'} · honor {fmt(info.honor)}
-                    </TooltipContent>
+                    <TooltipContent>{t('playerStats', { prestige: fmt(info.prestige), rank: info.ranking || '—', honor: fmt(info.honor) })}</TooltipContent>
                   </Tooltip>
                   {info.beginner && (
                     <Badge variant="secondary" className="hidden sm:inline-flex">
-                      Beginner protection
+                      {t('beginnerProtection')}
                     </Badge>
                   )}
                 </>
@@ -124,15 +125,15 @@ export function GamePage() {
                 <TooltipTrigger asChild>
                   <span
                     className={cn('size-2 rounded-full', status === 'open' ? 'bg-emerald-500' : status === 'connecting' ? 'bg-amber-500' : 'bg-red-500')}
-                    aria-label={`live updates ${status}`}
+                    aria-label={t('liveUpdates.aria', { status: t(`liveUpdates.status.${status}`) })}
                   />
                 </TooltipTrigger>
-                <TooltipContent>Live updates: {status}</TooltipContent>
+                <TooltipContent>{t('liveUpdates.tooltip', { status: t(`liveUpdates.status.${status}`) })}</TooltipContent>
               </Tooltip>
               <ThemeToggle />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="icon-sm" variant="ghost" aria-label="Account">
+                  <Button size="icon-sm" variant="ghost" aria-label={t('account.label')}>
                     <UserRound className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -142,23 +143,22 @@ export function GamePage() {
                     <DropdownMenuLabel className="grid gap-0.5 sm:hidden">
                       <span className="flex items-center gap-1">
                         <Crown className="size-4 text-amber-500" />
-                        {info.titleName} {info.userName}
+                        {t('titledName', { title: titleName(info.titleId), name: info.userName })}
                       </span>
                       <span className="text-xs font-normal text-muted-foreground">
-                        Prestige {fmt(info.prestige)} · honor {fmt(info.honor)}
-                        {info.beginner && ' · beginner protection'}
+                        {t(info.beginner ? 'account.statsBeginner' : 'account.stats', { prestige: fmt(info.prestige), honor: fmt(info.honor) })}
                       </span>
                     </DropdownMenuLabel>
                   )}
                   {info && <DropdownMenuSeparator className="sm:hidden" />}
-                  <DropdownMenuItem onSelect={() => setDialog('lord')}>Player settings</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDialog('lord')}>{t('account.playerSettings')}</DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <a href="/docs" target="_blank" rel="noreferrer">
-                      API docs
+                      {t('account.apiDocs')}
                     </a>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={logout}>Log out</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={logout}>{t('common:actions.logOut')}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -166,12 +166,12 @@ export function GamePage() {
           <div className="mx-auto max-w-6xl px-4 pb-2 sm:pt-1 sm:pb-3">
             {city.data ? <ResourceBar resource={city.data.resource} mayor={mayor} /> : <Skeleton className="h-5 w-2/3" />}
           </div>
-          <nav className="mx-auto max-w-6xl px-4 pb-2 sm:pb-3" aria-label="City tabs">
+          <nav className="mx-auto max-w-6xl px-4 pb-2 sm:pb-3" aria-label={t('cityTabs')}>
             <TabsList className="max-w-full justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {TABS.map((t) => (
-                <TabsTrigger key={t.id} value={t.id} className="gap-1.5">
-                  {t.label}
-                  {t.id === 'reports' && unreadReports > 0 && <Badge className="h-4 min-w-4 px-1 text-[10px] tabular-nums">{unreadReports}</Badge>}
+              {TABS.map((x) => (
+                <TabsTrigger key={x.id} value={x.id} className="gap-1.5">
+                  {x.label}
+                  {x.id === 'reports' && unreadReports > 0 && <Badge className="h-4 min-w-4 px-1 text-[10px] tabular-nums">{unreadReports}</Badge>}
                 </TabsTrigger>
               ))}
             </TabsList>

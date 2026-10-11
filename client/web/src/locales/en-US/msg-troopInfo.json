@@ -1,0 +1,6 @@
+{
+  "worker_one": "Cheap, weak laborers; each carries {{count, number}} resource. Good for padding an army or hauling plunder, not for fighting.",
+  "worker_other": "Cheap, weak laborers; each carries {{count, number}} resources. Good for padding an army or hauling plunder, not for fighting.",
+  "swordsman": "Sturdy melee infantry with high defense; they deal ×{{multiplier}} damage to {{target}} units.",
+  "cataphract": "Heavy armored cavalry: tough and hard-hitting, they deal ×{{multiplier}} damage to {{target}} units. Hurt by enemy {{abatis}}."
+}

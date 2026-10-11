@@ -1,6 +1,7 @@
 // Mail, reports, chat, friends & blocks and alliances.
 
 import { z } from 'zod';
+import { MessageSchema } from '@marchlands/core';
 import { Ms, zId, zPaging } from './common.ts';
 import { AllianceEventRow, AllianceRequestRow, AllianceRow, ArmyRow, ChatMessageRow, MailRow, PlayerRow, ReportRow } from './rows.ts';
 
@@ -19,11 +20,12 @@ export const MailSummary = MailRow.pick({ title: true })
   .extend({
     mailid: MailRow.shape.id,
     type_id: MailRow.shape.type.describe('folder: 1 inbox, 2 system, 3 sent'),
-    sender: z.string(),
+    sender: z.string().nullable().describe('null for mail the game sent (the client labels it)'),
     receiver: z.string(),
     playerId: MailRow.shape.otherPlayerId.describe('the other lord (sender for inbox, receiver for sent); null for system mail'),
     receiveTime: MailRow.shape.sentAt,
     isRead: z.boolean(),
+    systemTitle: MessageSchema.nullable().describe('mail the game sent: its title as a message (then `title` is empty)'),
   })
   .meta({ id: 'MailSummary' });
 export type MailSummary = z.infer<typeof MailSummary>;
@@ -33,7 +35,10 @@ export const MailList = z
   .meta({ id: 'MailList' });
 export type MailList = z.infer<typeof MailList>;
 
-export const MailDetail = MailSummary.extend({ content: MailRow.shape.content }).meta({ id: 'MailDetail' });
+export const MailDetail = MailSummary.extend({
+  content: MailRow.shape.content,
+  systemContent: MessageSchema.nullable().describe('mail the game sent: its content as a message (then `content` is empty)'),
+}).meta({ id: 'MailDetail' });
 export type MailDetail = z.infer<typeof MailDetail>;
 
 // ---- reports ----
@@ -151,7 +156,6 @@ export type AllianceProfile = z.infer<typeof AllianceProfile>;
 /** `data: null` when the lord is not in an alliance. */
 export const MyAlliance = AllianceRelationLists.extend({
   myRank: PlayerRow.shape.allianceRank.describe('4 Host, 5 Vice Host, 6 Presbyter, 7 Officer, 8 Member'),
-  myRankName: z.string(),
   alliance: AllianceProfile,
 }).meta({ id: 'MyAlliance' });
 export type MyAlliance = z.infer<typeof MyAlliance>;
@@ -173,14 +177,13 @@ export const AllianceList = z
   .meta({ id: 'AllianceList' });
 export type AllianceList = z.infer<typeof AllianceList>;
 
-export const CreateAllianceResult = z.object({ id: AllianceRow.shape.id, msg: z.string() }).meta({ id: 'CreateAllianceResult' });
+export const CreateAllianceResult = z.object({ id: AllianceRow.shape.id, msg: MessageSchema }).meta({ id: 'CreateAllianceResult' });
 export type CreateAllianceResult = z.infer<typeof CreateAllianceResult>;
 
 export const AllianceMember = PlayerRow.pick({ id: true, population: true })
   .extend({
     userName: PlayerRow.shape.name,
     levelId: PlayerRow.shape.allianceRank.describe('alliance rank: 4 Host … 8 Member'),
-    allianceLevel: z.string().describe('rank name'),
     prestige: z.number().int(),
     honor: z.number().int(),
     ranking: PlayerRow.shape.prestigeRank,

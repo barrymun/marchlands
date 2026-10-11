@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, Pencil, X } from 'lucide-react';
 import type { HeroBean } from '@marchlands/api-client';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ export function HeroRow({
   onRename?: (name: string) => Promise<void>;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation(['heroes-panel', 'common']);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(hero.name);
   const save = async () => {
@@ -56,28 +58,28 @@ export function HeroRow({
               className="h-7 w-40"
               maxLength={20}
               value={draft}
-              aria-label="Hero name"
+              aria-label={t('heroRow.nameLabel')}
               onFocus={(e) => e.currentTarget.select()}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => e.key === 'Escape' && setEditing(false)}
             />
-            <Button type="submit" size="icon-xs" aria-label="Save name">
+            <Button type="submit" size="icon-xs" aria-label={t('heroRow.saveName')}>
               <Check />
             </Button>
-            <Button type="button" size="icon-xs" variant="ghost" aria-label="Cancel" onClick={() => setEditing(false)}>
+            <Button type="button" size="icon-xs" variant="ghost" aria-label={t('common:actions.cancel')} onClick={() => setEditing(false)}>
               <X />
             </Button>
           </form>
         ) : (
           <div className="flex items-center gap-1 text-sm font-medium">
             {leading}
-            {hero.name} <span className="font-normal text-muted-foreground">Lv {hero.level}</span>
+            {hero.name} <span className="font-normal text-muted-foreground">{t('common:level.short', { level: hero.level })}</span>
             {onRename && (
               <Button
                 size="icon-xs"
                 variant="ghost"
                 className="text-muted-foreground"
-                aria-label={`Rename ${hero.name}`}
+                aria-label={t('heroRow.rename', { name: hero.name })}
                 onClick={() => {
                   setDraft(hero.name);
                   setEditing(true);

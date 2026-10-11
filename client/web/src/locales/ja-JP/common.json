@@ -1,0 +1,116 @@
+{
+  "actions": {
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "save": "保存",
+    "delete": "削除",
+    "confirm": "確認",
+    "send": "送る",
+    "edit": "編集",
+    "max": "最大",
+    "all": "すべて",
+    "none": "なし",
+    "back": "戻る",
+    "remove": "外す",
+    "use": "使う",
+    "buy": "購入",
+    "rename": "名前を変更",
+    "logOut": "ログアウト"
+  },
+  "resources": {
+    "gold": "金",
+    "food": "食料",
+    "wood": "木材",
+    "stone": "石材",
+    "iron": "鉄"
+  },
+  "resourcesInline": {
+    "gold": "金",
+    "food": "食料",
+    "wood": "木材",
+    "stone": "石材",
+    "iron": "鉄",
+    "goods": "物資"
+  },
+  "units": {
+    "days": "{{value}}日",
+    "hours": "{{value}}時間",
+    "minutes": "{{value}}分",
+    "seconds": "{{value}}秒",
+    "perHour": "{{value}}/時"
+  },
+  "time": {
+    "justNow": "たった今",
+    "ago": "{{time}}前"
+  },
+  "fallback": {
+    "building": "建物 {{id}}",
+    "unit": "ユニット {{id}}",
+    "tech": "研究 {{id}}",
+    "tile": "地形 {{id}}"
+  },
+  "genders": {
+    "male": "男性",
+    "female": "女性"
+  },
+  "heroAttributes": {
+    "politics": "政治",
+    "attack": "攻撃",
+    "intelligence": "知力",
+    "politicsShort": "政",
+    "attackShort": "攻",
+    "intelligenceShort": "知"
+  },
+  "push": {
+    "buildingComplete": "{{name}} がレベル {{level}} に到達しました",
+    "researchComplete": "{{name}} がレベル {{level}} に到達しました",
+    "hostileArmies_other": "敵軍 {{count}} 部隊が接近中",
+    "trade": "取引: {{resource}} {{amount}} を {{price}} 金で",
+    "delivery": "市場からの配送: {{resource}} {{amount}} が到着しました",
+    "newReport": "新しい報告",
+    "newReportHint": "報告タブを確認してください。"
+  },
+  "language": {
+    "label": "言語",
+    "names": {
+      "en-GB": "English (UK)",
+      "en-US": "English (US)",
+      "ja-JP": "日本語"
+    }
+  },
+  "list": {
+    "separator": "、"
+  },
+  "level": {
+    "short": "Lv {{level}}",
+    "ofMax": "Lv {{level}}/{{max}}",
+    "named": "{{name}} Lv{{level}}",
+    "namedParens": "{{name}}(Lv {{level}})",
+    "next": "Lv {{level}}:",
+    "now": "現在:",
+    "unlocks": "解放: {{list}}",
+    "mayorExp": "完了時に市長 {{name}} が経験値 {{exp}} を獲得"
+  },
+  "gold": "{{gold}} 金",
+  "amountOf": "{{resource}} {{amount}}",
+  "nothing": "なし",
+  "savedName": "「{{name}}」を保存しました",
+  "durations": {
+    "days_other": "{{count}}日",
+    "hours_other": "{{count}}時間"
+  },
+  "noMayor": "市長なし",
+  "noHero": "英雄なし",
+  "table": {
+    "total": "合計",
+    "unit": "ユニット"
+  },
+  "boughtWithCityGold": "{{city}} の金で購入",
+  "nothingYet": "まだ何もありません。",
+  "noneYet": "まだありません。",
+  "troops_other": "兵 {{n}}",
+  "errors": {
+    "network": "サーバーに接続できません。接続を確認してもう一度お試しください。",
+    "unexpected": "問題が発生しました。もう一度お試しください。"
+  }
+}

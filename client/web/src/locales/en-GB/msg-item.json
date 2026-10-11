@@ -1,0 +1,12 @@
+{
+  "notForSale": "This item isn't for sale.",
+  "dailyLimit": "You've reached the daily purchase limit for this item.",
+  "cannotUse": "This item can't be used here.",
+  "useFrom": {
+    "speedup": "Use this item from the speed-up button of a task in progress.",
+    "hero": "Use this item on one of your heroes.",
+    "elsewhere": "This item is used from its own screen, not from here."
+  },
+  "chooseCity": "Choose a city to use this item in.",
+  "needKey": "You need a {{key}} to open this."
+}

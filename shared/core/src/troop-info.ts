@@ -1,37 +1,51 @@
 // Player-facing troop and fortification descriptions: the unit's role, its special rules in the
 // battle simulator (battle/simulator.ts: damage modifiers, targeting, fortification triggers) and
 // on missions (armies.ts / combat.ts), and fortification wall space (BALANCE.fortSpace).
+// Each is a `troopInfo.*` message, worded by the client.
 
 import { BALANCE } from './balance.ts';
+import { BuildingType, TechType } from './constants.ts';
 import { troopConfig } from './data/index.ts';
+import { msg, ref, type Message } from './messages/index.ts';
 
-const fmt = (n: number) => n.toLocaleString('en');
-const carries = (id: number) => `carries ${fmt(troopConfig(id)?.load ?? 0)} resources`;
-const space = (id: number) => `Takes ${BALANCE.fortSpace[id] ?? 1} wall space.`;
+/** Damage multipliers and the tower's damage taken, as in battle/simulator.ts damageModifier. */
+const PIKEMAN_VS_HORSE = 1.8;
+const SWORDSMAN_VS_PIKEMAN = 1.1;
+const HORSE_VS_ARCHER = 1.2;
+const TOWER_DAMAGE_TAKEN_PERCENT = 30;
+/** Ranged units archers and siege engines shoot first (battle/simulator.ts RANGED, plus the tower). */
+const RANGED_IDS = [7, 11, 13, 16];
 
-const TEXT: Record<number, () => string> = {
-  2: () => `Cheap, weak labourers; each ${carries(2)}. Good for padding an army or hauling plunder, not for fighting.`,
-  3: () => 'Basic foot soldiers: cheap melee troops that fight whatever is closest.',
-  4: () =>
-    'The fastest unit. Needed to scout (scouting battles are fought between scouts only). In a battle they hang back while other troops are still fighting.',
-  5: () => 'Melee spearmen built to stop horses: deal ×1.8 damage to Cavalry and Cataphracts.',
-  6: () => 'Sturdy melee infantry with high defence; deal ×1.1 damage to Pikemen.',
-  7: () => 'Ranged foot troops with long reach; they shoot enemy ranged units (archers, ballistas, catapults, towers) first.',
-  8: () => `Supply wagons: each ${carries(8)}, by far the most. They stay out of the fight while other troops remain, so pair them with an escort.`,
-  9: () => 'Fast mounted troops; deal ×1.2 damage to Archers. Hurt by enemy Abatis.',
-  10: () => 'Heavy armoured cavalry: tough and hard-hitting, deal ×1.2 damage to Archers. Hurt by enemy Abatis.',
-  11: () => 'Siege engine with long range and high attack; shoots ranged units first and batters the walls when nothing else is in reach.',
-  12: () => 'Siege engine with enormous life (it soaks up damage) that smashes the walls; slow.',
-  13: () => 'The longest-range, hardest-hitting siege engine; devastating against walls and ranged units, but slow and fragile up close.',
-  14: () => `Hidden pits: when attackers reach the last stretch before the walls, traps kill some of every group there, and are used up. ${space(14)}`,
-  15: () => `Spiked barricades that only hit Cavalry and Cataphracts approaching the walls. ${space(15)}`,
+const load = (id: number) => troopConfig(id)?.load ?? 0;
+const space = (id: number) => BALANCE.fortSpace[id] ?? 1;
+
+const TEXT: Record<number, () => Message> = {
+  2: () => msg('troopInfo.worker', { count: load(2) }),
+  3: () => msg('troopInfo.warrior'),
+  4: () => msg('troopInfo.scout'),
+  5: () => msg('troopInfo.pikeman', { multiplier: PIKEMAN_VS_HORSE, cavalry: ref.troop(9), cataphract: ref.troop(10) }),
+  6: () => msg('troopInfo.swordsman', { multiplier: SWORDSMAN_VS_PIKEMAN, target: ref.troop(5) }),
+  7: () => msg('troopInfo.archer', { targets: RANGED_IDS.map(ref.troop) }),
+  8: () => msg('troopInfo.transporter', { count: load(8) }),
+  9: () => msg('troopInfo.cavalry', { multiplier: HORSE_VS_ARCHER, target: ref.troop(7), abatis: ref.troop(15) }),
+  10: () => msg('troopInfo.cataphract', { multiplier: HORSE_VS_ARCHER, target: ref.troop(7), abatis: ref.troop(15) }),
+  11: () => msg('troopInfo.ballista'),
+  12: () => msg('troopInfo.batteringRam'),
+  13: () => msg('troopInfo.catapult'),
+  14: () => msg('troopInfo.trap', { space: space(14) }),
+  15: () => msg('troopInfo.abatis', { cavalry: ref.troop(9), cataphract: ref.troop(10), space: space(15) }),
   16: () =>
-    `Archers on the walls: shoot attackers from range (range grows with the Walls level) and take only 30% damage. Upgraded by Archery, Medicine and Iron Working. ${space(16)}`,
-  17: () => `Logs rolled down on the strongest group of foot troops near the walls; used up. ${space(17)}`,
-  18: () => `Hurls rocks at the strongest attacking group within long range; used up. ${space(18)}`,
+    msg('troopInfo.archerTower', {
+      walls: ref.building(BuildingType.WALLS),
+      percent: TOWER_DAMAGE_TAKEN_PERCENT,
+      techs: [ref.tech(TechType.ARCHERY), ref.tech(TechType.MEDICINE), ref.tech(TechType.IRON_WORKING)],
+      space: space(16),
+    }),
+  17: () => msg('troopInfo.rollingLog', { space: space(17) }),
+  18: () => msg('troopInfo.trebuchet', { space: space(18) }),
 };
 
-/** Role and special rules of a troop or fortification type ('' for unknown ids). */
-export function troopDescription(troopId: number): string {
-  return TEXT[troopId]?.() ?? '';
+/** Role and special rules of a troop or fortification type (undefined for unknown ids). */
+export function troopDescription(troopId: number): Message | undefined {
+  return TEXT[troopId]?.();
 }

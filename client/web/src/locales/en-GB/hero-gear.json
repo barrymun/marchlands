@@ -1,0 +1,32 @@
+{
+  "line": {
+    "summary": "Gear <bonus>+{{total}}</bonus> · tier {{tier}}/{{max}}",
+    "nextTier": "(tier {{tier}} at level {{level}})",
+    "attributeGroup": "Attribute the gear boosts",
+    "boosts": "Gear boosts {{label}}",
+    "putOn": "Put the gear on {{label}}",
+    "uses_one": "Uses gear level {{level}} and up to {{count}} star per piece",
+    "uses_other": "Uses gear level {{level}} and up to {{count}} stars per piece"
+  },
+  "card": {
+    "starAdded": "Star added",
+    "title": "Hero gear",
+    "description": "Every hero wears all {{pieces}} pieces. Their level is your Hero Enhancement research ({{research}}/{{max}}, in the Academy); stars are bought with medals. A hero uses gear levels and stars up to its gear tier: none at hero levels 1-9, 1 at 10-19, … 9 at 90-99, all {{max}} at level {{heroMaxLevel}}. A piece at level L adds 1 + … + L points, each star +{{starPoints}}.",
+    "levelZero": "Your gear is level 0: only stars count until you research Hero Enhancement in the Academy (level N needs Academy level N).",
+    "goToResearch": "Go to Research",
+    "needsResearch": "Needs research {{level}}",
+    "medalCost": "{{n}}× {{medal}}",
+    "starNeedsResearch": "Star {{star}} needs Hero Enhancement level {{star}} (now {{level}})",
+    "starCost_one": "Star {{star}}: {{count}} {{medal}} (you have {{owned}})",
+    "starCost_other": "Star {{star}}: {{count}} {{medal}}s (you have {{owned}})",
+    "starsAboveHint": "Stars above your Hero Enhancement level count once you research it",
+    "starsCount": "{{used}} of {{stars}} count",
+    "allStars": "All stars",
+    "starNeedsResearchWaiting_one": "Star {{star}} needs Hero Enhancement level {{star}} (now {{level}}); only {{used}} of the {{count}} star counts until then",
+    "starNeedsResearchWaiting_other": "Star {{star}} needs Hero Enhancement level {{star}} (now {{level}}); only {{used}} of the {{count}} stars count until then"
+  },
+  "stars": {
+    "label_one": "{{n}} of {{count}} star",
+    "label_other": "{{n}} of {{count}} stars"
+  }
+}

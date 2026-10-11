@@ -3,6 +3,7 @@
 // types (`jsonb().$type<...>()`), the API contract and the client all use one definition.
 
 import { z } from 'zod';
+import { MessageSchema } from './messages/schema.ts';
 import { BUFF_IDS, FORT_KEY_LIST, HERO_BUFF_IDS, RESOURCE_KEYS, TROOP_KEY_LIST, type FortKey, type TroopKey } from './constants.ts';
 
 const count = z.number().nonnegative();
@@ -90,7 +91,8 @@ export type ItemCounts = z.infer<typeof ItemCountsSchema>;
 
 export const BuffStateSchema = z.object({
   id: z.enum(BUFF_IDS),
-  desc: z.string(),
+  /** what the buff does (`buff.*`), worded by the client */
+  desc: MessageSchema,
   endTime: z.number(),
   /** optional magnitude (e.g. upkeep reduction) */
   param: z.number().optional(),
@@ -105,9 +107,13 @@ export type BuffState = z.infer<typeof BuffStateSchema>;
 export const HeroBuffStateSchema = BuffStateSchema.extend({ id: z.enum(HERO_BUFF_IDS) });
 export type HeroBuffState = z.infer<typeof HeroBuffStateSchema>;
 
+/** A bookmarked city on the map: a lord's city with its name, or a barbarian city (named by the client from `type`). */
 export const CastleSignSchema = z.object({
   tileId: z.number().int(),
-  name: z.string(),
+  /** tile type: TileType.CASTLE (a lord's city) or TileType.NPC (a barbarian city) */
+  type: z.number().int(),
+  /** the city's name; absent for a barbarian city */
+  name: z.string().optional(),
   x: z.number().int(),
   y: z.number().int(),
 });
@@ -208,6 +214,7 @@ const ReportHeroBriefSchema = z.object({ name: z.string(), level: z.number().int
 const BeforeLostAfter = <T extends z.ZodType>(s: T) => z.object({ before: s, lost: s, after: s });
 
 export const BattleSideReportSchema = z.object({
+  /** the player's name; '' for a barbarian city or the defenders of a valley no one holds (the client names them) */
   player: z.string(),
   hero: ReportHeroSchema.nullable(),
   troops: BeforeLostAfter(TroopCountsSchema),
@@ -216,7 +223,7 @@ export const BattleSideReportSchema = z.object({
   honor: z.number(),
   heroExp: z.number(),
   /** (marchlands) item bonuses that counted in the battle (Ivory Horn …), with the item that set each */
-  bonuses: z.array(z.object({ desc: z.string(), itemId: z.string().optional() })).optional(),
+  bonuses: z.array(z.object({ desc: MessageSchema.describe('what the bonus does (`buff.*`)'), itemId: z.string().optional() })).optional(),
 });
 export const BattleDefenderReportSchema = BattleSideReportSchema.extend({
   forts: BeforeLostAfter(FortCountsSchema).optional(),
@@ -247,8 +254,8 @@ export const BattleNpcExtraSchema = BattlePlunderSchema.extend({
 });
 export const BattleValleyExtraSchema = z.object({
   occupied: z.boolean(),
-  /** why a won valley was not occupied ('' otherwise) */
-  reason: z.string(),
+  /** why a won valley was not occupied (null otherwise) */
+  reason: MessageSchema.nullable(),
   valley: z.object({ type: z.number().int(), level: z.number().int() }),
 });
 export type BattleExtra = z.infer<typeof BattleCityExtraSchema> | z.infer<typeof BattleNpcExtraSchema> | z.infer<typeof BattleValleyExtraSchema>;
@@ -359,7 +366,7 @@ export const ReportBodySchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('scout'), scout: ScoutReportSchema }),
   z.object({ kind: z.literal('movement'), movement: MovementReportSchema }),
   z.object({ kind: z.literal('trade'), trade: TradeReportSchema }),
-  z.object({ kind: z.literal('text'), text: z.string() }),
+  z.object({ kind: z.literal('text'), text: MessageSchema }),
   z.object({ kind: z.literal('desertion'), desertion: DesertionReportSchema }),
 ]);
 export type ReportBody = z.infer<typeof ReportBodySchema>;

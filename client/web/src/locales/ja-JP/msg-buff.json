@@ -1,0 +1,16 @@
+{
+  "production": "{{resource}}生産量 +{{percent}}%",
+  "goldIncome": "金収入 +{{percent}}%",
+  "troopAttack": "部隊の攻撃力 +{{percent}}%",
+  "troopDefense": "部隊の防御力 +{{percent}}%",
+  "armySize": "軍勢の兵数上限 +{{percent}}%",
+  "buildingQueue": "建設枠 +1",
+  "upkeep": "部隊の維持費 -{{percent}}%",
+  "trainingCost": "部隊の訓練費用 -{{percent}}%",
+  "truce": "休戦中",
+  "truceCooldown": "休戦クールダウン",
+  "teleportCooldown": "移転クールダウン",
+  "holiday": "休暇",
+  "heroStat": "{{stat}} +{{percent}}%",
+  "homeCity": "帰還先の都市"
+}

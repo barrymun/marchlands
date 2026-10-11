@@ -34,12 +34,12 @@ export async function lordStatistics(ctx: Ctx, playerId: number) {
     select id, name, player_id from cities where player_id = ${playerId} or id = any(${pgArray([...perCity.keys()])}::int[]) order by id`);
   const cities = owned.rows.map((c) => ({
     cityId: Number(c.id),
-    name: Number(c.player_id) === playerId ? c.name : 'Former city',
+    name: Number(c.player_id) === playerId ? c.name : null,
     owned: Number(c.player_id) === playerId,
     ...(perCity.get(Number(c.id)) ?? { allTime: {}, last7Days: {} }),
   }));
   // cities that no longer exist
-  for (const [cityId, c] of perCity) if (!cities.some((x) => x.cityId === cityId)) cities.push({ cityId, name: 'Former city', owned: false, ...c });
+  for (const [cityId, c] of perCity) if (!cities.some((x) => x.cityId === cityId)) cities.push({ cityId, name: null, owned: false, ...c });
   const [started] = await ctx.tx.select().from(worldState).where(eq(worldState.key, 'statsStartedAt'));
   const since = started ? Number((started.value as { at: number }).at) : null;
   return { allTime, last7Days, cities, since };

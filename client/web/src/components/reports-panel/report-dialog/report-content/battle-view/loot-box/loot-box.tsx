@@ -1,20 +1,20 @@
 import { Fragment } from 'react';
 import { Medal } from 'lucide-react';
-import { itemConfig, type BattleReport } from '@marchlands/core';
+import { useTranslation } from 'react-i18next';
+import { type BattleReport } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
-import { fmtExact } from '@/lib/format';
-import { RES_LABEL } from '@/components/reports-panel/report-dialog/report-content/constants';
+import { fmtExact, resourceLabel } from '@/lib/format';
+import { itemName } from '@/lib/game-data';
 
 /** What the attacker took: per resource and in total (valleys hold nothing). */
 export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }) {
+  const { t } = useTranslation(['reports-panel', 'common']);
   const mine = b.attacker.player === me;
   if (!('plunder' in b)) {
     return (
       <div className="grid gap-1 rounded-md bg-muted/50 p-3">
-        <div className="font-medium">Loot</div>
-        <span className="text-muted-foreground">
-          Nothing: valleys hold no resources to take{'occupied' in b && b.occupied ? ' (holding it raises your production instead)' : ''}.
-        </span>
+        <div className="font-medium">{t('loot.title')}</div>
+        <span className="text-muted-foreground">{'occupied' in b && b.occupied ? t('loot.valleyNothingOccupied') : t('loot.valleyNothing')}</span>
       </div>
     );
   }
@@ -22,37 +22,35 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
   const total = entries.reduce((s, [, n]) => s + n, 0);
   return (
     <div className="grid gap-1.5 rounded-md bg-muted/50 p-3">
-      <div className="font-medium">{mine ? 'Loot taken' : 'Resources lost to the attacker'}</div>
+      <div className="font-medium">{mine ? t('loot.taken') : t('loot.lost')}</div>
       {total === 0 ? (
-        <span className="text-muted-foreground">
-          Nothing{b.result === 'attackerWon' ? ' (nothing left unprotected, or no room to carry it)' : ': the attack failed'}.
-        </span>
+        <span className="text-muted-foreground">{b.result === 'attackerWon' ? t('loot.nothingWon') : t('loot.nothingFailed')}</span>
       ) : (
         <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-0.5 tabular-nums sm:grid-cols-[repeat(3,auto_1fr)]">
           {entries
             .filter(([, n]) => n > 0)
             .map(([k, n]) => (
               <Fragment key={k}>
-                <span className="text-muted-foreground">{RES_LABEL[k]}</span>
+                <span className="text-muted-foreground">{resourceLabel(k)}</span>
                 <span className={mine ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}>
                   {mine ? '+' : '−'}
                   {fmtExact(n)}
                 </span>
               </Fragment>
             ))}
-          <span className="font-medium">Total</span>
+          <span className="font-medium">{t('common:table.total')}</span>
           <span className="font-medium">{fmtExact(total)}</span>
         </div>
       )}
       {b.medals && Object.keys(b.medals).length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-muted-foreground">{mine ? 'Medals found:' : 'Medals the attacker found:'}</span>
+          <span className="text-muted-foreground">{mine ? t('loot.medalsFound') : t('loot.medalsAttackerFound')}</span>
           {Object.entries(b.medals)
             .sort(([a], [z]) => z.localeCompare(a))
             .map(([id, n]) => (
               <Badge key={id} variant="secondary" className="gap-1 font-normal">
                 <Medal className="size-3 text-amber-500" />
-                {itemConfig(id)?.name ?? id}
+                {itemName(id)}
                 {n > 1 && ` ×${n}`}
               </Badge>
             ))}
@@ -60,7 +58,8 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
       )}
       {'loyaltyDamage' in b && (
         <div className="text-xs text-muted-foreground">
-          Loyalty −{fmtExact(b.loyaltyDamage)} (now {fmtExact(b.loyaltyLeft)}){b.captured && ' · city captured'}
+          {t('loot.loyalty', { damage: fmtExact(b.loyaltyDamage), left: fmtExact(b.loyaltyLeft) })}
+          {b.captured && t('loot.captured')}
         </div>
       )}
     </div>
