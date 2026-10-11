@@ -41,7 +41,10 @@ export const Page = <T extends z.ZodType>(item: T) =>
 
 // ---- request helpers ----
 
-export const zId = z.coerce.number().int().nonnegative();
+/** An id in a body (city, hero, army, tile …): a Postgres integer, so a larger one is refused as invalid before it reaches a query. */
+export const zIdValue = z.number().int().nonnegative().max(2_147_483_647);
+/** An id in a path or query string (read from text). */
+export const zId = z.coerce.number().pipe(zIdValue);
 export const zCityParams = z.object({ cityId: zId });
 export const zPaging = z.object({
   pageNo: z.coerce.number().int().min(1).default(1),

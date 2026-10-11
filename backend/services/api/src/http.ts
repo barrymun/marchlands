@@ -55,11 +55,25 @@ export function bearer(req: FastifyRequest): string | null {
   return q ?? null;
 }
 
+/**
+ * Route hook (onRequest, so it runs before the body is read and validated): a valid token of an account that
+ * is not banned. A ban takes effect at once, not when the token expires.
+ */
 export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   const token = bearer(req);
   const claims = token ? verifyToken(token, req.server.deps.config.jwtSecret) : null;
   if (!claims) return reply.status(401).send({ ok: -2, error: msg('auth.notLoggedIn') });
+  const refusal = await accountRefusal(req.server.deps.db, claims.sub);
+  if (refusal) return reply.status(refusal.status).send({ ok: refusal.ok, error: refusal.error });
   req.claims = claims;
+}
+
+/** Why an account may not play now (gone, or banned), or null. */
+export async function accountRefusal(db: Db, accountId: number) {
+  const [acc] = await db.select({ status: accounts.status, banReason: accounts.banReason }).from(accounts).where(eq(accounts.id, accountId));
+  if (!acc) return { status: 401, ok: -2, error: msg('auth.accountNotFound') };
+  if (acc.status !== 0) return { status: 403, ok: -99, error: msg('auth.banned', { reason: acc.banReason ?? '' }) };
+  return null;
 }
 
 /** Resolve the lord of the authenticated account (404 until common.createNewPlayer). */

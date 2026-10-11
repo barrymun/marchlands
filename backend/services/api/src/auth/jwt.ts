@@ -29,7 +29,7 @@ export function verifyToken(token: string, secret: string): TokenClaims | null {
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
   try {
     const claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')) as TokenClaims;
-    if (typeof claims.sub !== 'number' || claims.exp * 1000 < Date.now()) return null;
+    if (typeof claims.sub !== 'number' || typeof claims.exp !== 'number' || claims.exp * 1000 < Date.now()) return null;
     return claims;
   } catch {
     return null;

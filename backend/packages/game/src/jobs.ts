@@ -1,7 +1,7 @@
 // Periodic maintenance run by the worker.
 
 import { and, eq, lt, sql } from 'drizzle-orm';
-import { BALANCE, scaled } from '@marchlands/core';
+import { BALANCE } from '@marchlands/core';
 import { players, type Db } from '@marchlands/db';
 import { runGame } from './context.ts';
 import { getPlayer, savePlayer } from './repo.ts';
@@ -21,7 +21,7 @@ export async function zonesJob(db: Db) {
 
 /** Beginner protection lapses after 7 days even without a Town Hall 5. */
 export async function beginnerJob(db: Db) {
-  const cutoff = Date.now() - scaled(BALANCE.beginnerProtectionMs);
+  const cutoff = Date.now() - BALANCE.beginnerProtectionMs; // real time, like checkBeginner
   const due = await db
     .select({ id: players.id })
     .from(players)

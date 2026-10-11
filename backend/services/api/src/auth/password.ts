@@ -19,10 +19,10 @@ export async function verifyPassword(password: string, stored: string): Promise<
   const [alg, n, rr, pp, salt, hash] = stored.split('$');
   if (alg !== 'scrypt' || !hash) return false;
   const expected = Buffer.from(hash, 'base64url');
-  const key = await scrypt(password, Buffer.from(salt, 'base64url'), expected.length, {
-    N: Number(n),
-    r: Number(rr),
-    p: Number(pp),
-  });
-  return timingSafeEqual(key, expected);
+  try {
+    const key = await scrypt(password, Buffer.from(salt, 'base64url'), expected.length, { N: Number(n), r: Number(rr), p: Number(pp) });
+    return timingSafeEqual(key, expected);
+  } catch {
+    return false; // a corrupt stored hash (bad cost numbers) matches nothing
+  }
 }

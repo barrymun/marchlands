@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { TileType } from '@marchlands/core';
-import { zCityParams, zId, zResources, zTroops } from './common.ts';
+import { zCityParams, zId, zIdValue, zResources, zTroops } from './common.ts';
 import { ArmyBean, HeroBean } from './beans.ts';
 import { TileRow } from './rows.ts';
 
@@ -189,7 +189,7 @@ export const MapSearchResult = z
   .meta({ id: 'MapSearchResult' });
 export type MapSearchResult = z.infer<typeof MapSearchResult>;
 
-export const ValleyUpgradeBody = z.object({ cityId: z.number().int().describe('city that pays the gold') });
+export const ValleyUpgradeBody = z.object({ cityId: zIdValue.describe('city that pays the gold') });
 export const ValleyUpgradeResult = z
   .object({ tileId: z.number().int(), level: z.number().int(), gold: z.number().describe('gold paid'), nextCost: z.number().nullable() })
   .meta({ id: 'ValleyUpgradeResult' });

@@ -40,7 +40,7 @@ import { signToken } from '../auth/jwt.ts';
 import { doc, authenticate, game, playerIdOf, tags, type ZApp } from '../http.ts';
 
 export default async function playerRoutes(app: ZApp) {
-  app.addHook('preHandler', authenticate);
+  app.addHook('onRequest', authenticate);
   const s = <R extends z.ZodType, T extends object = object>(summary: string, data: R, extra?: T) => doc(tags.player, summary, data, extra);
 
   app.get('/world/zones', doc(tags.map, 'States with population stats (common.zoneInfo)', z.array(ZoneStats)), async () => ({

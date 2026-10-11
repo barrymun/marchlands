@@ -192,7 +192,7 @@ export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targe
   if (valleyIds.length) await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, updatedAt: ctx.now }).where(inArray(tiles.id, valleyIds));
   b.valleys = [];
   b.city.tileId = target;
-  setBuff(ctx, b.player, BuffId.TELEPORT_COOLDOWN, msg('buff.teleportCooldown'), ctx.now + scaled(BALANCE.teleportCooldownMs));
+  setBuff(ctx, b.player, BuffId.TELEPORT_COOLDOWN, msg('buff.teleportCooldown'), ctx.now + BALANCE.teleportCooldownMs);
   pushCity(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, b.player);

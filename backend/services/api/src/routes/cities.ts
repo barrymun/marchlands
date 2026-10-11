@@ -41,8 +41,14 @@ import {
 import { buildings, interior, research, training } from '@marchlands/game';
 import { doc, authenticate, game, tags, zCityParams, type ZApp } from '../http.ts';
 
+/**
+ * The barracks position a troops route acts on. The training service tells troops from fortifications by the
+ * position (the walls are -2), so a troops route must never pass the walls: that becomes no barracks at all.
+ */
+const barracks = (positionId: number | undefined) => (positionId == null || positionId === training.WALLS_QUEUE ? -999 : positionId);
+
 export default async function cityRoutes(app: ZApp) {
-  app.addHook('preHandler', authenticate);
+  app.addHook('onRequest', authenticate);
   const s = doc;
 
   // ---- interior ----
@@ -188,7 +194,7 @@ export default async function cityRoutes(app: ZApp) {
       }),
       (req) =>
         game(req, (ctx, pid) =>
-          training.train(ctx, pid, req.params.cityId, req.body.troopId, req.body.count, fort ? training.WALLS_QUEUE : (req.body.positionId ?? -999)),
+          training.train(ctx, pid, req.params.cityId, req.body.troopId, req.body.count, fort ? training.WALLS_QUEUE : barracks(req.body.positionId)),
         ),
     );
     app.post(
@@ -196,11 +202,17 @@ export default async function cityRoutes(app: ZApp) {
       s(tag, `Order several ${kind} at once (one order per type), all or nothing`, TrainManyResult, { params: zCityParams, body: TrainManyBody }),
       (req) =>
         game(req, (ctx, pid) =>
-          training.trainMany(ctx, pid, req.params.cityId, req.body.orders, { fort, split: req.body.split, positionId: req.body.positionId }),
+          training.trainMany(ctx, pid, req.params.cityId, req.body.orders, {
+            fort,
+            split: req.body.split,
+            positionId: fort || req.body.positionId == null ? req.body.positionId : barracks(req.body.positionId),
+          }),
         ),
     );
     app.delete(`/cities/:cityId/${kind}/queues/:positionId/:queueId`, s(tag, 'Cancel a batch', Empty, { params: TrainingQueueParams }), (req) =>
-      game(req, (ctx, pid) => training.cancelTraining(ctx, pid, req.params.cityId, fort ? training.WALLS_QUEUE : req.params.positionId, req.params.queueId)),
+      game(req, (ctx, pid) =>
+        training.cancelTraining(ctx, pid, req.params.cityId, fort ? training.WALLS_QUEUE : barracks(req.params.positionId), req.params.queueId),
+      ),
     );
     app.post(
       `/cities/:cityId/${kind}/queues/:positionId/:queueId/speedup`,
@@ -208,7 +220,9 @@ export default async function cityRoutes(app: ZApp) {
         params: TrainingQueueParams,
       }),
       (req) =>
-        game(req, (ctx, pid) => training.speedupTraining(ctx, pid, req.params.cityId, fort ? training.WALLS_QUEUE : req.params.positionId, req.params.queueId)),
+        game(req, (ctx, pid) =>
+          training.speedupTraining(ctx, pid, req.params.cityId, fort ? training.WALLS_QUEUE : barracks(req.params.positionId), req.params.queueId),
+        ),
     );
   }
   app.post(

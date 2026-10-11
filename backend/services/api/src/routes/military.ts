@@ -36,7 +36,7 @@ import {
 import { doc, anon, authenticate, game, playerIdOf, tags, zCityParams, type ZApp } from '../http.ts';
 
 export default async function militaryRoutes(app: ZApp) {
-  app.addHook('preHandler', authenticate);
+  app.addHook('onRequest', authenticate);
   const s = doc;
 
   // ---- heroes ----

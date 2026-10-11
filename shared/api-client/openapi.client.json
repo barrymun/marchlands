@@ -2806,9 +2806,7 @@
         "type": "object",
         "properties": {
           "cityId": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
+            "type": "number"
           },
           "cityName": {
             "type": "string"
@@ -2854,9 +2852,7 @@
               "type": "object",
               "properties": {
                 "cityId": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 9007199254740991
+                  "type": "number"
                 },
                 "cityName": {
                   "type": "string"
@@ -2965,9 +2961,7 @@
               "type": "object",
               "properties": {
                 "cityId": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 9007199254740991
+                  "type": "number"
                 },
                 "cityName": {
                   "type": "string"
@@ -3208,9 +3202,7 @@
               "type": "object",
               "properties": {
                 "cityId": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 9007199254740991
+                  "type": "number"
                 },
                 "cityName": {
                   "type": "string"
@@ -4006,9 +3998,7 @@
               "type": "object",
               "properties": {
                 "cityId": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 9007199254740991
+                  "type": "number"
                 },
                 "name": {
                   "description": "the city's name; null when the player no longer holds it",
@@ -13871,7 +13861,7 @@
           "cityId": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 9007199254740991
+            "maximum": 2147483647
           },
           "cityName": {
             "type": "string"
@@ -13920,7 +13910,7 @@
                 "cityId": {
                   "type": "integer",
                   "minimum": 0,
-                  "maximum": 9007199254740991
+                  "maximum": 2147483647
                 },
                 "cityName": {
                   "type": "string"
@@ -14035,7 +14025,7 @@
                 "cityId": {
                   "type": "integer",
                   "minimum": 0,
-                  "maximum": 9007199254740991
+                  "maximum": 2147483647
                 },
                 "cityName": {
                   "type": "string"
@@ -14285,7 +14275,7 @@
                 "cityId": {
                   "type": "integer",
                   "minimum": 0,
-                  "maximum": 9007199254740991
+                  "maximum": 2147483647
                 },
                 "cityName": {
                   "type": "string"
@@ -15098,7 +15088,7 @@
                 "cityId": {
                   "type": "integer",
                   "minimum": 0,
-                  "maximum": 9007199254740991
+                  "maximum": 2147483647
                 },
                 "name": {
                   "description": "the city's name; null when the player no longer holds it",
@@ -23214,10 +23204,8 @@
                     "maximum": 9007199254740991
                   },
                   "cityId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991,
-                    "description": "the city whose gold pays"
+                    "description": "the city whose gold pays",
+                    "type": "number"
                   }
                 },
                 "required": [
@@ -23330,10 +23318,8 @@
                     "type": "string"
                   },
                   "cityId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991,
-                    "description": "the city whose gold pays when no Truce Agreement is owned"
+                    "description": "the city whose gold pays when no Truce Agreement is owned",
+                    "type": "number"
                   }
                 },
                 "required": [
@@ -23490,9 +23476,7 @@
                 "type": "object",
                 "properties": {
                   "tileId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   }
                 },
                 "required": [
@@ -23869,9 +23853,7 @@
                         "minItems": 1,
                         "type": "array",
                         "items": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 9007199254740991
+                          "type": "number"
                         }
                       }
                     ]
@@ -24013,9 +23995,7 @@
                         "minItems": 1,
                         "type": "array",
                         "items": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 9007199254740991
+                          "type": "number"
                         }
                       }
                     ]
@@ -24225,9 +24205,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "tileId",
@@ -24292,15 +24270,9 @@
                 "type": "object",
                 "properties": {
                   "cityId": {
-                    "anyOf": [
-                      {
-                        "type": "integer",
-                        "minimum": 0,
-                        "maximum": 9007199254740991
-                      },
-                      {
-                        "type": "null"
-                      }
+                    "type": [
+                      "number",
+                      "null"
                     ]
                   }
                 }
@@ -24367,9 +24339,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -24447,9 +24417,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -24525,9 +24493,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -24615,9 +24581,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -24705,9 +24669,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -24784,9 +24746,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -24842,9 +24802,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -24905,10 +24863,8 @@
                 "type": "object",
                 "properties": {
                   "targetTileId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991,
-                    "description": "a free flat"
+                    "description": "a free flat",
+                    "type": "number"
                   }
                 },
                 "required": [
@@ -24921,9 +24877,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -24993,9 +24947,7 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25051,9 +25003,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25145,9 +25095,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25203,9 +25151,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25271,9 +25217,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25339,9 +25283,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25407,9 +25349,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25492,9 +25432,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25560,9 +25498,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25636,9 +25572,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25703,9 +25637,7 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25772,9 +25704,7 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25853,9 +25783,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25911,9 +25839,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -25969,9 +25895,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26058,9 +25982,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26167,9 +26089,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26225,9 +26145,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26245,9 +26163,7 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "queueId",
@@ -26303,9 +26219,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26323,9 +26237,7 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "queueId",
@@ -26381,9 +26293,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26439,9 +26349,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26528,9 +26436,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26637,9 +26543,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26695,9 +26599,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26715,9 +26617,7 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "queueId",
@@ -26773,9 +26673,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26793,9 +26691,7 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "queueId",
@@ -26877,9 +26773,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -26961,9 +26855,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27045,9 +26937,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27138,9 +27028,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27222,9 +27110,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27280,9 +27166,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27338,9 +27222,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27396,9 +27278,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27454,9 +27334,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27464,9 +27342,7 @@
           },
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -27522,9 +27398,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27580,9 +27454,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -27646,9 +27518,7 @@
                     "maxItems": 100,
                     "type": "array",
                     "items": {
-                      "type": "integer",
-                      "minimum": 0,
-                      "maximum": 9007199254740991
+                      "type": "number"
                     },
                     "description": "the city's heroes in the new order (first = top)"
                   }
@@ -27663,9 +27533,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -27740,9 +27608,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -27822,9 +27688,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -27983,9 +27847,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -28041,9 +27903,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -28131,9 +27991,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -28189,9 +28047,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -28247,9 +28103,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -28330,9 +28184,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -28406,9 +28258,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -28464,9 +28314,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -28522,9 +28370,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "heroId",
@@ -28631,9 +28477,7 @@
                 "type": "object",
                 "properties": {
                   "targetTileId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   },
                   "mission": {
                     "type": "integer",
@@ -28707,9 +28551,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -28765,9 +28607,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "armyId",
@@ -28823,9 +28663,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "armyId",
@@ -28881,9 +28719,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -28944,9 +28780,7 @@
                 "type": "object",
                 "properties": {
                   "targetTileId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   },
                   "troops": {
                     "type": "object",
@@ -28971,9 +28805,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -29029,9 +28861,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -29087,9 +28917,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "tileId",
@@ -29151,8 +28979,8 @@
                 "properties": {
                   "cityId": {
                     "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "maximum": 2147483647,
                     "description": "city that pays the gold"
                   }
                 },
@@ -29166,9 +28994,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "tileId",
@@ -29312,9 +29138,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "tileId",
@@ -29656,9 +29480,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "mailId",
@@ -29980,9 +29802,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "reportId",
@@ -30613,9 +30433,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "playerId",
@@ -30735,9 +30553,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "playerId",
@@ -30849,9 +30665,7 @@
                 "type": "object",
                 "properties": {
                   "cityId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   },
                   "allianceName": {
                     "type": "string"
@@ -32731,9 +32545,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -32789,9 +32601,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "orderId",
@@ -32896,9 +32706,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "shipmentId",
@@ -33027,9 +32835,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -33201,9 +33007,7 @@
                 "type": "object",
                 "properties": {
                   "cityId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   }
                 },
                 "required": [
@@ -33216,9 +33020,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "questId",
@@ -33279,9 +33081,7 @@
                 "type": "object",
                 "properties": {
                   "cityId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   }
                 },
                 "required": [
@@ -33801,9 +33601,7 @@
                     "minimum": 0
                   },
                   "playerId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   }
                 },
                 "required": [
@@ -33816,9 +33614,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -33879,9 +33675,7 @@
                 "type": "object",
                 "properties": {
                   "playerId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   },
                   "positionId": {
                     "type": "integer",
@@ -33912,9 +33706,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -34051,9 +33843,7 @@
                 "type": "object",
                 "properties": {
                   "playerId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   },
                   "innLevel": {
                     "default": 10,
@@ -34072,9 +33862,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",
@@ -34152,9 +33940,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "accountId",
@@ -34497,9 +34283,7 @@
                 "type": "object",
                 "properties": {
                   "playerId": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 9007199254740991
+                    "type": "number"
                   },
                   "population": {
                     "type": "number"
@@ -34526,9 +34310,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 9007199254740991
+              "type": "number"
             },
             "in": "path",
             "name": "cityId",

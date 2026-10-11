@@ -99,6 +99,8 @@ Backend tests live beside the code they test, in a `test/` tree that mirrors `sr
   - `game(async (g) => …)` (`game.ts`) runs a test in one game transaction that is always rolled back, so tests leave nothing behind. `g` is the real context plus `g.pushes()`, `g.events()`, `g.advance(ms)` and `g.runDue()`, which runs the timed events that fall due (a construction completes, an army arrives). Time starts at a fixed `T0` and the random numbers are seeded.
   - `factories.ts` makes test data through the game's own code (`createTestPlayer`, `setBuildings`, `setResources`, `setResearch`, `giveItems`, `addHero` …), never with hand-written rows.
   - `expectRefused(promise, msg(…))` (`expect.ts`) asserts a service refuses with that message.
+- **API tests** (`backend/services/api/test/`, same naming) call the real app without a network: `apiTest(async (api) => …)` (`test/support/api.ts`) builds it on the test transaction, so each route's game transaction becomes a savepoint and the test rolls back. `api.ok` / `api.refused` / `api.call` send requests; `api.player(name)` makes an account, a player and a city; `api.game(fn)` runs game code for set-up. The database is empty in every test, so the first account registered is the server operator. Route tests check the HTTP layer (auth, validation, the envelope, refusals); the game rules are covered by the service tests.
+- **Code that commits** (`runGame`, the jobs, the worker) is tested by giving it the test transaction as its database, never the database itself.
 - Never commit in a test, and never point the tests at the dev database.
 
 ## Database

@@ -1,6 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { and, eq, isNull } from 'drizzle-orm';
-import { BALANCE, BASIC_RESOURCES, BuffId, BuildingType, ItemId, Mission, TileType, dur, itemGoldPrice, msg, ref, scaled, tileXY } from '@marchlands/core';
+import {
+  BALANCE,
+  BASIC_RESOURCES,
+  BuffId,
+  BuildingType,
+  ItemId,
+  Mission,
+  TileType,
+  dur,
+  itemGoldPrice,
+  msg,
+  ref,
+  scaled,
+  setGameSpeed,
+  tileXY,
+} from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
 import { tiles } from '@marchlands/db';
 import { admin, armies, cityStats, getTile, interior } from '../../src/index.ts';
@@ -290,6 +305,20 @@ describe(interior.setCityFlags.name, () => {
 });
 
 describe(interior.moveCity.name, () => {
+  it('cools down for real time, whatever the game speed', () =>
+    game(async (g) => {
+      setGameSpeed(4);
+      try {
+        const p = await createTestPlayer(g);
+        await giveItems(g, p, { [ItemId.CITY_TELEPORTER]: 1 });
+        await interior.moveCity(g, p.id, p.cityId, await freeFlat(g, [(await reloadCity(g, p.cityId)).tileId]));
+        const player = await reloadPlayer(g, p);
+        expect(player.buffs).toContainEqual(expect.objectContaining({ id: BuffId.TELEPORT_COOLDOWN, endTime: g.now + BALANCE.teleportCooldownMs }));
+      } finally {
+        setGameSpeed(1);
+      }
+    }));
+
   it('moves the city to a free flat with a City Teleporter, then cools down', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
@@ -307,7 +336,7 @@ describe(interior.moveCity.name, () => {
 
       const player = await reloadPlayer(g, p);
       expect(player.items[ItemId.CITY_TELEPORTER] ?? 0).toBe(0);
-      const end = g.now + scaled(BALANCE.teleportCooldownMs);
+      const end = g.now + BALANCE.teleportCooldownMs;
       expect(player.buffs).toContainEqual(expect.objectContaining({ id: BuffId.TELEPORT_COOLDOWN, endTime: end }));
       expect(g.events('buff.expire')).toContainEqual(expect.objectContaining({ dueAt: end, refKey: `buff:${p.id}:${BuffId.TELEPORT_COOLDOWN}` }));
       expect(g.pushes(PushCmd.CASTLE_UPDATE).at(-1)?.data).toMatchObject({ castleBean: { fieldId: to } });
@@ -315,7 +344,7 @@ describe(interior.moveCity.name, () => {
       await giveItems(g, p, { [ItemId.CITY_TELEPORTER]: 1 });
       const again = await freeFlat(g, [from, to]);
       await expectRefused(interior.moveCity(g, p.id, p.cityId, again), msg('city.teleportCooldown', { item: ref.item(ItemId.CITY_TELEPORTER) }));
-      g.advance(scaled(BALANCE.teleportCooldownMs));
+      g.advance(BALANCE.teleportCooldownMs);
       await interior.moveCity(g, p.id, p.cityId, again);
     }));
 

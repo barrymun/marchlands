@@ -49,7 +49,7 @@ import { alliance, mail, reports, social } from '@marchlands/game';
 import { doc, anon, authenticate, game, tags, zIds, type ZApp } from '../http.ts';
 
 export default async function socialRoutes(app: ZApp) {
-  app.addHook('preHandler', authenticate);
+  app.addHook('onRequest', authenticate);
   const s = doc;
 
   // ---- mail ----

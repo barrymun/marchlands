@@ -67,7 +67,7 @@ export default async function authRoutes(app: ZApp) {
 
   app.get(
     '/auth/me',
-    { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Current account and its lord', response: responses(AuthAccount) } },
+    { onRequest: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Current account and its lord', response: responses(AuthAccount) } },
     async (req) => {
       const [acc] = await db
         .select({ id: accounts.id, username: accounts.username, email: accounts.email, isAdmin: accounts.isAdmin, createdAt: accounts.createdAt })
@@ -81,7 +81,7 @@ export default async function authRoutes(app: ZApp) {
 
   app.post(
     '/auth/refresh',
-    { preHandler: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Issue a fresh token', response: responses(AuthSession) } },
+    { onRequest: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Issue a fresh token', response: responses(AuthSession) } },
     async (req) => {
       const [acc] = await db
         .select({ id: accounts.id, isAdmin: accounts.isAdmin, status: accounts.status })

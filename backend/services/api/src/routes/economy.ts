@@ -85,7 +85,7 @@ export default async function economyRoutes(app: ZApp) {
   );
 
   app.register(async (secure: ZApp) => {
-    secure.addHook('preHandler', authenticate);
+    secure.addHook('onRequest', authenticate);
 
     // ---- market ----
     secure.get(
@@ -179,7 +179,7 @@ export default async function economyRoutes(app: ZApp) {
 
     // ---- operator tools (accounts with is_admin) ----
     secure.register(async (gm: ZApp) => {
-      gm.addHook('preHandler', requireAdmin);
+      gm.addHook('onRequest', requireAdmin);
       const t = tags.admin;
       const db = app.deps.db;
       const run = <T>(fn: Parameters<typeof runGame<T>>[1]) => runGame(db, fn).then((data) => ({ ok: 1 as const, data: (data ?? null) as Data<T> }));

@@ -135,6 +135,7 @@ const RETRYABLE = new Set(['40001', '40P01']); // serialization failure, deadloc
 
 /** A Postgres error the whole transaction should be retried for (serialization failure, deadlock). */
 export function isRetryable(err: unknown): boolean {
+  if (typeof err !== 'object' || err === null) return false;
   const code = (err as { code?: string; cause?: { code?: string } }).code ?? (err as { cause?: { code?: string } }).cause?.code;
   return !(err instanceof GameError) && !!code && RETRYABLE.has(code);
 }
@@ -169,19 +170,21 @@ export async function runGame<T>(db: Db, fn: (ctx: Ctx) => Promise<T>, opts: Run
   const retries = opts.retries ?? 3;
   for (let attempt = 0; ; attempt++) {
     let internals: CtxInternals | undefined;
+    let result: T;
     try {
-      const result = await db.transaction(async (tx) => {
+      result = await db.transaction(async (tx) => {
         internals = createCtx(tx, opts.now ?? Date.now(), opts.rng ?? defaultRng);
         const r = await fn(internals);
         await flush(internals);
         return r;
       });
-      if (internals?._stats.size) bufferStats(internals._stats, statDay(internals.now));
-      for (const f of internals?._after ?? []) await f();
-      return result;
     } catch (err) {
       if (isRetryable(err) && attempt < retries) continue;
       throw err;
     }
+    // committed: from here on nothing may retry the operation (an afterCommit error must not run it twice)
+    if (internals?._stats.size) bufferStats(internals._stats, statDay(internals.now));
+    for (const f of internals?._after ?? []) await f();
+    return result;
   }
 }

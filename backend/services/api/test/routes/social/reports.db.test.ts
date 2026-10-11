@@ -1,0 +1,109 @@
+import { describe, expect, it } from 'vitest';
+import { msg } from '@marchlands/core';
+import type { ReportCounts, ReportDetail, ReportList } from '@marchlands/contracts';
+import { reports } from '@marchlands/game';
+import { apiTest, type TestApi } from '../../support/api.ts';
+import { accountWithoutPlayer, expectInvalid, expectNeedsPlayer, expectNeedsToken, type RouteCall } from '../../support/guards.ts';
+
+const ROUTES: RouteCall[] = [
+  { method: 'GET', url: 'reports' },
+  { method: 'GET', url: 'reports/unread' },
+  { method: 'GET', url: 'reports/1' },
+  { method: 'POST', url: 'reports/read', body: {} },
+  { method: 'POST', url: 'reports/delete', body: { ids: [1] } },
+];
+
+const TRADE = { kind: 'trade' as const, trade: { side: 'buy' as const, resource: 'wood' as const, amount: 100, price: 1, gold: 100 } };
+
+/** A trade report (tab 0) and an army report (tab 1) for the player, as the game files them; returns their ids. */
+async function withReports(api: TestApi, playerId: number) {
+  return api.game(async (ctx) => ({
+    trade: await reports.createReport(ctx, { playerId, typeId: reports.ReportType.TRADE, title: msg('report.title.tradeCompleted'), body: TRADE }),
+    army: await reports.createReport(ctx, { playerId, typeId: reports.ReportType.ARMY, title: msg('report.title.tradeCompleted'), body: TRADE }),
+  }));
+}
+
+describe('authentication', () => {
+  it('every report route needs a token and a player', () =>
+    apiTest(async (api) => {
+      await expectNeedsToken(api, ROUTES);
+      await expectNeedsPlayer(api, (await accountWithoutPlayer(api)).token, ROUTES);
+    }));
+});
+
+describe('GET /reports', () => {
+  it('answers a page of reports, of every tab or of one', () =>
+    apiTest(async (api) => {
+      const p = await api.player();
+      const ids = await withReports(api, p.playerId);
+      const all = await api.ok<ReportList>('GET', 'reports', { token: p.token });
+      expect(all).toMatchObject({ pageNo: 1, pageSize: 10, totalPage: 1 });
+      expect(all.reports.map((r) => r.id).sort()).toEqual([ids.trade, ids.army].sort());
+      expect(all.reports[0]).toMatchObject({ title: { code: 'report.title.tradeCompleted' }, isRead: false, attack: false, back: false });
+      const trade = await api.ok<ReportList>('GET', 'reports?type=0', { token: p.token });
+      expect(trade.reports).toEqual([expect.objectContaining({ id: ids.trade, type: 0 })]);
+    }));
+
+  it('validates the query', () =>
+    apiTest(async (api) => {
+      const p = await api.player();
+      await expectInvalid(api, p.token, [
+        { method: 'GET', url: 'reports?pageSize=0' },
+        { method: 'GET', url: 'reports?type=army' },
+      ]);
+    }));
+});
+
+describe('GET /reports/unread', () => {
+  it('counts unread reports by tab', () =>
+    apiTest(async (api) => {
+      const p = await api.player();
+      await withReports(api, p.playerId);
+      expect(await api.ok<ReportCounts>('GET', 'reports/unread', { token: p.token })).toEqual({ count: 2, trade_count: 1, army_count: 1, other_count: 0 });
+    }));
+});
+
+describe('GET /reports/:reportId', () => {
+  it('answers the report with its body and marks it read', () =>
+    apiTest(async (api) => {
+      const p = await api.player();
+      const ids = await withReports(api, p.playerId);
+      const r = await api.ok<ReportDetail>('GET', `reports/${ids.trade}`, { token: p.token });
+      expect(r).toMatchObject({ id: ids.trade, type: 0, content: TRADE });
+      expect((await api.ok<ReportCounts>('GET', 'reports/unread', { token: p.token })).trade_count).toBe(0);
+    }));
+
+  it("answers 404 for an unknown report or another player's", () =>
+    apiTest(async (api) => {
+      const p = await api.player();
+      const other = await api.player();
+      const ids = await withReports(api, other.playerId);
+      await api.refused('GET', `reports/${ids.trade}`, 'report.notFound', { token: p.token, status: 404 });
+      await api.refused('GET', 'reports/999999', 'report.notFound', { token: p.token, status: 404 });
+      await expectInvalid(api, p.token, [{ method: 'GET', url: 'reports/abc' }]);
+    }));
+});
+
+describe('POST /reports/read', () => {
+  it('marks the given reports read, or all without ids', () =>
+    apiTest(async (api) => {
+      const p = await api.player();
+      const ids = await withReports(api, p.playerId);
+      expect(await api.ok('POST', 'reports/read', { token: p.token, body: { ids: [ids.army] } })).toBeNull();
+      expect(await api.ok<ReportCounts>('GET', 'reports/unread', { token: p.token })).toMatchObject({ count: 1, army_count: 0 });
+      await api.ok('POST', 'reports/read', { token: p.token, body: {} });
+      expect((await api.ok<ReportCounts>('GET', 'reports/unread', { token: p.token })).count).toBe(0);
+      await expectInvalid(api, p.token, [{ method: 'POST', url: 'reports/read', body: { ids: 'all' } }]);
+    }));
+});
+
+describe('POST /reports/delete', () => {
+  it('deletes reports', () =>
+    apiTest(async (api) => {
+      const p = await api.player();
+      const ids = await withReports(api, p.playerId);
+      expect(await api.ok('POST', 'reports/delete', { token: p.token, body: { ids: [ids.trade] } })).toBeNull();
+      expect((await api.ok<ReportList>('GET', 'reports', { token: p.token })).reports.map((r) => r.id)).toEqual([ids.army]);
+      await expectInvalid(api, p.token, [{ method: 'POST', url: 'reports/delete', body: {} }]);
+    }));
+});

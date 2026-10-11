@@ -209,6 +209,7 @@ export const BALANCE = {
   heroExpPerBuild: 0.1,
 
   // ---- player ----
+  // (marchlands) beginner protection, truces and the teleport cooldown last real time, unaffected by GAME_SPEED
   beginnerProtectionMs: 7 * 24 * HOUR, // (orig)
   beginnerTownHallLevel: 5, // (orig)
   startingResources: 100_000, // (orig) every resource

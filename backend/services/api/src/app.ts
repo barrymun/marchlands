@@ -10,7 +10,7 @@ import { msg } from '@marchlands/core';
 import type { Db } from '@marchlands/db';
 import { verifyToken } from './auth/jwt.ts';
 import type { ApiConfig } from './config.ts';
-import { installErrorHandler, playerIdOf } from './http.ts';
+import { accountRefusal, installErrorHandler, playerIdOf } from './http.ts';
 import authRoutes from './routes/auth.ts';
 import cityRoutes from './routes/cities.ts';
 import economyRoutes from './routes/economy.ts';
@@ -43,6 +43,11 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
       (err as { statusCode?: number }).statusCode = 400;
       done(err as Error, undefined);
     }
+  });
+
+  // a command sent with no body at all is read as an empty one too
+  app.addHook('preValidation', async (req) => {
+    if (req.body == null && req.method !== 'GET' && req.method !== 'HEAD') req.body = {};
   });
 
   await app.register(cors, { origin: config.corsOrigin, credentials: true });
@@ -80,6 +85,12 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     const claims = token ? verifyToken(token, config.jwtSecret) : null;
     if (!claims || !gateway) {
       sendPush(socket, { cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: msg('auth.notLoggedIn') } });
+      socket.close(4001, 'unauthorized');
+      return;
+    }
+    const refusal = await accountRefusal(db, claims.sub);
+    if (refusal) {
+      sendPush(socket, { cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: refusal.error } });
       socket.close(4001, 'unauthorized');
       return;
     }
