@@ -65,7 +65,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/cities/{cityId}/buildings` | Construct (castle.newBuilding) |
 | GET | `/api/v1/cities/{cityId}/buildings/{positionId}` | Next-level cost (castle.checkOutUpgrade) |
 | POST | `/api/v1/cities/{cityId}/buildings/{positionId}/cancel` | Cancel construction (castle.cancleBuildCommand) |
-| POST | `/api/v1/cities/{cityId}/buildings/{positionId}/demolish` | Demolish: the whole building at once with BALANCE.instantDemolish, else one level (castle.destructBuilding) |
+| POST | `/api/v1/cities/{cityId}/buildings/{positionId}/demolish` | Demolish: the whole building at once, refunding a share of every level (castle.destructBuilding) |
 | GET | `/api/v1/cities/{cityId}/buildings/{positionId}/speedup` | Gold to finish now (castle.getCoinsNeed) |
 | POST | `/api/v1/cities/{cityId}/buildings/{positionId}/speedup` | Speed up (castle.speedUpBuildCommand) |
 | POST | `/api/v1/cities/{cityId}/buildings/{positionId}/upgrade` | Upgrade (castle.upgradeBuilding) |

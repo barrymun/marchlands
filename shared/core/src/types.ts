@@ -21,12 +21,12 @@ export type TroopCounts = z.infer<typeof TroopCountsSchema>;
 export const FortCountsSchema = z.partialRecord(FortKeySchema, count);
 export type FortCounts = z.infer<typeof FortCountsSchema>;
 
+/** (marchlands) no demolishing status: demolition is instant (orig 2, a timed demolition) */
 export const BuildingStatus = {
   IDLE: 0,
   BUILDING: 1,
-  DEMOLISHING: 2,
 } as const;
-export const BuildingStatusSchema = z.literal([BuildingStatus.IDLE, BuildingStatus.BUILDING, BuildingStatus.DEMOLISHING]);
+export const BuildingStatusSchema = z.literal([BuildingStatus.IDLE, BuildingStatus.BUILDING]);
 export type BuildingStatus = z.infer<typeof BuildingStatusSchema>;
 
 export const BuildingStateSchema = z.object({

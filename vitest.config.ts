@@ -6,6 +6,8 @@ export default defineConfig({
   resolve: { alias: { '@': path.resolve(import.meta.dirname, 'client/web/src') } },
   test: {
     include: ['shared/*/test/**/*.test.ts', 'backend/**/test/**/*.test.ts', 'client/web/src/**/*.test.ts'],
+    // service tests against Postgres run with npm run test:db (vitest.db.config.ts)
+    exclude: ['**/node_modules/**', '**/*.db.test.ts'],
     environment: 'node',
   },
 });

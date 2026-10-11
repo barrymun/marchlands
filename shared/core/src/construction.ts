@@ -118,15 +118,6 @@ export function fullDemolishRefund(typeId: number, level: number): Resources {
   return scaleResources(total, BALANCE.demolishRefund);
 }
 
-/** Demolishing one level takes half the time it took to build it (orig §3.2). */
-export function demolishTimeMs(typeId: number, currentLevel: number, mayor: MayorStats | null, research: ResearchState): number {
-  const cfg = buildingConfig(typeId, currentLevel);
-  if (!cfg) throw new GameError(msg('building.invalidBuilding'), -99);
-  const seconds =
-    (cfg.buildTime / 2) * heroFactor(mayor?.management, BALANCE.heroTimeFloor.building) * techFactor(researchLevel(research, TechType.CONSTRUCTION));
-  return scaled(Math.floor(seconds) * 1000);
-}
-
 /** Research time: mayor stratagem only (orig §3.3); (marchlands) never below BALANCE.heroTimeFloor.research. */
 export function researchTimeMs(techId: number, targetLevel: number, mayor: MayorStats | null): number {
   const cfg = researchConfig(techId, targetLevel);

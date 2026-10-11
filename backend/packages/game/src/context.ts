@@ -46,7 +46,8 @@ export interface Ctx {
   stat(playerId: number, cityId: number, counters: StatCounters): void;
 }
 
-interface CtxInternals extends Ctx {
+/** A context with what it has queued (tests read these). */
+export interface CtxInternals extends Ctx {
   _pushes: QueuedPush[];
   _events: Map<string, ScheduledEvent>;
   _unscheduled: Set<string>;

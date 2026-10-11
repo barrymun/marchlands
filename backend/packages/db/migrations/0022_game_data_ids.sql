@@ -1,10 +1,10 @@
 -- (marchlands) Game data names are no longer stored as English: the client names troops, buildings, tiles, ranks …
 -- by id in the player's language. Positions become messages, and a few stored labels become ids.
-CREATE FUNCTION pg_temp.legacy(t text) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.legacy(t text) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
   SELECT jsonb_build_object('code', 'common.legacyText', 'params', jsonb_build_object('text', t))
 $$;--> statement-breakpoint
 -- a position as stored text: "Hill Lv.3 (12,34)", "Land Lv.2 (…)", "Flat (…)", or "<city name> (x,y)"
-CREATE FUNCTION pg_temp.pos(t text) RETURNS jsonb LANGUAGE plpgsql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.pos(t text) RETURNS jsonb LANGUAGE plpgsql IMMUTABLE AS $$
 DECLARE m text[];
 BEGIN
   IF t IS NULL OR t = '' THEN RETURN NULL; END IF;

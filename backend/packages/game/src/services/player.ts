@@ -372,7 +372,7 @@ export async function publicPlayerInfo(ctx: Ctx, viewerId: number, name: string)
  * account can create a new lord in the same slot.
  */
 export async function restartPlayer(ctx: Ctx, playerId: number) {
-  const p = await getPlayer(ctx, playerId, { lock: true });
+  let p = await getPlayer(ctx, playerId, { lock: true });
   const cityRows = await citiesOf(ctx, playerId, { lock: true });
   const cityIds = cityRows.map((c) => c.id);
   // armies of others stationed in my cities go home
@@ -405,6 +405,8 @@ export async function restartPlayer(ctx: Ctx, playerId: number) {
   if (p.allianceId) {
     // leaving the alliance is handled by the alliance service rules: a host must hand over first
     await leaveAlliance(ctx, playerId, { force: true });
+    // leaving saved the player: carry on from that copy, or the old alliance would be written back
+    p = await getPlayer(ctx, playerId, { lock: true });
   }
   Object.assign(p, {
     prestige: 0,
@@ -417,9 +419,10 @@ export async function restartPlayer(ctx: Ctx, playerId: number) {
     beginner: true,
     status: 0,
     population: 0,
-    createdAt: ctx.now,
   });
   await savePlayer(ctx, p);
+  // savePlayer never writes createdAt; a restart starts the account (and its beginner protection) again
+  await ctx.tx.update(players).set({ createdAt: ctx.now }).where(eq(players.id, playerId));
 }
 
 const MAX_BOOKMARKS = 100;

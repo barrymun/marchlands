@@ -1,14 +1,14 @@
 -- (marchlands) The server no longer stores English for players: what it tells them is a message, a code plus params
 -- (shared/core/src/messages), worded by the client in the player's language. This converts what was stored as text.
 -- Text with a known meaning gets its code; anything else becomes common.legacyText, shown as it was.
-CREATE FUNCTION pg_temp.legacy(t text) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.legacy(t text) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE WHEN t IS NULL THEN NULL ELSE jsonb_build_object('code', 'common.legacyText', 'params', jsonb_build_object('text', t)) END
 $$;--> statement-breakpoint
 -- a stored value that is still a string becomes a legacy message; one already a message stays
-CREATE FUNCTION pg_temp.as_msg(v jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.as_msg(v jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE WHEN v IS NULL OR jsonb_typeof(v) = 'null' THEN v WHEN jsonb_typeof(v) = 'string' THEN pg_temp.legacy(v #>> '{}') ELSE v END
 $$;--> statement-breakpoint
-CREATE FUNCTION pg_temp.m(code text, params jsonb DEFAULT NULL) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.m(code text, params jsonb DEFAULT NULL) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE WHEN params IS NULL THEN jsonb_build_object('code', code) ELSE jsonb_build_object('code', code, 'params', params) END
 $$;--> statement-breakpoint
 
@@ -42,7 +42,7 @@ ALTER TABLE "reports" ALTER COLUMN "title" SET DATA TYPE jsonb USING (
 );--> statement-breakpoint
 
 -- report bodies: text reports, a valley battle's reason ('' meant none), and battle bonuses (boost descriptions)
-CREATE FUNCTION pg_temp.bonus(b jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.bonus(b jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE
     WHEN jsonb_typeof(b -> 'desc') <> 'string' THEN b
     WHEN b ->> 'desc' = 'Troop attack +20%' THEN jsonb_set(b, '{desc}', pg_temp.m('buff.troopAttack', '{"percent":20}'))
@@ -51,7 +51,7 @@ CREATE FUNCTION pg_temp.bonus(b jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $
     ELSE jsonb_set(b, '{desc}', pg_temp.legacy(b ->> 'desc'))
   END
 $$;--> statement-breakpoint
-CREATE FUNCTION pg_temp.side(s jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.side(s jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE WHEN jsonb_typeof(s -> 'bonuses') = 'array'
     THEN jsonb_set(s, '{bonuses}', (SELECT coalesce(jsonb_agg(pg_temp.bonus(x) ORDER BY i), '[]') FROM jsonb_array_elements(s -> 'bonuses') WITH ORDINALITY AS e(x, i)))
     ELSE s END
@@ -74,7 +74,7 @@ ALTER TABLE "alliance_events" ALTER COLUMN "message" SET DATA TYPE jsonb USING p
 ALTER TABLE "flows" ALTER COLUMN "stop_reason" SET DATA TYPE jsonb USING pg_temp.legacy("stop_reason");--> statement-breakpoint
 
 -- flow run logs and previews: every text becomes a legacy message (they are replaced by the next run or preview)
-CREATE FUNCTION pg_temp.flow_log(log jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.flow_log(log jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE WHEN log IS NULL OR jsonb_typeof(log) <> 'object' THEN log ELSE
     jsonb_set(
       CASE WHEN jsonb_typeof(log -> 'skippedCities') = 'array'
@@ -100,7 +100,7 @@ UPDATE "flows" SET "last_run" = pg_temp.flow_log("last_run"), "last_preview" = p
   WHERE "last_run" IS NOT NULL OR "last_preview" IS NOT NULL;--> statement-breakpoint
 
 -- boost descriptions, by boost id (each id has one meaning)
-CREATE FUNCTION pg_temp.buff_desc(b jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.buff_desc(b jsonb) RETURNS jsonb LANGUAGE sql IMMUTABLE AS $$
   SELECT CASE WHEN jsonb_typeof(b -> 'desc') <> 'string' THEN b ELSE jsonb_set(b, '{desc}', CASE b ->> 'id'
     WHEN 'FoodProductionBuff' THEN pg_temp.m('buff.production', '{"resource":{"ref":"resource","id":"food"},"percent":25}')
     WHEN 'WoodProductionBuff' THEN pg_temp.m('buff.production', '{"resource":{"ref":"resource","id":"wood"},"percent":25}')

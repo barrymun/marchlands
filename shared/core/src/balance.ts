@@ -102,12 +102,11 @@ export const BALANCE = {
   // ---- construction ----
   heroTimeFactor: 0.995, // (orig) per point of the relevant mayor attribute
   techTimeFactor: 0.9, // (orig) per research level
-  demolishRefund: 1 / 3, // (orig)
   /**
-   * (marchlands) demolishing removes the whole building at once, instantly, refunding demolishRefund of
-   * every level's cost (what demolishing it level by level returns); orig: one level per timed demolition
+   * (orig) share of a level's cost demolishing it returns. (marchlands) demolishing is instant and removes the
+   * whole building, returning this share of every level's cost (orig: one level per timed demolition)
    */
-  instantDemolish: true as boolean,
+  demolishRefund: 1 / 3,
   cancelBuildRefund: 1, // (orig intended)
   cancelResearchRefund: 1 / 3, // (orig)
   cancelTrainInProgressRefund: 1 / 3, // (orig)

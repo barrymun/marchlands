@@ -25,25 +25,19 @@
   },
   "detail": {
     "slot": "区画 {{pos}}",
-    "demolishing": "レベル {{level}} へ解体中",
     "upgrading": "レベル {{level}} へ強化中",
     "upgradeTo": "レベル {{level}} へ強化",
     "upgrade": "強化",
     "maxLevel": "最大レベルに達しています。",
     "upgradeStarted": "強化を開始しました",
     "demolished": "建物を解体しました",
-    "demolitionStarted": "解体を開始しました",
     "cancelled": "キャンセルしました",
     "demolishAll": "建物全体を即座に解体",
-    "demolishOne": "1 レベル解体",
-    "demolishTime": "（{{minutes}} 分）",
     "returns": "・{{refund}} が戻ります",
     "demolish": "解体",
     "confirmAllTitle": "{{name}}（Lv {{level}}）を解体しますか？",
-    "confirmOneTitle": "{{name}} を 1 レベル解体しますか？",
     "confirmAll": "建物全体が一度に失われます。この操作は取り消せません。",
-    "confirmAllRefund": "建物全体が一度に失われ、{{refund}} が戻ります。この操作は取り消せません。",
-    "confirmOne": "解体が完了するとレベルが 1 下がります。"
+    "confirmAllRefund": "建物全体が一度に失われ、{{refund}} が戻ります。この操作は取り消せません。"
   },
   "mayor": {
     "none": "市長がいません: 英雄タブで政治の高い英雄を市長に任命すると建設が速くなります。",

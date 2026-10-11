@@ -15,7 +15,6 @@ import {
   type BuildingBean,
   type CityBean,
 } from '@marchlands/api-client';
-import { BALANCE } from '@marchlands/core';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { Button } from '@/components/ui/button';
@@ -43,7 +42,7 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
   const info = useQuery(getCitiesBuildingsByPositionIdOptions({ path }));
   const refresh = () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } }), getCitiesBuildingsByPositionIdQueryKey({ path })];
   const upgrade = useCommand(postCitiesBuildingsUpgradeMutation(), refresh, t('detail.upgradeStarted'));
-  const demolish = useCommand(postCitiesBuildingsDemolishMutation(), refresh, BALANCE.instantDemolish ? t('detail.demolished') : t('detail.demolitionStarted'));
+  const demolish = useCommand(postCitiesBuildingsDemolishMutation(), refresh, t('detail.demolished'));
   const cancel = useCommand(postCitiesBuildingsCancelMutation(), refresh, t('detail.cancelled'));
   // the speed-up cost depends on the time left, so refresh it with the building
   const speedup = useCommand(postCitiesBuildingsSpeedupMutation(), () => [...refresh(), getPlayerQueryKey(), getCitiesBuildingsSpeedupQueryKey({ path })]);
@@ -72,9 +71,7 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
       </DialogHeader>
       {working ? (
         <div className="grid gap-3">
-          <p className="text-sm">
-            {building.status === 2 ? t('detail.demolishing', { level: building.level - 1 }) : t('detail.upgrading', { level: building.level + 1 })}
-          </p>
+          <p className="text-sm">{t('detail.upgrading', { level: building.level + 1 })}</p>
           <TimerBar startTime={building.startTime} endTime={building.endTime} />
           <SpeedupOptions
             endTime={building.endTime}
@@ -139,25 +136,16 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
               <Separator />
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs text-muted-foreground">
-                  {BALANCE.instantDemolish ? t('detail.demolishAll') : t('detail.demolishOne')}
-                  {info.data && !BALANCE.instantDemolish ? t('detail.demolishTime', { minutes: Math.round(info.data.demolishTime / 60) }) : ''}
+                  {t('detail.demolishAll')}
                   {info.data?.demolishRefund && t('detail.returns', { refund: refundText(info.data.demolishRefund) })}
                 </span>
                 <ConfirmButton
                   size="sm"
                   variant="destructive"
                   disabled={demolish.isPending}
-                  title={
-                    BALANCE.instantDemolish
-                      ? t('detail.confirmAllTitle', { name: buildingName(building.typeId), level: building.level })
-                      : t('detail.confirmOneTitle', { name: buildingName(building.typeId) })
-                  }
+                  title={t('detail.confirmAllTitle', { name: buildingName(building.typeId), level: building.level })}
                   description={
-                    BALANCE.instantDemolish
-                      ? info.data?.demolishRefund
-                        ? t('detail.confirmAllRefund', { refund: refundText(info.data.demolishRefund) })
-                        : t('detail.confirmAll')
-                      : t('detail.confirmOne')
+                    info.data?.demolishRefund ? t('detail.confirmAllRefund', { refund: refundText(info.data.demolishRefund) }) : t('detail.confirmAll')
                   }
                   confirmLabel={t('detail.demolish')}
                   onConfirm={() => demolish.mutateAsync({ path }).then(onDone)}

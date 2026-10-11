@@ -132,7 +132,8 @@ export async function chatHistory(ctx: Ctx, playerId: number, channel: string, s
       gt(chatMessages.sentAt, since),
     );
   } else where = and(eq(chatMessages.channel, channel), gt(chatMessages.sentAt, since));
-  const rows = await ctx.tx.select().from(chatMessages).where(where).orderBy(desc(chatMessages.sentAt)).limit(100);
+  // id breaks ties: messages sent in the same millisecond keep the order they were sent in
+  const rows = await ctx.tx.select().from(chatMessages).where(where).orderBy(desc(chatMessages.sentAt), desc(chatMessages.id)).limit(100);
   return rows
     .reverse()
     .map((r) => ({ id: r.id, channel: r.channel, fromUser: r.fromName, fromId: r.fromPlayerId, toId: r.toPlayerId, msg: r.message, time: r.sentAt }));

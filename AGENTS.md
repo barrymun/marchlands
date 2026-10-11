@@ -6,6 +6,7 @@ How to work in this repository. Read [README.md](README.md) for what Marchlands 
 
 - **Git:** the maintainer manages git. Don't commit, push or branch unless asked. When asked for a commit message, keep it concise, and don't use double quotes, backticks or `$` in it (it gets pasted into `git commit -m "..."`).
 - **Player-facing language is neutral:** say "player", never "lord" or "lady", in anything a player reads (UI text, item and quest descriptions, error messages, mail). Code identifiers and comments may still say lord.
+- **Ideas and known quirks for later** go in [docs/backlog.md](docs/backlog.md): what happens now, where, and why it was left.
 - **Deviations are documented:** every rule that differs from the original Evony Age 1 server goes in [docs/deviations.md](docs/deviations.md), marked *(design change)*. Every tunable number lives in `shared/core/src/balance.ts` (`BALANCE`); don't hard-code game values elsewhere.
 - **Don't change behaviour while restructuring.** A refactor moves code; a rule change is its own change, documented as above.
 
@@ -16,7 +17,8 @@ Run from the repo root.
 | Command | What it does |
 |---|---|
 | `npm run typecheck` | `tsc` for the backend + shared packages, then for the client |
-| `npm test` | vitest: `shared/*/test`, `backend/**/test`, and `client/web/src/**/*.test.ts` |
+| `npm test` | vitest: `shared/*/test`, `backend/**/test`, and `client/web/src/**/*.test.ts` (no database) |
+| `npm run test:db` | the backend service tests against Postgres (`*.db.test.ts`, see Backend tests). Needs the Postgres container. |
 | `npm run lint` / `npm run lint:fix` | ESLint (code quality only) |
 | `npm run format` / `npm run format:check` | Prettier (all formatting) |
 | `npm run gen:api` | regenerate the OpenAPI spec, the generated client (Hey API) and `docs/api-endpoints.md`. Run it after changing anything in `shared/contracts` or an API route. |
@@ -24,7 +26,7 @@ Run from the repo root.
 | `npm run delete-player -- <username>… [--yes]` | delete test accounts the way the game does (their valleys released, castles back to flat land); lists what it would delete until run with `--yes`. Never deletes admin accounts. |
 | `API=http://localhost:3100 node tools/smoke/smoke.mjs` (also `war.mjs`, `market.mjs`) | end-to-end checks against the running stack |
 
-Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and `npm run format:check` all pass.
+Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and `npm run format:check` all pass, and `npm run test:db` when the change touches the backend.
 
 **Running stack** (Docker Compose project `marchlands`; ports come from `.env`):
 
@@ -87,6 +89,18 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
     - `usePushSync` (`hooks/use-game.ts`) only connects the socket and subscribes the handlers.
     - To handle a new push, add its entry to `PUSH_HANDLERS` and a test in `lib/push/handlers.test.ts`. Those tests use a real `QueryClient` and mock `sonner`.
 
+## Backend tests
+
+Backend tests live beside the code they test, in a `test/` tree that mirrors `src/`: the tests of `backend/packages/game/src/services/armies.ts` are in `backend/packages/game/test/services/armies*.test.ts` (a large service gets a folder, `test/services/combat/`).
+
+- **`<name>.test.ts`** tests pure functions (no database) and runs in `npm test`. Prefer this: move a rule out of a service into a pure function (core, or an exported helper) and test it here.
+- **`<name>.db.test.ts`** tests a service against a real Postgres and runs in `npm run test:db` (`vitest.db.config.ts`). The setup creates the database `marchlands_test` (`TEST_DB_NAME`) next to the dev one, applies the migrations and seeds the map once; later runs reuse it. Files run one at a time.
+- **Support** (`backend/packages/game/test/support/`):
+  - `game(async (g) => …)` (`game.ts`) runs a test in one game transaction that is always rolled back, so tests leave nothing behind. `g` is the real context plus `g.pushes()`, `g.events()`, `g.advance(ms)` and `g.runDue()`, which runs the timed events that fall due (a construction completes, an army arrives). Time starts at a fixed `T0` and the random numbers are seeded.
+  - `factories.ts` makes test data through the game's own code (`createTestPlayer`, `setBuildings`, `setResources`, `setResearch`, `giveItems`, `addHero` …), never with hand-written rows.
+  - `expectRefused(promise, msg(…))` (`expect.ts`) asserts a service refuses with that message.
+- Never commit in a test, and never point the tests at the dev database.
+
 ## Database
 
 - The Drizzle schema in `backend/packages/db/src/schema.ts` is the source of truth.
@@ -95,6 +109,7 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
   1. Add `migrations/NNNN_name.sql`.
   2. Copy the previous `meta/NNNN_snapshot.json`, with a new `id` and `prevId`.
   3. Append an entry to `meta/_journal.json`.
+- **Helper functions in a migration** are temporary (`pg_temp.name`) and created with `CREATE OR REPLACE FUNCTION`: a fresh database runs every migration in one session, so a name used by two migrations would otherwise clash. `npm run test:db` builds a database from scratch and catches this.
 - **Removing an item:** add it to `REMOVED_ITEMS` / `REMOVED_ITEM_PATTERNS` (`shared/core/src/data/index.ts`), and add a migration that strips it from players' inventories.
 
 ## Client (`client/web/src`)

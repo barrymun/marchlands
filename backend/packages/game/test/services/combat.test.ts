@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { distributeLosses } from '../src/services/combat.ts';
+import { distributeLosses } from '../../src/services/combat.ts';
 
 describe('distributeLosses', () => {
   it('shrinks groups proportionally and preserves totals', () => {

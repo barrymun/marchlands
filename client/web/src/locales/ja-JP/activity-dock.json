@@ -10,7 +10,6 @@
   },
   "job": {
     "level": "{{name}} → Lv {{level}}",
-    "demolishing": "解体中",
     "troops": "{{troop}} ×{{amount}}",
     "queued": "待機 {{n}} 件"
   }

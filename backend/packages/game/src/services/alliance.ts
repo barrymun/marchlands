@@ -188,7 +188,8 @@ export async function members(ctx: Ctx, playerId: number) {
       titleId: players.title,
       population: players.population,
       lastLoginTime: players.lastSeenAt,
-      castleCount: sql<number>`(select count(*) from cities c where c.player_id = ${players.id})`,
+      // "players"."id" in full: without a join Drizzle would write a bare "id", which the subquery reads as cities.id
+      castleCount: sql<number>`(select count(*) from cities c where c.player_id = "players"."id")`,
     })
     .from(players)
     .where(eq(players.allianceId, allianceId))
@@ -280,7 +281,13 @@ export async function setInfo(ctx: Ctx, playerId: number, info: { note?: string;
 
 /** Delete an empty alliance and everything hanging off it. */
 async function disband(ctx: Ctx, allianceId: number) {
+  const a = await getAlliance(ctx, allianceId, true);
   await ctx.tx.update(players).set({ allianceId: null, allianceRank: 0 }).where(eq(players.allianceId, allianceId));
+  // players who had applied to it no longer have an application (its requests go with the alliance)
+  await ctx.tx
+    .update(players)
+    .set({ misc: sql`${players.misc} - 'allianceApply' - 'allianceApplyAt'` })
+    .where(sql`${players.misc}->>'allianceApply' = ${a.name}`);
   await ctx.tx.delete(alliances).where(eq(alliances.id, allianceId));
 }
 
@@ -458,7 +465,7 @@ export async function applications(ctx: Ctx, playerId: number) {
       prestige: players.prestige,
       rank: players.prestigeRank,
       inviteTime: allianceRequests.createdAt,
-      castleCount: sql<number>`(select count(*) from cities c where c.player_id = ${players.id})`,
+      castleCount: sql<number>`(select count(*) from cities c where c.player_id = "players"."id")`,
     })
     .from(allianceRequests)
     .innerJoin(players, eq(players.id, allianceRequests.playerId))
@@ -493,6 +500,9 @@ export async function declineApplication(ctx: Ctx, playerId: number, userName: s
   await ctx.tx
     .delete(allianceRequests)
     .where(and(eq(allianceRequests.allianceId, officer.allianceId!), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, 'apply')));
+  // only this alliance's application: the player may have applied elsewhere since
+  const a = await getAlliance(ctx, officer.allianceId!);
+  if (target.misc.allianceApply !== a.name) return;
   target.misc = { ...target.misc, allianceApply: undefined, allianceApplyAt: undefined };
   await ctx.tx.update(players).set({ misc: target.misc }).where(eq(players.id, target.id));
 }

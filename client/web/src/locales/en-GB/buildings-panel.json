@@ -26,25 +26,19 @@
   },
   "detail": {
     "slot": "Slot {{pos}}",
-    "demolishing": "Demolishing to level {{level}}",
     "upgrading": "Upgrading to level {{level}}",
     "upgradeTo": "Upgrade to level {{level}}",
     "upgrade": "Upgrade",
     "maxLevel": "Maximum level reached.",
     "upgradeStarted": "Upgrade started",
     "demolished": "Building demolished",
-    "demolitionStarted": "Demolition started",
     "cancelled": "Cancelled",
     "demolishAll": "Demolish the whole building, instantly",
-    "demolishOne": "Demolish one level",
-    "demolishTime": " ({{minutes}} min)",
     "returns": " · returns {{refund}}",
     "demolish": "Demolish",
     "confirmAllTitle": "Demolish {{name}} (Lv {{level}})?",
-    "confirmOneTitle": "Demolish one level of {{name}}?",
     "confirmAll": "The whole building goes at once. This cannot be undone.",
-    "confirmAllRefund": "The whole building goes at once, returning {{refund}}. This cannot be undone.",
-    "confirmOne": "The level is removed when the demolition finishes."
+    "confirmAllRefund": "The whole building goes at once, returning {{refund}}. This cannot be undone."
   },
   "mayor": {
     "none": "No mayor: appoint one with high Politics in the Heroes tab to build faster.",

@@ -774,8 +774,7 @@
             "type": "number",
             "enum": [
               0,
-              1,
-              2
+              1
             ]
           },
           "startTime": {
@@ -4338,12 +4337,6 @@
             "maximum": 9007199254740991,
             "description": "build time, seconds"
           },
-          "destructTime": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "seconds to demolish back from this level (0 for level 1)"
-          },
           "gold": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -4395,7 +4388,6 @@
           "typeId",
           "level",
           "time",
-          "destructTime",
           "gold",
           "food",
           "wood",
@@ -4505,12 +4497,6 @@
                       "maximum": 9007199254740991,
                       "description": "build time, seconds"
                     },
-                    "destructTime": {
-                      "type": "integer",
-                      "minimum": -9007199254740991,
-                      "maximum": 9007199254740991,
-                      "description": "seconds to demolish back from this level (0 for level 1)"
-                    },
                     "gold": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -4565,7 +4551,6 @@
                     "typeId",
                     "level",
                     "time",
-                    "destructTime",
                     "gold",
                     "food",
                     "wood",
@@ -4630,12 +4615,6 @@
             ],
             "description": "null at max level"
           },
-          "demolishTime": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "seconds (0: demolition is instant, BALANCE.instantDemolish)"
-          },
           "demolishRefund": {
             "anyOf": [
               {
@@ -4645,7 +4624,7 @@
                 "type": "null"
               }
             ],
-            "description": "a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0"
+            "description": "what demolishing returns: BALANCE.demolishRefund of every level up to the current one (unrounded); null at level 0"
           }
         },
         "required": [
@@ -4654,7 +4633,6 @@
           "effect",
           "maxLevel",
           "next",
-          "demolishTime",
           "demolishRefund"
         ]
       },
@@ -11820,8 +11798,7 @@
             "type": "number",
             "enum": [
               0,
-              1,
-              2
+              1
             ]
           },
           "startTime": {
@@ -15460,12 +15437,6 @@
             "maximum": 9007199254740991,
             "description": "build time, seconds"
           },
-          "destructTime": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "seconds to demolish back from this level (0 for level 1)"
-          },
           "gold": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -15517,7 +15488,6 @@
           "typeId",
           "level",
           "time",
-          "destructTime",
           "gold",
           "food",
           "wood",
@@ -15630,12 +15600,6 @@
                       "maximum": 9007199254740991,
                       "description": "build time, seconds"
                     },
-                    "destructTime": {
-                      "type": "integer",
-                      "minimum": -9007199254740991,
-                      "maximum": 9007199254740991,
-                      "description": "seconds to demolish back from this level (0 for level 1)"
-                    },
                     "gold": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -15690,7 +15654,6 @@
                     "typeId",
                     "level",
                     "time",
-                    "destructTime",
                     "gold",
                     "food",
                     "wood",
@@ -15757,12 +15720,6 @@
             ],
             "description": "null at max level"
           },
-          "demolishTime": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "seconds (0: demolition is instant, BALANCE.instantDemolish)"
-          },
           "demolishRefund": {
             "anyOf": [
               {
@@ -15772,7 +15729,7 @@
                 "type": "null"
               }
             ],
-            "description": "a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0"
+            "description": "what demolishing returns: BALANCE.demolishRefund of every level up to the current one (unrounded); null at level 0"
           }
         },
         "required": [
@@ -15781,7 +15738,6 @@
           "effect",
           "maxLevel",
           "next",
-          "demolishTime",
           "demolishRefund"
         ],
         "additionalProperties": false
@@ -25308,7 +25264,7 @@
     "/api/v1/cities/{cityId}/buildings/{positionId}/demolish": {
       "post": {
         "operationId": "postCitiesBuildingsDemolish",
-        "summary": "Demolish: the whole building at once with BALANCE.instantDemolish, else one level (castle.destructBuilding)",
+        "summary": "Demolish: the whole building at once, refunding a share of every level (castle.destructBuilding)",
         "tags": [
           "buildings"
         ],

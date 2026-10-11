@@ -111,7 +111,7 @@ async function main() {
     }
     await ok(gm.token, 'PUT', `/admin/cities/${cid}/resources`, { playerId: pid, gold: 5e6, food: 5e6, wood: 5e6, stone: 5e6, iron: 5e6 });
     check(true, 'admin fast-forward (buildings, resources)');
-    // demolition is instant and removes the whole building (BALANCE.instantDemolish)
+    // demolition is instant and removes the whole building
     await ok(gm.token, 'PUT', `/admin/cities/${cid}/buildings`, { playerId: pid, positionId: 20, typeId: 1, level: 3 });
     const before = await ok(a.token, 'GET', `/cities/${cid}`);
     await ok(a.token, 'POST', `/cities/${cid}/buildings/20/demolish`);

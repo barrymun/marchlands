@@ -196,9 +196,14 @@ function sumTroops(list: TroopCounts[]): TroopCounts {
 
 async function grantHeroExp(ctx: Ctx, h: HeroRow | null | undefined, exp: number) {
   if (!h || exp <= 0) return;
-  addHeroExp(h, exp);
-  await saveHero(ctx, h);
-  if (h.playerId) pushHero(ctx, h.playerId, h, 2);
+  // add to the hero as stored now: the battle may have changed it since it was loaded (its army disbanded and it
+  // went idle, or it was sent home), and saving the copy from before the battle would undo that
+  const stored = await getHero(ctx, h.id, { lock: true }).catch(() => null);
+  if (!stored) return;
+  addHeroExp(stored, exp);
+  await saveHero(ctx, stored);
+  Object.assign(h, stored);
+  if (stored.playerId) pushHero(ctx, stored.playerId, stored, 2);
 }
 
 function bestHero(list: (HeroRow | null | undefined)[]): HeroRow | null {
@@ -619,7 +624,12 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     body: { kind: 'scout', scout: { target: 'city', from: scoutOwner.name, success, battle } },
   });
   if (cityScouts > 0) ctx.push(def.player.id, PushCmd.TROOP_UPDATE, { castleId: def.city.id, troop: troopBean(def.city.troops) });
-  if (!success) return armyWiped(ctx, a, hero, def);
+  if (!success) {
+    // only the scouts fought: anything else sent along comes home with the hero
+    const { scouter: _lost, ...others } = a.troops;
+    if (totalTroops(others) > 0) return finishScout(ctx, a, others);
+    return armyWiped(ctx, a, hero, def);
+  }
   return finishScout(ctx, a, { ...a.troops, scouter: survivors });
 }
 

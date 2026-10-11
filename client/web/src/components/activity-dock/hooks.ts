@@ -22,12 +22,10 @@ export function useJobs(city: CityBean): Job[] {
   const jobs: Job[] = [];
   for (const b of city.buildings) {
     if (b.status === 0) continue;
-    const demolishing = b.status === 2;
     jobs.push({
       key: `b${b.positionId}`,
       group: 'Building',
-      label: i18n.t('activity-dock:job.level', { name: buildingName(b.typeId), level: demolishing ? b.level - 1 : b.level + 1 }),
-      note: demolishing ? i18n.t('activity-dock:job.demolishing') : undefined,
+      label: i18n.t('activity-dock:job.level', { name: buildingName(b.typeId), level: b.level + 1 }),
       startTime: b.startTime,
       endTime: b.endTime,
       open: () => go('buildings', `?building=${b.positionId}`),

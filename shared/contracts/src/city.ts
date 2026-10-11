@@ -111,7 +111,6 @@ export const BuildingLevelInfo = z
     typeId: int(),
     level: int().describe('level being built'),
     time: int().describe('build time, seconds'),
-    destructTime: int().describe('seconds to demolish back from this level (0 for level 1)'),
     ...costShape,
     requirements: z.array(RequirementCheck),
     ok: z.boolean().describe('all requirements met'),
@@ -150,9 +149,8 @@ export const BuildingUpgradeInfo = z
     effect: MessageSchema.nullable().describe('what the building gives at its current level (`buildingInfo.effect.*`); null when nothing measurable'),
     maxLevel: int(),
     next: BuildingLevelInfo.nullable().describe('null at max level'),
-    demolishTime: int().describe('seconds (0: demolition is instant, BALANCE.instantDemolish)'),
     demolishRefund: ResourceAmounts.nullable().describe(
-      'a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0',
+      'what demolishing returns: BALANCE.demolishRefund of every level up to the current one (unrounded); null at level 0',
     ),
   })
   .meta({ id: 'BuildingUpgradeInfo' });

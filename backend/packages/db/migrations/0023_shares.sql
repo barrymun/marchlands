@@ -1,7 +1,7 @@
 -- (marchlands) Messages and the API send shares, not percents: the client shows a share (0.25) as a percent in the
 -- player's language. Stored buff messages (player and hero buffs, battle report bonuses, queued pushes) held
 -- their percent as a number ("percent": 25); it becomes a share param.
-CREATE FUNCTION pg_temp.shares(j jsonb) RETURNS jsonb LANGUAGE plpgsql IMMUTABLE AS $$
+CREATE OR REPLACE FUNCTION pg_temp.shares(j jsonb) RETURNS jsonb LANGUAGE plpgsql IMMUTABLE AS $$
 DECLARE out jsonb;
 BEGIN
   CASE jsonb_typeof(j)

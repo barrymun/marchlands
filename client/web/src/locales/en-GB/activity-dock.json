@@ -10,7 +10,6 @@
   },
   "job": {
     "level": "{{name}} → Lv {{level}}",
-    "demolishing": "demolishing",
     "troops": "{{troop}} ×{{amount}}",
     "queued": "+{{n}} queued"
   }

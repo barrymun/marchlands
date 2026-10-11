@@ -514,7 +514,7 @@ export const postCitiesBuildingsUpgrade = <ThrowOnError extends boolean = false>
 });
 
 /**
- * Demolish: the whole building at once with BALANCE.instantDemolish, else one level (castle.destructBuilding)
+ * Demolish: the whole building at once, refunding a share of every level (castle.destructBuilding)
  */
 export const postCitiesBuildingsDemolish = <ThrowOnError extends boolean = false>(options: Options<PostCitiesBuildingsDemolishData, ThrowOnError>): RequestResult<PostCitiesBuildingsDemolishResponses, PostCitiesBuildingsDemolishErrors, ThrowOnError> => (options.client ?? client).post<PostCitiesBuildingsDemolishResponses, PostCitiesBuildingsDemolishErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

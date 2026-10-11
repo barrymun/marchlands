@@ -818,7 +818,7 @@ export const postCitiesBuildingsUpgradeMutation = (options?: Partial<Options<Pos
 };
 
 /**
- * Demolish: the whole building at once with BALANCE.instantDemolish, else one level (castle.destructBuilding)
+ * Demolish: the whole building at once, refunding a share of every level (castle.destructBuilding)
  */
 export const postCitiesBuildingsDemolishMutation = (options?: Partial<Options<PostCitiesBuildingsDemolishData>>): UseMutationOptions<PostCitiesBuildingsDemolishResponse, PostCitiesBuildingsDemolishError, Options<PostCitiesBuildingsDemolishData>> => {
     const mutationOptions: UseMutationOptions<PostCitiesBuildingsDemolishResponse, PostCitiesBuildingsDemolishError, Options<PostCitiesBuildingsDemolishData>> = {

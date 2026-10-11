@@ -58,7 +58,7 @@ export type BuildingBeanInput = {
     positionId: number;
     typeId: number;
     level: number;
-    status: 0 | 1 | 2;
+    status: 0 | 1;
     startTime: number;
     endTime: number;
 };
@@ -1301,10 +1301,6 @@ export type BuildingLevelInfoInput = {
      * build time, seconds
      */
     time: number;
-    /**
-     * seconds to demolish back from this level (0 for level 1)
-     */
-    destructTime: number;
     gold: number;
     food: number;
     wood: number;
@@ -1358,10 +1354,6 @@ export type AvailableBuildingsInput = {
          * build time, seconds
          */
         time: number;
-        /**
-         * seconds to demolish back from this level (0 for level 1)
-         */
-        destructTime: number;
         gold: number;
         food: number;
         wood: number;
@@ -1394,11 +1386,7 @@ export type BuildingUpgradeInfoInput = {
      */
     next: BuildingLevelInfoInput | null;
     /**
-     * seconds (0: demolition is instant, BALANCE.instantDemolish)
-     */
-    demolishTime: number;
-    /**
-     * a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0
+     * what demolishing returns: BALANCE.demolishRefund of every level up to the current one (unrounded); null at level 0
      */
     demolishRefund: ResourceAmountsInput | null;
 };
@@ -3183,7 +3171,7 @@ export type BuildingBean = {
     positionId: number;
     typeId: number;
     level: number;
-    status: 0 | 1 | 2;
+    status: 0 | 1;
     startTime: number;
     endTime: number;
 };
@@ -4426,10 +4414,6 @@ export type BuildingLevelInfo = {
      * build time, seconds
      */
     time: number;
-    /**
-     * seconds to demolish back from this level (0 for level 1)
-     */
-    destructTime: number;
     gold: number;
     food: number;
     wood: number;
@@ -4483,10 +4467,6 @@ export type AvailableBuildings = {
          * build time, seconds
          */
         time: number;
-        /**
-         * seconds to demolish back from this level (0 for level 1)
-         */
-        destructTime: number;
         gold: number;
         food: number;
         wood: number;
@@ -4519,11 +4499,7 @@ export type BuildingUpgradeInfo = {
      */
     next: BuildingLevelInfo | null;
     /**
-     * seconds (0: demolition is instant, BALANCE.instantDemolish)
-     */
-    demolishTime: number;
-    /**
-     * a third of the current level cost, or with instant demolition of every level up to it (unrounded); null at level 0
+     * what demolishing returns: BALANCE.demolishRefund of every level up to the current one (unrounded); null at level 0
      */
     demolishRefund: ResourceAmounts | null;
 };
