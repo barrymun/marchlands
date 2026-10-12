@@ -31,13 +31,15 @@
     "delete-player": "node --env-file-if-exists=.env tools/dev/delete-player.ts",
     "gen:api": "node backend/services/api/src/openapi.ts && npm run generate -w @marchlands/api-client && npm run docs:api",
     "dev:web": "npm run dev -w @marchlands/web",
-    "build:web": "npm run build -w @marchlands/web"
+    "build:web": "npm run build -w @marchlands/web",
+    "build:backend": "node tools/build/backend.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.19.1",
     "@types/pg": "^8.23.1",
     "drizzle-orm": "^0.45.3",
+    "esbuild": "0.28.2",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-i18next": "6.1.5",

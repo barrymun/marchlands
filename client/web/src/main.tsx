@@ -8,7 +8,7 @@ import { Toaster } from '@/components/ui/sonner';
 import '@/lib/i18n';
 import { App } from '@/app';
 import { LocaleRoot } from '@/components/locale-root/locale-root';
-import './index.css';
+import '@/index.css';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },

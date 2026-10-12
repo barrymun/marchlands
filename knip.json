@@ -13,7 +13,7 @@
       "project": ["src/**/*.ts!", "test/**/*.ts"]
     },
     "backend/packages/db": {
-      "entry": ["src/migrate.ts!"],
+      "entry": ["src/main.ts!"],
       "project": ["src/**/*.ts!", "test/**/*.ts"],
       "includeEntryExports": true
     },

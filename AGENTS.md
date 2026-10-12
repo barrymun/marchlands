@@ -21,6 +21,7 @@ Run from the repo root.
 | `npm run test:db` | the backend service tests against Postgres (`*.db.test.ts`, see Backend tests). Needs the Postgres container. |
 | `npm run lint` / `npm run lint:fix` | ESLint (code quality only); `lint` also runs `npm run knip` (unused files, exports and dependencies) |
 | `npm run format` / `npm run format:check` | Prettier (all formatting) |
+| `npm run build:backend` | bundle the API, worker and migrations into `dist/backend/` (what the backend image runs; the Dockerfile runs it with `--minify`) |
 | `npm run gen:api` | regenerate the OpenAPI spec, the generated client (Hey API) and `docs/api-endpoints.md`. Run it after changing anything in `shared/contracts` or an API route. |
 | `npm run sim -- …` | battle simulations, see [docs/battle-sims](docs/battle-sims/README.md) |
 | `npm run delete-player -- <username>… [--yes]` | delete test accounts the way the game does (their valleys released, castles back to flat land); lists what it would delete until run with `--yes`. Never deletes admin accounts. |
@@ -30,7 +31,10 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 
 **Running stack** (Docker Compose project `marchlands`; ports come from `.env`):
 
+- Hosting on the server is documented in [docs/deployment.md](docs/deployment.md) (production overrides in `docker-compose.prod.yml`, template `.env.production.example`). Keep it in step with any change to the images, Compose files, settings or start-up order.
+
 - Rebuild after a change: `docker compose up -d --build api worker web`, or only the services you touched.
+- The backend image runs esbuild bundles (`npm run build:backend`, `tools/build/backend.mjs`), not the sources: one `.mjs` each for the API, the worker and `migrate`, in `dist/backend/bin/`. A dependency that reads its own files at run time (Swagger UI's assets) is listed in `OWN_FILES` there, so its files are copied next to the bundle. Check a new dependency with a rebuilt image.
 - If the change adds a migration: `docker compose stop api worker` first, then rebuild, so the one-shot `migrate` service runs before they start.
 - Testing with the API creates players. Use temporary accounts and delete them with `npm run delete-player` when done (it also disbands alliances they leave empty), never with hand-written SQL. Never touch the maintainer's own player.
 
@@ -161,7 +165,7 @@ Worked examples: `components/military-panel/`, `components/buildings-panel/`, `c
    - Once a folder has a `constants.ts`, all of that component's module-level constants live there. The same goes for `types.ts`.
    - A component with no such file may keep private constants and types inline.
    - Avoid import cycles between `constants.ts` and `utils.ts`. A formatter that both need belongs in `lib/` (e.g. `percent` in `lib/format.ts`).
-5. **Imports use the full path,** e.g. `@/components/military-panel/production/production`. There are no `index.ts` barrel files, and nothing is re-exported. Use `import type { X }` for type-only imports.
+5. **Imports use the full path,** e.g. `@/components/military-panel/production/production` (stylesheets too: `@/index.css`); ESLint rejects relative paths. There are no `index.ts` barrel files, and nothing is re-exported. Use `import type { X }` for type-only imports.
 6. **Order within a file:** imports, then the component. The exported component is the last thing in the file.
 
 ### Tests

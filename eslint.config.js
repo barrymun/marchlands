@@ -51,6 +51,13 @@ export default tseslint.config(
     },
   },
   {
+    // client imports use the full path from src: @/… (AGENTS.md, Client structure)
+    files: ['client/web/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [{ group: ['./*', '../*'], message: 'Use @/… instead of a relative path.' }] }],
+    },
+  },
+  {
     // Text a player reads comes from the locale files (AGENTS.md, Translations): no words written in JSX, in the
     // attributes a player reads, or in toast and useCommand messages. Strings with no letters (— · ×3), single
     // letters (x, y) and the game's name are fine.

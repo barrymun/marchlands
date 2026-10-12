@@ -28,6 +28,8 @@ On first boot the worker seeds the 800×800 world. It uses a procedural map by d
 
 Set `GAME_SPEED=50` (or higher) to make every timer, production and march faster. This is handy while developing.
 
+This is the development setup. To host the game on a server (secrets, HTTPS, backups, updates, moving an existing game), follow [docs/deployment.md](docs/deployment.md).
+
 ### A first session with curl
 
 ```bash
@@ -54,8 +56,8 @@ marchlands/
 │   ├── contracts/            zod schemas of every request, response and WebSocket push
 │   │                         (row shapes derived from the Drizzle tables via drizzle-zod)
 │   └── api-client/           typed HTTP client (generated from OpenAPI) + WebSocket client
-├── backend/                  TypeScript (Node 24 runs .ts directly — no build step)
-│   ├── Dockerfile            one image for every backend service
+├── backend/                  TypeScript (Node 24 runs .ts directly in dev and tests)
+│   ├── Dockerfile            one image for every backend service: esbuild bundles, no sources or node_modules
 │   ├── packages/
 │   │   ├── db/               Drizzle schema (source of truth), SQL migrations, connection helpers
 │   │   └── game/             transactional game services shared by api + worker
@@ -69,6 +71,7 @@ marchlands/
 ├── db/                       postgres config, init scripts, seed data (legacy map)
 ├── docs/
 │   ├── architecture.md       how it fits together (incl. the type pipeline)
+│   ├── deployment.md         hosting it on a server: install, HTTPS, updates, backups, operations
 │   ├── api-endpoints.md      every endpoint, mapped to the original commands
 │   ├── websocket.md          push messages
 │   ├── deviations.md         what differs from the C++ server and why

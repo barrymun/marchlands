@@ -46,7 +46,7 @@ services:
   migrate:
     <<: *backend
     restart: 'no'
-    command: ['node', 'backend/packages/db/src/migrate.ts']
+    command: ['node', 'dist/backend/bin/migrate.mjs']
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,7 +54,7 @@ services:
   # HTTP + WebSocket API (OpenAPI docs at /docs).
   api:
     <<: *backend
-    command: ['node', 'backend/services/api/src/main.ts']
+    command: ['node', 'dist/backend/bin/api.mjs']
     environment:
       <<: *backend-env
       PORT: 3000
@@ -69,7 +69,7 @@ services:
   # Game clock: seeds the world on first boot and processes due timed events.
   worker:
     <<: *backend
-    command: ['node', 'backend/services/worker/src/main.ts']
+    command: ['node', 'dist/backend/bin/worker.mjs']
 
   # Browser client (static build) on nginx; proxies /api, /ws and /docs to the api service.
   web:

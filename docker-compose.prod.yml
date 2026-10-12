@@ -1,0 +1,73 @@
+# Production overrides for the dedicated host (docs/deployment.md). Used on top of docker-compose.yml:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml   (set in .env, so plain `docker compose …` uses both)
+#
+# - secrets are required: compose refuses to start without JWT_SECRET and POSTGRES_PASSWORD in .env
+# - only the web entrance is public: Postgres, the API and Adminer listen on 127.0.0.1 (Docker's published ports
+#   bypass host firewalls such as ufw, so binding them to localhost is what keeps them private)
+# - container logs are rotated (Docker keeps them forever by default)
+# - optional HTTPS: `--profile https` (or COMPOSE_PROFILES=https) adds Caddy on ports 80/443 for DOMAIN
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 20m
+    max-file: '5'
+
+x-backend-env: &backend-env
+  DATABASE_URL: postgres://${POSTGRES_USER:-marchlands}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-marchlands}
+  JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+
+services:
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports: !override
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    logging: *logging
+
+  migrate:
+    environment: *backend-env
+    logging: *logging
+
+  api:
+    environment: *backend-env
+    ports: !override
+      - '127.0.0.1:${API_PORT:-3000}:3000'
+    logging: *logging
+
+  worker:
+    environment: *backend-env
+    logging: *logging
+
+  # the public entrance: on every interface (WEB_BIND=0.0.0.0, port 80) without HTTPS, or on 127.0.0.1 behind Caddy
+  web:
+    ports: !override
+      - '${WEB_BIND:-0.0.0.0}:${WEB_PORT:-80}:80'
+    logging: *logging
+
+  adminer:
+    ports: !override
+      - '127.0.0.1:${ADMINER_PORT:-8080}:8080'
+
+  # HTTPS for DOMAIN with automatic Let's Encrypt certificates; forwards everything to the web container
+  caddy:
+    image: caddy:2.10-alpine
+    profiles: ['https']
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      DOMAIN: ${DOMAIN:-}
+    command: ['caddy', 'reverse-proxy', '--from', '${DOMAIN:-}', '--to', 'web:80']
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - web
+    logging: *logging
+
+volumes:
+  caddy-data:
+  caddy-config:

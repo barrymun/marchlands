@@ -15,7 +15,7 @@
   },
   "scripts": {
     "generate": "drizzle-kit generate",
-    "migrate": "node --env-file-if-exists=../../../.env src/migrate.ts"
+    "migrate": "node --env-file-if-exists=../../../.env src/main.ts"
   },
   "dependencies": {
     "@marchlands/core": "*",

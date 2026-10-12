@@ -39,7 +39,9 @@ export async function getWorldInfo(db: Db | Ctx['tx']): Promise<WorldInfo | unde
   return row?.value as WorldInfo | undefined;
 }
 
+/** The original server's map dump (db/seed), or WORLD_MAP_FILE where the sources aren't laid out as in the repo (the bundled image). */
 function legacyMapPath(): string {
+  if (process.env.WORLD_MAP_FILE) return process.env.WORLD_MAP_FILE;
   const here = path.dirname(fileURLToPath(import.meta.url));
   return path.resolve(here, '../../../../../db/seed/legacy-map-800.bin.gz');
 }
