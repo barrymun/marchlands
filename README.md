@@ -1,6 +1,6 @@
 # Marchlands
 
-A browser strategy game based on **Evony (Age 1)**: a from-scratch TypeScript rewrite of its game server that has since grown its own rules (see [docs/deviations.md](docs/deviations.md)). It is based on the open-source C++ server *Spitfire* (`../evony-private-server`) and the Age 1 battle calculator (`../EvonyAge1BattleCalc`).
+A browser strategy game based on **Evony (Age 1)**: a from-scratch TypeScript rewrite of its game server that has since grown its own rules (see [docs/deviations.md](docs/deviations.md)). It is based on the open-source C++ server *Spitfire* ([sonya75/evony-private-server](https://github.com/sonya75/evony-private-server)) and the Age 1 battle calculator ([sonya75/EvonyAge1BattleCalc](https://github.com/sonya75/EvonyAge1BattleCalc)).
 
 The original spoke AMF3 over a raw socket to a Flash client. This server instead offers:
 
@@ -118,7 +118,7 @@ API=http://localhost:3000 npm run smoke # end-to-end scenarios (needs GAME_SPEED
 
 To change the schema, edit `backend/packages/db/src/schema.ts`, then run `npm run db:generate` to write a new SQL migration into `backend/packages/db/migrations`.
 
-To rebuild the static game data from the original dumps, run `npm run legacy:convert -- ../evony-private-server/DB`.
+To rebuild the static game data from the original dumps, clone [evony-private-server](https://github.com/sonya75/evony-private-server) next to this repository and run `npm run legacy:convert -- ../evony-private-server/DB`.
 
 ## Configuration
 
