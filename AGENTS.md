@@ -21,6 +21,7 @@ Run from the repo root.
 | `npm run test:db` | the backend service tests against Postgres (`*.db.test.ts`, see Backend tests). Needs the Postgres container. |
 | `npm run lint` / `npm run lint:fix` | ESLint (code quality only); `lint` also runs `npm run knip` (unused files, exports and dependencies) |
 | `npm run format` / `npm run format:check` | Prettier (all formatting) |
+| `npm run build:web` | build the client, then check its size budget (`client/web/.size-limit.js`); over a limit, the build fails |
 | `npm run build:backend` | bundle the API, worker and migrations into `dist/backend/`, source maps into `dist/backend-maps/` (what the backend image runs; the Dockerfile runs it with `--minify`) |
 | `npm run trace < trace.txt` | map a stack trace from the bundles back to source positions; in production run it in the container (`docs/deployment.md`, Reading a stack trace) |
 | `npm run gen:api` | regenerate the OpenAPI spec, the generated client (Hey API) and `docs/api-endpoints.md`. Run it after changing anything in `shared/contracts` or an API route. |
@@ -169,7 +170,7 @@ Worked examples: `components/military-panel/`, `components/buildings-panel/`, `c
    - Avoid import cycles between `constants.ts` and `utils.ts`. A formatter that both need belongs in `lib/` (e.g. `percent` in `lib/format.ts`).
 5. **Imports use the full path,** e.g. `@/components/military-panel/production/production` (stylesheets too: `@/index.css`); ESLint rejects relative paths. There are no `index.ts` barrel files, and nothing is re-exported. Use `import type { X }` for type-only imports.
 6. **Order within a file:** imports, then the component. The exported component is the last thing in the file.
-7. **Load on first use what most visits don't open.** Players may be on slow connections, so the first page loads only what it shows (`vendor-*.js`, `app-*.js`, about 270 kB gzipped). Every game tab but Buildings is a `lazyComponent` (`lib/lazy.ts`, declared in `routes/game/constants.ts`), fetched in the background once the page is up (`usePreloadPanels`), so switching tabs doesn't wait. A new tab, or another heavy screen or library (charts), follows the same pattern; a library only lazy screens use stays out of the `vendor` list in `vite.config.ts`.
+7. **Load on first use what most visits don't open.** Players may be on slow connections, so the first page loads only what it shows (`vendor-*.js`, `app-*.js`, about 270 kB gzipped). Every game tab but Buildings is a `lazyComponent` (`lib/lazy.ts`, declared in `routes/game/constants.ts`), fetched in the background once the page is up (`usePreloadPanels`), so switching tabs doesn't wait. A new tab, or another heavy screen or library (charts), follows the same pattern; a library only lazy screens use stays out of the `vendor` list in `vite.config.ts`. A size budget (`client/web/.size-limit.js`, size-limit, gzipped) runs after every client build, the Docker image's included, and fails it over a limit; `npm run size -w @marchlands/web` shows the sizes. Raise a limit only on purpose, saying why.
 
 ### Tests
 

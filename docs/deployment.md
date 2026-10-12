@@ -322,7 +322,8 @@ Set by the image, not in `.env`: `NODE_ENV=production` (JSON logs) and `WORLD_MA
 - **Web** (`client/web/Dockerfile`): Vite builds the client and `tools/build/precompress.mjs` gzips its text files once, at
   the highest level; nginx (`client/web/nginx.conf`) sends those `.gz` copies as they are (`gzip_static`) and
   compresses API responses (JSON) on the fly. The first page is about 270 kB over the wire (three JavaScript files and
-  the stylesheet); the game tabs and any language but English are separate files, fetched when needed. Hashed files
+  the stylesheet); the game tabs and any language but English are separate files, fetched when needed. The build checks
+  the client's size budget (`client/web/.size-limit.js`) and fails, so the deploy stops, if the client has grown past it. Hashed files
   under `/assets/` are cached for a year, `index.html` is always revalidated, so a deploy reaches players on their
   next page load. A page left open across a deploy reloads itself if it asks for a file the deploy removed.
 - Development and the tests run the TypeScript sources directly; only the images use the bundles. A new backend
