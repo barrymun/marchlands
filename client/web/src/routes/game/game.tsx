@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -17,21 +17,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ActivityDock } from '@/components/activity-dock/activity-dock';
-import { ArmiesPanel } from '@/components/armies-panel/armies-panel';
 import { BuildingsPanel } from '@/components/buildings-panel/buildings-panel';
 import { CityDialog } from '@/components/city-dialog/city-dialog';
-import { FlowsPanel } from '@/components/flows-panel/flows-panel';
-import { StatsPanel } from '@/components/stats-panel/stats-panel';
 import { LordDialog } from '@/components/lord-dialog/lord-dialog';
 import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
-import { HeroesPanel } from '@/components/heroes-panel/heroes-panel';
-import { ItemsPanel } from '@/components/items-panel/items-panel';
-import { MapPanel } from '@/components/map-panel/map-panel';
-import { MarketPanel } from '@/components/market-panel/market-panel';
-import { MilitaryPanel } from '@/components/military-panel/military-panel';
-import { ResearchPanel } from '@/components/research-panel/research-panel';
 import { useUnreadReports } from '@/components/reports-panel/hooks';
-import { ReportsPanel } from '@/components/reports-panel/reports-panel';
 import { ResourceBar } from '@/components/resource-bar/resource-bar';
 import { mayorOf } from '@/routes/game/utils';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
@@ -41,7 +31,20 @@ import { titleName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 import { MayorSummary } from '@/routes/game/mayor-summary/mayor-summary';
 import { MayorChip } from '@/routes/game/mayor-chip/mayor-chip';
-import { TABS } from '@/routes/game/constants';
+import {
+  ArmiesPanel,
+  FlowsPanel,
+  HeroesPanel,
+  ItemsPanel,
+  MapPanel,
+  MarketPanel,
+  MilitaryPanel,
+  ReportsPanel,
+  ResearchPanel,
+  StatsPanel,
+  TABS,
+} from '@/routes/game/constants';
+import { usePreloadPanels } from '@/routes/game/hooks';
 
 export function GamePage() {
   const { t } = useTranslation(['game', 'common']);
@@ -58,6 +61,7 @@ export function GamePage() {
   const [dialog, setDialog] = useState<'lord' | 'city' | null>(null);
   const unreadReports = useUnreadReports().data?.count ?? 0;
   const mayor = city.data && mayorOf(city.data);
+  usePreloadPanels();
 
   function logout() {
     tokenStore.set(null);
@@ -182,7 +186,8 @@ export function GamePage() {
           {city.error && <p className="text-sm text-destructive">{errorMessage(city.error)}</p>}
           {city.isPending && <Skeleton className="h-96" />}
           {city.data && (
-            <>
+            // a tab whose code hasn't arrived yet shows the same placeholder as a city still loading
+            <Suspense fallback={<Skeleton className="h-96" />}>
               <TabsContent value="buildings">
                 <BuildingsPanel city={city.data} />
               </TabsContent>
@@ -216,7 +221,7 @@ export function GamePage() {
               <TabsContent value="map">
                 <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />
               </TabsContent>
-            </>
+            </Suspense>
           )}
         </main>
       </Tabs>

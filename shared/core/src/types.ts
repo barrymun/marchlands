@@ -4,7 +4,18 @@
 
 import { z } from 'zod';
 import { MessageSchema } from '#/messages/schema.ts';
-import { BUFF_IDS, FORT_KEY_LIST, HERO_BUFF_IDS, RESOURCE_KEYS, TROOP_KEY_LIST, type FortKey, type TroopKey } from '#/constants.ts';
+import {
+  BUFF_IDS,
+  BuildingStatus,
+  FLOW_MAX_TARGETS_PER_CITY,
+  FLOW_MAX_WAIT_MINUTES,
+  FORT_KEY_LIST,
+  HERO_BUFF_IDS,
+  RESOURCE_KEYS,
+  TROOP_KEY_LIST,
+  type FortKey,
+  type TroopKey,
+} from '#/constants.ts';
 
 const count = z.number().nonnegative();
 
@@ -21,13 +32,7 @@ export type TroopCounts = z.infer<typeof TroopCountsSchema>;
 export const FortCountsSchema = z.partialRecord(FortKeySchema, count);
 export type FortCounts = z.infer<typeof FortCountsSchema>;
 
-/** (marchlands) no demolishing status: demolition is instant (orig 2, a timed demolition) */
-export const BuildingStatus = {
-  IDLE: 0,
-  BUILDING: 1,
-} as const;
 export const BuildingStatusSchema = z.literal([BuildingStatus.IDLE, BuildingStatus.BUILDING]);
-export type BuildingStatus = z.infer<typeof BuildingStatusSchema>;
 
 export const BuildingStateSchema = z.object({
   /** -1 Town Hall, -2 Walls, 0..31 inside, 1001..1040 fields outside */
@@ -131,12 +136,6 @@ export type CityMisc = z.infer<typeof CityMiscSchema>;
 /** A named army composition a lord saved to send again quickly. */
 export const ArmyPresetSchema = z.object({ id: z.string(), name: z.string(), troops: TroopCountsSchema });
 export type ArmyPreset = z.infer<typeof ArmyPresetSchema>;
-
-/** Targets one city may attack in a flow action (a level 10 Rally Spot sends 10 armies). */
-export const FLOW_MAX_TARGETS_PER_CITY = 10;
-
-/** Longest a flow's "wait" action can wait (real time). */
-export const FLOW_MAX_WAIT_MINUTES = 7 * 24 * 60;
 
 /**
  * (marchlands) One action of a flow (flows.ts): appoint the city's best hero by an attribute as mayor,
@@ -370,3 +369,21 @@ export const ReportBodySchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('desertion'), desertion: DesertionReportSchema }),
 ]);
 export type ReportBody = z.infer<typeof ReportBodySchema>;
+
+/** What a chest, box or operator grant gives (items.ts). */
+export const GrantContentsSchema = z.object({
+  items: z.record(z.string(), z.number().int()).optional().describe('itemId -> count'),
+  resources: ResourceSetSchema.partial().optional(),
+  troops: TroopCountsSchema.optional(),
+});
+export type GrantContents = z.infer<typeof GrantContentsSchema>;
+
+/** One prerequisite of a building, tech or troop and whether it is met (construction.ts checkRequirements). */
+export const RequirementCheckSchema = z.object({
+  kind: z.enum(['building', 'tech', 'item']),
+  id: z.union([z.number().int(), z.string()]).describe('building type / tech id, or item id string'),
+  required: z.number().int().describe('level (or item count) required'),
+  current: z.number().int(),
+  ok: z.boolean(),
+});
+export type RequirementCheck = z.infer<typeof RequirementCheckSchema>;

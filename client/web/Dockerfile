@@ -17,7 +17,8 @@ COPY shared shared
 # the contract's row schemas are derived from the Drizzle tables (type-checked by the client build)
 COPY backend/packages/db backend/packages/db
 COPY client/web client/web
-RUN npm run build -w @marchlands/web
+COPY tools/build/precompress.mjs tools/build/precompress.mjs
+RUN npm run build -w @marchlands/web && node tools/build/precompress.mjs client/web/dist
 
 FROM nginx:1.29-alpine
 COPY client/web/nginx.conf /etc/nginx/conf.d/default.conf

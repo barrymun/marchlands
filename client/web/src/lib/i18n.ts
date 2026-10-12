@@ -4,7 +4,7 @@
 // another locale falls back to it. Text the server sends (errors, flow logs, reports) and game data names
 // (troops, buildings, items) are not translated yet.
 
-import i18n from 'i18next';
+import i18n, { type BackendModule } from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
@@ -25,32 +25,64 @@ export function matchLocale(lng: string | undefined): Locale {
   return LOCALES.find((l) => l.split('-')[0] === language) ?? DEFAULT_LOCALE;
 }
 
-// every locale file, bundled: ../locales/en-GB/common.json -> resources['en-GB'].common
-const files = import.meta.glob<Record<string, unknown>>('../locales/*/*.json', { eager: true, import: 'default' });
+// en-GB (the default and the fallback) and the en-US spellings are bundled with the app:
+// ../locales/en-GB/common.json -> resources['en-GB'].common
+const files = import.meta.glob<Record<string, unknown>>(['../locales/en-GB/*.json', '../locales/en-US/*.json'], { eager: true, import: 'default' });
 const resources: Record<string, Record<string, Record<string, unknown>>> = {};
 for (const [path, json] of Object.entries(files)) {
   const [, locale, ns] = path.match(/locales\/([^/]+)\/([^/]+)\.json$/)!;
   (resources[locale] ??= {})[ns] = json;
 }
 
+// every other locale is one file of the build (src/locales/<locale>.ts), loaded when chosen
+const lazyLocales = import.meta.glob<Record<string, Record<string, unknown>>>(['../locales/*.ts', '!../locales/*.test.ts'], { import: 'default' });
+const loading = new Map<string, Promise<Record<string, Record<string, unknown>>>>();
+const lazyLocalesBackend: BackendModule = {
+  type: 'backend',
+  init() {},
+  read(lng, ns, callback) {
+    const load = lazyLocales[`../locales/${lng}.ts`];
+    if (!load) return callback(null, {});
+    let files = loading.get(lng);
+    if (!files) {
+      files = load();
+      loading.set(lng, files);
+      files.catch(() => loading.delete(lng)); // a failed download is tried again next time
+    }
+    files.then(
+      (byFile) => callback(null, byFile[`./${lng}/${ns}.json`] ?? {}),
+      (err: unknown) => callback(err instanceof Error ? err : new Error(String(err)), null),
+    );
+  },
+};
+
 const browser = typeof window !== 'undefined';
 if (browser) i18n.use(LanguageDetector);
-void i18n.use(initReactI18next).init({
-  resources,
-  // tests run in Node, without a browser to detect from
-  lng: browser ? undefined : DEFAULT_LOCALE,
-  fallbackLng: DEFAULT_LOCALE,
-  supportedLngs: LOCALES,
-  defaultNS: 'common',
-  ns: Object.keys(resources[DEFAULT_LOCALE] ?? {}),
-  interpolation: { escapeValue: false }, // React escapes
-  detection: {
-    order: ['localStorage', 'navigator'],
-    lookupLocalStorage: STORAGE_KEY,
-    caches: ['localStorage'],
-    convertDetectedLanguage: matchLocale,
-  },
-});
+/** Settles once the detected locale's text has loaded: main.tsx renders after it, so no text flashes in English. */
+export const i18nReady = i18n
+  .use(lazyLocalesBackend)
+  .use(initReactI18next)
+  .init({
+    resources,
+    // the bundled locales above, plus the lazy ones from the backend
+    partialBundledLanguages: true,
+    // tests run in Node, without a browser to detect from
+    lng: browser ? undefined : DEFAULT_LOCALE,
+    fallbackLng: DEFAULT_LOCALE,
+    supportedLngs: LOCALES,
+    defaultNS: 'common',
+    ns: Object.keys(resources[DEFAULT_LOCALE] ?? {}),
+    interpolation: { escapeValue: false }, // React escapes
+    detection: {
+      order: ['localStorage', 'navigator'],
+      lookupLocalStorage: STORAGE_KEY,
+      caches: ['localStorage'],
+      convertDetectedLanguage: matchLocale,
+    },
+  });
+
+// tests (Node, no browser) read every locale's text synchronously
+if (!browser) await i18n.loadLanguages([...LOCALES]);
 
 if (browser) {
   const setLang = (lng: string) => document.documentElement.setAttribute('lang', lng);

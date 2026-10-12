@@ -246,3 +246,16 @@ export const HeroBuffId = {
 } as const;
 export type HeroBuffId = (typeof HeroBuffId)[keyof typeof HeroBuffId];
 export const HERO_BUFF_IDS = Object.values(HeroBuffId) as [HeroBuffId, ...HeroBuffId[]];
+
+/** (marchlands) no demolishing status: demolition is instant (orig 2, a timed demolition) */
+export const BuildingStatus = {
+  IDLE: 0,
+  BUILDING: 1,
+} as const;
+export type BuildingStatus = (typeof BuildingStatus)[keyof typeof BuildingStatus];
+
+/** Targets one city may attack in a flow action (a level 10 Rally Spot sends 10 armies). */
+export const FLOW_MAX_TARGETS_PER_CITY = 10;
+
+/** Longest a flow's "wait" action can wait (real time). */
+export const FLOW_MAX_WAIT_MINUTES = 7 * 24 * 60;

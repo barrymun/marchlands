@@ -50,6 +50,7 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 ## Shared code (`shared/core`, `shared/contracts`)
 
 - **Imports are absolute,** as in the backend (see Backend tests): `#/constants.ts` is the package's own `src/constants.ts`, `#test/…` its `test/` (the `imports` field of its `package.json`). Never a relative path (ESLint).
+- **Keep the client's imports free of schemas.** The browser bundle leaves out modules whose exports it doesn't use (`client/web/vite.config.ts`), but a module it does import comes whole, zod schemas and all (zod alone is about 350 kB). So a value the client needs doesn't live in a module that builds zod schemas: constants go in `shared/core/src/constants.ts` (`BuildingStatus`, `FLOW_MAX_WAIT_MINUTES`), schemas in `types.ts` beside the others, and `PushCmd` has its own `shared/contracts/src/push-cmd.ts`. Check with a client build: a jump of hundreds of kB in `app-*.js` usually means a schema module came in.
 - **Use const objects, never TypeScript `enum`.** Node runs `.ts` files directly (backend, `gen:api`, `tools/`), and type stripping cannot run `enum`. Follow the pattern in `shared/core/src/constants.ts`:
 
   ```ts
@@ -168,6 +169,7 @@ Worked examples: `components/military-panel/`, `components/buildings-panel/`, `c
    - Avoid import cycles between `constants.ts` and `utils.ts`. A formatter that both need belongs in `lib/` (e.g. `percent` in `lib/format.ts`).
 5. **Imports use the full path,** e.g. `@/components/military-panel/production/production` (stylesheets too: `@/index.css`); ESLint rejects relative paths. There are no `index.ts` barrel files, and nothing is re-exported. Use `import type { X }` for type-only imports.
 6. **Order within a file:** imports, then the component. The exported component is the last thing in the file.
+7. **Load on first use what most visits don't open.** Players may be on slow connections, so the first page loads only what it shows (`vendor-*.js`, `app-*.js`, about 270 kB gzipped). Every game tab but Buildings is a `lazyComponent` (`lib/lazy.ts`, declared in `routes/game/constants.ts`), fetched in the background once the page is up (`usePreloadPanels`), so switching tabs doesn't wait. A new tab, or another heavy screen or library (charts), follows the same pattern; a library only lazy screens use stays out of the `vendor` list in `vite.config.ts`.
 
 ### Tests
 
@@ -198,7 +200,7 @@ The client never writes player-facing text in code: every string comes from `src
   3. **Remove** a key from every locale once no code uses it.
   4. **A new namespace** needs its file in every locale and an entry in `src/i18next.d.ts`.
   5. Keys are typed against en-GB, so code using a missing or misspelled key fails `npm run typecheck`.
-- **Adding a locale:** add it to `LOCALES` in `lib/i18n.ts` (and to `OVERRIDE_LOCALES` if it only differs in spelling), create every namespace file for it, and add its name to `language.names` in each locale's `common.json`.
+- **Adding a locale:** add it to `LOCALES` in `lib/i18n.ts` (and to `OVERRIDE_LOCALES` if it only differs in spelling), create every namespace file for it, and add its name to `language.names` in each locale's `common.json`. A full translation also gets its loader, `src/locales/<locale>.ts` (copy `ja-JP.ts`): only en-GB and the en-US spellings are bundled with the app, and every other locale is one file loaded when chosen (a test checks the loader exists).
 - **Namespaces:** one per top-level component folder or route, named after it (`flows-panel`, `login`), plus `common` for text that means the same everywhere: actions (Cancel, Save, Log out), resources, units and durations, levels (`level.short` is "Lv {{level}}"), "{{gold}} gold", troop counts, list separators, genders, hero attributes. Use a `common` key rather than repeating its text in a namespace; a word that only looks the same (the Research tab and the Research button) keeps its own key.
 - **Adding text:**
   1. Add the key to the en-GB file of the namespace, then to `ja-JP` (and to `en-US` if the spelling differs).

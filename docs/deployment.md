@@ -319,7 +319,12 @@ Set by the image, not in `.env`: `NODE_ENV=production` (JSON logs) and `WORLD_MA
   ([Reading a stack trace](#reading-a-stack-trace)). They have to come from the same build as the bundles:
   esbuild names minified symbols differently on macOS and Linux, so maps from a build on your laptop don't fit
   the server's bundles.
-- **Web** (`client/web/Dockerfile`): Vite builds the client, nginx serves it (`client/web/nginx.conf`).
+- **Web** (`client/web/Dockerfile`): Vite builds the client and `tools/build/precompress.mjs` gzips its text files once, at
+  the highest level; nginx (`client/web/nginx.conf`) sends those `.gz` copies as they are (`gzip_static`) and
+  compresses API responses (JSON) on the fly. The first page is about 270 kB over the wire (three JavaScript files and
+  the stylesheet); the game tabs and any language but English are separate files, fetched when needed. Hashed files
+  under `/assets/` are cached for a year, `index.html` is always revalidated, so a deploy reaches players on their
+  next page load. A page left open across a deploy reloads itself if it asks for a file the deploy removed.
 - Development and the tests run the TypeScript sources directly; only the images use the bundles. A new backend
   dependency that reads its own files at run time must be listed in `OWN_FILES` in `tools/build/backend.mjs`;
   check one with a rebuilt image (`docker compose build && docker compose up -d`, then exercise it).

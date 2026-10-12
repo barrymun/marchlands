@@ -1,7 +1,6 @@
 // Buildings, research and troop/fort production rules (pure). Port of pcastle/ptech/ptroop/
 // pfortifications logic with the original's validation gaps closed.
 
-import { z } from 'zod';
 import { BALANCE, goldForCents, scaled } from '#/balance.ts';
 import { itemGoldPrice } from '#/items.ts';
 import { coinsForSpeedup, HOUR } from '#/time.ts';
@@ -11,7 +10,7 @@ import { buildingCount, buildingLevel, researchLevel, type MayorStats } from '#/
 import { GameError } from '#/errors.ts';
 import { msg, ref } from '#/messages/index.ts';
 import { addResources, emptyResources, scaleResources, type Resources } from '#/resources.ts';
-import type { BuildingState, FortCounts, ItemCounts, ResearchState, TrainBatch } from '#/types.ts';
+import type { BuildingState, FortCounts, ItemCounts, RequirementCheck, ResearchState, TrainBatch } from '#/types.ts';
 
 // ---------------------------------------------------------------------------------------------
 // Slots
@@ -59,15 +58,6 @@ export function isConstructing(buildings: BuildingState[], maxConcurrent = 1): b
 // ---------------------------------------------------------------------------------------------
 // Requirements
 // ---------------------------------------------------------------------------------------------
-
-export const RequirementCheckSchema = z.object({
-  kind: z.enum(['building', 'tech', 'item']),
-  id: z.union([z.number().int(), z.string()]).describe('building type / tech id, or item id string'),
-  required: z.number().int().describe('level (or item count) required'),
-  current: z.number().int(),
-  ok: z.boolean(),
-});
-export type RequirementCheck = z.infer<typeof RequirementCheckSchema>;
 
 /** Legacy config references items by config row id; map to the item id string. */
 function itemIdFromLegacy(legacyId: number): string | undefined {

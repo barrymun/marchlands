@@ -44,6 +44,10 @@ describe('locale files', () => {
     for (const locale of LOCALES) expect(Object.keys(byLocale[locale] ?? {}).sort(), locale).toEqual(namespaces);
   });
 
+  it('a full translation has its loader (src/locales/<locale>.ts), as it is loaded only when chosen (lib/i18n.ts)', () => {
+    for (const locale of full) expect(fs.existsSync(path.resolve(import.meta.dirname, `${locale}.ts`)), locale).toBe(true);
+  });
+
   it('are registered in i18next.d.ts (so their keys are typed)', () => {
     const decl = fs.readFileSync(path.resolve(import.meta.dirname, '../i18next.d.ts'), 'utf8');
     for (const ns of namespaces) expect(decl, ns).toContain(`/locales/en-GB/${ns}.json'`);

@@ -2,12 +2,11 @@
 // useCastleGoods / hero.useItem, speed-ups); the rest are defined here after Evony Age 1.
 // Effects are declarative; the game service applies them.
 
-import { z } from 'zod';
 import { BALANCE, goldForCents } from '#/balance.ts';
 import { createRandomHero, experienceItemGain, upgradeExpFor, type GeneratedHero } from '#/heroes.ts';
 import { itemConfig } from '#/data/index.ts';
 import { randInt, type Rng } from '#/rng.ts';
-import { ResourceSetSchema, TroopCountsSchema, type ResourceSet, type TroopCounts } from '#/types.ts';
+import type { GrantContents, ResourceSet, TroopCounts } from '#/types.ts';
 import { BuffId } from '#/constants.ts';
 import { msg, ref, share, type Message } from '#/messages/index.ts';
 import { ItemId } from '#/item-ids.ts';
@@ -24,13 +23,6 @@ export type ItemEffect =
   /** handled by a specific command (speed-ups, teleporters, hero items ...) */
   | { kind: 'command'; command: string }
   | { kind: 'special'; handler: 'civilCode' | 'cureInjured' | 'heroBox' };
-
-export const GrantContentsSchema = z.object({
-  items: z.record(z.string(), z.number().int()).optional().describe('itemId -> count'),
-  resources: ResourceSetSchema.partial().optional(),
-  troops: TroopCountsSchema.optional(),
-});
-export type GrantContents = z.infer<typeof GrantContentsSchema>;
 
 const pct = share;
 const BATTLE_BUFF_PERCENT = pct(BALANCE.battleBuffBonus);
