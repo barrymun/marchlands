@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { AllianceRank, ArmyDirection, BALANCE, Mission, msg, Relation } from '@marchlands/core';
 import { alliances, armies, players } from '@marchlands/db';
-import { alliance } from '../../../src/index.ts';
-import { addMember, allianceRow, createTestAlliance } from '../../support/alliance.ts';
-import { expectRefused } from '../../support/expect.ts';
-import { createTestPlayer, reloadCity, type TestPlayer } from '../../support/factories.ts';
-import { game, type TestGame } from '../../support/game.ts';
+import { alliance } from '#/index.ts';
+import { addMember, createTestAlliance, relationsOf } from '#test/support/alliance.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { createTestPlayer, reloadCity, type TestPlayer } from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
 
 /** An army row between two players' cities (what armies.send would store). */
 async function insertArmy(g: TestGame, from: TestPlayer, to: TestPlayer) {
@@ -76,7 +76,7 @@ describe(alliance.myAlliance.name, () => {
     }));
 });
 
-describe(alliance.relationLists.name, () => {
+describe(`${alliance.myAlliance.name}: relation lists`, () => {
   it('lists the alliances this one set as ally, neutral and enemy', () =>
     game(async (g) => {
       const a = await createTestAlliance(g);
@@ -85,16 +85,16 @@ describe(alliance.relationLists.name, () => {
       await alliance.setRelation(g, a.host.id, neutral.name, Relation.NEUTRAL);
       await alliance.setRelation(g, a.host.id, enemy.name, Relation.ENEMY);
       const summary = (x: { id: number; name: string }) => ({ id: x.id, allianceName: x.name, rank: 0, prestige: 0, honor: 0, memberCount: 1 });
-      expect(await alliance.relationLists(g, a.id)).toEqual({ friendlyList: [summary(ally)], middleList: [summary(neutral)], enemyList: [summary(enemy)] });
+      expect(await relationsOf(g, a)).toEqual({ friendlyList: [summary(ally)], middleList: [summary(neutral)], enemyList: [summary(enemy)] });
       // friendship is one-sided, war is mutual
-      expect(await alliance.relationLists(g, ally.id)).toEqual({ friendlyList: [], middleList: [], enemyList: [] });
-      expect((await alliance.relationLists(g, enemy.id)).enemyList).toEqual([summary(a)]);
+      expect(await relationsOf(g, ally)).toEqual({ friendlyList: [], middleList: [], enemyList: [] });
+      expect((await relationsOf(g, enemy)).enemyList).toEqual([summary(a)]);
     }));
 
   it('is empty for an alliance with no relations', () =>
     game(async (g) => {
       const a = await createTestAlliance(g);
-      expect(await alliance.relationLists(g, a.id)).toEqual({ friendlyList: [], middleList: [], enemyList: [] });
+      expect(await relationsOf(g, a)).toEqual({ friendlyList: [], middleList: [], enemyList: [] });
     }));
 });
 
@@ -229,27 +229,5 @@ describe(alliance.militarySituation.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await expectRefused(alliance.militarySituation(g, p.id), msg('alliance.notMember'));
-    }));
-});
-
-describe(alliance.refreshAllianceStats.name, () => {
-  it("sums members' prestige, honour, members and cities, and ranks the alliances", () =>
-    game(async (g) => {
-      const small = await createTestAlliance(g);
-      const big = await createTestAlliance(g);
-      const m = await addMember(g, big);
-      await g.tx.update(players).set({ prestige: 100, honor: 1 }).where(eq(players.id, small.host.id));
-      await g.tx.update(players).set({ prestige: 70, honor: 10 }).where(eq(players.id, big.host.id));
-      await g.tx.update(players).set({ prestige: 50, honor: 10 }).where(eq(players.id, m.id));
-
-      await alliance.refreshAllianceStats(g);
-      const s = await allianceRow(g, small.id);
-      const b = await allianceRow(g, big.id);
-      expect(s).toMatchObject({ prestige: 100, honor: 1, memberCount: 1, cityCount: 1 });
-      expect(b).toMatchObject({ prestige: 120, honor: 20, memberCount: 2, cityCount: 2 });
-      expect(b.prestigeRank).toBeLessThan(s.prestigeRank);
-      expect(b.honorRank).toBeLessThan(s.honorRank);
-      expect(b.membersRank).toBeLessThan(s.membersRank);
-      expect(s.prestigeRank).toBeGreaterThan(0);
     }));
 });

@@ -39,7 +39,7 @@ import {
   UpdateCityBody,
 } from '@marchlands/contracts';
 import { buildings, interior, research, training } from '@marchlands/game';
-import { doc, authenticate, game, tags, zCityParams, type ZApp } from '../http.ts';
+import { doc, authenticate, game, tags, zCityParams, type ZApp } from '#/http.ts';
 
 /**
  * The barracks position a troops route acts on. The training service tells troops from fortifications by the

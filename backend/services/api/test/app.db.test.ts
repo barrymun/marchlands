@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { PushCmd } from '@marchlands/contracts';
 import { players } from '@marchlands/db';
-import { buildApp } from '../src/app.ts';
-import { signToken } from '../src/auth/jwt.ts';
-import { PushGateway } from '../src/ws/gateway.ts';
-import { apiTest, TEST_CONFIG, type TestApi } from './support/api.ts';
-import { openSocket } from './support/ws-client.ts';
+import { buildApp } from '#/app.ts';
+import { signToken } from '#/auth/jwt.ts';
+import { PushGateway } from '#/ws/gateway.ts';
+import { apiTest, TEST_CONFIG, type TestApi } from '#test/support/api.ts';
+import { openSocket } from '#test/support/ws-client.ts';
 
 /** wait for the gateway's fire-and-forget lastSeenAt updates: queries on the test transaction run in order */
 const settle = (api: TestApi) => api.db.select({ id: players.id }).from(players).limit(1);

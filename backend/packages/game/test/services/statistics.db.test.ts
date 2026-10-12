@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { playerStats, worldState } from '@marchlands/db';
-import { statDay, statistics } from '../../src/index.ts';
-import { createTestPlayer } from '../support/factories.ts';
-import { game, T0, type TestGame } from '../support/game.ts';
+import { statDay } from '#/stats.ts';
+import { statistics } from '#/index.ts';
+import { createTestPlayer } from '#test/support/factories.ts';
+import { game, T0, type TestGame } from '#test/support/game.ts';
 
 const DAY = 86_400_000;
 

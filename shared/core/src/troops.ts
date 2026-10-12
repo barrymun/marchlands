@@ -1,6 +1,6 @@
 // Troop count helpers and march maths (orig spitfire::CalcTroopSpeed).
 
-import { BALANCE, scaled } from './balance.ts';
+import { BALANCE, scaled } from '#/balance.ts';
 import {
   BuildingType,
   FORT_ID_BY_KEY,
@@ -11,12 +11,12 @@ import {
   TROOP_KEYS,
   type FortKey,
   type TroopKey,
-} from './constants.ts';
-import { troopConfig } from './data/index.ts';
-import { buildingLevel, researchLevel } from './economy.ts';
-import { GameError } from './errors.ts';
-import { msg } from './messages/index.ts';
-import type { BuildingState, FortCounts, ResearchState, TroopCounts } from './types.ts';
+} from '#/constants.ts';
+import { troopConfig } from '#/data/index.ts';
+import { buildingLevel, researchLevel } from '#/economy.ts';
+import { GameError } from '#/errors.ts';
+import { msg } from '#/messages/index.ts';
+import type { BuildingState, FortCounts, ResearchState, TroopCounts } from '#/types.ts';
 
 /** Battle/legacy order: index = troop id - 2. */
 export function troopsToArray(t: TroopCounts): number[] {
@@ -230,4 +230,31 @@ export function healHonorCost(troops: Partial<Record<string, number>>): number {
     honor += n * (troopConfig(TROOP_ID_BY_KEY[key as TroopKey])?.upkeep ?? 0) * BALANCE.healHonorPerUpkeep;
   }
   return Math.ceil(honor);
+}
+
+/** Proportionally shrink several troop groups so their per-type totals equal `after`. */
+export function distributeLosses(groups: TroopCounts[], before: TroopCounts, after: TroopCounts): TroopCounts[] {
+  const out = groups.map((g) => ({ ...g }));
+  for (const k of TROOP_KEY_LIST) {
+    const b = before[k] ?? 0;
+    if (b <= 0) continue;
+    const target = after[k] ?? 0;
+    let assigned = 0;
+    for (const g of out) {
+      const v = Math.floor(((g[k] ?? 0) * target) / b);
+      g[k] = v;
+      assigned += v;
+    }
+    // hand out the rounding remainder to the largest groups
+    let rest = target - assigned;
+    const order = out.map((_, i) => i).sort((x, y) => (groups[y][k] ?? 0) - (groups[x][k] ?? 0));
+    for (const i of order) {
+      if (rest <= 0) break;
+      if ((out[i][k] ?? 0) < (groups[i][k] ?? 0)) {
+        out[i][k] = (out[i][k] ?? 0) + 1;
+        rest--;
+      }
+    }
+  }
+  return out.map((g) => Object.fromEntries(Object.entries(g).filter(([, v]) => (v ?? 0) > 0)) as TroopCounts);
 }

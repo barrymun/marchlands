@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { BALANCE, BuffId, BuildingType, heroManagement, HOUR, mayorProductionBonus, msg, TechType, TileType, valleyBonus } from '@marchlands/core';
 import { CityBean } from '@marchlands/contracts';
-import { cityBean, getTile, heroes, savePlayer, setBuff, viewOwnCity } from '../src/index.ts';
-import { holdValley } from './support/city-data.ts';
-import { addHero, cityBundle, createTestPlayer, reloadPlayer, setBuildings, setCityStats, setResearch, type TestPlayer } from './support/factories.ts';
-import { game, type TestGame } from './support/game.ts';
+import { cityBean } from '#/dto.ts';
+import { getTile, savePlayer } from '#/repo.ts';
+import { heroes } from '#/index.ts';
+import { setBuff } from '#/helpers.ts';
+import { viewOwnCity } from '#/city.ts';
+import { holdValley } from '#test/support/city-data.ts';
+import { addHero, cityBundle, createTestPlayer, reloadPlayer, setBuildings, setCityStats, setResearch, type TestPlayer } from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
 
 /** food an archer eats per hour */
 const ARCHER_UPKEEP = 9;

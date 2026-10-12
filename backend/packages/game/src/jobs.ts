@@ -3,13 +3,13 @@
 import { and, eq, lt, sql } from 'drizzle-orm';
 import { BALANCE } from '@marchlands/core';
 import { players, type Db } from '@marchlands/db';
-import { runGame } from './context.ts';
-import { getPlayer, savePlayer } from './repo.ts';
-import { checkBeginner } from './services/player.ts';
-import { merchantSweep } from './services/market.ts';
-import { refreshRankings } from './services/rankings.ts';
-import { refreshZoneStats } from './services/world.ts';
-import { compactStats } from './stats.ts';
+import { runGame } from '#/context.ts';
+import { getPlayer, savePlayer } from '#/repo.ts';
+import { checkBeginner } from '#/engine/player.ts';
+import { merchantSweep } from '#/engine/market.ts';
+import { refreshRankings } from '#/engine/rankings.ts';
+import { refreshZoneStats } from '#/engine/world.ts';
+import { compactStats } from '#/stats.ts';
 
 export async function rankingsJob(db: Db) {
   await runGame(db, (ctx) => refreshRankings(ctx));

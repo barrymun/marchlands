@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { msg } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
-import { mail, social } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
-import { createTestPlayer } from '../support/factories.ts';
-import { game } from '../support/game.ts';
 
-const { MailFolder } = mail;
+import { MailType, msg } from '@marchlands/core';
+
+import { PushCmd } from '@marchlands/contracts';
+
+import { mail, social } from '#/index.ts';
+
+import { expectRefused } from '#test/support/expect.ts';
+
+import { createTestPlayer } from '#test/support/factories.ts';
+
+import { game } from '#test/support/game.ts';
 
 describe(mail.sendMail.name, () => {
   it('delivers to the inbox and keeps a read copy in the sent folder', () =>
@@ -15,11 +19,11 @@ describe(mail.sendMail.name, () => {
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, 'Hello', 'How are you?');
 
-      const inbox = await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10);
+      const inbox = await mail.listMail(g, b.id, MailType.INBOX, 1, 10);
       expect(inbox.mails).toHaveLength(1);
       expect(inbox.mails[0]).toMatchObject({ title: 'Hello', sender: a.name, receiver: b.name, playerId: a.id, isRead: false });
 
-      const sent = await mail.listMail(g, a.id, MailFolder.SENT, 1, 10);
+      const sent = await mail.listMail(g, a.id, MailType.SENT, 1, 10);
       expect(sent.mails[0]).toMatchObject({ title: 'Hello', sender: a.name, receiver: b.name, isRead: true });
       expect(await mail.mailCounts(g, b.id)).toEqual({ count: 1, count_inbox: 1, count_system: 0 });
       expect(g.pushes(PushCmd.NEW_MAIL).at(-1)).toMatchObject({ playerIds: [b.id], data: { count: 1, count_inbox: 1 } });
@@ -30,7 +34,7 @@ describe(mail.sendMail.name, () => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, '  <b>Hi</b>  ', '<script>x</script>');
-      const [m] = (await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10)).mails;
+      const [m] = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
       const read = await mail.readMail(g, b.id, m.mailid);
       expect(read.title).toBe('&lt;b&gt;Hi&lt;/b&gt;');
       expect(read.content).toBe('&lt;script&gt;x&lt;/script&gt;');
@@ -51,28 +55,8 @@ describe(mail.sendMail.name, () => {
       const b = await createTestPlayer(g);
       await social.addRelation(g, b.id, a.name, 'block');
       await mail.sendMail(g, a.id, b.name, 'Hi', 'there');
-      expect((await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10)).mails).toHaveLength(0);
-      expect((await mail.listMail(g, a.id, MailFolder.SENT, 1, 10)).mails).toHaveLength(1);
-    }));
-});
-
-describe(mail.sendSystemMail.name, () => {
-  it('files system mail with no sender and its message', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      await mail.sendSystemMail(g, a.id, 'Welcome', 'Body');
-      const [m] = (await mail.listMail(g, a.id, MailFolder.SYSTEM, 1, 10)).mails;
-      expect(m).toMatchObject({ title: 'Welcome', sender: null, isRead: false });
-      expect(await mail.mailCounts(g, a.id)).toMatchObject({ count: 1, count_system: 1 });
-    }));
-
-  it('sent on behalf of a player, it goes to the inbox from them', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      const b = await createTestPlayer(g);
-      await mail.sendSystemMail(g, b.id, 'Circular', 'Text', { fromId: a.id, fromName: a.name });
-      const [m] = (await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10)).mails;
-      expect(m).toMatchObject({ sender: a.name, playerId: a.id });
+      expect((await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails).toHaveLength(0);
+      expect((await mail.listMail(g, a.id, MailType.SENT, 1, 10)).mails).toHaveLength(1);
     }));
 });
 
@@ -85,10 +69,10 @@ describe(mail.listMail.name, () => {
         await mail.sendMail(g, a.id, b.name, `Mail ${i}`, 'x');
         g.advance(1000);
       }
-      const page1 = await mail.listMail(g, b.id, MailFolder.INBOX, 1, 2);
+      const page1 = await mail.listMail(g, b.id, MailType.INBOX, 1, 2);
       expect(page1).toMatchObject({ pageNo: 1, pageSize: 2, totalPage: 3 });
       expect(page1.mails.map((m) => m.title)).toEqual(['Mail 5', 'Mail 4']);
-      expect((await mail.listMail(g, b.id, MailFolder.INBOX, 3, 2)).mails.map((m) => m.title)).toEqual(['Mail 1']);
+      expect((await mail.listMail(g, b.id, MailType.INBOX, 3, 2)).mails.map((m) => m.title)).toEqual(['Mail 1']);
     }));
 
   it('rejects an unknown folder and a bad page size', () =>
@@ -105,7 +89,7 @@ describe(mail.readMail.name, () => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, 'Hi', 'there');
-      const [m] = (await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10)).mails;
+      const [m] = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
       expect(await mail.readMail(g, b.id, m.mailid)).toMatchObject({ content: 'there', isRead: true });
       expect(await mail.mailCounts(g, b.id)).toMatchObject({ count: 0 });
     }));
@@ -115,7 +99,7 @@ describe(mail.readMail.name, () => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, 'Hi', 'there');
-      const [m] = (await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10)).mails;
+      const [m] = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
       await expectRefused(mail.readMail(g, a.id, m.mailid), msg('mail.notFound'));
     }));
 });
@@ -127,7 +111,7 @@ describe(mail.markMailRead.name, () => {
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, 'One', 'x');
       await mail.sendMail(g, a.id, b.name, 'Two', 'x');
-      const mails = (await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10)).mails;
+      const mails = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
       await mail.markMailRead(g, a.id, [mails[0].mailid]); // not a's mail: no effect
       await mail.markMailRead(g, b.id, [mails[0].mailid]);
       expect(await mail.mailCounts(g, b.id)).toMatchObject({ count: 1 });
@@ -140,11 +124,11 @@ describe(mail.deleteMail.name, () => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, 'Hi', 'x');
-      const [m] = (await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10)).mails;
+      const [m] = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
       await mail.deleteMail(g, a.id, [m.mailid]);
-      expect((await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10)).mails).toHaveLength(1);
+      expect((await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails).toHaveLength(1);
       await mail.deleteMail(g, b.id, [m.mailid]);
-      expect((await mail.listMail(g, b.id, MailFolder.INBOX, 1, 10)).mails).toHaveLength(0);
-      expect((await mail.listMail(g, a.id, MailFolder.SENT, 1, 10)).mails).toHaveLength(1);
+      expect((await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails).toHaveLength(0);
+      expect((await mail.listMail(g, a.id, MailType.SENT, 1, 10)).mails).toHaveLength(1);
     }));
 });

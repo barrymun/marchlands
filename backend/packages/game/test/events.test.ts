@@ -2,25 +2,25 @@
 // is covered by their own tests, and events.db.test.ts runs real events end to end).
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { dispatchEvent, type EventRow } from '../src/events.ts';
-import type { Ctx } from '../src/context.ts';
-import { getPlayer } from '../src/repo.ts';
-import { completeBuilding } from '../src/services/buildings.ts';
-import { processArmy } from '../src/services/combat.ts';
-import { resumeFlow, runQueue, runScheduledHeal } from '../src/services/flows.ts';
-import { expireHeroBuff } from '../src/services/heroes.ts';
-import { deliverShipment } from '../src/services/market.ts';
-import { completeResearch } from '../src/services/research.ts';
-import { completeTraining } from '../src/services/training.ts';
+import { dispatchEvent, type EventRow } from '#/events.ts';
+import type { Ctx } from '#/context.ts';
+import { getPlayer } from '#/repo.ts';
+import { completeBuilding } from '#/engine/buildings.ts';
+import { processArmy } from '#/engine/combat.ts';
+import { resumeFlow, runQueue, runScheduledHeal } from '#/engine/flows.ts';
+import { expireHeroBuff } from '#/engine/heroes.ts';
+import { deliverShipment } from '#/engine/market.ts';
+import { completeResearch } from '#/engine/research.ts';
+import { completeTraining } from '#/engine/training.ts';
 
-vi.mock('../src/services/buildings.ts', () => ({ completeBuilding: vi.fn() }));
-vi.mock('../src/services/combat.ts', () => ({ processArmy: vi.fn(async () => 'army result') }));
-vi.mock('../src/services/flows.ts', () => ({ resumeFlow: vi.fn(), runQueue: vi.fn(), runScheduledHeal: vi.fn() }));
-vi.mock('../src/services/heroes.ts', () => ({ expireHeroBuff: vi.fn() }));
-vi.mock('../src/services/market.ts', () => ({ deliverShipment: vi.fn() }));
-vi.mock('../src/services/research.ts', () => ({ completeResearch: vi.fn(), settleAllCities: vi.fn() }));
-vi.mock('../src/services/training.ts', () => ({ completeTraining: vi.fn() }));
-vi.mock('../src/repo.ts', () => ({ getPlayer: vi.fn(), savePlayer: vi.fn() }));
+vi.mock('#/engine/buildings.ts', () => ({ completeBuilding: vi.fn() }));
+vi.mock('#/engine/combat.ts', () => ({ processArmy: vi.fn(async () => 'army result') }));
+vi.mock('#/engine/flows.ts', () => ({ resumeFlow: vi.fn(), runQueue: vi.fn(), runScheduledHeal: vi.fn() }));
+vi.mock('#/engine/heroes.ts', () => ({ expireHeroBuff: vi.fn() }));
+vi.mock('#/engine/market.ts', () => ({ deliverShipment: vi.fn() }));
+vi.mock('#/engine/research.ts', () => ({ completeResearch: vi.fn(), settleAllCities: vi.fn() }));
+vi.mock('#/engine/training.ts', () => ({ completeTraining: vi.fn() }));
+vi.mock('#/repo.ts', () => ({ getPlayer: vi.fn(), savePlayer: vi.fn() }));
 
 const ctx = { now: 1000 } as Ctx;
 

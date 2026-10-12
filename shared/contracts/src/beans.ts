@@ -3,8 +3,8 @@
 
 import { z } from 'zod';
 import { BUFF_IDS, BuildingStateSchema, HERO_BUFF_IDS, MessageSchema } from '@marchlands/core';
-import { FortBean, Ms, ResourceAmounts, TroopBean } from './common.ts';
-import { ArmyRow, HeroRow, PlayerRow, TileRow } from './rows.ts';
+import { FortBean, Ms, ResourceAmounts, TroopBean } from '#/common.ts';
+import { ArmyRow, HeroRow, PlayerRow, TileRow } from '#/rows.ts';
 
 export const BuildingBean = BuildingStateSchema.extend({}).meta({ id: 'BuildingBean' });
 export type BuildingBean = z.infer<typeof BuildingBean>;

@@ -2,8 +2,8 @@
 
 import { z } from 'zod';
 import { MessageSchema } from '@marchlands/core';
-import { Ms, zId, zPaging } from './common.ts';
-import { AllianceEventRow, AllianceRequestRow, AllianceRow, ArmyRow, ChatMessageRow, MailRow, PlayerRow, ReportRow } from './rows.ts';
+import { Ms, zId, zPaging } from '#/common.ts';
+import { AllianceEventRow, AllianceRequestRow, AllianceRow, ArmyRow, ChatMessageRow, MailRow, PlayerRow, ReportRow } from '#/rows.ts';
 
 // ---- mail ----
 

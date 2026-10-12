@@ -3,11 +3,11 @@ import { eq } from 'drizzle-orm';
 import { AllianceRank, BALANCE, BuildingType, msg, ref } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
 import { alliances, players } from '@marchlands/db';
-import { alliance } from '../../../src/index.ts';
-import { addMember, createTestAlliance, withEmbassy } from '../../support/alliance.ts';
-import { expectRefused } from '../../support/expect.ts';
-import { createTestPlayer, reloadPlayer } from '../../support/factories.ts';
-import { game } from '../../support/game.ts';
+import { alliance } from '#/index.ts';
+import { addMember, createTestAlliance, withEmbassy } from '#test/support/alliance.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { createTestPlayer, reloadPlayer } from '#test/support/factories.ts';
+import { game } from '#test/support/game.ts';
 
 const noEmbassy = msg('alliance.buildingRequired', { building: ref.building(BuildingType.EMBASSY) });
 

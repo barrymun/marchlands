@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { researchesInCity } from '../../src/services/research.ts';
+import { researchesInCity } from '#/index.ts';
 
 describe(researchesInCity.name, () => {
   it("lists the techs running in that city only, and none that aren't running", () => {

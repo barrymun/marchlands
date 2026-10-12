@@ -2,9 +2,10 @@
 // escrow sums the market service uses, and switches for the BALANCE rules a test needs changed for
 // its duration: the merchant's price curve (instead of its fixed price) and timed shipments.
 
-import { BALANCE, BuildingType, type ResourceSet } from '@marchlands/core';
-import { createTestPlayer, setBuildings, setResources, type TestPlayer } from './factories.ts';
-import type { TestGame } from './game.ts';
+import { BALANCE, BuildingType, MarketSide, merchantBase, type ResourceSet } from '@marchlands/core';
+import { createTestPlayer, setBuildings, setResources, type TestPlayer } from '#test/support/factories.ts';
+import type { TestGame } from '#test/support/game.ts';
+import { market } from '#/index.ts';
 
 export const GOLD = 4;
 export const Res = { FOOD: 0, WOOD: 1, STONE: 2, IRON: 3 } as const;
@@ -48,3 +49,12 @@ export const withShipmentTime = <T>(ms: number, fn: () => Promise<T>) =>
     mutable.marketShipmentBaseMs = ms;
     return () => (mutable.marketShipmentBaseMs = saved);
   }, fn);
+
+export const bidPrice = () => Math.round(merchantBase('wood') * 1.03 * 1000) / 1000;
+
+export async function shipWoodTo(g: TestGame, a: TestPlayer, b: TestPlayer, amount = 1000) {
+  await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount, price: bidPrice() });
+  await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount, type: 'market' });
+  const [s] = await market.myShipments(g, b.id);
+  return s;
+}

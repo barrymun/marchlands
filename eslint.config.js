@@ -7,6 +7,9 @@ import i18next from 'eslint-plugin-i18next';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+const RELATIVE_IMPORT = { group: ['./*', '../*'], message: 'Use #/… or #test/… instead of a relative path.' };
+const TESTING_IMPORT = { name: '@marchlands/game/testing', message: 'Test hooks only: use @marchlands/game.' };
+
 export default tseslint.config(
   {
     ignores: ['**/node_modules', '**/dist', 'shared/api-client/src/generated', 'backend/packages/db/migrations', 'db'],
@@ -19,6 +22,24 @@ export default tseslint.config(
       // `_name` marks an argument or binding kept on purpose
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
     },
+  },
+  {
+    // backend and shared imports are absolute: #/… (the package's src) and #test/…, from package.json "imports" (AGENTS.md)
+    files: ['backend/**/*.ts', 'shared/core/**/*.ts', 'shared/contracts/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [RELATIVE_IMPORT] }],
+    },
+  },
+  {
+    // the game package's test hooks are for tests only: app code uses its index (AGENTS.md, Backend tests)
+    files: ['backend/services/*/src/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { paths: [TESTING_IMPORT], patterns: [RELATIVE_IMPORT] }],
+    },
+  },
+  {
+    files: ['tools/**/*.{ts,mjs}'],
+    rules: { 'no-restricted-imports': ['error', { paths: [TESTING_IMPORT] }] },
   },
   {
     files: ['client/web/**/*.{ts,tsx}'],

@@ -6,7 +6,7 @@ import type { HeroBean } from '@marchlands/api-client';
 import { i18n } from '@/lib/i18n';
 
 /** Badge colours (background + text, light and dark) per attribute. */
-export const ATTRIBUTE_TONE = {
+const ATTRIBUTE_TONE = {
   pol: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
   att: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300',
   int: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300',
@@ -22,7 +22,7 @@ export const ATTRIBUTE_BORDER = {
 } as const satisfies Record<AttributeKey, string>;
 
 /** `stat`: the attribute's field name on the hero (and in gear / boost APIs); `label` and `short` are in the current locale. */
-export const HERO_ATTRIBUTES = [
+const HERO_ATTRIBUTES = [
   {
     key: 'pol',
     stat: 'management',

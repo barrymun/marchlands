@@ -1,5 +1,6 @@
-// Helpers for the army and combat tests (armies.db.test.ts, combat/*.db.test.ts): a city ready for war,
-// targets on the seeded map near it, running a march through the real timed events, and its reports.
+// Helpers for the army and combat tests (services/armies.db.test.ts, engine/armies.db.test.ts,
+// engine/combat/*.db.test.ts): a city ready for war, targets on the seeded map near it, running a march
+// through the real timed events, and its reports.
 
 import { expect } from 'vitest';
 import { asc, eq } from 'drizzle-orm';
@@ -17,11 +18,13 @@ import {
   type ScoutReport,
 } from '@marchlands/core';
 import { reports } from '@marchlands/db';
-import { admin, alliance, armies, citiesOf, getArmy, getCity, getHero, getTile, world, type ArmyRow, type TileRow } from '../../src/index.ts';
-import { addHero, createTestPlayer, setBuildings, setCityStats, setResources, type TestPlayer } from './factories.ts';
-import type { TestGame } from './game.ts';
+import { admin, alliance, armies, world } from '#/index.ts';
+import { citiesOf, getArmy, getCity, getHero, getTile, type ArmyRow, type TileRow } from '#/repo.ts';
+import { addHero, createTestPlayer, setBuildings, setCityStats, setResources, type TestPlayer } from '#test/support/factories.ts';
+import type { TestGame } from '#test/support/game.ts';
+import { PushCmd, type SendArmyBody } from '@marchlands/contracts';
 
-export const RICH = { gold: 10_000_000, food: 10_000_000, wood: 10_000_000, stone: 10_000_000, iron: 10_000_000 };
+const RICH = { gold: 10_000_000, food: 10_000_000, wood: 10_000_000, stone: 10_000_000, iron: 10_000_000 };
 export const NO_RESOURCES = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
 
 /**
@@ -61,7 +64,7 @@ export async function warrior(
 }
 
 /** Send an army from the player's starting city. */
-export const send = (g: TestGame, p: TestPlayer, input: armies.SendArmyInput) => armies.sendArmy(g, p.id, p.cityId, input);
+export const send = (g: TestGame, p: TestPlayer, input: SendArmyBody) => armies.sendArmy(g, p.id, p.cityId, input);
 
 /** The tile of a player's city. */
 export const cityTile = async (g: TestGame, cityId: number) => (await getCity(g, cityId)).tileId;
@@ -92,7 +95,7 @@ export async function occupyValley(g: TestGame, p: TestPlayer, heroId: number) {
 }
 
 /** Free tiles of a type near a city (no city on them, not occupied), nearest first. */
-export async function tilesNear(g: TestGame, cityId: number, type: TileType, opts: { level?: number; radius?: number } = {}): Promise<TileRow[]> {
+async function tilesNear(g: TestGame, cityId: number, type: TileType, opts: { level?: number; radius?: number } = {}): Promise<TileRow[]> {
   const c = await getCity(g, cityId);
   const { x, y } = tileXY(c.tileId);
   const found = await world.searchTiles(g, x, y, opts.radius ?? 10, type);
@@ -193,3 +196,9 @@ export async function expectWipedHero(g: TestGame, heroId: number, loyaltyBefore
   } else expect(h).toMatchObject({ status: HeroStatus.IDLE, cityId: home.cityId, capturedByPlayerId: null });
   return h;
 }
+
+export const lastPush = (g: TestGame, cmd: PushCmd, playerId: number) =>
+  g
+    .pushes(cmd)
+    .filter((x) => x.playerIds.includes(playerId))
+    .at(-1);

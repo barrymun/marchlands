@@ -4,17 +4,17 @@
 // Descriptions are messages (messages/item-info.ts), worded by the client; item and category
 // names come from the client's locale files by id.
 
-import { BALANCE } from './balance.ts';
-import { BuildingType, TROOP_ID_BY_KEY, type TroopKey } from './constants.ts';
-import { SPEEDUP_ITEMS } from './construction.ts';
-import { ITEMS, itemConfig } from './data/index.ts';
-import { experienceItemGain } from './heroes.ts';
-import { HERO_ATTRIBUTE_ITEMS, heroBoxQuality, itemEffect, itemGoldPrice, medalId, medalOdds, type GrantContents } from './items.ts';
-import { msg, ref, share, type Message } from './messages/index.ts';
-import { QUEST_CATALOGUE } from './quests.ts';
-import { seededRng } from './rng.ts';
-import { DAY, HOUR, MINUTE } from './time.ts';
-import { ItemId } from './item-ids.ts';
+import { BALANCE } from '#/balance.ts';
+import { BuildingType, TROOP_ID_BY_KEY, type TroopKey } from '#/constants.ts';
+import { SPEEDUP_ITEMS } from '#/construction.ts';
+import { ITEMS, itemConfig } from '#/data/index.ts';
+import { experienceItemGain } from '#/heroes.ts';
+import { HERO_ATTRIBUTE_ITEMS, heroBoxQuality, itemEffect, itemGoldPrice, medalId, medalOdds, type GrantContents } from '#/items.ts';
+import { msg, ref, share, type Message } from '#/messages/index.ts';
+import { QUEST_CATALOGUE } from '#/quests.ts';
+import { seededRng } from '#/rng.ts';
+import { DAY, HOUR, MINUTE } from '#/time.ts';
+import { ItemId } from '#/item-ids.ts';
 
 export interface ItemInfo {
   id: string;

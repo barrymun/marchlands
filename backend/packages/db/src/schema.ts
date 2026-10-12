@@ -45,7 +45,7 @@ import type {
   FlowRunLog,
   FlowStatus,
   Message,
-} from './types.ts';
+} from '#/types.ts';
 
 const ms = (name: string) => bigint(name, { mode: 'number' });
 

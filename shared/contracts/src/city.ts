@@ -3,8 +3,8 @@
 
 import { z } from 'zod';
 import { FortKeySchema, MessageSchema, RequirementCheckSchema, ResourceKeySchema, TroopKeySchema } from '@marchlands/core';
-import { Ms, ResourceAmounts, zCityParams, zId, zTroops } from './common.ts';
-import { BuildingBean } from './beans.ts';
+import { Ms, ResourceAmounts, zCityParams, zId, zTroops } from '#/common.ts';
+import { BuildingBean } from '#/beans.ts';
 
 // ---- requests ----
 

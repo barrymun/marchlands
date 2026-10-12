@@ -1,14 +1,14 @@
 // Static game configuration converted from the legacy `config_*` tables
 // (tools/legacy-import/convert.mjs). Treat as read-only.
 
-import { BuildingType, TechType } from '../constants.ts';
-import type { Resources } from '../resources.ts';
-import buildingRows from './legacy/buildings.json' with { type: 'json' };
-import researchRows from './legacy/research.json' with { type: 'json' };
-import troopRows from './legacy/troops.json' with { type: 'json' };
-import itemRows from './legacy/items.json' with { type: 'json' };
-import questRows from './legacy/quests.json' with { type: 'json' };
-import { ItemId } from '../item-ids.ts';
+import { BuildingType, TechType } from '#/constants.ts';
+import type { Resources } from '#/resources.ts';
+import buildingRows from '#/data/legacy/buildings.json' with { type: 'json' };
+import researchRows from '#/data/legacy/research.json' with { type: 'json' };
+import troopRows from '#/data/legacy/troops.json' with { type: 'json' };
+import itemRows from '#/data/legacy/items.json' with { type: 'json' };
+import questRows from '#/data/legacy/quests.json' with { type: 'json' };
+import { ItemId } from '#/item-ids.ts';
 
 export interface Prereq {
   id: number;

@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { eq, like } from 'drizzle-orm';
 import { GameError, msg, seededRng } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { playerStats, pushMessages, timedEvents, worldState, type Db, type DbOrTx } from '@marchlands/db';
-import { flushStats, runGame, savepoint, statDay, type Ctx, type RunOptions } from '../src/index.ts';
-import { createTestPlayer } from './support/factories.ts';
-import { game, T0 } from './support/game.ts';
-import { arrange, inTestTx } from './support/tx.ts';
+import { playerStats, pushMessages, timedEvents, worldState, type Db, type Tx } from '@marchlands/db';
+import { flushStats, statDay } from '#/stats.ts';
+import { runGame, type Ctx } from '#/index.ts';
+import { savepoint, type RunOptions } from '#/context.ts';
+import { createTestPlayer } from '#test/support/factories.ts';
+import { game, T0 } from '#test/support/game.ts';
+import { arrange, inTestTx } from '#test/support/tx.ts';
 
 const NOW = T0 + 12 * 3_600_000;
 
@@ -23,7 +25,7 @@ const pgError = (code: string) => Object.assign(new Error(`pg ${code}`), { code 
 
 /** A marker row: shows whether an attempt's writes were kept. */
 const mark = (ctx: Ctx, key: string) => ctx.tx.insert(worldState).values({ key, value: { at: ctx.now }, updatedAt: ctx.now });
-const marked = async (db: DbOrTx, key: string) => (await db.select().from(worldState).where(eq(worldState.key, key))).length > 0;
+const marked = async (db: Db | Tx, key: string) => (await db.select().from(worldState).where(eq(worldState.key, key))).length > 0;
 
 describe(runGame.name, () => {
   it('runs the operation at the given time with the given random numbers, and returns its result', () =>

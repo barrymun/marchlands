@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   BALANCE,
   BuildingType,
-  createRandomHero,
   experienceItemGain,
   gearStarCost,
   heroAttributeBuffEnd,
@@ -26,52 +25,18 @@ import {
   medalId,
   msg,
   ref,
-  seededRng,
   tavernRefreshCost,
   TechType,
   upgradeExpFor,
 } from '@marchlands/core';
-import { PushCmd, type PushData } from '@marchlands/contracts';
-import { getHero, getPlayer, heroBean, heroes, heroesOfCity, saveHero, savePlayer, type HeroRow } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
-import {
-  addHero,
-  cityBundle,
-  createTestPlayer,
-  giveItems,
-  reloadCity,
-  reloadPlayer,
-  setBuildings,
-  setResearch,
-  setResources,
-  type TestPlayer,
-} from '../support/factories.ts';
-import { game, type TestGame } from '../support/game.ts';
-
-const INN = 2;
-const HALL = 3;
-
-/** An Inn and a Feasting Hall (hero slots) in the player's city. */
-const heroBuildings = (g: TestGame, p: TestPlayer, inn: number, hall = 3) =>
-  setBuildings(g, p, [
-    [INN, BuildingType.INN, inn],
-    [HALL, BuildingType.FEASTING_HALL, hall],
-  ]);
-
-/** Change a stored hero through the repo (gear and boosts follow, as for any save). */
-async function patchHero(g: TestGame, id: number, fields: Partial<HeroRow>): Promise<HeroRow> {
-  const h = await getHero(g, id);
-  Object.assign(h, fields);
-  await saveHero(g, h);
-  return getHero(g, id);
-}
-
-/** Change the stored player directly (no gear resync, unlike the admin tools). */
-async function patchPlayer(g: TestGame, p: TestPlayer, change: (row: Awaited<ReturnType<typeof getPlayer>>) => void) {
-  const row = await getPlayer(g, p.id);
-  change(row);
-  await savePlayer(g, row);
-}
+import { PushCmd } from '@marchlands/contracts';
+import { getHero, heroesOfCity } from '#/repo.ts';
+import { heroBean } from '#/dto.ts';
+import { heroes } from '#/index.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { addHero, createTestPlayer, giveItems, reloadCity, reloadPlayer, setResearch, setResources, type TestPlayer } from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
+import { heroBuildings, patchHero, patchPlayer, lastHeroPush, pushedHeroes } from '#test/support/heroes.ts';
 
 /** Hero `heroId` of `owner` is held captive in `captor`'s city, as combat leaves it. */
 const capture = (g: TestGame, heroId: number, owner: TestPlayer, captor: TestPlayer, loyalty = 70) =>
@@ -84,65 +49,6 @@ const capture = (g: TestGame, heroId: number, owner: TestPlayer, captor: TestPla
   });
 
 const gold = async (g: TestGame, p: TestPlayer) => (await reloadCity(g, p.cityId)).gold;
-const lastHeroPush = (g: TestGame) => g.pushes(PushCmd.HERO_UPDATE).at(-1);
-/** The heroes pushed in HERO_UPDATE, in order. */
-const pushedHeroes = (g: TestGame) => g.pushes(PushCmd.HERO_UPDATE).map((x) => (x.data as PushData<typeof PushCmd.HERO_UPDATE>).hero);
-
-describe(heroes.heroValues.name, () => {
-  it('takes the stored columns of a generated hero', () => {
-    const generated = createRandomHero(3, seededRng('values'));
-    const v = heroes.heroValues(generated);
-    expect(v).toEqual({
-      name: generated.name,
-      logoUrl: generated.logoUrl,
-      level: generated.level,
-      experience: generated.experience,
-      upgradeExp: generated.upgradeExp,
-      loyalty: generated.loyalty,
-      basePower: generated.basePower,
-      baseManagement: generated.baseManagement,
-      baseStratagem: generated.baseStratagem,
-      power: generated.power,
-      management: generated.management,
-      stratagem: generated.stratagem,
-      remainPoint: generated.remainPoint,
-    });
-  });
-});
-
-describe(heroes.heroSlots.name, () => {
-  it('is the Feasting Hall level', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      expect(heroes.heroSlots(await cityBundle(g, p))).toBe(0);
-      await heroBuildings(g, p, 1, 4);
-      expect(heroes.heroSlots(await cityBundle(g, p))).toBe(4);
-    }));
-});
-
-describe(heroes.pushHero.name, () => {
-  it('pushes the hero to its player with the update type', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      const h = await getHero(g, await addHero(g, p));
-      heroes.pushHero(g, p.id, h, 2);
-      expect(lastHeroPush(g)).toEqual({ playerIds: [p.id], cmd: PushCmd.HERO_UPDATE, data: { castleId: p.cityId, hero: heroBean(h), updateType: 2 } });
-    }));
-});
-
-describe(heroes.clearTavern.name, () => {
-  it("removes the Inn's offers and keeps the hired heroes", () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await heroBuildings(g, p, 3);
-      const hired = await addHero(g, p);
-      await heroes.tavern(g, p.id, p.cityId);
-      expect(await heroesOfCity(g, p.cityId, { tavern: true })).toHaveLength(3);
-      await heroes.clearTavern(g, p.cityId);
-      expect(await heroesOfCity(g, p.cityId, { tavern: true })).toHaveLength(0);
-      expect((await heroesOfCity(g, p.cityId)).map((h) => h.id)).toEqual([hired]);
-    }));
-});
 
 describe(heroes.listHeroes.name, () => {
   it("lists the city's heroes and its slots", () =>
@@ -560,31 +466,6 @@ describe(heroes.setHeroGearStat.name, () => {
     }));
 });
 
-describe(heroes.resyncHeroGear.name, () => {
-  it("puts the lord's gear on every hero whose gear changed", () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      const geared = await addHero(g, p);
-      const low = await addHero(g, p);
-      await patchHero(g, geared, { level: 30 });
-      await patchHero(g, low, { level: 5 }); // gear tier 0: no gear to wear
-      await patchPlayer(g, p, (row) => {
-        row.research = { ...row.research, [TechType.HERO_ENHANCEMENT]: { level: 3 } };
-      });
-      const h = await getHero(g, geared);
-      expect(h.powerAdded + h.managementAdded + h.stratagemAdded).toBe(0); // not yet applied
-      const pushes = g.pushes(PushCmd.HERO_UPDATE).length;
-      await heroes.resyncHeroGear(g, p.id);
-      const after = await getHero(g, geared);
-      expect(after[`${heroGearStat(after)}Added`]).toBe(heroGearBonus(30, lordGear(await reloadPlayer(g, p))));
-      expect(
-        pushedHeroes(g)
-          .slice(pushes)
-          .map((h) => h.id),
-      ).toEqual([geared]);
-    }));
-});
-
 describe(heroes.gearState.name, () => {
   it("is the lord's Hero Enhancement level and stars", () =>
     game(async (g) => {
@@ -785,29 +666,6 @@ describe(heroes.useHeroItem.name, () => {
       await expectRefused(heroes.useHeroItem(g, a.id, id, ItemId.HOLY_WATER), msg('hero.invalidItem'));
       await expectRefused(heroes.useHeroItem(g, a.id, id, 'no.such.item'), msg('hero.invalidItem'));
       await expectRefused(heroes.useHeroItem(g, b.id, id, ItemId.ANABASIS), msg('common.heroNotFound'));
-    }));
-});
-
-describe(heroes.expireHeroBuff.name, () => {
-  it('removes a boost that has run out, and only then', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      const id = await addHero(g, p);
-      await giveItems(g, p, { [ItemId.ART_OF_WAR]: 1 });
-      await heroes.useHeroItem(g, p.id, id, ItemId.ART_OF_WAR);
-      const end = (await getHero(g, id)).buffs[0].endTime;
-      await heroes.expireHeroBuff(g, id, HeroBuffId.STRATAGEM);
-      expect((await getHero(g, id)).buffs).toHaveLength(1);
-      await heroes.expireHeroBuff(g, id, HeroBuffId.POWER); // no such boost
-      expect((await getHero(g, id)).buffs).toHaveLength(1);
-      g.advance(end - g.now);
-      await heroes.expireHeroBuff(g, id, HeroBuffId.STRATAGEM);
-      expect(await getHero(g, id)).toMatchObject({ buffs: [], stratagemBuffAdded: 0 });
-    }));
-
-  it('ignores a hero that is gone', () =>
-    game(async (g) => {
-      await expect(heroes.expireHeroBuff(g, 999_999_999, HeroBuffId.POWER)).resolves.toBeUndefined();
     }));
 });
 

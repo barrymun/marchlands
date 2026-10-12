@@ -3,15 +3,33 @@ import { describe, expect, it } from 'vitest';
 import { freshNpcState, TileType, tileId, tileXY } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
 import { tiles } from '@marchlands/db';
-import { admin, flows, getTile, saveTile } from '../../../src/index.ts';
-import { createTestPlayer, reloadCity } from '../../support/factories.ts';
-import { armyPreset, farmingCity, flowOf, newFlow, runFlowIn } from '../../support/flows.ts';
-import { game, type TestGame } from '../../support/game.ts';
+import { admin } from '#/index.ts';
+import { getTile, saveTile } from '#/repo.ts';
+import { createTestPlayer, reloadCity } from '#test/support/factories.ts';
+import { armyPreset, farmingCity, flowOf, newFlow, runFlowIn } from '#test/support/flows.ts';
+import { game, type TestGame } from '#test/support/game.ts';
+import { dropCapturedTarget } from '#/engine/flows.ts';
 
 const mayor = { type: 'setMayor', stat: 'power' };
 const attack = (targets: Record<string, number[]>) => ({ type: 'attackTargets', presetId: '', targets });
 
-describe(flows.dropCapturedTarget.name, () => {
+/** The nearest barbarian city to this city. */
+async function npcNear(g: TestGame, cityId: number) {
+  const c = await reloadCity(g, cityId);
+  const { x, y } = tileXY(c.tileId);
+  const near: number[] = [];
+  for (let dy = -15; dy <= 15; dy++) for (let dx = -15; dx <= 15; dx++) near.push(tileId(x + dx, y + dy));
+  const rows = await g.tx
+    .select({ id: tiles.id })
+    .from(tiles)
+    .where(and(inArray(tiles.id, near), eq(tiles.type, TileType.NPC)));
+  const dist = (id: number) => Math.abs(tileXY(id).x - x) + Math.abs(tileXY(id).y - y);
+  const [nearest] = rows.map((r) => r.id).sort((p, q) => dist(p) - dist(q));
+  if (nearest == null) throw new Error('no barbarian city near');
+  return nearest;
+}
+
+describe(dropCapturedTarget.name, () => {
   it("takes the captured tile off every player's farming lists, and tells them", () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
@@ -19,7 +37,7 @@ describe(flows.dropCapturedTarget.name, () => {
       const fa = await newFlow(g, a, { name: 'A', actions: [mayor, attack({ [a.cityId]: [100, 200, 300] }), attack({ [a.cityId]: [200] })] });
       const fb = await newFlow(g, b, { name: 'B', actions: [attack({ [b.cityId]: [200] })] });
 
-      await flows.dropCapturedTarget(g, 200);
+      await dropCapturedTarget(g, 200);
       expect((await flowOf(g, a, fa.id)).actions).toEqual([mayor, attack({ [a.cityId]: [100, 300] }), attack({ [a.cityId]: [] })]);
       expect((await flowOf(g, b, fb.id)).actions).toEqual([attack({ [b.cityId]: [] })]);
       expect(g.pushes(PushCmd.FLOW_UPDATE).map((p) => [p.playerIds, p.data])).toEqual(
@@ -34,13 +52,13 @@ describe(flows.dropCapturedTarget.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const f = await newFlow(g, a, { name: 'A', actions: [mayor, attack({ [a.cityId]: [100, 300] })] });
-      await flows.dropCapturedTarget(g, 200);
+      await dropCapturedTarget(g, 200);
       expect((await flowOf(g, a, f.id)).actions).toEqual([mayor, attack({ [a.cityId]: [100, 300] })]);
       expect(g.pushes(PushCmd.FLOW_UPDATE)).toEqual([]);
     }));
 });
 
-describe(`${flows.dropCapturedTarget.name} (through combat)`, () => {
+describe(`${dropCapturedTarget.name} (through combat)`, () => {
   it('a barbarian city taken by an attack leaves the farming lists that had it', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
@@ -65,19 +83,3 @@ describe(`${flows.dropCapturedTarget.name} (through combat)`, () => {
       expect(g.pushes(PushCmd.FLOW_UPDATE)).toContainEqual(expect.objectContaining({ playerIds: [b.id], data: { flowId: fb.id, status: 'idle' } }));
     }));
 });
-
-/** The nearest barbarian city to this city. */
-async function npcNear(g: TestGame, cityId: number) {
-  const c = await reloadCity(g, cityId);
-  const { x, y } = tileXY(c.tileId);
-  const near: number[] = [];
-  for (let dy = -15; dy <= 15; dy++) for (let dx = -15; dx <= 15; dx++) near.push(tileId(x + dx, y + dy));
-  const rows = await g.tx
-    .select({ id: tiles.id })
-    .from(tiles)
-    .where(and(inArray(tiles.id, near), eq(tiles.type, TileType.NPC)));
-  const dist = (id: number) => Math.abs(tileXY(id).x - x) + Math.abs(tileXY(id).y - y);
-  const [nearest] = rows.map((r) => r.id).sort((p, q) => dist(p) - dist(q));
-  if (nearest == null) throw new Error('no barbarian city near');
-  return nearest;
-}

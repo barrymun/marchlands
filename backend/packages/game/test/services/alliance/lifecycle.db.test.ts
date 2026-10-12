@@ -3,11 +3,11 @@ import { eq } from 'drizzle-orm';
 import { AllianceRank, BALANCE, HOUR, msg } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
 import { players } from '@marchlands/db';
-import { alliance } from '../../../src/index.ts';
-import { addMember, allianceRow, createTestAlliance, withEmbassy } from '../../support/alliance.ts';
-import { expectRefused } from '../../support/expect.ts';
-import { createTestPlayer, reloadCity, reloadPlayer, setResources } from '../../support/factories.ts';
-import { game } from '../../support/game.ts';
+import { alliance } from '#/index.ts';
+import { addMember, allianceRow, createTestAlliance, withEmbassy } from '#test/support/alliance.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { createTestPlayer, reloadCity, reloadPlayer, setResources } from '#test/support/factories.ts';
+import { game } from '#test/support/game.ts';
 
 /** createAlliance's name limits (not exported). */
 const NAME_MIN = 2;

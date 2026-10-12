@@ -3,12 +3,12 @@
 // scouting), with numbers taken from BALANCE, so the text follows the rules. "Unlocks" is derived from the
 // requirement data and names nothing: the client names each entry by its id.
 
-import { BALANCE } from './balance.ts';
-import { FortType, TechType, TroopType } from './constants.ts';
-import { isFortType, SIEGE } from './construction.ts';
-import { BUILDINGS, RESEARCH, TROOPS } from './data/index.ts';
-import { GEAR_PIECES, gearLevelPoints } from './gear.ts';
-import { msg, ref, share, type Message } from './messages/index.ts';
+import { BALANCE } from '#/balance.ts';
+import { FortType, TechType, TroopType } from '#/constants.ts';
+import { isFortType, SIEGE } from '#/construction.ts';
+import { BUILDINGS, RESEARCH, TROOPS } from '#/data/index.ts';
+import { GEAR_PIECES, gearLevelPoints } from '#/gear.ts';
+import { msg, ref, share, type Message } from '#/messages/index.ts';
 
 /** A share param (0.125, shown as 12.5%). */
 const pct = share;

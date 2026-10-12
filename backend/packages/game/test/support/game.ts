@@ -4,8 +4,9 @@
 
 import { seededRng } from '@marchlands/core';
 import type { PushCmd, PushData } from '@marchlands/contracts';
-import { dispatchEvent, runGame, type CtxInternals, type QueuedPush, type ScheduledEvent } from '../../src/index.ts';
-import { testDb } from './db.ts';
+import { dispatchEvent, runGame } from '#/index.ts';
+import { type CtxInternals, type QueuedPush, type ScheduledEvent } from '#/context.ts';
+import { testDb } from '@marchlands/db/test/support/db.ts';
 
 // Each test starts from the seeded world with no players: every test rolls back, so a test only ever sees the
 // players and cities it made itself (rankings and map searches can rely on that).

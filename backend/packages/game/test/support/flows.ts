@@ -1,13 +1,14 @@
-// Helpers for the flows service tests (test/services/flows/).
+// Helpers for the flow tests (test/services/flows/, test/engine/flows/).
 
 import { and, desc, eq, gt, inArray, isNull } from 'drizzle-orm';
 import { vi } from 'vitest';
-import { BuildingType, TileType, tileId, tileXY, VALLEY_TYPES, type TroopCounts } from '@marchlands/core';
+import { BuildingType, healCost, Mission, msg, ref, tileId, TileType, tileXY, type TroopCounts, VALLEY_TYPES } from '@marchlands/core';
 import type { PushCmd, PushData } from '@marchlands/contracts';
 import { pushMessages, tiles, timedEvents, type Db } from '@marchlands/db';
-import { flows, getCity, player as players, saveCity } from '../../src/index.ts';
-import { addHero, setBuildings, setCityStats, type TestPlayer } from './factories.ts';
-import type { TestGame } from './game.ts';
+import { armies, flows, player as players } from '#/index.ts';
+import { getCity, saveCity } from '#/repo.ts';
+import { addHero, setBuildings, setCityStats, type TestPlayer } from '#test/support/factories.ts';
+import type { TestGame } from '#test/support/game.ts';
 
 export type FlowInput = { id?: string | null; name: string; actions: unknown[]; cities?: 'all' | number[] };
 
@@ -136,4 +137,27 @@ export async function persistEvents(g: TestGame) {
 export async function storedEvent(g: TestGame, refKey: string) {
   const [row] = await g.tx.select().from(timedEvents).where(eq(timedEvents.refKey, refKey));
   return row;
+}
+
+export const mayor = { type: 'setMayor', stat: 'power' };
+
+export const waitTime = { type: 'wait', until: 'time', minutes: 5 };
+
+export async function heroAway(g: TestGame, p: TestPlayer, heroId: number, cityId = p.cityId) {
+  const [valley] = await valleysNear(g, cityId);
+  const { armyId } = await armies.sendArmy(g, p.id, cityId, { targetTileId: valley, mission: Mission.ATTACK, troops: { militia: 10 }, heroId });
+  return { armyId, reach: g.events('army').find((e) => e.payload?.armyId === armyId)!.dueAt };
+}
+
+export const injured = { militia: 10 };
+
+export const healed = () => {
+  const cost = healCost(injured);
+  const amounts = (['food', 'wood', 'iron'] as const).map((k) => msg('flow.resourceAmount', { amount: Math.ceil(cost[k]), resource: ref.resource(k) }));
+  return msg('flow.step.healed', { count: 10, cost: amounts });
+};
+
+export async function sendOut(g: TestGame, p: TestPlayer, heroId: number) {
+  const [valley] = await valleysNear(g, p.cityId);
+  return (await armies.sendArmy(g, p.id, p.cityId, { targetTileId: valley, mission: Mission.ATTACK, troops: { militia: 10 }, heroId })).armyId;
 }

@@ -13,10 +13,10 @@ import {
   ItemId,
 } from '@marchlands/core';
 import { accounts } from '@marchlands/db/schema';
-import { Ms, zId } from './common.ts';
-import { ArmyBean, BuffBean, CityBean, HeroBean, ItemCount, PlayerInfo } from './beans.ts';
-import { LordGear } from './military.ts';
-import { CityRow, PlayerRow } from './rows.ts';
+import { Ms, zId } from '#/common.ts';
+import { ArmyBean, BuffBean, CityBean, HeroBean, ItemCount, PlayerInfo } from '#/beans.ts';
+import { LordGear } from '#/military.ts';
+import { CityRow, PlayerRow } from '#/rows.ts';
 
 // ---- auth ----
 
@@ -86,6 +86,7 @@ export const CreatePlayerBody = z.object({
   sex: z.number().int(),
   zone: z.number().int().min(-1).max(15).default(-1),
 });
+export type CreatePlayerBody = z.infer<typeof CreatePlayerBody>;
 export const PlayerNameParams = z.object({ name: z.string() });
 export const ChangeFaceBody = z.object({ faceUrl: z.string(), sex: z.number().int() });
 export const ChangeFlagBody = z.object({ flag: z.string() });

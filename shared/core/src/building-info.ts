@@ -2,15 +2,15 @@
 // the rule that uses the building (economy, construction, training, heroes, armies, market, alliance), with numbers
 // from BALANCE, so the text follows the rules. "Unlocks" is derived from the requirement data.
 
-import { BALANCE, getGameSpeed } from './balance.ts';
-import { BuildingType, FortType } from './constants.ts';
-import { isFortType, unlockedOuterSlots } from './construction.ts';
-import { BUILDINGS, RESEARCH, TROOPS, buildingConfig } from './data/index.ts';
-import { innHeroMaxLevel, innOffers } from './heroes.ts';
-import { wallHitPoints } from './battle/simulator.ts';
-import { msg, ref, share, type Message } from './messages/index.ts';
-import { reliefMultiplier } from './troops.ts';
-import { ItemId } from './item-ids.ts';
+import { BALANCE, getGameSpeed } from '#/balance.ts';
+import { BuildingType, FortType } from '#/constants.ts';
+import { isFortType, unlockedOuterSlots } from '#/construction.ts';
+import { BUILDINGS, RESEARCH, TROOPS, buildingConfig } from '#/data/index.ts';
+import { innHeroMaxLevel, innOffers } from '#/heroes.ts';
+import { wallHitPoints } from '#/battle/simulator.ts';
+import { msg, ref, share, type Message } from '#/messages/index.ts';
+import { reliefMultiplier } from '#/troops.ts';
+import { ItemId } from '#/item-ids.ts';
 
 const F = (l: number) => BALANCE.fieldFactor[l] ?? 0;
 /** the item that lets armies hold more troops (BALANCE.warEnsignTroopBonus) */

@@ -36,8 +36,8 @@ import {
 } from '@marchlands/contracts';
 import { players } from '@marchlands/db';
 import { flows, player, runGame, shop, statistics, world } from '@marchlands/game';
-import { signToken } from '../auth/jwt.ts';
-import { doc, authenticate, game, playerIdOf, tags, type ZApp } from '../http.ts';
+import { signToken } from '#/auth/jwt.ts';
+import { doc, authenticate, game, playerIdOf, tags, type ZApp } from '#/http.ts';
 
 export default async function playerRoutes(app: ZApp) {
   app.addHook('onRequest', authenticate);

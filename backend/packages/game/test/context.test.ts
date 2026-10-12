@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GameError, msg } from '@marchlands/core';
-import { isRetryable } from '../src/index.ts';
+import { isRetryable } from '#/context.ts';
 
 const withCode = (code: unknown) => Object.assign(new Error('pg'), { code });
 

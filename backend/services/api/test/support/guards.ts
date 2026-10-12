@@ -2,7 +2,7 @@
 // validates the request before the auth hooks (preHandler) run, so a bad body would answer 400 first.
 
 import { expect } from 'vitest';
-import type { TestApi } from './api.ts';
+import type { TestApi } from '#test/support/api.ts';
 
 export interface RouteCall {
   method: string;

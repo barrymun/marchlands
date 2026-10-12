@@ -2,8 +2,8 @@
 // server; values marked (evony) fill gaps the original never implemented, chosen to match
 // Evony Age 1 as closely as is known. Keep every magic number here.
 
-import { DAY, HOUR, MINUTE } from './time.ts';
-import { ItemId, SpeedupId } from './item-ids.ts';
+import { DAY, HOUR, MINUTE } from '#/time.ts';
+import { ItemId, SpeedupId } from '#/item-ids.ts';
 
 export const BALANCE = {
   // ---- world ----

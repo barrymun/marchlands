@@ -3,9 +3,9 @@ import type { z } from 'zod';
 import { GameError, msg } from '@marchlands/core';
 import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody } from '@marchlands/contracts';
 import { accounts, players } from '@marchlands/db';
-import { hashPassword, verifyPassword } from '../auth/password.ts';
-import { signToken } from '../auth/jwt.ts';
-import { authenticate, secured, tags, type ZApp } from '../http.ts';
+import { hashPassword, verifyPassword } from '#/auth/password.ts';
+import { signToken } from '#/auth/jwt.ts';
+import { authenticate, secured, tags, type ZApp } from '#/http.ts';
 
 /** Public routes cannot use doc(): same envelope, no `security`. */
 const responses = <T extends z.ZodType>(data: T) => ({ 200: Ok(data), '4xx': ErrorResponse, '5xx': ErrorResponse });

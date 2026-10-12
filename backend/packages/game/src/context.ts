@@ -6,11 +6,14 @@ import { sql } from 'drizzle-orm';
 import { defaultRng, GameError, type Rng } from '@marchlands/core';
 import type { PushCmd, PushData } from '@marchlands/contracts';
 import { pgArray, pushMessages, timedEvents, type Db, type Tx } from '@marchlands/db';
-import { addCounters, bufferStats, statDay, type StatCounters } from './stats.ts';
+import { addCounters, bufferStats, statDay, type StatCounters } from '#/stats.ts';
 
 export const PUSH_CHANNEL = 'marchlands_push';
 
-/** A push queued for the outbox (frame = `{ cmd, data }`, see PushMessage in @marchlands/contracts). */
+/**
+ * A push queued for the outbox (frame = `{ cmd, data }`, see PushMessage in @marchlands/contracts).
+ * @internal exported for the test harness
+ */
 export interface QueuedPush {
   /** recipients; empty = everyone online */
   playerIds: number[];
@@ -18,6 +21,7 @@ export interface QueuedPush {
   data: PushData<PushCmd>;
 }
 
+/** @internal exported for the test harness */
 export interface ScheduledEvent {
   type: string;
   dueAt: number;
@@ -46,7 +50,7 @@ export interface Ctx {
   stat(playerId: number, cityId: number, counters: StatCounters): void;
 }
 
-/** A context with what it has queued (tests read these). */
+/** A context with what it has queued (tests read these). @internal */
 export interface CtxInternals extends Ctx {
   _pushes: QueuedPush[];
   _events: Map<string, ScheduledEvent>;

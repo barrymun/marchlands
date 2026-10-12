@@ -1,23 +1,33 @@
 import { describe, expect, it } from 'vitest';
+
 import { eq } from 'drizzle-orm';
+
 import {
   buildingLevel,
+  buildingMaxLevel,
   BuildingType,
   heroGearBonus,
   innHeroMaxLevel,
   ItemId,
   lordGear,
+  MailType,
   msg,
   researchMaxLevel,
   TechType,
-  buildingMaxLevel,
 } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+
 import { accounts, heroes } from '@marchlands/db';
-import { admin, getHero, mail } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
-import { createTestPlayer, reloadCity, reloadPlayer } from '../support/factories.ts';
-import { game } from '../support/game.ts';
+
+import { admin, mail } from '#/index.ts';
+import { getHero } from '#/repo.ts';
+
+import { expectRefused } from '#test/support/expect.ts';
+
+import { createTestPlayer, reloadCity, reloadPlayer } from '#test/support/factories.ts';
+
+import { game } from '#test/support/game.ts';
 
 describe(admin.grantItems.name, () => {
   it('adds items to what the player has, and takes them away with a negative count', () =>
@@ -211,7 +221,7 @@ describe(admin.mailPlayer.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       await admin.mailPlayer(g, a.name, 'Notice', 'Maintenance tonight');
-      const [m] = (await mail.listMail(g, a.id, mail.MailFolder.SYSTEM, 1, 10)).mails;
+      const [m] = (await mail.listMail(g, a.id, MailType.SYSTEM, 1, 10)).mails;
       expect(m).toMatchObject({ title: 'Notice', sender: null, isRead: false });
       expect(g.pushes(PushCmd.NEW_MAIL).at(-1)).toMatchObject({ playerIds: [a.id], data: { count: 1, count_system: 1 } });
     }));

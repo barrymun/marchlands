@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { BALANCE, FortType, msg, TroopType } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { flows } from '../../../src/index.ts';
-import { expectRefused } from '../../support/expect.ts';
-import { addCity, createTestPlayer } from '../../support/factories.ts';
-import { armyPreset, flowOf, newFlow, runFlowIn, withHero } from '../../support/flows.ts';
-import { game } from '../../support/game.ts';
+import { flows } from '#/index.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { addCity, createTestPlayer } from '#test/support/factories.ts';
+import { armyPreset, flowOf, newFlow, runFlowIn, withHero } from '#test/support/flows.ts';
+import { game } from '#test/support/game.ts';
 
 const mayor = { type: 'setMayor', stat: 'power' };
 const waitTime = { type: 'wait', until: 'time', minutes: 5 };

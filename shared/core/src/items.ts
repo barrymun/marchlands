@@ -3,14 +3,14 @@
 // Effects are declarative; the game service applies them.
 
 import { z } from 'zod';
-import { BALANCE, goldForCents } from './balance.ts';
-import { createRandomHero, experienceItemGain, upgradeExpFor, type GeneratedHero } from './heroes.ts';
-import { itemConfig } from './data/index.ts';
-import { randInt, type Rng } from './rng.ts';
-import { ResourceSetSchema, TroopCountsSchema, type ResourceSet, type TroopCounts } from './types.ts';
-import { BuffId } from './constants.ts';
-import { msg, ref, share, type Message } from './messages/index.ts';
-import { ItemId } from './item-ids.ts';
+import { BALANCE, goldForCents } from '#/balance.ts';
+import { createRandomHero, experienceItemGain, upgradeExpFor, type GeneratedHero } from '#/heroes.ts';
+import { itemConfig } from '#/data/index.ts';
+import { randInt, type Rng } from '#/rng.ts';
+import { ResourceSetSchema, TroopCountsSchema, type ResourceSet, type TroopCounts } from '#/types.ts';
+import { BuffId } from '#/constants.ts';
+import { msg, ref, share, type Message } from '#/messages/index.ts';
+import { ItemId } from '#/item-ids.ts';
 
 export type ItemEffect =
   /** timed player buff (stacks by extending). `desc`: what it does, stored in the buff and worded by the client */

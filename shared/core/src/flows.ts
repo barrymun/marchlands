@@ -1,8 +1,8 @@
 // (marchlands) Flows: a lord's saved series of actions, run on any of their cities (backend services/flows.ts).
 
-import { TROOPS } from './data/index.ts';
-import { dur, msg, ref, type Message } from './messages/index.ts';
-import type { FlowAction } from './types.ts';
+import { TROOPS } from '#/data/index.ts';
+import { dur, msg, ref, type Message } from '#/messages/index.ts';
+import type { FlowAction } from '#/types.ts';
 
 /** Troops a flow can train (everything trained in barracks; fortifications are not troops). */
 export const FLOW_TROOP_IDS: readonly number[] = TROOPS.filter((t) => t.inside === 1).map((t) => t.troopId);

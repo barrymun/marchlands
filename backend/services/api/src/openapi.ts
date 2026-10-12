@@ -5,8 +5,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Db } from '@marchlands/db';
-import { buildApp } from './app.ts';
-import { loadConfig } from './config.ts';
+import { buildApp } from '#/app.ts';
+import { loadConfig } from '#/config.ts';
 
 const out = path.resolve(process.argv[2] ?? path.join(import.meta.dirname, '../../../../shared/api-client/openapi.json'));
 const config = loadConfig({ DATABASE_URL: 'postgres://unused', JWT_SECRET: 'openapi-export' });

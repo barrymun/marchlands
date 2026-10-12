@@ -1,4 +1,4 @@
-// castle.* — construction, upgrades, demolition, speed-ups, cancellation and completion.
+// castle.* — construction, upgrades, demolition, speed-ups and cancellation (completion: engine/buildings.ts).
 
 import {
   buildingEffect,
@@ -11,7 +11,6 @@ import {
   buildingMaxLevel,
   BUILDINGS,
   buildCost,
-  buildingHeroExp,
   buildTimeMs,
   canPlace,
   checkRequirements,
@@ -20,8 +19,6 @@ import {
   fullDemolishRefund,
   findBuilding,
   GameError,
-  prestigeOf,
-  PrestigeAction,
   requirementsMet,
   scaled,
   SPEEDUP_ITEMS,
@@ -29,48 +26,22 @@ import {
   assertCanConstruct,
   assertCanUpgrade,
   type BuildingState,
-  addHeroExp,
   BuffId,
   msg,
   ref,
   dur,
   SpeedupId,
 } from '@marchlands/core';
-import { mayorOf, mayorStats, openCity, openOwnCity, viewCity, type CityBundle } from '../city.ts';
-import type { Ctx } from '../context.ts';
-import { buildingBean, heroBean } from '../dto.ts';
-import { activeBuff, addPrestige, gainResources, pushPlayerInfo, pushResources, spendGold, spendResources, useItemOrGold } from '../helpers.ts';
-import { prefixed } from '../stats.ts';
-import { saveCity, saveHero, savePlayer } from '../repo.ts';
-import { checkBeginner } from './player.ts';
-import { clearTavern } from './heroes.ts';
-import { PushCmd } from '@marchlands/contracts';
-
-const refKey = (cityId: number, pos: number) => `building:${cityId}:${pos}`;
+import { mayorStats, openOwnCity, viewCity, type CityBundle } from '#/city.ts';
+import { type Ctx } from '#/context.ts';
+import { buildingBean } from '#/dto.ts';
+import { activeBuff, gainResources, pushResources, spendGold, spendResources, useItemOrGold } from '#/helpers.ts';
+import { prefixed } from '#/stats.ts';
+import { commit, pushBuilding, scheduleBuilding, refKey } from '#/engine/buildings.ts';
 
 /** How many constructions may run at once (Bernini's Hammer adds one more queue). */
 function maxConcurrent(b: CityBundle, now: number) {
   return BALANCE.buildQueues + (activeBuff(b.player, BuffId.BUILDING_QUEUE, now) ? 1 : 0);
-}
-
-function scheduleBuilding(ctx: Ctx, b: CityBundle, bld: BuildingState) {
-  ctx.schedule({
-    type: 'building',
-    dueAt: bld.endTime,
-    playerId: b.player.id,
-    cityId: b.city.id,
-    refKey: refKey(b.city.id, bld.positionId),
-    payload: { positionId: bld.positionId },
-  });
-}
-
-function pushBuilding(ctx: Ctx, b: CityBundle, bld: BuildingState) {
-  ctx.push(b.player.id, PushCmd.BUILD_COMPLETE, { castleId: b.city.id, buildingBean: buildingBean(bld) });
-}
-
-async function commit(ctx: Ctx, b: CityBundle) {
-  await saveCity(ctx, b.city);
-  await savePlayer(ctx, b.player);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -271,39 +242,4 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
 function removeBuilding(b: CityBundle, bld: BuildingState) {
   b.city.buildings = b.city.buildings.filter((x) => x.positionId !== bld.positionId);
   if (bld.typeId === BuildingType.BARRACKS) b.city.troopQueues = b.city.troopQueues.filter((q) => q.positionId !== bld.positionId);
-}
-
-// ---------------------------------------------------------------------------------------------
-// Completion (timed event)
-// ---------------------------------------------------------------------------------------------
-
-export async function completeBuilding(ctx: Ctx, cityId: number, positionId: number) {
-  const b = await openCity(ctx, cityId);
-  if (!b) return; // city vanished
-  const playerId = b.player.id;
-  const bld = findBuilding(b.city.buildings, positionId);
-  if (!bld || bld.status === BuildingStatus.IDLE) return;
-  if (bld.endTime > ctx.now) {
-    scheduleBuilding(ctx, b, bld); // was delayed; make sure an event exists
-    return;
-  }
-  const level = bld.level + 1;
-  const after: BuildingState = { ...bld, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 };
-  ctx.stat(playerId, cityId, { 'levels.building': 1 });
-  const th = bld.typeId === BuildingType.TOWN_HALL ? level : buildingLevel(b.city.buildings, BuildingType.TOWN_HALL);
-  const gain = prestigeOf(PrestigeAction.BUILDING, bld.typeId, level, th);
-  addPrestige(b.player, gain);
-  const mayor = mayorOf(b.heroes);
-  if (mayor) {
-    addHeroExp(mayor, buildingHeroExp(bld.typeId, level, th));
-    await saveHero(ctx, mayor);
-    ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: cityId, hero: heroBean(mayor), updateType: 2 });
-  }
-  if (bld.typeId === BuildingType.INN) await clearTavern(ctx, cityId);
-  if (bld.typeId === BuildingType.TOWN_HALL) await checkBeginner(ctx, b.player, level);
-  b.city.buildings = b.city.buildings.map((x) => (x.positionId === positionId ? after : x));
-  pushBuilding(ctx, b, after);
-  pushResources(ctx, b);
-  await pushPlayerInfo(ctx, b.player);
-  await commit(ctx, b);
 }

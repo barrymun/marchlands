@@ -17,11 +17,11 @@ import {
   type QuestSnapshot,
 } from '@marchlands/core';
 import { heroes, mails, playerRelations, questProgress, tiles } from '@marchlands/db';
-import { openOwnCity } from '../city.ts';
-import type { Ctx } from '../context.ts';
-import { addItem, gainResources, pushResources } from '../helpers.ts';
-import { citiesOf, getPlayer, saveCity, savePlayer } from '../repo.ts';
-import { prefixed } from '../stats.ts';
+import { openOwnCity } from '#/city.ts';
+import type { Ctx } from '#/context.ts';
+import { addItem, gainResources, pushResources } from '#/helpers.ts';
+import { citiesOf, getPlayer, saveCity, savePlayer } from '#/repo.ts';
+import { prefixed } from '#/stats.ts';
 
 async function snapshot(ctx: Ctx, playerId: number): Promise<QuestSnapshot> {
   const p = await getPlayer(ctx, playerId);

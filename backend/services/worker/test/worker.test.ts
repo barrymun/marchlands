@@ -2,7 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Db } from '@marchlands/db';
-import { eventLoop, every, processOne, type Log } from '../src/worker.ts';
+import { eventLoop, every, processOne, type Log } from '#/worker.ts';
 
 beforeEach(() => {
   vi.useFakeTimers();

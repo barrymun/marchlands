@@ -62,7 +62,10 @@ export function bufferStats(pending: Map<string, StatCounters>, day: string) {
   }
 }
 
-/** Write the buffer to player_stats in one statement; on failure the counters go back in. */
+/**
+ * Write the buffer to player_stats in one statement; on failure the counters go back in.
+ * @internal exported for tests; the worker and API flush through startStatsFlusher
+ */
 export async function flushStats(db: Db): Promise<number> {
   if (!buffer.size) return 0;
   const rows = [...buffer.entries()].map(([k, counters]) => {

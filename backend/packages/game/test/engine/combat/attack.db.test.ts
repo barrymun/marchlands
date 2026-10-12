@@ -21,7 +21,8 @@ import {
   type ResourceSet,
 } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { combat, getHero, interior, player, shop, training } from '../../../src/index.ts';
+import { getHero } from '#/repo.ts';
+import { interior, player, shop, training } from '#/index.ts';
 import {
   allies,
   armyRow,
@@ -36,7 +37,7 @@ import {
   WAR_ZONE,
   warCity,
   warrior,
-} from '../../support/armies.ts';
+} from '#test/support/armies.ts';
 import {
   addHero,
   cityBundle,
@@ -47,8 +48,9 @@ import {
   setBuildings,
   setResearch,
   type TestPlayer,
-} from '../../support/factories.ts';
-import { game, type TestGame } from '../../support/game.ts';
+} from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
+import { processArmy } from '#/engine/combat.ts';
 
 const KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 
@@ -66,7 +68,7 @@ async function justBefore(g: TestGame, armyId: number, q: TestPlayer) {
   return (await cityBundle(g, q)).city;
 }
 
-describe(`${combat.processArmy.name}: attacking a lord's city`, () => {
+describe(`${processArmy.name}: attacking a lord's city`, () => {
   it('a won battle: losses, injured, plunder, honor, medals and hero experience on both sides', () =>
     game(async (g) => {
       const { p, q, heroId, qHero, go } = await battle(g, { lightCavalry: 5000 }, { militia: 300, archer: 20 });

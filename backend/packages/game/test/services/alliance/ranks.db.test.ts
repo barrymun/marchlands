@@ -1,13 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { AllianceRank, BALANCE, msg, ref } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
-import { alliance, mail } from '../../../src/index.ts';
-import { addMember, allianceRow, createTestAlliance } from '../../support/alliance.ts';
-import { expectRefused } from '../../support/expect.ts';
-import { createTestPlayer, reloadPlayer } from '../../support/factories.ts';
-import { game } from '../../support/game.ts';
 
-const { MailFolder } = mail;
+import { AllianceRank, BALANCE, MailType, msg, ref } from '@marchlands/core';
+
+import { PushCmd } from '@marchlands/contracts';
+
+import { alliance, mail } from '#/index.ts';
+
+import { addMember, allianceRow, createTestAlliance } from '#test/support/alliance.ts';
+
+import { expectRefused } from '#test/support/expect.ts';
+
+import { createTestPlayer, reloadPlayer } from '#test/support/factories.ts';
+
+import { game } from '#test/support/game.ts';
 
 describe(alliance.setRank.name, () => {
   it('promotes and demotes, telling the member and the alliance', () =>
@@ -162,12 +167,12 @@ describe(alliance.massMail.name, () => {
       const outsider = await createTestPlayer(g);
       await alliance.massMail(g, officer.id, 'Muster', 'At dawn.');
       for (const p of [a.host, m]) {
-        const [mailRow] = (await mail.listMail(g, p.id, MailFolder.INBOX, 1, 10)).mails;
+        const [mailRow] = (await mail.listMail(g, p.id, MailType.INBOX, 1, 10)).mails;
         expect(mailRow).toMatchObject({ title: '[Alliance] Muster', sender: officer.name, playerId: officer.id });
         expect((await mail.readMail(g, p.id, mailRow.mailid)).content).toBe('At dawn.');
       }
-      expect((await mail.listMail(g, officer.id, MailFolder.INBOX, 1, 10)).mails).toEqual([]);
-      expect((await mail.listMail(g, outsider.id, MailFolder.INBOX, 1, 10)).mails).toEqual([]);
+      expect((await mail.listMail(g, officer.id, MailType.INBOX, 1, 10)).mails).toEqual([]);
+      expect((await mail.listMail(g, outsider.id, MailType.INBOX, 1, 10)).mails).toEqual([]);
     }));
 
   it('needs Officer or above', () =>

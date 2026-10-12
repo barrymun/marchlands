@@ -7,8 +7,8 @@
 // always loses the spread. Between trades p decays towards its base price (log-space half-life).
 // With BALANCE.merchant.fixedPrice set, the merchant instead trades everything at that one price.
 
-import { BALANCE, scaled } from './balance.ts';
-import type { BasicResource } from './constants.ts';
+import { BALANCE, scaled } from '#/balance.ts';
+import type { BasicResource } from '#/constants.ts';
 
 export interface MerchantPrice {
   /** reference price (gold per unit) at `at` */

@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { msg } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { admin, addPrestige, getPlayer, rankings, savePlayer, social } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
-import { createTestPlayer, reloadPlayer, type TestPlayer } from '../support/factories.ts';
-import { game, T0, type TestGame } from '../support/game.ts';
-import { foundAlliance, joinAlliance } from '../support/alliance.ts';
+import { admin, social } from '#/index.ts';
+import { addPrestige } from '#/helpers.ts';
+import { getPlayer, savePlayer } from '#/repo.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { createTestPlayer, reloadPlayer, type TestPlayer } from '#test/support/factories.ts';
+import { game, T0, type TestGame } from '#test/support/game.ts';
+import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
+import { refreshRankings } from '#/engine/rankings.ts';
 
 const MINUTE = 60_000;
 
@@ -97,22 +100,6 @@ describe(social.removeRelation.name, () => {
     }));
 });
 
-describe(social.isBlocked.name, () => {
-  it('is true only when the receiver blocks the sender', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      const b = await createTestPlayer(g);
-      expect(await social.isBlocked(g, a.id, b.id)).toBe(false);
-      await social.addRelation(g, a.id, b.name, 'friend');
-      expect(await social.isBlocked(g, a.id, b.id)).toBe(false);
-      await social.addRelation(g, a.id, b.name, 'block');
-      expect(await social.isBlocked(g, a.id, b.id)).toBe(true);
-      expect(await social.isBlocked(g, b.id, a.id)).toBe(false);
-      await social.removeRelation(g, a.id, b.id, 'block');
-      expect(await social.isBlocked(g, a.id, b.id)).toBe(false);
-    }));
-});
-
 describe(social.worldChat.name, () => {
   it('stores the message and broadcasts it to everyone', () =>
     game(async (g) => {
@@ -174,7 +161,7 @@ describe(social.worldChat.name, () => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
       await givePrestige(g, a, 1000);
-      await rankings.refreshRankings(g);
+      await refreshRankings(g);
       await social.worldChat(g, a.id, 'First');
       await social.worldChat(g, b.id, 'Second');
       expect(chatPushes(g)).toEqual(['<font color="#FF0000">First</font>', 'Second']);
@@ -192,7 +179,7 @@ describe(social.worldChat.name, () => {
       await foundAlliance(g, top, 'Order');
       await joinAlliance(g, top, member, 'Order');
       await foundAlliance(g, other, 'Chaos');
-      await rankings.refreshRankings(g);
+      await refreshRankings(g);
       // member: 3rd player but in the 1st alliance; other: 2nd player in the 2nd alliance
       await social.worldChat(g, member.id, 'Blue');
       await social.worldChat(g, other.id, 'Plain');

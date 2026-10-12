@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import pg from 'pg';
-import { connect, pgArray } from '../src/index.ts';
+import { connect, pgArray } from '#/index.ts';
 
 // a server nobody listens on: a pool only connects when first used
 const URL = 'postgres://tester@127.0.0.1:1/none';

@@ -3,8 +3,8 @@
 
 import { eq, sql } from 'drizzle-orm';
 import { pgArray, worldState } from '@marchlands/db';
-import type { Ctx } from '../context.ts';
-import { statDay, type StatCounters } from '../stats.ts';
+import type { Ctx } from '#/context.ts';
+import { statDay, type StatCounters } from '#/stats.ts';
 
 export async function lordStatistics(ctx: Ctx, playerId: number) {
   const since7 = statDay(ctx.now - 6 * 86_400_000);

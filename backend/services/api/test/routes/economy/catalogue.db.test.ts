@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest';
 import { BALANCE, BUILDINGS, getGameSpeed, ITEMS, itemGoldPrice, ItemId } from '@marchlands/core';
 import type { PlayerState, QuestBean, QuestGroupStatus, ShopCategory, StaticConfig } from '@marchlands/contracts';
 import { admin } from '@marchlands/game';
-import { apiTest, type TestApi } from '../../support/api.ts';
-import { accountWithoutPlayer, expectInvalid, expectNeedsPlayer, expectNeedsToken, type RouteCall } from '../../support/guards.ts';
+import { apiTest, type TestApi } from '#test/support/api.ts';
+import { accountWithoutPlayer, expectInvalid, expectNeedsPlayer, expectNeedsToken, type RouteCall } from '#test/support/guards.ts';
 
 const PLAYER_ROUTES: RouteCall[] = [
   { method: 'POST', url: 'cities/1/shop/gold', body: { itemId: ItemId.WAR_HORN } },

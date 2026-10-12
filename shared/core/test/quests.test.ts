@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { QUEST_CATALOGUE, questGroups, questGroupsWithQuests } from '../src/index.ts';
+import { QUEST_CATALOGUE, questGroups, questGroupsWithQuests } from '#/index.ts';
 
 describe('QUEST_CATALOGUE', () => {
   it('puts every quest in a quest group, by the group row id', () => {

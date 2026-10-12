@@ -1,15 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  BALANCE,
-  merchantAffordable,
-  merchantAsk,
-  merchantBid,
-  merchantBuys,
-  merchantMarginal,
-  merchantReference,
-  merchantSells,
-  scaled,
-} from '../src/index.ts';
+import { BALANCE, merchantAffordable, merchantAsk, merchantBid, merchantBuys, merchantMarginal, merchantReference, merchantSells, scaled } from '#/index.ts';
 
 const merchantCfg = BALANCE.merchant as { fixedPrice: number | null };
 const configuredFixed = merchantCfg.fixedPrice;

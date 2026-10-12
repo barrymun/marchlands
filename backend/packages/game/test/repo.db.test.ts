@@ -4,11 +4,9 @@ import { ArmyDirection, BuildingType, heroGearBonus, heroGearStat, HeroStatus, m
 import { players } from '@marchlands/db';
 import {
   armiesOfCity,
-  armiesOfPlayer,
   armiesStationedAt,
   citiesOf,
   findCity,
-  findPlayer,
   findPlayerByName,
   gearOfHero,
   getArmy,
@@ -16,8 +14,6 @@ import {
   getHero,
   getPlayer,
   getTile,
-  heroes,
-  heroesOfCities,
   heroesOfCity,
   lockPlayers,
   saveArmy,
@@ -26,12 +22,13 @@ import {
   savePlayer,
   saveTile,
   valleysOfCity,
-} from '../src/index.ts';
-import { holdValley, insertArmy } from './support/city-data.ts';
-import { expectRefused } from './support/expect.ts';
-import { addCity, addHero, createTestPlayer, reloadCity, reloadPlayer, setBuildings, setResearch, type TestPlayer } from './support/factories.ts';
-import { game, type TestGame } from './support/game.ts';
-import { lockedTables, recordSql } from './support/sql-log.ts';
+} from '#/repo.ts';
+import { heroes } from '#/index.ts';
+import { holdValley, insertArmy } from '#test/support/city-data.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { addCity, addHero, createTestPlayer, reloadCity, reloadPlayer, setBuildings, setResearch, type TestPlayer } from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
+import { lockedTables, recordSql } from '#test/support/sql-log.ts';
 
 const MISSING = 999_999_999;
 
@@ -47,9 +44,8 @@ async function updateHero(g: TestGame, id: number, set: Partial<Awaited<ReturnTy
 const enhance = (g: TestGame, p: TestPlayer, level: number) => setResearch(g, p, TechType.HERO_ENHANCEMENT, level);
 
 describe('players', () => {
-  it('findPlayer is undefined and getPlayer refuses for an unknown id', () =>
+  it('getPlayer refuses an unknown id', () =>
     game(async (g) => {
-      expect(await findPlayer(g, MISSING)).toBeUndefined();
       await expectRefused(getPlayer(g, MISSING), msg('common.playerNotFound'));
     }));
 
@@ -58,7 +54,6 @@ describe('players', () => {
       const p = await createTestPlayer(g);
       expect(lockedTables(await recordSql(g, () => getPlayer(g, p.id)))).toEqual([]);
       expect(lockedTables(await recordSql(g, () => getPlayer(g, p.id, { lock: true })))).toEqual(['players']);
-      expect(lockedTables(await recordSql(g, () => findPlayer(g, p.id, { lock: true })))).toEqual(['players']);
     }));
 
   it('findPlayerByName ignores case', () =>
@@ -162,19 +157,6 @@ describe('heroes', () => {
       expect((await heroesOfCity(g, p.cityId, { tavern: true })).map((h) => h.id).sort()).toEqual([...offers].sort());
     }));
 
-  it('heroesOfCities lists the heroes of several cities (none for no cities)', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      const other = await createTestPlayer(g);
-      const second = await addCity(g, p);
-      const a = await addHero(g, p);
-      const b = await addHero(g, p, 1, second);
-      await addHero(g, other);
-      await updateHero(g, b, { sortOrder: 1 });
-      expect((await heroesOfCities(g, [p.cityId, second])).map((h) => h.id)).toEqual([b, a]);
-      expect(await heroesOfCities(g, [])).toEqual([]);
-    }));
-
   it("gearOfHero is the lord's gear: Hero Enhancement level and the stars bought", () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
@@ -274,7 +256,7 @@ describe('armies', () => {
       expect(await getArmy(g, a.id)).toMatchObject({ createdAt, direction: ArmyDirection.BACKWARD, troops: { archer: 3 } });
     }));
 
-  it("armiesOfCity and armiesOfPlayer list a city's and a player's armies by id", () =>
+  it("armiesOfCity lists a city's armies by id", () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       const other = await createTestPlayer(g);
@@ -285,7 +267,6 @@ describe('armies', () => {
       await insertArmy(g, other, { archer: 4 });
       expect((await armiesOfCity(g, p.cityId)).map((a) => a.id)).toEqual([a1.id, a3.id]);
       expect((await armiesOfCity(g, second)).map((a) => a.id)).toEqual([a2.id]);
-      expect((await armiesOfPlayer(g, p.id)).map((a) => a.id)).toEqual([a1.id, a2.id, a3.id]);
     }));
 
   it('armiesStationedAt lists the armies camped on a tile, not those marching to it', () =>

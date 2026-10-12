@@ -4,8 +4,8 @@
 
 import { z } from 'zod';
 import { MessageSchema } from '@marchlands/core';
-import { FortBean, Ms, TroopBean } from './common.ts';
-import { ArmyBean, BuffBean, BuildingBean, CityBean, HeroBean, ItemCount, PlayerInfo, ResourceBean } from './beans.ts';
+import { FortBean, Ms, TroopBean } from '#/common.ts';
+import { ArmyBean, BuffBean, BuildingBean, CityBean, HeroBean, ItemCount, PlayerInfo, ResourceBean } from '#/beans.ts';
 
 const int = z.number().int();
 const castleId = int.describe('city id');

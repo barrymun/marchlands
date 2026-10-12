@@ -1,13 +1,25 @@
 import { afterEach, describe, expect, it } from 'vitest';
+
 import { and, eq, inArray, sql } from 'drizzle-orm';
-import { BALANCE, merchantBase, msg, setGameSpeed } from '@marchlands/core';
+
+import { BALANCE, MarketSide, merchantBase, msg, setGameSpeed } from '@marchlands/core';
+
 import { allianceEvents, alliances, chatMessages, mails, playerStats, players, pushMessages, reports, tiles, worldState, type Db } from '@marchlands/db';
-import { beginnerJob, cleanupJob, getPlayer, market, merchantJob, rankingsJob, savePlayer, statDay, statsJob, world, zonesJob } from '../src/index.ts';
-import { createTestAlliance } from './support/alliance.ts';
-import { createTestPlayer, setCityStats, type TestPlayer } from './support/factories.ts';
-import type { TestGame } from './support/game.ts';
-import { createTrader, Res, withMerchantCurve } from './support/market.ts';
-import { arrange, inTestTx } from './support/tx.ts';
+
+import { beginnerJob, cleanupJob, market, merchantJob, rankingsJob, statsJob, zonesJob } from '#/index.ts';
+import { getPlayer, savePlayer } from '#/repo.ts';
+import { statDay } from '#/stats.ts';
+
+import { createTestAlliance } from '#test/support/alliance.ts';
+
+import { createTestPlayer, setCityStats, type TestPlayer } from '#test/support/factories.ts';
+
+import type { TestGame } from '#test/support/game.ts';
+import { createTrader, Res, withMerchantCurve } from '#test/support/market.ts';
+
+import { arrange, inTestTx } from '#test/support/tx.ts';
+
+import { type ZoneStats } from '#/engine/world.ts';
 
 const DAY = 86_400_000;
 
@@ -50,7 +62,7 @@ describe(zonesJob.name, () => {
       await db.delete(worldState).where(eq(worldState.key, 'zones'));
       await zonesJob(db);
       const [row] = await db.select().from(worldState).where(eq(worldState.key, 'zones'));
-      const zones = row.value as world.ZoneStats[];
+      const zones = row.value as ZoneStats[];
       expect(zones).toHaveLength(BALANCE.stateGrid ** 2);
       const [{ castles }] = (await db.execute<{ castles: number }>(sql`select count(*)::int as castles from ${tiles} where city_id is not null`)).rows;
       expect(zones.reduce((s, z) => s + z.playerCount, 0)).toBe(castles);
@@ -94,9 +106,9 @@ describe(merchantJob.name, () => {
         const bid = Math.round(merchantBase('wood') * 1.03 * 1000) / 1000;
         const b = await arrange(db, async (g) => {
           const b = await createTrader(g);
-          await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: market.Side.BUY, amount: 1000, price: bid });
+          await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, price: bid });
           // b's own sale pushes the merchant's price below the bid
-          await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: market.Side.SELL, amount: 50_000, type: 'market' });
+          await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, type: 'market' });
           return b;
         });
         const orders = () => arrange(db, (g) => market.myOrders(g, b.id));

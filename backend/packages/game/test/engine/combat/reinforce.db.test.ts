@@ -1,9 +1,14 @@
 // processArmy for transports and reinforcements: goods delivered, troops moving in or camping.
 
 import { describe, expect, it } from 'vitest';
-import { ArmyDirection, HeroStatus, Mission, msg } from '@marchlands/core';
+
+import { ArmyDirection, HeroStatus, Mission, msg, ReportType } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
-import { alliance, combat, getHero, interior, reports } from '../../../src/index.ts';
+
+import { alliance, combat, interior } from '#/index.ts';
+import { getHero } from '#/repo.ts';
+
 import {
   allies,
   armyRow,
@@ -17,11 +22,13 @@ import {
   send,
   warCity,
   warrior,
-} from '../../support/armies.ts';
-import { addHero, cityBundle, reloadCity, type TestPlayer } from '../../support/factories.ts';
-import { game, type TestGame } from '../../support/game.ts';
+} from '#test/support/armies.ts';
 
-const { ReportType } = reports;
+import { addHero, cityBundle, reloadCity, type TestPlayer } from '#test/support/factories.ts';
+
+import { game, type TestGame } from '#test/support/game.ts';
+
+import { processArmy } from '#/engine/combat.ts';
 
 /** Run time to just before an army arrives and settle the city then: what it holds when the army walks in. */
 async function justBefore(g: TestGame, armyId: number, p: TestPlayer, cityId = p.cityId) {
@@ -35,7 +42,7 @@ const heroSummaryOf = async (g: TestGame, id: number) => {
   return { id: h.id, name: h.name, level: h.level, logoUrl: h.logoUrl };
 };
 
-describe(`${combat.processArmy.name}: transport`, () => {
+describe(`${processArmy.name}: transport`, () => {
   it('delivers goods to an ally, reports to both, and comes home empty', () =>
     game(async (g) => {
       const { p } = await warrior(g);
@@ -92,7 +99,7 @@ describe(`${combat.processArmy.name}: transport`, () => {
     }));
 });
 
-describe(`${combat.processArmy.name}: reinforce`, () => {
+describe(`${processArmy.name}: reinforce`, () => {
   it('camps in an allied city after delivering its goods, and the host is told', () =>
     game(async (g) => {
       const { p, heroId } = await warrior(g);

@@ -46,7 +46,7 @@ import {
   SetAllianceRelationBody,
 } from '@marchlands/contracts';
 import { alliance, mail, reports, social } from '@marchlands/game';
-import { doc, anon, authenticate, game, tags, zIds, type ZApp } from '../http.ts';
+import { doc, anon, authenticate, game, tags, zIds, type ZApp } from '#/http.ts';
 
 export default async function socialRoutes(app: ZApp) {
   app.addHook('onRequest', authenticate);

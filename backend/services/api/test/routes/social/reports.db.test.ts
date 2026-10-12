@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { msg } from '@marchlands/core';
+
+import { msg, ReportType } from '@marchlands/core';
+
 import type { ReportCounts, ReportDetail, ReportList } from '@marchlands/contracts';
-import { reports } from '@marchlands/game';
-import { apiTest, type TestApi } from '../../support/api.ts';
-import { accountWithoutPlayer, expectInvalid, expectNeedsPlayer, expectNeedsToken, type RouteCall } from '../../support/guards.ts';
+import { createReport } from '@marchlands/game/testing';
+
+import { apiTest, type TestApi } from '#test/support/api.ts';
+
+import { accountWithoutPlayer, expectInvalid, expectNeedsPlayer, expectNeedsToken, type RouteCall } from '#test/support/guards.ts';
 
 const ROUTES: RouteCall[] = [
   { method: 'GET', url: 'reports' },
@@ -18,8 +22,8 @@ const TRADE = { kind: 'trade' as const, trade: { side: 'buy' as const, resource:
 /** A trade report (tab 0) and an army report (tab 1) for the player, as the game files them; returns their ids. */
 async function withReports(api: TestApi, playerId: number) {
   return api.game(async (ctx) => ({
-    trade: await reports.createReport(ctx, { playerId, typeId: reports.ReportType.TRADE, title: msg('report.title.tradeCompleted'), body: TRADE }),
-    army: await reports.createReport(ctx, { playerId, typeId: reports.ReportType.ARMY, title: msg('report.title.tradeCompleted'), body: TRADE }),
+    trade: await createReport(ctx, { playerId, typeId: ReportType.TRADE, title: msg('report.title.tradeCompleted'), body: TRADE }),
+    army: await createReport(ctx, { playerId, typeId: ReportType.ARMY, title: msg('report.title.tradeCompleted'), body: TRADE }),
   }));
 }
 

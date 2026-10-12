@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ITEMS, itemConfig, itemGoldPrice } from '@marchlands/core';
-import { catalogue } from '../../src/services/shop.ts';
+import { catalogue } from '#/services/shop.ts';
 
 describe(catalogue.name, () => {
   it('lists every item with a gold price once, at that price, under its type', () => {

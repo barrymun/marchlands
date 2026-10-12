@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { BALANCE, BuffId, BuildingType, ItemId, msg, PlayerStatus, setGameSpeed, type BuffId as BuffIdType } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { buildings, dispatchEvent, getPlayer, savePlayer, setBuff, shop, type EventRow, player as players } from '../src/index.ts';
-import { cityBundle, createTestPlayer, giveItems, reloadCity, reloadPlayer, setBuildings, setResources, type TestPlayer } from './support/factories.ts';
-import { game, type TestGame } from './support/game.ts';
+import { buildings, dispatchEvent, shop, type EventRow, player as players } from '#/index.ts';
+import { getPlayer, savePlayer } from '#/repo.ts';
+import { setBuff } from '#/helpers.ts';
+import { cityBundle, createTestPlayer, giveItems, reloadCity, reloadPlayer, setBuildings, setResources, type TestPlayer } from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
 
 const HOUR = 3_600_000;
 

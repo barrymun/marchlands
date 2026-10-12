@@ -18,8 +18,10 @@ import {
 } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
 import { tiles } from '@marchlands/db';
-import { admin, armies, cityStats, getTile, interior } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
+import { admin, armies, interior } from '#/index.ts';
+import { cityStats } from '#/city.ts';
+import { getTile } from '#/repo.ts';
+import { expectRefused } from '#test/support/expect.ts';
 import {
   cityBundle,
   createTestPlayer,
@@ -30,8 +32,8 @@ import {
   setCityStats,
   setResources,
   type TestPlayer,
-} from '../support/factories.ts';
-import { game, type TestGame } from '../support/game.ts';
+} from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
 
 /** Max population of a city with one cottage of this level. */
 const maxPopWithCottage = (level: number) => BALANCE.basePopulation + BALANCE.cottagePopulation[level];

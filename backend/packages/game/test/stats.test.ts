@@ -3,7 +3,8 @@ import type { SQL } from 'drizzle-orm';
 import { PgDialect } from 'drizzle-orm/pg-core';
 import type { SettleFlows } from '@marchlands/core';
 import type { Db } from '@marchlands/db';
-import { addCounters, bufferStats, flushStats, noteSettle, prefixed, startStatsFlusher, statDay, takeSettle, type StatCounters } from '../src/index.ts';
+import { addCounters, bufferStats, flushStats, noteSettle, prefixed, statDay, takeSettle, type StatCounters } from '#/stats.ts';
+import { startStatsFlusher } from '#/index.ts';
 
 interface Row {
   player_id: number;

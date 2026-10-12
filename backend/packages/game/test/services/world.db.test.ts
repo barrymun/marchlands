@@ -1,19 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
-import { and, eq, isNull, sql } from 'drizzle-orm';
-import { BALANCE, msg, Relation, stateBounds, stateOf, TileType, tileId, tileXY, valleyUpgradeCost } from '@marchlands/core';
-import { tiles, worldState, type Db } from '@marchlands/db';
-import { alliance, getTile, saveTile, world } from '../../src/index.ts';
-import { testDb } from '../support/db.ts';
-import { expectRefused } from '../support/expect.ts';
-import { createTestPlayer, reloadCity, setResources, setTownHall, type TestPlayer } from '../support/factories.ts';
-import { game, type TestGame } from '../support/game.ts';
+import { and, eq, isNull } from 'drizzle-orm';
+import { BALANCE, MAP_VIEW_MAX, msg, Relation, relationPermissions, stateOf, TileType, tileId, tileXY, valleyUpgradeCost } from '@marchlands/core';
+import { tiles, worldState } from '@marchlands/db';
+import { alliance, world } from '#/index.ts';
+import { getTile, saveTile } from '#/repo.ts';
+import { testDb } from '@marchlands/db/test/support/db.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { createTestPlayer, reloadCity, setResources, setTownHall, type TestPlayer } from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
+import { SIZE, asDb } from '#test/support/world.ts';
 
-const { MAP_VIEW_MAX } = world;
-const SIZE = BALANCE.mapSize;
 const VALLEYS = [TileType.FOREST, TileType.DESERT, TileType.HILL, TileType.SWAMP, TileType.GRASS, TileType.LAKE];
-
-// refreshZoneStats / zoneStats take a Db; the game transaction serves as one, so what they write is rolled back too
-const asDb = (g: TestGame) => g.tx as unknown as Db;
 
 const hex = (n: number) => n.toString(16);
 
@@ -83,36 +80,6 @@ describe(world.ensureWorld.name, () => {
   });
 });
 
-describe(world.refreshZoneStats.name, () => {
-  it('counts the castles, barbarian cities and open flats of each zone', () =>
-    game(async (g) => {
-      const stats = await world.refreshZoneStats(asDb(g));
-      expect(stats.map((s) => s.id)).toEqual(Array.from({ length: BALANCE.stateGrid ** 2 }, (_, i) => i));
-      const [{ open }] = (
-        await g.tx.execute<{ open: number }>(
-          sql`select count(*)::int as open from tiles where type = ${TileType.FLAT} and city_id is null and owner_city_id is null`,
-        )
-      ).rows;
-      expect(stats.reduce((n, s) => n + s.openFlats, 0)).toBe(Number(open));
-      for (const s of stats) {
-        expect(s.castleCount).toBeGreaterThanOrEqual(s.playerCount);
-        expect(s.settled).toBeGreaterThanOrEqual(0);
-        expect(s.settled).toBeLessThanOrEqual(1);
-      }
-      const [cached] = await g.tx.select().from(worldState).where(eq(worldState.key, 'zones'));
-      expect(cached.value).toEqual(stats);
-    }));
-
-  it('a new city takes an open flat of its zone', () =>
-    game(async (g) => {
-      const before = (await world.refreshZoneStats(asDb(g)))[5];
-      await createTestPlayer(g, { zone: 5 });
-      const after = (await world.refreshZoneStats(asDb(g)))[5];
-      expect(after).toMatchObject({ playerCount: before.playerCount + 1, castleCount: before.castleCount + 1, openFlats: before.openFlats - 1 });
-      expect(after.settled).toBeGreaterThan(before.settled);
-    }));
-});
-
 describe(world.zoneStats.name, () => {
   it('reads the cached statistics, computing them when there are none', () =>
     game(async (g) => {
@@ -122,46 +89,6 @@ describe(world.zoneStats.name, () => {
       await createTestPlayer(g, { zone: 2 });
       expect(await world.zoneStats(asDb(g))).toEqual(fresh); // cached: the new city is not counted yet
     }));
-});
-
-describe(world.pickOpenFlat.name, () => {
-  it('picks a free flat in the zone asked for', () =>
-    game(async (g) => {
-      for (const zone of [0, 7, 15]) {
-        const t = await getTile(g, await world.pickOpenFlat(g, zone));
-        expect(t).toMatchObject({ type: TileType.FLAT, cityId: null, ownerCityId: null });
-        expect(stateOf(t.id)).toBe(zone);
-      }
-    }));
-
-  it('picks anywhere for a negative zone', () =>
-    game(async (g) => {
-      const t = await getTile(g, await world.pickOpenFlat(g, -1));
-      expect(t).toMatchObject({ type: TileType.FLAT, cityId: null, ownerCityId: null });
-    }));
-
-  it('refuses a zone with no open flat', () =>
-    game(async (g) => {
-      const b = stateBounds(3);
-      await g.tx
-        .update(tiles)
-        .set({ type: TileType.FOREST })
-        .where(
-          and(eq(tiles.type, TileType.FLAT), sql`${tiles.id} / ${SIZE} between ${b.y1} and ${b.y2} and ${tiles.id} % ${SIZE} between ${b.x1} and ${b.x2}`),
-        );
-      await expectRefused(world.pickOpenFlat(g, 3), msg('world.noOpenFlat'));
-    }));
-});
-
-describe(world.permissions.name, () => {
-  it('friends may be sent to and supplied, everyone else attacked and scouted', () => {
-    const friendly = { canLoot: false, canOccupy: false, canScout: false, canSend: true, canTrans: true };
-    for (const r of [Relation.SELF, Relation.ALLY, Relation.ALLIANCE]) expect(world.permissions(r)).toEqual(friendly);
-    expect(world.permissions(Relation.ENEMY)).toEqual({ canLoot: true, canOccupy: true, canScout: true, canSend: true, canTrans: true });
-    for (const r of [Relation.NEUTRAL, Relation.NO_RELATION]) {
-      expect(world.permissions(r)).toEqual({ canLoot: true, canOccupy: true, canScout: true, canSend: false, canTrans: false });
-    }
-  });
 });
 
 describe(world.mapView.name, () => {
@@ -185,7 +112,7 @@ describe(world.mapView.name, () => {
       const npc = view.castles.find((k) => k.npc);
       if (npc) {
         const t = await getTile(g, npc.id);
-        expect(npc).toEqual({ id: t.id, ...tileXY(t.id), npc: true, level: t.level, zoneId: stateOf(t.id), ...world.permissions(Relation.NO_RELATION) });
+        expect(npc).toEqual({ id: t.id, ...tileXY(t.id), npc: true, level: t.level, zoneId: stateOf(t.id), ...relationPermissions(Relation.NO_RELATION) });
       }
     }));
 
@@ -208,7 +135,7 @@ describe(world.mapView.name, () => {
           allianceName: '',
           relation: Relation.SELF,
           zoneId: stateOf(c.id),
-          ...world.permissions(Relation.SELF),
+          ...relationPermissions(Relation.SELF),
         }),
       ]);
       expect((await world.mapView(g, null, c.x, c.y, c.x, c.y)).castles[0]).toMatchObject({ relation: Relation.NO_RELATION, canSend: false });
@@ -230,14 +157,14 @@ describe(world.mapView.name, () => {
       const cb = await cityTile(g, b);
       const ca = await cityTile(g, a);
       const [seenByA] = (await world.mapView(g, a.id, cb.x, cb.y, cb.x, cb.y)).castles;
-      expect(seenByA).toMatchObject({ playerId: b.id, allianceName: `Band ${b.id}`, relation: Relation.ALLY, ...world.permissions(Relation.ALLY) });
+      expect(seenByA).toMatchObject({ playerId: b.id, allianceName: `Band ${b.id}`, relation: Relation.ALLY, ...relationPermissions(Relation.ALLY) });
       // one-sided: b's alliance set nothing towards a's
       const [seenByB] = (await world.mapView(g, b.id, ca.x, ca.y, ca.x, ca.y)).castles;
       expect(seenByB).toMatchObject({ allianceName: `Band ${a.id}`, relation: Relation.NO_RELATION });
       await alliance.setRelation(g, a.id, `Band ${b.id}`, Relation.ENEMY);
       expect((await world.mapView(g, b.id, ca.x, ca.y, ca.x, ca.y)).castles[0]).toMatchObject({
         relation: Relation.ENEMY,
-        ...world.permissions(Relation.ENEMY),
+        ...relationPermissions(Relation.ENEMY),
       });
     }));
 
@@ -303,7 +230,7 @@ describe(world.fieldInfo.name, () => {
         owner: null,
         relation: Relation.NO_RELATION,
         upgradeCost: valleyUpgradeCost(t.level),
-        ...world.permissions(Relation.NO_RELATION),
+        ...relationPermissions(Relation.NO_RELATION),
       });
       await saveTile(g, { ...t, level: BALANCE.valleyUpgrade.maxLevel });
       expect(await world.fieldInfo(g, p.id, t.id)).toMatchObject({ upgradeCost: null });
@@ -315,11 +242,11 @@ describe(world.fieldInfo.name, () => {
       const b = await createTestPlayer(g);
       const t = await holdValley(g, a);
       const owner = { cityId: a.cityId, cityName: (await cityTile(g, a)).name, playerId: a.id, userName: a.name };
-      expect(await world.fieldInfo(g, a.id, t.id)).toMatchObject({ owner, relation: Relation.SELF, upgradeCost: null, ...world.permissions(Relation.SELF) });
+      expect(await world.fieldInfo(g, a.id, t.id)).toMatchObject({ owner, relation: Relation.SELF, upgradeCost: null, ...relationPermissions(Relation.SELF) });
       expect(await world.fieldInfo(g, b.id, t.id)).toMatchObject({ owner, relation: Relation.NO_RELATION, canLoot: true });
       expect(await world.fieldInfo(g, null, t.id)).toMatchObject({ owner, relation: Relation.NO_RELATION });
       await allied(g, b, a, Relation.ENEMY);
-      expect(await world.fieldInfo(g, b.id, t.id)).toMatchObject({ relation: Relation.ENEMY, ...world.permissions(Relation.ENEMY) });
+      expect(await world.fieldInfo(g, b.id, t.id)).toMatchObject({ relation: Relation.ENEMY, ...relationPermissions(Relation.ENEMY) });
     }));
 
   it('a barbarian city can be raised too', () =>

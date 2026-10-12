@@ -5,7 +5,7 @@
 import type { TestProject } from 'vitest/node';
 import pg from 'pg';
 import { connect, runMigrations } from '@marchlands/db';
-import { world } from '../../src/index.ts';
+import { world } from '#/index.ts';
 
 declare module 'vitest' {
   export interface ProvidedContext {

@@ -16,22 +16,9 @@ import {
   type ResourceSet,
 } from '@marchlands/core';
 import { ArmyBean, BuffBean, CityBean, HeroBean, PlayerInfo } from '@marchlands/contracts';
-import {
-  armyBean,
-  buffsArray,
-  buildingBean,
-  cityBean,
-  cityStats,
-  fortBean,
-  heroBean,
-  itemsArray,
-  playerInfo,
-  resourceBean,
-  troopBean,
-  valleyBean,
-  type CityBundle,
-} from '../src/index.ts';
-import { armyRow, bundle, cityRow, heroRow, playerRow, T0, tileRow } from './support/city-rows.ts';
+import { armyBean, buffsArray, buildingBean, cityBean, fortBean, heroBean, itemsArray, playerInfo, resourceBean, troopBean, valleyBean } from '#/dto.ts';
+import { cityStats, type CityBundle } from '#/city.ts';
+import { armyRow, bundle, cityRow, heroRow, playerRow, T0, tileRow } from '#test/support/city-rows.ts';
 
 const building = (positionId: number, typeId: number, level: number): BuildingState => ({ positionId, typeId, level, status: 0, startTime: 0, endTime: 0 });
 const FARM_2 = BALANCE.fieldProductionPerF * BALANCE.fieldFactor[2];

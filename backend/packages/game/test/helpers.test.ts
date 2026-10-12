@@ -1,19 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BuffId, GameError, msg, type BuffState, type Message } from '@marchlands/core';
-import {
-  activeBuff,
-  addPrestige,
-  assertClean,
-  assertResources,
-  cleanName,
-  escapeHtml,
-  gainResources,
-  itemCount,
-  spendGold,
-  spendResources,
-  type CityRow,
-  type PlayerRow,
-} from '../src/index.ts';
+import { activeBuff, addPrestige, assertClean, cleanName, escapeHtml, gainResources, itemCount, spendGold, spendResources } from '#/helpers.ts';
+import { type CityRow, type PlayerRow } from '#/repo.ts';
 
 const city = (res: Partial<Record<'gold' | 'food' | 'wood' | 'stone' | 'iron', number>> = {}) =>
   ({ gold: 0, food: 0, wood: 0, stone: 0, iron: 0, ...res }) as CityRow;
@@ -31,21 +19,6 @@ function refusal(fn: () => unknown): { msg: Message; code: number } {
   return expect.unreachable('expected a refusal');
 }
 
-describe(assertResources.name, () => {
-  it('passes when the city has enough of everything asked for', () => {
-    expect(() => assertResources(city({ food: 10, wood: 5 }), { food: 10, wood: 5 })).not.toThrow();
-    expect(() => assertResources(city(), {})).not.toThrow();
-  });
-
-  it('refuses when anything is short, with the given message and code', () => {
-    expect(refusal(() => assertResources(city({ food: 10 }), { food: 11 }))).toEqual({ msg: msg('common.notEnoughResources'), code: -1 });
-    expect(refusal(() => assertResources(city({ food: 10 }), { gold: 1 }, msg('common.notEnoughGold'), -7))).toEqual({
-      msg: msg('common.notEnoughGold'),
-      code: -7,
-    });
-  });
-});
-
 describe(spendResources.name, () => {
   it('takes the cost from the city', () => {
     const c = city({ gold: 5, food: 10, wood: 7 });
@@ -55,8 +28,21 @@ describe(spendResources.name, () => {
 
   it('takes nothing when it cannot pay it all', () => {
     const c = city({ food: 10, wood: 1 });
-    expect(refusal(() => spendResources(c, { food: 4, wood: 2 })).msg).toEqual(msg('common.notEnoughResources'));
+    expect(refusal(() => spendResources(c, { food: 4, wood: 2 }))).toEqual({ msg: msg('common.notEnoughResources'), code: -1 });
     expect(c).toMatchObject({ food: 10, wood: 1 });
+  });
+
+  it('refuses with the given message and code', () => {
+    expect(refusal(() => spendResources(city({ food: 10 }), { gold: 1 }, msg('common.notEnoughGold'), -7))).toEqual({
+      msg: msg('common.notEnoughGold'),
+      code: -7,
+    });
+  });
+
+  it('a free cost always passes', () => {
+    const c = city();
+    spendResources(c, {});
+    expect(c).toMatchObject(city());
   });
 });
 

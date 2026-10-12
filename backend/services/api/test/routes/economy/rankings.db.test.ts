@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { BALANCE } from '@marchlands/core';
 import type { RankingAlliancePage, RankingCastlePage, RankingHeroPage, RankingPlayerPage } from '@marchlands/contracts';
 import { admin } from '@marchlands/game';
-import { apiTest } from '../../support/api.ts';
-import { accountWithoutPlayer, expectInvalid, expectNeedsToken } from '../../support/guards.ts';
+import { apiTest } from '#test/support/api.ts';
+import { accountWithoutPlayer, expectInvalid, expectNeedsToken } from '#test/support/guards.ts';
 
 const KINDS = ['players', 'alliances', 'heroes', 'castles'];
 

@@ -2,7 +2,7 @@
 // whether it writes anything (row locks cannot be seen from inside the transaction that holds them).
 
 import { vi } from 'vitest';
-import type { TestGame } from './game.ts';
+import type { TestGame } from '#test/support/game.ts';
 
 interface QueryClient {
   query: (...args: unknown[]) => unknown;

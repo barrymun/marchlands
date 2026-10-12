@@ -10,31 +10,31 @@
 // data the client names itself (troops, buildings, items …), a length of time (`dur(ms)`, real milliseconds, which
 // the client shows as a duration), a share (`share(0.25)`, which the client shows as a percent: 25%), or a list of these.
 
-import { AUTH_MESSAGES } from './auth.ts';
-import { COMMON_MESSAGES } from './common.ts';
-import { QUEST_INFO_MESSAGES } from './quest-info.ts';
-import { ITEM_INFO_MESSAGES } from './item-info.ts';
-import { TROOP_INFO_MESSAGES } from './troop-info.ts';
-import { TECH_INFO_MESSAGES } from './tech-info.ts';
-import { BUILDING_INFO_MESSAGES } from './building-info.ts';
-import { BUFF_MESSAGES } from './buff.ts';
-import { FLOW_MESSAGES } from './flow.ts';
-import { QUEST_MESSAGES } from './quest.ts';
-import { WORLD_MESSAGES } from './world.ts';
-import { MAIL_MESSAGES } from './mail.ts';
-import { SOCIAL_MESSAGES } from './social.ts';
-import { ITEM_MESSAGES } from './item.ts';
-import { MARKET_MESSAGES } from './market.ts';
-import { RESEARCH_MESSAGES } from './research.ts';
-import { TRAINING_MESSAGES } from './training.ts';
-import { ADMIN_MESSAGES } from './admin.ts';
-import { PLAYER_MESSAGES } from './player.ts';
-import { CITY_MESSAGES } from './city.ts';
-import { BUILDING_MESSAGES } from './building.ts';
-import { HERO_MESSAGES } from './hero.ts';
-import { REPORT_MESSAGES } from './report.ts';
-import { ARMY_MESSAGES } from './army.ts';
-import { ALLIANCE_MESSAGES } from './alliance.ts';
+import { AUTH_MESSAGES } from '#/messages/auth.ts';
+import { COMMON_MESSAGES } from '#/messages/common.ts';
+import { QUEST_INFO_MESSAGES } from '#/messages/quest-info.ts';
+import { ITEM_INFO_MESSAGES } from '#/messages/item-info.ts';
+import { TROOP_INFO_MESSAGES } from '#/messages/troop-info.ts';
+import { TECH_INFO_MESSAGES } from '#/messages/tech-info.ts';
+import { BUILDING_INFO_MESSAGES } from '#/messages/building-info.ts';
+import { BUFF_MESSAGES } from '#/messages/buff.ts';
+import { FLOW_MESSAGES } from '#/messages/flow.ts';
+import { QUEST_MESSAGES } from '#/messages/quest.ts';
+import { WORLD_MESSAGES } from '#/messages/world.ts';
+import { MAIL_MESSAGES } from '#/messages/mail.ts';
+import { SOCIAL_MESSAGES } from '#/messages/social.ts';
+import { ITEM_MESSAGES } from '#/messages/item.ts';
+import { MARKET_MESSAGES } from '#/messages/market.ts';
+import { RESEARCH_MESSAGES } from '#/messages/research.ts';
+import { TRAINING_MESSAGES } from '#/messages/training.ts';
+import { ADMIN_MESSAGES } from '#/messages/admin.ts';
+import { PLAYER_MESSAGES } from '#/messages/player.ts';
+import { CITY_MESSAGES } from '#/messages/city.ts';
+import { BUILDING_MESSAGES } from '#/messages/building.ts';
+import { HERO_MESSAGES } from '#/messages/hero.ts';
+import { REPORT_MESSAGES } from '#/messages/report.ts';
+import { ARMY_MESSAGES } from '#/messages/army.ts';
+import { ALLIANCE_MESSAGES } from '#/messages/alliance.ts';
 
 export const MESSAGES = {
   common: COMMON_MESSAGES,

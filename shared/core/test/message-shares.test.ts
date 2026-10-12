@@ -14,7 +14,7 @@ import {
   troopDescription,
   type Message,
   type MsgParam,
-} from '../src/index.ts';
+} from '#/index.ts';
 
 /** Params that hold a percentage: they must be shares (`share(x)`), never a percent number. */
 const SHARE_PARAMS = new Set(['percent', 'pct', 'life', 'injured', 'march', 'battle']);

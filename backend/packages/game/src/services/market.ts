@@ -9,12 +9,13 @@
 import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import {
   BALANCE,
-  BuildingType,
+  BASIC_RESOURCES,
+  type BasicResource,
   buildingLevel,
-  goldForSpeedup,
+  BuildingType,
   GameError,
-  msg,
-  ref as gameRef,
+  goldForSpeedup,
+  MarketSide,
   merchantAsk,
   merchantBase,
   merchantBid,
@@ -22,30 +23,24 @@ import {
   merchantMarginal,
   merchantReference,
   merchantSells,
-  scaled,
-  type BasicResource,
   type MerchantState,
-  BASIC_RESOURCES,
+  msg,
+  ref as gameRef,
+  ReportType,
+  scaled,
 } from '@marchlands/core';
 import { marketOrders, marketShipments, marketTrades, pgArray, worldState } from '@marchlands/db';
-import { openCity, openOwnCity } from '../city.ts';
-import type { Ctx } from '../context.ts';
-import { gainResources, pushResources, spendGold } from '../helpers.ts';
-import { citiesOf, saveCity } from '../repo.ts';
-import { createReport, ReportType } from './reports.ts';
+import { openOwnCity } from '#/city.ts';
+import { type Ctx } from '#/context.ts';
+import { gainResources, pushResources, spendGold } from '#/helpers.ts';
+import { saveCity } from '#/repo.ts';
+import { createReport } from '#/engine/reports.ts';
 import { PushCmd } from '@marchlands/contracts';
-
-const GOLD = 4;
-const resKey = (t: number) => (t === GOLD ? 'gold' : BASIC_RESOURCES[t]);
-
-export const Side = { BUY: 0, SELL: 1 } as const;
+import { resKey, GOLD, MERCHANT_KEY, tradeStat, withFee, escrowGold, ship, loadMerchant } from '#/engine/market.ts';
 
 type OrderRow = typeof marketOrders.$inferSelect;
 
 const roundPrice = (p: number) => Math.round(p * 1000) / 1000;
-const escrowGold = (amount: number, price: number) => Math.ceil(amount * price * (1 + BALANCE.marketFee));
-const withFee = (gold: number) => Math.ceil(gold * (1 + BALANCE.marketFee));
-const MERCHANT_KEY = 'merchant';
 
 function orderBean(o: OrderRow) {
   return {
@@ -64,21 +59,6 @@ function orderBean(o: OrderRow) {
 function assertResType(resType: number): BasicResource {
   if (!(Number.isInteger(resType) && resType >= 0 && resType <= 3)) throw new GameError(msg('market.invalidResource'), -99);
   return BASIC_RESOURCES[resType];
-}
-
-// ---------------------------------------------------------------------------------------------
-// Merchant state (world_state 'merchant': reference price per resource)
-// ---------------------------------------------------------------------------------------------
-
-async function loadMerchant(ctx: Ctx, lock: boolean): Promise<Partial<MerchantState>> {
-  if (lock) {
-    // create the row once so it can be locked; concurrent trades then queue on it
-    await ctx.tx.insert(worldState).values({ key: MERCHANT_KEY, value: {}, updatedAt: ctx.now }).onConflictDoNothing();
-    const [row] = await ctx.tx.select().from(worldState).where(eq(worldState.key, MERCHANT_KEY)).for('update');
-    return (row?.value ?? {}) as Partial<MerchantState>;
-  }
-  const [row] = await ctx.tx.select().from(worldState).where(eq(worldState.key, MERCHANT_KEY));
-  return (row?.value ?? {}) as Partial<MerchantState>;
 }
 
 function merchantQuoteBean(res: BasicResource, state: Partial<MerchantState>, now: number) {
@@ -104,7 +84,7 @@ interface Fill {
  * orders. `offers` are resting orders sorted best price first, then oldest.
  */
 function planFills(side: number, qty: number, limit: number, offers: OrderRow[], ref: number) {
-  const buy = side === Side.BUY;
+  const buy = side === MarketSide.BUY;
   const better = (a: number, b: number) => (buy ? a <= b : a >= b);
   const fills: Fill[] = [];
   let remaining = qty;
@@ -150,14 +130,14 @@ function used(fills: Fill[], o: OrderRow) {
 }
 
 async function restingOffers(ctx: Ctx, resType: number, side: number, limit: number, excludePlayerId: number | null, lock: boolean) {
-  const buy = side === Side.BUY;
+  const buy = side === MarketSide.BUY;
   const q = ctx.tx
     .select()
     .from(marketOrders)
     .where(
       and(
         eq(marketOrders.resType, resType),
-        eq(marketOrders.side, buy ? Side.SELL : Side.BUY),
+        eq(marketOrders.side, buy ? MarketSide.SELL : MarketSide.BUY),
         Number.isFinite(limit) && limit > 0 ? (buy ? lte(marketOrders.price, limit) : gte(marketOrders.price, limit)) : undefined,
         sql`${marketOrders.amount} > ${marketOrders.filled}`,
         excludePlayerId != null ? sql`${marketOrders.playerId} <> ${excludePlayerId}` : undefined,
@@ -179,7 +159,7 @@ export interface OrderInput {
 
 function normalise(o: OrderInput) {
   const res = assertResType(o.resType);
-  if (o.side !== Side.BUY && o.side !== Side.SELL) throw new GameError(msg('market.invalidSide'), -99);
+  if (o.side !== MarketSide.BUY && o.side !== MarketSide.SELL) throw new GameError(msg('market.invalidSide'), -99);
   if (!Number.isInteger(o.amount) || o.amount < 1 || o.amount > 1e10) throw new GameError(msg('common.invalidAmount'), -99);
   const market = o.type === 'market';
   let price = 0;
@@ -187,23 +167,23 @@ function normalise(o: OrderInput) {
     price = roundPrice(Number(o.price));
     if (!(price >= 0.001 && price <= 1e6)) throw new GameError(msg('market.invalidPrice'), -99);
   }
-  const limit = market ? (o.side === Side.BUY ? Infinity : 0) : price;
+  const limit = market ? (o.side === MarketSide.BUY ? Infinity : 0) : price;
   return { res, market, price, limit };
 }
 
 function summarise(side: number, plan: ReturnType<typeof planFills>, rest: number, price: number) {
   const fillGold = plan.fills.reduce((s, f) => s + f.gold, 0);
   const merchantFilled = plan.fills.filter((f) => !f.other).reduce((s, f) => s + f.qty, 0);
-  const gold = side === Side.BUY ? withFee(fillGold) : Math.floor(fillGold);
+  const gold = side === MarketSide.BUY ? withFee(fillGold) : Math.floor(fillGold);
   return {
     filled: plan.filled,
     avgPrice: plan.filled > 0 ? fillGold / plan.filled : null,
     gold,
-    fee: side === Side.BUY ? gold - Math.ceil(fillGold) : 0,
+    fee: side === MarketSide.BUY ? gold - Math.ceil(fillGold) : 0,
     merchantFilled,
     playerFilled: plan.filled - merchantFilled,
     rest,
-    escrow: rest > 0 ? (side === Side.BUY ? escrowGold(rest, price) : rest) : 0,
+    escrow: rest > 0 ? (side === MarketSide.BUY ? escrowGold(rest, price) : rest) : 0,
   };
 }
 
@@ -219,8 +199,8 @@ export async function orderBook(ctx: Ctx, resType: number, depth = 10) {
       select price, sum(amount - filled)::bigint as amount from market_orders
       where res_type = ${resType} and side = ${side} and amount > filled
       group by price order by price ${sql.raw(dir)} limit ${depth}`);
-  const buyers = await level(Side.BUY, 'desc');
-  const sellers = await level(Side.SELL, 'asc');
+  const buyers = await level(MarketSide.BUY, 'desc');
+  const sellers = await level(MarketSide.SELL, 'asc');
   const conv = (r: { price: number; amount: number }) => ({ price: Number(r.price), amount: Number(r.amount) });
   const merchant = merchantQuoteBean(res, await loadMerchant(ctx, false), ctx.now);
   return { resType, buyers: buyers.rows.map(conv), sellers: sellers.rows.map(conv), merchant };
@@ -306,33 +286,6 @@ function shipmentMs(marketLevel: number) {
   return scaled(Math.floor(BALANCE.marketShipmentBaseMs / Math.max(1, marketLevel)));
 }
 
-/** (marchlands) A lord's side of a trade, for their statistics. */
-function tradeStat(ctx: Ctx, playerId: number, cityId: number, bought: boolean, res: string, qty: number, gold: number) {
-  ctx.stat(
-    playerId,
-    cityId,
-    bought ? { [`market.bought.${res}`]: qty, 'market.goldPaid': gold } : { [`market.sold.${res}`]: qty, 'market.goldReceived': gold },
-  );
-}
-
-async function ship(ctx: Ctx, s: { playerId: number; cityId: number; orderId: number; resType: number; amount: number; price: number; ms: number }) {
-  const [row] = await ctx.tx
-    .insert(marketShipments)
-    .values({
-      playerId: s.playerId,
-      cityId: s.cityId,
-      orderId: s.orderId,
-      resType: s.resType,
-      amount: s.amount,
-      price: s.price,
-      startTime: ctx.now,
-      endTime: ctx.now + s.ms,
-    })
-    .returning();
-  ctx.schedule({ type: 'shipment', dueAt: row.endTime, playerId: s.playerId, cityId: s.cityId, refKey: `shipment:${row.id}`, payload: { shipmentId: row.id } });
-  return row;
-}
-
 // ---------------------------------------------------------------------------------------------
 // Placing an order
 // ---------------------------------------------------------------------------------------------
@@ -343,7 +296,7 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
   const b = await openOwnCity(ctx, playerId, cityId);
   const marketLevel = buildingLevel(b.city.buildings, BuildingType.MARKETPLACE);
   if (marketLevel < 1) throw new GameError(msg('market.needMarketplace', { building: gameRef.building(BuildingType.MARKETPLACE) }), -99);
-  const buy = o.side === Side.BUY;
+  const buy = o.side === MarketSide.BUY;
 
   const merchantState = await loadMerchant(ctx, true);
   const ref = merchantReference(res, merchantState[res], ctx.now);
@@ -433,77 +386,6 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
   return { ...sum, order: order ? orderBean(order) : null };
 }
 
-/**
- * The merchant fills resting orders its price has crossed (its reference drifts back towards the
- * base price over time, so a waiting bid can end up above its ask, or an offer below its bid).
- * Run periodically by the worker. Owners are paid like any counterparty: zero-time shipments.
- */
-export async function merchantSweep(ctx: Ctx) {
-  const state = await loadMerchant(ctx, true);
-  let changed = false;
-  for (let resType = 0; resType < BASIC_RESOURCES.length; resType++) {
-    const res = BASIC_RESOURCES[resType];
-    let ref = merchantReference(res, state[res], ctx.now);
-    let moved = false;
-    const crossed = async (side: number, bound: number) =>
-      ctx.tx
-        .select()
-        .from(marketOrders)
-        .where(
-          and(
-            eq(marketOrders.resType, resType),
-            eq(marketOrders.side, side),
-            side === Side.BUY ? gte(marketOrders.price, bound) : lte(marketOrders.price, bound),
-            sql`${marketOrders.amount} > ${marketOrders.filled}`,
-          ),
-        )
-        .orderBy(side === Side.BUY ? desc(marketOrders.price) : asc(marketOrders.price), asc(marketOrders.createdAt))
-        .limit(50)
-        .for('update');
-    for (const side of [Side.BUY, Side.SELL]) {
-      for (const o of await crossed(side, side === Side.BUY ? merchantAsk(ref) : merchantBid(ref))) {
-        const left = o.amount - o.filled;
-        const f = side === Side.BUY ? merchantSells(ref, left, o.price) : merchantBuys(ref, left, o.price);
-        if (f.qty <= 0) continue;
-        ref = f.ref;
-        moved = changed = true;
-        o.filled += f.qty;
-        const gold = Math.floor(f.gold);
-        if (side === Side.BUY) {
-          // goods to the bidder, plus what its escrow (at its own price) overpaid
-          await ship(ctx, { playerId: o.playerId, cityId: o.cityId, orderId: o.id, resType, amount: f.qty, price: f.gold / f.qty, ms: 0 });
-          const surplus = escrowGold(f.qty, o.price) - withFee(f.gold);
-          if (surplus > 0) await ship(ctx, { playerId: o.playerId, cityId: o.cityId, orderId: o.id, resType: GOLD, amount: surplus, price: 0, ms: 0 });
-        } else {
-          await ship(ctx, { playerId: o.playerId, cityId: o.cityId, orderId: o.id, resType: GOLD, amount: gold, price: f.gold / f.qty, ms: 0 });
-        }
-        if (o.filled >= o.amount) await ctx.tx.delete(marketOrders).where(eq(marketOrders.id, o.id));
-        else await ctx.tx.update(marketOrders).set({ filled: o.filled }).where(eq(marketOrders.id, o.id));
-        await ctx.tx.insert(marketTrades).values({
-          resType,
-          price: f.gold / f.qty,
-          amount: f.qty,
-          gold,
-          takerSide: side === Side.BUY ? Side.SELL : Side.BUY,
-          buyerPlayerId: side === Side.BUY ? o.playerId : null,
-          sellerPlayerId: side === Side.BUY ? null : o.playerId,
-          createdAt: ctx.now,
-        });
-        tradeStat(ctx, o.playerId, o.cityId, side === Side.BUY, res, f.qty, gold);
-        ctx.push(o.playerId, PushCmd.TRADES_UPDATE, { resType, amount: f.qty, price: f.gold / f.qty });
-        await createReport(ctx, {
-          playerId: o.playerId,
-          typeId: ReportType.TRADE,
-          title: msg('report.title.tradeCompleted'),
-          body: { kind: 'trade', trade: { side: side === Side.BUY ? 'buy' : 'sell', resource: res, amount: f.qty, price: f.gold / f.qty, gold } },
-        });
-      }
-    }
-    if (moved) state[res] = { price: ref, at: ctx.now };
-  }
-  if (changed) await ctx.tx.update(worldState).set({ value: state, updatedAt: ctx.now }).where(eq(worldState.key, MERCHANT_KEY));
-}
-
 async function marketLevelOf(ctx: Ctx, cityId: number) {
   const rows = await ctx.tx.execute<{ buildings: { typeId: number; level: number }[] }>(sql`select buildings from cities where id = ${cityId}`);
   return buildingLevel((rows.rows[0]?.buildings ?? []) as never, BuildingType.MARKETPLACE);
@@ -517,7 +399,7 @@ export async function cancelOrder(ctx: Ctx, playerId: number, orderId: number) {
   const [o] = await ctx.tx.select().from(marketOrders).where(eq(marketOrders.id, orderId)).for('update');
   if (!o) throw new GameError(msg('market.orderNotFound'), -99, 404);
   const left = o.amount - o.filled;
-  if (o.side === Side.BUY) gainResources(b.city, { gold: escrowGold(left, o.price) });
+  if (o.side === MarketSide.BUY) gainResources(b.city, { gold: escrowGold(left, o.price) });
   else gainResources(b.city, { [BASIC_RESOURCES[o.resType]]: left });
   await ctx.tx.delete(marketOrders).where(eq(marketOrders.id, orderId));
   pushResources(ctx, b);
@@ -536,29 +418,4 @@ export async function speedupShipment(ctx: Ctx, playerId: number, shipmentId: nu
   ctx.schedule({ type: 'shipment', dueAt: ctx.now, playerId, cityId: s.cityId, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
-}
-
-/** Delivery (timed event). Falls back to the lord's first city if the target city is gone. */
-export async function deliverShipment(ctx: Ctx, shipmentId: number) {
-  const [peek] = await ctx.tx.select().from(marketShipments).where(eq(marketShipments.id, shipmentId));
-  if (!peek) return;
-  let cityId = peek.cityId;
-  const owned = await citiesOf(ctx, peek.playerId);
-  if (!owned.some((c) => c.id === cityId)) cityId = owned[0]?.id ?? 0;
-  if (!cityId) {
-    await ctx.tx.delete(marketShipments).where(eq(marketShipments.id, shipmentId));
-    return;
-  }
-  const b = await openCity(ctx, cityId);
-  const [s] = await ctx.tx.select().from(marketShipments).where(eq(marketShipments.id, shipmentId)).for('update');
-  if (!b || !s) return;
-  if (s.endTime > ctx.now) {
-    ctx.schedule({ type: 'shipment', dueAt: s.endTime, playerId: s.playerId, cityId: s.cityId, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } });
-    return;
-  }
-  gainResources(b.city, { [resKey(s.resType)]: s.amount });
-  await ctx.tx.delete(marketShipments).where(eq(marketShipments.id, shipmentId));
-  await saveCity(ctx, b.city);
-  pushResources(ctx, b);
-  ctx.push(s.playerId, PushCmd.TRANSIT_TRADE_UPDATE, { id: s.id, delivered: true, resType: s.resType, amount: s.amount, castleId: cityId });
 }

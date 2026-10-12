@@ -12,8 +12,10 @@ import {
   type QuestTarget,
 } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { addPrestige, getPlayer, heroes, mail, quests, saveCity, savePlayer } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
+import { addPrestige } from '#/helpers.ts';
+import { getPlayer, saveCity, savePlayer } from '#/repo.ts';
+import { heroes, mail, quests } from '#/index.ts';
+import { expectRefused } from '#test/support/expect.ts';
 import {
   addHero,
   cityBundle,
@@ -25,9 +27,9 @@ import {
   setResearch,
   setTownHall,
   type TestPlayer,
-} from '../support/factories.ts';
-import { game, T0, type TestGame } from '../support/game.ts';
-import { foundAlliance } from '../support/alliance.ts';
+} from '#test/support/factories.ts';
+import { game, T0, type TestGame } from '#test/support/game.ts';
+import { foundAlliance } from '#test/support/alliance.ts';
 
 const DAY = 86_400_000;
 

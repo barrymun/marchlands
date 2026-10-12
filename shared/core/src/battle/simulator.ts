@@ -5,8 +5,8 @@
 // Math.fround in the same left-to-right order so results match the original regression data.
 // Troop indices are troop type id - 2 (0 worker ... 11 catapult); fort indices are id - 14.
 
-import { BALANCE } from '../balance.ts';
-import type { Rng } from '../rng.ts';
+import { BALANCE } from '#/balance.ts';
+import type { Rng } from '#/rng.ts';
 
 const f = Math.fround;
 

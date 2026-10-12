@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { operationIdOf } from '../src/operation-id.ts';
+import { operationIdOf } from '#/operation-id.ts';
 
 describe(operationIdOf.name, () => {
   it('joins the method and the path segments, without the /api/v1 prefix', () => {

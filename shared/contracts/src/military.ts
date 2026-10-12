@@ -2,9 +2,9 @@
 
 import { z } from 'zod';
 import { TileType } from '@marchlands/core';
-import { zCityParams, zId, zIdValue, zResources, zTroops } from './common.ts';
-import { ArmyBean, HeroBean } from './beans.ts';
-import { TileRow } from './rows.ts';
+import { zCityParams, zId, zIdValue, zResources, zTroops } from '#/common.ts';
+import { ArmyBean, HeroBean } from '#/beans.ts';
+import { TileRow } from '#/rows.ts';
 
 // ---- requests ----
 
@@ -41,6 +41,7 @@ export const SendArmyBody = z.object({
   heroId: z.number().int().nullish(),
   restTime: z.number().int().min(0).optional().describe('seconds to camp before returning (0 = until recalled)'),
 });
+export type SendArmyBody = z.infer<typeof SendArmyBody>;
 export const MarchEstimateBody = z.object({ targetTileId: zId, troops: zTroops });
 
 export const TileParams = z.object({ tileId: zId });

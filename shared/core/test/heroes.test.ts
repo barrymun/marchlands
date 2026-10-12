@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE } from '@marchlands/core';
-import { tavernRefill } from '../../src/services/heroes.ts';
+import { BALANCE, tavernRefill } from '#/index.ts';
 
 const heroes = (n: number) => Array.from({ length: n }, (_, i) => ({ id: i + 1 }));
 

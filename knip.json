@@ -1,0 +1,28 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignore": ["shared/api-client/src/generated/**", "client/web/src/components/ui/**"],
+  "workspaces": {
+    ".": {
+      "entry": ["tools/**/*.{ts,mjs}!"]
+    },
+    "backend/services/api": {
+      "project": ["src/**/*.ts!", "test/**/*.ts"],
+      "ignoreDependencies": ["pino-pretty"]
+    },
+    "backend/services/worker": {
+      "project": ["src/**/*.ts!", "test/**/*.ts"]
+    },
+    "backend/packages/db": {
+      "entry": ["src/migrate.ts!"],
+      "project": ["src/**/*.ts!", "test/**/*.ts"],
+      "includeEntryExports": true
+    },
+    "backend/packages/game": {
+      "project": ["src/**/*.ts!", "test/**/*.ts"],
+      "includeEntryExports": true
+    },
+    "shared/core": {
+      "project": ["src/**/*.ts!", "test/**/*.ts"]
+    }
+  }
+}

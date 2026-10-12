@@ -2,15 +2,15 @@
 // losses, hero experience, honor and plunder. The original never wired attacks up (spec
 // battle.md §7.3); this follows its recommended mapping.
 
-import { BALANCE } from '../balance.ts';
-import { TechType, TROOP_ID_BY_KEY, TROOP_KEY_LIST } from '../constants.ts';
-import { troopConfig } from '../data/index.ts';
-import { researchLevel } from '../economy.ts';
-import { heroBattleAttackBonus, heroPower, heroStratagem, type HeroStats } from '../heroes.ts';
-import type { Rng } from '../rng.ts';
-import { arrayToForts, arrayToTroops, fortsToArray, troopsToArray, unitsExp } from '../troops.ts';
-import type { FortCounts, ResearchState, ResourceSet, TroopCounts } from '../types.ts';
-import { simulateBattle, type BattleOutcome, type ResearchStats, type TraceEvent } from './simulator.ts';
+import { BALANCE } from '#/balance.ts';
+import { TechType, TROOP_ID_BY_KEY, TROOP_KEY_LIST } from '#/constants.ts';
+import { troopConfig } from '#/data/index.ts';
+import { researchLevel } from '#/economy.ts';
+import { heroBattleAttackBonus, heroPower, heroStratagem, type HeroStats } from '#/heroes.ts';
+import type { Rng } from '#/rng.ts';
+import { arrayToForts, arrayToTroops, fortsToArray, troopsToArray, unitsExp } from '#/troops.ts';
+import type { FortCounts, ResearchState, ResourceSet, TroopCounts } from '#/types.ts';
+import { simulateBattle, type BattleOutcome, type ResearchStats, type TraceEvent } from '#/battle/simulator.ts';
 
 export interface CombatantInput {
   troops: TroopCounts;

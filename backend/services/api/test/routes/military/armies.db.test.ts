@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { ArmyDirection, BuildingType, HeroStatus, Mission, TileType } from '@marchlands/core';
 import { armies, cities, heroes, tiles } from '@marchlands/db';
-import { apiTest, type TestApi } from '../../support/api.ts';
+import { apiTest, type TestApi } from '#test/support/api.ts';
 import {
   addHero,
   allies,
@@ -24,7 +24,7 @@ import {
   setCityStats,
   setResources,
   type Lord,
-} from '../../support/city-fixtures.ts';
+} from '#test/support/city-fixtures.ts';
 
 type Army = { armyId: number; missionType: number; direction: number; targetFieldId: number; troop: Record<string, number> | null; hero: string };
 type Tile = { id: number; type: number; level: number; cityId: number | null; ownerCityId: number | null; x: number; y: number };

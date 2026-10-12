@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { BALANCE, Relation, TileType } from '@marchlands/core';
 import { cities } from '@marchlands/db';
-import { apiTest, type TestApi } from '../../support/api.ts';
-import { expectInvalid, lords, patchTile, type Lord } from '../../support/city-fixtures.ts';
+import { apiTest, type TestApi } from '#test/support/api.ts';
+import { expectInvalid, lords, patchTile, type Lord } from '#test/support/city-fixtures.ts';
 
 type Castle = { id: number; cityId?: number; playerId?: number; relation?: number; name?: string };
 type Tile = { id: number; type: number; level: number; cityId: number | null; ownerCityId: number | null; x: number; y: number };

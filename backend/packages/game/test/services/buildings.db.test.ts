@@ -4,7 +4,6 @@ import {
   BuildingStatus,
   BuildingType,
   buildCost,
-  buildingHeroExp,
   buildingMaxLevel,
   buildTimeMs,
   dur,
@@ -13,8 +12,6 @@ import {
   ItemId,
   MINUTE,
   msg,
-  prestigeOf,
-  PrestigeAction,
   ref,
   RESOURCE_KEYS,
   scaled,
@@ -26,10 +23,10 @@ import {
   type Resources,
 } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { buildings, getHero, heroes, heroesOfCity, mayorStats, shop, training } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
+import { buildings, shop, training } from '#/index.ts';
+import { mayorStats } from '#/city.ts';
+import { expectRefused } from '#test/support/expect.ts';
 import {
-  addHero,
   cityBundle,
   createTestPlayer,
   giveItems,
@@ -41,10 +38,11 @@ import {
   setResources,
   setTownHall,
   type TestPlayer,
-} from '../support/factories.ts';
-import { game, T0, type TestGame } from '../support/game.ts';
+} from '#test/support/factories.ts';
+import { game, T0, type TestGame } from '#test/support/game.ts';
+import { buildingAt, appointMayor } from '#test/support/buildings.ts';
 
-const { COTTAGE, WAREHOUSE, FARM, MARKETPLACE, ACADEMY, BARRACKS, RALLY_SPOT, INN, TOWN_HALL, WALLS } = BuildingType;
+const { COTTAGE, WAREHOUSE, FARM, MARKETPLACE, ACADEMY, BARRACKS, RALLY_SPOT, TOWN_HALL, WALLS } = BuildingType;
 const GONE = { typeId: 0, level: 0, status: 0, startTime: 0, endTime: 0 };
 
 const res = (c: Resources): Resources => ({ gold: c.gold, food: c.food, wood: c.wood, stone: c.stone, iron: c.iron });
@@ -56,14 +54,6 @@ const minus = (a: Resources, b: Partial<Resources>): Resources => Object.fromEnt
 const stock = async (g: TestGame, p: TestPlayer) => res((await cityBundle(g, p)).city);
 /** The city's resources as stored. */
 const stored = async (g: TestGame, p: TestPlayer) => res(await reloadCity(g, p.cityId));
-const buildingAt = async (g: TestGame, p: TestPlayer, pos: number) => (await reloadCity(g, p.cityId)).buildings.find((b) => b.positionId === pos);
-
-/** A hired hero appointed mayor of the player's city; returns its id. */
-async function appointMayor(g: TestGame, p: TestPlayer) {
-  const id = await addHero(g, p, 5);
-  await heroes.appointMayor(g, p.id, id);
-  return id;
-}
 
 describe(buildings.construct.name, () => {
   it('starts a level-0 building, pays its cost and schedules its completion', () =>
@@ -520,78 +510,5 @@ describe(buildings.upgradeInfo.name, () => {
       const b = await createTestPlayer(g);
       await expectRefused(buildings.upgradeInfo(g, a.id, a.cityId, 0), msg('building.notFound'));
       await expectRefused(buildings.upgradeInfo(g, a.id, b.cityId, -1), msg('common.invalidCastle'));
-    }));
-});
-
-describe(buildings.completeBuilding.name, () => {
-  it('raises the level, awards prestige and tells the player', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      const prestige = (await reloadPlayer(g, p)).prestige;
-      const built = await buildings.construct(g, p.id, p.cityId, COTTAGE, 0);
-      await g.runDue(built.endTime);
-      const done = { positionId: 0, typeId: COTTAGE, level: 1, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 };
-      expect(await buildingAt(g, p, 0)).toEqual(done);
-      expect((await reloadPlayer(g, p)).prestige).toBe(prestige + prestigeOf(PrestigeAction.BUILDING, COTTAGE, 1, 1));
-      expect(g.pushes(PushCmd.BUILD_COMPLETE).at(-1)?.data).toEqual({ castleId: p.cityId, buildingBean: done });
-      expect(g.pushes(PushCmd.PLAYER_INFO_UPDATE).at(-1)?.playerIds).toEqual([p.id]);
-      expect(g.events()).toEqual([]);
-    }));
-
-  it('gives the mayor experience', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      const mayor = await appointMayor(g, p);
-      const exp = (await getHero(g, mayor)).experience;
-      const built = await buildings.upgrade(g, p.id, p.cityId, -1);
-      await g.runDue(built.endTime);
-      expect((await getHero(g, mayor)).experience).toBeCloseTo(exp + buildingHeroExp(TOWN_HALL, 2, 2), 6);
-      expect(g.pushes(PushCmd.HERO_UPDATE).at(-1)?.data).toMatchObject({ castleId: p.cityId, hero: { id: mayor }, updateType: 2 });
-    }));
-
-  it('a Town Hall reaching the beginner limit ends beginner protection', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      expect((await reloadPlayer(g, p)).beginner).toBe(true);
-      await setTownHall(g, p, BALANCE.beginnerTownHallLevel - 1);
-      await setBuildings(g, p, [[-2, WALLS, buildingMaxLevel(WALLS)]]);
-      await setResources(g, p, { food: 1e7, wood: 1e7, stone: 1e7, iron: 1e7 });
-      const built = await buildings.upgrade(g, p.id, p.cityId, -1);
-      await g.runDue(built.endTime);
-      expect((await reloadPlayer(g, p)).beginner).toBe(false);
-    }));
-
-  it('a finished Inn clears its offers', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await setBuildings(g, p, [
-        [0, INN, 1],
-        [1, COTTAGE, 2],
-      ]);
-      await heroes.tavern(g, p.id, p.cityId);
-      expect((await heroesOfCity(g, p.cityId, { tavern: true })).length).toBeGreaterThan(0);
-      const built = await buildings.upgrade(g, p.id, p.cityId, 0);
-      await g.runDue(built.endTime);
-      expect(await heroesOfCity(g, p.cityId, { tavern: true })).toEqual([]);
-    }));
-
-  it('a job that is not due yet is left alone and rescheduled', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      const built = await buildings.construct(g, p.id, p.cityId, COTTAGE, 0);
-      g.unschedule(`building:${p.cityId}:0`);
-      await buildings.completeBuilding(g, p.cityId, 0);
-      expect(await buildingAt(g, p, 0)).toMatchObject({ level: 0, status: BuildingStatus.BUILDING });
-      expect(g.events('building')).toMatchObject([{ dueAt: built.endTime, payload: { positionId: 0 } }]);
-    }));
-
-  it('does nothing for an idle building or a missing city', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await buildings.completeBuilding(g, p.cityId, -1);
-      await buildings.completeBuilding(g, p.cityId, 0);
-      await buildings.completeBuilding(g, 2_000_000_000, 0);
-      expect(await buildingAt(g, p, -1)).toMatchObject({ level: 1, status: BuildingStatus.IDLE });
-      expect(g.pushes(PushCmd.BUILD_COMPLETE)).toEqual([]);
     }));
 });

@@ -8,7 +8,7 @@ import { sql } from 'drizzle-orm';
 import { setGameSpeed } from '@marchlands/core';
 import { connect, timedEvents } from '@marchlands/db';
 import { beginnerJob, cleanupJob, merchantJob, rankingsJob, startStatsFlusher, statsJob, world, zonesJob } from '@marchlands/game';
-import { eventLoop, every as everyUntilStopped, log, processOne } from './worker.ts';
+import { eventLoop, every as everyUntilStopped, log, processOne } from '#/worker.ts';
 
 const BATCH = Number(process.env.WORKER_BATCH ?? 50);
 const IDLE_MS = Number(process.env.WORKER_IDLE_MS ?? 250);

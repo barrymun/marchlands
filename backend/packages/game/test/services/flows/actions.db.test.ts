@@ -15,7 +15,8 @@ import {
   type FlowCityResult,
   type FlowStepResult,
 } from '@marchlands/core';
-import { armies, flows, heroesOfCity, player as players, type HeroRow } from '../../../src/index.ts';
+import { armies, flows, player as players } from '#/index.ts';
+import { heroesOfCity, type HeroRow } from '#/repo.ts';
 import {
   addCity,
   createTestPlayer,
@@ -26,9 +27,9 @@ import {
   setInjured,
   setResources,
   type TestPlayer,
-} from '../../support/factories.ts';
-import { armyPreset, farmingCity, newFlow, runFlowIn, valleysNear, withBarracks, withHero } from '../../support/flows.ts';
-import { game, T0, type TestGame } from '../../support/game.ts';
+} from '#test/support/factories.ts';
+import { armyPreset, farmingCity, newFlow, runFlowIn, valleysNear, withBarracks, withHero } from '#test/support/flows.ts';
+import { game, T0, type TestGame } from '#test/support/game.ts';
 
 const warrior = ref.troop(TroopType.WARRIOR);
 

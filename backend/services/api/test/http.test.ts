@@ -5,9 +5,9 @@ import { z } from 'zod';
 import { GameError, msg } from '@marchlands/core';
 import { ErrorResponse } from '@marchlands/contracts';
 import type { Db } from '@marchlands/db';
-import { signToken } from '../src/auth/jwt.ts';
-import type { ApiConfig } from '../src/config.ts';
-import { authenticate, bearer, doc, installErrorHandler, secured, tags } from '../src/http.ts';
+import { signToken } from '#/auth/jwt.ts';
+import type { ApiConfig } from '#/config.ts';
+import { authenticate, bearer, doc, installErrorHandler, secured, tags } from '#/http.ts';
 
 const CONFIG: ApiConfig = {
   port: 0,

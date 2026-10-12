@@ -3,10 +3,10 @@
 // on missions (armies.ts / combat.ts), and fortification wall space (BALANCE.fortSpace).
 // Each is a `troopInfo.*` message, worded by the client.
 
-import { BALANCE } from './balance.ts';
-import { BuildingType, TechType } from './constants.ts';
-import { troopConfig } from './data/index.ts';
-import { msg, ref, share, type Message } from './messages/index.ts';
+import { BALANCE } from '#/balance.ts';
+import { BuildingType, TechType } from '#/constants.ts';
+import { troopConfig } from '#/data/index.ts';
+import { msg, ref, share, type Message } from '#/messages/index.ts';
 
 const { damage } = BALANCE.battle;
 /** Ranged units archers and siege engines shoot first (battle/simulator.ts RANGED, plus the tower). */

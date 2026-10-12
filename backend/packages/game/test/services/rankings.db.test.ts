@@ -1,68 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { AllianceRank, BALANCE, BuildingType, msg } from '@marchlands/core';
-import { alliances, heroes as heroTable } from '@marchlands/db';
-import { addPrestige, admin, alliance, getPlayer, heroes, rankings, savePlayer } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
-import { addHero, createTestPlayer, reloadPlayer, setBuildings, setCityStats, setTownHall, type TestPlayer } from '../support/factories.ts';
-import { game, type TestGame } from '../support/game.ts';
-import { foundAlliance, joinAlliance } from '../support/alliance.ts';
-
-/** Set a player's prestige and honour. */
-async function setFame(g: TestGame, p: TestPlayer, fame: { prestige?: number; honor?: number }) {
-  const row = await getPlayer(g, p.id);
-  if (fame.prestige != null) addPrestige(row, fame.prestige - row.prestige);
-  if (fame.honor != null) row.honor = fame.honor;
-  await savePlayer(g, row);
-}
-
-// the rankings cover the whole (otherwise empty) test world, so ranks are exact
-describe(rankings.refreshRankings.name, () => {
-  it('caches population and the prestige and honour ranks of every player', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      const b = await createTestPlayer(g);
-      const c = await createTestPlayer(g);
-      await setFame(g, a, { prestige: 100, honor: 5 });
-      await setFame(g, b, { prestige: 300, honor: 1 });
-      await setFame(g, c, { prestige: 100, honor: 9 });
-      await setCityStats(g, b, { population: 1234 });
-      await rankings.refreshRankings(g);
-      expect(await reloadPlayer(g, a)).toMatchObject({ prestigeRank: 2, honorRank: 2, population: BALANCE.startPopulation });
-      expect(await reloadPlayer(g, b)).toMatchObject({ prestigeRank: 1, honorRank: 3, population: 1234 });
-      // equal prestige: the older player first
-      expect(await reloadPlayer(g, c)).toMatchObject({ prestigeRank: 3, honorRank: 1 });
-    }));
-
-  it('aggregates alliance members, cities and ranks', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      const b = await createTestPlayer(g);
-      const c = await createTestPlayer(g);
-      await setFame(g, a, { prestige: 100, honor: 10 });
-      await setFame(g, b, { prestige: 50, honor: 20 });
-      await setFame(g, c, { prestige: 500, honor: 1 });
-      await foundAlliance(g, a, 'Order');
-      await joinAlliance(g, a, b, 'Order');
-      await foundAlliance(g, c, 'Chaos');
-      await rankings.refreshRankings(g);
-      const rows = await g.tx.select().from(alliances).orderBy(alliances.id);
-      const pick = ({ name, prestige, honor, memberCount, cityCount, prestigeRank, honorRank, membersRank }: (typeof rows)[number]) => ({
-        name,
-        prestige,
-        honor,
-        memberCount,
-        cityCount,
-        prestigeRank,
-        honorRank,
-        membersRank,
-      });
-      expect(rows.map(pick)).toEqual([
-        { name: 'Order', prestige: 150, honor: 30, memberCount: 2, cityCount: 2, prestigeRank: 2, honorRank: 1, membersRank: 1 },
-        { name: 'Chaos', prestige: 500, honor: 1, memberCount: 1, cityCount: 1, prestigeRank: 1, honorRank: 2, membersRank: 2 },
-      ]);
-    }));
-});
+import { heroes as heroTable } from '@marchlands/db';
+import { admin, alliance, heroes, rankings } from '#/index.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { addHero, createTestPlayer, reloadPlayer, setBuildings, setCityStats, setTownHall } from '#test/support/factories.ts';
+import { game } from '#test/support/game.ts';
+import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
+import { refreshRankings } from '#/engine/rankings.ts';
+import { setFame } from '#test/support/rankings.ts';
 
 describe(rankings.playerRanking.name, () => {
   it('ranks players by prestige by default, with their alliance and cities', () =>
@@ -72,7 +18,7 @@ describe(rankings.playerRanking.name, () => {
       await setFame(g, a, { prestige: 100.7, honor: 3.9 });
       await setFame(g, b, { prestige: 200 });
       await foundAlliance(g, a, 'Order');
-      await rankings.refreshRankings(g);
+      await refreshRankings(g);
       const r = await rankings.playerRanking(g, 2, 1, 10);
       expect(r).toMatchObject({ pageNo: 1, pageSize: 10, totalPage: 1 });
       const pa = await reloadPlayer(g, a);
@@ -109,7 +55,7 @@ describe(rankings.playerRanking.name, () => {
       await admin.setPlayerFlags(g, b.name, { title: 2 });
       await setCityStats(g, a, { population: 10 });
       await setCityStats(g, c, { population: 900 });
-      await rankings.refreshRankings(g);
+      await refreshRankings(g);
       const ids = async (sort: number) => (await rankings.playerRanking(g, sort, 1, 10)).beans.map((x) => x.id);
       expect(await ids(1)).toEqual([b.id, c.id, a.id]); // title, then prestige
       expect(await ids(3)).toEqual([b.id, c.id, a.id]);
@@ -175,7 +121,7 @@ describe(rankings.allianceRanking.name, () => {
       await joinAlliance(g, a, b, 'Order');
       await alliance.setInfo(g, a.id, { intro: 'We keep order' });
       await foundAlliance(g, c, 'Chaos');
-      await rankings.refreshRankings(g);
+      await refreshRankings(g);
       const r = await rankings.allianceRanking(g, 1, 1, 10);
       expect(r).toMatchObject({ pageNo: 1, pageSize: 10, totalPage: 1 });
       expect(r.beans).toEqual([
@@ -202,7 +148,7 @@ describe(rankings.allianceRanking.name, () => {
   it('searches and pages', () =>
     game(async (g) => {
       for (const name of ['Order', 'Chaos', 'Ordo']) await foundAlliance(g, await createTestPlayer(g), name);
-      await rankings.refreshRankings(g);
+      await refreshRankings(g);
       expect((await rankings.allianceRanking(g, 2, 1, 10, 'ORD')).beans.map((x) => x.name)).toEqual(['Order', 'Ordo']);
       const p2 = await rankings.allianceRanking(g, 2, 2, 2);
       expect(p2).toMatchObject({ pageNo: 2, totalPage: 2 });

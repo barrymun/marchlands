@@ -33,7 +33,7 @@ import {
   LordGear,
   ValleyUpgradeResult,
 } from '@marchlands/contracts';
-import { doc, anon, authenticate, game, playerIdOf, tags, zCityParams, type ZApp } from '../http.ts';
+import { doc, anon, authenticate, game, playerIdOf, tags, zCityParams, type ZApp } from '#/http.ts';
 
 export default async function militaryRoutes(app: ZApp) {
   app.addHook('onRequest', authenticate);

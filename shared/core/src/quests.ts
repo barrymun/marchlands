@@ -3,11 +3,11 @@
 // No text here: quest and group names are `data-quests` in the client's locale files, descriptions and
 // targets are messages (`questInfo.*`).
 
-import { FORT_ID_BY_KEY, TROOP_ID_BY_KEY, type FortKey, type TroopKey } from './constants.ts';
-import { QUESTS } from './data/index.ts';
-import { msg, ref, type Message } from './messages/index.ts';
-import type { ResourceSet } from './types.ts';
-import { ItemId } from './item-ids.ts';
+import { FORT_ID_BY_KEY, TROOP_ID_BY_KEY, type FortKey, type TroopKey } from '#/constants.ts';
+import { QUESTS } from '#/data/index.ts';
+import { msg, ref, type Message } from '#/messages/index.ts';
+import type { ResourceSet } from '#/types.ts';
+import { ItemId } from '#/item-ids.ts';
 
 export type QuestTarget =
   | { kind: 'building'; typeId: number; level: number; count?: number }

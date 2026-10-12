@@ -2,16 +2,16 @@
 // pfortifications logic with the original's validation gaps closed.
 
 import { z } from 'zod';
-import { BALANCE, goldForCents, scaled } from './balance.ts';
-import { itemGoldPrice } from './items.ts';
-import { coinsForSpeedup, HOUR } from './time.ts';
-import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEYS, TroopType } from './constants.ts';
-import { buildingConfig, buildingMaxLevel, ITEMS, researchConfig, researchMaxLevel, troopConfig, type Requirements } from './data/index.ts';
-import { buildingCount, buildingLevel, researchLevel, type MayorStats } from './economy.ts';
-import { GameError } from './errors.ts';
-import { msg, ref } from './messages/index.ts';
-import { addResources, emptyResources, scaleResources, type Resources } from './resources.ts';
-import type { BuildingState, FortCounts, ItemCounts, ResearchState, TrainBatch } from './types.ts';
+import { BALANCE, goldForCents, scaled } from '#/balance.ts';
+import { itemGoldPrice } from '#/items.ts';
+import { coinsForSpeedup, HOUR } from '#/time.ts';
+import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEYS, TroopType } from '#/constants.ts';
+import { buildingConfig, buildingMaxLevel, ITEMS, researchConfig, researchMaxLevel, troopConfig, type Requirements } from '#/data/index.ts';
+import { buildingCount, buildingLevel, researchLevel, type MayorStats } from '#/economy.ts';
+import { GameError } from '#/errors.ts';
+import { msg, ref } from '#/messages/index.ts';
+import { addResources, emptyResources, scaleResources, type Resources } from '#/resources.ts';
+import type { BuildingState, FortCounts, ItemCounts, ResearchState, TrainBatch } from '#/types.ts';
 
 // ---------------------------------------------------------------------------------------------
 // Slots

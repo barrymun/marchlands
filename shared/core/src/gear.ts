@@ -3,9 +3,9 @@
 // bought with medals and belong to the lord as well. A hero can use gear levels and stars up to its
 // gear tier (from its own level), and all of it boosts the one attribute chosen for that hero.
 
-import { BALANCE } from './balance.ts';
-import { TechType } from './constants.ts';
-import { medalId } from './items.ts';
+import { BALANCE } from '#/balance.ts';
+import { TechType } from '#/constants.ts';
+import { medalId } from '#/items.ts';
 
 export const GEAR_PIECES = [
   { id: 'weapon' },

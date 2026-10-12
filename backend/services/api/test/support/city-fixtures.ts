@@ -4,8 +4,9 @@
 
 import { expect, it } from 'vitest';
 import type { ResourceSet } from '@marchlands/core';
-import { admin, alliance, combat, getArmy, getHero, getTile, runGame, saveHero, saveTile, type HeroRow, type TileRow } from '@marchlands/game';
-import { apiTest, type Session, type TestApi } from './api.ts';
+import { admin, alliance, runGame } from '@marchlands/game';
+import { getArmy, getHero, getTile, processArmy, saveHero, saveTile, type HeroRow, type TileRow } from '@marchlands/game/testing';
+import { apiTest, type Session, type TestApi } from '#test/support/api.ts';
 
 let serial = 0;
 
@@ -80,7 +81,7 @@ export const allies = (api: TestApi, a: Lord, b: Lord) =>
 export async function arrive(api: TestApi, armyId: number) {
   const a = await api.game((ctx) => getArmy(ctx, armyId));
   if (!a) throw new Error(`army ${armyId} is gone`);
-  await runGame(api.db, (ctx) => combat.processArmy(ctx, armyId), { now: Math.max(Date.now(), a.reachTime), retries: 0 });
+  await runGame(api.db, (ctx) => processArmy(ctx, armyId), { now: Math.max(Date.now(), a.reachTime), retries: 0 });
 }
 
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';

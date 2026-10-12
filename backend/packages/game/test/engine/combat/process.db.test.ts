@@ -6,15 +6,17 @@ import { ArmyDirection, HeroStatus, Mission, msg, TileType } from '@marchlands/c
 import { PushCmd } from '@marchlands/contracts';
 import { armies as armiesTable } from '@marchlands/db';
 import { eq } from 'drizzle-orm';
-import { armies, combat, getHero } from '../../../src/index.ts';
-import { armyRow, arrive, lastReport, NO_RESOURCES, occupyValley, reportTitles, send, tileNear, warrior } from '../../support/armies.ts';
-import { reloadCity } from '../../support/factories.ts';
-import { game } from '../../support/game.ts';
+import { getHero } from '#/repo.ts';
+import { armyRow, arrive, lastReport, NO_RESOURCES, occupyValley, reportTitles, send, tileNear, warrior } from '#test/support/armies.ts';
+import { reloadCity } from '#test/support/factories.ts';
+import { game } from '#test/support/game.ts';
+import { armyRef, homeMarchMs } from '#/engine/armies.ts';
+import { processArmy } from '#/engine/combat.ts';
 
-describe(combat.processArmy.name, () => {
+describe(processArmy.name, () => {
   it('does nothing for an army that is gone', () =>
     game(async (g) => {
-      await combat.processArmy(g, 2_000_000_000);
+      await processArmy(g, 2_000_000_000);
       expect(g.events()).toEqual([]);
       expect(g.pushes()).toEqual([]);
     }));
@@ -25,10 +27,8 @@ describe(combat.processArmy.name, () => {
       const npc = await tileNear(g, p.cityId, TileType.NPC);
       const bean = await send(g, p, { targetTileId: npc.id, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId });
       g._events.clear();
-      await combat.processArmy(g, bean.armyId);
-      expect(g.events('army')).toEqual([
-        expect.objectContaining({ dueAt: bean.reachTime, refKey: armies.armyRef(bean.armyId), payload: { armyId: bean.armyId } }),
-      ]);
+      await processArmy(g, bean.armyId);
+      expect(g.events('army')).toEqual([expect.objectContaining({ dueAt: bean.reachTime, refKey: armyRef(bean.armyId), payload: { armyId: bean.armyId } })]);
       expect(await armyRow(g, bean.armyId)).toMatchObject({ direction: ArmyDirection.FORWARD, troops: { lightCavalry: 10 } });
       expect(await reportTitles(g, p.id)).toEqual([]);
     }));
@@ -82,14 +82,14 @@ describe(combat.processArmy.name, () => {
       await arrive(g, bean.armyId);
       const camp = (await armyRow(g, bean.armyId))!;
       expect(camp).toMatchObject({ direction: ArmyDirection.STAY, reachTime: g.now, restTime: 600_000 });
-      expect(g.events('army')).toEqual([expect.objectContaining({ dueAt: g.now + 600_000, refKey: armies.armyRef(bean.armyId) })]);
+      expect(g.events('army')).toEqual([expect.objectContaining({ dueAt: g.now + 600_000, refKey: armyRef(bean.armyId) })]);
 
       // an early wake-up changes nothing
-      await combat.processArmy(g, bean.armyId);
+      await processArmy(g, bean.armyId);
       expect((await armyRow(g, bean.armyId))!.direction).toBe(ArmyDirection.STAY);
 
       await g.runDue(g.now + 600_000);
-      const home = await armies.homeMarchMs(g, camp, valley.id);
+      const home = await homeMarchMs(g, camp, valley.id);
       expect(await armyRow(g, bean.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, restTime: 0, reachTime: g.now + home });
       await arrive(g, bean.armyId);
       expect(await armyRow(g, bean.armyId)).toBeUndefined();
@@ -103,7 +103,7 @@ describe(combat.processArmy.name, () => {
       await arrive(g, bean.armyId);
       expect(g.events('army')).toEqual([]);
       g.advance(30 * 86_400_000);
-      await combat.processArmy(g, bean.armyId);
+      await processArmy(g, bean.armyId);
       expect((await armyRow(g, bean.armyId))!.direction).toBe(ArmyDirection.STAY);
     }));
 

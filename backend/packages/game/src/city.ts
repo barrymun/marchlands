@@ -17,10 +17,10 @@ import {
   type SettleResult,
   type TroopCounts,
 } from '@marchlands/core';
-import type { Ctx } from './context.ts';
-import { troopBean } from './dto.ts';
-import { reportDesertion } from './services/reports.ts';
-import { noteSettle } from './stats.ts';
+import type { Ctx } from '#/context.ts';
+import { troopBean } from '#/dto.ts';
+import { reportDesertion } from '#/engine/reports.ts';
+import { noteSettle } from '#/stats.ts';
 import {
   armiesOfCity,
   findCity,
@@ -33,7 +33,7 @@ import {
   type HeroRow,
   type PlayerRow,
   type TileRow,
-} from './repo.ts';
+} from '#/repo.ts';
 import { PushCmd } from '@marchlands/contracts';
 
 export interface CityBundle {
@@ -56,6 +56,7 @@ export function mayorStats(heroes: HeroRow[]): MayorStats | null {
   return m ? { power: heroPower(m), management: heroManagement(m), stratagem: heroStratagem(m) } : null;
 }
 
+/** @internal exported for its unit test */
 export function economyContext(b: CityBundle): EconomyContext {
   return {
     research: b.player.research,
@@ -82,7 +83,10 @@ export async function loadBundle(ctx: Ctx, city: CityRow, player: PlayerRow): Pr
   return { player, city, heroes, valleys, awayTroops: away };
 }
 
-/** Settle resources/population to ctx.now (mutates the bundle's city row). */
+/**
+ * Settle resources/population to ctx.now (mutates the bundle's city row).
+ * @internal exported for tests; game code settles with settleAndReport
+ */
 export function settle(ctx: Ctx, b: CityBundle): SettleResult {
   const r = settleCity(b.city, economyContext(b), ctx.now);
   noteSettle(b.city, r.flows, r.deserted);

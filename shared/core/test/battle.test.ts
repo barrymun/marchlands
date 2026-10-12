@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { simulateBattle, wallHitPoints } from '../src/battle/simulator.ts';
-import { resolveCombat } from '../src/battle/resolve.ts';
-import { BALANCE, seededRng, TechType } from '../src/index.ts';
-import { fixtureRng, loadBattleCases, loadBattleGoldens } from './battle-fixtures.ts';
+import { simulateBattle, wallHitPoints } from '#/battle/simulator.ts';
+import { resolveCombat } from '#/battle/resolve.ts';
+import { BALANCE, seededRng, TechType } from '#/index.ts';
+import { fixtureRng, loadBattleCases, loadBattleGoldens } from '#test/battle-fixtures.ts';
 
 const noRng = { next: () => 0 };
 

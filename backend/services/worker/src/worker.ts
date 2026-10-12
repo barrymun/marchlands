@@ -12,6 +12,7 @@ export type Log = (level: string, msg: string, extra?: Record<string, unknown>) 
 
 export const log: Log = (level, msg, extra = {}) => console.log(JSON.stringify({ time: new Date().toISOString(), level, service: 'worker', msg, ...extra }));
 
+/** @internal exported for tests */
 export const MAX_ATTEMPTS = 5;
 
 /** Claim one due event and process it inside a single transaction. Returns false when idle. */

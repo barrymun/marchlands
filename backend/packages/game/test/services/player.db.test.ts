@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+
 import { and, eq, isNull } from 'drizzle-orm';
+
 import {
   ArmyDirection,
   BALANCE,
@@ -8,21 +10,28 @@ import {
   DAY,
   goldForCents,
   HOUR,
-  ItemId,
   itemGoldPrice,
+  ItemId,
   Mission,
   msg,
   PlayerStatus,
   Relation,
+  ReportType,
   stateOf,
   TileType,
   tileXY,
   TITLES,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
+
+import { type CreatePlayerBody, PushCmd } from '@marchlands/contracts';
+
 import { accounts, alliances, armies as armyRows, cities, heroes, mails, reports as reportRows, tiles, timedEvents } from '@marchlands/db';
-import { admin, alliance, armies, getCity, getPlayer, getTile, mail, player, reports, savePlayer } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
+
+import { admin, alliance, armies, mail, player, reports } from '#/index.ts';
+import { getCity, getPlayer, getTile, savePlayer } from '#/repo.ts';
+
+import { expectRefused } from '#test/support/expect.ts';
+
 import {
   addHero,
   createTestPlayer,
@@ -33,8 +42,15 @@ import {
   setCityStats,
   setResources,
   type TestPlayer,
-} from '../support/factories.ts';
-import { game, type TestGame } from '../support/game.ts';
+} from '#test/support/factories.ts';
+
+import { game, type TestGame } from '#test/support/game.ts';
+
+import { sendSystemMail } from '#/engine/mail.ts';
+
+import { initialCity, isProtected } from '#/engine/player.ts';
+
+import { createReport } from '#/engine/reports.ts';
 
 let accountSerial = 0;
 
@@ -48,7 +64,7 @@ async function newAccount(g: TestGame): Promise<number> {
   return a.id;
 }
 
-const input = (name: string, extra: Partial<player.CreatePlayerInput> = {}): player.CreatePlayerInput => ({
+const input = (name: string, extra: Partial<CreatePlayerBody> = {}): CreatePlayerBody => ({
   userName: name,
   castleName: `${name} City`,
   flag: 'T',
@@ -103,7 +119,7 @@ describe(player.createPlayer.name, () => {
       expect(p.faceUrl).toHaveLength(100);
 
       const [city] = await g.tx.select().from(cities).where(eq(cities.playerId, p.id));
-      expect(city).toMatchObject(player.initialCity(p.id, city.tileId, 'Alice City', g.now));
+      expect(city).toMatchObject(initialCity(p.id, city.tileId, 'Alice City', g.now));
       expect(stateOf(city.tileId)).toBe(3);
       expect(await getTile(g, city.tileId)).toMatchObject({ type: TileType.CASTLE, cityId: city.id, ownerPlayerId: p.id, ownerCityId: null });
     }));
@@ -195,13 +211,13 @@ describe(player.playerState.name, () => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
       await mail.sendMail(g, b.id, a.name, 'Hi', 'there');
-      await mail.sendSystemMail(g, a.id, 'Welcome', 'Body');
-      await mail.sendSystemMail(g, a.id, 'Again', 'Body');
+      await sendSystemMail(g, a.id, 'Welcome', 'Body');
+      await sendSystemMail(g, a.id, 'Again', 'Body');
       const title = msg('report.title.scoutReport');
       const body = { kind: 'text' as const, text: msg('report.oldFormat') };
-      await reports.createReport(g, { playerId: a.id, typeId: reports.ReportType.TRADE, title, body });
-      await reports.createReport(g, { playerId: a.id, typeId: reports.ReportType.ARMY, title, body });
-      const read = await reports.createReport(g, { playerId: a.id, typeId: reports.ReportType.OTHER, title, body });
+      await createReport(g, { playerId: a.id, typeId: ReportType.TRADE, title, body });
+      await createReport(g, { playerId: a.id, typeId: ReportType.ARMY, title, body });
+      const read = await createReport(g, { playerId: a.id, typeId: ReportType.OTHER, title, body });
       await reports.markReportsRead(g, a.id, [read]);
       expect(await player.playerState(g, a.id)).toMatchObject({
         newMailCount: 3,
@@ -432,7 +448,7 @@ describe(player.startFurlough.name, () => {
       const p = await reloadPlayer(g, a);
       expect(p.status).toBe(PlayerStatus.NORMAL);
       expect(p.buffs).toEqual([]);
-      expect(player.isProtected(p, g.now)).toEqual(msg('player.protected.beginner'));
+      expect(isProtected(p, g.now)).toEqual(msg('player.protected.beginner'));
     }));
 
   it('accepts 1 to 30 days only', () =>
@@ -559,76 +575,6 @@ describe(player.startTruce.name, () => {
     }));
 });
 
-describe(player.isProtected.name, () => {
-  it('names why a player cannot be attacked: beginner, truce or holiday', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      expect(player.isProtected(await reloadPlayer(g, a), g.now)).toEqual(msg('player.protected.beginner'));
-      await admin.setPlayerFlags(g, a.name, { beginner: false });
-      expect(player.isProtected(await reloadPlayer(g, a), g.now)).toBeNull();
-
-      await giveItems(g, a, { [ItemId.TRUCE_AGREEMENT]: 1 });
-      await player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, a.cityId);
-      const inTruce = await reloadPlayer(g, a);
-      expect(player.isProtected(inTruce, g.now)).toEqual(msg('player.protected.truce'));
-      // a buff whose time is over protects no more, even before its expiry runs
-      expect(player.isProtected(inTruce, g.now + BALANCE.truceDurationMs)).toBeNull();
-
-      await g.runDue(g.now + BALANCE.truceDurationMs);
-      await player.startFurlough(g, a.id, 1, a.cityId);
-      expect(player.isProtected(await reloadPlayer(g, a), g.now)).toEqual(msg('player.protected.holiday'));
-    }));
-});
-
-describe(player.checkBeginner.name, () => {
-  it('keeps protection for a young player below the Town Hall level', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      g.advance(BALANCE.beginnerProtectionMs);
-      const p = await reloadPlayer(g, a);
-      await player.checkBeginner(g, p, BALANCE.beginnerTownHallLevel - 1);
-      expect(p.beginner).toBe(true);
-      expect(g.pushes(PushCmd.NEW_MAIL)).toEqual([]);
-    }));
-
-  it('ends protection at the Town Hall level, with a system mail', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      const p = await reloadPlayer(g, a);
-      p.status = PlayerStatus.BEGINNER;
-      await player.checkBeginner(g, p, BALANCE.beginnerTownHallLevel);
-      expect(p).toMatchObject({ beginner: false, status: PlayerStatus.NORMAL });
-      const [m] = await g.tx.select().from(mails).where(eq(mails.playerId, a.id));
-      expect(m).toMatchObject({
-        type: 2,
-        system: { title: msg('player.mail.protectionExpired.title'), content: msg('player.mail.protectionExpired.content') },
-      });
-      expect(g.pushes(PushCmd.NEW_MAIL).at(-1)).toMatchObject({ playerIds: [a.id], data: { count: 1, count_system: 1 } });
-      expect(g.pushes(PushCmd.PLAYER_INFO_UPDATE).at(-1)).toMatchObject({ data: { playerInfo: { beginner: false } } });
-    }));
-
-  it('ends protection once it has run out', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      g.advance(BALANCE.beginnerProtectionMs + 1);
-      const p = await reloadPlayer(g, a);
-      await player.checkBeginner(g, p);
-      expect(p.beginner).toBe(false);
-      expect(await mail.mailCounts(g, a.id)).toMatchObject({ count_system: 1 });
-    }));
-
-  it('does nothing for a player no longer protected', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      await admin.setPlayerFlags(g, a.name, { beginner: false });
-      const p = await reloadPlayer(g, a);
-      const pushes = g.pushes().length;
-      await player.checkBeginner(g, p, BALANCE.beginnerTownHallLevel);
-      expect(g.pushes()).toHaveLength(pushes);
-      expect(await mail.mailCounts(g, a.id)).toMatchObject({ count: 0 });
-    }));
-});
-
 describe(player.publicPlayerInfo.name, () => {
   it("shows a player's info, cities and relation to the viewer", () =>
     game(async (g) => {
@@ -661,8 +607,8 @@ describe(player.restartPlayer.name, () => {
       await setPrestige(g, a, 5000);
       await admin.setPlayerFlags(g, a.name, { beginner: false, title: 2 });
       await player.addCastleSign(g, a.id, npc.id);
-      await mail.sendSystemMail(g, a.id, 'Hello', 'x');
-      await reports.createReport(g, { playerId: a.id, title: msg('report.title.scoutReport'), body: { kind: 'text', text: msg('report.oldFormat') } });
+      await sendSystemMail(g, a.id, 'Hello', 'x');
+      await createReport(g, { playerId: a.id, title: msg('report.title.scoutReport'), body: { kind: 'text', text: msg('report.oldFormat') } });
       await g.tx.insert(timedEvents).values({ type: 'research', dueAt: g.now + HOUR, playerId: a.id, payload: {}, createdAt: g.now });
       // a valley held by the city
       const [valley] = await freeTiles(g, TileType.FOREST);

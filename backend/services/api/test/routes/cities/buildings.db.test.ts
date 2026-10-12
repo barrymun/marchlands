@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { BuildingStatus, BuildingType, SpeedupId } from '@marchlands/core';
 import { cities } from '@marchlands/db';
-import { apiTest, type TestApi } from '../../support/api.ts';
-import { expectInvalid, itGuards, lords, RICH, setBuildings, setResources, type Lord } from '../../support/city-fixtures.ts';
+import { apiTest, type TestApi } from '#test/support/api.ts';
+import { expectInvalid, itGuards, lords, RICH, setBuildings, setResources, type Lord } from '#test/support/city-fixtures.ts';
 
 const cityRow = async (api: TestApi, id: number) => (await api.db.select().from(cities).where(eq(cities.id, id)))[0];
 const buildingAt = async (api: TestApi, cityId: number, positionId: number) => (await cityRow(api, cityId)).buildings.find((x) => x.positionId === positionId);

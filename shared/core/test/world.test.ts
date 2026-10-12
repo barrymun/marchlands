@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { BuildingStatus, BuildingType } from '@marchlands/core';
-import { combat } from '../../../src/index.ts';
+import { BuildingStatus, BuildingType, npcCityBuildings, Relation, relationPermissions } from '#/index.ts';
 
-describe(combat.npcCityBuildings.name, () => {
+describe(npcCityBuildings.name, () => {
   it('lays out a barbarian city as real buildings, all at its level', () => {
-    const list = combat.npcCityBuildings(3);
+    const list = npcCityBuildings(3);
     const at = (pos: number) => list.find((b) => b.positionId === pos);
     expect(at(-1)).toEqual({ positionId: -1, typeId: BuildingType.TOWN_HALL, level: 3, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 });
     expect(at(-2)?.typeId).toBe(BuildingType.WALLS);
@@ -37,11 +36,22 @@ describe(combat.npcCityBuildings.name, () => {
   });
 
   it('has 10 farms at level 1 and at most 37', () => {
-    const farms = (level: number) => combat.npcCityBuildings(level).filter((b) => b.typeId === BuildingType.FARM).length;
+    const farms = (level: number) => npcCityBuildings(level).filter((b) => b.typeId === BuildingType.FARM).length;
     expect(farms(1)).toBe(10);
     expect(farms(9)).toBe(34);
     expect(farms(10)).toBe(37);
     expect(farms(12)).toBe(37);
-    expect(combat.npcCityBuildings(1)).toHaveLength(2 + 12 + 20 + 10 + 3);
+    expect(npcCityBuildings(1)).toHaveLength(2 + 12 + 20 + 10 + 3);
+  });
+});
+
+describe(relationPermissions.name, () => {
+  it('friends may be sent to and supplied, everyone else attacked and scouted', () => {
+    const friendly = { canLoot: false, canOccupy: false, canScout: false, canSend: true, canTrans: true };
+    for (const r of [Relation.SELF, Relation.ALLY, Relation.ALLIANCE]) expect(relationPermissions(r)).toEqual(friendly);
+    expect(relationPermissions(Relation.ENEMY)).toEqual({ canLoot: true, canOccupy: true, canScout: true, canSend: true, canTrans: true });
+    for (const r of [Relation.NEUTRAL, Relation.NO_RELATION]) {
+      expect(relationPermissions(r)).toEqual({ canLoot: true, canOccupy: true, canScout: true, canSend: false, canTrans: false });
+    }
   });
 });

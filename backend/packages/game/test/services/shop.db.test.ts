@@ -15,8 +15,10 @@ import {
   type ItemEffect,
 } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { cityStats, heroesOfCity, saveCity, shop } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
+import { cityStats } from '#/city.ts';
+import { heroesOfCity, saveCity } from '#/repo.ts';
+import { shop } from '#/index.ts';
+import { expectRefused } from '#test/support/expect.ts';
 import {
   cityBundle,
   createTestPlayer,
@@ -27,8 +29,8 @@ import {
   setCityStats,
   setResources,
   type TestPlayer,
-} from '../support/factories.ts';
-import { game, type TestGame } from '../support/game.ts';
+} from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
 
 const BUFF_ITEMS = ITEMS.map((i) => [i.id, itemEffect(i.id)] as const).filter(
   (e): e is [string, Extract<ItemEffect, { kind: 'buff' }>] => e[1]?.kind === 'buff',

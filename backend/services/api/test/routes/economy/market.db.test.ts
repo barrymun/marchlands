@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { BALANCE, BuildingType, HOUR, merchantBase } from '@marchlands/core';
 import type { MarketHistory, MarketOrder, MarketOrderBook, MarketPlaceOrderResult, MarketQuote, MarketShipment, PlayerState } from '@marchlands/contracts';
 import { admin } from '@marchlands/game';
-import { apiTest, type TestApi } from '../../support/api.ts';
-import { accountWithoutPlayer, expectInvalid, expectNeedsPlayer, expectNeedsToken, type RouteCall } from '../../support/guards.ts';
-import { withMerchantCurve, withShipmentTime } from '../../../../../packages/game/test/support/market.ts';
+import { apiTest, type TestApi } from '#test/support/api.ts';
+import { accountWithoutPlayer, expectInvalid, expectNeedsPlayer, expectNeedsToken, type RouteCall } from '#test/support/guards.ts';
+import { withMerchantCurve, withShipmentTime } from '@marchlands/game/test/support/market.ts';
 
 const WOOD = 1;
 const BUY = 0;

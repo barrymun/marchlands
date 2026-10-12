@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { distributeLosses } from '../../src/services/combat.ts';
+import { distributeLosses } from '#/index.ts';
 
-describe('distributeLosses', () => {
+describe(distributeLosses.name, () => {
   it('shrinks groups proportionally and preserves totals', () => {
     const groups = [{ militia: 100, archer: 10 }, { militia: 50 }, { militia: 1 }];
     const out = distributeLosses(groups, { militia: 151, archer: 10 }, { militia: 76, archer: 5 });

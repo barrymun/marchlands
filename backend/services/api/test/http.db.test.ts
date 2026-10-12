@@ -4,9 +4,9 @@ import { eq } from 'drizzle-orm';
 import { GameError, msg } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
 import { accounts, pushMessages, type Db } from '@marchlands/db';
-import { signToken } from '../src/auth/jwt.ts';
-import { anon, game, playerIdOf, requireAdmin } from '../src/http.ts';
-import { apiTest, TEST_CONFIG } from './support/api.ts';
+import { signToken } from '#/auth/jwt.ts';
+import { anon, game, playerIdOf, requireAdmin } from '#/http.ts';
+import { apiTest, TEST_CONFIG } from '#test/support/api.ts';
 
 /** A request as the route helpers see it: the app's database and the token's claims. */
 const request = (db: Db, sub: number) => ({ server: { deps: { db, config: TEST_CONFIG } }, claims: { sub, iat: 0, exp: 0 } }) as unknown as FastifyRequest;

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { eq, inArray } from 'drizzle-orm';
 import { playerStats, type Db } from '@marchlands/db';
-import { bufferStats, compactStats, flushStats, statDay, type StatCounters } from '../src/index.ts';
-import { createTestPlayer } from './support/factories.ts';
-import { T0 } from './support/game.ts';
-import { arrange, inTestTx } from './support/tx.ts';
+import { bufferStats, compactStats, flushStats, statDay, type StatCounters } from '#/stats.ts';
+import { createTestPlayer } from '#test/support/factories.ts';
+import { T0 } from '#test/support/game.ts';
+import { arrange, inTestTx } from '#test/support/tx.ts';
 
 /** A player with no statistics yet (what making it buffered is flushed and cleared). */
 async function freshPlayer(db: Db) {

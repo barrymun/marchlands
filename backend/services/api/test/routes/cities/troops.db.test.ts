@@ -6,9 +6,9 @@ import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { BuildingType, FortType, ItemId, TroopType, type FortCounts, type TroopCounts } from '@marchlands/core';
 import { cities, players } from '@marchlands/db';
-import { getCity, saveCity } from '@marchlands/game';
-import { apiTest, type TestApi } from '../../support/api.ts';
-import { expectInvalid, giveItems, itGuards, lords, RICH, setBuildings, setCityStats, setResources, type Lord } from '../../support/city-fixtures.ts';
+import { getCity, saveCity } from '@marchlands/game/testing';
+import { apiTest, type TestApi } from '#test/support/api.ts';
+import { expectInvalid, giveItems, itGuards, lords, RICH, setBuildings, setCityStats, setResources, type Lord } from '#test/support/city-fixtures.ts';
 
 const cityRow = async (api: TestApi, id: number) => (await api.db.select().from(cities).where(eq(cities.id, id)))[0];
 const items = async (api: TestApi, p: Lord) => (await api.db.select({ items: players.items }).from(players).where(eq(players.id, p.playerId)))[0].items;

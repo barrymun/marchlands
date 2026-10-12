@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { AllianceRank, BALANCE, msg, Relation, scaled } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { alliance } from '../../../src/index.ts';
-import { addMember, allianceRow, createTestAlliance } from '../../support/alliance.ts';
-import { expectRefused } from '../../support/expect.ts';
-import { createTestPlayer } from '../../support/factories.ts';
-import { game } from '../../support/game.ts';
+import { alliance } from '#/index.ts';
+import { addMember, allianceRow, createTestAlliance, relationsOf } from '#test/support/alliance.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { createTestPlayer } from '#test/support/factories.ts';
+import { game } from '#test/support/game.ts';
 
 const ids = (list: { id: number }[]) => list.map((x) => x.id);
 
@@ -18,8 +18,8 @@ describe(alliance.setRelation.name, () => {
       g._pushes.length = 0;
       await alliance.setRelation(g, vice.id, b.name.toLowerCase(), Relation.ALLY);
 
-      expect(ids((await alliance.relationLists(g, a.id)).friendlyList)).toEqual([b.id]);
-      expect(await alliance.relationLists(g, b.id)).toEqual({ friendlyList: [], middleList: [], enemyList: [] });
+      expect(ids((await relationsOf(g, a)).friendlyList)).toEqual([b.id]);
+      expect(await relationsOf(g, b)).toEqual({ friendlyList: [], middleList: [], enemyList: [] });
       const told = msg('alliance.event.relationSet', { name: a.name, relation: msg('alliance.relation.ally') });
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE)).toEqual([
         { playerIds: [b.host.id], cmd: PushCmd.SYSTEM_INFO_MESSAGE, data: { alliance: true, tV: false, noSenderSystemInfo: false, msg: told } },
@@ -33,7 +33,7 @@ describe(alliance.setRelation.name, () => {
       const b = await createTestAlliance(g);
       await alliance.setRelation(g, a.host.id, b.name, Relation.ALLY);
       await alliance.setRelation(g, a.host.id, b.name, Relation.NEUTRAL);
-      expect(await alliance.relationLists(g, a.id)).toMatchObject({ friendlyList: [], middleList: [{ id: b.id }] });
+      expect(await relationsOf(g, a)).toMatchObject({ friendlyList: [], middleList: [{ id: b.id }] });
     }));
 
   it('war is mutual, broadcast to everyone, and puts both alliances on the war cooldown', () =>
@@ -44,8 +44,8 @@ describe(alliance.setRelation.name, () => {
       g._pushes.length = 0;
       await alliance.setRelation(g, a.host.id, b.name, Relation.ENEMY);
 
-      expect(ids((await alliance.relationLists(g, a.id)).enemyList)).toEqual([b.id]);
-      expect(await alliance.relationLists(g, b.id)).toMatchObject({ friendlyList: [], enemyList: [{ id: a.id }] });
+      expect(ids((await relationsOf(g, a)).enemyList)).toEqual([b.id]);
+      expect(await relationsOf(g, b)).toMatchObject({ friendlyList: [], enemyList: [{ id: a.id }] });
       const until = g.now + scaled(BALANCE.allianceWarCooldownMs);
       expect((await allianceRow(g, a.id)).warCooldownUntil).toBe(until);
       expect((await allianceRow(g, b.id)).warCooldownUntil).toBe(until);
@@ -69,7 +69,7 @@ describe(alliance.setRelation.name, () => {
       await alliance.setRelation(g, a.host.id, c.name, Relation.ALLY);
       g.advance(1);
       await alliance.setRelation(g, a.host.id, c.name, Relation.ENEMY);
-      expect(ids((await alliance.relationLists(g, a.id)).enemyList).sort()).toEqual([b.id, c.id].sort());
+      expect(ids((await relationsOf(g, a)).enemyList).sort()).toEqual([b.id, c.id].sort());
     }));
 
   it('rejects the relation already set, quoting it', () =>
@@ -112,8 +112,8 @@ describe(alliance.dropRelation.name, () => {
       await alliance.setRelation(g, a.host.id, b.name, Relation.ENEMY);
       await alliance.setRelation(g, a.host.id, c.name, Relation.ALLY);
       await alliance.dropRelation(g, a.host.id, b.name);
-      expect(await alliance.relationLists(g, a.id)).toMatchObject({ friendlyList: [{ id: c.id }], enemyList: [] });
-      expect(ids((await alliance.relationLists(g, b.id)).enemyList)).toEqual([a.id]);
+      expect(await relationsOf(g, a)).toMatchObject({ friendlyList: [{ id: c.id }], enemyList: [] });
+      expect(ids((await relationsOf(g, b)).enemyList)).toEqual([a.id]);
       await alliance.dropRelation(g, a.host.id, b.name); // no relation left: no error
     }));
 

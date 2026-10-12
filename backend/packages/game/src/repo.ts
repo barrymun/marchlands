@@ -2,11 +2,11 @@
 // until the transaction ends. Lock order, to avoid deadlocks: players (by id), then cities
 // (by id), then tiles, then heroes/armies.
 
-import { and, asc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import { GameError, HeroStatus, lordGear, msg, syncHeroBuffs, syncHeroGear, type LordGear } from '@marchlands/core';
 import { armies, cities, heroes, players, tiles } from '@marchlands/db';
-import type { Ctx } from './context.ts';
-import { takeSettle } from './stats.ts';
+import type { Ctx } from '#/context.ts';
+import { takeSettle } from '#/stats.ts';
 
 export type PlayerRow = typeof players.$inferSelect;
 export type CityRow = typeof cities.$inferSelect;
@@ -20,7 +20,7 @@ interface Opts {
 
 // ---- players ----
 
-export async function findPlayer(ctx: Ctx, id: number, opts: Opts = {}): Promise<PlayerRow | undefined> {
+async function findPlayer(ctx: Ctx, id: number, opts: Opts = {}): Promise<PlayerRow | undefined> {
   const q = ctx.tx.select().from(players).where(eq(players.id, id));
   const [row] = opts.lock ? await q.for('update') : await q;
   return row;
@@ -90,15 +90,6 @@ export async function heroesOfCity(ctx: Ctx, cityId: number, opts: Opts & { tave
     .orderBy(asc(heroes.id));
   return (opts.lock ? await q.for('update') : await q).sort(byHeroOrder);
 }
-export async function heroesOfCities(ctx: Ctx, cityIds: number[]): Promise<HeroRow[]> {
-  if (!cityIds.length) return [];
-  const rows = await ctx.tx
-    .select()
-    .from(heroes)
-    .where(and(inArray(heroes.cityId, cityIds), eq(heroes.inTavern, false)))
-    .orderBy(asc(heroes.id));
-  return rows.sort(byHeroOrder);
-}
 export async function getHero(ctx: Ctx, id: number, opts: Opts = {}): Promise<HeroRow> {
   const q = ctx.tx.select().from(heroes).where(eq(heroes.id, id));
   const [row] = opts.lock ? await q.for('update') : await q;
@@ -150,9 +141,6 @@ export async function saveArmy(ctx: Ctx, a: ArmyRow): Promise<void> {
 }
 export async function armiesOfCity(ctx: Ctx, cityId: number): Promise<ArmyRow[]> {
   return ctx.tx.select().from(armies).where(eq(armies.cityId, cityId)).orderBy(asc(armies.id));
-}
-export async function armiesOfPlayer(ctx: Ctx, playerId: number): Promise<ArmyRow[]> {
-  return ctx.tx.select().from(armies).where(eq(armies.playerId, playerId)).orderBy(asc(armies.id));
 }
 /** Armies camped (direction STAY) on a tile. */
 export async function armiesStationedAt(ctx: Ctx, tileId: number, opts: Opts = {}): Promise<ArmyRow[]> {

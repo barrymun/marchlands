@@ -3,7 +3,7 @@
 
 import type { FastifyInstance } from 'fastify';
 
-export interface Frame {
+interface Frame {
   cmd: string;
   data: Record<string, unknown>;
 }

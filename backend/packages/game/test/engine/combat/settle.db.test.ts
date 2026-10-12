@@ -1,16 +1,25 @@
 // processArmy for settlers (Mission.BUILD_CITY): a new city on free flat land.
 
 import { describe, expect, it } from 'vitest';
-import { ArmyDirection, BALANCE, BASIC_RESOURCES, HeroStatus, Mission, msg, TileType } from '@marchlands/core';
+
+import { ArmyDirection, BALANCE, BASIC_RESOURCES, HeroStatus, Mission, msg, ReportType, TileType } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
-import { admin, citiesOf, combat, getHero, getTile, reports } from '../../../src/index.ts';
-import { armyRow, arrive, lastReport, NO_RESOURCES, reportTitles, send, tileNear, warrior } from '../../support/armies.ts';
-import { addHero, reloadCity } from '../../support/factories.ts';
-import { game } from '../../support/game.ts';
+
+import { admin } from '#/index.ts';
+import { citiesOf, getHero, getTile } from '#/repo.ts';
+
+import { armyRow, arrive, lastReport, NO_RESOURCES, reportTitles, send, tileNear, warrior } from '#test/support/armies.ts';
+
+import { addHero, reloadCity } from '#test/support/factories.ts';
+
+import { game } from '#test/support/game.ts';
+
+import { processArmy } from '#/engine/combat.ts';
 
 const goods = { ...NO_RESOURCES, ...Object.fromEntries(BASIC_RESOURCES.map((k) => [k, BALANCE.newCityMinResource])), gold: 500 };
 
-describe(`${combat.processArmy.name}: settlers`, () => {
+describe(`${processArmy.name}: settlers`, () => {
   it('found a city on the flat, with the goods, the troops and the hero as mayor', () =>
     game(async (g) => {
       const { p, heroId } = await warrior(g);
@@ -36,7 +45,7 @@ describe(`${combat.processArmy.name}: settlers`, () => {
 
       const report = await lastReport(g, p.id, 'report.title.newCityFounded');
       expect(report).toMatchObject({
-        typeId: reports.ReportType.OTHER,
+        typeId: ReportType.OTHER,
         armyType: Mission.BUILD_CITY,
         targetPos: msg('world.position.city', { name, x: flat.id % BALANCE.mapSize, y: Math.floor(flat.id / BALANCE.mapSize) }),
         body: { kind: 'text', text: msg('report.cityFounded', { name }) },

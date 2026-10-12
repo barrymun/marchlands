@@ -10,7 +10,6 @@
     "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

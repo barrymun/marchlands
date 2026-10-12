@@ -4,11 +4,11 @@
 import { and, asc, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
 import { AllianceRank, BALANCE, BuildingType, buildingLevel, GameError, msg, ref, Relation, scaled, type Message, HOUR } from '@marchlands/core';
 import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, players } from '@marchlands/db';
-import { openOwnCity } from '../city.ts';
-import { sendSystemMail } from './mail.ts';
-import type { Ctx } from '../context.ts';
-import { assertClean, pushPlayerInfo, spendResources } from '../helpers.ts';
-import { citiesOf, findPlayerByName, getPlayer, saveCity, savePlayer, type PlayerRow } from '../repo.ts';
+import { openOwnCity } from '#/city.ts';
+import { sendSystemMail } from '#/engine/mail.ts';
+import { type Ctx } from '#/context.ts';
+import { assertClean, pushPlayerInfo, spendResources } from '#/helpers.ts';
+import { citiesOf, findPlayerByName, getPlayer, saveCity, savePlayer, type PlayerRow } from '#/repo.ts';
 import { PushCmd } from '@marchlands/contracts';
 
 export type AllianceRow = typeof alliances.$inferSelect;
@@ -131,7 +131,7 @@ export async function myAlliance(ctx: Ctx, playerId: number) {
 }
 
 /** alliance.getAllianceFriendshipList */
-export async function relationLists(ctx: Ctx, allianceId: number) {
+async function relationLists(ctx: Ctx, allianceId: number) {
   const rows = await ctx.tx
     .select({ relation: allianceRelations.relation, a: alliances })
     .from(allianceRelations)
@@ -638,24 +638,4 @@ export async function dropRelation(ctx: Ctx, playerId: number, targetName: strin
   requireRank(me, AllianceRank.VICE_HOST);
   const target = await allianceByName(ctx, targetName);
   await ctx.tx.delete(allianceRelations).where(and(eq(allianceRelations.allianceId, me.allianceId!), eq(allianceRelations.targetAllianceId, target.id)));
-}
-
-/** Ranking job: aggregate members into alliance totals and ranks. */
-export async function refreshAllianceStats(ctx: Ctx) {
-  await ctx.tx.execute(sql`
-    update alliances a set
-      prestige = coalesce(s.prestige, 0), honor = coalesce(s.honor, 0),
-      member_count = coalesce(s.members, 0), city_count = coalesce(s.cities, 0)
-    from (
-      select p.alliance_id, sum(p.prestige) prestige, sum(p.honor) honor, count(*) members,
-             sum((select count(*) from cities c where c.player_id = p.id)) cities
-      from players p where p.alliance_id is not null group by p.alliance_id
-    ) s where s.alliance_id = a.id`);
-  await ctx.tx.execute(sql`
-    update alliances a set prestige_rank = r.pr, honor_rank = r.hr, members_rank = r.mr
-    from (select id,
-            row_number() over (order by prestige desc, id) pr,
-            row_number() over (order by honor desc, id) hr,
-            row_number() over (order by member_count desc, prestige desc, id) mr
-          from alliances) r where r.id = a.id`);
 }

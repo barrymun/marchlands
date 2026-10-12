@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { sql } from 'drizzle-orm';
-import { pgArray } from '../src/index.ts';
-import { testDb } from '../../game/test/support/db.ts';
+import { pgArray } from '#/index.ts';
+import { testDb } from '#test/support/db.ts';
 
 describe(pgArray.name, () => {
   it('Postgres reads back the strings it was given', async () => {

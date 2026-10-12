@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadConfig } from '../src/config.ts';
+import { loadConfig } from '#/config.ts';
 
 const BASE = { DATABASE_URL: 'postgres://user:pw@localhost:5432/test', JWT_SECRET: 'fake-test-secret' };
 

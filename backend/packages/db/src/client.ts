@@ -1,16 +1,15 @@
 import pg from 'pg';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
-import * as schema from './schema.ts';
+import * as schema from '#/schema.ts';
 
 // bigint columns hold epoch-ms timestamps and ids that fit in a double; parse as numbers.
 pg.types.setTypeParser(pg.types.builtins.INT8, (v) => Number(v));
 pg.types.setTypeParser(pg.types.builtins.NUMERIC, (v) => Number(v));
 
-export type Schema = typeof schema;
+type Schema = typeof schema;
 export type Db = NodePgDatabase<Schema>;
 /** A transaction handle (same query API as Db). */
 export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
-export type DbOrTx = Db | Tx;
 
 export interface Database {
   pool: pg.Pool;

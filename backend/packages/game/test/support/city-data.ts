@@ -5,9 +5,9 @@ import { afterAll, beforeAll } from 'vitest';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { ArmyDirection, BALANCE, Mission, msg, type TroopCounts } from '@marchlands/core';
 import { armies, tiles } from '@marchlands/db';
-import { getCity, type ArmyRow } from '../../src/index.ts';
-import type { TestPlayer } from './factories.ts';
-import type { TestGame } from './game.ts';
+import { getCity, type ArmyRow } from '#/repo.ts';
+import type { TestPlayer } from '#test/support/factories.ts';
+import type { TestGame } from '#test/support/game.ts';
 
 /** An army row out of the player's city (what armies.sendArmy would store), heading for `targetTileId`. */
 export async function insertArmy(

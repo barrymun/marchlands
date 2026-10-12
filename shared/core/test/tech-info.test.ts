@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, BuildingType, FortType, MSG_CODES, TECH_IDS, TechType, TroopType, msgParamNames, ref, techEffect, techInfo } from '../src/index.ts';
+import { BALANCE, BuildingType, FortType, MSG_CODES, TECH_IDS, TechType, TroopType, msgParamNames, ref, techEffect, techInfo } from '#/index.ts';
 
 describe(techInfo.name, () => {
   it('describes every technology with a techInfo message', () => {

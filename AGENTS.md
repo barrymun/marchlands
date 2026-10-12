@@ -19,7 +19,7 @@ Run from the repo root.
 | `npm run typecheck` | `tsc` for the backend + shared packages, then for the client |
 | `npm test` | vitest: `shared/*/test`, `backend/**/test`, and `client/web/src/**/*.test.ts` (no database) |
 | `npm run test:db` | the backend service tests against Postgres (`*.db.test.ts`, see Backend tests). Needs the Postgres container. |
-| `npm run lint` / `npm run lint:fix` | ESLint (code quality only) |
+| `npm run lint` / `npm run lint:fix` | ESLint (code quality only); `lint` also runs `npm run knip` (unused files, exports and dependencies) |
 | `npm run format` / `npm run format:check` | Prettier (all formatting) |
 | `npm run gen:api` | regenerate the OpenAPI spec, the generated client (Hey API) and `docs/api-endpoints.md`. Run it after changing anything in `shared/contracts` or an API route. |
 | `npm run sim -- …` | battle simulations, see [docs/battle-sims](docs/battle-sims/README.md) |
@@ -44,6 +44,7 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 
 ## Shared code (`shared/core`, `shared/contracts`)
 
+- **Imports are absolute,** as in the backend (see Backend tests): `#/constants.ts` is the package's own `src/constants.ts`, `#test/…` its `test/` (the `imports` field of its `package.json`). Never a relative path (ESLint).
 - **Use const objects, never TypeScript `enum`.** Node runs `.ts` files directly (backend, `gen:api`, `tools/`), and type stripping cannot run `enum`. Follow the pattern in `shared/core/src/constants.ts`:
 
   ```ts
@@ -91,9 +92,12 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 
 ## Backend tests
 
-Backend tests live beside the code they test, in a `test/` tree that mirrors `src/`: the tests of `backend/packages/game/src/services/armies.ts` are in `backend/packages/game/test/services/armies*.test.ts` (a large service gets a folder, `test/services/combat/`).
+Backend tests live beside the code they test, in a `test/` tree that mirrors `src/`: the tests of `backend/packages/game/src/services/armies.ts` are in `backend/packages/game/test/services/armies*.test.ts`, those of `src/engine/armies.ts` in `test/engine/armies*.test.ts` (a large module gets a folder, `test/engine/combat/`). Helpers two test files share go in `test/support/<area>.ts`.
 
-- **`<name>.test.ts`** tests pure functions (no database) and runs in `npm test`. Prefer this: move a rule out of a service into a pure function (core, or an exported helper) and test it here.
+- **Imports are absolute,** as in the client: `#/engine/heroes.ts` is the package's own `src/engine/heroes.ts`, and `#test/support/game.ts` its `test/support/game.ts` (the `imports` field of each backend `package.json`, which Node, TypeScript and vitest all read). Never a relative path (ESLint). Another package is imported by name: `@marchlands/db`, and for shared test support `@marchlands/db/test/support/db.ts` or `@marchlands/game/test/support/…`.
+- **What the game package exports** (see [docs/architecture.md](docs/architecture.md)): a service file exports only operations the API, the worker or the tools call. A helper another service needs, or a timed-event handler, goes in `src/engine/<area>.ts`, which only the package itself imports. Its own tests import internal modules directly (`#/engine/…`); the API tests use `@marchlands/game/testing`.
+- **No unused exports:** `npm run lint` runs knip (`knip.json`). It fails on an export nothing imports, and, in the backend, on one only tests import. Prefer testing through the function that uses it; an export kept for tests (a pure helper with its own unit test, a test-harness type) is tagged `@internal` in its doc comment.
+- **`<name>.test.ts`** tests pure functions (no database) and runs in `npm test`. Prefer this: move a rule out of a service into a pure function (core, or an `@internal` helper) and test it here.
 - **`<name>.db.test.ts`** tests a service against a real Postgres and runs in `npm run test:db` (`vitest.db.config.ts`). The setup creates the database `marchlands_test` (`TEST_DB_NAME`) next to the dev one, applies the migrations and seeds the map once; later runs reuse it. Files run one at a time.
 - **Support** (`backend/packages/game/test/support/`):
   - `game(async (g) => …)` (`game.ts`) runs a test in one game transaction that is always rolled back, so tests leave nothing behind. `g` is the real context plus `g.pushes()`, `g.events()`, `g.advance(ms)` and `g.runDue()`, which runs the timed events that fall due (a construction completes, an army arrives). Time starts at a fixed `T0` and the random numbers are seeded.

@@ -5,9 +5,9 @@ import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { BuildingType } from '@marchlands/core';
 import { cities } from '@marchlands/db';
-import { world } from '@marchlands/game';
-import { apiTest, type TestApi } from '../../support/api.ts';
-import { expectClientError, expectInvalid, HUGE_ID, itGuards, lords, RICH, setResources } from '../../support/city-fixtures.ts';
+import { pickOpenFlat } from '@marchlands/game/testing';
+import { apiTest, type TestApi } from '#test/support/api.ts';
+import { expectClientError, expectInvalid, HUGE_ID, itGuards, lords, RICH, setResources } from '#test/support/city-fixtures.ts';
 
 const cityRow = async (api: TestApi, id: number) => (await api.db.select().from(cities).where(eq(cities.id, id)))[0];
 
@@ -204,11 +204,11 @@ describe('POST /cities/{cityId}/move', () => {
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       await setResources(api, a, RICH);
-      const flat = await api.game((ctx) => world.pickOpenFlat(ctx, -1));
+      const flat = await api.game((ctx) => pickOpenFlat(ctx, -1));
       const moved = await api.ok('POST', `cities/${a.cityId}/move`, { token: a.token, body: { targetTileId: flat } });
       expect(moved).toEqual({ fieldId: flat, x: expect.any(Number), y: expect.any(Number) });
       expect((await cityRow(api, a.cityId)).tileId).toBe(flat);
-      const again = await api.game((ctx) => world.pickOpenFlat(ctx, -1));
+      const again = await api.game((ctx) => pickOpenFlat(ctx, -1));
       const r = await api.refused('POST', `cities/${a.cityId}/move`, 'city.teleportCooldown', { token: a.token, body: { targetTileId: again }, status: 400 });
       expect(r.body.ok).toBe(-90);
     }));

@@ -8,8 +8,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import type { Db } from '@marchlands/db';
-import { buildApp } from '../src/app.ts';
-import { loadConfig } from '../src/config.ts';
+import { buildApp } from '#/app.ts';
+import { loadConfig } from '#/config.ts';
 
 const SCRIPT = path.join(import.meta.dirname, '../src/openapi.ts');
 const run = promisify(execFile);

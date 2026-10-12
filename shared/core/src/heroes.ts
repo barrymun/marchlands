@@ -1,7 +1,7 @@
 // Hero generation and progression (orig spitfire::RandomStat / CreateRandomHero, Hero.cpp).
 
-import { BALANCE } from './balance.ts';
-import { pick, randInt, type Rng } from './rng.ts';
+import { BALANCE } from '#/balance.ts';
+import { pick, randInt, type Rng } from '#/rng.ts';
 
 export interface HeroStats {
   level: number;
@@ -264,4 +264,14 @@ export const heroPointCap = (h: HeroStats) => h.basePower + h.baseManagement + h
 export function experienceItemGain(itemId: string, upgradeExp: number): number {
   const book = BALANCE.items.experienceBooks[itemId];
   return book ? Math.max(book.min, Math.floor(upgradeExp * book.share)) : 0;
+}
+
+/**
+ * The Inn's offers at `innLevel`, given the heroes it offers now: the ones it keeps, the ones it drops
+ * (it shrank), how many new heroes it adds, and the Inn level they are generated at (capped like the offers).
+ */
+export function tavernRefill<T>(current: readonly T[], innLevel: number) {
+  const offers = innOffers(innLevel);
+  const keep = current.slice(0, offers);
+  return { keep, drop: current.slice(offers), add: offers - keep.length, heroInnLevel: offers };
 }

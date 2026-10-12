@@ -28,8 +28,8 @@ import type {
   TroopBean,
   ValleyBean,
 } from '@marchlands/contracts';
-import { cityStats, type CityBundle } from './city.ts';
-import type { ArmyRow, CityRow, HeroRow, PlayerRow, TileRow } from './repo.ts';
+import { cityStats, type CityBundle } from '#/city.ts';
+import type { ArmyRow, CityRow, HeroRow, PlayerRow, TileRow } from '#/repo.ts';
 
 export const troopBean = (t: TroopCounts): TroopBean => Object.fromEntries(TROOP_KEY_LIST.map((k) => [k, Math.floor(t[k] ?? 0)])) as TroopBean;
 export const fortBean = (f: FortCounts): FortBean => Object.fromEntries(FORT_KEY_LIST.map((k) => [k, Math.floor(f[k] ?? 0)])) as FortBean;
@@ -162,6 +162,7 @@ export function cityBean(b: CityBundle, now: number): CityBean {
   };
 }
 
+/** @internal exported for its unit test */
 export function valleyBean(t: TileRow): ValleyBean {
   const { x, y } = tileXY(t.id);
   return { id: t.id, x, y, type: t.type, level: t.level, ownerCityId: t.ownerCityId };

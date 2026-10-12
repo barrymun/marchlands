@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createHmac } from 'node:crypto';
-import { signToken, verifyToken } from '../../src/auth/jwt.ts';
+import { signToken, verifyToken } from '#/auth/jwt.ts';
 
 const SECRET = 'fake-jwt-secret-for-tests';
 const T0 = Date.UTC(2026, 0, 1, 12);

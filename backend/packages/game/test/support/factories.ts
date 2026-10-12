@@ -4,8 +4,12 @@
 import { eq } from 'drizzle-orm';
 import { BuildingType, TileType, type ResourceSet, type TroopCounts } from '@marchlands/core';
 import { accounts, cities, tiles } from '@marchlands/db';
-import { admin, citiesOf, getCity, getPlayer, openOwnCity, player as players, saveCity, savePlayer, world, type CityBundle } from '../../src/index.ts';
-import type { TestGame } from './game.ts';
+import { admin, player as players } from '#/index.ts';
+import { citiesOf, getCity, getPlayer, saveCity, savePlayer } from '#/repo.ts';
+import { openOwnCity, type CityBundle } from '#/city.ts';
+import type { TestGame } from '#test/support/game.ts';
+import { initialCity } from '#/engine/player.ts';
+import { pickOpenFlat } from '#/engine/world.ts';
 
 let serial = 0;
 
@@ -65,10 +69,10 @@ export const cityBundle = (g: TestGame, p: TestPlayer, cityId = p.cityId): Promi
 
 /** Another city for the player on a free flat, as a new player's city is made (Town Hall 1, no heroes); returns its id. */
 export async function addCity(g: TestGame, p: TestPlayer, name = `${p.name} Two`): Promise<number> {
-  const tile = await world.pickOpenFlat(g, -1);
+  const tile = await pickOpenFlat(g, -1);
   const [city] = await g.tx
     .insert(cities)
-    .values(players.initialCity(p.id, tile, name, g.now))
+    .values(initialCity(p.id, tile, name, g.now))
     .returning();
   await g.tx.update(tiles).set({ cityId: city.id, type: TileType.CASTLE, ownerPlayerId: p.id, updatedAt: g.now }).where(eq(tiles.id, tile));
   return city.id;

@@ -14,7 +14,8 @@ import {
   TileType,
 } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { combat, getHero, getTile, interior } from '../../../src/index.ts';
+import { getHero, getTile } from '#/repo.ts';
+import { interior } from '#/index.ts';
 import {
   allies,
   armyRow,
@@ -30,9 +31,10 @@ import {
   tileNear,
   valleyNear,
   warrior,
-} from '../../support/armies.ts';
-import { addHero, cityBundle, reloadCity, setBuildings, setResearch } from '../../support/factories.ts';
-import { game, type TestGame } from '../../support/game.ts';
+} from '#test/support/armies.ts';
+import { addHero, cityBundle, reloadCity, setBuildings, setResearch } from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
+import { processArmy } from '#/engine/combat.ts';
 
 const guardOf = (seed: number, maxLevel: number) => createGuardHero(maxLevel, seededRng(`guard:${seed}`));
 
@@ -44,7 +46,7 @@ async function scoutCity(g: TestGame, scouts: number, defenders: number, opts: {
   return { p, q, heroId, armyId: bean.armyId };
 }
 
-describe(`${combat.processArmy.name}: scouting a barbarian city`, () => {
+describe(`${processArmy.name}: scouting a barbarian city`, () => {
   it('reports its resources, troops, fortifications, buildings and defending hero, and comes home', () =>
     game(async (g) => {
       const { p } = await warrior(g);
@@ -91,7 +93,7 @@ describe(`${combat.processArmy.name}: scouting a barbarian city`, () => {
     }));
 });
 
-describe(`${combat.processArmy.name}: scouting a valley`, () => {
+describe(`${processArmy.name}: scouting a valley`, () => {
   it('a free valley: its garrison and defending hero', () =>
     game(async (g) => {
       const { p } = await warrior(g);
@@ -134,7 +136,7 @@ describe(`${combat.processArmy.name}: scouting a valley`, () => {
     }));
 });
 
-describe(`${combat.processArmy.name}: scouting a lord's city`, () => {
+describe(`${processArmy.name}: scouting a lord's city`, () => {
   it('outnumbering the defending scouts, reports the city to the scout and warns the defender', () =>
     game(async (g) => {
       const { p, q, armyId } = await scoutCity(g, 500, 10);

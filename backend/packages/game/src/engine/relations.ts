@@ -4,15 +4,10 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { Relation } from '@marchlands/core';
 import { allianceRelations, players } from '@marchlands/db';
-import type { Ctx } from '../context.ts';
-
-export async function allianceOf(ctx: Ctx, playerId: number): Promise<number | null> {
-  const [row] = await ctx.tx.select({ a: players.allianceId }).from(players).where(eq(players.id, playerId));
-  return row?.a ?? null;
-}
+import { type Ctx } from '#/context.ts';
 
 /** Relation of alliance `a` towards alliance `b` (one-sided, as stored). */
-export async function allianceRelation(ctx: Ctx, a: number, b: number): Promise<number> {
+async function allianceRelation(ctx: Ctx, a: number, b: number): Promise<number> {
   if (a === b) return Relation.ALLIANCE;
   const [row] = await ctx.tx
     .select({ r: allianceRelations.relation })

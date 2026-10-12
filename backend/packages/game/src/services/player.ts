@@ -6,27 +6,25 @@ import {
   goldForCents,
   itemGoldPrice,
   BALANCE,
-  BuildingStatus,
   DAY,
   GameError,
   HOUR,
   TileType,
   TITLES,
   tileXY,
-  type BuildingState,
   type TroopCounts,
   TROOP_KEY_LIST,
   lordGear,
   BuffId,
   msg,
-  type Message,
   type CastleSign,
   ItemId,
 } from '@marchlands/core';
+import { type CreatePlayerBody } from '@marchlands/contracts';
 import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@marchlands/db';
-import { openOwnCity, viewOwnCity } from '../city.ts';
-import type { Ctx } from '../context.ts';
-import { buffsArray, cityBean, itemsArray } from '../dto.ts';
+import { openOwnCity, viewOwnCity } from '#/city.ts';
+import { type Ctx } from '#/context.ts';
+import { buffsArray, cityBean, itemsArray } from '#/dto.ts';
 import {
   activeBuff,
   assertClean,
@@ -40,46 +38,15 @@ import {
   setBuff,
   spendGold,
   useItemOrGold,
-} from '../helpers.ts';
-import { citiesOf, findPlayerByName, getCity, getPlayer, saveCity, savePlayer, type PlayerRow } from '../repo.ts';
-import { pickOpenFlat } from './world.ts';
-import { relationBetween } from './relations.ts';
-import { leaveAlliance } from './alliance.ts';
-import { pushMailCounts } from './mail.ts';
-import { visibleArmies } from './armies.ts';
+} from '#/helpers.ts';
+import { citiesOf, findPlayerByName, getCity, getPlayer, saveCity, savePlayer, type PlayerRow } from '#/repo.ts';
+import { pickOpenFlat } from '#/engine/world.ts';
+import { relationBetween } from '#/engine/relations.ts';
+import { leaveAlliance } from '#/services/alliance.ts';
+import { visibleArmies } from '#/services/armies.ts';
+import { initialCity } from '#/engine/player.ts';
 
-export interface CreatePlayerInput {
-  userName: string;
-  castleName: string;
-  flag: string;
-  faceUrl: string;
-  sex: number;
-  zone: number;
-}
-
-/** Starting city: Town Hall level 1, 100k of every resource (orig createNewPlayer). */
-export function initialCity(playerId: number, tileId: number, name: string, now: number) {
-  const buildings: BuildingState[] = [{ positionId: -1, typeId: 31, level: 1, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 }];
-  const r = BALANCE.startingResources;
-  return {
-    playerId,
-    tileId,
-    name,
-    gold: r,
-    food: r,
-    wood: r,
-    stone: r,
-    iron: r,
-    resourcesAt: now,
-    population: BALANCE.startPopulation,
-    taxRate: BALANCE.startTaxRate,
-    buildings,
-    misc: { lastTickAt: now },
-    createdAt: now,
-  };
-}
-
-export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePlayerInput): Promise<PlayerRow> {
+export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePlayerBody): Promise<PlayerRow> {
   const [existing] = await ctx.tx.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
   if (existing) {
     const [{ n }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, existing.id));
@@ -317,34 +284,6 @@ export async function startTruce(ctx: Ctx, playerId: number, itemId: string, cit
   p.status = 2;
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
-}
-
-/** Why a player can't be attacked (null: they can). */
-export function isProtected(p: PlayerRow, now: number): Message | null {
-  if (p.beginner) return msg('player.protected.beginner');
-  if (activeBuff(p, BuffId.TRUCE, now)) return msg('player.protected.truce');
-  if (activeBuff(p, BuffId.HOLIDAY, now)) return msg('player.protected.holiday');
-  return null;
-}
-
-/** Beginner protection ends after 7 days or Town Hall level 5 (orig CheckBeginner). */
-export async function checkBeginner(ctx: Ctx, p: PlayerRow, townHallLevel?: number) {
-  if (!p.beginner) return;
-  const expired = ctx.now - p.createdAt > BALANCE.beginnerProtectionMs;
-  if (expired || (townHallLevel ?? 0) >= BALANCE.beginnerTownHallLevel) {
-    p.beginner = false;
-    if (p.status === 3) p.status = 0;
-    await ctx.tx.insert(mails).values({
-      playerId: p.id,
-      type: 2,
-      title: '',
-      content: '',
-      system: { title: msg('player.mail.protectionExpired.title'), content: msg('player.mail.protectionExpired.content') },
-      sentAt: ctx.now,
-    });
-    await pushMailCounts(ctx, p.id);
-    await pushPlayerInfo(ctx, p);
-  }
 }
 
 // ---------------------------------------------------------------------------------------------

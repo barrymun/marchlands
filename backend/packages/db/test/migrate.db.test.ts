@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, inject, it } from 'vitest';
 import { sql } from 'drizzle-orm';
-import { runMigrations } from '../src/index.ts';
-import { testDb } from '../../game/test/support/db.ts';
+import { runMigrations } from '#/index.ts';
+import { testDb } from '#test/support/db.ts';
 
 const journal = JSON.parse(readFileSync(new URL('../migrations/meta/_journal.json', import.meta.url), 'utf8')) as { entries: { tag: string }[] };
 

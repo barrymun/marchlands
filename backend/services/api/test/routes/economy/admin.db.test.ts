@@ -3,8 +3,8 @@ import { desc, eq } from 'drizzle-orm';
 import { BuildingType, ItemId, TechType } from '@marchlands/core';
 import { PushCmd, type MailCounts, type PlayerState } from '@marchlands/contracts';
 import { accounts, heroes, players, pushMessages } from '@marchlands/db';
-import { apiTest, type TestApi } from '../../support/api.ts';
-import { expectAdminsOnly, expectInvalid, expectNeedsToken, type RouteCall } from '../../support/guards.ts';
+import { apiTest, type TestApi } from '#test/support/api.ts';
+import { expectAdminsOnly, expectInvalid, expectNeedsToken, type RouteCall } from '#test/support/guards.ts';
 
 /** Every operator route, with a valid request (ids that need not exist: the refusal comes first). */
 const ROUTES: RouteCall[] = [

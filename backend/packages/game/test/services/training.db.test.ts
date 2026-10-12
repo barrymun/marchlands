@@ -16,7 +16,6 @@ import {
   PrestigeAction,
   ref,
   splitTraining,
-  trainBatchMs,
   trainCost,
   troopUnitSeconds,
   unitExp,
@@ -24,11 +23,12 @@ import {
   type Resources,
 } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { getHero, heroes, saveCity, saveHero, savePlayer, savepoint, shop, training } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
+import { getHero, saveCity, saveHero, savePlayer } from '#/repo.ts';
+import { heroes, shop, training } from '#/index.ts';
+import { savepoint } from '#/context.ts';
+import { expectRefused } from '#test/support/expect.ts';
 import {
   addHero,
-  cityBundle,
   createTestPlayer,
   giveItems,
   reloadCity,
@@ -38,19 +38,10 @@ import {
   setResearch,
   setResources,
   type TestPlayer,
-} from '../support/factories.ts';
-import { game, type TestGame } from '../support/game.ts';
-
-const { WALLS_QUEUE } = training;
+} from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
+import { WALLS_QUEUE, withBarracks, queueOf, batchMs } from '#test/support/training.ts';
 const { WORKER, WARRIOR, SCOUT } = TroopType;
-
-/** Barracks at positions 0, 1, … of these levels. */
-const withBarracks = (g: TestGame, p: TestPlayer, levels: number[]) =>
-  setBuildings(
-    g,
-    p,
-    levels.map((l, i): [number, number, number] => [i, BuildingType.BARRACKS, l]),
-  );
 
 /** Walls (position -2) of this level. */
 const withWalls = (g: TestGame, p: TestPlayer, level: number) => setBuildings(g, p, [[-2, BuildingType.WALLS, level]]);
@@ -77,29 +68,7 @@ function expectResources(actual: Resources, expected: Resources) {
 const minus = (a: Resources, b: Partial<Resources>, mult = 1): Resources =>
   Object.fromEntries(RESOURCE_KEYS.map((k) => [k, a[k] - (b[k] ?? 0) * mult])) as unknown as Resources;
 
-const queueOf = async (g: TestGame, p: TestPlayer, positionId: number) => {
-  const c = await reloadCity(g, p.cityId);
-  return positionId === WALLS_QUEUE ? c.fortQueue.queue : (c.troopQueues.find((q) => q.positionId === positionId)?.queue ?? []);
-};
-
-const batchMs = async (g: TestGame, p: TestPlayer, troopId: number, count: number) => {
-  const b = await cityBundle(g, p);
-  return trainBatchMs(troopId, count, null, b.player.research);
-};
-
-describe(training.hasTrainingRoom.name, () => {
-  it('needs a barracks with fewer queued batches than its level', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      expect(training.hasTrainingRoom(await cityBundle(g, p))).toBe(false);
-      await withBarracks(g, p, [1]);
-      expect(training.hasTrainingRoom(await cityBundle(g, p))).toBe(true);
-      await training.train(g, p.id, p.cityId, WORKER, 1, 0);
-      expect(training.hasTrainingRoom(await cityBundle(g, p))).toBe(false);
-      await withBarracks(g, p, [2]);
-      expect(training.hasTrainingRoom(await cityBundle(g, p))).toBe(true);
-    }));
-});
+const INJURED = { peasants: 10, militia: 4 };
 
 describe(training.trainableList.name, () => {
   it('lists the troops with their requirements, time and cost share', () =>
@@ -667,40 +636,6 @@ describe(training.speedupTraining.name, () => {
     }));
 });
 
-describe(training.completeTraining.name, () => {
-  it('does nothing before the head is due, and keeps it scheduled', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await withBarracks(g, p, [1]);
-      await training.train(g, p.id, p.cityId, WORKER, 10, 0);
-      const ev = g.events('train')[0];
-      const pushes = g.pushes().length;
-      await training.completeTraining(g, p.cityId, 0);
-      expect(await queueOf(g, p, 0)).toHaveLength(1);
-      expect(g.events('train')).toEqual([ev]);
-      expect(g.pushes()).toHaveLength(pushes);
-    }));
-
-  it('completes every batch that is due, in one go', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await withBarracks(g, p, [2]);
-      await training.train(g, p.id, p.cityId, WORKER, 10, 0);
-      await training.train(g, p.id, p.cityId, WARRIOR, 10, 0);
-      g.advance((await batchMs(g, p, WORKER, 10)) + (await batchMs(g, p, WARRIOR, 10)));
-      await training.completeTraining(g, p.cityId, 0);
-      expect((await reloadCity(g, p.cityId)).troops).toMatchObject({ peasants: 10, militia: 10 });
-      expect(await queueOf(g, p, 0)).toEqual([]);
-      expect(g.events('train')).toEqual([]);
-    }));
-
-  it('ignores a city that no longer exists', () =>
-    game(async (g) => {
-      await training.completeTraining(g, -1, 0);
-      expect(g.pushes()).toEqual([]);
-    }));
-});
-
 describe(training.disbandTroops.name, () => {
   it('returns the troops to the population, up to its maximum', () =>
     game(async (g) => {
@@ -753,8 +688,6 @@ describe(training.destroyForts.name, () => {
       await expectRefused(training.destroyForts(g, p.id, p.cityId, FortType.TRAP, 2), msg('training.notEnoughUnits', { unit: ref.troop(FortType.TRAP) }));
     }));
 });
-
-const INJURED = { peasants: 10, militia: 4 };
 
 describe(training.cureInjured.name, () => {
   it('heals for a share of the training cost', () =>

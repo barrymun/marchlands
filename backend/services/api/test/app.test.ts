@@ -3,11 +3,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import type { Db } from '@marchlands/db';
 import { PushCmd } from '@marchlands/contracts';
-import { buildApp } from '../src/app.ts';
-import { signToken } from '../src/auth/jwt.ts';
-import type { ApiConfig } from '../src/config.ts';
-import { operationIdOf } from '../src/operation-id.ts';
-import { openSocket } from './support/ws-client.ts';
+import { buildApp } from '#/app.ts';
+import { signToken } from '#/auth/jwt.ts';
+import type { ApiConfig } from '#/config.ts';
+import { operationIdOf } from '#/operation-id.ts';
+import { openSocket } from '#test/support/ws-client.ts';
 
 const CONFIG: ApiConfig = {
   port: 0,

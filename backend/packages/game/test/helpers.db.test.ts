@@ -1,26 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { BuffId, ItemId, msg } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import {
-  addItem,
-  buffsArray,
-  cityBean,
-  consumeItem,
-  getCity,
-  getPlayer,
-  playerInfoOf,
-  pushBuffs,
-  pushCity,
-  pushPlayerInfo,
-  pushResources,
-  removeBuff,
-  setBuff,
-  useItemOrGold,
-} from '../src/index.ts';
-import { createTestAlliance } from './support/alliance.ts';
-import { expectRefused } from './support/expect.ts';
-import { addCity, cityBundle, createTestPlayer, setResources } from './support/factories.ts';
-import { game } from './support/game.ts';
+import { addItem, consumeItem, playerInfoOf, pushCity, pushPlayerInfo, pushResources, removeBuff, setBuff, useItemOrGold } from '#/helpers.ts';
+import { cityBean } from '#/dto.ts';
+import { getCity, getPlayer } from '#/repo.ts';
+import { createTestAlliance } from '#test/support/alliance.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { addCity, cityBundle, createTestPlayer, setResources } from '#test/support/factories.ts';
+import { game } from '#test/support/game.ts';
 
 const HOUR = 3_600_000;
 const ITEM = ItemId.TRUCE_AGREEMENT;
@@ -185,19 +172,6 @@ describe('pushes', () => {
       expect(g.pushes(PushCmd.CASTLE_UPDATE)).toEqual([
         { playerIds: [t.id], cmd: PushCmd.CASTLE_UPDATE, data: { updateType: 2, castleBean: cityBean(b, g.now) } },
       ]);
-    }));
-
-  it('pushBuffs sends the buffs still running', () =>
-    game(async (g) => {
-      const t = await createTestPlayer(g);
-      const p = await getPlayer(g, t.id);
-      setBuff(g, p, BuffId.ATTACK, msg('buff.truce'), g.now + HOUR);
-      setBuff(g, p, BuffId.DEFENSE, msg('buff.truce'), g.now + 2 * HOUR);
-      g.advance(HOUR);
-      pushBuffs(g, p);
-      const pushed = g.pushes(PushCmd.PLAYER_BUFFS_UPDATE);
-      expect(pushed).toEqual([{ playerIds: [p.id], cmd: PushCmd.PLAYER_BUFFS_UPDATE, data: { buffs: buffsArray(p.buffs, g.now) } }]);
-      expect(pushed[0].data.buffs.map((x) => x.id)).toEqual([BuffId.DEFENSE]);
     }));
 });
 

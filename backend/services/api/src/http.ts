@@ -10,10 +10,10 @@ import { GameError, msg } from '@marchlands/core';
 import { ErrorResponse, Ok } from '@marchlands/contracts';
 import { accounts, players, type Db } from '@marchlands/db';
 import { runGame, type Ctx } from '@marchlands/game';
-import { verifyToken, type TokenClaims } from './auth/jwt.ts';
-import type { ApiConfig } from './config.ts';
+import { verifyToken, type TokenClaims } from '#/auth/jwt.ts';
+import type { ApiConfig } from '#/config.ts';
 
-export interface AppDeps {
+interface AppDeps {
   db: Db;
   config: ApiConfig;
   online: () => number;
@@ -48,6 +48,7 @@ export function installErrorHandler(app: FastifyInstance) {
   app.setNotFoundHandler((req, reply) => reply.status(404).send({ ok: -99, error: msg('common.routeNotFound', { method: req.method, url: req.url }) }));
 }
 
+/** @internal exported for its unit test */
 export function bearer(req: FastifyRequest): string | null {
   const h = req.headers.authorization;
   if (h?.startsWith('Bearer ')) return h.slice(7);
@@ -108,7 +109,7 @@ export async function anon<T>(req: FastifyRequest, fn: (ctx: Ctx) => Promise<T>)
 
 // ---- common request schemas (defined in @marchlands/contracts) ----
 
-export { zCityParams, zId, zIds, zPaging, zResources, zTroops } from '@marchlands/contracts';
+export { zCityParams, zIds } from '@marchlands/contracts';
 
 export const tags = {
   auth: ['auth'],

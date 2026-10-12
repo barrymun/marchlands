@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { BuildingType, gearStarCost, HeroBuffId, HeroStatus, ItemId, medalId, msg, TechType } from '@marchlands/core';
 import { cities, heroes, players } from '@marchlands/db';
-import { apiTest, type TestApi } from '../../support/api.ts';
+import { apiTest, type TestApi } from '#test/support/api.ts';
 import {
   addHero,
   expectClientError,
@@ -23,7 +23,7 @@ import {
   setResearch,
   setResources,
   type Lord,
-} from '../../support/city-fixtures.ts';
+} from '#test/support/city-fixtures.ts';
 
 const INN = 2;
 const HALL = 3;

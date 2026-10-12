@@ -3,18 +3,14 @@
 import { count, eq } from 'drizzle-orm';
 import { GameError, hasResources, msg, RESOURCE_KEYS, type BuffId, type BuffState, type Message, type Resources } from '@marchlands/core';
 import { alliances, cities } from '@marchlands/db';
-import { cityStats, type CityBundle } from './city.ts';
-import type { Ctx } from './context.ts';
-import { buffsArray, cityBean, playerInfo, resourceBean } from './dto.ts';
-import type { CityRow, PlayerRow } from './repo.ts';
+import { cityStats, type CityBundle } from '#/city.ts';
+import type { Ctx } from '#/context.ts';
+import { cityBean, playerInfo, resourceBean } from '#/dto.ts';
+import type { CityRow, PlayerRow } from '#/repo.ts';
 import { PushCmd } from '@marchlands/contracts';
 
-export function assertResources(city: CityRow, cost: Partial<Resources>, message: Message = msg('common.notEnoughResources'), code = -1) {
+export function spendResources(city: CityRow, cost: Partial<Resources>, message: Message = msg('common.notEnoughResources'), code = -1) {
   if (!hasResources(city, cost)) throw new GameError(message, code);
-}
-
-export function spendResources(city: CityRow, cost: Partial<Resources>, message?: Message, code?: number) {
-  assertResources(city, cost, message, code);
   for (const k of RESOURCE_KEYS) city[k] -= cost[k] ?? 0;
 }
 
@@ -108,10 +104,6 @@ export async function playerInfoOf(ctx: Ctx, p: PlayerRow) {
 
 export async function pushPlayerInfo(ctx: Ctx, p: PlayerRow) {
   ctx.push(p.id, PushCmd.PLAYER_INFO_UPDATE, { playerInfo: await playerInfoOf(ctx, p) });
-}
-
-export function pushBuffs(ctx: Ctx, p: PlayerRow) {
-  ctx.push(p.id, PushCmd.PLAYER_BUFFS_UPDATE, { buffs: buffsArray(p.buffs, ctx.now) });
 }
 
 /** Validate a free-text name: length and a conservative character set. */

@@ -67,7 +67,7 @@ import {
   maxTrainableCount,
   ItemId,
   medalId,
-} from '../src/index.ts';
+} from '#/index.ts';
 
 const ctx = (over: Partial<EconomyContext> = {}): EconomyContext => ({
   research: {},

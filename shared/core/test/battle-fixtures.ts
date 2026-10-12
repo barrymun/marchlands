@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
-import type { BattleSide, DefenderSide } from '../src/battle/simulator.ts';
+import type { BattleSide, DefenderSide } from '#/battle/simulator.ts';
 
 export interface BattleCase {
   file: string;

@@ -4,9 +4,9 @@
 import { eq } from 'drizzle-orm';
 import { AllianceRank, BALANCE, BuildingType } from '@marchlands/core';
 import { alliances } from '@marchlands/db';
-import { alliance } from '../../src/index.ts';
-import { createTestPlayer, setBuildings, setResources, type TestPlayer } from './factories.ts';
-import type { TestGame } from './game.ts';
+import { alliance } from '#/index.ts';
+import { createTestPlayer, setBuildings, setResources, type TestPlayer } from '#test/support/factories.ts';
+import type { TestGame } from '#test/support/game.ts';
 
 let serial = 0;
 
@@ -56,4 +56,11 @@ export async function joinAlliance(g: TestGame, host: TestPlayer, p: TestPlayer,
   await withEmbassy(g, p);
   await alliance.invite(g, host.id, p.name);
   await alliance.acceptInvite(g, p.id, name);
+}
+
+/** The ally, neutral and enemy lists an alliance's Host sees (alliance.myAlliance). */
+export async function relationsOf(g: TestGame, a: TestAlliance) {
+  const mine = await alliance.myAlliance(g, a.host.id);
+  if (!mine) throw new Error(`${a.name} has no host`);
+  return { friendlyList: mine.friendlyList, middleList: mine.middleList, enemyList: mine.enemyList };
 }

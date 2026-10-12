@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { BuildingType, dur, HeroStatus, Mission, msg, ref, TroopType } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { armies, flows, heroesOfCity } from '../../../src/index.ts';
-import { expectRefused } from '../../support/expect.ts';
-import { addCity, createTestPlayer, reloadCity } from '../../support/factories.ts';
-import { armyPreset, farmingCity, flowOf, newFlow, runFlowIn, valleysNear, withBarracks, withHero } from '../../support/flows.ts';
-import { game, T0 } from '../../support/game.ts';
+import { armies, flows } from '#/index.ts';
+import { heroesOfCity } from '#/repo.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { addCity, createTestPlayer, reloadCity } from '#test/support/factories.ts';
+import { armyPreset, farmingCity, flowOf, newFlow, runFlowIn, valleysNear, withBarracks, withHero } from '#test/support/flows.ts';
+import { game, T0 } from '#test/support/game.ts';
 
 const mayor = { type: 'setMayor', stat: 'power' };
 const train5 = { type: 'trainTroops', troopId: TroopType.WARRIOR, amount: 5 };

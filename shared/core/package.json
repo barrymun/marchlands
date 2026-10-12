@@ -7,6 +7,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "imports": {
+    "#/*": "./src/*",
+    "#test/*": "./test/*"
+  },
   "dependencies": {
     "zod": "^4.6.5"
   }

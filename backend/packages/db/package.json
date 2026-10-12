@@ -6,7 +6,12 @@
   "description": "Postgres schema (Drizzle), migrations and connection helpers.",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./test/*": "./test/*"
+  },
+  "imports": {
+    "#/*": "./src/*",
+    "#test/*": "./test/*"
   },
   "scripts": {
     "generate": "drizzle-kit generate",

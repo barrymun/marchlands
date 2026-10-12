@@ -17,13 +17,13 @@ import {
   createBoxHero,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
-import { cityStats, openOwnCity, type CityBundle } from '../city.ts';
-import type { Ctx } from '../context.ts';
-import { heroBean, troopBean } from '../dto.ts';
-import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources, setBuff } from '../helpers.ts';
-import { getPlayer, saveCity, savePlayer, type PlayerRow } from '../repo.ts';
-import { heroSlots, heroValues, pushHero } from './heroes.ts';
-import { settleAllCities } from './research.ts';
+import { cityStats, openOwnCity, type CityBundle } from '#/city.ts';
+import type { Ctx } from '#/context.ts';
+import { heroBean, troopBean } from '#/dto.ts';
+import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources, setBuff } from '#/helpers.ts';
+import { getPlayer, saveCity, savePlayer, type PlayerRow } from '#/repo.ts';
+import { heroSlots, heroValues, pushHero } from '#/engine/heroes.ts';
+import { settleAllCities } from '#/engine/research.ts';
 import { PushCmd } from '@marchlands/contracts';
 
 /** Shop catalogue (orig saleTypeBeans): items for sale grouped by type (item category id), priced in city gold; the client names both by id. */

@@ -8,11 +8,8 @@ import {
   ItemId,
   MINUTE,
   msg,
-  prestigeOf,
-  PrestigeAction,
   ref,
   researchCost,
-  researchHeroExp,
   researchMaxLevel,
   researchTimeMs,
   RESOURCE_KEYS,
@@ -24,8 +21,9 @@ import {
   type Resources,
 } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { getHero, heroes, mayorStats, research } from '../../src/index.ts';
-import { expectRefused } from '../support/expect.ts';
+import { heroes, research } from '#/index.ts';
+import { mayorStats } from '#/city.ts';
+import { expectRefused } from '#test/support/expect.ts';
 import {
   addCity,
   addHero,
@@ -37,39 +35,18 @@ import {
   setBuildings,
   setResearch,
   setResources,
-  setTownHall,
-  type TestPlayer,
-} from '../support/factories.ts';
-import { game, T0, type TestGame } from '../support/game.ts';
+} from '#test/support/factories.ts';
+import { game, T0, type TestGame } from '#test/support/game.ts';
+import { res, stock, researchOf, withAcademy } from '#test/support/research.ts';
 
 const { AGRICULTURE, LUMBERING, HERO_ENHANCEMENT, CONSTRUCTION } = TechType;
-
-const res = (c: Resources): Resources => ({ gold: c.gold, food: c.food, wood: c.wood, stone: c.stone, iron: c.iron });
 const plus = (a: Resources, b: Partial<Resources>, mult = 1): Resources =>
   Object.fromEntries(RESOURCE_KEYS.map((k) => [k, a[k] + (b[k] ?? 0) * mult])) as Resources;
 const minus = (a: Resources, b: Partial<Resources>): Resources => Object.fromEntries(RESOURCE_KEYS.map((k) => [k, a[k] - (b[k] ?? 0)])) as Resources;
-
-/** The city's resources settled to now (what the next service call starts from). */
-const stock = async (g: TestGame, p: TestPlayer, cityId = p.cityId) => res((await cityBundle(g, p, cityId)).city);
 /** The city's resources as stored. */
 const stored = async (g: TestGame, cityId: number) => res(await reloadCity(g, cityId));
-const researchOf = async (g: TestGame, p: TestPlayer, techId: number) => (await reloadPlayer(g, p)).research[techId];
 
-/** An Academy with the fields Agriculture and Lumbering need; Hero Enhancement needs only the Academy. */
-async function withAcademy(g: TestGame, p: TestPlayer, cityId = p.cityId) {
-  await setBuildings(
-    g,
-    p,
-    [
-      [0, BuildingType.ACADEMY, 1],
-      [1001, BuildingType.FARM, 1],
-      [1002, BuildingType.SAWMILL, 1],
-    ],
-    cityId,
-  );
-}
-
-/** A second city for the player, on a free flat, made like the starting city (player.initialCity). */
+/** A second city for the player, on a free flat, made like the starting city (initialCity). */
 
 describe(research.researchList.name, () => {
   it('lists every tech with its level, next cost and whether it may start', () =>
@@ -406,108 +383,5 @@ describe(research.speedupResearch.name, () => {
         research.speedupResearch(g, p.id, p.cityId, SpeedupId.GOLD, LUMBERING),
         msg('research.notResearching', { tech: ref.tech(LUMBERING) }),
       );
-    }));
-});
-
-describe(research.settleAllCities.name, () => {
-  it("settles and saves every one of the player's cities", () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      const second = await addCity(g, p);
-      g.advance(HOUR);
-      const expected = [await stock(g, p), await stock(g, p, second)];
-      const bundles = await research.settleAllCities(g, await reloadPlayer(g, p));
-      expect(bundles.map((b) => b.city.id).sort((x, y) => x - y)).toEqual([p.cityId, second].sort((x, y) => x - y));
-      for (const [i, id] of [p.cityId, second].entries()) {
-        const city = await reloadCity(g, id);
-        expect(city.resourcesAt).toBe(g.now);
-        expect(res(city)).toEqual(expected[i]);
-        expect(city.food).toBeGreaterThan(BALANCE.startingResources);
-      }
-    }));
-});
-
-describe(research.completeResearch.name, () => {
-  it('raises the level, awards prestige and tells the player', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await withAcademy(g, p);
-      await setTownHall(g, p, 2);
-      const prestige = (await reloadPlayer(g, p)).prestige;
-      const out = await research.startResearch(g, p.id, p.cityId, AGRICULTURE);
-      expect(await g.runDue(out.endTime)).toBe(1);
-      const after = await reloadPlayer(g, p);
-      expect(after.research[AGRICULTURE]).toEqual({ level: 1 });
-      expect(after.prestige).toBe(prestige + prestigeOf(PrestigeAction.RESEARCH, AGRICULTURE, 1, 2));
-      expect(g.pushes(PushCmd.RESEARCH_COMPLETE_UPDATE).at(-1)).toMatchObject({
-        playerIds: [p.id],
-        data: { castleId: p.cityId, typeId: AGRICULTURE, level: 1 },
-      });
-      expect(g.pushes(PushCmd.PLAYER_INFO_UPDATE).at(-1)?.playerIds).toEqual([p.id]);
-      expect((await reloadCity(g, p.cityId)).resourcesAt).toBe(out.endTime);
-    }));
-
-  it('settles every city first and resources them all', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      const second = await addCity(g, p);
-      await withAcademy(g, p, second);
-      const out = await research.startResearch(g, p.id, second, AGRICULTURE);
-      const pushesBefore = g.pushes(PushCmd.RESOURCE_UPDATE).length;
-      await g.runDue(out.endTime);
-      for (const id of [p.cityId, second]) expect((await reloadCity(g, id)).resourcesAt).toBe(out.endTime);
-      const castleIds = g
-        .pushes(PushCmd.RESOURCE_UPDATE)
-        .slice(pushesBefore)
-        .map((x) => (x.data as { castleId: number }).castleId);
-      expect(castleIds).toEqual(expect.arrayContaining([p.cityId, second]));
-      expect(g.pushes(PushCmd.RESEARCH_COMPLETE_UPDATE).at(-1)?.data).toMatchObject({ castleId: second });
-    }));
-
-  it("gives the researching city's mayor experience", () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await withAcademy(g, p);
-      const mayor = await addHero(g, p, 5);
-      await heroes.appointMayor(g, p.id, mayor);
-      const exp = (await getHero(g, mayor)).experience;
-      const out = await research.startResearch(g, p.id, p.cityId, AGRICULTURE);
-      await g.runDue(out.endTime);
-      expect((await getHero(g, mayor)).experience).toBeCloseTo(exp + researchHeroExp(AGRICULTURE, 1, 1), 6);
-      expect(g.pushes(PushCmd.HERO_UPDATE).at(-1)?.data).toMatchObject({ castleId: p.cityId, hero: { id: mayor }, updateType: 2 });
-    }));
-
-  it("Hero Enhancement raises the heroes' gear", () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await withAcademy(g, p);
-      const hero = await addHero(g, p, 5);
-      const before = await getHero(g, hero);
-      const out = await research.startResearch(g, p.id, p.cityId, HERO_ENHANCEMENT);
-      await g.runDue(out.endTime);
-      const after = await getHero(g, hero);
-      expect(after).not.toEqual(before);
-      expect(g.pushes(PushCmd.HERO_UPDATE).some((x) => (x.data as { hero: { id: number } }).hero.id === hero)).toBe(true);
-    }));
-
-  it('a research that is not due yet is left alone and rescheduled', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await withAcademy(g, p);
-      const out = await research.startResearch(g, p.id, p.cityId, AGRICULTURE);
-      g.unschedule(`research:${p.id}:${AGRICULTURE}`);
-      await research.completeResearch(g, p.id, AGRICULTURE);
-      expect(await researchOf(g, p, AGRICULTURE)).toMatchObject({ level: 0, endTime: out.endTime });
-      expect(g.events('research')).toMatchObject([{ dueAt: out.endTime, cityId: p.cityId, payload: { techId: AGRICULTURE } }]);
-    }));
-
-  it('does nothing for a tech not being researched', () =>
-    game(async (g) => {
-      const p = await createTestPlayer(g);
-      await setResearch(g, p, AGRICULTURE, 2);
-      await research.completeResearch(g, p.id, AGRICULTURE);
-      await research.completeResearch(g, p.id, LUMBERING);
-      expect((await reloadPlayer(g, p)).research).toEqual({ [AGRICULTURE]: { level: 2 } });
-      expect(g.pushes(PushCmd.RESEARCH_COMPLETE_UPDATE)).toEqual([]);
     }));
 });

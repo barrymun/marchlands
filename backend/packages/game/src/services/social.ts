@@ -3,10 +3,11 @@
 import { and, desc, eq, gt, or, sql } from 'drizzle-orm';
 import { GameError, msg } from '@marchlands/core';
 import { chatMessages, playerRelations, players } from '@marchlands/db';
-import type { Ctx } from '../context.ts';
-import { escapeHtml } from '../helpers.ts';
-import { findPlayerByName, getPlayer } from '../repo.ts';
+import { type Ctx } from '#/context.ts';
+import { escapeHtml } from '#/helpers.ts';
+import { findPlayerByName, getPlayer } from '#/repo.ts';
 import { PushCmd } from '@marchlands/contracts';
+import { isBlocked } from '#/engine/social.ts';
 
 // ---------------------------------------------------------------------------------------------
 // Friends & blocks
@@ -34,15 +35,6 @@ export async function removeRelation(ctx: Ctx, playerId: number, otherId: number
   await ctx.tx
     .delete(playerRelations)
     .where(and(eq(playerRelations.playerId, playerId), eq(playerRelations.otherPlayerId, otherId), eq(playerRelations.kind, kind)));
-}
-
-/** friend.isBlockMailPlayer: does `receiver` block `sender`? */
-export async function isBlocked(ctx: Ctx, receiverId: number, senderId: number): Promise<boolean> {
-  const [row] = await ctx.tx
-    .select({ k: playerRelations.kind })
-    .from(playerRelations)
-    .where(and(eq(playerRelations.playerId, receiverId), eq(playerRelations.otherPlayerId, senderId), eq(playerRelations.kind, 'block')));
-  return !!row;
 }
 
 // ---------------------------------------------------------------------------------------------

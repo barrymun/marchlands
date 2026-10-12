@@ -1,11 +1,11 @@
 // World map: states, procedural generation, NPC (barbarian) cities and valley garrisons.
 // Port of Map.cpp / NpcCity.cpp / Valley.cpp.
 
-import { BALANCE, scaled } from './balance.ts';
-import { BASIC_RESOURCES, RESOURCE_KEYS, TileType, TROOP_ID_BY_KEY, VALLEY_TYPES } from './constants.ts';
-import { randInt, seededRng, type Rng } from './rng.ts';
-import { unitExp } from './troops.ts';
-import type { FortCounts, ResourceSet, TroopCounts } from './types.ts';
+import { BALANCE, scaled } from '#/balance.ts';
+import { BASIC_RESOURCES, Relation, RESOURCE_KEYS, TileType, TROOP_ID_BY_KEY, VALLEY_TYPES } from '#/constants.ts';
+import { randInt, seededRng, type Rng } from '#/rng.ts';
+import { unitExp } from '#/troops.ts';
+import { BuildingStatus, type BuildingState, type FortCounts, type ResourceSet, type TroopCounts } from '#/types.ts';
 
 export function stateOf(tileId: number, mapSize: number = BALANCE.mapSize): number {
   const x = tileId % mapSize;
@@ -216,3 +216,27 @@ export function valleyGarrison(level: number, rng: Rng): TroopCounts {
   for (const k of candidates) troops[k] = Math.ceil(total / unitExp(TROOP_ID_BY_KEY[k]));
   return troops;
 }
+
+/** NPC building layout (orig NpcCity::SetupBuildings) as real buildings of a captured city. */
+export function npcCityBuildings(level: number): BuildingState[] {
+  const b = (positionId: number, typeId: number): BuildingState => ({ positionId, typeId, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 });
+  const out = [b(-1, 31), b(-2, 32)];
+  [25, 22, 28, 27, 23, 30, 20, 21, 29, 24, 26, 2].forEach((t, i) => out.push(b(i, t)));
+  for (let p = 12; p <= 31; p++) out.push(b(p, 1));
+  const fields = Math.min(37, 10 + 3 * (level - 1));
+  for (let i = 0; i < fields; i++) out.push(b(1001 + i, 7));
+  out.push(b(1001 + fields, 4), b(1002 + fields, 5), b(1003 + fields, 6));
+  return out;
+}
+
+/** Interaction permissions by relation (orig GetMapCastle intended mapping). */
+export function relationPermissions(relation: number) {
+  if (relation === Relation.SELF || relation === Relation.ALLY || relation === Relation.ALLIANCE) {
+    return { canLoot: false, canOccupy: false, canScout: false, canSend: true, canTrans: true };
+  }
+  if (relation === Relation.ENEMY) return { canLoot: true, canOccupy: true, canScout: true, canSend: true, canTrans: true };
+  return { canLoot: true, canOccupy: true, canScout: true, canSend: false, canTrans: false };
+}
+
+/** The widest map view (tiles per side) a client may ask for. */
+export const MAP_VIEW_MAX = 21;

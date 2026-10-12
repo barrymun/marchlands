@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hashPassword, verifyPassword } from '../../src/auth/password.ts';
+import { hashPassword, verifyPassword } from '#/auth/password.ts';
 
 describe(hashPassword.name, () => {
   it('stores scrypt$N$r$p$salt$hash with a fresh salt each time', async () => {

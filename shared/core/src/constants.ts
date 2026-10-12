@@ -188,6 +188,20 @@ export const MailType = {
 } as const;
 export type MailType = (typeof MailType)[keyof typeof MailType];
 
+/** Report tabs (reports.type_id). */
+export const ReportType = {
+  TRADE: 0,
+  ARMY: 1,
+  OTHER: 2,
+} as const;
+export type ReportType = (typeof ReportType)[keyof typeof ReportType];
+
+export const MarketSide = {
+  BUY: 0,
+  SELL: 1,
+} as const;
+export type MarketSide = (typeof MarketSide)[keyof typeof MarketSide];
+
 export const RESOURCE_KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 export type ResourceKey = (typeof RESOURCE_KEYS)[number];
 

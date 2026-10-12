@@ -1,88 +1,49 @@
 // hero.* — tavern, hiring, mayor, attribute points, levels, loyalty, items, captives.
 
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import {
-  BuildingType,
+  BALANCE,
   buildingLevel,
+  BuildingType,
   createRandomHero,
   experienceItemGain,
-  heroItemGoldPrice,
-  itemGoldPrice,
-  heroBuffAmount,
   GameError,
-  HERO_ATTRIBUTE_ITEMS,
-  heroAwardCost,
-  heroHireCost,
-  tavernRefreshCost,
-  heroPointCap,
-  HeroStatus,
-  levelUpAll,
-  heroAtMaxLevel,
-  heroBuffBase,
-  BALANCE,
   GEAR_STATS,
   gearStarCost,
   gearStarLimit,
-  isGearPiece,
-  lordGear,
-  syncHeroGear,
   type GearStat,
-  type GeneratedHero,
-  HeroBuffId,
+  HERO_ATTRIBUTE_ITEMS,
+  heroAtMaxLevel,
+  heroAttributeBuffEnd,
+  heroAwardCost,
+  heroBuffAmount,
+  heroBuffBase,
   heroBuffDesc,
-  innOffers,
+  HeroBuffId,
+  heroHireCost,
+  heroItemGoldPrice,
+  heroPointCap,
+  HeroStatus,
+  isGearPiece,
+  itemGoldPrice,
+  ItemId,
+  levelUpAll,
+  lordGear,
+  loyaltyAfterMedal,
   msg,
   ref,
+  tavernRefill,
+  tavernRefreshCost,
   TechType,
-  loyaltyAfterMedal,
-  heroAttributeBuffEnd,
-  ItemId,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
-import { openOwnCity, viewCity, type CityBundle } from '../city.ts';
-import type { Ctx } from '../context.ts';
-import { heroBean } from '../dto.ts';
-import { addItem, assertClean, cleanName, consumeItem, itemCount, pushResources, spendGold, spendResources } from '../helpers.ts';
-import { findCity, gearOfHero, getHero, getPlayer, heroesOfCity, saveCity, saveHero, savePlayer, type HeroRow } from '../repo.ts';
+import { openOwnCity, viewCity, type CityBundle } from '#/city.ts';
+import { type Ctx } from '#/context.ts';
+import { heroBean } from '#/dto.ts';
+import { addItem, assertClean, cleanName, consumeItem, itemCount, pushResources, spendGold, spendResources } from '#/helpers.ts';
+import { findCity, getHero, getPlayer, heroesOfCity, saveCity, saveHero, savePlayer, type HeroRow } from '#/repo.ts';
 import { PushCmd } from '@marchlands/contracts';
-
-export const pushHero = (ctx: Ctx, playerId: number, h: HeroRow, updateType: 0 | 1 | 2) =>
-  ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: h.cityId, hero: heroBean(h), updateType });
-
-/** Hired heroes (incl. captives held) a city has room for: Feasting Hall level. */
-export const heroSlots = (b: CityBundle) => buildingLevel(b.city.buildings, BuildingType.FEASTING_HALL);
-
-export function heroValues(g: GeneratedHero) {
-  return {
-    name: g.name,
-    logoUrl: g.logoUrl,
-    level: g.level,
-    experience: g.experience,
-    upgradeExp: g.upgradeExp,
-    loyalty: g.loyalty,
-    basePower: g.basePower,
-    baseManagement: g.baseManagement,
-    baseStratagem: g.baseStratagem,
-    power: g.power,
-    management: g.management,
-    stratagem: g.stratagem,
-    remainPoint: g.remainPoint,
-  };
-}
-
-export async function clearTavern(ctx: Ctx, cityId: number) {
-  await ctx.tx.delete(heroes).where(and(eq(heroes.cityId, cityId), eq(heroes.inTavern, true)));
-}
-
-/**
- * The Inn's offers at `innLevel`, given the heroes it offers now: the ones it keeps, the ones it drops
- * (it shrank), how many new heroes it adds, and the Inn level they are generated at (capped like the offers).
- */
-export function tavernRefill<T>(current: readonly T[], innLevel: number) {
-  const offers = innOffers(innLevel);
-  const keep = current.slice(0, offers);
-  return { keep, drop: current.slice(offers), add: offers - keep.length, heroInnLevel: offers };
-}
+import { closeMayorCity, pushHero, openMayorCity, resyncHeroGear, clearTavern, heroValues, heroSlots } from '#/engine/heroes.ts';
 
 async function fillTavern(ctx: Ctx, b: CityBundle, regenerate: boolean) {
   if (regenerate) await clearTavern(ctx, b.city.id);
@@ -262,21 +223,6 @@ export async function resetPoints(ctx: Ctx, playerId: number, heroId: number) {
   return heroBean(h);
 }
 
-/**
- * A mayor's politics drives the city's production, so before changing a mayor's stats the city is
- * settled at the old rate (openOwnCity), and afterwards the new rates are pushed and saved.
- */
-async function openMayorCity(ctx: Ctx, h: HeroRow) {
-  if (h.status !== HeroStatus.MAYOR || h.playerId == null) return null;
-  return openOwnCity(ctx, h.playerId, h.cityId);
-}
-async function closeMayorCity(ctx: Ctx, b: CityBundle | null, h: HeroRow) {
-  if (!b) return;
-  b.heroes = b.heroes.map((x) => (x.id === h.id ? h : x));
-  pushResources(ctx, b);
-  await saveCity(ctx, b.city);
-}
-
 /** hero.addPoint: new absolute totals, never lower than current. */
 export async function assignPoints(ctx: Ctx, playerId: number, heroId: number, v: { power: number; management: number; stratagem: number }) {
   const h = await ownHero(ctx, playerId, heroId);
@@ -318,26 +264,6 @@ export async function setHeroGearStat(ctx: Ctx, playerId: number, heroId: number
   pushHero(ctx, playerId, h, 2);
   await closeMayorCity(ctx, city, h);
   return heroBean(h);
-}
-
-/**
- * Re-apply the lord's gear to every hero they own (after Hero Enhancement research or a new star).
- * Mayors' cities are settled at the old rates first, as with any change to a mayor's attributes.
- */
-export async function resyncHeroGear(ctx: Ctx, playerId: number) {
-  const owned = await ctx.tx
-    .select()
-    .from(heroes)
-    .where(and(eq(heroes.playerId, playerId), eq(heroes.inTavern, false)))
-    .for('update');
-  for (const h of owned) {
-    const probe = { ...h };
-    if (!syncHeroGear(probe, await gearOfHero(ctx, h))) continue;
-    const city = await openMayorCity(ctx, h);
-    await saveHero(ctx, h);
-    pushHero(ctx, playerId, h, 2);
-    await closeMayorCity(ctx, city, h);
-  }
 }
 
 /** (marchlands) The lord's gear: Hero Enhancement level and stars per piece. */
@@ -422,21 +348,6 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
   pushHero(ctx, playerId, h, 2);
   await closeMayorCity(ctx, city, h);
   return heroBean(h);
-}
-
-export async function expireHeroBuff(ctx: Ctx, heroId: number, attr: string) {
-  const h = await getHero(ctx, heroId, { lock: true }).catch(() => null);
-  if (!h) return;
-  const b = h.buffs.find((x) => x.id === attr);
-  if (!b || b.endTime > ctx.now) return;
-  const city = attr === HeroBuffId.MANAGEMENT ? await openMayorCity(ctx, h) : null;
-  h.buffs = h.buffs.filter((x) => x.id !== attr);
-  if (attr === HeroBuffId.POWER) h.powerBuffAdded = 0;
-  if (attr === HeroBuffId.MANAGEMENT) h.managementBuffAdded = 0;
-  if (attr === HeroBuffId.STRATAGEM) h.stratagemBuffAdded = 0;
-  await saveHero(ctx, h);
-  if (h.playerId) pushHero(ctx, h.playerId, h, 2);
-  await closeMayorCity(ctx, city, h);
 }
 
 /** hero.changeName */

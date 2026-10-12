@@ -1,9 +1,9 @@
 import { setGameSpeed } from '@marchlands/core';
 import { connect } from '@marchlands/db';
 import { startStatsFlusher } from '@marchlands/game';
-import { buildApp } from './app.ts';
-import { loadConfig } from './config.ts';
-import { PushGateway } from './ws/gateway.ts';
+import { buildApp } from '#/app.ts';
+import { loadConfig } from '#/config.ts';
+import { PushGateway } from '#/ws/gateway.ts';
 
 const config = loadConfig();
 setGameSpeed(Number(process.env.GAME_SPEED ?? 1));

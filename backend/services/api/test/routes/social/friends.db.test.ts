@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { PlayerRelationLists } from '@marchlands/contracts';
-import { apiTest } from '../../support/api.ts';
-import { accountWithoutPlayer, expectInvalid, expectNeedsPlayer, expectNeedsToken, type RouteCall } from '../../support/guards.ts';
+import { apiTest } from '#test/support/api.ts';
+import { accountWithoutPlayer, expectInvalid, expectNeedsPlayer, expectNeedsToken, type RouteCall } from '#test/support/guards.ts';
 
 const ROUTES: RouteCall[] = [
   { method: 'GET', url: 'friends' },

@@ -3,26 +3,15 @@ import { and, eq, sql } from 'drizzle-orm';
 import { BALANCE, BuildingType, HOUR, msg, TileType, tileXY, type ReportBody } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
 import { reports as reportRows } from '@marchlands/db';
-import {
-  cityStats,
-  getCity,
-  getPlayer,
-  heroes,
-  loadBundle,
-  openCity,
-  openOwnCity,
-  saveCity,
-  settle,
-  settleAndReport,
-  troopBean,
-  viewCity,
-  viewOwnCity,
-} from '../src/index.ts';
-import { expectRefused } from './support/expect.ts';
-import { addHero, createTestPlayer, reloadCity, setBuildings, setCityStats, setResources, type TestPlayer } from './support/factories.ts';
-import { game, T0, type TestGame } from './support/game.ts';
-import { holdValley, insertArmy, withStarvationDesertion } from './support/city-data.ts';
-import { lockedTables, recordSql, writes } from './support/sql-log.ts';
+import { cityStats, loadBundle, openCity, openOwnCity, settle, settleAndReport, viewCity, viewOwnCity } from '#/city.ts';
+import { getCity, getPlayer, saveCity } from '#/repo.ts';
+import { heroes } from '#/index.ts';
+import { troopBean } from '#/dto.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { addHero, createTestPlayer, reloadCity, setBuildings, setCityStats, setResources, type TestPlayer } from '#test/support/factories.ts';
+import { game, T0, type TestGame } from '#test/support/game.ts';
+import { holdValley, insertArmy, withStarvationDesertion } from '#test/support/city-data.ts';
+import { lockedTables, recordSql, writes } from '#test/support/sql-log.ts';
 
 const START = BALANCE.startingResources;
 const BASE = BALANCE.baseProductionPerHour;

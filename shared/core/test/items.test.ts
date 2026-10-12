@@ -27,7 +27,7 @@ import {
   medalId,
   ItemId,
   SpeedupId,
-} from '../src/index.ts';
+} from '#/index.ts';
 
 const items = BALANCE.items;
 

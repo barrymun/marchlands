@@ -47,8 +47,6 @@ export const push = new PushClient({
   getToken: tokenStore.get,
 });
 
-export { ApiError };
-
 /** What went wrong, in the player's language: the server's message, or a generic one when none came back. */
 export function errorMessage(err: unknown): string {
   if (err instanceof ApiError) return err.error ? translateMessage(err.error) : i18n.t('common:errors.network');

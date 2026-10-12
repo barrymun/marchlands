@@ -14,7 +14,7 @@ import {
   unlockedOuterSlots,
   wallHitPoints,
   type Message,
-} from '../src/index.ts';
+} from '#/index.ts';
 
 /** building types that stand in a slot (fortifications share the ids but are built at the walls) */
 const ALL = Object.values(BuildingType).filter((t) => !isFortType(t));

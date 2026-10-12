@@ -3,12 +3,12 @@
 // CalculateResources / RecalculateCityStats, with the gaps the original left as TODO filled in
 // (tech, mayor and valley production bonuses, troop food upkeep, starvation).
 
-import { BALANCE, getGameSpeed, scaled } from './balance.ts';
-import { BASIC_RESOURCES, BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, type BasicResource, BuffId } from './constants.ts';
-import { troopConfig } from './data/index.ts';
-import type { BuffState, BuildingState, CityMisc, ResearchState, ResourceSet, TroopCounts } from './types.ts';
-import { mayorProductionBonus } from './heroes.ts';
-import { merchantBase } from './merchant.ts';
+import { BALANCE, getGameSpeed, scaled } from '#/balance.ts';
+import { BASIC_RESOURCES, BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, type BasicResource, BuffId } from '#/constants.ts';
+import { troopConfig } from '#/data/index.ts';
+import type { BuffState, BuildingState, CityMisc, ResearchState, ResourceSet, TroopCounts } from '#/types.ts';
+import { mayorProductionBonus } from '#/heroes.ts';
+import { merchantBase } from '#/merchant.ts';
 
 /** Field building that produces each basic resource. */
 export const FIELD_FOR_RESOURCE: Record<BasicResource, number> = {
@@ -420,4 +420,11 @@ export function protectedResources(buildings: BuildingState[], storePercent: Res
   const out = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
   for (const r of RESOURCE_KEYS) out[r] = r === 'gold' ? 0 : (cap * (storePercent[r] ?? 0)) / 100;
   return out;
+}
+
+/** Techs being researched in a given city. */
+export function researchesInCity(research: ResearchState, cityId: number): number[] {
+  return Object.entries(research)
+    .filter(([, r]) => r.cityId === cityId && r.endTime)
+    .map(([id]) => Number(id));
 }

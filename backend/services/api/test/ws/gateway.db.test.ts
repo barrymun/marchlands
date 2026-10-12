@@ -7,9 +7,9 @@ import { desc, sql } from 'drizzle-orm';
 import { PushCmd } from '@marchlands/contracts';
 import { pushMessages } from '@marchlands/db';
 import { PUSH_CHANNEL } from '@marchlands/game';
-import { testDb } from '../../../../packages/game/test/support/db.ts';
-import { PushGateway, type GatewayLogger, type Socketish } from '../../src/ws/gateway.ts';
-import { apiTest, type TestApi } from '../support/api.ts';
+import { testDb } from '@marchlands/db/test/support/db.ts';
+import { PushGateway, type GatewayLogger, type Socketish } from '#/ws/gateway.ts';
+import { apiTest, type TestApi } from '#test/support/api.ts';
 
 function fakeSocket() {
   const sent: unknown[] = [];

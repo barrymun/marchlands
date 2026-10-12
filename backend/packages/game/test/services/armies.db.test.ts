@@ -16,83 +16,38 @@ import {
   reliefMultiplier,
   TechType,
   TileType,
-  tileXY,
   TroopType,
 } from '@marchlands/core';
 import { PushCmd } from '@marchlands/contracts';
-import { admin, armies, getHero, getTile, interior, player, shop, type ArmyRow } from '../../src/index.ts';
-import { allies, armyRow, arrive, lastReport, NO_RESOURCES, send, tileNear, valleyNear, WAR_ZONE, warCity, warrior } from '../support/armies.ts';
-import { expectRefused } from '../support/expect.ts';
-import { addHero, cityBundle, createTestPlayer, giveItems, reloadCity, setBuildings, setCityStats, setResearch, setResources } from '../support/factories.ts';
-import { game, type TestGame } from '../support/game.ts';
+import { admin, armies, interior, player, shop } from '#/index.ts';
+import { getHero } from '#/repo.ts';
+import { allies, armyRow, arrive, lastPush, lastReport, NO_RESOURCES, send, tileNear, valleyNear, WAR_ZONE, warCity, warrior } from '#test/support/armies.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import {
+  addHero,
+  cityBundle,
+  createTestPlayer,
+  giveItems,
+  reloadCity,
+  setBuildings,
+  setCityStats,
+  setResearch,
+  setResources,
+} from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
+import { armyRef, cityPosition, homeMarchMs, tilePosition } from '#/engine/armies.ts';
 
-const lastPush = (g: TestGame, cmd: PushCmd, playerId: number) =>
-  g
-    .pushes(cmd)
-    .filter((x) => x.playerIds.includes(playerId))
-    .at(-1);
-
-describe(armies.tilePosition.name, () => {
-  it('names a city by its name, a valley or barbarian city by type and level, flat land by type', () =>
-    game(async (g) => {
-      const { p } = await warrior(g);
-      const city = await reloadCity(g, p.cityId);
-      expect(await armies.tilePosition(g, await getTile(g, city.tileId))).toEqual(armies.cityPosition(city.name, city.tileId));
-      const npc = await tileNear(g, p.cityId, TileType.NPC);
-      expect(await armies.tilePosition(g, npc)).toEqual(msg('world.position.tile', { tile: ref.tile(TileType.NPC), level: npc.level, ...tileXY(npc.id) }));
-      const valley = await valleyNear(g, p.cityId);
-      expect(await armies.tilePosition(g, valley)).toEqual(
-        msg('world.position.tile', { tile: ref.tile(valley.type), level: valley.level, ...tileXY(valley.id) }),
-      );
-      const flat = await tileNear(g, p.cityId, TileType.FLAT);
-      expect(await armies.tilePosition(g, flat)).toEqual(msg('world.position.place', { tile: ref.tile(TileType.FLAT), ...tileXY(flat.id) }));
-    }));
-});
-
-describe(armies.tileOwner.name, () => {
-  it('is the owner of the city standing there, or nobody on free land', () =>
-    game(async (g) => {
-      const { p } = await warrior(g);
-      const city = await reloadCity(g, p.cityId);
-      expect(await armies.tileOwner(g, await getTile(g, city.tileId))).toBe(p.id);
-      expect(await armies.tileOwner(g, await tileNear(g, p.cityId, TileType.NPC))).toBeNull();
-      expect(await armies.tileOwner(g, await valleyNear(g, p.cityId))).toBeNull();
-    }));
-
-  it('is the occupier of a valley', () =>
-    game(async (g) => {
-      const { p, heroId } = await warrior(g, { lightCavalry: 40_000 });
-      const valley = await valleyNear(g, p.cityId, { level: 1 });
-      const a = await send(g, p, { targetTileId: valley.id, mission: Mission.ATTACK, troops: { lightCavalry: 40_000 }, heroId });
-      await arrive(g, a.armyId);
-      expect(await armies.tileOwner(g, await getTile(g, valley.id))).toBe(p.id);
-    }));
-});
-
-describe(armies.armyMarchMs.name, () => {
-  it('is the march time of the slowest troop', () =>
-    game(async (g) => {
-      const { p } = await warrior(g);
-      const b = await cityBundle(g, p);
-      const npc = await tileNear(g, p.cityId, TileType.NPC);
-      const troops = { lightCavalry: 10, archer: 1 };
-      expect(armies.armyMarchMs(b, b.city.tileId, npc.id, troops, false)).toBe(marchTimeMs(b.city.tileId, npc.id, troops, b.player.research, b.city.buildings));
-    }));
-
-  it('a Relief Station speeds up marches between own places only', () =>
-    game(async (g) => {
-      const { p } = await warrior(g);
-      await setBuildings(g, p, [[5, BuildingType.RELIEF_STATION, 4]]);
-      const b = await cityBundle(g, p);
-      const npc = await tileNear(g, p.cityId, TileType.NPC);
-      const troops = { archer: 1 };
-      const ms = marchTimeMs(b.city.tileId, npc.id, troops, b.player.research, b.city.buildings);
-      expect(armies.armyMarchMs(b, b.city.tileId, npc.id, troops, false)).toBe(ms);
-      expect(armies.armyMarchMs(b, b.city.tileId, npc.id, troops, true)).toBe(Math.max(1000, Math.floor(ms / reliefMultiplier(b.city.buildings))));
-      // never under a second
-      expect(armies.armyMarchMs(b, b.city.tileId, b.city.tileId + 1, { scouter: 1 }, true)).toBeGreaterThanOrEqual(1000);
-    }));
-});
+/** p reinforces its ally q's city (which accepts allied troops); returns the stationed army's id. */
+async function stationAtAlly(g: TestGame) {
+  const { p, heroId } = await warrior(g);
+  const { p: q } = await warrior(g);
+  await allies(g, p, q);
+  await interior.setCityFlags(g, q.id, q.cityId, { allowAlliance: true });
+  const host = await reloadCity(g, q.cityId);
+  const bean = await send(g, p, { targetTileId: host.tileId, mission: Mission.REINFORCE, troops: { lightCavalry: 100 }, heroId });
+  await arrive(g, bean.armyId);
+  return { p, q, heroId, armyId: bean.armyId };
+}
 
 describe(armies.sendArmy.name, () => {
   it('sends an attack: troops leave the city, the hero marches, the arrival is scheduled', () =>
@@ -119,8 +74,8 @@ describe(armies.sendArmy.name, () => {
         startTime: g.now,
         reachTime: g.now + ms,
         restTime: 0,
-        startPosName: armies.cityPosition(before.city.name, before.city.tileId),
-        targetPosName: await armies.tilePosition(g, npc),
+        startPosName: cityPosition(before.city.name, before.city.tileId),
+        targetPosName: await tilePosition(g, npc),
       });
       const row = (await armyRow(g, bean.armyId))!;
       expect(row).toMatchObject({ troops, resources: NO_RESOURCES, targetPlayerId: null, heroId });
@@ -129,7 +84,7 @@ describe(armies.sendArmy.name, () => {
       expect(city.troops.scouter).toBe(before.city.troops.scouter! - 10);
       expect(hero.status).toBe(HeroStatus.ATTACK);
       expect(g.events('army')).toEqual([
-        expect.objectContaining({ dueAt: g.now + ms, playerId: p.id, cityId: p.cityId, refKey: armies.armyRef(bean.armyId), payload: { armyId: bean.armyId } }),
+        expect.objectContaining({ dueAt: g.now + ms, playerId: p.id, cityId: p.cityId, refKey: armyRef(bean.armyId), payload: { armyId: bean.armyId } }),
       ]);
       expect(lastPush(g, PushCmd.TROOP_UPDATE, p.id)?.data).toMatchObject({ castleId: p.cityId });
       expect(lastPush(g, PushCmd.SELF_ARMIES_UPDATE, p.id)?.data).toMatchObject({ armys: [expect.objectContaining({ armyId: bean.armyId })] });
@@ -427,72 +382,6 @@ describe(armies.sendArmy.name, () => {
   });
 });
 
-describe(armies.notifyArmyParties.name, () => {
-  it('pushes fresh army lists to the sender and the target player', () =>
-    game(async (g) => {
-      const { p, heroId } = await warrior(g);
-      const { p: q } = await warrior(g);
-      const target = await reloadCity(g, q.cityId);
-      const bean = await send(g, p, { targetTileId: target.tileId, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId });
-      g._pushes.length = 0;
-      await armies.notifyArmyParties(g, { playerId: p.id, targetPlayerId: q.id });
-      for (const cmd of [PushCmd.SELF_ARMIES_UPDATE, PushCmd.FRIEND_ARMIES_UPDATE, PushCmd.ENEMY_ARMIES_UPDATE]) {
-        expect(g.pushes(cmd).map((x) => x.playerIds)).toEqual([[p.id], [q.id]]);
-      }
-      expect(lastPush(g, PushCmd.SELF_ARMIES_UPDATE, p.id)?.data).toEqual({ armys: [expect.objectContaining({ armyId: bean.armyId })] });
-      expect(lastPush(g, PushCmd.ENEMY_ARMIES_UPDATE, q.id)?.data).toEqual({ armys: [expect.objectContaining({ armyId: bean.armyId })] });
-    }));
-
-  it('pushes once when there is no target player', () =>
-    game(async (g) => {
-      const { p } = await warrior(g);
-      await armies.notifyArmyParties(g, { playerId: p.id, targetPlayerId: null });
-      await armies.notifyArmyParties(g, { playerId: p.id, targetPlayerId: p.id });
-      expect(g.pushes(PushCmd.SELF_ARMIES_UPDATE)).toHaveLength(2);
-    }));
-});
-
-describe(armies.sendBack.name, () => {
-  it('turns the army around towards home, its hero returning', () =>
-    game(async (g) => {
-      const { p, heroId } = await warrior(g);
-      const npc = await tileNear(g, p.cityId, TileType.NPC);
-      const bean = await send(g, p, { targetTileId: npc.id, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId, restTime: 60 });
-      g.advance(5000);
-      const a = (await armyRow(g, bean.armyId)) as ArmyRow;
-      await armies.sendBack(g, a, 7000);
-      expect(await armyRow(g, bean.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, startTime: g.now, reachTime: g.now + 7000, restTime: 0 });
-      expect((await getHero(g, heroId)).status).toBe(HeroStatus.RETURN);
-      expect(g.events('army')).toEqual([expect.objectContaining({ dueAt: g.now + 7000, refKey: armies.armyRef(bean.armyId) })]);
-      // never under a second
-      await armies.sendBack(g, a, 0);
-      expect((await armyRow(g, bean.armyId))!.reachTime).toBe(g.now + 1000);
-    }));
-});
-
-describe(armies.homeMarchMs.name, () => {
-  it('is the march from a tile back to the home city', () =>
-    game(async (g) => {
-      const { p, heroId } = await warrior(g);
-      await setResearch(g, p, TechType.HORSEBACK_RIDING, 3);
-      await setBuildings(g, p, [[6, BuildingType.ACADEMY, 5]]);
-      const npc = await tileNear(g, p.cityId, TileType.NPC);
-      const bean = await send(g, p, { targetTileId: npc.id, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId });
-      const a = (await armyRow(g, bean.armyId))!;
-      const b = await cityBundle(g, p);
-      expect(await armies.homeMarchMs(g, a, npc.id)).toBe(marchTimeMs(npc.id, b.city.tileId, a.troops, b.player.research, b.city.buildings));
-    }));
-
-  it('is a second when the home city is gone', () =>
-    game(async (g) => {
-      const { p, heroId } = await warrior(g);
-      const npc = await tileNear(g, p.cityId, TileType.NPC);
-      const bean = await send(g, p, { targetTileId: npc.id, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId });
-      const a = (await armyRow(g, bean.armyId))!;
-      expect(await armies.homeMarchMs(g, { ...a, cityId: 2_000_000_000 }, npc.id)).toBe(1000);
-    }));
-});
-
 describe(armies.recallArmy.name, () => {
   it('a marching army walks back the way it came, and gets home', () =>
     game(async (g) => {
@@ -535,7 +424,7 @@ describe(armies.recallArmy.name, () => {
       expect(camp.direction).toBe(ArmyDirection.STAY);
       g.advance(3_600_000);
       const back = await armies.recallArmy(g, p.id, r.armyId);
-      expect(back.reachTime - g.now).toBe(await armies.homeMarchMs(g, camp, valley.id));
+      expect(back.reachTime - g.now).toBe(await homeMarchMs(g, camp, valley.id));
     }));
 
   it('refuses armies that are not ours, unknown, or already coming back', () =>
@@ -551,18 +440,6 @@ describe(armies.recallArmy.name, () => {
     }));
 });
 
-/** p reinforces its ally q's city (which accepts allied troops); returns the stationed army's id. */
-async function stationAtAlly(g: TestGame) {
-  const { p, heroId } = await warrior(g);
-  const { p: q } = await warrior(g);
-  await allies(g, p, q);
-  await interior.setCityFlags(g, q.id, q.cityId, { allowAlliance: true });
-  const host = await reloadCity(g, q.cityId);
-  const bean = await send(g, p, { targetTileId: host.tileId, mission: Mission.REINFORCE, troops: { lightCavalry: 100 }, heroId });
-  await arrive(g, bean.armyId);
-  return { p, q, heroId, armyId: bean.armyId };
-}
-
 describe(armies.dismissGuest.name, () => {
   it('the host sends allied troops stationed in the city home', () =>
     game(async (g) => {
@@ -572,7 +449,7 @@ describe(armies.dismissGuest.name, () => {
       await armies.dismissGuest(g, q.id, armyId);
       expect(await armyRow(g, armyId)).toMatchObject({
         direction: ArmyDirection.BACKWARD,
-        reachTime: g.now + (await armies.homeMarchMs(g, camp, camp.targetTileId)),
+        reachTime: g.now + (await homeMarchMs(g, camp, camp.targetTileId)),
       });
       expect((await getHero(g, heroId)).status).toBe(HeroStatus.RETURN);
       await arrive(g, armyId);
@@ -647,23 +524,36 @@ describe(armies.marchEstimate.name, () => {
       const npc = await tileNear(g, p.cityId, TileType.NPC);
       const troops = { archer: 100, carriage: 2 };
       expect(await armies.marchEstimate(g, p.id, p.cityId, npc.id, troops)).toEqual({
-        marchTime: armies.armyMarchMs(b, b.city.tileId, npc.id, troops, false),
+        marchTime: marchTimeMs(b.city.tileId, npc.id, troops, b.player.research, b.city.buildings),
         load: armyLoad(troops, b.player.research),
       });
     }));
 
-  it('counts the Relief Station towards own places', () =>
+  it('is the march time of the slowest troop', () =>
+    game(async (g) => {
+      const { p } = await warrior(g);
+      const b = await cityBundle(g, p);
+      const npc = await tileNear(g, p.cityId, TileType.NPC);
+      const troops = { lightCavalry: 10, archer: 1 };
+      expect((await armies.marchEstimate(g, p.id, p.cityId, npc.id, troops)).marchTime).toBe(
+        marchTimeMs(b.city.tileId, npc.id, troops, b.player.research, b.city.buildings),
+      );
+    }));
+
+  it('counts the Relief Station towards own places only, never under a second', () =>
     game(async (g) => {
       const { p, heroId } = await warrior(g, { lightCavalry: 40_000 });
       await setBuildings(g, p, [[5, BuildingType.RELIEF_STATION, 10]]);
       const valley = await valleyNear(g, p.cityId, { level: 1 });
       const troops = { archer: 1 };
       const b = await cityBundle(g, p);
-      const foreign = (await armies.marchEstimate(g, p.id, p.cityId, valley.id, troops)).marchTime;
-      expect(foreign).toBe(armies.armyMarchMs(b, b.city.tileId, valley.id, troops, false));
+      const ms = marchTimeMs(b.city.tileId, valley.id, troops, b.player.research, b.city.buildings);
+      expect((await armies.marchEstimate(g, p.id, p.cityId, valley.id, troops)).marchTime).toBe(ms);
       const a = await send(g, p, { targetTileId: valley.id, mission: Mission.ATTACK, troops: { lightCavalry: 40_000 }, heroId });
       await arrive(g, a.armyId);
-      expect((await armies.marchEstimate(g, p.id, p.cityId, valley.id, troops)).marchTime).toBe(armies.armyMarchMs(b, b.city.tileId, valley.id, troops, true));
+      const own = (await armies.marchEstimate(g, p.id, p.cityId, valley.id, troops)).marchTime;
+      expect(own).toBe(Math.max(1000, Math.floor(ms / reliefMultiplier(b.city.buildings))));
+      expect(own).toBeGreaterThanOrEqual(1000);
     }));
 
   it('refuses another lord’s city and bad troops', () =>

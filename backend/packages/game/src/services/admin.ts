@@ -15,12 +15,12 @@ import {
   msg,
 } from '@marchlands/core';
 import { accounts, heroes } from '@marchlands/db';
-import { openOwnCity } from '../city.ts';
-import type { Ctx } from '../context.ts';
-import { addItem, pushCity, pushPlayerInfo } from '../helpers.ts';
-import { findPlayerByName, getPlayer, saveCity, saveHero, savePlayer } from '../repo.ts';
-import { heroValues, pushHero, resyncHeroGear } from './heroes.ts';
-import { sendSystemMail } from './mail.ts';
+import { openOwnCity } from '#/city.ts';
+import type { Ctx } from '#/context.ts';
+import { addItem, pushCity, pushPlayerInfo } from '#/helpers.ts';
+import { findPlayerByName, getPlayer, saveCity, saveHero, savePlayer } from '#/repo.ts';
+import { heroValues, pushHero, resyncHeroGear } from '#/engine/heroes.ts';
+import { sendSystemMail } from '#/engine/mail.ts';
 import { PushCmd } from '@marchlands/contracts';
 
 async function target(ctx: Ctx, name: string) {

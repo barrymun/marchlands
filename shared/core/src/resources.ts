@@ -1,4 +1,4 @@
-import { RESOURCE_KEYS, type ResourceKey } from './constants.ts';
+import { RESOURCE_KEYS, type ResourceKey } from '#/constants.ts';
 
 export type Resources = Record<ResourceKey, number>;
 

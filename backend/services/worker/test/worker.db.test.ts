@@ -12,11 +12,12 @@ import { describe, expect, it, vi, type Mock } from 'vitest';
 import { eq, sql } from 'drizzle-orm';
 import { BuffId, msg } from '@marchlands/core';
 import { pushMessages, timedEvents, type Db } from '@marchlands/db';
-import { getPlayer, runGame, savePlayer, setBuff, type Ctx } from '@marchlands/game';
-import { MAX_ATTEMPTS, processOne, type Log } from '../src/worker.ts';
-import { testDb } from '../../../packages/game/test/support/db.ts';
-import { createTestPlayer, type TestPlayer } from '../../../packages/game/test/support/factories.ts';
-import type { TestGame } from '../../../packages/game/test/support/game.ts';
+import { getPlayer, savePlayer, setBuff } from '@marchlands/game/testing';
+import { runGame, type Ctx } from '@marchlands/game';
+import { MAX_ATTEMPTS, processOne, type Log } from '#/worker.ts';
+import { testDb } from '@marchlands/db/test/support/db.ts';
+import { createTestPlayer, type TestPlayer } from '@marchlands/game/test/support/factories.ts';
+import type { TestGame } from '@marchlands/game/test/support/game.ts';
 
 const ROLLBACK = Symbol('rollback');
 

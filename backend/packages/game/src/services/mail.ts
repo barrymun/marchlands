@@ -1,43 +1,14 @@
 // mail.* — inbox (1), system (2) and sent (3) folders. Each participant owns a copy.
 
 import { and, count, desc, eq, inArray } from 'drizzle-orm';
-import { GameError, msg } from '@marchlands/core';
+import { GameError, MailType, msg } from '@marchlands/core';
 import { mails } from '@marchlands/db';
-import type { Ctx } from '../context.ts';
-import { escapeHtml } from '../helpers.ts';
-import { findPlayerByName, getPlayer } from '../repo.ts';
-import { isBlocked } from './social.ts';
-import { PushCmd } from '@marchlands/contracts';
-
-export const MailFolder = { INBOX: 1, SYSTEM: 2, SENT: 3 } as const;
-
-export async function mailCounts(ctx: Ctx, playerId: number) {
-  const rows = await ctx.tx
-    .select({ type: mails.type, n: count() })
-    .from(mails)
-    .where(and(eq(mails.playerId, playerId), eq(mails.readAt, 0)))
-    .groupBy(mails.type);
-  const n = (t: number) => Number(rows.find((r) => r.type === t)?.n ?? 0);
-  return { count: n(1) + n(2), count_inbox: n(1), count_system: n(2) };
-}
-
-export async function pushMailCounts(ctx: Ctx, playerId: number) {
-  ctx.push(playerId, PushCmd.NEW_MAIL, await mailCounts(ctx, playerId));
-}
-
-/** System mail (or mail on behalf of a lord, e.g. alliance circulars). */
-export async function sendSystemMail(ctx: Ctx, toId: number, title: string, content: string, from?: { fromId: number; fromName: string }) {
-  await ctx.tx.insert(mails).values({
-    playerId: toId,
-    type: from ? MailFolder.INBOX : MailFolder.SYSTEM,
-    otherPlayerId: from?.fromId ?? null,
-    otherPlayerName: from?.fromName ?? '', // system mail: no sender (the client says it came from the game)
-    title: title.slice(0, 100),
-    content: content.slice(0, 5000),
-    sentAt: ctx.now,
-  });
-  await pushMailCounts(ctx, toId);
-}
+import { type Ctx } from '#/context.ts';
+import { escapeHtml } from '#/helpers.ts';
+import { findPlayerByName, getPlayer } from '#/repo.ts';
+import { isBlocked } from '#/engine/social.ts';
+import { pushMailCounts } from '#/engine/mail.ts';
+export { mailCounts } from '#/engine/mail.ts';
 
 /** mail.sendMail */
 export async function sendMail(ctx: Ctx, playerId: number, toName: string, rawTitle: string, rawContent: string) {
@@ -51,12 +22,12 @@ export async function sendMail(ctx: Ctx, playerId: number, toName: string, rawTi
   if (!(await isBlocked(ctx, target.id, sender.id))) {
     await ctx.tx
       .insert(mails)
-      .values({ playerId: target.id, type: MailFolder.INBOX, otherPlayerId: sender.id, otherPlayerName: sender.name, title, content, sentAt: ctx.now });
+      .values({ playerId: target.id, type: MailType.INBOX, otherPlayerId: sender.id, otherPlayerName: sender.name, title, content, sentAt: ctx.now });
     await pushMailCounts(ctx, target.id);
   }
   await ctx.tx.insert(mails).values({
     playerId,
-    type: MailFolder.SENT,
+    type: MailType.SENT,
     otherPlayerId: target.id,
     otherPlayerName: target.name,
     title,
@@ -70,8 +41,8 @@ const bean = (m: typeof mails.$inferSelect, me: { id: number; name: string }) =>
   mailid: m.id,
   type_id: m.type,
   title: m.title,
-  sender: m.type === MailFolder.SENT ? me.name : m.otherPlayerName || null,
-  receiver: m.type === MailFolder.SENT ? m.otherPlayerName : me.name,
+  sender: m.type === MailType.SENT ? me.name : m.otherPlayerName || null,
+  receiver: m.type === MailType.SENT ? m.otherPlayerName : me.name,
   playerId: m.otherPlayerId,
   receiveTime: m.sentAt,
   isRead: m.readAt > 0,

@@ -3,8 +3,8 @@
 // types (`jsonb().$type<...>()`), the API contract and the client all use one definition.
 
 import { z } from 'zod';
-import { MessageSchema } from './messages/schema.ts';
-import { BUFF_IDS, FORT_KEY_LIST, HERO_BUFF_IDS, RESOURCE_KEYS, TROOP_KEY_LIST, type FortKey, type TroopKey } from './constants.ts';
+import { MessageSchema } from '#/messages/schema.ts';
+import { BUFF_IDS, FORT_KEY_LIST, HERO_BUFF_IDS, RESOURCE_KEYS, TROOP_KEY_LIST, type FortKey, type TroopKey } from '#/constants.ts';
 
 const count = z.number().nonnegative();
 

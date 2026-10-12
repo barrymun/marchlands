@@ -1,10 +1,9 @@
-// rank.* — rankings are recomputed by the worker (refreshRankings) into cached columns; the
+// rank.* — rankings are recomputed by the worker (engine/rankings.ts) into cached columns; the
 // queries below page over them with optional case-insensitive name search.
 
 import { sql } from 'drizzle-orm';
 import { GameError, msg } from '@marchlands/core';
-import type { Ctx } from '../context.ts';
-import { refreshAllianceStats } from './alliance.ts';
+import { type Ctx } from '#/context.ts';
 
 function paging(pageNo: number, pageSize: number) {
   if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new GameError(msg('common.invalidData'), -99);
@@ -40,19 +39,6 @@ type AllianceRankRow = Paged & {
 };
 type HeroRankRow = Paged & { id: number; name: string; level: number; power: number; management: number; stratagem: number; kind: string };
 type CastleRankRow = Paged & { id: number; name: string; population: number; kind: string; alliance: string | null; level: number };
-
-/** Worker job: player population/prestige ranks and alliance aggregates. */
-export async function refreshRankings(ctx: Ctx) {
-  await ctx.tx.execute(sql`
-    update players p set population = coalesce(s.pop, 0)
-    from (select player_id, sum(population)::int pop from cities group by player_id) s
-    where s.player_id = p.id and p.population is distinct from coalesce(s.pop, 0)`);
-  await ctx.tx.execute(sql`
-    update players p set prestige_rank = r.pr, honor_rank = r.hr
-    from (select id, row_number() over (order by prestige desc, id) pr, row_number() over (order by honor desc, id) hr from players) r
-    where r.id = p.id and (p.prestige_rank <> r.pr or p.honor_rank <> r.hr)`);
-  await refreshAllianceStats(ctx);
-}
 
 const PLAYER_SORT: Record<number, string> = {
   1: 'title desc, prestige desc',

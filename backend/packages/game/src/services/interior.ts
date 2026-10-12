@@ -17,11 +17,11 @@ import {
   ItemId,
 } from '@marchlands/core';
 import { armies, tiles } from '@marchlands/db';
-import { cityStats, openOwnCity, viewCity, viewOwnCity } from '../city.ts';
-import type { Ctx } from '../context.ts';
-import { cityBean } from '../dto.ts';
-import { activeBuff, assertClean, cleanName, pushCity, pushResources, setBuff, useItemOrGold } from '../helpers.ts';
-import { saveCity, savePlayer } from '../repo.ts';
+import { cityStats, openOwnCity, viewCity, viewOwnCity } from '#/city.ts';
+import type { Ctx } from '#/context.ts';
+import { cityBean } from '#/dto.ts';
+import { activeBuff, assertClean, cleanName, pushCity, pushResources, setBuff, useItemOrGold } from '#/helpers.ts';
+import { saveCity, savePlayer } from '#/repo.ts';
 
 export async function getCity(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewOwnCity(ctx, playerId, cityId);

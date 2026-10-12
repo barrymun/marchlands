@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { BALANCE, BuildingStatus, BuildingType } from '@marchlands/core';
-import { player } from '../../src/index.ts';
+import { initialCity } from '#/engine/player.ts';
 
-describe(player.initialCity.name, () => {
+describe(initialCity.name, () => {
   it('is a Town Hall 1 city with the starting resources, population and tax rate', () => {
     const r = BALANCE.startingResources;
-    expect(player.initialCity(7, 1234, 'Home', 5000)).toEqual({
+    expect(initialCity(7, 1234, 'Home', 5000)).toEqual({
       playerId: 7,
       tileId: 1234,
       name: 'Home',
@@ -24,8 +24,8 @@ describe(player.initialCity.name, () => {
   });
 
   it('gives each city its own buildings list', () => {
-    const a = player.initialCity(1, 1, 'A', 0);
-    const b = player.initialCity(1, 2, 'B', 0);
+    const a = initialCity(1, 1, 'A', 0);
+    const b = initialCity(1, 2, 'B', 0);
     expect(a.buildings).not.toBe(b.buildings);
   });
 });

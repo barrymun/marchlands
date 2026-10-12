@@ -4,9 +4,9 @@
 
 import type { Db } from '@marchlands/db';
 import { runGame, type Ctx } from '@marchlands/game';
-import { buildApp } from '../../src/app.ts';
-import type { ApiConfig } from '../../src/config.ts';
-import { testDb } from '../../../../packages/game/test/support/db.ts';
+import { buildApp } from '#/app.ts';
+import type { ApiConfig } from '#/config.ts';
+import { testDb } from '@marchlands/db/test/support/db.ts';
 
 export const TEST_CONFIG: ApiConfig = {
   port: 0,
@@ -20,7 +20,7 @@ export const TEST_CONFIG: ApiConfig = {
 };
 
 /** What a request answered: the HTTP status and the parsed JSON body. */
-export interface Answer<T = unknown> {
+interface Answer<T = unknown> {
   status: number;
   body: { ok: number; data?: T; error?: { code: string; params?: Record<string, unknown> }; [k: string]: unknown };
 }

@@ -3,8 +3,8 @@
 
 import { MessageSchema } from '@marchlands/core';
 import { z } from 'zod';
-import { Ms, zId, zPaging, zResources } from './common.ts';
-import { AllianceRow, CityRow, HeroRow, MarketOrderRow, MarketShipmentRow, PlayerRow, QuestProgressRow } from './rows.ts';
+import { Ms, zId, zPaging, zResources } from '#/common.ts';
+import { AllianceRow, CityRow, HeroRow, MarketOrderRow, MarketShipmentRow, PlayerRow, QuestProgressRow } from '#/rows.ts';
 
 const int = () => z.number().int();
 const ms = () => z.number().int().describe('milliseconds');

@@ -5,7 +5,13 @@
   "type": "module",
   "description": "Game services: transactional, DB-backed operations shared by the API and the worker.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts",
+    "./test/*": "./test/*"
+  },
+  "imports": {
+    "#/*": "./src/*",
+    "#test/*": "./test/*"
   },
   "dependencies": {
     "@marchlands/contracts": "*",
