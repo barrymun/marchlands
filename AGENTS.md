@@ -21,7 +21,8 @@ Run from the repo root.
 | `npm run test:db` | the backend service tests against Postgres (`*.db.test.ts`, see Backend tests). Needs the Postgres container. |
 | `npm run lint` / `npm run lint:fix` | ESLint (code quality only); `lint` also runs `npm run knip` (unused files, exports and dependencies) |
 | `npm run format` / `npm run format:check` | Prettier (all formatting) |
-| `npm run build:backend` | bundle the API, worker and migrations into `dist/backend/` (what the backend image runs; the Dockerfile runs it with `--minify`) |
+| `npm run build:backend` | bundle the API, worker and migrations into `dist/backend/`, source maps into `dist/backend-maps/` (what the backend image runs; the Dockerfile runs it with `--minify`) |
+| `npm run trace < trace.txt` | map a stack trace from the bundles back to source positions; in production run it in the container (`docs/deployment.md`, Reading a stack trace) |
 | `npm run gen:api` | regenerate the OpenAPI spec, the generated client (Hey API) and `docs/api-endpoints.md`. Run it after changing anything in `shared/contracts` or an API route. |
 | `npm run sim -- …` | battle simulations, see [docs/battle-sims](docs/battle-sims/README.md) |
 | `npm run delete-player -- <username>… [--yes]` | delete test accounts the way the game does (their valleys released, castles back to flat land); lists what it would delete until run with `--yes`. Never deletes admin accounts. |

@@ -311,13 +311,38 @@ Set by the image, not in `.env`: `NODE_ENV=production` (JSON logs) and `WORLD_MA
 
 - **Backend** (`backend/Dockerfile`, one image for `migrate`, `api` and `worker`): a build stage installs the
   dependencies and bundles each entry point with esbuild (`tools/build/backend.mjs --minify`) into
-  `dist/backend/bin/{api,worker,migrate}.mjs`. The runtime stage is plain Alpine with only the `node` binary,
-  the bundles, the SQL migrations, Swagger UI's assets and the legacy map: no TypeScript sources, no
-  `node_modules`, no npm (about 150 MB).
+  `dist/backend/bin/{api,worker,migrate}.mjs`, fully minified (function names too). The runtime stage is plain
+  Alpine with only the `node` binary, the bundles and their source maps, the SQL migrations, Swagger UI's assets
+  and the legacy map: no TypeScript sources, no `node_modules`, no npm (about 150 MB).
+- **Source maps** (`dist/backend-maps/`) are in the image but Node never loads them: running with
+  `--enable-source-maps` would cost about 45 MB per process. They are read only when you decode a stack trace
+  ([Reading a stack trace](#reading-a-stack-trace)). They have to come from the same build as the bundles:
+  esbuild names minified symbols differently on macOS and Linux, so maps from a build on your laptop don't fit
+  the server's bundles.
 - **Web** (`client/web/Dockerfile`): Vite builds the client, nginx serves it (`client/web/nginx.conf`).
 - Development and the tests run the TypeScript sources directly; only the images use the bundles. A new backend
   dependency that reads its own files at run time must be listed in `OWN_FILES` in `tools/build/backend.mjs`;
   check one with a rebuilt image (`docker compose build && docker compose up -d`, then exercise it).
+
+## Reading a stack trace
+
+Errors are logged with their stack trace (`docker compose logs api worker`), but the positions point into the
+minified bundles (`file:///app/dist/backend/bin/worker.mjs:13:17214`) and the function names are minified. The
+image's trace tool maps them back to the source, using the source maps of that same image:
+
+```bash
+docker compose logs --no-log-prefix --since 1h worker | docker compose exec -T worker node tools/build/trace.mjs
+```
+
+Or save the log lines (or a pasted stack trace) to a file first:
+`docker compose exec -T api node tools/build/trace.mjs < trace.txt`. It accepts plain stack traces and the JSON log
+lines as they are. A frame like `at Q5 (file:///app/dist/backend/bin/worker.mjs:1:2345)` becomes
+`at Q5 (backend/services/worker/src/main.ts:26:16)`; the file, line and column are the source's, and the function
+name stays minified. Run it in a container of the image that logged the error: after an update, the new image's
+maps no longer fit older log lines.
+
+For errors you want to hear about without reading logs, see the error-tracking note in
+[backlog.md](backlog.md#operations).
 
 ## Security checklist
 

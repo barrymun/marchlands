@@ -1,6 +1,6 @@
 # Single image for every backend service (api, worker, migrate). The build stage bundles each entry point with
-# esbuild (tools/build/backend.mjs); the runtime image holds only Node, the bundles and the files they read: no
-# TypeScript sources, no node_modules, no npm.
+# esbuild (tools/build/backend.mjs); the runtime image holds only Node, the bundles, their source maps and the files
+# they read: no TypeScript sources, no node_modules, no npm.
 
 FROM node:24-alpine AS build
 WORKDIR /app
@@ -39,6 +39,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV WORLD_MAP_FILE=/app/db/seed/legacy-map-800.bin.gz
 COPY --from=build /app/dist/backend dist/backend
+# source maps, never loaded at run time; read by the trace tool to decode stack traces (docs/deployment.md)
+COPY --from=build /app/dist/backend-maps dist/backend-maps
+COPY tools/build/trace.mjs tools/build/trace.mjs
 COPY db/seed db/seed
 
 USER node

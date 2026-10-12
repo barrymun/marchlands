@@ -32,7 +32,8 @@
     "gen:api": "node backend/services/api/src/openapi.ts && npm run generate -w @marchlands/api-client && npm run docs:api",
     "dev:web": "npm run dev -w @marchlands/web",
     "build:web": "npm run build -w @marchlands/web",
-    "build:backend": "node tools/build/backend.mjs"
+    "build:backend": "node tools/build/backend.mjs",
+    "trace": "node tools/build/trace.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

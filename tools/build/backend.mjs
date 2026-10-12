@@ -1,6 +1,11 @@
 // Bundles the backend's entry points (API, worker, migrations) into dist/backend/bin/*.mjs with esbuild, so the
 // production image ships those bundles and a few assets instead of the TypeScript sources and node_modules.
 // Run by backend/Dockerfile: `node tools/build/backend.mjs [--minify]`.
+//
+// Source maps go to dist/backend-maps/. The image ships them but Node never loads them (--enable-source-maps would
+// cost about 45 MB per process); tools/build/trace.mjs reads them on demand to turn a production stack trace back
+// into source positions (docs/deployment.md, Reading a stack trace). They're built with the bundles because esbuild
+// names minified symbols differently on macOS and Linux: only the image's own maps fit the image's bundles.
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -9,6 +14,7 @@ import { build } from 'esbuild';
 const root = path.resolve(import.meta.dirname, '../..');
 const out = path.join(root, 'dist/backend');
 const bin = path.join(out, 'bin');
+const maps = path.join(root, 'dist/backend-maps');
 const minify = process.argv.includes('--minify');
 
 const entryPoints = {
@@ -44,6 +50,7 @@ const ownFiles = {
 };
 
 fs.rmSync(out, { recursive: true, force: true });
+fs.rmSync(maps, { recursive: true, force: true });
 await build({
   absWorkingDir: root,
   entryPoints,
@@ -54,7 +61,9 @@ await build({
   format: 'esm',
   target: 'node24',
   minify,
-  keepNames: true,
+  // positions only: the sources are in the checkout that rebuilds the maps
+  sourcemap: 'external',
+  sourcesContent: false,
   // pg's optional native binding is required inside a try/catch
   external: ['pg-native'],
   // CommonJS dependencies call require() and read __dirname, which an ES module doesn't have
@@ -69,6 +78,9 @@ await build({
   plugins: [ownFiles],
   logLevel: 'warning',
 });
+
+fs.mkdirSync(maps, { recursive: true });
+for (const f of fs.readdirSync(bin).filter((f) => f.endsWith('.map'))) fs.renameSync(path.join(bin, f), path.join(maps, f));
 
 for (const [name, files] of Object.entries(OWN_FILES)) {
   for (const f of files) fs.cpSync(path.join(packageDir(name), f), path.join(bin, name, f), { recursive: true });
