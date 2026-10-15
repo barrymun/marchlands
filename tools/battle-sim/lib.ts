@@ -6,6 +6,9 @@ import {
   armyLoad,
   BALANCE,
   createGuardHero,
+  GEAR_PIECES,
+  type GearStat,
+  heroGearBonus,
   type HeroStats,
   injuredOf,
   type KillSource,
@@ -13,6 +16,7 @@ import {
   type ResearchState,
   resolveCombat,
   seededRng,
+  syncHeroGear,
   TechType,
   type TraceEvent,
   TROOP_ID_BY_KEY,
@@ -22,22 +26,53 @@ import {
   type TroopKey,
 } from '@marchlands/core';
 
-/** The attacking lord: research, the hero leading the army and the items running. */
+/**
+ * The attacking lord: research, the hero leading the army, the lord's hero gear and the items running. The hero's
+ * gear points come from the game's own gear rules (syncHeroGear in core), as on the server.
+ */
 export interface Lord {
   /** every research at this level */
   researchLevel: number;
-  /** hero Attack (power, including added points) */
+  /** the hero's level: its gear tier is level ÷ 10 */
+  heroLevel: number;
+  /** hero Attack (power) and Intelligence (stratagem): the hero's own points (base + assigned), without gear */
   power: number;
-  /** hero Intelligence (stratagem) */
   stratagem: number;
+  /** Hero Enhancement level (the gear pieces' level) and the stars on every piece */
+  gearLevel: number;
+  gearStars: number;
+  /** the attribute the gear boosts */
+  gearStat: GearStat;
   /** attack item (Ivory Horn / War Horn): +20% attack */
   attackItem: boolean;
   /** defense item (Ultra Corselet / Corselet): +20% defense */
   defenseItem: boolean;
 }
 
-/** barrymun on 2026-10-09: every research at 10, ATK - 70 in lol, the attack item running. */
-export const DEFAULT_LORD: Lord = { researchLevel: 10, power: 1359, stratagem: 18, attackItem: true, defenseItem: false };
+/**
+ * barrymun on 2026-10-16: every research at 10 (Hero Enhancement too), 10 stars on every gear piece, ATK - 70 in lol
+ * (level 100, Attack 169 + 1,050 gear, Intelligence 18), the attack item running.
+ */
+export const DEFAULT_LORD: Lord = {
+  researchLevel: 10,
+  heroLevel: 100,
+  power: 169,
+  stratagem: 18,
+  gearLevel: 10,
+  gearStars: 10,
+  gearStat: 'power',
+  attackItem: true,
+  defenseItem: false,
+};
+
+/** The lord's gear: every piece at `gearLevel` with `gearStars` stars. */
+export const lordGearOf = (lord: Lord) => ({
+  level: lord.gearLevel,
+  stars: Object.fromEntries(GEAR_PIECES.map((p) => [p.id, lord.gearStars])),
+});
+
+/** Gear points the lord's hero gets (on its gear attribute). */
+export const lordGearPoints = (lord: Lord) => heroGearBonus(lord.heroLevel, lordGearOf(lord));
 
 /** The attack / defense item bonus (combat.ts buffBonus). */
 const ITEM_BONUS = 0.2;
@@ -49,8 +84,10 @@ export function researchAt(level: number): ResearchState {
 }
 
 function lordHero(lord: Lord): HeroStats {
-  const h = createGuardHero(100, seededRng('lord-hero'));
-  return { ...h, power: lord.power, powerAdded: 0, powerBuffAdded: 0, stratagem: lord.stratagem, stratagemAdded: 0, stratagemBuffAdded: 0 };
+  const h = createGuardHero(lord.heroLevel, seededRng('lord-hero'));
+  const hero = { ...h, level: lord.heroLevel, power: lord.power, stratagem: lord.stratagem, gearStat: lord.gearStat, powerBuffAdded: 0, stratagemBuffAdded: 0 };
+  syncHeroGear(hero, lordGearOf(lord));
+  return hero;
 }
 
 /** Resources to train one unit (food + lumber + stone + iron + gold). */

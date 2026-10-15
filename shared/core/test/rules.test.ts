@@ -17,8 +17,11 @@ import {
   fullDemolishRefund,
   GEAR_PIECES,
   gearLevelPoints,
+  gearSetBonus,
+  gearSetStars,
   gearStarCost,
   gearStarLimit,
+  gearStarPoints,
   gearTier,
   generateMap,
   healCost,
@@ -26,6 +29,7 @@ import {
   heroBattleAttackBonus,
   heroBuffDesc,
   heroGearBonus,
+  heroGearBreakdown,
   heroItemGoldPrice,
   heroTimeMultiplier,
   injuredOf,
@@ -633,31 +637,47 @@ describe('hero gear', () => {
     expect([1, 9, 10, 19, 50, 79, 80, 99, 100].map(gearTier)).toEqual([0, 0, 1, 1, 5, 7, 8, 9, 10]);
   });
 
-  it('gives 1 + … + L points per piece level and 3 per star', () => {
-    expect(gearLevelPoints(10)).toBe(55);
+  it('gives L points per piece level and N for star N', () => {
+    expect(gearLevelPoints(10)).toBe(10);
+    expect([0, 1, 2, 9, 10].map(gearStarPoints)).toEqual([0, 1, 3, 45, 55]);
     const maxed = { level: 10, stars: allStars(10) };
-    expect(heroGearBonus(100, maxed)).toBe(14 * (55 + 30));
-    // level 50 (tier 5): level 5 pieces and 5 stars of each; nothing below level 10
-    expect(heroGearBonus(50, maxed)).toBe(14 * (15 + 15));
+    // levels 140, stars 770, set bonus 140
+    expect(heroGearBonus(100, maxed)).toBe(14 * (10 + 55) + 140);
+    // level 50 (tier 5): level 5 pieces, 5 stars of each and a set bonus of 5 star levels; nothing below level 10
+    expect(heroGearBonus(50, maxed)).toBe(14 * (5 + 15) + 5 * 14);
     expect(heroGearBonus(9, maxed)).toBe(0);
-    // research and stars still limit a maxed hero
-    expect(heroGearBonus(100, { level: 3, stars: { weapon: 2 } })).toBe(14 * 6 + 6);
+    // research and stars still limit a maxed hero; one starred piece earns no set bonus
+    expect(heroGearBonus(100, { level: 3, stars: { weapon: 2 } })).toBe(14 * 3 + 3);
   });
 
-  it('reaches at least 1,250 in one attribute for a maxed level 100 hero', () => {
-    const h = hero(100, 70 + 100);
+  it('adds a set bonus for the star level every piece has reached', () => {
+    // half the pieces at 9 stars, half at 10, and one at 8: the set counts 8
+    const stars = Object.fromEntries(GEAR_PIECES.map((p, i) => [p.id, i === 0 ? 8 : i % 2 ? 9 : 10]));
+    const gear = { level: 10, stars };
+    expect(gearSetStars(gear)).toBe(8);
+    expect(heroGearBreakdown(100, gear)).toMatchObject({ setStars: 8, setBonus: 112 });
+    expect(gearSetBonus(10)).toBe(140);
+    // the Hero Enhancement level and the hero's tier cap it
+    expect(gearSetStars({ level: 5, stars })).toBe(5);
+    expect(heroGearBreakdown(60, gear).setStars).toBe(6);
+    // a piece with no stars means no set bonus
+    expect(gearSetStars({ level: 10, stars: { ...stars, feet: 0 } })).toBe(0);
+  });
+
+  it('reaches 1,229 in one attribute for a maxed level 100 hero with the best base roll', () => {
+    const h = hero(100, 79 + 100);
     syncHeroGear(h, { level: 10, stars: allStars(10) });
-    expect(h.power + h.powerAdded).toBe(1_360);
+    expect(h.power + h.powerAdded).toBe(1_229);
   });
 
   it('boosts the chosen attribute, else the strongest one; none without gear', () => {
     const gear = { level: 2, stars: {} };
     const h = hero(30, 100);
     syncHeroGear(h, gear);
-    expect([h.powerAdded, h.managementAdded, h.stratagemAdded]).toEqual([42, 0, 0]);
+    expect([h.powerAdded, h.managementAdded, h.stratagemAdded]).toEqual([28, 0, 0]);
     h.gearStat = 'stratagem';
     expect(syncHeroGear(h, gear)).toBe(true);
-    expect([h.powerAdded, h.managementAdded, h.stratagemAdded]).toEqual([0, 0, 42]);
+    expect([h.powerAdded, h.managementAdded, h.stratagemAdded]).toEqual([0, 0, 28]);
     expect(syncHeroGear(h, gear)).toBe(false);
     syncHeroGear(h, null);
     expect(h.stratagemAdded).toBe(0);
@@ -666,14 +686,14 @@ describe('hero gear', () => {
   it('counts no more stars than the Hero Enhancement level', () => {
     expect(gearStarLimit({ level: 3, stars: {} })).toBe(3);
     expect(heroGearBonus(100, { level: 0, stars: { weapon: 10 } })).toBe(0);
-    expect(heroGearBonus(100, { level: 3, stars: { weapon: 10 } })).toBe(14 * 6 + 3 * 3);
+    expect(heroGearBonus(100, { level: 3, stars: { weapon: 10 } })).toBe(14 * 3 + gearStarPoints(3));
   });
 
-  it('prices stars 1-9 at one medal of that level and star 10 at three Nation Medals', () => {
-    expect(gearStarCost(1)).toEqual({ itemId: ItemId.CROSS_MEDAL, count: 1 });
-    expect(gearStarCost(6)).toEqual({ itemId: ItemId.WISDOM_MEDAL, count: 1 });
-    expect(gearStarCost(9)).toEqual({ itemId: ItemId.NATION_MEDAL, count: 1 });
-    expect(gearStarCost(10)).toEqual({ itemId: ItemId.NATION_MEDAL, count: 3 });
+  it('prices stars 1-9 at two medals of that level and star 10 at six Nation Medals', () => {
+    expect(gearStarCost(1)).toEqual({ itemId: ItemId.CROSS_MEDAL, count: 2 });
+    expect(gearStarCost(6)).toEqual({ itemId: ItemId.WISDOM_MEDAL, count: 2 });
+    expect(gearStarCost(9)).toEqual({ itemId: ItemId.NATION_MEDAL, count: 2 });
+    expect(gearStarCost(10)).toEqual({ itemId: ItemId.NATION_MEDAL, count: 6 });
   });
 
   it('reads the lord gear from Hero Enhancement and the stars bought', () => {

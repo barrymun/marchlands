@@ -62,6 +62,7 @@ const TEXT: Record<number, TechText> = {
   [TechType.HERO_ENHANCEMENT]: {
     summary: msg('techInfo.summary.heroEnhancement', {
       count: GEAR_PIECES.length,
+      levelPoints: BALANCE.heroGear.levelPoints,
       maxTier: BALANCE.heroGear.maxLevel,
       heroMaxLevel: BALANCE.heroMaxLevel,
     }),

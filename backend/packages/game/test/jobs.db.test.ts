@@ -1,16 +1,30 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { BALANCE, MarketSide, merchantBase, msg, setGameSpeed } from '@marchlands/core';
-import { allianceEvents, alliances, chatMessages, type Db, mails, players, playerStats, pushMessages, reports, tiles, worldState } from '@marchlands/db';
+import { BALANCE, heroGearBonus, heroGearStat, MarketSide, merchantBase, msg, setGameSpeed, TechType } from '@marchlands/core';
+import {
+  allianceEvents,
+  alliances,
+  chatMessages,
+  type Db,
+  heroes,
+  mails,
+  players,
+  playerStats,
+  pushMessages,
+  reports,
+  tiles,
+  worldState,
+} from '@marchlands/db';
 
 import { type ZoneStats } from '#/engine/world.ts';
-import { beginnerJob, cleanupJob, market, merchantJob, rankingsJob, statsJob, zonesJob } from '#/index.ts';
+import { beginnerJob, cleanupJob, heroGearJob, market, merchantJob, rankingsJob, statsJob, zonesJob } from '#/index.ts';
 import { getPlayer, savePlayer } from '#/repo.ts';
 import { statDay } from '#/stats.ts';
 import { createTestAlliance } from '#test/support/alliance.ts';
-import { createTestPlayer, setCityStats, type TestPlayer } from '#test/support/factories.ts';
+import { addHero, createTestPlayer, setCityStats, setResearch, type TestPlayer } from '#test/support/factories.ts';
 import type { TestGame } from '#test/support/game.ts';
+import { patchHero } from '#test/support/heroes.ts';
 import { createTrader, Res, withMerchantCurve } from '#test/support/market.ts';
 import { arrange, inTestTx } from '#test/support/tx.ts';
 
@@ -165,5 +179,27 @@ describe(cleanupJob.name, () => {
         .from(allianceEvents)
         .where(and(eq(allianceEvents.allianceId, al.id), sql`${allianceEvents.createdAt} < ${now - DAY}`));
       expect(events.map((r) => r.createdAt)).toEqual([now - 29 * DAY]);
+    }));
+});
+
+describe(heroGearJob.name, () => {
+  it('re-applies the current gear rules to heroes whose stored gear points are out of date, and only to them', () =>
+    inTestTx(async (db) => {
+      const id = await arrange(db, async (g) => {
+        const p = await createTestPlayer(g);
+        const id = await addHero(g, p);
+        await patchHero(g, id, { level: 30 });
+        await setResearch(g, p, TechType.HERO_ENHANCEMENT, 3);
+        return id;
+      });
+      // gear points stored under older rules
+      await db.update(heroes).set({ powerAdded: 999, managementAdded: 999, stratagemAdded: 999 }).where(eq(heroes.id, id));
+
+      expect(await heroGearJob(db)).toBeGreaterThanOrEqual(1);
+      const [h] = await db.select().from(heroes).where(eq(heroes.id, id));
+      const stat = heroGearStat(h);
+      expect(h[`${stat}Added`]).toBe(heroGearBonus(30, { level: 3, stars: {} }));
+      expect([h.powerAdded, h.managementAdded, h.stratagemAdded].filter((n) => n > 0)).toHaveLength(1);
+      expect(await heroGearJob(db)).toBe(0);
     }));
 });

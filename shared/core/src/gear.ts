@@ -2,6 +2,9 @@
 // The pieces' level is the lord's Hero Enhancement research (1-10); stars (0-10 per piece) are
 // bought with medals and belong to the lord as well. A hero can use gear levels and stars up to its
 // gear tier (from its own level), and all of it boosts the one attribute chosen for that hero.
+// A piece adds 1 point per level and N points for its star N; a set bonus adds BALANCE.heroGear.setBonus
+// for every star level all pieces have reached. A level 100 hero with the best base roll (79) reaches
+// 179 + 140 (levels) + 770 (stars) + 140 (set bonus) = 1,229 in its gear attribute.
 
 import { BALANCE } from '#/balance.ts';
 import { TechType } from '#/constants.ts';
@@ -56,8 +59,23 @@ export function gearTier(heroLevel: number): number {
 /** Stars a piece can hold: no more than the Hero Enhancement level (stars bought beyond it wait, unused). */
 export const gearStarLimit = (gear: LordGear) => Math.min(gear.level, BALANCE.heroGear.maxStars);
 
-/** Attribute points of one piece at gear level `level`: 1 + 2 + … + level (55 at level 10). */
-export const gearLevelPoints = (level: number) => (level * (level + 1)) / 2;
+/** Attribute points of one piece at gear level `level`: BALANCE.heroGear.levelPoints per level (10 at level 10). */
+export const gearLevelPoints = (level: number) => level * BALANCE.heroGear.levelPoints;
+
+/** Attribute points of a piece's first `stars` stars: star N adds N, so 1 + 2 + … + stars (55 for all 10). */
+export const gearStarPoints = (stars: number) => (stars * (stars + 1)) / 2;
+
+/**
+ * The star level every piece has reached (the set bonus counts it), up to `tier`: the fewest stars on any piece,
+ * counting only stars the Hero Enhancement level allows.
+ */
+export function gearSetStars(gear: LordGear, tier: number = BALANCE.heroGear.maxStars): number {
+  const limit = Math.min(gearStarLimit(gear), tier);
+  return Math.min(limit, ...GEAR_PIECES.map((p) => gear.stars[p.id] ?? 0));
+}
+
+/** Set bonus points for `setStars` (gearSetStars): BALANCE.heroGear.setBonus per star level (140 at 10). */
+export const gearSetBonus = (setStars: number) => setStars * BALANCE.heroGear.setBonus;
 
 export interface GearPieceBonus {
   /** named by the client (`data-gear`) */
@@ -71,27 +89,32 @@ export interface GearPieceBonus {
   points: number;
 }
 
-/** Every piece's contribution for a hero of `heroLevel`, and the total. */
-export function heroGearBreakdown(heroLevel: number, gear: LordGear): { tier: number; pieces: GearPieceBonus[]; total: number } {
+/** Every piece's contribution for a hero of `heroLevel`, the set bonus, and the total. */
+export function heroGearBreakdown(
+  heroLevel: number,
+  gear: LordGear,
+): { tier: number; pieces: GearPieceBonus[]; setStars: number; setBonus: number; total: number } {
   const tier = gearTier(heroLevel);
   const pieces = GEAR_PIECES.map((p) => {
     const level = Math.min(gear.level, BALANCE.heroGear.maxLevel);
     const stars = Math.min(gear.stars[p.id] ?? 0, BALANCE.heroGear.maxStars);
     const usedLevel = Math.min(level, tier);
     const usedStars = Math.min(stars, tier, gearStarLimit(gear));
-    return { id: p.id, level, stars, usedLevel, usedStars, points: gearLevelPoints(usedLevel) + usedStars * BALANCE.heroGear.starPoints };
+    return { id: p.id, level, stars, usedLevel, usedStars, points: gearLevelPoints(usedLevel) + gearStarPoints(usedStars) };
   });
-  return { tier, pieces, total: pieces.reduce((s, p) => s + p.points, 0) };
+  const setStars = gearSetStars(gear, tier);
+  const setBonus = gearSetBonus(setStars);
+  return { tier, pieces, setStars, setBonus, total: pieces.reduce((s, p) => s + p.points, 0) + setBonus };
 }
 
 /** Total gear points for a hero of `heroLevel`. */
 export const heroGearBonus = (heroLevel: number, gear: LordGear) => heroGearBreakdown(heroLevel, gear).total;
 
-/** Medals for a piece's star `star` (1-10): stars 1-9 take one medal of that level, star 10 several Nation Medals. */
+/** Medals for a piece's star `star` (1-10): stars 1-9 take starMedals medals of that level, star 10 lastStarMedals Nation Medals. */
 export function gearStarCost(star: number): { itemId: string; count: number } {
-  const { maxStars, lastStarMedals } = BALANCE.heroGear;
+  const { maxStars, starMedals, lastStarMedals } = BALANCE.heroGear;
   if (star >= maxStars) return { itemId: medalId(9), count: lastStarMedals };
-  return { itemId: medalId(star), count: 1 };
+  return { itemId: medalId(star), count: starMedals };
 }
 
 interface GearedHero {

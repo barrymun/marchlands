@@ -2,12 +2,12 @@
 // on each hero card the gear bonus and the attribute it boosts.
 
 import { Star } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postGearStarMutation } from '@marchlands/api-client';
-import { BALANCE, GEAR_PIECES, gearStarCost, gearStarLimit, TechType } from '@marchlands/core';
+import { BALANCE, GEAR_PIECES, gearSetBonus, gearSetStars, gearStarCost, gearStarLimit, TechType } from '@marchlands/core';
 
-import { maxLevel, maxStars, starPoints } from '@/components/hero-gear/constants';
+import { levelPoints, maxLevel, maxStars, setBonus } from '@/components/hero-gear/constants';
 import { Stars } from '@/components/hero-gear/gear-card/stars/stars';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,13 +27,28 @@ export function GearCard({ onResearch }: { onResearch?: () => void }) {
   if (!gear) return null;
   const starLimit = gearStarLimit(gear);
   const research = player.data?.research[TechType.HERO_ENHANCEMENT]?.level ?? 0;
+  // the set bonus: the star level every piece has reached (heroes below that tier get less)
+  const setStars = gearSetStars(gear);
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{t('card.title')}</CardTitle>
         <CardDescription>
-          {t('card.description', { pieces: GEAR_PIECES.length, research, max: maxLevel, heroMaxLevel: BALANCE.heroMaxLevel, starPoints })}
+          {t('card.description', { pieces: GEAR_PIECES.length, research, max: maxLevel, heroMaxLevel: BALANCE.heroMaxLevel, levelPoints, setBonus })}
         </CardDescription>
+        <div className="text-xs tabular-nums">
+          {setStars > 0 ? (
+            <Trans
+              t={t}
+              i18nKey="card.setBonus"
+              values={{ bonus: gearSetBonus(setStars), count: setStars }}
+              components={{ b: <span className="font-semibold" /> }}
+            />
+          ) : (
+            t('card.setBonusNone', { bonus: setBonus })
+          )}
+          {setStars > 0 && setStars < maxStars && ` ${t('card.setBonusNext', { bonus: setBonus, count: setStars + 1 })}`}
+        </div>
         {gear.level === 0 && (
           <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-1.5 text-xs text-amber-800 dark:text-amber-300">
             <span>{t('card.levelZero')}</span>

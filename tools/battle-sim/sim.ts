@@ -5,14 +5,15 @@
 //   npm run sim -- trace [--preset archers-best | --troops ...] [--seed 3]
 //   npm run sim -- presets
 //
-// Common options: --level 10 (barbarian city level), --seeds N, and the lord: --research 10 --power 1359
-// --stratagem 18 --no-attack-item --defense-item (defaults: DEFAULT_LORD in lib.ts).
+// Common options: --level 10 (barbarian city level), --seeds N, and the lord: --research 10, the hero
+// --hero-level 100 --power 169 --stratagem 18 (its own points, without gear), the gear --gear-level 10 --stars 10
+// --gear-stat power, --no-attack-item --defense-item (defaults: DEFAULT_LORD in lib.ts).
 
 import { parseArgs } from 'node:util';
 
-import { TROOP_KEY_LIST, type TroopCounts, type TroopKey } from '@marchlands/core';
+import { GEAR_STATS, type GearStat, TROOP_KEY_LIST, type TroopCounts, type TroopKey } from '@marchlands/core';
 
-import { armySize, attackNpc, DEFAULT_LORD, type Lord, type Summary, traceNpc } from './lib.ts';
+import { armySize, attackNpc, DEFAULT_LORD, type Lord, lordGearPoints, type Summary, traceNpc } from './lib.ts';
 import { PRESETS } from './presets.ts';
 
 const { positionals, values } = parseArgs({
@@ -25,8 +26,12 @@ const { positionals, values } = parseArgs({
     troops: { type: 'string', multiple: true },
     sources: { type: 'boolean', default: false },
     research: { type: 'string' },
+    'hero-level': { type: 'string' },
     power: { type: 'string' },
     stratagem: { type: 'string' },
+    'gear-level': { type: 'string' },
+    stars: { type: 'string' },
+    'gear-stat': { type: 'string' },
     'no-attack-item': { type: 'boolean', default: false },
     'defense-item': { type: 'boolean', default: false },
     main: { type: 'string', default: 'archer' },
@@ -41,10 +46,19 @@ const { positionals, values } = parseArgs({
 });
 
 const level = Number(values.level);
+const num = (v: string | undefined, fallback: number) => (v != null ? Number(v) : fallback);
+const gearStat = values['gear-stat'] ?? DEFAULT_LORD.gearStat;
+if (!GEAR_STATS.includes(gearStat as GearStat)) throw new Error(`bad --gear-stat "${gearStat}": use ${GEAR_STATS.join(', ')}`);
+const researchLevel = num(values.research, DEFAULT_LORD.researchLevel);
 const lord: Lord = {
-  researchLevel: values.research != null ? Number(values.research) : DEFAULT_LORD.researchLevel,
-  power: values.power != null ? Number(values.power) : DEFAULT_LORD.power,
-  stratagem: values.stratagem != null ? Number(values.stratagem) : DEFAULT_LORD.stratagem,
+  researchLevel,
+  heroLevel: num(values['hero-level'], DEFAULT_LORD.heroLevel),
+  power: num(values.power, DEFAULT_LORD.power),
+  stratagem: num(values.stratagem, DEFAULT_LORD.stratagem),
+  // Hero Enhancement is research: it follows --research unless given
+  gearLevel: num(values['gear-level'], values.research != null ? researchLevel : DEFAULT_LORD.gearLevel),
+  gearStars: num(values.stars, DEFAULT_LORD.gearStars),
+  gearStat: gearStat as GearStat,
   attackItem: !values['no-attack-item'],
   defenseItem: values['defense-item'],
 };
@@ -94,8 +108,11 @@ function printSummary(name: string, s: Summary) {
 }
 
 function describeLord() {
+  const gear = lordGearPoints(lord);
+  const attr = (stat: GearStat, own: number) => (lord.gearStat === stat && gear > 0 ? `${own} + ${count(gear)} gear = ${count(own + gear)}` : String(own));
   return (
-    `lord: research ${lord.researchLevel}, hero Attack ${lord.power} / Intelligence ${lord.stratagem}, ` +
+    `lord: research ${lord.researchLevel}, hero Lv ${lord.heroLevel} Attack ${attr('power', lord.power)} / Intelligence ${attr('stratagem', lord.stratagem)} ` +
+    `(gear Lv ${lord.gearLevel}, ${lord.gearStars} stars), ` +
     `attack item ${lord.attackItem ? 'on' : 'off'}, defense item ${lord.defenseItem ? 'on' : 'off'} · barbarian city level ${level}`
   );
 }

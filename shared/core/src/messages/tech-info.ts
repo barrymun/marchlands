@@ -10,7 +10,7 @@ export const TECH_INFO_MESSAGES = {
   /** `troops`: the siege units */
   'summary.metalCasting': ['troops', 'factor'],
   /** `count` gear pieces; gear tiers up to `maxTier` at hero level `heroMaxLevel` */
-  'summary.heroEnhancement': ['count', 'maxTier', 'heroMaxLevel'],
+  'summary.heroEnhancement': ['count', 'levelPoints', 'maxTier', 'heroMaxLevel'],
   'summary.militaryTradition': ['pct'],
   /** `tower`: Archer's Tower */
   'summary.ironWorking': ['tower', 'pct'],

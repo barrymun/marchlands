@@ -5,12 +5,16 @@
     "attributeGroup": "装備で強化する能力",
     "boosts": "装備は{{label}}を強化中",
     "putOn": "装備で{{label}}を強化する",
-    "uses_other": "装備レベル {{level}}、各部位の星 {{count}} 個までが有効"
+    "uses_other": "装備レベル {{level}}、各部位の星 {{count}} 個までが有効",
+    "setBonus_other": "セットボーナス +{{bonus}}（すべての部位が星 {{count}} 個以上）。"
   },
   "card": {
     "starAdded": "星を追加しました",
     "title": "英雄の装備",
-    "description": "すべての英雄が {{pieces}} 部位すべての装備を身に着けます。装備のレベルは英雄強化の研究レベルです（{{research}}/{{max}}、アカデミーで研究）。星はメダルで購入します。英雄は装備ティアまでの装備レベルと星を使えます: 英雄レベル 1-9 はなし、10-19 は 1、… 90-99 は 9、レベル {{heroMaxLevel}} ですべての {{max}}。レベル L の部位は 1 + … + L ポイント、星 1 つにつき +{{starPoints}}。",
+    "description": "すべての英雄が {{pieces}} 部位すべての装備を身に着けます。装備のレベルは英雄強化の研究レベルです（{{research}}/{{max}}、アカデミーで研究）。星はメダルで購入します。英雄は装備ティアまでの装備レベルと星を使えます: 英雄レベル 1-9 はなし、10-19 は 1、… 90-99 は 9、レベル {{heroMaxLevel}} ですべての {{max}}。部位のレベル 1 つにつき +{{levelPoints}}、星 N は +N。セットボーナス: {{pieces}} 部位すべてがそろえた星のレベルごとに +{{setBonus}}。",
+    "setBonus_other": "セットボーナス <b>+{{bonus}}</b>: すべての部位が星 {{count}} 個以上です。",
+    "setBonusNone": "セットボーナス: まだありません。すべての部位に星を 1 つ付けると +{{bonus}}。",
+    "setBonusNext_other": "すべての部位が星 {{count}} 個になると、さらに +{{bonus}}。",
     "levelZero": "装備はレベル 0 です: アカデミーで英雄強化を研究するまでは星のみが有効です（レベル N にはアカデミー レベル N が必要）。",
     "goToResearch": "研究へ",
     "needsResearch": "研究 {{level}} が必要",

@@ -6,12 +6,19 @@
     "boosts": "Gear boosts {{label}}",
     "putOn": "Put the gear on {{label}}",
     "uses_one": "Uses gear level {{level}} and up to {{count}} star per piece",
-    "uses_other": "Uses gear level {{level}} and up to {{count}} stars per piece"
+    "uses_other": "Uses gear level {{level}} and up to {{count}} stars per piece",
+    "setBonus_one": "Set bonus +{{bonus}} (every piece at {{count}} star or more).",
+    "setBonus_other": "Set bonus +{{bonus}} (every piece at {{count}} stars or more)."
   },
   "card": {
     "starAdded": "Star added",
     "title": "Hero gear",
-    "description": "Every hero wears all {{pieces}} pieces. Their level is your Hero Enhancement research ({{research}}/{{max}}, in the Academy); stars are bought with medals. A hero uses gear levels and stars up to its gear tier: none at hero levels 1-9, 1 at 10-19, … 9 at 90-99, all {{max}} at level {{heroMaxLevel}}. A piece at level L adds 1 + … + L points, each star +{{starPoints}}.",
+    "description": "Every hero wears all {{pieces}} pieces. Their level is your Hero Enhancement research ({{research}}/{{max}}, in the Academy); stars are bought with medals. A hero uses gear levels and stars up to its gear tier: none at hero levels 1-9, 1 at 10-19, … 9 at 90-99, all {{max}} at level {{heroMaxLevel}}. Every level of a piece adds +{{levelPoints}}, and its star N adds +N. Set bonus: +{{setBonus}} for every star level all {{pieces}} pieces have reached.",
+    "setBonus_one": "Set bonus <b>+{{bonus}}</b>: every piece has {{count}} star or more.",
+    "setBonus_other": "Set bonus <b>+{{bonus}}</b>: every piece has {{count}} stars or more.",
+    "setBonusNone": "Set bonus: none yet. Give every piece a star for +{{bonus}}.",
+    "setBonusNext_one": "+{{bonus}} more once every piece has {{count}} star.",
+    "setBonusNext_other": "+{{bonus}} more once every piece has {{count}} stars.",
     "levelZero": "Your gear is level 0: only stars count until you research Hero Enhancement in the Academy (level N needs Academy level N).",
     "goToResearch": "Go to Research",
     "needsResearch": "Needs research {{level}}",

@@ -1,4 +1,4 @@
-// Game clock. Seeds the world on first boot, then:
+// Game clock. Seeds the world on first boot and re-applies hero gear (heroGearJob), then:
 //  - claims due timed events (FOR UPDATE SKIP LOCKED, so several workers can run side by side)
 //    and processes each in its own transaction;
 //  - runs periodic jobs (rankings, zone stats, beginner expiry, merchant sweep, cleanup).
@@ -8,7 +8,7 @@ import { sql } from 'drizzle-orm';
 
 import { setGameSpeed } from '@marchlands/core';
 import { connect, timedEvents } from '@marchlands/db';
-import { beginnerJob, cleanupJob, merchantJob, rankingsJob, startStatsFlusher, statsJob, world, zonesJob } from '@marchlands/game';
+import { beginnerJob, cleanupJob, heroGearJob, merchantJob, rankingsJob, startStatsFlusher, statsJob, world, zonesJob } from '@marchlands/game';
 
 import { eventLoop, every as everyUntilStopped, log, processOne } from '#/worker.ts';
 
@@ -31,6 +31,8 @@ async function main() {
     log: (m) => log('info', m),
   });
   log('info', 'world ready', { ...info });
+  // heroes store their gear points: bring them in line with the current gear rules
+  log('info', 'hero gear synced', { heroes: await heroGearJob(db) });
   const [{ n }] = (await db.select({ n: sql<number>`count(*)` }).from(timedEvents)) as { n: number }[];
   log('info', 'worker started', { pendingEvents: Number(n), gameSpeed: Number(process.env.GAME_SPEED ?? 1) });
 

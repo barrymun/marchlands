@@ -6,6 +6,7 @@ import {
   BuildingType,
   experienceItemGain,
   gearStarCost,
+  gearStarPoints,
   heroAttributeBuffEnd,
   heroAwardCost,
   heroBuffAmount,
@@ -495,7 +496,8 @@ describe(heroes.buyGearStar.name, () => {
       expect((await reloadPlayer(g, p)).items[cost.itemId]).toBe(1);
       const after = await getHero(g, id);
       const stat = heroGearStat(after);
-      expect(after[`${stat}Added`]).toBe(before[`${stat}Added`] + BALANCE.heroGear.starPoints);
+      // star 1 adds 1 point; with only one piece starred there is no set bonus yet
+      expect(after[`${stat}Added`]).toBe(before[`${stat}Added`] + gearStarPoints(1));
     }));
 
   it('charges several Nation Medals for the last star', () =>
@@ -521,7 +523,7 @@ describe(heroes.buyGearStar.name, () => {
       await expectRefused(heroes.buyGearStar(g, p.id, 'hat'), msg('hero.invalidGearPiece'));
       await expectRefused(heroes.buyGearStar(g, p.id, 'weapon'), msg('hero.gearStarLimit', { tech: ref.tech(TechType.HERO_ENHANCEMENT), limit: 0, level: 1 }));
       await setResearch(g, p, TechType.HERO_ENHANCEMENT, 1);
-      await expectRefused(heroes.buyGearStar(g, p.id, 'weapon'), msg('hero.notEnoughMedals', { item: ref.item(medalId(1)), amount: 1 }));
+      await expectRefused(heroes.buyGearStar(g, p.id, 'weapon'), msg('hero.notEnoughMedals', { item: ref.item(medalId(1)), amount: gearStarCost(1).count }));
     }));
 });
 

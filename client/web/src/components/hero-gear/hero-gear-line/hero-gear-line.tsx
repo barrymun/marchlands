@@ -18,7 +18,7 @@ export function HeroGearLine({ hero, cityId }: { hero: HeroBean; cityId: number 
   const gear: LordGear | undefined = usePlayer().data?.gear;
   const setStat = useCommand(putHeroesGearStatMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId } })]);
   if (!gear || hero.seized) return null;
-  const { tier, total } = heroGearBreakdown(hero.level, gear);
+  const { tier, setStars, setBonus, total } = heroGearBreakdown(hero.level, gear);
   const current = attributeOfStat(hero.gearStat);
   return (
     <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs tabular-nums">
@@ -36,6 +36,7 @@ export function HeroGearLine({ hero, cityId }: { hero: HeroBean; cityId: number 
         <TooltipContent>
           {t('line.uses', { level: Math.min(gear.level, tier), count: tier })}
           {tier < maxLevel && ` ${t('line.nextTier', { tier: tier + 1, level: (tier + 1) * 10 })}`}
+          {setBonus > 0 && ` ${t('line.setBonus', { bonus: setBonus, count: setStars })}`}
         </TooltipContent>
       </Tooltip>
       <span className="flex gap-0.5" role="group" aria-label={t('line.attributeGroup')}>

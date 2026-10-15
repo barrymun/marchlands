@@ -57,15 +57,17 @@ export async function closeMayorCity(ctx: Ctx, b: CityBundle | null, h: HeroRow)
 }
 
 /**
- * Re-apply the lord's gear to every hero they own (after Hero Enhancement research or a new star).
- * Mayors' cities are settled at the old rates first, as with any change to a mayor's attributes.
+ * Re-apply the lord's gear to every hero they own (after Hero Enhancement research or a new star, and at worker
+ * start-up, heroGearJob). Mayors' cities are settled at the old rates first, as with any change to a mayor's
+ * attributes. Returns how many heroes changed.
  */
-export async function resyncHeroGear(ctx: Ctx, playerId: number) {
+export async function resyncHeroGear(ctx: Ctx, playerId: number): Promise<number> {
   const owned = await ctx.tx
     .select()
     .from(heroes)
     .where(and(eq(heroes.playerId, playerId), eq(heroes.inTavern, false)))
     .for('update');
+  let changed = 0;
   for (const h of owned) {
     const probe = { ...h };
     if (!syncHeroGear(probe, await gearOfHero(ctx, h))) continue;
@@ -73,7 +75,9 @@ export async function resyncHeroGear(ctx: Ctx, playerId: number) {
     await saveHero(ctx, h);
     pushHero(ctx, playerId, h, 2);
     await closeMayorCity(ctx, city, h);
+    changed++;
   }
+  return changed;
 }
 
 export async function expireHeroBuff(ctx: Ctx, heroId: number, attr: string) {

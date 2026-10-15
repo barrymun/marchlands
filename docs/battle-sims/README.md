@@ -33,12 +33,12 @@ npm run sim -- compare --preset archers-old,archers-best --sources
 | `presets` | Lists the named armies |
 
 - **Common options:** `--level` (barbarian city level, default 10) and `--seeds`.
-- **The lord:** `--research`, `--power`, `--stratagem`, `--no-attack-item` and `--defense-item`. The defaults are barrymun on 2026-10-09; see `DEFAULT_LORD` in `lib.ts`.
+- **The lord:** `--research` (every research at that level), the hero (`--hero-level`, and `--power` and `--stratagem`: its own points, without gear), the lord's gear (`--gear-level` for Hero Enhancement, which follows `--research` unless given, `--stars` on every piece, and `--gear-stat` for the attribute it boosts), `--no-attack-item` and `--defense-item`. The defaults are barrymun on 2026-10-16; see `DEFAULT_LORD` in `lib.ts`.
 - **Seeds:** the scripts use their own seeds, so averages can differ slightly (by about 0.05M) from the figures on these pages.
 
 ## How the simulations are run
 
-- **Attacker:** the lord's real research, hero and active items. Attack bonus = 1 + hero attack bonus + 5% per Military Tradition level + the attack item. Defense = 1 + the defense item.
+- **Attacker:** the lord's real research, hero and active items. The hero's gear points come from the game's own gear rules (`syncHeroGear` in `shared/core/src/gear.ts`), so they follow any change to them. Attack bonus = 1 + hero attack bonus + 5% per Military Tradition level + the attack item. Defense = 1 + the defense item.
 - **Defender:** `npcTemplate(level)` troops and fortifications, the wall at the NPC's level, no research, and a random guard hero (`createGuardHero(level × 10)`).
 - **Seeds:** each setup runs over many seeds (usually 500). They vary the guard hero and how many traps fire each round, and results are averages.
 - **Value of losses:** the sum of food, lumber, stone and iron to train each lost unit. With Medicine 10, half of an attacking army's losses come home injured (`BALANCE.attackersGetInjured`) and can be healed with honor. "Dead" is the other half.

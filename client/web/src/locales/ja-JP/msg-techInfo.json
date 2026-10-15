@@ -5,7 +5,7 @@
     "construction": "レベルごとに建設・解体・防衛施設の建造時間 ×{{factor}}。",
     "militaryScience": "レベルごとに攻城兵器を除く全部隊の訓練時間 ×{{factor}}。",
     "metalCasting": "レベルごとに攻城兵器（{{troops}}）の訓練時間 ×{{factor}}。",
-    "heroEnhancement_other": "すべての英雄の装備{{count, number}}部位をすべて1レベル上げます。レベルLの部位は英雄の装備能力に 1 + 2 + … + L ポイントを加えます。英雄は装備ティアまでの装備レベルを使えます（英雄レベル 1-9 はなし、10-19 は 1、… 90-99 は 9、レベル {{heroMaxLevel}} で {{maxTier}}）。",
+    "heroEnhancement_other": "すべての英雄の装備{{count, number}}部位をすべて1レベル上げます。部位のレベルごとに英雄の装備能力が +{{levelPoints, number}} されます。英雄は装備ティアまでの装備レベルを使えます（英雄レベル 1-9 はなし、10-19 は 1、… 90-99 は 9、レベル {{heroMaxLevel}} で {{maxTier}}）。",
     "militaryTradition": "戦闘時、レベルごとに部隊の攻撃力 +{{pct}}。",
     "ironWorking": "部隊と{{tower}}の被ダメージを軽減します。戦闘時、レベルごとに防御力 +{{pct}}。",
     "medicine": "戦闘時、レベルごとに歩兵（{{from}}〜{{to}}）と{{tower}}のHP +{{pct}}。また、都市の防衛でも攻撃でも、失った部隊のうちレベルごとに{{injured}}（最大{{max}}）が負傷兵として生き残り、資源または名誉で治療できます。",

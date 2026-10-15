@@ -1,11 +1,12 @@
 // Periodic maintenance run by the worker.
 
-import { and, eq, lt, sql } from 'drizzle-orm';
+import { and, eq, isNotNull, lt, sql } from 'drizzle-orm';
 
 import { BALANCE } from '@marchlands/core';
-import { type Db, players } from '@marchlands/db';
+import { type Db, heroes, players } from '@marchlands/db';
 
 import { runGame } from '#/context.ts';
+import { resyncHeroGear } from '#/engine/heroes.ts';
 import { merchantSweep } from '#/engine/market.ts';
 import { checkBeginner } from '#/engine/player.ts';
 import { refreshRankings } from '#/engine/rankings.ts';
@@ -55,4 +56,19 @@ export async function cleanupJob(db: Db) {
   await db.execute(sql`delete from chat_messages where sent_at < ${now - 7 * 86_400_000}`);
   await db.execute(sql`delete from reports where event_time < ${now - 30 * 86_400_000}`);
   await db.execute(sql`delete from alliance_events where created_at < ${now - 30 * 86_400_000}`);
+}
+
+/**
+ * (marchlands) Re-apply every lord's gear to their heroes, run at worker start-up. Heroes store their gear points, so
+ * this is how a change to the gear rules (gear.ts, BALANCE.heroGear) reaches them. Saves only heroes that changed;
+ * returns how many.
+ */
+export async function heroGearJob(db: Db): Promise<number> {
+  const owners = await db
+    .selectDistinct({ id: heroes.playerId })
+    .from(heroes)
+    .where(and(isNotNull(heroes.playerId), eq(heroes.inTavern, false)));
+  let changed = 0;
+  for (const { id } of owners) if (id != null) changed += await runGame(db, (ctx) => resyncHeroGear(ctx, id));
+  return changed;
 }

@@ -62,11 +62,12 @@ export const BALANCE = {
   /** (evony) the highest loyalty a hero can have; new heroes start at it */
   heroMaxLoyalty: 100,
   /**
-   * (marchlands) hero gear (Age II Hero Enhancement): piece levels follow the Hero Enhancement research,
-   * each level adds its number in points (55 per piece at 10); each star adds starPoints; star 10 of a
-   * piece costs lastStarMedals Nation Medals (stars 1-9: one medal of that level)
+   * (marchlands) hero gear (Age II Hero Enhancement, gear.ts): piece levels follow the Hero Enhancement research,
+   * each level adding levelPoints to a piece (10 at level 10); star N of a piece adds N points (55 for all 10).
+   * The set bonus adds setBonus for every star level all 14 pieces have reached (140 at 10 stars each). Stars 1-9
+   * cost starMedals medals of that level, star 10 lastStarMedals Nation Medals
    */
-  heroGear: { maxLevel: 10, maxStars: 10, starPoints: 3, lastStarMedals: 3 },
+  heroGear: { maxLevel: 10, maxStars: 10, levelPoints: 1, setBonus: 14, starMedals: 2, lastStarMedals: 6 },
   /**
    * (marchlands) soft caps for geared heroes (orig: linear). With a toggle on, a hero attribute counts
    * in full up to `knee` and as √(knee × attribute) above it (knee 200: 450 → 300, 800 → 400,

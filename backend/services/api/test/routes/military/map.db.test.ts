@@ -1,11 +1,11 @@
 // Map routes (src/routes/military.ts): the map view, tile details and the tile search. They need a token but no
 // player: an account without one sees the map with no relations. The rules are covered by the world service tests.
 
-import { eq } from 'drizzle-orm';
+import { and, between, eq, isNull, ne } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { BALANCE, Relation, TileType } from '@marchlands/core';
-import { cities } from '@marchlands/db';
+import { BALANCE, Relation, TileType, tileXY, valleyUpgradeCost } from '@marchlands/core';
+import { cities, tiles } from '@marchlands/db';
 
 import { apiTest, type TestApi } from '#test/support/api.ts';
 import { expectInvalid, type Lord, lords, patchTile } from '#test/support/city-fixtures.ts';
@@ -97,21 +97,33 @@ describe('GET /map/tiles/{tileId}', () => {
         playerId: a.playerId,
         relation: Relation.SELF,
       });
+      // terrain comes in regions, so a city may have no grass nearby: make a free tile next to it a level 3 grass valley
+      const [free] = await api.db
+        .select({ id: tiles.id })
+        .from(tiles)
+        .where(and(between(tiles.id, tileId - 40, tileId + 40), isNull(tiles.cityId), isNull(tiles.ownerCityId), ne(tiles.type, TileType.NPC)))
+        .limit(1);
+      await patchTile(api, free.id, { type: TileType.GRASS, level: 3 });
+      const at = tileXY(free.id);
       const found = await api.ok<Tile[]>('GET', 'map/search', {
         token: a.token,
-        query: { x: String(x), y: String(y), radius: '12', type: String(TileType.GRASS) },
+        query: { x: String(at.x), y: String(at.y), radius: '1', type: String(TileType.GRASS) },
       });
-      const valley = found.find((t) => t.cityId == null && t.ownerCityId == null)!;
-      expect(await api.ok('GET', `map/tiles/${valley.id}`, { token: a.token })).toMatchObject({
-        id: valley.id,
+      const valley = found.find((t) => t.id === free.id);
+      expect(valley).toMatchObject({ type: TileType.GRASS, level: 3, cityId: null, ownerCityId: null });
+      expect(await api.ok('GET', `map/tiles/${free.id}`, { token: a.token })).toMatchObject({
+        id: free.id,
         type: TileType.GRASS,
-        level: valley.level,
+        level: 3,
         npc: false,
         owner: null,
-        upgradeCost: expect.any(Number),
+        upgradeCost: valleyUpgradeCost(3),
       });
-      await patchTile(api, valley.id, { ownerCityId: b.cityId, ownerPlayerId: b.playerId });
-      expect(await api.ok('GET', `map/tiles/${valley.id}`, { token: a.token })).toMatchObject({
+      // at the top level there is nothing left to upgrade
+      await patchTile(api, free.id, { level: BALANCE.valleyUpgrade.maxLevel });
+      expect(await api.ok('GET', `map/tiles/${free.id}`, { token: a.token })).toMatchObject({ owner: null, upgradeCost: null });
+      await patchTile(api, free.id, { ownerCityId: b.cityId, ownerPlayerId: b.playerId });
+      expect(await api.ok('GET', `map/tiles/${free.id}`, { token: a.token })).toMatchObject({
         owner: { cityId: b.cityId, playerId: b.playerId, userName: b.name, cityName: `${b.name} City` },
         upgradeCost: null,
       });

@@ -1,6 +1,6 @@
 # Farming level 10 barbarian cities
 
-*Simulated 2026-10-09 with barrymun's research (every level 10), heroes and items. Checked against 697 real level 10 attack reports.*
+*Simulated 2026-10-09 with barrymun's research (every level 10), heroes and items. Checked against 697 real level 10 attack reports. Re-checked 2026-10-16 after the gear rework, with the hero's gear modelled: its Attack fell from 1,359 to 1,219, which changes none of the archer results (see [Hero gear](#hero-gear)).*
 
 ## The target
 
@@ -33,8 +33,25 @@ Army size is 125,000 (Rally Spot 10 with a War Ensign).
 | War Ensign | **Keep it.** Without it the army has fewer archers and the battle lasts longer: 90k archers takes 10 rounds (6.4M lost), and 60k takes 11 rounds (7.4M). |
 | Attack item (Ivory Horn) | **No effect:** still 9 rounds. Save it for fights against other lords. |
 | Defense item (Ultra Corselet) | **Slightly worse:** +0.06M per hit (see [the defense factor](mechanics.md#the-defense-factor)). |
-| Hero | **Send the lowest-Intelligence attack hero:** ATK - 70 in lol (Intelligence 18) or ATK - 68 (21). Intelligence 55 costs about 150 more archers per hit. |
+| Hero | **Send the lowest-Intelligence attack hero:** ATK - 70 in lol (Intelligence 18) or ATK - 68 (21). Intelligence 55 costs about 150 more archers per hit. It needs about 1,050 Attack: see [Hero gear](#hero-gear). |
 | Intelligence heroes | **Much worse:** too little attack, so 14 rounds and about 13k archers lost. |
+
+## Hero gear
+
+The best army with a level 100 hero (Attack 169 of its own, Intelligence 18), research 10 and gear on Attack, 300 seeds each (2026-10-16 gear rules):
+
+| Gear | Hero Attack | Rounds | Value lost per hit |
+|---|---|---|---|
+| None | 169 | 11 | 7.41M |
+| Level 10, no stars | 309 | 10 | 6.52M |
+| Level 10, 5 stars on every piece | 589 | 10 | 6.48M |
+| Level 10, 8 stars | 925 | 10 | 6.48M |
+| Level 10, 9 stars | 1,065 | **9** | **5.82M** |
+| Level 10, 10 stars | 1,219 | 9 | 5.82M |
+
+- **Attack decides the rounds, and only in steps:** about 1,050 Attack kills the 400k defending militia in two volleys, for 9 rounds. At 925 the second volley leaves about 11k of them (seed 3), so a third volley costs a round: 10 rounds and about 650 more archers lost. Between the steps, more Attack changes nothing (the soft cap above 200 also flattens it).
+- **For 9 rounds, a level 100 hero needs 9 stars on every piece.** A lower-level hero uses fewer levels and stars (its gear tier is its level ÷ 10), so a level 50 hero with the full set has 519 Attack and takes 10 rounds.
+- `npm run sim -- compare --preset archers-best --stars 9` (or `--hero-level 80`, `--gear-level 0 --stars 0` for no gear) re-runs these.
 
 ## How the battle goes
 
@@ -90,8 +107,8 @@ From one seed of the best setup. Positions run from 0 (attacker) to 5200 (defend
 |---|---|---|---|---|
 | Archers (the best army above) | 100% | 9 | 5.4k archers + 2.7k fodder | **5.8M** |
 | 121.5k militia (with or without a peasant layer) | 0% | 19 | The whole army | 36.5M |
-| 121.5k swordsmen | 100% | 13 | 80.5k | 60M |
-| 121.5k pikemen | 98% | 11 | 87.5k | 66M |
+| 121.5k swordsmen | 99.7% | 13.5 | 81k | 61M |
+| 121.5k pikemen | 98% | 11.4 | 86k | 65M |
 | 118k light cavalry + peasant and militia layers | 100% | **5** | 8.9k cavalry + 2.7k fodder | 19.3M |
 | 121.5k heavy cavalry | 100% | 6 | 30k | 150M |
 | 110k archers + 8k light cavalry | 100% | 9 | 5.3k archers + all 8k cavalry | 23M |

@@ -42,7 +42,7 @@
   - `src/testing.ts` (`@marchlands/game/testing`) lets the API tests set up state; app code never imports it (ESLint). `npm run knip` (part of `npm run lint`) fails on an export nothing uses, and on a backend export only tests use unless it is tagged `@internal`.
 - **contracts** declares every request body, query, response and push as a zod schema. Shapes that mirror a table are `createSelectSchema(table).pick(...).extend(...)`, so a column change propagates. Named schemas carry `.meta({ id })` and become OpenAPI components.
 - **api** is a thin Fastify layer. Each route passes its contract schemas to `doc(tag, summary, DataSchema, { params, body, querystring })`; fastify-type-provider-zod validates input, serializes output through the schema (stripping unknown keys) and type-checks the handler's return value against it. It authenticates with a JWT and calls one service per request inside `runGame()`. `src/openapi.ts` writes the OpenAPI document without a database (`npm run gen:api`).
-- **worker** seeds the world on first boot, processes due timed events and runs periodic jobs: rankings, zone stats, beginner-protection expiry and cleanup.
+- **worker** seeds the world on first boot and re-applies hero gear at start-up (heroes store their gear points, so a gear rule change reaches them), then processes due timed events and runs periodic jobs: rankings, zone stats, beginner-protection expiry and cleanup.
 
 ### Import prefixes
 

@@ -287,7 +287,7 @@ describe('POST /gear/{pieceId}/star', () => {
       await setResearch(api, a, TechType.HERO_ENHANCEMENT, 1);
       await api.refused('POST', 'gear/hat/star', 'hero.invalidGearPiece', { token: a.token, status: 400 });
       const r = await api.refused('POST', 'gear/weapon/star', 'hero.notEnoughMedals', { token: a.token, status: 400 });
-      expect(r.body.error?.params).toEqual({ item: { ref: 'item', id: medalId(1) }, amount: 1 });
+      expect(r.body.error?.params).toEqual({ item: { ref: 'item', id: medalId(1) }, amount: gearStarCost(1).count });
     }));
 });
 
