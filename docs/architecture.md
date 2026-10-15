@@ -44,6 +44,23 @@
 - **api** is a thin Fastify layer. Each route passes its contract schemas to `doc(tag, summary, DataSchema, { params, body, querystring })`; fastify-type-provider-zod validates input, serializes output through the schema (stripping unknown keys) and type-checks the handler's return value against it. It authenticates with a JWT and calls one service per request inside `runGame()`. `src/openapi.ts` writes the OpenAPI document without a database (`npm run gen:api`).
 - **worker** seeds the world on first boot, processes due timed events and runs periodic jobs: rankings, zone stats, beginner-protection expiry and cleanup.
 
+### Import prefixes
+
+Code inside a package imports its own files by an absolute path, never a relative one (ESLint):
+
+| Where | Prefix | Mechanism |
+|---|---|---|
+| backend and shared packages | `#/…`, `#test/…` | the package.json `imports` field (Node subpath imports) |
+| client (`client/web`) | `@/…` | a Vite alias plus tsconfig `paths` |
+
+Other packages are imported by name (`@marchlands/game`). Why two prefixes (weighed in October 2026):
+
+- **Node runs the backend's TypeScript directly** (`node src/main.ts` in dev, `gen:api`, `sim`, `delete-player`). Node ignores tsconfig `paths`; its only alias mechanism is `imports`, whose keys must start with `#`. Only the production image would work with `@/`, because esbuild resolves it at bundle time.
+- **Each package has its own root.** `#/repo.ts` resolves through the nearest package.json, so it means `game/src/repo.ts` in game and `db/src/…` in db, in one process. An `@/` alias is one map for everything: the root `tsc` run, vitest and tsx (which reads a single tsconfig per process) can't point `@/` at a different `src/` per package. A list of fallback folders in `paths` would silently pick the wrong file when two packages share a file name.
+- **The client compiles shared code from source.** Vite's `@` alias (→ `client/web/src`) applies to every file it builds, `shared/core` included, so shared packages can't use `@/` at all.
+- **tsx instead of Node** fixes the first point only, adds a runtime dependency and compiles every file at start-up (Node's own type stripping is close to free). The production image gains nothing, since it already runs bundles.
+- **`#/` in the client** would work (Vite and TypeScript 6 read `imports` natively) and give one prefix everywhere, but `@/` is the convention for Vite apps, shadcn/ui and most React code, and the client only ever runs through Vite. Kept as is.
+
 ## A request
 
 1. `POST /api/v1/cities/12/buildings {typeId: 1, positionId: 0}` reaches the API.
