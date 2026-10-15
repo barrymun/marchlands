@@ -8,6 +8,10 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
   - NPC cities at levels 12, 14, 16 and 18, with a single level 18 city at (0, 0).
   - Capturing one lets its owner draft troops from the neighbouring NPC cities: a share of each city's troops (50%?), once per day (to decide).
   - To decide: how they are captured and held, what "neighbouring" means (radius or zone), and what happens to drafted troops when the city is lost.
+- [ ] **Overhaul the marketplace mechanics.**
+  - Now: players post buy and sell orders, and a computer merchant always buys and sells every resource around a reference price that moves with trade (`BALANCE` merchant settings, `merchantJob`, `backend/packages/game/src/engine/market.ts`). The Market tab shows the order book and a price history line chart (`client/web/src/components/market-panel/`).
+  - Plan: a complete rework of how the market works (details to decide).
+  - Better graphs, with a live stock ticker where NPC cities trade in game.
 
 ## Client
 
