@@ -128,6 +128,7 @@ export async function playerState(ctx: Ctx, playerId: number) {
     buffs: buffsArray(player.buffs, ctx.now),
     research: player.research,
     gear: lordGear(player),
+    refundCredit: player.misc.refundCredit ?? {},
     selfArmys: armiesView.self,
     friendArmys: armiesView.friend,
     enemyArmys: armiesView.enemy,

@@ -29,6 +29,26 @@
     "dismissTitle_one": "Dismiss {{n}} injured troop?",
     "dismissTitle_other": "Dismiss {{n}} injured troops?"
   },
+  "dismiss": {
+    "actions": "Actions",
+    "dismissTip": "Dismiss some of these troops",
+    "destroyTip": "Destroy some of these fortifications",
+    "titleTroops": "Dismiss {{unit}}",
+    "titleForts": "Destroy {{unit}}",
+    "troopsInfo": "Dismissed troops leave the army for good and rejoin the population.",
+    "fortsInfo": "Destroyed fortifications are gone for good and free their wall space.",
+    "refundInfo": "They give back {{percent}} of what training them cost, while some of that cost is left to give back: units that cost less to get (a training discount, healing, quest rewards) give back less.",
+    "amount": "How many",
+    "allPlaceholder": "all {{n}}",
+    "refund": "You get back:",
+    "noRefund": "You get back nothing: no training cost is left to give back for these.",
+    "dismiss": "Dismiss {{n}}",
+    "destroy": "Destroy {{n}}",
+    "dismissed_one": "Dismissed {{n}} troop",
+    "dismissed_other": "Dismissed {{n}} troops",
+    "destroyed_one": "Destroyed {{n}} fortification",
+    "destroyed_other": "Destroyed {{n}} fortifications"
+  },
   "production": {
     "training": "Training",
     "fortifications": "Fortifications",

@@ -21,7 +21,7 @@ import {
 import { type CityBundle, mayorOf, openCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { fortBean, heroBean, troopBean } from '#/dto.ts';
-import { addPrestige, pushResources } from '#/helpers.ts';
+import { addPrestige, addRefundCredit, pushResources } from '#/helpers.ts';
 import { saveCity, saveHero, savePlayer } from '#/repo.ts';
 import { prefixed } from '#/stats.ts';
 
@@ -107,14 +107,14 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
   const done: Record<string, number> = {};
   while (queue[0] && queue[0].endTime > 0 && queue[0].endTime <= ctx.now) {
     const head = queue[0];
-    if (positionId === WALLS_QUEUE) {
-      const key = FORT_KEYS[head.troopId as keyof typeof FORT_KEYS] as FortKey | undefined;
-      if (key) b.city.forts = addForts(b.city.forts, { [key]: head.count });
-      if (key) done[key] = (done[key] ?? 0) + head.count;
-    } else {
-      const key = troopKey(head.troopId);
-      if (key) b.city.troops = addTroops(b.city.troops, { [key]: head.count });
-      if (key) done[key] = (done[key] ?? 0) + head.count;
+    const fort = positionId === WALLS_QUEUE;
+    const key = fort ? (FORT_KEYS[head.troopId as keyof typeof FORT_KEYS] as FortKey | undefined) : troopKey(head.troopId);
+    if (key) {
+      if (fort) b.city.forts = addForts(b.city.forts, { [key]: head.count });
+      else b.city.troops = addTroops(b.city.troops, { [key]: head.count });
+      done[key] = (done[key] ?? 0) + head.count;
+      // what the batch paid becomes refund credit (disbandRefund in core)
+      addRefundCredit(b.player, key, head.count * (head.paidShare ?? 1));
     }
     gain += head.count * prestigeOf(PrestigeAction.TRAIN, head.troopId, 1, th);
     exp += head.count * unitExp(head.troopId) * BALANCE.heroExpPerTrain;

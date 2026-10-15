@@ -10,6 +10,7 @@ import {
   buildingLevel,
   BuildingType,
   checkRequirements,
+  disbandRefund,
   findBuilding,
   FORT_ID_BY_KEY,
   FORT_KEYS,
@@ -39,11 +40,11 @@ import {
   wallCapacity,
 } from '@marchlands/core';
 
-import { cityStats, mayorStats, openCity, openOwnCity, viewCity } from '#/city.ts';
+import { type CityBundle, cityStats, mayorStats, openCity, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { fortBean, troopBean } from '#/dto.ts';
 import { completeTraining, pushQueues, queueBean, queueOf, scheduleHead, setQueue, startBatch, WALLS_QUEUE } from '#/engine/training.ts';
-import { gainResources, pushPlayerInfo, pushResources, spendResources, useItemOrGold } from '#/helpers.ts';
+import { addRefundCredit, gainResources, pushPlayerInfo, pushResources, spendResources, useItemOrGold } from '#/helpers.ts';
 import { saveCity, savePlayer } from '#/repo.ts';
 import { prefixed } from '#/stats.ts';
 
@@ -281,7 +282,10 @@ export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number
 // Disband / destroy / injured
 // ---------------------------------------------------------------------------------------------
 
-/** troop.disbandTroop: dismissed troops return to the population. */
+/**
+ * troop.disbandTroop: dismissed troops return to the population. (marchlands) They also return BALANCE.disbandRefund of
+ * their training cost, up to the player's refund credit (disbandRefund in core; orig: nothing).
+ */
 export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, troopId: number, count: number) {
   const key = troopKey(troopId);
   if (!key) throw new GameError(msg('common.invalidTroopType'), -99);
@@ -291,14 +295,15 @@ export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, 
   b.city.troops = addTroops(b.city.troops, { [key]: count }, -1);
   const stats = cityStats(b, ctx.now);
   b.city.population = Math.min(stats.maxPopulation, b.city.population + (troopConfig(troopId)?.population ?? 1) * count);
-  gainResources(b.city, trainCost(troopId, count), BALANCE.disbandRefund);
+  payRefund(ctx, b, key, troopId, count);
   ctx.stat(playerId, cityId, { [`disbanded.${key}`]: count });
   ctx.push(playerId, PushCmd.TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.troops) });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
+  await savePlayer(ctx, b.player);
 }
 
-/** fortifications.destructWallProtect */
+/** fortifications.destructWallProtect. (marchlands) Refunds like disbandTroops (orig: nothing). */
 export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, fortId: number, count: number) {
   const key = FORT_KEYS[fortId as keyof typeof FORT_KEYS];
   if (!key) throw new GameError(msg('training.invalidFort'), -99);
@@ -306,9 +311,21 @@ export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, f
   const b = await openOwnCity(ctx, playerId, cityId);
   if ((b.city.forts[key] ?? 0) < count) throw new GameError(msg('training.notEnoughUnits', { unit: ref.troop(FORT_ID_BY_KEY[key]) }), -99);
   b.city.forts = addForts(b.city.forts, { [key]: count }, -1);
+  payRefund(ctx, b, key, fortId, count);
   ctx.stat(playerId, cityId, { [`disbanded.${key}`]: count });
   ctx.push(playerId, PushCmd.FORTIFICATIONS_UPDATE, { castleId: cityId, fortification: fortBean(b.city.forts) });
+  pushResources(ctx, b);
   await saveCity(ctx, b.city);
+  await savePlayer(ctx, b.player);
+}
+
+/** Pay back disbanded units out of the player's refund credit (disbandRefund in core). Counted as training spending undone. */
+function payRefund(ctx: Ctx, b: CityBundle, key: string, unitId: number, count: number) {
+  const { refund, creditUsed } = disbandRefund(unitId, count, b.player.misc.refundCredit?.[key] ?? 0);
+  if (creditUsed <= 0) return;
+  gainResources(b.city, refund);
+  addRefundCredit(b.player, key, -creditUsed);
+  ctx.stat(b.player.id, b.city.id, prefixed('spent.training', refund, -1));
 }
 
 /** army.cureInjuredTroop: heal injured troops for BALANCE.healCostShare of their training cost, or for honor. */

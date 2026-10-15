@@ -6,7 +6,7 @@ How to work in this repository. Read [README.md](README.md) for what Marchlands 
 
 - **Git:** the maintainer manages git. Don't commit, push or branch unless asked. When asked for a commit message, keep it concise, and don't use double quotes, backticks or `$` in it (it gets pasted into `git commit -m "..."`).
 - **Player-facing language is neutral:** say "player", never "lord" or "lady", in anything a player reads (UI text, item and quest descriptions, error messages, mail). Code identifiers and comments may still say lord.
-- **Planned work** is listed in [TODO.md](TODO.md). Tick an item off (or remove it) in the change that does it.
+- **Planned work** is listed in [TODO.md](TODO.md). In the change that finishes an item, move it to the Done section at the bottom (newest first, dated, one line saying what was done).
 - **Ideas and known quirks for later** go in [docs/backlog.md](docs/backlog.md): what happens now, where, and why it was left.
 - **Deviations are documented:** every rule that differs from the original Evony Age 1 server goes in [docs/deviations.md](docs/deviations.md), marked *(design change)*. Every tunable number lives in `shared/core/src/balance.ts` (`BALANCE`); don't hard-code game values elsewhere.
 - **Don't change behaviour while restructuring.** A refactor moves code; a rule change is its own change, documented as above.

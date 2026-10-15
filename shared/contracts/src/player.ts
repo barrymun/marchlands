@@ -202,6 +202,9 @@ export const PlayerState = z
     buffs: z.array(BuffBean),
     research: ResearchStateSchema.describe('techId -> state'),
     gear: LordGear.describe("(marchlands) the lord's hero gear"),
+    refundCredit: z
+      .record(z.string(), z.number())
+      .describe('(marchlands) troop or fortification key -> units of training cost disbanding can still refund (BALANCE.disbandRefund each)'),
     selfArmys: z.array(ArmyBean),
     friendArmys: z.array(ArmyBean),
     enemyArmys: z.array(ArmyBean),

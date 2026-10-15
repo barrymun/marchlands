@@ -25,6 +25,13 @@ export function addPrestige(p: PlayerRow, amount: number) {
   p.prestige = Math.min(2_100_000_000, Math.max(0, p.prestige + amount));
 }
 
+/** Change the player's refund credit for a troop or fortification (disbandRefund in core): + after training, - on a refund. */
+export function addRefundCredit(p: PlayerRow, key: string, units: number) {
+  const next = Math.max(0, (p.misc.refundCredit?.[key] ?? 0) + units);
+  const { [key]: _, ...rest } = p.misc.refundCredit ?? {};
+  p.misc = { ...p.misc, refundCredit: next > 0 ? { ...rest, [key]: next } : rest };
+}
+
 // ---- items ----
 
 export const itemCount = (p: PlayerRow, id: string) => p.items[id] ?? 0;

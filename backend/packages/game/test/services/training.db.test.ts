@@ -4,6 +4,7 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BuildingType,
+  disbandRefund,
   FORT_KEYS,
   FortType,
   healCost,
@@ -651,7 +652,8 @@ describe(training.disbandTroops.name, () => {
       let city = await reloadCity(g, p.cityId);
       expect(city.troops.peasants).toBe(15);
       expect(city.population).toBe(Math.min(max, before.population + 5));
-      expectResources(resourcesOf(city), minus(resourcesOf(before), trainCost(WORKER, 5), -BALANCE.disbandRefund));
+      // troops with no refund credit (never trained here) refund nothing
+      expectResources(resourcesOf(city), resourcesOf(before));
       expect(g.pushes(PushCmd.TROOP_UPDATE).at(-1)?.data).toMatchObject({ castleId: p.cityId, troop: { peasants: 15 } });
 
       await setCityStats(g, p, { population: max - 2 });
@@ -659,6 +661,42 @@ describe(training.disbandTroops.name, () => {
       city = await reloadCity(g, p.cityId);
       expect(city.troops.peasants ?? 0).toBe(0);
       expect(city.population).toBe(max);
+    }));
+
+  it('refunds BALANCE.disbandRefund of what discounted training paid, out of the refund credit', () =>
+    game(async (g) => {
+      const p = await createTestPlayer(g);
+      await withBarracks(g, p, [1]);
+      await giveItems(g, p, { [ItemId.QUARTERMASTERS_SEAL]: 1 });
+      await shop.useItem(g, p.id, ItemId.QUARTERMASTERS_SEAL, null);
+      const share = 1 - BALANCE.trainCostReduction;
+      await training.train(g, p.id, p.cityId, WORKER, 10, 0);
+      await g.runDue(g.events('train')[0].dueAt);
+      expect((await reloadPlayer(g, p)).misc.refundCredit).toEqual({ peasants: 10 * share });
+
+      const before = await reloadCity(g, p.cityId);
+      await training.disbandTroops(g, p.id, p.cityId, WORKER, 10);
+      const { refund } = disbandRefund(WORKER, 10, 10 * share);
+      expect(refund.food).toBeGreaterThan(0);
+      expectResources(resourcesOf(await reloadCity(g, p.cityId)), minus(resourcesOf(before), refund, -1));
+      for (const k of RESOURCE_KEYS) expect(refund[k]).toBeLessThanOrEqual(trainCost(WORKER, 10, share)[k] * BALANCE.disbandRefund);
+      expect((await reloadPlayer(g, p)).misc.refundCredit).toEqual({});
+      expect(g.pushes(PushCmd.RESOURCE_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { castleId: p.cityId } });
+    }));
+
+  it('refunds only as many units as the credit covers, and uses it up', () =>
+    game(async (g) => {
+      const p = await createTestPlayer(g);
+      await setCityStats(g, p, { troops: { peasants: 20, militia: 5 } });
+      const player = await reloadPlayer(g, p);
+      player.misc = { ...player.misc, refundCredit: { peasants: 6, militia: 5 } };
+      await savePlayer(g, player);
+      const before = await reloadCity(g, p.cityId);
+      await training.disbandTroops(g, p.id, p.cityId, WORKER, 4);
+      await training.disbandTroops(g, p.id, p.cityId, WORKER, 4);
+      expect((await reloadPlayer(g, p)).misc.refundCredit).toEqual({ militia: 5 });
+      const refunded = disbandRefund(WORKER, 6, 6).refund;
+      expectResources(resourcesOf(await reloadCity(g, p.cityId)), minus(resourcesOf(before), refunded, -1));
     }));
 
   it('refuses a bad type, a bad count and more than the city has', () =>
@@ -680,6 +718,20 @@ describe(training.destroyForts.name, () => {
       await training.destroyForts(g, p.id, p.cityId, FortType.TRAP, 4);
       expect((await reloadCity(g, p.cityId)).forts).toEqual({ trap: 6, abatis: 2 });
       expect(g.pushes(PushCmd.FORTIFICATIONS_UPDATE).at(-1)?.data).toMatchObject({ castleId: p.cityId, fortification: { trap: 6, abatis: 2 } });
+    }));
+
+  it('refunds trained fortifications like troops', () =>
+    game(async (g) => {
+      const p = await createTestPlayer(g);
+      await withWalls(g, p, 1);
+      await training.train(g, p.id, p.cityId, FortType.TRAP, 10, WALLS_QUEUE);
+      await g.runDue(g.events('train')[0].dueAt);
+      expect((await reloadPlayer(g, p)).misc.refundCredit).toEqual({ trap: 10 });
+      const before = await reloadCity(g, p.cityId);
+      await training.destroyForts(g, p.id, p.cityId, FortType.TRAP, 4);
+      expectResources(resourcesOf(await reloadCity(g, p.cityId)), minus(resourcesOf(before), disbandRefund(FortType.TRAP, 4, 10).refund, -1));
+      expect((await reloadPlayer(g, p)).misc.refundCredit).toEqual({ trap: 6 });
+      expect(g.pushes(PushCmd.RESOURCE_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { castleId: p.cityId } });
     }));
 
   it('refuses a bad type, a bad count and more than the walls hold', () =>

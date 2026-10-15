@@ -169,6 +169,21 @@ export function trainCost(troopId: number, count: number, costShare = 1): Resour
   return cost;
 }
 
+/**
+ * (marchlands) What disbanding `count` troops or fortifications of `unitId` returns: BALANCE.disbandRefund of their
+ * training cost (rounded down), for as many units as `credit` covers. The credit is the player's refund credit for
+ * that unit (PlayerMisc.refundCredit): finished training adds the share of the cost it paid (0.75 a unit while
+ * discounted), and a refund uses up what it covers. So refunds never exceed BALANCE.disbandRefund of what training
+ * cost, and units that cost less (a discount, healing, quest rewards) can't be turned into resources.
+ */
+export function disbandRefund(unitId: number, count: number, credit: number): { refund: Resources; creditUsed: number } {
+  const creditUsed = Math.min(count, Math.max(0, credit));
+  const refund = trainCost(unitId, creditUsed);
+  // the epsilon keeps float error (50 x 0.9 = 44.99…) from costing a unit of resource
+  for (const k of Object.keys(refund) as (keyof Resources)[]) refund[k] = Math.floor(refund[k] * BALANCE.disbandRefund + 1e-9);
+  return { refund, creditUsed };
+}
+
 export interface NewBuildingCheck {
   typeId: number;
   positionId: number;

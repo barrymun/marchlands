@@ -26,6 +26,24 @@
     "dismissed_other": "{{n}}人の負傷兵を解雇しました",
     "dismissTitle_other": "{{n}}人の負傷兵を解雇しますか?"
   },
+  "dismiss": {
+    "actions": "操作",
+    "dismissTip": "この兵の一部を解雇",
+    "destroyTip": "この防衛施設の一部を破壊",
+    "titleTroops": "{{unit}}を解雇",
+    "titleForts": "{{unit}}を破壊",
+    "troopsInfo": "解雇した兵は永久に軍を離れ、人口に戻ります。",
+    "fortsInfo": "破壊した防衛施設は永久に失われ、城壁の空きが増えます。",
+    "refundInfo": "訓練コストの{{percent}}が、返せる分が残っている限り戻ります。安く手に入れたユニット(訓練の割引、治療、クエスト報酬)は戻る量が少なくなります。",
+    "amount": "数",
+    "allPlaceholder": "全部 {{n}}",
+    "refund": "戻る資源:",
+    "noRefund": "戻る資源はありません: これらのユニットには返せる訓練コストが残っていません。",
+    "dismiss": "{{n}}を解雇",
+    "destroy": "{{n}}を破壊",
+    "dismissed_other": "{{n}}人の兵を解雇しました",
+    "destroyed_other": "{{n}}個の防衛施設を破壊しました"
+  },
   "production": {
     "training": "訓練",
     "fortifications": "防衛施設",

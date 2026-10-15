@@ -111,7 +111,11 @@ export const BALANCE = {
   cancelResearchRefund: 1 / 3, // (orig)
   cancelTrainInProgressRefund: 1 / 3, // (orig)
   cancelTrainQueuedRefund: 1, // (orig)
-  disbandRefund: 0, // (evony) disbanding returns nothing
+  /**
+   * (marchlands) share of the training cost disbanding troops or destroying fortifications returns, for as many units
+   * as the player's refund credit covers (disbandRefund in construction.ts). (evony) disbanding returned nothing
+   */
+  disbandRefund: 0.9,
   outerSlotsBase: 10, // (orig intended) field slots = 10 + 3*TownHall
   outerSlotsPerTownHall: 3,
   /** (marchlands) constructions a city may run at once (orig 1); Bernini's Hammer adds one more */

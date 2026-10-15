@@ -3392,6 +3392,16 @@
             "description": "(marchlands) the lord's hero gear",
             "$ref": "#/components/schemas/LordGearInput"
           },
+          "refundCredit": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "(marchlands) troop or fortification key -> units of training cost disbanding can still refund (BALANCE.disbandRefund each)"
+          },
           "selfArmys": {
             "type": "array",
             "items": {
@@ -3496,6 +3506,7 @@
           "buffs",
           "research",
           "gear",
+          "refundCredit",
           "selfArmys",
           "friendArmys",
           "enemyArmys",
@@ -3576,6 +3587,16 @@
           "gear": {
             "description": "(marchlands) the lord's hero gear",
             "$ref": "#/components/schemas/LordGearInput"
+          },
+          "refundCredit": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "(marchlands) troop or fortification key -> units of training cost disbanding can still refund (BALANCE.disbandRefund each)"
           },
           "selfArmys": {
             "type": "array",
@@ -3685,6 +3706,7 @@
           "buffs",
           "research",
           "gear",
+          "refundCredit",
           "selfArmys",
           "friendArmys",
           "enemyArmys",
@@ -14471,6 +14493,16 @@
             "description": "(marchlands) the lord's hero gear",
             "$ref": "#/components/schemas/LordGear"
           },
+          "refundCredit": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "(marchlands) troop or fortification key -> units of training cost disbanding can still refund (BALANCE.disbandRefund each)"
+          },
           "selfArmys": {
             "type": "array",
             "items": {
@@ -14575,6 +14607,7 @@
           "buffs",
           "research",
           "gear",
+          "refundCredit",
           "selfArmys",
           "friendArmys",
           "enemyArmys",
@@ -14657,6 +14690,16 @@
           "gear": {
             "description": "(marchlands) the lord's hero gear",
             "$ref": "#/components/schemas/LordGear"
+          },
+          "refundCredit": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "(marchlands) troop or fortification key -> units of training cost disbanding can still refund (BALANCE.disbandRefund each)"
           },
           "selfArmys": {
             "type": "array",
@@ -14766,6 +14809,7 @@
           "buffs",
           "research",
           "gear",
+          "refundCredit",
           "selfArmys",
           "friendArmys",
           "enemyArmys",

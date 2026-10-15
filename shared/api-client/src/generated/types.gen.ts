@@ -970,6 +970,12 @@ export type PlayerStateInput = {
      * (marchlands) the lord's hero gear
      */
     gear: LordGearInput;
+    /**
+     * (marchlands) troop or fortification key -> units of training cost disbanding can still refund (BALANCE.disbandRefund each)
+     */
+    refundCredit: {
+        [key: string]: number;
+    };
     selfArmys: Array<ArmyBeanInput>;
     friendArmys: Array<ArmyBeanInput>;
     enemyArmys: Array<ArmyBeanInput>;
@@ -1024,6 +1030,12 @@ export type PlayerCreatedInput = {
      * (marchlands) the lord's hero gear
      */
     gear: LordGearInput;
+    /**
+     * (marchlands) troop or fortification key -> units of training cost disbanding can still refund (BALANCE.disbandRefund each)
+     */
+    refundCredit: {
+        [key: string]: number;
+    };
     selfArmys: Array<ArmyBeanInput>;
     friendArmys: Array<ArmyBeanInput>;
     enemyArmys: Array<ArmyBeanInput>;
@@ -4083,6 +4095,12 @@ export type PlayerState = {
      * (marchlands) the lord's hero gear
      */
     gear: LordGear;
+    /**
+     * (marchlands) troop or fortification key -> units of training cost disbanding can still refund (BALANCE.disbandRefund each)
+     */
+    refundCredit: {
+        [key: string]: number;
+    };
     selfArmys: Array<ArmyBean>;
     friendArmys: Array<ArmyBean>;
     enemyArmys: Array<ArmyBean>;
@@ -4137,6 +4155,12 @@ export type PlayerCreated = {
      * (marchlands) the lord's hero gear
      */
     gear: LordGear;
+    /**
+     * (marchlands) troop or fortification key -> units of training cost disbanding can still refund (BALANCE.disbandRefund each)
+     */
+    refundCredit: {
+        [key: string]: number;
+    };
     selfArmys: Array<ArmyBean>;
     friendArmys: Array<ArmyBean>;
     enemyArmys: Array<ArmyBean>;

@@ -1,14 +1,14 @@
 // The one way the client asks "are you sure?": a dialog with Cancel and a confirm button. Never the
 // browser's confirm() or a click-twice button.
 
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ConfirmProps } from '@/components/confirm-dialog/types';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-/** A controlled confirmation dialog. */
+/** A controlled confirmation dialog; `children` (optional) go between the description and the buttons. */
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -17,8 +17,10 @@ export function ConfirmDialog({
   confirmLabel,
   cancelLabel,
   destructive = true,
+  disabled = false,
   onConfirm,
-}: ConfirmProps & { open: boolean; onOpenChange: (open: boolean) => void }) {
+  children,
+}: ConfirmProps & { open: boolean; onOpenChange: (open: boolean) => void; disabled?: boolean; children?: ReactNode }) {
   const { t } = useTranslation('common');
   const [busy, setBusy] = useState(false);
   const confirm = async () => {
@@ -39,11 +41,12 @@ export function ConfirmDialog({
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
+        {children}
         <DialogFooter>
           <Button variant="outline" disabled={busy} onClick={() => onOpenChange(false)}>
             {cancelLabel ?? t('actions.cancel')}
           </Button>
-          <Button variant={destructive ? 'destructive' : 'default'} disabled={busy} onClick={() => void confirm()}>
+          <Button variant={destructive ? 'destructive' : 'default'} disabled={busy || disabled} onClick={() => void confirm()}>
             {confirmLabel}
           </Button>
         </DialogFooter>

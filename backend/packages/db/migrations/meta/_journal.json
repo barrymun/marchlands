@@ -169,6 +169,13 @@
       "when": 1791745462670,
       "tag": "0023_shares",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792101800143,
+      "tag": "0024_refund_credit",
+      "breakpoints": true
     }
   ]
 }

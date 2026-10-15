@@ -4,9 +4,6 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
 
 ## Gameplay
 
-- [ ] **Refund resources when troops are destroyed.**
-  - Now: disbanding returns nothing (`BALANCE.disbandRefund: 0`, used by `disbandTroops` in `backend/packages/game/src/services/training.ts`), and destroying fortifications (`destroyForts`) refunds nothing either.
-  - Plan: return most of the training cost, e.g. 90% (decide the share). Decide whether fortifications get the same refund.
 - [ ] **Rework gear power.**
   - Now: a piece at level `n` gives 1 + 2 + … + n points (`gearLevelPoints` in `shared/core/src/gear.ts`), so a level 10 set with no stars gives 55 × 14 pieces = 770. Each star adds 3 points (`BALANCE.heroGear.starPoints`).
   - Plan: 1 point per level per piece, so a level 10 set with no stars gives 1 × 10 × 14 = 140.
@@ -27,6 +24,9 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
   - Images for cities and for each valley type.
   - Move around the map by dragging (and by touch on phones) instead of only the arrow buttons.
 
-## Code quality
+## Done
 
-- [x] **Sort imports alphabetically, enforced by the linter.** `import-x/order`, `sort-imports` and `tools/eslint/import-spacing.mjs` in `eslint.config.js` (AGENTS.md, Formatting and linting).
+Newest first, with the date it was finished.
+
+- 2026-10-15: **Refund resources when troops are destroyed.** 90% of the training cost, up to a per-player refund credit that training adds to, for troops and fortifications (injured troops still refund nothing). See [docs/deviations.md](docs/deviations.md).
+- 2026-10-15: **Sort imports alphabetically, enforced by the linter.** `import-x/order`, `sort-imports` and `tools/eslint/import-spacing.mjs` in `eslint.config.js` (AGENTS.md, Formatting and linting).

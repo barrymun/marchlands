@@ -10,6 +10,7 @@ import {
   coinsForSpeedup,
   computeCityStats,
   createRandomHero,
+  disbandRefund,
   type EconomyCity,
   type EconomyContext,
   freshNpcState,
@@ -778,5 +779,42 @@ describe('(marchlands) troop training discount', () => {
     const have = { gold: 1e9, food: full.food, wood: 1e9, stone: 1e9, iron: 1e9 };
     expect(maxTrainableCount(3, have, 1e9)).toBe(3);
     expect(maxTrainableCount(3, have, 1e9, 0.75)).toBe(4);
+  });
+});
+
+describe(disbandRefund.name, () => {
+  const share = (cost: number, units: number) => Math.floor(cost * units * BALANCE.disbandRefund + 1e-9);
+
+  it('returns the refund share of the training cost, rounded down, for units the credit covers', () => {
+    const full = trainCost(3, 10);
+    const r = disbandRefund(3, 10, 25);
+    expect(r.creditUsed).toBe(10);
+    for (const k of ['gold', 'food', 'wood', 'stone', 'iron'] as const) expect(r.refund[k]).toBe(share(full[k] / 10, 10));
+  });
+
+  it('refunds only as many units as the credit covers', () => {
+    const one = trainCost(3, 1);
+    const r = disbandRefund(3, 10, 7.5);
+    expect(r.creditUsed).toBe(7.5);
+    expect(r.refund.food).toBe(share(one.food, 7.5));
+  });
+
+  it('refunds nothing without credit', () => {
+    const r = disbandRefund(3, 10, 0);
+    expect(r.creditUsed).toBe(0);
+    expect(Object.values(r.refund).every((v) => v === 0)).toBe(true);
+    expect(disbandRefund(3, 10, -1).creditUsed).toBe(0);
+  });
+
+  it('never returns more than the share of what discounted training paid', () => {
+    // trained at 0.75 of the cost: 100 units add 75 units of credit
+    const paid = trainCost(3, 100, 0.75);
+    const r = disbandRefund(3, 100, 100 * 0.75);
+    for (const k of ['gold', 'food', 'wood', 'stone', 'iron'] as const) expect(r.refund[k]).toBeLessThanOrEqual(paid[k] * BALANCE.disbandRefund);
+  });
+
+  it('works for fortifications', () => {
+    const full = trainCost(14, 4);
+    expect(disbandRefund(14, 4, 4).refund.wood).toBe(share(full.wood, 1));
   });
 });

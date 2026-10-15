@@ -198,6 +198,8 @@ export const PlayerMiscSchema = z.object({
   armyPresets: z.array(ArmyPresetSchema).optional(),
   /** (marchlands) hero gear stars bought per piece (gear.ts) */
   gearStars: z.record(z.string(), z.number().int()).optional(),
+  /** (marchlands) troop or fortification key -> units of training cost disbanding can still refund (disbandRefund) */
+  refundCredit: z.record(z.string(), z.number()).optional(),
 });
 export type PlayerMisc = z.infer<typeof PlayerMiscSchema>;
 
