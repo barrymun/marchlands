@@ -1,17 +1,19 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, type QueryKey } from '@tanstack/react-query';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
+  type CityBean,
   getArmiesQueryKey,
   getCitiesByCityIdQueryKey,
   getCitiesTroopsQueuesQueryKey,
   getPlayerQueryKey,
-  getReportsUnreadQueryKey,
-  type CityBean,
   type GetPlayerResponse,
+  getReportsUnreadQueryKey,
   type HeroBean,
   type PushClient,
   PushCmd,
 } from '@marchlands/api-client';
+
 import { PUSH_HANDLERS, subscribePushHandlers } from '@/lib/push/handlers';
 
 const toast = vi.hoisted(() => Object.assign(vi.fn(), { success: vi.fn(), warning: vi.fn(), info: vi.fn() }));

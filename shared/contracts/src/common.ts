@@ -1,7 +1,7 @@
 // Envelope and primitives shared by every endpoint.
 
 import { z } from 'zod';
-import { FortKeySchema, MessageSchema, TroopKeySchema, type FortKey, type TroopKey } from '@marchlands/core';
+import { type FortKey, FortKeySchema, MessageSchema, type TroopKey, TroopKeySchema } from '@marchlands/core';
 
 /** Every successful call answers `{ ok: 1, data }`. */
 export const Ok = <T extends z.ZodType>(data: T) => z.object({ ok: z.literal(1), data });

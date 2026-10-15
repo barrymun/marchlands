@@ -1,17 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
+import { PushCmd } from '@marchlands/contracts';
 import { BALANCE, BuildingType, MarketSide, merchantBase, merchantMarginal, merchantSells, msg, ref, ReportType } from '@marchlands/core';
 
-import { PushCmd } from '@marchlands/contracts';
-
 import { market, reports } from '#/index.ts';
-
 import { expectRefused } from '#test/support/expect.ts';
-
 import { createTestPlayer, reloadCity, type TestPlayer } from '#test/support/factories.ts';
-
 import { game } from '#test/support/game.ts';
-
 import { createTrader, escrowGold, GOLD, Res, withFee, withMerchantCurve } from '#test/support/market.ts';
 
 /** The merchant's fixed price for wood (BALANCE.merchant.fixedPrice). */

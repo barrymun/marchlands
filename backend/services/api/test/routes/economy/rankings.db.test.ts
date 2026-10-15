@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE } from '@marchlands/core';
+
 import type { RankingAlliancePage, RankingCastlePage, RankingHeroPage, RankingPlayerPage } from '@marchlands/contracts';
+import { BALANCE } from '@marchlands/core';
 import { admin } from '@marchlands/game';
+
 import { apiTest } from '#test/support/api.ts';
 import { accountWithoutPlayer, expectInvalid, expectNeedsToken } from '#test/support/guards.ts';
 

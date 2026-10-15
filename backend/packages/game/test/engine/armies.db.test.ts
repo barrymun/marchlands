@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { ArmyDirection, BuildingType, HeroStatus, marchTimeMs, Mission, msg, ref, TechType, TileType, tileXY } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
-import { getHero, getTile, type ArmyRow } from '#/repo.ts';
+import { ArmyDirection, BuildingType, HeroStatus, marchTimeMs, Mission, msg, ref, TechType, TileType, tileXY } from '@marchlands/core';
+
+import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner, tilePosition } from '#/engine/armies.ts';
+import { type ArmyRow, getHero, getTile } from '#/repo.ts';
 import { armyRow, arrive, lastPush, send, tileNear, valleyNear, warrior } from '#test/support/armies.ts';
 import { cityBundle, reloadCity, setBuildings, setResearch } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner, tilePosition } from '#/engine/armies.ts';
 
 describe(tilePosition.name, () => {
   it('names a city by its name, a valley or barbarian city by type and level, flat land by type', () =>

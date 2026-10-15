@@ -1,17 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
+import { PushCmd } from '@marchlands/contracts';
 import { AllianceRank, BALANCE, MailType, msg, ref } from '@marchlands/core';
 
-import { PushCmd } from '@marchlands/contracts';
-
 import { alliance, mail } from '#/index.ts';
-
 import { addMember, allianceRow, createTestAlliance } from '#test/support/alliance.ts';
-
 import { expectRefused } from '#test/support/expect.ts';
-
 import { createTestPlayer, reloadPlayer } from '#test/support/factories.ts';
-
 import { game } from '#test/support/game.ts';
 
 describe(alliance.setRank.name, () => {

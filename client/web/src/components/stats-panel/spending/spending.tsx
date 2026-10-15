@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { fmt, RESOURCES, resourceLabel } from '@/lib/format';
-import type { Counters } from '@/components/stats-panel/types';
-import { sumPrefix } from '@/components/stats-panel/utils';
+
 import { Num } from '@/components/stats-panel/num/num';
 import { SPENDING } from '@/components/stats-panel/spending/constants';
+import type { Counters } from '@/components/stats-panel/types';
+import { sumPrefix } from '@/components/stats-panel/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { fmt, resourceLabel, RESOURCES } from '@/lib/format';
 
 export function Spending({ c }: { c: Counters }) {
   const { t } = useTranslation(['stats-panel', 'common']);

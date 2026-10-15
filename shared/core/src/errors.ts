@@ -1,4 +1,4 @@
-import { msgLogText, type Message } from '#/messages/index.ts';
+import { type Message, msgLogText } from '#/messages/index.ts';
 
 /**
  * A rule violation reported back to the player. `code` mirrors the original server's `ok` field (negative

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { BuildingType, dur, HeroStatus, Mission, msg, ref, TroopType } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { BuildingType, dur, HeroStatus, Mission, msg, ref, TroopType } from '@marchlands/core';
+
 import { armies, flows } from '#/index.ts';
 import { heroesOfCity } from '#/repo.ts';
 import { expectRefused } from '#test/support/expect.ts';

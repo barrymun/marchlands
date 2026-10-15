@@ -2,6 +2,8 @@
 // trade statistics shared with trade.*.
 
 import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BASIC_RESOURCES,
@@ -16,12 +18,12 @@ import {
   ReportType,
 } from '@marchlands/core';
 import { marketOrders, marketShipments, marketTrades, worldState } from '@marchlands/db';
+
 import { openCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
+import { createReport } from '#/engine/reports.ts';
 import { gainResources, pushResources } from '#/helpers.ts';
 import { citiesOf, saveCity } from '#/repo.ts';
-import { createReport } from '#/engine/reports.ts';
-import { PushCmd } from '@marchlands/contracts';
 
 export const GOLD = 4;
 export const resKey = (t: number) => (t === GOLD ? 'gold' : BASIC_RESOURCES[t]);

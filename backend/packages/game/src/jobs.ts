@@ -1,14 +1,16 @@
 // Periodic maintenance run by the worker.
 
 import { and, eq, lt, sql } from 'drizzle-orm';
+
 import { BALANCE } from '@marchlands/core';
-import { players, type Db } from '@marchlands/db';
+import { type Db, players } from '@marchlands/db';
+
 import { runGame } from '#/context.ts';
-import { getPlayer, savePlayer } from '#/repo.ts';
-import { checkBeginner } from '#/engine/player.ts';
 import { merchantSweep } from '#/engine/market.ts';
+import { checkBeginner } from '#/engine/player.ts';
 import { refreshRankings } from '#/engine/rankings.ts';
 import { refreshZoneStats } from '#/engine/world.ts';
+import { getPlayer, savePlayer } from '#/repo.ts';
 import { compactStats } from '#/stats.ts';
 
 export async function rankingsJob(db: Db) {

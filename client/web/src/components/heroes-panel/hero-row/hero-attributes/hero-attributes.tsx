@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
+
 import type { HeroBean } from '@marchlands/api-client';
+
 import { dominantAttribute, heroAttributeValues } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
 

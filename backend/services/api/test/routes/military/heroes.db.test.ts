@@ -1,10 +1,12 @@
 // Hero routes (src/routes/military.ts): the city's heroes, the tavern, the mayor, hero commands, the lord's gear
 // and captives. The rules are covered by the heroes service tests.
 
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { BuildingType, gearStarCost, HeroBuffId, HeroStatus, ItemId, medalId, msg, TechType } from '@marchlands/core';
 import { cities, heroes, players } from '@marchlands/db';
+
 import { apiTest, type TestApi } from '#test/support/api.ts';
 import {
   addHero,
@@ -15,6 +17,7 @@ import {
   itGuards,
   itGuardsHero,
   itNeedsPlayer,
+  type Lord,
   lords,
   patchHero,
   readHero,
@@ -22,7 +25,6 @@ import {
   setBuildings,
   setResearch,
   setResources,
-  type Lord,
 } from '#test/support/city-fixtures.ts';
 
 const INN = 2;

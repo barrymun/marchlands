@@ -1,8 +1,10 @@
-import { useTranslation } from 'react-i18next';
 import { Medal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { medalOdds } from '@marchlands/core';
-import { percent } from '@/lib/format';
+
 import { medalName } from '@/components/map-panel/medal-odds/utils';
+import { percent } from '@/lib/format';
 
 /** What winning an attack on this city can drop (core medalOdds; a lord's city counts its Town Hall level). */
 export function MedalOdds({ level }: { level: number }) {

@@ -2,20 +2,15 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { PushCmd } from '@marchlands/contracts';
 import { ArmyDirection, BALANCE, BASIC_RESOURCES, HeroStatus, Mission, msg, ReportType, TileType } from '@marchlands/core';
 
-import { PushCmd } from '@marchlands/contracts';
-
+import { processArmy } from '#/engine/combat.ts';
 import { admin } from '#/index.ts';
 import { citiesOf, getHero, getTile } from '#/repo.ts';
-
 import { armyRow, arrive, lastReport, NO_RESOURCES, reportTitles, send, tileNear, warrior } from '#test/support/armies.ts';
-
 import { addHero, reloadCity } from '#test/support/factories.ts';
-
 import { game } from '#test/support/game.ts';
-
-import { processArmy } from '#/engine/combat.ts';
 
 const goods = { ...NO_RESOURCES, ...Object.fromEntries(BASIC_RESOURCES.map((k) => [k, BALANCE.newCityMinResource])), gold: 500 };
 

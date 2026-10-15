@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, BuildingType, TOWN_HALL_POSITION } from '@marchlands/core';
+
 import type { BuildingBean } from '@marchlands/api-client';
-import { fieldSlots } from '@/components/buildings-panel/utils';
+import { BALANCE, BuildingType, TOWN_HALL_POSITION } from '@marchlands/core';
+
 import { OUTSIDE } from '@/components/buildings-panel/constants';
+import { fieldSlots } from '@/components/buildings-panel/utils';
 
 const building = (positionId: number, typeId: number, level: number): BuildingBean => ({ positionId, typeId, level, status: 0, startTime: 0, endTime: 0 });
 

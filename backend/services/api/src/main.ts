@@ -1,6 +1,7 @@
 import { setGameSpeed } from '@marchlands/core';
 import { connect } from '@marchlands/db';
 import { startStatsFlusher } from '@marchlands/game';
+
 import { buildApp } from '#/app.ts';
 import { loadConfig } from '#/config.ts';
 import { PushGateway } from '#/ws/gateway.ts';

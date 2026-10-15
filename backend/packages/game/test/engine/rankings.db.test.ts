@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
+
 import { BALANCE } from '@marchlands/core';
 import { alliances } from '@marchlands/db';
+
+import { refreshRankings } from '#/engine/rankings.ts';
+import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
 import { createTestPlayer, reloadPlayer, setCityStats } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
-import { refreshRankings } from '#/engine/rankings.ts';
 import { setFame } from '#test/support/rankings.ts';
 
 // the rankings cover the whole (otherwise empty) test world, so ranks are exact

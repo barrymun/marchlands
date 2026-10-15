@@ -1,15 +1,17 @@
+import { Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Minus, Plus } from 'lucide-react';
-import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postHeroesPointsMutation, postHeroesResetMutation, type HeroBean } from '@marchlands/api-client';
-import { HeroStatus, heroManagement, itemGoldPrice, mayorProductionBonus } from '@marchlands/core';
+
+import { getCitiesByCityIdQueryKey, getPlayerQueryKey, type HeroBean, postHeroesPointsMutation, postHeroesResetMutation } from '@marchlands/api-client';
+import { heroManagement, HeroStatus, itemGoldPrice, mayorProductionBonus } from '@marchlands/core';
+
+import { HOLY_WATER, STATS } from '@/components/hero-points-dialog/points-form/constants';
+import type { StatKey } from '@/components/hero-points-dialog/points-form/types';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { useCommand, usePlayer } from '@/hooks/use-game';
-import { fmt, signedRate, percent } from '@/lib/format';
-import { HOLY_WATER, STATS } from '@/components/hero-points-dialog/points-form/constants';
-import type { StatKey } from '@/components/hero-points-dialog/points-form/types';
+import { fmt, percent, signedRate } from '@/lib/format';
 
 export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBean; cityId: number; fieldOutput: number; onDone: () => void }) {
   const { t } = useTranslation(['hero-points-dialog', 'common']);

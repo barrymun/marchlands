@@ -2,12 +2,14 @@
 // marching home and the armies a lord can see.
 
 import { eq, or } from 'drizzle-orm';
-import { ArmyDirection, BuildingType, buildingLevel, HeroStatus, marchTimeMs, Mission, msg, ref, TileType, tileXY, type Message } from '@marchlands/core';
+
+import { PushCmd } from '@marchlands/contracts';
+import { ArmyDirection, buildingLevel, BuildingType, HeroStatus, marchTimeMs, type Message, Mission, msg, ref, TileType, tileXY } from '@marchlands/core';
 import { armies, cities, heroes, players } from '@marchlands/db';
+
 import { type Ctx } from '#/context.ts';
 import { armyBean } from '#/dto.ts';
-import { findCity, getPlayer, saveArmy, type ArmyRow, type TileRow } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
+import { type ArmyRow, findCity, getPlayer, saveArmy, type TileRow } from '#/repo.ts';
 
 export const armyRef = (id: number) => `army:${id}`;
 

@@ -2,9 +2,11 @@
 // missing, applies the migrations and seeds the world map once (later runs reuse it). Tests never commit (see
 // game.ts), so the database stays as the setup left it.
 
-import type { TestProject } from 'vitest/node';
 import pg from 'pg';
+import type { TestProject } from 'vitest/node';
+
 import { connect, runMigrations } from '@marchlands/db';
+
 import { world } from '#/index.ts';
 
 declare module 'vitest' {

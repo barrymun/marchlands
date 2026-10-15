@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
+
 import { getGameSpeed } from '@marchlands/core';
-import { signedRate } from '@/lib/format';
+
 import type { Row } from '@/components/resource-bar/types';
+import { signedRate } from '@/lib/format';
 
 export function Rows({ rows, total }: { rows: Row[]; total: number }) {
   const { t } = useTranslation(['resource-bar', 'common']);

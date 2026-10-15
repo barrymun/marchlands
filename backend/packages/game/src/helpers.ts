@@ -1,13 +1,15 @@
 // Small shared mutations + their push notifications.
 
 import { count, eq } from 'drizzle-orm';
-import { GameError, hasResources, msg, RESOURCE_KEYS, type BuffId, type BuffState, type Message, type Resources } from '@marchlands/core';
+
+import { PushCmd } from '@marchlands/contracts';
+import { type BuffId, type BuffState, GameError, hasResources, type Message, msg, RESOURCE_KEYS, type Resources } from '@marchlands/core';
 import { alliances, cities } from '@marchlands/db';
-import { cityStats, type CityBundle } from '#/city.ts';
+
+import { type CityBundle, cityStats } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
 import { cityBean, playerInfo, resourceBean } from '#/dto.ts';
 import type { CityRow, PlayerRow } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
 
 export function spendResources(city: CityRow, cost: Partial<Resources>, message: Message = msg('common.notEnoughResources'), code = -1) {
   if (!hasResources(city, cost)) throw new GameError(message, code);

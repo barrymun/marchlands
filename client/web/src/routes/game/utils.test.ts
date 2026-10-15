@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+
 import type { HeroBean } from '@marchlands/api-client';
 import { HeroStatus } from '@marchlands/core';
+
 import { mayorOf } from '@/routes/game/utils';
 
 /** Only the fields mayorOf reads matter; the rest of the bean is irrelevant here. */

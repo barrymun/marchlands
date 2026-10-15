@@ -1,7 +1,7 @@
+import { and, eq, isNull } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { and, eq, isNull } from 'drizzle-orm';
-
+import { type CreatePlayerBody, PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
   BALANCE,
@@ -22,16 +22,14 @@ import {
   tileXY,
   TITLES,
 } from '@marchlands/core';
-
-import { type CreatePlayerBody, PushCmd } from '@marchlands/contracts';
-
 import { accounts, alliances, armies as armyRows, cities, heroes, mails, reports as reportRows, tiles, timedEvents } from '@marchlands/db';
 
+import { sendSystemMail } from '#/engine/mail.ts';
+import { initialCity, isProtected } from '#/engine/player.ts';
+import { createReport } from '#/engine/reports.ts';
 import { admin, alliance, armies, mail, player, reports } from '#/index.ts';
 import { getCity, getPlayer, getTile, savePlayer } from '#/repo.ts';
-
 import { expectRefused } from '#test/support/expect.ts';
-
 import {
   addHero,
   createTestPlayer,
@@ -43,14 +41,7 @@ import {
   setResources,
   type TestPlayer,
 } from '#test/support/factories.ts';
-
 import { game, type TestGame } from '#test/support/game.ts';
-
-import { sendSystemMail } from '#/engine/mail.ts';
-
-import { initialCity, isProtected } from '#/engine/player.ts';
-
-import { createReport } from '#/engine/reports.ts';
 
 let accountSerial = 0;
 

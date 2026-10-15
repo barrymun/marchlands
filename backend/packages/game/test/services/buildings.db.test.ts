@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
-  BuildingStatus,
-  BuildingType,
   buildCost,
   buildingMaxLevel,
+  BuildingStatus,
+  BuildingType,
   buildTimeMs,
   dur,
   fullDemolishRefund,
@@ -14,17 +16,18 @@ import {
   msg,
   ref,
   RESOURCE_KEYS,
+  type Resources,
   scaled,
   SpeedupId,
   speedupItemGold,
   TechType,
   TroopType,
   unlockedOuterSlots,
-  type Resources,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
-import { buildings, shop, training } from '#/index.ts';
+
 import { mayorStats } from '#/city.ts';
+import { buildings, shop, training } from '#/index.ts';
+import { appointMayor, buildingAt } from '#test/support/buildings.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import {
   cityBundle,
@@ -40,7 +43,6 @@ import {
   type TestPlayer,
 } from '#test/support/factories.ts';
 import { game, T0, type TestGame } from '#test/support/game.ts';
-import { buildingAt, appointMayor } from '#test/support/buildings.ts';
 
 const { COTTAGE, WAREHOUSE, FARM, MARKETPLACE, ACADEMY, BARRACKS, RALLY_SPOT, TOWN_HALL, WALLS } = BuildingType;
 const GONE = { typeId: 0, level: 0, status: 0, startTime: 0, endTime: 0 };

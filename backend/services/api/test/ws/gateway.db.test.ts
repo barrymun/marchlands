@@ -2,13 +2,15 @@
 // is also the gateway's database, so they never commit; the NOTIFY that a commit would send is sent by hand from
 // another connection (a NOTIFY writes no rows).
 
-import { describe, expect, inject, it, vi } from 'vitest';
 import { desc, sql } from 'drizzle-orm';
+import { describe, expect, inject, it, vi } from 'vitest';
+
 import { PushCmd } from '@marchlands/contracts';
 import { pushMessages } from '@marchlands/db';
-import { PUSH_CHANNEL } from '@marchlands/game';
 import { testDb } from '@marchlands/db/test/support/db.ts';
-import { PushGateway, type GatewayLogger, type Socketish } from '#/ws/gateway.ts';
+import { PUSH_CHANNEL } from '@marchlands/game';
+
+import { type GatewayLogger, PushGateway, type Socketish } from '#/ws/gateway.ts';
 import { apiTest, type TestApi } from '#test/support/api.ts';
 
 function fakeSocket() {

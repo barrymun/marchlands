@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next';
+
 import { FORT_KEY_LIST, TROOP_KEY_LIST } from '@marchlands/core';
+
+import { Num } from '@/components/stats-panel/num/num';
+import type { Counters } from '@/components/stats-panel/types';
+import { UNIT_COLUMNS } from '@/components/stats-panel/units/constants';
+import { unitCount, unitName } from '@/components/stats-panel/units/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { Counters } from '@/components/stats-panel/types';
-import { Num } from '@/components/stats-panel/num/num';
-import { unitCount, unitName } from '@/components/stats-panel/units/utils';
-import { UNIT_COLUMNS } from '@/components/stats-panel/units/constants';
 
 export function Units({ c }: { c: Counters }) {
   const { t } = useTranslation(['stats-panel', 'common']);

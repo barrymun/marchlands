@@ -1,7 +1,9 @@
-import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
-import { getCitiesFortificationsQueuesOptions, getCitiesResearchOptions, getCitiesTroopsQueuesOptions, type CityBean } from '@marchlands/api-client';
+import { useNavigate } from 'react-router';
+
+import { type CityBean, getCitiesFortificationsQueuesOptions, getCitiesResearchOptions, getCitiesTroopsQueuesOptions } from '@marchlands/api-client';
 import { buildingLevel, BuildingType } from '@marchlands/core';
+
 import type { Job } from '@/components/activity-dock/types';
 import { fmtExact } from '@/lib/format';
 import { buildingName, techName, troopName } from '@/lib/game-data';

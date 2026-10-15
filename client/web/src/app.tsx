@@ -1,12 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes } from 'react-router';
+
 import { ApiError } from '@marchlands/api-client';
+
+import { FullPageMessage } from '@/components/full-page-message/full-page-message';
 import { useToken } from '@/hooks/use-auth';
 import { usePlayer } from '@/hooks/use-game';
-import { LoginPage } from '@/routes/login/login';
 import { CreateLordPage } from '@/routes/create-lord/create-lord';
 import { GamePage } from '@/routes/game/game';
-import { FullPageMessage } from '@/components/full-page-message/full-page-message';
+import { LoginPage } from '@/routes/login/login';
 
 export function App() {
   const token = useToken();

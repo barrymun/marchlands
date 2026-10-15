@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
+
+import type { StepItem } from '@/components/flows-panel/run-flow/run-report/step-items/types';
 import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
-import type { StepItem } from '@/components/flows-panel/run-flow/run-report/step-items/types';
 
 /** Per-target outcomes; when every target was skipped for the same reason, the reason is shown once. */
 export function StepItems({ items }: { items: StepItem[] }) {

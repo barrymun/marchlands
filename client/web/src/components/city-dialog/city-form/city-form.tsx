@@ -1,30 +1,32 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+
 import {
+  type CityBean,
   getCitiesByCityIdQueryKey,
   getMapQueryKey,
   getMapTilesByTileIdQueryKey,
   getPlayerQueryKey,
   patchCitiesByCityIdMutation,
   postCitiesMoveMutation,
-  type CityBean,
 } from '@marchlands/api-client';
-import { BALANCE, itemGoldPrice, BuffId } from '@marchlands/core';
+import { BALANCE, BuffId, itemGoldPrice } from '@marchlands/core';
+
+import { TELEPORT } from '@/components/city-dialog/city-form/constants';
+import { TaxRate } from '@/components/city-dialog/city-form/tax-rate/tax-rate';
+import { WorkRates } from '@/components/city-dialog/city-form/work-rates/work-rates';
+import { Countdown } from '@/components/countdown/countdown';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Countdown } from '@/components/countdown/countdown';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';
-import { allOf } from '@/lib/query-keys';
 import { fmt } from '@/lib/format';
-import { TELEPORT } from '@/components/city-dialog/city-form/constants';
-import { WorkRates } from '@/components/city-dialog/city-form/work-rates/work-rates';
-import { TaxRate } from '@/components/city-dialog/city-form/tax-rate/tax-rate';
 import { itemName, zoneName } from '@/lib/game-data';
+import { allOf } from '@/lib/query-keys';
 
 export function CityForm({ city, target, onDone }: { city: CityBean; target?: { x: number; y: number }; onDone: () => void }) {
   const { t } = useTranslation(['city-dialog', 'common']);

@@ -1,13 +1,16 @@
 // openapi.ts is a script (it writes on import): run it in a child process, writing to a temporary file, never to the
 // repository's shared/api-client/openapi.json.
 
-import { afterEach, describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
+
+import { afterEach, describe, expect, it } from 'vitest';
+
 import type { Db } from '@marchlands/db';
+
 import { buildApp } from '#/app.ts';
 import { loadConfig } from '#/config.ts';
 

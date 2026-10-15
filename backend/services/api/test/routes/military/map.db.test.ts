@@ -1,12 +1,14 @@
 // Map routes (src/routes/military.ts): the map view, tile details and the tile search. They need a token but no
 // player: an account without one sees the map with no relations. The rules are covered by the world service tests.
 
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { BALANCE, Relation, TileType } from '@marchlands/core';
 import { cities } from '@marchlands/db';
+
 import { apiTest, type TestApi } from '#test/support/api.ts';
-import { expectInvalid, lords, patchTile, type Lord } from '#test/support/city-fixtures.ts';
+import { expectInvalid, type Lord, lords, patchTile } from '#test/support/city-fixtures.ts';
 
 type Castle = { id: number; cityId?: number; playerId?: number; relation?: number; name?: string };
 type Tile = { id: number; type: number; level: number; cityId: number | null; ownerCityId: number | null; x: number; y: number };

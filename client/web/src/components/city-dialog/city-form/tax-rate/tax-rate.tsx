@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getCitiesByCityIdQueryKey, putCitiesTaxMutation, type CityBean } from '@marchlands/api-client';
-import { merchantBase, merchantFixed, BASIC_RESOURCES, type BasicResource } from '@marchlands/core';
+
+import { type CityBean, getCitiesByCityIdQueryKey, putCitiesTaxMutation } from '@marchlands/api-client';
+import { BASIC_RESOURCES, type BasicResource, merchantBase, merchantFixed } from '@marchlands/core';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

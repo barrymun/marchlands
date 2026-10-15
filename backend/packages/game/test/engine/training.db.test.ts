@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
+
 import { TroopType } from '@marchlands/core';
+
+import { completeTraining, hasTrainingRoom } from '#/engine/training.ts';
 import { training } from '#/index.ts';
 import { cityBundle, createTestPlayer, reloadCity } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { completeTraining, hasTrainingRoom } from '#/engine/training.ts';
-import { withBarracks, queueOf, batchMs } from '#test/support/training.ts';
+import { batchMs, queueOf, withBarracks } from '#test/support/training.ts';
+
 const { WORKER, WARRIOR } = TroopType;
 
 describe(hasTrainingRoom.name, () => {

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
 import { AuthForm } from '@/routes/login/auth-form/auth-form';
 
 export function LoginPage() {

@@ -2,6 +2,7 @@
 // a city's production queues and batch times.
 
 import { BuildingType, trainBatchMs } from '@marchlands/core';
+
 import { training } from '#/index.ts';
 import { cityBundle, reloadCity, setBuildings, type TestPlayer } from '#test/support/factories.ts';
 import { type TestGame } from '#test/support/game.ts';

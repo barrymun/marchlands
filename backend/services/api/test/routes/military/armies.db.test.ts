@@ -2,10 +2,12 @@
 // armies, march parameters and estimates, allied troops stationed in a city, and giving up or raising valleys.
 // The rules are covered by the armies and combat service tests.
 
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { ArmyDirection, BuildingType, HeroStatus, Mission, TileType } from '@marchlands/core';
 import { armies, cities, heroes, tiles } from '@marchlands/db';
+
 import { apiTest, type TestApi } from '#test/support/api.ts';
 import {
   addHero,
@@ -17,13 +19,13 @@ import {
   HUGE_ID,
   itGuards,
   itNeedsPlayer,
+  type Lord,
   lords,
   patchTile,
   RICH,
   setBuildings,
   setCityStats,
   setResources,
-  type Lord,
 } from '#test/support/city-fixtures.ts';
 
 type Army = { armyId: number; missionType: number; direction: number; targetFieldId: number; troop: Record<string, number> | null; hero: string };

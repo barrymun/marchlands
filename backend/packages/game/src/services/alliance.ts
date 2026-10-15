@@ -2,14 +2,16 @@
 // Ranks: 4 Host, 5 Vice Host, 6 Presbyter, 7 Officer, 8 Member (lower = more power).
 
 import { and, asc, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
-import { AllianceRank, BALANCE, BuildingType, buildingLevel, GameError, msg, ref, Relation, scaled, type Message, HOUR } from '@marchlands/core';
-import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, players } from '@marchlands/db';
-import { openOwnCity } from '#/city.ts';
-import { sendSystemMail } from '#/engine/mail.ts';
-import { type Ctx } from '#/context.ts';
-import { assertClean, pushPlayerInfo, spendResources } from '#/helpers.ts';
-import { citiesOf, findPlayerByName, getPlayer, saveCity, savePlayer, type PlayerRow } from '#/repo.ts';
+
 import { PushCmd } from '@marchlands/contracts';
+import { AllianceRank, BALANCE, buildingLevel, BuildingType, GameError, HOUR, type Message, msg, ref, Relation, scaled } from '@marchlands/core';
+import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, players } from '@marchlands/db';
+
+import { openOwnCity } from '#/city.ts';
+import { type Ctx } from '#/context.ts';
+import { sendSystemMail } from '#/engine/mail.ts';
+import { assertClean, pushPlayerInfo, spendResources } from '#/helpers.ts';
+import { citiesOf, findPlayerByName, getPlayer, type PlayerRow, saveCity, savePlayer } from '#/repo.ts';
 
 export type AllianceRow = typeof alliances.$inferSelect;
 

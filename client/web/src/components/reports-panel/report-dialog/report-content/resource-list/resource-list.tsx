@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { fmtExact } from '@/lib/format';
 import { resourceKeyLabel } from '@/components/reports-panel/report-dialog/report-content/utils';
+import { fmtExact } from '@/lib/format';
 
 export function ResourceList({ res, empty }: { res: Record<string, number | undefined>; empty?: string }) {
   const { t } = useTranslation('common');

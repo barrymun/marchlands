@@ -2,11 +2,12 @@
 // and can run in any order. The context is the real one (services see no difference); the test can read
 // what it queued (pushes, timed events), move time forward and run the timed events that fall due.
 
-import { seededRng } from '@marchlands/core';
 import type { PushCmd, PushData } from '@marchlands/contracts';
-import { dispatchEvent, runGame } from '#/index.ts';
-import { type CtxInternals, type QueuedPush, type ScheduledEvent } from '#/context.ts';
+import { seededRng } from '@marchlands/core';
 import { testDb } from '@marchlands/db/test/support/db.ts';
+
+import { type CtxInternals, type QueuedPush, type ScheduledEvent } from '#/context.ts';
+import { dispatchEvent, runGame } from '#/index.ts';
 
 // Each test starts from the seeded world with no players: every test rolls back, so a test only ever sees the
 // players and cities it made itself (rankings and map searches can rely on that).

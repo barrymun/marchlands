@@ -1,17 +1,19 @@
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { getMarketByResTypeOptions, type CityBean, type MarketPriceLevel } from '@marchlands/api-client';
+
+import { type CityBean, getMarketByResTypeOptions, type MarketPriceLevel } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
+
+import { RESOURCES } from '@/components/market-panel/constants';
+import { MyOrders } from '@/components/market-panel/my-orders/my-orders';
+import { OrderBook } from '@/components/market-panel/order-book/order-book';
+import { PriceHistory } from '@/components/market-panel/price-history/price-history';
+import { Shipments } from '@/components/market-panel/shipments/shipments';
+import { TradeForm } from '@/components/market-panel/trade-form/trade-form';
+import type { Mode, Side } from '@/components/market-panel/types';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { RESOURCES } from '@/components/market-panel/constants';
-import type { Mode, Side } from '@/components/market-panel/types';
-import { OrderBook } from '@/components/market-panel/order-book/order-book';
-import { TradeForm } from '@/components/market-panel/trade-form/trade-form';
-import { PriceHistory } from '@/components/market-panel/price-history/price-history';
-import { MyOrders } from '@/components/market-panel/my-orders/my-orders';
-import { Shipments } from '@/components/market-panel/shipments/shipments';
 
 export function MarketPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation('market-panel');

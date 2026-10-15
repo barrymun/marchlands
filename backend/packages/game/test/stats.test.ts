@@ -1,10 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SQL } from 'drizzle-orm';
 import { PgDialect } from 'drizzle-orm/pg-core';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { SettleFlows } from '@marchlands/core';
 import type { Db } from '@marchlands/db';
-import { addCounters, bufferStats, flushStats, noteSettle, prefixed, statDay, takeSettle, type StatCounters } from '#/stats.ts';
+
 import { startStatsFlusher } from '#/index.ts';
+import { addCounters, bufferStats, flushStats, noteSettle, prefixed, type StatCounters, statDay, takeSettle } from '#/stats.ts';
 
 interface Row {
   player_id: number;

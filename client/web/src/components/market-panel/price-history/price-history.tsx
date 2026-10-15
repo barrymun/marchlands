@@ -1,14 +1,16 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { getMarketHistoryOptions } from '@marchlands/api-client';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
+
+import { getMarketHistoryOptions } from '@marchlands/api-client';
+
+import { chartConfig } from '@/components/market-panel/price-history/constants';
+import { fmtPrice, resLabel } from '@/components/market-panel/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { fmtExact, clockTime } from '@/lib/format';
+import { clockTime, fmtExact } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { fmtPrice, resLabel } from '@/components/market-panel/utils';
-import { chartConfig } from '@/components/market-panel/price-history/constants';
 
 export function PriceHistory({ resType }: { resType: number }) {
   const { t } = useTranslation(['market-panel', 'common']);

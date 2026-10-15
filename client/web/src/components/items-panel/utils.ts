@@ -1,5 +1,6 @@
 import { itemGoldPrice, TROOP_ID_BY_KEY, type TroopKey } from '@marchlands/core';
-import { fmtExact, RESOURCES, type Resource } from '@/lib/format';
+
+import { fmtExact, type Resource, RESOURCES } from '@/lib/format';
 import { itemName, troopName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 

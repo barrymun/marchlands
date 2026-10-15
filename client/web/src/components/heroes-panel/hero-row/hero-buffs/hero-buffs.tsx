@@ -1,14 +1,16 @@
-import { useTranslation } from 'react-i18next';
 import { Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import type { HeroBean } from '@marchlands/api-client';
 import { HeroBuffId } from '@marchlands/core';
+
+import { BUFF_LABEL } from '@/components/heroes-panel/hero-row/hero-buffs/constants';
 import { Badge } from '@/components/ui/badge';
 import { useNow } from '@/hooks/use-now';
 import { duration } from '@/lib/format';
 import { translateMessage } from '@/lib/messages';
 import { ITEM_BONUS_TONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { BUFF_LABEL } from '@/components/heroes-panel/hero-row/hero-buffs/constants';
 
 /**
  * Active attribute boosts with a live countdown (real time: boosts are not sped up by GAME_SPEED); what each

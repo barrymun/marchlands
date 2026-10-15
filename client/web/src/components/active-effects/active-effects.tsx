@@ -1,32 +1,34 @@
 // The lord's running item bonuses as fixed slots, grouped like the shop: every bonus has its place,
 // so a missing one shows as a gap. A slot's timer turns amber in its last day, and its + button extends it.
 
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+
 import {
+  type CityBean,
   getCitiesByCityIdQueryKey,
   getPlayerQueryKey,
   postCitiesShopGold,
   postPlayerItemsUse,
   postPlayerItemsUseMutation,
-  type CityBean,
 } from '@marchlands/api-client';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog';
+
 import { GROUPS, SLOT_BUFFS, STORE_KEY, WARN_MS } from '@/components/active-effects/constants';
+import { SlotCell } from '@/components/active-effects/slot-cell/slot-cell';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
 import { adds, extensionFor, readCollapsed, slotItems } from '@/components/active-effects/utils';
-import { itemName } from '@/lib/game-data';
+import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useCommand } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { fmt, fmtExact, shortDuration } from '@/lib/format';
+import { itemName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { WARN_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { SlotCell } from '@/components/active-effects/slot-cell/slot-cell';
 
 export function ActiveEffects({
   city,

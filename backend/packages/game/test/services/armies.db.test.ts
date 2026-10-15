@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
-  armyLoad,
   ArmyDirection,
+  armyLoad,
   BALANCE,
   BASIC_RESOURCES,
   BuildingType,
@@ -18,7 +20,8 @@ import {
   TileType,
   TroopType,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
+
+import { armyRef, cityPosition, homeMarchMs, tilePosition } from '#/engine/armies.ts';
 import { admin, armies, interior, player, shop } from '#/index.ts';
 import { getHero } from '#/repo.ts';
 import { allies, armyRow, arrive, lastPush, lastReport, NO_RESOURCES, send, tileNear, valleyNear, WAR_ZONE, warCity, warrior } from '#test/support/armies.ts';
@@ -35,7 +38,6 @@ import {
   setResources,
 } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
-import { armyRef, cityPosition, homeMarchMs, tilePosition } from '#/engine/armies.ts';
 
 /** p reinforces its ally q's city (which accepts allied troops); returns the stationed army's id. */
 async function stationAtAlly(g: TestGame) {

@@ -1,10 +1,12 @@
 // Mail counts and system mail, sent by other services.
 
-import { MailType } from '@marchlands/core';
 import { and, count, eq } from 'drizzle-orm';
-import { mails } from '@marchlands/db';
-import { type Ctx } from '#/context.ts';
+
 import { PushCmd } from '@marchlands/contracts';
+import { MailType } from '@marchlands/core';
+import { mails } from '@marchlands/db';
+
+import { type Ctx } from '#/context.ts';
 
 export async function mailCounts(ctx: Ctx, playerId: number) {
   const rows = await ctx.tx

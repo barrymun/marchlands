@@ -1,17 +1,19 @@
 // processArmy: the timed event of an army (arrival, camping time over, coming home). The missions'
 // arrivals have their own files: reinforce, settle, scout, attack (lords' cities), npc, valley.
 
-import { describe, expect, it } from 'vitest';
-import { ArmyDirection, HeroStatus, Mission, msg, TileType } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
-import { armies as armiesTable } from '@marchlands/db';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
+import { ArmyDirection, HeroStatus, Mission, msg, TileType } from '@marchlands/core';
+import { armies as armiesTable } from '@marchlands/db';
+
+import { armyRef, homeMarchMs } from '#/engine/armies.ts';
+import { processArmy } from '#/engine/combat.ts';
 import { getHero } from '#/repo.ts';
 import { armyRow, arrive, lastReport, NO_RESOURCES, occupyValley, reportTitles, send, tileNear, warrior } from '#test/support/armies.ts';
 import { reloadCity } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { armyRef, homeMarchMs } from '#/engine/armies.ts';
-import { processArmy } from '#/engine/combat.ts';
 
 describe(processArmy.name, () => {
   it('does nothing for an army that is gone', () =>

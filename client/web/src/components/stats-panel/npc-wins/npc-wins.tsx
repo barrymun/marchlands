@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Counters } from '@/components/stats-panel/types';
+
 import { Tile } from '@/components/stats-panel/tile/tile';
+import type { Counters } from '@/components/stats-panel/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function NpcWins({ c }: { c: Counters }) {
   const { t } = useTranslation(['stats-panel', 'common']);

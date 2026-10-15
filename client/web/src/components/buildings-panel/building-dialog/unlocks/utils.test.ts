@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { BUILDINGS, BuildingType, buildingInfo, isFortType, TechType, TroopType } from '@marchlands/core';
-import dataBuildings from '@/locales/en-GB/data-buildings.json';
+
+import { buildingInfo, BUILDINGS, BuildingType, isFortType, TechType, TroopType } from '@marchlands/core';
+
 import { unlockName } from '@/components/buildings-panel/building-dialog/unlocks/utils';
+import dataBuildings from '@/locales/en-GB/data-buildings.json';
 
 describe(unlockName.name, () => {
   it('names buildings, troops and technologies from their data namespaces', () => {

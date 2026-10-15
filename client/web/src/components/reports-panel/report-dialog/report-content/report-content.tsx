@@ -1,11 +1,12 @@
 import type { ReportDetail } from '@marchlands/api-client';
 import type { ReportBody } from '@marchlands/core';
+
 import { BattleView } from '@/components/reports-panel/report-dialog/report-content/battle-view/battle-view';
-import { ScoutView } from '@/components/reports-panel/report-dialog/report-content/scout-view/scout-view';
-import { MovementView } from '@/components/reports-panel/report-dialog/report-content/movement-view/movement-view';
 import { DesertionView } from '@/components/reports-panel/report-dialog/report-content/desertion-view/desertion-view';
-import { translateMessage } from '@/lib/messages';
+import { MovementView } from '@/components/reports-panel/report-dialog/report-content/movement-view/movement-view';
+import { ScoutView } from '@/components/reports-panel/report-dialog/report-content/scout-view/scout-view';
 import { TradeView } from '@/components/reports-panel/report-dialog/report-content/trade-view/trade-view';
+import { translateMessage } from '@/lib/messages';
 
 // ---------------------------------------------------------------------------------------------
 // Bodies

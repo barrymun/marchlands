@@ -1,48 +1,51 @@
 // army.* — sending, recalling and listing armies. Arrival handling lives in engine/combat.ts.
 
 import { and, count, eq, ne } from 'drizzle-orm';
+
+import { PushCmd, type SendArmyBody } from '@marchlands/contracts';
 import {
+  addTroops,
   ArmyDirection,
+  armyLoad,
   BALANCE,
-  BuildingType,
+  BASIC_RESOURCES,
+  BuffId,
   buildingLevel,
+  BuildingType,
+  DAY,
   GameError,
   hasTroops,
   HeroStatus,
   marchTimeMs,
   maxArmies,
   maxArmyTroops,
-  totalTroops,
   maxCitiesFor,
   Mission,
-  armyLoad,
+  msg,
+  ref,
   reliefMultiplier,
   researchLevel,
+  type ResourceSet,
   sanitizeTroops,
   TechType,
   TileType,
   totalResources,
-  addTroops,
-  type ResourceSet,
+  totalTroops,
   type TroopCounts,
-  BuffId,
-  DAY,
-  msg,
-  ref,
   TroopType,
-  BASIC_RESOURCES,
 } from '@marchlands/core';
 import { armies, cities, heroes, players } from '@marchlands/db';
-import { openOwnCity, viewCity, type CityBundle } from '#/city.ts';
+
+import { type CityBundle, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { armyBean, troopBean } from '#/dto.ts';
+import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner, tilePosition } from '#/engine/armies.ts';
+import { pushHero } from '#/engine/heroes.ts';
+import { isProtected } from '#/engine/player.ts';
+import { isFriendly, relationBetween } from '#/engine/relations.ts';
 import { activeBuff, pushResources, spendResources } from '#/helpers.ts';
 import { getArmy, getCity, getPlayer, getTile, saveCity, saveHero } from '#/repo.ts';
-import { isFriendly, relationBetween } from '#/engine/relations.ts';
-import { isProtected } from '#/engine/player.ts';
-import { pushHero } from '#/engine/heroes.ts';
-import { PushCmd, type SendArmyBody } from '@marchlands/contracts';
-import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner, tilePosition } from '#/engine/armies.ts';
+
 export { visibleArmies } from '#/engine/armies.ts';
 
 function cleanResources(r: Partial<ResourceSet> | undefined): ResourceSet {

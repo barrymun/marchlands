@@ -3,7 +3,9 @@
 
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
 import {
+  type CityBean,
   getArmiesQueryKey,
   getCitiesBuildingsAvailableQueryKey,
   getCitiesBuildingsByPositionIdQueryKey,
@@ -18,15 +20,15 @@ import {
   getMarketShipmentsQueryKey,
   getPlayerFlowsQueryKey,
   getPlayerQueryKey,
+  type GetPlayerResponse,
   getReportsQueryKey,
   getReportsUnreadQueryKey,
-  type CityBean,
-  type GetPlayerResponse,
   type GetReportsUnreadResponse,
   type PushClient,
   PushCmd,
   type PushData,
 } from '@marchlands/api-client';
+
 import { fmtExact } from '@/lib/format';
 import { buildingName, techName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';

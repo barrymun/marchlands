@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ITEMS, itemConfig, itemGoldPrice } from '@marchlands/core';
+import { itemConfig, itemGoldPrice, ITEMS } from '@marchlands/core';
 import { catalogue } from '#/services/shop.ts';
 
 describe(catalogue.name, () => {

@@ -1,4 +1,5 @@
 import { BALANCE, BuffId, ItemId } from '@marchlands/core';
+
 import type { Slot } from '@/components/active-effects/types';
 import { percent, resourceLabel } from '@/lib/format';
 import { i18n } from '@/lib/i18n';

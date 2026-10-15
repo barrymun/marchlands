@@ -1,6 +1,7 @@
 // Mail, reports, chat, friends and alliances.
 
 import { z } from 'zod';
+
 import {
   AddPlayerRelationBody,
   AllianceApplication,
@@ -46,7 +47,8 @@ import {
   SetAllianceRelationBody,
 } from '@marchlands/contracts';
 import { alliance, mail, reports, social } from '@marchlands/game';
-import { doc, anon, authenticate, game, tags, zIds, type ZApp } from '#/http.ts';
+
+import { anon, authenticate, doc, game, tags, type ZApp, zIds } from '#/http.ts';
 
 export default async function socialRoutes(app: ZApp) {
   app.addHook('onRequest', authenticate);

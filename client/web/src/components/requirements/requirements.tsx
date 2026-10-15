@@ -1,6 +1,8 @@
 import { Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
 import type { RequirementCheck } from '@marchlands/api-client';
+
 import { Badge } from '@/components/ui/badge';
 import { buildingName, itemName, techName } from '@/lib/game-data';
 

@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
+
 import { PushCmd } from '@marchlands/contracts';
 import type { Db } from '@marchlands/db';
-import { PushGateway, sendPush, type GatewayLogger, type Socketish } from '#/ws/gateway.ts';
+
+import { type GatewayLogger, PushGateway, sendPush, type Socketish } from '#/ws/gateway.ts';
 
 /** A socket that records what it was sent and how it was closed. */
 function fakeSocket(readyState = 1) {

@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
+
 import type { CityBean } from '@marchlands/api-client';
 import { TileType, valleyBonus } from '@marchlands/core';
+
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { fmt, fmtExact, percent } from '@/lib/format';
 

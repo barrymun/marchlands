@@ -3,9 +3,11 @@
 // rows. See api.ts for the harness.
 
 import { expect, it } from 'vitest';
+
 import type { ResourceSet } from '@marchlands/core';
 import { admin, alliance, runGame } from '@marchlands/game';
-import { getArmy, getHero, getTile, processArmy, saveHero, saveTile, type HeroRow, type TileRow } from '@marchlands/game/testing';
+import { getArmy, getHero, getTile, type HeroRow, processArmy, saveHero, saveTile, type TileRow } from '@marchlands/game/testing';
+
 import { apiTest, type Session, type TestApi } from '#test/support/api.ts';
 
 let serial = 0;

@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
+
 import type { ReportBody } from '@marchlands/core';
-import { TroopList } from '@/components/reports-panel/report-dialog/report-content/troop-list/troop-list';
-import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
+
 import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
+import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
+import { TroopList } from '@/components/reports-panel/report-dialog/report-content/troop-list/troop-list';
 
 export function MovementView({ movement: m }: { movement: Extract<ReportBody, { kind: 'movement' }>['movement'] }) {
   const { t } = useTranslation(['reports-panel', 'common']);

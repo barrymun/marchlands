@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { msg } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
-import { admin, social } from '#/index.ts';
+import { msg } from '@marchlands/core';
+
+import { refreshRankings } from '#/engine/rankings.ts';
 import { addPrestige } from '#/helpers.ts';
+import { admin, social } from '#/index.ts';
 import { getPlayer, savePlayer } from '#/repo.ts';
+import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { createTestPlayer, reloadPlayer, type TestPlayer } from '#test/support/factories.ts';
 import { game, T0, type TestGame } from '#test/support/game.ts';
-import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
-import { refreshRankings } from '#/engine/rankings.ts';
 
 const MINUTE = 60_000;
 

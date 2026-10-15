@@ -9,9 +9,10 @@
 // Admin accounts are never deleted.
 
 import { and, count, eq, inArray } from 'drizzle-orm';
+
+import { tileXY } from '@marchlands/core';
 import { accounts, armies, cities, connect, players, tiles } from '@marchlands/db';
 import { player, runGame } from '@marchlands/game';
-import { tileXY } from '@marchlands/core';
 
 const args = process.argv.slice(2);
 const confirm = args.includes('--yes');

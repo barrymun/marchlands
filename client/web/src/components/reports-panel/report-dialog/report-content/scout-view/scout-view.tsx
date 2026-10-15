@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next';
+
 import type { ReportBody } from '@marchlands/core';
+
+import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
+import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
+import { TroopList } from '@/components/reports-panel/report-dialog/report-content/troop-list/troop-list';
 import { fmtExact } from '@/lib/format';
 import { tileName } from '@/lib/game-data';
-import { TroopList } from '@/components/reports-panel/report-dialog/report-content/troop-list/troop-list';
-import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
-import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
 
 export function ScoutView({ scout: s }: { scout: Extract<ReportBody, { kind: 'scout' }>['scout'] }) {
   const { t } = useTranslation(['reports-panel', 'common']);

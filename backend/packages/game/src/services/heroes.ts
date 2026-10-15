@@ -1,6 +1,8 @@
 // hero.* — tavern, hiring, mayor, attribute points, levels, loyalty, items, captives.
 
 import { eq } from 'drizzle-orm';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   buildingLevel,
@@ -37,13 +39,13 @@ import {
   TechType,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
-import { openOwnCity, viewCity, type CityBundle } from '#/city.ts';
+
+import { type CityBundle, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { heroBean } from '#/dto.ts';
+import { clearTavern, closeMayorCity, heroSlots, heroValues, openMayorCity, pushHero, resyncHeroGear } from '#/engine/heroes.ts';
 import { addItem, assertClean, cleanName, consumeItem, itemCount, pushResources, spendGold, spendResources } from '#/helpers.ts';
-import { findCity, getHero, getPlayer, heroesOfCity, saveCity, saveHero, savePlayer, type HeroRow } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
-import { closeMayorCity, pushHero, openMayorCity, resyncHeroGear, clearTavern, heroValues, heroSlots } from '#/engine/heroes.ts';
+import { findCity, getHero, getPlayer, heroesOfCity, type HeroRow, saveCity, saveHero, savePlayer } from '#/repo.ts';
 
 async function fillTavern(ctx: Ctx, b: CityBundle, regenerate: boolean) {
   if (regenerate) await clearTavern(ctx, b.city.id);

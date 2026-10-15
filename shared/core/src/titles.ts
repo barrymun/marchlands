@@ -1,4 +1,5 @@
 import { ItemId } from '#/item-ids.ts';
+
 // Nobility titles (Evony Age 1). The original kept a `title` field but never changed it.
 // A title raises the number of cities a lord may own and is bought with prestige + medals.
 

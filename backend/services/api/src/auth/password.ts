@@ -1,5 +1,5 @@
 // scrypt password hashing: "scrypt$N$r$p$salt$hash" (base64url parts).
-import { randomBytes, scrypt as scryptCb, timingSafeEqual, type ScryptOptions } from 'node:crypto';
+import { randomBytes, scrypt as scryptCb, type ScryptOptions, timingSafeEqual } from 'node:crypto';
 
 const scrypt = (pw: string, salt: Buffer, len: number, opts: ScryptOptions) =>
   new Promise<Buffer>((resolve, reject) => scryptCb(pw, salt, len, opts, (e, k) => (e ? reject(e) : resolve(k))));

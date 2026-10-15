@@ -2,13 +2,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { PushCmd } from '@marchlands/contracts';
 import { ArmyDirection, HeroStatus, Mission, msg, ReportType } from '@marchlands/core';
 
-import { PushCmd } from '@marchlands/contracts';
-
+import { processArmy } from '#/engine/combat.ts';
 import { alliance, combat, interior } from '#/index.ts';
 import { getHero } from '#/repo.ts';
-
 import {
   allies,
   armyRow,
@@ -23,12 +22,8 @@ import {
   warCity,
   warrior,
 } from '#test/support/armies.ts';
-
 import { addHero, cityBundle, reloadCity, type TestPlayer } from '#test/support/factories.ts';
-
 import { game, type TestGame } from '#test/support/game.ts';
-
-import { processArmy } from '#/engine/combat.ts';
 
 /** Run time to just before an army arrives and settle the city then: what it holds when the army walks in. */
 async function justBefore(g: TestGame, armyId: number, p: TestPlayer, cityId = p.cityId) {

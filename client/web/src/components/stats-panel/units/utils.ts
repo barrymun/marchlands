@@ -1,4 +1,4 @@
-import { FORT_ID_BY_KEY, TROOP_ID_BY_KEY, type FortKey, type TroopKey } from '@marchlands/core';
+import { FORT_ID_BY_KEY, type FortKey, TROOP_ID_BY_KEY, type TroopKey } from '@marchlands/core';
 import type { Counters } from '@/components/stats-panel/types';
 import { troopName } from '@/lib/game-data';
 

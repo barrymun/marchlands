@@ -1,10 +1,12 @@
-import { describe, expect, it } from 'vitest';
 import Fastify, { type FastifyRequest } from 'fastify';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
+import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { GameError, msg } from '@marchlands/core';
+
 import { ErrorResponse } from '@marchlands/contracts';
+import { GameError, msg } from '@marchlands/core';
 import type { Db } from '@marchlands/db';
+
 import { signToken } from '#/auth/jwt.ts';
 import type { ApiConfig } from '#/config.ts';
 import { authenticate, bearer, doc, installErrorHandler, secured, tags } from '#/http.ts';

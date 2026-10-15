@@ -1,12 +1,16 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, GripVertical, Lock, LockOpen, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
+
 import {
+  type CityBean,
   getCitiesByCityIdQueryKey,
   getCitiesTavernOptions,
   getCitiesTavernQueryKey,
+  type HeroBean,
   patchHeroesByHeroIdMutation,
   postCitiesTavernHireMutation,
   postCitiesTavernRefreshMutation,
@@ -15,27 +19,25 @@ import {
   postHeroesMayorMutation,
   putCitiesHeroesOrder,
   putHeroesLockMutation,
-  type CityBean,
-  type HeroBean,
 } from '@marchlands/api-client';
-import { toast } from 'sonner';
-import { BuildingType, HeroStatus, heroAtMaxLevel, heroManagement, mayorProductionBonus, levelsReady, BASIC_RESOURCES } from '@marchlands/core';
+import { BASIC_RESOURCES, BuildingType, heroAtMaxLevel, heroManagement, HeroStatus, levelsReady, mayorProductionBonus } from '@marchlands/core';
+
+import { GearCard } from '@/components/hero-gear/gear-card/gear-card';
+import { HeroGearLine } from '@/components/hero-gear/hero-gear-line/hero-gear-line';
+import { HeroItemsDialog } from '@/components/hero-items-dialog/hero-items-dialog';
+import { HeroPointsDialog } from '@/components/hero-points-dialog/hero-points-dialog';
+import { STATUS } from '@/components/heroes-panel/constants';
+import { DismissHeroDialog } from '@/components/heroes-panel/dismiss-hero-dialog/dismiss-hero-dialog';
+import { HeroRow } from '@/components/heroes-panel/hero-row/hero-row';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { HeroPointsDialog } from '@/components/hero-points-dialog/hero-points-dialog';
-import { HeroItemsDialog } from '@/components/hero-items-dialog/hero-items-dialog';
-import { GearCard } from '@/components/hero-gear/gear-card/gear-card';
-import { HeroGearLine } from '@/components/hero-gear/hero-gear-line/hero-gear-line';
 import { useCommand } from '@/hooks/use-game';
 import { errorMessage } from '@/lib/api';
-import { fmt, signedRate, percent } from '@/lib/format';
+import { fmt, percent, signedRate } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { HeroRow } from '@/components/heroes-panel/hero-row/hero-row';
-import { DismissHeroDialog } from '@/components/heroes-panel/dismiss-hero-dialog/dismiss-hero-dialog';
-import { STATUS } from '@/components/heroes-panel/constants';
 
 export function HeroesPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['heroes-panel', 'common']);

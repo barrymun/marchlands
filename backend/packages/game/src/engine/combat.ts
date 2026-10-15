@@ -4,6 +4,8 @@
 // recommendations in docs/spec/battle.md §7.3.
 
 import { count, eq } from 'drizzle-orm';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   addHeroExp,
   addTroops,
@@ -55,37 +57,37 @@ import {
   WAR_ENSIGN_DESC,
 } from '@marchlands/core';
 import { armies, cities, heroes, tiles } from '@marchlands/db';
-import { openCity, viewCity, type CityBundle } from '#/city.ts';
+
+import { type CityBundle, openCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { fortBean, heroBean, troopBean } from '#/dto.ts';
-import { addItem, addPrestige, activeBuff, gainResources, pushCity, pushResources } from '#/helpers.ts';
-import { prefixed } from '#/stats.ts';
-import {
-  armiesStationedAt,
-  citiesOf,
-  findCity,
-  getArmy,
-  getHero,
-  getPlayer,
-  getTile,
-  lockPlayers,
-  saveArmy,
-  saveCity,
-  saveHero,
-  savePlayer,
-  saveTile,
-  type ArmyRow,
-  type HeroRow,
-  type PlayerRow,
-  type TileRow,
-} from '#/repo.ts';
 import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner } from '#/engine/armies.ts';
 import { dropCapturedTarget } from '#/engine/flows.ts';
 import { heroSlots, pushHero } from '#/engine/heroes.ts';
 import { initialCity, isProtected } from '#/engine/player.ts';
 import { isFriendly, relationBetween } from '#/engine/relations.ts';
 import { createReport } from '#/engine/reports.ts';
-import { PushCmd } from '@marchlands/contracts';
+import { activeBuff, addItem, addPrestige, gainResources, pushCity, pushResources } from '#/helpers.ts';
+import {
+  armiesStationedAt,
+  type ArmyRow,
+  citiesOf,
+  findCity,
+  getArmy,
+  getHero,
+  getPlayer,
+  getTile,
+  type HeroRow,
+  lockPlayers,
+  type PlayerRow,
+  saveArmy,
+  saveCity,
+  saveHero,
+  savePlayer,
+  saveTile,
+  type TileRow,
+} from '#/repo.ts';
+import { prefixed } from '#/stats.ts';
 
 // ---------------------------------------------------------------------------------------------
 // Entry point (timed event "army")

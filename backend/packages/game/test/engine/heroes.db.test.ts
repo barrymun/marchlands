@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { createRandomHero, HeroBuffId, heroGearBonus, heroGearStat, ItemId, lordGear, seededRng, TechType } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
-import { getHero, heroesOfCity } from '#/repo.ts';
+import { createRandomHero, HeroBuffId, heroGearBonus, heroGearStat, ItemId, lordGear, seededRng, TechType } from '@marchlands/core';
+
 import { heroBean } from '#/dto.ts';
+import { clearTavern, expireHeroBuff, heroSlots, heroValues, pushHero, resyncHeroGear } from '#/engine/heroes.ts';
 import { heroes } from '#/index.ts';
+import { getHero, heroesOfCity } from '#/repo.ts';
 import { addHero, cityBundle, createTestPlayer, giveItems, reloadPlayer } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { clearTavern, expireHeroBuff, heroSlots, heroValues, pushHero, resyncHeroGear } from '#/engine/heroes.ts';
-import { heroBuildings, patchHero, patchPlayer, lastHeroPush, pushedHeroes } from '#test/support/heroes.ts';
+import { heroBuildings, lastHeroPush, patchHero, patchPlayer, pushedHeroes } from '#test/support/heroes.ts';
 
 describe(heroValues.name, () => {
   it('takes the stored columns of a generated hero', () => {

@@ -3,14 +3,14 @@
 // from BALANCE, so the text follows the rules. "Unlocks" is derived from the requirement data.
 
 import { BALANCE, getGameSpeed } from '#/balance.ts';
+import { wallHitPoints } from '#/battle/simulator.ts';
 import { BuildingType, FortType } from '#/constants.ts';
 import { isFortType, unlockedOuterSlots } from '#/construction.ts';
-import { BUILDINGS, RESEARCH, TROOPS, buildingConfig } from '#/data/index.ts';
+import { buildingConfig, BUILDINGS, RESEARCH, TROOPS } from '#/data/index.ts';
 import { innHeroMaxLevel, innOffers } from '#/heroes.ts';
-import { wallHitPoints } from '#/battle/simulator.ts';
-import { msg, ref, share, type Message } from '#/messages/index.ts';
-import { reliefMultiplier } from '#/troops.ts';
 import { ItemId } from '#/item-ids.ts';
+import { type Message, msg, ref, share } from '#/messages/index.ts';
+import { reliefMultiplier } from '#/troops.ts';
 
 const F = (l: number) => BALANCE.fieldFactor[l] ?? 0;
 /** the item that lets armies hold more troops (BALANCE.warEnsignTroopBonus) */

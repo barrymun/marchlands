@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { AllianceRank, BALANCE, BuildingType, msg, ref } from '@marchlands/core';
+import { describe, expect, it } from 'vitest';
+
 import { PushCmd } from '@marchlands/contracts';
+import { AllianceRank, BALANCE, BuildingType, msg, ref } from '@marchlands/core';
 import { alliances, players } from '@marchlands/db';
+
 import { alliance } from '#/index.ts';
 import { addMember, createTestAlliance, withEmbassy } from '#test/support/alliance.ts';
 import { expectRefused } from '#test/support/expect.ts';

@@ -1,12 +1,14 @@
 import { useTranslation } from 'react-i18next';
+
 import type { ArmyBean } from '@marchlands/api-client';
 import { ArmyDirection } from '@marchlands/core';
+
+import { MISSION_NAMES } from '@/components/armies-panel/constants';
+import { Countdown } from '@/components/countdown/countdown';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Countdown } from '@/components/countdown/countdown';
 import { fmt } from '@/lib/format';
 import { translateMessage } from '@/lib/messages';
-import { MISSION_NAMES } from '@/components/armies-panel/constants';
 
 export function ArmyRow({ army: a, tone, onRecall }: { army: ArmyBean; tone?: 'destructive'; onRecall?: () => void }) {
   const { t } = useTranslation(['armies-panel', 'common']);

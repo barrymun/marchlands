@@ -1,17 +1,19 @@
-import { BASIC_RESOURCES } from '@marchlands/core';
-import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import type { HeroBean, ResourceBean } from '@marchlands/api-client';
+import { BASIC_RESOURCES } from '@marchlands/core';
+
+import { Breakdown } from '@/components/resource-bar/breakdown/breakdown';
+import { icons } from '@/components/resource-bar/constants';
+import { Rows } from '@/components/resource-bar/rows/rows';
+import type { Row } from '@/components/resource-bar/types';
 import { live } from '@/components/resource-bar/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNow } from '@/hooks/use-now';
 import { fmt, fmtExact, percent, resourceLabel, signedRate } from '@/lib/format';
 import { ITEM_BONUS_TEXT_INVERTED } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { Breakdown } from '@/components/resource-bar/breakdown/breakdown';
-import { icons } from '@/components/resource-bar/constants';
-import { Rows } from '@/components/resource-bar/rows/rows';
-import type { Row } from '@/components/resource-bar/types';
 
 export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor?: HeroBean }) {
   const { t } = useTranslation('resource-bar');

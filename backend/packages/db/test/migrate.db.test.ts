@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, inject, it } from 'vitest';
+
 import { sql } from 'drizzle-orm';
+import { describe, expect, inject, it } from 'vitest';
+
 import { runMigrations } from '#/index.ts';
 import { testDb } from '#test/support/db.ts';
 

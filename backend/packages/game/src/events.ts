@@ -1,9 +1,9 @@
 // Timed-event dispatch (used by the worker). Each handler is idempotent: it re-reads state
 // and does nothing if the event is stale (e.g. a speed-up already completed the work).
 
+import { BALANCE, BUFF_IDS, BuffId, msg } from '@marchlands/core';
+
 import type { Ctx } from '#/context.ts';
-import { getPlayer, savePlayer } from '#/repo.ts';
-import { activeBuff, pushPlayerInfo, removeBuff, setBuff } from '#/helpers.ts';
 import { completeBuilding } from '#/engine/buildings.ts';
 import { processArmy } from '#/engine/combat.ts';
 import { resumeFlow, runQueue, runScheduledHeal } from '#/engine/flows.ts';
@@ -11,7 +11,8 @@ import { expireHeroBuff } from '#/engine/heroes.ts';
 import { deliverShipment } from '#/engine/market.ts';
 import { completeResearch, settleAllCities } from '#/engine/research.ts';
 import { completeTraining } from '#/engine/training.ts';
-import { BALANCE, BUFF_IDS, BuffId, msg } from '@marchlands/core';
+import { activeBuff, pushPlayerInfo, removeBuff, setBuff } from '#/helpers.ts';
+import { getPlayer, savePlayer } from '#/repo.ts';
 
 export interface EventRow {
   id: number;

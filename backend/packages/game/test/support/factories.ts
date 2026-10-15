@@ -2,14 +2,16 @@
 // a player gets an account and a real starting city on a free flat, exactly as a new player does.
 
 import { eq } from 'drizzle-orm';
-import { BuildingType, TileType, type ResourceSet, type TroopCounts } from '@marchlands/core';
+
+import { BuildingType, type ResourceSet, TileType, type TroopCounts } from '@marchlands/core';
 import { accounts, cities, tiles } from '@marchlands/db';
-import { admin, player as players } from '#/index.ts';
-import { citiesOf, getCity, getPlayer, saveCity, savePlayer } from '#/repo.ts';
-import { openOwnCity, type CityBundle } from '#/city.ts';
-import type { TestGame } from '#test/support/game.ts';
+
+import { type CityBundle, openOwnCity } from '#/city.ts';
 import { initialCity } from '#/engine/player.ts';
 import { pickOpenFlat } from '#/engine/world.ts';
+import { admin, player as players } from '#/index.ts';
+import { citiesOf, getCity, getPlayer, saveCity, savePlayer } from '#/repo.ts';
+import type { TestGame } from '#test/support/game.ts';
 
 let serial = 0;
 

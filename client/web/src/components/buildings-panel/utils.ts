@@ -1,5 +1,5 @@
-import { TOWN_HALL_POSITION, unlockedOuterSlots } from '@marchlands/core';
 import type { BuildingBean } from '@marchlands/api-client';
+import { TOWN_HALL_POSITION, unlockedOuterSlots } from '@marchlands/core';
 
 /** The city's Town Hall level and how many field slots outside the walls it unlocks. */
 export function fieldSlots(buildings: BuildingBean[]): { townHall: number; unlocked: number } {

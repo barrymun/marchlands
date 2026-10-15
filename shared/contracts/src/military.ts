@@ -1,9 +1,11 @@
 // Heroes, armies, map and valleys (backend/services/api/src/routes/military.ts).
 
 import { z } from 'zod';
+
 import { TileType } from '@marchlands/core';
-import { zCityParams, zId, zIdValue, zResources, zTroops } from '#/common.ts';
+
 import { ArmyBean, HeroBean } from '#/beans.ts';
+import { zCityParams, zId, zIdValue, zResources, zTroops } from '#/common.ts';
 import { TileRow } from '#/rows.ts';
 
 // ---- requests ----

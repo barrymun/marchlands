@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, TROOPS, troopConfig, troopDescription } from '#/index.ts';
+import { BALANCE, troopConfig, troopDescription, TROOPS } from '#/index.ts';
 
 describe(troopDescription.name, () => {
   it('describes every troop and fortification with a troopInfo message', () => {

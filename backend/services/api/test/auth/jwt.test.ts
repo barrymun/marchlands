@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createHmac } from 'node:crypto';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { signToken, verifyToken } from '#/auth/jwt.ts';
 
 const SECRET = 'fake-jwt-secret-for-tests';

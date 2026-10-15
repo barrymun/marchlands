@@ -1,5 +1,5 @@
-import { BASIC_RESOURCES } from '@marchlands/core';
 import type { GetPlayerResponse, HeroBean } from '@marchlands/api-client';
+import { BASIC_RESOURCES } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /** Apply a HeroUpdate push to a city's hero list (updateType 1 = the hero left). */

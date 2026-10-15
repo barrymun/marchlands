@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router';
+
 import type { CityBean } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
+
+import { BuildingDialog } from '@/components/buildings-panel/building-dialog/building-dialog';
+import { INSIDE, OUTSIDE } from '@/components/buildings-panel/constants';
+import { Slot } from '@/components/buildings-panel/slot/slot';
+import { fieldSlots } from '@/components/buildings-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
-import { INSIDE, OUTSIDE } from '@/components/buildings-panel/constants';
-import { fieldSlots } from '@/components/buildings-panel/utils';
-import { Slot } from '@/components/buildings-panel/slot/slot';
-import { BuildingDialog } from '@/components/buildings-panel/building-dialog/building-dialog';
 
 export function BuildingsPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['buildings-panel', 'common']);

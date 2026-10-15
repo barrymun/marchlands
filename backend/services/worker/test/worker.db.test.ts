@@ -8,16 +8,18 @@
 // and the handler's writes undone, an aborted transaction made usable again), and the update runs in the test
 // transaction: it sees the same row and leaves the same result.
 
-import { describe, expect, it, vi, type Mock } from 'vitest';
 import { eq, sql } from 'drizzle-orm';
+import { describe, expect, it, type Mock, vi } from 'vitest';
+
 import { BuffId, msg } from '@marchlands/core';
-import { pushMessages, timedEvents, type Db } from '@marchlands/db';
-import { getPlayer, savePlayer, setBuff } from '@marchlands/game/testing';
-import { runGame, type Ctx } from '@marchlands/game';
-import { MAX_ATTEMPTS, processOne, type Log } from '#/worker.ts';
+import { type Db, pushMessages, timedEvents } from '@marchlands/db';
 import { testDb } from '@marchlands/db/test/support/db.ts';
+import { type Ctx, runGame } from '@marchlands/game';
 import { createTestPlayer, type TestPlayer } from '@marchlands/game/test/support/factories.ts';
 import type { TestGame } from '@marchlands/game/test/support/game.ts';
+import { getPlayer, savePlayer, setBuff } from '@marchlands/game/testing';
+
+import { type Log, MAX_ATTEMPTS, processOne } from '#/worker.ts';
 
 const ROLLBACK = Symbol('rollback');
 

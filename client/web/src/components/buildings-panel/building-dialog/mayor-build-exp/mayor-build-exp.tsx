@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
+
 import type { CityBean } from '@marchlands/api-client';
 import { buildingHeroExp, buildingLevel, BuildingType, HeroStatus } from '@marchlands/core';
+
 import { fmtExact } from '@/lib/format';
 
 /** Experience the mayor earns when this building level completes (construction.ts buildingHeroExp). */

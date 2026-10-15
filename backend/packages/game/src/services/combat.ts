@@ -1,11 +1,12 @@
 // valley.* — abandoning and upgrading valleys. Army arrival and battles live in engine/combat.ts.
 
-import { GameError, TileType, VALLEY_TYPES, valleyUpgradeCost, msg } from '@marchlands/core';
+import { GameError, msg, TileType, VALLEY_TYPES, valleyUpgradeCost } from '@marchlands/core';
+
 import { openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
+import { homeMarchMs, sendBack } from '#/engine/armies.ts';
 import { pushResources } from '#/helpers.ts';
 import { armiesStationedAt, getTile, saveCity, saveTile } from '#/repo.ts';
-import { homeMarchMs, sendBack } from '#/engine/armies.ts';
 
 /** field.giveUpField: release a valley the city occupies; its garrison comes home. */
 export async function abandonValley(ctx: Ctx, playerId: number, tileId: number) {

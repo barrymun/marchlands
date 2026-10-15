@@ -1,7 +1,9 @@
+import { Monitor, Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from 'next-themes';
-import { Monitor, Moon, Sun } from 'lucide-react';
+
+import { noSubscribe } from '@/components/theme-toggle/utils';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,7 +13,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { noSubscribe } from '@/components/theme-toggle/utils';
 
 /** Light / dark / follow the system. The choice is remembered in this browser (next-themes). */
 export function ThemeToggle() {

@@ -1,12 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { TileType, type BattleReport } from '@marchlands/core';
-import { Badge } from '@/components/ui/badge';
-import { tileName } from '@/lib/game-data';
-import { translateMessage } from '@/lib/messages';
-import { usePlayer } from '@/hooks/use-game';
-import { resultLabel } from '@/components/reports-panel/report-dialog/report-content/battle-view/utils';
+
+import { type BattleReport, TileType } from '@marchlands/core';
+
 import { LootBox } from '@/components/reports-panel/report-dialog/report-content/battle-view/loot-box/loot-box';
 import { SideView } from '@/components/reports-panel/report-dialog/report-content/battle-view/side-view/side-view';
+import { resultLabel } from '@/components/reports-panel/report-dialog/report-content/battle-view/utils';
+import { Badge } from '@/components/ui/badge';
+import { usePlayer } from '@/hooks/use-game';
+import { tileName } from '@/lib/game-data';
+import { translateMessage } from '@/lib/messages';
 
 export function BattleView({ battle: b }: { battle: BattleReport }) {
   const { t } = useTranslation('reports-panel');

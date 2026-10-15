@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
+
+import { Num } from '@/components/stats-panel/num/num';
+import type { Counters } from '@/components/stats-panel/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import type { Counters } from '@/components/stats-panel/types';
-import { Num } from '@/components/stats-panel/num/num';
 import { itemName } from '@/lib/game-data';
 
 export function ItemsUsed({ c }: { c: Counters }) {

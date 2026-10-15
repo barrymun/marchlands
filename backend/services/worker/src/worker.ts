@@ -6,7 +6,7 @@
 
 import { sql } from 'drizzle-orm';
 import type { Db } from '@marchlands/db';
-import { dispatchEvent, runGame, type EventRow } from '@marchlands/game';
+import { dispatchEvent, type EventRow, runGame } from '@marchlands/game';
 
 export type Log = (level: string, msg: string, extra?: Record<string, unknown>) => void;
 

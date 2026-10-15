@@ -1,13 +1,16 @@
 // mail.* — inbox (1), system (2) and sent (3) folders. Each participant owns a copy.
 
 import { and, count, desc, eq, inArray } from 'drizzle-orm';
+
 import { GameError, MailType, msg } from '@marchlands/core';
 import { mails } from '@marchlands/db';
+
 import { type Ctx } from '#/context.ts';
+import { pushMailCounts } from '#/engine/mail.ts';
+import { isBlocked } from '#/engine/social.ts';
 import { escapeHtml } from '#/helpers.ts';
 import { findPlayerByName, getPlayer } from '#/repo.ts';
-import { isBlocked } from '#/engine/social.ts';
-import { pushMailCounts } from '#/engine/mail.ts';
+
 export { mailCounts } from '#/engine/mail.ts';
 
 /** mail.sendMail */

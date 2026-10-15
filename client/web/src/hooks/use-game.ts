@@ -1,10 +1,12 @@
 // Server state: TanStack Query over the typed client, kept fresh by WebSocket pushes.
 
+import { type MutationFunction, type QueryClient, type QueryKey, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery, useQueryClient, type MutationFunction, type QueryClient, type QueryKey } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { BALANCE, scaled, setGameSpeed } from '@marchlands/core';
+
 import { getCitiesByCityIdOptions, getPlayer, getPlayerQueryKey, type PushStatus } from '@marchlands/api-client';
+import { BALANCE, scaled, setGameSpeed } from '@marchlands/core';
+
 import { errorMessage, push } from '@/lib/api';
 import { subscribePushHandlers } from '@/lib/push/handlers';
 

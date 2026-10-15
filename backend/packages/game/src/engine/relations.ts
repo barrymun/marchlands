@@ -2,8 +2,10 @@
 // "two alliance-less players count as one alliance" bug fixed).
 
 import { and, eq, inArray } from 'drizzle-orm';
+
 import { Relation } from '@marchlands/core';
 import { allianceRelations, players } from '@marchlands/db';
+
 import { type Ctx } from '#/context.ts';
 
 /** Relation of alliance `a` towards alliance `b` (one-sided, as stored). */

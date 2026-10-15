@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
   getReportsByReportIdOptions,
   getReportsByReportIdQueryKey,
@@ -9,15 +10,16 @@ import {
   getReportsUnreadQueryKey,
   postReportsDeleteMutation,
 } from '@marchlands/api-client';
+
+import { ReportContent } from '@/components/reports-panel/report-dialog/report-content/report-content';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCommand } from '@/hooks/use-game';
 import { useSticky } from '@/hooks/use-sticky';
-import { allOf } from '@/lib/query-keys';
-import { ReportContent } from '@/components/reports-panel/report-dialog/report-content/report-content';
 import { dateTime } from '@/lib/format';
 import { translateMessage } from '@/lib/messages';
+import { allOf } from '@/lib/query-keys';
 
 export function ReportDialog({ reportId, onClose }: { reportId: number | null; onClose: () => void }) {
   const { t } = useTranslation(['reports-panel', 'common']);

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+
 import { BALANCE, BuffId, computeCityStats, HeroStatus, mayorProductionBonus, msg, TileType } from '@marchlands/core';
+
 import { cityStats, economyContext, mayorOf, mayorStats } from '#/city.ts';
 import { bundle, cityRow, heroRow, playerRow, T0, tileRow } from '#test/support/city-rows.ts';
 

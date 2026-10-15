@@ -1,7 +1,9 @@
-import { useTranslation } from 'react-i18next';
 import { CircleCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import type { HeroBean } from '@marchlands/api-client';
 import { BALANCE, heroAtMaxLevel, levelsReady } from '@marchlands/core';
+
 import { fmtExact } from '@/lib/format';
 import { STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';

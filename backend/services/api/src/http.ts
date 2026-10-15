@@ -1,16 +1,19 @@
 // Shared HTTP plumbing: auth, the game transaction runner, error mapping, route helpers.
 
-import type { FastifyBaseLogger, FastifyInstance, FastifyReply, FastifyRequest, RawServerDefault } from 'fastify';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+
+import { eq } from 'drizzle-orm';
+import type { FastifyBaseLogger, FastifyInstance, FastifyReply, FastifyRequest, RawServerDefault } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
-import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { GameError, msg } from '@marchlands/core';
+
 import { ErrorResponse, Ok } from '@marchlands/contracts';
-import { accounts, players, type Db } from '@marchlands/db';
-import { runGame, type Ctx } from '@marchlands/game';
-import { verifyToken, type TokenClaims } from '#/auth/jwt.ts';
+import { GameError, msg } from '@marchlands/core';
+import { accounts, type Db, players } from '@marchlands/db';
+import { type Ctx, runGame } from '@marchlands/game';
+
+import { type TokenClaims, verifyToken } from '#/auth/jwt.ts';
 import type { ApiConfig } from '#/config.ts';
 
 interface AppDeps {

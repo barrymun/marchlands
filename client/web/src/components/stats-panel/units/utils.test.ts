@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+
 import { FORT_KEY_LIST, FORT_KEYS, TROOP_KEY_LIST, TROOP_KEYS } from '@marchlands/core';
+
 import { unitCount, unitName } from '@/components/stats-panel/units/utils';
 import { troopName } from '@/lib/game-data';
 

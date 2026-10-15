@@ -1,20 +1,14 @@
+import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { eq } from 'drizzle-orm';
-
-import { BALANCE, ItemId, msg, PlayerStatus } from '@marchlands/core';
-
 import { PushCmd } from '@marchlands/contracts';
-
+import { BALANCE, ItemId, msg, PlayerStatus } from '@marchlands/core';
 import { mails } from '@marchlands/db';
 
-import { admin, mail, player } from '#/index.ts';
-
-import { createTestPlayer, giveItems, reloadPlayer } from '#test/support/factories.ts';
-
-import { game } from '#test/support/game.ts';
-
 import { checkBeginner, isProtected } from '#/engine/player.ts';
+import { admin, mail, player } from '#/index.ts';
+import { createTestPlayer, giveItems, reloadPlayer } from '#test/support/factories.ts';
+import { game } from '#test/support/game.ts';
 
 describe(isProtected.name, () => {
   it('names why a player cannot be attacked: beginner, truce or holiday', () =>

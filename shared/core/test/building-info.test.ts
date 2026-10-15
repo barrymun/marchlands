@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
   BALANCE,
-  isFortType,
-  BuildingType,
-  FortType,
-  TroopType,
   buildingEffect,
   buildingInfo,
+  BuildingType,
+  FortType,
   innHeroMaxLevel,
   innOffers,
+  isFortType,
+  type Message,
   msgParamNames,
   ref,
+  TroopType,
   unlockedOuterSlots,
   wallHitPoints,
-  type Message,
 } from '#/index.ts';
 
 /** building types that stand in a slot (fortifications share the ids but are built at the walls) */

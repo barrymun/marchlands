@@ -29,4 +29,4 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
 
 ## Code quality
 
-- [ ] **Sort imports alphabetically, enforced by the linter.** Add an auto-fixable ESLint rule (e.g. `eslint-plugin-simple-import-sort` or `eslint-plugin-perfectionist`) to `eslint.config.js`, run `npm run lint:fix` once over the repo, and pin the plugin to an exact version.
+- [x] **Sort imports alphabetically, enforced by the linter.** `import-x/order`, `sort-imports` and `tools/eslint/import-spacing.mjs` in `eslint.config.js` (AGENTS.md, Formatting and linting).

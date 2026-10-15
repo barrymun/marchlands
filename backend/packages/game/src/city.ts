@@ -1,40 +1,41 @@
 // Loading a city together with everything its economy depends on, and settling it to "now".
 
+import { PushCmd } from '@marchlands/contracts';
 import {
-  computeCityStats,
-  GameError,
-  msg,
-  heroManagement,
-  heroPower,
-  heroStratagem,
-  HeroStatus,
-  settleCity,
-  tileXY,
   addTroops,
   type CityStats,
+  computeCityStats,
   type EconomyContext,
+  GameError,
+  heroManagement,
+  heroPower,
+  HeroStatus,
+  heroStratagem,
   type MayorStats,
+  msg,
+  settleCity,
   type SettleResult,
+  tileXY,
   type TroopCounts,
 } from '@marchlands/core';
+
 import type { Ctx } from '#/context.ts';
 import { troopBean } from '#/dto.ts';
 import { reportDesertion } from '#/engine/reports.ts';
-import { noteSettle } from '#/stats.ts';
 import {
   armiesOfCity,
+  type CityRow,
   findCity,
   getCity,
   getPlayer,
   heroesOfCity,
-  saveCity,
-  valleysOfCity,
-  type CityRow,
   type HeroRow,
   type PlayerRow,
+  saveCity,
   type TileRow,
+  valleysOfCity,
 } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
+import { noteSettle } from '#/stats.ts';
 
 export interface CityBundle {
   player: PlayerRow;

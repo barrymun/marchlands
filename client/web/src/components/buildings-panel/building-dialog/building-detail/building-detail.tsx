@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { CircleCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
 import {
+  type BuildingBean,
+  type CityBean,
   getCitiesBuildingsByPositionIdOptions,
   getCitiesBuildingsByPositionIdQueryKey,
   getCitiesBuildingsSpeedupOptions,
@@ -12,28 +15,27 @@ import {
   postCitiesBuildingsDemolishMutation,
   postCitiesBuildingsSpeedupMutation,
   postCitiesBuildingsUpgradeMutation,
-  type BuildingBean,
-  type CityBean,
 } from '@marchlands/api-client';
-import { Badge } from '@/components/ui/badge';
+
+import { refundText } from '@/components/buildings-panel/building-dialog/building-detail/utils';
+import { MayorBuildExp } from '@/components/buildings-panel/building-dialog/mayor-build-exp/mayor-build-exp';
+import { MayorBuildHint } from '@/components/buildings-panel/building-dialog/mayor-build-hint/mayor-build-hint';
+import { Unlocks } from '@/components/buildings-panel/building-dialog/unlocks/unlocks';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
+import { CostList } from '@/components/cost-list/cost-list';
+import { Requirements } from '@/components/requirements/requirements';
+import { SpeedupOptions } from '@/components/speedup-options/speedup-options';
+import { TimerBar } from '@/components/timer-bar/timer-bar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TimerBar } from '@/components/timer-bar/timer-bar';
-import { CostList } from '@/components/cost-list/cost-list';
-import { Requirements } from '@/components/requirements/requirements';
-import { SpeedupOptions } from '@/components/speedup-options/speedup-options';
 import { useCommand } from '@/hooks/use-game';
 import { buildingName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { refundText } from '@/components/buildings-panel/building-dialog/building-detail/utils';
-import { MayorBuildHint } from '@/components/buildings-panel/building-dialog/mayor-build-hint/mayor-build-hint';
-import { MayorBuildExp } from '@/components/buildings-panel/building-dialog/mayor-build-exp/mayor-build-exp';
-import { Unlocks } from '@/components/buildings-panel/building-dialog/unlocks/unlocks';
 
 export function BuildingDetail({ city, building, onDone }: { city: CityBean; building: BuildingBean; onDone: () => void }) {
   const { t } = useTranslation(['buildings-panel', 'common']);

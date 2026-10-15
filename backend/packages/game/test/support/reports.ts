@@ -1,9 +1,10 @@
 // Helpers for the report tests (services/reports.db.test.ts, engine/reports.db.test.ts).
 
 import { msg, type ReportBody, ReportType } from '@marchlands/core';
+
+import { createReport } from '#/engine/reports.ts';
 import { type TestPlayer } from '#test/support/factories.ts';
 import { type TestGame } from '#test/support/game.ts';
-import { createReport } from '#/engine/reports.ts';
 
 export const textBody = (text = msg('report.oldFormat')): ReportBody => ({ kind: 'text', text });
 

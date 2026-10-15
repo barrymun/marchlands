@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+
 import type { CityBean } from '@marchlands/api-client';
 import { FLOW_MAX_TARGETS_PER_CITY, HeroStatus } from '@marchlands/core';
+
 import { idleHeroes, targetCap } from '@/components/flow-attack/utils';
 
 type Hero = CityBean['heros'][number];

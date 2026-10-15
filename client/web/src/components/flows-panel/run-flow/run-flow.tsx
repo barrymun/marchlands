@@ -1,8 +1,11 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CirclePlay, Eye, Square } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+
 import {
+  type Flow,
   getCitiesBuildingsAvailableQueryKey,
   getCitiesBuildingsByPositionIdQueryKey,
   getCitiesByCityIdQueryKey,
@@ -16,21 +19,20 @@ import {
   postPlayerFlowsRepeat,
   postPlayerFlowsRun,
   postPlayerFlowsStop,
-  type Flow,
 } from '@marchlands/api-client';
-import { toast } from 'sonner';
+
+import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
+import { LastPreview } from '@/components/flows-panel/run-flow/last-preview/last-preview';
+import { LastRun } from '@/components/flows-panel/run-flow/last-run/last-run';
+import { withPreview } from '@/components/flows-panel/run-flow/utils';
+import type { Targets } from '@/components/flows-panel/types';
+import { hasHero } from '@/components/flows-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { usePlayer } from '@/hooks/use-game';
 import { errorMessage } from '@/lib/api';
 import { allOf } from '@/lib/query-keys';
-import type { Targets } from '@/components/flows-panel/types';
-import { LastRun } from '@/components/flows-panel/run-flow/last-run/last-run';
-import { withPreview } from '@/components/flows-panel/run-flow/utils';
-import { LastPreview } from '@/components/flows-panel/run-flow/last-preview/last-preview';
-import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
-import { hasHero } from '@/components/flows-panel/utils';
 
 /** Pick cities, then preview (up to the first wait, rolled back) or run the flow; repeat; stop; the latest preview or run. */
 export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: number }) {

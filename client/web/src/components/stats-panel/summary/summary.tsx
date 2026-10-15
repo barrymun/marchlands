@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { Tile } from '@/components/stats-panel/tile/tile';
 import type { Counters } from '@/components/stats-panel/types';
 import { sumPrefix } from '@/components/stats-panel/utils';
-import { Tile } from '@/components/stats-panel/tile/tile';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function Summary({ c, lordWide }: { c: Counters; lordWide: boolean }) {
   const { t } = useTranslation('stats-panel');

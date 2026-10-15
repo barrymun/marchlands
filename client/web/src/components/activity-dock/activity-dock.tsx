@@ -1,18 +1,20 @@
 // A floating, frosted "in progress" dock (bottom left; a bottom bar on phones) for the current
 // city's construction, research and training, so in-page status cards no longer pop in and out.
 
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+
 import type { CityBean } from '@marchlands/api-client';
+
 import { GROUPS, PER_GROUP, STORE_KEY } from '@/components/activity-dock/constants';
 import { useJobs } from '@/components/activity-dock/hooks';
+import { JobRow } from '@/components/activity-dock/job-row/job-row';
 import { readCollapsed } from '@/components/activity-dock/utils';
 import { useNow } from '@/hooks/use-now';
 import { useSticky } from '@/hooks/use-sticky';
 import { duration } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { JobRow } from '@/components/activity-dock/job-row/job-row';
 
 export function ActivityDock({ city }: { city: CityBean }) {
   const { t } = useTranslation('activity-dock');

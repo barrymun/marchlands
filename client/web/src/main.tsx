@@ -1,13 +1,15 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from 'next-themes';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from 'next-themes';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { Toaster } from '@/components/ui/sonner';
-import { i18nReady } from '@/lib/i18n';
+
 import { App } from '@/app';
 import { LocaleRoot } from '@/components/locale-root/locale-root';
+import { Toaster } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { i18nReady } from '@/lib/i18n';
+
 import '@/index.css';
 
 const queryClient = new QueryClient({

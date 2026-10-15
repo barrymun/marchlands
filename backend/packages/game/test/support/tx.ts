@@ -3,8 +3,9 @@
 // backend/services/api/test/support/api.ts).
 
 import type { Db } from '@marchlands/db';
-import { runGame } from '#/index.ts';
 import { testDb } from '@marchlands/db/test/support/db.ts';
+
+import { runGame } from '#/index.ts';
 import type { TestGame } from '#test/support/game.ts';
 
 const ROLLBACK = Symbol('rollback');

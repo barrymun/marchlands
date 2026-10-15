@@ -1,13 +1,15 @@
-import { describe, expect, it } from 'vitest';
 import { and, eq, sql } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { BALANCE, msg, stateBounds, stateOf, TileType } from '@marchlands/core';
 import { tiles, worldState } from '@marchlands/db';
+
+import { pickOpenFlat, refreshZoneStats } from '#/engine/world.ts';
 import { getTile } from '#/repo.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { createTestPlayer } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { pickOpenFlat, refreshZoneStats } from '#/engine/world.ts';
-import { SIZE, asDb } from '#test/support/world.ts';
+import { asDb, SIZE } from '#test/support/world.ts';
 
 describe(refreshZoneStats.name, () => {
   it('counts the castles, barbarian cities and open flats of each zone', () =>

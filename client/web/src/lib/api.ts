@@ -1,6 +1,6 @@
 // One API client, one push socket, and the stored access token.
 
-import { ApiError, PushClient, configureApi } from '@marchlands/api-client';
+import { ApiError, configureApi, PushClient } from '@marchlands/api-client';
 import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
 

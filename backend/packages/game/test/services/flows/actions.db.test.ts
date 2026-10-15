@@ -1,8 +1,11 @@
 // What each kind of action does in a run (through runFlow; most of it previewed, which runs the actions for real and rolls back).
 
 import { describe, expect, it } from 'vitest';
+
 import {
   BuildingType,
+  type FlowCityResult,
+  type FlowStepResult,
   healCost,
   healHonorCost,
   heroManagement,
@@ -12,9 +15,8 @@ import {
   msg,
   ref,
   TroopType,
-  type FlowCityResult,
-  type FlowStepResult,
 } from '@marchlands/core';
+
 import { armies, flows, player as players } from '#/index.ts';
 import { heroesOfCity, type HeroRow } from '#/repo.ts';
 import {

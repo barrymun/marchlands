@@ -1,13 +1,15 @@
 // friend.* (friends and block list) and chat (world / beginner / alliance / private).
 
 import { and, desc, eq, gt, or, sql } from 'drizzle-orm';
+
+import { PushCmd } from '@marchlands/contracts';
 import { GameError, msg } from '@marchlands/core';
 import { chatMessages, playerRelations, players } from '@marchlands/db';
+
 import { type Ctx } from '#/context.ts';
+import { isBlocked } from '#/engine/social.ts';
 import { escapeHtml } from '#/helpers.ts';
 import { findPlayerByName, getPlayer } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
-import { isBlocked } from '#/engine/social.ts';
 
 // ---------------------------------------------------------------------------------------------
 // Friends & blocks

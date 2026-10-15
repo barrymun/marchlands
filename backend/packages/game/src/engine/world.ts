@@ -1,8 +1,10 @@
 // Zone statistics (worker job) and picking an open flat for new and teleporting cities.
 
 import { and, eq, inArray, sql } from 'drizzle-orm';
+
 import { BALANCE, GameError, msg, randInt, stateBounds, TileType } from '@marchlands/core';
-import { tiles, worldState, type Db } from '@marchlands/db';
+import { type Db, tiles, worldState } from '@marchlands/db';
+
 import { type Ctx } from '#/context.ts';
 
 // ---------------------------------------------------------------------------------------------

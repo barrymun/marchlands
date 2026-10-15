@@ -2,13 +2,15 @@
 // speeding up batches, dismissing troops and fortifications and the injured. The same routes serve troops (at a
 // barracks) and fortifications (at the walls). The rules are covered by the training service tests.
 
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
-import { BuildingType, FortType, ItemId, TroopType, type FortCounts, type TroopCounts } from '@marchlands/core';
+import { describe, expect, it } from 'vitest';
+
+import { BuildingType, type FortCounts, FortType, ItemId, type TroopCounts, TroopType } from '@marchlands/core';
 import { cities, players } from '@marchlands/db';
 import { getCity, saveCity } from '@marchlands/game/testing';
+
 import { apiTest, type TestApi } from '#test/support/api.ts';
-import { expectInvalid, giveItems, itGuards, lords, RICH, setBuildings, setCityStats, setResources, type Lord } from '#test/support/city-fixtures.ts';
+import { expectInvalid, giveItems, itGuards, type Lord, lords, RICH, setBuildings, setCityStats, setResources } from '#test/support/city-fixtures.ts';
 
 const cityRow = async (api: TestApi, id: number) => (await api.db.select().from(cities).where(eq(cities.id, id)))[0];
 const items = async (api: TestApi, p: Lord) => (await api.db.select({ items: players.items }).from(players).where(eq(players.id, p.playerId)))[0].items;

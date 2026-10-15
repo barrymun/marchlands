@@ -1,50 +1,52 @@
 // troop.* and fortifications.* — production queues (one per Barracks, one on the Walls),
 // cancellation, speed-ups, disbanding and injured troops.
 
+import { PushCmd } from '@marchlands/contracts';
 import {
-  BALANCE,
-  BuildingType,
-  buildingLevel,
-  FORT_KEYS,
-  FORT_ID_BY_KEY,
-  TROOP_ID_BY_KEY,
-  GameError,
-  checkRequirements,
-  requirementsMet,
-  trainBatchMs,
-  trainCost,
-  itemGoldPrice,
-  troopCostShare,
-  troopConfig,
-  troopKey,
-  troopUnitSeconds,
-  troopDescription,
-  TROOPS,
-  usedWallSpace,
-  wallCapacity,
-  assertCanTrain,
-  findBuilding,
-  addTroops,
   addForts,
-  type TrainBatch,
+  addTroops,
+  assertCanTrain,
+  BALANCE,
+  buildingLevel,
+  BuildingType,
+  checkRequirements,
+  findBuilding,
+  FORT_ID_BY_KEY,
+  FORT_KEYS,
+  GameError,
   getGameSpeed,
-  splitTraining,
-  type SplitLane,
   healCost,
   healHonorCost,
+  itemGoldPrice,
+  ItemId,
   msg,
   ref,
+  requirementsMet,
   speedUpTrainBatch,
-  ItemId,
+  type SplitLane,
+  splitTraining,
+  type TrainBatch,
+  trainBatchMs,
+  trainCost,
+  TROOP_ID_BY_KEY,
+  troopConfig,
+  troopCostShare,
+  troopDescription,
+  troopKey,
+  TROOPS,
+  troopUnitSeconds,
+  usedWallSpace,
+  wallCapacity,
 } from '@marchlands/core';
+
 import { cityStats, mayorStats, openCity, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { fortBean, troopBean } from '#/dto.ts';
+import { completeTraining, pushQueues, queueBean, queueOf, scheduleHead, setQueue, startBatch, WALLS_QUEUE } from '#/engine/training.ts';
 import { gainResources, pushPlayerInfo, pushResources, spendResources, useItemOrGold } from '#/helpers.ts';
-import { prefixed } from '#/stats.ts';
 import { saveCity, savePlayer } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
-import { completeTraining, pushQueues, queueOf, queueBean, setQueue, scheduleHead, startBatch, WALLS_QUEUE } from '#/engine/training.ts';
+import { prefixed } from '#/stats.ts';
+
 export { WALLS_QUEUE } from '#/engine/training.ts';
 
 /** trainMany: the most unit types one request may order. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, HOUR, ITEM_CATEGORY_IDS, ITEM_INFO, ITEMS, itemInfo, medalSources, ItemId } from '#/index.ts';
+import { BALANCE, HOUR, ITEM_CATEGORY_IDS, ITEM_INFO, ItemId, itemInfo, ITEMS, medalSources } from '#/index.ts';
 
 describe(itemInfo.name, () => {
   it('describes every item with an itemInfo message, and its category by id', () => {

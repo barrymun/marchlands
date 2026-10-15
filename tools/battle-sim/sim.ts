@@ -9,8 +9,10 @@
 // --stratagem 18 --no-attack-item --defense-item (defaults: DEFAULT_LORD in lib.ts).
 
 import { parseArgs } from 'node:util';
+
 import { TROOP_KEY_LIST, type TroopCounts, type TroopKey } from '@marchlands/core';
-import { DEFAULT_LORD, armySize, attackNpc, traceNpc, type Lord, type Summary } from './lib.ts';
+
+import { armySize, attackNpc, DEFAULT_LORD, type Lord, type Summary, traceNpc } from './lib.ts';
 import { PRESETS } from './presets.ts';
 
 const { positionals, values } = parseArgs({

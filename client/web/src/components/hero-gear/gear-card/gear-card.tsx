@@ -1,10 +1,14 @@
 // (marchlands) Hero gear (shared/core gear.ts): the lord's 14 pieces with their level and stars, and
 // on each hero card the gear bonus and the attribute it boosts.
 
-import { useTranslation } from 'react-i18next';
 import { Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postGearStarMutation } from '@marchlands/api-client';
 import { BALANCE, GEAR_PIECES, gearStarCost, gearStarLimit, TechType } from '@marchlands/core';
+
+import { maxLevel, maxStars, starPoints } from '@/components/hero-gear/constants';
+import { Stars } from '@/components/hero-gear/gear-card/stars/stars';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -12,8 +16,6 @@ import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { gearName, itemName, itemShortName } from '@/lib/game-data';
 import { allOf } from '@/lib/query-keys';
-import { maxLevel, maxStars, starPoints } from '@/components/hero-gear/constants';
-import { Stars } from '@/components/hero-gear/gear-card/stars/stars';
 
 /** The lord's gear: every piece's level (Hero Enhancement) and stars, with a button to add a star. */
 export function GearCard({ onResearch }: { onResearch?: () => void }) {

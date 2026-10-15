@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+
 import type { CityBean } from '@marchlands/api-client';
 import { HeroStatus, Mission } from '@marchlands/core';
+
 import { bestIdleHero, capTroops, defaultHero } from '@/components/send-army-dialog/send-form/utils';
 
 type Hero = CityBean['heros'][number];

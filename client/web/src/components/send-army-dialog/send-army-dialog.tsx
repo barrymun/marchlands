@@ -1,8 +1,9 @@
 import type { CityBean } from '@marchlands/api-client';
-import { useSticky } from '@/hooks/use-sticky';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import type { SendTarget } from '@/components/send-army-dialog/types';
+
 import { SendForm } from '@/components/send-army-dialog/send-form/send-form';
+import type { SendTarget } from '@/components/send-army-dialog/types';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useSticky } from '@/hooks/use-sticky';
 
 export function SendArmyDialog({ city, target, onClose }: { city: CityBean; target: SendTarget | null; onClose: () => void }) {
   const shown = useSticky(target);

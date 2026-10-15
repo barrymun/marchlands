@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+
 import { FORT_KEYS, TROOP_KEYS } from '@marchlands/core';
+
 import { resourceKeyLabel, troopLabel } from '@/components/reports-panel/report-dialog/report-content/utils';
 import { troopName } from '@/lib/game-data';
 

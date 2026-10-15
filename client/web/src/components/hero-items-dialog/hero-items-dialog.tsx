@@ -1,7 +1,8 @@
 import type { HeroBean } from '@marchlands/api-client';
-import { useSticky } from '@/hooks/use-sticky';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+
 import { HeroItems } from '@/components/hero-items-dialog/hero-items/hero-items';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useSticky } from '@/hooks/use-sticky';
 
 export function HeroItemsDialog({ hero, cityId, onClose }: { hero: HeroBean | null; cityId: number; onClose: () => void }) {
   const shown = useSticky(hero);

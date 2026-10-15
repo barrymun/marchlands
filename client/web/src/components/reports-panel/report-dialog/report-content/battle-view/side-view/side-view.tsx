@@ -1,14 +1,16 @@
 import { useTranslation } from 'react-i18next';
+
 import { type BattleReport } from '@marchlands/core';
+
+import { TroopList } from '@/components/reports-panel/report-dialog/report-content/troop-list/troop-list';
+import { troopLabel } from '@/components/reports-panel/report-dialog/report-content/utils';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { fmtExact } from '@/lib/format';
+import { itemName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { ITEM_BONUS_TONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { troopLabel } from '@/components/reports-panel/report-dialog/report-content/utils';
-import { TroopList } from '@/components/reports-panel/report-dialog/report-content/troop-list/troop-list';
-import { itemName } from '@/lib/game-data';
 
 export function SideView({
   title,

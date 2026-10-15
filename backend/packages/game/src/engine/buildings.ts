@@ -1,24 +1,25 @@
 // Construction completion (timed event 'building.complete') and the helpers that schedule it.
 
+import { PushCmd } from '@marchlands/contracts';
 import {
+  addHeroExp,
+  buildingHeroExp,
+  buildingLevel,
+  type BuildingState,
   BuildingStatus,
   BuildingType,
-  buildingLevel,
-  buildingHeroExp,
   findBuilding,
-  prestigeOf,
   PrestigeAction,
-  type BuildingState,
-  addHeroExp,
+  prestigeOf,
 } from '@marchlands/core';
-import { mayorOf, openCity, type CityBundle } from '#/city.ts';
+
+import { type CityBundle, mayorOf, openCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { buildingBean, heroBean } from '#/dto.ts';
+import { clearTavern } from '#/engine/heroes.ts';
+import { checkBeginner } from '#/engine/player.ts';
 import { addPrestige, pushPlayerInfo, pushResources } from '#/helpers.ts';
 import { saveCity, saveHero, savePlayer } from '#/repo.ts';
-import { checkBeginner } from '#/engine/player.ts';
-import { clearTavern } from '#/engine/heroes.ts';
-import { PushCmd } from '@marchlands/contracts';
 
 export const refKey = (cityId: number, pos: number) => `building:${cityId}:${pos}`;
 

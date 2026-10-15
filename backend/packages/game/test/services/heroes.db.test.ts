@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BuildingType,
@@ -29,14 +31,14 @@ import {
   TechType,
   upgradeExpFor,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
-import { getHero, heroesOfCity } from '#/repo.ts';
+
 import { heroBean } from '#/dto.ts';
 import { heroes } from '#/index.ts';
+import { getHero, heroesOfCity } from '#/repo.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { addHero, createTestPlayer, giveItems, reloadCity, reloadPlayer, setResearch, setResources, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
-import { heroBuildings, patchHero, patchPlayer, lastHeroPush, pushedHeroes } from '#test/support/heroes.ts';
+import { heroBuildings, lastHeroPush, patchHero, patchPlayer, pushedHeroes } from '#test/support/heroes.ts';
 
 /** Hero `heroId` of `owner` is held captive in `captor`'s city, as combat leaves it. */
 const capture = (g: TestGame, heroId: number, owner: TestPlayer, captor: TestPlayer, loyalty = 70) =>

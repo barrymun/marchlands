@@ -2,9 +2,11 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
+
 import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm';
+
 import {
   BALANCE,
   GameError,
@@ -19,7 +21,8 @@ import {
   VALLEY_TYPES,
   valleyUpgradeCost,
 } from '@marchlands/core';
-import { cities, pgArray, players, tiles, worldState, type Db } from '@marchlands/db';
+import { cities, type Db, pgArray, players, tiles, worldState } from '@marchlands/db';
+
 import { type Ctx } from '#/context.ts';
 import { relationBetween } from '#/engine/relations.ts';
 import { refreshZoneStats, type ZoneStats } from '#/engine/world.ts';

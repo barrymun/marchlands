@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
-  BUILDINGS,
   buildingEffect,
   buildingInfo,
+  BUILDINGS,
   heroBuffDesc,
-  ITEMS,
   itemEffect,
   itemInfo,
+  ITEMS,
+  type Message,
+  type MsgParam,
   TECH_IDS,
   techEffect,
   techInfo,
-  TROOPS,
   troopDescription,
-  type Message,
-  type MsgParam,
+  TROOPS,
 } from '#/index.ts';
 
 /** Params that hold a percentage: they must be shares (`share(x)`), never a percent number. */

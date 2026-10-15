@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { DAY, HOUR, setGameSpeed } from '@marchlands/core';
+
 import { clockTime, dateTime, duration, fmt, fmtDecimal, fmtExact, percent, period, resourceLabel, shortDuration, signed, signedRate } from '@/lib/format';
 import { buildingName, troopName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';

@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
+
 import type { CityBean } from '@marchlands/api-client';
 import { BALANCE, heroManagement, HeroStatus, heroTimeMultiplier } from '@marchlands/core';
+
 import { percent } from '@/lib/format';
 
 /** How the mayor's Politics shortens build times (×BALANCE.heroTimeFactor per point, at most to BALANCE.heroTimeFloor.building); refreshed live with the hero. */

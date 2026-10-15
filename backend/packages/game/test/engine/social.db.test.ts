@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
+
+import { isBlocked } from '#/engine/social.ts';
 import { social } from '#/index.ts';
 import { createTestPlayer } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { isBlocked } from '#/engine/social.ts';
 
 describe(isBlocked.name, () => {
   it('is true only when the receiver blocks the sender', () =>

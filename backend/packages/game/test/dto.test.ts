@@ -1,23 +1,25 @@
 import { describe, expect, it } from 'vitest';
+
+import { ArmyBean, BuffBean, CityBean, HeroBean, PlayerInfo } from '@marchlands/contracts';
 import {
   BALANCE,
   BuffId,
+  type BuildingState,
   BuildingType,
   FORT_KEY_LIST,
   HeroBuffId,
   HeroStatus,
   mayorProductionBonus,
   msg,
+  type ResourceSet,
   stateOf,
   TileType,
-  TROOP_KEY_LIST,
   tileXY,
-  type BuildingState,
-  type ResourceSet,
+  TROOP_KEY_LIST,
 } from '@marchlands/core';
-import { ArmyBean, BuffBean, CityBean, HeroBean, PlayerInfo } from '@marchlands/contracts';
+
+import { type CityBundle, cityStats } from '#/city.ts';
 import { armyBean, buffsArray, buildingBean, cityBean, fortBean, heroBean, itemsArray, playerInfo, resourceBean, troopBean, valleyBean } from '#/dto.ts';
-import { cityStats, type CityBundle } from '#/city.ts';
 import { armyRow, bundle, cityRow, heroRow, playerRow, T0, tileRow } from '#test/support/city-rows.ts';
 
 const building = (positionId: number, typeId: number, level: number): BuildingState => ({ positionId, typeId, level, status: 0, startTime: 0, endTime: 0 });

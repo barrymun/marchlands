@@ -2,14 +2,16 @@
 // expiring hero buffs.
 
 import { and, eq } from 'drizzle-orm';
-import { BuildingType, buildingLevel, HeroStatus, syncHeroGear, type GeneratedHero, HeroBuffId } from '@marchlands/core';
+
+import { PushCmd } from '@marchlands/contracts';
+import { buildingLevel, BuildingType, type GeneratedHero, HeroBuffId, HeroStatus, syncHeroGear } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
-import { openOwnCity, type CityBundle } from '#/city.ts';
+
+import { type CityBundle, openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { heroBean } from '#/dto.ts';
 import { pushResources } from '#/helpers.ts';
-import { gearOfHero, getHero, saveCity, saveHero, type HeroRow } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
+import { gearOfHero, getHero, type HeroRow, saveCity, saveHero } from '#/repo.ts';
 
 export const pushHero = (ctx: Ctx, playerId: number, h: HeroRow, updateType: 0 | 1 | 2) =>
   ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: h.cityId, hero: heroBean(h), updateType });

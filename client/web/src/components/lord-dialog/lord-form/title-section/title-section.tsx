@@ -1,7 +1,9 @@
-import { TITLES, titleOf } from '@marchlands/core';
 import { Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
 import { getPlayerQueryKey, postPlayerTitlePromoteMutation } from '@marchlands/api-client';
+import { titleOf, TITLES } from '@marchlands/core';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCommand, usePlayer } from '@/hooks/use-game';

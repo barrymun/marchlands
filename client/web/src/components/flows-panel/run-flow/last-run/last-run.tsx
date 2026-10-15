@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
+
 import type { Flow } from '@marchlands/api-client';
-import { useNow } from '@/hooks/use-now';
+
 import { RunReport } from '@/components/flows-panel/run-flow/run-report/run-report';
 import { ago } from '@/components/flows-panel/run-flow/utils';
+import { useNow } from '@/hooks/use-now';
 
 export function LastRun({ flow }: { flow: Flow }) {
   const { t } = useTranslation('flows-panel');

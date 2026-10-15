@@ -1,22 +1,24 @@
 // interior.* and city.* — tax, work rates, comfort, city settings and teleporting.
 
 import { and, count, eq, inArray, ne } from 'drizzle-orm';
+
 import {
   BALANCE,
   BASIC_RESOURCES,
+  BuffId,
+  dur,
   GameError,
   itemGoldPrice,
+  ItemId,
+  msg,
+  ref,
+  type ResourceSet,
   scaled,
   TileType,
   tileXY,
-  type ResourceSet,
-  BuffId,
-  msg,
-  ref,
-  dur,
-  ItemId,
 } from '@marchlands/core';
 import { armies, tiles } from '@marchlands/db';
+
 import { cityStats, openOwnCity, viewCity, viewOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
 import { cityBean } from '#/dto.ts';

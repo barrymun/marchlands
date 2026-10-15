@@ -3,8 +3,10 @@
 // (by id), then tiles, then heroes/armies.
 
 import { and, asc, eq, sql } from 'drizzle-orm';
-import { GameError, HeroStatus, lordGear, msg, syncHeroBuffs, syncHeroGear, type LordGear } from '@marchlands/core';
+
+import { GameError, HeroStatus, type LordGear, lordGear, msg, syncHeroBuffs, syncHeroGear } from '@marchlands/core';
 import { armies, cities, heroes, players, tiles } from '@marchlands/db';
+
 import type { Ctx } from '#/context.ts';
 import { takeSettle } from '#/stats.ts';
 

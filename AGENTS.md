@@ -45,6 +45,11 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 
 - **Prettier owns formatting:** single quotes, 160-character lines (`.prettierrc.json`). Generated files, migrations, the original game's data JSON and Markdown are ignored (`.prettierignore`).
 - **ESLint owns code quality** (`eslint.config.js`): the JS and TypeScript recommended rules, plus react-hooks, react-refresh and i18next (no hard-coded text, see Translations) in the client. Its style rules are off (`eslint-config-prettier`), so the two never disagree.
+- **Imports are sorted** (auto-fixed by `npm run lint:fix`):
+  - Groups in this order, each alphabetised: stylesheets, `node:` builtins, packages, workspace packages (`@marchlands/…`), local (`#/…`, `#test/…`, `@/…`), relative (`import-x/order`).
+  - A file with more than 3 imports has one blank line between groups; a smaller file keeps them together (`tools/eslint/import-spacing.mjs`).
+  - The names inside the braces are alphabetised too (`sort-imports`).
+  - Side-effect imports (`import '@/index.css'`) are never moved. A big reorder can take ESLint more than one `--fix` run.
 - An unused name prefixed with `_` is allowed.
 - **Don't read the time during render:** use the `useNow()` hook (`client/web/src/hooks/use-now.ts`).
 - **Don't call setState synchronously in an effect.** Derive the value while rendering instead, or use `useSyncExternalStore`.

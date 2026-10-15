@@ -2,13 +2,15 @@
 // position messages built from them (msg-world `position.*`): every id the game defines is named.
 
 import { afterEach, describe, expect, it } from 'vitest';
+
 import { AllianceRank, BALANCE, msg, ref, TileType } from '@marchlands/core';
-import tilesGB from '@/locales/en-GB/data-tiles.json';
-import zonesGB from '@/locales/en-GB/data-zones.json';
-import ranksGB from '@/locales/en-GB/data-ranks.json';
+
 import { rankName, tileName, zoneName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
+import ranksGB from '@/locales/en-GB/data-ranks.json';
+import tilesGB from '@/locales/en-GB/data-tiles.json';
+import zonesGB from '@/locales/en-GB/data-zones.json';
 
 const sorted = (ids: number[]) => [...ids].sort((a, b) => a - b);
 const keys = (o: object) => sorted(Object.keys(o).map(Number));

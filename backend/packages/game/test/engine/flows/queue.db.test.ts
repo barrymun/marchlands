@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { msg } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { msg } from '@marchlands/core';
+
+import { resumeFlow, runQueue } from '#/engine/flows.ts';
 import { armies, flows, heroes } from '#/index.ts';
 import { addCity, createTestPlayer, reloadCity, type TestPlayer } from '#test/support/factories.ts';
 import { armyPreset, farmingCity, flowOf, heroAway, loseCity, mayor, newFlow, runFlowIn, valleysNear, waitTime, withHero } from '#test/support/flows.ts';
 import { game, T0, type TestGame } from '#test/support/game.ts';
-import { resumeFlow, runQueue } from '#/engine/flows.ts';
 
 /** Bring the army home now (recalled at once, it is back in a second). */
 async function comeHome(g: TestGame, p: TestPlayer, armyId: number) {

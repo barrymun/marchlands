@@ -1,15 +1,21 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { itemGoldPrice, BuffId } from '@marchlands/core';
+
 import {
+  type CityBean,
   getCitiesByCityIdQueryKey,
   getPlayerQueryKey,
   postPlayerFlagMutation,
   postPlayerGenderMutation,
   postPlayerRenameMutation,
   postPlayerTruceMutation,
-  type CityBean,
 } from '@marchlands/api-client';
+import { BuffId, itemGoldPrice } from '@marchlands/core';
+
+import { Countdown } from '@/components/countdown/countdown';
+import { TRUCE } from '@/components/lord-dialog/lord-form/constants';
+import { LanguageSelect } from '@/components/lord-dialog/lord-form/language-select/language-select';
+import { TitleSection } from '@/components/lord-dialog/lord-form/title-section/title-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,16 +23,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Countdown } from '@/components/countdown/countdown';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';
 import { fmt } from '@/lib/format';
-import { GENDERS } from '@/lib/genders';
-import { TRUCE } from '@/components/lord-dialog/lord-form/constants';
-import { TitleSection } from '@/components/lord-dialog/lord-form/title-section/title-section';
-import { LanguageSelect } from '@/components/lord-dialog/lord-form/language-select/language-select';
 import { itemName, titleName } from '@/lib/game-data';
+import { GENDERS } from '@/lib/genders';
 
 export function LordForm({ city }: { city?: CityBean }) {
   const { t } = useTranslation(['lord-dialog', 'common']);

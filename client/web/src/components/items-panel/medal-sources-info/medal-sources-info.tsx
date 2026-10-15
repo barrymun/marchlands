@@ -1,6 +1,8 @@
-import { medalSources } from '@marchlands/core';
 import { Medal } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
+
+import { medalSources } from '@marchlands/core';
+
 import { pct, range } from '@/components/items-panel/medal-sources-info/utils';
 import { fmt } from '@/lib/format';
 import { itemName, questName } from '@/lib/game-data';

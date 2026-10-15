@@ -1,6 +1,8 @@
-import { useTranslation } from 'react-i18next';
-import type { HeroBean } from '@marchlands/api-client';
 import { Landmark } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+import type { HeroBean } from '@marchlands/api-client';
+
 import { DominantBadge } from '@/routes/game/dominant-badge/dominant-badge';
 
 /** The city switcher's mayor line: name, then the strongest attribute below it. */

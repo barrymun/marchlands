@@ -1,6 +1,7 @@
 // Helpers for the barbarian city tests (services/combat/npc.db.test.ts, engine/combat/npc.db.test.ts).
 
 import { Mission } from '@marchlands/core';
+
 import { arrive, battleOf, reportsOf, send } from '#test/support/armies.ts';
 import { type TestPlayer } from '#test/support/factories.ts';
 import { type TestGame } from '#test/support/game.ts';

@@ -1,8 +1,11 @@
-import { useState, type FormEvent } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { getPlayerQueryKey, getWorldZonesOptions, postPlayer } from '@marchlands/api-client';
+
+import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,10 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { errorMessage, tokenStore } from '@/lib/api';
+import { percent } from '@/lib/format';
 import { zoneName } from '@/lib/game-data';
 import { GENDERS } from '@/lib/genders';
-import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
-import { percent } from '@/lib/format';
 
 export function CreateLordPage() {
   const { t } = useTranslation(['create-lord', 'common']);

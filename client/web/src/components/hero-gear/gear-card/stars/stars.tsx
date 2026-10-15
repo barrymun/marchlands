@@ -1,7 +1,8 @@
-import { useTranslation } from 'react-i18next';
 import { Star } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+
 import { maxStars } from '@/components/hero-gear/constants';
+import { cn } from '@/lib/utils';
 
 export function Stars({ count, used }: { count: number; used?: number }) {
   const { t } = useTranslation('hero-gear');

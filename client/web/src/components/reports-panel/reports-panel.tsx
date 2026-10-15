@@ -1,8 +1,14 @@
-import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { getReportsByReportIdQueryKey, getReportsOptions, getReportsQueryKey, getReportsUnreadQueryKey, postReportsReadMutation } from '@marchlands/api-client';
+
+import { PAGE_SIZE, TABS } from '@/components/reports-panel/constants';
+import { useUnreadReports } from '@/components/reports-panel/hooks';
+import { ReportDialog } from '@/components/reports-panel/report-dialog/report-dialog';
+import { ReportRow } from '@/components/reports-panel/report-row/report-row';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -11,10 +17,6 @@ import { Table, TableBody } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand } from '@/hooks/use-game';
 import { allOf } from '@/lib/query-keys';
-import { PAGE_SIZE, TABS } from '@/components/reports-panel/constants';
-import { useUnreadReports } from '@/components/reports-panel/hooks';
-import { ReportRow } from '@/components/reports-panel/report-row/report-row';
-import { ReportDialog } from '@/components/reports-panel/report-dialog/report-dialog';
 
 export function ReportsPanel() {
   const { t } = useTranslation('reports-panel');

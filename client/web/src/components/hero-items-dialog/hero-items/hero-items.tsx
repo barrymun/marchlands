@@ -1,20 +1,22 @@
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postHeroesItemsMutation, type HeroBean } from '@marchlands/api-client';
+
+import { getCitiesByCityIdQueryKey, getPlayerQueryKey, type HeroBean, postHeroesItemsMutation } from '@marchlands/api-client';
 import { BALANCE, experienceItemGain, HERO_ATTRIBUTE_ITEMS, heroAtMaxLevel, heroBuffAmount, heroBuffBase, heroItemGoldPrice } from '@marchlands/core';
+
 import { Countdown } from '@/components/countdown/countdown';
+import { ATTR_LABEL } from '@/components/hero-items-dialog/hero-items/constants';
+import { experienceItems, isLoyaltyFull, loyaltyMedals } from '@/components/hero-items-dialog/hero-items/utils';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCity, useCommand } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
+import { useNow } from '@/hooks/use-now';
 import { fmt, fmtExact, percent, period } from '@/lib/format';
 import { itemName } from '@/lib/game-data';
 import { ATTRIBUTE_BORDER, dominantAttribute } from '@/lib/hero-attributes';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { ATTR_LABEL } from '@/components/hero-items-dialog/hero-items/constants';
-import { experienceItems, isLoyaltyFull, loyaltyMedals } from '@/components/hero-items-dialog/hero-items/utils';
-import { useNow } from '@/hooks/use-now';
 
 export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) {
   const { t } = useTranslation(['hero-items-dialog', 'common']);

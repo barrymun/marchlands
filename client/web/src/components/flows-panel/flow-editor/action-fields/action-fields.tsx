@@ -1,17 +1,19 @@
-import { useTranslation } from 'react-i18next';
 import { HeartPulse, Hourglass } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { FLOW_MAX_WAIT_MINUTES, FLOW_TROOP_IDS } from '@marchlands/core';
+
 import { AttackTargetsFields } from '@/components/flow-attack/attack-targets-fields/attack-targets-fields';
+import { FLOW_STATS } from '@/components/flows-panel/flow-editor/action-fields/constants';
+import type { Stat } from '@/components/flows-panel/flow-editor/action-fields/types';
+import type { Draft, Targets } from '@/components/flows-panel/types';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { attributeOfStat } from '@/lib/hero-attributes';
 import { shortDuration } from '@/lib/format';
 import { troopName } from '@/lib/game-data';
+import { attributeOfStat } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
-import type { Draft, Targets } from '@/components/flows-panel/types';
-import type { Stat } from '@/components/flows-panel/flow-editor/action-fields/types';
-import { FLOW_STATS } from '@/components/flows-panel/flow-editor/action-fields/constants';
 
 /** The inputs of one action: which attribute for "set mayor"; troop type and amount (or max) for "train". */
 export function ActionFields({ action, cities, onChange }: { action: Draft; cities: Targets; onChange: (a: Draft) => void }) {

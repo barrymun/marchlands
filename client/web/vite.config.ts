@@ -1,7 +1,8 @@
 import path from 'node:path';
-import { defineConfig, loadEnv } from 'vite';
-import react from '@vitejs/plugin-react';
+
 import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig, loadEnv } from 'vite';
 
 // The dev server proxies the API so the browser talks to one origin (no CORS, same-origin WebSocket).
 // Target: API_PROXY, else http://localhost:${API_PORT} from the repo's .env, else :3000.

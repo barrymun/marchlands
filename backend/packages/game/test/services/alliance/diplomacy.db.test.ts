@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { AllianceRank, BALANCE, msg, Relation, scaled } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { AllianceRank, BALANCE, msg, Relation, scaled } from '@marchlands/core';
+
 import { alliance } from '#/index.ts';
 import { addMember, allianceRow, createTestAlliance, relationsOf } from '#test/support/alliance.ts';
 import { expectRefused } from '#test/support/expect.ts';

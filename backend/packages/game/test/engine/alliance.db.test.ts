@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { players } from '@marchlands/db';
+
+import { refreshAllianceStats } from '#/engine/alliance.ts';
 import { addMember, allianceRow, createTestAlliance } from '#test/support/alliance.ts';
 import { game } from '#test/support/game.ts';
-import { refreshAllianceStats } from '#/engine/alliance.ts';
 
 describe(refreshAllianceStats.name, () => {
   it("sums members' prestige, honour, members and cities, and ranks the alliances", () =>

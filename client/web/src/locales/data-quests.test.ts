@@ -2,13 +2,15 @@
 // gear pieces (data-gear): everything the game defines is named, and worded in every full locale.
 
 import { afterEach, describe, expect, it } from 'vitest';
+
 import { GEAR_PIECE_IDS, QUEST_CATALOGUE, questGroups, questTargetMessage, TITLES } from '@marchlands/core';
-import quests from '@/locales/en-GB/data-quests.json';
-import titles from '@/locales/en-GB/data-titles.json';
-import gear from '@/locales/en-GB/data-gear.json';
+
 import { gearName, questGroupName, questName, titleName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
+import gear from '@/locales/en-GB/data-gear.json';
+import quests from '@/locales/en-GB/data-quests.json';
+import titles from '@/locales/en-GB/data-titles.json';
 
 const sorted = (ids: (string | number)[]) => ids.map(String).sort();
 

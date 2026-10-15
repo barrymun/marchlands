@@ -1,15 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import { PushCmd } from '@marchlands/contracts';
 import { MailType, msg } from '@marchlands/core';
 
-import { PushCmd } from '@marchlands/contracts';
-
 import { mail, social } from '#/index.ts';
-
 import { expectRefused } from '#test/support/expect.ts';
-
 import { createTestPlayer } from '#test/support/factories.ts';
-
 import { game } from '#test/support/game.ts';
 
 describe(mail.sendMail.name, () => {

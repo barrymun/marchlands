@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BuildingType,
@@ -13,16 +15,16 @@ import {
   researchMaxLevel,
   researchTimeMs,
   RESOURCE_KEYS,
+  type Resources,
   scaled,
   SpeedupId,
   speedupItemGold,
   TECH_IDS,
   TechType,
-  type Resources,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
-import { heroes, research } from '#/index.ts';
+
 import { mayorStats } from '#/city.ts';
+import { heroes, research } from '#/index.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import {
   addCity,
@@ -37,7 +39,7 @@ import {
   setResources,
 } from '#test/support/factories.ts';
 import { game, T0, type TestGame } from '#test/support/game.ts';
-import { res, stock, researchOf, withAcademy } from '#test/support/research.ts';
+import { res, researchOf, stock, withAcademy } from '#test/support/research.ts';
 
 const { AGRICULTURE, LUMBERING, HERO_ENHANCEMENT, CONSTRUCTION } = TechType;
 const plus = (a: Resources, b: Partial<Resources>, mult = 1): Resources =>

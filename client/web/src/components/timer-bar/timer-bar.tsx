@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+
 import { Progress } from '@/components/ui/progress';
 import { useNow } from '@/hooks/use-now';
 import { duration } from '@/lib/format';

@@ -1,22 +1,16 @@
+import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { eq } from 'drizzle-orm';
-
-import { HOUR, MarketSide, merchantAsk, merchantBase, merchantBid, merchantBuys, merchantSells, ReportType } from '@marchlands/core';
-
 import { PushCmd } from '@marchlands/contracts';
-
+import { HOUR, MarketSide, merchantAsk, merchantBase, merchantBid, merchantBuys, merchantSells, ReportType } from '@marchlands/core';
 import { cities, marketShipments } from '@marchlands/db';
 
+import { deliverShipment, merchantSweep } from '#/engine/market.ts';
 import { market, reports } from '#/index.ts';
-
 import { reloadCity } from '#test/support/factories.ts';
-
 import { game } from '#test/support/game.ts';
-
 import { bidPrice, createTrader, escrowGold, GOLD, Res, shipWoodTo, withFee, withMerchantCurve, withShipmentTime } from '#test/support/market.ts';
 
-import { deliverShipment, merchantSweep } from '#/engine/market.ts';
 const offerPrice = () => Math.round(merchantBase('wood') * 0.97 * 1000) / 1000;
 
 describe(deliverShipment.name, () => {

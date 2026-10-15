@@ -1,11 +1,14 @@
 // Lint rules (code quality only: Prettier owns formatting, see .prettierrc.json).
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
+import i18next from 'eslint-plugin-i18next';
+import importX from 'eslint-plugin-import-x';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
-import i18next from 'eslint-plugin-i18next';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+
+import importSpacing from './tools/eslint/import-spacing.mjs';
 
 const RELATIVE_IMPORT = { group: ['./*', '../*'], message: 'Use #/… or #test/… instead of a relative path.' };
 const TESTING_IMPORT = { name: '@marchlands/game/testing', message: 'Test hooks only: use @marchlands/game.' };
@@ -21,6 +24,33 @@ export default tseslint.config(
     rules: {
       // `_name` marks an argument or binding kept on purpose
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    // Imports in groups, each alphabetised: stylesheets, node: builtins, packages, workspace packages (@marchlands/…),
+    // local (#/…, #test/…, @/…), relative. Side-effect imports (import '@/index.css') stay where they are, since their
+    // order can matter. The blank lines between groups are the marchlands/import-spacing rule's (tools/eslint).
+    plugins: { 'import-x': importX, marchlands: { rules: { 'import-spacing': importSpacing } } },
+    rules: {
+      'import-x/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', ['parent', 'sibling'], 'index', 'unknown'],
+          pathGroups: [
+            { pattern: '**/*.{css,scss,sass}', group: 'builtin', position: 'before' },
+            { pattern: '@marchlands/**', group: 'external', position: 'after' },
+            { pattern: '{#,#test,@}/**', group: 'internal' },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin'],
+          'newlines-between': 'ignore',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
+      // exactly one blank line after the last import (a comment right after them counts as code)
+      'import-x/newline-after-import': ['error', { count: 1, exactCount: true, considerComments: true }],
+      'marchlands/import-spacing': 'error',
+      // the names inside an import's braces, alphabetised (the import lines themselves are import-x/order's)
+      'sort-imports': ['error', { ignoreCase: true, ignoreDeclarationSort: true }],
     },
   },
   {

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { usePlayer } from '@/hooks/use-game';
 import type { Targets } from '@/components/flows-panel/types';
+import { usePlayer } from '@/hooks/use-game';
 
 /** "All cities", or the chosen cities' names. */
 export function CitiesSummary({ targets }: { targets: Targets }) {

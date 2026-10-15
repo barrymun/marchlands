@@ -4,8 +4,11 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { describe, expect, it } from 'vitest';
+
 import { MESSAGES, MSG_CODES, msgParamNames } from '@marchlands/core';
+
 import { DEFAULT_LOCALE, LOCALES, OVERRIDE_LOCALES } from '@/lib/i18n';
 
 type Tree = { [key: string]: string | Tree };

@@ -5,8 +5,8 @@
 // Locally, after `npm run build:backend`: npm run trace < trace.txt
 // Accepts plain stack traces and JSON log lines (their escaped \n become line breaks).
 import fs from 'node:fs';
-import path from 'node:path';
 import { SourceMap } from 'node:module';
+import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const bin = path.join(root, 'dist/backend/bin');

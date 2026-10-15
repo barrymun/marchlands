@@ -2,8 +2,10 @@
 // invitation (they get an Embassy first) and promoted by the Host. Shared by every service test that needs one.
 
 import { eq } from 'drizzle-orm';
+
 import { AllianceRank, BALANCE, BuildingType } from '@marchlands/core';
 import { alliances } from '@marchlands/db';
+
 import { alliance } from '#/index.ts';
 import { createTestPlayer, setBuildings, setResources, type TestPlayer } from '#test/support/factories.ts';
 import type { TestGame } from '#test/support/game.ts';

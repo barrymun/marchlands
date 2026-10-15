@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+
 import { getArmiesOptions, getArmiesQueryKey, postArmiesRecallMutation } from '@marchlands/api-client';
 import { ArmyDirection } from '@marchlands/core';
+
+import { ArmyRow } from '@/components/armies-panel/army-row/army-row';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCommand } from '@/hooks/use-game';
-import { ArmyRow } from '@/components/armies-panel/army-row/army-row';
 
 export function ArmiesPanel() {
   const { t } = useTranslation('armies-panel');

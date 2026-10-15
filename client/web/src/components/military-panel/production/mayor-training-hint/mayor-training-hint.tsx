@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
+
 import type { CityBean } from '@marchlands/api-client';
 import { heroManagement, heroPower, HeroStatus, heroTimeMultiplier } from '@marchlands/core';
+
 import { percent } from '@/lib/format';
 
 /** The mayor's Attack (troops) or Politics (fortifications) shortens training: ×BALANCE.heroTimeFactor per point. */

@@ -1,14 +1,16 @@
 import { Bot } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
 import type { MarketMerchant, MarketPriceLevel } from '@marchlands/api-client';
 import { BALANCE } from '@marchlands/core';
+
+import type { Side } from '@/components/market-panel/types';
+import { fmtPrice, resLabel } from '@/components/market-panel/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { fmtExact } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { fmtPrice, resLabel } from '@/components/market-panel/utils';
-import type { Side } from '@/components/market-panel/types';
 
 export function OrderBook({
   resType,

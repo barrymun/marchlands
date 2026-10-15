@@ -5,9 +5,11 @@
 // The moving parts live in worker.ts; this file wires them to the environment, the database and the signals.
 
 import { sql } from 'drizzle-orm';
+
 import { setGameSpeed } from '@marchlands/core';
 import { connect, timedEvents } from '@marchlands/db';
 import { beginnerJob, cleanupJob, merchantJob, rankingsJob, startStatsFlusher, statsJob, world, zonesJob } from '@marchlands/game';
+
 import { eventLoop, every as everyUntilStopped, log, processOne } from '#/worker.ts';
 
 const BATCH = Number(process.env.WORKER_BATCH ?? 50);

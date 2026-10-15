@@ -1,7 +1,8 @@
 import { BALANCE } from '@marchlands/core';
-import { i18n } from '@/lib/i18n';
+
 import { RES_KEYS } from '@/components/military-panel/production/constants';
 import type { TrainLimit } from '@/components/military-panel/production/types';
+import { i18n } from '@/lib/i18n';
 
 /** Most units of a type the city can order now: resources, idle population and (fortifications) wall space. */
 export function maxTrainable(

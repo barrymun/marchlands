@@ -7,8 +7,9 @@
 // into source positions (docs/deployment.md, Reading a stack trace). They're built with the bundles because esbuild
 // names minified symbols differently on macOS and Linux: only the image's own maps fit the image's bundles.
 import fs from 'node:fs';
-import path from 'node:path';
 import { createRequire } from 'node:module';
+import path from 'node:path';
+
 import { build } from 'esbuild';
 
 const root = path.resolve(import.meta.dirname, '../..');

@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
+
 import { Relation } from '@marchlands/core';
+
+import { isFriendly, relationBetween } from '#/engine/relations.ts';
 import { alliance } from '#/index.ts';
+import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
 import { createTestPlayer } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
-import { isFriendly, relationBetween } from '#/engine/relations.ts';
 
 describe(relationBetween.name, () => {
   it('a player is SELF to themselves, alliance or not', () =>

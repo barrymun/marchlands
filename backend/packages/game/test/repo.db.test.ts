@@ -1,7 +1,10 @@
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { ArmyDirection, BuildingType, heroGearBonus, heroGearStat, HeroStatus, msg, TechType, TileType } from '@marchlands/core';
 import { players } from '@marchlands/db';
+
+import { heroes } from '#/index.ts';
 import {
   armiesOfCity,
   armiesStationedAt,
@@ -23,7 +26,6 @@ import {
   saveTile,
   valleysOfCity,
 } from '#/repo.ts';
-import { heroes } from '#/index.ts';
 import { holdValley, insertArmy } from '#test/support/city-data.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { addCity, addHero, createTestPlayer, reloadCity, reloadPlayer, setBuildings, setResearch, type TestPlayer } from '#test/support/factories.ts';

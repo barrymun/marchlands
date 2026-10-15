@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Trans, useTranslation } from 'react-i18next';
+
 import {
   getCitiesByCityIdQueryKey,
   getMarketShipmentsOptions,
@@ -8,14 +9,15 @@ import {
   postMarketShipmentsSpeedupMutation,
 } from '@marchlands/api-client';
 import { goldForSpeedup } from '@marchlands/core';
+
+import { Countdown } from '@/components/countdown/countdown';
+import { resInline } from '@/components/market-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Countdown } from '@/components/countdown/countdown';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
-import { allOf } from '@/lib/query-keys';
 import { fmtExact } from '@/lib/format';
-import { resInline } from '@/components/market-panel/utils';
+import { allOf } from '@/lib/query-keys';
 
 /** Only relevant if travel times are re-enabled (BALANCE.marketShipmentBaseMs > 0). */
 export function Shipments() {

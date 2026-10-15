@@ -1,11 +1,12 @@
 // A new lord's first city and beginner protection.
 
-import { BALANCE, BuildingStatus, type BuildingState, BuffId, msg, type Message } from '@marchlands/core';
+import { BALANCE, BuffId, type BuildingState, BuildingStatus, type Message, msg } from '@marchlands/core';
 import { mails } from '@marchlands/db';
+
 import { type Ctx } from '#/context.ts';
+import { pushMailCounts } from '#/engine/mail.ts';
 import { activeBuff, pushPlayerInfo } from '#/helpers.ts';
 import { type PlayerRow } from '#/repo.ts';
-import { pushMailCounts } from '#/engine/mail.ts';
 
 /** Starting city: Town Hall level 1, 100k of every resource (orig createNewPlayer). */
 export function initialCity(playerId: number, tileId: number, name: string, now: number) {

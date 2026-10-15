@@ -2,13 +2,15 @@
 // on each hero card the gear bonus and the attribute it boosts.
 
 import { Trans, useTranslation } from 'react-i18next';
-import { getCitiesByCityIdQueryKey, putHeroesGearStatMutation, type HeroBean, type LordGear } from '@marchlands/api-client';
+
+import { getCitiesByCityIdQueryKey, type HeroBean, type LordGear, putHeroesGearStatMutation } from '@marchlands/api-client';
 import { GEAR_STATS, heroGearBreakdown } from '@marchlands/core';
+
+import { maxLevel } from '@/components/hero-gear/constants';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { attributeOfStat } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
-import { maxLevel } from '@/components/hero-gear/constants';
 
 /** On a hero card: the gear bonus this hero gets, its gear tier, and the attribute the gear boosts (free to change). */
 export function HeroGearLine({ hero, cityId }: { hero: HeroBean; cityId: number }) {

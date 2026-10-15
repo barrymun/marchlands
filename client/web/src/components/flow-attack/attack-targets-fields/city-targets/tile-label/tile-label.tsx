@@ -1,9 +1,11 @@
-import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+
 import { getMapTilesByTileIdOptions } from '@marchlands/api-client';
 import { tileXY } from '@marchlands/core';
-import { usePlayer } from '@/hooks/use-game';
+
 import { placeName } from '@/components/map-panel/utils';
+import { usePlayer } from '@/hooks/use-game';
 
 /** "(x,y) Barbarian city Lv 10" for a tile. */
 export function TileLabel({ tileId }: { tileId: number }) {

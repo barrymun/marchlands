@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { BuildingType, TECH_IDS, TechType, TroopType, techEffect, techInfo } from '@marchlands/core';
+
+import { BuildingType, TECH_IDS, techEffect, techInfo, TechType, TroopType } from '@marchlands/core';
+
 import { unlockName } from '@/components/research-panel/utils';
 import { techName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';

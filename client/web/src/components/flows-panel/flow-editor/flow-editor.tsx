@@ -1,16 +1,18 @@
+import { ArrowDown, ArrowUp, Check, GripVertical, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowDown, ArrowUp, Check, GripVertical, Plus, X } from 'lucide-react';
+
 import { FLOW_TROOP_IDS } from '@marchlands/core';
+
+import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
+import { ActionFields } from '@/components/flows-panel/flow-editor/action-fields/action-fields';
+import type { Draft, EditDraft } from '@/components/flows-panel/types';
+import { keyed } from '@/components/flows-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import type { Draft, EditDraft } from '@/components/flows-panel/types';
-import { keyed } from '@/components/flows-panel/utils';
-import { ActionFields } from '@/components/flows-panel/flow-editor/action-fields/action-fields';
-import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
 
 export function FlowEditor({
   draft,

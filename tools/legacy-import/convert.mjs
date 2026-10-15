@@ -9,8 +9,9 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
+
 import { readInserts, toObjects } from './mysql-dump.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));

@@ -2,21 +2,23 @@
 // claimed once for their award (orig sent a single hard-coded dummy quest).
 
 import { and, count, eq, inArray } from 'drizzle-orm';
+
 import {
   BALANCE,
   evaluateTarget,
+  FORT_KEY_LIST,
   GameError,
   HeroStatus,
   msg,
   QUEST_CATALOGUE,
   questById,
   questGroupsWithQuests,
+  type QuestSnapshot,
   questTargetMessage,
   TROOP_KEY_LIST,
-  FORT_KEY_LIST,
-  type QuestSnapshot,
 } from '@marchlands/core';
 import { heroes, mails, playerRelations, questProgress, tiles } from '@marchlands/db';
+
 import { openOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
 import { addItem, gainResources, pushResources } from '#/helpers.ts';

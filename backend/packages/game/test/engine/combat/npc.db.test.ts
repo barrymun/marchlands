@@ -1,6 +1,8 @@
 // processArmy for attacks on barbarian cities (plunder, loyalty, capture, regeneration), and raising their level.
 
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
   armyLoad,
@@ -18,14 +20,14 @@ import {
   TileType,
   totalResources,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
+
+import { processArmy } from '#/engine/combat.ts';
 import { admin } from '#/index.ts';
 import { citiesOf, getHero, getTile } from '#/repo.ts';
 import { armyRow, expectWipedHero, roundTrip, send, tileNear, warrior } from '#test/support/armies.ts';
+import { attack } from '#test/support/combat.ts';
 import { reloadCity, reloadPlayer, setResearch } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { processArmy } from '#/engine/combat.ts';
-import { attack } from '#test/support/combat.ts';
 
 const KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 

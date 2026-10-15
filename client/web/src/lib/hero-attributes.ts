@@ -1,8 +1,8 @@
 // Hero attributes with their display colours: one place to reference politics = green, attack = red, intelligence = blue.
 // (Running item bonuses are purple: tones.ts.)
 
-import { heroManagement, heroPower, heroStratagem, type GearStat } from '@marchlands/core';
 import type { HeroBean } from '@marchlands/api-client';
+import { type GearStat, heroManagement, heroPower, heroStratagem } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /** Badge colours (background + text, light and dark) per attribute. */

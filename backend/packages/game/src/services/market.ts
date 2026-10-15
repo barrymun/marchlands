@@ -7,6 +7,8 @@
 // - a 0.5% fee on the buyer's gold, and a log of completed trades (market_trades) for history.
 
 import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BASIC_RESOURCES,
@@ -14,6 +16,7 @@ import {
   buildingLevel,
   BuildingType,
   GameError,
+  ref as gameRef,
   goldForSpeedup,
   MarketSide,
   merchantAsk,
@@ -25,18 +28,17 @@ import {
   merchantSells,
   type MerchantState,
   msg,
-  ref as gameRef,
   ReportType,
   scaled,
 } from '@marchlands/core';
 import { marketOrders, marketShipments, marketTrades, pgArray, worldState } from '@marchlands/db';
+
 import { openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
+import { escrowGold, GOLD, loadMerchant, MERCHANT_KEY, resKey, ship, tradeStat, withFee } from '#/engine/market.ts';
+import { createReport } from '#/engine/reports.ts';
 import { gainResources, pushResources, spendGold } from '#/helpers.ts';
 import { saveCity } from '#/repo.ts';
-import { createReport } from '#/engine/reports.ts';
-import { PushCmd } from '@marchlands/contracts';
-import { resKey, GOLD, MERCHANT_KEY, tradeStat, withFee, escrowGold, ship, loadMerchant } from '#/engine/market.ts';
 
 type OrderRow = typeof marketOrders.$inferSelect;
 

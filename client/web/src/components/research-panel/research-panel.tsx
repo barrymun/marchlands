@@ -1,23 +1,25 @@
 import { CircleCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getCitiesByCityIdQueryKey, getCitiesResearchQueryKey, postCitiesResearchMutation, type CityBean } from '@marchlands/api-client';
-import { BALANCE, buildingLevel, BuildingType, heroStratagem, HeroStatus, heroTimeMultiplier, researchHeroExp } from '@marchlands/core';
+
+import { type CityBean, getCitiesByCityIdQueryKey, getCitiesResearchQueryKey, postCitiesResearchMutation } from '@marchlands/api-client';
+import { BALANCE, buildingLevel, BuildingType, HeroStatus, heroStratagem, heroTimeMultiplier, researchHeroExp } from '@marchlands/core';
+
+import { CostList } from '@/components/cost-list/cost-list';
+import { Requirements } from '@/components/requirements/requirements';
+import { useResearchList } from '@/components/research-panel/hooks';
+import { ResearchJob } from '@/components/research-panel/research-job/research-job';
+import { unlockName } from '@/components/research-panel/utils';
+import { TimerBar } from '@/components/timer-bar/timer-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TimerBar } from '@/components/timer-bar/timer-bar';
-import { CostList } from '@/components/cost-list/cost-list';
-import { Requirements } from '@/components/requirements/requirements';
 import { useCommand } from '@/hooks/use-game';
 import { fmtExact, percent } from '@/lib/format';
 import { techName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { useResearchList } from '@/components/research-panel/hooks';
-import { ResearchJob } from '@/components/research-panel/research-job/research-job';
-import { unlockName } from '@/components/research-panel/utils';
 
 export function ResearchPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['research-panel', 'common']);

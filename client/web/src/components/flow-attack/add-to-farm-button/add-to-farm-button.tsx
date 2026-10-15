@@ -1,18 +1,20 @@
 // (marchlands) The "Attack targets" flow action: a saved army plus each city's own targets, picked by
 // typing x,y here or with "Add to farming list" on the Map tab.
 
-import { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Swords } from 'lucide-react';
-import { getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows, type CityBean, type Flow } from '@marchlands/api-client';
+import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+
+import { type CityBean, type Flow, getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows } from '@marchlands/api-client';
+
+import type { AttackAction } from '@/components/flow-attack/types';
+import { targetCap } from '@/components/flow-attack/utils';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { errorMessage } from '@/lib/api';
-import type { AttackAction } from '@/components/flow-attack/types';
-import { targetCap } from '@/components/flow-attack/utils';
 
 /** Map tab: add a tile to this city's targets in a flow that has an "Attack targets" action. */
 export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; tileId: number; tileName: string }) {

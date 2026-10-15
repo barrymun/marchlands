@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { BALANCE, scaled, speedupItemGold, ItemId, SpeedupId } from '@marchlands/core';
+
+import { BALANCE, ItemId, scaled, SpeedupId, speedupItemGold } from '@marchlands/core';
+
 import { Button } from '@/components/ui/button';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';

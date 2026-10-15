@@ -12,34 +12,34 @@ import {
   ComfortBody,
   ComfortResult,
   ConstructBody,
+  CureInjuredBody,
   Empty,
   InjuredTroopsBody,
-  CureInjuredBody,
   MoveCityBody,
   ProduceQueue,
   ProductionBreakdown,
   ProductionQueues,
   ResearchBody,
-  ResearchSpeedupBody,
-  ResearchTechQuery,
   ResearchList,
+  ResearchSpeedupBody,
   ResearchSpeedupResult,
   ResearchStarted,
+  ResearchTechQuery,
   ResourcePercentBody,
   SpeedupBody,
   TaxRateBody,
   TrainableList,
   TrainBody,
+  TrainingQueueParams,
   TrainManyBody,
   TrainManyResult,
-  TrainingQueueParams,
-  TroopCountBody,
   TrainSplitBody,
   TrainSplitResult,
+  TroopCountBody,
   UpdateCityBody,
 } from '@marchlands/contracts';
 import { buildings, interior, research, training } from '@marchlands/game';
-import { doc, authenticate, game, tags, zCityParams, type ZApp } from '#/http.ts';
+import { authenticate, doc, game, tags, type ZApp, zCityParams } from '#/http.ts';
 
 /**
  * The barracks position a troops route acts on. The training service tells troops from fortifications by the

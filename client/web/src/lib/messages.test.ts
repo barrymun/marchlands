@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
+
 import { msg, ref, share } from '@marchlands/core';
-import { gameRefName, paramText, translateMessage } from '@/lib/messages';
+
 import { i18n } from '@/lib/i18n';
+import { gameRefName, paramText, translateMessage } from '@/lib/messages';
 
 afterEach(async () => {
   await i18n.changeLanguage('en-GB');

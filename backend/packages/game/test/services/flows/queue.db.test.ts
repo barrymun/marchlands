@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { msg } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { msg } from '@marchlands/core';
+
 import { flows } from '#/index.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { addCity, createTestPlayer } from '#test/support/factories.ts';

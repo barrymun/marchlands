@@ -3,9 +3,10 @@
 // its duration: the merchant's price curve (instead of its fixed price) and timed shipments.
 
 import { BALANCE, BuildingType, MarketSide, merchantBase, type ResourceSet } from '@marchlands/core';
+
+import { market } from '#/index.ts';
 import { createTestPlayer, setBuildings, setResources, type TestPlayer } from '#test/support/factories.ts';
 import type { TestGame } from '#test/support/game.ts';
-import { market } from '#/index.ts';
 
 export const GOLD = 4;
 export const Res = { FOOD: 0, WOOD: 1, STONE: 2, IRON: 3 } as const;

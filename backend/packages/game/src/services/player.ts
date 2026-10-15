@@ -2,29 +2,34 @@
 // titles, holiday (furlough), truce and restart.
 
 import { and, count, eq, inArray, ne, sql } from 'drizzle-orm';
+
+import { type CreatePlayerBody } from '@marchlands/contracts';
 import {
-  goldForCents,
-  itemGoldPrice,
   BALANCE,
+  BuffId,
+  type CastleSign,
   DAY,
   GameError,
+  goldForCents,
   HOUR,
-  TileType,
-  TITLES,
-  tileXY,
-  type TroopCounts,
-  TROOP_KEY_LIST,
-  lordGear,
-  BuffId,
-  msg,
-  type CastleSign,
+  itemGoldPrice,
   ItemId,
+  lordGear,
+  msg,
+  TileType,
+  tileXY,
+  TITLES,
+  TROOP_KEY_LIST,
+  type TroopCounts,
 } from '@marchlands/core';
-import { type CreatePlayerBody } from '@marchlands/contracts';
 import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@marchlands/db';
+
 import { openOwnCity, viewOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { buffsArray, cityBean, itemsArray } from '#/dto.ts';
+import { initialCity } from '#/engine/player.ts';
+import { relationBetween } from '#/engine/relations.ts';
+import { pickOpenFlat } from '#/engine/world.ts';
 import {
   activeBuff,
   assertClean,
@@ -39,12 +44,9 @@ import {
   spendGold,
   useItemOrGold,
 } from '#/helpers.ts';
-import { citiesOf, findPlayerByName, getCity, getPlayer, saveCity, savePlayer, type PlayerRow } from '#/repo.ts';
-import { pickOpenFlat } from '#/engine/world.ts';
-import { relationBetween } from '#/engine/relations.ts';
+import { citiesOf, findPlayerByName, getCity, getPlayer, type PlayerRow, saveCity, savePlayer } from '#/repo.ts';
 import { leaveAlliance } from '#/services/alliance.ts';
 import { visibleArmies } from '#/services/armies.ts';
-import { initialCity } from '#/engine/player.ts';
 
 export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePlayerBody): Promise<PlayerRow> {
   const [existing] = await ctx.tx.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));

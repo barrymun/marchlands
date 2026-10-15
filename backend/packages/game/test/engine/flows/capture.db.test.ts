@@ -1,14 +1,16 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { freshNpcState, TileType, tileId, tileXY } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { freshNpcState, tileId, TileType, tileXY } from '@marchlands/core';
 import { tiles } from '@marchlands/db';
+
+import { dropCapturedTarget } from '#/engine/flows.ts';
 import { admin } from '#/index.ts';
 import { getTile, saveTile } from '#/repo.ts';
 import { createTestPlayer, reloadCity } from '#test/support/factories.ts';
 import { armyPreset, farmingCity, flowOf, newFlow, runFlowIn } from '#test/support/flows.ts';
 import { game, type TestGame } from '#test/support/game.ts';
-import { dropCapturedTarget } from '#/engine/flows.ts';
 
 const mayor = { type: 'setMayor', stat: 'power' };
 const attack = (targets: Record<string, number[]>) => ({ type: 'attackTargets', presetId: '', targets });

@@ -1,15 +1,17 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Star, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import {
+  type CityBean,
   deletePlayerArmyPresetsByPresetIdMutation,
   getPlayerArmyPresetsOptions,
   getPlayerArmyPresetsQueryKey,
   postPlayerArmyPresetsMutation,
-  type CityBean,
 } from '@marchlands/api-client';
 import { totalTroops, TROOP_ID_BY_KEY, type TroopKey } from '@marchlands/core';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

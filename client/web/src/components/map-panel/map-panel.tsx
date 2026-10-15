@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Eye } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import {
+  type CityBean,
   deleteValleysByTileIdMutation,
   getArmiesQueryKey,
   getCitiesByCityIdQueryKey,
@@ -11,28 +13,28 @@ import {
   getMapTilesByTileIdOptions,
   getMapTilesByTileIdQueryKey,
   getPlayerQueryKey,
-  postValleysUpgradeMutation,
-  type CityBean,
   type MapCastle,
+  postValleysUpgradeMutation,
 } from '@marchlands/api-client';
 import { Mission, Relation, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@marchlands/core';
-import { Badge } from '@/components/ui/badge';
+
+import { CityDialog } from '@/components/city-dialog/city-dialog';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add-to-farm-button';
+import { R, RELATION_STYLE, TILE_STYLE } from '@/components/map-panel/constants';
+import { MedalOdds } from '@/components/map-panel/medal-odds/medal-odds';
+import { placeName, relationGroup } from '@/components/map-panel/utils';
+import { ValleyUpgrade } from '@/components/map-panel/valley-upgrade/valley-upgrade';
 import { SendArmyDialog } from '@/components/send-army-dialog/send-army-dialog';
 import type { SendTarget } from '@/components/send-army-dialog/types';
-import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add-to-farm-button';
-import { CityDialog } from '@/components/city-dialog/city-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCommand, usePlayer } from '@/hooks/use-game';
-import { allOf } from '@/lib/query-keys';
 import { fmt, percent } from '@/lib/format';
 import { tileName, zoneName } from '@/lib/game-data';
+import { allOf } from '@/lib/query-keys';
 import { cn } from '@/lib/utils';
-import { placeName, relationGroup } from '@/components/map-panel/utils';
-import { R, RELATION_STYLE, TILE_STYLE } from '@/components/map-panel/constants';
-import { ValleyUpgrade } from '@/components/map-panel/valley-upgrade/valley-upgrade';
-import { MedalOdds } from '@/components/map-panel/medal-odds/medal-odds';
 
 export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number }) {
   const { t } = useTranslation(['map-panel', 'common']);

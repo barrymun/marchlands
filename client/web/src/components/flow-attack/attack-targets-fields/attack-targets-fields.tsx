@@ -1,19 +1,21 @@
 // (marchlands) The "Attack targets" flow action: a saved army plus each city's own targets, picked by
 // typing x,y here or with "Add to farming list" on the Map tab.
 
+import { Swords } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Swords } from 'lucide-react';
+
 import { totalTroops, TROOP_KEYS } from '@marchlands/core';
+
+import { CityTargets } from '@/components/flow-attack/attack-targets-fields/city-targets/city-targets';
+import { usePresets } from '@/components/flow-attack/attack-targets-fields/hooks';
+import { NewArmy } from '@/components/flow-attack/attack-targets-fields/new-army/new-army';
+import type { AttackAction } from '@/components/flow-attack/types';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePlayer } from '@/hooks/use-game';
 import { fmtExact } from '@/lib/format';
 import { troopName } from '@/lib/game-data';
-import type { AttackAction } from '@/components/flow-attack/types';
-import { usePresets } from '@/components/flow-attack/attack-targets-fields/hooks';
-import { CityTargets } from '@/components/flow-attack/attack-targets-fields/city-targets/city-targets';
-import { NewArmy } from '@/components/flow-attack/attack-targets-fields/new-army/new-army';
 
 /** Editor fields of an "Attack targets" action: the saved army, then each city's targets. */
 export function AttackTargetsFields({

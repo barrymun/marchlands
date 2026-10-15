@@ -1,8 +1,10 @@
 import { Trans, useTranslation } from 'react-i18next';
+
 import { BALANCE, getGameSpeed, splitTraining } from '@marchlands/core';
-import { useNow } from '@/hooks/use-now';
-import { duration, fmtExact, fmtDecimal } from '@/lib/format';
+
 import type { Queue } from '@/components/military-panel/production/train-estimate/types';
+import { useNow } from '@/hooks/use-now';
+import { duration, fmtDecimal, fmtExact } from '@/lib/format';
 
 /** Real time per unit, and (when an amount is entered) when the order would finish: in one barracks, or split. */
 export function TrainEstimate({

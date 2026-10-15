@@ -1,6 +1,7 @@
 // tech.* — research is per lord; each city's Academy researches up to BALANCE.researchQueues
 // techs at a time (orig 1) and a tech can only be researched in one city at once.
 
+import { PushCmd } from '@marchlands/contracts';
 import {
   assertCanResearch,
   BALANCE,
@@ -27,13 +28,13 @@ import {
   techEffect,
   techInfo,
 } from '@marchlands/core';
+
 import { mayorStats, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
-import { gainResources, pushResources, spendGold, spendResources, useItemOrGold } from '#/helpers.ts';
-import { prefixed } from '#/stats.ts';
-import { getPlayer, saveCity, savePlayer } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
 import { refKey } from '#/engine/research.ts';
+import { gainResources, pushResources, spendGold, spendResources, useItemOrGold } from '#/helpers.ts';
+import { getPlayer, saveCity, savePlayer } from '#/repo.ts';
+import { prefixed } from '#/stats.ts';
 
 /** The city's research to act on: `techId` when given, else the only one running. */
 function pickResearch(research: ResearchState, cityId: number, techId?: number): number {

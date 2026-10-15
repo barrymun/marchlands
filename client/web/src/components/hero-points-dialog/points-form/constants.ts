@@ -1,5 +1,5 @@
-import { i18n } from '@/lib/i18n';
 import { ItemId } from '@marchlands/core';
+import { i18n } from '@/lib/i18n';
 
 /** The attributes points go to; `label` and `hint` are in the current locale. */
 export const STATS = [

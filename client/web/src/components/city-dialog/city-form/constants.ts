@@ -1,5 +1,5 @@
-import { i18n } from '@/lib/i18n';
 import { ItemId } from '@marchlands/core';
+import { i18n } from '@/lib/i18n';
 
 export const TELEPORT = ItemId.CITY_TELEPORTER;
 

@@ -1,11 +1,13 @@
 import { Trans, useTranslation } from 'react-i18next';
-import { itemEffect, type BuffId } from '@marchlands/core';
-import { Badge } from '@/components/ui/badge';
+
+import { type BuffId, itemEffect } from '@marchlands/core';
+
 import { Countdown } from '@/components/countdown/countdown';
+import { Badge } from '@/components/ui/badge';
 import { useNow } from '@/hooks/use-now';
+import { itemName } from '@/lib/game-data';
 import { ITEM_BONUS_TONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { itemName } from '@/lib/game-data';
 
 /**
  * For an item that applies a timed bonus (a buff on the lord): whether that bonus is running now and

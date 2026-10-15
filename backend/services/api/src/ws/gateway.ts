@@ -3,10 +3,11 @@
 // order (one transaction's pushes arrive as written, e.g. a mayor swapped in and back out).
 // Any number of API replicas can run: each delivers to the sockets it holds.
 
-import pg from 'pg';
 import { asc, eq, inArray } from 'drizzle-orm';
+import pg from 'pg';
+
 import type { PushMessage } from '@marchlands/contracts';
-import { players, pushMessages, type Db } from '@marchlands/db';
+import { type Db, players, pushMessages } from '@marchlands/db';
 import { PUSH_CHANNEL } from '@marchlands/game';
 
 export interface Socketish {

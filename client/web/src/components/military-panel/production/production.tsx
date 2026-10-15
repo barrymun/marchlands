@@ -1,7 +1,10 @@
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+
 import {
+  type CityBean,
   deleteCitiesFortificationsQueuesByQueueIdMutation,
   deleteCitiesTroopsQueuesByQueueIdMutation,
   getCitiesByCityIdQueryKey,
@@ -16,34 +19,33 @@ import {
   postCitiesFortificationsTrainManyMutation,
   postCitiesTroopsQueuesSpeedupMutation,
   postCitiesTroopsTrainManyMutation,
-  type CityBean,
 } from '@marchlands/api-client';
-import { BALANCE, usedWallSpace, wallCapacity, researchLevel, TechType, BuildingType, itemGoldPrice, ItemId } from '@marchlands/core';
-import { toast } from 'sonner';
+import { BALANCE, BuildingType, itemGoldPrice, ItemId, researchLevel, TechType, usedWallSpace, wallCapacity } from '@marchlands/core';
+
+import { CostList } from '@/components/cost-list/cost-list';
+import { RES_KEYS } from '@/components/military-panel/production/constants';
+import { MayorExpHint } from '@/components/military-panel/production/mayor-exp-hint/mayor-exp-hint';
+import { MayorTrainingHint } from '@/components/military-panel/production/mayor-training-hint/mayor-training-hint';
+import { TrainDiscountHint } from '@/components/military-panel/production/train-discount-hint/train-discount-hint';
+import { TrainEstimate } from '@/components/military-panel/production/train-estimate/train-estimate';
+import type { TrainLimit } from '@/components/military-panel/production/types';
+import { limitLabel, maxTrainable } from '@/components/military-panel/production/utils';
+import { Requirements } from '@/components/requirements/requirements';
+import { TimerBar } from '@/components/timer-bar/timer-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TimerBar } from '@/components/timer-bar/timer-bar';
-import { CostList } from '@/components/cost-list/cost-list';
-import { Requirements } from '@/components/requirements/requirements';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { fmt, fmtExact, realHourly } from '@/lib/format';
-import { troopName, itemName } from '@/lib/game-data';
+import { itemName, troopName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
-import { TrainDiscountHint } from '@/components/military-panel/production/train-discount-hint/train-discount-hint';
-import { MayorTrainingHint } from '@/components/military-panel/production/mayor-training-hint/mayor-training-hint';
-import { MayorExpHint } from '@/components/military-panel/production/mayor-exp-hint/mayor-exp-hint';
-import { TrainEstimate } from '@/components/military-panel/production/train-estimate/train-estimate';
-import { RES_KEYS } from '@/components/military-panel/production/constants';
-import { limitLabel, maxTrainable } from '@/components/military-panel/production/utils';
-import type { TrainLimit } from '@/components/military-panel/production/types';
 
 export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const { t } = useTranslation(['military-panel', 'common']);

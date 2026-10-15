@@ -3,7 +3,7 @@
 
 import { BALANCE, scaled } from '#/balance.ts';
 import { BASIC_RESOURCES, BuildingStatus, Relation, RESOURCE_KEYS, TileType, TROOP_ID_BY_KEY, VALLEY_TYPES } from '#/constants.ts';
-import { randInt, seededRng, type Rng } from '#/rng.ts';
+import { randInt, type Rng, seededRng } from '#/rng.ts';
 import { unitExp } from '#/troops.ts';
 import { type BuildingState, type FortCounts, type ResourceSet, type TroopCounts } from '#/types.ts';
 

@@ -1,43 +1,44 @@
 // castle.* — construction, upgrades, demolition, speed-ups and cancellation (completion: engine/buildings.ts).
 
 import {
+  assertCanConstruct,
+  assertCanUpgrade,
+  BALANCE,
+  BuffId,
+  buildCost,
+  buildingConfig,
   buildingEffect,
   buildingInfo,
-  BALANCE,
-  BuildingStatus,
-  BuildingType,
-  buildingConfig,
   buildingLevel,
   buildingMaxLevel,
   BUILDINGS,
-  buildCost,
+  type BuildingState,
+  BuildingStatus,
+  BuildingType,
   buildTimeMs,
   canPlace,
   checkRequirements,
-  goldForSpeedup,
-  speedupItemGold,
-  fullDemolishRefund,
+  dur,
   findBuilding,
+  fullDemolishRefund,
   GameError,
+  goldForSpeedup,
+  msg,
+  ref,
   requirementsMet,
   scaled,
   SPEEDUP_ITEMS,
-  unlockedOuterSlots,
-  assertCanConstruct,
-  assertCanUpgrade,
-  type BuildingState,
-  BuffId,
-  msg,
-  ref,
-  dur,
   SpeedupId,
+  speedupItemGold,
+  unlockedOuterSlots,
 } from '@marchlands/core';
-import { mayorStats, openOwnCity, viewCity, type CityBundle } from '#/city.ts';
+
+import { type CityBundle, mayorStats, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { buildingBean } from '#/dto.ts';
+import { commit, pushBuilding, refKey, scheduleBuilding } from '#/engine/buildings.ts';
 import { activeBuff, gainResources, pushResources, spendGold, spendResources, useItemOrGold } from '#/helpers.ts';
 import { prefixed } from '#/stats.ts';
-import { commit, pushBuilding, scheduleBuilding, refKey } from '#/engine/buildings.ts';
 
 /** How many constructions may run at once (Bernini's Hammer adds one more queue). */
 function maxConcurrent(b: CityBundle, now: number) {

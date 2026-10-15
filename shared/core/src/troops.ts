@@ -5,11 +5,11 @@ import {
   BuildingType,
   FORT_ID_BY_KEY,
   FORT_KEY_LIST,
+  type FortKey,
   TechType,
   TROOP_ID_BY_KEY,
   TROOP_KEY_LIST,
   TROOP_KEYS,
-  type FortKey,
   type TroopKey,
 } from '#/constants.ts';
 import { troopConfig } from '#/data/index.ts';

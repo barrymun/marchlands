@@ -1,12 +1,14 @@
+import { Check, Pencil, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Pencil, X } from 'lucide-react';
+
 import type { HeroBean } from '@marchlands/api-client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
+import { ExpBar } from '@/components/heroes-panel/hero-row/exp-bar/exp-bar';
 import { HeroAttributes } from '@/components/heroes-panel/hero-row/hero-attributes/hero-attributes';
 import { HeroBuffs } from '@/components/heroes-panel/hero-row/hero-buffs/hero-buffs';
-import { ExpBar } from '@/components/heroes-panel/hero-row/exp-bar/exp-bar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export function HeroRow({
   hero,

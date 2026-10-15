@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { playerStats, worldState } from '@marchlands/db';
-import { statDay } from '#/stats.ts';
+
 import { statistics } from '#/index.ts';
+import { statDay } from '#/stats.ts';
 import { createTestPlayer } from '#test/support/factories.ts';
 import { game, T0, type TestGame } from '#test/support/game.ts';
 

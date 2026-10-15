@@ -2,19 +2,6 @@
 // so a client port stays easy, with the original's misspellings corrected
 // (storeRercent -> storePercent, texRate -> taxRate, caslteId -> castleId, ...).
 
-import {
-  BALANCE,
-  BASIC_RESOURCES,
-  FORT_KEY_LIST,
-  TROOP_KEY_LIST,
-  populationDirection,
-  stateOf,
-  tileXY,
-  type CityStats,
-  type FortCounts,
-  type TroopCounts,
-  heroGearStat,
-} from '@marchlands/core';
 import type {
   ArmyBean,
   BuffBean,
@@ -28,7 +15,21 @@ import type {
   TroopBean,
   ValleyBean,
 } from '@marchlands/contracts';
-import { cityStats, type CityBundle } from '#/city.ts';
+import {
+  BALANCE,
+  BASIC_RESOURCES,
+  type CityStats,
+  FORT_KEY_LIST,
+  type FortCounts,
+  heroGearStat,
+  populationDirection,
+  stateOf,
+  tileXY,
+  TROOP_KEY_LIST,
+  type TroopCounts,
+} from '@marchlands/core';
+
+import { type CityBundle, cityStats } from '#/city.ts';
 import type { ArmyRow, CityRow, HeroRow, PlayerRow, TileRow } from '#/repo.ts';
 
 export const troopBean = (t: TroopCounts): TroopBean => Object.fromEntries(TROOP_KEY_LIST.map((k) => [k, Math.floor(t[k] ?? 0)])) as TroopBean;

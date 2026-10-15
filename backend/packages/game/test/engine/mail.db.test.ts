@@ -2,13 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { MailType } from '@marchlands/core';
 
-import { mail } from '#/index.ts';
-
-import { createTestPlayer } from '#test/support/factories.ts';
-
-import { game } from '#test/support/game.ts';
-
 import { sendSystemMail } from '#/engine/mail.ts';
+import { mail } from '#/index.ts';
+import { createTestPlayer } from '#test/support/factories.ts';
+import { game } from '#test/support/game.ts';
 
 describe(sendSystemMail.name, () => {
   it('files system mail with no sender and its message', () =>

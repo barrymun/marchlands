@@ -1,4 +1,5 @@
 import { troopDescription } from '@marchlands/core';
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { troopName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';

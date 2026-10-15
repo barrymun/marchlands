@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { AllianceRank, ArmyDirection, BALANCE, Mission, msg, Relation } from '@marchlands/core';
 import { alliances, armies, players } from '@marchlands/db';
+
 import { alliance } from '#/index.ts';
 import { addMember, createTestAlliance, relationsOf } from '#test/support/alliance.ts';
 import { expectRefused } from '#test/support/expect.ts';

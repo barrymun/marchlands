@@ -4,11 +4,11 @@
 // (tech, mayor and valley production bonuses, troop food upkeep, starvation).
 
 import { BALANCE, getGameSpeed, scaled } from '#/balance.ts';
-import { BASIC_RESOURCES, BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, type BasicResource, BuffId } from '#/constants.ts';
+import { BASIC_RESOURCES, type BasicResource, BuffId, BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST } from '#/constants.ts';
 import { troopConfig } from '#/data/index.ts';
-import type { BuffState, BuildingState, CityMisc, ResearchState, ResourceSet, TroopCounts } from '#/types.ts';
 import { mayorProductionBonus } from '#/heroes.ts';
 import { merchantBase } from '#/merchant.ts';
+import type { BuffState, BuildingState, CityMisc, ResearchState, ResourceSet, TroopCounts } from '#/types.ts';
 
 /** Field building that produces each basic resource. */
 export const FIELD_FOR_RESOURCE: Record<BasicResource, number> = {

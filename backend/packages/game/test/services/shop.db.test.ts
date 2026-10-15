@@ -1,23 +1,25 @@
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BuildingType,
-  ITEMS,
-  ItemId,
   civilCodePopulation,
   heroBoxQuality,
+  type ItemEffect,
   itemEffect,
   itemGoldPrice,
+  ItemId,
+  ITEMS,
   medalId,
   msg,
   ref,
   upgradeExpFor,
-  type ItemEffect,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
+
 import { cityStats } from '#/city.ts';
-import { heroesOfCity, saveCity } from '#/repo.ts';
 import { shop } from '#/index.ts';
+import { heroesOfCity, saveCity } from '#/repo.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import {
   cityBundle,

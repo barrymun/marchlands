@@ -1,6 +1,8 @@
 // processArmy for scouts: barbarian cities and valleys are always scouted; lords' cities fight with their scouts.
 
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
   BuildingType,
@@ -13,16 +15,17 @@ import {
   TechType,
   TileType,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
-import { getHero, getTile } from '#/repo.ts';
+
+import { processArmy } from '#/engine/combat.ts';
 import { interior } from '#/index.ts';
+import { getHero, getTile } from '#/repo.ts';
 import {
   allies,
   armyRow,
   arrive,
   battleOf,
-  expectWipedHero,
   cityTile,
+  expectWipedHero,
   lastReport,
   occupyValley,
   reportTitles,
@@ -34,7 +37,6 @@ import {
 } from '#test/support/armies.ts';
 import { addHero, cityBundle, reloadCity, setBuildings, setResearch } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
-import { processArmy } from '#/engine/combat.ts';
 
 const guardOf = (seed: number, maxLevel: number) => createGuardHero(maxLevel, seededRng(`guard:${seed}`));
 

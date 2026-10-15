@@ -12,43 +12,45 @@
 // flows held earlier go first. A preview runs up to the first wait and rolls everything back; only its
 // report is kept on the flow (until it runs, is edited or repeat is switched).
 
+import { and, asc, eq, gt, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
-  checkRequirements,
-  flowActionMessage,
-  GameError,
-  heroManagement,
-  heroPower,
-  heroStratagem,
-  HeroStatus,
-  maxTrainableCount,
-  troopCostShare,
-  requirementsMet,
-  troopConfig,
-  hasTroops,
-  Mission,
-  tileXY,
   ArmyDirection,
-  healCost,
-  healHonorCost,
+  checkRequirements,
   dur,
-  msg,
-  ref,
   type FlowAction,
+  flowActionMessage,
   type FlowCityResult,
   type FlowSkippedCity,
   type FlowStepResult,
+  GameError,
+  hasTroops,
+  healCost,
+  healHonorCost,
+  heroManagement,
+  heroPower,
+  HeroStatus,
+  heroStratagem,
+  maxTrainableCount,
   type Message,
+  Mission,
+  msg,
+  ref,
+  requirementsMet,
+  tileXY,
+  troopConfig,
+  troopCostShare,
 } from '@marchlands/core';
 import { armies, flows as flowsTable, heroes as heroesTable, timedEvents } from '@marchlands/db';
-import { and, asc, eq, gt, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
+
 import { cityStats, openOwnCity } from '#/city.ts';
-import { isRetryable, savepoint, type Ctx } from '#/context.ts';
-import { citiesOf, getPlayer } from '#/repo.ts';
-import { appointMayor } from '#/services/heroes.ts';
-import { sendArmy } from '#/services/armies.ts';
-import { cureInjured, trainSplit } from '#/services/training.ts';
+import { type Ctx, isRetryable, savepoint } from '#/context.ts';
 import { hasTrainingRoom } from '#/engine/training.ts';
-import { PushCmd } from '@marchlands/contracts';
+import { citiesOf, getPlayer } from '#/repo.ts';
+import { sendArmy } from '#/services/armies.ts';
+import { appointMayor } from '#/services/heroes.ts';
+import { cureInjured, trainSplit } from '#/services/training.ts';
 
 /** A repeating flow starts again no sooner than this after its last run started (real time). */
 const REPEAT_MIN_GAP_MS = 60_000;

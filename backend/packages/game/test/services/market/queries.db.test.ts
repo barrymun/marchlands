@@ -3,13 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { HOUR, MarketSide, merchantAsk, merchantBase, merchantBid, merchantBuys, merchantSells, msg, scaled } from '@marchlands/core';
 
 import { market } from '#/index.ts';
-
 import { expectRefused } from '#test/support/expect.ts';
-
 import { reloadCity } from '#test/support/factories.ts';
-
 import { game } from '#test/support/game.ts';
-
 import { createTrader, escrowGold, Res, withFee, withMerchantCurve } from '#test/support/market.ts';
 
 describe(market.orderBook.name, () => {

@@ -1,7 +1,9 @@
-import { Fragment } from 'react';
 import { Medal } from 'lucide-react';
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { type BattleReport } from '@marchlands/core';
+
 import { Badge } from '@/components/ui/badge';
 import { fmtExact, resourceLabel } from '@/lib/format';
 import { itemName } from '@/lib/game-data';

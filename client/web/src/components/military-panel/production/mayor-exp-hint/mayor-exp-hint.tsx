@@ -1,7 +1,9 @@
 import { Trans, useTranslation } from 'react-i18next';
+
 import type { CityBean } from '@marchlands/api-client';
-import { BALANCE, buildingLevel, BuildingType, HeroStatus, prestigeOf, PrestigeAction, unitExp } from '@marchlands/core';
-import { fmtExact, fmtDecimal } from '@/lib/format';
+import { BALANCE, buildingLevel, BuildingType, HeroStatus, PrestigeAction, prestigeOf, unitExp } from '@marchlands/core';
+
+import { fmtDecimal, fmtExact } from '@/lib/format';
 
 /** Experience the mayor earns when the units finish: their experience weight plus the training prestige. */
 export function MayorExpHint({ city, typeId, count }: { city: CityBean; typeId: number; count: number }) {

@@ -1,21 +1,15 @@
+import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { eq } from 'drizzle-orm';
-
-import { HOUR, msg, ReportType } from '@marchlands/core';
-
 import { PushCmd } from '@marchlands/contracts';
-
+import { HOUR, msg, ReportType } from '@marchlands/core';
 import { reports as reportRows } from '@marchlands/db';
 
-import { reports } from '#/index.ts';
-
-import { createTestPlayer } from '#test/support/factories.ts';
-
-import { game, type TestGame } from '#test/support/game.ts';
-
 import { createReport, pushReportCounts, reportDesertion } from '#/engine/reports.ts';
-import { textBody, addReport } from '#test/support/reports.ts';
+import { reports } from '#/index.ts';
+import { createTestPlayer } from '#test/support/factories.ts';
+import { game, type TestGame } from '#test/support/game.ts';
+import { addReport, textBody } from '#test/support/reports.ts';
 
 const food = { production: 100, upkeep: 300, net: -200 };
 const position = msg('world.position.city', { name: 'Home', x: 1, y: 2 });

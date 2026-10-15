@@ -2,8 +2,11 @@
 // and raising a free valley's level.
 
 import { describe, expect, it } from 'vitest';
-import { ArmyDirection, BuildingType, createGuardHero, HeroStatus, maxValleysFor, Mission, msg, ref, seededRng } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { ArmyDirection, BuildingType, createGuardHero, HeroStatus, maxValleysFor, Mission, msg, ref, seededRng } from '@marchlands/core';
+
+import { processArmy } from '#/engine/combat.ts';
 import { getHero, getTile, valleysOfCity } from '#/repo.ts';
 import {
   allies,
@@ -23,7 +26,6 @@ import {
 } from '#test/support/armies.ts';
 import { addHero, cityBundle, reloadPlayer, setCityStats, setTownHall, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
-import { processArmy } from '#/engine/combat.ts';
 
 /** p attacks a valley; runs the march to the battle and returns the army id and p's latest report. */
 async function attack(g: TestGame, p: TestPlayer, heroId: number, tileId: number, troops: Record<string, number> = { lightCavalry: 40_000 }) {

@@ -1,6 +1,6 @@
 // Components loaded on first use (their code is a separate file of the build), for screens most visits don't open.
 
-import { createElement, lazy, useState, type ComponentType } from 'react';
+import { type ComponentType, createElement, lazy, useState } from 'react';
 
 /** sessionStorage key of the last reload after a file of the app failed to load */
 const RELOAD_KEY = 'marchlands-reloaded-at';

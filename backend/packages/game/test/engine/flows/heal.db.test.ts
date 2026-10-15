@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { healHonorCost, msg } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { healHonorCost, msg } from '@marchlands/core';
+
+import { runScheduledHeal } from '#/engine/flows.ts';
 import { armies } from '#/index.ts';
 import { createTestPlayer, reloadCity, setHonor, setInjured } from '#test/support/factories.ts';
 import { armyPreset, farmingCity, healed, injured, loseCity, newFlow, runFlowIn, sendOut, valleysNear } from '#test/support/flows.ts';
 import { game, T0 } from '#test/support/game.ts';
-import { runScheduledHeal } from '#/engine/flows.ts';
 
 describe(runScheduledHeal.name, () => {
   it('heals once the armies are home and tells the player', () =>

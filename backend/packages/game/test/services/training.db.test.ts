@@ -1,31 +1,33 @@
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BuildingType,
   FORT_KEYS,
   FortType,
-  ItemId,
-  RESOURCE_KEYS,
-  TechType,
-  TroopType,
   healCost,
   healHonorCost,
   itemGoldPrice,
+  ItemId,
   msg,
-  prestigeOf,
   PrestigeAction,
+  prestigeOf,
   ref,
+  RESOURCE_KEYS,
+  type Resources,
   splitTraining,
+  TechType,
   trainCost,
+  TroopType,
   troopUnitSeconds,
   unitExp,
   wallCapacity,
-  type Resources,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
-import { getHero, saveCity, saveHero, savePlayer } from '#/repo.ts';
-import { heroes, shop, training } from '#/index.ts';
+
 import { savepoint } from '#/context.ts';
+import { heroes, shop, training } from '#/index.ts';
+import { getHero, saveCity, saveHero, savePlayer } from '#/repo.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import {
   addHero,
@@ -40,7 +42,8 @@ import {
   type TestPlayer,
 } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
-import { WALLS_QUEUE, withBarracks, queueOf, batchMs } from '#test/support/training.ts';
+import { batchMs, queueOf, WALLS_QUEUE, withBarracks } from '#test/support/training.ts';
+
 const { WORKER, WARRIOR, SCOUT } = TroopType;
 
 /** Walls (position -2) of this level. */

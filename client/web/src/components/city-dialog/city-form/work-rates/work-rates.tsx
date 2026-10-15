@@ -1,13 +1,15 @@
-import { BASIC_RESOURCES, type BasicResource } from '@marchlands/core';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getCitiesByCityIdQueryKey, putCitiesWorkRatesMutation, type CityBean } from '@marchlands/api-client';
+
+import { type CityBean, getCitiesByCityIdQueryKey, putCitiesWorkRatesMutation } from '@marchlands/api-client';
+import { BASIC_RESOURCES, type BasicResource } from '@marchlands/core';
+
+import { FIELD_LABEL } from '@/components/city-dialog/city-form/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCommand } from '@/hooks/use-game';
 import { fmtExact } from '@/lib/format';
-import { FIELD_LABEL } from '@/components/city-dialog/city-form/constants';
 
 /**
  * Work rates (interior.modifyCommenceRate): the share of each field type's workers this city

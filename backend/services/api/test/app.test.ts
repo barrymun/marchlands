@@ -1,8 +1,10 @@
 // The app's plumbing that answers without touching the database (the app gets no database here, like openapi.ts).
 
 import { afterEach, describe, expect, it } from 'vitest';
-import type { Db } from '@marchlands/db';
+
 import { PushCmd } from '@marchlands/contracts';
+import type { Db } from '@marchlands/db';
+
 import { buildApp } from '#/app.ts';
 import { signToken } from '#/auth/jwt.ts';
 import type { ApiConfig } from '#/config.ts';

@@ -3,12 +3,14 @@
 // every full locale.
 
 import { afterEach, describe, expect, it } from 'vitest';
-import { ITEM_CATEGORY_IDS, ITEM_INFO, ITEMS, itemInfo, medalId, ItemId } from '@marchlands/core';
-import enGB from '@/locales/en-GB/data-items.json';
-import categories from '@/locales/en-GB/data-item-categories.json';
+
+import { ITEM_CATEGORY_IDS, ITEM_INFO, ItemId, itemInfo, ITEMS, medalId } from '@marchlands/core';
+
 import { itemCategoryName, itemName, itemShortName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
+import categories from '@/locales/en-GB/data-item-categories.json';
+import enGB from '@/locales/en-GB/data-items.json';
 
 const ids = ITEMS.map((i) => i.id);
 const medals = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(medalId);

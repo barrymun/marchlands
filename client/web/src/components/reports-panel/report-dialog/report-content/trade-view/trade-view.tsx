@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
+
 import type { ReportBody } from '@marchlands/core';
-import { fmtExact, fmtDecimal } from '@/lib/format';
-import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
+
 import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
+import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
+import { fmtDecimal, fmtExact } from '@/lib/format';
 
 export function TradeView({ trade }: { trade: Extract<ReportBody, { kind: 'trade' }>['trade'] }) {
   const { t } = useTranslation(['reports-panel', 'common']);

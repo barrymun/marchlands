@@ -1,6 +1,6 @@
 import { RESOURCES } from '@/components/market-panel/constants';
+import { fmtDecimal, resourceLabel } from '@/lib/format';
 import { i18n } from '@/lib/i18n';
-import { resourceLabel, fmtDecimal } from '@/lib/format';
 
 /** A market resource type as a label ("Lumber"); type 4 is gold. */
 export const resLabel = (t: number) => (t === 4 ? resourceLabel('gold') : (RESOURCES[t]?.label ?? `#${t}`));

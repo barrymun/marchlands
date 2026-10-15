@@ -2,9 +2,8 @@
 // is covered by their own tests, and events.db.test.ts runs real events end to end).
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { dispatchEvent, type EventRow } from '#/events.ts';
+
 import type { Ctx } from '#/context.ts';
-import { getPlayer } from '#/repo.ts';
 import { completeBuilding } from '#/engine/buildings.ts';
 import { processArmy } from '#/engine/combat.ts';
 import { resumeFlow, runQueue, runScheduledHeal } from '#/engine/flows.ts';
@@ -12,6 +11,8 @@ import { expireHeroBuff } from '#/engine/heroes.ts';
 import { deliverShipment } from '#/engine/market.ts';
 import { completeResearch } from '#/engine/research.ts';
 import { completeTraining } from '#/engine/training.ts';
+import { dispatchEvent, type EventRow } from '#/events.ts';
+import { getPlayer } from '#/repo.ts';
 
 vi.mock('#/engine/buildings.ts', () => ({ completeBuilding: vi.fn() }));
 vi.mock('#/engine/combat.ts', () => ({ processArmy: vi.fn(async () => 'army result') }));

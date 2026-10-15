@@ -2,26 +2,28 @@
 // The server runs each city all-or-nothing between waits; Preview runs up to the first wait and rolls
 // everything back. Repeat runs the flow again after every run; one flow runs at a time, others queue.
 
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react';
-import { deletePlayerFlowsByFlowId, getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows, type CityBean, type Flow } from '@marchlands/api-client';
-import { flowActionMessage } from '@marchlands/core';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+
+import { type CityBean, deletePlayerFlowsByFlowId, type Flow, getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows } from '@marchlands/api-client';
+import { flowActionMessage } from '@marchlands/core';
+
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
+import { CitiesSummary } from '@/components/flows-panel/cities-summary/cities-summary';
+import { FlowEditor } from '@/components/flows-panel/flow-editor/flow-editor';
+import { RunFlow } from '@/components/flows-panel/run-flow/run-flow';
+import { StatusBadge } from '@/components/flows-panel/status-badge/status-badge';
+import { StatusLine } from '@/components/flows-panel/status-line/status-line';
+import type { EditDraft } from '@/components/flows-panel/types';
+import { currentAction, keyed, strip } from '@/components/flows-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { errorMessage } from '@/lib/api';
 import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
-import type { EditDraft } from '@/components/flows-panel/types';
-import { currentAction, keyed, strip } from '@/components/flows-panel/utils';
-import { FlowEditor } from '@/components/flows-panel/flow-editor/flow-editor';
-import { StatusBadge } from '@/components/flows-panel/status-badge/status-badge';
-import { StatusLine } from '@/components/flows-panel/status-line/status-line';
-import { RunFlow } from '@/components/flows-panel/run-flow/run-flow';
-import { CitiesSummary } from '@/components/flows-panel/cities-summary/cities-summary';
 
 export function FlowsPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['flows-panel', 'common']);

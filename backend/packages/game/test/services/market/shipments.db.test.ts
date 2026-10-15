@@ -3,13 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { goldForSpeedup, HOUR, msg, scaled } from '@marchlands/core';
 
 import { market } from '#/index.ts';
-
 import { expectRefused } from '#test/support/expect.ts';
-
 import { reloadCity, setResources } from '#test/support/factories.ts';
-
 import { game } from '#test/support/game.ts';
-
 import { createTrader, shipWoodTo, withMerchantCurve, withShipmentTime } from '#test/support/market.ts';
 
 describe(market.speedupShipment.name, () => {

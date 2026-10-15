@@ -2,27 +2,29 @@
 // engine/combat/*.db.test.ts): a city ready for war, targets on the seeded map near it, running a march
 // through the real timed events, and its reports.
 
-import { expect } from 'vitest';
 import { asc, eq } from 'drizzle-orm';
+import { expect } from 'vitest';
+
+import { PushCmd, type SendArmyBody } from '@marchlands/contracts';
 import {
-  BASIC_RESOURCES,
   BALANCE,
+  BASIC_RESOURCES,
+  type BattleReport,
   BuildingType,
   HeroStatus,
   Mission,
+  type ReportBody,
+  type ScoutReport,
   tileDistance,
   TileType,
   tileXY,
-  type BattleReport,
-  type ReportBody,
-  type ScoutReport,
 } from '@marchlands/core';
 import { reports } from '@marchlands/db';
+
 import { admin, alliance, armies, world } from '#/index.ts';
-import { citiesOf, getArmy, getCity, getHero, getTile, type ArmyRow, type TileRow } from '#/repo.ts';
+import { type ArmyRow, citiesOf, getArmy, getCity, getHero, getTile, type TileRow } from '#/repo.ts';
 import { addHero, createTestPlayer, setBuildings, setCityStats, setResources, type TestPlayer } from '#test/support/factories.ts';
 import type { TestGame } from '#test/support/game.ts';
-import { PushCmd, type SendArmyBody } from '@marchlands/contracts';
 
 const RICH = { gold: 10_000_000, food: 10_000_000, wood: 10_000_000, stone: 10_000_000, iron: 10_000_000 };
 export const NO_RESOURCES = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };

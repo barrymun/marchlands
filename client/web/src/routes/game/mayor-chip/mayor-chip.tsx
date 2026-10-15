@@ -1,6 +1,8 @@
-import { useTranslation } from 'react-i18next';
-import type { HeroBean } from '@marchlands/api-client';
 import { Landmark } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+import type { HeroBean } from '@marchlands/api-client';
+
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { heroAttributeValues } from '@/lib/hero-attributes';

@@ -1,13 +1,15 @@
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { AllianceRank, BALANCE, BuildingType, msg } from '@marchlands/core';
 import { heroes as heroTable } from '@marchlands/db';
+
+import { refreshRankings } from '#/engine/rankings.ts';
 import { admin, alliance, heroes, rankings } from '#/index.ts';
+import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { addHero, createTestPlayer, reloadPlayer, setBuildings, setCityStats, setTownHall } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { foundAlliance, joinAlliance } from '#test/support/alliance.ts';
-import { refreshRankings } from '#/engine/rankings.ts';
 import { setFame } from '#test/support/rankings.ts';
 
 describe(rankings.playerRanking.name, () => {

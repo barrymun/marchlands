@@ -1,8 +1,9 @@
 import type { BuildingBean, CityBean } from '@marchlands/api-client';
-import { useSticky } from '@/hooks/use-sticky';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+
 import { BuildList } from '@/components/buildings-panel/building-dialog/build-list/build-list';
 import { BuildingDetail } from '@/components/buildings-panel/building-dialog/building-detail/building-detail';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useSticky } from '@/hooks/use-sticky';
 
 export function BuildingDialog({
   city,

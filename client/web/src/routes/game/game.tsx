@@ -1,8 +1,16 @@
+import { useQueryClient } from '@tanstack/react-query';
+import { ChevronDown, Crown, UserRound } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Crown, UserRound } from 'lucide-react';
+
+import { ActivityDock } from '@/components/activity-dock/activity-dock';
+import { BuildingsPanel } from '@/components/buildings-panel/buildings-panel';
+import { CityDialog } from '@/components/city-dialog/city-dialog';
+import { LordDialog } from '@/components/lord-dialog/lord-dialog';
+import { useUnreadReports } from '@/components/reports-panel/hooks';
+import { ResourceBar } from '@/components/resource-bar/resource-bar';
+import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,21 +24,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ActivityDock } from '@/components/activity-dock/activity-dock';
-import { BuildingsPanel } from '@/components/buildings-panel/buildings-panel';
-import { CityDialog } from '@/components/city-dialog/city-dialog';
-import { LordDialog } from '@/components/lord-dialog/lord-dialog';
-import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
-import { useUnreadReports } from '@/components/reports-panel/hooks';
-import { ResourceBar } from '@/components/resource-bar/resource-bar';
-import { mayorOf } from '@/routes/game/utils';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
 import { errorMessage, tokenStore } from '@/lib/api';
 import { fmt } from '@/lib/format';
 import { titleName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
-import { MayorSummary } from '@/routes/game/mayor-summary/mayor-summary';
-import { MayorChip } from '@/routes/game/mayor-chip/mayor-chip';
 import {
   ArmiesPanel,
   FlowsPanel,
@@ -45,6 +43,9 @@ import {
   TABS,
 } from '@/routes/game/constants';
 import { usePreloadPanels } from '@/routes/game/hooks';
+import { MayorChip } from '@/routes/game/mayor-chip/mayor-chip';
+import { MayorSummary } from '@/routes/game/mayor-summary/mayor-summary';
+import { mayorOf } from '@/routes/game/utils';
 
 export function GamePage() {
   const { t } = useTranslation(['game', 'common']);

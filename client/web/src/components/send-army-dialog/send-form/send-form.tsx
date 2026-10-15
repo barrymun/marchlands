@@ -1,27 +1,29 @@
+import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useMutation } from '@tanstack/react-query';
-import { getArmiesQueryKey, getCitiesByCityIdQueryKey, postCitiesArmies, postCitiesArmiesEstimate, type CityBean } from '@marchlands/api-client';
-import { armyLoad, buildingLevel, BuildingType, heroPower, HeroStatus, maxArmyTroops, Mission, TROOP_KEYS, type TroopKey, BuffId } from '@marchlands/core';
+
+import { type CityBean, getArmiesQueryKey, getCitiesByCityIdQueryKey, postCitiesArmies, postCitiesArmiesEstimate } from '@marchlands/api-client';
+import { armyLoad, BuffId, buildingLevel, BuildingType, heroPower, HeroStatus, maxArmyTroops, Mission, TROOP_KEYS, type TroopKey } from '@marchlands/core';
+
+import { MISSION_NAMES } from '@/components/armies-panel/constants';
 import { Countdown } from '@/components/countdown/countdown';
+import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
+import { RES } from '@/components/send-army-dialog/send-form/constants';
+import { ScoutNote } from '@/components/send-army-dialog/send-form/scout-note/scout-note';
+import { capTroops, defaultHero } from '@/components/send-army-dialog/send-form/utils';
+import type { SendTarget } from '@/components/send-army-dialog/types';
 import { Button } from '@/components/ui/button';
-import { useNow } from '@/hooks/use-now';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MISSION_NAMES } from '@/components/armies-panel/constants';
 import { useCommand, usePlayer } from '@/hooks/use-game';
+import { useNow } from '@/hooks/use-now';
 import { duration, fmt, fmtExact, resourceLabel } from '@/lib/format';
-import { troopName, itemName } from '@/lib/game-data';
+import { itemName, troopName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import type { SendTarget } from '@/components/send-army-dialog/types';
-import { RES } from '@/components/send-army-dialog/send-form/constants';
-import { ScoutNote } from '@/components/send-army-dialog/send-form/scout-note/scout-note';
-import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
-import { capTroops, defaultHero } from '@/components/send-army-dialog/send-form/utils';
 
 /** Send an army to the target. The dialog stays open after sending, so more waves can follow. */
 export function SendForm({ city, target }: { city: CityBean; target: SendTarget }) {

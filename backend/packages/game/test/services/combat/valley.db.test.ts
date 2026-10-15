@@ -2,15 +2,17 @@
 // and raising a free valley's level.
 
 import { describe, expect, it } from 'vitest';
-import { ArmyDirection, BALANCE, HeroStatus, Mission, msg, TileType, valleyUpgradeCost } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { ArmyDirection, BALANCE, HeroStatus, Mission, msg, TileType, valleyUpgradeCost } from '@marchlands/core';
+
+import { homeMarchMs } from '#/engine/armies.ts';
 import { combat } from '#/index.ts';
 import { getHero, getTile, valleysOfCity } from '#/repo.ts';
 import { armyRow, arrive, occupyValley, send, valleyNear, warrior } from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { cityBundle, setResources } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { homeMarchMs } from '#/engine/armies.ts';
 
 describe(combat.abandonValley.name, () => {
   it('releases the valley; its garrison marches home', () =>

@@ -2,21 +2,23 @@
 // cities or one, all time or the last 7 days. The server writes the counters in batches, so the
 // newest actions can take a few minutes to appear.
 
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+
 import { getPlayerStatisticsOptions, type LordStatistics } from '@marchlands/api-client';
+
+import { ItemsUsed } from '@/components/stats-panel/items-used/items-used';
+import { NpcWins } from '@/components/stats-panel/npc-wins/npc-wins';
+import { Resources } from '@/components/stats-panel/resources/resources';
+import { Spending } from '@/components/stats-panel/spending/spending';
+import { Summary } from '@/components/stats-panel/summary/summary';
+import type { Counters } from '@/components/stats-panel/types';
+import { Units } from '@/components/stats-panel/units/units';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { Counters } from '@/components/stats-panel/types';
-import { Summary } from '@/components/stats-panel/summary/summary';
-import { Units } from '@/components/stats-panel/units/units';
-import { Resources } from '@/components/stats-panel/resources/resources';
-import { Spending } from '@/components/stats-panel/spending/spending';
-import { NpcWins } from '@/components/stats-panel/npc-wins/npc-wins';
-import { ItemsUsed } from '@/components/stats-panel/items-used/items-used';
 import { dateTime } from '@/lib/format';
 
 export function StatsPanel() {

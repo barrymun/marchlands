@@ -1,13 +1,14 @@
 // Research completion (timed event) and settling a lord's cities before their rates change.
 
-import { BuildingType, buildingLevel, prestigeOf, PrestigeAction, researchHeroExp, addHeroExp, TechType } from '@marchlands/core';
-import { loadBundle, mayorOf, settleAndReport, type CityBundle } from '#/city.ts';
+import { PushCmd } from '@marchlands/contracts';
+import { addHeroExp, buildingLevel, BuildingType, PrestigeAction, prestigeOf, researchHeroExp, TechType } from '@marchlands/core';
+
+import { type CityBundle, loadBundle, mayorOf, settleAndReport } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { heroBean } from '#/dto.ts';
 import { resyncHeroGear } from '#/engine/heroes.ts';
 import { addPrestige, pushPlayerInfo, pushResources } from '#/helpers.ts';
-import { citiesOf, getPlayer, saveCity, saveHero, savePlayer, type PlayerRow } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
+import { citiesOf, getPlayer, type PlayerRow, saveCity, saveHero, savePlayer } from '#/repo.ts';
 
 export const refKey = (playerId: number, techId: number) => `research:${playerId}:${techId}`;
 

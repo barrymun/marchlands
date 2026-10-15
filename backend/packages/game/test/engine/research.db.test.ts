@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, HOUR, prestigeOf, PrestigeAction, researchHeroExp, TechType } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
-import { getHero } from '#/repo.ts';
+import { BALANCE, HOUR, PrestigeAction, prestigeOf, researchHeroExp, TechType } from '@marchlands/core';
+
+import { completeResearch, settleAllCities } from '#/engine/research.ts';
 import { heroes, research } from '#/index.ts';
+import { getHero } from '#/repo.ts';
 import { addCity, addHero, createTestPlayer, reloadCity, reloadPlayer, setResearch, setTownHall } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { completeResearch, settleAllCities } from '#/engine/research.ts';
-import { res, stock, researchOf, withAcademy } from '#test/support/research.ts';
+import { res, researchOf, stock, withAcademy } from '#test/support/research.ts';
 
 const { AGRICULTURE, LUMBERING, HERO_ENHANCEMENT } = TechType;
 

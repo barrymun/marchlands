@@ -1,10 +1,12 @@
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { accounts, players } from '@marchlands/db';
 import { admin } from '@marchlands/game';
+
 import { buildApp } from '#/app.ts';
 import { signToken, verifyToken } from '#/auth/jwt.ts';
-import { apiTest, TEST_CONFIG, type Session, type TestApi } from '#test/support/api.ts';
+import { apiTest, type Session, TEST_CONFIG, type TestApi } from '#test/support/api.ts';
 
 type AuthSession = Omit<Session, 'username'> & { hasPlayer: boolean };
 const claimsOf = (token: string) => verifyToken(token, TEST_CONFIG.jwtSecret);

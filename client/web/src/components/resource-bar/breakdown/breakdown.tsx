@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
+
 import type { HeroBean, ResourceLine } from '@marchlands/api-client';
-import { ITEM_BONUS_TEXT_INVERTED } from '@/lib/tones';
+
 import { Rows } from '@/components/resource-bar/rows/rows';
 import type { Row } from '@/components/resource-bar/types';
 import { percent } from '@/lib/format';
+import { ITEM_BONUS_TEXT_INVERTED } from '@/lib/tones';
 
 export function Breakdown({ line, mayor }: { line: ResourceLine; mayor?: HeroBean }) {
   const { t } = useTranslation(['resource-bar', 'common']);

@@ -5,6 +5,7 @@
 // (write it as `{{count, number}}`).
 
 import type { GameRef } from '@marchlands/core';
+
 import { fmtDecimal, fmtExact, percent, shortDuration } from '@/lib/format';
 import { buildingName, gearName, itemCategoryName, itemName, rankName, techName, tileName, titleName, troopName, zoneName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';

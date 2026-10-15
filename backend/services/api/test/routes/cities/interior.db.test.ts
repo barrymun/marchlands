@@ -1,11 +1,13 @@
 // City interior routes (src/routes/cities.ts): city detail, settings, tax, work rates, store percent, comfort,
 // production and teleporting. The rules are covered by the interior service tests.
 
-import { describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { BuildingType } from '@marchlands/core';
 import { cities } from '@marchlands/db';
 import { pickOpenFlat } from '@marchlands/game/testing';
+
 import { apiTest, type TestApi } from '#test/support/api.ts';
 import { expectClientError, expectInvalid, HUGE_ID, itGuards, lords, RICH, setResources } from '#test/support/city-fixtures.ts';
 

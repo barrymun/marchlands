@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import pg from 'pg';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { connect, pgArray } from '#/index.ts';
 
 // a server nobody listens on: a pool only connects when first used

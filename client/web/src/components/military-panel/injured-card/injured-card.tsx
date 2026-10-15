@@ -1,21 +1,23 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
+  type CityBean,
   getCitiesByCityIdQueryKey,
   getPlayerQueryKey,
   postCitiesTroopsInjuredCureMutation,
   postCitiesTroopsInjuredDisbandMutation,
-  type CityBean,
 } from '@marchlands/api-client';
 import { BALANCE, healCost, healHonorCost, researchLevel, TechType, TROOP_KEYS, type TroopKey } from '@marchlands/core';
+
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
+import { CostList } from '@/components/cost-list/cost-list';
+import { UnitName } from '@/components/military-panel/unit-name/unit-name';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { CostList } from '@/components/cost-list/cost-list';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { fmt, fmtExact, percent } from '@/lib/format';
-import { UnitName } from '@/components/military-panel/unit-name/unit-name';
 
 /**
  * Injured troops of this city: defenders that fell while it was attacked survive injured, a share

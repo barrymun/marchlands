@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { BuffId, ITEMS, itemEffect, itemGoldPrice, msg, ref, ItemId } from '@marchlands/core';
-import { adds, extensionFor, readCollapsed, slotItems } from '@/components/active-effects/utils';
+
+import { BuffId, itemEffect, itemGoldPrice, ItemId, ITEMS, msg, ref } from '@marchlands/core';
+
 import { GROUPS, STORE_KEY } from '@/components/active-effects/constants';
 import type { Buff, Slot } from '@/components/active-effects/types';
+import { adds, extensionFor, readCollapsed, slotItems } from '@/components/active-effects/utils';
 
 // real game data, plus made-up items for branches no real item reaches (buffs shorter than a day)
 vi.mock('@marchlands/core', async (importOriginal) => {

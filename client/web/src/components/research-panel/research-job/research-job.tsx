@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+
 import {
+  type CityBean,
   deleteCitiesResearchMutation,
   getCitiesByCityIdQueryKey,
   getCitiesResearchQueryKey,
@@ -8,14 +10,14 @@ import {
   getCitiesResearchSpeedupQueryKey,
   getPlayerQueryKey,
   postCitiesResearchSpeedupMutation,
-  type CityBean,
 } from '@marchlands/api-client';
-import { Button } from '@/components/ui/button';
-import { TimerBar } from '@/components/timer-bar/timer-bar';
+
+import type { Tech } from '@/components/research-panel/research-job/types';
 import { SpeedupOptions } from '@/components/speedup-options/speedup-options';
+import { TimerBar } from '@/components/timer-bar/timer-bar';
+import { Button } from '@/components/ui/button';
 import { useCommand } from '@/hooks/use-game';
 import { techName } from '@/lib/game-data';
-import type { Tech } from '@/components/research-panel/research-job/types';
 
 /** One running research in this city: progress, speed-ups and cancel. */
 export function ResearchJob({ city, tech }: { city: CityBean; tech: Tech }) {

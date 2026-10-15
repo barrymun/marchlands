@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, BuildingStatus, BuildingType, buildingHeroExp, buildingMaxLevel, prestigeOf, PrestigeAction } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { BALANCE, buildingHeroExp, buildingMaxLevel, BuildingStatus, BuildingType, PrestigeAction, prestigeOf } from '@marchlands/core';
+
+import { completeBuilding } from '#/engine/buildings.ts';
 import { buildings, heroes } from '#/index.ts';
 import { getHero, heroesOfCity } from '#/repo.ts';
+import { appointMayor, buildingAt } from '#test/support/buildings.ts';
 import { createTestPlayer, reloadPlayer, setBuildings, setResources, setTownHall } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { completeBuilding } from '#/engine/buildings.ts';
-import { buildingAt, appointMayor } from '#test/support/buildings.ts';
 
 const { COTTAGE, INN, TOWN_HALL, WALLS } = BuildingType;
 

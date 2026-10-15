@@ -2,8 +2,8 @@
 // overridden by what a test cares about.
 
 import { BALANCE, HeroStatus, msg, TileType } from '@marchlands/core';
-import { type ArmyRow, type CityRow, type HeroRow, type PlayerRow, type TileRow } from '#/repo.ts';
 import { type CityBundle } from '#/city.ts';
+import { type ArmyRow, type CityRow, type HeroRow, type PlayerRow, type TileRow } from '#/repo.ts';
 
 /** game.ts's T0, without loading the database support */
 export const T0 = Date.UTC(2026, 0, 1);

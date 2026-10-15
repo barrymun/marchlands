@@ -2,11 +2,13 @@
 // every troop and fortification the game defines is named and described in every full locale.
 
 import { afterEach, describe, expect, it } from 'vitest';
-import { TROOPS, troopDescription } from '@marchlands/core';
-import enGB from '@/locales/en-GB/data-troops.json';
+
+import { troopDescription, TROOPS } from '@marchlands/core';
+
 import { troopName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
+import enGB from '@/locales/en-GB/data-troops.json';
 
 const ids = TROOPS.map((t) => t.troopId);
 

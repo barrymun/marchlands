@@ -1,15 +1,16 @@
 import { Plus, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
 import { WARN_MS } from '@/components/active-effects/constants';
+import { IconButton } from '@/components/active-effects/slot-cell/icon-button/icon-button';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
 import { adds } from '@/components/active-effects/utils';
-import { itemName } from '@/lib/game-data';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { duration, fmt, fmtExact, shortDuration } from '@/lib/format';
+import { itemName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { ITEM_BONUS_TEXT, WARN_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
-import { IconButton } from '@/components/active-effects/slot-cell/icon-button/icon-button';
 
 export function SlotCell({
   slot,

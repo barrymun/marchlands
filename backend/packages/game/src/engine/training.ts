@@ -1,28 +1,29 @@
 // Production queue internals: queue rows, scheduling the head batch and completing it (timed event).
 
+import { PushCmd } from '@marchlands/contracts';
 import {
-  BALANCE,
-  BuildingType,
-  buildingLevel,
-  FORT_KEYS,
-  prestigeOf,
-  PrestigeAction,
-  troopKey,
-  addTroops,
   addForts,
+  addHeroExp,
+  addTroops,
+  BALANCE,
+  buildingLevel,
+  BuildingType,
+  FORT_KEYS,
   type FortKey,
+  PrestigeAction,
+  prestigeOf,
   type TrainBatch,
+  troopKey,
   type TroopQueueState,
   unitExp,
-  addHeroExp,
 } from '@marchlands/core';
-import { mayorOf, openCity, type CityBundle } from '#/city.ts';
+
+import { type CityBundle, mayorOf, openCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { fortBean, heroBean, troopBean } from '#/dto.ts';
 import { addPrestige, pushResources } from '#/helpers.ts';
-import { prefixed } from '#/stats.ts';
 import { saveCity, saveHero, savePlayer } from '#/repo.ts';
-import { PushCmd } from '@marchlands/contracts';
+import { prefixed } from '#/stats.ts';
 
 export const WALLS_QUEUE = -2;
 const refKey = (cityId: number, pos: number) => `train:${cityId}:${pos}`;

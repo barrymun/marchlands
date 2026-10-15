@@ -1,11 +1,13 @@
 // Database helpers for the tests of city.ts, repo.ts and dto.ts: armies out of a city, valleys held by it,
 // and starvation desertion switched on (BALANCE.starvationDesertion is off in this game).
 
-import { afterAll, beforeAll } from 'vitest';
 import { and, asc, eq, isNull } from 'drizzle-orm';
+import { afterAll, beforeAll } from 'vitest';
+
 import { ArmyDirection, BALANCE, Mission, msg, type TroopCounts } from '@marchlands/core';
 import { armies, tiles } from '@marchlands/db';
-import { getCity, type ArmyRow } from '#/repo.ts';
+
+import { type ArmyRow, getCity } from '#/repo.ts';
 import type { TestPlayer } from '#test/support/factories.ts';
 import type { TestGame } from '#test/support/game.ts';
 

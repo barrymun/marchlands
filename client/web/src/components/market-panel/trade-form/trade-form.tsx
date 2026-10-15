@@ -1,16 +1,21 @@
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useDeferredValue, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
 import {
+  type CityBean,
   getCitiesByCityIdQueryKey,
   getMarketOrdersMineOptions,
   getMarketQuoteOptions,
-  postCitiesMarketOrdersMutation,
-  type CityBean,
   type MarketMerchant,
+  postCitiesMarketOrdersMutation,
 } from '@marchlands/api-client';
 import { BALANCE, merchantAffordable } from '@marchlands/core';
+
+import { RESOURCES } from '@/components/market-panel/constants';
+import type { Mode, Side } from '@/components/market-panel/types';
+import { fmtPrice, resInline, resLabel } from '@/components/market-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,11 +23,8 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand } from '@/hooks/use-game';
 import { fmtExact, percent } from '@/lib/format';
-import { cn } from '@/lib/utils';
-import { RESOURCES } from '@/components/market-panel/constants';
 import { allMarketQueries } from '@/lib/query-keys';
-import { fmtPrice, resInline, resLabel } from '@/components/market-panel/utils';
-import type { Mode, Side } from '@/components/market-panel/types';
+import { cn } from '@/lib/utils';
 
 export function TradeForm({
   city,

@@ -1,9 +1,10 @@
 // Helpers for the hero tests (services/heroes.db.test.ts, engine/heroes.db.test.ts): an Inn and a Feasting
 // Hall, patching hero and player rows, and the hero pushes.
 
-import { BuildingType } from '@marchlands/core';
 import { PushCmd, type PushData } from '@marchlands/contracts';
-import { getHero, getPlayer, saveHero, savePlayer, type HeroRow } from '#/repo.ts';
+import { BuildingType } from '@marchlands/core';
+
+import { getHero, getPlayer, type HeroRow, saveHero, savePlayer } from '#/repo.ts';
 import { setBuildings, type TestPlayer } from '#test/support/factories.ts';
 import { type TestGame } from '#test/support/game.ts';
 

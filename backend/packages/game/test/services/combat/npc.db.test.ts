@@ -1,15 +1,17 @@
 // processArmy for attacks on barbarian cities (plunder, loyalty, capture, regeneration), and raising their level.
 
 import { describe, expect, it } from 'vitest';
-import { BALANCE, HeroStatus, msg, TileType, valleyUpgradeCost } from '@marchlands/core';
+
 import { PushCmd } from '@marchlands/contracts';
+import { BALANCE, HeroStatus, msg, TileType, valleyUpgradeCost } from '@marchlands/core';
+
 import { admin, combat } from '#/index.ts';
 import { getHero, getTile } from '#/repo.ts';
 import { roundTrip, tileNear, warrior } from '#test/support/armies.ts';
+import { attack } from '#test/support/combat.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { reloadCity, setResources } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
-import { attack } from '#test/support/combat.ts';
 
 describe(combat.upgradeValley.name, () => {
   it('raises a barbarian city a level for gold; its garrison starts afresh', () =>

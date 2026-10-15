@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+
 import type { Job } from '@/components/activity-dock/types';
 import { Progress } from '@/components/ui/progress';
 import { duration } from '@/lib/format';

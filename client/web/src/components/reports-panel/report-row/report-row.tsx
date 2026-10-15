@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
+
 import type { ReportSummary } from '@marchlands/api-client';
+
 import { TableCell, TableRow } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
 import { dateTime } from '@/lib/format';
 import { translateMessage } from '@/lib/messages';
+import { cn } from '@/lib/utils';
 
 export function ReportRow({ report: r, onOpen }: { report: ReportSummary; onOpen: () => void }) {
   const { t } = useTranslation('reports-panel');

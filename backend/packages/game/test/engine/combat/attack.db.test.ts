@@ -2,6 +2,8 @@
 // experience and capture, allied troops stationed there, and the reasons an attack turns back.
 
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
   armyLoad,
@@ -15,14 +17,15 @@ import {
   maxArmyTroops,
   Mission,
   msg,
+  type ResourceSet,
   TechType,
   totalResources,
   WAR_ENSIGN_DESC,
-  type ResourceSet,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
-import { getHero } from '#/repo.ts';
+
+import { processArmy } from '#/engine/combat.ts';
 import { interior, player, shop, training } from '#/index.ts';
+import { getHero } from '#/repo.ts';
 import {
   allies,
   armyRow,
@@ -50,7 +53,6 @@ import {
   type TestPlayer,
 } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
-import { processArmy } from '#/engine/combat.ts';
 
 const KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 

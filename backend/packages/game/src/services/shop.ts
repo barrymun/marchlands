@@ -1,30 +1,31 @@
 // shop.* — buying items with a city's gold (there are no cents: itemGoldPrice) and using items
 // (shop.useGoods / shop.useCastleGoods). Item effects are declared in @marchlands/core items.ts.
 
+import { PushCmd } from '@marchlands/contracts';
 import {
+  addTroops,
+  BuildingType,
+  civilCodePopulation,
+  createBoxHero,
   GameError,
+  type GrantContents,
   itemConfig,
   itemEffect,
   itemGoldPrice,
   ITEMS,
-  addTroops,
-  BuildingType,
+  type Message,
   msg,
   ref,
-  type GrantContents,
-  type Message,
-  civilCodePopulation,
-  createBoxHero,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
-import { cityStats, openOwnCity, type CityBundle } from '#/city.ts';
+
+import { type CityBundle, cityStats, openOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
 import { heroBean, troopBean } from '#/dto.ts';
-import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources, setBuff } from '#/helpers.ts';
-import { getPlayer, saveCity, savePlayer, type PlayerRow } from '#/repo.ts';
 import { heroSlots, heroValues, pushHero } from '#/engine/heroes.ts';
 import { settleAllCities } from '#/engine/research.ts';
-import { PushCmd } from '@marchlands/contracts';
+import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources, setBuff } from '#/helpers.ts';
+import { getPlayer, type PlayerRow, saveCity, savePlayer } from '#/repo.ts';
 
 /** Shop catalogue (orig saleTypeBeans): items for sale grouped by type (item category id), priced in city gold; the client names both by id. */
 export function catalogue() {

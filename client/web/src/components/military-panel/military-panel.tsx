@@ -1,12 +1,14 @@
 import { useTranslation } from 'react-i18next';
+
 import type { CityBean } from '@marchlands/api-client';
-import { usedWallSpace, wallCapacity, FORT_KEYS, TROOP_KEYS } from '@marchlands/core';
+import { FORT_KEYS, TROOP_KEYS, usedWallSpace, wallCapacity } from '@marchlands/core';
+
+import { InjuredCard } from '@/components/military-panel/injured-card/injured-card';
+import { Production } from '@/components/military-panel/production/production';
+import { UnitName } from '@/components/military-panel/unit-name/unit-name';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { fmtExact } from '@/lib/format';
-import { Production } from '@/components/military-panel/production/production';
-import { InjuredCard } from '@/components/military-panel/injured-card/injured-card';
-import { UnitName } from '@/components/military-panel/unit-name/unit-name';
 
 export function MilitaryPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['military-panel', 'common']);

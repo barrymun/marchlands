@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
 import { sql } from 'drizzle-orm';
+import { describe, expect, it } from 'vitest';
+
 import { pgArray } from '#/index.ts';
 import { testDb } from '#test/support/db.ts';
 

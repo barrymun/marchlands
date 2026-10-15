@@ -1,10 +1,12 @@
 import { eq, sql } from 'drizzle-orm';
 import type { z } from 'zod';
-import { GameError, msg } from '@marchlands/core';
+
 import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody } from '@marchlands/contracts';
+import { GameError, msg } from '@marchlands/core';
 import { accounts, players } from '@marchlands/db';
-import { hashPassword, verifyPassword } from '#/auth/password.ts';
+
 import { signToken } from '#/auth/jwt.ts';
+import { hashPassword, verifyPassword } from '#/auth/password.ts';
 import { authenticate, secured, tags, type ZApp } from '#/http.ts';
 
 /** Public routes cannot use doc(): same envelope, no `security`. */

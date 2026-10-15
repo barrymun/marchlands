@@ -1,20 +1,23 @@
 import { describe, expect, it } from 'vitest';
+
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BuildingType,
   ItemId,
   msg,
   QUEST_CATALOGUE,
+  type QuestDef,
   questGroupsWithQuests,
+  type QuestTarget,
   questTargetMessage,
   RESOURCE_KEYS,
-  type QuestDef,
-  type QuestTarget,
 } from '@marchlands/core';
-import { PushCmd } from '@marchlands/contracts';
+
 import { addPrestige } from '#/helpers.ts';
-import { getPlayer, saveCity, savePlayer } from '#/repo.ts';
 import { heroes, mail, quests } from '#/index.ts';
+import { getPlayer, saveCity, savePlayer } from '#/repo.ts';
+import { foundAlliance } from '#test/support/alliance.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import {
   addHero,
@@ -29,7 +32,6 @@ import {
   type TestPlayer,
 } from '#test/support/factories.ts';
 import { game, T0, type TestGame } from '#test/support/game.ts';
-import { foundAlliance } from '#test/support/alliance.ts';
 
 const DAY = 86_400_000;
 

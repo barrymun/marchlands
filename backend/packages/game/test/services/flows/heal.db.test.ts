@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
+
+import { runScheduledHeal } from '#/engine/flows.ts';
 import { armies, flows } from '#/index.ts';
 import { createTestPlayer, setInjured } from '#test/support/factories.ts';
 import { farmingCity, healed, injured, newFlow, persistEvents, runFlowIn, sendOut, storedEvent } from '#test/support/flows.ts';
 import { game } from '#test/support/game.ts';
-import { runScheduledHeal } from '#/engine/flows.ts';
 
 describe(`${flows.runFlow.name}: a heal still waiting from an earlier run`, () => {
   it('is done now, and no longer waits, once that run’s armies are home', () =>

@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
+
+import type { Targets } from '@/components/flows-panel/types';
+import { hasHero } from '@/components/flows-panel/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { usePlayer } from '@/hooks/use-game';
-import type { Targets } from '@/components/flows-panel/types';
-import { hasHero } from '@/components/flows-panel/utils';
 
 /** All cities (including ones gained later; a city with no hero is skipped), or a selection of one or more cities. */
 export function CityPicker({ value, onChange, currentCityId }: { value: Targets; onChange: (t: Targets) => void; currentCityId?: number }) {

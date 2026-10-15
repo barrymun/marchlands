@@ -1,14 +1,16 @@
+import { Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, X } from 'lucide-react';
+import { toast } from 'sonner';
+
 import type { CityBean } from '@marchlands/api-client';
 import { tileId as toTileId } from '@marchlands/core';
-import { toast } from 'sonner';
+
+import { TileLabel } from '@/components/flow-attack/attack-targets-fields/city-targets/tile-label/tile-label';
+import { idleHeroes, targetCap } from '@/components/flow-attack/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { usePlayer } from '@/hooks/use-game';
-import { idleHeroes, targetCap } from '@/components/flow-attack/utils';
-import { TileLabel } from '@/components/flow-attack/attack-targets-fields/city-targets/tile-label/tile-label';
 
 export function CityTargets({ city, list, onChange }: { city: CityBean; list: number[]; onChange: (list: number[]) => void }) {
   const { t } = useTranslation('flow-attack');

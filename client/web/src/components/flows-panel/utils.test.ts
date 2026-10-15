@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+
 import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
 import { FLOW_TROOP_IDS } from '@marchlands/core';
+
 import { currentAction, hasHero, keyed, strip } from '@/components/flows-panel/utils';
 
 const ACTIONS: FlowAction[] = [

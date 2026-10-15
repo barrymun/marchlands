@@ -1,7 +1,7 @@
 // (marchlands) Flows: a lord's saved series of actions, run on any of their cities (backend services/flows.ts).
 
 import { TROOPS } from '#/data/index.ts';
-import { dur, msg, ref, type Message } from '#/messages/index.ts';
+import { dur, type Message, msg, ref } from '#/messages/index.ts';
 import type { FlowAction } from '#/types.ts';
 
 /** Troops a flow can train (everything trained in barracks; fortifications are not troops). */

@@ -1,19 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { getCitiesBuildingsAvailableOptions, getCitiesByCityIdQueryKey, postCitiesBuildingsMutation, type CityBean } from '@marchlands/api-client';
+
+import { type CityBean, getCitiesBuildingsAvailableOptions, getCitiesByCityIdQueryKey, postCitiesBuildingsMutation } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
+
+import { areaOf } from '@/components/buildings-panel/building-dialog/build-list/utils';
+import { MayorBuildExp } from '@/components/buildings-panel/building-dialog/mayor-build-exp/mayor-build-exp';
+import { MayorBuildHint } from '@/components/buildings-panel/building-dialog/mayor-build-hint/mayor-build-hint';
+import { Unlocks } from '@/components/buildings-panel/building-dialog/unlocks/unlocks';
+import { CostList } from '@/components/cost-list/cost-list';
+import { Requirements } from '@/components/requirements/requirements';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CostList } from '@/components/cost-list/cost-list';
-import { Requirements } from '@/components/requirements/requirements';
 import { useCommand } from '@/hooks/use-game';
 import { buildingName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
-import { areaOf } from '@/components/buildings-panel/building-dialog/build-list/utils';
-import { MayorBuildHint } from '@/components/buildings-panel/building-dialog/mayor-build-hint/mayor-build-hint';
-import { MayorBuildExp } from '@/components/buildings-panel/building-dialog/mayor-build-exp/mayor-build-exp';
-import { Unlocks } from '@/components/buildings-panel/building-dialog/unlocks/unlocks';
 
 export function BuildList({ city, positionId, onDone }: { city: CityBean; positionId: number; onDone: () => void }) {
   const { t } = useTranslation('buildings-panel');

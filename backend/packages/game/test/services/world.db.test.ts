@@ -1,14 +1,16 @@
-import { describe, expect, it, vi } from 'vitest';
 import { and, eq, isNull } from 'drizzle-orm';
-import { BALANCE, MAP_VIEW_MAX, msg, Relation, relationPermissions, stateOf, TileType, tileId, tileXY, valleyUpgradeCost } from '@marchlands/core';
+import { describe, expect, it, vi } from 'vitest';
+
+import { BALANCE, MAP_VIEW_MAX, msg, Relation, relationPermissions, stateOf, tileId, TileType, tileXY, valleyUpgradeCost } from '@marchlands/core';
 import { tiles, worldState } from '@marchlands/db';
+import { testDb } from '@marchlands/db/test/support/db.ts';
+
 import { alliance, world } from '#/index.ts';
 import { getTile, saveTile } from '#/repo.ts';
-import { testDb } from '@marchlands/db/test/support/db.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { createTestPlayer, reloadCity, setResources, setTownHall, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
-import { SIZE, asDb } from '#test/support/world.ts';
+import { asDb, SIZE } from '#test/support/world.ts';
 
 const VALLEYS = [TileType.FOREST, TileType.DESERT, TileType.HILL, TileType.SWAMP, TileType.GRASS, TileType.LAKE];
 

@@ -1,22 +1,24 @@
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+
 import {
   ArmyPreset,
   ArmyPresetBody,
   ArmyPresetParams,
+  BookmarkBody,
+  BookmarkParams,
+  CastleSign,
+  ChangeFaceBody,
+  ChangeFlagBody,
+  ChangeGenderBody,
+  CreatePlayerBody,
+  Empty,
   Flow,
   FlowBody,
   FlowParams,
   FlowRepeatBody,
   FlowRunBody,
   FlowRunReport,
-  BookmarkBody,
-  BookmarkParams,
-  CastleSign,
-  ChangeFaceBody,
-  ChangeFlagBody,
-  CreatePlayerBody,
-  Empty,
   FurloughBody,
   LordStatistics,
   PlayerCreated,
@@ -24,7 +26,6 @@ import {
   PlayerState,
   PublicPlayerInfo,
   RenamePlayerBody,
-  ChangeGenderBody,
   TitlePromotion,
   TruceBody,
   TutorialStepBody,
@@ -36,8 +37,9 @@ import {
 } from '@marchlands/contracts';
 import { players } from '@marchlands/db';
 import { flows, player, runGame, shop, statistics, world } from '@marchlands/game';
+
 import { signToken } from '#/auth/jwt.ts';
-import { doc, authenticate, game, playerIdOf, tags, type ZApp } from '#/http.ts';
+import { authenticate, doc, game, playerIdOf, tags, type ZApp } from '#/http.ts';
 
 export default async function playerRoutes(app: ZApp) {
   app.addHook('onRequest', authenticate);

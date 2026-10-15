@@ -3,10 +3,11 @@
 // the whole test is rolled back at the end, like the game service tests (backend/packages/game/test/support).
 
 import type { Db } from '@marchlands/db';
-import { runGame, type Ctx } from '@marchlands/game';
+import { testDb } from '@marchlands/db/test/support/db.ts';
+import { type Ctx, runGame } from '@marchlands/game';
+
 import { buildApp } from '#/app.ts';
 import type { ApiConfig } from '#/config.ts';
-import { testDb } from '@marchlands/db/test/support/db.ts';
 
 export const TEST_CONFIG: ApiConfig = {
   port: 0,

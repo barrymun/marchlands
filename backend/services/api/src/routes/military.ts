@@ -1,14 +1,18 @@
 // Heroes, armies, map and valleys.
 
-import { armies, combat, heroes, world } from '@marchlands/game';
 import {
   ArmyBean,
   ArmyParams,
   CityHeroList,
   Empty,
+  GearPieceParams,
   HeroBean,
+  HeroGearStatBody,
+  HeroOrderBody,
   HeroParams,
   HeroPointsBody,
+  LockHeroBody,
+  LordGear,
   MapFieldInfo,
   MapQuery,
   MapSearchQuery,
@@ -24,16 +28,12 @@ import {
   TileParams,
   TroopParams,
   UseHeroItemBody,
-  VisibleArmies,
   ValleyUpgradeBody,
-  HeroOrderBody,
-  LockHeroBody,
-  HeroGearStatBody,
-  GearPieceParams,
-  LordGear,
   ValleyUpgradeResult,
+  VisibleArmies,
 } from '@marchlands/contracts';
-import { doc, anon, authenticate, game, playerIdOf, tags, zCityParams, type ZApp } from '#/http.ts';
+import { armies, combat, heroes, world } from '@marchlands/game';
+import { anon, authenticate, doc, game, playerIdOf, tags, type ZApp, zCityParams } from '#/http.ts';
 
 export default async function militaryRoutes(app: ZApp) {
   app.addHook('onRequest', authenticate);
