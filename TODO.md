@@ -12,6 +12,8 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
   - Now: players post buy and sell orders, and a computer merchant always buys and sells every resource around a reference price that moves with trade (`BALANCE` merchant settings, `merchantJob`, `backend/packages/game/src/engine/market.ts`). The Market tab shows the order book and a price history line chart (`client/web/src/components/market-panel/`).
   - Plan: a complete rework of how the market works (details to decide).
   - Better graphs, with a live stock ticker where NPC cities trade in game.
+- [ ] **Better hero name generator for heroes in the Inn.**
+  - Now: a random first name and epithet, e.g. "Aldric the Bold" (`randomHeroName` in `shared/core/src/heroes.ts`, 40 first names and 18 epithets), so names repeat often and read alike.
 
 ## Client
 
