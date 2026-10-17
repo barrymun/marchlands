@@ -64,8 +64,8 @@ describe(shop.buyItemWithGold.name, () => {
   it('refuses items not for sale and bad amounts', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      expect(itemGoldPrice(ItemId.NEWBIES_PACKAGE)).toBeNull();
-      await expectRefused(shop.buyItemWithGold(g, p.id, p.cityId, ItemId.NEWBIES_PACKAGE, 1), msg('item.notForSale'));
+      expect(itemGoldPrice(ItemId.WELCOME_PACKAGE)).toBeNull();
+      await expectRefused(shop.buyItemWithGold(g, p.id, p.cityId, ItemId.WELCOME_PACKAGE, 1), msg('item.notForSale'));
       await expectRefused(shop.buyItemWithGold(g, p.id, p.cityId, medalId(1), 1), msg('item.notForSale'));
       await expectRefused(shop.buyItemWithGold(g, p.id, p.cityId, 'no.such.item', 1), msg('item.notForSale'));
       for (const n of [0, -1, 1.5, 1001]) await expectRefused(shop.buyItemWithGold(g, p.id, p.cityId, ItemId.WAR_HORN, n), msg('common.invalidAmount'));
@@ -156,16 +156,16 @@ describe(shop.useItem.name, () => {
       expect((await reloadCity(g, p.cityId)).resourcesAt).toBe(g.now);
     }));
 
-  it("the Newbie's Package grants items and resources to the city", () =>
+  it('the Welcome Package grants items and resources to the city', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      expect(await count(g, p, ItemId.NEWBIES_PACKAGE)).toBe(1);
+      expect(await count(g, p, ItemId.WELCOME_PACKAGE)).toBe(1);
       const before = await reloadCity(g, p.cityId);
-      const pkg = BALANCE.items.newbiesPackage;
-      const r = await shop.useItem(g, p.id, ItemId.NEWBIES_PACKAGE, p.cityId);
-      expect(r).toEqual({ itemId: ItemId.NEWBIES_PACKAGE, granted: itemEffect(ItemId.NEWBIES_PACKAGE) });
+      const pkg = BALANCE.items.welcomePackage;
+      const r = await shop.useItem(g, p.id, ItemId.WELCOME_PACKAGE, p.cityId);
+      expect(r).toEqual({ itemId: ItemId.WELCOME_PACKAGE, granted: itemEffect(ItemId.WELCOME_PACKAGE) });
       const player = await reloadPlayer(g, p);
-      expect(player.items[ItemId.NEWBIES_PACKAGE]).toBeUndefined();
+      expect(player.items[ItemId.WELCOME_PACKAGE]).toBeUndefined();
       for (const [id, n] of Object.entries(pkg.items)) expect(player.items[id]).toBe(n);
       const city = await reloadCity(g, p.cityId);
       for (const [k, n] of Object.entries(pkg.resources)) expect(city[k as keyof typeof pkg.resources]).toBe(before[k as keyof typeof pkg.resources] + n);
@@ -175,8 +175,8 @@ describe(shop.useItem.name, () => {
   it('a grant with resources needs a city, and is kept until one is chosen', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      await expectRefused(shop.useItem(g, p.id, ItemId.NEWBIES_PACKAGE, null), msg('item.chooseCity'));
-      expect(await count(g, p, ItemId.NEWBIES_PACKAGE)).toBe(1);
+      await expectRefused(shop.useItem(g, p.id, ItemId.WELCOME_PACKAGE, null), msg('item.chooseCity'));
+      expect(await count(g, p, ItemId.WELCOME_PACKAGE)).toBe(1);
     }));
 
   it('a medal box holds a few of each of its medals, no city needed', () =>

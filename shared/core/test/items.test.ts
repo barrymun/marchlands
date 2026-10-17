@@ -103,10 +103,10 @@ describe(itemEffect.name, () => {
     expect(items.buffDurationMs).toEqual({ short: DAY, long: 7 * DAY });
   });
 
-  it('grants the Newbies Package from BALANCE, as a copy', () => {
-    const e = itemEffect(ItemId.NEWBIES_PACKAGE);
-    expect(e).toEqual({ kind: 'grant', items: items.newbiesPackage.items, resources: items.newbiesPackage.resources });
-    if (e?.kind === 'grant') expect(e.items).not.toBe(items.newbiesPackage.items);
+  it('grants the Welcome Package from BALANCE, as a copy', () => {
+    const e = itemEffect(ItemId.WELCOME_PACKAGE);
+    expect(e).toEqual({ kind: 'grant', items: items.welcomePackage.items, resources: items.welcomePackage.resources });
+    if (e?.kind === 'grant') expect(e.items).not.toBe(items.welcomePackage.items);
   });
 
   it('fills a medal box with medalBoxCount of each of its medal levels', () => {

@@ -153,7 +153,7 @@ export const REMOVED_ITEMS: readonly string[] = [
 ];
 /**
  * (marchlands) legacy item families removed from this game: event, promotion and compensation packages
- * (every gift package but the Newbies Package each new lord gets), event keys and tokens, and the Amulet
+ * (every gift package but the Welcome Package each new lord gets), event keys and tokens, and the Amulet
  * (a gamble) with every copy of it and its prizes (player.box.gambling.*)
  */
 const REMOVED_ITEM_PATTERNS: readonly RegExp[] = [

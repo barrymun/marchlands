@@ -81,7 +81,7 @@ export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePla
         flag,
         faceUrl,
         sex: input.sex,
-        items: { [ItemId.NEWBIES_PACKAGE]: 1 },
+        items: { [ItemId.WELCOME_PACKAGE]: 1 },
         createdAt: ctx.now,
         lastLoginAt: ctx.now,
       })

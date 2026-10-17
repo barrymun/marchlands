@@ -44,7 +44,7 @@ export const ItemId = {
   MEDIUM_MEDAL_BOX: 'player.box.special.2',
   SENIOR_MEDAL_BOX: 'player.box.special.3',
   HERO_PACKAGE: 'player.box.currently.1',
-  NEWBIES_PACKAGE: 'player.box.present.2',
+  WELCOME_PACKAGE: 'player.box.present.2',
   // ---- heroes ----
   HOLY_WATER: 'hero.reset.1',
   EXCALIBUR: 'hero.power.1',

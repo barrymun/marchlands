@@ -301,8 +301,8 @@ export const BALANCE = {
       [ItemId.SENIOR_MEDAL_BOX]: [7, 8, 9],
     } as Record<string, readonly number[]>,
     medalBoxCount: { min: 2, max: 4 },
-    /** (evony) the Newbies Package every new player gets */
-    newbiesPackage: {
+    /** (evony) the Welcome Package every new player gets */
+    welcomePackage: {
       items: { [ItemId.BEGINNER_GUIDELINES]: 5, [ItemId.PRIMARY_GUIDELINES]: 3 } as Record<string, number>,
       resources: { food: 50_000, wood: 50_000, stone: 50_000, iron: 50_000 },
     },

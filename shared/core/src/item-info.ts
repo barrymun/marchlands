@@ -127,8 +127,8 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
     case 'grant': {
       const toCity = !!(e.resources || e.troops);
       const description = msg(toCity ? 'itemInfo.grantCity' : 'itemInfo.grant', { contents: contents(e) });
-      // the Newbies Package is never sold or won: every new player gets one (player.createPlayer)
-      if (id === ItemId.NEWBIES_PACKAGE) return { description, use: 'direct', howTo: msg('itemInfo.howTo.newbies') };
+      // the Welcome Package is never sold or won: every new player gets one (player.createPlayer)
+      if (id === ItemId.WELCOME_PACKAGE) return { description, use: 'direct', howTo: msg('itemInfo.howTo.welcome') };
       return { description, use: 'direct' };
     }
     case 'chest':

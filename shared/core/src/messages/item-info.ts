@@ -69,6 +69,6 @@ export const ITEM_INFO_MESSAGES = {
   'howTo.cityTruce': [],
   /** a chest key, `chest` (item) */
   'howTo.key': ['chest'],
-  /** the Newbies Package */
-  'howTo.newbies': [],
+  /** the Welcome Package */
+  'howTo.welcome': [],
 } as const;

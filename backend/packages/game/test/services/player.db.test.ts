@@ -103,7 +103,7 @@ describe(player.createPlayer.name, () => {
         sex: 1,
         beginner: true,
         title: 0,
-        items: { [ItemId.NEWBIES_PACKAGE]: 1 },
+        items: { [ItemId.WELCOME_PACKAGE]: 1 },
         createdAt: g.now,
         lastLoginAt: g.now,
       });
@@ -177,7 +177,7 @@ describe(player.playerState.name, () => {
       const s = await player.playerState(g, a.id);
       expect(s).toMatchObject({
         playerInfo: { id: a.id, userName: a.name, beginner: true, castleCount: 1 },
-        items: [{ id: ItemId.NEWBIES_PACKAGE, count: 1 }],
+        items: [{ id: ItemId.WELCOME_PACKAGE, count: 1 }],
         buffs: [],
         research: {},
         selfArmys: [],

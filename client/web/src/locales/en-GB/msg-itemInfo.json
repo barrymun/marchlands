@@ -49,6 +49,6 @@
     "heroesUseItem": "Use from a hero's Items button in the Heroes tab.",
     "cityTruce": "Use from Player settings (top-right menu).",
     "key": "Use the {{chest}}; the key is taken automatically.",
-    "newbies": "Every new player gets one when they start; it cannot be bought."
+    "welcome": "Every new player gets one when they start; it cannot be bought."
   }
 }

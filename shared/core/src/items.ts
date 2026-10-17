@@ -88,10 +88,10 @@ const EFFECTS: Record<string, ItemEffect> = {
   [ItemId.MEDIUM_MEDAL_BOX]: { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.MEDIUM_MEDAL_BOX]) },
   [ItemId.SENIOR_MEDAL_BOX]: { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.SENIOR_MEDAL_BOX]) },
   [ItemId.HERO_PACKAGE]: { kind: 'special', handler: 'heroBox' },
-  [ItemId.NEWBIES_PACKAGE]: {
+  [ItemId.WELCOME_PACKAGE]: {
     kind: 'grant',
-    items: { ...BALANCE.items.newbiesPackage.items },
-    resources: { ...BALANCE.items.newbiesPackage.resources },
+    items: { ...BALANCE.items.welcomePackage.items },
+    resources: { ...BALANCE.items.welcomePackage.resources },
   },
 
   // ---- used through dedicated commands ----

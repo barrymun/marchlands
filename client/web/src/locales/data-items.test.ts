@@ -76,7 +76,7 @@ describe('item descriptions', () => {
     expect(text(ItemId.MASTER_GUIDELINES)).toBe('Cuts 10–30 hours (at random) off a construction or research.');
     expect(text(ItemId.ULTIMATE_GUIDELINES)).toBe('Cuts 30% of the total time off a construction or research.');
     expect(text(ItemId.JUNIOR_MEDAL_BOX)).toBe('Contains 2–4 each of Cross Medal, Rose Medal, Lion Medal.');
-    expect(text(ItemId.NEWBIES_PACKAGE)).toBe(
+    expect(text(ItemId.WELCOME_PACKAGE)).toBe(
       'Gives 5 × Beginner Guidelines, 3 × Primary Guidelines, 50,000 food, 50,000 lumber, 50,000 stone, 50,000 iron to the current city.',
     );
     expect(text(ItemId.EXCALIBUR)).toBe("Raises one hero's Attack by 25% for 1 day.");
