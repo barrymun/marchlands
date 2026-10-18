@@ -26,6 +26,7 @@ Run from the repo root.
 | `npm run build:backend` | bundle the API, worker and migrations into `dist/backend/`, source maps into `dist/backend-maps/` (what the backend image runs; the Dockerfile runs it with `--minify`) |
 | `npm run trace < trace.txt` | map a stack trace from the bundles back to source positions; in production run it in the container (`docs/deployment.md`, Reading a stack trace) |
 | `npm run gen:api` | regenerate the OpenAPI spec, the generated client (Hey API) and `docs/api-endpoints.md`. Run it after changing anything in `shared/contracts` or an API route. |
+| `npm run ci:local` | run the CI workflow (`.github/workflows/ci.yml`) locally with [act](https://nektosact.com/): every check below in clean Linux containers, about 2 minutes (see Local CI) |
 | `npm run art:draw [-- <name>…]` | redraw the building sprites made in code (`tools/art/buildings/`, see Client, Game art), all or the ones named (`cottage`, `forest`, `walls`) |
 | `npm run art:placeholders [-- --force]` | write placeholder sprites for any building art that's missing (see Client, Game art); `--force` rewrites them all, real art included |
 | `npm run sim -- …` | battle simulations, see [docs/battle-sims](docs/battle-sims/README.md) |
@@ -33,6 +34,14 @@ Run from the repo root.
 | `API=http://localhost:3100 node tools/smoke/smoke.mjs` (also `war.mjs`, `market.mjs`) | end-to-end checks against the running stack |
 
 Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and `npm run format:check` all pass, and `npm run test:db` when the change touches the backend.
+
+**Local CI** (`npm run ci:local`, needs act and Docker):
+
+- `.github/workflows/ci.yml` runs the checks above in two jobs: `checks` (`npm ci`, typecheck, lint with knip, format check, `npm test`, the client build with its size budget, the backend bundle) and `database` (`npm run test:db` against a Postgres 17 service, as in `docker-compose.yml`). Keep it in step with the list above.
+- **Manual trigger only** (`workflow_dispatch`): GitHub never runs it by itself. To turn on CI on GitHub, add `push` / `pull_request` under `on` in the workflow.
+- Both jobs run inside the `node:24-bookworm` image, so act only needs that image, and Postgres is reached as `postgres` under act and on GitHub alike.
+- act copies the working tree into the containers, uncommitted changes included and gitignored files (`node_modules`, `dist`, `.env`) left out, so the run checks what's on disk from a clean install.
+- `.actrc` maps `ubuntu-latest` to the node image (no first-run image prompt) and turns off act's own `.env` loading (`--env-file=/dev/null`): act would otherwise pass the stack's `.env` into every job and override the workflow's `DATABASE_URL`.
 
 **Running stack** (Docker Compose project `marchlands`; ports come from `.env`):
 

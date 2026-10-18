@@ -1,0 +1,2 @@
+-P ubuntu-latest=node:24-bookworm
+--env-file=/dev/null

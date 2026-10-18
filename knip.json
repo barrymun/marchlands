@@ -1,6 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignore": ["shared/api-client/src/generated/**", "client/web/src/components/ui/**"],
+  "ignoreBinaries": ["act"],
   "workspaces": {
     ".": {
       "entry": ["tools/**/*.{ts,mjs}!"]

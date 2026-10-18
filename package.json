@@ -27,6 +27,7 @@
     "legacy:convert": "node tools/legacy-import/convert.mjs",
     "smoke": "node tools/smoke/smoke.mjs && node tools/smoke/war.mjs && node tools/smoke/market.mjs",
     "docs:api": "node tools/docs/gen-api-md.mjs",
+    "ci:local": "act workflow_dispatch",
     "art:draw": "node tools/art/draw.ts",
     "art:placeholders": "node tools/art/placeholders.ts",
     "sim": "node tools/battle-sim/sim.ts",
