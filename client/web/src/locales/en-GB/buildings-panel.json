@@ -13,7 +13,8 @@
     "unlocked": "({{unlocked}} of {{total}} unlocked by Town Hall Lv {{level}})"
   },
   "slot": {
-    "build": "Build at slot {{pos}}"
+    "build": "Build at slot {{pos}}",
+    "building": "{{name}}, level {{level}}"
   },
   "buildList": {
     "title": "Build",

@@ -15,6 +15,9 @@ export default defineConfig(({ mode }) => {
     build: {
       // the vendor file (React, the router, Radix …) is one deliberate file of about 540 kB (165 kB gzipped)
       chunkSizeWarningLimit: 600,
+      // game art (src/assets) stays separate files, never inlined into the JS as data URLs (Vite inlines files under
+      // 4 kB, and every sprite is that small): the browser loads only the sprites it shows and caches them by hash
+      assetsInlineLimit: (file) => (file.includes('/src/assets/') ? false : undefined),
       rolldownOptions: {
         output: {
           codeSplitting: {

@@ -12,7 +12,8 @@
     "unlocked": "（{{total}} 区画中 {{unlocked}} 区画が解放済み・市役所 Lv {{level}}）"
   },
   "slot": {
-    "build": "区画 {{pos}} に建設"
+    "build": "区画 {{pos}} に建設",
+    "building": "{{name}} レベル {{level}}"
   },
   "buildList": {
     "title": "建設",

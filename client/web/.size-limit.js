@@ -33,6 +33,15 @@ export default [
     gzip: true,
   },
   {
+    // every building sprite (src/assets/buildings, AGENTS.md Client, Game art), loaded as slots show them. PNG is already
+    // compressed, so this counts the files as they are. Sized for the real pixel art, about 3 kB a sprite (the
+    // placeholders are about 0.2 kB)
+    name: 'building art',
+    path: 'dist/assets/*.png',
+    limit: '250 kB',
+    brotli: false,
+  },
+  {
     // a language other than English, loaded only when chosen
     name: 'Japanese',
     path: 'dist/assets/ja-JP-*.js',

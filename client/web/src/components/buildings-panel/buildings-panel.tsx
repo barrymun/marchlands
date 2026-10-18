@@ -3,12 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
 import type { CityBean } from '@marchlands/api-client';
-import { BuildingType } from '@marchlands/core';
 
 import { BuildingDialog } from '@/components/buildings-panel/building-dialog/building-dialog';
-import { INSIDE, OUTSIDE } from '@/components/buildings-panel/constants';
+import { OUTSIDE } from '@/components/buildings-panel/constants';
 import { Slot } from '@/components/buildings-panel/slot/slot';
 import { fieldSlots } from '@/components/buildings-panel/utils';
+import { WalledCity } from '@/components/buildings-panel/walled-city/walled-city';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { buildingName } from '@/lib/game-data';
@@ -83,19 +83,8 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">{t('inside.title')}</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-            {[-1, -2].map((pos) => (
-              <Slot
-                key={pos}
-                pos={pos}
-                building={byPos.get(pos)}
-                onClick={() => setSelected(pos)}
-                fixedName={buildingName(pos === -1 ? BuildingType.TOWN_HALL : BuildingType.WALLS)}
-              />
-            ))}
-            {INSIDE.map((pos) => (
-              <Slot key={pos} pos={pos} building={byPos.get(pos)} onClick={() => setSelected(pos)} />
-            ))}
+          <CardContent>
+            <WalledCity byPos={byPos} onSelect={setSelected} />
           </CardContent>
         </Card>
       )}

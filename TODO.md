@@ -30,8 +30,11 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
 ## Client
 
 - [ ] **Images for buildings, troops, gear, items, etc.**
-  - Serve them from an image server or CDN that caches, resizes and picks the format per browser (AVIF / WebP), and lowers quality on slow connections.
-  - Keep them out of the first page's download and the size budget (`client/web/.size-limit.js`): load them lazily, with sizes set so the layout doesn't jump.
+  - Pixel art, committed as small PNGs and served by nginx as hashed static files (AGENTS.md, Client, Game art): no image server needed while the art stays this small.
+  - Buildings: all 19 buildings are drawn for every level band (isometric pixel art, `tools/art/buildings/`), shown as square slot cards with the level in the corner and the name on hover. The walls are a pixel-art frame round the buildings inside the walls, from a wooden palisade to a fortress, with the Town Hall centre-top and the gate opening the Walls.
+  - Map tiles: the seven valley types are drawn for every level band (`client/web/src/assets/tiles/`, `tools/art/tiles.ts`), ready for the map rework below; still to draw: player cities and barbarian cities. Show them through a sprite sheet, since the map shows about 250 tiles at once.
+  - Then troops and fortifications (one sprite each).
+  - Revisit an image service (imgproxy behind nginx's cache, or a CDN) if art changes need to ship without a redeploy, sizes must vary freely (a zoomable map), or images are combined per player (a city with its alliance flag).
 - [ ] **Rework the map's UI** (`client/web/src/components/map-panel/`).
   - Images for cities and for each valley type.
   - Move around the map by dragging (and by touch on phones) instead of only the arrow buttons.
