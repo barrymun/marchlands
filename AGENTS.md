@@ -4,12 +4,28 @@ How to work in this repository. Read [README.md](README.md) for what Marchlands 
 
 ## Ground rules
 
-- **Git:** the maintainer manages git. Don't commit, push or branch unless asked. When asked for a commit message, keep it concise, and don't use double quotes, backticks or `$` in it (it gets pasted into `git commit -m "..."`).
+- **Git:** the maintainer manages git.
+  - Don't commit, push or branch unless asked.
+  - Never change the index (`git add`, `git mv`, `git rm`, `git restore --staged`). The maintainer curates what's staged. Move or delete files with plain `mv` / `rm`. Read-only git (`status`, `diff`, `log`) is fine.
+  - When asked for a commit message, keep it concise. Leave out double quotes, backticks and `$` (it gets pasted into `git commit -m "..."`), and add no `Co-Authored-By` or other attribution trailer.
+- **New dependencies** are pinned to an exact version (no `^` or `~`) released at least two weeks ago.
 - **Player-facing language is neutral:** say "player", never "lord" or "lady", in anything a player reads (UI text, item and quest descriptions, error messages, mail). Code identifiers and comments may still say lord.
 - **Planned work** is listed in [TODO.md](TODO.md). In the change that finishes an item, move it to the Done section at the bottom (newest first, dated, one line saying what was done).
 - **Ideas and known quirks for later** go in [docs/backlog.md](docs/backlog.md): what happens now, where, and why it was left.
 - **Deviations are documented:** every rule that differs from the original Evony Age 1 server goes in [docs/deviations.md](docs/deviations.md), marked *(design change)*. Every tunable number lives in `shared/core/src/balance.ts` (`BALANCE`); don't hard-code game values elsewhere.
 - **Don't change behaviour while restructuring.** A refactor moves code; a rule change is its own change, documented as above.
+
+## Picking up where the last session left off
+
+Everything a new session needs is in the repository. Nothing lives only in an agent's memory. To see where things stand:
+
+- **The plan:** [TODO.md](TODO.md) lists the open items. Its Done section (newest first) shows what was finished last.
+- **Recent work:** run `git log --oneline` and `git status`. Staged changes are the maintainer's curated next commit; unstaged ones are still in progress. Ask before assuming which is which.
+- **Decisions already made, and the reasons for them:**
+  - [docs/architecture.md](docs/architecture.md), e.g. Import prefixes.
+  - [docs/deviations.md](docs/deviations.md): rule changes.
+  - [docs/backlog.md](docs/backlog.md): quirks left on purpose.
+- **Moving to another machine** (the stack, `.env` and a database dump): README.md, Moving the dev stack to another machine.
 
 ## Commands
 
@@ -50,7 +66,8 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 - Rebuild after a change: `docker compose up -d --build api worker web`, or only the services you touched.
 - The backend image runs esbuild bundles (`npm run build:backend`, `tools/build/backend.mjs`), not the sources: one `.mjs` each for the API, the worker and `migrate`, in `dist/backend/bin/`. A dependency that reads its own files at run time (Swagger UI's assets) is listed in `OWN_FILES` there, so its files are copied next to the bundle. Check a new dependency with a rebuilt image.
 - If the change adds a migration: `docker compose stop api worker` first, then rebuild, so the one-shot `migrate` service runs before they start.
-- Testing with the API creates players. Use temporary accounts and delete them with `npm run delete-player` when done (it also disbands alliances they leave empty), never with hand-written SQL. Never touch the maintainer's own player.
+- Testing with the API creates players. Use temporary accounts named `fx_…` and delete them with `npm run delete-player` when done (it also disbands alliances they leave empty), never with hand-written SQL. Never touch any account you didn't create: the maintainer plays on the dev stack.
+- Stop and back up the stack (to move it, or before something risky): README.md, Moving the dev stack to another machine. The restore needs an empty database, so removing the old volume is left to the maintainer.
 
 ## Formatting and linting
 

@@ -120,6 +120,36 @@ To change the schema, edit `backend/packages/db/src/schema.ts`, then run `npm ru
 
 To rebuild the static game data from the original dumps, clone [evony-private-server](https://github.com/sonya75/evony-private-server) next to this repository and run `npm run legacy:convert -- ../evony-private-server/DB`.
 
+### Moving the dev stack to another machine
+
+The code comes from git. Three things don't, so copy them yourself:
+
+- **`.env`**: it's gitignored. It holds this machine's ports, `JWT_SECRET`, `GAME_SPEED` and `ADMIN_USERNAMES`. Copy it, or start again from `.env.example`. With the same `JWT_SECRET`, players stay logged in.
+- **The database**, as a dump (below). Players, cities and the map all live there.
+- **Optional:** the high-resolution art samples (AGENTS.md, Game art), and the sibling clones `../evony-private-server` and `../EvonyAge1BattleCalc`. Only `legacy:convert` needs `../evony-private-server`.
+
+**On the old machine,** stop the services that change the game, dump the database to `backups/` (gitignored), then stop Postgres:
+
+```bash
+docker compose stop api worker web
+tools/ops/backup.sh                      # writes backups/marchlands-<UTC time>.dump
+docker compose stop postgres
+```
+
+**On the new machine,** clone the repository and put `.env` and the dump in place. Restore the dump into a fresh database before anything else starts. If the worker starts first, it seeds a new map.
+
+```bash
+npm install
+docker compose up -d postgres
+docker compose exec -T postgres sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --no-owner --exit-on-error' < backups/marchlands-<time>.dump
+docker compose up -d --build             # migrate applies any migrations the dump lacks
+```
+
+- **The database must be empty.** That means a machine where Marchlands never ran, or one where the old volume was removed: `docker compose down`, then `docker volume rm marchlands_pgdata`.
+- **To check a dump without touching the game,** restore it into a scratch database. Run `createdb` / `pg_restore -d <scratch>` / `dropdb` inside the postgres container.
+
+The same steps move a hosted game: [docs/deployment.md](docs/deployment.md), Moving the game to this machine.
+
 ## Configuration
 
 | Variable | Default | Purpose |
