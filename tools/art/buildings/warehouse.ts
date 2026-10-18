@@ -16,7 +16,7 @@ function band1(): IsoCanvas {
   c.roof(4, 3, 12, 6, 5, 4, 'x', { roofing: 'barn' });
   c.crates(12, 13, 4);
   c.crates(4, 14, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -33,7 +33,7 @@ function band2(): IsoCanvas {
   c.roof(17, 4, 5, 12, 5, 3, 'y', { roofing: 'barn' });
   c.crates(3, 13, 6);
   c.crates(10, 17, 4);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -55,7 +55,7 @@ function band3(): IsoCanvas {
   c.crates(3, 14, 6);
   c.crates(10, 16, 6);
   c.crates(4, 21, 3);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -81,7 +81,7 @@ function band4(): IsoCanvas {
   c.stone(0, 29, 0, 11, 1, 2);
   c.stone(16, 29, 0, 14, 1, 2);
   c.stone(29, 0, 0, 1, 30, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

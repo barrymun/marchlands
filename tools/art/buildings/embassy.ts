@@ -22,7 +22,7 @@ function band1(): IsoCanvas {
   rotunda(c, 6, 4, 0, 8, 5, 'slate');
   c.banner(c.p(4, 15, 0), 8);
   c.banner(c.p(16, 15, 0), 8);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -34,7 +34,7 @@ function band2(): IsoCanvas {
   rotunda(c, 6, 3, 0, 10, 6, 'slate');
   c.stone(7, 13, 0, 8, 2, 1);
   for (const x of [3, 8, 14, 19]) c.banner(c.p(x, 19, 0), 8);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -52,7 +52,7 @@ function band3(): IsoCanvas {
   rotunda(c, 8, 3, 0, 11, 7, 'gold');
   c.stone(9, 14, 0, 9, 2, 1);
   for (const x of [3, 8, 18, 23]) c.banner(c.p(x, 21, 0), 9);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -79,7 +79,7 @@ function band4(): IsoCanvas {
   c.stone(0, 29, 0, 12, 1, 2);
   c.stone(18, 29, 0, 12, 1, 2);
   c.stone(29, 0, 0, 1, 30, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

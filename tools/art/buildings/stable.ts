@@ -29,7 +29,7 @@ function band1(): IsoCanvas {
   c.horse(15, 16);
   paddock(c, 9, 11, 18, 18);
   c.haystack(4, 14);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -49,7 +49,7 @@ function band2(): IsoCanvas {
   paddock(c, 9, 11, 22, 22);
   c.haystack(3, 13);
   c.haystack(5, 16);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -73,7 +73,7 @@ function band3(): IsoCanvas {
   c.horse(21, 18);
   c.horse(20, 22);
   paddock(c, 14, 14, 25, 24);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -102,7 +102,7 @@ function band4(): IsoCanvas {
   c.horse(21, 25);
   c.horse(25, 24);
   paddock(c, 15, 17, 28, 28);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

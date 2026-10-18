@@ -5,7 +5,9 @@
 // client/web/src/assets/tiles/, as <name>-<band>.png for each art band, the walls' frame pieces
 // (tools/art/walls.ts) to client/web/src/assets/walls/, and the troops (tools/art/troops.ts) and fortifications
 // (tools/art/fortifications.ts) to client/web/src/assets/units/ as <name>.png, the troop badges (tools/art/badges.ts)
-// to client/web/src/assets/badges/, and the resource icons (tools/art/resources.ts) to client/web/src/assets/resources/.
+// to client/web/src/assets/badges/, the resource icons (tools/art/resources.ts) to client/web/src/assets/resources/,
+// and the isometric city view's ground and walls (tools/art/city.ts) and its grand Town Hall
+// (tools/art/buildings/town-hall.ts) to client/web/src/assets/city/.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -30,9 +32,10 @@ import { rallySpot } from './buildings/rally-spot.ts';
 import { reliefStation } from './buildings/relief-station.ts';
 import { sawmill } from './buildings/sawmill.ts';
 import { stable } from './buildings/stable.ts';
-import { townHall } from './buildings/town-hall.ts';
+import { grandTownHall, townHall } from './buildings/town-hall.ts';
 import { warehouse } from './buildings/warehouse.ts';
 import { workshop } from './buildings/workshop.ts';
+import { CITY_GROUND_DRAWINGS, CITY_WALL_DRAWINGS } from './city.ts';
 import { FORT_DRAWINGS } from './fortifications.ts';
 import type { IsoCanvas } from './iso.ts';
 import type { PixelCanvas } from './pixel.ts';
@@ -43,6 +46,9 @@ import { WALL_DRAWINGS } from './walls.ts';
 import {
   ART_BANDS,
   buildingArtFile,
+  cityGroundFile,
+  cityWallFile,
+  grandTownHallFile,
   resourceArtFile,
   tileArtFile,
   troopBadgeFile,
@@ -50,7 +56,7 @@ import {
   WALL_PIECES,
   wallArtFile,
 } from '../../client/web/src/lib/game-art.ts';
-import type { ResourceKey } from '../../client/web/src/lib/game-art.ts';
+import type { CityGround, CityWallPiece, ResourceKey, WallBand } from '../../client/web/src/lib/game-art.ts';
 
 const ASSETS = path.resolve(import.meta.dirname, '../../client/web/src/assets');
 
@@ -123,4 +129,19 @@ for (const [type, drawing] of Object.entries(BADGE_DRAWINGS)) {
   if (wanted.size && !wanted.has(file.replace(/\.png$/, ''))) continue;
   fs.writeFileSync(path.join(ASSETS, 'badges', file), drawing().png());
   console.log(`drew badges/${file}`);
+}
+
+fs.mkdirSync(path.join(ASSETS, 'city'), { recursive: true });
+for (const [name, drawing] of Object.entries(CITY_GROUND_DRAWINGS) as [CityGround, () => IsoCanvas][]) {
+  if (wanted.size && !wanted.has(name) && !wanted.has('city')) continue;
+  fs.writeFileSync(path.join(ASSETS, 'city', cityGroundFile(name)), drawing().png());
+  console.log(`drew city/${cityGroundFile(name)}`);
+}
+if (!wanted.size || wanted.has('city')) {
+  for (const { band } of ART_BANDS)
+    for (const [piece, drawing] of Object.entries(CITY_WALL_DRAWINGS) as [CityWallPiece, (band: WallBand) => IsoCanvas][])
+      fs.writeFileSync(path.join(ASSETS, 'city', cityWallFile(band, piece)), drawing(band as WallBand).png());
+  console.log(`drew city walls (${Object.keys(CITY_WALL_DRAWINGS).length} pieces × ${ART_BANDS.length} bands)`);
+  for (const { band } of ART_BANDS) fs.writeFileSync(path.join(ASSETS, 'city', grandTownHallFile(band)), grandTownHall[band]().png());
+  console.log(`drew city/town-hall (${ART_BANDS.length} bands)`);
 }

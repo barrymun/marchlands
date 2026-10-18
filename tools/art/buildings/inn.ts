@@ -38,7 +38,7 @@ function band1(): IsoCanvas {
   c.banner(c.p(15, 10, 4), 3);
   table(c, 5, 13);
   table(c, 11, 14);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -51,7 +51,7 @@ function band2(): IsoCanvas {
   wingY(c, 3, 8, 5, 12, 6);
   c.well(15, 14);
   table(c, 10, 18);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -66,7 +66,7 @@ function band3(): IsoCanvas {
   c.horse(12, 20);
   c.horse(15, 22);
   wingY(c, 20, 8, 5, 15, 6);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -86,7 +86,7 @@ function band4(): IsoCanvas {
   wingX(c, 7, 23, 6, 5, 6);
   wingX(c, 17, 23, 6, 5, 6);
   c.banner(c.p(15, 28, 0), 9);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

@@ -15,7 +15,7 @@ function band1(): IsoCanvas {
   c.hipRoof(13, 2, 5, 5, 4, 3, 'x', 'teal');
   c.banner(c.p(5, 9, 0), 10);
   c.rack(9, 14);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -34,7 +34,7 @@ function band2(): IsoCanvas {
   c.rack(15, 18);
   c.dummy(5, 17);
   c.dummy(8, 19);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -57,7 +57,7 @@ function band3(): IsoCanvas {
   c.dummy(9, 20);
   c.dummy(12, 22);
   c.dummy(22, 23);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -83,7 +83,7 @@ function band4(): IsoCanvas {
   c.dummy(12, 25);
   c.dummy(19, 25);
   c.dummy(23, 23);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

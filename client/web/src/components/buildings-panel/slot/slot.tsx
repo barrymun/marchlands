@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { BuildingBean } from '@marchlands/api-client';
 
-import { BUILDING_ART } from '@/components/buildings-panel/slot/constants';
+import { BUILDING_ART } from '@/components/buildings-panel/constants';
 import { Countdown } from '@/components/countdown/countdown';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { artBand, buildingArtFile } from '@/lib/game-art';

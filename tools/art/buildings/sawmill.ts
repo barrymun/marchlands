@@ -21,7 +21,7 @@ function band1(): IsoCanvas {
   c.stump(3, 13);
   c.stump(15, 15);
   c.pine(2, 17, 9);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -48,7 +48,7 @@ function band2(): IsoCanvas {
   c.stump(20, 19);
   c.pine(2, 21, 10);
   c.pine(21, 21, 8);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -77,7 +77,7 @@ function band3(): IsoCanvas {
   c.stump(2, 22);
   c.stump(18, 22);
   c.pine(2, 25, 10);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -109,7 +109,7 @@ function band4(): IsoCanvas {
   c.fence(23, 9, 23, 27);
   c.pine(2, 29, 11);
   c.pine(28, 28, 9);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

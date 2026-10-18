@@ -4,6 +4,11 @@
     "showAll": "すべて表示",
     "summary_other": "（{{count}} 棟・レベル {{min}}〜{{max}}）"
   },
+  "view": {
+    "label": "都市の表示",
+    "town": "街並み",
+    "grid": "一覧"
+  },
   "inside": {
     "title": "城壁内"
   },

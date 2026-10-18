@@ -1,13 +1,19 @@
 // Town Hall: a Roman villa. Band 1 (levels 1-3) is a columned hall and a wing round a paved courtyard; each band
 // after it is bigger and stronger: a second wing, then a stone wall, a fountain and a two-storey wing, then towers with
-// banners and a hall with gilded eaves on a podium.
+// banners and a hall with gilded eaves on a podium. Each band is drawn twice: the 64-pixel sprite for slot cards, and a
+// grand one at twice the size on a 128-pixel canvas for the isometric town, where the Town Hall covers a 2×2 block.
 
 import { IsoCanvas } from '../iso.ts';
 
 const SIZE = 64;
 
-function band1(): IsoCanvas {
-  const c = new IsoCanvas(SIZE, 22);
+/** A band's canvas: the slot sprite, or the grand one at twice the size, anchored on a 2×2 block. */
+function canvas(plot: number, grand: boolean): IsoCanvas {
+  return grand ? new IsoCanvas(SIZE * 2, plot, 'marchlands', 2) : new IsoCanvas(SIZE, plot);
+}
+
+function band1(grand = false): IsoCanvas {
+  const c = canvas(22, grand);
   c.ground(0, 0, 22, 22, 'sand');
   c.ground(5, 10, 13, 10, 'paving');
   // the wing, along the back left
@@ -21,13 +27,13 @@ function band1(): IsoCanvas {
   c.roof(9, 2, 11, 7, 5, 4, 'x');
   c.cypress(19, 14, 5);
   c.cypress(3, 19, 4);
-  c.centre();
+  c.anchor(grand ? 2 : 1);
   c.outline();
   return c;
 }
 
-function band2(): IsoCanvas {
-  const c = new IsoCanvas(SIZE, 25);
+function band2(grand = false): IsoCanvas {
+  const c = canvas(25, grand);
   c.ground(0, 0, 25, 25, 'sand');
   c.ground(6, 11, 15, 8, 'paving');
   c.wall(1, 2, 0, 4, 15, 5);
@@ -43,13 +49,13 @@ function band2(): IsoCanvas {
   c.roof(1, 20, 13, 4, 4, 3, 'x');
   c.cypress(21, 16, 6);
   c.cypress(23, 20, 5);
-  c.centre();
+  c.anchor(grand ? 2 : 1);
   c.outline();
   return c;
 }
 
-function band3(): IsoCanvas {
-  const c = new IsoCanvas(SIZE, 28);
+function band3(grand = false): IsoCanvas {
+  const c = canvas(28, grand);
   c.ground(0, 0, 28, 28, 'sand');
   c.ground(8, 13, 15, 9, 'paving');
   // the stone wall's back sides
@@ -76,13 +82,13 @@ function band3(): IsoCanvas {
   c.stone(0, 27, 0, 9, 1, 3);
   c.stone(14, 27, 0, 14, 1, 3);
   c.stone(27, 0, 0, 1, 28, 3);
-  c.centre();
+  c.anchor(grand ? 2 : 1);
   c.outline();
   return c;
 }
 
-function band4(): IsoCanvas {
-  const c = new IsoCanvas(SIZE, 31);
+function band4(grand = false): IsoCanvas {
+  const c = canvas(31, grand);
   c.ground(0, 0, 31, 31, 'sand');
   c.ground(9, 15, 17, 10, 'paving');
   // the wall's back sides and the back tower
@@ -119,10 +125,13 @@ function band4(): IsoCanvas {
   c.banner(c.p(1.5, 29.5, 10), 5);
   c.stone(28, 28, 0, 3, 3, 9);
   c.crenels(28, 28, 9, 3, 3);
-  c.centre();
+  c.anchor(grand ? 2 : 1);
   c.outline();
   return c;
 }
 
 /** The Town Hall's sprite for each art band (1-4). */
-export const townHall: Record<number, () => IsoCanvas> = { 1: band1, 2: band2, 3: band3, 4: band4 };
+export const townHall: Record<number, () => IsoCanvas> = { 1: () => band1(), 2: () => band2(), 3: () => band3(), 4: () => band4() };
+
+/** The grand Town Hall of the isometric town, 128 pixels, for each art band (1-4). */
+export const grandTownHall: Record<number, () => IsoCanvas> = { 1: () => band1(true), 2: () => band2(true), 3: () => band3(true), 4: () => band4(true) };

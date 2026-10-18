@@ -31,7 +31,7 @@ function band1(): IsoCanvas {
   c.mineEntrance(7, 11, 2, 3);
   c.cart(8, 14, 3);
   orePile(c, 14, 13);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -49,7 +49,7 @@ function band2(): IsoCanvas {
   c.cart(8, 15, 4);
   orePile(c, 13, 17);
   orePile(c, 3, 17);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -71,7 +71,7 @@ function band3(): IsoCanvas {
   c.cart(4, 19, 3);
   orePile(c, 14, 19);
   orePile(c, 2, 22);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -100,7 +100,7 @@ function band4(): IsoCanvas {
   c.stone(0, 29, 0, 8, 1, 2);
   c.stone(13, 29, 0, 17, 1, 2);
   c.stone(29, 0, 0, 1, 30, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

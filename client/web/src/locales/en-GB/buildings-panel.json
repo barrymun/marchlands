@@ -5,6 +5,11 @@
     "summary_one": "({{count}} building · levels {{min}}–{{max}})",
     "summary_other": "({{count}} buildings · levels {{min}}–{{max}})"
   },
+  "view": {
+    "label": "City view",
+    "town": "Town",
+    "grid": "Grid"
+  },
   "inside": {
     "title": "Inside the walls"
   },

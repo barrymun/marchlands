@@ -5,18 +5,30 @@ import { useSearchParams } from 'react-router';
 import type { CityBean } from '@marchlands/api-client';
 
 import { BuildingDialog } from '@/components/buildings-panel/building-dialog/building-dialog';
-import { OUTSIDE } from '@/components/buildings-panel/constants';
+import { CITY_VIEWS, OUTSIDE, TOWN_VIEW_QUERY } from '@/components/buildings-panel/constants';
+import { IsoCity } from '@/components/buildings-panel/iso-city/iso-city';
+import { IsoFields } from '@/components/buildings-panel/iso-fields/iso-fields';
 import { Slot } from '@/components/buildings-panel/slot/slot';
-import { fieldSlots } from '@/components/buildings-panel/utils';
+import type { CityView } from '@/components/buildings-panel/types';
+import { fieldSlots, readView, saveView } from '@/components/buildings-panel/utils';
 import { WalledCity } from '@/components/buildings-panel/walled-city/walled-city';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
 export function BuildingsPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['buildings-panel', 'common']);
   const [selected, setSelected] = useState<number | null>(null);
+  const [chosen, setChosen] = useState<CityView>(readView);
+  // the town needs room: narrower screens always get the cards, and no choice
+  const wide = useMediaQuery(TOWN_VIEW_QUERY);
+  const view: CityView = wide ? chosen : 'grid';
+  const choose = (v: CityView) => {
+    setChosen(v);
+    saveView(v);
+  };
   // ?building=<position> (from the activity dock) opens that building's dialog
   const [search, setSearch] = useSearchParams();
   const requested = search.get('building');
@@ -43,19 +55,30 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
 
   return (
     <div className="grid gap-4">
-      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t('filter.label')}>
-        <Button size="xs" variant={active.length === 0 ? 'default' : 'outline'} onClick={() => setTags([])}>
-          {t('filter.showAll')}
-        </Button>
-        {typeList.map(([typeId, n]) => {
-          const on = active.includes(typeId);
-          return (
-            <Button key={typeId} size="xs" variant={on ? 'default' : 'outline'} aria-pressed={on} onClick={() => toggle(typeId)} className="gap-1">
-              {buildingName(typeId)}
-              <span className={cn('tabular-nums', on ? 'opacity-80' : 'text-muted-foreground')}>{n}</span>
-            </Button>
-          );
-        })}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t('filter.label')}>
+          <Button size="xs" variant={active.length === 0 ? 'default' : 'outline'} onClick={() => setTags([])}>
+            {t('filter.showAll')}
+          </Button>
+          {typeList.map(([typeId, n]) => {
+            const on = active.includes(typeId);
+            return (
+              <Button key={typeId} size="xs" variant={on ? 'default' : 'outline'} aria-pressed={on} onClick={() => toggle(typeId)} className="gap-1">
+                {buildingName(typeId)}
+                <span className={cn('tabular-nums', on ? 'opacity-80' : 'text-muted-foreground')}>{n}</span>
+              </Button>
+            );
+          })}
+        </div>
+        {wide && (
+          <div className="flex gap-1" role="group" aria-label={t('view.label')}>
+            {CITY_VIEWS.map((v) => (
+              <Button key={v} size="xs" variant={view === v ? 'default' : 'outline'} aria-pressed={view === v} onClick={() => choose(v)}>
+                {t(`view.${v}`)}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
       {active.length > 0 && (
         <Card>
@@ -83,9 +106,7 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">{t('inside.title')}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <WalledCity byPos={byPos} onSelect={setSelected} />
-          </CardContent>
+          <CardContent>{view === 'town' ? <IsoCity byPos={byPos} onSelect={setSelected} /> : <WalledCity byPos={byPos} onSelect={setSelected} />}</CardContent>
         </Card>
       )}
       {active.length === 0 && (
@@ -98,11 +119,17 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-8">
-            {OUTSIDE.map((pos, i) => (
-              <Slot key={pos} pos={pos} building={byPos.get(pos)} locked={i >= outerSlots} onClick={() => setSelected(pos)} />
-            ))}
-          </CardContent>
+          {view === 'town' ? (
+            <CardContent>
+              <IsoFields byPos={byPos} unlocked={outerSlots} onSelect={setSelected} />
+            </CardContent>
+          ) : (
+            <CardContent className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-8">
+              {OUTSIDE.map((pos, i) => (
+                <Slot key={pos} pos={pos} building={byPos.get(pos)} locked={i >= outerSlots} onClick={() => setSelected(pos)} />
+              ))}
+            </CardContent>
+          )}
         </Card>
       )}
       <BuildingDialog city={city} positionId={selected} building={selected != null ? byPos.get(selected) : undefined} onClose={() => setSelected(null)} />

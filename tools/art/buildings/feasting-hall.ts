@@ -15,7 +15,7 @@ function band1(): IsoCanvas {
   c.windows([5, 7, 13, 15], 10, 2, 1);
   c.roof(3, 4, 14, 6, 5, 4, 'x', { roofing: 'green' });
   c.box(6, 13, 0, 7, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -35,7 +35,7 @@ function band2(): IsoCanvas {
   c.smoke(c.p(20.5, 5.5, 9));
   c.box(4, 14, 0, 8, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
   c.box(4, 17, 0, 8, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -54,7 +54,7 @@ function band3(): IsoCanvas {
   c.garden(3, 21, 7, 4);
   c.cypress(14, 23, 6);
   c.cypress(20, 22, 6);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -79,7 +79,7 @@ function band4(): IsoCanvas {
   c.box(20, 17, 0, 6, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
   c.cypress(4, 26, 6);
   c.cypress(25, 26, 6);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

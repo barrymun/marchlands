@@ -1,7 +1,8 @@
 // Game art (AGENTS.md, Client, Game art): one pixel-art sprite per building type and level band in
 // src/assets/buildings/, the walls' frame pieces per level band in src/assets/walls/, one sprite per valley type and
 // level band in src/assets/tiles/, one sprite per troop and fortification type in src/assets/units/, one badge per
-// troop type in src/assets/badges/, and one icon per resource in src/assets/resources/. The art scripts in tools/art import this file, so it uses no `@/` imports.
+// troop type in src/assets/badges/, one icon per resource in src/assets/resources/, and the isometric city view's
+// ground and wall pieces in src/assets/city/. The art scripts in tools/art import this file, so it uses no `@/` imports.
 
 import { buildingConfig, BuildingType, FortType, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
 
@@ -80,4 +81,31 @@ export type ResourceKey = (typeof RESOURCE_ART_KEYS)[number];
 /** A resource icon's file name: `wood.png`. */
 export function resourceArtFile(key: ResourceKey): string {
   return `${key}.png`;
+}
+
+/** The isometric city view's ground: grass tiles, and the markers laid over it for an empty plot and a locked field. */
+export const CITY_GROUNDS = ['grass', 'plot', 'locked'] as const;
+export type CityGround = (typeof CITY_GROUNDS)[number];
+
+/** A city ground tile's file name: `plot.png`. */
+export function cityGroundFile(name: CityGround): string {
+  return `${name}.png`;
+}
+
+/**
+ * The isometric city view's wall pieces, for each art band: a stretch of wall where the row is fixed (`wall-x`) or the
+ * column is (`wall-y`), a corner `tower` and the `gate` at the front corner.
+ */
+export const CITY_WALL_PIECES = ['wall-x', 'wall-y', 'tower', 'gate'] as const;
+export type CityWallPiece = (typeof CITY_WALL_PIECES)[number];
+export type WallBand = 1 | 2 | 3 | 4;
+
+/** A city wall piece's file name: `walls-4-gate.png` (in src/assets/city/, apart from the grid view's frame pieces). */
+export function cityWallFile(band: number, piece: CityWallPiece): string {
+  return `walls-${band}-${piece}.png`;
+}
+
+/** The grand Town Hall of the isometric town (128×128, a 2×2 block) for a level band: `town-hall-4.png` in src/assets/city/. */
+export function grandTownHallFile(band: number): string {
+  return `town-hall-${band}.png`;
 }

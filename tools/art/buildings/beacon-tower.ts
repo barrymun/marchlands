@@ -21,7 +21,7 @@ function band1(): IsoCanvas {
   c.box(7.5, 7.5, 11, 5, 5, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
   c.fire(c.p(10, 10, 12), 5);
   c.logs(13, 14, 4, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -36,7 +36,7 @@ function band2(): IsoCanvas {
   c.box(10.5, 9.5, 14, 2, 2, 1, { top: 'outline', left: 'metal', right: 'stoneR' });
   c.fire(c.p(11.5, 10.5, 15), 7);
   c.logs(15, 16, 5, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -57,7 +57,7 @@ function band3(): IsoCanvas {
   c.windows([19, 20], 18, 0, 3, 'logDark');
   c.hipRoof(17, 13, 6, 5, 4, 2, 'x', 'slate');
   c.logs(4, 17, 6, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -84,7 +84,7 @@ function band4(): IsoCanvas {
   c.stone(4, 25, 0, 8, 1, 3);
   c.stone(17, 25, 0, 9, 1, 3);
   c.stone(25, 4, 0, 1, 22, 3);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

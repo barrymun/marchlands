@@ -31,21 +31,37 @@ export type Roofing = keyof typeof ROOFING;
 
 export class IsoCanvas extends PixelCanvas {
   readonly plot: number;
+  readonly scale: number;
 
   /**
    * `plot` is the ground's size in world units; the canvas centres its diamond at the bottom. `seed` makes the
-   * natural details (rocks, trees, pond edges) the same on every run.
+   * natural details (rocks, trees, pond edges) the same on every run. `scale` draws everything that many times bigger
+   * (shapes grow, while one-pixel details such as columns and window bars stay one pixel): the Town Hall drawn at 2 on a
+   * 128-pixel canvas is the 2×2 Town Hall of the isometric town.
    */
-  constructor(size: number, plot: number, seed = 'marchlands') {
+  constructor(size: number, plot: number, seed = 'marchlands', scale = 1) {
     super(size, seed);
     this.plot = plot;
+    this.scale = scale;
+  }
+
+  /**
+   * Move the drawing up so the middle of its ground diamond sits `tiles` × 16 + 2 pixels above the canvas's bottom
+   * whatever the plot's size: on a 64-pixel sprite that is (32, 46), the middle of a 64×32 map tile whose front corner
+   * is 2 pixels above the bottom; on a 128-pixel sprite anchored at 2 tiles, (64, 94), the middle of a 2×2 block.
+   * Building sprites are anchored this way, so the isometric city view can stand each one on its tile
+   * (client/web/src/components/buildings-panel/iso-grid/utils.ts, spriteBox).
+   */
+  anchor(tiles = 1) {
+    this.shift(Math.round(this.size - 2 - 16 * tiles - (this.size - 2 - (this.plot * this.scale) / 2)));
   }
 
   /** Screen position of a world point. */
   p(x: number, y: number, z = 0): Pt {
+    const k = this.scale;
     const ox = this.size / 2;
-    const oy = this.size - 2 - this.plot;
-    return [ox + x - y, oy + (x + y) / 2 - z];
+    const oy = this.size - 2 - this.plot * k;
+    return [ox + (x - y) * k, oy + ((x + y) / 2 - z) * k];
   }
 
   /** The ground plot: a diamond of `c`, or of a paving pattern. */

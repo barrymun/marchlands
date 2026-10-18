@@ -23,7 +23,7 @@ function band1(): IsoCanvas {
   c.timber(14, 3, 0, 4, 4, 3);
   c.hipRoof(14, 3, 4, 4, 3, 2, 'x', 'slate');
   blocks(c, 12, 13, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -40,7 +40,7 @@ function band2(): IsoCanvas {
   c.hipRoof(17, 3, 5, 5, 4, 3, 'x', 'slate');
   blocks(c, 14, 15, 3);
   blocks(c, 4, 17, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -63,7 +63,7 @@ function band3(): IsoCanvas {
   blocks(c, 16, 18, 3);
   blocks(c, 3, 19, 3);
   c.fence(2, 25, 24, 25);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -93,7 +93,7 @@ function band4(): IsoCanvas {
   c.stone(0, 29, 0, 12, 1, 2);
   c.stone(17, 29, 0, 13, 1, 2);
   c.stone(29, 0, 0, 1, 30, 2);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

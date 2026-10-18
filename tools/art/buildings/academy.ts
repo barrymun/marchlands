@@ -16,7 +16,7 @@ function band1(): IsoCanvas {
   c.windows([9, 10], 11, 0, 3, 'logDark');
   c.roof(4, 4, 11, 7, 6, 4, 'x', { roofing: 'slate' });
   c.cypress(16, 14, 5);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -34,7 +34,7 @@ function band2(): IsoCanvas {
   c.garden(2, 18, 6, 4);
   c.cypress(19, 17, 6);
   c.cypress(21, 20, 5);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -56,7 +56,7 @@ function band3(): IsoCanvas {
   c.dome(0.5, 3.5, 9, 4, 'slate');
   c.garden(3, 20, 7, 5);
   c.cypress(21, 22, 6);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -81,7 +81,7 @@ function band4(): IsoCanvas {
   c.garden(7, 23, 5, 4);
   c.garden(18, 23, 5, 4);
   c.cypress(26, 25, 6);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

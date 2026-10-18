@@ -27,7 +27,7 @@ function band1(): IsoCanvas {
   chimney(c, 14, 5, 10);
   c.anvil(9, 13);
   coal(c, 3, 13);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -46,7 +46,7 @@ function band2(): IsoCanvas {
   c.anvil(12, 16);
   c.rack(5, 18);
   coal(c, 2, 13);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -68,7 +68,7 @@ function band3(): IsoCanvas {
   c.rack(17, 21);
   coal(c, 2, 15);
   c.crates(9, 22, 3);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -95,7 +95,7 @@ function band4(): IsoCanvas {
   c.rack(21, 23);
   coal(c, 2, 16);
   c.crates(24, 20, 6);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

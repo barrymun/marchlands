@@ -14,7 +14,7 @@ function band1(): IsoCanvas {
   c.roof(4, 3, 11, 6, 5, 3, 'x', { roofing: 'shingle' });
   c.logs(3, 13, 6, 2);
   c.crates(12, 13, 3);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -28,7 +28,7 @@ function band2(): IsoCanvas {
   c.catapult(12, 14);
   c.logs(3, 13, 7, 3);
   c.crates(17, 9, 4);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -46,7 +46,7 @@ function band3(): IsoCanvas {
   c.catapult(10, 15);
   c.catapult(17, 19);
   c.logs(2, 20, 7, 3);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }
@@ -69,7 +69,7 @@ function band4(): IsoCanvas {
   c.catapult(20, 23);
   c.logs(2, 22, 7, 3);
   c.crates(24, 17, 6);
-  c.centre();
+  c.anchor();
   c.outline();
   return c;
 }

@@ -201,11 +201,18 @@ export class PixelCanvas {
     const n = this.size;
     const rows = [...Array(n).keys()].filter((y) => this.px.subarray(y * n, (y + 1) * n).some((v) => v !== 0));
     if (!rows.length) return;
-    const shift = Math.floor((n - (rows[rows.length - 1] - rows[0] + 1)) / 2) - rows[0];
+    this.shift(Math.floor((n - (rows[rows.length - 1] - rows[0] + 1)) / 2) - rows[0]);
+  }
+
+  /** Move the drawing `by` rows down (up when negative); a drawn row moved off the canvas is an error, never a crop. */
+  shift(by: number) {
+    const n = this.size;
     const out = new Uint8Array(n * n);
     for (let y = 0; y < n; y++) {
-      const to = y + shift;
-      if (to >= 0 && to < n) out.set(this.px.subarray(y * n, (y + 1) * n), to * n);
+      const to = y + by;
+      const row = this.px.subarray(y * n, (y + 1) * n);
+      if (to >= 0 && to < n) out.set(row, to * n);
+      else if (row.some((v) => v !== 0)) throw new Error(`shift(${by}) would cut off row ${y}`);
     }
     this.px.set(out);
   }

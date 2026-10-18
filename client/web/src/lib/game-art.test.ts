@@ -10,6 +10,11 @@ import {
   artBand,
   BUILDING_ART_TYPES,
   buildingArtFile,
+  CITY_GROUNDS,
+  CITY_WALL_PIECES,
+  cityGroundFile,
+  cityWallFile,
+  grandTownHallFile,
   RESOURCE_ART_KEYS,
   resourceArtFile,
   TILE_ART_TYPES,
@@ -28,6 +33,7 @@ const WALL_DIR = path.resolve(import.meta.dirname, '../assets/walls');
 const UNIT_DIR = path.resolve(import.meta.dirname, '../assets/units');
 const RESOURCE_DIR = path.resolve(import.meta.dirname, '../assets/resources');
 const BADGE_DIR = path.resolve(import.meta.dirname, '../assets/badges');
+const CITY_DIR = path.resolve(import.meta.dirname, '../assets/city');
 
 describe(artBand.name, () => {
   it('changes the art at levels 4, 7 and 10', () => {
@@ -141,5 +147,33 @@ describe('troop badges', () => {
   it('has a badge for every troop type, and nothing else', () => {
     expect(TROOP_BADGE_TYPES).toHaveLength(12);
     expect(fs.readdirSync(BADGE_DIR).sort()).toEqual(TROOP_BADGE_TYPES.map(troopBadgeFile).sort());
+  });
+});
+
+describe(cityGroundFile.name, () => {
+  it('names the file after the ground', () => {
+    expect(cityGroundFile('plot')).toBe('plot.png');
+  });
+});
+
+describe(cityWallFile.name, () => {
+  it('names the file after the band and the piece', () => {
+    expect(cityWallFile(4, 'gate')).toBe('walls-4-gate.png');
+  });
+});
+
+describe(grandTownHallFile.name, () => {
+  it('names the grand Town Hall after its band', () => {
+    expect(grandTownHallFile(3)).toBe('town-hall-3.png');
+  });
+});
+
+describe('city view art', () => {
+  it('has the ground, and every wall piece and the grand Town Hall for every band, and nothing else', () => {
+    const expected = [
+      ...CITY_GROUNDS.map(cityGroundFile),
+      ...ART_BANDS.flatMap(({ band }) => [...CITY_WALL_PIECES.map((piece) => cityWallFile(band, piece)), grandTownHallFile(band)]),
+    ].sort();
+    expect(fs.readdirSync(CITY_DIR).sort()).toEqual(expected);
   });
 });
