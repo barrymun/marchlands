@@ -12,6 +12,7 @@ import { RES } from '@/components/send-army-dialog/send-form/constants';
 import { ScoutNote } from '@/components/send-army-dialog/send-form/scout-note/scout-note';
 import { capTroops, defaultHero } from '@/components/send-army-dialog/send-form/utils';
 import type { SendTarget } from '@/components/send-army-dialog/types';
+import { TroopBadge } from '@/components/troop-badge/troop-badge';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -178,8 +179,11 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
           {scouting && <ScoutNote kind={target.kind} />}
           {available.map(([id, key]) => (
             <div key={key} className="flex items-center justify-between gap-2 text-sm">
-              <span>
-                {troopName(Number(id))} <span className="text-muted-foreground">({fmtExact(city.troop[key])})</span>
+              <span className="flex items-center gap-2">
+                <TroopBadge id={Number(id)} />
+                <span>
+                  {troopName(Number(id))} <span className="text-muted-foreground">({fmtExact(city.troop[key])})</span>
+                </span>
               </span>
               <div className="flex items-center gap-1">
                 <Input

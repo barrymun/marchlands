@@ -14,6 +14,8 @@ import {
   resourceArtFile,
   TILE_ART_TYPES,
   tileArtFile,
+  TROOP_BADGE_TYPES,
+  troopBadgeFile,
   UNIT_ART_TYPES,
   unitArtFile,
   WALL_PIECES,
@@ -25,6 +27,7 @@ const TILE_DIR = path.resolve(import.meta.dirname, '../assets/tiles');
 const WALL_DIR = path.resolve(import.meta.dirname, '../assets/walls');
 const UNIT_DIR = path.resolve(import.meta.dirname, '../assets/units');
 const RESOURCE_DIR = path.resolve(import.meta.dirname, '../assets/resources');
+const BADGE_DIR = path.resolve(import.meta.dirname, '../assets/badges');
 
 describe(artBand.name, () => {
   it('changes the art at levels 4, 7 and 10', () => {
@@ -125,5 +128,18 @@ describe('resource icons', () => {
   it('has an icon for gold and every basic resource, and nothing else', () => {
     expect([...RESOURCE_ART_KEYS].sort()).toEqual(['gold', ...BASIC_RESOURCES].sort());
     expect(fs.readdirSync(RESOURCE_DIR).sort()).toEqual(RESOURCE_ART_KEYS.map(resourceArtFile).sort());
+  });
+});
+
+describe(troopBadgeFile.name, () => {
+  it('names the badge after the troop type, like its sprite', () => {
+    expect(troopBadgeFile(TroopType.CATAPHRACT)).toBe('cataphract.png');
+  });
+});
+
+describe('troop badges', () => {
+  it('has a badge for every troop type, and nothing else', () => {
+    expect(TROOP_BADGE_TYPES).toHaveLength(12);
+    expect(fs.readdirSync(BADGE_DIR).sort()).toEqual(TROOP_BADGE_TYPES.map(troopBadgeFile).sort());
   });
 });

@@ -4,8 +4,8 @@
 // Buildings (tools/art/buildings/) go to client/web/src/assets/buildings/, valley tiles (tools/art/tiles.ts) to
 // client/web/src/assets/tiles/, as <name>-<band>.png for each art band, the walls' frame pieces
 // (tools/art/walls.ts) to client/web/src/assets/walls/, and the troops (tools/art/troops.ts) and fortifications
-// (tools/art/fortifications.ts) to client/web/src/assets/units/ as <name>.png, and the resource icons
-// (tools/art/resources.ts) to client/web/src/assets/resources/.
+// (tools/art/fortifications.ts) to client/web/src/assets/units/ as <name>.png, the troop badges (tools/art/badges.ts)
+// to client/web/src/assets/badges/, and the resource icons (tools/art/resources.ts) to client/web/src/assets/resources/.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,6 +13,7 @@ import { parseArgs } from 'node:util';
 
 import { BuildingType } from '@marchlands/core';
 
+import { BADGE_DRAWINGS } from './badges.ts';
 import { academy } from './buildings/academy.ts';
 import { barracks } from './buildings/barracks.ts';
 import { beaconTower } from './buildings/beacon-tower.ts';
@@ -39,7 +40,16 @@ import { RESOURCE_DRAWINGS } from './resources.ts';
 import { TILE_DRAWINGS } from './tiles.ts';
 import { TROOP_DRAWINGS } from './troops.ts';
 import { WALL_DRAWINGS } from './walls.ts';
-import { ART_BANDS, buildingArtFile, resourceArtFile, tileArtFile, unitArtFile, WALL_PIECES, wallArtFile } from '../../client/web/src/lib/game-art.ts';
+import {
+  ART_BANDS,
+  buildingArtFile,
+  resourceArtFile,
+  tileArtFile,
+  troopBadgeFile,
+  unitArtFile,
+  WALL_PIECES,
+  wallArtFile,
+} from '../../client/web/src/lib/game-art.ts';
 import type { ResourceKey } from '../../client/web/src/lib/game-art.ts';
 
 const ASSETS = path.resolve(import.meta.dirname, '../../client/web/src/assets');
@@ -105,4 +115,12 @@ for (const [key, drawing] of Object.entries(RESOURCE_DRAWINGS) as [ResourceKey, 
   if (wanted.size && !wanted.has(key)) continue;
   fs.writeFileSync(path.join(ASSETS, 'resources', resourceArtFile(key)), drawing().png());
   console.log(`drew resources/${resourceArtFile(key)}`);
+}
+
+fs.mkdirSync(path.join(ASSETS, 'badges'), { recursive: true });
+for (const [type, drawing] of Object.entries(BADGE_DRAWINGS)) {
+  const file = troopBadgeFile(Number(type));
+  if (wanted.size && !wanted.has(file.replace(/\.png$/, ''))) continue;
+  fs.writeFileSync(path.join(ASSETS, 'badges', file), drawing().png());
+  console.log(`drew badges/${file}`);
 }

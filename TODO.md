@@ -34,6 +34,7 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
   - Buildings: all 19 buildings are drawn for every level band (isometric pixel art, `tools/art/buildings/`), shown as square slot cards with the level in the corner and the name on hover. The walls are a pixel-art frame round the buildings inside the walls, from a wooden palisade to a fortress, with the Town Hall centre-top and the gate opening the Walls.
   - Map tiles: the seven valley types are drawn for every level band (`client/web/src/assets/tiles/`, `tools/art/tiles.ts`), ready for the map rework below; still to draw: player cities and barbarian cities. Show them through a sprite sheet, since the map shows about 250 tiles at once.
   - Troops and fortifications: all 12 troops and 5 fortifications are drawn (32×32, side on, `tools/art/troops.ts` and `tools/art/fortifications.ts`) and shown in the Military tab's garrison and defences tables and training cards.
+  - Troop badges: a 24×24 badge per troop (`tools/art/badges.ts`) in the garrison table and the send-army dialog.
   - Resource icons: gold, food, lumber, stone and iron are drawn (16×16, `tools/art/resources.ts`) and shown in the resource bar in place of the Lucide icons.
   - Revisit an image service (imgproxy behind nginx's cache, or a CDN) if art changes need to ship without a redeploy, sizes must vary freely (a zoomable map), or images are combined per player (a city with its alliance flag).
 - [ ] **Rework the map's UI** (`client/web/src/components/map-panel/`).

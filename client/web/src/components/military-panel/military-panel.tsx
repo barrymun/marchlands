@@ -10,6 +10,7 @@ import { InjuredCard } from '@/components/military-panel/injured-card/injured-ca
 import { Production } from '@/components/military-panel/production/production';
 import { UnitIcon } from '@/components/military-panel/unit-icon/unit-icon';
 import { UnitName } from '@/components/military-panel/unit-name/unit-name';
+import { TroopBadge } from '@/components/troop-badge/troop-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -48,7 +49,7 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
                   <TableRow key={u.id} className={u.count || u.injured ? '' : 'text-muted-foreground'}>
                     <TableCell className="py-1">
                       <div className="flex items-center gap-2">
-                        <UnitIcon id={u.id} />
+                        <TroopBadge id={u.id} />
                         <UnitName id={u.id} />
                       </div>
                     </TableCell>

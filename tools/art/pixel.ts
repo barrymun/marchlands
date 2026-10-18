@@ -114,6 +114,8 @@ export const PALETTE = {
   hoodDark: [60, 56, 54],
   bannerHi: [214, 76, 64],
   horseHi: [160, 106, 66],
+  blueHi: [112, 154, 208],
+  blueEdge: [34, 56, 96],
 } as const satisfies Record<string, Rgb>;
 
 export type Colour = keyof typeof PALETTE;
