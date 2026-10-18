@@ -1,7 +1,7 @@
 // Game art (AGENTS.md, Client, Game art): one pixel-art sprite per building type and level band in
 // src/assets/buildings/, the walls' frame pieces per level band in src/assets/walls/, one sprite per valley type and
-// level band in src/assets/tiles/, and one sprite per troop and fortification type in src/assets/units/. The art scripts in tools/art
-// import this file, so it uses no `@/` imports.
+// level band in src/assets/tiles/, one sprite per troop and fortification type in src/assets/units/, and one icon
+// per resource in src/assets/resources/. The art scripts in tools/art import this file, so it uses no `@/` imports.
 
 import { buildingConfig, BuildingType, FortType, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
 
@@ -63,4 +63,13 @@ const UNIT_SLUGS = new Map<number, string>(
 /** A troop's or fortification's sprite file name: `cataphract.png`, `archer-tower.png`. */
 export function unitArtFile(typeId: number): string {
   return `${UNIT_SLUGS.get(typeId) ?? `unit-${typeId}`}.png`;
+}
+
+/** The resources with an icon, as the resource bar lists them. */
+export const RESOURCE_ART_KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
+export type ResourceKey = (typeof RESOURCE_ART_KEYS)[number];
+
+/** A resource icon's file name: `wood.png`. */
+export function resourceArtFile(key: ResourceKey): string {
+  return `${key}.png`;
 }

@@ -1,10 +1,11 @@
 // Draws the sprites that are made in code, replacing any placeholders:
-//   npm run art:draw                    every drawn building, map tile, troop and fortification
+//   npm run art:draw                    every drawn building, map tile, unit and resource icon
 //   npm run art:draw -- cottage forest  only the ones named (file names as in client/web/src/lib/game-art.ts; `walls`)
 // Buildings (tools/art/buildings/) go to client/web/src/assets/buildings/, valley tiles (tools/art/tiles.ts) to
 // client/web/src/assets/tiles/, as <name>-<band>.png for each art band, the walls' frame pieces
 // (tools/art/walls.ts) to client/web/src/assets/walls/, and the troops (tools/art/troops.ts) and fortifications
-// (tools/art/fortifications.ts) to client/web/src/assets/units/ as <name>.png.
+// (tools/art/fortifications.ts) to client/web/src/assets/units/ as <name>.png, and the resource icons
+// (tools/art/resources.ts) to client/web/src/assets/resources/.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -33,10 +34,13 @@ import { warehouse } from './buildings/warehouse.ts';
 import { workshop } from './buildings/workshop.ts';
 import { FORT_DRAWINGS } from './fortifications.ts';
 import type { IsoCanvas } from './iso.ts';
+import type { PixelCanvas } from './pixel.ts';
+import { RESOURCE_DRAWINGS } from './resources.ts';
 import { TILE_DRAWINGS } from './tiles.ts';
 import { TROOP_DRAWINGS } from './troops.ts';
 import { WALL_DRAWINGS } from './walls.ts';
-import { ART_BANDS, buildingArtFile, tileArtFile, unitArtFile, WALL_PIECES, wallArtFile } from '../../client/web/src/lib/game-art.ts';
+import { ART_BANDS, buildingArtFile, resourceArtFile, tileArtFile, unitArtFile, WALL_PIECES, wallArtFile } from '../../client/web/src/lib/game-art.ts';
+import type { ResourceKey } from '../../client/web/src/lib/game-art.ts';
 
 const ASSETS = path.resolve(import.meta.dirname, '../../client/web/src/assets');
 
@@ -94,4 +98,11 @@ for (const [type, drawing] of Object.entries({ ...TROOP_DRAWINGS, ...FORT_DRAWIN
   if (wanted.size && !wanted.has(file.replace(/\.png$/, ''))) continue;
   fs.writeFileSync(path.join(ASSETS, 'units', file), drawing().png());
   console.log(`drew units/${file}`);
+}
+
+fs.mkdirSync(path.join(ASSETS, 'resources'), { recursive: true });
+for (const [key, drawing] of Object.entries(RESOURCE_DRAWINGS) as [ResourceKey, () => PixelCanvas][]) {
+  if (wanted.size && !wanted.has(key)) continue;
+  fs.writeFileSync(path.join(ASSETS, 'resources', resourceArtFile(key)), drawing().png());
+  console.log(`drew resources/${resourceArtFile(key)}`);
 }

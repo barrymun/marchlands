@@ -3,13 +3,15 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { buildingMaxLevel, BuildingType, FortType, TileType, TroopType } from '@marchlands/core';
+import { BASIC_RESOURCES, buildingMaxLevel, BuildingType, FortType, TileType, TroopType } from '@marchlands/core';
 
 import {
   ART_BANDS,
   artBand,
   BUILDING_ART_TYPES,
   buildingArtFile,
+  RESOURCE_ART_KEYS,
+  resourceArtFile,
   TILE_ART_TYPES,
   tileArtFile,
   UNIT_ART_TYPES,
@@ -22,6 +24,7 @@ const ART_DIR = path.resolve(import.meta.dirname, '../assets/buildings');
 const TILE_DIR = path.resolve(import.meta.dirname, '../assets/tiles');
 const WALL_DIR = path.resolve(import.meta.dirname, '../assets/walls');
 const UNIT_DIR = path.resolve(import.meta.dirname, '../assets/units');
+const RESOURCE_DIR = path.resolve(import.meta.dirname, '../assets/resources');
 
 describe(artBand.name, () => {
   it('changes the art at levels 4, 7 and 10', () => {
@@ -109,5 +112,18 @@ describe('unit sprites', () => {
   it('has a sprite for every troop and fortification type, and nothing else', () => {
     expect(UNIT_ART_TYPES).toHaveLength(17);
     expect(fs.readdirSync(UNIT_DIR).sort()).toEqual(UNIT_ART_TYPES.map(unitArtFile).sort());
+  });
+});
+
+describe(resourceArtFile.name, () => {
+  it('names the file after the resource key', () => {
+    expect(resourceArtFile('wood')).toBe('wood.png');
+  });
+});
+
+describe('resource icons', () => {
+  it('has an icon for gold and every basic resource, and nothing else', () => {
+    expect([...RESOURCE_ART_KEYS].sort()).toEqual(['gold', ...BASIC_RESOURCES].sort());
+    expect(fs.readdirSync(RESOURCE_DIR).sort()).toEqual(RESOURCE_ART_KEYS.map(resourceArtFile).sort());
   });
 });
