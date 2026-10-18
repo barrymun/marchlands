@@ -36,7 +36,15 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
   - Troops and fortifications: all 12 troops and 5 fortifications are drawn (32×32, side on, `tools/art/troops.ts` and `tools/art/fortifications.ts`) and shown in the Military panel's garrison and defences tables and training cards.
   - Troop badges: a 24×24 badge per troop (`tools/art/badges.ts`) in the garrison table and the send-army dialog.
   - Resource icons: gold, food, lumber, stone and iron are drawn (16×16, `tools/art/resources.ts`) and shown in the resource bar in place of the Lucide icons.
+  - Still to draw: hero gear. The 14 pieces (weapon, shield, mount, necklace, charm, ring, head, shoulder, chest, back, gauntlets, belt, legs, feet; `GEAR_PIECES` in `shared/core/src/gear.ts`) have no art: one sprite per piece, richer with the level band like the buildings, the stars shown over it rather than drawn in. Shown in the Heroes panel's gear (`components/hero-gear/`) and the hero items dialog.
+  - Still to draw: items. The 53 items (`ItemId`, `shared/core/src/item-ids.ts`) have no art: one icon each, drawn side on like the troops (`tools/art/`, a `PixelCanvas`); medals by level can share a drawing with the level marked. Shown in the Items panel and wherever an item is offered or used (hero items, speed-ups, boosts).
   - Revisit an image service (imgproxy behind nginx's cache, or a CDN) if art changes need to ship without a redeploy, sizes must vary freely (a zoomable map), or images are combined per player (a city with its alliance flag).
+- [ ] **Chat in the client.**
+  - Now: the server has the world, alliance and beginner channels and whispers (`/api/v1/chat/…`, see [docs/api-endpoints.md](docs/api-endpoints.md), chat) and pushes new messages (`PushCmd.CHANNEL_CHAT_MESSAGE`, `ALLIANCE_CHAT_MESSAGE`, `PRIVATE_CHAT_MESSAGE`), but the client shows no chat and handles none of those pushes.
+  - Plan: a chat in the desktop bottom bar (the space between the player and the menu was left for it, as in the original), and a Chat screen or sheet on phones: channels as tabs, whispers, live through the WebSocket push, muted players respected.
+- [ ] **Mail in the client.**
+  - Now: the server has an inbox, system mail and sent mail, reading, sending, deleting and unread counts (`/api/v1/mail/…`, alliance circulars at `/api/v1/alliance/mail`) and pushes new mail (`PushCmd.NEW_MAIL`), but the client shows no mail.
+  - Plan: a Mail page (folders, reading, writing and replying to a player, deleting) in the menu beside Reports, with the unread count on its menu button.
 
 ## Done
 
