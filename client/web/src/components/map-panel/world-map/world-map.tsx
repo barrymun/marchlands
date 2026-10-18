@@ -143,7 +143,7 @@ export function WorldMap({
       tabIndex={0}
       role="application"
       aria-label={t('aria')}
-      className="relative h-[min(65vh,640px)] min-h-72 w-full cursor-grab touch-none overflow-hidden rounded-md border bg-[#7c9c4c] outline-none select-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+      className="relative h-[min(72vh,900px)] min-h-72 w-full cursor-grab touch-none overflow-hidden rounded-md border bg-[#7c9c4c] outline-none select-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
         drag.current = { x: e.clientX, y: e.clientY, from: center, moved: false };

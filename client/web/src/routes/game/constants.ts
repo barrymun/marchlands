@@ -3,8 +3,11 @@ import { lazyComponent } from '@/lib/lazy';
 
 const tab = <const Id extends 'buildings' | 'military' | 'heroes' | 'research' | 'items' | 'market' | 'armies' | 'reports' | 'map' | 'flows' | 'stats'>(
   id: Id,
+  wide = false,
 ) => ({
   id,
+  /** whether the tab uses the window's whole width (the town, the map) rather than a readable one (TAB_WIDTH) */
+  wide,
   /** in the current locale */
   get label() {
     return i18n.t(`game:tabs.${id}`);
@@ -12,7 +15,7 @@ const tab = <const Id extends 'buildings' | 'military' | 'heroes' | 'research' |
 });
 
 export const TABS = [
-  tab('buildings'),
+  tab('buildings', true),
   tab('military'),
   tab('heroes'),
   tab('research'),
@@ -20,10 +23,13 @@ export const TABS = [
   tab('market'),
   tab('armies'),
   tab('reports'),
-  tab('map'),
+  tab('map', true),
   tab('flows'),
   tab('stats'),
 ] as const;
+
+/** The width a tab's content keeps unless it is wide: lines and tables stay readable on a big screen. */
+export const TAB_WIDTH = 'max-w-7xl';
 
 // Every tab but the city's buildings (the one a visit starts on) loads its code on first use; usePreloadPanels
 // fetches them all once the page is up, so switching tabs normally finds them loaded.

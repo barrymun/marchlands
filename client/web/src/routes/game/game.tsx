@@ -40,6 +40,7 @@ import {
   ReportsPanel,
   ResearchPanel,
   StatsPanel,
+  TAB_WIDTH,
   TABS,
 } from '@/routes/game/constants';
 import { usePreloadPanels } from '@/routes/game/hooks';
@@ -75,7 +76,7 @@ export function GamePage() {
       {/* the tab bar sits in the sticky header, so it stays in view while the page scrolls */}
       <Tabs value={tab} onValueChange={(v) => navigate(`/cities/${cityId}/${v}`)} className="contents">
         <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:pt-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:pt-3 lg:px-6">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="max-w-[60vw] min-w-0 gap-1 px-2 font-semibold sm:max-w-none">
@@ -168,10 +169,10 @@ export function GamePage() {
               </DropdownMenu>
             </div>
           </div>
-          <div className="mx-auto max-w-6xl px-4 pb-2 sm:pt-1 sm:pb-3">
+          <div className="px-4 pb-2 sm:pt-1 sm:pb-3 lg:px-6">
             {city.data ? <ResourceBar resource={city.data.resource} mayor={mayor} /> : <Skeleton className="h-5 w-2/3" />}
           </div>
-          <nav className="mx-auto max-w-6xl px-4 pb-2 sm:pb-3" aria-label={t('cityTabs')}>
+          <nav className="px-4 pb-2 sm:pb-3 lg:px-6" aria-label={t('cityTabs')}>
             <TabsList className="max-w-full justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {TABS.map((x) => (
                 <TabsTrigger key={x.id} value={x.id} className="gap-1.5">
@@ -182,8 +183,9 @@ export function GamePage() {
             </TabsList>
           </nav>
         </header>
-        {/* bottom padding leaves room for the floating activity dock */}
-        <main className="mx-auto max-w-6xl p-4 pb-24">
+        {/* the header runs the window's whole width; the town and the map do too, the other tabs keep a readable width.
+            Bottom padding leaves room for the floating activity dock */}
+        <main className={cn('mx-auto p-4 pb-24 lg:px-6', TABS.find((x) => x.id === tab)?.wide ? 'max-w-none' : TAB_WIDTH)}>
           {city.error && <p className="text-sm text-destructive">{errorMessage(city.error)}</p>}
           {city.isPending && <Skeleton className="h-96" />}
           {city.data && (

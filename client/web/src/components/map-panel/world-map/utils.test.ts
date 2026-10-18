@@ -181,10 +181,11 @@ describe(zoomsFor.name, () => {
 });
 
 describe(startZoom.name, () => {
-  it('opens at the largest zoom that still shows five tiles across', () => {
+  it('opens at the largest zoom that still shows six tiles across', () => {
+    expect(startZoom(1500, 1)).toBe(3);
     expect(startZoom(1200, 2)).toBe(3);
-    expect(startZoom(750, 1)).toBe(2);
-    expect(startZoom(900, 2)).toBe(2.5);
+    expect(startZoom(900, 2)).toBe(2);
+    expect(startZoom(750, 1)).toBe(1);
   });
 
   it('opens at the smallest zoom on a narrow view', () => {

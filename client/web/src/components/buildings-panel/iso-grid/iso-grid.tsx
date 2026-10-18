@@ -6,7 +6,7 @@ import type { BuildingBean } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
 
 import { BUILDING_ART, CITY_ART } from '@/components/buildings-panel/constants';
-import { TILE_H, TILE_W } from '@/components/buildings-panel/iso-grid/constants';
+import { HEADROOM, TILE_H, TILE_W } from '@/components/buildings-panel/iso-grid/constants';
 import type { IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
 import { buildingSprites, depthOf, gridBounds, hitTest, markerOf, spriteBox, tilePoint } from '@/components/buildings-panel/iso-grid/utils';
 import { Countdown } from '@/components/countdown/countdown';
@@ -18,7 +18,8 @@ import { cn } from '@/lib/utils';
 /**
  * Building slots laid out as an isometric diamond, as wide as its card: the ground, the buildings standing on it and
  * any `extra` sprites (the walls) are drawn back to front on one canvas at the art's own size, which the browser then
- * scales to the card's width, pixels kept square and sharp; the height follows. Everything over the art (level numbers,
+ * scales to the card's width, pixels kept square and sharp; the height follows, up to the screen's height below the
+ * header (HEADROOM), past which the height decides the width instead. Everything over the art (level numbers,
  * the hover outline and label, the buttons) is placed in percentages, so it follows any width. A click picks the
  * building whose pixels are under the pointer, else the tile; every slot is also a focusable button, so the keyboard
  * reaches them all. Each building's level shows small on its tile's front corner (on the grass, not over the building),
@@ -114,7 +115,9 @@ export function IsoGrid({
 
   return (
     <div
-      className={cn('relative w-full', hover != null && 'cursor-pointer')}
+      className={cn('relative mx-auto', hover != null && 'cursor-pointer')}
+      // as wide as the card, but never taller than the screen below the header: on a wide screen the height decides
+      style={{ width: `min(100%, calc((100svh - ${HEADROOM}) * ${W / H}))` }}
       onPointerMove={(e) => setHover(pick(e) ?? null)}
       onPointerLeave={() => setHover(null)}
       onClick={(e) => {

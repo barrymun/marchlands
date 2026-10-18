@@ -11,7 +11,7 @@ export const CHUNK = 21;
 export const ZOOMS = [1, 1.5, 2, 2.5, 3, 4] as const;
 
 /** The map opens at the largest zoom that still shows at least this many tiles across (about the original's view). */
-export const MIN_TILES_ACROSS = 5;
+export const MIN_TILES_ACROSS = 6;
 
 /** How many tiles an arrow button moves the map: diagonally in tile terms, straight up, down or across on screen. */
 export const PAN_STEP = 4;
