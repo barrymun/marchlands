@@ -1,12 +1,17 @@
 {
   "title": "マップ ({{x}}, {{y}})",
   "pan": {
-    "west": "西",
-    "north": "北",
-    "south": "南",
-    "east": "東",
-    "home": "自都市"
+    "left": "左へ移動",
+    "up": "上へ移動",
+    "down": "下へ移動",
+    "right": "右へ移動",
+    "home": "この都市に戻る"
   },
+  "zoom": {
+    "in": "拡大",
+    "out": "縮小"
+  },
+  "aria": "ワールドマップ：ドラッグで見回し、矢印キーで移動、+ と - でズーム、Enter で中央のタイルを選択",
   "relations": {
     "friend": "同盟・友好",
     "enemy": "敵対",
@@ -23,8 +28,7 @@
     "heldByYou": "自分の都市 {{city}} が保有",
     "heldBy": "{{city}}（{{player}}）が保有",
     "heldByAlliance": "{{city}}（{{player}}、{{alliance}}）が保有",
-    "foreignValley": "{{relation}}の領地",
-    "yourValley": "自分の領地"
+    "loading": "（{{x}},{{y}}）読み込み中"
   },
   "info": {
     "selectTile": "タイルを選択",

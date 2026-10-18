@@ -32,12 +32,15 @@ export function buildingArtFile(typeId: number, band: number): string {
   return `${SLUGS.get(typeId) ?? `building-${typeId}`}-${band}.png`;
 }
 
-/** Valley types with tile art: forest, desert, hill, swamp, grassland, lake and flat land. */
-export const TILE_ART_TYPES: readonly number[] = VALLEY_TYPES;
+/**
+ * Map tile types with art: the valleys (forest, desert, hill, swamp, grassland, lake and flat land), players' castles and
+ * barbarian camps.
+ */
+export const TILE_ART_TYPES: readonly number[] = [...VALLEY_TYPES, TileType.CASTLE, TileType.NPC];
 
 const TILE_SLUGS = new Map<number, string>(Object.entries(TileType).map(([key, id]) => [id, key.toLowerCase().replaceAll('_', '-')]));
 
-/** The tile sprite's file name for a valley type and band: `forest-4.png`. */
+/** The tile sprite's file name for a tile type and band: `forest-4.png`, `castle-2.png`, `npc-3.png`. */
 export function tileArtFile(type: number, band: number): string {
   return `${TILE_SLUGS.get(type) ?? `tile-${type}`}-${band}.png`;
 }

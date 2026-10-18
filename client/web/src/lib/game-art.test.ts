@@ -85,8 +85,9 @@ describe(tileArtFile.name, () => {
 });
 
 describe('tile sprites', () => {
-  it('has a sprite for every valley type and band, and nothing else', () => {
-    expect(TILE_ART_TYPES).not.toContain(TileType.CASTLE);
+  it('has a sprite for every valley type, castles and barbarian camps, at every band, and nothing else', () => {
+    expect(TILE_ART_TYPES).toContain(TileType.CASTLE);
+    expect(TILE_ART_TYPES).toContain(TileType.NPC);
     const expected = TILE_ART_TYPES.flatMap((t) => ART_BANDS.map(({ band }) => tileArtFile(t, band))).sort();
     expect(fs.readdirSync(TILE_DIR).sort()).toEqual(expected);
   });

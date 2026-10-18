@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Eye } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,23 +8,24 @@ import {
   deleteValleysByTileIdMutation,
   getArmiesQueryKey,
   getCitiesByCityIdQueryKey,
-  getMapOptions,
   getMapQueryKey,
   getMapTilesByTileIdOptions,
   getMapTilesByTileIdQueryKey,
   getPlayerQueryKey,
-  type MapCastle,
   postValleysUpgradeMutation,
 } from '@marchlands/api-client';
-import { Mission, Relation, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@marchlands/core';
+import { Mission, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus } from '@marchlands/core';
 
 import { CityDialog } from '@/components/city-dialog/city-dialog';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add-to-farm-button';
-import { R, RELATION_STYLE, TILE_STYLE } from '@/components/map-panel/constants';
+import { RELATION_STYLE } from '@/components/map-panel/constants';
 import { MedalOdds } from '@/components/map-panel/medal-odds/medal-odds';
-import { placeName, relationGroup } from '@/components/map-panel/utils';
+import { placeName } from '@/components/map-panel/utils';
 import { ValleyUpgrade } from '@/components/map-panel/valley-upgrade/valley-upgrade';
+import type { PanDirection } from '@/components/map-panel/world-map/types';
+import { panStep } from '@/components/map-panel/world-map/utils';
+import { WorldMap } from '@/components/map-panel/world-map/world-map';
 import { SendArmyDialog } from '@/components/send-army-dialog/send-army-dialog';
 import type { SendTarget } from '@/components/send-army-dialog/types';
 import { Badge } from '@/components/ui/badge';
@@ -38,27 +39,21 @@ import { cn } from '@/lib/utils';
 
 export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number }) {
   const { t } = useTranslation(['map-panel', 'common']);
+  // the tile at the middle of the map (fractional while dragging, and allowed past the edge, which the map wraps)
   const [center, setCenter] = useState({ x: city.x, y: city.y });
   const [selected, setSelected] = useState<number | null>(null);
   const [target, setTarget] = useState<SendTarget | null>(null);
   const [moveTo, setMoveTo] = useState<{ x: number; y: number } | null>(null);
   const wrap = (v: number) => ((v % mapSize) + mapSize) % mapSize;
-  const view = useQuery({
-    ...getMapOptions({ query: { x1: center.x - R, y1: center.y - R, x2: center.x + R, y2: center.y + R } }),
-    placeholderData: keepPreviousData,
-  });
   const info = useQuery({
     ...getMapTilesByTileIdOptions({ path: { tileId: selected! } }),
     enabled: selected != null,
   });
-  const castles = new Map<string, MapCastle>((view.data?.castles ?? []).map((c) => [`${c.x},${c.y}`, c]));
   // valleys held by this city, then by the lord's other cities
   const player = usePlayer();
   const owned = new Map<number, { cityName: string; here: boolean }>();
   for (const c of player.data?.castles ?? []) if (c.id !== city.id) for (const v of c.fields) owned.set(v.id, { cityName: c.name, here: false });
   for (const v of city.fields) owned.set(v.id, { cityName: city.name, here: true });
-  // other lords' valleys in view, coloured by relation
-  const others = new Map((view.data?.valleys ?? []).filter((v) => !owned.has(v.id) && v.relation !== Relation.SELF).map((v) => [v.id, v]));
   const release = useCommand(
     deleteValleysByTileIdMutation(),
     () => [
@@ -79,16 +74,10 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     setCenter({ x, y });
     setSelected(y * mapSize + x);
   };
-  const pan = (dx: number, dy: number) => setCenter((c) => ({ x: wrap(c.x + dx), y: wrap(c.y + dy) }));
-
-  const tiles: { x: number; y: number; type: number; level: number }[] = [];
-  if (view.data) {
-    const { x1, y1, x2, mapStr } = view.data;
-    const w = x2 - x1 + 1;
-    for (let i = 0; i * 2 < mapStr.length; i++) {
-      tiles.push({ x: wrap(x1 + (i % w)), y: wrap(y1 + Math.floor(i / w)), type: parseInt(mapStr[i * 2], 16), level: parseInt(mapStr[i * 2 + 1], 16) });
-    }
-  }
+  const pan = (dir: PanDirection) => {
+    const { dx, dy } = panStep(dir);
+    setCenter((c) => ({ x: c.x + dx, y: c.y + dy }));
+  };
 
   const scouts = city.troop.scouter ?? 0;
   /** what can be scouted on a tile (empty land has nothing to see) */
@@ -105,21 +94,21 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   };
 
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-[auto_minmax(0,1fr)]">
+    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-          <CardTitle className="text-sm tabular-nums">{t('title', { x: center.x, y: center.y })}</CardTitle>
+          <CardTitle className="text-sm tabular-nums">{t('title', { x: wrap(Math.round(center.x)), y: wrap(Math.round(center.y)) })}</CardTitle>
           <div className="flex gap-1">
-            <Button size="icon-xs" variant="outline" onClick={() => pan(-R, 0)} aria-label={t('pan.west')}>
+            <Button size="icon-xs" variant="outline" onClick={() => pan('left')} aria-label={t('pan.left')}>
               <ArrowLeft />
             </Button>
-            <Button size="icon-xs" variant="outline" onClick={() => pan(0, -R)} aria-label={t('pan.north')}>
+            <Button size="icon-xs" variant="outline" onClick={() => pan('up')} aria-label={t('pan.up')}>
               <ArrowUp />
             </Button>
-            <Button size="icon-xs" variant="outline" onClick={() => pan(0, R)} aria-label={t('pan.south')}>
+            <Button size="icon-xs" variant="outline" onClick={() => pan('down')} aria-label={t('pan.down')}>
               <ArrowDown />
             </Button>
-            <Button size="icon-xs" variant="outline" onClick={() => pan(R, 0)} aria-label={t('pan.east')}>
+            <Button size="icon-xs" variant="outline" onClick={() => pan('right')} aria-label={t('pan.right')}>
               <ArrowRight />
             </Button>
             <Button size="icon-xs" variant="outline" onClick={() => setCenter({ x: city.x, y: city.y })} aria-label={t('pan.home')}>
@@ -128,62 +117,15 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-[repeat(15,minmax(0,1fr))] gap-px overflow-hidden rounded-md border bg-border" style={{ width: 'min(90vw, 600px)' }}>
-            {tiles.map((tile) => {
-              const castle = castles.get(`${tile.x},${tile.y}`);
-              const style = TILE_STYLE[tile.type] ?? TILE_STYLE[TileType.FLAT];
-              const id = tile.y * mapSize + tile.x;
-              const home = tile.x === city.x && tile.y === city.y;
-              const held = owned.get(id);
-              const foreign = others.get(id);
-              const fStyle = foreign ? RELATION_STYLE[relationGroup(foreign.relation)] : null;
-              return (
-                <button
-                  key={id}
-                  title={
-                    castle
-                      ? castle.userName
-                        ? t('tile.castle', { name: castle.name ?? '', player: castle.userName })
-                        : (castle.name ?? tileName(TileType.NPC))
-                      : [
-                          t('tile.summary', { type: tileName(tile.type), level: tile.level, x: tile.x, y: tile.y }),
-                          held && t('tile.heldByYou', { city: held.cityName }),
-                          foreign &&
-                            (foreign.allianceName
-                              ? t('tile.heldByAlliance', { city: foreign.cityName, player: foreign.userName, alliance: foreign.allianceName })
-                              : t('tile.heldBy', { city: foreign.cityName, player: foreign.userName })),
-                          foreign && RELATION_STYLE[relationGroup(foreign.relation)].inline,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')
-                  }
-                  onClick={() => setSelected(id)}
-                  className={cn(
-                    'relative flex aspect-square items-center justify-center text-[10px] font-medium leading-none',
-                    style.className,
-                    held && (held.here ? 'ring-[3px] ring-fuchsia-500 ring-inset' : 'ring-2 ring-violet-300 ring-inset'),
-                    fStyle?.ring,
-                    home && 'ring-2 ring-amber-400 ring-inset',
-                    selected === id && 'ring-2 ring-primary ring-inset',
-                  )}
-                >
-                  {tile.type === TileType.FLAT ? '' : tile.level}
-                  {fStyle && (
-                    <span
-                      aria-label={t('tile.foreignValley', { relation: fStyle.label })}
-                      className={cn('absolute top-0.5 right-0.5 size-1.5 rounded-full ring-1 ring-white', fStyle.dot)}
-                    />
-                  )}
-                  {held && (
-                    <span
-                      aria-label={t('tile.yourValley')}
-                      className={cn('absolute top-0.5 right-0.5 size-1.5 rounded-full ring-1 ring-white', held.here ? 'bg-fuchsia-500' : 'bg-violet-300')}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          <WorldMap
+            center={center}
+            onCenter={setCenter}
+            mapSize={mapSize}
+            selected={selected}
+            onSelect={setSelected}
+            home={{ x: city.x, y: city.y }}
+            owned={owned}
+          />
         </CardContent>
       </Card>
       <div className="grid content-start gap-4">
@@ -280,11 +222,6 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
               </>
             )}
             <div className="mt-2 flex flex-wrap gap-1">
-              {Object.entries(TILE_STYLE).map(([type, s]) => (
-                <span key={type} className={cn('rounded px-1.5 py-0.5 text-[10px]', s.className)}>
-                  {tileName(Number(type))}
-                </span>
-              ))}
               <span className="rounded px-1.5 py-0.5 text-[10px] ring-[3px] ring-fuchsia-500 ring-inset">{t('legend.thisCityValleys')}</span>
               <span className="rounded px-1.5 py-0.5 text-[10px] ring-2 ring-violet-300 ring-inset">{t('legend.otherCitiesValleys')}</span>
               <span className="rounded px-1.5 py-0.5 text-[10px] ring-2 ring-amber-400 ring-inset">{t('legend.thisCity')}</span>

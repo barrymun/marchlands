@@ -1,12 +1,17 @@
 {
   "title": "Map ({{x}}, {{y}})",
   "pan": {
-    "west": "West",
-    "north": "North",
-    "south": "South",
-    "east": "East",
-    "home": "Home"
+    "left": "Move left",
+    "up": "Move up",
+    "down": "Move down",
+    "right": "Move right",
+    "home": "Back to this city"
   },
+  "zoom": {
+    "in": "Zoom in",
+    "out": "Zoom out"
+  },
+  "aria": "World map: drag to look round, arrow keys to move, + and - to zoom, Enter to select the tile in the middle",
   "relations": {
     "friend": "Alliance & allies",
     "enemy": "Enemy",
@@ -23,8 +28,7 @@
     "heldByYou": "held by your city {{city}}",
     "heldBy": "held by {{city}} ({{player}})",
     "heldByAlliance": "held by {{city}} ({{player}}, {{alliance}})",
-    "foreignValley": "{{relation}} valley",
-    "yourValley": "your valley"
+    "loading": "({{x}},{{y}}) loading"
   },
   "info": {
     "selectTile": "Select a tile",

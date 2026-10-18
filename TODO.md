@@ -32,18 +32,17 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
 - [ ] **Images for buildings, troops, gear, items, etc.**
   - Pixel art, committed as small PNGs and served by nginx as hashed static files (AGENTS.md, Client, Game art): no image server needed while the art stays this small.
   - Buildings: all 19 buildings are drawn for every level band (isometric pixel art, `tools/art/buildings/`), shown in an isometric town (the City tab's Town view, as wide as its card: the buildings spaced out on a diamond of grass round a grand 2×2 Town Hall, with the walls, towers and gate round it, and the fields as a second diamond) or as square slot cards (the Grid view, and always on screens narrower than `md`). The walls are a pixel-art frame round the buildings inside the walls, from a wooden palisade to a fortress, with the Town Hall centre-top and the gate opening the Walls.
-  - Map tiles: the seven valley types are drawn for every level band (`client/web/src/assets/tiles/`, `tools/art/tiles.ts`), ready for the map rework below; still to draw: player cities and barbarian cities. Show them through a sprite sheet, since the map shows about 250 tiles at once.
+  - Map tiles: the seven valley types, players' castles and barbarian camps are drawn for every level band (`client/web/src/assets/tiles/`, `tools/art/tiles.ts`) as features standing on the world map's continuous grass.
   - Troops and fortifications: all 12 troops and 5 fortifications are drawn (32×32, side on, `tools/art/troops.ts` and `tools/art/fortifications.ts`) and shown in the Military tab's garrison and defences tables and training cards.
   - Troop badges: a 24×24 badge per troop (`tools/art/badges.ts`) in the garrison table and the send-army dialog.
   - Resource icons: gold, food, lumber, stone and iron are drawn (16×16, `tools/art/resources.ts`) and shown in the resource bar in place of the Lucide icons.
   - Revisit an image service (imgproxy behind nginx's cache, or a CDN) if art changes need to ship without a redeploy, sizes must vary freely (a zoomable map), or images are combined per player (a city with its alliance flag).
-- [ ] **Rework the map's UI** (`client/web/src/components/map-panel/`).
-  - Images for cities and for each valley type.
-  - Move around the map by dragging (and by touch on phones) instead of only the arrow buttons.
 
 ## Done
 
 Newest first, with the date it was finished.
+
+- 2026-10-18: **Rework the map's UI.** The world map is isometric like the original: valleys, castles and barbarian camps drawn as pixel art on continuous grass, on a canvas that fills the view. Drag it (or swipe on a phone) to look round, with the arrows, the home button, zoom and the keyboard as well; it loads the squares coming into view and wraps round the world's edge (AGENTS.md, Client, Game art).
 
 - 2026-10-15: **Rework gear power.** 1 point per piece level (140 for a level 10 set), star N adds N (770 for 10 stars on every piece), a new set bonus of 14 per star level every piece has reached (140), and star costs doubled (2 medals for stars 1-9, 6 Nation Medals for star 10). A maxed hero reaches 1,229. The worker re-applies gear to every hero at start-up. Stars stay capped at 10. See [docs/deviations.md](docs/deviations.md).
 - 2026-10-15: **Refund resources when troops are destroyed.** 90% of the training cost, up to a per-player refund credit that training adds to, for troops and fortifications (injured troops still refund nothing). See [docs/deviations.md](docs/deviations.md).

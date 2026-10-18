@@ -7,10 +7,10 @@ import { BuildingType } from '@marchlands/core';
 
 import { BUILDING_ART, CITY_ART } from '@/components/buildings-panel/constants';
 import { TILE_H, TILE_W } from '@/components/buildings-panel/iso-grid/constants';
-import { opaqueAt, useImages } from '@/components/buildings-panel/iso-grid/hooks';
 import type { IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
 import { buildingSprites, depthOf, gridBounds, hitTest, markerOf, spriteBox, tilePoint } from '@/components/buildings-panel/iso-grid/utils';
 import { Countdown } from '@/components/countdown/countdown';
+import { opaqueAt, useImages } from '@/hooks/use-images';
 import { artBand, buildingArtFile, cityGroundFile, grandTownHallFile } from '@/lib/game-art';
 import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';

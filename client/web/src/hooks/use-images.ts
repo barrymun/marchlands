@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-/** Every sprite image loaded so far, by URL, shared by every grid on the page. */
+/** Every sprite image loaded so far, by URL, shared by every canvas on the page (the isometric town, the world map). */
 const images = new Map<string, HTMLImageElement>();
 
 /** Each loaded sprite's alpha channel by URL, read on the first hit test that needs it. */
