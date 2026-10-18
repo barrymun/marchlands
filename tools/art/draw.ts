@@ -1,9 +1,10 @@
 // Draws the sprites that are made in code, replacing any placeholders:
-//   npm run art:draw                    every drawn building and map tile
+//   npm run art:draw                    every drawn building, map tile, troop and fortification
 //   npm run art:draw -- cottage forest  only the ones named (file names as in client/web/src/lib/game-art.ts; `walls`)
 // Buildings (tools/art/buildings/) go to client/web/src/assets/buildings/, valley tiles (tools/art/tiles.ts) to
-// client/web/src/assets/tiles/, as <name>-<band>.png for each art band, and the walls' frame pieces
-// (tools/art/walls.ts) to client/web/src/assets/walls/.
+// client/web/src/assets/tiles/, as <name>-<band>.png for each art band, the walls' frame pieces
+// (tools/art/walls.ts) to client/web/src/assets/walls/, and the troops (tools/art/troops.ts) and fortifications
+// (tools/art/fortifications.ts) to client/web/src/assets/units/ as <name>.png.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -30,10 +31,12 @@ import { stable } from './buildings/stable.ts';
 import { townHall } from './buildings/town-hall.ts';
 import { warehouse } from './buildings/warehouse.ts';
 import { workshop } from './buildings/workshop.ts';
+import { FORT_DRAWINGS } from './fortifications.ts';
 import type { IsoCanvas } from './iso.ts';
 import { TILE_DRAWINGS } from './tiles.ts';
+import { TROOP_DRAWINGS } from './troops.ts';
 import { WALL_DRAWINGS } from './walls.ts';
-import { ART_BANDS, buildingArtFile, tileArtFile, WALL_PIECES, wallArtFile } from '../../client/web/src/lib/game-art.ts';
+import { ART_BANDS, buildingArtFile, tileArtFile, unitArtFile, WALL_PIECES, wallArtFile } from '../../client/web/src/lib/game-art.ts';
 
 const ASSETS = path.resolve(import.meta.dirname, '../../client/web/src/assets');
 
@@ -83,4 +86,12 @@ if (!wanted.size || wanted.has('walls')) {
   for (const { band } of ART_BANDS)
     for (const piece of WALL_PIECES) fs.writeFileSync(path.join(ASSETS, 'walls', wallArtFile(band, piece)), WALL_DRAWINGS[piece](band).png());
   console.log(`drew walls (${WALL_PIECES.length} pieces × ${ART_BANDS.length} bands)`);
+}
+
+fs.mkdirSync(path.join(ASSETS, 'units'), { recursive: true });
+for (const [type, drawing] of Object.entries({ ...TROOP_DRAWINGS, ...FORT_DRAWINGS })) {
+  const file = unitArtFile(Number(type));
+  if (wanted.size && !wanted.has(file.replace(/\.png$/, ''))) continue;
+  fs.writeFileSync(path.join(ASSETS, 'units', file), drawing().png());
+  console.log(`drew units/${file}`);
 }

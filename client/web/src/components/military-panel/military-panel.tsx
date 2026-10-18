@@ -8,6 +8,7 @@ import { FORT_KEYS, TROOP_KEYS, usedWallSpace, wallCapacity } from '@marchlands/
 import { DismissDialog } from '@/components/military-panel/dismiss-dialog/dismiss-dialog';
 import { InjuredCard } from '@/components/military-panel/injured-card/injured-card';
 import { Production } from '@/components/military-panel/production/production';
+import { UnitIcon } from '@/components/military-panel/unit-icon/unit-icon';
 import { UnitName } from '@/components/military-panel/unit-name/unit-name';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,8 +46,11 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
               <TableBody>
                 {garrison.map((u) => (
                   <TableRow key={u.id} className={u.count || u.injured ? '' : 'text-muted-foreground'}>
-                    <TableCell>
-                      <UnitName id={u.id} />
+                    <TableCell className="py-1">
+                      <div className="flex items-center gap-2">
+                        <UnitIcon id={u.id} />
+                        <UnitName id={u.id} />
+                      </div>
                     </TableCell>
                     <TableCell className="text-right tabular-nums">{fmtExact(u.count)}</TableCell>
                     <TableCell className="text-right tabular-nums">{u.injured ? fmtExact(u.injured) : '—'}</TableCell>
@@ -88,8 +92,11 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
               <TableBody>
                 {forts.map((f) => (
                   <TableRow key={f.id} className={f.count ? '' : 'text-muted-foreground'}>
-                    <TableCell>
-                      <UnitName id={f.id} />
+                    <TableCell className="py-1">
+                      <div className="flex items-center gap-2">
+                        <UnitIcon id={f.id} />
+                        <UnitName id={f.id} />
+                      </div>
                     </TableCell>
                     <TableCell className="text-right tabular-nums">{fmtExact(f.count)}</TableCell>
                     <TableCell className="py-0">

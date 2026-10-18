@@ -3,7 +3,8 @@
 // seam; `corner` (24×24) is a tower and `gate` (32×32) the gatehouse. Band 1 (levels 1-3) is a wooden palisade, band 2
 // low stone walls, band 3 high stone walls with towers, band 4 a crenellated fortress with banners.
 
-import { type Colour, IsoCanvas } from './iso.ts';
+import { IsoCanvas } from './iso.ts';
+import type { Colour } from './pixel.ts';
 import type { WallPiece } from '../../client/web/src/lib/game-art.ts';
 
 type Fill = Colour | ((x: number, y: number) => Colour);

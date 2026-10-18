@@ -1,9 +1,9 @@
 // Game art (AGENTS.md, Client, Game art): one pixel-art sprite per building type and level band in
-// src/assets/buildings/, the walls' frame pieces per level band in src/assets/walls/, and one sprite per valley type
-// and level band in src/assets/tiles/. The art scripts in tools/art
+// src/assets/buildings/, the walls' frame pieces per level band in src/assets/walls/, one sprite per valley type and
+// level band in src/assets/tiles/, and one sprite per troop and fortification type in src/assets/units/. The art scripts in tools/art
 // import this file, so it uses no `@/` imports.
 
-import { buildingConfig, BuildingType, TileType, VALLEY_TYPES } from '@marchlands/core';
+import { buildingConfig, BuildingType, FortType, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
 
 /** The level bands the art changes at (a building's or a valley's level): 1-3, 4-6, 7-9 and 10. */
 export const ART_BANDS = [
@@ -51,4 +51,16 @@ export type WallPiece = (typeof WALL_PIECES)[number];
 /** A wall piece's file name: `walls-4-gate.png`. */
 export function wallArtFile(band: number, piece: WallPiece): string {
   return `walls-${band}-${piece}.png`;
+}
+
+/** Unit types with a sprite: every troop and every fortification (they share one id space). */
+export const UNIT_ART_TYPES: readonly number[] = [...Object.values(TroopType), ...Object.values(FortType)];
+
+const UNIT_SLUGS = new Map<number, string>(
+  [...Object.entries(TroopType), ...Object.entries(FortType)].map(([key, id]) => [id, key.toLowerCase().replaceAll('_', '-')]),
+);
+
+/** A troop's or fortification's sprite file name: `cataphract.png`, `archer-tower.png`. */
+export function unitArtFile(typeId: number): string {
+  return `${UNIT_SLUGS.get(typeId) ?? `unit-${typeId}`}.png`;
 }

@@ -30,6 +30,7 @@ import { TrainDiscountHint } from '@/components/military-panel/production/train-
 import { TrainEstimate } from '@/components/military-panel/production/train-estimate/train-estimate';
 import type { TrainLimit } from '@/components/military-panel/production/types';
 import { limitLabel, maxTrainable } from '@/components/military-panel/production/utils';
+import { UnitIcon } from '@/components/military-panel/unit-icon/unit-icon';
 import { Requirements } from '@/components/requirements/requirements';
 import { TimerBar } from '@/components/timer-bar/timer-bar';
 import { Badge } from '@/components/ui/badge';
@@ -246,23 +247,26 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
               return (
                 <div key={u.typeId} className={cn('grid gap-2 rounded-md border p-3', count > 0 && 'border-primary/60')}>
                   <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <div className="font-medium">{troopName(u.typeId)}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {[
-                          t('production.stats', { attack: u.stats.attack, defense: u.stats.defense, life: u.stats.life }),
-                          !fort &&
-                            t('production.troopStats', {
-                              speed: u.stats.speed,
-                              range: u.stats.range,
-                              load: fmt(Math.floor(u.stats.load * loadFactor)),
-                              upkeep: fmt(BALANCE.upkeepPerRealHour ? u.stats.upkeep : realHourly(u.stats.upkeep)),
-                            }),
-                          fort && u.stats.range > 0 && t('production.range', { range: u.stats.range }),
-                          t('production.population', { n: u.population }),
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')}
+                    <div className="flex items-center gap-3">
+                      <UnitIcon id={u.typeId} size={64} />
+                      <div>
+                        <div className="font-medium">{troopName(u.typeId)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {[
+                            t('production.stats', { attack: u.stats.attack, defense: u.stats.defense, life: u.stats.life }),
+                            !fort &&
+                              t('production.troopStats', {
+                                speed: u.stats.speed,
+                                range: u.stats.range,
+                                load: fmt(Math.floor(u.stats.load * loadFactor)),
+                                upkeep: fmt(BALANCE.upkeepPerRealHour ? u.stats.upkeep : realHourly(u.stats.upkeep)),
+                              }),
+                            fort && u.stats.range > 0 && t('production.range', { range: u.stats.range }),
+                            t('production.population', { n: u.population }),
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

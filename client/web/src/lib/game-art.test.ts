@@ -3,13 +3,25 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { buildingMaxLevel, BuildingType, TileType } from '@marchlands/core';
+import { buildingMaxLevel, BuildingType, FortType, TileType, TroopType } from '@marchlands/core';
 
-import { ART_BANDS, artBand, BUILDING_ART_TYPES, buildingArtFile, TILE_ART_TYPES, tileArtFile, WALL_PIECES, wallArtFile } from '@/lib/game-art';
+import {
+  ART_BANDS,
+  artBand,
+  BUILDING_ART_TYPES,
+  buildingArtFile,
+  TILE_ART_TYPES,
+  tileArtFile,
+  UNIT_ART_TYPES,
+  unitArtFile,
+  WALL_PIECES,
+  wallArtFile,
+} from '@/lib/game-art';
 
 const ART_DIR = path.resolve(import.meta.dirname, '../assets/buildings');
 const TILE_DIR = path.resolve(import.meta.dirname, '../assets/tiles');
 const WALL_DIR = path.resolve(import.meta.dirname, '../assets/walls');
+const UNIT_DIR = path.resolve(import.meta.dirname, '../assets/units');
 
 describe(artBand.name, () => {
   it('changes the art at levels 4, 7 and 10', () => {
@@ -78,5 +90,24 @@ describe('wall sprites', () => {
   it('has every piece for every band, and nothing else', () => {
     const expected = ART_BANDS.flatMap(({ band }) => WALL_PIECES.map((piece) => wallArtFile(band, piece))).sort();
     expect(fs.readdirSync(WALL_DIR).sort()).toEqual(expected);
+  });
+});
+
+describe(unitArtFile.name, () => {
+  it('names the file after the troop or fortification type, in kebab case', () => {
+    expect(unitArtFile(TroopType.WORKER)).toBe('worker.png');
+    expect(unitArtFile(TroopType.CATAPHRACT)).toBe('cataphract.png');
+    expect(unitArtFile(FortType.ARCHER_TOWER)).toBe('archer-tower.png');
+  });
+
+  it('falls back to the type id for a type it does not know', () => {
+    expect(unitArtFile(999)).toBe('unit-999.png');
+  });
+});
+
+describe('unit sprites', () => {
+  it('has a sprite for every troop and fortification type, and nothing else', () => {
+    expect(UNIT_ART_TYPES).toHaveLength(17);
+    expect(fs.readdirSync(UNIT_DIR).sort()).toEqual(UNIT_ART_TYPES.map(unitArtFile).sort());
   });
 });

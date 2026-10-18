@@ -33,10 +33,10 @@ export default [
     gzip: true,
   },
   {
-    // every building sprite (src/assets/buildings, AGENTS.md Client, Game art), loaded as slots show them. PNG is already
-    // compressed, so this counts the files as they are. Sized for the real pixel art, about 3 kB a sprite (the
-    // placeholders are about 0.2 kB)
-    name: 'building art',
+    // every sprite (buildings, walls, map tiles and troops in src/assets, AGENTS.md Client, Game art), loaded as the
+    // screens show them. PNG is already compressed, so this counts the files as they are. Sized for the real pixel art,
+    // about 3 kB a building sprite (a troop is about 0.3 kB)
+    name: 'game art',
     path: 'dist/assets/*.png',
     limit: '250 kB',
     brotli: false,
