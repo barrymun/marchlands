@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 
 import type { CityBean } from '@marchlands/api-client';
+import { isOuterPosition } from '@marchlands/core';
 
 import { BuildingDialog } from '@/components/buildings-panel/building-dialog/building-dialog';
 import { CITY_VIEWS, OUTSIDE, TOWN_VIEW_QUERY } from '@/components/buildings-panel/constants';
@@ -18,7 +19,12 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
-export function BuildingsPanel({ city }: { city: CityBean }) {
+/**
+ * The city's buildings in one area: inside the walls (the Town view) or the fields outside them (the Fields view). Each
+ * shows as a picture (the isometric scene) or as cards, with tags to pick out buildings by type; a building opens in
+ * its dialog, also from `?building=<position>` (the activity dock).
+ */
+export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' | 'fields' }) {
   const { t } = useTranslation(['buildings-panel', 'common']);
   const [selected, setSelected] = useState<number | null>(null);
   const [chosen, setChosen] = useState<CityView>(readView);
@@ -42,14 +48,15 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
   }, [requested, setSearch]);
   const byPos = new Map(city.buildings.map((b) => [b.positionId, b]));
   const { townHall, unlocked: outerSlots } = fieldSlots(city.buildings);
+  const here = city.buildings.filter((b) => (area === 'fields') === isOuterPosition(b.positionId));
   // tag filter: one tag per building type present; with tags selected only those buildings show
   const [tags, setTags] = useState<number[]>([]);
   const typeCounts = new Map<number, number>();
-  for (const b of city.buildings) if (b.typeId) typeCounts.set(b.typeId, (typeCounts.get(b.typeId) ?? 0) + 1);
+  for (const b of here) if (b.typeId) typeCounts.set(b.typeId, (typeCounts.get(b.typeId) ?? 0) + 1);
   const typeList = [...typeCounts.entries()].sort((a, b) => buildingName(a[0]).localeCompare(buildingName(b[0])));
   const active = tags.filter((t) => typeCounts.has(t));
   const toggle = (t: number) => setTags((cur) => (cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t]));
-  const filtered = city.buildings
+  const filtered = here
     .filter((b) => active.includes(b.typeId))
     .sort((a, b) => buildingName(a.typeId).localeCompare(buildingName(b.typeId)) || b.level - a.level || a.positionId - b.positionId);
 
@@ -101,15 +108,15 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
           </CardContent>
         </Card>
       )}
-      {active.length === 0 && (
+      {active.length === 0 && area === 'inside' && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">{t('inside.title')}</CardTitle>
           </CardHeader>
-          <CardContent>{view === 'town' ? <IsoCity byPos={byPos} onSelect={setSelected} /> : <WalledCity byPos={byPos} onSelect={setSelected} />}</CardContent>
+          <CardContent>{view === 'scene' ? <IsoCity byPos={byPos} onSelect={setSelected} /> : <WalledCity byPos={byPos} onSelect={setSelected} />}</CardContent>
         </Card>
       )}
-      {active.length === 0 && (
+      {active.length === 0 && area === 'fields' && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">
@@ -119,7 +126,7 @@ export function BuildingsPanel({ city }: { city: CityBean }) {
               </span>
             </CardTitle>
           </CardHeader>
-          {view === 'town' ? (
+          {view === 'scene' ? (
             <CardContent>
               <IsoFields byPos={byPos} unlocked={outerSlots} onSelect={setSelected} />
             </CardContent>

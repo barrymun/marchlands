@@ -1,38 +1,52 @@
+import {
+  Backpack,
+  Castle,
+  ChartColumn,
+  Flag,
+  FlaskConical,
+  type LucideIcon,
+  Map as MapIcon,
+  Scale,
+  ScrollText,
+  Swords,
+  UsersRound,
+  Wheat,
+  Workflow,
+} from 'lucide-react';
+
 import { i18n } from '@/lib/i18n';
 import { lazyComponent } from '@/lib/lazy';
+import type { PageId, PanelId, ViewId } from '@/lib/nav';
 
-const tab = <const Id extends 'buildings' | 'military' | 'heroes' | 'research' | 'items' | 'market' | 'armies' | 'reports' | 'map' | 'flows' | 'stats'>(
-  id: Id,
-  wide = false,
-) => ({
+/** A place in the game's menus: its id (lib/nav.ts), its icon, and its name in the current locale. */
+const place = <const Id extends ViewId | PageId | PanelId>(id: Id, icon: LucideIcon) => ({
   id,
-  /** whether the tab uses the window's whole width (the town, the map) rather than a readable one (TAB_WIDTH) */
-  wide,
-  /** in the current locale */
+  icon,
   get label() {
-    return i18n.t(`game:tabs.${id}`);
+    return i18n.t(`game:nav.${id}`);
   },
 });
 
-export const TABS = [
-  tab('buildings', true),
-  tab('military'),
-  tab('heroes'),
-  tab('research'),
-  tab('items'),
-  tab('market'),
-  tab('armies'),
-  tab('reports'),
-  tab('map', true),
-  tab('flows'),
-  tab('stats'),
+/** The viewport's views, in the order of the switch. */
+export const VIEWS = [place('town', Castle), place('fields', Wheat), place('map', MapIcon)] as const;
+
+/** The panels that open over the view, in the order of the menu. */
+export const PANELS = [
+  place('military', Swords),
+  place('heroes', UsersRound),
+  place('research', FlaskConical),
+  place('items', Backpack),
+  place('armies', Flag),
 ] as const;
 
-/** The width a tab's content keeps unless it is wide: lines and tables stay readable on a big screen. */
-export const TAB_WIDTH = 'max-w-7xl';
+/** The pages that take the viewport's place, in the order of the menu. */
+export const PAGES = [place('reports', ScrollText), place('market', Scale), place('flows', Workflow), place('stats', ChartColumn)] as const;
 
-// Every tab but the city's buildings (the one a visit starts on) loads its code on first use; usePreloadPanels
-// fetches them all once the page is up, so switching tabs normally finds them loaded.
+/** The width a page keeps: lines and tables stay readable on a big screen. Views use the whole viewport. */
+export const PAGE_WIDTH = 'max-w-7xl';
+
+// Every screen but the town and the fields (the one a visit starts on) loads its code on first use; usePreloadPanels
+// fetches them all once the page is up, so opening one normally finds it loaded.
 export const MilitaryPanel = lazyComponent(() => import('@/components/military-panel/military-panel').then((m) => m.MilitaryPanel));
 export const HeroesPanel = lazyComponent(() => import('@/components/heroes-panel/heroes-panel').then((m) => m.HeroesPanel));
 export const ResearchPanel = lazyComponent(() => import('@/components/research-panel/research-panel').then((m) => m.ResearchPanel));

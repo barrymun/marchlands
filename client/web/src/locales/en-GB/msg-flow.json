@@ -47,7 +47,7 @@
   "step": {
     "noTargets": "No targets listed for this city",
     "armyGone": "Skipped: the saved army no longer exists",
-    "noArmy": "Skipped: choose a saved army for this action in the Flows tab",
+    "noArmy": "Skipped: choose a saved army for this action in Flows",
     "sent": "Sent {{sent}} of {{total}} with \"{{army}}\"",
     "noInjured": "No injured troops",
     "healed_one": "Healed {{count, number}} troop for {{cost}}",

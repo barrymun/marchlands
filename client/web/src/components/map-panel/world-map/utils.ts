@@ -1,4 +1,4 @@
-import { ANCHOR, CHUNK, MIN_TILES_ACROSS, PAN_STEP, SPRITE, TILE_H, TILE_W, ZOOMS } from '@/components/map-panel/world-map/constants';
+import { ANCHOR, CHUNK, MIN_TILES_ACROSS, PAN_STEP, SPRITE, START_STEPS_OUT, TILE_H, TILE_W, ZOOMS } from '@/components/map-panel/world-map/constants';
 import type { Camera, ChunkArea, PanDirection, TileInfo, View } from '@/components/map-panel/world-map/types';
 
 /** `v` brought into 0 … size - 1, the map wrapping round at its edges. */
@@ -93,10 +93,15 @@ export function zoomsFor(dpr: number): number[] {
   return whole.length ? whole : [1];
 }
 
-/** The zoom the map opens at: the largest whole-pixel zoom that still shows MIN_TILES_ACROSS tiles across the view. */
+/**
+ * The zoom the map opens at: START_STEPS_OUT steps out from the largest whole-pixel zoom that still shows
+ * MIN_TILES_ACROSS tiles across the view, for a wide first look round (never past the smallest zoom).
+ */
 export function startZoom(width: number, dpr: number): number {
   const zooms = zoomsFor(dpr);
-  return [...zooms].reverse().find((z) => width / (TILE_W * z) >= MIN_TILES_ACROSS) ?? zooms[0];
+  let zoom = [...zooms].reverse().find((z) => width / (TILE_W * z) >= MIN_TILES_ACROSS) ?? zooms[0];
+  for (let i = 0; i < START_STEPS_OUT; i++) zoom = nextZoom(zoom, -1, dpr);
+  return zoom;
 }
 
 /** The next zoom level in (`step` 1) or out (-1) from `zoom`, staying at the ends. */

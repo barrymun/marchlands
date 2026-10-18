@@ -71,7 +71,7 @@
     "lost": "Lost",
     "after": "After",
     "injured": "Survived injured (Medicine): ",
-    "healHint": "· heal them in the Military tab",
+    "healHint": "· heal them in Military",
     "honor": "+{{value}} honour",
     "heroExp": "hero +{{value}} exp",
     "walls": "walls Lv {{level}}"

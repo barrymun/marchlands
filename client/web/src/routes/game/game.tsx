@@ -1,236 +1,84 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Crown, UserRound } from 'lucide-react';
 import { Suspense, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router';
+import { Navigate } from 'react-router';
 
 import { ActivityDock } from '@/components/activity-dock/activity-dock';
 import { BuildingsPanel } from '@/components/buildings-panel/buildings-panel';
 import { CityDialog } from '@/components/city-dialog/city-dialog';
 import { LordDialog } from '@/components/lord-dialog/lord-dialog';
-import { useUnreadReports } from '@/components/reports-panel/hooks';
-import { ResourceBar } from '@/components/resource-bar/resource-bar';
-import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
-import { errorMessage, tokenStore } from '@/lib/api';
-import { fmt } from '@/lib/format';
-import { titleName } from '@/lib/game-data';
+import { useGameNav } from '@/hooks/use-game-nav';
+import { errorMessage } from '@/lib/api';
+import { isPanel, legacyTarget, screenHref, VIEW_IDS } from '@/lib/nav';
 import { cn } from '@/lib/utils';
-import {
-  ArmiesPanel,
-  FlowsPanel,
-  HeroesPanel,
-  ItemsPanel,
-  MapPanel,
-  MarketPanel,
-  MilitaryPanel,
-  ReportsPanel,
-  ResearchPanel,
-  StatsPanel,
-  TAB_WIDTH,
-  TABS,
-} from '@/routes/game/constants';
+import { BottomBar } from '@/routes/game/bottom-bar/bottom-bar';
+import { FlowsPanel, MapPanel, MarketPanel, PAGE_WIDTH, ReportsPanel, StatsPanel } from '@/routes/game/constants';
 import { usePreloadPanels } from '@/routes/game/hooks';
-import { MayorChip } from '@/routes/game/mayor-chip/mayor-chip';
-import { MayorSummary } from '@/routes/game/mayor-summary/mayor-summary';
-import { mayorOf } from '@/routes/game/utils';
+import { PanelSheet } from '@/routes/game/panel-sheet/panel-sheet';
+import { SideBar } from '@/routes/game/side-bar/side-bar';
+import { TabBar } from '@/routes/game/tab-bar/tab-bar';
+import { TopBar } from '@/routes/game/top-bar/top-bar';
 
+/**
+ * The game, laid out like the original but for any screen: a top bar (the city, the Town · Fields · Map switch, the
+ * account), the viewport showing a view (the town, the fields, the map) or a page (reports, market, flows, stats),
+ * and on a desktop a sidebar (cities, resources, troops at home, queues) and a bottom bar (the player, the menu) that
+ * stay the same everywhere; on a phone a tab bar and a menu instead. The lighter screens open as panels over the view
+ * (lib/nav.ts).
+ */
 export function GamePage() {
-  const { t } = useTranslation(['game', 'common']);
-  const params = useParams();
-  const navigate = useNavigate();
-  const qc = useQueryClient();
-  const cityId = Number(params.cityId);
-  const tab = TABS.some((x) => x.id === params['*']) ? params['*']! : 'buildings';
+  const nav = useGameNav();
   const player = usePlayer();
-  const city = useCity(cityId);
+  const city = useCity(nav.cityId);
   const status = usePushSync(true);
-  const info = player.data?.playerInfo;
-  const cities = player.data?.castles ?? [];
   const [dialog, setDialog] = useState<'lord' | 'city' | null>(null);
-  const unreadReports = useUnreadReports().data?.count ?? 0;
-  const mayor = city.data && mayorOf(city.data);
   usePreloadPanels();
 
-  function logout() {
-    tokenStore.set(null);
-    qc.clear();
-    navigate('/login', { replace: true });
+  // an address naming no view or page (the city's own, or one from before the views) goes where it now lives
+  if (!nav.screen) {
+    const to = legacyTarget(nav.part);
+    return <Navigate to={screenHref(nav.cityId, to.screen, to.panel && isPanel(to.panel) ? { panel: to.panel } : undefined)} replace />;
   }
+  const isView = (VIEW_IDS as readonly string[]).includes(nav.screen);
+  // the map fills the viewport edge to edge, with nothing to scroll; the other screens scroll inside it
+  const fill = nav.screen === 'map';
 
   return (
-    <div className="min-h-svh bg-muted/30">
-      {/* the tab bar sits in the sticky header, so it stays in view while the page scrolls */}
-      <Tabs value={tab} onValueChange={(v) => navigate(`/cities/${cityId}/${v}`)} className="contents">
-        <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:pt-3 lg:px-6">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="max-w-[60vw] min-w-0 gap-1 px-2 font-semibold sm:max-w-none">
-                  <span className="truncate">{city.data?.name ?? cities.find((c) => c.id === cityId)?.name ?? t('cityFallback')}</span>
-                  <span className="font-normal text-muted-foreground tabular-nums">{city.data && `(${city.data.x},${city.data.y})`}</span>
-                  <ChevronDown className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="min-w-60">
-                <DropdownMenuLabel>{t('yourCities')}</DropdownMenuLabel>
-                {cities.map((c) => (
-                  <DropdownMenuItem key={c.id} className="flex-col items-start gap-0.5" onSelect={() => navigate(`/cities/${c.id}/${tab}`)}>
-                    <span className={cn(c.id === cityId && 'font-semibold')}>
-                      {c.name}{' '}
-                      <span className="text-muted-foreground tabular-nums">
-                        ({c.x},{c.y})
-                      </span>
-                    </span>
-                    <MayorSummary mayor={mayorOf(c.id === cityId && city.data ? city.data : c)} />
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setDialog('city')}>{t('citySettings')}</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {/* phones: the mayor gets its own row under the city and the account controls */}
+    <div className="flex h-svh flex-col bg-muted/30">
+      <TopBar city={city.data} status={status} onDialog={setDialog} />
+      <div className="flex min-h-0 flex-1">
+        <main className={cn('min-w-0 flex-1', fill ? 'overflow-hidden' : 'overflow-y-auto')}>
+          <div className={cn(fill ? 'h-full' : 'mx-auto p-3 pb-24 sm:p-4 sm:pb-24 lg:px-6 lg:pb-6', isView ? 'max-w-none' : PAGE_WIDTH)}>
+            {city.error && <p className="text-sm text-destructive">{errorMessage(city.error)}</p>}
+            {city.isPending && <Skeleton className="h-96" />}
             {city.data && (
-              <div className="order-last w-full sm:order-none sm:w-auto">
-                <MayorChip mayor={mayor} onClick={() => navigate(`/cities/${cityId}/heroes`)} />
-              </div>
+              // a screen whose code hasn't arrived yet shows the same placeholder as a city still loading
+              <Suspense fallback={<Skeleton className="h-96" />}>
+                {nav.screen === 'town' && <BuildingsPanel city={city.data} area="inside" />}
+                {nav.screen === 'fields' && <BuildingsPanel city={city.data} area="fields" />}
+                {nav.screen === 'map' && <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />}
+                {nav.screen === 'reports' && <ReportsPanel />}
+                {nav.screen === 'market' && <MarketPanel city={city.data} />}
+                {nav.screen === 'flows' && <FlowsPanel city={city.data} />}
+                {nav.screen === 'stats' && <StatsPanel />}
+              </Suspense>
             )}
-            <div className="ml-auto flex min-w-0 items-center justify-end gap-x-3 gap-y-1 text-sm sm:flex-wrap sm:gap-x-4">
-              {info && (
-                <>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="hidden items-center gap-1 sm:flex">
-                        <Crown className="size-4 text-amber-500" />
-                        {t('titledName', { title: titleName(info.titleId), name: info.userName })}
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>{t('playerStats', { prestige: fmt(info.prestige), rank: info.ranking || '—', honor: fmt(info.honor) })}</TooltipContent>
-                  </Tooltip>
-                  {info.beginner && (
-                    <Badge variant="secondary" className="hidden sm:inline-flex">
-                      {t('beginnerProtection')}
-                    </Badge>
-                  )}
-                </>
-              )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span
-                    className={cn('size-2 rounded-full', status === 'open' ? 'bg-emerald-500' : status === 'connecting' ? 'bg-amber-500' : 'bg-red-500')}
-                    aria-label={t('liveUpdates.aria', { status: t(`liveUpdates.status.${status}`) })}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>{t('liveUpdates.tooltip', { status: t(`liveUpdates.status.${status}`) })}</TooltipContent>
-              </Tooltip>
-              <ThemeToggle />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon-sm" variant="ghost" aria-label={t('account.label')}>
-                    <UserRound className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {/* phones: the lord's title and name are shown here instead of in the header */}
-                  {info && (
-                    <DropdownMenuLabel className="grid gap-0.5 sm:hidden">
-                      <span className="flex items-center gap-1">
-                        <Crown className="size-4 text-amber-500" />
-                        {t('titledName', { title: titleName(info.titleId), name: info.userName })}
-                      </span>
-                      <span className="text-xs font-normal text-muted-foreground">
-                        {t(info.beginner ? 'account.statsBeginner' : 'account.stats', { prestige: fmt(info.prestige), honor: fmt(info.honor) })}
-                      </span>
-                    </DropdownMenuLabel>
-                  )}
-                  {info && <DropdownMenuSeparator className="sm:hidden" />}
-                  <DropdownMenuItem onSelect={() => setDialog('lord')}>{t('account.playerSettings')}</DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <a href="/docs" target="_blank" rel="noreferrer">
-                      {t('account.apiDocs')}
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={logout}>{t('common:actions.logOut')}</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </div>
-          <div className="px-4 pb-2 sm:pt-1 sm:pb-3 lg:px-6">
-            {city.data ? <ResourceBar resource={city.data.resource} mayor={mayor} /> : <Skeleton className="h-5 w-2/3" />}
-          </div>
-          <nav className="px-4 pb-2 sm:pb-3 lg:px-6" aria-label={t('cityTabs')}>
-            <TabsList className="max-w-full justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {TABS.map((x) => (
-                <TabsTrigger key={x.id} value={x.id} className="gap-1.5">
-                  {x.label}
-                  {x.id === 'reports' && unreadReports > 0 && <Badge className="h-4 min-w-4 px-1 text-[10px] tabular-nums">{unreadReports}</Badge>}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </nav>
-        </header>
-        {/* the header runs the window's whole width; the town and the map do too, the other tabs keep a readable width.
-            Bottom padding leaves room for the floating activity dock */}
-        <main className={cn('mx-auto p-4 pb-24 lg:px-6', TABS.find((x) => x.id === tab)?.wide ? 'max-w-none' : TAB_WIDTH)}>
-          {city.error && <p className="text-sm text-destructive">{errorMessage(city.error)}</p>}
-          {city.isPending && <Skeleton className="h-96" />}
-          {city.data && (
-            // a tab whose code hasn't arrived yet shows the same placeholder as a city still loading
-            <Suspense fallback={<Skeleton className="h-96" />}>
-              <TabsContent value="buildings">
-                <BuildingsPanel city={city.data} />
-              </TabsContent>
-              <TabsContent value="military">
-                <MilitaryPanel city={city.data} />
-              </TabsContent>
-              <TabsContent value="heroes">
-                <HeroesPanel city={city.data} />
-              </TabsContent>
-              <TabsContent value="research">
-                <ResearchPanel city={city.data} />
-              </TabsContent>
-              <TabsContent value="items">
-                <ItemsPanel city={city.data} />
-              </TabsContent>
-              <TabsContent value="market">
-                <MarketPanel city={city.data} />
-              </TabsContent>
-              <TabsContent value="armies">
-                <ArmiesPanel />
-              </TabsContent>
-              <TabsContent value="reports">
-                <ReportsPanel />
-              </TabsContent>
-              <TabsContent value="flows">
-                <FlowsPanel city={city.data} />
-              </TabsContent>
-              <TabsContent value="stats">
-                <StatsPanel />
-              </TabsContent>
-              <TabsContent value="map">
-                <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />
-              </TabsContent>
-            </Suspense>
-          )}
         </main>
-      </Tabs>
-      {city.data && <ActivityDock city={city.data} />}
+        {city.data && <SideBar city={city.data} />}
+      </div>
+      <BottomBar />
+      <TabBar city={city.data} />
+      {city.data && (
+        <>
+          <PanelSheet city={city.data} />
+          <div className="lg:hidden">
+            <ActivityDock city={city.data} variant="floating" />
+          </div>
+          <CityDialog city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />
+        </>
+      )}
       <LordDialog open={dialog === 'lord'} onClose={() => setDialog(null)} city={city.data} />
-      {city.data && <CityDialog city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />}
     </div>
   );
 }

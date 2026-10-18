@@ -41,12 +41,12 @@
   "notUsable": "Not usable on this server yet.",
   "noEffect": "Event item with no effect on this server.",
   "howTo": {
-    "speedup": "Use from a construction (City tab) or research (Research tab) in progress.",
-    "troopsSpeedup": "Use on a batch in the Military tab's training queue.",
-    "fortificationsSpeedup": "Use on a batch in the Military tab's fortification queue.",
-    "cityMove": "Use with \"Move city here\" on a free flat tile in the Map tab.",
-    "heroesReset": "Use from a hero's Points dialog in the Heroes tab.",
-    "heroesUseItem": "Use from a hero's Items button in the Heroes tab.",
+    "speedup": "Use from a construction (in the Town or Fields) or research (in Research) in progress.",
+    "troopsSpeedup": "Use on a batch in Military's training queue.",
+    "fortificationsSpeedup": "Use on a batch in Military's fortification queue.",
+    "cityMove": "Use with \"Move city here\" on a free flat tile on the Map.",
+    "heroesReset": "Use from a hero's Points dialog in Heroes.",
+    "heroesUseItem": "Use from a hero's Items button in Heroes.",
     "cityTruce": "Use from Player settings (top-right menu).",
     "key": "Use the {{chest}}; the key is taken automatically.",
     "welcome": "Every new player gets one when they start; it cannot be bought."

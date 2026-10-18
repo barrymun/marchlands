@@ -31,22 +31,22 @@ describe(fieldSlots.name, () => {
 describe(readView.name, () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it('reads the grid when it was chosen, and the town otherwise', () => {
+  it('reads the grid when it was chosen, and the scene otherwise', () => {
     vi.stubGlobal('localStorage', { getItem: (key: string) => (key === VIEW_KEY ? 'grid' : null) });
     expect(readView()).toBe('grid');
     vi.stubGlobal('localStorage', { getItem: () => 'something else' });
-    expect(readView()).toBe('town');
+    expect(readView()).toBe('scene');
     vi.stubGlobal('localStorage', { getItem: () => null });
-    expect(readView()).toBe('town');
+    expect(readView()).toBe('scene');
   });
 
-  it('falls back to the town when storage throws', () => {
+  it('falls back to the scene when storage throws', () => {
     vi.stubGlobal('localStorage', {
       getItem: () => {
         throw new Error('blocked');
       },
     });
-    expect(readView()).toBe('town');
+    expect(readView()).toBe('scene');
   });
 });
 
@@ -66,6 +66,6 @@ describe(saveView.name, () => {
         throw new Error('blocked');
       },
     });
-    expect(() => saveView('town')).not.toThrow();
+    expect(() => saveView('scene')).not.toThrow();
   });
 });

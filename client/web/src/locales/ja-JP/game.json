@@ -1,20 +1,29 @@
 {
   "loading": "ゲームを読み込み中…",
   "loadError": "ゲームを読み込めませんでした",
-  "tabs": {
-    "buildings": "都市",
+  "nav": {
+    "town": "城内",
+    "fields": "資源地",
+    "map": "マップ",
     "military": "軍事",
     "heroes": "英雄",
     "research": "研究",
     "items": "アイテム",
-    "market": "市場",
     "armies": "軍隊",
     "reports": "報告",
-    "map": "マップ",
+    "market": "市場",
     "flows": "フロー",
     "stats": "統計"
   },
-  "cityTabs": "都市タブ",
+  "viewSwitch": "表示",
+  "mainMenu": "ゲームメニュー",
+  "menu": "メニュー",
+  "sidebar": "都市の概要",
+  "panel": "画面の上に開きます。閉じると元の画面に戻ります。",
+  "troopsHome": {
+    "title": "城内の部隊",
+    "none": "城内に部隊はいません。"
+  },
   "cityFallback": "都市",
   "yourCities": "自分の都市",
   "citySettings": "都市設定",
@@ -32,14 +41,12 @@
   },
   "account": {
     "label": "アカウント",
-    "stats": "名声 {{prestige}} · 名誉 {{honor}}",
-    "statsBeginner": "名声 {{prestige}} · 名誉 {{honor}} · 初心者保護",
     "playerSettings": "プレイヤー設定",
     "apiDocs": "APIドキュメント"
   },
   "mayor": {
     "label": "市長",
     "attributesHint": "政治: 生産と建設速度 · 攻撃: 訓練 · 知力: 研究",
-    "appointHint": "英雄タブで市長を任命すると、生産・建設・訓練・研究が速くなります。"
+    "appointHint": "「英雄」で市長を任命すると、生産・建設・訓練・研究が速くなります。"
   }
 }

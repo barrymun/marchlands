@@ -19,7 +19,7 @@
   },
   "mayor": {
     "hint": "Research times include mayor {{name}}'s Intelligence {{intelligence}}: −{{cut}}. A mayor with higher Intelligence researches faster.",
-    "none": "No mayor: appoint one with high Intelligence in the Heroes tab to research faster."
+    "none": "No mayor: appoint one with high Intelligence in Heroes to research faster."
   },
   "tech": {
     "effective": "(effective {{level}})",

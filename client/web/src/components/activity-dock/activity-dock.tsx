@@ -1,5 +1,6 @@
-// A floating, frosted "in progress" dock (bottom left; a bottom bar on phones) for the current
-// city's construction, research and training, so in-page status cards no longer pop in and out.
+// The current city's construction, research and training in one place, so in-page status cards no longer pop in and
+// out: `floating`, a frosted dock above the phone tab bar (narrow screens only); `inline`, a section of the desktop
+// sidebar, always open.
 
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -16,7 +17,7 @@ import { useSticky } from '@/hooks/use-sticky';
 import { duration } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-export function ActivityDock({ city }: { city: CityBean }) {
+export function ActivityDock({ city, variant }: { city: CityBean; variant: 'floating' | 'inline' }) {
   const { t } = useTranslation('activity-dock');
   const jobs = useJobs(city);
   const now = useNow();
@@ -32,13 +33,40 @@ export function ActivityDock({ city }: { city: CityBean }) {
   const shown = useSticky(jobs.length ? jobs : null) ?? [];
   const visible = jobs.length > 0;
   const next = jobs[0];
+  const groups = GROUPS.map(({ id, icon: Icon, label }) => {
+    const list = shown.filter((j) => j.group === id);
+    if (!list.length) return null;
+    return (
+      <section key={id} className="grid gap-1.5">
+        <h3 className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+          <Icon className="size-3" /> {label}
+        </h3>
+        {list.slice(0, PER_GROUP).map((j) => (
+          <JobRow key={j.key} job={j} now={now} />
+        ))}
+        {list.length > PER_GROUP && (
+          <button type="button" className="text-left text-[11px] text-muted-foreground hover:underline" onClick={list[PER_GROUP].open}>
+            {t('more', { n: list.length - PER_GROUP })}
+          </button>
+        )}
+      </section>
+    );
+  });
+
+  if (variant === 'inline')
+    return (
+      <section aria-label={t('title')} className="grid gap-2">
+        <h2 className="text-xs font-medium text-muted-foreground">{t('title')}</h2>
+        {visible ? groups : <p className="text-xs text-muted-foreground">{t('nothing')}</p>}
+      </section>
+    );
 
   return (
     <aside
       aria-label={t('title')}
       aria-hidden={!visible}
       className={cn(
-        'fixed inset-x-2 bottom-[calc(0.5rem+env(safe-area-inset-bottom))] z-40 sm:inset-x-auto sm:bottom-4 sm:left-4 sm:w-80',
+        'fixed inset-x-2 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-40 sm:inset-x-auto sm:left-4 sm:w-80',
         'rounded-xl border bg-background/65 shadow-lg backdrop-blur-md supports-[backdrop-filter]:bg-background/55',
         'transition-all duration-300 ease-out',
         visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0',
@@ -62,29 +90,7 @@ export function ActivityDock({ city }: { city: CityBean }) {
         </span>
         {collapsed ? <ChevronUp className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
       </button>
-      {!collapsed && (
-        <div className="grid max-h-[45svh] gap-2 overflow-y-auto px-3 pb-3 sm:max-h-[60svh]">
-          {GROUPS.map(({ id, icon: Icon, label }) => {
-            const list = shown.filter((j) => j.group === id);
-            if (!list.length) return null;
-            return (
-              <section key={id} className="grid gap-1.5">
-                <h3 className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  <Icon className="size-3" /> {label}
-                </h3>
-                {list.slice(0, PER_GROUP).map((j) => (
-                  <JobRow key={j.key} job={j} now={now} />
-                ))}
-                {list.length > PER_GROUP && (
-                  <button type="button" className="text-left text-[11px] text-muted-foreground hover:underline" onClick={list[PER_GROUP].open}>
-                    {t('more', { n: list.length - PER_GROUP })}
-                  </button>
-                )}
-              </section>
-            );
-          })}
-        </div>
-      )}
+      {!collapsed && <div className="grid max-h-[45svh] gap-2 overflow-y-auto px-3 pb-3 sm:max-h-[60svh]">{groups}</div>}
     </aside>
   );
 }

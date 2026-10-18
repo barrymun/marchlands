@@ -6,8 +6,8 @@
     "summary_other": "({{count}} buildings · levels {{min}}–{{max}})"
   },
   "view": {
-    "label": "City view",
-    "town": "Town",
+    "label": "Show buildings as",
+    "scene": "Scene",
     "grid": "Grid"
   },
   "inside": {
@@ -47,7 +47,7 @@
     "confirmAllRefund": "The whole building goes at once, returning {{refund}}. This cannot be undone."
   },
   "mayor": {
-    "none": "No mayor: appoint one with high Politics in the Heroes tab to build faster.",
+    "none": "No mayor: appoint one with high Politics in Heroes to build faster.",
     "hint": "Times include mayor {{name}}'s Politics {{politics}}: −{{cut}}. A mayor with higher Politics builds faster."
   }
 }

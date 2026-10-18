@@ -3,6 +3,7 @@
   "summary": "{{jobs}} · 次 {{next}}",
   "finishing": "まもなく完了…",
   "more": "他 {{n}} 件",
+  "nothing": "進行中のものはありません",
   "groups": {
     "building": "建設",
     "research": "研究",

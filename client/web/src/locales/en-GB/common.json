@@ -69,7 +69,7 @@
     "trade": "Trade: {{amount}} {{resource}} at {{price}} gold",
     "delivery": "Market delivery: {{amount}} {{resource}} arrived",
     "newReport": "New report",
-    "newReportHint": "See the Reports tab."
+    "newReportHint": "See Reports."
   },
   "language": {
     "label": "Language",

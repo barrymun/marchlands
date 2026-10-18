@@ -70,7 +70,7 @@
     "lost": "損失",
     "after": "戦闘後",
     "injured": "負傷して生存（医学）: ",
-    "healHint": "· 軍事タブで治療できます",
+    "healHint": "· 「軍事」で治療できます",
     "honor": "名誉 +{{value}}",
     "heroExp": "英雄 経験値 +{{value}}",
     "walls": "城壁 Lv {{level}}"

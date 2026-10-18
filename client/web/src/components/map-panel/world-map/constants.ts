@@ -10,8 +10,11 @@ export const CHUNK = 21;
 /** The zoom levels, in screen pixels per art pixel; each is used only where it lands on whole device pixels. */
 export const ZOOMS = [1, 1.5, 2, 2.5, 3, 4] as const;
 
-/** The map opens at the largest zoom that still shows at least this many tiles across (about the original's view). */
+/** The map opens START_STEPS_OUT zoom steps out from the largest zoom that still shows at least this many tiles across. */
 export const MIN_TILES_ACROSS = 6;
+
+/** How many zoom steps further out than that the map opens, for a wide first look round. */
+export const START_STEPS_OUT = 2;
 
 /** How many tiles an arrow button moves the map: diagonally in tile terms, straight up, down or across on screen. */
 export const PAN_STEP = 4;

@@ -68,7 +68,7 @@
     "trade": "取引: {{resource}} {{amount}} を {{price}} 金で",
     "delivery": "市場からの配送: {{resource}} {{amount}} が到着しました",
     "newReport": "新しい報告",
-    "newReportHint": "報告タブを確認してください。"
+    "newReportHint": "「報告」を確認してください。"
   },
   "language": {
     "label": "言語",

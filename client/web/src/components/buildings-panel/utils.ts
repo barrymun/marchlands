@@ -10,12 +10,12 @@ export function fieldSlots(buildings: BuildingBean[]): { townHall: number; unloc
   return { townHall, unlocked: unlockedOuterSlots(townHall) };
 }
 
-/** The city view this browser last chose: the isometric town unless the grid was picked. */
+/** How this browser last chose to show the buildings: the isometric scene unless the cards were picked. */
 export function readView(): CityView {
   try {
-    return localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'town';
+    return localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'scene';
   } catch {
-    return 'town';
+    return 'scene';
   }
 }
 

@@ -3,6 +3,7 @@
   "summary": "{{jobs}} · next {{next}}",
   "finishing": "finishing…",
   "more": "+{{n}} more",
+  "nothing": "Nothing in progress",
   "groups": {
     "building": "Building",
     "research": "Research",

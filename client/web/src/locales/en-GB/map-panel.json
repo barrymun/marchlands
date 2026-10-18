@@ -1,5 +1,6 @@
 {
   "title": "Map ({{x}}, {{y}})",
+  "toolbar": "Map controls",
   "pan": {
     "left": "Move left",
     "up": "Move up",
@@ -31,14 +32,13 @@
     "loading": "({{x}},{{y}}) loading"
   },
   "info": {
-    "selectTile": "Select a tile",
     "player": "Player {{player}} · prestige {{prestige}}",
     "playerAlliance": "Player {{player}} of {{alliance}} · prestige {{prestige}}",
     "heldBy": "Held by {{city}} ({{player}})",
     "moveCityHere": "Move city here…",
     "sendArmy": "Send army",
     "scout": "Scout",
-    "noScouts": "No Scouts in this city: train some in the Military tab.",
+    "noScouts": "No Scouts in this city: train some in Military.",
     "upgraded": "Valley upgraded"
   },
   "release": {
@@ -51,6 +51,7 @@
     "success": "Valley released; any troops stationed there are marching home"
   },
   "legend": {
+    "title": "Key",
     "thisCityValleys": "This city's valleys",
     "otherCitiesValleys": "Your other cities' valleys",
     "thisCity": "This city",

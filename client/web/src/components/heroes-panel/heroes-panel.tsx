@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, GripVertical, Lock, LockOpen, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 
 import {
@@ -35,13 +34,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useCommand } from '@/hooks/use-game';
+import { useGameNav } from '@/hooks/use-game-nav';
 import { errorMessage } from '@/lib/api';
 import { fmt, percent, signedRate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 export function HeroesPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['heroes-panel', 'common']);
-  const navigate = useNavigate();
+  const nav = useGameNav();
   const hasInn = city.buildings.some((b) => b.typeId === BuildingType.INN && b.level > 0);
   const cityPath = { path: { cityId: city.id } };
   const tavern = useQuery({ ...getCitiesTavernOptions(cityPath), enabled: hasInn });
@@ -278,7 +278,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
             </CardContent>
           )}
         </Card>
-        <GearCard onResearch={() => navigate(`/cities/${city.id}/research`)} />
+        <GearCard onResearch={() => nav.open('research')} />
       </div>
       <DismissHeroDialog hero={dismissing} onCancel={() => setDismissing(null)} onConfirm={(h) => fire.mutateAsync({ path: { heroId: h.id } })} />
       <HeroItemsDialog hero={city.heros.find((h) => h.id === itemsFor) ?? null} cityId={city.id} onClose={() => setItemsFor(null)} />

@@ -9,7 +9,7 @@ import { heroAttributeValues } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
 import { DominantBadge } from '@/routes/game/dominant-badge/dominant-badge';
 
-/** The current city's mayor at a glance; opens the Heroes tab. */
+/** The current city's mayor at a glance; opens the Heroes panel. */
 export function MayorChip({ mayor, onClick }: { mayor?: HeroBean; onClick: () => void }) {
   const { t } = useTranslation(['game', 'common']);
   return (

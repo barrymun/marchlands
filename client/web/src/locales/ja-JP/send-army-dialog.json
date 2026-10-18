@@ -10,7 +10,7 @@
     "capacity": "{{chosen}} / {{cap}}(集結地 Lv {{rally}})",
     "capacityEnsign": "{{chosen}} / {{cap}}(集結地 Lv {{rally}}<b>、戦旗 +25%</b>)",
     "battleBuff": "この戦闘で{{desc}} · 残り<timer/>",
-    "noScouts": "都市に斥候がいません: 軍事タブで訓練してください。",
+    "noScouts": "都市に斥候がいません: 「軍事」で訓練してください。",
     "noTroops": "都市に兵がいません。",
     "allTitle": "部隊に入るだけ",
     "resources": "資源",

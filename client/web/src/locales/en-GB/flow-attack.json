@@ -5,7 +5,7 @@
     "defaultName": "Farming list",
     "dialogTitle": "Add to farming list?",
     "willAttack": "{{city}} will attack {{tile}} as part of the flow below.",
-    "noFlow": "No flow farms yet: this starts a flow called \"{{name}}\" with {{tile}} as {{city}}'s first target. Choose the saved army to send in the Flows tab.",
+    "noFlow": "No flow farms yet: this starts a flow called \"{{name}}\" with {{tile}} as {{city}}'s first target. Choose the saved army to send in Flows.",
     "flow": "Flow: <b>{{name}}</b>",
     "alreadyTarget": "{{tile}} is already one of {{city}}'s targets in this flow.",
     "addTarget": "Add target",
@@ -15,7 +15,7 @@
       "noIdleHero": "{{city}} has no idle hero left for another target in \"{{flow}}\"",
       "added": "Added {{tile}} to \"{{flow}}\" ({{city}}, target {{n}})",
       "started": "Started \"{{name}}\" with {{tile}}",
-      "startedHint": "Choose the saved army to send in the Flows tab."
+      "startedHint": "Choose the saved army to send in Flows."
     },
     "targetCount_one": "{{city}} has {{n}} of {{count}} target (one per idle hero).",
     "targetCount_other": "{{city}} has {{n}} of {{count}} targets (one per idle hero)."

@@ -12,5 +12,5 @@ export const SLOT_PITCH = 1.3;
 export const TOWN_HALL = -1;
 export const WALLS = -2;
 
-/** The screen height kept clear of a grid (the header and the card's title), so a whole grid fits on screen. */
-export const HEADROOM = '13rem';
+/** The screen height kept clear of a grid (the top and bottom bars, the card's title), so a whole grid fits on screen. */
+export const HEADROOM = '15rem';

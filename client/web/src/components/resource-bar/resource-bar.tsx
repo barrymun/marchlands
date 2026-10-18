@@ -16,7 +16,11 @@ import { resourceArtFile } from '@/lib/game-art';
 import { ITEM_BONUS_TEXT_INVERTED } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
-export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor?: HeroBean }) {
+/**
+ * The city's gold and resources, live, each with its rate and a breakdown on hover. `stacked` lays them out two to a
+ * row, the rate under the amount, for the desktop sidebar; otherwise one row (a 4-column grid on phones).
+ */
+export function ResourceBar({ resource, mayor, stacked }: { resource: ResourceBean; mayor?: HeroBean; stacked?: boolean }) {
   const { t } = useTranslation('resource-bar');
   const now = useNow();
   const r = resource;
@@ -40,7 +44,14 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
   ];
   return (
     // phones: a 4-column grid, the rate under the amount; wider screens: one wrapping row
-    <div className="grid grid-cols-4 gap-x-2 gap-y-1.5 text-sm sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2 lg:gap-x-8">
+    <div
+      className={cn(
+        'text-sm',
+        stacked
+          ? 'grid grid-cols-2 gap-x-3 gap-y-2.5'
+          : 'grid grid-cols-4 gap-x-2 gap-y-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-2 lg:gap-x-8',
+      )}
+    >
       {items.map(({ key, label, amount, rate, max, line }) => {
         const full = max != null && amount >= max;
         return (
@@ -48,7 +59,7 @@ export function ResourceBar({ resource, mayor }: { resource: ResourceBean; mayor
             <TooltipTrigger asChild>
               <div className="flex min-w-0 items-center gap-1.5 tabular-nums">
                 <img src={RESOURCE_ART[resourceArtFile(key)]} alt="" width={16} height={16} className="size-4 shrink-0 [image-rendering:pixelated]" />
-                <span className="flex min-w-0 flex-col leading-tight sm:flex-row sm:items-center sm:gap-1.5">
+                <span className={cn('flex min-w-0 flex-col leading-tight', !stacked && 'sm:flex-row sm:items-center sm:gap-1.5')}>
                   <span className={full ? 'font-medium text-amber-600' : 'font-medium'}>{fmt(amount)}</span>
                   <span className={cn('truncate text-[11px] sm:text-xs', rate < 0 ? 'text-destructive' : 'text-muted-foreground')}>{signedRate(rate)}</span>
                 </span>

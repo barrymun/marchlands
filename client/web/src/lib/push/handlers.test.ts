@@ -95,7 +95,7 @@ describe(PushCmd.NEW_REPORT, () => {
     handle(PushCmd.NEW_REPORT, { count: 3 }, qc);
     expect(qc.getQueryData(getReportsUnreadQueryKey())).toEqual({ count: 3 });
     expect(stale(cityKey(1))).toBe(true);
-    expect(toast).toHaveBeenCalledWith('New report', { description: 'See the Reports tab.' });
+    expect(toast).toHaveBeenCalledWith('New report', { description: 'See Reports.' });
   });
 });
 

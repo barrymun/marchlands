@@ -1,0 +1,41 @@
+import { useTranslation } from 'react-i18next';
+
+import type { CityBean } from '@marchlands/api-client';
+import { TROOP_KEYS } from '@marchlands/core';
+
+import { TroopBadge } from '@/components/troop-badge/troop-badge';
+import { useGameNav } from '@/hooks/use-game-nav';
+import { fmt } from '@/lib/format';
+import { troopName } from '@/lib/game-data';
+
+/** The troops at home in the city, each with its badge and count; a click opens the Military panel. */
+export function TroopsHome({ city, onPick }: { city: CityBean; onPick?: () => void }) {
+  const { t } = useTranslation('game');
+  const nav = useGameNav();
+  const troops = Object.entries(TROOP_KEYS)
+    .map(([id, key]) => ({ id: Number(id), count: city.troop[key] }))
+    .filter((x) => x.count > 0);
+  return (
+    <section aria-label={t('troopsHome.title')} className="grid gap-1.5">
+      <h2 className="text-xs font-medium text-muted-foreground">{t('troopsHome.title')}</h2>
+      {troops.length === 0 && <p className="text-xs text-muted-foreground">{t('troopsHome.none')}</p>}
+      <div className="grid grid-cols-2 gap-1">
+        {troops.map((x) => (
+          <button
+            key={x.id}
+            type="button"
+            className="flex min-w-0 items-center gap-1.5 rounded-md px-1 py-0.5 text-left text-xs transition hover:bg-muted"
+            title={troopName(x.id)}
+            onClick={() => {
+              nav.open('military');
+              onPick?.();
+            }}
+          >
+            <TroopBadge id={x.id} />
+            <span className="font-medium tabular-nums">{fmt(x.count)}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}

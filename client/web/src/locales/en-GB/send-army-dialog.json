@@ -10,7 +10,7 @@
     "capacity": "{{chosen}} / {{cap}} (Rally Spot Lv {{rally}})",
     "capacityEnsign": "{{chosen}} / {{cap}} (Rally Spot Lv {{rally}}<b>, War Ensign +25%</b>)",
     "battleBuff": "{{desc}} in this battle · <timer/> left",
-    "noScouts": "No Scouts in the city: train some in the Military tab.",
+    "noScouts": "No Scouts in the city: train some in Military.",
     "noTroops": "No troops in the city.",
     "allTitle": "As many as fit in the army",
     "resources": "Resources",

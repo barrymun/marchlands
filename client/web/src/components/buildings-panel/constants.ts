@@ -12,10 +12,10 @@ export const BUILDING_ART = byFile(import.meta.glob<string>('@/assets/buildings/
 /** The isometric city view's ground and wall pieces by file name (`plot.png`, lib/game-art.ts). */
 export const CITY_ART = byFile(import.meta.glob<string>('@/assets/city/*.png', { eager: true, query: '?url', import: 'default' }));
 
-/** The city views the panel offers, in the order of their buttons. */
-export const CITY_VIEWS = ['town', 'grid'] as const;
+/** How the panel can show the buildings, in the order of their buttons: the isometric scene, or cards. */
+export const CITY_VIEWS = ['scene', 'grid'] as const;
 
-/** Screens at least this wide may show the isometric town (Tailwind's md); narrower ones always show the cards. */
+/** Screens at least this wide may show the isometric scene (Tailwind's md); narrower ones always show the cards. */
 export const TOWN_VIEW_QUERY = '(min-width: 768px)';
 
 /** Which city view the panel shows, remembered per browser. */

@@ -99,8 +99,8 @@
     "total": "<b>+{{exp}} exp</b> for {{n}}"
   },
   "mayorTraining": {
-    "noMayorTrain": "No mayor: appoint one with high {{stat}} in the Heroes tab to train faster.",
-    "noMayorBuild": "No mayor: appoint one with high {{stat}} in the Heroes tab to build fortifications faster.",
+    "noMayorTrain": "No mayor: appoint one with high {{stat}} in Heroes to train faster.",
+    "noMayorBuild": "No mayor: appoint one with high {{stat}} in Heroes to build fortifications faster.",
     "train": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}} (new batches). A mayor with higher {{stat}} trains faster.",
     "build": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}} (new batches). A mayor with higher {{stat}} builds them faster."
   },

@@ -1,18 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router';
 
 import { type CityBean, getCitiesFortificationsQueuesOptions, getCitiesResearchOptions, getCitiesTroopsQueuesOptions } from '@marchlands/api-client';
 import { buildingLevel, BuildingType } from '@marchlands/core';
 
 import type { Job } from '@/components/activity-dock/types';
+import { useGameNav } from '@/hooks/use-game-nav';
 import { fmtExact } from '@/lib/format';
 import { buildingName, techName, troopName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
+import { viewOf } from '@/lib/nav';
 
 /** Everything running in the city: construction, research here, and the batch each barracks / the walls is producing. */
 export function useJobs(city: CityBean): Job[] {
-  const navigate = useNavigate();
-  const go = (tab: string, search = '') => navigate(`/cities/${city.id}/${tab}${search}`);
+  const nav = useGameNav();
   const path = { path: { cityId: city.id } };
   const hasAcademy = buildingLevel(city.buildings, BuildingType.ACADEMY) > 0;
   const hasBarracks = city.buildings.some((b) => b.typeId === BuildingType.BARRACKS && b.level > 0);
@@ -30,7 +30,7 @@ export function useJobs(city: CityBean): Job[] {
       label: i18n.t('activity-dock:job.level', { name: buildingName(b.typeId), level: b.level + 1 }),
       startTime: b.startTime,
       endTime: b.endTime,
-      open: () => go('buildings', `?building=${b.positionId}`),
+      open: () => nav.go(viewOf(b.positionId), { building: String(b.positionId) }),
     });
   }
   for (const t of research.data?.techs ?? []) {
@@ -41,7 +41,7 @@ export function useJobs(city: CityBean): Job[] {
       label: i18n.t('activity-dock:job.level', { name: techName(t.typeId), level: t.level + 1 }),
       startTime: t.startTime,
       endTime: t.endTime,
-      open: () => go('research'),
+      open: () => nav.open('research'),
     });
   }
   for (const q of [...(troops.data?.queues ?? []), ...(forts.data?.queues ?? [])]) {
@@ -55,7 +55,7 @@ export function useJobs(city: CityBean): Job[] {
       note: waiting > 0 ? i18n.t('activity-dock:job.queued', { n: waiting }) : undefined,
       startTime: running.startTime,
       endTime: running.endTime,
-      open: () => go('military'),
+      open: () => nav.open('military'),
     });
   }
   return jobs.sort((a, b) => a.endTime - b.endTime);
