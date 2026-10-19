@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { Eye, X } from 'lucide-react';
+import { Copy, Eye, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { type CityBean, getMapTilesByTileIdOptions } from '@marchlands/api-client';
 import { Mission, TileType, VALLEY_TYPES } from '@marchlands/core';
@@ -14,6 +15,7 @@ import type { SendTarget } from '@/components/send-army-dialog/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { copyText } from '@/lib/clipboard';
 import { fmt } from '@/lib/format';
 import { tileName, zoneName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
@@ -65,6 +67,15 @@ export function TileCard({
     return m;
   };
 
+  // the coordinates in the game's own notation, ready to paste into a chat, a mail or another tool
+  const copyCoords = (x: number, y: number) => {
+    const coords = `(${x},${y})`;
+    copyText(coords).then(
+      () => toast.success(t('copy.done', { coords })),
+      () => toast.error(t('copy.failed')),
+    );
+  };
+
   return (
     <section
       aria-label={tile ? placeName(tile) : undefined}
@@ -78,12 +89,15 @@ export function TileCard({
       </div>
       {tile && (
         <>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             <Badge variant="secondary">{tileName(tile.type)}</Badge>
             <Badge variant="secondary">{t('common:level.short', { level: tile.level })}</Badge>
             <Badge variant="outline">
               ({tile.x}, {tile.y}) · {zoneName(tile.zoneId)}
             </Badge>
+            <Button size="icon-xs" variant="ghost" onClick={() => copyCoords(tile.x, tile.y)} aria-label={t('copy.label')} title={t('copy.label')}>
+              <Copy />
+            </Button>
           </div>
           {'userName' in tile && tile.userName && (
             <p>

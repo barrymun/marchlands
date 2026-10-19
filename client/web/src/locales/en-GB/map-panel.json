@@ -46,6 +46,11 @@
     "hint": "Stationed troops march home; the production bonus stops.",
     "success": "Valley released; any troops stationed there are marching home"
   },
+  "copy": {
+    "label": "Copy coordinates",
+    "done": "Copied {{coords}}",
+    "failed": "Couldn't copy the coordinates"
+  },
   "legend": {
     "title": "Key",
     "thisCityValleys": "This city's valleys",
