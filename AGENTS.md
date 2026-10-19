@@ -11,6 +11,7 @@ How to work in this repository. Read [README.md](README.md) for what Marchlands 
 - **New dependencies** are pinned to an exact version (no `^` or `~`) released at least two weeks ago.
 - **Player-facing language is neutral:** say "player", never "lord" or "lady", in anything a player reads (UI text, item and quest descriptions, error messages, mail). Code identifiers and comments may still say lord.
 - **Planned work** is listed in [TODO.md](TODO.md). In the change that finishes an item, move it to the Done section at the bottom (newest first, dated, one line saying what was done).
+- **A large feature gets a design document** in [docs/features/](docs/features/README.md), linked from its TODO item: where things stand, what's decided and why, open questions and phases. Record decisions there as they're made.
 - **Ideas and known quirks for later** go in [docs/backlog.md](docs/backlog.md): what happens now, where, and why it was left.
 - **Deviations are documented:** every rule that differs from the original Evony Age 1 server goes in [docs/deviations.md](docs/deviations.md), marked *(design change)*. Every tunable number lives in `shared/core/src/balance.ts` (`BALANCE`); don't hard-code game values elsewhere.
 - **Don't change behaviour while restructuring.** A refactor moves code; a rule change is its own change, documented as above.
@@ -23,6 +24,8 @@ Everything a new session needs is in the repository. Nothing lives only in an ag
 - **Recent work:** run `git log --oneline` and `git status`. Staged changes are the maintainer's curated next commit; unstaged ones are still in progress. Ask before assuming which is which.
 - **Decisions already made, and the reasons for them:**
   - [docs/architecture.md](docs/architecture.md), e.g. Import prefixes.
+  - [docs/features/](docs/features/README.md): designs of large features in progress.
+  - [docs/reference/](docs/reference/README.md): how the original game worked, from guides and fan sites (in our own words, with sources). [docs/spec/](docs/spec/) is from the original server's source code.
   - [docs/deviations.md](docs/deviations.md): rule changes.
   - [docs/backlog.md](docs/backlog.md): quirks left on purpose.
 - **Moving to another machine** (the stack, `.env` and a database dump): README.md, Moving the dev stack to another machine.

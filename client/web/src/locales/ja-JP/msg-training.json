@@ -12,5 +12,11 @@
   "invalidFort": "無効な防御施設の種類です。",
   "notEnoughUnits": "{{unit}}の数が足りません。",
   "notEnoughInjured": "負傷兵が足りません。",
-  "notEnoughHonor": "名誉が足りません：{{amount}}必要です。"
+  "notEnoughHonor": "名誉が足りません：{{amount}}必要です。",
+  "mail": {
+    "wallSpaceRefund": {
+      "title": "防御施設の払い戻し",
+      "content_other": "防御施設が城壁で占める空きが増えたため、{{city}}の城壁にすべてを置けなくなりました。防御施設{{count, number}}基を撤去し、その費用を全額都市に返還しました。"
+    }
+  }
 }

@@ -12,5 +12,12 @@
   "invalidFort": "Invalid fortification type.",
   "notEnoughUnits": "You do not have that many {{unit}} units.",
   "notEnoughInjured": "Not enough injured troops.",
-  "notEnoughHonor": "Not enough honour: {{amount}} needed."
+  "notEnoughHonor": "Not enough honour: {{amount}} needed.",
+  "mail": {
+    "wallSpaceRefund": {
+      "title": "Fortifications refunded",
+      "content_one": "Fortifications now take more space on the walls, and the walls of {{city}} no longer had room for all of theirs. {{count, number}} fortification was taken down and its full cost returned to the city.",
+      "content_other": "Fortifications now take more space on the walls, and the walls of {{city}} no longer had room for all of theirs. {{count, number}} fortifications were taken down and their full cost returned to the city."
+    }
+  }
 }

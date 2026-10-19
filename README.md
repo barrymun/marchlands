@@ -75,6 +75,8 @@ marchlands/
 │   ├── api-endpoints.md      every endpoint, mapped to the original commands
 │   ├── websocket.md          push messages
 │   ├── deviations.md         what differs from the C++ server and why
+│   ├── features/             designs of large planned features (one document each)
+│   ├── reference/            notes on the original game from guides and fan sites, with sources
 │   └── spec/                 reverse-engineering specs of the original server
 └── tools/
     ├── legacy-import/        converts the original MySQL dumps into data files

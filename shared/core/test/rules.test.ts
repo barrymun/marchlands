@@ -301,6 +301,7 @@ describe('armies', () => {
     expect(troopConfig(8)?.load).toBe(5000);
     expect(troopConfig(9)?.life).toBe(500);
     expect(troopConfig(10)?.life).toBe(1000);
+    expect([8, 9, 10].map((id) => troopConfig(id)?.population)).toEqual([4, 3, 6]);
   });
   it('plunder spreads evenly and respects availability', () => {
     const p = plunder({ gold: 100, food: 1_000_000, wood: 1_000_000, stone: 0, iron: 1_000_000 }, 30_100);

@@ -1,6 +1,6 @@
 # Farming level 10 barbarian cities
 
-*Simulated 2026-10-09 with barrymun's research (every level 10), heroes and items. Checked against 697 real level 10 attack reports. Re-checked 2026-10-16 after the gear rework, with the hero's gear modelled: its Attack fell from 1,359 to 1,219, which changes none of the archer results (see [Hero gear](#hero-gear)).*
+*Simulated 2026-10-09 with the maintainer's research (every level 10), heroes and items. Checked against 697 real level 10 attack reports. Re-checked 2026-10-16 after the gear rework, with the hero's gear modelled: its Attack fell from 1,359 to 1,219, which changes none of the archer results (see [Hero gear](#hero-gear)).*
 
 ## The target
 

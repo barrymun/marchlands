@@ -202,7 +202,7 @@
  {
   "troopId": 8,
   "buildTime": 1000,
-  "population": 3,
+  "population": 4,
   "cost": {
    "food": 600,
    "wood": 1500,
@@ -241,7 +241,7 @@
  {
   "troopId": 9,
   "buildTime": 500,
-  "population": 6,
+  "population": 3,
   "cost": {
    "food": 1000,
    "wood": 600,
@@ -276,7 +276,7 @@
  {
   "troopId": 10,
   "buildTime": 1500,
-  "population": 4,
+  "population": 6,
   "cost": {
    "food": 2000,
    "wood": 500,

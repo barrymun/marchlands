@@ -50,7 +50,7 @@ export interface Lord {
 }
 
 /**
- * barrymun on 2026-10-16: every research at 10 (Hero Enhancement too), 10 stars on every gear piece, ATK - 70 in lol
+ * The maintainer's account on 2026-10-16: every research at 10 (Hero Enhancement too), 10 stars on every gear piece, ATK - 70 in lol
  * (level 100, Attack 169 + 1,050 gear, Intelligence 18), the attack item running.
  */
 export const DEFAULT_LORD: Lord = {

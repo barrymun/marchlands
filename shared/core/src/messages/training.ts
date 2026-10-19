@@ -19,4 +19,7 @@ export const TRAINING_MESSAGES = {
   notEnoughUnits: ['unit'],
   notEnoughInjured: [],
   notEnoughHonor: ['amount'],
+  /** system mail from migration 0025: fortifications taken down in `city` when wall space per fortification grew */
+  'mail.wallSpaceRefund.title': [],
+  'mail.wallSpaceRefund.content': ['city', 'count'],
 } as const;

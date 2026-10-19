@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BuildingStatus, BuildingType, npcCityBuildings, Relation, relationPermissions } from '#/index.ts';
+import { BALANCE, BuildingStatus, BuildingType, npcCityBuildings, npcTemplate, Relation, relationPermissions, usedWallSpace, wallCapacity } from '#/index.ts';
 
 describe(npcCityBuildings.name, () => {
   it('lays out a barbarian city as real buildings, all at its level', () => {
@@ -52,6 +52,16 @@ describe(relationPermissions.name, () => {
     expect(relationPermissions(Relation.ENEMY)).toEqual({ canLoot: true, canOccupy: true, canScout: true, canSend: true, canTrans: true });
     for (const r of [Relation.NEUTRAL, Relation.NO_RELATION]) {
       expect(relationPermissions(r)).toEqual({ canLoot: true, canOccupy: true, canScout: true, canSend: false, canTrans: false });
+    }
+  });
+});
+
+describe(npcTemplate.name, () => {
+  it("fits every level's fortifications on the walls of a barbarian city of that level", () => {
+    for (let level = 1; level <= 10; level++) {
+      const used = usedWallSpace(npcTemplate(level).forts, []);
+      expect(wallCapacity(npcCityBuildings(level))).toBe(BALANCE.wallSpace[level]);
+      expect(used, `level ${level}`).toBeLessThanOrEqual(BALANCE.wallSpace[level]);
     }
   });
 });

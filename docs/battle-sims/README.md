@@ -33,7 +33,7 @@ npm run sim -- compare --preset archers-old,archers-best --sources
 | `presets` | Lists the named armies |
 
 - **Common options:** `--level` (barbarian city level, default 10) and `--seeds`.
-- **The lord:** `--research` (every research at that level), the hero (`--hero-level`, and `--power` and `--stratagem`: its own points, without gear), the lord's gear (`--gear-level` for Hero Enhancement, which follows `--research` unless given, `--stars` on every piece, and `--gear-stat` for the attribute it boosts), `--no-attack-item` and `--defense-item`. The defaults are barrymun on 2026-10-16; see `DEFAULT_LORD` in `lib.ts`.
+- **The lord:** `--research` (every research at that level), the hero (`--hero-level`, and `--power` and `--stratagem`: its own points, without gear), the lord's gear (`--gear-level` for Hero Enhancement, which follows `--research` unless given, `--stars` on every piece, and `--gear-stat` for the attribute it boosts), `--no-attack-item` and `--defense-item`. The defaults are the maintainer's account on 2026-10-16; see `DEFAULT_LORD` in `lib.ts`.
 - **Seeds:** the scripts use their own seeds, so averages can differ slightly (by about 0.05M) from the figures on these pages.
 
 ## How the simulations are run

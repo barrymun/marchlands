@@ -4,14 +4,13 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
 
 ## Gameplay
 
-- [ ] **Historical cities.**
-  - NPC cities at levels 12, 14, 16 and 18, with a single level 18 city at (0, 0).
+- [ ] **Historical cities.** Now part of the market and factions design as seats of power: [docs/features/market-and-factions.md](docs/features/market-and-factions.md), Historical cities.
+  - NPC cities at levels 12, 14, 16 and 18, with a single level 18 city at (0, 0). How Age 2 placed and used them (every level): [docs/reference/historic-cities.md](docs/reference/historic-cities.md).
   - Capturing one lets its owner draft troops from the neighbouring NPC cities: a share of each city's troops (50%?), once per day (to decide).
   - To decide: how they are captured and held, what "neighbouring" means (radius or zone), and what happens to drafted troops when the city is lost.
-- [ ] **Overhaul the marketplace mechanics.**
-  - Now: players post buy and sell orders, and a computer merchant always buys and sells every resource around a reference price that moves with trade (`BALANCE` merchant settings, `merchantJob`, `backend/packages/game/src/engine/market.ts`). The Market tab shows the order book and a price history line chart (`client/web/src/components/market-panel/`).
-  - Plan: a complete rework of how the market works (details to decide).
-  - Better graphs, with a live stock ticker where NPC cities trade in game.
+- [ ] **Overhaul the marketplace mechanics.** Design: [docs/features/market-and-factions.md](docs/features/market-and-factions.md).
+  - Now: players post buy and sell orders, and a computer merchant buys and sells every resource at a fixed 1.00 gold (`BALANCE.merchant.fixedPrice`), so every trade goes through it. The Market page shows the order book and a price history line chart (`client/web/src/components/market-panel/`).
+  - Plan: NPC cities trade with each other in factions (simulated as groups, so the database holds candles rather than every trade), player actions move faction prices, a live ticker, and candle charts with Lightweight Charts. Phases and open questions are in the design.
 - [ ] **Better hero name generator for heroes in the Inn.**
   - Now: a random first name and epithet, e.g. "Aldric the Bold" (`randomHeroName` in `shared/core/src/heroes.ts`, 40 first names and 18 epithets), so names repeat often and read alike.
 - [ ] **Check the game logic against the original game's documentation.**

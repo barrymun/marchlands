@@ -91,12 +91,13 @@ const troops = tables.config_troops
   }))
   .sort((a, b) => a.troopId - b.troopId);
 
-// In the dump the combat/logistics columns (life..range) of ids 8, 9, 10 are rotated: they were
-// entered in the order cavalry, cataphract, transporter while the ids (and the cost/prerequisite
-// columns) follow defines.h: 8 transporter, 9 cavalry, 10 cataphract. Evidence: row 8 has load
-// 100 / upkeep 18 (cavalry), row 10 has load 5000 / attack 10 (transporter). Rotate them back.
+// In the dump the population and combat/logistics columns (life..range) of ids 8, 9, 10 are rotated:
+// they were entered in the order cavalry, cataphract, transporter while the ids (and the time, cost
+// and prerequisite columns) follow defines.h: 8 transporter, 9 cavalry, 10 cataphract. Evidence: row 8
+// has load 100 / upkeep 18 (cavalry), row 10 has load 5000 / attack 10 (transporter); rotated back, the
+// population is transporter 4, cavalry 3, cataphract 6, as the Evony wiki's troop table gives. Rotate them back.
 {
-  const statKeys = ['life', 'attack', 'defense', 'load', 'upkeep', 'speed', 'range'];
+  const statKeys = ['population', 'life', 'attack', 'defense', 'load', 'upkeep', 'speed', 'range'];
   const byId = Object.fromEntries(troops.map((t) => [t.troopId, t]));
   const pick = (t) => Object.fromEntries(statKeys.map((k) => [k, t[k]]));
   const [s8, s9, s10] = [pick(byId[8]), pick(byId[9]), pick(byId[10])];

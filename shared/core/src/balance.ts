@@ -130,8 +130,11 @@ export const BALANCE = {
   // ---- fortifications ----
   /** (evony) wall capacity in fort "space" by wall level 1..10 */
   wallSpace: [0, 1_000, 3_000, 6_000, 10_000, 15_000, 21_000, 28_000, 36_000, 45_000, 55_000],
-  /** (evony) wall space used per fort unit */
-  fortSpace: { 14: 1, 15: 1, 16: 2, 17: 3, 18: 4 } as Record<number, number>,
+  /**
+   * (evony) wall space used per fort unit: trap 1, abatis 2, archer tower 3, rolling log 4, trebuchet 5 (Evony wiki,
+   * Walls). Every NPC city's garrison (world.ts NPC_TABLE) fits its wall with these.
+   */
+  fortSpace: { 14: 1, 15: 2, 16: 3, 17: 4, 18: 5 } as Record<number, number>,
 
   // ---- battle ----
   /**

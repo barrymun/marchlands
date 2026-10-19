@@ -109,7 +109,7 @@ The original either stubbed these or never answered them.
   - *(design change)* **Computer merchant** (`core/src/merchant.ts`, `BALANCE.merchant`): always buys and sells every resource in any amount. It quotes around a reference price (±5%); its trades move the price along an exponential curve (fills are priced along the curve, so splitting orders or round-tripping gains nothing) and the price drifts back to its base with a 6-game-hour half-life. Lords' orders at a better or equal price are filled first. A worker job lets the merchant fill resting orders its drifting price has crossed. **Currently fixed** (`BALANCE.merchant.fixedPrice = 1`): the merchant buys and sells every resource at 1.00 gold, with no spread and no curve, which puts a floor under sell prices. Lords' orders keep the same rules, but no lord can beat the merchant's price, so in practice every trade goes through the merchant. Set `fixedPrice: null` to bring the curve back.
   - **Market and limit orders**, a quote endpoint, and a trade log (`market_trades`) with recent trades and hourly (game time) price candles.
   - Order cap of 2 resting orders per Marketplace level; cancellation refunds.
-- **Walls.** Fortifications take wall space (by Walls level).
+- **Walls.** Fortifications take wall space (by Walls level, 1,000 to 55,000): trap 1, abatis 2, archer tower 3, rolling log 4, trebuchet 5, as the Evony wiki's Walls page gives them (`BALANCE.fortSpace`). Every NPC city's garrison (`NPC_TABLE`) fits its wall with these, levels 6–10 about 85–89% full. The NPC table alone would suggest rolling logs 5 and trebuchets 8, which fill levels 7–10 almost exactly; the wiki was preferred as what players saw in the game. Until migration 0025 these were 1, 1, 2, 3 and 4 (a guess): walls left over capacity had the forts that no longer fit taken down, in proportion across types, their full cost returned to the city, and the player was sent a mail.
 - **Items.** A declarative effect for every item in `config_items`: production, attack, defence and upkeep buffs; boxes, chests and keys, Bernini's Hammer (one extra build queue); War Ensign; Civil Code; Penicillin.
 - **Nobility titles** (Knight … Prince) bought with prestige and medals. A title limits how many cities a lord may own.
 - **Social.** Friends and block list (blocked lords' mail and whispers are dropped); mail delete and bulk read; alliance event log, member circulars, military overview and diplomacy drop.
@@ -120,7 +120,7 @@ The original either stubbed these or never answered them.
 
 ## Data corrections
 
-- In `config_troops`, the combat and logistics columns of ids 8, 9 and 10 were rotated: row 8 carried cavalry stats. `tools/legacy-import/convert.mjs` rotates them back, so transporters carry 5,000, cavalry 100 and cataphracts 80.
+- In `config_troops`, the population, combat and logistics columns of ids 8, 9 and 10 were rotated: row 8 carried cavalry stats. `tools/legacy-import/convert.mjs` rotates them back, so transporters carry 5,000, cavalry 100 and cataphracts 80, and they take 4, 3 and 6 population (the dump had 3, 6 and 4). The population matches the Evony wiki's troop table (evony.fandom.com/wiki/Troops) and an Evony Age 2 guide; their training times, which weren't rotated, match the dump. Troops trained before the population fix return today's population when disbanded or cancelled.
 - Item names that were double-encoded in the dump ("Beginnerâ€™s Package") are repaired.
 
 ## Values chosen without a source
@@ -128,7 +128,6 @@ The original either stubbed these or never answered them.
 These Evony Age 1 values were not in the original code. They are marked `(evony)` in `balance.ts`:
 
 - warehouse protection table;
-- wall space per fortification;
 - barbarian city loyalty damage per attack of 10–15;
 - market fee and shipment time;
 - curing injured troops at 25% of training cost;

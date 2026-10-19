@@ -29,8 +29,8 @@ describe(maxTrainable.name, () => {
   });
 
   it('is limited by idle population divided by the unit population', () => {
-    // cavalry takes 6 population each
-    const u = unit(TroopType.CAVALRY);
+    // cataphracts take 6 population each
+    const u = unit(TroopType.CATAPHRACT);
     expect(u.population).toBe(6);
     expect(maxTrainable(u, plenty, 20, Infinity, false)).toEqual({ count: 3, limit: 'idlePopulation' });
   });
@@ -56,16 +56,17 @@ describe(maxTrainable.name, () => {
   });
 
   it('limits fortifications by wall space, using the footprint of each type', () => {
-    // rolling logs take 3 wall space each
+    // rolling logs take 4 wall space each
     const u = unit(FortType.ROLLING_LOG);
-    expect(BALANCE.fortSpace[FortType.ROLLING_LOG]).toBe(3);
-    expect(maxTrainable(u, plenty, 1e6, 10, true)).toEqual({ count: 3, limit: 'wallSpace' });
+    expect(BALANCE.fortSpace[FortType.ROLLING_LOG]).toBe(4);
+    expect(maxTrainable(u, plenty, 1e6, 10, true)).toEqual({ count: 2, limit: 'wallSpace' });
   });
 
   it('applies wall space even to a fortification with no population (archer tower)', () => {
     const u = unit(FortType.ARCHER_TOWER);
     expect(u.population).toBe(0);
-    expect(maxTrainable(u, plenty, 0, 9, true)).toEqual({ count: 4, limit: 'wallSpace' });
+    // archer towers take 3 wall space each
+    expect(maxTrainable(u, plenty, 0, 10, true)).toEqual({ count: 3, limit: 'wallSpace' });
   });
 
   it('ignores wall space for troops', () => {
