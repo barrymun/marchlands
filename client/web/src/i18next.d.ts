@@ -30,6 +30,7 @@ import type heroGear from '@/locales/en-GB/hero-gear.json';
 import type heroItemsDialog from '@/locales/en-GB/hero-items-dialog.json';
 import type heroPointsDialog from '@/locales/en-GB/hero-points-dialog.json';
 import type heroesPanel from '@/locales/en-GB/heroes-panel.json';
+import type isoViewport from '@/locales/en-GB/iso-viewport.json';
 import type itemsPanel from '@/locales/en-GB/items-panel.json';
 import type login from '@/locales/en-GB/login.json';
 import type lordDialog from '@/locales/en-GB/lord-dialog.json';
@@ -127,6 +128,7 @@ declare module 'i18next' {
       'heroes-panel': typeof heroesPanel;
       'items-panel': typeof itemsPanel;
       'lord-dialog': typeof lordDialog;
+      'iso-viewport': typeof isoViewport;
       'map-panel': typeof mapPanel;
       'market-panel': typeof marketPanel;
       'military-panel': typeof militaryPanel;

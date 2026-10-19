@@ -39,16 +39,15 @@ export function GamePage() {
     const to = legacyTarget(nav.part);
     return <Navigate to={screenHref(nav.cityId, to.screen, to.panel && isPanel(to.panel) ? { panel: to.panel } : undefined)} replace />;
   }
+  // a view fills the viewport edge to edge (the town and fields scroll themselves when shown as cards); a page scrolls inside it
   const isView = (VIEW_IDS as readonly string[]).includes(nav.screen);
-  // the map fills the viewport edge to edge, with nothing to scroll; the other screens scroll inside it
-  const fill = nav.screen === 'map';
 
   return (
     <div className="flex h-svh flex-col bg-muted/30">
       <TopBar city={city.data} status={status} onDialog={setDialog} />
       <div className="flex min-h-0 flex-1">
-        <main className={cn('min-w-0 flex-1', fill ? 'overflow-hidden' : 'overflow-y-auto')}>
-          <div className={cn(fill ? 'h-full' : 'mx-auto p-3 pb-24 sm:p-4 sm:pb-24 lg:px-6 lg:pb-6', isView ? 'max-w-none' : PAGE_WIDTH)}>
+        <main className={cn('min-w-0 flex-1', isView ? 'overflow-hidden' : 'overflow-y-auto')}>
+          <div className={isView ? 'h-full' : cn('mx-auto p-3 pb-24 sm:p-4 sm:pb-24 lg:px-6 lg:pb-6', PAGE_WIDTH)}>
             {city.error && <p className="text-sm text-destructive">{errorMessage(city.error)}</p>}
             {city.isPending && <Skeleton className="h-96" />}
             {city.data && (

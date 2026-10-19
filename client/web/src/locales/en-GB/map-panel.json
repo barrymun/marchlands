@@ -8,10 +8,6 @@
     "right": "Move right",
     "home": "Back to this city"
   },
-  "zoom": {
-    "in": "Zoom in",
-    "out": "Zoom out"
-  },
   "aria": "World map: drag to look round, arrow keys to move, + and - to zoom, Enter to select the tile in the middle",
   "relations": {
     "friend": "Alliance & allies",

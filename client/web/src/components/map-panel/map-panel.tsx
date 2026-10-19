@@ -14,16 +14,21 @@ import {
 } from '@marchlands/api-client';
 
 import { CityDialog } from '@/components/city-dialog/city-dialog';
+import { useIsoViewport } from '@/components/iso-viewport/hooks';
+import type { PanDirection, ViewPoint } from '@/components/iso-viewport/types';
+import { panStep, spriteAt, tileAt } from '@/components/iso-viewport/utils';
 import { HeldValleys } from '@/components/map-panel/held-valleys/held-valleys';
 import { MapLegend } from '@/components/map-panel/map-legend/map-legend';
 import { TileCard } from '@/components/map-panel/tile-card/tile-card';
-import type { PanDirection } from '@/components/map-panel/world-map/types';
-import { panStep } from '@/components/map-panel/world-map/utils';
+import { PAN_STEP } from '@/components/map-panel/world-map/constants';
+import { useWorldMap } from '@/components/map-panel/world-map/hooks';
+import { startZoom } from '@/components/map-panel/world-map/utils';
 import { WorldMap } from '@/components/map-panel/world-map/world-map';
 import { SendArmyDialog } from '@/components/send-army-dialog/send-army-dialog';
 import type { SendTarget } from '@/components/send-army-dialog/types';
 import { Button } from '@/components/ui/button';
 import { useCommand, usePlayer } from '@/hooks/use-game';
+import { opaqueAt } from '@/hooks/use-images';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { allOf } from '@/lib/query-keys';
 import { cn } from '@/lib/utils';
@@ -35,14 +40,34 @@ import { cn } from '@/lib/utils';
  */
 export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number }) {
   const { t } = useTranslation(['map-panel', 'common']);
-  // the tile at the middle of the map (fractional while dragging, and allowed past the edge, which the map wraps)
-  const [center, setCenter] = useState({ x: city.x, y: city.y });
   const [selected, setSelected] = useState<number | null>(null);
+  const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [list, setList] = useState<'valleys' | 'legend' | null>(null);
   const [target, setTarget] = useState<SendTarget | null>(null);
   const [moveTo, setMoveTo] = useState<{ x: number; y: number } | null>(null);
   const wide = useMediaQuery('(min-width: 1024px)');
   const wrap = (v: number) => ((v % mapSize) + mapSize) % mapSize;
+  // the camera starts on the city, at a zoom wide enough to look round; it may go past the edge, which the map wraps
+  const vp = useIsoViewport({
+    start: (view) => ({ x: city.x, y: city.y, zoom: startZoom(view.w, view.dpr) }),
+    resetKey: city.id,
+    onTap: (p) => {
+      const tile = pick(p);
+      if (tile) select(map.idOf(tile.x, tile.y));
+    },
+    onHover: (p) => setHover(p ? (pick(p) ?? null) : null),
+    onEnter: () => vp.camera && select(map.idOf(Math.round(vp.camera.x), Math.round(vp.camera.y))),
+  });
+  const map = useWorldMap(vp, mapSize);
+  /** The tile under a point: the front-most sprite with a pixel there, else the tile whose diamond holds it. */
+  const pick = (p: ViewPoint) => {
+    if (!vp.camera) return undefined;
+    const sprite = spriteAt(p, map.sprites, vp.camera, vp.view, opaqueAt);
+    if (sprite) return { x: sprite.col, y: sprite.row };
+    const t = tileAt(p, vp.camera, vp.view);
+    return { x: Math.round(t.x), y: Math.round(t.y) };
+  };
+  const centre = vp.camera ?? { x: city.x, y: city.y };
   // valleys held by this city, then by the lord's other cities
   const player = usePlayer();
   const owned = new Map<number, { cityName: string; here: boolean }>();
@@ -70,25 +95,25 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     if (!wide) setList(null);
   };
   const goTo = (x: number, y: number) => {
-    setCenter({ x, y });
+    vp.centreOn(x, y);
     select(y * mapSize + x);
   };
   const pan = (dir: PanDirection) => {
-    const { dx, dy } = panStep(dir);
-    setCenter((c) => ({ x: c.x + dx, y: c.y + dy }));
+    const { dx, dy } = panStep(dir, PAN_STEP);
+    vp.panBy(dx, dy);
   };
   const toggle = (which: 'valleys' | 'legend') => setList((l) => (l === which ? null : which));
   const floating = 'absolute max-h-[calc(100%-4.5rem)] overflow-y-auto';
 
   return (
     <div className="relative h-full min-h-80 overflow-hidden">
-      <WorldMap center={center} onCenter={setCenter} mapSize={mapSize} selected={selected} onSelect={select} home={{ x: city.x, y: city.y }} owned={owned} />
+      <WorldMap vp={vp} map={map} mapSize={mapSize} selected={selected} hover={hover} home={{ x: city.x, y: city.y }} owned={owned} />
       <div
         role="toolbar"
         aria-label={t('toolbar')}
         className="absolute top-2 left-2 flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1 rounded-lg border bg-background/90 p-1 shadow backdrop-blur"
       >
-        <span className="px-1.5 text-sm font-medium tabular-nums">{t('title', { x: wrap(Math.round(center.x)), y: wrap(Math.round(center.y)) })}</span>
+        <span className="px-1.5 text-sm font-medium tabular-nums">{t('title', { x: wrap(Math.round(centre.x)), y: wrap(Math.round(centre.y)) })}</span>
         <Button size="icon-xs" variant="ghost" onClick={() => pan('left')} aria-label={t('pan.left')}>
           <ArrowLeft />
         </Button>
@@ -101,7 +126,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
         <Button size="icon-xs" variant="ghost" onClick={() => pan('right')} aria-label={t('pan.right')}>
           <ArrowRight />
         </Button>
-        <Button size="icon-xs" variant="ghost" onClick={() => setCenter({ x: city.x, y: city.y })} aria-label={t('pan.home')}>
+        <Button size="icon-xs" variant="ghost" onClick={() => vp.centreOn(city.x, city.y)} aria-label={t('pan.home')}>
           <Crosshair />
         </Button>
         <span className="mx-0.5 h-5 w-px bg-border" />

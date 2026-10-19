@@ -1,21 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import type { Camera, View } from '@/components/iso-viewport/types';
 import { CHUNK } from '@/components/map-panel/world-map/constants';
-import type { Camera, View } from '@/components/map-panel/world-map/types';
-import {
-  chunksFor,
-  decodeTiles,
-  dragged,
-  nextZoom,
-  panStep,
-  pickTile,
-  startZoom,
-  tileAt,
-  tileOrigin,
-  visibleTiles,
-  wrap,
-  zoomsFor,
-} from '@/components/map-panel/world-map/utils';
+import { chunksFor, decodeTiles, startZoom, visibleTiles, wrap } from '@/components/map-panel/world-map/utils';
 
 const view: View = { w: 640, h: 320, dpr: 1 };
 const cam: Camera = { x: 100, y: 200, zoom: 1 };
@@ -26,70 +13,6 @@ describe(wrap.name, () => {
     expect(wrap(800, 800)).toBe(0);
     expect(wrap(-1, 800)).toBe(799);
     expect(wrap(-801, 800)).toBe(799);
-  });
-});
-
-describe(tileOrigin.name, () => {
-  it('puts the camera tile in the middle of the view', () => {
-    expect(tileOrigin(100, 200, cam, view)).toEqual({ x: 320, y: 160 });
-  });
-
-  it('moves half a tile right and down per column, half a tile left and down per row', () => {
-    expect(tileOrigin(101, 200, cam, view)).toEqual({ x: 352, y: 176 });
-    expect(tileOrigin(100, 201, cam, view)).toEqual({ x: 288, y: 176 });
-  });
-
-  it('works in device pixels, scaled by the zoom and the device pixel ratio', () => {
-    expect(tileOrigin(101, 200, { ...cam, zoom: 2 }, { ...view, dpr: 2 })).toEqual({ x: 640 + 128, y: 320 + 64 });
-  });
-
-  it('lands every tile on a whole pixel when the camera is between tiles', () => {
-    const p = tileOrigin(103, 205, { x: 100.37, y: 200.81, zoom: 1.5 }, { ...view, dpr: 2 });
-    expect(Number.isInteger(p.x) && Number.isInteger(p.y)).toBe(true);
-  });
-});
-
-describe(tileAt.name, () => {
-  it('turns a screen point back into the tile it came from', () => {
-    const p = tileOrigin(103, 197, cam, view);
-    expect(tileAt(p.x, p.y, cam, view)).toEqual({ x: 103, y: 197 });
-  });
-
-  it('gives the camera tile at the middle of the view', () => {
-    expect(tileAt(320, 160, cam, view)).toEqual({ x: 100, y: 200 });
-  });
-});
-
-describe(dragged.name, () => {
-  it('moves the map with the pointer: what was under it stays under it', () => {
-    const before = tileAt(400, 100, cam, view);
-    const moved = dragged(cam, 50, -30);
-    const after = tileAt(450, 70, moved, view);
-    expect(after.x).toBeCloseTo(before.x);
-    expect(after.y).toBeCloseTo(before.y);
-  });
-
-  it('keeps the zoom', () => {
-    expect(dragged({ ...cam, zoom: 2 }, 10, 10).zoom).toBe(2);
-  });
-});
-
-describe(panStep.name, () => {
-  it('moves straight up the screen by going back along both axes', () => {
-    expect(panStep('up', 4)).toEqual({ dx: -4, dy: -4 });
-    expect(panStep('down', 4)).toEqual({ dx: 4, dy: 4 });
-  });
-
-  it('moves across the screen along one axis and back along the other', () => {
-    expect(panStep('left', 4)).toEqual({ dx: -4, dy: 4 });
-    expect(panStep('right', 4)).toEqual({ dx: 4, dy: -4 });
-  });
-
-  it('does what it says on screen', () => {
-    const { dx, dy } = panStep('right', 4);
-    const p = tileOrigin(100 + dx, 200 + dy, cam, view);
-    expect(p.y).toBe(160);
-    expect(p.x).toBeGreaterThan(320);
   });
 });
 
@@ -165,21 +88,6 @@ describe(decodeTiles.name, () => {
   });
 });
 
-describe(zoomsFor.name, () => {
-  it('keeps only whole-number zooms on an ordinary screen', () => {
-    expect(zoomsFor(1)).toEqual([1, 2, 3, 4]);
-  });
-
-  it('adds the half steps on a screen with two device pixels to the CSS pixel', () => {
-    expect(zoomsFor(2)).toEqual([1, 1.5, 2, 2.5, 3, 4]);
-  });
-
-  it('keeps only the zooms that are whole on an odd ratio, and falls back to 1 when none are', () => {
-    expect(zoomsFor(1.25)).toEqual([4]);
-    expect(zoomsFor(1.1)).toEqual([1]);
-  });
-});
-
 describe(startZoom.name, () => {
   it('opens two steps out from the largest zoom that still shows six tiles across', () => {
     expect(startZoom(1500, 1)).toBe(1);
@@ -194,49 +102,5 @@ describe(startZoom.name, () => {
 
   it('opens at the smallest zoom on a narrow view', () => {
     expect(startZoom(300, 2)).toBe(1);
-  });
-});
-
-describe(nextZoom.name, () => {
-  it('steps in and out through the zooms this screen allows', () => {
-    expect(nextZoom(2, 1, 2)).toBe(2.5);
-    expect(nextZoom(2, -1, 2)).toBe(1.5);
-    expect(nextZoom(2, 1, 1)).toBe(3);
-  });
-
-  it('stays at the ends', () => {
-    expect(nextZoom(4, 1, 1)).toBe(4);
-    expect(nextZoom(1, -1, 1)).toBe(1);
-  });
-
-  it('snaps a zoom this screen cannot show to the next one in that direction', () => {
-    expect(nextZoom(1.5, 1, 1)).toBe(2);
-    expect(nextZoom(1.5, -1, 1)).toBe(1);
-  });
-});
-
-describe(pickTile.name, () => {
-  const clear = () => false;
-  const solid = () => true;
-
-  it('finds the tile whose diamond holds the point', () => {
-    const p = tileOrigin(102, 199, cam, view);
-    expect(pickTile(p.x, p.y, [], cam, view, clear)).toEqual({ x: 102, y: 199 });
-  });
-
-  it('prefers a sprite whose pixels are under the point, front-most first', () => {
-    // a point just above tile (100, 200)'s diamond: the sprite of the tile behind reaches it, and so does this one's
-    const p = tileOrigin(100, 200, cam, view);
-    const drawn = [
-      { x: 99, y: 199, src: 'back' },
-      { x: 100, y: 200, src: 'front' },
-    ];
-    expect(pickTile(p.x, p.y - 20, drawn, cam, view, solid)).toEqual({ x: 100, y: 200 });
-    expect(pickTile(p.x, p.y - 20, drawn, cam, view, (src) => src === 'back')).toEqual({ x: 99, y: 199 });
-  });
-
-  it('ignores a tile drawn without a sprite, and goes by the diamond under the point', () => {
-    const p = tileOrigin(100, 200, cam, view);
-    expect(pickTile(p.x, p.y - 20, [{ x: 100, y: 200 }], cam, view, solid)).toEqual({ x: 99, y: 199 });
   });
 });

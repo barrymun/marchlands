@@ -1,32 +1,22 @@
 import { useQueries } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
 
 import { getMapOptions, type MapCastle, type MapHeldValley } from '@marchlands/api-client';
 
+import type { Viewport } from '@/components/iso-viewport/hooks';
+import type { Drawable } from '@/components/iso-viewport/types';
+import { TILE_ART } from '@/components/map-panel/constants';
 import type { ChunkArea, TileInfo } from '@/components/map-panel/world-map/types';
-import { decodeTiles } from '@/components/map-panel/world-map/utils';
+import { chunksFor, decodeTiles, visibleTiles, wrap } from '@/components/map-panel/world-map/utils';
+import { artBand, tileArtFile } from '@/lib/game-art';
 
 /** How long a loaded square of the map counts as fresh before it is fetched again when it comes back into view. */
 const FRESH_MS = 30_000;
-
-/** A ref for an element and its size in CSS pixels, kept up to date as it resizes. */
-export function useSize<T extends HTMLElement>(): [(el: T | null) => void, { w: number; h: number }] {
-  const [el, setEl] = useState<T | null>(null);
-  const [size, setSize] = useState({ w: 0, h: 0 });
-  useEffect(() => {
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setSize({ w: entry.contentRect.width, h: entry.contentRect.height }));
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [el]);
-  return [setEl, size];
-}
 
 /**
  * The map in the given squares, merged: every tile's type and level, the castles and barbarian camps, and the valleys
  * other players hold, each by tile id. Squares load one request each and are cached, so panning back is instant.
  */
-export function useMapArea(
+function useMapArea(
   chunks: readonly ChunkArea[],
   mapSize: number,
 ): { tiles: Map<number, TileInfo>; castles: Map<number, MapCastle>; valleys: Map<number, MapHeldValley> } {
@@ -46,3 +36,22 @@ export function useMapArea(
     },
   });
 }
+
+/**
+ * What the world map shows through a viewport: every tile in view (unwrapped coordinates, back to front) with its id,
+ * what it is once its square has loaded, and its sprite; and the castles and other players' valleys in view.
+ */
+export function useWorldMap(vp: Viewport, mapSize: number) {
+  const visible = vp.camera ? visibleTiles(vp.camera, vp.view) : [];
+  const area = useMapArea(chunksFor(visible, mapSize), mapSize);
+  const idOf = (x: number, y: number) => wrap(y, mapSize) * mapSize + wrap(x, mapSize);
+  const tiles = visible.map((v) => {
+    const id = idOf(v.x, v.y);
+    const info = area.tiles.get(id);
+    return { ...v, id, info, src: info ? TILE_ART[tileArtFile(info.type, artBand(info.level))] : undefined };
+  });
+  const sprites: (Drawable & { id: number })[] = tiles.flatMap((t) => (t.src ? [{ key: `${t.x},${t.y}`, col: t.x, row: t.y, src: t.src, id: t.id }] : []));
+  return { area, tiles, sprites, idOf };
+}
+
+export type WorldMapData = ReturnType<typeof useWorldMap>;

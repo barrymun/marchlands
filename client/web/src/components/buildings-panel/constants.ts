@@ -20,3 +20,6 @@ export const TOWN_VIEW_QUERY = '(min-width: 768px)';
 
 /** Which city view the panel shows, remembered per browser. */
 export const VIEW_KEY = 'marchlands-city-view';
+
+/** A box floating over the scene: the title and tags, the view switch. */
+export const FLOATING = 'absolute rounded-lg border bg-background/90 shadow backdrop-blur';

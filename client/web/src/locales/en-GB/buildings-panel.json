@@ -10,6 +10,9 @@
     "scene": "Scene",
     "grid": "Grid"
   },
+  "scene": {
+    "label": "{{area}}: drag to look round, scroll or pinch to zoom, arrow keys to move, + and - to zoom"
+  },
   "inside": {
     "title": "Inside the walls"
   },

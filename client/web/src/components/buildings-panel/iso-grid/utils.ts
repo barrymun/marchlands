@@ -1,5 +1,6 @@
-import { SPRITE, TILE_H, TILE_W } from '@/components/buildings-panel/iso-grid/constants';
 import type { GridPoint, GroundTile, IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
+import { SPRITE, TILE_H, TILE_W } from '@/components/iso-viewport/constants';
+import { spriteBox } from '@/components/iso-viewport/utils';
 
 /**
  * The middle of a tile's diamond, in pixels from the middle of tile (0, 0), at the art's own size, rounded to a whole
@@ -19,15 +20,6 @@ export function gridCells(cols: number, rows: number): [number, number][] {
   const cells: [number, number][] = [];
   for (let col = 0; col < cols; col++) for (let row = 0; row < rows; row++) cells.push([col, row]);
   return cells.sort((a, b) => depthOf(...a) - depthOf(...b) || a[0] - a[1] - (b[0] - b[1]));
-}
-
-/**
- * Where a `size`-pixel square sprite lies round the middle of its tile: anchored so its ground diamond's middle is a
- * quarter of its size, plus 2 pixels, above its bottom ((32, 46) on a 64-pixel sprite, (64, 94) on the 128-pixel Town
- * Hall; tools/art/iso.ts, anchor).
- */
-export function spriteBox(size = SPRITE): { left: number; top: number; width: number; height: number } {
-  return { left: -size / 2, top: -((size * 3) / 4 - 2), width: size, height: size };
 }
 
 /**
@@ -97,21 +89,6 @@ export function fieldLayout(o: { cols: number; rows: number; pitch: number; extr
     cols: c.ground,
     rows: r.ground,
   };
-}
-
-/**
- * The box every sprite on these cells fits in, at the art's own size: its size, and where the middle of tile (0, 0)
- * falls in it (`originX`, `originY`). `size` is a sprite's size in pixels (64 when left out).
- */
-export function gridBounds(cells: readonly { col: number; row: number; size?: number }[]): { originX: number; originY: number; width: number; height: number } {
-  const boxes = cells.map((c) => {
-    const p = tilePoint(c.col, c.row);
-    const b = spriteBox(c.size);
-    return { left: p.x + b.left, top: p.y + b.top, right: p.x + b.left + b.width, bottom: p.y + b.top + b.height };
-  });
-  const left = Math.min(...boxes.map((b) => b.left));
-  const top = Math.min(...boxes.map((b) => b.top));
-  return { originX: -left, originY: -top, width: Math.max(...boxes.map((b) => b.right)) - left, height: Math.max(...boxes.map((b) => b.bottom)) - top };
 }
 
 /** Whether a point (dx, dy) from the middle of a tile lies on its diamond, `span` tiles across. */

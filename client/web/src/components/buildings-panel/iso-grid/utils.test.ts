@@ -4,13 +4,11 @@ import {
   buildingSprites,
   depthOf,
   fieldLayout,
-  gridBounds,
   gridCells,
   hitTest,
   inDiamond,
   markerOf,
   spacing,
-  spriteBox,
   tilePoint,
   townLayout,
 } from '@/components/buildings-panel/iso-grid/utils';
@@ -146,33 +144,6 @@ describe(fieldLayout.name, () => {
 
   it('refuses a diamond that does not hold every field', () => {
     expect(() => fieldLayout({ cols: 6, rows: 6, pitch: 1.3, extra: 1, positions, unlocked: 3 })).toThrow();
-  });
-});
-
-describe(spriteBox.name, () => {
-  it('anchors a 64-pixel sprite at (32, 46)', () => {
-    expect(spriteBox()).toEqual({ left: -32, top: -46, width: 64, height: 64 });
-  });
-
-  it('anchors the 128-pixel Town Hall at (64, 94)', () => {
-    expect(spriteBox(128)).toEqual({ left: -64, top: -94, width: 128, height: 128 });
-  });
-});
-
-describe(gridBounds.name, () => {
-  it('fits one 64×64 sprite, its anchor at (32, 46)', () => {
-    expect(gridBounds([{ col: 0, row: 0 }])).toEqual({ originX: 32, originY: 46, width: 64, height: 64 });
-  });
-
-  it('makes room for a bigger sprite', () => {
-    expect(gridBounds([{ col: 0, row: 0, size: 128 }])).toEqual({ originX: 64, originY: 94, width: 128, height: 128 });
-  });
-
-  it('spans a whole diamond: 32 pixels across per column and row, 16 down', () => {
-    const b = gridBounds(gridCells(6, 6).map(([col, row]) => ({ col, row })));
-    expect(b.width).toBe(6 * 32 + 6 * 32);
-    expect(b.height).toBe(10 * 16 + 64);
-    expect(b.originX).toBe(5 * 32 + 32);
   });
 });
 
