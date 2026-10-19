@@ -7,7 +7,7 @@
   "title": "Items for {{name}}",
   "maxLevel": "Max level",
   "experienceProgress": "Experience {{exp}} / {{needed}}",
-  "summary": "{{progress}} · loyalty {{loyalty}} · {{gold}} gold in this city",
+  "summary": "{{progress}} · Loyalty {{loyalty}} · {{gold}} gold in this city",
   "experience": {
     "title": "Experience",
     "gain": "+{{amount}} experience",

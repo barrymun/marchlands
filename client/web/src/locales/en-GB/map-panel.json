@@ -22,14 +22,14 @@
   "tile": {
     "castle": "{{name}} ({{player}})",
     "summary": "{{type}} Lv {{level}} ({{x}},{{y}})",
-    "heldByYou": "held by your city {{city}}",
-    "heldBy": "held by {{city}} ({{player}})",
-    "heldByAlliance": "held by {{city}} ({{player}}, {{alliance}})",
+    "heldByYou": "Held by your city {{city}}",
+    "heldBy": "Held by {{city}} ({{player}})",
+    "heldByAlliance": "Held by {{city}} ({{player}}, {{alliance}})",
     "loading": "({{x}},{{y}}) loading"
   },
   "info": {
-    "player": "Player {{player}} · prestige {{prestige}}",
-    "playerAlliance": "Player {{player}} of {{alliance}} · prestige {{prestige}}",
+    "player": "Player {{player}} · Prestige {{prestige}}",
+    "playerAlliance": "Player {{player}} of {{alliance}} · Prestige {{prestige}}",
     "heldBy": "Held by {{city}} ({{player}})",
     "moveCityHere": "Move city here…",
     "sendArmy": "Send army",

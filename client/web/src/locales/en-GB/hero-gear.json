@@ -1,6 +1,6 @@
 {
   "line": {
-    "summary": "Gear <bonus>+{{total}}</bonus> · tier {{tier}}/{{max}}",
+    "summary": "Gear <bonus>+{{total}}</bonus> · Tier {{tier}}/{{max}}",
     "nextTier": "(tier {{tier}} at level {{level}})",
     "attributeGroup": "Attribute the gear boosts",
     "boosts": "Gear boosts {{label}}",

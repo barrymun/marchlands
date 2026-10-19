@@ -57,9 +57,9 @@
     "politics": "Politics",
     "attack": "Attack",
     "intelligence": "Intelligence",
-    "politicsShort": "pol",
-    "attackShort": "att",
-    "intelligenceShort": "int"
+    "politicsShort": "Pol",
+    "attackShort": "Att",
+    "intelligenceShort": "Int"
   },
   "push": {
     "buildingComplete": "{{name}} reached level {{level}}",

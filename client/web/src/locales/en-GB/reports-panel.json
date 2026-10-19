@@ -17,7 +17,7 @@
     "deleted": "Report deleted"
   },
   "none": "none",
-  "walls": "· walls Lv {{level}}",
+  "walls": "· Walls Lv {{level}}",
   "barbarianCity": "Barbarian city Lv {{level}}",
   "labels": {
     "from": "From",
@@ -71,10 +71,10 @@
     "lost": "Lost",
     "after": "After",
     "injured": "Survived injured (Medicine): ",
-    "healHint": "· heal them in Military",
+    "healHint": "· Heal them in Military",
     "honor": "+{{value}} honour",
-    "heroExp": "hero +{{value}} exp",
-    "walls": "walls Lv {{level}}"
+    "heroExp": "Hero +{{value}} exp",
+    "walls": "Walls Lv {{level}}"
   },
   "loot": {
     "title": "Loot",
@@ -87,7 +87,7 @@
     "medalsFound": "Medals found:",
     "medalsAttackerFound": "Medals the attacker found:",
     "loyalty": "Loyalty −{{damage}} (now {{left}})",
-    "captured": " · city captured"
+    "captured": " · City captured"
   },
   "desertion": {
     "intro": "{{city}} ran out of food, so troops deserted: 10% of every troop type for each game hour the upkeep went unpaid (a game hour is {{gameHour}}).",
@@ -104,7 +104,7 @@
     "nobody": "nobody",
     "gotThrough": "got through",
     "repelled": "were repelled",
-    "fight": "{{outcome}} · ours {{ourBefore}} → {{ourAfter}}, theirs {{theirBefore}} → {{theirAfter}}"
+    "fight": "{{outcome}} · Ours {{ourBefore}} → {{ourAfter}}, theirs {{theirBefore}} → {{theirAfter}}"
   },
   "trade": {
     "order": "{{amount}} {{resource}} at {{price}}"

@@ -17,7 +17,7 @@
     "carried": "{{loaded}} / {{capacity}} carried",
     "chooseTroops": "Choose troops to carry resources",
     "maxTitle": "As much as the troops can still carry",
-    "estimate": "March {{time}} · carries {{load}}",
+    "estimate": "March {{time}} · Carries {{load}}",
     "estimateButton": "Estimate"
   },
   "presets": {

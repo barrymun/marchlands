@@ -52,7 +52,7 @@
   },
   "attributes": {
     "strongest": "Strongest attribute: {{label}}",
-    "loyalty": "loyalty {{loyalty}}",
+    "loyalty": "Loyalty {{loyalty}}",
     "points_one": "{{count}} point",
     "points_other": "{{count}} points"
   },
@@ -68,7 +68,7 @@
   },
   "dismissDialog": {
     "title": "Dismiss {{name}}?",
-    "description": "{{name}} (Lv {{level}}, att {{att}} · pol {{pol}} · int {{int}}) will leave your city for good. This cannot be undone.",
+    "description": "{{name}} (Lv {{level}}, Att {{att}} · Pol {{pol}} · Int {{int}}) will leave your city for good. This cannot be undone.",
     "keep": "Keep {{name}}",
     "confirm": "Dismiss"
   }

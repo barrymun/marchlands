@@ -27,8 +27,8 @@
     "player": "player",
     "unlimited": "unlimited",
     "merchant": "merchant",
-    "divider": "sellers above · buyers below",
-    "reference": " · reference {{price}}"
+    "divider": "Sellers above · Buyers below",
+    "reference": " · Reference {{price}}"
   },
   "priceHistory": {
     "title": "Price · {{resource}}",
@@ -55,8 +55,8 @@
     "lowestPrice": "Lowest price (gold each)",
     "enterAmount": "Enter an amount to see a quote.",
     "enterAmountAndPrice": "Enter an amount and a price to see a quote.",
-    "buyNowQuote": "Buy {{amount}} now · avg {{price}}",
-    "sellNowQuote": "Sell {{amount}} now · avg {{price}}",
+    "buyNowQuote": "Buy {{amount}} now · Avg {{price}}",
+    "sellNowQuote": "Sell {{amount}} now · Avg {{price}}",
     "goldSpent": "−{{gold}} gold",
     "goldEarned": "+{{gold}} gold",
     "nothingTrades": "Nothing trades at this price right now.",

@@ -43,7 +43,7 @@
     "demolished": "Building demolished",
     "cancelled": "Cancelled",
     "demolishAll": "Demolish the whole building, instantly",
-    "returns": " · returns {{refund}}",
+    "returns": " · Returns {{refund}}",
     "demolish": "Demolish",
     "confirmAllTitle": "Demolish {{name}} (Lv {{level}})?",
     "confirmAll": "The whole building goes at once. This cannot be undone.",

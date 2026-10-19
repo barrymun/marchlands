@@ -6,7 +6,7 @@
     "truce": "Truce in effect",
     "promoted": "Promoted"
   },
-  "summary": "{{title}} · flag {{flag}}",
+  "summary": "{{title}} · Flag {{flag}}",
   "name": {
     "label": "New name",
     "wait": "Renaming is free once a day: next in <countdown />.",

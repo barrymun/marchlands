@@ -19,7 +19,7 @@
   },
   "workRates": {
     "label": "Production work rates",
-    "description": "Lower a rate to free that field type's workers: they become idle population you can train troops from. At 0% the fields produce nothing. Idle now: {{idle}} · in the fields: {{workers}}.",
+    "description": "Lower a rate to free that field type's workers: they become idle population you can train troops from. At 0% the fields produce nothing. Idle now: {{idle}} · In the fields: {{workers}}.",
     "field": "{{resource}} %",
     "save": "Save rates",
     "allIdle": "All 0% (everyone idle)",

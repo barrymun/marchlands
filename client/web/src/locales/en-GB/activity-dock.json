@@ -1,6 +1,6 @@
 {
   "title": "In progress",
-  "summary": "{{jobs}} · next {{next}}",
+  "summary": "{{jobs}} · Next {{next}}",
   "finishing": "finishing…",
   "more": "+{{n}} more",
   "nothing": "Nothing in progress",

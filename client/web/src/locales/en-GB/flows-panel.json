@@ -91,8 +91,8 @@
     },
     "lastPreview": "Preview · {{ago}} (nothing was changed)",
     "lastRun": {
-      "inProgress": "Run {{run}} · started {{started}} · in progress",
-      "ended": "Run {{run}} · started {{started}} · ended {{ended}}"
+      "inProgress": "Run {{run}} · Started {{started}} · In progress",
+      "ended": "Run {{run}} · Started {{started}} · Ended {{ended}}"
     },
     "report": {
       "wouldRun": "Would run",

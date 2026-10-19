@@ -27,7 +27,7 @@
   "cityFallback": "City",
   "yourCities": "Your cities",
   "citySettings": "City settings",
-  "playerStats": "Prestige {{prestige}} · rank {{rank}} · honour {{honor}}",
+  "playerStats": "Prestige {{prestige}} · Rank {{rank}} · Honour {{honor}}",
   "beginnerProtection": "Beginner protection",
   "titledName": "{{title}} {{name}}",
   "liveUpdates": {
