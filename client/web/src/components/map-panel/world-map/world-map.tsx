@@ -104,10 +104,10 @@ export function WorldMap({
           <span
             key={`${d.x},${d.y}`}
             aria-hidden
-            className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-full items-center gap-1 rounded-sm bg-background/85 px-1 text-[10px] leading-4 font-medium whitespace-nowrap"
+            className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-full items-center gap-1 rounded-sm bg-background/85 py-0.5 pr-1.5 pl-0.5 text-[10px] leading-4 font-medium whitespace-nowrap"
             style={{ left: p.x, top: p.y - (anchor - 8) * zoom }}
           >
-            {castle.flag && <span className="rounded-[2px] bg-red-700 px-0.5 text-[9px] text-white">{castle.flag}</span>}
+            {castle.flag && <span className="rounded-[3px] bg-red-700 px-1 text-xs leading-5 font-bold tracking-wide text-white shadow-sm">{castle.flag}</span>}
             {castle.name}
           </span>
         );
