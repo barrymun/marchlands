@@ -111,7 +111,7 @@ export function TopBar({ city, status, onDialog }: { city?: CityBean; status: 'o
                 <UserRound className="size-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-auto min-w-56">
               <DropdownMenuLabel className="font-normal">
                 <PlayerSummary />
               </DropdownMenuLabel>

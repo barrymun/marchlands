@@ -4,6 +4,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   type CityBean,
   getCitiesByCityIdQueryKey,
+  getMapQueryKey,
+  getMapTilesByTileIdQueryKey,
   getPlayerQueryKey,
   postPlayerFlagMutation,
   postPlayerGenderMutation,
@@ -29,6 +31,7 @@ import { useNow } from '@/hooks/use-now';
 import { fmt } from '@/lib/format';
 import { itemName, titleName } from '@/lib/game-data';
 import { GENDERS } from '@/lib/genders';
+import { allOf } from '@/lib/query-keys';
 
 export function LordForm({ city }: { city?: CityBean }) {
   const { t } = useTranslation(['lord-dialog', 'common']);
@@ -39,12 +42,14 @@ export function LordForm({ city }: { city?: CityBean }) {
   const [flag, setFlag] = useState('');
   const [gender, setGender] = useState<string | null>(null);
   const refresh = () => [getPlayerQueryKey()];
-  const rename = useCommand(postPlayerRenameMutation(), refresh, t('toast.renamed'));
+  // the map shows each castle's player name, flag and status, on the map itself and in a tile's card
+  const refreshMap = () => [getPlayerQueryKey(), allOf(getMapQueryKey), allOf(getMapTilesByTileIdQueryKey)];
+  const rename = useCommand(postPlayerRenameMutation(), refreshMap, t('toast.renamed'));
   const changeGender = useCommand(postPlayerGenderMutation(), refresh, t('toast.genderChanged'));
-  const changeFlag = useCommand(postPlayerFlagMutation(), refresh, t('toast.flagChanged'));
+  const changeFlag = useCommand(postPlayerFlagMutation(), refreshMap, t('toast.flagChanged'));
   const truce = useCommand(
     postPlayerTruceMutation(),
-    () => [getPlayerQueryKey(), ...(city ? [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })] : [])],
+    () => [...refreshMap(), ...(city ? [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })] : [])],
     t('toast.truce'),
   );
   const truceGold = itemGoldPrice(TRUCE) ?? 0;
