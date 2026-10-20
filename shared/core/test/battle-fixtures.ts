@@ -69,7 +69,9 @@ export interface BattleGolden {
 /**
  * Random battles with research, hero stratagem, fortifications and walls, and their outcome as the
  * simulator gave it when every battle rule was a number written into it (before BALANCE.battle). The
- * original's regression data has no research or walls, so this pins those rules.
+ * original's regression data has no research or walls, so this pins those rules. The 149 run with `fixes`
+ * were regenerated on 2026-10-20, when traps began hitting only ground troops and ranged groups stopping
+ * once the wall is in range (docs/deviations.md); the others are unchanged.
  */
 export function loadBattleGoldens(): BattleGolden[] {
   const file = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures/battle-research-walls.jsonl.gz');

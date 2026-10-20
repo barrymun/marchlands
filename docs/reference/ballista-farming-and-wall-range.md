@@ -1,6 +1,6 @@
 # Ballista farming and the wall's range bonus (Evony Age 1)
 
-**Version:** Evony Age 1 player reports (the Evony Wiki's farming pages and blogs from 2009-2010), compared with Marchlands' battle engine (`shared/core/src/battle/simulator.ts`). This note follows up two open rows of [combat-guides.md](combat-guides.md), Where they differ: the Age 2 guide's 500-ballista farm, and the wall's range bonus for defending troops. It changes nothing in the engine; the recommendations are for the maintainer to decide.
+**Version:** Evony Age 1 player reports (the Evony Wiki's farming pages and blogs from 2009-2010), compared with Marchlands' battle engine (`shared/core/src/battle/simulator.ts`). This note follows up two open rows of [combat-guides.md](combat-guides.md), Where they differ: the Age 2 guide's 500-ballista farm, and the wall's range bonus for defending troops. **Adopted 2026-10-20:** both rule changes in question 1 are in game battles (`fixes: true`, `shared/core/src/battle/simulator.ts`; [deviations.md](../deviations.md)), with tests in `shared/core/test/battle-scenarios.test.ts`. Question 2 is left as it was.
 
 **Sources** (read 2026-10-19 and 2026-10-20, facts in our own words):
 

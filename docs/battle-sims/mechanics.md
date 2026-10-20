@@ -17,7 +17,8 @@ How a field battle in `shared/core/src/battle/simulator.ts` plays out. Server ba
   **The field decides round 1:** cavalry at Horseback Riding 10 move 1500, so on a 1600 field they reach archers and strike in round 1, and on a 1700 field they hit nothing. One catapult in a city denies cavalry their first strike.
 - **Moving:** a group moves toward the nearest enemy group unless an enemy group is already in its range.
   - It never passes an enemy group: it stops at that group's position.
-  - The wall and archer towers are not groups, so a group keeps walking even when the wall is in range.
+  - The wall and archer towers are not groups, so a melee group keeps walking even when the wall is in range.
+  - **A ranged group stands off the wall:** an attacking archer, ballista or catapult group stops once the wall is in its range while the wall or a tower stands, and shoots the towers and then the wall from there. Archers with Archery 10 (range 1800) stop at 3500 on a 5200 field. Ballistae out-range a barbarian city's towers, so they can besiege them without being shot.
   - **The attacker's scouts and transporters don't move** while the army has any other type, so they stay at 0, out of reach of every fortification. **The defender's never move.**
 - **Order:** groups move one at a time in a fixed order by type, and strike in another, the defender's group of each type before the attacker's. Researched speed doesn't change the order (`MOVEMENT_ORDER`, `ATTACK_ORDER` in `simulator.ts`):
   - moving: scouts, cavalry, cataphracts, pikemen, swordsmen, warriors, workers, transporters, rams, archers, ballistae, catapults;
@@ -45,7 +46,7 @@ All of them only hit attacking groups inside their zone: from `fieldSize - range
 
 | Fortification | Zone | Each round |
 |---|---|---|
-| Traps | 200 to 5200 (anything that has moved) | 5-9% of all traps fire (fixed for the battle). Each fired trap kills 0.625 units, **split evenly over every group in the zone**. |
+| Traps | 200 to 5200 (any ground troops that have moved) | 5-9% of all traps fire (fixed for the battle). Each fired trap kills 0.625 units, **split evenly over every ground group in the zone** (workers, warriors, scouts, pikemen, swordsmen, archers). Mounted troops, transporters and siege engines walk past them. |
 | Abatis | 200 to 5200 | Fire only at cavalry and cataphracts |
 | Rolling logs | 3900 to 5200 | 10% fire at the ground group with the most attack power |
 | Trebuchets | 200 to 5200 | 10% fire at **the group with the most attack power**. They kill `fired × 1000 / (defense × life)`. If that wipes the group, only the rocks needed are spent. |
@@ -54,14 +55,10 @@ All of them only hit attacking groups inside their zone: from `fieldSize - range
 **What follows from this:**
 - **Traps:** the total killed each round is the same however many groups are in the zone. More groups means a smaller share for each, so cheap fodder groups take kills that would otherwise fall on your main troops.
 - **Trebuchets** always hit your main damage group, and kill a fixed number of its units each round, whatever the army's size. A decoy would need more attack power than the main group: about 23k catapults against 115k archers.
-- **Rolling logs** only reach groups that walk past 3900. Archers do that in the last round, on their way to the wall.
+- **Rolling logs** only reach groups that walk past 3900: melee groups on their way to the wall. Ranged groups stop at the wall's range first (archers at 3500), so the logs never reach them.
 - **Archer towers:** fast fodder (pikemen, swordsmen) reaches tower range first and gets shot. Archers that reach range 3400 kill the towers in one volley.
 
-**Where Age 1 players saw otherwise** ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)): two of the rules above come from the calculator we port, whose fortifications were never fully tested, and Age 1 battle reports contradict them.
-- **Traps hit every attacking group here.** In Age 1 they only stopped infantry, so ballistae walked past them.
-- **Ranged groups keep walking past the point where the wall is in range,** into the towers' range. In Age 1, ballistae stood off and shot the towers from out of their reach for dozens of rounds (a level 5 barbarian city took 45-100 rounds, without losses).
-
-So ballistae can't farm barbarian cities without losses here (500 against a level 5 lose everything to traps), though they could in Age 1. Changing this is a decision for the maintainer.
+**From Age 1 players' reports, not the calculator** (since 2026-10-20, [reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)): traps sparing mounted troops and siege engines, and ranged groups standing off the wall, aren't in the calculator we port, whose fortifications were never fully tested. Age 1 players' battle reports show both, so game battles (`fixes: true`) follow them. Ballistae farm barbarian cities of levels 1-5 without losses, as in Age 1: 500 against a level 5 win every time in about 34 rounds with the maintainer's research.
 
 ## The defense factor
 

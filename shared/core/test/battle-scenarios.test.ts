@@ -11,6 +11,7 @@ import { type BattleSide, type DefenderSide, type ResearchStats, simulateBattle,
 import { TROOP_KEY_LIST, type TroopKey } from '#/constants.ts';
 import { fortsToArray, troopsToArray } from '#/troops.ts';
 import type { FortCounts, TroopCounts } from '#/types.ts';
+import { npcTemplate } from '#/world.ts';
 
 type RoundEvent = Extract<TraceEvent, { kind: 'round' }>;
 type KillEvent = Extract<TraceEvent, { kind: 'kill' }>;
@@ -227,6 +228,37 @@ describe(simulateBattle.name, () => {
       expect(firstHit({ batteringRam: 10_000 }, 6, 10, 10)).toBe(2808);
       expect(firstHit({ catapult: 10_000 }, 3, 9, 10)).toBe(2760);
       expect(firstHit({ catapult: 10_000 }, 3, 10, 9)).toBe(2760);
+    });
+  });
+
+  describe('traps and ranged groups (Age 1 rules)', () => {
+    // Where the calculator we port differs from Age 1 players' battle reports, server battles follow the reports
+    // (docs/reference/ballista-farming-and-wall-range.md, docs/deviations.md): traps only stop ground troops, and an
+    // attacking ranged group stands off once the wall is in its range.
+    const trapKills = (troops: TroopCounts) =>
+      fight({ research: RESEARCH_10, troops }, { research: {}, troops: {}, forts: { trap: 10_000 }, wallLevel: 1 }).kills.filter((k) => k.source === 'trap');
+
+    it('traps hit ground troops, not mounted troops or siege engines', () => {
+      expect(trapKills({ militia: 1000 }).length).toBeGreaterThan(0);
+      expect(trapKills({ lightCavalry: 1000, heavyCavalry: 1000, carriage: 1000, ballista: 1000, batteringRam: 1000, catapult: 1000 })).toEqual([]);
+    });
+
+    it('lets 500 ballistae farm a level 5 barbarian city without losses, standing off the wall', () => {
+      // The standard Age 1 farm: the ballistae walk past the traps, stop once the wall is in range, outside the
+      // towers' reach, and shoot the towers and then the wall from there.
+      const npc = npcTemplate(5);
+      const { outcome, rounds, kills } = fight(
+        { research: RESEARCH_10, troops: { ballista: 500 } },
+        { research: {}, troops: npc.troops, forts: npc.forts, wallLevel: 5 },
+      );
+      const stops = rounds.map((r) => r.attacker[at('ballista')].location);
+      const standOff = Math.max(...stops);
+      expect(kills).toEqual([]);
+      expect(outcome.attackerTroops[at('ballista')]).toBe(500);
+      expect(outcome.attackerAlive).toBe(true);
+      expect(outcome.wallHitPoints).toBe(0);
+      // once at its post it never moves closer
+      expect(stops.slice(stops.indexOf(standOff))).toEqual(stops.slice(stops.indexOf(standOff)).map(() => standOff));
     });
   });
 });

@@ -27,13 +27,16 @@
 
 ## Decided
 
-- **The economy is a (relatively) deep game in its own right,** not only colour around combat (2026-10-19). So the plan goes past phase 3: events that move prices, factions with relations, and tools for players who want to trade seriously (scripts, below).
+- **The economy is a (relatively) deep game in its own right,** not only colour around combat (2026-10-19). So the plan goes past NPC trade: events that move prices, factions with relations, and tools for players who want to trade seriously (scripts, below).
 - **Charts: TradingView Lightweight Charts** (v5, Apache 2.0, canvas, about 35–45 kB gzipped), for candles, volume, depth and the live ticker on the Market page.
   - It is loaded with the Market page only (a lazy screen), and replaces recharts there.
   - recharts has no other users, so it, `components/ui/chart.tsx` and recharts' share of the market's size budget can go. Check the budget (`client/web/.size-limit.js`, *market tab*) with a build.
   - The new dependency is pinned to an exact version at least two weeks old (AGENTS.md).
-  - **Credit:** in README.md, with TradingView's logo. *To check before shipping:* as I understand the library's NOTICE, turning off the logo it draws on the chart (`attributionLogo`) needs a link to tradingview.com that every user of the app can reach (a footer, or an About or credits screen). The README only reaches developers. Either keep the chart's logo, or add an in-game credit as well.
+  - **Credit** (decided 2026-10-20): the small logo the library draws on each chart stays on (`attributionLogo`), plus a credit in README.md with TradingView's logo. As we read the library's NOTICE, turning the chart's logo off would need a link to tradingview.com that every player can reach; keeping it is simplest and clearly meets the licence.
 - **recharts' `^3.8.0`:** pin or remove it with this work. Removing it is likelier, since Lightweight Charts takes over its only use. About 30 other dependencies also use `^` versions; they predate the exact-pin rule (which applies to new dependencies), and pinning them is a separate tidy-up.
+- **The merchant stays at about 1.00 gold, as a last resort with a spread** (2026-10-20). Every trade so far went through it at about 1.00 (822 trades, about 115 billion resources on the dev stack). The design's per-resource base prices (food 0.2 … iron 0.5) would cut what resources and the tax rate earn by 50–80%, a balance change for every player. So the middle price stays near 1.00 and the merchant gets a spread (buying near 0.75, selling near 1.25, numbers in `BALANCE`), so player orders inside the spread beat it at last. Differences between resources come later, from NPC trade.
+- **Factions: five blocks of neighbouring zones, worked out from the zone, with levels 1–4 as unaligned bandits** (2026-10-20), as in Factions, Membership. Names, strengths and temperaments can still change.
+- **Phase order: seats of power straight after factions,** with the ballista rule change before them (2026-10-20). Taking a seat is a fight against fortifications, and most of a seat's value (capture, the daily draft, the title, bigger armies) doesn't need NPC trade; its tribute from trade and market rights arrive with NPC trade. The ballista rule change ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)) also makes farming cheaper, so it changes how fast resources enter the game, and should be settled before NPC trade is tuned.
 - **Factions trade, and player actions move their prices:** plunder a faction's cities and its stock falls, so its prices rise. Two factions at war stop trading with each other and demand iron, so shortages appear. A live ticker shows the NPC trades ("The Saxon League bought 2M iron at 0.62").
 
 ## How every NPC city can trade without flooding the database
@@ -65,7 +68,7 @@ So **every city appears to trade, and the charts show the whole crowd's activity
 - **Resources have to leave the world as well as arrive:**
   - **Sinks:** NPCs use resources up through troop upkeep, building and the wars between factions. Without that, they only ever sell and prices only ever fall.
   - **Gold:** gold leaves through the fee and the merchant's spread.
-- **The merchant becomes a last resort:** curve mode with a wide spread (buying at about half the market price, selling at about twice), so the market never seizes up but factions and players always offer better prices. This is mostly `BALANCE.merchant` (`fixedPrice: null`, a bigger `spread`). The tax rate's sale to the merchant (`merchantBase`) needs a rethink alongside it.
+- **The merchant becomes a last resort** (decided, see Decided): its middle price stays near 1.00, with a spread, so the market never seizes up but factions and players can always offer better prices. The tax rate keeps selling at the merchant's middle price (`merchantBase`), so what it earns doesn't change.
 - **Events:**
   - Plunder lowers a cohort's stock.
   - Wars between factions raise their demand for iron and food.
@@ -85,7 +88,7 @@ So **every city appears to trade, and the charts show the whole crowd's activity
 - **Relations between factions:** alliances, wars and embargoes, which change who trades with whom and so cause the shortages. They could also give quests ("deliver 1M iron to the Saxon League" for standing).
 - **The main risk:** attacking barbarians is the core of single-player play. If factions hit back too hard, that becomes a chore. Keep the low levels unaligned "bandits", and keep every effect tunable in `BALANCE`.
 
-#### Membership (proposal, not decided)
+#### Membership (decided 2026-10-20)
 
 **What the map gives us** (counted on the dev stack, 2026-10-19):
 - The 16 zones are a 4 × 4 grid of 200 × 200 tiles (`stateOf` in `shared/core/src/world.ts`, `BALANCE.stateGrid`), laid out roughly like the real places, Friesland in the north-west and Romagna in the south-east.
@@ -179,7 +182,7 @@ The historical cities (TODO.md, *Historical cities*) and the factions fit togeth
 
 **How it ties into factions:**
 - **Seats are how borders move.** A state belongs to the faction that holds its level 16 seat. When a rival faction takes that seat, the state and its member cities change sides. That's the "borders can move" mechanism, with an event on the map to show it.
-- **Taking a seat from a faction** costs a lot of standing with that faction, and may gain some with its rivals. The faction tries to win the seat back, which is where retaliation (phase 4) matters most.
+- **Taking a seat from a faction** costs a lot of standing with that faction, and may gain some with its rivals. The faction tries to win the seat back, which is where retaliation (phase 5) matters most.
 - **When a player holds a state's level 16,** the NPC members in the state are cut off from their faction. They could stay members but pay their tribute to the player, or become the player's own for drafting and tribute. To decide.
 
 **Keeping it from snowballing.** Seats are prizes for strong players and alliances, so one early player must not be able to take them all.
@@ -245,40 +248,42 @@ Players write scripts that trade for them: buy below a price, keep a stock betwe
 
 ## Phases
 
+In this order (decided 2026-10-20):
+
 1. **Charts and the merchant.**
-   - Lightweight Charts in place of recharts: candles, volume, depth.
-   - `market_candles` written as trades happen.
-   - The merchant in curve mode with a wide spread.
-   - recharts removed or pinned; the README credit.
+   - Lightweight Charts on the Market page in place of recharts: candles, volume and order-book depth, lazy-loaded with the page. recharts and `components/ui/chart.tsx` go; check the market's size budget with a build.
+   - A `market_candles` table (resource, scope, bucket start, open, high, low, close, volume, trade count) written as trades happen, with fine candles rolled up into hours and days and old ones deleted. The Market page reads candles, not every trade.
+   - The merchant as a last resort: middle price near 1.00 and a spread (about 0.75 to buy, 1.25 to sell), in `BALANCE.merchant`; the tax rate still sells at the middle price.
+   - A limit on how often a player can place and cancel orders (in `BALANCE`), so outside bots can't flood the book once it matters.
+   - The credit: the chart's own logo, and README.md.
+   - deviations.md: the merchant's spread replaces the fixed price.
 
    Small, and it makes players' own orders matter at once.
-2. **Factions and reputation, without trading yet.** Factions and their members, standing from combat, standing shifting the merchant's prices. Membership and its rules are settled here.
-3. **NPC trade.** The cohort simulation, clearing each tick, the factions' ladders in the order book, the ticker over the WebSocket.
-4. **Relations between factions and retaliation.** Wars, embargoes, reinforcements. Then, maybe, raids, caravans and regional prices.
-5. **Seats of power.**
-   - The historical cities placed on the map, with their areas.
-   - Capturing and holding them.
-   - Their benefits: the draft and title first; tribute and market rights once NPC trade exists (phase 3).
-   - Seats moving borders, once factions have relations (phase 4).
-
-   This is also the TODO's *Historical cities* item.
-6. **Acts of god.** Scheduled events, their effects on cities and NPC groups, the almanac's forecasts, weather in the map and the town. They can start any time after phase 3, once there are NPC prices for them to move.
+2. **Factions and reputation, without trading yet.** The five factions and their members (worked out from zone and level), their names in a `data-factions` locale namespace, standing from combat, and standing shifting the merchant's prices.
+3. **The ballista rule change, then seats of power.**
+   - First the rule change: traps hit only ground troops, and ranged groups stop once the wall is in range ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)). **Done 2026-10-20.**
+   - The historic cities placed on the map, with their areas and garrisons.
+   - Capturing and holding them, the daily draft, titles and the larger armies.
+   - Seats deciding which faction holds a state.
+   - This is also the TODO's *Historical cities* item.
+4. **NPC trade.** The cohort simulation, clearing each tick, the factions' ladders in the order book, the ticker over the WebSocket. Seats gain their tribute from trade and market rights here.
+5. **Relations between factions and retaliation.** Wars, embargoes, reinforcements, and seats changing hands between factions. Then, maybe, raids, caravans and regional prices.
+6. **Acts of god.** Scheduled events, their effects on cities and NPC groups, the almanac's forecasts, weather in the map and the town. They can start any time after phase 4, once there are NPC prices for them to move.
 7. **Trading scripts.**
-   - The API's rate limits come first, whenever outside bots become a worry.
+   - The API's rate limits come first (in phase 1).
    - Then standing orders and rules, then the language, and the TypeScript sandbox only if it's still wanted.
 
 Each phase records its rule changes in deviations.md (*(design change)*) and its numbers in `BALANCE`.
 
 ## Open questions
 
-- **Membership:** the proposal (Factions, Membership) is five factions of neighbouring zones, worked out from the zone rather than stored. Is that the shape? And which names, strengths and temperaments?
-- **Low levels:** the proposal leaves levels 1–4 as unaligned bandits. Is that the right line, and should clearing bandits raise standing?
+- **Factions' character** (phase 2): their names, strengths, shortages and temperaments. Should clearing bandits raise standing with the faction whose land they're on?
+- **Merchant numbers** (phase 1): the exact spread, and the order rate limit.
 - **Prices:** one world price per resource, or prices by region with travel time?
 - **Retaliation:** prices only, reinforcing their cities, or raiding yours?
 - **Tick:** how often, and in real or game time? Real time keeps the charts' pace the same at any game speed.
 - **Drafting players:** Age 2 let a historic city's holder draft other players' cities in range. Leave that out (the proposal), or allow it with protection (reinforcements, beginners)?
 - **Seats:** all four levels follow Age 2 (proposed). Keep all 1,920 level 12s, or fewer? Does a captured seat become the player's city, as in Age 2, and so count against the city limit? What does each bring, and how much? What happens to a state's NPC members when a player holds its seat? What limits holding (upkeep, one level 16 per player, unrest)? Are benefits shared with the holder's alliance? What does the level 18 bring?
-- **Chart credit:** keep the chart's logo, or credit TradingView in the game itself (see Decided)?
 - **Events:** which ones, how often, how much damage, and whether they also hit troops or marches (a storm delaying armies)?
 - **Forecasts:** how often are they right? Can research or a building improve them?
 - **Scripts:** which level to aim for (rules, a language, TypeScript)? Which building or hero runs them, and what limits come with its level?

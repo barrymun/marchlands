@@ -38,7 +38,7 @@ Both guides agree with our engine on:
 
 | Guide (Age 2) | Our engine | Judgement |
 |---|---|---|
-| **500 ballistae take a level 5 NPC city with no losses,** given high research (source 2) | `npm run sim -- compare --troops ballista=500 --level 5 --research 10`: **won 0%,** all 500 killed by traps in about 5 rounds. 5,000 ballistae win but lose about 2,300 | **Investigated** ([ballista-farming-and-wall-range.md](ballista-farming-and-wall-range.md)): Age 1 players farmed exactly this way (300-550 ballistae, no losses, 45-100 rounds), so it is neither Age 2 nor a guide error. The calculator we port differs from the live game: traps should hit only infantry, and a ranged group should stop once the wall is in range. Recommended as one rule change; no regression case is affected |
+| **500 ballistae take a level 5 NPC city with no losses,** given high research (source 2) | `npm run sim -- compare --troops ballista=500 --level 5 --research 10`: **won 0%,** all 500 killed by traps in about 5 rounds. 5,000 ballistae win but lose about 2,300 | **Adopted 2026-10-20** ([ballista-farming-and-wall-range.md](ballista-farming-and-wall-range.md), [deviations.md](../deviations.md)): Age 1 players farmed exactly this way (300-550 ballistae, no losses, 45-100 rounds), so it is neither Age 2 nor a guide error. The calculator we port differs from the live game: traps should hit only infantry, and a ranged group should stop once the wall is in range. Both are now game rules; no regression case is affected, and 500 ballistae win without losses |
 | **Defending ranged troops get +5% range per wall level** (source 1: archers 2400, ballistae 2800 at wall 10; source 2 says 4.5%) | Only the archer tower gets a wall bonus (`simulator.ts:197-199`, `250`) | **Investigated** ([ballista-farming-and-wall-range.md](ballista-farming-and-wall-range.md)): one Age 1 source says so without numbers; the Age 1 wiki's tables give the bonus to towers only, at 5% a level rather than our 4.5%. Left as it is until firmer evidence. It only matters on a field longer than the archers' range (traps, abatis, trebuchets or siege engines present) |
 | Ranged attackers hit **archer towers first** | A tower is picked only if its attack × count beats the best ranged group's (`simulator.ts:385`) | Age 1 rule as ported, or the guides simplifying |
 | Melee units go for **the missile stack** first (source 1, which the author doubts) | Nearest, then largest attack × count | Ours is verified; the guide is probably wrong |
@@ -107,7 +107,7 @@ The scenarios:
    - With the point-blank quarter: 15,177, against the guide's 15,400.
    - This supports our point-blank rule over source 1's reading.
 
-Not tests: the 500-ballista farm (above: a rule change to decide first), the guides' Age 2 casualty figures, and source 1's "melee hits the missile stack".
+The 500-ballista farm is now a test too (traps and ranged groups). Not tests: the guides' Age 2 casualty figures, and source 1's "melee hits the missile stack".
 
 ## Gaps in our docs the guides point to
 

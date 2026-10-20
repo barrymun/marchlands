@@ -2,6 +2,8 @@
 
 *Simulated 2026-10-09 with the maintainer's research (every level 10), heroes and items. Checked against 697 real level 10 attack reports. Re-checked 2026-10-16 after the gear rework, with the hero's gear modelled: its Attack fell from 1,359 to 1,219, which changes none of the archer results (see [Hero gear](#hero-gear)).*
 
+> **Since 2026-10-20** traps only hit ground troops and ranged groups stop once the wall is in range ([mechanics.md](mechanics.md)). The archers now stop at 3500, short of the rolling logs, and the siege armies further down are no longer trapped. The best army is still best and still wins every time in 9 rounds, losing a little less: **5,077 archers, 1,348 peasants and 1,433 militia, 5.44M a hit** (was 5.79M); the old setup loses 6.38M (was 6.88M). The tables below are from before the change; `npm run sim -- compare --preset archers-best` gives today's.
+
 ## The target
 
 | | |

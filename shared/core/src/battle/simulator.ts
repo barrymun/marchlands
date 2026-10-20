@@ -50,8 +50,10 @@ export interface DefenderSide extends BattleSide {
 export interface BattleOptions {
   rng: Rng;
   /**
-   * Fix known bugs of the original (default false = bit-exact parity):
+   * Fix known bugs of the original (default false = bit-exact parity with the calculator we port):
    * abatis are consumed when they fire; a trebuchet volley big enough to wipe a group kills it.
+   * (marchlands) Also follow Age 1 players' battle reports where the calculator differs: traps only hit ground troops,
+   * and an attacking ranged group stops once the wall is in its range (docs/reference/ballista-farming-and-wall-range.md).
    */
   fixes?: boolean;
   /** (marchlands) observe the battle: every kill on an attacking group, and each round's end state (tools/battle-sim) */
@@ -303,8 +305,10 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
       pq = A[i];
       if (pq.count > 0) {
         let nearest = fieldSize;
-        let inRange = false;
+        // (marchlands, fixes) a ranged group stands off once the wall is in its range while the wall or a tower stands,
+        // as it stops for an enemy group, and shoots the towers and then the wall from there
         const maxRange = Math.trunc(f(pq.location + pq.stat.range));
+        let inRange = fixes && RANGED.includes(i) && maxRange >= fieldSize && (wallHp > 0 || tower.eff > 0);
         for (const xp of D) {
           if (xp.count > 0) {
             if (xp.location <= maxRange) {
@@ -395,7 +399,8 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
     // ---- traps ----
     if (trapCount > 0) {
       const pos = fieldSize - 5000;
-      const inZone = (lp: Group) => lp.eff > 0 && lp.location >= pos && lp.location < fieldSize;
+      // (marchlands, fixes) traps only stop ground troops; mounted troops, transporters and siege engines pass them
+      const inZone = (lp: Group) => lp.eff > 0 && lp.location >= pos && lp.location < fieldSize && (!fixes || GROUND.includes(lp.typeId));
       const groups = A.filter(inZone).length;
       if (groups > 0) {
         const maxTraps = Math.min(trapCount, trapDieRate);
