@@ -30,6 +30,12 @@ export type Rock = keyof typeof ROCK;
 export type Roofing = keyof typeof ROOFING;
 
 export class IsoCanvas extends PixelCanvas {
+  /**
+   * Draw sprites bare: without their moving parts (windmill sails, water wheels, sheep), which the animated town draws
+   * moving over the bare sprite. Their spots are still recorded. Set by tools/art/draw.ts around a second drawing.
+   */
+  static bare = false;
+
   readonly plot: number;
   readonly scale: number;
 
@@ -206,6 +212,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** A pile of logs along x: `rows` layers, each one log shorter at both ends; the cut ends face south-east. */
   logs(x0: number, y0: number, len: number, rows: number) {
+    this.spot('logs', this.p(x0 + len / 2, y0 + rows / 2, rows), len);
     for (let r = 0; r < rows; r++)
       for (let i = 0; i < rows - r; i++) this.box(x0 + r, y0 + i * 1 + r * 0.5, r, len - r, 1, 1, { top: 'log', left: 'logDark', right: 'logEnd' });
   }
@@ -213,6 +220,8 @@ export class IsoCanvas extends PixelCanvas {
   /** A water wheel on a south-east face (x = x0), centred on (y, z): a dark rim with light paddles. */
   wheel(x: number, y: number, z: number, radius: number) {
     const [cx, cy] = this.p(x, y, z);
+    this.spot('wheel', [cx, cy], radius);
+    if (IsoCanvas.bare) return;
     for (let a = 0; a < 360; a += 3) {
       const rad = (a * Math.PI) / 180;
       for (const r of [radius, radius - 1]) this.set(cx + Math.cos(rad) * r * 0.6, cy + Math.sin(rad) * r, 'logDark');
@@ -227,6 +236,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** A field of crops: soil with rows along x, ripe wheat or green shoots. */
   crops(x0: number, y0: number, w: number, d: number, kind: 'wheat' | 'green') {
+    this.spot('crops', this.p(x0 + w / 2, y0 + d / 2), w, d);
     const [a, b] = kind === 'wheat' ? (['wheat', 'wheatDark'] as const) : (['leaf', 'leafDark'] as const);
     this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], 'soil');
     for (let y = y0 + 0.5; y < y0 + d; y += 2) this.line(this.p(x0 + 0.5, y), this.p(x0 + w - 0.5, y), a);
@@ -244,6 +254,8 @@ export class IsoCanvas extends PixelCanvas {
   /** A sheep: a white fleece with a dark head. */
   sheep(x: number, y: number) {
     const [sx, sy] = this.p(x, y);
+    this.spot('sheep', [sx, sy]);
+    if (IsoCanvas.bare) return;
     this.set(sx, sy - 1, 'wool');
     this.set(sx + 1, sy - 1, 'wool');
     this.set(sx - 1, sy - 1, 'outline');
@@ -259,6 +271,8 @@ export class IsoCanvas extends PixelCanvas {
   /** Windmill sails on a south-west face, centred on a world point: four canvas blades on wooden spars. */
   sails(x: number, y: number, z: number, len: number) {
     const [cx, cy] = this.p(x, y, z);
+    this.spot('sails', [cx, cy], len);
+    if (IsoCanvas.bare) return;
     for (const [dx, dy] of [
       [1, 1],
       [-1, 1],
@@ -283,6 +297,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** A rocky outcrop: spires of random height over an area, tallest towards the middle, drawn back to front. */
   outcrop(x0: number, y0: number, w: number, d: number, maxH: number, rock: Rock, step = 2) {
+    this.spot('rock', this.p(x0 + w / 2, y0 + d / 2, maxH), w, d);
     const spots: [number, number, number][] = [];
     for (let y = y0; y < y0 + d; y += step)
       for (let x = x0; x < x0 + w; x += step) {
@@ -383,6 +398,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** A mine entrance in a south-west face: a dark opening framed with timber. */
   mineEntrance(x: number, y: number, w: number, h: number) {
+    this.spot('mine', this.p(x + w / 2, y, 0), w, h);
     this.poly([this.p(x, y, 0), this.p(x + w, y, 0), this.p(x + w, y, h), this.p(x, y, h)], 'outline');
     this.line(this.p(x, y, 0), this.p(x, y, h), 'wood');
     this.line(this.p(x + w, y, 0), this.p(x + w, y, h), 'wood');
@@ -409,6 +425,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** A puff of smoke rising from a screen point. */
   smoke([sx, sy]: Pt) {
+    this.spot('smoke', [sx, sy]);
     for (const [dx, dy] of [
       [0, -1],
       [1, -2],
@@ -422,11 +439,13 @@ export class IsoCanvas extends PixelCanvas {
 
   /** A tent: a canvas hip roof standing on the ground. */
   tent(x: number, y: number, w: number, d: number, h: number) {
+    this.spot('tent', this.p(x + w / 2, y + d / 2, 0), w, d);
     this.hipRoof(x, y, w, d, 0, h, w >= d ? 'x' : 'y', 'canvas');
   }
 
   /** A market stall: a plank counter under a striped awning. */
   stall(x: number, y: number, colour: 'red' | 'blue') {
+    this.spot('stall', this.p(x + 1.5, y + 2.5, 0));
     this.timber(x, y, 0, 3, 2, 1);
     this.line(this.p(x, y + 2, 1), this.p(x, y + 2, 3), 'wood');
     this.line(this.p(x + 3, y + 2, 1), this.p(x + 3, y + 2, 3), 'wood');
@@ -459,6 +478,7 @@ export class IsoCanvas extends PixelCanvas {
       }
     // the finial: a short tip (a thin spike would only show as outline)
     const top = Math.floor(cy - up);
+    this.spot('dome', [cx, top], w);
     this.line([cx, top - 1], [cx, top - 2], 'gold');
   }
 
@@ -474,6 +494,7 @@ export class IsoCanvas extends PixelCanvas {
   /** A horse: a brown body on four legs with a dark mane, facing south-west. */
   horse(x: number, y: number) {
     const [sx, sy] = this.p(x, y);
+    this.spot('horse', [sx, sy]);
     for (const dx of [0, 1, 2]) this.set(sx + dx, sy - 2, 'horse');
     this.set(sx - 1, sy - 3, 'horse');
     this.set(sx - 1, sy - 2, 'horseDark');
@@ -483,6 +504,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** Flames on a screen point (a beacon, a forge). */
   fire([sx, sy]: Pt, h: number) {
+    this.spot('fire', [sx, sy], h);
     for (let i = 0; i < h; i++) {
       const half = Math.max(0, Math.floor((h - i) / 2.5));
       for (let dx = -half; dx <= half; dx++) this.set(sx + dx, sy - i, Math.abs(dx) < half || i > h - 2 ? 'fireHi' : 'fire');
@@ -491,6 +513,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** An anvil on a block. */
   anvil(x: number, y: number) {
+    this.spot('anvil', this.p(x + 0.5, y + 0.5, 1.6));
     this.box(x, y, 0, 1, 1, 1, { top: 'logDark', left: 'logDark', right: 'outline' });
     this.box(x - 0.3, y - 0.3, 1, 1.6, 1, 0.6, { top: 'metal', left: 'stoneR', right: 'outline' });
   }
@@ -498,6 +521,7 @@ export class IsoCanvas extends PixelCanvas {
   /** A straw training dummy on a post. */
   dummy(x: number, y: number) {
     const [sx, sy] = this.p(x, y);
+    this.spot('dummy', [sx, sy]);
     this.line([sx, sy], [sx, sy - 5], 'wood');
     this.line([sx - 2, sy - 4], [sx + 2, sy - 4], 'wood');
     this.set(sx, sy - 6, 'wheat');
@@ -518,6 +542,7 @@ export class IsoCanvas extends PixelCanvas {
   catapult(x: number, y: number) {
     this.box(x, y, 0, 4, 2, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
     const pivot = this.p(x + 2, y + 1, 3);
+    this.spot('catapult', pivot);
     this.line(this.p(x + 1.5, y + 1, 1), pivot, 'wood');
     this.line(this.p(x + 2.5, y + 1, 1), pivot, 'wood');
     this.line([pivot[0] - 4, pivot[1] + 1], [pivot[0] + 4, pivot[1] - 4], 'logDark');
@@ -561,6 +586,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** A stone well with water in it. */
   well(x: number, y: number) {
+    this.spot('well', this.p(x + 1.5, y + 1.5, 0));
     this.box(x, y, 0, 3, 3, 2, { top: 'water', left: 'stoneL', right: 'stoneR', corner: 'stoneR' });
     this.line(this.p(x, y + 3, 2), this.p(x, y + 3, 5), 'wood');
     this.line(this.p(x + 3, y, 2), this.p(x + 3, y, 5), 'wood');
@@ -581,12 +607,18 @@ export class IsoCanvas extends PixelCanvas {
 
   /** Small windows or doors on a south-west face: dark marks `h` high at each x. */
   windows(xs: number[], y: number, z0: number, h: number, c: Colour = 'window') {
-    for (const x of xs) this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), c);
+    for (const x of xs) {
+      this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), c);
+      if (c === 'window' || c === 'fire') this.spot(c === 'fire' ? 'glow' : 'window', this.p(x, y, z0 + h - 1), h);
+    }
   }
 
   /** Windows on a south-east face, at each y. */
   windowsSe(x: number, ys: number[], z0: number, h: number, c: Colour = 'window') {
-    for (const y of ys) this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), c);
+    for (const y of ys) {
+      this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), c);
+      if (c === 'window' || c === 'fire') this.spot(c === 'fire' ? 'glow' : 'window', this.p(x, y, z0 + h - 1), h);
+    }
   }
 
   /** A cypress: a tall dark-green flame on a short trunk. */
@@ -607,6 +639,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** A banner on a pole standing at a screen point. */
   banner([sx, sy]: Pt, h: number) {
+    this.spot('banner', [sx + 1, sy - h], h);
     this.line([sx, sy], [sx, sy - h], 'outline');
     for (let y = 0; y < 3; y++) for (let x = 1; x <= 3; x++) this.set(sx + x, sy - h + y, y === 2 && x === 3 ? 'clear' : 'banner');
   }

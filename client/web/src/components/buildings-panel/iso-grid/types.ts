@@ -41,6 +41,17 @@ export interface IsoSprite {
   depth: number;
   pos?: number;
   size?: number;
+  /** its key in assets/spots.json (`buildings/forge-2.png`), for its animations */
+  file?: string;
+  /** its bare twin's URL, drawn under its turning parts when the scene moves */
+  bare?: string;
+}
+
+/** A building's art: its sprite's URL, its key in spots.json, and its bare twin's URL if it has turning parts. */
+export interface BuildingArt {
+  src: string | undefined;
+  file: string;
+  bare?: string;
 }
 
 /** A point in grid pixels, at the art's own size. */

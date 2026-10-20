@@ -1,5 +1,5 @@
 import { PINCH_WHEEL_RATE, SPRITE, TILE_H, TILE_W, WHEEL_LINE, WHEEL_RATE, ZOOMS } from '@/components/iso-viewport/constants';
-import type { Camera, Drawable, PanDirection, SceneBox, View, ViewPoint } from '@/components/iso-viewport/types';
+import type { Camera, Drawable, Overlay, PanDirection, Piece, PixelArt, SceneBox, View, ViewPoint } from '@/components/iso-viewport/types';
 
 /**
  * Where tile (col, row)'s middle falls, in device pixels from the view's top left. The camera's offset is rounded once,
@@ -13,6 +13,35 @@ export function tileOrigin(col: number, row: number, cam: Camera, view: View): V
   const ox = Math.round((view.w * view.dpr) / 2 - ((cam.x - cam.y) * TILE_W * k) / 2);
   const oy = Math.round((view.h * view.dpr) / 2 - ((cam.x + cam.y) * TILE_H * k) / 2);
   return { x: ox + Math.round(((col - row) * TILE_W) / 2) * k, y: oy + Math.round(((col + row) * TILE_H) / 2) * k };
+}
+
+/** Whether a piece is an overlay (a frame made in code) rather than a sprite. */
+export function isOverlay(p: Piece): p is Overlay {
+  return 'art' in p;
+}
+
+/** Where an overlay is drawn, in device pixels: its tile's middle, moved by its offset in art pixels. */
+export function overlayRect(o: Overlay, cam: Camera, view: View): { x: number; y: number; w: number; h: number } {
+  const k = cam.zoom * view.dpr;
+  const p = tileOrigin(o.col, o.row, cam, view);
+  return { x: p.x + o.x * k, y: p.y + o.y * k, w: o.art.w * k, h: o.art.h * k };
+}
+
+/** Canvases holding the frames made so far, by id, so each frame is turned into an image once. */
+const artCanvases = new Map<string, HTMLCanvasElement>();
+
+/** A frame made in code as a canvas the viewport can draw (made on first use, then kept). */
+export function artCanvas(art: PixelArt): HTMLCanvasElement | undefined {
+  let c = artCanvases.get(art.id);
+  if (c) return c;
+  c = document.createElement('canvas');
+  c.width = art.w;
+  c.height = art.h;
+  const ctx = c.getContext('2d');
+  if (!ctx) return undefined;
+  ctx.putImageData(new ImageData(art.data, art.w, art.h), 0, 0);
+  artCanvases.set(art.id, c);
+  return c;
 }
 
 /** Where tile (col, row)'s middle falls in CSS pixels, for what is laid over the art. */

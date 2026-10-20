@@ -10,3 +10,4 @@ Design documents for large planned features, kept while they are worked out and 
 | Document | Feature | Status |
 |---|---|---|
 | [market-and-factions.md](market-and-factions.md) | Market overhaul: NPC cities trading, factions, historical cities as seats of power, events, trading scripts, new charts | Design |
+| [town-animations.md](town-animations.md) | Animated town, fields and map: smoke, sails and wheels, walkers, construction, buildings showing what they're doing, day and night, weather, marching armies | Built |

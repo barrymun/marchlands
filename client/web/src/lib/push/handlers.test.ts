@@ -14,6 +14,7 @@ import {
   PushCmd,
 } from '@marchlands/api-client';
 
+import { builtAt } from '@/lib/build-events';
 import { PUSH_HANDLERS, subscribePushHandlers } from '@/lib/push/handlers';
 
 const toast = vi.hoisted(() => Object.assign(vi.fn(), { success: vi.fn(), warning: vi.fn(), info: vi.fn() }));
@@ -67,9 +68,11 @@ describe('invalidation', () => {
   it('BuildComplate refreshes that city only, and announces a finished level', () => {
     seed(cityKey(1), city(1));
     seed(cityKey(2), city(2));
-    handle(PushCmd.BUILD_COMPLETE, { castleId: 1, buildingBean: { typeId: 1, status: 0, level: 2 } }, qc);
+    handle(PushCmd.BUILD_COMPLETE, { castleId: 1, buildingBean: { typeId: 1, status: 0, level: 2, positionId: 4 } }, qc);
     expect([stale(cityKey(1)), stale(cityKey(2))]).toEqual([true, false]);
     expect(toast).toHaveBeenCalledWith('Cottage reached level 2');
+    // the town sparkles over it (lib/build-events.ts)
+    expect(builtAt(1, 4)).toBeGreaterThanOrEqual(0);
   });
   it('ResearchCompleteUpdate announces the technology by name', () => {
     handle(PushCmd.RESEARCH_COMPLETE_UPDATE, { castleId: 1, typeId: 1, level: 3 }, qc);

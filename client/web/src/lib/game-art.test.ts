@@ -8,6 +8,7 @@ import { BASIC_RESOURCES, buildingMaxLevel, BuildingType, FortType, TileType, Tr
 import {
   ART_BANDS,
   artBand,
+  bareArtFile,
   BUILDING_ART_TYPES,
   buildingArtFile,
   CITY_GROUNDS,
@@ -34,6 +35,9 @@ const UNIT_DIR = path.resolve(import.meta.dirname, '../assets/units');
 const RESOURCE_DIR = path.resolve(import.meta.dirname, '../assets/resources');
 const BADGE_DIR = path.resolve(import.meta.dirname, '../assets/badges');
 const CITY_DIR = path.resolve(import.meta.dirname, '../assets/city');
+const SPOTS: Record<string, { k: string }[]> = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, '../assets/spots.json'), 'utf8'));
+/** Whether a sprite has parts the animated town draws turning (and so a bare twin). */
+const moving = (file: string) => (SPOTS[`buildings/${file}`] ?? []).some((s) => s.k === 'sails' || s.k === 'wheel' || s.k === 'sheep');
 
 describe(artBand.name, () => {
   it('changes the art at levels 4, 7 and 10', () => {
@@ -67,9 +71,17 @@ describe('BUILDING_ART_TYPES', () => {
 });
 
 describe('building sprites', () => {
-  it('has a sprite for every building type and band, and nothing else', () => {
-    const expected = BUILDING_ART_TYPES.flatMap((t) => ART_BANDS.map(({ band }) => buildingArtFile(t, band))).sort();
+  it('has a sprite for every building type and band, a bare twin for each with moving parts, and nothing else', () => {
+    const files = BUILDING_ART_TYPES.flatMap((t) => ART_BANDS.map(({ band }) => buildingArtFile(t, band)));
+    const expected = [...files, ...files.filter(moving).map(bareArtFile)].sort();
     expect(fs.readdirSync(ART_DIR).sort()).toEqual(expected);
+    expect(files.filter(moving).length).toBeGreaterThan(0);
+  });
+});
+
+describe(bareArtFile.name, () => {
+  it('names the bare twin of a sprite', () => {
+    expect(bareArtFile('farm-4.png')).toBe('farm-4-bare.png');
   });
 });
 

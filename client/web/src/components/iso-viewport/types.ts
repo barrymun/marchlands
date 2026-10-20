@@ -32,6 +32,54 @@ export interface Drawable {
   tone?: 'lit' | 'dim';
 }
 
+/** A small pixel-art image made in code (an animation frame): RGBA pixels at the art's own size, named by `id` for caching. */
+export interface PixelArt {
+  id: string;
+  w: number;
+  h: number;
+  data: Uint8ClampedArray<ArrayBuffer>;
+}
+
+/**
+ * A frame laid over the scene (smoke, a turning sail, a walker): drawn with its top left `x`, `y` art pixels from the
+ * middle of tile (col, row), at `alpha` (1 when left out).
+ */
+export interface Overlay {
+  key: string;
+  col: number;
+  row: number;
+  art: PixelArt;
+  x: number;
+  y: number;
+  alpha?: number;
+  /** it gives light (a lit window, a fire): drawn over the night's darkness rather than under it */
+  light?: boolean;
+}
+
+/** Weather over a scene. */
+export type Weather = 'rain' | 'snow' | 'storm';
+
+/**
+ * The sky over a scene at a moment: how dark it is (0 day, 1 deep night), the weather and its drops or flakes (in CSS
+ * pixels of the view), and a lightning flash (0 none, 1 full).
+ */
+export interface Sky {
+  darkness: number;
+  weather: Weather | null;
+  particles: readonly Particle[];
+  flash: number;
+}
+
+/** A raindrop or snowflake, in CSS pixels of the view, and how long it is (a raindrop's streak). */
+export interface Particle {
+  x: number;
+  y: number;
+  len: number;
+}
+
+/** Anything the viewport draws over the ground, back to front: a sprite or an overlay. */
+export type Piece = Drawable | Overlay;
+
 /** The box a scene's sprites fill, at the art's own size: its size, and where the middle of tile (0, 0) falls in it. */
 export interface SceneBox {
   originX: number;

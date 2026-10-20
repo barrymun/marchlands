@@ -29,6 +29,7 @@ import {
   type PushData,
 } from '@marchlands/api-client';
 
+import { noteBuilt } from '@/lib/build-events';
 import { fmtExact } from '@/lib/format';
 import { buildingName, techName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
@@ -53,8 +54,10 @@ export const PUSH_HANDLERS: { [K in PushCmd]?: Handler<K> } = {
   [PushCmd.BUILD_COMPLETE]: ({ castleId, buildingBean }, qc) => {
     const path = { path: { cityId: castleId } };
     invalidate(qc, cityKey(castleId), allOf(getCitiesBuildingsByPositionIdQueryKey, path), allOf(getCitiesBuildingsAvailableQueryKey, path));
-    if (buildingBean.typeId && buildingBean.status === 0)
+    if (buildingBean.typeId && buildingBean.status === 0) {
+      noteBuilt(castleId, buildingBean.positionId, performance.now());
       toast(i18n.t('common:push.buildingComplete', { name: buildingName(buildingBean.typeId), level: buildingBean.level }));
+    }
   },
 
   [PushCmd.CASTLE_UPDATE]: (d, qc) => {

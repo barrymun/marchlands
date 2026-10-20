@@ -7,15 +7,17 @@ import { isOuterPosition } from '@marchlands/core';
 
 import { BuildingDialog } from '@/components/buildings-panel/building-dialog/building-dialog';
 import { CITY_VIEWS, FLOATING, OUTSIDE, TOWN_VIEW_QUERY } from '@/components/buildings-panel/constants';
+import { useTownState } from '@/components/buildings-panel/hooks';
 import { IsoCity } from '@/components/buildings-panel/iso-city/iso-city';
 import { IsoFields } from '@/components/buildings-panel/iso-fields/iso-fields';
 import { Slot } from '@/components/buildings-panel/slot/slot';
 import type { CityView } from '@/components/buildings-panel/types';
-import { fieldSlots, readView, saveView } from '@/components/buildings-panel/utils';
+import { fieldSlots, fieldWorkers, readView, saveView, townWalkers } from '@/components/buildings-panel/utils';
 import { WalledCity } from '@/components/buildings-panel/walled-city/walled-city';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useMotion } from '@/hooks/use-motion';
 import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +35,8 @@ export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' 
   // the town needs room: narrower screens always get the cards, and no choice
   const wide = useMediaQuery(TOWN_VIEW_QUERY);
   const view: CityView = wide ? chosen : 'grid';
+  // what the city is doing, for the animated scene's buildings
+  const state = useTownState(city, useMotion() && view === 'scene');
   const choose = (v: CityView) => {
     setChosen(v);
     saveView(v);
@@ -112,9 +116,24 @@ export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' 
     return (
       <div className="relative h-full min-h-80 overflow-hidden">
         {area === 'inside' ? (
-          <IsoCity byPos={byPos} onSelect={setSelected} highlight={highlight} />
+          <IsoCity
+            cityId={city.id}
+            people={townWalkers(city.resource.curPopulation)}
+            state={state}
+            byPos={byPos}
+            onSelect={setSelected}
+            highlight={highlight}
+          />
         ) : (
-          <IsoFields byPos={byPos} unlocked={outerSlots} onSelect={setSelected} highlight={highlight} />
+          <IsoFields
+            cityId={city.id}
+            people={fieldWorkers(here.filter((b) => b.typeId !== 0).length)}
+            state={state}
+            byPos={byPos}
+            unlocked={outerSlots}
+            onSelect={setSelected}
+            highlight={highlight}
+          />
         )}
         <div className={cn(FLOATING, 'top-2 left-2 grid max-w-[calc(100%-12rem)] gap-1.5 p-2')}>
           <p className="text-sm font-medium">

@@ -12,6 +12,9 @@ export const SPRITE = 64;
  */
 export const ZOOMS = [1, 1.5, 2, 2.5, 3, 4] as const;
 
+/** How often an animated scene is redrawn, a second: a pixel-art pace, cheap enough for a few thousand pieces. */
+export const ANIMATION_FPS = 12;
+
 /** A press that moves less than this many screen pixels is a click, not a drag. */
 export const DRAG_SLOP = 4;
 

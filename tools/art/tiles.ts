@@ -26,6 +26,7 @@ function layered(name: string, band: number, ground: (c: IsoCanvas) => void, obj
   objects(o);
   o.outline();
   for (let i = 0; i < c.px.length; i++) if (o.px[i]) c.px[i] = o.px[i];
+  c.spots.push(...o.spots);
   return c;
 }
 
@@ -93,6 +94,7 @@ const swamp = bands((band) => {
       for (const [x, y, r] of pools) {
         c.blob(x, y, r + 1.5, r + 1.5, 'moss');
         c.blob(x, y, r, r, (sx, sy) => c.water(sx, sy));
+        c.spot('water', c.p(x, y), r);
       }
     },
     (c) => {
@@ -109,6 +111,7 @@ const lake = bands((band) => {
     (c) => {
       c.blob(MID, MID, r + 2, r + 2, 'sandLight');
       c.blob(MID, MID, r, r, (x, y) => c.water(x, y));
+      c.spot('water', c.p(MID, MID), r);
       if (band >= 3) c.blob(MID - 1, MID - 1, r * 0.45, r * 0.45, 'waterDeep');
     },
     (c) => {

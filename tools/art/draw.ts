@@ -8,6 +8,9 @@
 // to client/web/src/assets/badges/, the resource icons (tools/art/resources.ts) to client/web/src/assets/resources/,
 // and the isometric city view's ground and walls (tools/art/city.ts) and its grand Town Hall
 // (tools/art/buildings/town-hall.ts) to client/web/src/assets/city/.
+// A building with moving parts (windmill sails, a water wheel) also gets a bare sprite without them,
+// <name>-<band>-bare.png, which the animated town draws them turning over. Where each sprite's moving parts stand
+// (its spots, tools/art/pixel.ts) goes to client/web/src/assets/spots.json, keyed by <folder>/<file>.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -37,14 +40,15 @@ import { warehouse } from './buildings/warehouse.ts';
 import { workshop } from './buildings/workshop.ts';
 import { CITY_GROUND_DRAWINGS, CITY_WALL_DRAWINGS } from './city.ts';
 import { FORT_DRAWINGS } from './fortifications.ts';
-import type { IsoCanvas } from './iso.ts';
-import type { PixelCanvas } from './pixel.ts';
+import { IsoCanvas } from './iso.ts';
+import type { PixelCanvas, Spot } from './pixel.ts';
 import { RESOURCE_DRAWINGS } from './resources.ts';
 import { TILE_DRAWINGS } from './tiles.ts';
 import { TROOP_DRAWINGS } from './troops.ts';
 import { WALL_DRAWINGS } from './walls.ts';
 import {
   ART_BANDS,
+  bareArtFile,
   buildingArtFile,
   cityGroundFile,
   cityWallFile,
@@ -88,12 +92,34 @@ const BUILDINGS: Record<number, Drawing> = {
 const { positionals } = parseArgs({ allowPositionals: true });
 const wanted = new Set(positionals);
 
+/** Every sprite's spots by <folder>/<file>: what's in spots.json now, updated as sprites are drawn, written at the end. */
+const SPOTS_FILE = path.join(ASSETS, 'spots.json');
+const spots: Record<string, Spot[]> = fs.existsSync(SPOTS_FILE) ? JSON.parse(fs.readFileSync(SPOTS_FILE, 'utf8')) : {};
+/** Parts the animated town draws moving over a bare sprite. */
+const MOVING = new Set(['sails', 'wheel', 'sheep']);
+
+/** Save a sprite and its spots; one with moving parts also gets a bare sprite drawn without them. */
+function save(dir: string, file: string, drawing: () => PixelCanvas) {
+  const c = drawing();
+  fs.writeFileSync(path.join(ASSETS, dir, file), c.png());
+  if (c.spots.length) spots[`${dir}/${file}`] = c.spots;
+  else delete spots[`${dir}/${file}`];
+  if (c.spots.some((s) => MOVING.has(s.k))) {
+    IsoCanvas.bare = true;
+    try {
+      fs.writeFileSync(path.join(ASSETS, dir, bareArtFile(file)), drawing().png());
+    } finally {
+      IsoCanvas.bare = false;
+    }
+  }
+}
+
 function draw(drawings: Record<number, Drawing>, dir: string, fileOf: (type: number, band: number) => string) {
   fs.mkdirSync(path.join(ASSETS, dir), { recursive: true });
   for (const [type, bands] of Object.entries(drawings)) {
     const name = fileOf(Number(type), 1).replace(/-1\.png$/, '');
     if (wanted.size && !wanted.has(name)) continue;
-    for (const { band } of ART_BANDS) fs.writeFileSync(path.join(ASSETS, dir, fileOf(Number(type), band)), bands[band]().png());
+    for (const { band } of ART_BANDS) save(dir, fileOf(Number(type), band), bands[band]);
     console.log(`drew ${dir}/${name} (${ART_BANDS.length} bands)`);
   }
 }
@@ -103,8 +129,7 @@ draw(TILE_DRAWINGS, 'tiles', tileArtFile);
 
 if (!wanted.size || wanted.has('walls')) {
   fs.mkdirSync(path.join(ASSETS, 'walls'), { recursive: true });
-  for (const { band } of ART_BANDS)
-    for (const piece of WALL_PIECES) fs.writeFileSync(path.join(ASSETS, 'walls', wallArtFile(band, piece)), WALL_DRAWINGS[piece](band).png());
+  for (const { band } of ART_BANDS) for (const piece of WALL_PIECES) save('walls', wallArtFile(band, piece), () => WALL_DRAWINGS[piece](band));
   console.log(`drew walls (${WALL_PIECES.length} pieces × ${ART_BANDS.length} bands)`);
 }
 
@@ -134,14 +159,17 @@ for (const [type, drawing] of Object.entries(BADGE_DRAWINGS)) {
 fs.mkdirSync(path.join(ASSETS, 'city'), { recursive: true });
 for (const [name, drawing] of Object.entries(CITY_GROUND_DRAWINGS) as [CityGround, () => IsoCanvas][]) {
   if (wanted.size && !wanted.has(name) && !wanted.has('city')) continue;
-  fs.writeFileSync(path.join(ASSETS, 'city', cityGroundFile(name)), drawing().png());
+  save('city', cityGroundFile(name), drawing);
   console.log(`drew city/${cityGroundFile(name)}`);
 }
 if (!wanted.size || wanted.has('city')) {
   for (const { band } of ART_BANDS)
     for (const [piece, drawing] of Object.entries(CITY_WALL_DRAWINGS) as [CityWallPiece, (band: WallBand) => IsoCanvas][])
-      fs.writeFileSync(path.join(ASSETS, 'city', cityWallFile(band, piece)), drawing(band as WallBand).png());
+      save('city', cityWallFile(band, piece), () => drawing(band as WallBand));
   console.log(`drew city walls (${Object.keys(CITY_WALL_DRAWINGS).length} pieces × ${ART_BANDS.length} bands)`);
-  for (const { band } of ART_BANDS) fs.writeFileSync(path.join(ASSETS, 'city', grandTownHallFile(band)), grandTownHall[band]().png());
+  for (const { band } of ART_BANDS) save('city', grandTownHallFile(band), grandTownHall[band]);
   console.log(`drew city/town-hall (${ART_BANDS.length} bands)`);
 }
+
+fs.writeFileSync(SPOTS_FILE, JSON.stringify(Object.fromEntries(Object.entries(spots).sort(([a], [b]) => a.localeCompare(b)))) + '\n');
+console.log(`wrote spots.json (${Object.keys(spots).length} sprites)`);

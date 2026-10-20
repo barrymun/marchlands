@@ -6,16 +6,19 @@ import type { BuildingBean } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
 
 import { BUILDING_ART, CITY_ART } from '@/components/buildings-panel/constants';
-import type { IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
+import type { BuildingArt, IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
 import { buildingSprites, depthOf, hitTest, markerOf } from '@/components/buildings-panel/iso-grid/utils';
 import { Countdown } from '@/components/countdown/countdown';
+import { useAnimations } from '@/components/iso-anim/hooks';
+import type { TownState } from '@/components/iso-anim/types';
 import { SPRITE, TILE_H, TILE_W } from '@/components/iso-viewport/constants';
 import { useIsoViewport } from '@/components/iso-viewport/hooks';
 import { IsoViewport } from '@/components/iso-viewport/iso-viewport';
-import type { Drawable, ViewPoint } from '@/components/iso-viewport/types';
+import type { Drawable, Piece, ViewPoint } from '@/components/iso-viewport/types';
 import { clampToScene, fitZoom, sceneBox, sceneCentre, spriteAt, spriteBox, tileAt } from '@/components/iso-viewport/utils';
 import { opaqueAt } from '@/hooks/use-images';
-import { artBand, buildingArtFile, cityGroundFile, grandTownHallFile } from '@/lib/game-art';
+import { builtAt } from '@/lib/build-events';
+import { artBand, bareArtFile, buildingArtFile, cityGroundFile, grandTownHallFile } from '@/lib/game-art';
 import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +32,9 @@ import { cn } from '@/lib/utils';
  * left while it is built.
  */
 export function IsoGrid({
+  cityId,
+  people,
+  state,
   layout,
   extra = [],
   byPos,
@@ -37,6 +43,11 @@ export function IsoGrid({
   highlight,
   label,
 }: {
+  cityId: number;
+  /** how many people walk between the slots */
+  people: number;
+  /** what the city is doing, for the buildings that show it */
+  state: TownState;
   layout: IsoLayout;
   extra?: readonly IsoSprite[];
   byPos: ReadonlyMap<number, BuildingBean>;
@@ -62,8 +73,14 @@ export function IsoGrid({
       : tile.kind === 'gate'
         ? buildingName(BuildingType.WALLS)
         : t('slot.build', { pos: tile.pos });
-  const artOf = (type: number, level: number, span: number) =>
-    span === 2 ? CITY_ART[grandTownHallFile(artBand(level))] : BUILDING_ART[buildingArtFile(type, artBand(level))];
+  const artOf = (type: number, level: number, span: number): BuildingArt => {
+    if (span === 2) {
+      const file = grandTownHallFile(artBand(level));
+      return { src: CITY_ART[file], file: `city/${file}` };
+    }
+    const file = buildingArtFile(type, artBand(level));
+    return { src: BUILDING_ART[file], file: `buildings/${file}`, bare: BUILDING_ART[bareArtFile(file)] };
+  };
   const sprites = [...buildingSprites(tiles, byPos, artOf), ...extra].sort((a, b) => a.depth - b.depth);
   const box = sceneBox([...ground, ...tiles.map((tile) => ({ ...tile, size: (tile.span ?? 1) * SPRITE })), ...extra]);
 
@@ -110,6 +127,39 @@ export function IsoGrid({
     ...s,
     tone: s.pos != null && s.pos === hover ? 'lit' : s.pos != null && byPos.has(s.pos) && s.key.startsWith('b') && dimmed(s.pos) ? 'dim' : undefined,
   }));
+  // the scene at a moment, once the animation code has loaded: each sprite (bare under its turning parts), then what it
+  // shows (smoke, sails, construction, a finished level's sparkle), and people on the streets, all back to front; a
+  // dimmed building stays still
+  const anim = useAnimations();
+  const streets = anim?.streetsOf(tiles.filter((tile) => tile.kind === 'slot'));
+  const animate =
+    anim && streets
+      ? (t: number): Piece[] => {
+          const night = anim.isNight();
+          const layers: { depth: number; pieces: Piece[] }[] = sprites.map((s, i) => {
+            const d = spriteArt[i];
+            if (!s.file || d.tone === 'dim') return { depth: s.depth, pieces: [d] };
+            const owner = { key: s.key, col: s.col, row: s.row, size: s.size, file: s.file };
+            const b = s.pos != null ? byPos.get(s.pos) : undefined;
+            return {
+              depth: s.depth,
+              pieces: [
+                s.bare ? { ...d, src: s.bare } : d,
+                ...anim.buildingOverlays(owner, b?.typeId ?? 0, s.pos, state, t, night),
+                ...(b && b.status !== 0 ? anim.constructionOverlays(owner, t) : []),
+                ...(s.pos != null ? anim.sparkleOverlays(owner, t, builtAt(cityId, s.pos)) : []),
+              ],
+            };
+          });
+          for (const w of anim.walkerOverlays(streets, people, t, label)) layers.push({ depth: depthOf(w.col, w.row), pieces: [w] });
+          const burnable = sprites.flatMap((s) => (s.file && s.pos != null ? [{ key: s.key, col: s.col, row: s.row, size: s.size, file: s.file }] : []));
+          for (const f of anim.aftermathOverlays(burnable, state.attackedAt, t)) layers.push({ depth: depthOf(f.col, f.row) + 0.01, pieces: [f] });
+          return layers.sort((a, b) => a.depth - b.depth).flatMap((l) => l.pieces);
+        }
+      : undefined;
+  const preload = sprites.flatMap((s) => (s.bare ? [s.bare] : []));
+  // the sky over the city's state: night by the player's clock, and the weather
+  const sky = anim ? (t: number) => anim.skyAt(state.zoneId, t, vp.view.w, vp.view.h) : undefined;
   const hovered = tiles.find((tile) => tile.pos != null && tile.pos === hover && tile.kind !== 'locked');
   const corners = (pts: ViewPoint[]) => pts.map((p) => `${p.x},${p.y}`).join(' ');
   const diamond = (tile: IsoTile) => {
@@ -125,7 +175,7 @@ export function IsoGrid({
   const [c1, r1] = [layout.cols - 0.5, layout.rows - 0.5];
 
   return (
-    <IsoViewport vp={vp} label={label} ground={groundArt} sprites={spriteArt}>
+    <IsoViewport vp={vp} label={label} ground={groundArt} sprites={spriteArt} animate={animate} sky={sky} preload={preload}>
       {(outlined || hovered) && (
         <svg className="pointer-events-none absolute inset-0 size-full" aria-hidden>
           {outlined && (

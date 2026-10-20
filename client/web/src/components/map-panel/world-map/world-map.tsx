@@ -1,10 +1,15 @@
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
+import { getArmiesOptions } from '@marchlands/api-client';
 import { Relation } from '@marchlands/core';
 
+import { useAnimations } from '@/components/iso-anim/hooks';
+import type { Side } from '@/components/iso-anim/types';
 import { TILE_H, TILE_W } from '@/components/iso-viewport/constants';
 import type { Viewport } from '@/components/iso-viewport/hooks';
 import { IsoViewport } from '@/components/iso-viewport/iso-viewport';
+import type { Piece } from '@/components/iso-viewport/types';
 import { spriteBox } from '@/components/iso-viewport/utils';
 import { GRASS, RELATION_STYLE } from '@/components/map-panel/constants';
 import { relationGroup } from '@/components/map-panel/utils';
@@ -41,6 +46,31 @@ export function WorldMap({
   const zoom = vp.camera?.zoom ?? 1;
   const hoverId = hover ? idOf(hover.x, hover.y) : null;
   const anchor = -spriteBox().top;
+  const shown = sprites.map((s) => (s.id === hoverId ? { ...s, tone: 'lit' as const } : s));
+
+  // the map at a moment, once the animation code has loaded: campfires and glints on the tiles, a worker on each of the
+  // player's valleys, and the armies the player can see on the march, back to front; and the sky over the camera's state
+  const anim = useAnimations();
+  const armies = useQuery({ ...getArmiesOptions(), enabled: !!anim });
+  const marching = [
+    ...(armies.data?.self ?? []).map((army) => ({ army, side: 'own' as Side })),
+    ...(armies.data?.friend ?? []).map((army) => ({ army, side: 'ally' as Side })),
+    ...(armies.data?.enemy ?? []).map((army) => ({ army, side: 'enemy' as Side })),
+  ];
+  const near = vp.camera ?? { x: home.x, y: home.y };
+  const animate = anim
+    ? (t: number): Piece[] => {
+        const layers: { depth: number; pieces: Piece[] }[] = shown.map((s) => ({
+          depth: s.col + s.row,
+          pieces: s.file ? [s, ...anim.ambientOverlays({ key: s.key, col: s.col, row: s.row, file: s.file }, t)] : [s],
+        }));
+        const valleys = tiles.filter((d) => owned.has(d.id) && d.info).map((d) => ({ key: `v${d.id}`, col: d.x, row: d.y }));
+        for (const w of anim.workerOverlays(valleys, t)) layers.push({ depth: w.col + w.row + 0.01, pieces: [w] });
+        for (const a of anim.armyOverlays(marching, mapSize, { col: near.x, row: near.y }, t)) layers.push({ depth: a.col + a.row + 0.02, pieces: [a] });
+        return layers.sort((a, b) => a.depth - b.depth).flatMap((l) => l.pieces);
+      }
+    : undefined;
+  const sky = anim ? (t: number) => anim.skyAt(anim.zoneOf({ col: near.x, row: near.y }, mapSize), t, vp.view.w, vp.view.h) : undefined;
   const diamond = (x: number, y: number) => {
     const p = vp.at(x, y);
     const [w, h] = [(TILE_W / 2) * zoom, (TILE_H / 2) * zoom];
@@ -88,7 +118,9 @@ export function WorldMap({
       label={t('aria')}
       className="bg-[#7c9c4c]"
       ground={tiles.map((d) => ({ key: `g${d.x},${d.y}`, col: d.x, row: d.y, src: GRASS }))}
-      sprites={sprites.map((s) => (s.id === hoverId ? { ...s, tone: 'lit' as const } : s))}
+      sprites={shown}
+      animate={animate}
+      sky={sky}
     >
       <svg className="pointer-events-none absolute inset-0 size-full" aria-hidden>
         {outlines.map((o) => (

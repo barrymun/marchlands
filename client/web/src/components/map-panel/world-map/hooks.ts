@@ -48,9 +48,12 @@ export function useWorldMap(vp: Viewport, mapSize: number) {
   const tiles = visible.map((v) => {
     const id = idOf(v.x, v.y);
     const info = area.tiles.get(id);
-    return { ...v, id, info, src: info ? TILE_ART[tileArtFile(info.type, artBand(info.level))] : undefined };
+    const file = info ? tileArtFile(info.type, artBand(info.level)) : undefined;
+    return { ...v, id, info, src: file ? TILE_ART[file] : undefined, file: file ? `tiles/${file}` : undefined };
   });
-  const sprites: (Drawable & { id: number })[] = tiles.flatMap((t) => (t.src ? [{ key: `${t.x},${t.y}`, col: t.x, row: t.y, src: t.src, id: t.id }] : []));
+  const sprites: (Drawable & { id: number; file?: string })[] = tiles.flatMap((t) =>
+    t.src ? [{ key: `${t.x},${t.y}`, col: t.x, row: t.y, src: t.src, id: t.id, file: t.file }] : [],
+  );
   return { area, tiles, sprites, idOf };
 }
 

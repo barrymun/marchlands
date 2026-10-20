@@ -12,10 +12,11 @@ export default [
   },
   {
     // the game's own code for the first page; a jump here usually means a zod schema module came in (AGENTS.md,
-    // Shared code)
+    // Shared code). Raised from 110 kB (2026-10-20) for the isometric viewport's animation layer (overlays and the
+    // redraw clock); the animations themselves load after the first page (components/iso-anim/hooks.ts)
     name: 'app',
     path: 'dist/assets/app-*.js',
-    limit: '110 kB',
+    limit: '115 kB',
     gzip: true,
   },
   {

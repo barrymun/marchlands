@@ -1,4 +1,4 @@
-import type { GridPoint, GroundTile, IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
+import type { BuildingArt, GridPoint, GroundTile, IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
 import { SPRITE, TILE_H, TILE_W } from '@/components/iso-viewport/constants';
 import { spriteBox } from '@/components/iso-viewport/utils';
 
@@ -136,18 +136,30 @@ export function markerOf(tile: IsoTile, built: boolean): 'plot' | 'locked' | nul
 
 /**
  * The buildings standing on the tiles, as sprites drawn at their tile's depth, as big as the tile (`span` × 64 pixels);
- * `artOf` gives a building's sprite URL for its size (none: the building is left out). The gate's building, the Walls,
- * is drawn as part of the walls instead.
+ * `artOf` gives a building's art for its size: its sprite (none: the building is left out), its key in spots.json and
+ * its bare twin. The gate's building, the Walls, is drawn as part of the walls instead.
  */
 export function buildingSprites(
   tiles: readonly IsoTile[],
   byPos: ReadonlyMap<number, { typeId: number; level: number }>,
-  artOf: (typeId: number, level: number, span: number) => string | undefined,
+  artOf: (typeId: number, level: number, span: number) => BuildingArt | undefined,
 ): IsoSprite[] {
   return tiles.flatMap((t) => {
     const b = t.kind === 'slot' && t.pos != null ? byPos.get(t.pos) : undefined;
     const span = t.span ?? 1;
-    const src = b && b.typeId !== 0 ? artOf(b.typeId, b.level, span) : undefined;
-    return src ? [{ key: `b${t.pos}`, col: t.col, row: t.row, src, depth: depthOf(t.col, t.row), pos: t.pos, size: span * SPRITE }] : [];
+    const art = b && b.typeId !== 0 ? artOf(b.typeId, b.level, span) : undefined;
+    if (!art?.src) return [];
+    const sprite: IsoSprite = {
+      key: `b${t.pos}`,
+      col: t.col,
+      row: t.row,
+      src: art.src,
+      depth: depthOf(t.col, t.row),
+      pos: t.pos,
+      size: span * SPRITE,
+      file: art.file,
+    };
+    if (art.bare) sprite.bare = art.bare;
+    return [sprite];
   });
 }

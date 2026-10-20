@@ -27,6 +27,14 @@ export const BUILDING_ART_TYPES: readonly number[] = Object.values(BuildingType)
 
 const SLUGS = new Map<number, string>(Object.entries(BuildingType).map(([key, id]) => [id, key.toLowerCase().replaceAll('_', '-')]));
 
+/**
+ * A sprite's bare twin, drawn without its moving parts (windmill sails, water wheels) for the animated town to draw them
+ * turning over it: `farm-4.png` → `farm-4-bare.png`. Only sprites with moving parts have one (assets/spots.json).
+ */
+export function bareArtFile(file: string): string {
+  return file.replace(/\.png$/, '-bare.png');
+}
+
 /** The sprite's file name for a building type and band: `town-hall-4.png`. */
 export function buildingArtFile(typeId: number, band: number): string {
   return `${SLUGS.get(typeId) ?? `building-${typeId}`}-${band}.png`;

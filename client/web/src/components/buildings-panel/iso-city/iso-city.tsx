@@ -7,6 +7,7 @@ import { TOWN } from '@/components/buildings-panel/iso-city/constants';
 import { wallSprites } from '@/components/buildings-panel/iso-city/utils';
 import { WALLS } from '@/components/buildings-panel/iso-grid/constants';
 import { IsoGrid } from '@/components/buildings-panel/iso-grid/iso-grid';
+import type { TownState } from '@/components/iso-anim/types';
 import { artBand, cityWallFile } from '@/lib/game-art';
 
 /**
@@ -14,10 +15,18 @@ import { artBand, cityWallFile } from '@/lib/game-art';
  * band with the gate on the front corner. With no walls built the town is outlined and the gate is where to build them.
  */
 export function IsoCity({
+  cityId,
+  people,
+  state,
   byPos,
   onSelect,
   highlight,
 }: {
+  cityId: number;
+  /** how many people walk its streets */
+  people: number;
+  /** what the city is doing, for the buildings that show it */
+  state: TownState;
   byPos: ReadonlyMap<number, BuildingBean>;
   onSelect: (pos: number) => void;
   highlight?: (b: BuildingBean) => boolean;
@@ -28,6 +37,9 @@ export function IsoCity({
   const extra = built ? wallSprites(TOWN.cols, TOWN.rows, (piece) => CITY_ART[cityWallFile(artBand(walls.level), piece)]) : [];
   return (
     <IsoGrid
+      cityId={cityId}
+      people={people}
+      state={state}
       layout={TOWN}
       extra={extra}
       byPos={byPos}

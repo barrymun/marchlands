@@ -124,9 +124,24 @@ const INDEX = new Map(NAMES.map((n, i) => [n, i]));
 
 export type Pt = readonly [number, number];
 
+/**
+ * Where something that moves stands on a sprite (client/web/src/assets/spots.json): a chimney's smoke, a windmill's hub,
+ * a lit window. `x` and `y` are the sprite's pixels; `n` and `m` are its size where it has one (a sail's length, a
+ * wheel's radius, a window's height, a field's width and depth in world units).
+ */
+export interface Spot {
+  k: string;
+  x: number;
+  y: number;
+  n?: number;
+  m?: number;
+}
+
 export class PixelCanvas {
   readonly px: Uint8Array;
   readonly size: number;
+  /** Where the moving parts stand, in the order they were drawn (`spot`); `shift` moves them with the pixels. */
+  readonly spots: Spot[] = [];
 
   private state: number;
 
@@ -204,8 +219,17 @@ export class PixelCanvas {
     this.shift(Math.floor((n - (rows[rows.length - 1] - rows[0] + 1)) / 2) - rows[0]);
   }
 
+  /** Record where something that moves stands, at a screen point (rounded to a pixel), with its size if it has one. */
+  spot(k: string, [x, y]: Pt, n?: number, m?: number) {
+    const s: Spot = { k, x: Math.round(x), y: Math.round(y) };
+    if (n != null) s.n = Math.round(n * 10) / 10;
+    if (m != null) s.m = Math.round(m * 10) / 10;
+    this.spots.push(s);
+  }
+
   /** Move the drawing `by` rows down (up when negative); a drawn row moved off the canvas is an error, never a crop. */
   shift(by: number) {
+    for (const s of this.spots) s.y += by;
     const n = this.size;
     const out = new Uint8Array(n * n);
     for (let y = 0; y < n; y++) {

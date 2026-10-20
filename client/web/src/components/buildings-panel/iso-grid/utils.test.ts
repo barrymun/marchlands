@@ -233,19 +233,24 @@ describe(buildingSprites.name, () => {
   ]);
 
   it('stands each built building on its tile, at its depth', () => {
-    expect(buildingSprites(tiles, byPos, (type, level) => `art-${type}-${level}`)).toEqual([
-      { key: 'b1', col: 0, row: 0, src: 'art-1-4', depth: 0, pos: 1, size: 64 },
+    expect(buildingSprites(tiles, byPos, (type, level) => ({ src: `art-${type}-${level}`, file: `f-${type}` }))).toEqual([
+      { key: 'b1', col: 0, row: 0, src: 'art-1-4', depth: 0, pos: 1, size: 64, file: 'f-1' },
     ]);
+  });
+
+  it('carries the bare twin of a building with turning parts', () => {
+    expect(buildingSprites(tiles, byPos, () => ({ src: 'a', file: 'f', bare: 'a-bare' }))[0]).toMatchObject({ src: 'a', bare: 'a-bare' });
   });
 
   it('draws a building on a 2×2 tile at twice the size, asking for its big art', () => {
     const hall: IsoTile[] = [{ col: 1, row: 1, kind: 'slot', pos: 1, span: 2 }];
-    expect(buildingSprites(hall, byPos, (_type, _level, span) => `art-${span}`)).toEqual([
-      { key: 'b1', col: 1, row: 1, src: 'art-2', depth: 2, pos: 1, size: 128 },
+    expect(buildingSprites(hall, byPos, (_type, _level, span) => ({ src: `art-${span}`, file: 'hall' }))).toEqual([
+      { key: 'b1', col: 1, row: 1, src: 'art-2', depth: 2, pos: 1, size: 128, file: 'hall' },
     ]);
   });
 
   it('leaves out a building without art', () => {
     expect(buildingSprites(tiles, byPos, () => undefined)).toEqual([]);
+    expect(buildingSprites(tiles, byPos, () => ({ src: undefined, file: 'f' }))).toEqual([]);
   });
 });
