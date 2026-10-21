@@ -44,6 +44,16 @@
 - **api** is a thin Fastify layer. Each route passes its contract schemas to `doc(tag, summary, DataSchema, { params, body, querystring })`; fastify-type-provider-zod validates input, serializes output through the schema (stripping unknown keys) and type-checks the handler's return value against it. It authenticates with a JWT and calls one service per request inside `runGame()`. `src/openapi.ts` writes the OpenAPI document without a database (`npm run gen:api`).
 - **worker** seeds the world on first boot and re-applies hero gear at start-up (heroes store their gear points, so a gear rule change reaches them), then processes due timed events and runs periodic jobs: rankings, zone stats, beginner-protection expiry and cleanup.
 
+### How the packages are wired
+
+Each folder above is a real npm package, listed in the root `package.json`'s `workspaces`. `npm install` links each one into `node_modules` (`node_modules/@marchlands/game` → `backend/packages/game`), so `import { runGame } from '@marchlands/game'` resolves like any other package, with nothing built or published in between:
+
+- **`exports` is a package's public surface.** It points at the TypeScript sources (`"."` → `./src/index.ts`), which Node runs directly, Vite compiles into the client and esbuild bundles into the production image, all through the same links. Only what it names can be imported from outside: game exposes its index, `./testing` (for the API tests only, ESLint) and `./test/*` (shared test support), so the API can't reach into `engine/` or `repo.ts`, and db exposes its index and `./schema`.
+- **`"*"` is the version range** of every `@marchlands/…` dependency: the packages are never published and always move together, so any version means the local one. (npm has no `workspace:*` protocol, unlike pnpm and yarn.)
+- **Listing a dependency declares an edge, it doesn't make the import work:** the link in the root `node_modules` does that, for every package. Each `package.json` lists the packages it builds on, which is the graph drawn above. `npm run knip` fails when a listed package is no longer imported, but not the other way round: an import of a workspace package that isn't listed resolves through the link and passes unnoticed. So add the dependency in the same change as the first import. The scripts in `tools/` belong to the root package, whose `devDependencies` list the packages they use (core, db and game).
+
+Why packages rather than one project with relative imports: a relative path (`../../packages/game/src/engine/…`) would reach past a package's public surface, and each package needs its own root for `#/…` (below).
+
 ### Import prefixes
 
 Code inside a package imports its own files by an absolute path, never a relative one (ESLint):

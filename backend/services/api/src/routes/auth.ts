@@ -2,10 +2,11 @@ import { eq, sql } from 'drizzle-orm';
 import type { z } from 'zod';
 
 import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody } from '@marchlands/contracts';
-import { GameError, msg } from '@marchlands/core';
+import { dur, GameError, msg } from '@marchlands/core';
 import { accounts, players } from '@marchlands/db';
 
 import { signToken } from '#/auth/jwt.ts';
+import { LoginBackoff } from '#/auth/login-backoff.ts';
 import { hashPassword, verifyPassword } from '#/auth/password.ts';
 import { authenticate, secured, tags, type ZApp } from '#/http.ts';
 
@@ -14,6 +15,7 @@ const responses = <T extends z.ZodType>(data: T) => ({ 200: Ok(data), '4xx': Err
 
 export default async function authRoutes(app: ZApp) {
   const { db, config } = app.deps;
+  const backoff = new LoginBackoff(config.loginBackoff);
 
   const issue = async (accountId: number, isAdmin: boolean) => {
     const [p] = await db.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
@@ -52,13 +54,23 @@ export default async function authRoutes(app: ZApp) {
     { schema: { tags: tags.auth, summary: 'Log in (orig `login`)', body: LoginBody, response: responses(AuthSession) } },
     async (req, reply) => {
       const { username, password } = req.body;
+      // after repeated wrong passwords for this username, no password is checked until the wait is over (the right one included)
+      const wait = backoff.waitFor(username);
+      if (wait > 0) {
+        return reply
+          .status(429)
+          .header('retry-after', String(Math.ceil(wait / 1000)))
+          .send({ ok: -2, error: msg('auth.tooManyTries', { wait: dur(Math.ceil(wait / 1000) * 1000) }) });
+      }
       const [acc] = await db
         .select()
         .from(accounts)
         .where(sql`lower(${accounts.username}) = lower(${username})`);
       if (!acc || !(await verifyPassword(password, acc.passwordHash))) {
+        backoff.failed(username);
         return reply.status(401).send({ ok: -2, error: msg('auth.wrongPassword') });
       }
+      backoff.succeeded(username);
       if (acc.status !== 0) return reply.status(403).send({ ok: -99, error: msg('auth.banned', { reason: acc.banReason ?? '' }) });
       const isAdmin = acc.isAdmin || config.adminUsernames.includes(acc.username.toLowerCase());
       await db.update(accounts).set({ lastLoginAt: Date.now(), lastLoginIp: req.ip, isAdmin }).where(eq(accounts.id, acc.id));

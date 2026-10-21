@@ -25,6 +25,7 @@ describe(loadConfig.name, () => {
       logLevel: 'info',
       corsOrigin: true,
       adminUsernames: [],
+      loginBackoff: { freeTries: 5, firstWaitMs: 1000, maxWaitMs: 300_000, forgetAfterMs: 900_000 },
     });
   });
 
@@ -40,6 +41,11 @@ describe(loadConfig.name, () => {
   it('parses ADMIN_USERNAMES: comma separated, trimmed, lower case, blanks dropped', () => {
     expect(loadConfig({ ...BASE, ADMIN_USERNAMES: ' Alice, BOB ,,carol, ' }).adminUsernames).toEqual(['alice', 'bob', 'carol']);
     expect(loadConfig({ ...BASE, ADMIN_USERNAMES: '' }).adminUsernames).toEqual([]);
+  });
+
+  it('reads the login backoff settings in seconds', () => {
+    const config = loadConfig({ ...BASE, LOGIN_FREE_TRIES: '3', LOGIN_FIRST_WAIT: '2', LOGIN_MAX_WAIT: '60', LOGIN_RESET_AFTER: '600' });
+    expect(config.loginBackoff).toEqual({ freeTries: 3, firstWaitMs: 2000, maxWaitMs: 60_000, forgetAfterMs: 600_000 });
   });
 
   it('reads process.env by default', () => {

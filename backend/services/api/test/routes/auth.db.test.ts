@@ -135,6 +135,27 @@ describe('POST /auth/login', () => {
       expect(unknown.body).toEqual(wrong.body);
     }));
 
+  it('after 5 wrong passwords, refuses with 429 auth.tooManyTries until the wait is over, the right password included', () =>
+    apiTest(async (api) => {
+      await api.register('judy');
+      const wrong = { username: 'judy', password: 'wrong-password' };
+      for (let i = 0; i < 5; i++) await api.refused('POST', 'auth/login', 'auth.wrongPassword', { body: wrong, status: 401 });
+      const a = await api.refused('POST', 'auth/login', 'auth.tooManyTries', { body: { username: 'JUDY', password: 'test-password' }, status: 429 });
+      expect(a.body.error).toEqual({ code: 'auth.tooManyTries', params: { wait: { duration: 1000 } } });
+      const res = await api.app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: wrong });
+      expect(res.headers['retry-after']).toBe('1');
+      // other usernames are not held up
+      await api.register('ken');
+      await login(api, 'ken');
+    }));
+
+  it('counts wrong passwords for a username with no account alike, so the wait never tells whether it exists', () =>
+    apiTest(async (api) => {
+      const body = { username: 'nobody', password: 'test-password' };
+      for (let i = 0; i < 5; i++) await api.refused('POST', 'auth/login', 'auth.wrongPassword', { body, status: 401 });
+      await api.refused('POST', 'auth/login', 'auth.tooManyTries', { body, status: 429 });
+    }));
+
   it('refuses a banned account with 403 and the reason, only once the password is right', () =>
     apiTest(async (api) => {
       await api.operator();

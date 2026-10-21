@@ -2,6 +2,7 @@
   "notLoggedIn": "You are not logged in.",
   "needPlayer": "Create your player first.",
   "wrongPassword": "Incorrect username or password.",
+  "tooManyTries": "Too many wrong passwords. Try again in {{wait}}.",
   "alreadyRegistered": "That username or email is already registered.",
   "accountNotFound": "Account not found.",
   "banned": "You are banned. Reason: {{reason}}"

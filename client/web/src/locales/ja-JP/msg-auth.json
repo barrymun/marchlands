@@ -2,6 +2,7 @@
   "notLoggedIn": "ログインしていません。",
   "needPlayer": "先にプレイヤーを作成してください。",
   "wrongPassword": "ユーザー名またはパスワードが違います。",
+  "tooManyTries": "パスワードの誤りが続いたため、{{wait}}後にもう一度お試しください。",
   "alreadyRegistered": "このユーザー名またはメールアドレスは登録済みです。",
   "accountNotFound": "アカウントが見つかりません。",
   "banned": "アカウントは停止されています。理由: {{reason}}"

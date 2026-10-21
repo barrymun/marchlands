@@ -20,6 +20,7 @@ const CONFIG: ApiConfig = {
   logLevel: 'silent',
   corsOrigin: true,
   adminUsernames: [],
+  loginBackoff: { freeTries: 5, firstWaitMs: 1000, maxWaitMs: 300_000, forgetAfterMs: 900_000 },
 };
 
 let app: Awaited<ReturnType<typeof buildApp>> | undefined;

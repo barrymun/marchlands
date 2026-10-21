@@ -20,6 +20,7 @@ const CONFIG: ApiConfig = {
   logLevel: 'silent',
   corsOrigin: true,
   adminUsernames: [],
+  loginBackoff: { freeTries: 5, firstWaitMs: 1000, maxWaitMs: 300_000, forgetAfterMs: 900_000 },
 };
 
 /** A bare app with the API's error handling and a few routes that fail in each way. */

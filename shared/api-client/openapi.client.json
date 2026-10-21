@@ -140,6 +140,7 @@
               "auth.notLoggedIn",
               "auth.needPlayer",
               "auth.wrongPassword",
+              "auth.tooManyTries",
               "auth.alreadyRegistered",
               "auth.accountNotFound",
               "auth.banned",
@@ -11174,6 +11175,7 @@
               "auth.notLoggedIn",
               "auth.needPlayer",
               "auth.wrongPassword",
+              "auth.tooManyTries",
               "auth.alreadyRegistered",
               "auth.accountNotFound",
               "auth.banned",
@@ -22355,7 +22357,7 @@
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 30,
-                    "pattern": "^[A-Za-z0-9_.-]+$"
+                    "pattern": "^[\\w.-]+$"
                   },
                   "password": {
                     "type": "string",
@@ -22430,7 +22432,7 @@
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 30,
-                    "pattern": "^[A-Za-z0-9_.-]+$"
+                    "pattern": "^[\\w.-]+$"
                   },
                   "password": {
                     "type": "string",

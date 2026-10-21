@@ -1,3 +1,5 @@
+import type { LoginBackoffConfig } from '#/auth/login-backoff.ts';
+
 export interface ApiConfig {
   port: number;
   host: string;
@@ -9,6 +11,8 @@ export interface ApiConfig {
   corsOrigin: string | boolean;
   /** usernames that are always operators (comma separated ADMIN_USERNAMES) */
   adminUsernames: string[];
+  /** the wait after repeated wrong passwords for a username (LOGIN_FREE_TRIES, LOGIN_FIRST_WAIT …, in seconds) */
+  loginBackoff: LoginBackoffConfig;
 }
 
 export function loadConfig(env = process.env): ApiConfig {
@@ -28,5 +32,11 @@ export function loadConfig(env = process.env): ApiConfig {
       .split(',')
       .map((s) => s.trim().toLowerCase())
       .filter(Boolean),
+    loginBackoff: {
+      freeTries: Number(env.LOGIN_FREE_TRIES ?? 5),
+      firstWaitMs: Number(env.LOGIN_FIRST_WAIT ?? 1) * 1000,
+      maxWaitMs: Number(env.LOGIN_MAX_WAIT ?? 5 * 60) * 1000,
+      forgetAfterMs: Number(env.LOGIN_RESET_AFTER ?? 15 * 60) * 1000,
+    },
   };
 }
