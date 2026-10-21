@@ -155,8 +155,10 @@ export function IsoViewport({
   }, [motion]);
 
   return (
+    // eslint-disable-next-line jsx-a11y-x/no-noninteractive-element-interactions -- the scene (map, town, fields) is an application: it takes the pointer and the keyboard
     <div
       ref={setElement}
+      // eslint-disable-next-line jsx-a11y-x/no-noninteractive-tabindex -- as above, it is focused to move and zoom with the keys
       tabIndex={0}
       role="application"
       aria-label={label}

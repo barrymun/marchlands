@@ -6,7 +6,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 
 const dir = path.resolve(process.argv[2] ?? 'client/web/dist');
-const TEXT = /\.(js|mjs|css|html|svg|json|txt|xml|webmanifest)$/;
+const TEXT = /\.(?:js|mjs|css|html|svg|json|txt|xml|webmanifest)$/;
 let before = 0;
 let after = 0;
 for (const entry of fs.readdirSync(dir, { recursive: true, withFileTypes: true })) {

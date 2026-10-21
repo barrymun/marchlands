@@ -152,7 +152,7 @@ export function attackNpc(troops: TroopCounts, opts: { level?: number; seeds?: n
     );
     if (r.attackerWon) wins++;
     rounds += r.rounds;
-    for (const k of TROOP_KEY_LIST) if (r.attacker.lost[k]) lost[k] = (lost[k] ?? 0) + r.attacker.lost[k]! / seeds;
+    for (const k of TROOP_KEY_LIST) if (r.attacker.lost[k]) lost[k] = (lost[k] ?? 0) + r.attacker.lost[k] / seeds;
     const injured = BALANCE.attackersGetInjured ? injuredOf(r.attacker.lost, research) : {};
     lostValue += valueOf(r.attacker.lost) / seeds;
     deadValue += (valueOf(r.attacker.lost) - valueOf(injured)) / seeds;

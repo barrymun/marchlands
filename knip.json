@@ -8,7 +8,7 @@
     },
     "backend/services/api": {
       "project": ["src/**/*.ts!", "test/**/*.ts"],
-      "ignoreDependencies": ["pino-pretty"]
+      "ignoreDependencies": ["pino-pretty", "@types/ws"]
     },
     "backend/services/worker": {
       "project": ["src/**/*.ts!", "test/**/*.ts"]

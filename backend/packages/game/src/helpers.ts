@@ -115,12 +115,13 @@ export async function pushPlayerInfo(ctx: Ctx, p: PlayerRow) {
   ctx.push(p.id, PushCmd.PLAYER_INFO_UPDATE, { playerInfo: await playerInfoOf(ctx, p) });
 }
 
+/** Text typed by a player as a string: a number reads as its digits, anything else (null, an object) as ''. */
+export const textOf = (raw: unknown): string => (typeof raw === 'string' || typeof raw === 'number' ? String(raw) : '');
+
 /** Validate a free-text name: length and a conservative character set. */
 /** `what` names the thing being named in the messages (common.playerName, cityName, heroName). */
 export function cleanName(raw: unknown, min: number, max: number, what: Message = msg('common.name')): string {
-  const s = String(raw ?? '')
-    .trim()
-    .replace(/\s+/g, ' ');
+  const s = textOf(raw).trim().replace(/\s+/g, ' ');
   if (s.length < min || s.length > max) throw new GameError(msg('common.nameLength', { what, min, max }), -87);
   if (!/^[\p{L}\p{N} _.'-]+$/u.test(s)) throw new GameError(msg('common.nameInvalid', { what }), -87);
   return s;

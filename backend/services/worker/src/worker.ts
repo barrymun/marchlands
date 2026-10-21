@@ -90,7 +90,7 @@ export function every(name: string, ms: number, fn: () => Promise<void>, opts: P
     }
     const took = Date.now() - t;
     if (took > 2000) opts.log('info', `${name} took ${took}ms`);
-    if (!opts.stopping()) setTimeout(run, ms);
+    if (!opts.stopping()) setTimeout(() => void run(), ms);
   };
-  setTimeout(run, 1000);
+  setTimeout(() => void run(), 1000);
 }

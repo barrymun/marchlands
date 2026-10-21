@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { type FormEvent, useState } from 'react';
+import { type SubmitEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { errorMessage, tokenStore } from '@/lib/api';
 import { percent } from '@/lib/format';
+import { formText } from '@/lib/forms';
 import { zoneName } from '@/lib/game-data';
 import { GENDERS } from '@/lib/genders';
 
@@ -27,7 +28,7 @@ export function CreateLordPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function submit(e: FormEvent<HTMLFormElement>) {
+  async function submit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     setBusy(true);
@@ -35,9 +36,9 @@ export function CreateLordPage() {
     try {
       const { data: created } = await postPlayer({
         body: {
-          userName: String(form.get('userName')),
-          castleName: String(form.get('castleName')),
-          flag: String(form.get('flag')),
+          userName: formText(form, 'userName'),
+          castleName: formText(form, 'castleName'),
+          flag: formText(form, 'flag'),
           sex: Number(sex),
           zone: Number(zone),
         },
@@ -46,7 +47,7 @@ export function CreateLordPage() {
       tokenStore.set(created.token);
       const { token: _token, ...state } = created;
       qc.setQueryData(getPlayerQueryKey(), state);
-      navigate(`/cities/${state.castles[0]?.id ?? 0}`, { replace: true });
+      void navigate(`/cities/${state.castles[0]?.id ?? 0}`, { replace: true });
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -65,7 +66,7 @@ export function CreateLordPage() {
           <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4" onSubmit={submit}>
+          <form className="grid gap-4" onSubmit={(e) => void submit(e)}>
             <div className="grid gap-2">
               <Label htmlFor="userName">{t('playerName')}</Label>
               <Input id="userName" name="userName" required maxLength={20} />

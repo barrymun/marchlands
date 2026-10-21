@@ -78,7 +78,7 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
   const [chosen, setChosen] = useState('');
   const flow = farms.find((f) => f.id === chosen) ?? farms[0];
   const cap = targetCap(city);
-  const targets = flow ? ((flow.actions.find((a) => a.type === 'attackTargets') as AttackAction | undefined)?.targets[String(city.id)] ?? []) : [];
+  const targets = flow ? (flow.actions.find((a): a is AttackAction => a.type === 'attackTargets')?.targets[String(city.id)] ?? []) : [];
   const confirm = async () => {
     if (await (flow ? addTo(flow) : createList())) setOpen(false);
   };

@@ -5,7 +5,6 @@ import { getArmiesOptions } from '@marchlands/api-client';
 import { Relation } from '@marchlands/core';
 
 import { useAnimations } from '@/components/iso-anim/hooks';
-import type { Side } from '@/components/iso-anim/types';
 import { TILE_H, TILE_W } from '@/components/iso-viewport/constants';
 import type { Viewport } from '@/components/iso-viewport/hooks';
 import { IsoViewport } from '@/components/iso-viewport/iso-viewport';
@@ -53,9 +52,9 @@ export function WorldMap({
   const anim = useAnimations();
   const armies = useQuery({ ...getArmiesOptions(), enabled: !!anim });
   const marching = [
-    ...(armies.data?.self ?? []).map((army) => ({ army, side: 'own' as Side })),
-    ...(armies.data?.friend ?? []).map((army) => ({ army, side: 'ally' as Side })),
-    ...(armies.data?.enemy ?? []).map((army) => ({ army, side: 'enemy' as Side })),
+    ...(armies.data?.self ?? []).map((army) => ({ army, side: 'own' as const })),
+    ...(armies.data?.friend ?? []).map((army) => ({ army, side: 'ally' as const })),
+    ...(armies.data?.enemy ?? []).map((army) => ({ army, side: 'enemy' as const })),
   ];
   const near = vp.camera ?? { x: home.x, y: home.y };
   const animate = anim

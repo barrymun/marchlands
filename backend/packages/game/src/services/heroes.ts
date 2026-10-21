@@ -367,7 +367,7 @@ export async function renameHero(ctx: Ctx, playerId: number, heroId: number, nam
 export async function releaseCaptive(ctx: Ctx, captorId: number, heroId: number) {
   const h = await getHero(ctx, heroId, { lock: true });
   if (h.capturedByPlayerId !== captorId || h.status !== HeroStatus.SEIZED) throw new GameError(msg('hero.notPrisoner'), -99);
-  const home = (h.buffs.find((x) => x.id === HeroBuffId.HOME_CITY)?.param ?? 0) as number;
+  const home = h.buffs.find((x) => x.id === HeroBuffId.HOME_CITY)?.param ?? 0;
   const homeCity = home ? await findCity(ctx, home) : undefined;
   if (!homeCity || homeCity.playerId !== h.playerId) {
     await ctx.tx.delete(heroes).where(eq(heroes.id, heroId));

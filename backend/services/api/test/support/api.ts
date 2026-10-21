@@ -18,6 +18,7 @@ export const TEST_CONFIG: ApiConfig = {
   logLevel: 'silent',
   corsOrigin: true,
   adminUsernames: [],
+  loginBackoff: { freeTries: 5, firstWaitMs: 1000, maxWaitMs: 5 * 60_000, forgetAfterMs: 15 * 60_000 },
 };
 
 /** What a request answered: the HTTP status and the parsed JSON body. */
@@ -57,7 +58,8 @@ export interface TestApi {
   game<T>(fn: (ctx: Ctx) => Promise<T>): Promise<T>;
 }
 
-const ROLLBACK = Symbol('rollback');
+// thrown to roll the test's transaction back, then caught here
+const ROLLBACK = new Error('rollback');
 let serial = 0;
 
 /** Run `fn` with the API app on a test transaction that is rolled back afterwards. */
@@ -89,7 +91,7 @@ function makeApi(app: TestApi['app'], db: Db): TestApi {
       headers: opts.token ? { authorization: `Bearer ${opts.token}` } : undefined,
       ...(opts.body !== undefined ? { payload: opts.body as object } : {}),
     });
-    return { status: res.statusCode, body: res.body ? JSON.parse(res.body) : {} } as Answer<never>;
+    return { status: res.statusCode, body: res.body ? JSON.parse(res.body) : {} };
   };
   const api: TestApi = {
     app,

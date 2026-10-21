@@ -45,7 +45,7 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
   if (mayor) {
     addHeroExp(mayor, researchHeroExp(techId, level, th));
     await saveHero(ctx, mayor);
-    ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: home!.city.id, hero: heroBean(mayor), updateType: 2 });
+    ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: home.city.id, hero: heroBean(mayor), updateType: 2 });
   }
   await savePlayer(ctx, p);
   ctx.push(playerId, PushCmd.RESEARCH_COMPLETE_UPDATE, { castleId: r.cityId!, typeId: techId, level });

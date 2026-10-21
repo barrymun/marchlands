@@ -21,7 +21,8 @@ import { getPlayer, savePlayer, setBuff } from '@marchlands/game/testing';
 
 import { type Log, MAX_ATTEMPTS, processOne } from '#/worker.ts';
 
-const ROLLBACK = Symbol('rollback');
+// thrown to roll the test's transaction back, then caught here
+const ROLLBACK = new Error('rollback');
 
 /** Run `fn` with the test transaction as the worker's database, rolled back afterwards. */
 async function workerTest(fn: (db: Db, log: Mock<Log>) => Promise<void>) {

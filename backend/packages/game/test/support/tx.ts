@@ -8,14 +8,15 @@ import { testDb } from '@marchlands/db/test/support/db.ts';
 import { runGame } from '#/index.ts';
 import type { TestGame } from '#test/support/game.ts';
 
-const ROLLBACK = Symbol('rollback');
+// thrown to roll the test's transaction back, then caught here
+const ROLLBACK = new Error('rollback');
 
 /** Run `fn` with the test transaction as its database; everything is rolled back afterwards. */
 export async function inTestTx<T>(fn: (db: Db) => Promise<T>): Promise<T> {
   let result: T | undefined;
   try {
     await testDb().transaction(async (tx) => {
-      result = await fn(tx as unknown as Db);
+      result = await fn(tx);
       throw ROLLBACK;
     });
   } catch (err) {

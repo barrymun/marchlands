@@ -14,7 +14,7 @@ export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 export interface Database {
   pool: pg.Pool;
   db: Db;
-  close(): Promise<void>;
+  close: () => Promise<void>;
 }
 
 export function connect(url = process.env.DATABASE_URL, max = Number(process.env.DB_POOL_SIZE ?? 20)): Database {

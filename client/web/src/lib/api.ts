@@ -19,7 +19,7 @@ const listeners = new Set<() => void>();
 
 export const tokenStore = {
   get: () => token,
-  set(next: string | null) {
+  set: (next: string | null) => {
     token = next;
     try {
       if (next) localStorage.setItem(TOKEN_KEY, next);
@@ -29,7 +29,7 @@ export const tokenStore = {
     }
     for (const fn of listeners) fn();
   },
-  subscribe(fn: () => void) {
+  subscribe: (fn: () => void) => {
     listeners.add(fn);
     return () => listeners.delete(fn);
   },

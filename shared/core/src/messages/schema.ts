@@ -20,4 +20,4 @@ export const MsgParamSchema: z.ZodType<MsgParam> = z
 /** What the server tells a player: a code (`hero.locked`) and its params; the client words it in the player's language. */
 export const MessageSchema: z.ZodType<Message> = z
   .object({ code: z.enum(MSG_CODES), params: z.record(z.string(), MsgParamSchema).optional() })
-  .meta({ id: 'Message' }) as z.ZodType<Message>;
+  .meta({ id: 'Message' });

@@ -9,10 +9,10 @@ const SPARSE_MAX = 3;
 
 /** The import group of a module specifier. */
 function groupOf(source) {
-  if (/\.(css|scss|sass)$/.test(source)) return 'stylesheet';
+  if (/\.(?:css|scss|sass)$/.test(source)) return 'stylesheet';
   if (source.startsWith('node:')) return 'builtin';
   if (source.startsWith('@marchlands/')) return 'workspace';
-  if (/^(#|@\/)/.test(source)) return 'local';
+  if (/^(?:#|@\/)/.test(source)) return 'local';
   if (source.startsWith('.')) return 'relative';
   return 'package';
 }

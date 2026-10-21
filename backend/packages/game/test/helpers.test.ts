@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { BuffId, type BuffState, GameError, type Message, msg } from '@marchlands/core';
 
-import { activeBuff, addPrestige, assertClean, cleanName, escapeHtml, gainResources, itemCount, spendGold, spendResources } from '#/helpers.ts';
+import { activeBuff, addPrestige, assertClean, cleanName, escapeHtml, gainResources, itemCount, spendGold, spendResources, textOf } from '#/helpers.ts';
 import { type CityRow, type PlayerRow } from '#/repo.ts';
 
 const city = (res: Partial<Record<'gold' | 'food' | 'wood' | 'stone' | 'iron', number>> = {}) =>
@@ -114,6 +114,20 @@ describe('activeBuff', () => {
     const p = player({ buffs: [buff(BuffId.ATTACK, 100)] });
     expect(activeBuff(p, BuffId.ATTACK, 100)).toBeUndefined();
     expect(activeBuff(p, BuffId.DEFENSE, 0)).toBeUndefined();
+  });
+});
+
+describe(textOf.name, () => {
+  it('keeps a string as it is and reads a number as its digits', () => {
+    expect(textOf('  Camelot ')).toBe('  Camelot ');
+    expect(textOf(42)).toBe('42');
+  });
+
+  it("reads anything else as '', never '[object Object]'", () => {
+    expect(textOf(null)).toBe('');
+    expect(textOf(undefined)).toBe('');
+    expect(textOf({ name: 'Camelot' })).toBe('');
+    expect(textOf(['Camelot'])).toBe('');
   });
 });
 

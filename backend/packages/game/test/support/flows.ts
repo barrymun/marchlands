@@ -5,7 +5,7 @@ import { vi } from 'vitest';
 
 import type { PushCmd, PushData } from '@marchlands/contracts';
 import { BuildingType, healCost, Mission, msg, ref, tileId, TileType, tileXY, type TroopCounts, VALLEY_TYPES } from '@marchlands/core';
-import { type Db, pushMessages, tiles, timedEvents } from '@marchlands/db';
+import { pushMessages, tiles, timedEvents } from '@marchlands/db';
 
 import { armies, flows, player as players } from '#/index.ts';
 import { getCity, saveCity } from '#/repo.ts';
@@ -41,7 +41,7 @@ export async function runFlowIn(g: TestGame, p: TestPlayer, flowId: string, city
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(g.now);
   try {
-    return await flows.runFlow(g.tx as unknown as Db, p.id, flowId, cityIds, preview);
+    return await flows.runFlow(g.tx, p.id, flowId, cityIds, preview);
   } finally {
     vi.useRealTimers();
     const pushed = await g.tx

@@ -28,7 +28,7 @@ const Credentials = z.object({
     .trim()
     .min(3)
     .max(30)
-    .regex(/^[A-Za-z0-9_.-]+$/, 'letters, digits, _ . - only'),
+    .regex(/^[\w.-]+$/, 'letters, digits, _ . - only'),
   password: z.string().min(6).max(200),
 });
 export const LoginBody = Credentials;

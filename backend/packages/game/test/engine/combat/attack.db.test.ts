@@ -17,7 +17,6 @@ import {
   maxArmyTroops,
   Mission,
   msg,
-  type ResourceSet,
   TechType,
   totalResources,
   WAR_ENSIGN_DESC,
@@ -104,7 +103,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       if (Object.keys(b.attacker.injured ?? {}).length) expect(g.pushes(PushCmd.INJURED_TROOP_UPDATE).at(-1)?.playerIds).toEqual([p.id]);
 
       // plunder: what the survivors can carry, taken from the city
-      const loot = b.plunder as ResourceSet;
+      const loot = b.plunder;
       expect(totalResources(loot)).toBeGreaterThan(0);
       expect(totalResources(loot)).toBeLessThanOrEqual(armyLoad(b.attacker.troops.after, pp.research));
       for (const k of KEYS) expect(before[k] - city[k]).toBeCloseTo(loot[k], 0);

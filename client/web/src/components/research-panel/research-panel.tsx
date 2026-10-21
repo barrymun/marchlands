@@ -117,14 +117,14 @@ export function ResearchPanel({ city }: { city: CityBean }) {
                 {tech.effect && (
                   <span>
                     <span className="text-muted-foreground">{t('common:level.now')}</span> {translateMessage(tech.effect)}
-                    {tech.effectiveLevel < tech.level && <span className="text-muted-foreground">{t('tech.capped', { level: list.data!.academyLevel })}</span>}
+                    {tech.effectiveLevel < tech.level && <span className="text-muted-foreground">{t('tech.capped', { level: list.data.academyLevel })}</span>}
                   </span>
                 )}
                 {tech.nextEffect && (
                   <span>
                     <span className="text-muted-foreground">{t('common:level.next', { level: tech.level + 1 })}</span>{' '}
                     <span className="text-emerald-600 dark:text-emerald-400">{translateMessage(tech.nextEffect)}</span>
-                    {tech.level + 1 > list.data!.academyLevel && (
+                    {tech.level + 1 > list.data.academyLevel && (
                       <span className="text-muted-foreground">{t('tech.needsAcademy', { level: tech.level + 1 })}</span>
                     )}
                   </span>

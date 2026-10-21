@@ -237,7 +237,7 @@ async function main() {
     check(
       farmed.cities[0].ok &&
         farmed.cities[0].steps[0].items?.[0]?.ok === false &&
-        /^flow\.target\.(noIdleHero|notEnoughTroops|refused)$/.test(farmed.cities[0].steps[0].items[0].detail.code),
+        /^flow\.target\.(?:noIdleHero|notEnoughTroops|refused)$/.test(farmed.cities[0].steps[0].items[0].detail.code),
       'attack target without enough troops is skipped, not failed',
     );
     // train steps the city cannot afford in full train what it can, or are skipped: the run carries on

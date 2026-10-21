@@ -71,7 +71,7 @@ describe(`${dropCapturedTarget.name} (through combat)`, () => {
       // a barbarian city with no defenders left and its loyalty nearly gone (not regenerating before the army arrives)
       const tile = await getTile(g, npc);
       const { state } = freshNpcState(tile.level, g.now + 3_600_000);
-      await saveTile(g, { ...tile, state: { ...state, loyalty: 1 } as unknown as Record<string, number>, troops: {}, forts: {} });
+      await saveTile(g, { ...tile, state: { ...state, loyalty: 1 }, troops: {}, forts: {} });
 
       const preset = await armyPreset(g, a, 'Siege', { militia: 5000 });
       const fa = await newFlow(g, a, { name: 'Take', actions: [{ type: 'attackTargets', presetId: preset, targets: { [a.cityId]: [npc] } }] });

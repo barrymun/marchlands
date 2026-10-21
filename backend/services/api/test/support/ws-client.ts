@@ -37,16 +37,20 @@ export async function openSocket(app: FastifyInstance, url: string, timeoutMs = 
   const waiting: (() => void)[] = [];
   let onClose!: (c: { code: number; reason: string }) => void;
   const closed = new Promise<{ code: number; reason: string }>((resolve) => (onClose = resolve));
-  const ws = (await app.injectWS(url, {}, {
-    onInit: (raw: unknown) => {
-      const s = raw as ClientSocket;
-      s.on('message', (data) => {
-        frames.push(JSON.parse(data.toString()) as Frame);
-        waiting.splice(0).forEach((w) => w());
-      });
-      s.on('close', (code, reason) => onClose({ code, reason: reason.toString() }));
+  const ws = (await app.injectWS(
+    url,
+    {},
+    {
+      onInit: (raw: unknown) => {
+        const s = raw as ClientSocket;
+        s.on('message', (data) => {
+          frames.push(JSON.parse(data.toString()) as Frame);
+          waiting.splice(0).forEach((w) => w());
+        });
+        s.on('close', (code, reason) => onClose({ code, reason: reason.toString() }));
+      },
     },
-  } as never)) as unknown as ClientSocket;
+  )) as unknown as ClientSocket;
 
   return {
     frames,

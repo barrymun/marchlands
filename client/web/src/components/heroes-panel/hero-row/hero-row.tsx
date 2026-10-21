@@ -56,6 +56,7 @@ export function HeroRow({
             }}
           >
             <Input
+              // eslint-disable-next-line jsx-a11y-x/no-autofocus -- the field appears when the player asks to rename the hero, so it takes the focus
               autoFocus
               className="h-7 w-40"
               maxLength={20}

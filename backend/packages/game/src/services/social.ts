@@ -8,7 +8,7 @@ import { chatMessages, playerRelations, players } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { isBlocked } from '#/engine/social.ts';
-import { escapeHtml } from '#/helpers.ts';
+import { escapeHtml, textOf } from '#/helpers.ts';
 import { findPlayerByName, getPlayer } from '#/repo.ts';
 
 // ---------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ export async function removeRelation(ctx: Ctx, playerId: number, otherId: number
 const MAX_CHAT = 300;
 
 function cleanMessage(raw: unknown): string {
-  const text = String(raw ?? '').trim();
+  const text = textOf(raw).trim();
   if (!text) throw new GameError(msg('social.emptyMessage'), -99);
   if (text.length > MAX_CHAT) throw new GameError(msg('social.messageTooLong', { count: MAX_CHAT }), -99);
   return escapeHtml(text);

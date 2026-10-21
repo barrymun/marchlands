@@ -61,6 +61,12 @@ describe('locale files', () => {
       for (const ns of namespaces) for (const [key, text] of flatten(byLocale[locale][ns])) expect(text.trim(), `${locale} ${ns}:${key}`).not.toBe('');
   });
 
+  it('say "player", never "lord" or "lady", in English (AGENTS.md, Ground rules)', () => {
+    for (const locale of [DEFAULT_LOCALE, ...OVERRIDE_LOCALES])
+      for (const [ns, tree] of Object.entries(byLocale[locale]))
+        for (const [key, text] of flatten(tree)) expect(text, `${locale} ${ns}:${key}`).not.toMatch(/\b(?:lords?|lady|ladies)\b/i);
+  });
+
   it('en-GB gives every plural key all of its English forms', () => {
     for (const ns of namespaces) {
       const keys = [...flatten(source[ns]).keys()];

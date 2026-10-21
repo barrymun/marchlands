@@ -119,7 +119,7 @@ export function msgParamNames(code: MsgCode): readonly string[] {
 
 /** A message: `msg('hero.locked', { name })`; codes without params take none. */
 export function msg<C extends MsgCode>(code: C, ...params: [ParamNames<C>] extends [never] ? [] : [Record<ParamNames<C>, MsgParam>]): Message {
-  return params[0] ? { code, params: params[0] as Record<string, MsgParam> } : { code };
+  return params[0] ? { code, params: params[0] } : { code };
 }
 
 /** A message as text for logs (not for players): `hero.locked {"name":"ATK - 76"}`. */

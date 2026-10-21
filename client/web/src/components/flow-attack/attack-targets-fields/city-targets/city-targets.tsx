@@ -18,12 +18,12 @@ export function CityTargets({ city, list, onChange }: { city: CityBean; list: nu
   const [text, setText] = useState('');
   const cap = targetCap(city);
   const add = () => {
-    const m = text.match(/^\s*\(?\s*(\d+)\s*[,\s]\s*(\d+)\s*\)?\s*$/);
-    if (!m) return toast.error(t('cityTargets.badFormat'));
+    const m = text.match(/^\s*(?:\(\s*)?(\d+)(?:\s|\s*,)\s*(\d+)\s*(?:\)\s*)?$/);
+    if (!m) return void toast.error(t('cityTargets.badFormat'));
     const [x, y] = [Number(m[1]), Number(m[2])];
-    if (x >= mapSize || y >= mapSize) return toast.error(t('cityTargets.outOfRange', { max: mapSize - 1 }));
+    if (x >= mapSize || y >= mapSize) return void toast.error(t('cityTargets.outOfRange', { max: mapSize - 1 }));
     const id = toTileId(x, y, mapSize);
-    if (list.includes(id)) return toast.error(t('cityTargets.duplicate'));
+    if (list.includes(id)) return void toast.error(t('cityTargets.duplicate'));
     onChange([...list, id]);
     setText('');
   };

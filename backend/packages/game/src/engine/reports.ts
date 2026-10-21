@@ -59,7 +59,7 @@ export async function reportDesertion(
     )
     .orderBy(desc(reports.id))
     .limit(1);
-  const old = prev && (prev.body as ReportBody).kind === 'desertion' ? (prev.body as Extract<ReportBody, { kind: 'desertion' }>).desertion : null;
+  const old = prev && prev.body.kind === 'desertion' ? prev.body.desertion : null;
   const replaces = old != null && old.last.from === r.from;
   if (prev && old && (replaces || !prev.isRead)) {
     const base = replaces ? addTroops(old.troops, old.last.troops, -1) : old.troops;

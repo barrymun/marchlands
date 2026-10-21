@@ -24,4 +24,4 @@ export async function recordSql(g: TestGame, fn: () => Promise<unknown>): Promis
 export const lockedTables = (statements: string[]) => statements.filter((s) => /\bfor update\b/i.test(s)).map((s) => /\bfrom "(\w+)"/.exec(s)?.[1]);
 
 /** The statements that change data. */
-export const writes = (statements: string[]) => statements.filter((s) => /^\s*(insert|update|delete)\b/i.test(s));
+export const writes = (statements: string[]) => statements.filter((s) => /^\s*(?:insert|update|delete)\b/i.test(s));

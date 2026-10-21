@@ -26,11 +26,11 @@ export const itemShortName = (id: string) => dataName('data-items', `${id}.short
 
 /** A quest's name (`data-quests` `quest.<id>`). */
 export const questName = (id: number) => {
-  const key = `data-quests:quest.${id}`;
-  return i18n.exists(key) ? (i18n.t(key as never) as unknown as string) : String(id);
+  const key = `data-quests:quest.${id}` as never;
+  return i18n.exists(key) ? (i18n.t(key) as unknown as string) : String(id);
 };
 /** A quest group's name (`data-quests` `group.<id>`, by its config_quests row id). */
 export const questGroupName = (id: number) => {
-  const key = `data-quests:group.${id}`;
-  return i18n.exists(key) ? (i18n.t(key as never) as unknown as string) : String(id);
+  const key = `data-quests:group.${id}` as never;
+  return i18n.exists(key) ? (i18n.t(key) as unknown as string) : String(id);
 };

@@ -15,7 +15,6 @@ import {
   type NpcState,
   npcTemplate,
   regenerateNpc,
-  type ResourceSet,
   TechType,
   TileType,
   totalResources,
@@ -46,7 +45,7 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
       expect(b.loyaltyDamage).toBeLessThanOrEqual(hi);
       expect(b.loyaltyLeft).toBe(npcTemplate(1).loyalty - b.loyaltyDamage);
 
-      const loot = b.plunder as ResourceSet;
+      const loot = b.plunder;
       const pp = await reloadPlayer(g, p);
       expect(totalResources(loot)).toBeGreaterThan(0);
       expect(totalResources(loot)).toBeLessThanOrEqual(armyLoad(b.attacker.troops.after, pp.research));
@@ -115,7 +114,7 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
       await admin.setPlayerFlags(g, p.name, { title: 1 });
       const npc = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
       const prestige = (await reloadPlayer(g, p)).prestige;
-      let last;
+      let last: Awaited<ReturnType<typeof attack>> | undefined;
       for (let i = 0; i < 15; i++) {
         last = await attack(g, p, heroId, npc.id);
         await roundTrip(g, last.armyId);

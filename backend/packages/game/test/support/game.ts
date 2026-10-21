@@ -27,7 +27,8 @@ export interface TestGame extends CtxInternals {
   runDue(until?: number): Promise<number>;
 }
 
-const ROLLBACK = Symbol('rollback');
+// thrown to roll the test's transaction back, then caught here
+const ROLLBACK = new Error('rollback');
 
 /** Run `fn` in a game transaction that is rolled back afterwards; returns what `fn` returned. */
 export async function game<T>(fn: (g: TestGame) => Promise<T>, opts: { now?: number; seed?: string } = {}): Promise<T> {
@@ -53,7 +54,7 @@ function pending(ctx: CtxInternals): ScheduledEvent[] {
 
 function asTestGame(ctx: CtxInternals): TestGame {
   const g = ctx as TestGame;
-  g.pushes = ((cmd?: PushCmd) => ctx._pushes.filter((p) => cmd == null || p.cmd === cmd)) as TestGame['pushes'];
+  g.pushes = (cmd?: PushCmd) => ctx._pushes.filter((p) => cmd == null || p.cmd === cmd);
   g.events = (type) => pending(ctx).filter((e) => type == null || e.type === type);
   g.advance = (ms) => {
     ctx.now += ms;

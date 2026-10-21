@@ -8,7 +8,7 @@ How to work in this repository. Read [README.md](README.md) for what Marchlands 
   - Don't commit, push or branch unless asked.
   - Never change the index (`git add`, `git mv`, `git rm`, `git restore --staged`). The maintainer curates what's staged. Move or delete files with plain `mv` / `rm`. Read-only git (`status`, `diff`, `log`) is fine.
   - When asked for a commit message, keep it concise. Leave out double quotes, backticks and `$` (it gets pasted into `git commit -m "..."`), and add no `Co-Authored-By` or other attribution trailer.
-- **New dependencies** are pinned to an exact version (no `^` or `~`) released at least two weeks ago.
+- **New dependencies** are pinned to an exact version (no `^` or `~`) released at least two weeks ago. `.npmrc` sets `save-exact=true`, so `npm i` pins by itself; checking a version's age is still by hand (`npm view <name> time`).
 - **Player-facing language is neutral:** say "player", never "lord" or "lady", in anything a player reads (UI text, item and quest descriptions, error messages, mail). Code identifiers and comments may still say lord.
 - **Planned work** is listed in [TODO.md](TODO.md). In the change that finishes an item, move it to the Done section at the bottom (newest first, dated, one line saying what was done).
 - **A large feature gets a design document** in [docs/features/](docs/features/README.md), linked from its TODO item: where things stand, what's decided and why, open questions and phases. Record decisions there as they're made.
@@ -39,7 +39,7 @@ Run from the repo root.
 | `npm run typecheck` | `tsc` for the backend + shared packages, then for the client |
 | `npm test` | vitest: `shared/*/test`, `backend/**/test`, and `client/web/src/**/*.test.ts` (no database) |
 | `npm run test:db` | the backend service tests against Postgres (`*.db.test.ts`, see Backend tests). Needs the Postgres container. |
-| `npm run lint` / `npm run lint:fix` | ESLint (code quality only); `lint` also runs `npm run knip` (unused files, exports and dependencies) |
+| `npm run lint` / `npm run lint:fix` | ESLint (code quality only); `lint` also runs `npm run knip` (unused files, exports and dependencies) and `npm run sherif` (the workspaces' `package.json` files agree: the same version of a shared dependency everywhere, and so on). sherif's `root-package-manager-field` rule is off: npm comes with Node 24, here and in CI's `node:24` image, so the root names no `packageManager`. |
 | `npm run format` / `npm run format:check` | Prettier (all formatting) |
 | `npm run build:web` | build the client, then check its size budget (`client/web/.size-limit.js`); over a limit, the build fails |
 | `npm run build:backend` | bundle the API, worker and migrations into `dist/backend/`, source maps into `dist/backend-maps/` (what the backend image runs; the Dockerfile runs it with `--minify`) |
@@ -76,6 +76,14 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 
 - **Prettier owns formatting:** single quotes, 160-character lines (`.prettierrc.json`). Generated files, migrations, the original game's data JSON and Markdown are ignored (`.prettierignore`).
 - **ESLint owns code quality** (`eslint.config.js`): the JS and TypeScript recommended rules, plus react-hooks, react-refresh and i18next (no hard-coded text, see Translations) in the client. Its style rules are off (`eslint-config-prettier`), so the two never disagree.
+- **Type-aware rules** (typescript-eslint `recommendedTypeChecked`, about 20 s for the whole repo) run on the files a tsconfig covers (`TYPED` in `eslint.config.js`; keep it in step with the tsconfigs). Files outside them (`tools/art`, `tools/build`, the api-client's own files) are linted without types, and shadcn/ui is left as shipped.
+  - **A promise is awaited, or handed on with `void`:** an async handler is `onClick={() => void save()}`, never `onClick={save}` (`no-misused-promises`, `no-floating-promises`). `useGameNav`'s moves already return nothing.
+  - **No `any` from untyped values:** read a form with `formText` and typed amounts with `typedAmounts` (`lib/forms.ts`), never `String(form.get(…))` or `Object.fromEntries` over `.map`. Tests may read JSON untyped.
+  - **Only errors are thrown** (`only-throw-error`), deprecated APIs aren't used (`no-deprecated`), and a switch over a union covers every member or has a default (`switch-exhaustiveness-check`).
+  - **`no-unnecessary-type-assertion` misjudges some casts** (a literal for a union, a cast i18next needs). Its `--fix` can break the types, so run `npm run typecheck` after it, and keep the cast in a form it accepts (`'own' as const`, the cast on a variable).
+- **Other rules:** `eqeqeq` (`== null` allowed), `regexp` (no backtracking blow-ups, no unused groups), `jsx-a11y-x` (the maintained fork of jsx-a11y, for ESLint 10), `@tanstack/eslint-plugin-query`, the Drizzle rules (an `update` or `delete` on `tx` or `db` has a `where`), and in tests no `it.only`, `it.skip` or repeated titles.
+- **The client's conventions are rules too:** no `alert`, `confirm` or `prompt` (use `ConfirmDialog`), no `fetch` (use the generated client), and no `toLocaleString` / `toLocaleTimeString` outside `lib/format.ts`. A locale test checks English text says "player", never "lord" or "lady".
+- **An `eslint-disable` comment says why** after `--`, and fails the lint once it no longer disables anything (`reportUnusedDisableDirectives`).
 - **Imports are sorted** (auto-fixed by `npm run lint:fix`):
   - Groups in this order, each alphabetised: stylesheets, `node:` builtins, packages, workspace packages (`@marchlands/…`), local (`#/…`, `#test/…`, `@/…`), relative (`import-x/order`).
   - A file with more than 3 imports has one blank line between groups; a smaller file keeps them together (`tools/eslint/import-spacing.mjs`).

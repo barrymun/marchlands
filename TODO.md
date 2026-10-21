@@ -55,10 +55,36 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
     - **Personal, not the world's:** the map, other players' views and any game event keep the game's weather; when acts of god exist, a game storm overrides the real sky, since it's part of the game. If anything fails (no zone, the service down), the town falls back to the game's weather.
   - To decide: on or off by default; which weather service, and its terms and credit; how often to refresh; whether to add fog and overcast skies; whether sunrise and sunset ship first.
 
+## Code quality and security
+
+Phases 2 to 4 of the October 2026 tooling review; phase 1 (type-aware linting and the convention rules) is in Done.
+
+- [ ] **An emergency ceiling on gameplay routes, off by default (to decide).**
+  - Now: nothing limits gameplay requests, on purpose: an engaged player must never meet a limit. Sign-in is guarded on its own (wrong passwords wait, in Done).
+  - Idea: a per-player limit set far above anything a person does, turned on only during an incident (a runaway script hammering the server), documented in docs/deployment.md. Measure what the client really sends first (map panning loads 21×21 chunks, queue polling, flows). If the limiter fails, it lets requests through.
+- [ ] **A proof-of-work challenge on sign-up.**
+  - Now: `POST /auth/register` makes an account for anyone who asks, so accounts can be made in bulk by a script.
+  - Plan: the browser solves a small proof-of-work puzzle (about a second of computing, e.g. ALTCHA) before an account is made. Invisible to players, self-hosted, and no player data goes to a third party, unlike a CAPTCHA (Turnstile, hCaptcha). The API makes the challenge and checks the answer; the sign-up form solves it while the player types.
+  - To decide: how hard the puzzle is (slow phones); whether login asks for one too after a few wrong passwords.
+- [ ] **Dependency updates with Renovate.**
+  - Now: dependencies are updated by hand, and the two-week rule (AGENTS.md, Ground rules) is checked by hand.
+  - Plan: Renovate with `minimumReleaseAge: "14 days"` and pinned versions (`rangeStrategy: "pin"`), grouped so updates come as a few pull requests.
+  - To decide first: CI runs only when started by hand (`workflow_dispatch` in `.github/workflows/ci.yml`), so Renovate's pull requests would go untested unless CI also runs on `pull_request`.
+- [ ] **Turn on `noUncheckedIndexedAccess`.**
+  - Now: off (`tsconfig.base.json`), so a lookup in a record or array (`BALANCE.fortSpace[id]`, the data tables) is typed as always found. Turning it on gives about 300 errors in the client and about 1,400 in the backend and shared code (measured 2026-10-21).
+  - Plan: a design document first (AGENTS.md, Ground rules), with the patterns for a lookup that can miss. The client first (its own tsconfig); the backend and shared code share `tsconfig.json`, so going a package at a time means splitting it. Then turn on `@typescript-eslint/no-unnecessary-condition`, whose findings are mostly false alarms while the flag is off.
+- [ ] **Browser tests with Playwright.**
+  - Now: the client's tests are pure functions in plain Node; the only end-to-end checks are `tools/smoke/*.mjs`, against the API.
+  - Plan: a small Playwright suite against the running stack (log in, build, train, send an army) with axe accessibility checks, using temporary `fx_…` accounts deleted afterwards (AGENTS.md, Running stack).
+
 ## Done
 
 Newest first, with the date it was finished.
 
+- 2026-10-21: **Wrong passwords wait.** After 5 wrong passwords in a row for a username, each further login waits 1 s, 2 s, 4 s … up to 5 minutes (429 `auth.tooManyTries`, with Retry-After), even with the right password; the right password or 15 minutes without a wrong one starts it again. Counted per username, never per IP, and alike for names with no account; kept in memory (`backend/services/api/src/auth/login-backoff.ts`, settings `LOGIN_*` in docs/deployment.md).
+- 2026-10-21: **Workspace dependencies checked with sherif**, part of `npm run lint` (AGENTS.md, Commands).
+- 2026-10-21: **New dependencies pinned by default:** `.npmrc` sets `save-exact=true`, so `npm i` writes exact versions.
+- 2026-10-21: **Lint with types, and with the project's conventions.** typescript-eslint `recommendedTypeChecked`, regexp, jsx-a11y-x, TanStack Query, Drizzle and vitest rules, the client's conventions (no `confirm`, `fetch` or `toLocaleString`) and a locale test against "lord"; `noImplicitReturns` and `noFallthroughCasesInSwitch` everywhere. Fixed what they found: unhandled promises from async handlers, `[object File]` from form fields, untyped army bodies sent to the API, the WebSocket's missing types (`@types/ws`) and React's deprecated `FormEvent` (AGENTS.md, Formatting and linting).
 - 2026-10-20: **Animate the town and fields.** The Town, Fields and Map views come alive in pixel art (docs/features/town-animations.md): smoke, flames, turning sails and wheels, quarry blasts, sheep and horses; people on the streets and in the fields; scaffolding while a building goes up and a sparkle when it finishes; buildings showing what the city does (the beacon blazing at an enemy's approach, recruits drilling, sparks at the forge, the academy aglow, a rider, a stretcher, troops mustering, sawdust); night with lit windows, rain, snow and storms; fires after an attack; and on the map campfires, glinting lakes, valley workers and marching armies. Frames are made in code from spots the art scripts record, loaded after the first page, and still with reduced motion.
 
 - 2026-10-18: **Rework the map's UI.** The world map is isometric like the original: valleys, castles and barbarian camps drawn as pixel art on continuous grass, on a canvas that fills the view. Drag it (or swipe on a phone) to look round, with the arrows, the home button, zoom and the keyboard as well; it loads the squares coming into view and wraps round the world's edge (AGENTS.md, Client, Game art).

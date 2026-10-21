@@ -30,7 +30,7 @@ describe(techName.name, () => {
   it('has a name for every technology in en-GB and ja-JP', async () => {
     for (const id of TECH_IDS) expect(i18n.exists(String(id), { ns: 'data-techs', lng: 'en-GB' }), `tech ${id}`).toBe(true);
     await i18n.changeLanguage('ja-JP');
-    for (const id of TECH_IDS) expect(techName(id), `tech ${id}`).not.toMatch(/[A-Za-z]/);
+    for (const id of TECH_IDS) expect(techName(id), `tech ${id}`).not.toMatch(/[A-Z]/i);
   });
 });
 

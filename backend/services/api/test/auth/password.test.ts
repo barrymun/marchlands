@@ -5,7 +5,7 @@ describe(hashPassword.name, () => {
   it('stores scrypt$N$r$p$salt$hash with a fresh salt each time', async () => {
     const a = await hashPassword('fake-password');
     const b = await hashPassword('fake-password');
-    expect(a).toMatch(/^scrypt\$16384\$8\$1\$[A-Za-z0-9_-]{22}\$[A-Za-z0-9_-]{43}$/);
+    expect(a).toMatch(/^scrypt\$16384\$8\$1\$[\w-]{22}\$[\w-]{43}$/);
     expect(a).not.toContain('fake-password');
     expect(a).not.toBe(b);
   });

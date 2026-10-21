@@ -48,7 +48,7 @@ describe('city patches', () => {
   });
   it('HeroUpdate patches the hero in the city and in the player state', () => {
     seed(cityKey(7), city(7));
-    seed(getPlayerQueryKey(), { castles: [city(7)] } as unknown as GetPlayerResponse);
+    seed(getPlayerQueryKey(), { castles: [city(7)] });
     const hero = { id: 1, level: 5 } as HeroBean;
     handle(PushCmd.HERO_UPDATE, { castleId: 7, hero, updateType: 0 }, qc);
     expect(qc.getQueryData<CityBean>(cityKey(7))?.heros[0].level).toBe(5);

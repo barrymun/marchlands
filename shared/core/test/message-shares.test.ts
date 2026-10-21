@@ -23,7 +23,7 @@ const SHARE_PARAMS = new Set(['percent', 'pct', 'life', 'injured', 'march', 'bat
 function params(m: MsgParam | undefined, out: [string, string, MsgParam][] = [], code = ''): [string, string, MsgParam][] {
   if (Array.isArray(m)) for (const v of m) params(v, out, code);
   else if (m && typeof m === 'object' && 'code' in m) {
-    for (const [k, v] of Object.entries((m as Message).params ?? {})) {
+    for (const [k, v] of Object.entries(m.params ?? {})) {
       out.push([m.code, k, v]);
       params(v, out, m.code);
     }

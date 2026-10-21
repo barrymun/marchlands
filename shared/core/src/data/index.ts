@@ -88,7 +88,7 @@ const HERO_ENHANCEMENT_RESEARCH: ResearchLevelConfig[] = (researchRows as Resear
     techId: TechType.HERO_ENHANCEMENT,
     level: r.level,
     buildTime: r.buildTime * 2,
-    cost: Object.fromEntries(Object.entries(r.cost).map(([k, v]) => [k, (v as number) * 2])) as ResearchLevelConfig['cost'],
+    cost: Object.fromEntries(Object.entries(r.cost).map(([k, v]) => [k, v * 2])) as ResearchLevelConfig['cost'],
     requires: { buildings: [{ id: BuildingType.ACADEMY, level: r.level }], items: [], techs: [] },
   }));
 export const RESEARCH = [...(researchRows as ResearchLevelConfig[]), ...HERO_ENHANCEMENT_RESEARCH];

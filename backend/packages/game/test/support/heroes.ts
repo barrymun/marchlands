@@ -1,7 +1,7 @@
 // Helpers for the hero tests (services/heroes.db.test.ts, engine/heroes.db.test.ts): an Inn and a Feasting
 // Hall, patching hero and player rows, and the hero pushes.
 
-import { PushCmd, type PushData } from '@marchlands/contracts';
+import { PushCmd } from '@marchlands/contracts';
 import { BuildingType } from '@marchlands/core';
 
 import { getHero, getPlayer, type HeroRow, saveHero, savePlayer } from '#/repo.ts';
@@ -32,4 +32,4 @@ export async function patchPlayer(g: TestGame, p: TestPlayer, change: (row: Awai
 
 export const lastHeroPush = (g: TestGame) => g.pushes(PushCmd.HERO_UPDATE).at(-1);
 
-export const pushedHeroes = (g: TestGame) => g.pushes(PushCmd.HERO_UPDATE).map((x) => (x.data as PushData<typeof PushCmd.HERO_UPDATE>).hero);
+export const pushedHeroes = (g: TestGame) => g.pushes(PushCmd.HERO_UPDATE).map((x) => x.data.hero);

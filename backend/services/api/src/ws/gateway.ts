@@ -81,7 +81,7 @@ export class PushGateway {
       this.client = null;
     }
     setTimeout(() => {
-      if (!this.stopped) this.connect().catch((err) => this.log.error({ err }, 'push gateway reconnect failed'));
+      if (!this.stopped) this.connect().catch((err: unknown) => this.log.error({ err }, 'push gateway reconnect failed'));
     }, 2000);
   }
 
@@ -110,7 +110,7 @@ export class PushGateway {
           const rows = await this.db.select().from(pushMessages).where(inArray(pushMessages.id, ids)).orderBy(asc(pushMessages.id));
           for (const row of rows) {
             // rows are only written by ctx.push / ctx.broadcast, which are typed against PushSchemas
-            const frame = JSON.stringify({ cmd: row.cmd, data: row.data } as PushMessage);
+            const frame = JSON.stringify({ cmd: row.cmd, data: row.data });
             const targets = row.playerIds.length ? row.playerIds : [...this.sockets.keys()];
             for (const pid of targets) for (const s of this.sockets.get(pid) ?? []) if (s.readyState === 1) s.send(frame);
           }

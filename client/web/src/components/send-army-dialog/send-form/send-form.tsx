@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { duration, fmt, fmtExact, resourceLabel } from '@/lib/format';
+import { typedAmounts } from '@/lib/forms';
 import { itemName, troopName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
@@ -41,11 +42,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   // only scouts go on a scouting mission
   const available = Object.entries(TROOP_KEYS).filter(([, key]) => city.troop[key] > 0 && (!scouting || key === 'scouter'));
   const idleHeroes = city.heros.filter((h) => h.status === HeroStatus.IDLE && !h.seized);
-  const troopBody = Object.fromEntries(
-    Object.entries(troops)
-      .map(([k, v]) => [k, Number(v || 0)])
-      .filter(([k, n]) => Number(n) > 0 && (!scouting || k === 'scouter')),
-  );
+  const troopBody = typedAmounts(scouting ? { scouter: troops.scouter } : troops);
   // troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)
   const player = usePlayer();
   const now = useNow();
@@ -57,11 +54,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   // attack / defense items (Ivory Horn …) that will count in the battle
   const battleBuffs =
     Number(mission) === Mission.ATTACK ? (player.data?.buffs ?? []).filter((b) => (b.id === BuffId.ATTACK || b.id === BuffId.DEFENSE) && b.endTime > now) : [];
-  const resourceBody = Object.fromEntries(
-    Object.entries(resources)
-      .map(([k, v]) => [k, Number(v || 0)])
-      .filter(([, n]) => Number(n) > 0),
-  );
+  const resourceBody = typedAmounts(resources);
   const path = { cityId: city.id };
   // carrying capacity of the chosen troops (troop load x Logistics), shared by every resource
   const capacity = armyLoad(troopBody, player.data?.research ?? {});

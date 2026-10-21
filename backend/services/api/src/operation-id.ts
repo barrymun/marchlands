@@ -15,7 +15,7 @@ const pascal = (s: string) =>
 export function operationIdOf(method: string, url: string): string {
   const segments = url.split('/').filter((s) => s && s !== 'api' && s !== 'v1');
   const parts = segments.map((s, i) => {
-    const param = /^[{:](\w+)}?$/.exec(s);
+    const param = /^[{:](\w+)\}?$/.exec(s);
     if (!param) return pascal(s);
     return i === segments.length - 1 ? `By${pascal(param[1])}` : '';
   });

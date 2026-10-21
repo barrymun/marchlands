@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCommand } from '@/hooks/use-game';
+import { typedAmounts } from '@/lib/forms';
 import { troopName } from '@/lib/game-data';
 
 /** Save a new army composition on the fly (it joins your saved armies). */
@@ -18,11 +19,7 @@ export function NewArmy({ onSaved }: { onSaved: (id: string) => void }) {
   const qc = useQueryClient();
   const [name, setName] = useState('');
   const [troops, setTroops] = useState<Partial<Record<TroopKey, string>>>({});
-  const body = Object.fromEntries(
-    Object.entries(troops)
-      .map(([k, v]) => [k, Number(v || 0)])
-      .filter(([, n]) => Number(n) > 0),
-  );
+  const body = typedAmounts(troops);
   const save = useCommand(postPlayerArmyPresetsMutation(), () => [getPlayerArmyPresetsQueryKey()]);
   return (
     <div className="grid gap-2 rounded-md border border-dashed p-2">

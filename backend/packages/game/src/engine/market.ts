@@ -41,10 +41,10 @@ export async function loadMerchant(ctx: Ctx, lock: boolean): Promise<Partial<Mer
     // create the row once so it can be locked; concurrent trades then queue on it
     await ctx.tx.insert(worldState).values({ key: MERCHANT_KEY, value: {}, updatedAt: ctx.now }).onConflictDoNothing();
     const [row] = await ctx.tx.select().from(worldState).where(eq(worldState.key, MERCHANT_KEY)).for('update');
-    return (row?.value ?? {}) as Partial<MerchantState>;
+    return row?.value ?? {};
   }
   const [row] = await ctx.tx.select().from(worldState).where(eq(worldState.key, MERCHANT_KEY));
-  return (row?.value ?? {}) as Partial<MerchantState>;
+  return row?.value ?? {};
 }
 
 /** (marchlands) A lord's side of a trade, for their statistics. */

@@ -185,12 +185,12 @@ export function regenerateNpc(level: number, state: NpcState, troops: TroopCount
 export function npcBuildings(level: number): { typeId: number; levels: number[] }[] {
   const fields = 10 + 3 * (level - 1);
   return [
-    { typeId: 1, levels: Array(20).fill(level) },
+    { typeId: 1, levels: Array<number>(20).fill(level) },
     { typeId: 2, levels: [level] },
     { typeId: 4, levels: [level] },
     { typeId: 5, levels: [level] },
     { typeId: 6, levels: [level] },
-    { typeId: 7, levels: Array(fields).fill(level) },
+    { typeId: 7, levels: Array<number>(fields).fill(level) },
     ...[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map((typeId) => ({ typeId, levels: [level] })),
   ];
 }

@@ -943,7 +943,7 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     loyaltyDamage = randInt(ctx.rng, lo, hi);
     state.loyalty = Math.max(0, state.loyalty - loyaltyDamage);
   }
-  Object.assign(tile, { troops: r.defender.after, forts: r.forts.after, state: state as unknown as Record<string, number>, updatedAt: ctx.now });
+  Object.assign(tile, { troops: r.defender.after, forts: r.forts.after, state, updatedAt: ctx.now });
   if (r.attackerWon && state.loyalty <= 0) {
     const [{ n }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, attacker.id));
     if (Number(n) < maxCitiesFor(attacker.title)) {

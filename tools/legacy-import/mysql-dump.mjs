@@ -68,14 +68,14 @@ export async function readInserts(file, tables, onRows) {
   const rl = readline.createInterface({ input: fs.createReadStream(file, 'utf8'), crlfDelay: Infinity });
   let current = null;
   let buf = [];
-  const re = /^INSERT INTO `([^`]+)` \(([^)]*)\) VALUES\s*(.*)$/;
+  const re = /^INSERT INTO `([^`]+)` \(([^)]*)\) VALUES\s*(\S.*)?$/;
   for await (const line of rl) {
     if (!current) {
       const m = re.exec(line);
       if (!m) continue;
       if (!tables.includes(m[1])) continue;
       current = { table: m[1], columns: m[2].split(',').map((c) => c.trim().replace(/`/g, '')) };
-      buf = [m[3]];
+      buf = [m[3] ?? ''];
     } else {
       buf.push(line);
     }

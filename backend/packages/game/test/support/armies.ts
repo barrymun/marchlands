@@ -148,7 +148,7 @@ export async function roundTrip(g: TestGame, armyId: number) {
 /** A player's reports, oldest first, with their bodies. */
 export async function reportsOf(g: TestGame, playerId: number) {
   const rows = await g.tx.select().from(reports).where(eq(reports.playerId, playerId)).orderBy(asc(reports.id));
-  return rows.map((r) => ({ ...r, body: r.body as ReportBody }));
+  return rows.map((r) => ({ ...r, body: r.body }));
 }
 
 /** Report title codes of a player, oldest first. */

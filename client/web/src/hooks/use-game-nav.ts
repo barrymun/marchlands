@@ -20,7 +20,7 @@ export function useGameNav() {
     screen,
     panel,
     /** Show a view or a page (closing any panel), with search parameters (a building to open). */
-    go: (to: ScreenId, params?: Record<string, string>) => navigate(screenHref(cityId, to, params)),
+    go: (to: ScreenId, params?: Record<string, string>) => void navigate(screenHref(cityId, to, params)),
     /** Open a panel over the current screen; the browser's back button closes it. */
     open: (p: PanelId) =>
       setSearch((s) => {
@@ -33,6 +33,6 @@ export function useGameNav() {
         return s;
       }),
     /** Switch to another city, keeping the screen and the panel. */
-    toCity: (id: number) => navigate(screenHref(id, screen ?? 'town', panel ? { panel } : undefined)),
+    toCity: (id: number) => void navigate(screenHref(id, screen ?? 'town', panel ? { panel } : undefined)),
   };
 }

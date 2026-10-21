@@ -19,6 +19,7 @@ export async function copyText(text: string): Promise<void> {
   document.body.appendChild(area);
   area.select();
   try {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- the older way, for where the Clipboard API is missing (above)
     if (!document.execCommand('copy')) throw new Error('copy refused');
   } finally {
     area.remove();
