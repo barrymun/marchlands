@@ -21,6 +21,7 @@ const CONFIG: ApiConfig = {
   corsOrigin: true,
   adminUsernames: [],
   loginBackoff: { freeTries: 5, firstWaitMs: 1000, maxWaitMs: 300_000, forgetAfterMs: 900_000 },
+  signUpProof: { cost: 1, counterMin: 0, counterMax: 3, expiresAfterMs: 600_000 },
 };
 
 let app: Awaited<ReturnType<typeof buildApp>> | undefined;

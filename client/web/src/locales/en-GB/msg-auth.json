@@ -4,6 +4,8 @@
   "wrongPassword": "Incorrect username or password.",
   "tooManyTries": "Too many wrong passwords. Try again in {{wait}}.",
   "alreadyRegistered": "That username or email is already registered.",
+  "signUpCheckFailed": "We couldn't confirm the sign-up. Please try again.",
+  "signUpCheckExpired": "The sign-up form was open too long. Please try again.",
   "accountNotFound": "Account not found.",
   "banned": "You are banned. Reason: {{reason}}"
 }

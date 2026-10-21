@@ -1,13 +1,14 @@
 import { eq, sql } from 'drizzle-orm';
 import type { z } from 'zod';
 
-import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody } from '@marchlands/contracts';
+import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody, SignUpChallenge } from '@marchlands/contracts';
 import { dur, GameError, msg } from '@marchlands/core';
 import { accounts, players } from '@marchlands/db';
 
 import { signToken } from '#/auth/jwt.ts';
 import { LoginBackoff } from '#/auth/login-backoff.ts';
 import { hashPassword, verifyPassword } from '#/auth/password.ts';
+import { SignUpProofs } from '#/auth/signup-proof.ts';
 import { authenticate, secured, tags, type ZApp } from '#/http.ts';
 
 /** Public routes cannot use doc(): same envelope, no `security`. */
@@ -16,6 +17,7 @@ const responses = <T extends z.ZodType>(data: T) => ({ 200: Ok(data), '4xx': Err
 export default async function authRoutes(app: ZApp) {
   const { db, config } = app.deps;
   const backoff = new LoginBackoff(config.loginBackoff);
+  const proofs = new SignUpProofs(config.signUpProof, config.jwtSecret);
 
   const issue = async (accountId: number, isAdmin: boolean) => {
     const [p] = await db.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
@@ -28,16 +30,32 @@ export default async function authRoutes(app: ZApp) {
     };
   };
 
+  app.get(
+    '/auth/challenge',
+    { schema: { tags: tags.auth, summary: 'A proof-of-work puzzle to solve before signing up', response: responses(SignUpChallenge) } },
+    async (_req, reply) => {
+      reply.header('cache-control', 'no-store');
+      return { ok: 1 as const, data: await proofs.challenge() };
+    },
+  );
+
   app.post(
     '/auth/register',
-    { schema: { tags: tags.auth, summary: 'Create an account', body: RegisterBody, response: responses(AuthSession) } },
+    { schema: { tags: tags.auth, summary: 'Create an account (with a solved GET /auth/challenge)', body: RegisterBody, response: responses(AuthSession) } },
     async (req) => {
-      const { username, password, email } = req.body;
+      const { username, password, email, proof } = req.body;
+      const check = await proofs.check(proof);
+      if (check === 'expired') throw new GameError(msg('auth.signUpCheckExpired'), -12, 403);
+      if (check !== 'ok') throw new GameError(msg('auth.signUpCheckFailed'), -12, 403);
       const [dupe] = await db
         .select({ id: accounts.id })
         .from(accounts)
         .where(sql`lower(${accounts.username}) = lower(${username}) or lower(${accounts.email}) = lower(${email})`);
-      if (dupe) throw new GameError(msg('auth.alreadyRegistered'), -12, 409);
+      if (dupe) {
+        // the player picks another name and sends the same proof
+        proofs.release(proof);
+        throw new GameError(msg('auth.alreadyRegistered'), -12, 409);
+      }
       // the very first account, and any listed in ADMIN_USERNAMES, are server operators
       const [{ n }] = await db.select({ n: sql<number>`count(*)` }).from(accounts);
       const isAdmin = Number(n) === 0 || config.adminUsernames.includes(username.toLowerCase());

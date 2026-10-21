@@ -303,6 +303,9 @@ Settings come from `.env` (template: `.env.production.example`). After changing 
 | `LOGIN_FREE_TRIES` | `5` | api | wrong passwords in a row for a username answered straight away; after them each try waits (`src/auth/login-backoff.ts`) |
 | `LOGIN_FIRST_WAIT` / `LOGIN_MAX_WAIT` | `1` / `300` | api | the first wait in seconds, doubling with each further wrong password, and its cap (5 minutes) |
 | `LOGIN_RESET_AFTER` | `900` | api | seconds without a wrong password after which a username starts again (15 minutes); the right password resets it too |
+| `SIGNUP_POW_COST` | `1000` | api | PBKDF2 rounds per counter in the sign-up puzzle (`src/auth/signup-proof.ts`); the browser does about (counter + 1) × cost |
+| `SIGNUP_POW_COUNTER_MIN` / `SIGNUP_POW_COUNTER_MAX` | `5000` / `10000` | api | the range the hidden counter is picked from: about 0.5 s on a desktop, a few seconds on a slow phone |
+| `SIGNUP_POW_EXPIRES` | `600` | api | seconds a sign-up puzzle stays valid (10 minutes); the sign-up form fetches a new one before then |
 | `CORS_ORIGIN` | any | api | allowed browser origin for direct API calls; the client uses the same origin, so it rarely matters |
 | `DB_POOL_SIZE` | `20` (api), `10` (worker) | api, worker | database connections per process (Postgres allows 200) |
 | `WORKER_BATCH` / `WORKER_IDLE_MS` | `50` / `250` | worker | timed events claimed per round, and the pause when none are due |

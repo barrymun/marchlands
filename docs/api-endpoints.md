@@ -8,10 +8,11 @@ All paths are relative to the server root. Names in parentheses are the original
 
 | Method | Path | Description |
 |---|---|---|
+| GET | `/api/v1/auth/challenge` | A proof-of-work puzzle to solve before signing up *(public)* |
 | POST | `/api/v1/auth/login` | Log in (orig `login`) *(public)* |
 | GET | `/api/v1/auth/me` | Current account and its lord |
 | POST | `/api/v1/auth/refresh` | Issue a fresh token |
-| POST | `/api/v1/auth/register` | Create an account *(public)* |
+| POST | `/api/v1/auth/register` | Create an account (with a solved GET /auth/challenge) *(public)* |
 
 ## player
 

@@ -4,6 +4,8 @@
 // in ADMIN_USERNAMES) and a fast GAME_SPEED (>= 200 recommended).
 //   API=http://localhost:3100 node tools/smoke/war.mjs
 
+import { signUpProof } from './proof.mjs';
+
 const API = process.env.API ?? 'http://localhost:3000';
 const base = `${API}/api/v1`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -40,12 +42,18 @@ const suffix = Math.random().toString(36).slice(2, 7);
 async function admin() {
   const user = process.env.SMOKE_ADMIN ?? 'smoke_admin';
   let r = await call(null, 'POST', '/auth/login', { username: user, password: 'secret123' });
-  if (r.ok !== 1) r = await call(null, 'POST', '/auth/register', { username: user, email: `${user}@example.test`, password: 'secret123' });
+  if (r.ok !== 1)
+    r = await call(null, 'POST', '/auth/register', { username: user, email: `${user}@example.test`, password: 'secret123', proof: await signUpProof(base) });
   if (!r.data?.isAdmin) throw new Error(`${user} must be an operator (ADMIN_USERNAMES)`);
   return r.data.token;
 }
 async function lord(name, zone) {
-  const reg = await ok(null, 'POST', '/auth/register', { username: `${name}_${suffix}`, email: `${name}_${suffix}@example.test`, password: 'secret123' });
+  const reg = await ok(null, 'POST', '/auth/register', {
+    username: `${name}_${suffix}`,
+    email: `${name}_${suffix}@example.test`,
+    password: 'secret123',
+    proof: await signUpProof(base),
+  });
   const c = await ok(reg.token, 'POST', '/player', { userName: `${name}${suffix}`, castleName: `${name} Keep`, flag: name.slice(0, 3), sex: 1, zone });
   return { token: c.token, id: c.playerInfo.id, name: c.playerInfo.userName, city: c.castles[0] };
 }

@@ -32,7 +32,34 @@ const Credentials = z.object({
   password: z.string().min(6).max(200),
 });
 export const LoginBody = Credentials;
-export const RegisterBody = Credentials.extend({ email: z.email().max(120) });
+
+/** A proof-of-work puzzle for signing up (ALTCHA): find the counter whose PBKDF2 key starts with `keyPrefix`. */
+export const SignUpChallenge = z
+  .object({
+    parameters: z.object({
+      algorithm: z.string(),
+      nonce: z.string(),
+      salt: z.string(),
+      cost: z.number().int(),
+      keyLength: z.number().int(),
+      keyPrefix: z.string(),
+      expiresAt: z.number().int().describe('Unix seconds'),
+    }),
+    signature: z.string().describe('the server signs the parameters, so they cannot be made easier'),
+  })
+  .meta({ id: 'SignUpChallenge' });
+export type SignUpChallenge = z.infer<typeof SignUpChallenge>;
+
+/** A solved challenge, sent with the sign-up; each one is accepted once. */
+export const SignUpProof = z
+  .object({
+    challenge: SignUpChallenge,
+    solution: z.object({ counter: z.number().int().min(0), derivedKey: z.string().max(256) }),
+  })
+  .meta({ id: 'SignUpProof' });
+export type SignUpProof = z.infer<typeof SignUpProof>;
+
+export const RegisterBody = Credentials.extend({ email: z.email().max(120), proof: SignUpProof });
 
 /** Not exported from rows.ts (it carries the password hash): only picked from here. */
 const AccountRow = createSelectSchema(accounts);

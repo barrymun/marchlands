@@ -9,6 +9,9 @@
     "email": "メールアドレス",
     "password": "パスワード",
     "logIn": "ログイン",
-    "createAccount": "アカウント作成"
+    "createAccount": "アカウント作成",
+    "gettingReady": "準備中…",
+    "notReady": "登録の準備ができませんでした。接続を確認して、もう一度お試しください。",
+    "tryAgain": "再試行"
   }
 }

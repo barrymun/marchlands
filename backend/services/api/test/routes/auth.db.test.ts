@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { accounts, players } from '@marchlands/db';
 import { admin } from '@marchlands/game';
@@ -26,6 +26,20 @@ async function withAdminUsernames<T>(api: TestApi, adminUsernames: string[], fn:
   }
 }
 
+describe('GET /auth/challenge', () => {
+  it('gives a signed PBKDF2 puzzle at the configured cost, valid for 10 minutes and never cached', () =>
+    apiTest(async (api) => {
+      const res = await api.app.inject({ method: 'GET', url: '/api/v1/auth/challenge' });
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['cache-control']).toBe('no-store');
+      const { parameters, signature } = res.json().data;
+      expect(parameters).toMatchObject({ algorithm: 'PBKDF2/SHA-256', cost: TEST_CONFIG.signUpProof.cost, keyLength: 32 });
+      expect(parameters.expiresAt).toBeGreaterThan(Date.now() / 1000 + 9 * 60);
+      expect(parameters.expiresAt).toBeLessThanOrEqual(Math.ceil(Date.now() / 1000) + 10 * 60);
+      expect(signature).toMatch(/^[0-9a-f]{64}$/);
+    }));
+});
+
 describe('POST /auth/register', () => {
   it('creates an account and a session; the first account is the operator', () =>
     apiTest(async (api) => {
@@ -43,13 +57,53 @@ describe('POST /auth/register', () => {
     apiTest(async (api) => {
       await api.register('alice');
       await api.refused('POST', 'auth/register', 'auth.alreadyRegistered', {
-        body: { username: 'ALICE', password: 'another-pass', email: 'new@example.test' },
+        body: { username: 'ALICE', password: 'another-pass', email: 'new@example.test', proof: await api.signUpProof() },
         status: 409,
       });
       await api.refused('POST', 'auth/register', 'auth.alreadyRegistered', {
-        body: { username: 'carol', password: 'another-pass', email: 'Alice@Example.test' },
+        body: { username: 'carol', password: 'another-pass', email: 'Alice@Example.test', proof: await api.signUpProof() },
         status: 409,
       });
+    }));
+
+  it('refuses a sign-up without a solved puzzle', () =>
+    apiTest(async (api) => {
+      const body = { username: 'mallory', password: 'test-password', email: 'mallory@example.test' };
+      await api.refused('POST', 'auth/register', 'common.invalidRequest', { body, status: 400 });
+      const { challenge, solution } = await api.signUpProof();
+      const wrong = { challenge, solution: { ...solution, counter: solution.counter + 1 } };
+      await api.refused('POST', 'auth/register', 'auth.signUpCheckFailed', { body: { ...body, proof: wrong }, status: 403 });
+      // the server signed the puzzle, so it can't be made easier
+      const easier = { challenge: { ...challenge, parameters: { ...challenge.parameters, cost: 1, keyPrefix: '00' } }, solution };
+      await api.refused('POST', 'auth/register', 'auth.signUpCheckFailed', { body: { ...body, proof: easier }, status: 403 });
+    }));
+
+  it('accepts each solved puzzle once, but again after the username was taken', () =>
+    apiTest(async (api) => {
+      await api.register('alice');
+      const proof = await api.signUpProof();
+      const taken = { username: 'alice', password: 'test-password', email: 'other@example.test', proof };
+      await api.refused('POST', 'auth/register', 'auth.alreadyRegistered', { body: taken, status: 409 });
+      await api.ok('POST', 'auth/register', { body: { ...taken, username: 'alice2' } });
+      await api.refused('POST', 'auth/register', 'auth.signUpCheckFailed', {
+        body: { ...taken, username: 'alice3', email: 'third@example.test' },
+        status: 403,
+      });
+    }));
+
+  it('refuses a puzzle solved after it expired (10 minutes)', () =>
+    apiTest(async (api) => {
+      const proof = await api.signUpProof();
+      const later = Date.now() + 10 * 60_000 + 1000;
+      vi.spyOn(Date, 'now').mockReturnValue(later);
+      try {
+        await api.refused('POST', 'auth/register', 'auth.signUpCheckExpired', {
+          body: { username: 'olivia', password: 'test-password', email: 'olivia@example.test', proof },
+          status: 403,
+        });
+      } finally {
+        vi.restoreAllMocks();
+      }
     }));
 
   it('refuses a malformed body with the validation issues', () =>
@@ -60,7 +114,7 @@ describe('POST /auth/register', () => {
 
   it('refuses usernames with other characters, short passwords and bad emails', () =>
     apiTest(async (api) => {
-      const valid = { username: 'valid_name.1', password: 'long-enough', email: 'valid@example.test' };
+      const valid = { username: 'valid_name.1', password: 'long-enough', email: 'valid@example.test', proof: await api.signUpProof() };
       for (const body of [
         { ...valid, username: 'ab' },
         { ...valid, username: 'has space' },
@@ -75,7 +129,9 @@ describe('POST /auth/register', () => {
 
   it('trims the username', () =>
     apiTest(async (api) => {
-      const s = await api.ok<AuthSession>('POST', 'auth/register', { body: { username: '  dave  ', password: 'test-password', email: 'dave@example.test' } });
+      const s = await api.ok<AuthSession>('POST', 'auth/register', {
+        body: { username: '  dave  ', password: 'test-password', email: 'dave@example.test', proof: await api.signUpProof() },
+      });
       const [row] = await api.db.select().from(accounts).where(eq(accounts.id, s.accountId));
       expect(row.username).toBe('dave');
     }));
@@ -95,8 +151,10 @@ describe('POST /auth/register', () => {
     apiTest(async (api) => {
       await api.operator();
       await withAdminUsernames(api, ['boss'], async (post) => {
-        expect(await post('auth/register', { username: 'Boss', password: 'test-password', email: 'boss@example.test' })).toMatchObject({ isAdmin: true });
-        expect(await post('auth/register', { username: 'worker', password: 'test-password', email: 'worker@example.test' })).toMatchObject({
+        const boss = { username: 'Boss', password: 'test-password', email: 'boss@example.test', proof: await api.signUpProof() };
+        expect(await post('auth/register', boss)).toMatchObject({ isAdmin: true });
+        const worker = { username: 'worker', password: 'test-password', email: 'worker@example.test', proof: await api.signUpProof() };
+        expect(await post('auth/register', worker)).toMatchObject({
           isAdmin: false,
         });
       });

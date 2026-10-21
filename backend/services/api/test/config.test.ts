@@ -26,6 +26,7 @@ describe(loadConfig.name, () => {
       corsOrigin: true,
       adminUsernames: [],
       loginBackoff: { freeTries: 5, firstWaitMs: 1000, maxWaitMs: 300_000, forgetAfterMs: 900_000 },
+      signUpProof: { cost: 1000, counterMin: 5000, counterMax: 10_000, expiresAfterMs: 600_000 },
     });
   });
 
@@ -41,6 +42,11 @@ describe(loadConfig.name, () => {
   it('parses ADMIN_USERNAMES: comma separated, trimmed, lower case, blanks dropped', () => {
     expect(loadConfig({ ...BASE, ADMIN_USERNAMES: ' Alice, BOB ,,carol, ' }).adminUsernames).toEqual(['alice', 'bob', 'carol']);
     expect(loadConfig({ ...BASE, ADMIN_USERNAMES: '' }).adminUsernames).toEqual([]);
+  });
+
+  it('reads the sign-up proof settings, its expiry in seconds', () => {
+    const config = loadConfig({ ...BASE, SIGNUP_POW_COST: '500', SIGNUP_POW_COUNTER_MIN: '100', SIGNUP_POW_COUNTER_MAX: '200', SIGNUP_POW_EXPIRES: '60' });
+    expect(config.signUpProof).toEqual({ cost: 500, counterMin: 100, counterMax: 200, expiresAfterMs: 60_000 });
   });
 
   it('reads the login backoff settings in seconds', () => {

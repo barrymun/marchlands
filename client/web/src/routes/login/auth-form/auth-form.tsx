@@ -3,7 +3,7 @@ import { type SubmitEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import { postAuthLogin, postAuthRegister } from '@marchlands/api-client';
+import { ApiError, postAuthLogin, postAuthRegister } from '@marchlands/api-client';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { errorMessage, tokenStore } from '@/lib/api';
 import { formText } from '@/lib/forms';
+import { useSignUpProof } from '@/routes/login/auth-form/hooks';
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const { t } = useTranslation('login');
@@ -18,6 +19,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const qc = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const signUp = useSignUpProof(mode === 'register');
 
   async function submit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -30,12 +32,14 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
       const { data: session } =
         mode === 'login'
           ? await postAuthLogin({ body: { username, password }, throwOnError: true })
-          : await postAuthRegister({ body: { username, password, email: formText(form, 'email') }, throwOnError: true });
+          : await postAuthRegister({ body: { username, password, email: formText(form, 'email'), proof: signUp.proof! }, throwOnError: true });
       qc.clear();
       tokenStore.set(session.token);
       void navigate(session.hasPlayer ? '/' : '/create', { replace: true });
     } catch (err) {
       setError(errorMessage(err));
+      // a proof is spent once it's checked, unless only the name was taken: solve a fresh one for the next try
+      if (mode === 'register' && !(err instanceof ApiError && err.error?.code === 'auth.alreadyRegistered')) signUp.renew();
     } finally {
       setBusy(false);
     }
@@ -62,9 +66,25 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <Button type="submit" disabled={busy}>
-        {mode === 'login' ? t('form.logIn') : t('form.createAccount')}
-      </Button>
+      {mode === 'register' && signUp.failed && (
+        <Alert variant="destructive">
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+            {t('form.notReady')}
+            <Button type="button" size="sm" variant="outline" onClick={signUp.renew}>
+              {t('form.tryAgain')}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      {mode === 'login' ? (
+        <Button type="submit" disabled={busy}>
+          {t('form.logIn')}
+        </Button>
+      ) : (
+        <Button type="submit" disabled={busy || !signUp.proof}>
+          {signUp.proof || signUp.failed ? t('form.createAccount') : t('form.gettingReady')}
+        </Button>
+      )}
     </form>
   );
 }

@@ -2,6 +2,9 @@
 // Marketplace scenarios: the computer merchant, instant settlement, limit orders resting and
 // being filled by another lord, escrow refunds and trade history.
 //   API=http://localhost:3000 node tools/smoke/market.mjs   (needs SMOKE_ADMIN as for smoke.mjs)
+
+import { signUpProof } from './proof.mjs';
+
 const A = `${process.env.API ?? 'http://localhost:3000'}/api/v1`;
 const j = async (m, p, b, t) =>
   (
@@ -24,12 +27,14 @@ const check = (c, m) => {
 const adminUser = process.env.SMOKE_ADMIN ?? 'smoke_admin';
 const login = await j('POST', '/auth/login', { username: adminUser, password: 'secret123' });
 const gm =
-  login.ok === 1 ? login.data : (await j('POST', '/auth/register', { username: adminUser, email: `${adminUser}@example.test`, password: 'secret123' })).data;
+  login.ok === 1
+    ? login.data
+    : (await j('POST', '/auth/register', { username: adminUser, email: `${adminUser}@example.test`, password: 'secret123', proof: await signUpProof(A) })).data;
 if (!gm?.isAdmin) throw new Error(`${adminUser} is not an operator: add it to ADMIN_USERNAMES`);
 const admin = gm.token;
 async function lord(tag) {
   const u = tag + Date.now().toString(36).slice(-5);
-  let t = (await ok('POST', '/auth/register', { username: u, password: 'password1', email: u + '@x.test' })).token;
+  let t = (await ok('POST', '/auth/register', { username: u, password: 'password1', email: u + '@x.test', proof: await signUpProof(A) })).token;
   const c = await ok('POST', '/player', { userName: u, castleName: tag, flag: 'T', sex: 0 }, t);
   await ok('PUT', `/admin/cities/${c.castles[0].id}/buildings`, { playerId: c.playerInfo.id, positionId: 3, typeId: 23, level: 3 }, admin);
   return { t: c.token, city: c.castles[0].id };

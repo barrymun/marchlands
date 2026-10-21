@@ -9,6 +9,9 @@
     "email": "Email",
     "password": "Password",
     "logIn": "Log in",
-    "createAccount": "Create account"
+    "createAccount": "Create account",
+    "gettingReady": "Getting ready…",
+    "notReady": "Couldn't get the sign-up ready. Check your connection and try again.",
+    "tryAgain": "Try again"
   }
 }

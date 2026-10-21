@@ -62,10 +62,6 @@ Phases 2 to 4 of the October 2026 tooling review; phase 1 (type-aware linting an
 - [ ] **An emergency ceiling on gameplay routes, off by default (to decide).**
   - Now: nothing limits gameplay requests, on purpose: an engaged player must never meet a limit. Sign-in is guarded on its own (wrong passwords wait, in Done).
   - Idea: a per-player limit set far above anything a person does, turned on only during an incident (a runaway script hammering the server), documented in docs/deployment.md. Measure what the client really sends first (map panning loads 21×21 chunks, queue polling, flows). If the limiter fails, it lets requests through.
-- [ ] **A proof-of-work challenge on sign-up.**
-  - Now: `POST /auth/register` makes an account for anyone who asks, so accounts can be made in bulk by a script.
-  - Plan: the browser solves a small proof-of-work puzzle (about a second of computing, e.g. ALTCHA) before an account is made. Invisible to players, self-hosted, and no player data goes to a third party, unlike a CAPTCHA (Turnstile, hCaptcha). The API makes the challenge and checks the answer; the sign-up form solves it while the player types.
-  - To decide: how hard the puzzle is (slow phones); whether login asks for one too after a few wrong passwords.
 - [ ] **Dependency updates with Renovate.**
   - Now: dependencies are updated by hand, and the two-week rule (AGENTS.md, Ground rules) is checked by hand.
   - Plan: Renovate with `minimumReleaseAge: "14 days"` and pinned versions (`rangeStrategy: "pin"`), grouped so updates come as a few pull requests.
@@ -81,6 +77,7 @@ Phases 2 to 4 of the October 2026 tooling review; phase 1 (type-aware linting an
 
 Newest first, with the date it was finished.
 
+- 2026-10-21: **A proof-of-work puzzle on sign-up.** The sign-up form fetches a signed puzzle (`GET /auth/challenge`, ALTCHA's `altcha-lib`, without its widget) and solves it in a worker while the player types: PBKDF2/SHA-256, cost 1,000, a hidden counter of 5,000-10,000 (about 0.5 s on a desktop, measured; a few seconds on a slow phone, estimated). `POST /auth/register` checks it and accepts each puzzle once, again only if the name was taken; puzzles expire after 10 minutes and the form renews them before then. Signed with a secret derived from `JWT_SECRET`; settings `SIGNUP_POW_*` in docs/deployment.md. It makes accounts made in bulk by a script cost something, not impossible (a GPU computes PBKDF2 far faster).
 - 2026-10-21: **Wrong passwords wait.** After 5 wrong passwords in a row for a username, each further login waits 1 s, 2 s, 4 s … up to 5 minutes (429 `auth.tooManyTries`, with Retry-After), even with the right password; the right password or 15 minutes without a wrong one starts it again. Counted per username, never per IP, and alike for names with no account; kept in memory (`backend/services/api/src/auth/login-backoff.ts`, settings `LOGIN_*` in docs/deployment.md).
 - 2026-10-21: **Workspace dependencies checked with sherif**, part of `npm run lint` (AGENTS.md, Commands).
 - 2026-10-21: **New dependencies pinned by default:** `.npmrc` sets `save-exact=true`, so `npm i` writes exact versions.

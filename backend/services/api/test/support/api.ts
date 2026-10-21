@@ -2,6 +2,10 @@
 // is given the open test transaction as its database, so every route's game transaction becomes a savepoint and
 // the whole test is rolled back at the end, like the game service tests (backend/packages/game/test/support).
 
+import { solveChallenge } from 'altcha-lib';
+import { deriveKey } from 'altcha-lib/algorithms/pbkdf2';
+
+import type { SignUpChallenge, SignUpProof } from '@marchlands/contracts';
 import type { Db } from '@marchlands/db';
 import { testDb } from '@marchlands/db/test/support/db.ts';
 import { type Ctx, runGame } from '@marchlands/game';
@@ -19,6 +23,8 @@ export const TEST_CONFIG: ApiConfig = {
   corsOrigin: true,
   adminUsernames: [],
   loginBackoff: { freeTries: 5, firstWaitMs: 1000, maxWaitMs: 5 * 60_000, forgetAfterMs: 15 * 60_000 },
+  // a puzzle the tests solve at once
+  signUpProof: { cost: 1, counterMin: 0, counterMax: 3, expiresAfterMs: 10 * 60_000 },
 };
 
 /** What a request answered: the HTTP status and the parsed JSON body. */
@@ -45,6 +51,8 @@ export interface TestApi {
   ok<T = unknown>(method: string, url: string, opts?: { body?: unknown; token?: string; query?: Record<string, string> }): Promise<T>;
   /** a request that must fail with this message code (and status, if given); returns the answer */
   refused(method: string, url: string, code: string, opts?: { body?: unknown; token?: string; status?: number }): Promise<Answer>;
+  /** A solved sign-up puzzle (GET auth/challenge), to send with POST auth/register. */
+  signUpProof(): Promise<SignUpProof>;
   /**
    * Register an account. The database is empty in every test, so the first account is the server operator
    * (auth.ts): call `operator()` first when a test needs ordinary players only.
@@ -109,9 +117,15 @@ function makeApi(app: TestApi['app'], db: Db): TestApi {
       }
       return a;
     },
+    async signUpProof() {
+      const challenge = await api.ok<SignUpChallenge>('GET', 'auth/challenge');
+      const solution = await solveChallenge({ challenge, deriveKey });
+      if (!solution) throw new Error('GET auth/challenge: no solution found');
+      return { challenge, solution: { counter: solution.counter, derivedKey: solution.derivedKey } };
+    },
     async register(username = `user${++serial}`) {
       const data = await api.ok<Omit<Session, 'username'>>('POST', 'auth/register', {
-        body: { username, password: 'test-password', email: `${username}@example.test` },
+        body: { username, password: 'test-password', email: `${username}@example.test`, proof: await api.signUpProof() },
       });
       return { ...data, username };
     },

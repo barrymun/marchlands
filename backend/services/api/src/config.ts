@@ -1,4 +1,5 @@
 import type { LoginBackoffConfig } from '#/auth/login-backoff.ts';
+import type { SignUpProofConfig } from '#/auth/signup-proof.ts';
 
 export interface ApiConfig {
   port: number;
@@ -13,6 +14,8 @@ export interface ApiConfig {
   adminUsernames: string[];
   /** the wait after repeated wrong passwords for a username (LOGIN_FREE_TRIES, LOGIN_FIRST_WAIT …, in seconds) */
   loginBackoff: LoginBackoffConfig;
+  /** the proof of work asked for on sign-up (SIGNUP_POW_COST, SIGNUP_POW_COUNTER_MIN …, the expiry in seconds) */
+  signUpProof: SignUpProofConfig;
 }
 
 export function loadConfig(env = process.env): ApiConfig {
@@ -37,6 +40,12 @@ export function loadConfig(env = process.env): ApiConfig {
       firstWaitMs: Number(env.LOGIN_FIRST_WAIT ?? 1) * 1000,
       maxWaitMs: Number(env.LOGIN_MAX_WAIT ?? 5 * 60) * 1000,
       forgetAfterMs: Number(env.LOGIN_RESET_AFTER ?? 15 * 60) * 1000,
+    },
+    signUpProof: {
+      cost: Number(env.SIGNUP_POW_COST ?? 1000),
+      counterMin: Number(env.SIGNUP_POW_COUNTER_MIN ?? 5000),
+      counterMax: Number(env.SIGNUP_POW_COUNTER_MAX ?? 10_000),
+      expiresAfterMs: Number(env.SIGNUP_POW_EXPIRES ?? 10 * 60) * 1000,
     },
   };
 }
