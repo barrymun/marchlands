@@ -7,7 +7,8 @@ How to work in this repository. Read [README.md](README.md) for what Marchlands 
 - **Git:** the maintainer manages git.
   - Don't commit, push or branch unless asked.
   - Never change the index (`git add`, `git mv`, `git rm`, `git restore --staged`). The maintainer curates what's staged. Move or delete files with plain `mv` / `rm`. Read-only git (`status`, `diff`, `log`) is fine.
-  - When asked for a commit message, keep it concise. Leave out double quotes, backticks and `$` (it gets pasted into `git commit -m "..."`), and add no `Co-Authored-By` or other attribution trailer.
+  - When asked for a commit message, keep it concise. Leave out double quotes, backticks and `$` (it gets pasted into `git commit -m "..."`).
+  - When Claude helped with the work, the message ends with a co-author trailer naming the model that did it, given as a second `-m` so it lands in its own paragraph: `git commit -m "Subject" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"`. No other attribution.
 - **New dependencies** are pinned to an exact version (no `^` or `~`) released at least two weeks ago. `.npmrc` sets `save-exact=true`, so `npm i` pins by itself; checking a version's age is still by hand (`npm view <name> time`).
 - **Player-facing language is neutral:** say "player", never "lord" or "lady", in anything a player reads (UI text, item and quest descriptions, error messages, mail). Code identifiers and comments may still say lord.
 - **Planned work** is listed in [TODO.md](TODO.md). In the change that finishes an item, move it to the Done section at the bottom (newest first, dated, one line saying what was done).
