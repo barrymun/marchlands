@@ -213,6 +213,9 @@ above. Anything players did since that backup is lost.
 `tools/ops/backup.sh` dumps the database (`pg_dump` custom format, a few MB) to `backups/` and deletes dumps
 older than 14 days. `BACKUP_DIR` and `KEEP_DAYS` change both. Dumps are consistent while the game runs.
 
+To keep a dump past that (one taken before a big change, say), copy it to a name the pruning doesn't match,
+anything not starting with `marchlands-`: `backups/pre-market-overhaul-<UTC time>.dump`. It stays until you delete it.
+
 Schedule it with cron (`crontab -e`), for example every hour:
 
 ```cron
