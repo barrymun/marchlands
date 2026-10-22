@@ -13,37 +13,68 @@
     "filled": "Filled",
     "placed": "Placed",
     "amount": "Amount",
-    "from": "From"
+    "from": "From",
+    "time": "Time"
   },
   "myOrders": {
     "title": "My waiting orders",
     "cancelled": "Order cancelled; held goods or gold returned",
-    "cancel": "Cancel order"
+    "cancel": "Cancel order",
+    "none": "No orders waiting."
+  },
+  "myTrades": {
+    "title": "My trades",
+    "none": "No trades yet.",
+    "bought": "Bought",
+    "sold": "Sold",
+    "gold": "Gold",
+    "with": "With",
+    "counterparty": {
+      "player": "a player",
+      "factions": "the factions",
+      "merchant": "the merchant"
+    }
   },
   "orderBook": {
-    "title": "Order book · {{resource}}",
-    "fixedPrice": "Gold per unit. The merchant always buys and sells any amount at a fixed {{price}}, so you can always sell for at least that. Click a row to trade at it.",
-    "floatingPrice": "Gold per unit. The merchant always trades; its price rises as people buy and falls as they sell, then drifts back to {{price}}. Click a row to trade at it.",
     "player": "player",
     "unlimited": "unlimited",
     "merchant": "merchant",
-    "divider": "Sellers above · Buyers below",
-    "reference": " · Reference {{price}}"
+    "factions": "factions",
+    "factionsDepth": "How much they trade before their price reaches the merchant's"
   },
   "priceHistory": {
-    "title": "Price · {{resource}}",
-    "description": "Closing price of each game hour (last 24).",
-    "chartLabel": "Price",
+    "ranges": {
+      "hour": "1 hour",
+      "day": "1 day",
+      "week": "1 week",
+      "month": "1 month"
+    },
+    "merchantSells": "Merchant sells",
+    "merchantBuys": "Merchant buys",
+    "credit": "Charts by <link>TradingView Lightweight Charts™</link>",
     "noTrades": "No trades yet.",
-    "recentTrades": "Recent trades",
     "merchant": "merchant",
-    "players": "players"
+    "players": "players",
+    "factions": "factions"
+  },
+  "depth": {
+    "empty": "No orders on the book."
+  },
+  "ticker": {
+    "title": "Between the factions",
+    "seller": "Seller",
+    "buyer": "Buyer",
+    "trade": "Trade",
+    "amountAt": "{{amount}} {{resource}} at {{price}}",
+    "group": "{{zone}} Lv {{level}}",
+    "none": "No trades between the factions yet."
   },
   "shipments": {
     "title": "Goods in transit",
     "delivered": "Delivered",
     "arrivesIn": "arrives in <countdown/>",
-    "deliverNow": "Deliver now · {{gold}} gold"
+    "deliverNow": "Deliver now · {{gold}} gold",
+    "none": "Nothing on its way."
   },
   "tradeForm": {
     "title": "Trade {{resource}}",
@@ -73,6 +104,36 @@
     "buyNow": "Buy now",
     "sellNow": "Sell now",
     "placeBuy": "Place buy order",
-    "placeSell": "Place sell order"
-  }
+    "placeSell": "Place sell order",
+    "withFactions": "{{amount}} with the factions",
+    "sheetHint": "Buy or sell now, or set your price."
+  },
+  "bar": {
+    "markets": "Markets",
+    "changeCaption": "24h change",
+    "changeTitle": "Change since 24 hours ago",
+    "high": "24h high",
+    "low": "24h low",
+    "volume": "24h volume",
+    "merchant": "Merchant buys / sells"
+  },
+  "chart": {
+    "views": "Chart",
+    "price": "Price",
+    "depth": "Depth",
+    "ranges": "Range"
+  },
+  "book": {
+    "views": "Book and trades",
+    "book": "Order book",
+    "trades": "Trades",
+    "worldPrice": "World price",
+    "merchantPrice": "Merchant's price",
+    "spread": "Spread {{spread}}"
+  },
+  "activity": {
+    "views": "Your trading"
+  },
+  "showMore_one": "Show {{count}} more",
+  "showMore_other": "Show {{count}} more"
 }

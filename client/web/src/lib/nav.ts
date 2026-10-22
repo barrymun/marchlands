@@ -10,7 +10,7 @@ export const VIEW_IDS = ['town', 'fields', 'map'] as const;
 /** The heavier screens, each a page in the viewport's place. */
 const PAGE_IDS = ['reports', 'market', 'flows', 'stats'] as const;
 /** The lighter screens, each a panel over the view. */
-export const PANEL_IDS = ['military', 'heroes', 'research', 'items', 'armies'] as const;
+export const PANEL_IDS = ['military', 'heroes', 'research', 'items', 'armies', 'factions'] as const;
 
 export type ViewId = (typeof VIEW_IDS)[number];
 export type PageId = (typeof PAGE_IDS)[number];

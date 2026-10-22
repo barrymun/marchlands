@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { getArmiesOptions } from '@marchlands/api-client';
-import { Relation } from '@marchlands/core';
+import { factionOfZone, Relation, stateOf } from '@marchlands/core';
 
 import { useAnimations } from '@/components/iso-anim/hooks';
 import { TILE_H, TILE_W } from '@/components/iso-viewport/constants';
@@ -14,6 +14,7 @@ import { GRASS, RELATION_STYLE } from '@/components/map-panel/constants';
 import { relationGroup } from '@/components/map-panel/utils';
 import type { WorldMapData } from '@/components/map-panel/world-map/hooks';
 import { wrap } from '@/components/map-panel/world-map/utils';
+import { FACTION_STYLE } from '@/lib/factions';
 import { tileName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +23,7 @@ import { cn } from '@/lib/utils';
  * on it, in a viewport (drag, zoom with the buttons, wheel or pinch; it loads the squares coming into view and wraps
  * round the world's edge). Your valleys, other players' valleys, your city and the selected tile are outlined;
  * players' castles carry their flag and name, and the tile under the pointer is named with its level and holder.
+ * With `factions` on, the land is tinted by the faction holding each zone.
  */
 export function WorldMap({
   vp,
@@ -31,6 +33,7 @@ export function WorldMap({
   hover,
   home,
   owned,
+  factions,
 }: {
   vp: Viewport;
   map: WorldMapData;
@@ -39,6 +42,7 @@ export function WorldMap({
   hover: { x: number; y: number } | null;
   home: { x: number; y: number };
   owned: ReadonlyMap<number, { cityName: string; here: boolean }>;
+  factions: boolean;
 }) {
   const { t } = useTranslation(['map-panel', 'common']);
   const { area, tiles, sprites, idOf } = map;
@@ -122,6 +126,11 @@ export function WorldMap({
       sky={sky}
     >
       <svg className="pointer-events-none absolute inset-0 size-full" aria-hidden>
+        {factions &&
+          tiles.map((d) => {
+            const f = factionOfZone(stateOf(d.id, mapSize));
+            return f && <polygon key={`z${d.x},${d.y}`} points={diamond(d.x, d.y)} className={FACTION_STYLE[f.id].tint} />;
+          })}
         {outlines.map((o) => (
           <polygon key={o.key} points={diamond(o.x, o.y)} className={cn('fill-none', o.className)} strokeWidth={o.width} />
         ))}

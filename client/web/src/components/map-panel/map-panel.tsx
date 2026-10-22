@@ -20,6 +20,7 @@ import { panStep, spriteAt, tileAt } from '@/components/iso-viewport/utils';
 import { HeldValleys } from '@/components/map-panel/held-valleys/held-valleys';
 import { MapLegend } from '@/components/map-panel/map-legend/map-legend';
 import { TileCard } from '@/components/map-panel/tile-card/tile-card';
+import { readFactionTint, saveFactionTint } from '@/components/map-panel/utils';
 import { PAN_STEP } from '@/components/map-panel/world-map/constants';
 import { useWorldMap } from '@/components/map-panel/world-map/hooks';
 import { startZoom } from '@/components/map-panel/world-map/utils';
@@ -43,6 +44,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const [selected, setSelected] = useState<number | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [list, setList] = useState<'valleys' | 'legend' | null>(null);
+  const [factions, setFactions] = useState(readFactionTint);
   const [target, setTarget] = useState<SendTarget | null>(null);
   const [moveTo, setMoveTo] = useState<{ x: number; y: number } | null>(null);
   const wide = useMediaQuery('(min-width: 1024px)');
@@ -103,11 +105,15 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     vp.panBy(dx, dy);
   };
   const toggle = (which: 'valleys' | 'legend') => setList((l) => (l === which ? null : which));
+  const tintFactions = (on: boolean) => {
+    setFactions(on);
+    saveFactionTint(on);
+  };
   const floating = 'absolute max-h-[calc(100%-4.5rem)] overflow-y-auto';
 
   return (
     <div className="relative h-full min-h-80 overflow-hidden">
-      <WorldMap vp={vp} map={map} mapSize={mapSize} selected={selected} hover={hover} home={{ x: city.x, y: city.y }} owned={owned} />
+      <WorldMap vp={vp} map={map} mapSize={mapSize} selected={selected} hover={hover} home={{ x: city.x, y: city.y }} owned={owned} factions={factions} />
       <div
         role="toolbar"
         aria-label={t('toolbar')}
@@ -160,7 +166,9 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           className={cn(floating, 'top-14 left-2 w-[min(24rem,calc(100%-1rem))]')}
         />
       )}
-      {list === 'legend' && <MapLegend className={cn(floating, 'top-14 left-2 w-[min(22rem,calc(100%-1rem))]')} />}
+      {list === 'legend' && (
+        <MapLegend factions={factions} onFactions={tintFactions} className={cn(floating, 'top-14 left-2 w-[min(22rem,calc(100%-1rem))]')} />
+      )}
       {selected != null && (
         <TileCard
           key={selected}

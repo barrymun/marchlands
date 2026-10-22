@@ -4,7 +4,7 @@ x-backend: &backend
   build:
     context: .
     dockerfile: backend/Dockerfile
-  image: marchlands/backend:dev
+  image: ${COMPOSE_PROJECT_NAME:-marchlands}/backend:dev
   restart: unless-stopped
   env_file:
     - path: .env
@@ -76,7 +76,7 @@ services:
     build:
       context: .
       dockerfile: client/web/Dockerfile
-    image: marchlands/web:dev
+    image: ${COMPOSE_PROJECT_NAME:-marchlands}/web:dev
     restart: unless-stopped
     ports:
       - '${WEB_PORT:-8000}:80'

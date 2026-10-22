@@ -1,0 +1,1 @@
+ALTER TABLE "market_trades" ADD COLUMN "npc" boolean DEFAULT false NOT NULL;

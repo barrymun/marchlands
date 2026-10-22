@@ -2,7 +2,21 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { DAY, HOUR, setGameSpeed } from '@marchlands/core';
 
-import { clockTime, dateTime, duration, fmt, fmtDecimal, fmtExact, percent, period, resourceLabel, shortDuration, signed, signedRate } from '@/lib/format';
+import {
+  clockTime,
+  dateTime,
+  duration,
+  fmt,
+  fmtDecimal,
+  fmtExact,
+  percent,
+  period,
+  resourceLabel,
+  shortDate,
+  shortDuration,
+  signed,
+  signedRate,
+} from '@/lib/format';
 import { buildingName, troopName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 
@@ -162,6 +176,16 @@ describe(dateTime.name, () => {
     expect(dateTime(AT)).toBe('10/11/2026, 1:04:05 PM');
     await i18n.changeLanguage('ja-JP');
     expect(dateTime(AT)).toBe('2026/10/11 13:04:05');
+  });
+});
+
+describe(shortDate.name, () => {
+  it('writes the day and month the way the locale does', async () => {
+    expect(shortDate(AT)).toBe('11 Oct');
+    await i18n.changeLanguage('en-US');
+    expect(shortDate(AT)).toBe('Oct 11');
+    await i18n.changeLanguage('ja-JP');
+    expect(shortDate(AT)).toBe('10月11日');
   });
 });
 

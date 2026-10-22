@@ -18,6 +18,7 @@ export * as mail from '#/services/mail.ts';
 export * as social from '#/services/social.ts';
 export * as alliance from '#/services/alliance.ts';
 export * as market from '#/services/market.ts';
+export * as factions from '#/services/factions.ts';
 export * as shop from '#/services/shop.ts';
 export * as quests from '#/services/quests.ts';
 export * as rankings from '#/services/rankings.ts';

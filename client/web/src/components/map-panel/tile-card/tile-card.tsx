@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { type CityBean, getMapTilesByTileIdOptions } from '@marchlands/api-client';
-import { Mission, TileType, VALLEY_TYPES } from '@marchlands/core';
+import { BALANCE, factionOfZone, isFactionLevel, Mission, TileType, VALLEY_TYPES } from '@marchlands/core';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add-to-farm-button';
@@ -16,8 +16,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { copyText } from '@/lib/clipboard';
+import { FACTION_STYLE } from '@/lib/factions';
 import { fmt } from '@/lib/format';
-import { tileName, zoneName } from '@/lib/game-data';
+import { factionName, tileName, zoneName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
 /**
@@ -54,6 +55,8 @@ export function TileCard({
   const info = useQuery(getMapTilesByTileIdOptions({ path: { tileId } }));
   const tile = info.data;
   const scouts = city.troop.scouter ?? 0;
+  // a barbarian city's side: the faction holding its zone, or none for a bandit below the faction level
+  const side = tile?.type === TileType.NPC ? (isFactionLevel(tile.level) ? factionOfZone(tile.zoneId) : null) : undefined;
   /** what can be scouted on a tile (empty land has nothing to see) */
   const kindOf = (t: NonNullable<typeof tile>): SendTarget['kind'] =>
     t.type === TileType.CASTLE ? 'city' : t.type === TileType.NPC ? 'npc' : t.type === TileType.FLAT ? undefined : 'valley';
@@ -98,6 +101,17 @@ export function TileCard({
             <Button size="icon-xs" variant="ghost" onClick={() => copyCoords(tile.x, tile.y)} aria-label={t('copy.label')} title={t('copy.label')}>
               <Copy />
             </Button>
+            {side && (
+              <Badge variant="outline" title={t('faction.memberTitle', { faction: factionName(side.id) })}>
+                <span aria-hidden className={cn('size-2 rounded-sm', FACTION_STYLE[side.id].swatch)} />
+                {factionName(side.id)}
+              </Badge>
+            )}
+            {side === null && (
+              <Badge variant="outline" title={t('faction.banditsTitle', { level: BALANCE.factions.minLevel })}>
+                {t('faction.bandits')}
+              </Badge>
+            )}
           </div>
           {'userName' in tile && tile.userName && (
             <p>

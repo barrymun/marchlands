@@ -13,7 +13,6 @@ import { goldForSpeedup } from '@marchlands/core';
 import { Countdown } from '@/components/countdown/countdown';
 import { resInline } from '@/components/market-panel/utils';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { fmtExact } from '@/lib/format';
@@ -32,29 +31,24 @@ export function Shipments() {
     t('shipments.delivered'),
   );
   const list = (shipments.data ?? []).filter((s) => s.endTime > now + 1000);
-  if (list.length === 0) return null;
+  if (list.length === 0) return <p className="p-3 text-xs text-muted-foreground">{t('shipments.none')}</p>;
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm">{t('shipments.title')}</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-2">
-        {list.map((s) => {
-          const gold = goldForSpeedup(Math.max(0, s.endTime - now));
-          const has = castles.find((c) => c.id === s.cityId)?.resource.gold ?? 0;
-          return (
-            <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2 text-sm">
-              <span className="tabular-nums">{t('common:amountOf', { amount: fmtExact(s.amount), resource: resInline(s.resType) })}</span>
-              <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Trans t={t} i18nKey="shipments.arrivesIn" components={{ countdown: <Countdown endTime={s.endTime} /> }} />
-                <Button size="xs" variant="outline" disabled={rush.isPending || has < gold} onClick={() => rush.mutate({ path: { shipmentId: s.id } })}>
-                  {t('shipments.deliverNow', { gold: fmtExact(gold) })}
-                </Button>
-              </span>
-            </div>
-          );
-        })}
-      </CardContent>
-    </Card>
+    <div className="grid gap-2 p-2">
+      {list.map((s) => {
+        const gold = goldForSpeedup(Math.max(0, s.endTime - now));
+        const has = castles.find((c) => c.id === s.cityId)?.resource.gold ?? 0;
+        return (
+          <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2 text-sm">
+            <span className="tabular-nums">{t('common:amountOf', { amount: fmtExact(s.amount), resource: resInline(s.resType) })}</span>
+            <span className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Trans t={t} i18nKey="shipments.arrivesIn" components={{ countdown: <Countdown endTime={s.endTime} /> }} />
+              <Button size="xs" variant="outline" disabled={rush.isPending || has < gold} onClick={() => rush.mutate({ path: { shipmentId: s.id } })}>
+                {t('shipments.deliverNow', { gold: fmtExact(gold) })}
+              </Button>
+            </span>
+          </div>
+        );
+      })}
+    </div>
   );
 }

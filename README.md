@@ -152,6 +152,28 @@ docker compose up -d --build             # migrate applies any migrations the du
 
 The same steps move a hosted game: [docs/deployment.md](docs/deployment.md), Moving the game to this machine.
 
+### A second stack for a worktree
+
+A large feature can live in a git worktree (`.claude/worktrees/<name>`) with a stack of its own, so its migrations and rebuilds never touch the main one. The Compose file names the project `marchlands`, and the images after the project, so the worktree's `.env` gives it another name and other ports:
+
+```bash
+sed -E 's/^POSTGRES_PORT=.*/POSTGRES_PORT=5434/; s/^API_PORT=.*/API_PORT=3200/; s/^WEB_PORT=.*/WEB_PORT=8200/; s#(@localhost:)[0-9]+/#\15434/#' ../../../.env > .env
+printf 'COMPOSE_PROJECT_NAME=marchlands-<name>\nADMINER_PORT=8180\n' >> .env
+```
+
+Then fill its database from a dump of the main one, before anything else starts (as when moving the stack, above), and build:
+
+```bash
+docker compose up -d postgres --wait
+docker compose exec -T postgres pg_restore -U marchlands -d marchlands --no-owner --exit-on-error < ../../../backups/<dump>
+docker compose up -d --build
+npm ci
+```
+
+- `docker compose` in the worktree now runs `marchlands-<name>`: its own containers, images (`marchlands-<name>/backend:dev`) and volume (`marchlands-<name>_pgdata`).
+- `npm run test:db` uses the worktree's Postgres too, through `DATABASE_URL`, so its `marchlands_test` is its own.
+- To remove it: `docker compose down -v` in the worktree (only its own volume), then `docker image rm marchlands-<name>/backend:dev marchlands-<name>/web:dev`, then remove the worktree.
+
 ## Configuration
 
 | Variable | Default | Purpose |
@@ -171,3 +193,7 @@ The same steps move a hosted game: [docs/deployment.md](docs/deployment.md), Mov
 | `STATS_FLUSH_MS` | 300000 | how often the API and worker write buffered lord statistics |
 
 Gameplay constants are collected in `shared/core/src/balance.ts`. Values marked `(orig)` come from the original server; values marked `(evony)` fill gaps the original never implemented.
+
+## Credits
+
+The Market page's charts are drawn with [TradingView Lightweight Charts™](https://www.tradingview.com/lightweight-charts/) (Apache 2.0). Copyright © 2025 TradingView, Inc., [tradingview.com](https://www.tradingview.com/). The charts keep the library's own TradingView logo, and a line under the price chart links to TradingView, as its licence asks.

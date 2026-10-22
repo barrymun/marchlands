@@ -64,6 +64,7 @@ import { fortBean, heroBean, troopBean } from '#/dto.ts';
 import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner } from '#/engine/armies.ts';
 import { dropCapturedTarget } from '#/engine/flows.ts';
 import { heroSlots, pushHero } from '#/engine/heroes.ts';
+import { plunderNpc } from '#/engine/npc-economy.ts';
 import { initialCity, isProtected } from '#/engine/player.ts';
 import { isFriendly, relationBetween } from '#/engine/relations.ts';
 import { createReport } from '#/engine/reports.ts';
@@ -945,6 +946,8 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   if (r.attackerWon) {
     loot = plunder({ gold: state.gold, food: state.food, wood: state.wood, stone: state.stone, iron: state.iron }, lootCapacity(a, r.attacker.after, attacker));
     for (const k of Object.keys(loot) as (keyof ResourceSet)[]) state[k] -= loot[k];
+    // (marchlands) a faction member's plunder lowers its group's stock, and so moves the factions' prices
+    if (tile.ownerCityId == null) await plunderNpc(ctx, tile.id, tile.level, loot);
     const [lo, hi] = BALANCE.npcLoyaltyDamagePerAttack;
     loyaltyDamage = randInt(ctx.rng, lo, hi);
     state.loyalty = Math.max(0, state.loyalty - loyaltyDamage);

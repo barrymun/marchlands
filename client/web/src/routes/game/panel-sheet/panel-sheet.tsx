@@ -6,7 +6,7 @@ import type { CityBean } from '@marchlands/api-client';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGameNav } from '@/hooks/use-game-nav';
-import { ArmiesPanel, HeroesPanel, ItemsPanel, MilitaryPanel, PANELS, ResearchPanel } from '@/routes/game/constants';
+import { ArmiesPanel, FactionsPanel, HeroesPanel, ItemsPanel, MilitaryPanel, PANELS, ResearchPanel } from '@/routes/game/constants';
 
 /**
  * The open panel (lib/nav.ts) as a sheet over the view: from the right on a wide screen, the whole screen on a phone.
@@ -42,6 +42,7 @@ export function PanelSheet({ city }: { city: CityBean }) {
             {nav.panel === 'research' && <ResearchPanel city={city} />}
             {nav.panel === 'items' && <ItemsPanel city={city} />}
             {nav.panel === 'armies' && <ArmiesPanel />}
+            {nav.panel === 'factions' && <FactionsPanel />}
           </Suspense>
         </div>
       </SheetContent>

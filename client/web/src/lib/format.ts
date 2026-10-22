@@ -43,6 +43,9 @@ export const dateTime = (ms: number) => new Date(ms).toLocaleString(i18n.languag
 export const clockTime = (ms: number, short = false) =>
   new Date(ms).toLocaleTimeString(i18n.language, short ? { hour: '2-digit', minute: '2-digit' } : undefined);
 
+/** A day and month in the current locale (11 Oct in en-GB), for chart axes. */
+export const shortDate = (ms: number) => new Date(ms).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' });
+
 export const fmt = (n: number) => (Math.abs(n) >= 100_000 ? numberFormats().compact.format(n) : numberFormats().whole.format(Math.floor(n)));
 export const fmtExact = (n: number) => numberFormats().whole.format(Math.floor(n));
 export const signed = (n: number) => (n >= 0 ? `+${fmt(n)}` : `-${fmt(-n)}`);

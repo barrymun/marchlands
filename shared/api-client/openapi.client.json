@@ -414,6 +414,7 @@
               "market.nothingToTrade",
               "market.tooManyOrders",
               "market.notEnoughResource",
+              "market.slowDown",
               "market.orderNotFound",
               "market.shipmentNotFound",
               "research.notResearching",
@@ -10115,6 +10116,65 @@
         ],
         "description": "computer merchant: always buys and sells, in unlimited amounts"
       },
+      "MarketFactionsInput": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "number",
+            "description": "the world price at their stock now, inside the merchant's band"
+          },
+          "ask": {
+            "description": "they sell at this price (marginal; rises as they sell); null at the band's edge",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "bid": {
+            "description": "they buy at this price (marginal; falls as they buy); null at the band's edge",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "sells": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units they sell before their price reaches the band's edge"
+          },
+          "buys": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units they buy before their price reaches the band's edge"
+          },
+          "sellers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketPriceLevelInput"
+            },
+            "description": "what they sell in a few price steps up to the band's edge, best first"
+          },
+          "buyers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketPriceLevelInput"
+            },
+            "description": "what they buy in a few price steps down to the band's edge, best first"
+          }
+        },
+        "required": [
+          "price",
+          "ask",
+          "bid",
+          "sells",
+          "buys",
+          "sellers",
+          "buyers"
+        ],
+        "description": "the NPC factions: they trade from their shared stock along their price curve"
+      },
       "MarketOrderBookInput": {
         "type": "object",
         "properties": {
@@ -10139,13 +10199,25 @@
           },
           "merchant": {
             "$ref": "#/components/schemas/MarketMerchantInput"
+          },
+          "factions": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MarketFactionsInput"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null before the factions first trade"
           }
         },
         "required": [
           "resType",
           "buyers",
           "sellers",
-          "merchant"
+          "merchant",
+          "factions"
         ]
       },
       "MarketOrderInput": {
@@ -10248,6 +10320,12 @@
             "maximum": 9007199254740991,
             "description": "units traded with the computer merchant"
           },
+          "factionsFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with the NPC factions"
+          },
           "playerFilled": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -10273,6 +10351,7 @@
           "gold",
           "fee",
           "merchantFilled",
+          "factionsFilled",
           "playerFilled",
           "rest",
           "escrow"
@@ -10311,6 +10390,12 @@
             "maximum": 9007199254740991,
             "description": "units traded with the computer merchant"
           },
+          "factionsFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with the NPC factions"
+          },
           "playerFilled": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -10347,6 +10432,7 @@
           "gold",
           "fee",
           "merchantFilled",
+          "factionsFilled",
           "playerFilled",
           "rest",
           "escrow",
@@ -10384,6 +10470,10 @@
             "type": "boolean",
             "description": "traded with the computer merchant"
           },
+          "factions": {
+            "type": "boolean",
+            "description": "traded with the NPC factions"
+          },
           "createdAt": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -10396,8 +10486,84 @@
           "gold",
           "takerSide",
           "merchant",
+          "factions",
           "createdAt"
         ]
+      },
+      "MarketNpcTradeInput": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "number",
+            "description": "epoch milliseconds"
+          },
+          "resource": {
+            "type": "string",
+            "enum": [
+              "food",
+              "wood",
+              "stone",
+              "iron"
+            ]
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "price": {
+            "type": "number"
+          },
+          "seller": {
+            "type": "object",
+            "properties": {
+              "zone": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "the zone (state) of its cities"
+              },
+              "level": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "zone",
+              "level"
+            ]
+          },
+          "buyer": {
+            "type": "object",
+            "properties": {
+              "zone": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "the zone (state) of its cities"
+              },
+              "level": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "zone",
+              "level"
+            ]
+          }
+        },
+        "required": [
+          "at",
+          "resource",
+          "amount",
+          "price",
+          "seller",
+          "buyer"
+        ],
+        "description": "a single trade between two factions' groups, made up from an auction to show it"
       },
       "MarketCandleInput": {
         "type": "object",
@@ -10441,11 +10607,19 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "period": {
+            "type": "string",
+            "enum": [
+              "minute",
+              "hour",
+              "day"
+            ]
+          },
           "bucketMs": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "candle length: one game hour"
+            "description": "candle length in real ms"
           },
           "merchant": {
             "$ref": "#/components/schemas/MarketMerchantInput"
@@ -10455,7 +10629,7 @@
             "items": {
               "$ref": "#/components/schemas/MarketCandleInput"
             },
-            "description": "oldest first; buckets without trades are omitted"
+            "description": "every trade in the world, oldest first; candles without trades are omitted"
           },
           "trades": {
             "type": "array",
@@ -10463,14 +10637,183 @@
               "$ref": "#/components/schemas/MarketTradeInput"
             },
             "description": "most recent first"
+          },
+          "ticker": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketNpcTradeInput"
+            },
+            "description": "the factions' latest trades with each other in this resource, newest first"
           }
         },
         "required": [
           "resType",
+          "period",
           "bucketMs",
           "merchant",
           "candles",
-          "trades"
+          "trades",
+          "ticker"
+        ]
+      },
+      "MarketAffordableInput": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the most units the gold buys now with an instant order, the fee included"
+          }
+        },
+        "required": [
+          "amount"
+        ]
+      },
+      "MarketSummaryInput": {
+        "type": "object",
+        "properties": {
+          "resType": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "price": {
+            "type": "number",
+            "description": "its price now: the factions' world price, or the merchant's reference before they trade"
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/MarketMerchantInput"
+          },
+          "day": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "open": {
+                    "type": "number"
+                  },
+                  "high": {
+                    "type": "number"
+                  },
+                  "low": {
+                    "type": "number"
+                  },
+                  "volume": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "open",
+                  "high",
+                  "low",
+                  "volume"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the last 24 hours from hourly candles: the price it opened at, its high and low, the units traded; null when nothing traded"
+          }
+        },
+        "required": [
+          "resType",
+          "price",
+          "merchant",
+          "day"
+        ]
+      },
+      "FactionGoldInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "saxon",
+              "lotharingian",
+              "franconian",
+              "bohemian",
+              "italian"
+            ]
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the gold the faction holds now: it pays players selling to it with this"
+          },
+          "treasury": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "what its gold drifts back to: its members' gold in the NPC table"
+          }
+        },
+        "required": [
+          "id",
+          "gold",
+          "treasury"
+        ]
+      },
+      "MarketMyTradeInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "resType": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "side": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the player's side: 0 bought, 1 sold"
+          },
+          "price": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold that changed hands, before the buyer's fee"
+          },
+          "with": {
+            "type": "string",
+            "enum": [
+              "player",
+              "factions",
+              "merchant"
+            ],
+            "description": "who was on the other side"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "epoch milliseconds"
+          }
+        },
+        "required": [
+          "id",
+          "resType",
+          "side",
+          "price",
+          "amount",
+          "gold",
+          "with",
+          "createdAt"
         ]
       },
       "MarketShipmentInput": {
@@ -11536,6 +11879,7 @@
               "market.nothingToTrade",
               "market.tooManyOrders",
               "market.notEnoughResource",
+              "market.slowDown",
               "market.orderNotFound",
               "market.shipmentNotFound",
               "research.notResearching",
@@ -21469,6 +21813,66 @@
         "additionalProperties": false,
         "description": "computer merchant: always buys and sells, in unlimited amounts"
       },
+      "MarketFactions": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "number",
+            "description": "the world price at their stock now, inside the merchant's band"
+          },
+          "ask": {
+            "description": "they sell at this price (marginal; rises as they sell); null at the band's edge",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "bid": {
+            "description": "they buy at this price (marginal; falls as they buy); null at the band's edge",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "sells": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units they sell before their price reaches the band's edge"
+          },
+          "buys": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units they buy before their price reaches the band's edge"
+          },
+          "sellers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketPriceLevel"
+            },
+            "description": "what they sell in a few price steps up to the band's edge, best first"
+          },
+          "buyers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketPriceLevel"
+            },
+            "description": "what they buy in a few price steps down to the band's edge, best first"
+          }
+        },
+        "required": [
+          "price",
+          "ask",
+          "bid",
+          "sells",
+          "buys",
+          "sellers",
+          "buyers"
+        ],
+        "additionalProperties": false,
+        "description": "the NPC factions: they trade from their shared stock along their price curve"
+      },
       "MarketOrderBook": {
         "type": "object",
         "properties": {
@@ -21493,13 +21897,25 @@
           },
           "merchant": {
             "$ref": "#/components/schemas/MarketMerchant"
+          },
+          "factions": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MarketFactions"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null before the factions first trade"
           }
         },
         "required": [
           "resType",
           "buyers",
           "sellers",
-          "merchant"
+          "merchant",
+          "factions"
         ],
         "additionalProperties": false
       },
@@ -21604,6 +22020,12 @@
             "maximum": 9007199254740991,
             "description": "units traded with the computer merchant"
           },
+          "factionsFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with the NPC factions"
+          },
           "playerFilled": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -21629,6 +22051,7 @@
           "gold",
           "fee",
           "merchantFilled",
+          "factionsFilled",
           "playerFilled",
           "rest",
           "escrow"
@@ -21668,6 +22091,12 @@
             "maximum": 9007199254740991,
             "description": "units traded with the computer merchant"
           },
+          "factionsFilled": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "units traded with the NPC factions"
+          },
           "playerFilled": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -21704,6 +22133,7 @@
           "gold",
           "fee",
           "merchantFilled",
+          "factionsFilled",
           "playerFilled",
           "rest",
           "escrow",
@@ -21742,6 +22172,10 @@
             "type": "boolean",
             "description": "traded with the computer merchant"
           },
+          "factions": {
+            "type": "boolean",
+            "description": "traded with the NPC factions"
+          },
           "createdAt": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -21754,9 +22188,88 @@
           "gold",
           "takerSide",
           "merchant",
+          "factions",
           "createdAt"
         ],
         "additionalProperties": false
+      },
+      "MarketNpcTrade": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "number",
+            "description": "epoch milliseconds"
+          },
+          "resource": {
+            "type": "string",
+            "enum": [
+              "food",
+              "wood",
+              "stone",
+              "iron"
+            ]
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "price": {
+            "type": "number"
+          },
+          "seller": {
+            "type": "object",
+            "properties": {
+              "zone": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "the zone (state) of its cities"
+              },
+              "level": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "zone",
+              "level"
+            ],
+            "additionalProperties": false
+          },
+          "buyer": {
+            "type": "object",
+            "properties": {
+              "zone": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "the zone (state) of its cities"
+              },
+              "level": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "zone",
+              "level"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "at",
+          "resource",
+          "amount",
+          "price",
+          "seller",
+          "buyer"
+        ],
+        "additionalProperties": false,
+        "description": "a single trade between two factions' groups, made up from an auction to show it"
       },
       "MarketCandle": {
         "type": "object",
@@ -21801,11 +22314,19 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "period": {
+            "type": "string",
+            "enum": [
+              "minute",
+              "hour",
+              "day"
+            ]
+          },
           "bucketMs": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "candle length: one game hour"
+            "description": "candle length in real ms"
           },
           "merchant": {
             "$ref": "#/components/schemas/MarketMerchant"
@@ -21815,7 +22336,7 @@
             "items": {
               "$ref": "#/components/schemas/MarketCandle"
             },
-            "description": "oldest first; buckets without trades are omitted"
+            "description": "every trade in the world, oldest first; candles without trades are omitted"
           },
           "trades": {
             "type": "array",
@@ -21823,14 +22344,188 @@
               "$ref": "#/components/schemas/MarketTrade"
             },
             "description": "most recent first"
+          },
+          "ticker": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketNpcTrade"
+            },
+            "description": "the factions' latest trades with each other in this resource, newest first"
           }
         },
         "required": [
           "resType",
+          "period",
           "bucketMs",
           "merchant",
           "candles",
-          "trades"
+          "trades",
+          "ticker"
+        ],
+        "additionalProperties": false
+      },
+      "MarketAffordable": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the most units the gold buys now with an instant order, the fee included"
+          }
+        },
+        "required": [
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "MarketSummary": {
+        "type": "object",
+        "properties": {
+          "resType": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "price": {
+            "type": "number",
+            "description": "its price now: the factions' world price, or the merchant's reference before they trade"
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/MarketMerchant"
+          },
+          "day": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "open": {
+                    "type": "number"
+                  },
+                  "high": {
+                    "type": "number"
+                  },
+                  "low": {
+                    "type": "number"
+                  },
+                  "volume": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "open",
+                  "high",
+                  "low",
+                  "volume"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the last 24 hours from hourly candles: the price it opened at, its high and low, the units traded; null when nothing traded"
+          }
+        },
+        "required": [
+          "resType",
+          "price",
+          "merchant",
+          "day"
+        ],
+        "additionalProperties": false
+      },
+      "FactionGold": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "saxon",
+              "lotharingian",
+              "franconian",
+              "bohemian",
+              "italian"
+            ]
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the gold the faction holds now: it pays players selling to it with this"
+          },
+          "treasury": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "what its gold drifts back to: its members' gold in the NPC table"
+          }
+        },
+        "required": [
+          "id",
+          "gold",
+          "treasury"
+        ],
+        "additionalProperties": false
+      },
+      "MarketMyTrade": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "resType": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "side": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the player's side: 0 bought, 1 sold"
+          },
+          "price": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "gold that changed hands, before the buyer's fee"
+          },
+          "with": {
+            "type": "string",
+            "enum": [
+              "player",
+              "factions",
+              "merchant"
+            ],
+            "description": "who was on the other side"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "epoch milliseconds"
+          }
+        },
+        "required": [
+          "id",
+          "resType",
+          "side",
+          "price",
+          "amount",
+          "gold",
+          "with",
+          "createdAt"
         ],
         "additionalProperties": false
       },
@@ -32658,11 +33353,38 @@
     "/api/v1/market/{resType}/history": {
       "get": {
         "operationId": "getMarketHistory",
-        "summary": "Recent trades and hourly (game time) price candles",
+        "summary": "Recent trades and price candles of a minute, an hour or a day (real time)",
         "tags": [
           "market"
         ],
         "parameters": [
+          {
+            "schema": {
+              "default": "hour",
+              "type": "string",
+              "enum": [
+                "minute",
+                "hour",
+                "day"
+              ]
+            },
+            "in": "query",
+            "name": "period",
+            "required": false,
+            "description": "candle length in real time"
+          },
+          {
+            "schema": {
+              "default": 500,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2000
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "description": "the most recent candles, at most this many"
+          },
           {
             "schema": {
               "type": "integer",
@@ -32686,6 +33408,222 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MarketHistory"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/factions": {
+      "get": {
+        "operationId": "getFactions",
+        "summary": "The NPC factions' gold now and their treasuries",
+        "tags": [
+          "market"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FactionGold"
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/market/summary": {
+      "get": {
+        "operationId": "getMarketSummary",
+        "summary": "Every resource's price now, the merchant's quotes and its last 24 hours",
+        "tags": [
+          "market"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketSummary"
+                  }
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/market/{resType}/affordable": {
+      "get": {
+        "operationId": "getMarketAffordable",
+        "summary": "The most units an amount of gold buys now with an instant order, the fee included",
+        "tags": [
+          "market"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000000000
+            },
+            "in": "query",
+            "name": "gold",
+            "required": true,
+            "description": "the gold to spend, fee included"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "in": "path",
+            "name": "resType",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketAffordable"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/market/trades/mine": {
+      "get": {
+        "operationId": "getMarketTradesMine",
+        "summary": "The player's latest trades, newest first",
+        "tags": [
+          "market"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketMyTrade"
+                  }
                 }
               }
             }
@@ -32765,7 +33703,7 @@
     "/api/v1/cities/{cityId}/market/orders": {
       "post": {
         "operationId": "postCitiesMarketOrders",
-        "summary": "Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade)",
+        "summary": "Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade); limited per player",
         "tags": [
           "market"
         ],
@@ -32867,7 +33805,7 @@
     "/api/v1/market/orders/{orderId}": {
       "delete": {
         "operationId": "deleteMarketOrdersByOrderId",
-        "summary": "Cancel (trade.cancelTrade)",
+        "summary": "Cancel (trade.cancelTrade); limited per player, with placing",
         "tags": [
           "market"
         ],

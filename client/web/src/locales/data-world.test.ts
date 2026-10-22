@@ -1,13 +1,14 @@
-// Map tile names (data-tiles), zone names (data-zones) and alliance rank names (data-ranks), and the
+// Map tile names (data-tiles), zone names (data-zones), NPC faction names (data-factions) and alliance rank names (data-ranks), and the
 // position messages built from them (msg-world `position.*`): every id the game defines is named.
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { AllianceRank, BALANCE, msg, ref, TileType } from '@marchlands/core';
+import { AllianceRank, BALANCE, FACTION_IDS, FactionId, msg, ref, TileType } from '@marchlands/core';
 
-import { rankName, tileName, zoneName } from '@/lib/game-data';
+import { factionName, rankName, tileName, zoneName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
+import factionsGB from '@/locales/en-GB/data-factions.json';
 import ranksGB from '@/locales/en-GB/data-ranks.json';
 import tilesGB from '@/locales/en-GB/data-tiles.json';
 import zonesGB from '@/locales/en-GB/data-zones.json';
@@ -40,6 +41,18 @@ describe('data-zones', () => {
     expect(zoneName(1)).toBe('SAXONY');
     await i18n.changeLanguage('ja-JP');
     expect(zoneName(1)).toBe('ザクセン');
+  });
+});
+
+describe('data-factions', () => {
+  it('names every faction in en-GB, and nothing else', () => {
+    expect(Object.keys(factionsGB).sort()).toEqual([...FACTION_IDS].sort());
+  });
+
+  it('is looked up by faction id', async () => {
+    expect(factionName(FactionId.SAXON_LEAGUE)).toBe('Saxon League');
+    await i18n.changeLanguage('ja-JP');
+    expect(factionName(FactionId.BOHEMIAN_CROWN)).toBe('ボヘミア王冠領');
   });
 });
 

@@ -115,6 +115,17 @@ const NPC_TABLE: readonly [NpcRow, ...NpcRow[]] = [
 ];
 const NPC_POPULATION: readonly [number, ...number[]] = [1000, 4000, 8000, 16000, 25000, 33000, 38000, 58000, 68000, 78000];
 
+/**
+ * (marchlands) An NPC city's gold as the original table has it (55,000 at level 1 to 1,500,000 at level 10), whatever
+ * BALANCE.npcGoldMatchesTopResource makes it hold for plunder: what a faction member brings to its faction's treasury
+ * (npc-economy.ts).
+ */
+export function npcTableGold(level: number): number {
+  const l = Math.min(10, Math.max(1, level));
+  // l is clamped to the table's 10 levels
+  return (NPC_TABLE[l - 1] ?? NPC_TABLE[0])[0];
+}
+
 export function npcTemplate(level: number): NpcTemplate {
   const l = Math.min(10, Math.max(1, level));
   // l is clamped to the table's 10 levels

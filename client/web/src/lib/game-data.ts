@@ -1,7 +1,8 @@
 // Names of game data in the current locale, by id: troops and fortifications, buildings, research, items, titles,
-// map tiles, zones, alliance ranks, gear pieces and item categories. They live in the `data-<kind>` locale
+// map tiles, zones, NPC factions, alliance ranks, gear pieces and item categories. They live in the `data-<kind>` locale
 // namespaces (src/locales/<locale>/data-*.json), keyed by the id the game uses; nothing in core holds them.
 
+import type { FactionId } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /** A name from a `data-<kind>` namespace; ids may contain dots (item ids), so keys are not split. */
@@ -18,6 +19,7 @@ export const itemName = (id: string) => dataName('data-items', id, () => id);
 export const titleName = (id: number) => dataName('data-titles', id, () => String(id));
 export const tileName = (type: number) => dataName('data-tiles', type, () => i18n.t('common:fallback.tile', { id: type }));
 export const zoneName = (id: number) => dataName('data-zones', id, () => String(id));
+export const factionName = (id: FactionId) => dataName('data-factions', id, () => id);
 export const rankName = (rank: number) => dataName('data-ranks', rank, () => String(rank));
 export const gearName = (piece: string) => dataName('data-gear', piece, () => piece);
 export const itemCategoryName = (type: number) => dataName('data-item-categories', type, () => String(type));

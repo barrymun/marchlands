@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { HOUR, MarketSide, merchantAsk, merchantBase, merchantBid, merchantBuys, merchantSells, msg, scaled } from '@marchlands/core';
+import { CANDLE_PERIOD_MS, CandlePeriod, MarketSide, merchantAsk, merchantBase, merchantBid, merchantBuys, merchantSells, MINUTE, msg } from '@marchlands/core';
 
 import { market } from '#/index.ts';
 import { expectRefused } from '#test/support/expect.ts';
@@ -16,7 +16,8 @@ describe(market.orderBook.name, () => {
         resType: Res.STONE,
         buyers: [],
         sellers: [],
-        merchant: { reference: P, base: P, bid: P, ask: P },
+        merchant: { reference: P, base: P, bid: merchantBid(P), ask: merchantAsk(P) },
+        factions: null,
       });
     }));
 
@@ -77,7 +78,7 @@ describe(market.quote.name, () => {
   it('says what the order would do, changing nothing', () =>
     game(async (g) => {
       const a = await createTrader(g);
-      const P = merchantBase('wood');
+      const P = merchantAsk(merchantBase('wood'));
       const order = { resType: Res.WOOD, side: MarketSide.BUY, amount: 2000, type: 'market' } as const;
       const q = await market.quote(g, a.id, order);
       expect(q).toEqual({
@@ -86,6 +87,7 @@ describe(market.quote.name, () => {
         gold: withFee(2000 * P),
         fee: withFee(2000 * P) - 2000 * P,
         merchantFilled: 2000,
+        factionsFilled: 0,
         playerFilled: 0,
         rest: 0,
         escrow: 0,
@@ -137,33 +139,36 @@ describe(market.quote.name, () => {
 });
 
 describe(market.history.name, () => {
-  it('lists recent trades newest first and groups them into hourly candles', () =>
+  it('lists recent trades newest first, and candles of a minute, an hour and a day of real time', () =>
     game(async (g) => {
       const a = await createTrader(g);
       const P = merchantBase('food');
+      const [ask, bid] = [merchantAsk(P), merchantBid(P)];
       const trade = (side: number, amount: number) => market.placeOrder(g, a.id, a.cityId, { resType: Res.FOOD, side, amount, type: 'market' });
-      const bucketMs = Math.max(1000, scaled(HOUR));
-      const start = Math.floor(g.now / bucketMs) * bucketMs;
+      const startOf = (period: CandlePeriod) => g.now - (g.now % CANDLE_PERIOD_MS[period]);
+      const [minute, hour, day] = [startOf(CandlePeriod.MINUTE), startOf(CandlePeriod.HOUR), startOf(CandlePeriod.DAY)];
       await trade(MarketSide.BUY, 100);
-      g.advance(bucketMs / 2);
       await trade(MarketSide.SELL, 40);
-      g.advance(bucketMs + 1);
+      // into the next minute, still the same hour and day (T0 starts a day)
+      g.advance(minute + MINUTE - g.now);
       await trade(MarketSide.BUY, 7);
 
-      const h = await market.history(g, Res.FOOD);
-      expect(h).toMatchObject({ resType: Res.FOOD, bucketMs, merchant: { reference: P } });
+      const h = await market.history(g, Res.FOOD, CandlePeriod.MINUTE);
+      expect(h).toMatchObject({ resType: Res.FOOD, period: CandlePeriod.MINUTE, bucketMs: MINUTE, merchant: { reference: P } });
       expect(h.trades.map((t) => [t.amount, t.takerSide, t.merchant])).toEqual([
         [7, MarketSide.BUY, true],
         [40, MarketSide.SELL, true],
         [100, MarketSide.BUY, true],
       ]);
       expect(h.candles).toEqual([
-        { t: start, open: P, high: P, low: P, close: P, volume: 140 },
-        { t: start + bucketMs, open: P, high: P, low: P, close: P, volume: 7 },
+        { t: minute, open: ask, high: ask, low: bid, close: bid, volume: 140 },
+        { t: minute + MINUTE, open: ask, high: ask, low: ask, close: ask, volume: 7 },
       ]);
-      // candles cover trades of the last `buckets` hours (a rolling window); the trade list is not limited by time
-      const last = await market.history(g, Res.FOOD, 1);
-      expect(last.candles).toEqual([{ t: start + bucketMs, open: P, high: P, low: P, close: P, volume: 7 }]);
+      expect((await market.history(g, Res.FOOD, CandlePeriod.HOUR)).candles).toEqual([{ t: hour, open: ask, high: ask, low: bid, close: ask, volume: 147 }]);
+      expect((await market.history(g, Res.FOOD, CandlePeriod.DAY)).candles).toEqual([{ t: day, open: ask, high: ask, low: bid, close: ask, volume: 147 }]);
+      // the latest `limit` candles; the trade list is not limited by them
+      const last = await market.history(g, Res.FOOD, CandlePeriod.MINUTE, 1);
+      expect(last.candles).toEqual([{ t: minute + MINUTE, open: ask, high: ask, low: ask, close: ask, volume: 7 }]);
       expect(last.trades).toHaveLength(3);
       expect((await market.history(g, Res.WOOD)).trades).toEqual([]);
     }));
@@ -248,4 +253,73 @@ describe(market.myShipments.name, () => {
         expect(await market.myShipments(g, a.id)).toEqual([]);
       }),
     ));
+});
+
+describe(market.affordable.name, () => {
+  it('is the most units the gold buys with an instant order, the fee included', () =>
+    game(async (g) => {
+      const a = await createTrader(g);
+      const { amount } = await market.affordable(g, a.id, Res.WOOD, 100_000);
+      const buy = (n: number) => market.quote(g, a.id, { resType: Res.WOOD, side: MarketSide.BUY, amount: n, type: 'market' });
+      expect(amount).toBeGreaterThan(0);
+      expect((await buy(amount)).gold).toBeLessThanOrEqual(100_000);
+      expect((await buy(amount + 1)).gold).toBeGreaterThan(100_000);
+    }));
+
+  it("counts other players' cheaper offers, never the player's own", () =>
+    game(async (g) => {
+      const [a, b] = [await createTrader(g), await createTrader(g)];
+      const merchantOnly = (await market.affordable(g, a.id, Res.WOOD, 100_000)).amount;
+      await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, price: 0.9 });
+      expect((await market.affordable(g, a.id, Res.WOOD, 100_000)).amount).toBeGreaterThan(merchantOnly);
+      expect((await market.affordable(g, b.id, Res.WOOD, 100_000)).amount).toBe(merchantOnly);
+    }));
+
+  it('is nothing for no gold', () =>
+    game(async (g) => {
+      const a = await createTrader(g);
+      expect(await market.affordable(g, a.id, Res.FOOD, 0)).toEqual({ amount: 0 });
+    }));
+});
+
+describe(market.summary.name, () => {
+  it("gives every resource the merchant's price and no day before anything trades", () =>
+    game(async (g) => {
+      const s = await market.summary(g);
+      expect(s.map((x) => x.resType)).toEqual([Res.FOOD, Res.WOOD, Res.STONE, Res.IRON]);
+      for (const x of s) {
+        expect(x.price).toBe(x.merchant.reference);
+        expect(x.day).toBeNull();
+      }
+    }));
+
+  it("sums up the last 24 hours' candles: the opening price, the high and low, the volume", () =>
+    game(async (g) => {
+      const a = await createTrader(g);
+      const trade = (side: number, amount: number) => market.placeOrder(g, a.id, a.cityId, { resType: Res.STONE, side, amount, type: 'market' });
+      await trade(MarketSide.BUY, 100);
+      await trade(MarketSide.SELL, 40);
+      const P = merchantBase('stone');
+      const s = await market.summary(g);
+      expect(s.find((x) => x.resType === Res.STONE)?.day).toEqual({ open: merchantAsk(P), high: merchantAsk(P), low: merchantBid(P), volume: 140 });
+      expect(s.find((x) => x.resType === Res.FOOD)?.day).toBeNull();
+    }));
+});
+
+describe(market.myTrades.name, () => {
+  it("lists the player's trades newest first, from their side, with whom", () =>
+    game(async (g) => {
+      const [a, b] = [await createTrader(g), await createTrader(g)];
+      await market.placeOrder(g, a.id, a.cityId, { resType: Res.FOOD, side: MarketSide.BUY, amount: 10, type: 'market' });
+      g.advance(MINUTE);
+      await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 20, price: 1 });
+      await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 20, type: 'market' });
+      expect((await market.myTrades(g, a.id)).map((t) => [t.resType, t.side, t.amount, t.with])).toEqual([
+        [Res.WOOD, MarketSide.BUY, 20, 'player'],
+        [Res.FOOD, MarketSide.BUY, 10, 'merchant'],
+      ]);
+      expect((await market.myTrades(g, b.id)).map((t) => [t.resType, t.side, t.amount, t.with, t.price])).toEqual([
+        [Res.WOOD, MarketSide.SELL, 20, 'player', 1],
+      ]);
+    }));
 });

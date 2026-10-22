@@ -1,7 +1,7 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { BALANCE, heroGearBonus, heroGearStat, MarketSide, merchantBase, msg, setGameSpeed, TechType } from '@marchlands/core';
+import { BALANCE, CandlePeriod, heroGearBonus, heroGearStat, MarketSide, merchantBase, msg, setGameSpeed, TechType } from '@marchlands/core';
 import {
   allianceEvents,
   alliances,
@@ -9,6 +9,7 @@ import {
   type Db,
   heroes,
   mails,
+  marketCandles,
   players,
   playerStats,
   pushMessages,
@@ -145,7 +146,7 @@ describe(statsJob.name, () => {
 });
 
 describe(cleanupJob.name, () => {
-  it('drops pushes older than 10 minutes, chat older than 7 days, reports and alliance events older than 30 days', () =>
+  it('drops pushes older than 10 minutes, chat older than 7 days, reports and alliance events older than 30 days, and old price candles', () =>
     inTestTx(async (db) => {
       const now = Date.now();
       const { p, al } = await arrange(db, async (g) => {
@@ -166,6 +167,29 @@ describe(cleanupJob.name, () => {
       await db.insert(reports).values([report(now - 31 * DAY), report(now - 29 * DAY)]);
       const event = (createdAt: number) => ({ allianceId: al.id, message: msg('common.invalidData'), createdAt });
       await db.insert(allianceEvents).values([event(now - 31 * DAY), event(now - 29 * DAY)]);
+      const keep = BALANCE.marketCandles.keepMs;
+      const candle = (period: CandlePeriod, start: number) => ({
+        resType: Res.FOOD,
+        scope: 'world',
+        period,
+        start,
+        open: 1,
+        high: 1,
+        low: 1,
+        close: 1,
+        volume: 1,
+        gold: 1,
+        trades: 1,
+      });
+      await db
+        .insert(marketCandles)
+        .values([
+          candle(CandlePeriod.MINUTE, now - keep.minute - MIN),
+          candle(CandlePeriod.MINUTE, now - keep.minute + MIN),
+          candle(CandlePeriod.HOUR, now - keep.hour - MIN),
+          candle(CandlePeriod.HOUR, now - keep.hour + MIN),
+          candle(CandlePeriod.DAY, now - 3 * keep.hour),
+        ]);
 
       await cleanupJob(db);
       const pushes = await db.select().from(pushMessages).where(eq(pushMessages.cmd, 'test.cleanup'));
@@ -179,6 +203,12 @@ describe(cleanupJob.name, () => {
         .from(allianceEvents)
         .where(and(eq(allianceEvents.allianceId, al.id), sql`${allianceEvents.createdAt} < ${now - DAY}`));
       expect(events.map((r) => r.createdAt)).toEqual([now - 29 * DAY]);
+      const candles = await db.select({ period: marketCandles.period, start: marketCandles.start }).from(marketCandles).orderBy(marketCandles.start);
+      expect(candles).toEqual([
+        { period: CandlePeriod.DAY, start: now - 3 * keep.hour },
+        { period: CandlePeriod.HOUR, start: now - keep.hour + MIN },
+        { period: CandlePeriod.MINUTE, start: now - keep.minute + MIN },
+      ]);
     }));
 });
 

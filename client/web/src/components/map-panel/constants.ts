@@ -30,3 +30,6 @@ export const RELATION_STYLE: Record<RelationGroup, { label: string; inline: stri
   enemy: relation('enemy', 'ring-2 ring-red-600 ring-inset', 'stroke-red-600'),
   other: relation('other', 'ring-2 ring-zinc-900 ring-inset dark:ring-zinc-100', 'stroke-zinc-900 dark:stroke-zinc-100'),
 };
+
+/** Where this browser remembers whether the map is tinted by faction (localStorage). */
+export const FACTION_TINT_KEY = 'marchlands-map-factions';

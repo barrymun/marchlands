@@ -5,7 +5,8 @@
 // by e^(q/depth), selling divides it by the same. Fills are priced along the curve (the integral
 // of the marginal price), so splitting an order changes nothing and a buy followed by a sell
 // always loses the spread. Between trades p decays towards its base price (log-space half-life).
-// With BALANCE.merchant.fixedPrice set, the merchant instead trades everything at that one price.
+// With BALANCE.merchant.fixedPrice set, p is that price for every resource and never moves: the
+// merchant sells everything at its ask and buys at its bid, in any amount.
 
 import { BALANCE, scaled } from '#/balance.ts';
 import type { BasicResource } from '#/constants.ts';
@@ -33,8 +34,8 @@ export function merchantReference(r: BasicResource, state: MerchantPrice | undef
   return Math.min(base * cfg().band, Math.max(base / cfg().band, p));
 }
 
-export const merchantAsk = (ref: number) => merchantFixed() ?? ref * (1 + cfg().spread / 2);
-export const merchantBid = (ref: number) => merchantFixed() ?? ref * (1 - cfg().spread / 2);
+export const merchantAsk = (ref: number) => (merchantFixed() ?? ref) * (1 + cfg().spread / 2);
+export const merchantBid = (ref: number) => (merchantFixed() ?? ref) * (1 - cfg().spread / 2);
 
 export interface MerchantFill {
   qty: number;
@@ -51,8 +52,9 @@ export interface MerchantFill {
 export function merchantSells(ref: number, qty: number, limit = Infinity): MerchantFill {
   const fixed = merchantFixed();
   if (fixed != null) {
-    const q = limit < fixed ? 0 : Math.max(0, qty);
-    return { qty: q, gold: q * fixed, ref: fixed };
+    const ask = merchantAsk(fixed);
+    const q = limit < ask ? 0 : Math.max(0, qty);
+    return { qty: q, gold: q * ask, ref: fixed };
   }
   const d = cfg().depth;
   const ask0 = merchantAsk(ref);
@@ -65,8 +67,9 @@ export function merchantSells(ref: number, qty: number, limit = Infinity): Merch
 export function merchantBuys(ref: number, qty: number, limit = 0): MerchantFill {
   const fixed = merchantFixed();
   if (fixed != null) {
-    const q = limit > fixed ? 0 : Math.max(0, qty);
-    return { qty: q, gold: q * fixed, ref: fixed };
+    const bid = merchantBid(fixed);
+    const q = limit > bid ? 0 : Math.max(0, qty);
+    return { qty: q, gold: q * bid, ref: fixed };
   }
   const d = cfg().depth;
   const bid0 = merchantBid(ref);
@@ -78,7 +81,7 @@ export function merchantBuys(ref: number, qty: number, limit = 0): MerchantFill 
 /** Marginal merchant price after `q` more units on `side` (buy = the merchant sells). */
 export function merchantMarginal(ref: number, side: 'buy' | 'sell', q = 0): number {
   const fixed = merchantFixed();
-  if (fixed != null) return fixed;
+  if (fixed != null) return side === 'buy' ? merchantAsk(fixed) : merchantBid(fixed);
   const d = cfg().depth;
   return side === 'buy' ? merchantAsk(ref) * Math.exp(q / d) : merchantBid(ref) * Math.exp(-q / d);
 }

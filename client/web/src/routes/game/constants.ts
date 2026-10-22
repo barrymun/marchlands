@@ -4,6 +4,7 @@ import {
   ChartColumn,
   Flag,
   FlaskConical,
+  Landmark,
   type LucideIcon,
   Map as MapIcon,
   Scale,
@@ -37,6 +38,7 @@ export const PANELS = [
   place('research', FlaskConical),
   place('items', Backpack),
   place('armies', Flag),
+  place('factions', Landmark),
 ] as const;
 
 /** The pages that take the viewport's place, in the order of the menu. */
@@ -53,9 +55,22 @@ export const ResearchPanel = lazyComponent(() => import('@/components/research-p
 export const ItemsPanel = lazyComponent(() => import('@/components/items-panel/items-panel').then((m) => m.ItemsPanel));
 export const MarketPanel = lazyComponent(() => import('@/components/market-panel/market-panel').then((m) => m.MarketPanel));
 export const ArmiesPanel = lazyComponent(() => import('@/components/armies-panel/armies-panel').then((m) => m.ArmiesPanel));
+export const FactionsPanel = lazyComponent(() => import('@/components/factions-panel/factions-panel').then((m) => m.FactionsPanel));
 export const ReportsPanel = lazyComponent(() => import('@/components/reports-panel/reports-panel').then((m) => m.ReportsPanel));
 export const FlowsPanel = lazyComponent(() => import('@/components/flows-panel/flows-panel').then((m) => m.FlowsPanel));
 export const StatsPanel = lazyComponent(() => import('@/components/stats-panel/stats-panel').then((m) => m.StatsPanel));
 export const MapPanel = lazyComponent(() => import('@/components/map-panel/map-panel').then((m) => m.MapPanel));
 
-export const LAZY_PANELS = [MilitaryPanel, HeroesPanel, ResearchPanel, ItemsPanel, MarketPanel, ArmiesPanel, ReportsPanel, FlowsPanel, StatsPanel, MapPanel];
+export const LAZY_PANELS = [
+  MilitaryPanel,
+  HeroesPanel,
+  ResearchPanel,
+  ItemsPanel,
+  MarketPanel,
+  ArmiesPanel,
+  FactionsPanel,
+  ReportsPanel,
+  FlowsPanel,
+  StatsPanel,
+  MapPanel,
+];

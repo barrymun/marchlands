@@ -1,6 +1,6 @@
 # Market overhaul: NPC trade, factions and new charts
 
-**Status:** design. Nothing built yet. TODO.md item: *Overhaul the marketplace mechanics.*
+**Status:** phases 1 (charts and the merchant), 2 (the faction data) and 3 (NPC trade) built 2026-10-22; reputation is next. The rest is design. TODO.md item: *Overhaul the marketplace mechanics.*
 
 **The aim:** a market that feels alive. NPC cities trade with each other all the time, so prices move for reasons players can see and influence: plunder, war, shortages. The charts and a live ticker show it. NPC cities belong to factions, which remember how each player has treated them.
 
@@ -9,11 +9,12 @@
 **The market today** (`backend/packages/game/src/services/market.ts`, `src/engine/market.ts`, `shared/core/src/merchant.ts`, `BALANCE.merchant`; deviations.md, Market):
 
 - Players post buy and sell orders (`market_orders`), limit or market, up to 2 resting orders per Marketplace level. Trades settle at once (`BALANCE.marketShipmentBaseMs = 0`) with a 0.5% fee on the gold paid.
-- A computer merchant always buys and sells every resource. Its curve mode is written and tested: a reference price that moves with its trades along an exponential curve, a ±5% spread, a drift back to its base price (half-life 6 game hours), and a worker job every 10 s that fills resting orders its price has crossed.
-- **The merchant is in fixed-price mode** (`fixedPrice: 1`): it buys and sells everything at exactly 1.00 gold, in any amount. No player can beat it, so every trade goes through the merchant and the order book is unused.
-- Every fill is a row in `market_trades`: 822 rows, 224 kB on the dev stack (about 270 bytes a row with its indexes). The price candles (one game hour each) are built from those rows every time the market is opened.
-- The Market page draws its price history with recharts (`components/market-panel/price-history/`, through shadcn's `components/ui/chart.tsx`), the only place recharts is used.
-- The tax rate also sells a share of each city's field output to the merchant at its price (`merchantBase`); see deviations.md, Tax.
+- **The merchant is a market of last resort** (phase 1): it buys every resource at 0.85 and sells at 1.15, in any amount, around a fixed reference of 1.00 (`fixedPrice: 1`, `spread: 0.3`). A player's order between those prices beats it. Before 2026-10-22 it traded at exactly 1.00, so nobody could beat it and the order book went unused.
+- Its curve mode is still written and tested: a reference price that moves with its trades along an exponential curve, a drift back to its base price (half-life 6 game hours), and a worker job every 10 s that fills resting orders its price has crossed. Its `depth` (1,000,000) is far too shallow for today's trades (100–350 million a trade on the dev stack), so it would need retuning before use.
+- Every fill is a row in `market_trades` (822 rows, 224 kB on the dev stack in October 2026, about 270 bytes a row with its indexes), and adds to the world's price candles in `market_candles` (`logTrade`, `engine/market.ts`): one per resource, scope (`'world'` for now), length (a minute, an hour or a day of real time) and start. The worker deletes minute candles after 7 days and hour candles after 90 (`BALANCE.marketCandles`, in `cleanupJob`). The Market page reads candles, never trades. Migration 0027 built candles from the trades made before.
+- The Market page draws candles, volume and the merchant's prices with TradingView Lightweight Charts (`components/market-panel/price-history/candle-chart/`, ranges of an hour to a month), and the order book's depth (`depth-chart/`, players' orders only). recharts is gone.
+- A player places and cancels at most 10 orders a minute (`BALANCE.marketOrderLimit`, `OrderLimit` in the API, kept in memory like the login backoff); quotes are free.
+- The tax rate also sells a share of each city's field output to the merchant at its middle price (`merchantBase`, 1.00), so what it earns didn't change with the spread; see deviations.md, Tax.
 
 **The NPC cities** (counted on the dev stack, 2026-10-19). There are 51,217 on the 800 × 800 map (640,000 tiles), spread over the 16 zones (Friesland … Romagna):
 
@@ -23,7 +24,7 @@
 
 - An NPC city keeps nothing in the database until it is touched: `tiles.troops`, `forts` and `state` stay null while it is at full strength, and are worked out when read (regeneration is lazy). 54 of the 51,217 have any state at all.
 - Their resources regenerate +1/80 of the maximum every 6 game minutes, and gold matches their largest resource (deviations.md).
-- None trade today, and none belong to anything bigger than their zone.
+- From level 5 up they belong to the faction holding their zone (phase 2, Factions below) and trade in groups of one zone and level (phase 3, NPC trade below): 96 groups on the dev stack's map.
 
 ## Decided
 
@@ -35,8 +36,30 @@
   - **Credit** (decided 2026-10-20): the small logo the library draws on each chart stays on (`attributionLogo`), plus a credit in README.md with TradingView's logo. As we read the library's NOTICE, turning the chart's logo off would need a link to tradingview.com that every player can reach; keeping it is simplest and clearly meets the licence.
 - **recharts' `^3.8.0`:** pin or remove it with this work. Removing it is likelier, since Lightweight Charts takes over its only use. About 30 other dependencies also use `^` versions; they predate the exact-pin rule (which applies to new dependencies), and pinning them is a separate tidy-up.
 - **The merchant stays at about 1.00 gold, as a last resort with a spread** (2026-10-20). Every trade so far went through it at about 1.00 (822 trades, about 115 billion resources on the dev stack). The design's per-resource base prices (food 0.2 … iron 0.5) would cut what resources and the tax rate earn by 50–80%, a balance change for every player. So the middle price stays near 1.00 and the merchant gets a spread (buying near 0.75, selling near 1.25, numbers in `BALANCE`), so player orders inside the spread beat it at last. Differences between resources come later, from NPC trade.
-- **Factions: five blocks of neighbouring zones, worked out from the zone, with levels 1–4 as unaligned bandits** (2026-10-20), as in Factions, Membership. Names, strengths and temperaments can still change.
-- **Phase order: seats of power straight after factions,** with the ballista rule change before them (2026-10-20). Taking a seat is a fight against fortifications, and most of a seat's value (capture, the daily draft, the title, bigger armies) doesn't need NPC trade; its tribute from trade and market rights arrive with NPC trade. The ballista rule change ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)) also makes farming cheaper, so it changes how fast resources enter the game, and should be settled before NPC trade is tuned.
+- **Phase 1's numbers** (decided 2026-10-22):
+  - **Spread 0.85 / 1.15** (first 0.75 / 1.25, narrowed the same day as too harsh). Selling 100M lumber to the merchant now brings 85M gold instead of 100M, and buying 100M iron costs 115M. Players' orders between the two prices beat it, and NPC factions will trade inside the same band (NPC economy, below).
+  - **The middle price stays fixed at 1.00,** rather than turning the curve back on (with a much larger depth) now. Prices move once factions trade (phase 3).
+  - **Orders: 10 a minute per player,** placing and cancelling together (a burst of 10, then one every 6 s), counted in the API's memory as the login backoff is; 429 with Retry-After past it. Counting in the database (surviving restarts and several API processes) was the alternative; there is one API instance.
+  - **Candles in real time,** a minute, an hour and a day, so the charts keep their pace at any game speed and the minute ticks of NPC trade fit them. The table has a `scope` column from the start (`'world'`), ready for faction and zone candles.
+- **Factions: five blocks of neighbouring zones, worked out from the zone, with levels 1–4 as unaligned bandits** (2026-10-20), as in Factions, Membership.
+- **The faction data** (decided 2026-10-22): the working names stay (display names can change any time, they're locale text); members from level 5; the characters in Factions, A character for each. Players see them on a barbarian city's map card, in a Factions panel, and in the map's key with a switch to tint the land by faction.
+- **Phase order changed (2026-10-22): NPC trade straight after the faction data,** before reputation and seats of power. NPC trade needs the factions' characters (the zones are alike, so nothing else makes groups want different things) but not standing or seats, and it is what makes the market's charts move on their own. Seats gain their tribute from trade when they come.
+- **NPC trade's rules** (decided 2026-10-22):
+  - **A tick every real minute,** matching the minute candles: the same pace at any game speed. Production and use inside a tick follow game time.
+  - **Steady use by faction:** each group uses each resource at a steady rate set by its faction, more than it makes of what it is short of and less of what it is strong in. A shortage lasts, so the strong sell to the short every tick. (Rejected: pulling stock back to a target, under which trade dies down once everyone is at target; and no use at all, under which prices only fall.)
+  - **Prices stay inside the merchant's band,** from the same constant (`BALANCE.merchant.spread`, 0.85 to 1.15): nobody can buy from one and sell to the other for free gold, and a shortage shows as a price near 1.15. Narrowing or widening the merchant's spread moves both.
+  - **Plunder lowers a group's stock at once,** until the city refills (8 game hours): raiding a faction's cities raises its prices for a while.
+- **NPC trade's numbers** (decided 2026-10-22, all in `BALANCE.npcTrade`):
+  - **The model.** 96 groups (16 zones × levels 5–10). A group's *target* is its members' full-strength stock (the NPC table × the member count). Every game hour each group makes and uses resources and drifts back towards its target; every real minute one auction per resource sets the world price, (world target ÷ world stock)^sensitivity inside the merchant's band, and groups above target sell to those below.
+  - **Moderate volume:** groups make and use 2% of their target per game hour, so the factions move about 15M lumber and 0.5B food between them per game hour, against 100–350M for a typical player trade on the dev stack. Players clearly move prices.
+  - **Sensitivity:** the price reaches 1.15 when the world's stock is a quarter short of target (the exponent comes from that and the merchant's spread).
+  - **Prices wander gently:** each faction's making rises and falls a little at random (seeded), so prices drift a few % over a game day when nobody plays. Acts of god bring the big shocks later.
+  - **The world is balanced:** each resource's extra making and using is scaled so the world as a whole neither gains nor loses (the strengths alone would leave stone in glut at 0.85 and lumber short at 1.15 for good). Factions still trade with each other.
+  - **Each zone's land shapes what it makes:** a zone makes more of a resource the more of its valleys yield it, against the world average (forest lumber, desert stone, hills iron, swamp, grass and lake food), counted from the map. On the dev stack's map Franconia has 44% more forest than average and Moravia 34% less, so states become known for what their land gives. It sits on top of the faction's character, and the world stays balanced.
+  - **Strengths and shortages: +50%,** more making of what a faction is strong in, more using of what it is short of.
+  - **Players trade along the curve, with a ±1% spread:** players buy from and sell to the factions' shared stock along the auction's own price curve, factions selling 1% above it and buying 1% below, as far as the curve goes before the band's edge (about a quarter of the world's stock); past it the merchant is cheaper. A big order simply pays more as it fills.
+  - **Gold** (decided 2026-10-22): each group's treasury is its members' gold in the NPC table (55,000 at level 1 to 1,500,000 at level 10, not the food-matching gold NPC cities hold for plunder): about 15B across the factions on the dev stack's map. A group makes and uses 2% of its treasury per game hour (the Italian League making 50% more, the world balanced) and drifts back to it like its stock, so a drained faction recovers over about a game day. In the auction a group buys only what its gold pays for; players selling to the factions are paid only while the factions hold gold, and the merchant buys the rest. On the dev stack's map gold halves the food the factions trade with each other (poorer groups can't buy all they want); prices behave as before.
+- **Phase order: seats of power straight after factions,** with the ballista rule change before them (2026-10-20; changed 2026-10-22, below). Taking a seat is a fight against fortifications, and most of a seat's value (capture, the daily draft, the title, bigger armies) doesn't need NPC trade; its tribute from trade and market rights arrive with NPC trade. The ballista rule change ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)) also makes farming cheaper, so it changes how fast resources enter the game, and should be settled before NPC trade is tuned.
 - **Factions trade, and player actions move their prices:** plunder a faction's cities and its stock falls, so its prices rise. Two factions at war stop trading with each other and demand iron, so shortages appear. A live ticker shows the NPC trades ("The Saxon League bought 2M iron at 0.62").
 
 ## How every NPC city can trade without flooding the database
@@ -116,11 +139,11 @@ What is stored is small:
 
 - **Saxon League:** Friesland, Saxony and North March (3 zones, north).
 - **Lotharingian Crown:** Lower Lorraine, Upper Lorraine and Burgundy (3, west).
-- **Franconian heartland:** Franconia, Thuringia, Swabia and Bavaria (4, centre). It borders every other faction, so it's the crossroads where trade and wars meet.
+- **Franconian Heartland:** Franconia, Thuringia, Swabia and Bavaria (4, centre). It borders every other faction, so it's the crossroads where trade and wars meet.
 - **Bohemian Crown:** Bohemia, Moravia and Carinthia (3, east).
 - **Italian League:** Lombardy, Tuscany and Romagna (3, south).
 
-Counting member cities at level 5 and above, the four three-zone factions would have 3,612–3,737 each, and the Franconian heartland, with four zones, 4,958.
+Counting member cities at level 5 and above, the four three-zone factions would have 3,612–3,737 each, and the Franconian Heartland, with four zones, 4,958.
 
 **Low levels stay unaligned.** Levels 1–4 (31,581 cities, 62%) are bandits:
 - they belong to no faction and don't trade;
@@ -129,16 +152,17 @@ Counting member cities at level 5 and above, the four three-zone factions would 
 
 Levels 5–10 (19,636 cities) are members. Where the line falls is one number in `BALANCE`.
 
-**A character for each, by design:**
-- **Strong and short in a resource,** for example:
-  - the Italian League rich in food and gold and short of iron;
-  - the Bohemian Crown rich in iron and stone and short of food.
+**A character for each, by design** (decided 2026-10-22, in `shared/core/src/factions.ts`):
 
-  That makes trade between them worth something.
-- **A temperament:** trading, warlike or keeping to itself.
-- **A flag.**
+| Faction | Strong in | Short of | Temperament |
+|---|---|---|---|
+| Saxon League (north) | lumber | stone | trading |
+| Lotharingian Crown (west) | stone | food | keeps to itself |
+| Franconian Heartland (centre) | food | lumber | trading (the crossroads) |
+| Bohemian Crown (east) | iron, stone | food | warlike |
+| Italian League (south) | food, gold | iron | trading |
 
-These would sit in a core data file. Its numbers (target stock, how warlike) would go in `BALANCE`.
+Every resource has a faction strong in it and another short of it (a core test checks), so there is always a reason to trade. How much stronger or shorter (production and use multipliers, target stock) goes in `BALANCE` with NPC trade. A flag for each is still to draw; for now each has a colour.
 
 **Borders can move.** A war between factions could, rarely, change who holds a zone. That changes one of the 16 entries, and every NPC city in the zone changes sides with it: dramatic on the map, and cheap.
 
@@ -182,7 +206,7 @@ The historical cities (TODO.md, *Historical cities*) and the factions fit togeth
 
 **How it ties into factions:**
 - **Seats are how borders move.** A state belongs to the faction that holds its level 16 seat. When a rival faction takes that seat, the state and its member cities change sides. That's the "borders can move" mechanism, with an event on the map to show it.
-- **Taking a seat from a faction** costs a lot of standing with that faction, and may gain some with its rivals. The faction tries to win the seat back, which is where retaliation (phase 5) matters most.
+- **Taking a seat from a faction** costs a lot of standing with that faction, and may gain some with its rivals. The faction tries to win the seat back, which is where retaliation (phase 6) matters most.
 - **When a player holds a state's level 16,** the NPC members in the state are cut off from their faction. They could stay members but pay their tribute to the player, or become the player's own for drafting and tribute. To decide.
 
 **Keeping it from snowballing.** Seats are prizes for strong players and alliances, so one early player must not be able to take them all.
@@ -248,28 +272,41 @@ Players write scripts that trade for them: buy below a price, keep a stock betwe
 
 ## Phases
 
-In this order (decided 2026-10-20):
+In this order (decided 2026-10-20; NPC trade moved before reputation and seats on 2026-10-22):
 
-1. **Charts and the merchant.**
-   - Lightweight Charts on the Market page in place of recharts: candles, volume and order-book depth, lazy-loaded with the page. recharts and `components/ui/chart.tsx` go; check the market's size budget with a build.
-   - A `market_candles` table (resource, scope, bucket start, open, high, low, close, volume, trade count) written as trades happen, with fine candles rolled up into hours and days and old ones deleted. The Market page reads candles, not every trade.
-   - The merchant as a last resort: middle price near 1.00 and a spread (about 0.75 to buy, 1.25 to sell), in `BALANCE.merchant`; the tax rate still sells at the middle price.
-   - A limit on how often a player can place and cancel orders (in `BALANCE`), so outside bots can't flood the book once it matters.
-   - The credit: the chart's own logo, and README.md.
-   - deviations.md: the merchant's spread replaces the fixed price.
-
-   Small, and it makes players' own orders matter at once.
-2. **Factions and reputation, without trading yet.** The five factions and their members (worked out from zone and level), their names in a `data-factions` locale namespace, standing from combat, and standing shifting the merchant's prices.
-3. **The ballista rule change, then seats of power.**
+1. **Charts and the merchant.** **Built 2026-10-22** (branch `market-overhaul`), as Where things stand describes:
+   - Lightweight Charts (5.2.1) on the Market page in place of recharts: candles and volume over an hour, a day, a week or a month, the merchant's prices as dashed lines, and the order book's depth. Lazy-loaded with the page: the market tab is about 61 kB gzipped (its budget went from 115 to 70 kB). recharts and `components/ui/chart.tsx` are gone.
+   - `market_candles`, written as trades happen: each trade updates its minute, hour and day candle directly, so no roll-up job is needed, only the deletion of old ones.
+   - The merchant as a last resort: 0.85 to buy, 1.15 to sell, the tax rate still at 1.00.
+   - The order limit, 10 a minute.
+   - The credit: the chart's own logo, a line under the chart linking to TradingView (the licence asks for its notice and a link on a page players can reach), and README.md.
+   - deviations.md: the merchant's spread, the candles and the order limit.
+2. **The faction data.** **Built 2026-10-22:**
+   - The five factions in core (`shared/core/src/factions.ts`: `FACTIONS`, `factionOfZone`, `npcFaction`), members from `BALANCE.factions.minLevel` (5), worked out from zone and level with nothing stored. Which faction holds a zone is fixed data for now; it moves into the database when borders can move (phase 6).
+   - Their names in a `data-factions` locale namespace, and their colours (`client/web/src/lib/factions.ts`).
+   - Shown on a barbarian city's map card (its faction, or Bandits below level 5), in a Factions panel (zones, strengths, shortages, temperament) and in the map's key, with a switch that tints the land by faction (remembered per browser).
+   - No rule changes: nothing behaves differently yet, so deviations.md has no entry.
+3. **NPC trade.** **Built 2026-10-22**, with the rules and numbers in Decided, above:
+   - The rules in core (`shared/core/src/npc-economy.ts`: `npcTick`, the price curve `worldPrice`, players' fills `factionSells` / `factionBuys`, `landFactors`, `plunderGroup`), all numbers in `BALANCE.npcTrade`. A simulation over the dev stack's map, at game speed 60: prices wander between about 0.97 and 1.05 over three game days; the factions move 10–25M lumber and 0.3–0.9B food a game hour; a 300M lumber purchase fills at about 1.02.
+   - The state in one `world_state` row (`npc-economy`): each group's stock, each faction's wander, the prices, the zones' land (counted once from the map), the groups as last counted, the ticker. The worker ticks every real minute (`npcTradeJob`): it counts the members from the map, runs the auction, adds it to the world's candles, and the factions then fill players' resting orders their price has crossed (`npcSweep`).
+   - Players trade with the factions through the order book (a factions row on each side, sorted with the players' and the merchant's, and their depth in the depth chart), between other players' orders and the merchant (`planFills`). Their trades are `market_trades` rows marked `npc` (migration 0028), and the trade form says how much went to the factions.
+   - Plunder: a won attack on a member lowers its group's stock by the loot (`plunderNpc`, from `attackNpc`).
+   - The ticker: a few made-up trades per resource each tick, picked at random among the groups that traded, the last 50 kept in the state and shown in the Market page's *Between the factions* tab.
+   - Not yet: candles per faction (there is one world price, so they would show the world's price with a faction's volume).
+   - deviations.md: NPC factions trade.
+   - **The factions' gold** (2026-10-22): each group holds gold (`NpcEconomy.gold`, `groupTreasury`, `worldGold`), as decided above. The order book's factions row buys only what their gold pays for, and the Factions panel shows each faction's gold against its treasury (`GET /factions`).
+   - **The phone trading flow** (2026-10-22): on a phone the trade form opens in a sheet from Buy and Sell kept at the bottom of the screen, or from a row of the order book, and a finger dragging up or down on the chart scrolls the page (`handleScroll.vertTouchDrag` off; across still pans the chart). Below the wide terminal (`xl`) the panes grow to their content and only the page scrolls, so a finger on the order book or a list never gets caught in it; the longer lists (trades, the factions' trades, the player's orders and trades) show their first 12 rows and a Show more.
+   - **Live updates** (2026-10-22): the Market page doesn't poll. Each tick, each order placed or cancelled and each fill of the merchant's sweep broadcasts `server.MarketUpdate` with the resources that moved (`ctx.broadcast`, to everyone connected; market data is public); the client marks those resources' book, history, quote and affordable queries and the summary stale, so only what is on screen refetches. Pushes sent while a socket was down are lost, so the client refreshes every market query when it reconnects (`usePushSync`). With many traders the broadcasts could be throttled to one per resource per few seconds.
+4. **Reputation.** Standing with each faction from combat (plunder, conquest), and standing shifting that faction's prices.
+5. **The ballista rule change, then seats of power.**
    - First the rule change: traps hit only ground troops, and ranged groups stop once the wall is in range ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)). **Done 2026-10-20.**
    - The historic cities placed on the map, with their areas and garrisons.
-   - Capturing and holding them, the daily draft, titles and the larger armies.
+   - Capturing and holding them, the daily draft, titles and the larger armies; their tribute from trade and market rights, since NPC trade is there by then.
    - Seats deciding which faction holds a state.
    - This is also the TODO's *Historical cities* item.
-4. **NPC trade.** The cohort simulation, clearing each tick, the factions' ladders in the order book, the ticker over the WebSocket. Seats gain their tribute from trade and market rights here.
-5. **Relations between factions and retaliation.** Wars, embargoes, reinforcements, and seats changing hands between factions. Then, maybe, raids, caravans and regional prices.
-6. **Acts of god.** Scheduled events, their effects on cities and NPC groups, the almanac's forecasts, weather in the map and the town. They can start any time after phase 4, once there are NPC prices for them to move.
-7. **Trading scripts.**
+6. **Relations between factions and retaliation.** Wars, embargoes, reinforcements, and seats changing hands between factions. Then, maybe, raids, caravans and regional prices.
+7. **Acts of god.** Scheduled events, their effects on cities and NPC groups, the almanac's forecasts, weather in the map and the town. They can start any time after phase 3, once there are NPC prices for them to move.
+8. **Trading scripts.**
    - The API's rate limits come first (in phase 1).
    - Then standing orders and rules, then the language, and the TypeScript sandbox only if it's still wanted.
 
@@ -277,11 +314,11 @@ Each phase records its rule changes in deviations.md (*(design change)*) and its
 
 ## Open questions
 
-- **Factions' character** (phase 2): their names, strengths, shortages and temperaments. Should clearing bandits raise standing with the faction whose land they're on?
-- **Merchant numbers** (phase 1): the exact spread, and the order rate limit.
+- **Bandits and standing** (phase 4): should clearing bandits raise standing with the faction whose land they're on?
+- **NPC trade, later:** candles per faction or per region (with prices by region, below).
 - **Prices:** one world price per resource, or prices by region with travel time?
 - **Retaliation:** prices only, reinforcing their cities, or raiding yours?
-- **Tick:** how often, and in real or game time? Real time keeps the charts' pace the same at any game speed.
+- **The merchant once factions trade:** does its middle price stay at 1.00 for every resource, or follow the factions' prices (the curve, retuned)?
 - **Drafting players:** Age 2 let a historic city's holder draft other players' cities in range. Leave that out (the proposal), or allow it with protection (reinforcements, beginners)?
 - **Seats:** all four levels follow Age 2 (proposed). Keep all 1,920 level 12s, or fewer? Does a captured seat become the player's city, as in Age 2, and so count against the city limit? What does each bring, and how much? What happens to a state's NPC members when a player holds its seat? What limits holding (upkeep, one level 16 per player, unrest)? Are benefits shared with the holder's alliance? What does the level 18 bring?
 - **Events:** which ones, how often, how much damage, and whether they also hit troops or marches (a storm delaying armies)?

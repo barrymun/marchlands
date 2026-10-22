@@ -11,6 +11,8 @@ export const MARKET_MESSAGES = {
   tooManyOrders: ['building'],
   /** not enough of the resource being sold */
   notEnoughResource: ['resource'],
+  /** the player placed or cancelled orders too quickly (BALANCE.marketOrderLimit) */
+  slowDown: ['wait'],
   orderNotFound: [],
   shipmentNotFound: [],
 } as const;

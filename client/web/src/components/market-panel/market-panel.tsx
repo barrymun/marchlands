@@ -2,29 +2,47 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type CityBean, getMarketByResTypeOptions, type MarketPriceLevel } from '@marchlands/api-client';
+import { type CityBean, getMarketByResTypeOptions, getMarketHistoryOptions, type MarketPriceLevel } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
 
-import { RESOURCES } from '@/components/market-panel/constants';
-import { MyOrders } from '@/components/market-panel/my-orders/my-orders';
-import { OrderBook } from '@/components/market-panel/order-book/order-book';
-import { PriceHistory } from '@/components/market-panel/price-history/price-history';
-import { Shipments } from '@/components/market-panel/shipments/shipments';
+import { ActivityPanel } from '@/components/market-panel/activity-panel/activity-panel';
+import { BookPanel } from '@/components/market-panel/book-panel/book-panel';
+import { ChartPanel } from '@/components/market-panel/chart-panel/chart-panel';
+import { type RangeId, RANGES } from '@/components/market-panel/chart-panel/constants';
+import { MarketBar } from '@/components/market-panel/market-bar/market-bar';
+import { TradeBar } from '@/components/market-panel/trade-bar/trade-bar';
 import { TradeForm } from '@/components/market-panel/trade-form/trade-form';
 import type { Mode, Side } from '@/components/market-panel/types';
+import { resInline } from '@/components/market-panel/utils';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
+/**
+ * The Market page as a trading terminal: a bar of every resource's price on top; the chart, the order book and the
+ * trade form side by side; the player's orders and the factions' trades in a strip below. On a wide screen it fills the
+ * viewport and each pane scrolls by itself (routes/game/game.tsx); narrower, the panes stack and grow to their content (the
+ * longer lists show their first rows and a Show more), and only the page scrolls. On a
+ * phone the trade form opens in a sheet from Buy and Sell kept at the bottom of the screen, or from the order book.
+ */
 export function MarketPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation('market-panel');
   const market = city.buildings.filter((b) => b.typeId === BuildingType.MARKETPLACE).reduce((m, b) => Math.max(m, b.level), 0);
   const [resType, setResType] = useState(0);
+  const [rangeId, setRangeId] = useState<RangeId>('hour');
   const [side, setSide] = useState<Side>(0);
   const [mode, setMode] = useState<Mode>('market');
   const [price, setPrice] = useState('');
+  const wide = useMediaQuery('(min-width: 768px)');
+  // a phone's trade sheet
+  const [trading, setTrading] = useState(false);
   const book = useQuery({
     ...getMarketByResTypeOptions({ path: { resType } }),
-    refetchInterval: 5_000,
+    placeholderData: keepPreviousData,
+  });
+  const range = RANGES[rangeId];
+  const history = useQuery({
+    ...getMarketHistoryOptions({ path: { resType }, query: { period: range.period, limit: range.limit } }),
     placeholderData: keepPreviousData,
   });
 
@@ -43,49 +61,54 @@ export function MarketPanel({ city }: { city: CityBean }) {
     setSide(levelSide === 1 ? 0 : 1);
     setMode('limit');
     setPrice(String(level.price));
+    setTrading(!wide);
   };
-  const pickMerchant = (merchantSells: boolean) => {
-    setSide(merchantSells ? 0 : 1);
+  // clicking the factions or the merchant prepares an instant order against them
+  const pickInstant = (theySell: boolean) => {
+    setSide(theySell ? 0 : 1);
     setMode('market');
+    setTrading(!wide);
   };
+  // the history's trades and ticker are of the resource shown (the previous one while the next loads)
+  const shown = history.data?.resType === resType ? history.data : undefined;
+  // the trade form's state lives here, so the column and a phone's sheet show the same order
+  const trade = { city, market, resType, merchant: book.data?.merchant, side, setSide, mode, setMode, price, setPrice };
 
   return (
-    <div className="grid gap-4">
-      <Tabs value={String(resType)} onValueChange={(v) => setResType(Number(v))}>
-        <TabsList>
-          {RESOURCES.map((r) => (
-            <TabsTrigger key={r.type} value={String(r.type)}>
-              {r.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <OrderBook
+    <div className="flex flex-col gap-2 xl:h-full">
+      <MarketBar resType={resType} onResType={setResType} />
+      <div className="grid gap-2 md:grid-cols-2 xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,1fr)_17rem_19rem] xl:grid-rows-[minmax(0,1fr)_minmax(11rem,32%)]">
+        <ChartPanel
+          className="h-96 md:col-span-2 xl:col-span-1 xl:h-auto"
           resType={resType}
-          buyers={book.data?.buyers ?? []}
-          sellers={book.data?.sellers ?? []}
-          merchant={book.data?.merchant}
-          onLevel={pickLevel}
-          onMerchant={pickMerchant}
+          rangeId={rangeId}
+          onRange={setRangeId}
+          history={history.data}
+          book={book.data}
         />
-        <TradeForm
-          key={resType}
-          city={city}
-          market={market}
-          resType={resType}
-          merchant={book.data?.merchant}
-          side={side}
-          setSide={setSide}
-          mode={mode}
-          setMode={setMode}
-          price={price}
-          setPrice={setPrice}
-        />
-        <PriceHistory resType={resType} />
+        <BookPanel book={book.data} trades={shown?.trades ?? []} onLevel={pickLevel} onInstant={pickInstant} />
+        {wide && <TradeForm key={resType} {...trade} className="xl:row-span-2" />}
+        <ActivityPanel className="md:col-span-2" ticker={shown?.ticker ?? []} />
       </div>
-      <MyOrders />
-      <Shipments />
+      {!wide && (
+        <>
+          <TradeBar
+            onTrade={(s) => {
+              setSide(s);
+              setTrading(true);
+            }}
+          />
+          <Sheet open={trading} onOpenChange={setTrading}>
+            <SheetContent side="bottom" className="max-h-[85svh] gap-0 overflow-y-auto p-0">
+              <SheetHeader className="sr-only">
+                <SheetTitle>{t('tradeForm.title', { resource: resInline(resType) })}</SheetTitle>
+                <SheetDescription>{t('tradeForm.sheetHint')}</SheetDescription>
+              </SheetHeader>
+              <TradeForm key={resType} {...trade} className="rounded-none border-0" onPlaced={() => setTrading(false)} />
+            </SheetContent>
+          </Sheet>
+        </>
+      )}
     </div>
   );
 }

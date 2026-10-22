@@ -31,6 +31,8 @@ export const PushCmd = {
   NEW_REPORT: 'server.NewReport',
   TRADES_UPDATE: 'server.TradesUpdate',
   TRANSIT_TRADE_UPDATE: 'server.TransingTradeUpdate',
+  /** (marchlands) a resource's market changed (a tick of the factions' trade, an order placed or cancelled): broadcast */
+  MARKET_UPDATE: 'server.MarketUpdate',
   CHANNEL_CHAT_MESSAGE: 'server.ChannelChatMsg',
   ALLIANCE_CHAT_MESSAGE: 'server.AllianceChatMsg',
   PRIVATE_CHAT_MESSAGE: 'server.PrivateChatMessage',

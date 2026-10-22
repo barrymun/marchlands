@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RESOURCES } from '@/components/market-panel/constants';
-import { fmtPrice, resInline, resLabel } from '@/components/market-panel/utils';
+import { cssColour, fmtPrice, resInline, resLabel } from '@/components/market-panel/utils';
 
 describe(resLabel.name, () => {
   it('labels every tradeable resource by its type', () => {
@@ -48,5 +48,36 @@ describe(fmtPrice.name, () => {
   it('groups thousands', () => {
     expect(fmtPrice(1234.5)).toBe('1,234.500');
     expect(fmtPrice(1_000_000)).toBe('1,000,000.000');
+  });
+});
+
+describe(cssColour.name, () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  /** A document whose canvas reads back `pixel` (none: no canvas) and remembers the colours it was given. */
+  function stubCanvas(pixel: number[] | null) {
+    const painted: string[] = [];
+    const ctx = {
+      set fillStyle(c: string) {
+        painted.push(c);
+      },
+      fillRect: () => {},
+      getImageData: () => ({ data: new Uint8ClampedArray(pixel ?? []) }),
+    };
+    vi.stubGlobal('document', { createElement: () => ({ getContext: () => (pixel ? ctx : null) }) });
+    return painted;
+  }
+
+  it('paints the colour and reads it back as RGBA, alpha from 0 to 1', () => {
+    const painted = stubCanvas([16, 185, 129, 255]);
+    expect(cssColour('oklch(0.6 0.15 160)')).toEqual([16, 185, 129, 1]);
+    expect(painted).toEqual(['oklch(0.6 0.15 160)']);
+    stubCanvas([255, 0, 0, 51]);
+    expect(cssColour('color-mix(in oklch, red 20%, transparent)')).toEqual([255, 0, 0, 0.2]);
+  });
+
+  it('is null without a canvas', () => {
+    stubCanvas(null);
+    expect(cssColour('red')).toBeNull();
   });
 });

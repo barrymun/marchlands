@@ -159,6 +159,8 @@ describe(merchantSweep.name, () => {
         expect(await market.myShipments(g, b.id)).toEqual([expect.objectContaining({ resType: GOLD, amount: Math.floor(f.gold), price: f.gold / 1000 })]);
         expect((await market.history(g, Res.WOOD)).trades[0]).toMatchObject({ amount: 1000, takerSide: MarketSide.BUY, merchant: true });
         expect(g._stats.get(`${b.id}|${b.cityId}`)).toMatchObject({ 'market.sold.wood': 1000 });
+        // the sweep moved the lumber market: everyone connected hears of it
+        expect(g.pushes(PushCmd.MARKET_UPDATE).at(-1)).toEqual({ playerIds: [], cmd: PushCmd.MARKET_UPDATE, data: { resTypes: [Res.WOOD] } });
       }),
     ));
 
@@ -197,7 +199,9 @@ describe(merchantSweep.name, () => {
       const P = merchantBase('wood');
       await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, price: P / 2 });
       await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 1000, price: P * 2 });
+      const before = g.pushes(PushCmd.MARKET_UPDATE).length;
       await merchantSweep(g);
+      expect(g.pushes(PushCmd.MARKET_UPDATE)).toHaveLength(before);
       expect(await market.myOrders(g, b.id)).toHaveLength(2);
       expect(await market.myShipments(g, b.id)).toEqual([]);
       expect((await market.orderBook(g, Res.WOOD)).merchant.reference).toBe(P);

@@ -248,16 +248,62 @@ export const BALANCE = {
   marketShipmentBaseMs: 0 * MINUTE,
   marketMaxOrdersPerLevel: 2,
   /**
-   * (marchlands) computer merchant: always buys and sells every resource. Its reference price moves
-   * with its trades (x e^(qty/depth)) and drifts back to `basePrice` with a half-life of
-   * `recoveryHalfLifeMs` (game time). It sells at reference x (1 + spread/2), buys at x (1 - spread/2).
-   * When `fixedPrice` is set, all of that is switched off: the merchant buys and sells every
-   * resource at exactly that price, in any amount (a floor for sellers, a ceiling for buyers).
+   * (marchlands) placing and cancelling market orders, per player and real time (not GAME_SPEED): up to
+   * `burst` at once, then one more every `refillMs` (10 a minute). Quotes are free.
+   */
+  marketOrderLimit: { burst: 10, refillMs: 6_000 },
+  /**
+   * (marchlands) price candles (market_candles), by length in real time. Minute and hour candles are
+   * deleted once older than `keepMs`; day candles are kept.
+   */
+  marketCandles: { keepMs: { minute: 7 * DAY, hour: 90 * DAY } },
+  /**
+   * (marchlands) NPC factions (factions.ts): NPC cities from `minLevel` up belong to the faction holding their
+   * zone; lower ones are unaligned bandits (no faction, no trade, no standing lost by attacking them)
+   */
+  factions: { minLevel: 5 },
+  /**
+   * (marchlands) NPC trade (npc-economy.ts): faction members trade in groups of one zone and level. A group's target
+   * is its members' full-strength stock, its treasury their gold in the NPC table (npcTableGold); `turnover`,
+   * `strength` and `restoreHalfLifeMs` apply to its gold as to its stock. Game time unless marked real.
+   */
+  npcTrade: {
+    /** a tick, real time: one auction per resource */
+    tickMs: MINUTE,
+    /** real time: the most one tick catches up after the worker was stopped */
+    maxCatchUpMs: HOUR,
+    /** share of its target a group makes, and uses, per game hour */
+    turnover: 0.02,
+    /** a faction makes this much more of what it is strong in, and uses this much more of what it is short of */
+    strength: 0.5,
+    /** how much a zone's land (its valleys against the world average) shapes what it makes: 1 fully, 0 not at all */
+    landWeight: 1,
+    /** the world's stock this far below its target puts the price at the merchant's ask */
+    edgeShare: 0.25,
+    /** share of the gap between what a group holds and what it wants at the world price, traded each tick */
+    adjust: 0.5,
+    /** half of a group's distance from its target closes in this long, as its making adjusts */
+    restoreHalfLifeMs: DAY,
+    /** each faction's making wanders around normal at random: its spread, and half of a swing fades in `halfLifeMs` */
+    wander: { sd: 0.25, halfLifeMs: DAY },
+    /** factions sell to players this share above the world price and buy this share below (half each way) */
+    playerSpread: 0.02,
+    /** made-up trades kept for the Market page's ticker, and how many each tick adds per resource */
+    ticker: { keep: 50, perResource: 2 },
+  },
+  /**
+   * (marchlands) computer merchant: always buys and sells every resource, in any amount. It sells at
+   * its reference price x (1 + spread/2) and buys at x (1 - spread/2), so players' orders inside the
+   * spread beat it: a market of last resort.
+   * With `fixedPrice` set the reference is that price for every resource and never moves. Otherwise
+   * it moves with the merchant's trades (x e^(qty/depth)) and drifts back to `basePrice` with a
+   * half-life of `recoveryHalfLifeMs` (game time).
    */
   merchant: {
     fixedPrice: 1 as number | null,
     basePrice: { food: 0.2, wood: 0.3, stone: 0.4, iron: 0.5 },
-    spread: 0.1,
+    /** buys at 0.85 and sells at 1.15 around a reference of 1.00 */
+    spread: 0.3,
     depth: 1_000_000,
     recoveryHalfLifeMs: 6 * HOUR,
     /** the reference never leaves [base / band, base x band] */

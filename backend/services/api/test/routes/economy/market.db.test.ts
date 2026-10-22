@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
-import type { MarketHistory, MarketOrder, MarketOrderBook, MarketPlaceOrderResult, MarketQuote, MarketShipment, PlayerState } from '@marchlands/contracts';
+import type {
+  FactionGold,
+  MarketAffordable,
+  MarketHistory,
+  MarketMyTrade,
+  MarketOrder,
+  MarketOrderBook,
+  MarketPlaceOrderResult,
+  MarketQuote,
+  MarketShipment,
+  MarketSummary,
+  PlayerState,
+} from '@marchlands/contracts';
 import { BALANCE, BuildingType, HOUR, merchantBase } from '@marchlands/core';
 import { admin } from '@marchlands/game';
 import { withMerchantCurve, withShipmentTime } from '@marchlands/game/test/support/market.ts';
@@ -16,6 +28,8 @@ const SELL = 1;
 const PLAYER_ROUTES: RouteCall[] = [
   { method: 'GET', url: 'market/1/quote?side=0&amount=10' },
   { method: 'GET', url: 'market/orders/mine' },
+  { method: 'GET', url: 'market/trades/mine' },
+  { method: 'GET', url: 'market/1/affordable?gold=100' },
   { method: 'POST', url: 'cities/1/market/orders', body: { resType: 1, side: 0, amount: 10, price: 0.5 } },
   { method: 'DELETE', url: 'market/orders/1' },
   { method: 'GET', url: 'market/shipments' },
@@ -25,6 +39,8 @@ const PLAYER_ROUTES: RouteCall[] = [
 const ACCOUNT_ROUTES: RouteCall[] = [
   { method: 'GET', url: 'market/1' },
   { method: 'GET', url: 'market/1/history' },
+  { method: 'GET', url: 'market/summary' },
+  { method: 'GET', url: 'factions' },
 ];
 
 /** A player with a Marketplace and plenty of gold and wood. */
@@ -98,9 +114,63 @@ describe('GET /market/:resType/history', () => {
       const p = await trader(api);
       await api.ok('POST', `cities/${p.cityId}/market/orders`, { token: p.token, body: { resType: WOOD, side: BUY, amount: 50, type: 'market' } });
       const h = await api.ok<MarketHistory>('GET', `market/${WOOD}/history`, { token: p.token });
-      expect(h).toMatchObject({ resType: WOOD, bucketMs: expect.any(Number), merchant: expect.any(Object) });
+      expect(h).toMatchObject({ resType: WOOD, period: 'hour', bucketMs: HOUR, merchant: expect.any(Object) });
       expect(h.trades).toEqual([expect.objectContaining({ amount: 50, takerSide: BUY, merchant: true })]);
       expect(h.candles).toEqual([expect.objectContaining({ volume: 50 })]);
+      const m = await api.ok<MarketHistory>('GET', `market/${WOOD}/history?period=minute&limit=10`, { token: p.token });
+      expect(m).toMatchObject({ period: 'minute', bucketMs: 60_000, candles: [expect.objectContaining({ volume: 50 })] });
+    }));
+
+  it('validates the period and limit', () =>
+    apiTest(async (api) => {
+      const a = await accountWithoutPlayer(api);
+      await expectInvalid(api, a.token, [
+        { method: 'GET', url: `market/${WOOD}/history?period=week` },
+        { method: 'GET', url: `market/${WOOD}/history?limit=0` },
+        { method: 'GET', url: `market/${WOOD}/history?limit=5000` },
+      ]);
+    }));
+});
+
+describe('GET /market/summary', () => {
+  it("answers every resource's price, the merchant's quotes and its day, for an account without a player", () =>
+    apiTest(async (api) => {
+      const a = await accountWithoutPlayer(api);
+      const s = await api.ok<MarketSummary[]>('GET', 'market/summary', { token: a.token });
+      expect(s.map((x) => x.resType)).toEqual([0, 1, 2, 3]);
+      expect(s[0]).toMatchObject({ price: expect.any(Number), merchant: expect.any(Object), day: null });
+    }));
+});
+
+describe('GET /factions', () => {
+  it("answers every faction's gold and treasury, for an account without a player", () =>
+    apiTest(async (api) => {
+      const a = await accountWithoutPlayer(api);
+      const list = await api.ok<FactionGold[]>('GET', 'factions', { token: a.token });
+      expect(list.map((f) => f.id)).toEqual(['saxon', 'lotharingian', 'franconian', 'bohemian', 'italian']);
+    }));
+});
+
+describe('GET /market/:resType/affordable', () => {
+  it('answers how much the gold buys now, and validates the query', () =>
+    apiTest(async (api) => {
+      const p = await trader(api);
+      const { amount } = await api.ok<MarketAffordable>('GET', `market/${WOOD}/affordable?gold=10000`, { token: p.token });
+      expect(amount).toBeGreaterThan(0);
+      await expectInvalid(api, p.token, [
+        { method: 'GET', url: `market/${WOOD}/affordable` },
+        { method: 'GET', url: `market/${WOOD}/affordable?gold=-1` },
+      ]);
+    }));
+});
+
+describe('GET /market/trades/mine', () => {
+  it("answers the player's trades from their side", () =>
+    apiTest(async (api) => {
+      const p = await trader(api);
+      await api.ok('POST', `cities/${p.cityId}/market/orders`, { token: p.token, body: { resType: WOOD, side: SELL, amount: 100, type: 'market' } });
+      const trades = await api.ok<MarketMyTrade[]>('GET', 'market/trades/mine', { token: p.token });
+      expect(trades).toEqual([expect.objectContaining({ resType: WOOD, side: SELL, amount: 100, with: 'merchant' })]);
     }));
 });
 
@@ -183,6 +253,28 @@ describe('DELETE /market/orders/:orderId', () => {
       });
       await api.refused('DELETE', `market/orders/${order!.id}`, 'market.orderNotFound', { token: other.token, status: 404 });
       await expectInvalid(api, p.token, [{ method: 'DELETE', url: 'market/orders/abc' }]);
+    }));
+});
+
+describe('order limit', () => {
+  it('refuses placing and cancelling past BALANCE.marketOrderLimit with 429 market.slowDown and Retry-After; quotes and other players go on', () =>
+    apiTest(async (api) => {
+      const p = await trader(api);
+      const other = await trader(api);
+      const { burst, refillMs } = BALANCE.marketOrderLimit;
+      const url = (q: { cityId: number }) => `cities/${q.cityId}/market/orders`;
+      const body = { resType: WOOD, side: SELL, amount: 1, type: 'market' };
+      for (let i = 0; i < burst - 1; i++) await api.ok('POST', url(p), { token: p.token, body });
+      // a cancel counts too, refused or not
+      await api.refused('DELETE', 'market/orders/999999', 'market.orderNotFound', { token: p.token, status: 404 });
+      const a = await api.refused('POST', url(p), 'market.slowDown', { token: p.token, body, status: 429 });
+      expect(a.body.error?.params).toEqual({ wait: { duration: expect.any(Number) } });
+      const res = await api.app.inject({ method: 'DELETE', url: '/api/v1/market/orders/1', headers: { authorization: `Bearer ${p.token}` } });
+      expect(res.statusCode).toBe(429);
+      expect(Number(res.headers['retry-after'])).toBeGreaterThan(0);
+      expect(Number(res.headers['retry-after'])).toBeLessThanOrEqual(refillMs / 1000);
+      await api.ok('GET', `market/${WOOD}/quote?side=${SELL}&amount=1&type=market`, { token: p.token });
+      await api.ok('POST', url(other), { token: other.token, body });
     }));
 });
 

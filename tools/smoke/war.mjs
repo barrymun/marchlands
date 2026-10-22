@@ -200,16 +200,12 @@ async function main() {
   check(blocked.ok === -13, 'cannot attack an alliance member');
 
   // ---- market ----
-  // an offer inside the computer merchant's spread beats the merchant, so the bid fills against it;
-  // with a fixed merchant price (no spread) the merchant takes the offer and fills the bid itself
+  // an offer inside the computer merchant's spread beats the merchant, so the bid fills against it
   const merchant = (await ok(a.token, 'GET', '/market/1')).merchant;
-  const fixed = merchant.ask === merchant.bid;
   const ref = Math.round(merchant.reference * 1000) / 1000;
-  const offer = await ok(b.token, 'POST', `/cities/${b.city.id}/market/orders`, { resType: 1, side: 1, amount: 5000, price: ref });
+  await ok(b.token, 'POST', `/cities/${b.city.id}/market/orders`, { resType: 1, side: 1, amount: 5000, price: ref });
   const fill = await ok(a.token, 'POST', `/cities/${a.city.id}/market/orders`, { resType: 1, side: 0, amount: 5000, price: ref });
-  if (fixed)
-    check(offer.merchantFilled === 5000 && fill.filled === 5000 && fill.merchantFilled === 5000, 'fixed-price merchant took the offer and filled the bid');
-  else check(fill.filled === 5000 && fill.playerFilled === 5000, 'buy order filled against the offer');
+  check(fill.filled === 5000 && fill.playerFilled === 5000, 'buy order filled against the offer');
   const left = await ok(a.token, 'GET', '/market/orders/mine');
   check(fill.order === null && left.length === 0, 'fully filled order not left on the book (no refundable escrow left behind)');
   check(!(await ok(b.token, 'GET', '/market/orders/mine')).length, "seller's filled offer removed too");

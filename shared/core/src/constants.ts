@@ -202,6 +202,16 @@ export const MarketSide = {
 } as const;
 export type MarketSide = (typeof MarketSide)[keyof typeof MarketSide];
 
+/** (marchlands) Lengths of the market's price candles, in real time (market_candles.period). */
+export const CandlePeriod = {
+  MINUTE: 'minute',
+  HOUR: 'hour',
+  DAY: 'day',
+} as const;
+export type CandlePeriod = (typeof CandlePeriod)[keyof typeof CandlePeriod];
+export const CANDLE_PERIODS = Object.values(CandlePeriod) as [CandlePeriod, ...CandlePeriod[]];
+export const CANDLE_PERIOD_MS: Record<CandlePeriod, number> = { minute: 60_000, hour: 3_600_000, day: 86_400_000 };
+
 export const RESOURCE_KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
 export type ResourceKey = (typeof RESOURCE_KEYS)[number];
 

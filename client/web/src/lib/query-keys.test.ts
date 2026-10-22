@@ -30,6 +30,10 @@ describe(allMarketQueries.name, () => {
       'getMarketQuote',
       'getMarketOrdersMine',
       'getMarketShipments',
+      'getMarketSummary',
+      'getMarketTradesMine',
+      'getMarketAffordable',
+      'getFactions',
     ]);
   });
   it('matches the books of every resource (no parameters on the per-resource keys)', () => {

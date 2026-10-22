@@ -6,6 +6,7 @@
   "nothingToTrade": "現在、取引できるものがありません。",
   "tooManyOrders": "さらに注文を出すには{{building}}をアップグレードしてください。",
   "notEnoughResource": "{{resource}}が足りません。",
+  "slowDown": "注文の発注と取り消しが速すぎます。{{wait}}後にもう一度お試しください。",
   "orderNotFound": "注文が見つかりません。",
   "shipmentNotFound": "輸送が見つかりません。"
 }

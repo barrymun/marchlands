@@ -2,12 +2,13 @@
 
 import { and, eq, isNotNull, lt, sql } from 'drizzle-orm';
 
-import { BALANCE } from '@marchlands/core';
+import { BALANCE, CandlePeriod } from '@marchlands/core';
 import { type Db, heroes, players } from '@marchlands/db';
 
 import { runGame } from '#/context.ts';
 import { resyncHeroGear } from '#/engine/heroes.ts';
 import { merchantSweep } from '#/engine/market.ts';
+import { npcTradeTick } from '#/engine/npc-economy.ts';
 import { checkBeginner } from '#/engine/player.ts';
 import { refreshRankings } from '#/engine/rankings.ts';
 import { refreshZoneStats } from '#/engine/world.ts';
@@ -44,18 +45,26 @@ export async function merchantJob(db: Db) {
   await runGame(db, (ctx) => merchantSweep(ctx));
 }
 
+/** (marchlands) The factions trade: one auction per resource (engine/npc-economy.ts). */
+export async function npcTradeJob(db: Db) {
+  await runGame(db, (ctx) => npcTradeTick(ctx));
+}
+
 /** (marchlands) Fold lord statistics older than 60 days into one row per month (stats.ts). */
 export async function statsJob(db: Db) {
   await compactStats(db, Date.now());
 }
 
-/** Drop delivered pushes and old chat/reports. */
+/** Drop delivered pushes, old chat, reports and alliance events, and old minute and hour price candles. */
 export async function cleanupJob(db: Db) {
   const now = Date.now();
   await db.execute(sql`delete from push_messages where created_at < ${now - 10 * 60_000}`);
   await db.execute(sql`delete from chat_messages where sent_at < ${now - 7 * 86_400_000}`);
   await db.execute(sql`delete from reports where event_time < ${now - 30 * 86_400_000}`);
   await db.execute(sql`delete from alliance_events where created_at < ${now - 30 * 86_400_000}`);
+  const keep = BALANCE.marketCandles.keepMs;
+  await db.execute(sql`delete from market_candles where period = ${CandlePeriod.MINUTE} and start < ${now - keep.minute}`);
+  await db.execute(sql`delete from market_candles where period = ${CandlePeriod.HOUR} and start < ${now - keep.hour}`);
 }
 
 /**

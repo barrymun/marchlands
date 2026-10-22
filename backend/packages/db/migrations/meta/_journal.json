@@ -183,6 +183,27 @@
       "when": 1792450952097,
       "tag": "0025_fort_wall_space",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792671802644,
+      "tag": "0026_market_candles",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792671803644,
+      "tag": "0027_market_candles_backfill",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792677844519,
+      "tag": "0028_market_trades_npc",
+      "breakpoints": true
     }
   ]
 }

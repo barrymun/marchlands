@@ -27,10 +27,10 @@ export default [
     gzip: true,
   },
   {
-    // the biggest tab: the market's price chart (recharts)
+    // the market's charts (TradingView Lightweight Charts, about 45 kB of it), loaded with the Market page only
     name: 'market tab',
     path: 'dist/assets/market-panel-*.js',
-    limit: '115 kB',
+    limit: '70 kB',
     gzip: true,
   },
   {

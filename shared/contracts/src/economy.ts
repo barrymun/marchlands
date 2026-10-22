@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 
-import { MessageSchema } from '@marchlands/core';
+import { CANDLE_PERIODS, FACTION_IDS, MessageSchema } from '@marchlands/core';
 
 import { Ms, zId, zPaging, zResources } from '#/common.ts';
 import { AllianceRow, CityRow, HeroRow, MarketOrderRow, MarketShipmentRow, PlayerRow, QuestProgressRow } from '#/rows.ts';
@@ -221,6 +221,11 @@ export const MarketQuoteQuery = z.object({
   price: z.coerce.number().optional(),
   type: z.enum(['limit', 'market']).default('limit'),
 });
+export const MarketHistoryQuery = z.object({
+  period: z.enum(CANDLE_PERIODS).default('hour').describe('candle length in real time'),
+  limit: z.coerce.number().int().min(1).max(2000).default(500).describe('the most recent candles, at most this many'),
+});
+export const MarketAffordableQuery = z.object({ gold: z.coerce.number().int().min(0).max(1e15).describe('the gold to spend, fee included') });
 export const OrderIdParams = z.object({ orderId: zId });
 export const ShipmentIdParams = z.object({ shipmentId: zId });
 
@@ -239,12 +244,26 @@ export const MarketMerchant = z
   .meta({ id: 'MarketMerchant', description: 'computer merchant: always buys and sells, in unlimited amounts' });
 export type MarketMerchant = z.infer<typeof MarketMerchant>;
 
+export const MarketFactions = z
+  .object({
+    price: z.number().describe("the world price at their stock now, inside the merchant's band"),
+    ask: z.number().nullable().describe("they sell at this price (marginal; rises as they sell); null at the band's edge"),
+    bid: z.number().nullable().describe("they buy at this price (marginal; falls as they buy); null at the band's edge"),
+    sells: int().describe("units they sell before their price reaches the band's edge"),
+    buys: int().describe("units they buy before their price reaches the band's edge"),
+    sellers: z.array(MarketPriceLevel).describe("what they sell in a few price steps up to the band's edge, best first"),
+    buyers: z.array(MarketPriceLevel).describe("what they buy in a few price steps down to the band's edge, best first"),
+  })
+  .meta({ id: 'MarketFactions', description: 'the NPC factions: they trade from their shared stock along their price curve' });
+export type MarketFactions = z.infer<typeof MarketFactions>;
+
 export const MarketOrderBook = z
   .object({
     resType: int(),
     buyers: z.array(MarketPriceLevel).describe('bids, best (highest) price first'),
     sellers: z.array(MarketPriceLevel).describe('offers, best (lowest) price first'),
     merchant: MarketMerchant,
+    factions: MarketFactions.nullable().describe('null before the factions first trade'),
   })
   .meta({ id: 'MarketOrderBook' });
 export type MarketOrderBook = z.infer<typeof MarketOrderBook>;
@@ -264,6 +283,7 @@ const tradeSummary = {
   gold: int().describe('gold paid (buy, incl. fee) or received (sell) for the units traded now'),
   fee: int(),
   merchantFilled: int().describe('units traded with the computer merchant'),
+  factionsFilled: int().describe('units traded with the NPC factions'),
   playerFilled: int().describe('units traded with other lords'),
   rest: int().describe('units left resting on the book (limit orders)'),
   escrow: int().describe('gold (buy) or goods (sell) held for the resting part'),
@@ -284,22 +304,79 @@ export const MarketTrade = z
     gold: int(),
     takerSide: int().describe('side of the order that triggered the trade: 0 buy, 1 sell'),
     merchant: z.boolean().describe('traded with the computer merchant'),
+    factions: z.boolean().describe('traded with the NPC factions'),
     createdAt: Ms,
   })
   .meta({ id: 'MarketTrade' });
+const npcGroupRef = z.object({ zone: int().describe('the zone (state) of its cities'), level: int() });
+export const MarketNpcTrade = z
+  .object({
+    at: Ms,
+    resource: resourceName,
+    amount: int(),
+    price: z.number(),
+    seller: npcGroupRef,
+    buyer: npcGroupRef,
+  })
+  .meta({ id: 'MarketNpcTrade', description: "a single trade between two factions' groups, made up from an auction to show it" });
+export type MarketNpcTrade = z.infer<typeof MarketNpcTrade>;
+
 export const MarketCandle = z
   .object({ t: Ms.describe('bucket start'), open: z.number(), high: z.number(), low: z.number(), close: z.number(), volume: int() })
   .meta({ id: 'MarketCandle' });
 export const MarketHistory = z
   .object({
     resType: int(),
-    bucketMs: int().describe('candle length: one game hour'),
+    period: z.enum(CANDLE_PERIODS),
+    bucketMs: int().describe('candle length in real ms'),
     merchant: MarketMerchant,
-    candles: z.array(MarketCandle).describe('oldest first; buckets without trades are omitted'),
+    candles: z.array(MarketCandle).describe('every trade in the world, oldest first; candles without trades are omitted'),
     trades: z.array(MarketTrade).describe('most recent first'),
+    ticker: z.array(MarketNpcTrade).describe("the factions' latest trades with each other in this resource, newest first"),
   })
   .meta({ id: 'MarketHistory' });
 export type MarketHistory = z.infer<typeof MarketHistory>;
+
+export const MarketAffordable = z
+  .object({ amount: int().describe('the most units the gold buys now with an instant order, the fee included') })
+  .meta({ id: 'MarketAffordable' });
+export type MarketAffordable = z.infer<typeof MarketAffordable>;
+
+export const MarketSummary = z
+  .object({
+    resType: int(),
+    price: z.number().describe("its price now: the factions' world price, or the merchant's reference before they trade"),
+    merchant: MarketMerchant,
+    day: z
+      .object({ open: z.number(), high: z.number(), low: z.number(), volume: int() })
+      .nullable()
+      .describe('the last 24 hours from hourly candles: the price it opened at, its high and low, the units traded; null when nothing traded'),
+  })
+  .meta({ id: 'MarketSummary' });
+export type MarketSummary = z.infer<typeof MarketSummary>;
+
+export const FactionGold = z
+  .object({
+    id: z.enum(FACTION_IDS),
+    gold: int().describe('the gold the faction holds now: it pays players selling to it with this'),
+    treasury: int().describe("what its gold drifts back to: its members' gold in the NPC table"),
+  })
+  .meta({ id: 'FactionGold' });
+export type FactionGold = z.infer<typeof FactionGold>;
+
+export const MarketMyTrade = z
+  .object({
+    id: int(),
+    resType: int(),
+    side: int().describe("the player's side: 0 bought, 1 sold"),
+    price: z.number(),
+    amount: int(),
+    gold: int().describe("gold that changed hands, before the buyer's fee"),
+    with: z.enum(['player', 'factions', 'merchant']).describe('who was on the other side'),
+    createdAt: Ms,
+  })
+  .meta({ id: 'MarketMyTrade' });
+export type MarketMyTrade = z.infer<typeof MarketMyTrade>;
 
 export const MarketShipment = MarketShipmentRow.pick({ id: true, cityId: true, resType: true, amount: true, price: true, startTime: true, endTime: true })
   .extend({ resourceName: z.string().describe('food | wood | stone | iron | gold (resType 4: sale proceeds or escrow refund)') })

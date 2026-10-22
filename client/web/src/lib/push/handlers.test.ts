@@ -6,6 +6,10 @@ import {
   getArmiesQueryKey,
   getCitiesByCityIdQueryKey,
   getCitiesTroopsQueuesQueryKey,
+  getMarketByResTypeQueryKey,
+  getMarketHistoryQueryKey,
+  getMarketOrdersMineQueryKey,
+  getMarketSummaryQueryKey,
   getPlayerQueryKey,
   type GetPlayerResponse,
   getReportsUnreadQueryKey,
@@ -53,6 +57,18 @@ describe('city patches', () => {
     handle(PushCmd.HERO_UPDATE, { castleId: 7, hero, updateType: 0 }, qc);
     expect(qc.getQueryData<CityBean>(cityKey(7))?.heros[0]!.level).toBe(5);
     expect(qc.getQueryData<GetPlayerResponse>(getPlayerQueryKey())?.castles[0]!.heros[0]!.level).toBe(5);
+  });
+});
+
+describe('MarketUpdate', () => {
+  it("marks the moved resources' books and histories stale, and the summary, but not other resources or the player's orders", () => {
+    const book = (resType: number) => getMarketByResTypeQueryKey({ path: { resType } });
+    const history = (resType: number) => getMarketHistoryQueryKey({ path: { resType }, query: { period: 'minute', limit: 1440 } });
+    for (const key of [book(0), book(1), history(0), history(1), getMarketSummaryQueryKey(), getMarketOrdersMineQueryKey()]) seed(key, {});
+    handle(PushCmd.MARKET_UPDATE, { resTypes: [0] }, qc);
+    expect([stale(book(0)), stale(history(0)), stale(getMarketSummaryQueryKey())]).toEqual([true, true, true]);
+    expect([stale(book(1)), stale(history(1)), stale(getMarketOrdersMineQueryKey())]).toEqual([false, false, false]);
+    expect(toast).not.toHaveBeenCalled();
   });
 });
 

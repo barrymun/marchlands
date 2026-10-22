@@ -596,7 +596,7 @@ export const marketShipments = pgTable(
   (t) => [index('market_shipments_city_idx').on(t.cityId)],
 );
 
-/** Completed market trades (price history). A null buyer/seller is the computer merchant. */
+/** Completed market trades with a player in them (price history). A null buyer/seller is the computer merchant, or the NPC factions when `npc`. */
 export const marketTrades = pgTable(
   'market_trades',
   {
@@ -611,6 +611,8 @@ export const marketTrades = pgTable(
     takerSide: smallint('taker_side').notNull(),
     buyerPlayerId: integer('buyer_player_id'),
     sellerPlayerId: integer('seller_player_id'),
+    /** (marchlands) the other side was the NPC factions (core npc-economy.ts), not the computer merchant */
+    npc: boolean('npc').notNull().default(false),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [
@@ -618,6 +620,32 @@ export const marketTrades = pgTable(
     index('market_trades_buyer_idx').on(t.buyerPlayerId),
     index('market_trades_seller_idx').on(t.sellerPlayerId),
   ],
+);
+
+/**
+ * (marchlands) Price candles: one per resource, scope, length (minute, hour, day of real time) and start,
+ * updated as trades happen. The Market page's charts read these, never the trades.
+ */
+export const marketCandles = pgTable(
+  'market_candles',
+  {
+    resType: smallint('res_type').notNull(),
+    /** whose trades: 'world' for every trade (later a faction or zone) */
+    scope: text('scope').notNull(),
+    /** CandlePeriod: minute, hour or day */
+    period: text('period').notNull(),
+    start: ms('start').notNull(),
+    open: doublePrecision('open').notNull(),
+    high: doublePrecision('high').notNull(),
+    low: doublePrecision('low').notNull(),
+    close: doublePrecision('close').notNull(),
+    /** units traded */
+    volume: bigint('volume', { mode: 'number' }).notNull(),
+    /** gold that changed hands, before the buyer's fee */
+    gold: bigint('gold', { mode: 'number' }).notNull(),
+    trades: integer('trades').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.resType, t.scope, t.period, t.start] }), index('market_candles_period_start_idx').on(t.period, t.start)],
 );
 
 export const questProgress = pgTable(

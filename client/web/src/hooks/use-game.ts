@@ -9,6 +9,7 @@ import { BALANCE, scaled, setGameSpeed } from '@marchlands/core';
 
 import { errorMessage, push } from '@/lib/api';
 import { subscribePushHandlers } from '@/lib/push/handlers';
+import { allMarketQueries } from '@/lib/query-keys';
 
 export function usePlayer() {
   return useQuery({
@@ -64,7 +65,15 @@ export function usePushSync(enabled: boolean): PushStatus {
   useEffect(() => {
     if (!enabled) return;
     const offs = subscribePushHandlers(push, qc);
-    offs.push(push.onStatus(setStatus));
+    // pushes sent while the socket was down are lost: on reconnecting, refresh what only pushes keep fresh (the market)
+    let wasOpen = false;
+    offs.push(
+      push.onStatus((s) => {
+        if (s === 'open' && wasOpen) for (const queryKey of allMarketQueries()) void qc.invalidateQueries({ queryKey });
+        if (s === 'open') wasOpen = true;
+        setStatus(s);
+      }),
+    );
     push.connect();
     return () => {
       offs.forEach((off) => off());

@@ -1,0 +1,13 @@
+{
+  "intro": "Five factions hold the land. Barbarian cities from level {{level}} up belong to the faction holding their zone; lower ones are bandits, loyal to no one.",
+  "zones": "Holds {{zones}}",
+  "strong": "Strong in",
+  "short": "Short of",
+  "gold": "Gold",
+  "goldOf": "{{gold}} of {{treasury}}",
+  "temperament": {
+    "trading": "Traders",
+    "warlike": "Warlike",
+    "insular": "Keeps to itself"
+  }
+}

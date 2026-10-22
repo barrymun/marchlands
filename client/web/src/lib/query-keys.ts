@@ -1,9 +1,13 @@
 import {
+  getFactionsQueryKey,
+  getMarketAffordableQueryKey,
   getMarketByResTypeQueryKey,
   getMarketHistoryQueryKey,
   getMarketOrdersMineQueryKey,
   getMarketQuoteQueryKey,
   getMarketShipmentsQueryKey,
+  getMarketSummaryQueryKey,
+  getMarketTradesMineQueryKey,
 } from '@marchlands/api-client';
 
 // Query keys come from the generated client (`get<Operation>QueryKey`, @marchlands/api-client). A key
@@ -16,11 +20,15 @@ import {
  */
 export const allOf = <K extends readonly unknown[]>(keyFn: (options: never) => K, partial: object = {}): K => keyFn(partial as never);
 
-/** Every market query: the order books, price histories, quotes, my orders and shipments. */
+/** Every market query: the order books, price histories, quotes, my orders and shipments, the summary, my trades, what gold buys and the factions' gold. */
 export const allMarketQueries = () => [
   allOf(getMarketByResTypeQueryKey),
   allOf(getMarketHistoryQueryKey),
   allOf(getMarketQuoteQueryKey),
   getMarketOrdersMineQueryKey(),
   getMarketShipmentsQueryKey(),
+  getMarketSummaryQueryKey(),
+  getMarketTradesMineQueryKey(),
+  allOf(getMarketAffordableQueryKey),
+  getFactionsQueryKey(),
 ];

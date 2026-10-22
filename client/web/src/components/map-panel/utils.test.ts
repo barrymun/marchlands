@@ -1,6 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { Relation, TileType } from '@marchlands/core';
-import { placeName, relationGroup } from '@/components/map-panel/utils';
+
+import { FACTION_TINT_KEY } from '@/components/map-panel/constants';
+import { placeName, readFactionTint, relationGroup, saveFactionTint } from '@/components/map-panel/utils';
 
 describe(relationGroup.name, () => {
   it('groups alliance members and allies as friends', () => {
@@ -29,5 +32,51 @@ describe(placeName.name, () => {
     expect(placeName({ type: TileType.NPC })).toBe('Barbarian city');
     expect(placeName({ type: TileType.GRASS })).toBe('Grassland');
     expect(placeName({ type: TileType.FLAT, name: '' })).toBe('Flat');
+  });
+});
+
+describe(readFactionTint.name, () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('is on only once this browser chose it', () => {
+    vi.stubGlobal('localStorage', { getItem: (key: string) => (key === FACTION_TINT_KEY ? 'on' : null) });
+    expect(readFactionTint()).toBe(true);
+    vi.stubGlobal('localStorage', { getItem: () => 'off' });
+    expect(readFactionTint()).toBe(false);
+    vi.stubGlobal('localStorage', { getItem: () => null });
+    expect(readFactionTint()).toBe(false);
+  });
+
+  it('is off when storage throws', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: () => {
+        throw new Error('blocked');
+      },
+    });
+    expect(readFactionTint()).toBe(false);
+  });
+});
+
+describe(saveFactionTint.name, () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('remembers the choice', () => {
+    const setItem = vi.fn();
+    vi.stubGlobal('localStorage', { setItem });
+    saveFactionTint(true);
+    saveFactionTint(false);
+    expect(setItem.mock.calls).toEqual([
+      [FACTION_TINT_KEY, 'on'],
+      [FACTION_TINT_KEY, 'off'],
+    ]);
+  });
+
+  it('carries on when storage throws', () => {
+    vi.stubGlobal('localStorage', {
+      setItem: () => {
+        throw new Error('blocked');
+      },
+    });
+    expect(() => saveFactionTint(true)).not.toThrow();
   });
 });

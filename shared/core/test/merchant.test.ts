@@ -12,27 +12,28 @@ describe('merchant (fixed price)', () => {
     merchantCfg.fixedPrice = configuredFixed;
   });
 
-  it('buys and sells every resource at the fixed price, in any amount', () => {
+  it('sells every resource at its ask and buys at its bid, around the fixed price, in any amount', () => {
     for (const r of ['food', 'wood', 'stone', 'iron'] as const) {
       const ref = merchantReference(r, { price: 0.01, at: 0 }, 0);
       expect(ref).toBe(1);
-      expect(merchantAsk(ref)).toBe(1);
-      expect(merchantBid(ref)).toBe(1);
+      expect(merchantAsk(ref)).toBe(1.15);
+      expect(merchantBid(ref)).toBe(0.85);
     }
-    expect(merchantSells(1, 5_000_000)).toEqual({ qty: 5_000_000, gold: 5_000_000, ref: 1 });
-    expect(merchantBuys(1, 5_000_000)).toEqual({ qty: 5_000_000, gold: 5_000_000, ref: 1 });
-    expect(merchantMarginal(1, 'sell', 1e9)).toBe(1);
+    expect(merchantSells(1, 5_000_000)).toEqual({ qty: 5_000_000, gold: 5_750_000, ref: 1 });
+    expect(merchantBuys(1, 5_000_000)).toEqual({ qty: 5_000_000, gold: 4_250_000, ref: 1 });
+    expect(merchantMarginal(1, 'buy', 1e9)).toBe(1.15);
+    expect(merchantMarginal(1, 'sell', 1e9)).toBe(0.85);
   });
 
   it('respects limits: never sells above or buys below the limit', () => {
-    expect(merchantSells(1, 100, 0.9).qty).toBe(0);
-    expect(merchantSells(1, 100, 1).qty).toBe(100);
-    expect(merchantBuys(1, 100, 1.1).qty).toBe(0);
-    expect(merchantBuys(1, 100, 1).qty).toBe(100);
+    expect(merchantSells(1, 100, 1.149).qty).toBe(0);
+    expect(merchantSells(1, 100, 1.15).qty).toBe(100);
+    expect(merchantBuys(1, 100, 0.851).qty).toBe(0);
+    expect(merchantBuys(1, 100, 0.85).qty).toBe(100);
   });
 
   it('affordable units are gold / (price x fee)', () => {
-    expect(merchantAffordable(1, 1_000, 1.25)).toBe(800);
+    expect(merchantAffordable(1.25, 1_000, 1.6)).toBe(500);
   });
 });
 

@@ -1,0 +1,13 @@
+{
+  "intro": "5つの勢力が領土を治めています。レベル{{level}}以上の蛮族の都市は、その地域を治める勢力に属します。それ未満は山賊で、どの勢力にも属しません。",
+  "zones": "領有：{{zones}}",
+  "strong": "豊富な資源",
+  "short": "不足している資源",
+  "gold": "金",
+  "goldOf": "{{gold}} / {{treasury}}",
+  "temperament": {
+    "trading": "交易好き",
+    "warlike": "好戦的",
+    "insular": "閉鎖的"
+  }
+}

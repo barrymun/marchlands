@@ -24,7 +24,7 @@ export async function createTrader(g: TestGame, res: Partial<ResourceSet> = {}, 
   return p;
 }
 
-const mutable = BALANCE as unknown as { marketShipmentBaseMs: number; merchant: { fixedPrice: number | null } };
+const mutable = BALANCE as unknown as { marketShipmentBaseMs: number; merchant: { fixedPrice: number | null; spread: number } };
 
 async function withSetting<T>(set: () => () => void, fn: () => Promise<T>): Promise<T> {
   const restore = set();
@@ -35,12 +35,16 @@ async function withSetting<T>(set: () => () => void, fn: () => Promise<T>): Prom
   }
 }
 
-/** Run `fn` with the merchant on its price curve (BALANCE.merchant.fixedPrice off). */
+/**
+ * Run `fn` with the merchant on its price curve (BALANCE.merchant.fixedPrice off) and the 10% spread the curve was
+ * tuned with, which these tests' prices assume (the fixed price uses a wider one).
+ */
 export const withMerchantCurve = <T>(fn: () => Promise<T>) =>
   withSetting(() => {
-    const saved = mutable.merchant.fixedPrice;
+    const saved = { ...mutable.merchant };
     mutable.merchant.fixedPrice = null;
-    return () => (mutable.merchant.fixedPrice = saved);
+    mutable.merchant.spread = 0.1;
+    return () => Object.assign(mutable.merchant, saved);
   }, fn);
 
 /** Run `fn` with goods bought on the market travelling `ms` / Marketplace level (BALANCE.marketShipmentBaseMs). */

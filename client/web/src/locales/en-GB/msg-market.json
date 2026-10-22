@@ -6,6 +6,7 @@
   "nothingToTrade": "There's nothing to trade at the moment.",
   "tooManyOrders": "Upgrade your {{building}} to place more orders.",
   "notEnoughResource": "Not enough {{resource}}.",
+  "slowDown": "You're placing and cancelling orders too quickly. Try again in {{wait}}.",
   "orderNotFound": "Order not found.",
   "shipmentNotFound": "Shipment not found."
 }

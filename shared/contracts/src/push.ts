@@ -80,6 +80,9 @@ export const PushSchemas = {
   // market
   [PushCmd.TRADES_UPDATE]: z.object({ resType: int, amount: z.number(), price: z.number() }),
   [PushCmd.TRANSIT_TRADE_UPDATE]: z.object({ id: int, delivered: z.literal(true), resType: int, amount: z.number(), castleId }),
+  [PushCmd.MARKET_UPDATE]: z
+    .object({ resTypes: z.array(int).describe('the resources whose book, prices or candles changed') })
+    .describe('(marchlands) sent to everyone connected, so open market screens refresh instead of asking every few seconds'),
 
   // chat / social
   [PushCmd.CHANNEL_CHAT_MESSAGE]: ChatMsg(z.enum(['world', 'beginner'])),

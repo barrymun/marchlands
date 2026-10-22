@@ -1,14 +1,14 @@
 // Game clock. Seeds the world on first boot and re-applies hero gear (heroGearJob), then:
 //  - claims due timed events (FOR UPDATE SKIP LOCKED, so several workers can run side by side)
 //    and processes each in its own transaction;
-//  - runs periodic jobs (rankings, zone stats, beginner expiry, merchant sweep, cleanup).
+//  - runs periodic jobs (rankings, zone stats, beginner expiry, merchant sweep, the factions' trade, cleanup).
 // The moving parts live in worker.ts; this file wires them to the environment, the database and the signals.
 
 import { sql } from 'drizzle-orm';
 
-import { setGameSpeed } from '@marchlands/core';
+import { BALANCE, setGameSpeed } from '@marchlands/core';
 import { connect, one, timedEvents } from '@marchlands/db';
-import { beginnerJob, cleanupJob, heroGearJob, merchantJob, rankingsJob, startStatsFlusher, statsJob, world, zonesJob } from '@marchlands/game';
+import { beginnerJob, cleanupJob, heroGearJob, merchantJob, npcTradeJob, rankingsJob, startStatsFlusher, statsJob, world, zonesJob } from '@marchlands/game';
 
 import { eventLoop, every as everyUntilStopped, log, processOne } from '#/worker.ts';
 
@@ -40,6 +40,7 @@ async function main() {
   every('zones', 60_000, () => zonesJob(db));
   every('beginner', 60_000, () => beginnerJob(db));
   every('merchant', 10_000, () => merchantJob(db));
+  every('npc-trade', BALANCE.npcTrade.tickMs, () => npcTradeJob(db));
   every('cleanup', 10 * 60_000, () => cleanupJob(db));
   every('stats', 60 * 60_000, () => statsJob(db));
   await eventLoop(() => processOne(db, { log }), { batch: BATCH, idleMs: IDLE_MS, stopping: isStopping, log });

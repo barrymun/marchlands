@@ -5,14 +5,13 @@ import type { HeroBean, ResourceBean } from '@marchlands/api-client';
 import { BASIC_RESOURCES } from '@marchlands/core';
 
 import { Breakdown } from '@/components/resource-bar/breakdown/breakdown';
-import { RESOURCE_ART } from '@/components/resource-bar/constants';
 import { Rows } from '@/components/resource-bar/rows/rows';
 import type { Row } from '@/components/resource-bar/types';
 import { live } from '@/components/resource-bar/utils';
+import { ResourceIcon } from '@/components/resource-icon/resource-icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNow } from '@/hooks/use-now';
 import { fmt, fmtExact, percent, resourceLabel, signedRate } from '@/lib/format';
-import { resourceArtFile } from '@/lib/game-art';
 import { ITEM_BONUS_TEXT_INVERTED } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
@@ -58,7 +57,7 @@ export function ResourceBar({ resource, mayor, stacked }: { resource: ResourceBe
           <Tooltip key={key}>
             <TooltipTrigger asChild>
               <div className="flex min-w-0 items-center gap-1.5 tabular-nums">
-                <img src={RESOURCE_ART[resourceArtFile(key)]} alt="" width={16} height={16} className="size-4 shrink-0 [image-rendering:pixelated]" />
+                <ResourceIcon resource={key} />
                 <span className={cn('flex min-w-0 flex-col leading-tight', !stacked && 'sm:flex-row sm:items-center sm:gap-1.5')}>
                   <span className={full ? 'font-medium text-amber-600' : 'font-medium'}>{fmt(amount)}</span>
                   <span className={cn('truncate text-[11px] sm:text-xs', rate < 0 ? 'text-destructive' : 'text-muted-foreground')}>{signedRate(rate)}</span>

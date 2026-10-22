@@ -13,37 +13,68 @@
     "filled": "約定",
     "placed": "発注日時",
     "amount": "数量",
-    "from": "相手"
+    "from": "相手",
+    "time": "時刻"
   },
   "myOrders": {
     "title": "待機中の注文",
     "cancelled": "注文を取り消しました。預けていた資源または金を返却しました",
-    "cancel": "注文を取り消す"
+    "cancel": "注文を取り消す",
+    "none": "待機中の注文はありません。"
+  },
+  "myTrades": {
+    "title": "自分の取引",
+    "none": "まだ取引はありません。",
+    "bought": "購入",
+    "sold": "売却",
+    "gold": "金",
+    "with": "相手",
+    "counterparty": {
+      "player": "プレイヤー",
+      "factions": "勢力",
+      "merchant": "商人"
+    }
   },
   "orderBook": {
-    "title": "板情報 · {{resource}}",
-    "fixedPrice": "1単位あたりの金。商人はどんな量でも固定価格 {{price}} で売買するので、少なくともその価格で必ず売れます。行をクリックするとその価格で取引します。",
-    "floatingPrice": "1単位あたりの金。商人は常に取引に応じます。買われると価格が上がり、売られると下がり、やがて {{price}} に戻ります。行をクリックするとその価格で取引します。",
     "player": "プレイヤー",
     "unlimited": "無制限",
     "merchant": "商人",
-    "divider": "上：売り注文 · 下：買い注文",
-    "reference": " · 基準 {{price}}"
+    "factions": "勢力",
+    "factionsDepth": "価格が商人の価格に達するまでに取引する量"
   },
   "priceHistory": {
-    "title": "価格 · {{resource}}",
-    "description": "ゲーム内1時間ごとの終値（直近24件）。",
-    "chartLabel": "価格",
+    "ranges": {
+      "hour": "1時間",
+      "day": "1日",
+      "week": "1週間",
+      "month": "1か月"
+    },
+    "merchantSells": "商人の売値",
+    "merchantBuys": "商人の買値",
+    "credit": "チャート: <link>TradingView Lightweight Charts™</link>",
     "noTrades": "まだ取引がありません。",
-    "recentTrades": "最近の取引",
     "merchant": "商人",
-    "players": "プレイヤー"
+    "players": "プレイヤー",
+    "factions": "勢力"
+  },
+  "depth": {
+    "empty": "取引板に注文はありません。"
+  },
+  "ticker": {
+    "title": "勢力間の取引",
+    "seller": "売り手",
+    "buyer": "買い手",
+    "trade": "取引",
+    "amountAt": "{{price}}で{{resource}} {{amount}}",
+    "group": "{{zone}} Lv {{level}}",
+    "none": "勢力間の取引はまだありません。"
   },
   "shipments": {
     "title": "輸送中の物資",
     "delivered": "配達しました",
     "arrivesIn": "到着まで <countdown/>",
-    "deliverNow": "今すぐ配達 · {{gold}} 金"
+    "deliverNow": "今すぐ配達 · {{gold}} 金",
+    "none": "輸送中のものはありません。"
   },
   "tradeForm": {
     "title": "{{resource}}を取引",
@@ -73,6 +104,35 @@
     "buyNow": "今すぐ購入",
     "sellNow": "今すぐ売却",
     "placeBuy": "買い注文を出す",
-    "placeSell": "売り注文を出す"
-  }
+    "placeSell": "売り注文を出す",
+    "withFactions": "勢力と {{amount}}",
+    "sheetHint": "すぐに売買するか、価格を指定して注文します。"
+  },
+  "bar": {
+    "markets": "市場",
+    "changeCaption": "24時間の変動",
+    "changeTitle": "24時間前からの変動",
+    "high": "24時間高値",
+    "low": "24時間安値",
+    "volume": "24時間出来高",
+    "merchant": "商人 買値 / 売値"
+  },
+  "chart": {
+    "views": "チャート",
+    "price": "価格",
+    "depth": "板の厚み",
+    "ranges": "期間"
+  },
+  "book": {
+    "views": "取引板と取引",
+    "book": "取引板",
+    "trades": "取引",
+    "worldPrice": "世界価格",
+    "merchantPrice": "商人の価格",
+    "spread": "スプレッド {{spread}}"
+  },
+  "activity": {
+    "views": "あなたの取引"
+  },
+  "showMore_other": "さらに{{count}}件を表示"
 }

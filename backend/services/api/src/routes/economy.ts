@@ -1,5 +1,6 @@
 // Market, shop, quests, rankings, static game configuration and operator tools.
 
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 
 import {
@@ -20,9 +21,14 @@ import {
   ClaimQuestBody,
   Empty,
   ErrorResponse,
+  FactionGold,
   GoldShopBuyBody,
   GoldShopBuyResult,
+  MarketAffordable,
+  MarketAffordableQuery,
   MarketHistory,
+  MarketHistoryQuery,
+  MarketMyTrade,
   MarketOrder,
   MarketOrderBook,
   MarketPlaceOrderResult,
@@ -30,6 +36,7 @@ import {
   MarketQuoteQuery,
   MarketResTypeParams,
   MarketShipment,
+  MarketSummary,
   Ok,
   OrderIdParams,
   PlaceOrderBody,
@@ -48,13 +55,26 @@ import {
   ShopCategory,
   StaticConfig,
 } from '@marchlands/contracts';
-import { BALANCE, BUILDINGS, getGameSpeed, itemGoldPrice, itemInfo, ITEMS, QUESTS, RESEARCH, TITLES, TROOPS } from '@marchlands/core';
-import { admin, market, quests, rankings, runGame, shop } from '@marchlands/game';
+import { BALANCE, BUILDINGS, dur, getGameSpeed, itemGoldPrice, itemInfo, ITEMS, msg, QUESTS, RESEARCH, TITLES, TROOPS } from '@marchlands/core';
+import { admin, factions, market, quests, rankings, runGame, shop } from '@marchlands/game';
 
-import { anon, authenticate, type Data, doc, game, requireAdmin, tags, type ZApp, zCityParams } from '#/http.ts';
+import { anon, authenticate, claimsOf, type Data, doc, game, requireAdmin, tags, type ZApp, zCityParams } from '#/http.ts';
+import { OrderLimit } from '#/market/order-limit.ts';
 
 export default async function economyRoutes(app: ZApp) {
   const s = doc;
+  const orderLimit = new OrderLimit(BALANCE.marketOrderLimit);
+  /** Placing and cancelling orders: refused with 429 and Retry-After once the player has used up BALANCE.marketOrderLimit. */
+  const limitOrders = async (req: FastifyRequest, reply: FastifyReply) => {
+    const wait = orderLimit.take(claimsOf(req).sub);
+    if (wait > 0) {
+      const seconds = Math.ceil(wait / 1000);
+      return reply
+        .status(429)
+        .header('retry-after', String(seconds))
+        .send({ ok: -99, error: msg('market.slowDown', { wait: dur(seconds * 1000) }) });
+    }
+  };
 
   // ---- static configuration (public) ----
   app.get(
@@ -108,22 +128,52 @@ export default async function economyRoutes(app: ZApp) {
     );
     secure.get(
       '/market/:resType/history',
-      s(tags.market, 'Recent trades and hourly (game time) price candles', MarketHistory, { params: MarketResTypeParams }),
-      (req) => anon(req, (ctx) => market.history(ctx, req.params.resType)),
+      s(tags.market, 'Recent trades and price candles of a minute, an hour or a day (real time)', MarketHistory, {
+        params: MarketResTypeParams,
+        querystring: MarketHistoryQuery,
+      }),
+      (req) => anon(req, (ctx) => market.history(ctx, req.params.resType, req.query.period, req.query.limit)),
+    );
+    secure.get('/factions', s(tags.market, "The NPC factions' gold now and their treasuries", z.array(FactionGold)), (req) =>
+      anon(req, (ctx) => factions.list(ctx)),
+    );
+    secure.get('/market/summary', s(tags.market, "Every resource's price now, the merchant's quotes and its last 24 hours", z.array(MarketSummary)), (req) =>
+      anon(req, (ctx) => market.summary(ctx)),
+    );
+    secure.get(
+      '/market/:resType/affordable',
+      s(tags.market, 'The most units an amount of gold buys now with an instant order, the fee included', MarketAffordable, {
+        params: MarketResTypeParams,
+        querystring: MarketAffordableQuery,
+      }),
+      (req) => game(req, (ctx, pid) => market.affordable(ctx, pid, req.params.resType, req.query.gold)),
+    );
+    secure.get('/market/trades/mine', s(tags.market, "The player's latest trades, newest first", z.array(MarketMyTrade)), (req) =>
+      game(req, (ctx, pid) => market.myTrades(ctx, pid)),
     );
     secure.get('/market/orders/mine', s(tags.market, 'My open orders (trade.getMyTradeList)', z.array(MarketOrder)), (req) =>
       game(req, (ctx, pid) => market.myOrders(ctx, pid)),
     );
     secure.post(
       '/cities/:cityId/market/orders',
-      s(tags.market, 'Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade)', MarketPlaceOrderResult, {
-        params: zCityParams,
-        body: PlaceOrderBody,
-      }),
+      {
+        ...s(
+          tags.market,
+          'Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade); limited per player',
+          MarketPlaceOrderResult,
+          {
+            params: zCityParams,
+            body: PlaceOrderBody,
+          },
+        ),
+        preHandler: limitOrders,
+      },
       (req) => game(req, (ctx, pid) => market.placeOrder(ctx, pid, req.params.cityId, req.body)),
     );
-    secure.delete('/market/orders/:orderId', s(tags.market, 'Cancel (trade.cancelTrade)', Empty, { params: OrderIdParams }), (req) =>
-      game(req, (ctx, pid) => market.cancelOrder(ctx, pid, req.params.orderId)),
+    secure.delete(
+      '/market/orders/:orderId',
+      { ...s(tags.market, 'Cancel (trade.cancelTrade); limited per player, with placing', Empty, { params: OrderIdParams }), preHandler: limitOrders },
+      (req) => game(req, (ctx, pid) => market.cancelOrder(ctx, pid, req.params.orderId)),
     );
     secure.get('/market/shipments', s(tags.market, 'Goods in transit (trade.getTransingTradeList)', z.array(MarketShipment)), (req) =>
       game(req, (ctx, pid) => market.myShipments(ctx, pid)),

@@ -15,9 +15,15 @@ import {
   getCitiesResearchQueryKey,
   getCitiesTroopsQueuesQueryKey,
   getCitiesTroopsTrainableQueryKey,
+  getFactionsQueryKey,
   getMapQueryKey,
   getMapTilesByTileIdQueryKey,
+  getMarketAffordableQueryKey,
+  getMarketByResTypeQueryKey,
+  getMarketHistoryQueryKey,
+  getMarketQuoteQueryKey,
   getMarketShipmentsQueryKey,
+  getMarketSummaryQueryKey,
   getPlayerFlowsQueryKey,
   getPlayerQueryKey,
   type GetPlayerResponse,
@@ -105,6 +111,22 @@ export const PUSH_HANDLERS: { [K in PushCmd]?: Handler<K> } = {
   [PushCmd.TRADES_UPDATE]: ({ resType, amount, price }, qc) => {
     invalidate(qc, ...allMarketQueries());
     toast.success(i18n.t('common:push.trade', { amount: fmtExact(amount), resource: resourceName(resType), price }));
+  },
+  // a market moved (the factions' tick, someone's order): what the market screens show of it is stale; only the queries on
+  // screen refetch, so players elsewhere pay nothing
+  [PushCmd.MARKET_UPDATE]: ({ resTypes }, qc) => {
+    for (const resType of resTypes) {
+      const path = { path: { resType } };
+      invalidate(
+        qc,
+        allOf(getMarketByResTypeQueryKey, path),
+        allOf(getMarketHistoryQueryKey, path),
+        allOf(getMarketQuoteQueryKey, path),
+        allOf(getMarketAffordableQueryKey, path),
+      );
+    }
+    // the factions' gold moves with every tick and every trade with them
+    invalidate(qc, getMarketSummaryQueryKey(), getFactionsQueryKey());
   },
   [PushCmd.TRANSIT_TRADE_UPDATE]: ({ resType, amount }, qc) => {
     invalidate(qc, getMarketShipmentsQueryKey());

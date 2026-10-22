@@ -20,7 +20,7 @@ export type MsgShareInput = {
 export type MsgParamInput = string | number | boolean | GameRefInput | MsgDurationInput | MsgShareInput | MessageInput | Array<MsgParamInput>;
 
 export type MessageInput = {
-    code: 'common.legacyText' | 'common.invalidRequest' | 'common.serverError' | 'common.requestFailed' | 'common.routeNotFound' | 'common.notAllowed' | 'common.adminsOnly' | 'common.invalidData' | 'common.invalidAmount' | 'common.invalidCastle' | 'common.invalidCoordinates' | 'common.invalidTroopType' | 'common.invalidTroopCount' | 'common.unknownTroopType' | 'common.noTroopsSelected' | 'common.notEnoughResources' | 'common.notEnoughGold' | 'common.notEnoughGoldFor' | 'common.insufficientItems' | 'common.playerNotFound' | 'common.playerNamedNotFound' | 'common.cityNotFound' | 'common.heroNotFound' | 'common.playerName' | 'common.cityName' | 'common.heroName' | 'common.name' | 'common.nameLength' | 'common.nameInvalid' | 'common.nameNotAllowed' | 'common.freeSpeedupTooEarly' | 'common.invalidSpeedup' | 'auth.notLoggedIn' | 'auth.needPlayer' | 'auth.wrongPassword' | 'auth.tooManyTries' | 'auth.alreadyRegistered' | 'auth.signUpCheckFailed' | 'auth.signUpCheckExpired' | 'auth.accountNotFound' | 'auth.banned' | 'questInfo.description.upgrade' | 'questInfo.description.upgradeAny' | 'questInfo.description.field' | 'questInfo.description.ownFields' | 'questInfo.description.cottage' | 'questInfo.description.rallySpot' | 'questInfo.description.barracks' | 'questInfo.description.warehouse' | 'questInfo.description.academy' | 'questInfo.description.walls' | 'questInfo.description.embassy' | 'questInfo.description.inn' | 'questInfo.description.feastingHall' | 'questInfo.description.research' | 'questInfo.description.appointMayor' | 'questInfo.description.taxRate' | 'questInfo.description.joinAlliance' | 'questInfo.description.sendMail' | 'questInfo.description.recruitHero' | 'questInfo.description.train' | 'questInfo.description.fortify' | 'questInfo.description.secondCity' | 'questInfo.description.occupyValley' | 'questInfo.description.population' | 'questInfo.description.prestige' | 'questInfo.target.building' | 'questInfo.target.buildings' | 'questInfo.target.research' | 'questInfo.target.troops' | 'questInfo.target.heroes' | 'questInfo.target.mayor' | 'questInfo.target.alliance' | 'questInfo.target.cities' | 'questInfo.target.valleys' | 'questInfo.target.prestige' | 'questInfo.target.population' | 'questInfo.target.taxRate' | 'questInfo.target.mailSent' | 'questInfo.target.friend' | 'itemInfo.period.days' | 'itemInfo.period.hours' | 'itemInfo.period.minutes' | 'itemInfo.speedup.time' | 'itemInfo.speedup.hours' | 'itemInfo.speedup.percent' | 'itemInfo.speedup.troopBatch' | 'itemInfo.speedup.fortBatch' | 'itemInfo.loyalty' | 'itemInfo.heroStat' | 'itemInfo.experience.share' | 'itemInfo.experience.level' | 'itemInfo.holyWater' | 'itemInfo.buff' | 'itemInfo.grant' | 'itemInfo.grantCity' | 'itemInfo.contents.item' | 'itemInfo.contents.amount' | 'itemInfo.chest' | 'itemInfo.key' | 'itemInfo.medalBox' | 'itemInfo.randomBox' | 'itemInfo.civilCode' | 'itemInfo.cureInjured' | 'itemInfo.heroBox' | 'itemInfo.teleporter' | 'itemInfo.truce' | 'itemInfo.notUsable' | 'itemInfo.noEffect' | 'itemInfo.howTo.speedup' | 'itemInfo.howTo.troopsSpeedup' | 'itemInfo.howTo.fortificationsSpeedup' | 'itemInfo.howTo.cityMove' | 'itemInfo.howTo.heroesReset' | 'itemInfo.howTo.heroesUseItem' | 'itemInfo.howTo.cityTruce' | 'itemInfo.howTo.key' | 'itemInfo.howTo.welcome' | 'troopInfo.worker' | 'troopInfo.warrior' | 'troopInfo.scout' | 'troopInfo.pikeman' | 'troopInfo.swordsman' | 'troopInfo.archer' | 'troopInfo.transporter' | 'troopInfo.cavalry' | 'troopInfo.cataphract' | 'troopInfo.ballista' | 'troopInfo.batteringRam' | 'troopInfo.catapult' | 'troopInfo.trap' | 'troopInfo.abatis' | 'troopInfo.archerTower' | 'troopInfo.rollingLog' | 'troopInfo.trebuchet' | 'techInfo.summary.resource' | 'techInfo.summary.stockpile' | 'techInfo.summary.construction' | 'techInfo.summary.militaryScience' | 'techInfo.summary.metalCasting' | 'techInfo.summary.heroEnhancement' | 'techInfo.summary.militaryTradition' | 'techInfo.summary.ironWorking' | 'techInfo.summary.medicine' | 'techInfo.summary.archery' | 'techInfo.summary.compass' | 'techInfo.summary.horsebackRiding' | 'techInfo.summary.logistics' | 'techInfo.summary.informatics' | 'techInfo.summary.none' | 'techInfo.effect.resource' | 'techInfo.effect.stockpile' | 'techInfo.effect.construction' | 'techInfo.effect.militaryScience' | 'techInfo.effect.metalCasting' | 'techInfo.effect.heroEnhancement' | 'techInfo.effect.militaryTradition' | 'techInfo.effect.ironWorking' | 'techInfo.effect.medicine' | 'techInfo.effect.archery' | 'techInfo.effect.compass' | 'techInfo.effect.horsebackRiding' | 'techInfo.effect.logistics' | 'techInfo.effect.informaticsHeroes' | 'techInfo.effect.informaticsBuildings' | 'buildingInfo.summary.townHall' | 'buildingInfo.summary.walls' | 'buildingInfo.summary.cottage' | 'buildingInfo.summary.field' | 'buildingInfo.summary.warehouse' | 'buildingInfo.summary.barracks' | 'buildingInfo.summary.academy' | 'buildingInfo.summary.inn' | 'buildingInfo.summary.feastingHall' | 'buildingInfo.summary.rallySpot' | 'buildingInfo.summary.marketplace' | 'buildingInfo.summary.reliefStation' | 'buildingInfo.summary.beaconTower' | 'buildingInfo.summary.embassy' | 'buildingInfo.summary.prerequisite' | 'buildingInfo.placement.unique' | 'buildingInfo.placement.inside' | 'buildingInfo.placement.insideLimited' | 'buildingInfo.placement.outside' | 'buildingInfo.placement.outsideLimited' | 'buildingInfo.effect.townHall' | 'buildingInfo.effect.walls' | 'buildingInfo.effect.cottage' | 'buildingInfo.effect.field' | 'buildingInfo.effect.warehouse' | 'buildingInfo.effect.barracks' | 'buildingInfo.effect.academy' | 'buildingInfo.effect.inn' | 'buildingInfo.effect.feastingHall' | 'buildingInfo.effect.rallySpot' | 'buildingInfo.effect.marketplace' | 'buildingInfo.effect.reliefStation' | 'buildingInfo.effect.beaconTroops' | 'buildingInfo.effect.beaconHeroes' | 'buff.production' | 'buff.goldIncome' | 'buff.troopAttack' | 'buff.troopDefense' | 'buff.armySize' | 'buff.buildingQueue' | 'buff.upkeep' | 'buff.trainingCost' | 'buff.truce' | 'buff.truceCooldown' | 'buff.teleportCooldown' | 'buff.holiday' | 'buff.heroStat' | 'buff.homeCity' | 'flow.nameLength' | 'flow.actionCount' | 'flow.invalidAction' | 'flow.chooseArmy' | 'flow.targetsOwnCities' | 'flow.chooseCities' | 'flow.notFound' | 'flow.runningLocked' | 'flow.tooMany' | 'flow.noMayorHero' | 'flow.cannotTrain' | 'flow.req.level' | 'flow.req.item' | 'flow.alreadyQueued' | 'flow.alreadyRunning' | 'flow.noHeroCities' | 'flow.chooseCity' | 'flow.noOwnCities' | 'flow.cityFailed' | 'flow.runFailed' | 'flow.failedCity' | 'flow.stopped' | 'flow.healDone' | 'flow.healFailed' | 'flow.action.setMayor' | 'flow.action.healResources' | 'flow.action.healHonour' | 'flow.action.healResourcesHome' | 'flow.action.healHonourHome' | 'flow.action.waitArmiesHome' | 'flow.action.wait' | 'flow.action.attack' | 'flow.action.attackFrom' | 'flow.action.train' | 'flow.action.trainMax' | 'flow.cityCount' | 'flow.resourceAmount' | 'flow.step.noTargets' | 'flow.step.armyGone' | 'flow.step.noArmy' | 'flow.step.sent' | 'flow.step.noInjured' | 'flow.step.healed' | 'flow.step.healedHonour' | 'flow.step.healScheduled' | 'flow.step.alreadyMayor' | 'flow.step.mayor' | 'flow.step.noBarracksRoom' | 'flow.step.cannotAfford' | 'flow.step.training' | 'flow.step.trainingDone' | 'flow.step.trainingPartial' | 'flow.step.trainingPartialDone' | 'flow.step.noArmiesOut' | 'flow.step.waiting' | 'flow.step.moreActions' | 'flow.step.runEnds' | 'flow.target.sent' | 'flow.target.noIdleHero' | 'flow.target.notEnoughTroops' | 'flow.target.refused' | 'flow.skipNoHero' | 'quest.notFound' | 'quest.alreadyClaimed' | 'quest.notFinished' | 'quest.dailyGiftClaimed' | 'world.noOpenFlat' | 'world.invalidArea' | 'world.areaTooLarge' | 'world.invalidTile' | 'world.position.city' | 'world.position.tile' | 'world.position.place' | 'mail.toSelf' | 'mail.titleAndContentRequired' | 'mail.notFound' | 'social.selfTarget' | 'social.emptyMessage' | 'social.messageTooLong' | 'social.muted' | 'social.notInAlliance' | 'item.notForSale' | 'item.dailyLimit' | 'item.cannotUse' | 'item.useFrom.speedup' | 'item.useFrom.hero' | 'item.useFrom.elsewhere' | 'item.chooseCity' | 'item.needKey' | 'market.invalidResource' | 'market.invalidSide' | 'market.invalidPrice' | 'market.needMarketplace' | 'market.nothingToTrade' | 'market.tooManyOrders' | 'market.notEnoughResource' | 'market.orderNotFound' | 'market.shipmentNotFound' | 'research.notResearching' | 'research.noResearch' | 'research.chooseResearch' | 'research.queueFull' | 'research.alreadyResearching' | 'training.wallsNeeded' | 'training.invalidBarracks' | 'training.queueFull' | 'training.allQueuesFull' | 'training.wallSpaceFull' | 'training.notEnoughPopulation' | 'training.orderLimit' | 'training.duplicateOrder' | 'training.fortsAtWalls' | 'training.batchNotFound' | 'training.invalidFort' | 'training.notEnoughUnits' | 'training.notEnoughInjured' | 'training.notEnoughHonor' | 'training.mail.wallSpaceRefund.title' | 'training.mail.wallSpaceRefund.content' | 'admin.broadcast' | 'admin.unknownItem' | 'admin.invalidLevel' | 'player.accountExists' | 'player.nameTaken' | 'player.sameName' | 'player.renameCooldown' | 'player.sameGender' | 'player.genderCooldown' | 'player.invalidSetting' | 'player.invalidFlag' | 'player.title.highest' | 'player.title.prestigeRequired' | 'player.title.notEnoughMedals' | 'player.holiday.invalidDays' | 'player.holiday.troopsOut' | 'player.truce.cooldown' | 'player.protected.beginner' | 'player.protected.truce' | 'player.protected.holiday' | 'player.bookmark.tooMany' | 'player.preset.nameLength' | 'player.preset.tooMany' | 'player.mail.protectionExpired.title' | 'player.mail.protectionExpired.content' | 'city.taxRateRange' | 'city.workRateRange' | 'city.invalidStorePercent' | 'city.storePercentTotal' | 'city.comfortCooldown' | 'city.notEnoughFood' | 'city.invalidComfortType' | 'city.invalidLogo' | 'city.teleportCooldown' | 'city.recallTroopsFirst' | 'city.foreignTroops' | 'city.notFreeFlat' | 'building.invalidBuilding' | 'building.notFound' | 'building.invalidPosition' | 'building.cannotBuild' | 'building.cannotBuildHere' | 'building.positionTaken' | 'building.limitReached' | 'building.slotLocked' | 'building.queuesBusy' | 'building.requirementsNotMet' | 'building.statusChanged' | 'building.maxLevel' | 'building.busy' | 'building.nothingToDemolish' | 'building.cannotDemolish' | 'building.notInProgress' | 'building.invalidTech' | 'building.academyNeeded' | 'building.techRequirementsNotMet' | 'building.troopRequirementsNotMet' | 'hero.needInn' | 'hero.noVacancy' | 'hero.notIdle' | 'hero.locked' | 'hero.noMayor' | 'hero.invalidPoints' | 'hero.maxLevel' | 'hero.maxLevelNoExperience' | 'hero.notEnoughExperience' | 'hero.invalidAttribute' | 'hero.invalidGearPiece' | 'hero.gearMaxStars' | 'hero.gearStarLimit' | 'hero.notEnoughMedals' | 'hero.fullyLoyal' | 'hero.itemNotForGold' | 'hero.invalidItem' | 'hero.notPrisoner' | 'hero.stillLoyal' | 'report.title.missionAborted' | 'report.title.scoutReturned' | 'report.title.attackReturned' | 'report.title.returned' | 'report.title.transportReport' | 'report.title.transportReceived' | 'report.title.reinforcementArrived' | 'report.title.reinforcementsFrom' | 'report.title.newCityFounded' | 'report.title.scoutReport' | 'report.title.enemyScouts' | 'report.title.scoutsRepelled' | 'report.title.attackSucceeded' | 'report.title.attackFailed' | 'report.title.cityAttacked' | 'report.title.attackRepelled' | 'report.title.reinforcementsFought' | 'report.title.valleyOccupied' | 'report.title.valleyLost' | 'report.title.valleyDefended' | 'report.title.tradeCompleted' | 'report.title.troopsDeserted' | 'report.notFound' | 'report.oldFormat' | 'report.cityFounded' | 'army.invalidMission' | 'army.insufficientTroops' | 'army.overloaded' | 'army.rallySpotRequired' | 'army.armyLimit' | 'army.troopLimit' | 'army.invalidTarget' | 'army.transportTarget' | 'army.noResources' | 'army.reinforceTarget' | 'army.alliedTroopsRefused' | 'army.scoutsRequired' | 'army.beginnerProtection' | 'army.truce' | 'army.nothingToAttack' | 'army.buildOnFlat' | 'army.cityLimit' | 'army.newCityResources' | 'army.heroRequiredAttack' | 'army.heroRequiredSettlers' | 'army.notFound' | 'army.alreadyReturning' | 'army.unknownMission' | 'army.destinationNotFriendly' | 'army.valleyNoLongerHeld' | 'army.landNotFree' | 'army.cityGone' | 'army.cityNowFriendly' | 'army.valleyAlreadyHeld' | 'army.valleyNowFriendly' | 'army.homeCityGone' | 'army.valleyLimit' | 'army.valleyNotHeld' | 'army.upgradeTarget' | 'army.upgradeHeld' | 'army.valleyMaxLevel' | 'army.barbarianCityMaxLevel' | 'alliance.name' | 'alliance.notFound' | 'alliance.namedNotFound' | 'alliance.nameTaken' | 'alliance.notMember' | 'alliance.alreadyMember' | 'alliance.rankTooLow' | 'alliance.full' | 'alliance.rejoinCooldown' | 'alliance.hostMustTransfer' | 'alliance.playerInOtherAlliance' | 'alliance.inviteNotFound' | 'alliance.applicationNotFound' | 'alliance.notApplied' | 'alliance.buildingRequired' | 'alliance.invalidRank' | 'alliance.memberNotFound' | 'alliance.ownRank' | 'alliance.rankLimit' | 'alliance.hostToViceHostOnly' | 'alliance.kickSelf' | 'alliance.kickHigherRank' | 'alliance.invalidRelation' | 'alliance.invalidTarget' | 'alliance.alreadyRelation' | 'alliance.warCooldown' | 'alliance.invited' | 'alliance.warDeclared' | 'alliance.event.created' | 'alliance.event.joined' | 'alliance.event.left' | 'alliance.event.applied' | 'alliance.event.promoted' | 'alliance.event.demoted' | 'alliance.event.newHost' | 'alliance.event.removed' | 'alliance.event.relationSet' | 'alliance.relation.ally' | 'alliance.relation.neutral' | 'alliance.relation.enemy';
+    code: 'common.legacyText' | 'common.invalidRequest' | 'common.serverError' | 'common.requestFailed' | 'common.routeNotFound' | 'common.notAllowed' | 'common.adminsOnly' | 'common.invalidData' | 'common.invalidAmount' | 'common.invalidCastle' | 'common.invalidCoordinates' | 'common.invalidTroopType' | 'common.invalidTroopCount' | 'common.unknownTroopType' | 'common.noTroopsSelected' | 'common.notEnoughResources' | 'common.notEnoughGold' | 'common.notEnoughGoldFor' | 'common.insufficientItems' | 'common.playerNotFound' | 'common.playerNamedNotFound' | 'common.cityNotFound' | 'common.heroNotFound' | 'common.playerName' | 'common.cityName' | 'common.heroName' | 'common.name' | 'common.nameLength' | 'common.nameInvalid' | 'common.nameNotAllowed' | 'common.freeSpeedupTooEarly' | 'common.invalidSpeedup' | 'auth.notLoggedIn' | 'auth.needPlayer' | 'auth.wrongPassword' | 'auth.tooManyTries' | 'auth.alreadyRegistered' | 'auth.signUpCheckFailed' | 'auth.signUpCheckExpired' | 'auth.accountNotFound' | 'auth.banned' | 'questInfo.description.upgrade' | 'questInfo.description.upgradeAny' | 'questInfo.description.field' | 'questInfo.description.ownFields' | 'questInfo.description.cottage' | 'questInfo.description.rallySpot' | 'questInfo.description.barracks' | 'questInfo.description.warehouse' | 'questInfo.description.academy' | 'questInfo.description.walls' | 'questInfo.description.embassy' | 'questInfo.description.inn' | 'questInfo.description.feastingHall' | 'questInfo.description.research' | 'questInfo.description.appointMayor' | 'questInfo.description.taxRate' | 'questInfo.description.joinAlliance' | 'questInfo.description.sendMail' | 'questInfo.description.recruitHero' | 'questInfo.description.train' | 'questInfo.description.fortify' | 'questInfo.description.secondCity' | 'questInfo.description.occupyValley' | 'questInfo.description.population' | 'questInfo.description.prestige' | 'questInfo.target.building' | 'questInfo.target.buildings' | 'questInfo.target.research' | 'questInfo.target.troops' | 'questInfo.target.heroes' | 'questInfo.target.mayor' | 'questInfo.target.alliance' | 'questInfo.target.cities' | 'questInfo.target.valleys' | 'questInfo.target.prestige' | 'questInfo.target.population' | 'questInfo.target.taxRate' | 'questInfo.target.mailSent' | 'questInfo.target.friend' | 'itemInfo.period.days' | 'itemInfo.period.hours' | 'itemInfo.period.minutes' | 'itemInfo.speedup.time' | 'itemInfo.speedup.hours' | 'itemInfo.speedup.percent' | 'itemInfo.speedup.troopBatch' | 'itemInfo.speedup.fortBatch' | 'itemInfo.loyalty' | 'itemInfo.heroStat' | 'itemInfo.experience.share' | 'itemInfo.experience.level' | 'itemInfo.holyWater' | 'itemInfo.buff' | 'itemInfo.grant' | 'itemInfo.grantCity' | 'itemInfo.contents.item' | 'itemInfo.contents.amount' | 'itemInfo.chest' | 'itemInfo.key' | 'itemInfo.medalBox' | 'itemInfo.randomBox' | 'itemInfo.civilCode' | 'itemInfo.cureInjured' | 'itemInfo.heroBox' | 'itemInfo.teleporter' | 'itemInfo.truce' | 'itemInfo.notUsable' | 'itemInfo.noEffect' | 'itemInfo.howTo.speedup' | 'itemInfo.howTo.troopsSpeedup' | 'itemInfo.howTo.fortificationsSpeedup' | 'itemInfo.howTo.cityMove' | 'itemInfo.howTo.heroesReset' | 'itemInfo.howTo.heroesUseItem' | 'itemInfo.howTo.cityTruce' | 'itemInfo.howTo.key' | 'itemInfo.howTo.welcome' | 'troopInfo.worker' | 'troopInfo.warrior' | 'troopInfo.scout' | 'troopInfo.pikeman' | 'troopInfo.swordsman' | 'troopInfo.archer' | 'troopInfo.transporter' | 'troopInfo.cavalry' | 'troopInfo.cataphract' | 'troopInfo.ballista' | 'troopInfo.batteringRam' | 'troopInfo.catapult' | 'troopInfo.trap' | 'troopInfo.abatis' | 'troopInfo.archerTower' | 'troopInfo.rollingLog' | 'troopInfo.trebuchet' | 'techInfo.summary.resource' | 'techInfo.summary.stockpile' | 'techInfo.summary.construction' | 'techInfo.summary.militaryScience' | 'techInfo.summary.metalCasting' | 'techInfo.summary.heroEnhancement' | 'techInfo.summary.militaryTradition' | 'techInfo.summary.ironWorking' | 'techInfo.summary.medicine' | 'techInfo.summary.archery' | 'techInfo.summary.compass' | 'techInfo.summary.horsebackRiding' | 'techInfo.summary.logistics' | 'techInfo.summary.informatics' | 'techInfo.summary.none' | 'techInfo.effect.resource' | 'techInfo.effect.stockpile' | 'techInfo.effect.construction' | 'techInfo.effect.militaryScience' | 'techInfo.effect.metalCasting' | 'techInfo.effect.heroEnhancement' | 'techInfo.effect.militaryTradition' | 'techInfo.effect.ironWorking' | 'techInfo.effect.medicine' | 'techInfo.effect.archery' | 'techInfo.effect.compass' | 'techInfo.effect.horsebackRiding' | 'techInfo.effect.logistics' | 'techInfo.effect.informaticsHeroes' | 'techInfo.effect.informaticsBuildings' | 'buildingInfo.summary.townHall' | 'buildingInfo.summary.walls' | 'buildingInfo.summary.cottage' | 'buildingInfo.summary.field' | 'buildingInfo.summary.warehouse' | 'buildingInfo.summary.barracks' | 'buildingInfo.summary.academy' | 'buildingInfo.summary.inn' | 'buildingInfo.summary.feastingHall' | 'buildingInfo.summary.rallySpot' | 'buildingInfo.summary.marketplace' | 'buildingInfo.summary.reliefStation' | 'buildingInfo.summary.beaconTower' | 'buildingInfo.summary.embassy' | 'buildingInfo.summary.prerequisite' | 'buildingInfo.placement.unique' | 'buildingInfo.placement.inside' | 'buildingInfo.placement.insideLimited' | 'buildingInfo.placement.outside' | 'buildingInfo.placement.outsideLimited' | 'buildingInfo.effect.townHall' | 'buildingInfo.effect.walls' | 'buildingInfo.effect.cottage' | 'buildingInfo.effect.field' | 'buildingInfo.effect.warehouse' | 'buildingInfo.effect.barracks' | 'buildingInfo.effect.academy' | 'buildingInfo.effect.inn' | 'buildingInfo.effect.feastingHall' | 'buildingInfo.effect.rallySpot' | 'buildingInfo.effect.marketplace' | 'buildingInfo.effect.reliefStation' | 'buildingInfo.effect.beaconTroops' | 'buildingInfo.effect.beaconHeroes' | 'buff.production' | 'buff.goldIncome' | 'buff.troopAttack' | 'buff.troopDefense' | 'buff.armySize' | 'buff.buildingQueue' | 'buff.upkeep' | 'buff.trainingCost' | 'buff.truce' | 'buff.truceCooldown' | 'buff.teleportCooldown' | 'buff.holiday' | 'buff.heroStat' | 'buff.homeCity' | 'flow.nameLength' | 'flow.actionCount' | 'flow.invalidAction' | 'flow.chooseArmy' | 'flow.targetsOwnCities' | 'flow.chooseCities' | 'flow.notFound' | 'flow.runningLocked' | 'flow.tooMany' | 'flow.noMayorHero' | 'flow.cannotTrain' | 'flow.req.level' | 'flow.req.item' | 'flow.alreadyQueued' | 'flow.alreadyRunning' | 'flow.noHeroCities' | 'flow.chooseCity' | 'flow.noOwnCities' | 'flow.cityFailed' | 'flow.runFailed' | 'flow.failedCity' | 'flow.stopped' | 'flow.healDone' | 'flow.healFailed' | 'flow.action.setMayor' | 'flow.action.healResources' | 'flow.action.healHonour' | 'flow.action.healResourcesHome' | 'flow.action.healHonourHome' | 'flow.action.waitArmiesHome' | 'flow.action.wait' | 'flow.action.attack' | 'flow.action.attackFrom' | 'flow.action.train' | 'flow.action.trainMax' | 'flow.cityCount' | 'flow.resourceAmount' | 'flow.step.noTargets' | 'flow.step.armyGone' | 'flow.step.noArmy' | 'flow.step.sent' | 'flow.step.noInjured' | 'flow.step.healed' | 'flow.step.healedHonour' | 'flow.step.healScheduled' | 'flow.step.alreadyMayor' | 'flow.step.mayor' | 'flow.step.noBarracksRoom' | 'flow.step.cannotAfford' | 'flow.step.training' | 'flow.step.trainingDone' | 'flow.step.trainingPartial' | 'flow.step.trainingPartialDone' | 'flow.step.noArmiesOut' | 'flow.step.waiting' | 'flow.step.moreActions' | 'flow.step.runEnds' | 'flow.target.sent' | 'flow.target.noIdleHero' | 'flow.target.notEnoughTroops' | 'flow.target.refused' | 'flow.skipNoHero' | 'quest.notFound' | 'quest.alreadyClaimed' | 'quest.notFinished' | 'quest.dailyGiftClaimed' | 'world.noOpenFlat' | 'world.invalidArea' | 'world.areaTooLarge' | 'world.invalidTile' | 'world.position.city' | 'world.position.tile' | 'world.position.place' | 'mail.toSelf' | 'mail.titleAndContentRequired' | 'mail.notFound' | 'social.selfTarget' | 'social.emptyMessage' | 'social.messageTooLong' | 'social.muted' | 'social.notInAlliance' | 'item.notForSale' | 'item.dailyLimit' | 'item.cannotUse' | 'item.useFrom.speedup' | 'item.useFrom.hero' | 'item.useFrom.elsewhere' | 'item.chooseCity' | 'item.needKey' | 'market.invalidResource' | 'market.invalidSide' | 'market.invalidPrice' | 'market.needMarketplace' | 'market.nothingToTrade' | 'market.tooManyOrders' | 'market.notEnoughResource' | 'market.slowDown' | 'market.orderNotFound' | 'market.shipmentNotFound' | 'research.notResearching' | 'research.noResearch' | 'research.chooseResearch' | 'research.queueFull' | 'research.alreadyResearching' | 'training.wallsNeeded' | 'training.invalidBarracks' | 'training.queueFull' | 'training.allQueuesFull' | 'training.wallSpaceFull' | 'training.notEnoughPopulation' | 'training.orderLimit' | 'training.duplicateOrder' | 'training.fortsAtWalls' | 'training.batchNotFound' | 'training.invalidFort' | 'training.notEnoughUnits' | 'training.notEnoughInjured' | 'training.notEnoughHonor' | 'training.mail.wallSpaceRefund.title' | 'training.mail.wallSpaceRefund.content' | 'admin.broadcast' | 'admin.unknownItem' | 'admin.invalidLevel' | 'player.accountExists' | 'player.nameTaken' | 'player.sameName' | 'player.renameCooldown' | 'player.sameGender' | 'player.genderCooldown' | 'player.invalidSetting' | 'player.invalidFlag' | 'player.title.highest' | 'player.title.prestigeRequired' | 'player.title.notEnoughMedals' | 'player.holiday.invalidDays' | 'player.holiday.troopsOut' | 'player.truce.cooldown' | 'player.protected.beginner' | 'player.protected.truce' | 'player.protected.holiday' | 'player.bookmark.tooMany' | 'player.preset.nameLength' | 'player.preset.tooMany' | 'player.mail.protectionExpired.title' | 'player.mail.protectionExpired.content' | 'city.taxRateRange' | 'city.workRateRange' | 'city.invalidStorePercent' | 'city.storePercentTotal' | 'city.comfortCooldown' | 'city.notEnoughFood' | 'city.invalidComfortType' | 'city.invalidLogo' | 'city.teleportCooldown' | 'city.recallTroopsFirst' | 'city.foreignTroops' | 'city.notFreeFlat' | 'building.invalidBuilding' | 'building.notFound' | 'building.invalidPosition' | 'building.cannotBuild' | 'building.cannotBuildHere' | 'building.positionTaken' | 'building.limitReached' | 'building.slotLocked' | 'building.queuesBusy' | 'building.requirementsNotMet' | 'building.statusChanged' | 'building.maxLevel' | 'building.busy' | 'building.nothingToDemolish' | 'building.cannotDemolish' | 'building.notInProgress' | 'building.invalidTech' | 'building.academyNeeded' | 'building.techRequirementsNotMet' | 'building.troopRequirementsNotMet' | 'hero.needInn' | 'hero.noVacancy' | 'hero.notIdle' | 'hero.locked' | 'hero.noMayor' | 'hero.invalidPoints' | 'hero.maxLevel' | 'hero.maxLevelNoExperience' | 'hero.notEnoughExperience' | 'hero.invalidAttribute' | 'hero.invalidGearPiece' | 'hero.gearMaxStars' | 'hero.gearStarLimit' | 'hero.notEnoughMedals' | 'hero.fullyLoyal' | 'hero.itemNotForGold' | 'hero.invalidItem' | 'hero.notPrisoner' | 'hero.stillLoyal' | 'report.title.missionAborted' | 'report.title.scoutReturned' | 'report.title.attackReturned' | 'report.title.returned' | 'report.title.transportReport' | 'report.title.transportReceived' | 'report.title.reinforcementArrived' | 'report.title.reinforcementsFrom' | 'report.title.newCityFounded' | 'report.title.scoutReport' | 'report.title.enemyScouts' | 'report.title.scoutsRepelled' | 'report.title.attackSucceeded' | 'report.title.attackFailed' | 'report.title.cityAttacked' | 'report.title.attackRepelled' | 'report.title.reinforcementsFought' | 'report.title.valleyOccupied' | 'report.title.valleyLost' | 'report.title.valleyDefended' | 'report.title.tradeCompleted' | 'report.title.troopsDeserted' | 'report.notFound' | 'report.oldFormat' | 'report.cityFounded' | 'army.invalidMission' | 'army.insufficientTroops' | 'army.overloaded' | 'army.rallySpotRequired' | 'army.armyLimit' | 'army.troopLimit' | 'army.invalidTarget' | 'army.transportTarget' | 'army.noResources' | 'army.reinforceTarget' | 'army.alliedTroopsRefused' | 'army.scoutsRequired' | 'army.beginnerProtection' | 'army.truce' | 'army.nothingToAttack' | 'army.buildOnFlat' | 'army.cityLimit' | 'army.newCityResources' | 'army.heroRequiredAttack' | 'army.heroRequiredSettlers' | 'army.notFound' | 'army.alreadyReturning' | 'army.unknownMission' | 'army.destinationNotFriendly' | 'army.valleyNoLongerHeld' | 'army.landNotFree' | 'army.cityGone' | 'army.cityNowFriendly' | 'army.valleyAlreadyHeld' | 'army.valleyNowFriendly' | 'army.homeCityGone' | 'army.valleyLimit' | 'army.valleyNotHeld' | 'army.upgradeTarget' | 'army.upgradeHeld' | 'army.valleyMaxLevel' | 'army.barbarianCityMaxLevel' | 'alliance.name' | 'alliance.notFound' | 'alliance.namedNotFound' | 'alliance.nameTaken' | 'alliance.notMember' | 'alliance.alreadyMember' | 'alliance.rankTooLow' | 'alliance.full' | 'alliance.rejoinCooldown' | 'alliance.hostMustTransfer' | 'alliance.playerInOtherAlliance' | 'alliance.inviteNotFound' | 'alliance.applicationNotFound' | 'alliance.notApplied' | 'alliance.buildingRequired' | 'alliance.invalidRank' | 'alliance.memberNotFound' | 'alliance.ownRank' | 'alliance.rankLimit' | 'alliance.hostToViceHostOnly' | 'alliance.kickSelf' | 'alliance.kickHigherRank' | 'alliance.invalidRelation' | 'alliance.invalidTarget' | 'alliance.alreadyRelation' | 'alliance.warCooldown' | 'alliance.invited' | 'alliance.warDeclared' | 'alliance.event.created' | 'alliance.event.joined' | 'alliance.event.left' | 'alliance.event.applied' | 'alliance.event.promoted' | 'alliance.event.demoted' | 'alliance.event.newHost' | 'alliance.event.removed' | 'alliance.event.relationSet' | 'alliance.relation.ally' | 'alliance.relation.neutral' | 'alliance.relation.enemy';
     params?: {
         [key: string]: MsgParamInput;
     };
@@ -2786,6 +2786,40 @@ export type MarketMerchantInput = {
     ask: number;
 };
 
+/**
+ * the NPC factions: they trade from their shared stock along their price curve
+ */
+export type MarketFactionsInput = {
+    /**
+     * the world price at their stock now, inside the merchant's band
+     */
+    price: number;
+    /**
+     * they sell at this price (marginal; rises as they sell); null at the band's edge
+     */
+    ask: number | null;
+    /**
+     * they buy at this price (marginal; falls as they buy); null at the band's edge
+     */
+    bid: number | null;
+    /**
+     * units they sell before their price reaches the band's edge
+     */
+    sells: number;
+    /**
+     * units they buy before their price reaches the band's edge
+     */
+    buys: number;
+    /**
+     * what they sell in a few price steps up to the band's edge, best first
+     */
+    sellers: Array<MarketPriceLevelInput>;
+    /**
+     * what they buy in a few price steps down to the band's edge, best first
+     */
+    buyers: Array<MarketPriceLevelInput>;
+};
+
 export type MarketOrderBookInput = {
     resType: number;
     /**
@@ -2797,6 +2831,10 @@ export type MarketOrderBookInput = {
      */
     sellers: Array<MarketPriceLevelInput>;
     merchant: MarketMerchantInput;
+    /**
+     * null before the factions first trade
+     */
+    factions: MarketFactionsInput | null;
 };
 
 export type MarketOrderInput = {
@@ -2836,6 +2874,10 @@ export type MarketQuoteInput = {
      */
     merchantFilled: number;
     /**
+     * units traded with the NPC factions
+     */
+    factionsFilled: number;
+    /**
      * units traded with other lords
      */
     playerFilled: number;
@@ -2868,6 +2910,10 @@ export type MarketPlaceOrderResultInput = {
      */
     merchantFilled: number;
     /**
+     * units traded with the NPC factions
+     */
+    factionsFilled: number;
+    /**
      * units traded with other lords
      */
     playerFilled: number;
@@ -2899,9 +2945,40 @@ export type MarketTradeInput = {
      */
     merchant: boolean;
     /**
+     * traded with the NPC factions
+     */
+    factions: boolean;
+    /**
      * epoch milliseconds
      */
     createdAt: number;
+};
+
+/**
+ * a single trade between two factions' groups, made up from an auction to show it
+ */
+export type MarketNpcTradeInput = {
+    /**
+     * epoch milliseconds
+     */
+    at: number;
+    resource: 'food' | 'wood' | 'stone' | 'iron';
+    amount: number;
+    price: number;
+    seller: {
+        /**
+         * the zone (state) of its cities
+         */
+        zone: number;
+        level: number;
+    };
+    buyer: {
+        /**
+         * the zone (state) of its cities
+         */
+        zone: number;
+        level: number;
+    };
 };
 
 export type MarketCandleInput = {
@@ -2918,19 +2995,84 @@ export type MarketCandleInput = {
 
 export type MarketHistoryInput = {
     resType: number;
+    period: 'minute' | 'hour' | 'day';
     /**
-     * candle length: one game hour
+     * candle length in real ms
      */
     bucketMs: number;
     merchant: MarketMerchantInput;
     /**
-     * oldest first; buckets without trades are omitted
+     * every trade in the world, oldest first; candles without trades are omitted
      */
     candles: Array<MarketCandleInput>;
     /**
      * most recent first
      */
     trades: Array<MarketTradeInput>;
+    /**
+     * the factions' latest trades with each other in this resource, newest first
+     */
+    ticker: Array<MarketNpcTradeInput>;
+};
+
+export type MarketAffordableInput = {
+    /**
+     * the most units the gold buys now with an instant order, the fee included
+     */
+    amount: number;
+};
+
+export type MarketSummaryInput = {
+    resType: number;
+    /**
+     * its price now: the factions' world price, or the merchant's reference before they trade
+     */
+    price: number;
+    merchant: MarketMerchantInput;
+    /**
+     * the last 24 hours from hourly candles: the price it opened at, its high and low, the units traded; null when nothing traded
+     */
+    day: {
+        open: number;
+        high: number;
+        low: number;
+        volume: number;
+    } | null;
+};
+
+export type FactionGoldInput = {
+    id: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
+    /**
+     * the gold the faction holds now: it pays players selling to it with this
+     */
+    gold: number;
+    /**
+     * what its gold drifts back to: its members' gold in the NPC table
+     */
+    treasury: number;
+};
+
+export type MarketMyTradeInput = {
+    id: number;
+    resType: number;
+    /**
+     * the player's side: 0 bought, 1 sold
+     */
+    side: number;
+    price: number;
+    amount: number;
+    /**
+     * gold that changed hands, before the buyer's fee
+     */
+    gold: number;
+    /**
+     * who was on the other side
+     */
+    with: 'player' | 'factions' | 'merchant';
+    /**
+     * epoch milliseconds
+     */
+    createdAt: number;
 };
 
 export type MarketShipmentInput = {
@@ -3172,7 +3314,7 @@ export type MsgShare = {
 export type MsgParam = string | number | boolean | GameRef | MsgDuration | MsgShare | Message | Array<MsgParam>;
 
 export type Message = {
-    code: 'common.legacyText' | 'common.invalidRequest' | 'common.serverError' | 'common.requestFailed' | 'common.routeNotFound' | 'common.notAllowed' | 'common.adminsOnly' | 'common.invalidData' | 'common.invalidAmount' | 'common.invalidCastle' | 'common.invalidCoordinates' | 'common.invalidTroopType' | 'common.invalidTroopCount' | 'common.unknownTroopType' | 'common.noTroopsSelected' | 'common.notEnoughResources' | 'common.notEnoughGold' | 'common.notEnoughGoldFor' | 'common.insufficientItems' | 'common.playerNotFound' | 'common.playerNamedNotFound' | 'common.cityNotFound' | 'common.heroNotFound' | 'common.playerName' | 'common.cityName' | 'common.heroName' | 'common.name' | 'common.nameLength' | 'common.nameInvalid' | 'common.nameNotAllowed' | 'common.freeSpeedupTooEarly' | 'common.invalidSpeedup' | 'auth.notLoggedIn' | 'auth.needPlayer' | 'auth.wrongPassword' | 'auth.tooManyTries' | 'auth.alreadyRegistered' | 'auth.signUpCheckFailed' | 'auth.signUpCheckExpired' | 'auth.accountNotFound' | 'auth.banned' | 'questInfo.description.upgrade' | 'questInfo.description.upgradeAny' | 'questInfo.description.field' | 'questInfo.description.ownFields' | 'questInfo.description.cottage' | 'questInfo.description.rallySpot' | 'questInfo.description.barracks' | 'questInfo.description.warehouse' | 'questInfo.description.academy' | 'questInfo.description.walls' | 'questInfo.description.embassy' | 'questInfo.description.inn' | 'questInfo.description.feastingHall' | 'questInfo.description.research' | 'questInfo.description.appointMayor' | 'questInfo.description.taxRate' | 'questInfo.description.joinAlliance' | 'questInfo.description.sendMail' | 'questInfo.description.recruitHero' | 'questInfo.description.train' | 'questInfo.description.fortify' | 'questInfo.description.secondCity' | 'questInfo.description.occupyValley' | 'questInfo.description.population' | 'questInfo.description.prestige' | 'questInfo.target.building' | 'questInfo.target.buildings' | 'questInfo.target.research' | 'questInfo.target.troops' | 'questInfo.target.heroes' | 'questInfo.target.mayor' | 'questInfo.target.alliance' | 'questInfo.target.cities' | 'questInfo.target.valleys' | 'questInfo.target.prestige' | 'questInfo.target.population' | 'questInfo.target.taxRate' | 'questInfo.target.mailSent' | 'questInfo.target.friend' | 'itemInfo.period.days' | 'itemInfo.period.hours' | 'itemInfo.period.minutes' | 'itemInfo.speedup.time' | 'itemInfo.speedup.hours' | 'itemInfo.speedup.percent' | 'itemInfo.speedup.troopBatch' | 'itemInfo.speedup.fortBatch' | 'itemInfo.loyalty' | 'itemInfo.heroStat' | 'itemInfo.experience.share' | 'itemInfo.experience.level' | 'itemInfo.holyWater' | 'itemInfo.buff' | 'itemInfo.grant' | 'itemInfo.grantCity' | 'itemInfo.contents.item' | 'itemInfo.contents.amount' | 'itemInfo.chest' | 'itemInfo.key' | 'itemInfo.medalBox' | 'itemInfo.randomBox' | 'itemInfo.civilCode' | 'itemInfo.cureInjured' | 'itemInfo.heroBox' | 'itemInfo.teleporter' | 'itemInfo.truce' | 'itemInfo.notUsable' | 'itemInfo.noEffect' | 'itemInfo.howTo.speedup' | 'itemInfo.howTo.troopsSpeedup' | 'itemInfo.howTo.fortificationsSpeedup' | 'itemInfo.howTo.cityMove' | 'itemInfo.howTo.heroesReset' | 'itemInfo.howTo.heroesUseItem' | 'itemInfo.howTo.cityTruce' | 'itemInfo.howTo.key' | 'itemInfo.howTo.welcome' | 'troopInfo.worker' | 'troopInfo.warrior' | 'troopInfo.scout' | 'troopInfo.pikeman' | 'troopInfo.swordsman' | 'troopInfo.archer' | 'troopInfo.transporter' | 'troopInfo.cavalry' | 'troopInfo.cataphract' | 'troopInfo.ballista' | 'troopInfo.batteringRam' | 'troopInfo.catapult' | 'troopInfo.trap' | 'troopInfo.abatis' | 'troopInfo.archerTower' | 'troopInfo.rollingLog' | 'troopInfo.trebuchet' | 'techInfo.summary.resource' | 'techInfo.summary.stockpile' | 'techInfo.summary.construction' | 'techInfo.summary.militaryScience' | 'techInfo.summary.metalCasting' | 'techInfo.summary.heroEnhancement' | 'techInfo.summary.militaryTradition' | 'techInfo.summary.ironWorking' | 'techInfo.summary.medicine' | 'techInfo.summary.archery' | 'techInfo.summary.compass' | 'techInfo.summary.horsebackRiding' | 'techInfo.summary.logistics' | 'techInfo.summary.informatics' | 'techInfo.summary.none' | 'techInfo.effect.resource' | 'techInfo.effect.stockpile' | 'techInfo.effect.construction' | 'techInfo.effect.militaryScience' | 'techInfo.effect.metalCasting' | 'techInfo.effect.heroEnhancement' | 'techInfo.effect.militaryTradition' | 'techInfo.effect.ironWorking' | 'techInfo.effect.medicine' | 'techInfo.effect.archery' | 'techInfo.effect.compass' | 'techInfo.effect.horsebackRiding' | 'techInfo.effect.logistics' | 'techInfo.effect.informaticsHeroes' | 'techInfo.effect.informaticsBuildings' | 'buildingInfo.summary.townHall' | 'buildingInfo.summary.walls' | 'buildingInfo.summary.cottage' | 'buildingInfo.summary.field' | 'buildingInfo.summary.warehouse' | 'buildingInfo.summary.barracks' | 'buildingInfo.summary.academy' | 'buildingInfo.summary.inn' | 'buildingInfo.summary.feastingHall' | 'buildingInfo.summary.rallySpot' | 'buildingInfo.summary.marketplace' | 'buildingInfo.summary.reliefStation' | 'buildingInfo.summary.beaconTower' | 'buildingInfo.summary.embassy' | 'buildingInfo.summary.prerequisite' | 'buildingInfo.placement.unique' | 'buildingInfo.placement.inside' | 'buildingInfo.placement.insideLimited' | 'buildingInfo.placement.outside' | 'buildingInfo.placement.outsideLimited' | 'buildingInfo.effect.townHall' | 'buildingInfo.effect.walls' | 'buildingInfo.effect.cottage' | 'buildingInfo.effect.field' | 'buildingInfo.effect.warehouse' | 'buildingInfo.effect.barracks' | 'buildingInfo.effect.academy' | 'buildingInfo.effect.inn' | 'buildingInfo.effect.feastingHall' | 'buildingInfo.effect.rallySpot' | 'buildingInfo.effect.marketplace' | 'buildingInfo.effect.reliefStation' | 'buildingInfo.effect.beaconTroops' | 'buildingInfo.effect.beaconHeroes' | 'buff.production' | 'buff.goldIncome' | 'buff.troopAttack' | 'buff.troopDefense' | 'buff.armySize' | 'buff.buildingQueue' | 'buff.upkeep' | 'buff.trainingCost' | 'buff.truce' | 'buff.truceCooldown' | 'buff.teleportCooldown' | 'buff.holiday' | 'buff.heroStat' | 'buff.homeCity' | 'flow.nameLength' | 'flow.actionCount' | 'flow.invalidAction' | 'flow.chooseArmy' | 'flow.targetsOwnCities' | 'flow.chooseCities' | 'flow.notFound' | 'flow.runningLocked' | 'flow.tooMany' | 'flow.noMayorHero' | 'flow.cannotTrain' | 'flow.req.level' | 'flow.req.item' | 'flow.alreadyQueued' | 'flow.alreadyRunning' | 'flow.noHeroCities' | 'flow.chooseCity' | 'flow.noOwnCities' | 'flow.cityFailed' | 'flow.runFailed' | 'flow.failedCity' | 'flow.stopped' | 'flow.healDone' | 'flow.healFailed' | 'flow.action.setMayor' | 'flow.action.healResources' | 'flow.action.healHonour' | 'flow.action.healResourcesHome' | 'flow.action.healHonourHome' | 'flow.action.waitArmiesHome' | 'flow.action.wait' | 'flow.action.attack' | 'flow.action.attackFrom' | 'flow.action.train' | 'flow.action.trainMax' | 'flow.cityCount' | 'flow.resourceAmount' | 'flow.step.noTargets' | 'flow.step.armyGone' | 'flow.step.noArmy' | 'flow.step.sent' | 'flow.step.noInjured' | 'flow.step.healed' | 'flow.step.healedHonour' | 'flow.step.healScheduled' | 'flow.step.alreadyMayor' | 'flow.step.mayor' | 'flow.step.noBarracksRoom' | 'flow.step.cannotAfford' | 'flow.step.training' | 'flow.step.trainingDone' | 'flow.step.trainingPartial' | 'flow.step.trainingPartialDone' | 'flow.step.noArmiesOut' | 'flow.step.waiting' | 'flow.step.moreActions' | 'flow.step.runEnds' | 'flow.target.sent' | 'flow.target.noIdleHero' | 'flow.target.notEnoughTroops' | 'flow.target.refused' | 'flow.skipNoHero' | 'quest.notFound' | 'quest.alreadyClaimed' | 'quest.notFinished' | 'quest.dailyGiftClaimed' | 'world.noOpenFlat' | 'world.invalidArea' | 'world.areaTooLarge' | 'world.invalidTile' | 'world.position.city' | 'world.position.tile' | 'world.position.place' | 'mail.toSelf' | 'mail.titleAndContentRequired' | 'mail.notFound' | 'social.selfTarget' | 'social.emptyMessage' | 'social.messageTooLong' | 'social.muted' | 'social.notInAlliance' | 'item.notForSale' | 'item.dailyLimit' | 'item.cannotUse' | 'item.useFrom.speedup' | 'item.useFrom.hero' | 'item.useFrom.elsewhere' | 'item.chooseCity' | 'item.needKey' | 'market.invalidResource' | 'market.invalidSide' | 'market.invalidPrice' | 'market.needMarketplace' | 'market.nothingToTrade' | 'market.tooManyOrders' | 'market.notEnoughResource' | 'market.orderNotFound' | 'market.shipmentNotFound' | 'research.notResearching' | 'research.noResearch' | 'research.chooseResearch' | 'research.queueFull' | 'research.alreadyResearching' | 'training.wallsNeeded' | 'training.invalidBarracks' | 'training.queueFull' | 'training.allQueuesFull' | 'training.wallSpaceFull' | 'training.notEnoughPopulation' | 'training.orderLimit' | 'training.duplicateOrder' | 'training.fortsAtWalls' | 'training.batchNotFound' | 'training.invalidFort' | 'training.notEnoughUnits' | 'training.notEnoughInjured' | 'training.notEnoughHonor' | 'training.mail.wallSpaceRefund.title' | 'training.mail.wallSpaceRefund.content' | 'admin.broadcast' | 'admin.unknownItem' | 'admin.invalidLevel' | 'player.accountExists' | 'player.nameTaken' | 'player.sameName' | 'player.renameCooldown' | 'player.sameGender' | 'player.genderCooldown' | 'player.invalidSetting' | 'player.invalidFlag' | 'player.title.highest' | 'player.title.prestigeRequired' | 'player.title.notEnoughMedals' | 'player.holiday.invalidDays' | 'player.holiday.troopsOut' | 'player.truce.cooldown' | 'player.protected.beginner' | 'player.protected.truce' | 'player.protected.holiday' | 'player.bookmark.tooMany' | 'player.preset.nameLength' | 'player.preset.tooMany' | 'player.mail.protectionExpired.title' | 'player.mail.protectionExpired.content' | 'city.taxRateRange' | 'city.workRateRange' | 'city.invalidStorePercent' | 'city.storePercentTotal' | 'city.comfortCooldown' | 'city.notEnoughFood' | 'city.invalidComfortType' | 'city.invalidLogo' | 'city.teleportCooldown' | 'city.recallTroopsFirst' | 'city.foreignTroops' | 'city.notFreeFlat' | 'building.invalidBuilding' | 'building.notFound' | 'building.invalidPosition' | 'building.cannotBuild' | 'building.cannotBuildHere' | 'building.positionTaken' | 'building.limitReached' | 'building.slotLocked' | 'building.queuesBusy' | 'building.requirementsNotMet' | 'building.statusChanged' | 'building.maxLevel' | 'building.busy' | 'building.nothingToDemolish' | 'building.cannotDemolish' | 'building.notInProgress' | 'building.invalidTech' | 'building.academyNeeded' | 'building.techRequirementsNotMet' | 'building.troopRequirementsNotMet' | 'hero.needInn' | 'hero.noVacancy' | 'hero.notIdle' | 'hero.locked' | 'hero.noMayor' | 'hero.invalidPoints' | 'hero.maxLevel' | 'hero.maxLevelNoExperience' | 'hero.notEnoughExperience' | 'hero.invalidAttribute' | 'hero.invalidGearPiece' | 'hero.gearMaxStars' | 'hero.gearStarLimit' | 'hero.notEnoughMedals' | 'hero.fullyLoyal' | 'hero.itemNotForGold' | 'hero.invalidItem' | 'hero.notPrisoner' | 'hero.stillLoyal' | 'report.title.missionAborted' | 'report.title.scoutReturned' | 'report.title.attackReturned' | 'report.title.returned' | 'report.title.transportReport' | 'report.title.transportReceived' | 'report.title.reinforcementArrived' | 'report.title.reinforcementsFrom' | 'report.title.newCityFounded' | 'report.title.scoutReport' | 'report.title.enemyScouts' | 'report.title.scoutsRepelled' | 'report.title.attackSucceeded' | 'report.title.attackFailed' | 'report.title.cityAttacked' | 'report.title.attackRepelled' | 'report.title.reinforcementsFought' | 'report.title.valleyOccupied' | 'report.title.valleyLost' | 'report.title.valleyDefended' | 'report.title.tradeCompleted' | 'report.title.troopsDeserted' | 'report.notFound' | 'report.oldFormat' | 'report.cityFounded' | 'army.invalidMission' | 'army.insufficientTroops' | 'army.overloaded' | 'army.rallySpotRequired' | 'army.armyLimit' | 'army.troopLimit' | 'army.invalidTarget' | 'army.transportTarget' | 'army.noResources' | 'army.reinforceTarget' | 'army.alliedTroopsRefused' | 'army.scoutsRequired' | 'army.beginnerProtection' | 'army.truce' | 'army.nothingToAttack' | 'army.buildOnFlat' | 'army.cityLimit' | 'army.newCityResources' | 'army.heroRequiredAttack' | 'army.heroRequiredSettlers' | 'army.notFound' | 'army.alreadyReturning' | 'army.unknownMission' | 'army.destinationNotFriendly' | 'army.valleyNoLongerHeld' | 'army.landNotFree' | 'army.cityGone' | 'army.cityNowFriendly' | 'army.valleyAlreadyHeld' | 'army.valleyNowFriendly' | 'army.homeCityGone' | 'army.valleyLimit' | 'army.valleyNotHeld' | 'army.upgradeTarget' | 'army.upgradeHeld' | 'army.valleyMaxLevel' | 'army.barbarianCityMaxLevel' | 'alliance.name' | 'alliance.notFound' | 'alliance.namedNotFound' | 'alliance.nameTaken' | 'alliance.notMember' | 'alliance.alreadyMember' | 'alliance.rankTooLow' | 'alliance.full' | 'alliance.rejoinCooldown' | 'alliance.hostMustTransfer' | 'alliance.playerInOtherAlliance' | 'alliance.inviteNotFound' | 'alliance.applicationNotFound' | 'alliance.notApplied' | 'alliance.buildingRequired' | 'alliance.invalidRank' | 'alliance.memberNotFound' | 'alliance.ownRank' | 'alliance.rankLimit' | 'alliance.hostToViceHostOnly' | 'alliance.kickSelf' | 'alliance.kickHigherRank' | 'alliance.invalidRelation' | 'alliance.invalidTarget' | 'alliance.alreadyRelation' | 'alliance.warCooldown' | 'alliance.invited' | 'alliance.warDeclared' | 'alliance.event.created' | 'alliance.event.joined' | 'alliance.event.left' | 'alliance.event.applied' | 'alliance.event.promoted' | 'alliance.event.demoted' | 'alliance.event.newHost' | 'alliance.event.removed' | 'alliance.event.relationSet' | 'alliance.relation.ally' | 'alliance.relation.neutral' | 'alliance.relation.enemy';
+    code: 'common.legacyText' | 'common.invalidRequest' | 'common.serverError' | 'common.requestFailed' | 'common.routeNotFound' | 'common.notAllowed' | 'common.adminsOnly' | 'common.invalidData' | 'common.invalidAmount' | 'common.invalidCastle' | 'common.invalidCoordinates' | 'common.invalidTroopType' | 'common.invalidTroopCount' | 'common.unknownTroopType' | 'common.noTroopsSelected' | 'common.notEnoughResources' | 'common.notEnoughGold' | 'common.notEnoughGoldFor' | 'common.insufficientItems' | 'common.playerNotFound' | 'common.playerNamedNotFound' | 'common.cityNotFound' | 'common.heroNotFound' | 'common.playerName' | 'common.cityName' | 'common.heroName' | 'common.name' | 'common.nameLength' | 'common.nameInvalid' | 'common.nameNotAllowed' | 'common.freeSpeedupTooEarly' | 'common.invalidSpeedup' | 'auth.notLoggedIn' | 'auth.needPlayer' | 'auth.wrongPassword' | 'auth.tooManyTries' | 'auth.alreadyRegistered' | 'auth.signUpCheckFailed' | 'auth.signUpCheckExpired' | 'auth.accountNotFound' | 'auth.banned' | 'questInfo.description.upgrade' | 'questInfo.description.upgradeAny' | 'questInfo.description.field' | 'questInfo.description.ownFields' | 'questInfo.description.cottage' | 'questInfo.description.rallySpot' | 'questInfo.description.barracks' | 'questInfo.description.warehouse' | 'questInfo.description.academy' | 'questInfo.description.walls' | 'questInfo.description.embassy' | 'questInfo.description.inn' | 'questInfo.description.feastingHall' | 'questInfo.description.research' | 'questInfo.description.appointMayor' | 'questInfo.description.taxRate' | 'questInfo.description.joinAlliance' | 'questInfo.description.sendMail' | 'questInfo.description.recruitHero' | 'questInfo.description.train' | 'questInfo.description.fortify' | 'questInfo.description.secondCity' | 'questInfo.description.occupyValley' | 'questInfo.description.population' | 'questInfo.description.prestige' | 'questInfo.target.building' | 'questInfo.target.buildings' | 'questInfo.target.research' | 'questInfo.target.troops' | 'questInfo.target.heroes' | 'questInfo.target.mayor' | 'questInfo.target.alliance' | 'questInfo.target.cities' | 'questInfo.target.valleys' | 'questInfo.target.prestige' | 'questInfo.target.population' | 'questInfo.target.taxRate' | 'questInfo.target.mailSent' | 'questInfo.target.friend' | 'itemInfo.period.days' | 'itemInfo.period.hours' | 'itemInfo.period.minutes' | 'itemInfo.speedup.time' | 'itemInfo.speedup.hours' | 'itemInfo.speedup.percent' | 'itemInfo.speedup.troopBatch' | 'itemInfo.speedup.fortBatch' | 'itemInfo.loyalty' | 'itemInfo.heroStat' | 'itemInfo.experience.share' | 'itemInfo.experience.level' | 'itemInfo.holyWater' | 'itemInfo.buff' | 'itemInfo.grant' | 'itemInfo.grantCity' | 'itemInfo.contents.item' | 'itemInfo.contents.amount' | 'itemInfo.chest' | 'itemInfo.key' | 'itemInfo.medalBox' | 'itemInfo.randomBox' | 'itemInfo.civilCode' | 'itemInfo.cureInjured' | 'itemInfo.heroBox' | 'itemInfo.teleporter' | 'itemInfo.truce' | 'itemInfo.notUsable' | 'itemInfo.noEffect' | 'itemInfo.howTo.speedup' | 'itemInfo.howTo.troopsSpeedup' | 'itemInfo.howTo.fortificationsSpeedup' | 'itemInfo.howTo.cityMove' | 'itemInfo.howTo.heroesReset' | 'itemInfo.howTo.heroesUseItem' | 'itemInfo.howTo.cityTruce' | 'itemInfo.howTo.key' | 'itemInfo.howTo.welcome' | 'troopInfo.worker' | 'troopInfo.warrior' | 'troopInfo.scout' | 'troopInfo.pikeman' | 'troopInfo.swordsman' | 'troopInfo.archer' | 'troopInfo.transporter' | 'troopInfo.cavalry' | 'troopInfo.cataphract' | 'troopInfo.ballista' | 'troopInfo.batteringRam' | 'troopInfo.catapult' | 'troopInfo.trap' | 'troopInfo.abatis' | 'troopInfo.archerTower' | 'troopInfo.rollingLog' | 'troopInfo.trebuchet' | 'techInfo.summary.resource' | 'techInfo.summary.stockpile' | 'techInfo.summary.construction' | 'techInfo.summary.militaryScience' | 'techInfo.summary.metalCasting' | 'techInfo.summary.heroEnhancement' | 'techInfo.summary.militaryTradition' | 'techInfo.summary.ironWorking' | 'techInfo.summary.medicine' | 'techInfo.summary.archery' | 'techInfo.summary.compass' | 'techInfo.summary.horsebackRiding' | 'techInfo.summary.logistics' | 'techInfo.summary.informatics' | 'techInfo.summary.none' | 'techInfo.effect.resource' | 'techInfo.effect.stockpile' | 'techInfo.effect.construction' | 'techInfo.effect.militaryScience' | 'techInfo.effect.metalCasting' | 'techInfo.effect.heroEnhancement' | 'techInfo.effect.militaryTradition' | 'techInfo.effect.ironWorking' | 'techInfo.effect.medicine' | 'techInfo.effect.archery' | 'techInfo.effect.compass' | 'techInfo.effect.horsebackRiding' | 'techInfo.effect.logistics' | 'techInfo.effect.informaticsHeroes' | 'techInfo.effect.informaticsBuildings' | 'buildingInfo.summary.townHall' | 'buildingInfo.summary.walls' | 'buildingInfo.summary.cottage' | 'buildingInfo.summary.field' | 'buildingInfo.summary.warehouse' | 'buildingInfo.summary.barracks' | 'buildingInfo.summary.academy' | 'buildingInfo.summary.inn' | 'buildingInfo.summary.feastingHall' | 'buildingInfo.summary.rallySpot' | 'buildingInfo.summary.marketplace' | 'buildingInfo.summary.reliefStation' | 'buildingInfo.summary.beaconTower' | 'buildingInfo.summary.embassy' | 'buildingInfo.summary.prerequisite' | 'buildingInfo.placement.unique' | 'buildingInfo.placement.inside' | 'buildingInfo.placement.insideLimited' | 'buildingInfo.placement.outside' | 'buildingInfo.placement.outsideLimited' | 'buildingInfo.effect.townHall' | 'buildingInfo.effect.walls' | 'buildingInfo.effect.cottage' | 'buildingInfo.effect.field' | 'buildingInfo.effect.warehouse' | 'buildingInfo.effect.barracks' | 'buildingInfo.effect.academy' | 'buildingInfo.effect.inn' | 'buildingInfo.effect.feastingHall' | 'buildingInfo.effect.rallySpot' | 'buildingInfo.effect.marketplace' | 'buildingInfo.effect.reliefStation' | 'buildingInfo.effect.beaconTroops' | 'buildingInfo.effect.beaconHeroes' | 'buff.production' | 'buff.goldIncome' | 'buff.troopAttack' | 'buff.troopDefense' | 'buff.armySize' | 'buff.buildingQueue' | 'buff.upkeep' | 'buff.trainingCost' | 'buff.truce' | 'buff.truceCooldown' | 'buff.teleportCooldown' | 'buff.holiday' | 'buff.heroStat' | 'buff.homeCity' | 'flow.nameLength' | 'flow.actionCount' | 'flow.invalidAction' | 'flow.chooseArmy' | 'flow.targetsOwnCities' | 'flow.chooseCities' | 'flow.notFound' | 'flow.runningLocked' | 'flow.tooMany' | 'flow.noMayorHero' | 'flow.cannotTrain' | 'flow.req.level' | 'flow.req.item' | 'flow.alreadyQueued' | 'flow.alreadyRunning' | 'flow.noHeroCities' | 'flow.chooseCity' | 'flow.noOwnCities' | 'flow.cityFailed' | 'flow.runFailed' | 'flow.failedCity' | 'flow.stopped' | 'flow.healDone' | 'flow.healFailed' | 'flow.action.setMayor' | 'flow.action.healResources' | 'flow.action.healHonour' | 'flow.action.healResourcesHome' | 'flow.action.healHonourHome' | 'flow.action.waitArmiesHome' | 'flow.action.wait' | 'flow.action.attack' | 'flow.action.attackFrom' | 'flow.action.train' | 'flow.action.trainMax' | 'flow.cityCount' | 'flow.resourceAmount' | 'flow.step.noTargets' | 'flow.step.armyGone' | 'flow.step.noArmy' | 'flow.step.sent' | 'flow.step.noInjured' | 'flow.step.healed' | 'flow.step.healedHonour' | 'flow.step.healScheduled' | 'flow.step.alreadyMayor' | 'flow.step.mayor' | 'flow.step.noBarracksRoom' | 'flow.step.cannotAfford' | 'flow.step.training' | 'flow.step.trainingDone' | 'flow.step.trainingPartial' | 'flow.step.trainingPartialDone' | 'flow.step.noArmiesOut' | 'flow.step.waiting' | 'flow.step.moreActions' | 'flow.step.runEnds' | 'flow.target.sent' | 'flow.target.noIdleHero' | 'flow.target.notEnoughTroops' | 'flow.target.refused' | 'flow.skipNoHero' | 'quest.notFound' | 'quest.alreadyClaimed' | 'quest.notFinished' | 'quest.dailyGiftClaimed' | 'world.noOpenFlat' | 'world.invalidArea' | 'world.areaTooLarge' | 'world.invalidTile' | 'world.position.city' | 'world.position.tile' | 'world.position.place' | 'mail.toSelf' | 'mail.titleAndContentRequired' | 'mail.notFound' | 'social.selfTarget' | 'social.emptyMessage' | 'social.messageTooLong' | 'social.muted' | 'social.notInAlliance' | 'item.notForSale' | 'item.dailyLimit' | 'item.cannotUse' | 'item.useFrom.speedup' | 'item.useFrom.hero' | 'item.useFrom.elsewhere' | 'item.chooseCity' | 'item.needKey' | 'market.invalidResource' | 'market.invalidSide' | 'market.invalidPrice' | 'market.needMarketplace' | 'market.nothingToTrade' | 'market.tooManyOrders' | 'market.notEnoughResource' | 'market.slowDown' | 'market.orderNotFound' | 'market.shipmentNotFound' | 'research.notResearching' | 'research.noResearch' | 'research.chooseResearch' | 'research.queueFull' | 'research.alreadyResearching' | 'training.wallsNeeded' | 'training.invalidBarracks' | 'training.queueFull' | 'training.allQueuesFull' | 'training.wallSpaceFull' | 'training.notEnoughPopulation' | 'training.orderLimit' | 'training.duplicateOrder' | 'training.fortsAtWalls' | 'training.batchNotFound' | 'training.invalidFort' | 'training.notEnoughUnits' | 'training.notEnoughInjured' | 'training.notEnoughHonor' | 'training.mail.wallSpaceRefund.title' | 'training.mail.wallSpaceRefund.content' | 'admin.broadcast' | 'admin.unknownItem' | 'admin.invalidLevel' | 'player.accountExists' | 'player.nameTaken' | 'player.sameName' | 'player.renameCooldown' | 'player.sameGender' | 'player.genderCooldown' | 'player.invalidSetting' | 'player.invalidFlag' | 'player.title.highest' | 'player.title.prestigeRequired' | 'player.title.notEnoughMedals' | 'player.holiday.invalidDays' | 'player.holiday.troopsOut' | 'player.truce.cooldown' | 'player.protected.beginner' | 'player.protected.truce' | 'player.protected.holiday' | 'player.bookmark.tooMany' | 'player.preset.nameLength' | 'player.preset.tooMany' | 'player.mail.protectionExpired.title' | 'player.mail.protectionExpired.content' | 'city.taxRateRange' | 'city.workRateRange' | 'city.invalidStorePercent' | 'city.storePercentTotal' | 'city.comfortCooldown' | 'city.notEnoughFood' | 'city.invalidComfortType' | 'city.invalidLogo' | 'city.teleportCooldown' | 'city.recallTroopsFirst' | 'city.foreignTroops' | 'city.notFreeFlat' | 'building.invalidBuilding' | 'building.notFound' | 'building.invalidPosition' | 'building.cannotBuild' | 'building.cannotBuildHere' | 'building.positionTaken' | 'building.limitReached' | 'building.slotLocked' | 'building.queuesBusy' | 'building.requirementsNotMet' | 'building.statusChanged' | 'building.maxLevel' | 'building.busy' | 'building.nothingToDemolish' | 'building.cannotDemolish' | 'building.notInProgress' | 'building.invalidTech' | 'building.academyNeeded' | 'building.techRequirementsNotMet' | 'building.troopRequirementsNotMet' | 'hero.needInn' | 'hero.noVacancy' | 'hero.notIdle' | 'hero.locked' | 'hero.noMayor' | 'hero.invalidPoints' | 'hero.maxLevel' | 'hero.maxLevelNoExperience' | 'hero.notEnoughExperience' | 'hero.invalidAttribute' | 'hero.invalidGearPiece' | 'hero.gearMaxStars' | 'hero.gearStarLimit' | 'hero.notEnoughMedals' | 'hero.fullyLoyal' | 'hero.itemNotForGold' | 'hero.invalidItem' | 'hero.notPrisoner' | 'hero.stillLoyal' | 'report.title.missionAborted' | 'report.title.scoutReturned' | 'report.title.attackReturned' | 'report.title.returned' | 'report.title.transportReport' | 'report.title.transportReceived' | 'report.title.reinforcementArrived' | 'report.title.reinforcementsFrom' | 'report.title.newCityFounded' | 'report.title.scoutReport' | 'report.title.enemyScouts' | 'report.title.scoutsRepelled' | 'report.title.attackSucceeded' | 'report.title.attackFailed' | 'report.title.cityAttacked' | 'report.title.attackRepelled' | 'report.title.reinforcementsFought' | 'report.title.valleyOccupied' | 'report.title.valleyLost' | 'report.title.valleyDefended' | 'report.title.tradeCompleted' | 'report.title.troopsDeserted' | 'report.notFound' | 'report.oldFormat' | 'report.cityFounded' | 'army.invalidMission' | 'army.insufficientTroops' | 'army.overloaded' | 'army.rallySpotRequired' | 'army.armyLimit' | 'army.troopLimit' | 'army.invalidTarget' | 'army.transportTarget' | 'army.noResources' | 'army.reinforceTarget' | 'army.alliedTroopsRefused' | 'army.scoutsRequired' | 'army.beginnerProtection' | 'army.truce' | 'army.nothingToAttack' | 'army.buildOnFlat' | 'army.cityLimit' | 'army.newCityResources' | 'army.heroRequiredAttack' | 'army.heroRequiredSettlers' | 'army.notFound' | 'army.alreadyReturning' | 'army.unknownMission' | 'army.destinationNotFriendly' | 'army.valleyNoLongerHeld' | 'army.landNotFree' | 'army.cityGone' | 'army.cityNowFriendly' | 'army.valleyAlreadyHeld' | 'army.valleyNowFriendly' | 'army.homeCityGone' | 'army.valleyLimit' | 'army.valleyNotHeld' | 'army.upgradeTarget' | 'army.upgradeHeld' | 'army.valleyMaxLevel' | 'army.barbarianCityMaxLevel' | 'alliance.name' | 'alliance.notFound' | 'alliance.namedNotFound' | 'alliance.nameTaken' | 'alliance.notMember' | 'alliance.alreadyMember' | 'alliance.rankTooLow' | 'alliance.full' | 'alliance.rejoinCooldown' | 'alliance.hostMustTransfer' | 'alliance.playerInOtherAlliance' | 'alliance.inviteNotFound' | 'alliance.applicationNotFound' | 'alliance.notApplied' | 'alliance.buildingRequired' | 'alliance.invalidRank' | 'alliance.memberNotFound' | 'alliance.ownRank' | 'alliance.rankLimit' | 'alliance.hostToViceHostOnly' | 'alliance.kickSelf' | 'alliance.kickHigherRank' | 'alliance.invalidRelation' | 'alliance.invalidTarget' | 'alliance.alreadyRelation' | 'alliance.warCooldown' | 'alliance.invited' | 'alliance.warDeclared' | 'alliance.event.created' | 'alliance.event.joined' | 'alliance.event.left' | 'alliance.event.applied' | 'alliance.event.promoted' | 'alliance.event.demoted' | 'alliance.event.newHost' | 'alliance.event.removed' | 'alliance.event.relationSet' | 'alliance.relation.ally' | 'alliance.relation.neutral' | 'alliance.relation.enemy';
     params?: {
         [key: string]: MsgParam;
     };
@@ -5938,6 +6080,40 @@ export type MarketMerchant = {
     ask: number;
 };
 
+/**
+ * the NPC factions: they trade from their shared stock along their price curve
+ */
+export type MarketFactions = {
+    /**
+     * the world price at their stock now, inside the merchant's band
+     */
+    price: number;
+    /**
+     * they sell at this price (marginal; rises as they sell); null at the band's edge
+     */
+    ask: number | null;
+    /**
+     * they buy at this price (marginal; falls as they buy); null at the band's edge
+     */
+    bid: number | null;
+    /**
+     * units they sell before their price reaches the band's edge
+     */
+    sells: number;
+    /**
+     * units they buy before their price reaches the band's edge
+     */
+    buys: number;
+    /**
+     * what they sell in a few price steps up to the band's edge, best first
+     */
+    sellers: Array<MarketPriceLevel>;
+    /**
+     * what they buy in a few price steps down to the band's edge, best first
+     */
+    buyers: Array<MarketPriceLevel>;
+};
+
 export type MarketOrderBook = {
     resType: number;
     /**
@@ -5949,6 +6125,10 @@ export type MarketOrderBook = {
      */
     sellers: Array<MarketPriceLevel>;
     merchant: MarketMerchant;
+    /**
+     * null before the factions first trade
+     */
+    factions: MarketFactions | null;
 };
 
 export type MarketOrder = {
@@ -5988,6 +6168,10 @@ export type MarketQuote = {
      */
     merchantFilled: number;
     /**
+     * units traded with the NPC factions
+     */
+    factionsFilled: number;
+    /**
      * units traded with other lords
      */
     playerFilled: number;
@@ -6020,6 +6204,10 @@ export type MarketPlaceOrderResult = {
      */
     merchantFilled: number;
     /**
+     * units traded with the NPC factions
+     */
+    factionsFilled: number;
+    /**
      * units traded with other lords
      */
     playerFilled: number;
@@ -6051,9 +6239,40 @@ export type MarketTrade = {
      */
     merchant: boolean;
     /**
+     * traded with the NPC factions
+     */
+    factions: boolean;
+    /**
      * epoch milliseconds
      */
     createdAt: number;
+};
+
+/**
+ * a single trade between two factions' groups, made up from an auction to show it
+ */
+export type MarketNpcTrade = {
+    /**
+     * epoch milliseconds
+     */
+    at: number;
+    resource: 'food' | 'wood' | 'stone' | 'iron';
+    amount: number;
+    price: number;
+    seller: {
+        /**
+         * the zone (state) of its cities
+         */
+        zone: number;
+        level: number;
+    };
+    buyer: {
+        /**
+         * the zone (state) of its cities
+         */
+        zone: number;
+        level: number;
+    };
 };
 
 export type MarketCandle = {
@@ -6070,19 +6289,84 @@ export type MarketCandle = {
 
 export type MarketHistory = {
     resType: number;
+    period: 'minute' | 'hour' | 'day';
     /**
-     * candle length: one game hour
+     * candle length in real ms
      */
     bucketMs: number;
     merchant: MarketMerchant;
     /**
-     * oldest first; buckets without trades are omitted
+     * every trade in the world, oldest first; candles without trades are omitted
      */
     candles: Array<MarketCandle>;
     /**
      * most recent first
      */
     trades: Array<MarketTrade>;
+    /**
+     * the factions' latest trades with each other in this resource, newest first
+     */
+    ticker: Array<MarketNpcTrade>;
+};
+
+export type MarketAffordable = {
+    /**
+     * the most units the gold buys now with an instant order, the fee included
+     */
+    amount: number;
+};
+
+export type MarketSummary = {
+    resType: number;
+    /**
+     * its price now: the factions' world price, or the merchant's reference before they trade
+     */
+    price: number;
+    merchant: MarketMerchant;
+    /**
+     * the last 24 hours from hourly candles: the price it opened at, its high and low, the units traded; null when nothing traded
+     */
+    day: {
+        open: number;
+        high: number;
+        low: number;
+        volume: number;
+    } | null;
+};
+
+export type FactionGold = {
+    id: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
+    /**
+     * the gold the faction holds now: it pays players selling to it with this
+     */
+    gold: number;
+    /**
+     * what its gold drifts back to: its members' gold in the NPC table
+     */
+    treasury: number;
+};
+
+export type MarketMyTrade = {
+    id: number;
+    resType: number;
+    /**
+     * the player's side: 0 bought, 1 sold
+     */
+    side: number;
+    price: number;
+    amount: number;
+    /**
+     * gold that changed hands, before the buyer's fee
+     */
+    gold: number;
+    /**
+     * who was on the other side
+     */
+    with: 'player' | 'factions' | 'merchant';
+    /**
+     * epoch milliseconds
+     */
+    createdAt: number;
 };
 
 export type MarketShipment = {
@@ -11647,7 +11931,16 @@ export type GetMarketHistoryData = {
     path: {
         resType: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * candle length in real time
+         */
+        period?: 'minute' | 'hour' | 'day';
+        /**
+         * the most recent candles, at most this many
+         */
+        limit?: number;
+    };
     url: '/api/v1/market/{resType}/history';
 };
 
@@ -11672,6 +11965,129 @@ export type GetMarketHistoryResponses = {
 };
 
 export type GetMarketHistoryResponse = GetMarketHistoryResponses[keyof GetMarketHistoryResponses];
+
+export type GetFactionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/factions';
+};
+
+export type GetFactionsErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Default Response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type GetFactionsError = GetFactionsErrors[keyof GetFactionsErrors];
+
+export type GetFactionsResponses = {
+    /**
+     * Default Response
+     */
+    200: Array<FactionGold>;
+};
+
+export type GetFactionsResponse = GetFactionsResponses[keyof GetFactionsResponses];
+
+export type GetMarketSummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/market/summary';
+};
+
+export type GetMarketSummaryErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Default Response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type GetMarketSummaryError = GetMarketSummaryErrors[keyof GetMarketSummaryErrors];
+
+export type GetMarketSummaryResponses = {
+    /**
+     * Default Response
+     */
+    200: Array<MarketSummary>;
+};
+
+export type GetMarketSummaryResponse = GetMarketSummaryResponses[keyof GetMarketSummaryResponses];
+
+export type GetMarketAffordableData = {
+    body?: never;
+    path: {
+        resType: number;
+    };
+    query: {
+        /**
+         * the gold to spend, fee included
+         */
+        gold: number;
+    };
+    url: '/api/v1/market/{resType}/affordable';
+};
+
+export type GetMarketAffordableErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Default Response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type GetMarketAffordableError = GetMarketAffordableErrors[keyof GetMarketAffordableErrors];
+
+export type GetMarketAffordableResponses = {
+    /**
+     * Default Response
+     */
+    200: MarketAffordable;
+};
+
+export type GetMarketAffordableResponse = GetMarketAffordableResponses[keyof GetMarketAffordableResponses];
+
+export type GetMarketTradesMineData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/market/trades/mine';
+};
+
+export type GetMarketTradesMineErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Default Response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type GetMarketTradesMineError = GetMarketTradesMineErrors[keyof GetMarketTradesMineErrors];
+
+export type GetMarketTradesMineResponses = {
+    /**
+     * Default Response
+     */
+    200: Array<MarketMyTrade>;
+};
+
+export type GetMarketTradesMineResponse = GetMarketTradesMineResponses[keyof GetMarketTradesMineResponses];
 
 export type GetMarketOrdersMineData = {
     body?: never;
