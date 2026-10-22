@@ -386,15 +386,17 @@ export interface SplitLane {
  * unit (the same in every barracks). Returns only queues that get at least one unit.
  */
 export function splitTraining(lanes: SplitLane[], count: number, unitMs: number): { positionId: number; count: number; finishAt: number }[] {
-  if (count <= 0 || lanes.length === 0) return [];
   const u = Math.max(1e-9, unitMs);
   const sorted = [...lanes].sort((a, b) => a.freeAt - b.freeAt);
+  const [first, ...later] = sorted;
+  if (count <= 0 || !first) return [];
   // the k earliest-free queues share the work; T is their common finish time
   let k = 1;
-  let sum = sorted[0].freeAt;
+  let sum = first.freeAt;
   let finish = sum + count * u;
-  while (k < sorted.length && sorted[k].freeAt < finish) {
-    sum += sorted[k].freeAt;
+  for (const lane of later) {
+    if (lane.freeAt >= finish) break;
+    sum += lane.freeAt;
     k++;
     finish = (count * u + sum) / k;
   }
@@ -402,8 +404,7 @@ export function splitTraining(lanes: SplitLane[], count: number, unitMs: number)
   let left = count - alloc.reduce((s, a) => s + a.count, 0);
   // hand out the rounding remainder to whichever queue would finish earliest with one more unit
   while (left > 0) {
-    let best = alloc[0];
-    for (const a of alloc) if (a.freeAt + (a.count + 1) * u < best.freeAt + (best.count + 1) * u) best = a;
+    const best = alloc.reduce((b, a) => (a.freeAt + (a.count + 1) * u < b.freeAt + (b.count + 1) * u ? a : b));
     best.count++;
     left--;
   }

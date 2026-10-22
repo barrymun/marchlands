@@ -243,8 +243,8 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
   const b = await openOwnCity(ctx, playerId, cityId);
   const { queue, nextQueueId } = queueOf(b, positionId);
   const idx = queue.findIndex((q) => q.queueId === queueId);
-  if (idx < 0) throw new GameError(msg('training.batchNotFound'), -99, 404);
   const batch = queue[idx];
+  if (!batch) throw new GameError(msg('training.batchNotFound'), -99, 404);
   const share = idx === 0 ? BALANCE.cancelTrainInProgressRefund : BALANCE.cancelTrainQueuedRefund;
   const paid = trainCost(batch.troopId, batch.count, batch.paidShare ?? 1);
   gainResources(b.city, paid, share);
@@ -266,10 +266,11 @@ export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number
   const b = await openOwnCity(ctx, playerId, cityId);
   const { queue, nextQueueId } = queueOf(b, positionId);
   const idx = queue.findIndex((q) => q.queueId === queueId);
-  if (idx < 0) throw new GameError(msg('training.batchNotFound'), -99, 404);
+  const batch = queue[idx];
+  if (!batch) throw new GameError(msg('training.batchNotFound'), -99, 404);
   useItemOrGold(ctx, b.player, b.city, itemId, itemGoldPrice(itemId) ?? 0);
   const next = [...queue];
-  next[idx] = speedUpTrainBatch(queue[idx], idx === 0, ctx.now);
+  next[idx] = speedUpTrainBatch(batch, idx === 0, ctx.now);
   setQueue(b, positionId, next, nextQueueId);
   scheduleHead(ctx, b, positionId, next);
   pushQueues(ctx, b, positionId);

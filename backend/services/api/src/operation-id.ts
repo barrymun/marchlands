@@ -9,7 +9,7 @@ const pascal = (s: string) =>
   s
     .split(/[-_.]/)
     .filter(Boolean)
-    .map((w) => w[0].toUpperCase() + w.slice(1))
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join('');
 
 export function operationIdOf(method: string, url: string): string {
@@ -17,7 +17,7 @@ export function operationIdOf(method: string, url: string): string {
   const parts = segments.map((s, i) => {
     const param = /^[{:](\w+)\}?$/.exec(s);
     if (!param) return pascal(s);
-    return i === segments.length - 1 ? `By${pascal(param[1])}` : '';
+    return i === segments.length - 1 ? `By${pascal(param[1] ?? '')}` : '';
   });
   return method.toLowerCase() + parts.join('');
 }

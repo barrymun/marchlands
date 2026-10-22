@@ -114,7 +114,8 @@ const EFFECTS: Record<string, ItemEffect> = {
 };
 for (const l of [1, 2, 3, 4, 5, 6, 7, 8, 9]) EFFECTS[medalId(l)] = { kind: 'command', command: 'heroes.useItem' };
 
-function medals(rng: Rng, levels: readonly number[]): GrantContents {
+/** The medals in a medal box: each of its levels (BALANCE.items.medalBoxes, set for every box). */
+function medals(rng: Rng, levels: readonly number[] = []): GrantContents {
   const items: Record<string, number> = {};
   for (const l of levels.slice(0, 3)) items[medalId(l)] = randInt(rng, BALANCE.items.medalBoxCount.min, BALANCE.items.medalBoxCount.max);
   return { items };

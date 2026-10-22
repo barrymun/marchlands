@@ -114,7 +114,7 @@ export const MSG_CODES = Object.entries(MESSAGES).flatMap(([area, names]) => Obj
 export function msgParamNames(code: MsgCode): readonly string[] {
   const dot = code.indexOf('.');
   const area = MESSAGES[code.slice(0, dot) as MsgArea] as Record<string, readonly string[]>;
-  return area[code.slice(dot + 1)];
+  return area[code.slice(dot + 1)] ?? [];
 }
 
 /** A message: `msg('hero.locked', { name })`; codes without params take none. */

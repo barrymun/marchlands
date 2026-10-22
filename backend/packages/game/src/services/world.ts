@@ -70,6 +70,8 @@ export async function ensureWorld(db: Db, opts: { source: 'generated' | 'legacy'
     }
     const started = Date.now();
     const total = size * size;
+    // two bytes a tile (type, level); a legacy dump read from disk could be cut short
+    if (data.length < total * 2) throw new Error(`world map data is ${data.length} bytes, expected ${total * 2}`);
     const chunk = 40_000;
     for (let start = 0; start < total; start += chunk) {
       const end = Math.min(total, start + chunk);
@@ -78,7 +80,7 @@ export async function ensureWorld(db: Db, opts: { source: 'generated' | 'legacy'
       const levels: number[] = [];
       for (let id = start; id < end; id++) {
         ids.push(id);
-        types.push(data[id * 2]);
+        types.push(data[id * 2] ?? TileType.FLAT); // in range: checked above
         levels.push(data[id * 2 + 1] || 1);
       }
       await tx.execute(sql`
@@ -270,8 +272,10 @@ export async function fieldInfo(ctx: Ctx, viewerId: number | null, tileId: numbe
   const { x, y } = tileXY(tileId);
   const base = { id: tileId, x, y, type: t.type, level: t.level, zoneId: stateOf(tileId) };
   if (t.cityId != null) {
-    const view = await mapView(ctx, viewerId, x, y, x, y);
-    return { ...base, ...view.castles[0], type: TileType.CASTLE };
+    const [castle] = (await mapView(ctx, viewerId, x, y, x, y)).castles;
+    // the map view draws a castle on every tile with a city
+    if (!castle) throw new Error(`tile ${tileId} has city ${t.cityId} but the map shows no castle`);
+    return { ...base, ...castle, type: TileType.CASTLE };
   }
   let owner: { cityId: number; cityName: string; playerId: number; userName: string } | undefined;
   if (t.ownerCityId != null) {

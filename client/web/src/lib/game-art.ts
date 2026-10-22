@@ -16,7 +16,7 @@ export const ART_BANDS = [
 
 /** The art band of a building or valley at `level` (1-4). */
 export function artBand(level: number): number {
-  return (ART_BANDS.find((b) => level <= b.to) ?? ART_BANDS[ART_BANDS.length - 1]).band;
+  return (ART_BANDS.find((b) => level <= b.to) ?? ART_BANDS[3]).band; // past the last band: the last
 }
 
 /**

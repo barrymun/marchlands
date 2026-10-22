@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next';
 
 import type { BuildingBean } from '@marchlands/api-client';
 
-import { CITY_ART } from '@/components/buildings-panel/constants';
 import { TOWN } from '@/components/buildings-panel/iso-city/constants';
 import { wallSprites } from '@/components/buildings-panel/iso-city/utils';
 import { WALLS } from '@/components/buildings-panel/iso-grid/constants';
 import { IsoGrid } from '@/components/buildings-panel/iso-grid/iso-grid';
+import { cityArt } from '@/components/buildings-panel/utils';
 import type { TownState } from '@/components/iso-anim/types';
 import { artBand, cityWallFile } from '@/lib/game-art';
 
@@ -34,7 +34,7 @@ export function IsoCity({
   const { t } = useTranslation('buildings-panel');
   const walls = byPos.get(WALLS);
   const built = !!walls && walls.typeId !== 0;
-  const extra = built ? wallSprites(TOWN.cols, TOWN.rows, (piece) => CITY_ART[cityWallFile(artBand(walls.level), piece)]) : [];
+  const extra = built ? wallSprites(TOWN.cols, TOWN.rows, (piece) => cityArt(cityWallFile(artBand(walls.level), piece))) : [];
   return (
     <IsoGrid
       cityId={cityId}

@@ -9,7 +9,8 @@ const byFile = (urls: Record<string, string>): Record<string, string> =>
 export const TILE_ART = byFile(import.meta.glob<string>('@/assets/tiles/*.png', { eager: true, query: '?url', import: 'default' }));
 
 /** The grass laid under every map tile: the isometric town's grass tile. */
-export const GRASS = Object.values(import.meta.glob<string>('@/assets/city/grass.png', { eager: true, query: '?url', import: 'default' }))[0];
+// one file, so one URL ('' never loads: the map draws no grass, as with any missing art)
+export const GRASS = Object.values(import.meta.glob<string>('@/assets/city/grass.png', { eager: true, query: '?url', import: 'default' }))[0] ?? '';
 
 /** `label` (a heading) and `inline` (inside a sentence) are in the current locale. */
 const relation = (key: RelationGroup, ring: string, stroke: string) => ({

@@ -24,6 +24,7 @@ import {
 import type { Animated, Frame, GridSpot, Marching, Rgb, Side, Spot, Streets, TownState } from '@/components/iso-anim/types';
 import type { Overlay, Particle, PixelArt, Sky, Weather } from '@/components/iso-viewport/types';
 import { spriteBox } from '@/components/iso-viewport/utils';
+import { pairs } from '@/lib/arrays';
 
 /** A stable 32-bit hash of a string (FNV-1a), to seed an animation from what it belongs to. */
 export function hash(s: string): number {
@@ -65,11 +66,11 @@ export function pixelArt(id: string, w: number, h: number, draw: (put: Put) => v
     data.set([r, g, b, a], i);
   });
   if (outline) {
-    const filled = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && data[(y * w + x) * 4 + 3] > 0;
+    const filled = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && (data[(y * w + x) * 4 + 3] ?? 0) > 0;
     const edge: number[] = [];
     for (let y = 0; y < h; y++)
       for (let x = 0; x < w; x++) if (filled(x, y) && [-1, 1].some((d) => !filled(x + d, y) || !filled(x, y + d))) edge.push((y * w + x) * 4);
-    for (const i of edge) data.set([...C.outline, data[i + 3]], i);
+    for (const i of edge) data.set([...C.outline, data[i + 3] ?? 255], i);
   }
   const art = { id, w, h, data };
   made.set(id, art);
@@ -301,16 +302,16 @@ export function constructionFrame(i: number, span: number): Frame {
   const [w, ht] = [hw * 2 + 7, h + hd + 6];
   const [cx, cy] = [hw + 3, h + 2];
   const art = pixelArt(`build:${f}:${s}`, w, ht, (put) => {
-    const left = [cx - hw, cy];
-    const front = [cx, cy + hd];
-    const right = [cx + hw, cy];
+    const left = [cx - hw, cy] as const;
+    const front = [cx, cy + hd] as const;
+    const right = [cx + hw, cy] as const;
     for (const [x, y] of [left, front, right]) for (let k = 0; k <= h; k++) put(x, y - k, C.wood);
     for (const level of [0.3, 0.62, 0.95]) {
       const z = Math.round(h * level);
       for (const [[x0, y0], [x1, y1]] of [
         [left, front],
         [front, right],
-      ]) {
+      ] as const) {
         const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
         for (let k = 0; k <= n; k++) put(x0 + ((x1 - x0) * k) / n, y0 + ((y1 - y0) * k) / n - z, C.plank);
       }
@@ -318,8 +319,8 @@ export function constructionFrame(i: number, span: number): Frame {
     // two builders on the planks, hammering in turn
     const z1 = Math.round(h * 0.62);
     const z2 = Math.round(h * 0.3);
-    const b1 = [Math.round(cx - hw / 2), Math.round(cy + hd / 2 - z1 - 6)];
-    const b2 = [Math.round(cx + hw / 2), Math.round(cy + hd / 2 - z2 - 6)];
+    const b1 = [Math.round(cx - hw / 2), Math.round(cy + hd / 2 - z1 - 6)] as const;
+    const b2 = [Math.round(cx + hw / 2), Math.round(cy + hd / 2 - z2 - 6)] as const;
     person(put, b1[0], b1[1], CLOTHES[1], false);
     person(put, b2[0], b2[1], CLOTHES[3], false, true);
     const up1 = f % 4 < 2;
@@ -360,7 +361,7 @@ export function sparkleFrame(i: number, span: number): Frame {
 export function walkerFrame(i: number, cloth: number, left: boolean): Frame {
   const c = cloth % CLOTHES.length;
   const step = i % 2 === 1;
-  const art = pixelArt(`walker:${step ? 1 : 0}:${c}:${left ? 'l' : 'r'}`, 3, 6, (put) => person(put, 1, 0, CLOTHES[c], step, left));
+  const art = pixelArt(`walker:${step ? 1 : 0}:${c}:${left ? 'l' : 'r'}`, 3, 6, (put) => person(put, 1, 0, CLOTHES[c] ?? CLOTHES[0], step, left));
   return { art, ax: 1, ay: 5 };
 }
 
@@ -445,7 +446,7 @@ export function twinkleFrame(i: number): Frame {
         [1, 0],
         [0, -1],
         [0, 1],
-      ])
+      ] as const)
         put(2 + dx, 2 + dy, C.gold);
     if (f === 0)
       for (const [dx, dy] of [
@@ -453,7 +454,7 @@ export function twinkleFrame(i: number): Frame {
         [2, 0],
         [0, -2],
         [0, 2],
-      ])
+      ] as const)
         put(2 + dx, 2 + dy, C.gold, 140);
   });
   return { art, ax: 2, ay: 4, light: true };
@@ -637,11 +638,11 @@ export function sparkleOverlays(owner: Omit<Animated, 'file'>, t: number, doneAt
  */
 export function streetLines(values: readonly number[]): number[] {
   const v = [...new Set(values.map((x) => Math.round(x * 1000) / 1000))].sort((a, b) => a - b);
-  if (v.length < 2) return [];
-  const lines = [v[0] - (v[1] - v[0]) / 2];
-  for (let i = 1; i < v.length; i++) lines.push((v[i - 1] + v[i]) / 2);
-  lines.push(v[v.length - 1] + (v[v.length - 1] - v[v.length - 2]) / 2);
-  return lines;
+  const gaps = pairs(v);
+  const [first] = gaps;
+  const last = gaps.at(-1);
+  if (!first || !last) return [];
+  return [first[0] - (first[1] - first[0]) / 2, ...gaps.map(([a, b]) => (a + b) / 2), last[1] + (last[1] - last[0]) / 2];
 }
 
 /**
@@ -659,15 +660,20 @@ export function streetsOf(slots: readonly { col: number; row: number; span?: num
   const links = nodes.map((n, k) => {
     if (blocked(n.col, n.row)) return [];
     const [i, j] = [Math.floor(k / rows.length), k % rows.length];
-    return [
-      [i - 1, j],
-      [i + 1, j],
-      [i, j - 1],
-      [i, j + 1],
-    ]
+    return (
+      [
+        [i - 1, j],
+        [i + 1, j],
+        [i, j - 1],
+        [i, j + 1],
+      ] as const
+    )
       .filter(([a, b]) => a >= 0 && b >= 0 && a < cols.length && b < rows.length)
       .map(([a, b]) => at(a, b))
-      .filter((m) => !blocked(nodes[m].col, nodes[m].row) && !blocked((n.col + nodes[m].col) / 2, (n.row + nodes[m].row) / 2));
+      .filter((m) => {
+        const o = nodes[m];
+        return !!o && !blocked(o.col, o.row) && !blocked((n.col + o.col) / 2, (n.row + o.row) / 2);
+      });
   });
   return { nodes, links };
 }
@@ -677,13 +683,19 @@ export function walkerRoute(streets: Streets, seed: number): number[] {
   const rand = seeded(seed);
   const usable = streets.links.flatMap((l, i) => (l.length ? [i] : []));
   if (!usable.length) return [];
-  const route = [usable[Math.floor(rand() * usable.length)]];
+  const start = usable[Math.floor(rand() * usable.length)];
+  if (start === undefined) return [];
+  const route = [start];
+  let [prev, cur]: [number | undefined, number] = [undefined, start];
   for (let k = 0; k < ROUTE_STEPS; k++) {
-    const cur = route[route.length - 1];
-    const prev = route[route.length - 2];
-    const ways = streets.links[cur].filter((n) => n !== prev);
-    const options = ways.length ? ways : streets.links[cur];
-    route.push(options[Math.floor(rand() * options.length)]);
+    // a crossing's links are mutual, so every crossing on the route has a way on
+    const links = streets.links[cur] ?? [];
+    const ways = links.filter((n) => n !== prev);
+    const options = ways.length ? ways : links;
+    const next = options[Math.floor(rand() * options.length)];
+    if (next === undefined) break;
+    route.push(next);
+    [prev, cur] = [cur, next];
   }
   return route;
 }
@@ -693,19 +705,22 @@ export function walkerRoute(streets: Streets, seed: number): number[] {
  * its grid point, and whether it faces left on screen (walking up a row or down a column).
  */
 export function walkerAt(streets: Streets, route: readonly number[], t: number, phase: number): (GridSpot & { left: boolean }) | null {
-  if (route.length < 2) return null;
-  const seq = [...route, ...route.slice(1, -1).reverse(), route[0]].map((i) => streets.nodes[i]);
-  const lengths = seq.slice(1).map((p, i) => Math.abs(p.col - seq[i].col) + Math.abs(p.row - seq[i].row));
-  const total = lengths.reduce((a, b) => a + b, 0);
-  if (!total) return { ...seq[0], left: false };
+  const [home] = route;
+  if (home === undefined || route.length < 2) return null;
+  // there and back: the route's crossings, then back along them to where it started
+  const seq = [...route, ...route.slice(1, -1).reverse(), home].flatMap((i) => streets.nodes[i] ?? []);
+  const legs = pairs(seq).map(([a, b]) => ({ a, b, length: Math.abs(b.col - a.col) + Math.abs(b.row - a.row) }));
+  const total = legs.reduce((s, leg) => s + leg.length, 0);
+  const [start] = seq;
+  if (!start) return null;
+  if (!total) return { ...start, left: false };
   let d = ((((t / 1000 + phase) * WALK_SPEED) % total) + total) % total;
-  for (let i = 0; i < lengths.length; i++) {
-    if (d <= lengths[i] || i === lengths.length - 1) {
-      const [a, b] = [seq[i], seq[i + 1]];
-      const k = lengths[i] ? Math.min(1, d / lengths[i]) : 0;
+  for (const [i, { a, b, length }] of legs.entries()) {
+    if (d <= length || i === legs.length - 1) {
+      const k = length ? Math.min(1, d / length) : 0;
       return { col: a.col + (b.col - a.col) * k, row: a.row + (b.row - a.row) * k, left: b.col - b.row < a.col - a.row };
     }
-    d -= lengths[i];
+    d -= length;
   }
   return null;
 }

@@ -79,9 +79,9 @@ export function spriteBox(size = SPRITE): { left: number; top: number; width: nu
 }
 
 /** The zoom levels that land on whole device pixels on this screen, smallest first. */
-export function zoomsFor(dpr: number): number[] {
-  const whole = ZOOMS.filter((z) => Number.isInteger(z * dpr));
-  return whole.length ? whole : [1];
+export function zoomsFor(dpr: number): [number, ...number[]] {
+  const [first, ...more] = ZOOMS.filter((z) => Number.isInteger(z * dpr));
+  return first === undefined ? [1] : [first, ...more];
 }
 
 /** The next zoom level in (`step` 1) or out (-1) from `zoom`, staying at the ends. */
@@ -89,12 +89,12 @@ export function nextZoom(zoom: number, step: 1 | -1, dpr: number): number {
   const zooms = zoomsFor(dpr);
   const i = zooms.findIndex((z) => z >= zoom);
   const at = i < 0 ? zooms.length - 1 : i;
-  return zooms[Math.max(0, Math.min(zooms.length - 1, zooms[at] === zoom ? at + step : step > 0 ? at : at - 1))];
+  return zooms[Math.max(0, Math.min(zooms.length - 1, zooms[at] === zoom ? at + step : step > 0 ? at : at - 1))] ?? zoom; // clamped: always one of them
 }
 
 /** A zoom kept inside the zoom levels' range. */
 export function clampZoom(zoom: number): number {
-  return Math.min(Math.max(zoom, ZOOMS[0]), ZOOMS[ZOOMS.length - 1]);
+  return Math.min(Math.max(zoom, ZOOMS[0]), Math.max(...ZOOMS));
 }
 
 /**
@@ -170,13 +170,12 @@ export function spriteAt<T extends Drawable>(
   opaque: (src: string, x: number, y: number) => boolean,
 ): T | undefined {
   const unit = { ...view, dpr: 1 };
-  for (let i = drawn.length - 1; i >= 0; i--) {
-    const d = drawn[i];
+  // front to back: the last drawn is on top
+  return drawn.findLast((d) => {
     const o = tileOrigin(d.col, d.row, cam, unit);
     const box = spriteBox(d.size);
     const x = Math.floor((p.x - o.x) / cam.zoom - box.left);
     const y = Math.floor((p.y - o.y) / cam.zoom - box.top);
-    if (x >= 0 && y >= 0 && x < box.width && y < box.height && opaque(d.src, x, y)) return d;
-  }
-  return undefined;
+    return x >= 0 && y >= 0 && x < box.width && y < box.height && opaque(d.src, x, y);
+  });
 }

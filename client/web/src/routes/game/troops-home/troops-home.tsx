@@ -13,7 +13,7 @@ export function TroopsHome({ city, onPick }: { city: CityBean; onPick?: () => vo
   const { t } = useTranslation('game');
   const nav = useGameNav();
   const troops = Object.entries(TROOP_KEYS)
-    .map(([id, key]) => ({ id: Number(id), count: city.troop[key] }))
+    .map(([id, key]) => ({ id: Number(id), count: city.troop[key] ?? 0 }))
     .filter((x) => x.count > 0);
   return (
     <section aria-label={t('troopsHome.title')} className="grid gap-1.5">

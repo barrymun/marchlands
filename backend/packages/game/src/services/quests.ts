@@ -17,7 +17,7 @@ import {
   questTargetMessage,
   TROOP_KEY_LIST,
 } from '@marchlands/core';
-import { heroes, mails, playerRelations, questProgress, tiles } from '@marchlands/db';
+import { heroes, mails, one, playerRelations, questProgress, tiles } from '@marchlands/db';
 
 import { openOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
@@ -46,15 +46,19 @@ async function snapshot(ctx: Ctx, playerId: number): Promise<QuestSnapshot> {
         .from(heroes)
         .where(and(inArray(heroes.cityId, cityIds), eq(heroes.inTavern, false), eq(heroes.playerId, playerId)))
     : [];
-  const [{ n: valleys }] = cityIds.length ? await ctx.tx.select({ n: count() }).from(tiles).where(inArray(tiles.ownerCityId, cityIds)) : [{ n: 0 }];
-  const [{ n: sent }] = await ctx.tx
-    .select({ n: count() })
-    .from(mails)
-    .where(and(eq(mails.playerId, playerId), eq(mails.type, 3)));
-  const [{ n: friends }] = await ctx.tx
-    .select({ n: count() })
-    .from(playerRelations)
-    .where(and(eq(playerRelations.playerId, playerId), eq(playerRelations.kind, 'friend')));
+  const { n: valleys } = one(cityIds.length ? await ctx.tx.select({ n: count() }).from(tiles).where(inArray(tiles.ownerCityId, cityIds)) : [{ n: 0 }]);
+  const { n: sent } = one(
+    await ctx.tx
+      .select({ n: count() })
+      .from(mails)
+      .where(and(eq(mails.playerId, playerId), eq(mails.type, 3))),
+  );
+  const { n: friends } = one(
+    await ctx.tx
+      .select({ n: count() })
+      .from(playerRelations)
+      .where(and(eq(playerRelations.playerId, playerId), eq(playerRelations.kind, 'friend'))),
+  );
   return {
     buildings,
     research: Object.fromEntries(Object.entries(p.research).map(([k, v]) => [Number(k), v.level])),

@@ -20,7 +20,7 @@ export function opaqueAt(src: string, x: number, y: number): boolean {
     a = { width: img.naturalWidth, alpha: ctx.getImageData(0, 0, img.naturalWidth, img.naturalHeight).data.filter((_, i) => i % 4 === 3) };
     alphas.set(src, a);
   }
-  return !!a && a.alpha[y * a.width + x] > 0;
+  return !!a && (a.alpha[y * a.width + x] ?? 0) > 0;
 }
 
 /** Load every image in `srcs` and hand back the loaded ones by URL; the grid re-renders, and redraws, as each arrives. */

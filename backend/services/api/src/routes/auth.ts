@@ -3,7 +3,7 @@ import type { z } from 'zod';
 
 import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody, SignUpChallenge } from '@marchlands/contracts';
 import { dur, GameError, msg } from '@marchlands/core';
-import { accounts, players } from '@marchlands/db';
+import { accounts, one, players } from '@marchlands/db';
 
 import { signToken } from '#/auth/jwt.ts';
 import { LoginBackoff } from '#/auth/login-backoff.ts';
@@ -57,12 +57,14 @@ export default async function authRoutes(app: ZApp) {
         throw new GameError(msg('auth.alreadyRegistered'), -12, 409);
       }
       // the very first account, and any listed in ADMIN_USERNAMES, are server operators
-      const [{ n }] = await db.select({ n: sql<number>`count(*)` }).from(accounts);
+      const { n } = one(await db.select({ n: sql<number>`count(*)` }).from(accounts));
       const isAdmin = Number(n) === 0 || config.adminUsernames.includes(username.toLowerCase());
-      const [row] = await db
-        .insert(accounts)
-        .values({ username, email, passwordHash: await hashPassword(password), isAdmin, createdAt: Date.now(), lastLoginAt: Date.now(), lastLoginIp: req.ip })
-        .returning();
+      const row = one(
+        await db
+          .insert(accounts)
+          .values({ username, email, passwordHash: await hashPassword(password), isAdmin, createdAt: Date.now(), lastLoginAt: Date.now(), lastLoginIp: req.ip })
+          .returning(),
+      );
       return { ok: 1 as const, data: await issue(row.id, row.isAdmin) };
     },
   );

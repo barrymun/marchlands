@@ -11,7 +11,7 @@
 import { and, count, eq, inArray } from 'drizzle-orm';
 
 import { tileXY } from '@marchlands/core';
-import { accounts, armies, cities, connect, players, tiles } from '@marchlands/db';
+import { accounts, armies, cities, connect, one, players, tiles } from '@marchlands/db';
 import { player, runGame } from '@marchlands/game';
 
 const args = process.argv.slice(2);
@@ -38,8 +38,8 @@ try {
     if (p) {
       const owned = await db.select().from(cities).where(eq(cities.playerId, p.id));
       const cityIds = owned.map((c) => c.id);
-      const [{ valleys }] = cityIds.length ? await db.select({ valleys: count() }).from(tiles).where(inArray(tiles.ownerCityId, cityIds)) : [{ valleys: 0 }];
-      const [{ marching }] = await db.select({ marching: count() }).from(armies).where(eq(armies.playerId, p.id));
+      const { valleys } = one(cityIds.length ? await db.select({ valleys: count() }).from(tiles).where(inArray(tiles.ownerCityId, cityIds)) : [{ valleys: 0 }]);
+      const { marching } = one(await db.select({ marching: count() }).from(armies).where(eq(armies.playerId, p.id)));
       const where = owned.map((c) => {
         const { x, y } = tileXY(c.tileId);
         return `${c.name} (${x},${y})`;

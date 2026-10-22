@@ -108,7 +108,7 @@ export async function saveFlow(
   if (input.id && !existing) throw new GameError(msg('flow.notFound'), -99, 404);
   if (existing) {
     // a run in progress continues by action index: its actions may change settings (targets, amounts), not order
-    if (isActive(existing) && (existing.actions.length !== actions.length || existing.actions.some((a, i) => a.type !== actions[i].type)))
+    if (isActive(existing) && (existing.actions.length !== actions.length || existing.actions.some((a, i) => a.type !== actions[i]?.type)))
       throw new GameError(msg('flow.runningLocked'), -99);
     // a preview of other actions or cities no longer shows what the flow would do
     const same = isDeepStrictEqual([existing.actions, existing.cities], [actions, cities]);
@@ -160,10 +160,11 @@ export async function runFlow(
         skippedCities = plan.skipped;
         if (!f.runCities.length) throw new GameError(msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.chooseCity'), -99);
         const waitAt = f.actions.findIndex((a) => a.type === 'wait');
+        const waitAction = f.actions[waitAt];
         cities = await runPart(ctx, playerId, f, 0, waitAt < 0 ? f.actions.length : waitAt);
-        if (waitAt >= 0) {
+        if (waitAction) {
           const rest = f.actions.length - waitAt - 1;
-          const note = waitStep(f.actions[waitAt], rest ? msg('flow.step.moreActions', { count: rest }) : msg('flow.step.runEnds'));
+          const note = waitStep(waitAction, rest ? msg('flow.step.moreActions', { count: rest }) : msg('flow.step.runEnds'));
           cities = cities.map((c) => (c.ok ? { ...c, steps: [...c.steps, note] } : c));
         }
         throw new PreviewRollback();

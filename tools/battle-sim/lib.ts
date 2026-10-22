@@ -137,6 +137,7 @@ export function attackNpc(troops: TroopCounts, opts: { level?: number; seeds?: n
   const trace = (e: TraceEvent) => {
     if (e.kind !== 'kill' || e.killed <= 0) return;
     const k = TROOP_KEY_LIST[e.target];
+    if (k === undefined) return; // the simulator only reports troop types it has
     const row = (bySource[k] ??= {});
     const src = sourceName(e.source);
     row[src] = (row[src] ?? 0) + e.killed / seeds;

@@ -17,7 +17,7 @@ import {
   msg,
   ref,
 } from '@marchlands/core';
-import { heroes } from '@marchlands/db';
+import { heroes, one } from '@marchlands/db';
 
 import { type CityBundle, cityStats, openOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
@@ -168,16 +168,18 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
           const city = needCity();
           if (city.heroes.length >= heroSlots(city)) throw new GameError(msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }), -99);
           consumeItem(ctx, p, itemId);
-          const [row] = await ctx.tx
-            .insert(heroes)
-            .values({
-              ...heroValues(createBoxHero(itemId, ctx.rng)),
-              playerId: p.id,
-              cityId: city.city.id,
-              inTavern: false,
-              createdAt: ctx.now,
-            })
-            .returning();
+          const row = one(
+            await ctx.tx
+              .insert(heroes)
+              .values({
+                ...heroValues(createBoxHero(itemId, ctx.rng)),
+                playerId: p.id,
+                cityId: city.city.id,
+                inTavern: false,
+                createdAt: ctx.now,
+              })
+              .returning(),
+          );
           pushHero(ctx, p.id, row, 0);
           result.hero = heroBean(row);
           break;

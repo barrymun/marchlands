@@ -104,6 +104,23 @@ interface Group {
   stat: TroopStat;
 }
 
+// Battle indices as types, so every lookup in the fixed-size arrays below is known to land
+// (docs/features/unchecked-index-access.md): a tuple indexed by a union of its positions is never undefined.
+/** A troop's battle index: troop type id - 2 (0 worker ... 11 catapult). */
+type TroopIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+/** A fortification's index: id - 14 (trap, abatis, archer tower, rolling log, trebuchet). */
+type FortIndex = 0 | 1 | 2 | 3 | 4;
+/** One value per troop type, by battle index. */
+type PerTroop<T> = readonly [T, T, T, T, T, T, T, T, T, T, T, T];
+/** One value per fortification, by index. */
+type PerFort<T> = readonly [T, T, T, T, T];
+
+const TROOP_INDICES: readonly TroopIndex[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+const FORT_INDICES: readonly FortIndex[] = [0, 1, 2, 3, 4];
+// a map over the full index list has one entry per index, which TypeScript can't see on its own
+const perTroop = <T>(fn: (i: TroopIndex) => T) => TROOP_INDICES.map(fn) as unknown as PerTroop<T>;
+const perFort = <T>(fn: (i: FortIndex) => T) => FORT_INDICES.map(fn) as unknown as PerFort<T>;
+
 const stat = (life: number, attack: number, defense: number, speed: number, range: number): TroopStat => ({
   life,
   attack,
@@ -112,7 +129,7 @@ const stat = (life: number, attack: number, defense: number, speed: number, rang
   range,
 });
 
-export const BASE_STATS: readonly TroopStat[] = [
+export const BASE_STATS: PerTroop<TroopStat> = [
   stat(100, 5, 50, 180, 10), // worker
   stat(200, 50, 50, 200, 20), // warrior
   stat(100, 20, 50, 3000, 20), // scout
@@ -126,7 +143,7 @@ export const BASE_STATS: readonly TroopStat[] = [
   stat(5000, 250, 160, 120, 600), // ram
   stat(480, 600, 200, 80, 1500), // catapult
 ];
-export const BASE_FORT_STATS: readonly TroopStat[] = [
+export const BASE_FORT_STATS: PerFort<TroopStat> = [
   stat(0, 0, 0, 0, 5000), // trap
   stat(0, 0, 0, 0, 5000), // abatis
   stat(2000, 300, 360, 0, 1300), // archer tower
@@ -134,17 +151,18 @@ export const BASE_FORT_STATS: readonly TroopStat[] = [
   stat(0, 800, 0, 0, 5000), // trebuchet
 ];
 
-const IS_MELEE = [true, true, true, true, true, false, true, true, true, false, true, false];
+const IS_MELEE: PerTroop<boolean> = [true, true, true, true, true, false, true, true, true, false, true, false];
 const isMelee = (typeId: number) => IS_MELEE[typeId] ?? false; // archer tower (14) reads as false
-const RANGED = [5, 9, 11];
-const MECH = [9, 10, 11];
-const MOUNTED = [7, 8];
-const GROUND = [0, 1, 2, 3, 4, 5];
-const MOVEMENT_ORDER = [2, 7, 8, 3, 4, 1, 0, 6, 10, 5, 9, 11];
-const ATTACK_ORDER = [2, 7, 8, 3, 4, 5, 1, 0, 6, 10, 9, 11];
-const NON_RANGED = [7, 8, 3, 4, 1, 0, 6, 2, 10];
-const FIELD_TYPES = [0, 1, 3, 4, 6, 5, 7, 8, 9, 10, 11];
-const NON_SCOUT_TYPES = [0, 1, 3, 4, 5, 7, 8, 9, 10, 11];
+const RANGED: readonly TroopIndex[] = [5, 9, 11];
+const MECH: readonly TroopIndex[] = [9, 10, 11];
+const MOUNTED: readonly TroopIndex[] = [7, 8];
+const GROUND: readonly TroopIndex[] = [0, 1, 2, 3, 4, 5];
+const MOVEMENT_ORDER: readonly TroopIndex[] = [2, 7, 8, 3, 4, 1, 0, 6, 10, 5, 9, 11];
+const ATTACK_ORDER: readonly TroopIndex[] = [2, 7, 8, 3, 4, 5, 1, 0, 6, 10, 9, 11];
+const NON_RANGED: readonly TroopIndex[] = [7, 8, 3, 4, 1, 0, 6, 2, 10];
+const FIELD_TYPES: readonly TroopIndex[] = [0, 1, 3, 4, 6, 5, 7, 8, 9, 10, 11];
+const NON_SCOUT_TYPES: readonly TroopIndex[] = [0, 1, 3, 4, 5, 7, 8, 9, 10, 11];
+const isGround = (typeId: number) => GROUND.some((i) => i === typeId);
 const TOWER_TYPE_ID = 14;
 
 /** damageModifiers[actor][target]; 0 means x1. Column 14 is the archer tower. */
@@ -171,9 +189,9 @@ function research(r: Partial<ResearchStats>): ResearchStats {
 
 const cdiv = (a: number, b: number) => Math.trunc(a / b); // C integer division
 
-function modifyStats(base: TroopStat[], r: ResearchStats, intel: number, atkMod: number, defMod: number, lifeMod: number, fixes: boolean) {
+function modifyStats(base: PerTroop<TroopStat>, r: ResearchStats, intel: number, atkMod: number, defMod: number, lifeMod: number, fixes: boolean) {
   const pct = BALANCE.battle.researchPct;
-  for (let i = 0; i < 12; i++) {
+  for (const i of TROOP_INDICES) {
     // max((float)(1000 - ((iw*5+100)/100)*((100+intel)/100)*defense*defMod)/1000, 0.5)
     // the original truncates (integer division), so Iron Working has no effect below level 20;
     // with `fixes` it gives the intended +5% per level
@@ -219,8 +237,8 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
   /** report a kill on an attacking group (before it is applied) */
   const killed = (round: number, source: KillSource, target: Group, n: number) =>
     trace?.({ kind: 'kill', round, source, target: target.typeId, killed: Math.min(n, target.eff), location: target.location });
-  const atkStats = BASE_STATS.map((s) => ({ ...s }));
-  const defStats = BASE_STATS.map((s) => ({ ...s }));
+  const atkStats = perTroop((i) => ({ ...BASE_STATS[i] }));
+  const defStats = perTroop((i) => ({ ...BASE_STATS[i] }));
   const atkModA = f(atk.attackModifier ?? 1);
   const atkModD = f(atk.defenceModifier ?? 1);
   const atkModL = f(atk.lifeModifier ?? 1);
@@ -235,8 +253,8 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
   modifyStats(defStats, defResearch, defIntel, defModA, defModD, defModL, fixes);
 
   const wallLevel = def.wallLevel ?? 0;
-  const forts = [0, 1, 2, 3, 4].map((i) => Math.max(0, Math.floor(def.fortifications?.[i] ?? 0)));
-  const fortStats = BASE_FORT_STATS.map((s) => ({ ...s }));
+  const forts = perFort((i) => Math.max(0, Math.floor(def.fortifications?.[i] ?? 0)));
+  const fortStats = perFort((i) => ({ ...BASE_FORT_STATS[i] }));
   {
     const t = fortStats[2];
     const pct = BALANCE.battle.researchPct;
@@ -259,10 +277,10 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
   for (const i of FIELD_TYPES) {
     if (atkTroops[i] > 0 || defTroops[i] > 0) fieldSize = Math.max(fieldSize, Math.trunc(200 + BASE_STATS[i].range));
   }
-  for (let i = 0; i < 5; i++) if (forts[i] > 0) fieldSize = Math.max(fieldSize, Math.trunc(200 + BASE_FORT_STATS[i].range));
+  for (const i of FORT_INDICES) if (forts[i] > 0) fieldSize = Math.max(fieldSize, Math.trunc(200 + BASE_FORT_STATS[i].range));
 
-  const A: Group[] = atkTroops.map((n, i) => ({ location: 0, typeId: i, count: n, eff: n, stat: atkStats[i] }));
-  const D: Group[] = defTroops.map((n, i) => ({ location: fieldSize, typeId: i, count: n, eff: n, stat: defStats[i] }));
+  const A = perTroop<Group>((i) => ({ location: 0, typeId: i, count: atkTroops[i], eff: atkTroops[i], stat: atkStats[i] }));
+  const D = perTroop<Group>((i) => ({ location: fieldSize, typeId: i, count: defTroops[i], eff: defTroops[i], stat: defStats[i] }));
   const tower: Group = { location: fieldSize, typeId: TOWER_TYPE_ID, count: forts[2], eff: forts[2], stat: fortStats[2] };
 
   let trapCount = forts[0];
@@ -400,7 +418,7 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
     if (trapCount > 0) {
       const pos = fieldSize - 5000;
       // (marchlands, fixes) traps only stop ground troops; mounted troops, transporters and siege engines pass them
-      const inZone = (lp: Group) => lp.eff > 0 && lp.location >= pos && lp.location < fieldSize && (!fixes || GROUND.includes(lp.typeId));
+      const inZone = (lp: Group) => lp.eff > 0 && lp.location >= pos && lp.location < fieldSize && (!fixes || isGround(lp.typeId));
       const groups = A.filter(inZone).length;
       if (groups > 0) {
         const maxTraps = Math.min(trapCount, trapDieRate);
@@ -541,12 +559,12 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
   };
 }
 
-function troopArray(troops: number[]): number[] {
-  return Array.from({ length: 12 }, (_, i) => Math.max(0, Math.floor(troops[i] ?? 0)));
+function troopArray(troops: number[]): PerTroop<number> {
+  return perTroop((i) => Math.max(0, Math.floor(troops[i] ?? 0)));
 }
 
 /** Fastest in-range non-ranged group (ties: earlier in NON_RANGED order). */
-function fastest(side: Group[], inRange: (g: Group) => boolean): Group | null {
+function fastest(side: PerTroop<Group>, inRange: (g: Group) => boolean): Group | null {
   let best = -1;
   let target: Group | null = null;
   for (const j of NON_RANGED) {

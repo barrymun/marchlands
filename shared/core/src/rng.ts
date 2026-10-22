@@ -51,6 +51,9 @@ export function randInt(rng: Rng, min: number, max: number): number {
   return min + Math.floor(rng.next() * (max - min + 1));
 }
 
+/** One element of `list` at random; the list is never empty (and holds no `undefined`). */
 export function pick<T>(rng: Rng, list: readonly T[]): T {
-  return list[Math.floor(rng.next() * list.length)];
+  const item = list[Math.floor(rng.next() * list.length)];
+  if (item === undefined) throw new Error('pick: the list is empty');
+  return item;
 }

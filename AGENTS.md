@@ -36,7 +36,7 @@ Run from the repo root.
 
 | Command | What it does |
 |---|---|
-| `npm run typecheck` | `tsc` for the backend + shared packages, then for the client |
+| `npm run typecheck` | `tsc` for the backend + shared packages, then for the client, then `tools/dev/check-index-access.mjs`: no unchecked index access in the folders already fixed (`DONE` there; docs/features/unchecked-index-access.md) |
 | `npm test` | vitest: `shared/*/test`, `backend/**/test`, and `client/web/src/**/*.test.ts` (no database) |
 | `npm run test:db` | the backend service tests against Postgres (`*.db.test.ts`, see Backend tests). Needs the Postgres container. |
 | `npm run lint` / `npm run lint:fix` | ESLint (code quality only); `lint` also runs `npm run knip` (unused files, exports and dependencies) and `npm run sherif` (the workspaces' `package.json` files agree: the same version of a shared dependency everywhere, and so on). sherif's `root-package-manager-field` rule is off: npm comes with Node 24, here and in CI's `node:24` image, so the root names no `packageManager`. |

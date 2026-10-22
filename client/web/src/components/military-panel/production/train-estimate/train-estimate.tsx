@@ -28,10 +28,10 @@ export function TrainEstimate({
   const now = useNow();
   const unitMs = (Math.max(BALANCE.minTrainUnitSeconds, unitSeconds) * 1000) / getGameSpeed();
   const freeAt = (q?: Queue) => {
-    const list = q?.allProduceQueue ?? [];
-    if (!list.length) return now;
-    const head = Math.max(now, list[0].endTime || now + list[0].costTime * 1000);
-    return head + list.slice(1).reduce((t, b) => t + b.costTime * 1000, 0);
+    const [first, ...rest] = q?.allProduceQueue ?? [];
+    if (!first) return now;
+    const head = Math.max(now, first.endTime || now + first.costTime * 1000);
+    return head + rest.reduce((t, b) => t + b.costTime * 1000, 0);
   };
   const perUnit =
     unitMs <= 0

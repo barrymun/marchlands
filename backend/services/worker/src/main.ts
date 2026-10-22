@@ -7,7 +7,7 @@
 import { sql } from 'drizzle-orm';
 
 import { setGameSpeed } from '@marchlands/core';
-import { connect, timedEvents } from '@marchlands/db';
+import { connect, one, timedEvents } from '@marchlands/db';
 import { beginnerJob, cleanupJob, heroGearJob, merchantJob, rankingsJob, startStatsFlusher, statsJob, world, zonesJob } from '@marchlands/game';
 
 import { eventLoop, every as everyUntilStopped, log, processOne } from '#/worker.ts';
@@ -33,7 +33,7 @@ async function main() {
   log('info', 'world ready', { ...info });
   // heroes store their gear points: bring them in line with the current gear rules
   log('info', 'hero gear synced', { heroes: await heroGearJob(db) });
-  const [{ n }] = (await db.select({ n: sql<number>`count(*)` }).from(timedEvents)) as { n: number }[];
+  const { n } = one(await db.select({ n: sql<number>`count(*)` }).from(timedEvents));
   log('info', 'worker started', { pendingEvents: Number(n), gameSpeed: Number(process.env.GAME_SPEED ?? 1) });
 
   every('rankings', 60_000, () => rankingsJob(db));

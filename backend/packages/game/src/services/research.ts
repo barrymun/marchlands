@@ -37,15 +37,22 @@ import { getPlayer, saveCity, savePlayer } from '#/repo.ts';
 import { prefixed } from '#/stats.ts';
 
 /** The city's research to act on: `techId` when given, else the only one running. */
-function pickResearch(research: ResearchState, cityId: number, techId?: number): number {
+function pickResearch(research: ResearchState, cityId: number, which?: number) {
   const busy = researchesInCity(research, cityId);
-  if (techId != null) {
-    if (!busy.includes(techId)) throw new GameError(msg('research.notResearching', { tech: ref.tech(techId) }), -99);
-    return techId;
+  let techId: number;
+  if (which != null) {
+    if (!busy.includes(which)) throw new GameError(msg('research.notResearching', { tech: ref.tech(which) }), -99);
+    techId = which;
+  } else {
+    const [only, ...more] = busy;
+    if (only === undefined) throw new GameError(msg('research.noResearch'), -99);
+    if (more.length > 0) throw new GameError(msg('research.chooseResearch'), -99);
+    techId = only;
   }
-  if (busy.length === 0) throw new GameError(msg('research.noResearch'), -99);
-  if (busy.length > 1) throw new GameError(msg('research.chooseResearch'), -99);
-  return busy[0];
+  // busy lists only techs the player has an entry for
+  const entry = research[techId];
+  if (!entry) throw new GameError(msg('research.notResearching', { tech: ref.tech(techId) }), -99);
+  return { techId, entry };
 }
 
 /** tech.getResearchList */
@@ -113,8 +120,7 @@ export async function startResearch(ctx: Ctx, playerId: number, cityId: number, 
 /** tech.cancelResearch: refunds a third of the cost (orig). */
 export async function cancelResearch(ctx: Ctx, playerId: number, cityId: number, which?: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  const techId = pickResearch(b.player.research, cityId, which);
-  const r = b.player.research[techId];
+  const { techId, entry: r } = pickResearch(b.player.research, cityId, which);
   const paid = researchCost(techId, r.level + 1);
   gainResources(b.city, paid, BALANCE.cancelResearchRefund);
   ctx.stat(playerId, cityId, prefixed('spent.research', paid, -BALANCE.cancelResearchRefund));
@@ -129,8 +135,8 @@ export async function cancelResearch(ctx: Ctx, playerId: number, cityId: number,
 /** tech.getCoinsNeed */
 export async function researchSpeedupCost(ctx: Ctx, playerId: number, cityId: number, which?: number) {
   const p = await getPlayer(ctx, playerId);
-  const techId = pickResearch(p.research, cityId, which);
-  const left = Math.max(0, (p.research[techId].endTime ?? 0) - ctx.now);
+  const { entry } = pickResearch(p.research, cityId, which);
+  const left = Math.max(0, (entry.endTime ?? 0) - ctx.now);
   return { goldNeed: goldForSpeedup(left), timeLeft: left };
 }
 
@@ -139,9 +145,8 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
   // the researching city pays in gold for what is not owned
   const b = await openOwnCity(ctx, playerId, cityId);
   const p = b.player;
-  const techId = pickResearch(p.research, cityId, which);
-  const r = p.research[techId];
-  const end = r.endTime!;
+  const { techId, entry: r } = pickResearch(p.research, cityId, which);
+  const end = r.endTime ?? ctx.now; // a research under way always has its end
   const left = Math.max(0, end - ctx.now);
   let reduce: number;
   if (itemId === SpeedupId.FREE) {

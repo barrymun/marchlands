@@ -43,7 +43,7 @@ export const SIDE_COLOURS: Readonly<Record<Side, Rgb>> = {
 };
 
 /** Clothes people in the town wear, one picked for each (seeded). */
-export const CLOTHES: readonly Rgb[] = [
+export const CLOTHES = [
   [178, 44, 44],
   [72, 112, 172],
   [92, 134, 66],
@@ -51,7 +51,7 @@ export const CLOTHES: readonly Rgb[] = [
   [128, 30, 32],
   [242, 240, 230],
   [104, 72, 42],
-];
+] as const satisfies readonly Rgb[];
 
 /** Spots whose part is drawn moving over a bare sprite (tools/art/draw.ts, MOVING). */
 export const MOVING_SPOTS: ReadonlySet<string> = new Set(['sails', 'wheel', 'sheep']);

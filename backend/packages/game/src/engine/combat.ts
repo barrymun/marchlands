@@ -18,7 +18,7 @@ import {
   BuildingType,
   type CombatResult,
   createGuardHero,
-  distributeLosses,
+  distributeLossesAmong,
   type FortCounts,
   freshNpcState,
   HeroBuffId,
@@ -56,7 +56,7 @@ import {
   valleyGarrison,
   WAR_ENSIGN_DESC,
 } from '@marchlands/core';
-import { armies, cities, heroes, tiles } from '@marchlands/db';
+import { armies, cities, heroes, one, tiles } from '@marchlands/db';
 
 import { type CityBundle, openCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -378,23 +378,25 @@ async function station(ctx: Ctx, a: ArmyRow) {
 
 async function arriveBuildCity(ctx: Ctx, a: ArmyRow, settler: PlayerRow) {
   const tile = await getTile(ctx, a.targetTileId, { lock: true });
-  const [{ n }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, a.playerId));
+  const { n } = one(await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, a.playerId)));
   if (tile.type !== TileType.FLAT || tile.cityId != null || tile.ownerCityId != null) return turnBack(ctx, a, msg('army.landNotFree'));
   if (Number(n) >= maxCitiesFor(settler.title)) return turnBack(ctx, a, msg('army.cityLimit'));
   const name = `${settler.name.slice(0, 12)} ${Number(n) + 1}`;
   const base = initialCity(a.playerId, tile.id, name, ctx.now);
-  const [city] = await ctx.tx
-    .insert(cities)
-    .values({
-      ...base,
-      gold: a.resources.gold,
-      food: a.resources.food,
-      wood: a.resources.wood,
-      stone: a.resources.stone,
-      iron: a.resources.iron,
-      troops: a.troops,
-    })
-    .returning();
+  const city = one(
+    await ctx.tx
+      .insert(cities)
+      .values({
+        ...base,
+        gold: a.resources.gold,
+        food: a.resources.food,
+        wood: a.resources.wood,
+        stone: a.resources.stone,
+        iron: a.resources.iron,
+        troops: a.troops,
+      })
+      .returning(),
+  );
   await ctx.tx
     .update(tiles)
     .set({ cityId: city.id, type: TileType.CASTLE, ownerPlayerId: a.playerId, ownerCityId: null, updatedAt: ctx.now })
@@ -546,13 +548,15 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     ctx.rng,
   );
   const survivors = result.attacker.after.scouter ?? 0;
-  // defending scout losses spread over the city and stationed armies
-  const groups = [{ scouter: cityScouts }, ...stationed.map((s) => ({ scouter: s.troops.scouter ?? 0 }))];
-  const after = distributeLosses(groups, { scouter: defScouts }, result.defender.after);
-  if (cityScouts > 0) def.city.troops = { ...def.city.troops, scouter: after[0].scouter ?? 0 };
-  for (let i = 0; i < stationed.length; i++) {
-    const s = stationed[i];
-    s.troops = { ...s.troops, scouter: after[i + 1].scouter ?? 0 };
+  // defending scout losses spread over the city (null) and stationed armies
+  const holders = [null, ...stationed];
+  const scoutsOf = (s: (typeof stationed)[number] | null) => ({ scouter: s ? (s.troops.scouter ?? 0) : cityScouts });
+  for (const { holder: s, troops } of distributeLossesAmong(holders, scoutsOf, { scouter: defScouts }, result.defender.after)) {
+    if (!s) {
+      if (cityScouts > 0) def.city.troops = { ...def.city.troops, scouter: troops.scouter ?? 0 };
+      continue;
+    }
+    s.troops = { ...s.troops, scouter: troops.scouter ?? 0 };
     if (totalTroops(s.troops) <= 0) await disbandEmptyArmy(ctx, s);
     else await saveArmy(ctx, s);
   }
@@ -823,18 +827,19 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   );
 
   let defenderInjured: TroopCounts = {};
-  // apply defender losses
-  const afterGroups = distributeLosses(groups, defTroops, r.defender.after);
-  if (def.city.goOutForBattle) {
-    const lost = addTroops(def.city.troops, afterGroups[0], -1);
-    def.city.troops = afterGroups[0];
-    // Medicine: part of the city's own fallen recover as injured
-    defenderInjured = injuredOf(lost, def.player.research);
-    def.city.injuredTroops = addTroops(def.city.injuredTroops, defenderInjured);
-  }
-  for (let i = 0; i < stationed.length; i++) {
-    const s = stationed[i];
-    s.troops = afterGroups[i + 1];
+  // apply defender losses: the city's own (null), then each stationed army's
+  for (const { holder: s, troops } of distributeLossesAmong([null, ...stationed], (s) => (s ? s.troops : cityTroops), defTroops, r.defender.after)) {
+    if (!s) {
+      if (def.city.goOutForBattle) {
+        const lost = addTroops(def.city.troops, troops, -1);
+        def.city.troops = troops;
+        // Medicine: part of the city's own fallen recover as injured
+        defenderInjured = injuredOf(lost, def.player.research);
+        def.city.injuredTroops = addTroops(def.city.injuredTroops, defenderInjured);
+      }
+      continue;
+    }
+    s.troops = troops;
     if (totalTroops(s.troops) <= 0) await disbandEmptyArmy(ctx, s);
     else await saveArmy(ctx, s);
   }
@@ -945,7 +950,7 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   }
   Object.assign(tile, { troops: r.defender.after, forts: r.forts.after, state, updatedAt: ctx.now });
   if (r.attackerWon && state.loyalty <= 0) {
-    const [{ n }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, attacker.id));
+    const { n } = one(await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, attacker.id)));
     if (Number(n) < maxCitiesFor(attacker.title)) {
       captured = true;
       await captureNpc(ctx, attacker, tile, state);
@@ -995,19 +1000,21 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
 async function captureNpc(ctx: Ctx, attacker: PlayerRow, tile: TileRow, state: NpcState) {
   const name = `${attacker.name.slice(0, 12)} Keep`;
   const base = initialCity(attacker.id, tile.id, name, ctx.now);
-  const [city] = await ctx.tx
-    .insert(cities)
-    .values({
-      ...base,
-      buildings: npcCityBuildings(tile.level),
-      gold: state.gold,
-      food: state.food,
-      wood: state.wood,
-      stone: state.stone,
-      iron: state.iron,
-      population: state.population,
-    })
-    .returning();
+  const city = one(
+    await ctx.tx
+      .insert(cities)
+      .values({
+        ...base,
+        buildings: npcCityBuildings(tile.level),
+        gold: state.gold,
+        food: state.food,
+        wood: state.wood,
+        stone: state.stone,
+        iron: state.iron,
+        population: state.population,
+      })
+      .returning(),
+  );
   Object.assign(tile, {
     type: TileType.CASTLE,
     cityId: city.id,
@@ -1030,6 +1037,7 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const hero = await heroOf(ctx, a);
   let groups: TroopCounts[];
   let stationed: ArmyRow[] = [];
+  let valleyTroops: TroopCounts = {}; // the valley's own defenders, when no player holds it
   let defenderName = ''; // the valley's own defenders: the client names them
   let defenderId: number | null = null;
   if (tile.ownerPlayerId) {
@@ -1040,7 +1048,10 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     groups = stationed.map((s) => s.troops);
     defenderId = tile.ownerPlayerId;
     defenderName = (await getPlayer(ctx, defenderId)).name;
-  } else groups = [valleyDefenders(ctx, tile)];
+  } else {
+    valleyTroops = valleyDefenders(ctx, tile);
+    groups = [valleyTroops];
+  }
   const defTroops = sumTroops(groups);
   const owner = defenderId ? await getPlayer(ctx, defenderId) : null;
   const stationedHeroes = await heroesOfArmies(ctx, stationed);
@@ -1063,17 +1074,15 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     },
     ctx.rng,
   );
-  const afterGroups = distributeLosses(groups, defTroops, r.defender.after);
   if (owner) {
-    for (let i = 0; i < stationed.length; i++) {
-      const s = stationed[i];
-      s.troops = afterGroups[i];
+    for (const { holder: s, troops } of distributeLossesAmong(stationed, (s) => s.troops, defTroops, r.defender.after)) {
+      s.troops = troops;
       if (totalTroops(s.troops) <= 0) await disbandEmptyArmy(ctx, s);
       else await saveArmy(ctx, s);
     }
     owner.honor += r.defenderHonor;
     await savePlayer(ctx, owner);
-  } else tile.troops = afterGroups[0];
+  } else for (const { troops } of distributeLossesAmong([tile], () => valleyTroops, defTroops, r.defender.after)) tile.troops = troops;
 
   let occupied = false;
   let reason: Message | null = null;
@@ -1082,7 +1091,7 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     if (!home) reason = msg('army.homeCityGone');
     else {
       const th = buildingLevel(home.city.buildings, BuildingType.TOWN_HALL);
-      const [{ n }] = await ctx.tx.select({ n: count() }).from(tiles).where(eq(tiles.ownerCityId, home.city.id));
+      const { n } = one(await ctx.tx.select({ n: count() }).from(tiles).where(eq(tiles.ownerCityId, home.city.id)));
       if (Number(n) >= maxValleysFor(th)) reason = msg('army.valleyLimit', { building: ref.building(BuildingType.TOWN_HALL) });
       else {
         // remaining stationed armies of the old owner go home

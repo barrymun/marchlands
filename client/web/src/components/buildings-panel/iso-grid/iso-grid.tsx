@@ -5,9 +5,10 @@ import { useTranslation } from 'react-i18next';
 import type { BuildingBean } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
 
-import { BUILDING_ART, CITY_ART } from '@/components/buildings-panel/constants';
+import { BUILDING_ART } from '@/components/buildings-panel/constants';
 import type { BuildingArt, IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
 import { buildingSprites, depthOf, hitTest, markerOf } from '@/components/buildings-panel/iso-grid/utils';
+import { cityArt } from '@/components/buildings-panel/utils';
 import { Countdown } from '@/components/countdown/countdown';
 import { useAnimations } from '@/components/iso-anim/hooks';
 import type { TownState } from '@/components/iso-anim/types';
@@ -76,7 +77,7 @@ export function IsoGrid({
   const artOf = (type: number, level: number, span: number): BuildingArt => {
     if (span === 2) {
       const file = grandTownHallFile(artBand(level));
-      return { src: CITY_ART[file], file: `city/${file}` };
+      return { src: cityArt(file), file: `city/${file}` };
     }
     const file = buildingArtFile(type, artBand(level));
     return { src: BUILDING_ART[file], file: `buildings/${file}`, bare: BUILDING_ART[bareArtFile(file)] };
@@ -117,16 +118,26 @@ export function IsoGrid({
     return !b || !highlight(b);
   };
   const groundArt: Drawable[] = [
-    ...ground.map((g) => ({ key: `g${g.col},${g.row}`, col: g.col, row: g.row, src: CITY_ART[cityGroundFile('grass')] })),
+    ...ground.map((g) => ({ key: `g${g.col},${g.row}`, col: g.col, row: g.row, src: cityArt(cityGroundFile('grass')) })),
     ...tiles.flatMap((tile) => {
       const m = markerOf(tile, !!built(tile.pos));
-      return m ? [{ key: `m${tile.pos}`, col: tile.col, row: tile.row, src: CITY_ART[cityGroundFile(m)], tone: highlight ? ('dim' as const) : undefined }] : [];
+      return m ? [{ key: `m${tile.pos}`, col: tile.col, row: tile.row, src: cityArt(cityGroundFile(m)), tone: highlight ? ('dim' as const) : undefined }] : [];
     }),
   ];
-  const spriteArt: Drawable[] = sprites.map((s) => ({
-    ...s,
-    tone: s.pos != null && s.pos === hover ? 'lit' : s.pos != null && byPos.has(s.pos) && s.key.startsWith('b') && dimmed(s.pos) ? 'dim' : undefined,
+  // each sprite with how it's drawn now (lit under the pointer, dimmed when not picked)
+  const toned = sprites.map((s) => ({
+    s,
+    d: {
+      ...s,
+      tone:
+        s.pos != null && s.pos === hover
+          ? ('lit' as const)
+          : s.pos != null && byPos.has(s.pos) && s.key.startsWith('b') && dimmed(s.pos)
+            ? ('dim' as const)
+            : undefined,
+    } satisfies Drawable,
   }));
+  const spriteArt: Drawable[] = toned.map(({ d }) => d);
   // the scene at a moment, once the animation code has loaded: each sprite (bare under its turning parts), then what it
   // shows (smoke, sails, construction, a finished level's sparkle), and people on the streets, all back to front; a
   // dimmed building stays still
@@ -136,8 +147,7 @@ export function IsoGrid({
     anim && streets
       ? (t: number): Piece[] => {
           const night = anim.isNight();
-          const layers: { depth: number; pieces: Piece[] }[] = sprites.map((s, i) => {
-            const d = spriteArt[i];
+          const layers: { depth: number; pieces: Piece[] }[] = toned.map(({ s, d }) => {
             if (!s.file || d.tone === 'dim') return { depth: s.depth, pieces: [d] };
             const owner = { key: s.key, col: s.col, row: s.row, size: s.size, file: s.file };
             const b = s.pos != null ? byPos.get(s.pos) : undefined;

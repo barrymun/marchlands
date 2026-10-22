@@ -17,7 +17,7 @@ import {
   TileType,
   tileXY,
 } from '@marchlands/core';
-import { armies, tiles } from '@marchlands/db';
+import { armies, one, tiles } from '@marchlands/db';
 
 import { cityStats, openOwnCity, viewCity, viewOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
@@ -175,12 +175,14 @@ const TELEPORTER = ItemId.CITY_TELEPORTER;
 export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targetTileId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   if (activeBuff(b.player, BuffId.TELEPORT_COOLDOWN, ctx.now)) throw new GameError(msg('city.teleportCooldown', { item: ref.item(TELEPORTER) }), -90);
-  const [{ n: out }] = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId));
+  const { n: out } = one(await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId)));
   if (Number(out) > 0) throw new GameError(msg('city.recallTroopsFirst'), -77);
-  const [{ n: guests }] = await ctx.tx
-    .select({ n: count() })
-    .from(armies)
-    .where(and(eq(armies.targetTileId, b.city.tileId), ne(armies.playerId, playerId)));
+  const { n: guests } = one(
+    await ctx.tx
+      .select({ n: count() })
+      .from(armies)
+      .where(and(eq(armies.targetTileId, b.city.tileId), ne(armies.playerId, playerId))),
+  );
   if (Number(guests) > 0) throw new GameError(msg('city.foreignTroops'), -77);
 
   const target = targetTileId;

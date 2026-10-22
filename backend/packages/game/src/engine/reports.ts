@@ -4,7 +4,7 @@ import { and, count, desc, eq, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import { addTroops, type DesertionReport, type Message, msg, type ReportBody, ReportType, type TroopCounts } from '@marchlands/core';
-import { reports } from '@marchlands/db';
+import { one, reports } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 
@@ -22,21 +22,23 @@ export interface NewReport {
 }
 
 export async function createReport(ctx: Ctx, r: NewReport): Promise<number> {
-  const [row] = await ctx.tx
-    .insert(reports)
-    .values({
-      playerId: r.playerId,
-      typeId: r.typeId ?? ReportType.ARMY,
-      title: r.title,
-      armyType: r.armyType ?? 0,
-      isAttack: r.isAttack ?? false,
-      isBack: r.isBack ?? false,
-      startPos: r.startPos ?? null,
-      targetPos: r.targetPos ?? null,
-      body: r.body,
-      eventTime: ctx.now,
-    })
-    .returning({ id: reports.id });
+  const row = one(
+    await ctx.tx
+      .insert(reports)
+      .values({
+        playerId: r.playerId,
+        typeId: r.typeId ?? ReportType.ARMY,
+        title: r.title,
+        armyType: r.armyType ?? 0,
+        isAttack: r.isAttack ?? false,
+        isBack: r.isBack ?? false,
+        startPos: r.startPos ?? null,
+        targetPos: r.targetPos ?? null,
+        body: r.body,
+        eventTime: ctx.now,
+      })
+      .returning({ id: reports.id }),
+  );
   await pushReportCounts(ctx, r.playerId);
   return row.id;
 }

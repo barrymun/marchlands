@@ -63,8 +63,10 @@ export function IsoViewport({
     const r = e.currentTarget.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
+  /** The two fingers' distance and middle, or null with fewer than two down. */
   const two = () => {
     const [a, b] = [...pointers.current.values()];
+    if (!a || !b) return null;
     return { dist: Math.hypot(a.x - b.x, a.y - b.y), mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } };
   };
 
@@ -172,7 +174,8 @@ export function IsoViewport({
         pointers.current.set(e.pointerId, point(e));
         if (pointers.current.size === 1) drag.current = { p: point(e), from: camera, moved: false };
         else if (pointers.current.size === 2) {
-          pinch.current = { ...two(), from: camera };
+          const both = two();
+          if (both) pinch.current = { ...both, from: camera };
           if (drag.current) drag.current.moved = true;
         }
       }}
@@ -180,9 +183,9 @@ export function IsoViewport({
         const p = point(e);
         if (pointers.current.has(e.pointerId)) pointers.current.set(e.pointerId, p);
         const pin = pinch.current;
-        if (pin && pointers.current.size >= 2) {
+        const now = pin && two();
+        if (pin && now) {
           // two fingers: the view follows their middle, and zooms as far as they spread or close
-          const now = two();
           const zoom = clampZoom(pin.from.zoom * (now.dist / pin.dist));
           vp.setCamera(zoomAround(dragged(pin.from, now.mid.x - pin.mid.x, now.mid.y - pin.mid.y), zoom, now.mid, view));
           return;

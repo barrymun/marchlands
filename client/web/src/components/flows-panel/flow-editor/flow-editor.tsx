@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { moved } from '@/lib/arrays';
 import { cn } from '@/lib/utils';
 
 export function FlowEditor({
@@ -36,10 +37,7 @@ export function FlowEditor({
   const setActions = (actions: Draft[]) => onChange({ ...draft, actions });
   const move = (from: number, to: number) => {
     if (locked || to < 0 || to >= draft.actions.length || from === to) return;
-    const next = [...draft.actions];
-    const [a] = next.splice(from, 1);
-    next.splice(to, 0, a);
-    setActions(next);
+    setActions(moved(draft.actions, from, to));
   };
   const update = (i: number, a: Draft) => setActions(draft.actions.map((x, j) => (j === i ? a : x)));
   const valid =
@@ -138,7 +136,7 @@ export function FlowEditor({
             variant="outline"
             disabled={locked || draft.actions.length >= 20}
             onClick={() =>
-              setActions([...draft.actions, keyed({ type: 'trainTroops', troopId: FLOW_TROOP_IDS.includes(7) ? 7 : FLOW_TROOP_IDS[0], amount: 'max' })])
+              setActions([...draft.actions, keyed({ type: 'trainTroops', troopId: FLOW_TROOP_IDS.includes(7) ? 7 : (FLOW_TROOP_IDS[0] ?? 7), amount: 'max' })])
             }
           >
             <Plus /> {t('flowEditor.add.trainTroops')}

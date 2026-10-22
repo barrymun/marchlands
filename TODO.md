@@ -66,9 +66,9 @@ Phases 2 to 4 of the October 2026 tooling review; phase 1 (type-aware linting an
   - Now: dependencies are updated by hand, and the two-week rule (AGENTS.md, Ground rules) is checked by hand.
   - Plan: Renovate with `minimumReleaseAge: "14 days"` and pinned versions (`rangeStrategy: "pin"`), grouped so updates come as a few pull requests.
   - To decide first: CI runs only when started by hand (`workflow_dispatch` in `.github/workflows/ci.yml`), so Renovate's pull requests would go untested unless CI also runs on `pull_request`.
-- [ ] **Turn on `noUncheckedIndexedAccess`.**
-  - Now: off (`tsconfig.base.json`), so a lookup in a record or array (`BALANCE.fortSpace[id]`, the data tables) is typed as always found. Turning it on gives about 300 errors in the client and about 1,400 in the backend and shared code (measured 2026-10-21).
-  - Plan: a design document first (AGENTS.md, Ground rules), with the patterns for a lookup that can miss. The client first (its own tsconfig); the backend and shared code share `tsconfig.json`, so going a package at a time means splitting it. Then turn on `@typescript-eslint/no-unnecessary-condition`, whose findings are mostly false alarms while the flag is off.
+- [ ] **Turn on `noUncheckedIndexedAccess`.** Design: [docs/features/unchecked-index-access.md](docs/features/unchecked-index-access.md).
+  - Now: off, so a lookup in a record or array (`BALANCE.fortSpace[id]`, `rows[0]`, the battle simulator's arrays) is typed as always found. Turning it on gives about 1,540 errors (measured 2026-10-21): 127 in the battle simulator, about 240 in the rest of the source, and about 1,180 in tests.
+  - Plan: fix in chunks with the flag off (core first, since the client compiles it; then the backend, the client and tests), kept from slipping back by a check on finished folders, then turn it on and `no-unnecessary-condition` after it. Decided: tests are fixed too (with `!`), `one(rows)` for rows that must be there, and `!` banned in source code. Phases are in the design; 1 to 4 are done (the check on finished folders, `one(rows)`, and all source code: core, the backend and the client). Tests are next.
 - [ ] **Browser tests with Playwright.**
   - Now: the client's tests are pure functions in plain Node; the only end-to-end checks are `tools/smoke/*.mjs`, against the API.
   - Plan: a small Playwright suite against the running stack (log in, build, train, send an army) with axe accessibility checks, using temporary `fx_…` accounts deleted afterwards (AGENTS.md, Running stack).

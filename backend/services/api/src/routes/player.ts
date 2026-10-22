@@ -35,7 +35,7 @@ import {
   WorldInfo,
   ZoneStats,
 } from '@marchlands/contracts';
-import { players } from '@marchlands/db';
+import { one, players } from '@marchlands/db';
 import { flows, player, runGame, shop, statistics, world } from '@marchlands/game';
 
 import { signToken } from '#/auth/jwt.ts';
@@ -104,7 +104,7 @@ export default async function playerRoutes(app: ZApp) {
   );
 
   app.get('/player/bookmarks', s('Map bookmarks (castleSignBean)', z.array(CastleSign)), (req) =>
-    game(req, async (ctx, pid) => (await ctx.tx.select({ s: players.castleSigns }).from(players).where(eq(players.id, pid)))[0].s),
+    game(req, async (ctx, pid) => one(await ctx.tx.select({ s: players.castleSigns }).from(players).where(eq(players.id, pid))).s),
   );
   app.post('/player/bookmarks', s('Bookmark a castle (castle.saveCastleSignList)', z.array(CastleSign), { body: BookmarkBody }), (req) =>
     game(req, (ctx, pid) => player.addCastleSign(ctx, pid, req.body.tileId)),

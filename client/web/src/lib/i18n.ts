@@ -21,7 +21,7 @@ export function matchLocale(lng: string | undefined): Locale {
   if (!lng) return DEFAULT_LOCALE;
   const exact = LOCALES.find((l) => l.toLowerCase() === lng.toLowerCase());
   if (exact) return exact;
-  const language = lng.split('-')[0].toLowerCase();
+  const [language = ''] = lng.toLowerCase().split('-');
   return LOCALES.find((l) => l.split('-')[0] === language) ?? DEFAULT_LOCALE;
 }
 
@@ -30,8 +30,8 @@ export function matchLocale(lng: string | undefined): Locale {
 const files = import.meta.glob<Record<string, unknown>>(['../locales/en-GB/*.json', '../locales/en-US/*.json'], { eager: true, import: 'default' });
 const resources: Record<string, Record<string, Record<string, unknown>>> = {};
 for (const [path, json] of Object.entries(files)) {
-  const [, locale, ns] = path.match(/locales\/([^/]+)\/([^/]+)\.json$/)!;
-  (resources[locale] ??= {})[ns] = json;
+  const [, locale, ns] = /locales\/([^/]+)\/([^/]+)\.json$/.exec(path) ?? [];
+  if (locale && ns) (resources[locale] ??= {})[ns] = json;
 }
 
 // every other locale is one file of the build (src/locales/<locale>.ts), loaded when chosen

@@ -53,7 +53,8 @@ export function generateMap(seed: string, mapSize: number = BALANCE.mapSize): Ui
     const ty = gy - y0;
     const sx = tx * tx * (3 - 2 * tx);
     const sy = ty * ty * (3 - 2 * ty);
-    const n = (a: number, b: number) => noise[b * gw + a];
+    // the grid has a cell to spare on every side, so a neighbour is always there
+    const n = (a: number, b: number) => noise[b * gw + a] ?? 0;
     const top = n(x0, y0) * (1 - sx) + n(x0 + 1, y0) * sx;
     const bot = n(x0, y0 + 1) * (1 - sx) + n(x0 + 1, y0 + 1) * sx;
     return top * (1 - sy) + bot * sy;
@@ -77,7 +78,7 @@ export function generateMap(seed: string, mapSize: number = BALANCE.mapSize): Ui
       else if (roll < 0.43) type = TileType.FLAT;
       else {
         const v = Math.min(0.9999, sample(x, y));
-        type = valleys[Math.floor(v * valleys.length)];
+        type = valleys[Math.floor(v * valleys.length)] ?? TileType.FLAT; // v < 1: always one of them
       }
       out[i] = type;
       out[i + 1] = level();
@@ -98,7 +99,8 @@ export interface NpcTemplate {
   loyalty: number;
 }
 
-const NPC_TABLE: [number, number, number, number, number, number, number, number, number, number, number, number, number][] = [
+type NpcRow = [number, number, number, number, number, number, number, number, number, number, number, number, number];
+const NPC_TABLE: readonly [NpcRow, ...NpcRow[]] = [
   // gold, food, wsi, warrior, pike, sword, archer, cavalry, traps, abatis, towers, logs, trebs
   [55000, 100000, 20000, 50, 40, 30, 10, 8, 1000, 0, 0, 0, 0],
   [65000, 200000, 30000, 50, 45, 40, 30, 25, 1850, 550, 0, 0, 0],
@@ -111,16 +113,17 @@ const NPC_TABLE: [number, number, number, number, number, number, number, number
   [1200000, 14000000, 550000, 60000, 18000, 2000, 6750, 2500, 9000, 4500, 3000, 1800, 1125],
   [1500000, 19000000, 600000, 400000, 0, 0, 0, 0, 11000, 5500, 3666, 2200, 1375],
 ];
-const NPC_POPULATION = [1000, 4000, 8000, 16000, 25000, 33000, 38000, 58000, 68000, 78000];
+const NPC_POPULATION: readonly [number, ...number[]] = [1000, 4000, 8000, 16000, 25000, 33000, 38000, 58000, 68000, 78000];
 
 export function npcTemplate(level: number): NpcTemplate {
   const l = Math.min(10, Math.max(1, level));
-  const [gold, food, wsi, warrior, pike, sword, archer, cav, traps, abatis, towers, logs, trebs] = NPC_TABLE[l - 1];
+  // l is clamped to the table's 10 levels
+  const [gold, food, wsi, warrior, pike, sword, archer, cav, traps, abatis, towers, logs, trebs] = NPC_TABLE[l - 1] ?? NPC_TABLE[0];
   return {
     resources: { gold: BALANCE.npcGoldMatchesTopResource ? Math.max(food, wsi) : gold, food, wood: wsi, stone: wsi, iron: wsi },
     troops: { militia: warrior, pikemen: pike, swordsmen: sword, archer, lightCavalry: cav },
     forts: { trap: traps, abatis, arrowTower: towers, rollingLogs: logs, rockfall: trebs },
-    population: NPC_POPULATION[l - 1],
+    population: NPC_POPULATION[l - 1] ?? NPC_POPULATION[0],
     loyalty: l > 2 ? BALANCE.npcLoyaltyStart.high : BALANCE.npcLoyaltyStart.low,
   };
 }

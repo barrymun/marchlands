@@ -18,7 +18,7 @@ export function NpcWins({ c }: { c: Counters }) {
         ) : (
           <div className="grid grid-cols-5 gap-2">
             {levels.map((l) => (
-              <Tile key={l} label={t('npcWins.level', { level: l })} value={c[`npcWins.${l}`]} />
+              <Tile key={l} label={t('npcWins.level', { level: l })} value={c[`npcWins.${l}`] ?? 0} />
             ))}
           </div>
         )}

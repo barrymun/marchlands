@@ -42,7 +42,7 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
   const gain = prestigeOf(PrestigeAction.RESEARCH, techId, level, th);
   addPrestige(p, gain);
   const mayor = home ? mayorOf(home.heroes) : undefined;
-  if (mayor) {
+  if (home && mayor) {
     addHeroExp(mayor, researchHeroExp(techId, level, th));
     await saveHero(ctx, mayor);
     ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: home.city.id, hero: heroBean(mayor), updateType: 2 });

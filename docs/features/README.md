@@ -11,3 +11,4 @@ Design documents for large planned features, kept while they are worked out and 
 |---|---|---|
 | [market-and-factions.md](market-and-factions.md) | Market overhaul: NPC cities trading, factions, historical cities as seats of power, events, trading scripts, new charts | Design |
 | [town-animations.md](town-animations.md) | Animated town, fields and map: smoke, sails and wheels, walkers, construction, buildings showing what they're doing, day and night, weather, marching armies | Built |
+| [unchecked-index-access.md](unchecked-index-access.md) | `noUncheckedIndexedAccess`: lookups that can miss typed as such, in chunks (core, backend, client, tests), then `no-unnecessary-condition` | Building (source done, tests next) |

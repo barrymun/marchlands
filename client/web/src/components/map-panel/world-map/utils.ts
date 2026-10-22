@@ -55,7 +55,7 @@ export function decodeTiles(area: ChunkArea & { mapStr: string }, size: number):
   for (let i = 0; i * 2 < area.mapStr.length; i++) {
     const x = wrap(area.x1 + (i % w), size);
     const y = wrap(area.y1 + Math.floor(i / w), size);
-    tiles.set(y * size + x, { type: parseInt(area.mapStr[i * 2], 16), level: parseInt(area.mapStr[i * 2 + 1], 16) });
+    tiles.set(y * size + x, { type: parseInt(area.mapStr.charAt(i * 2), 16), level: parseInt(area.mapStr.charAt(i * 2 + 1), 16) });
   }
   return tiles;
 }

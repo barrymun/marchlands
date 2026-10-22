@@ -42,7 +42,7 @@ export function useIsoViewport(o: ViewportOptions) {
 
   useEffect(() => {
     if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setSize({ w: entry.contentRect.width, h: entry.contentRect.height }));
+    const observer = new ResizeObserver(([entry]) => entry && setSize({ w: entry.contentRect.width, h: entry.contentRect.height }));
     observer.observe(el);
     // the wheel and the trackpad zoom the view rather than scrolling or zooming the page, so they need listeners that may
     // cancel that; events can come faster than React renders, so each zoom builds on the last one, not on the camera

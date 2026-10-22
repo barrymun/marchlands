@@ -51,7 +51,7 @@ export function TradeForm({
 }) {
   const { t } = useTranslation(['market-panel', 'common']);
   const [amount, setAmount] = useState('');
-  const res = RESOURCES[resType];
+  const res = RESOURCES[resType] ?? RESOURCES[0]; // the market page only offers its four types
   const qty = Number(amount) || 0;
   const unit = Number(price) || 0;
   const ready = qty >= 1 && (mode === 'market' || unit >= 0.001);

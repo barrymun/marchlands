@@ -145,7 +145,9 @@ if (command === 'presets') {
     .sort((a, b) => a.s.lostValue - b.s.lostValue);
   for (const { t, s } of results.slice(0, Number(values.top))) printSummary(units(t), s);
 } else if (command === 'trace') {
-  const [name, t] = armies()[0];
+  const [first] = armies();
+  if (!first) throw new Error('trace: no army to run');
+  const [name, t] = first;
   console.log(`${describeLord()} · ${name} · seed ${values.seed}\n`);
   const kills: string[] = [];
   for (const e of traceNpc(t, { level, seed: Number(values.seed), lord })) {

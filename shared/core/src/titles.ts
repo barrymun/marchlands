@@ -13,7 +13,7 @@ export interface TitleDef {
   medals: Record<string, number>;
 }
 
-export const TITLES: TitleDef[] = [
+export const TITLES: [TitleDef, ...TitleDef[]] = [
   { id: 0, maxCities: 1, prestige: 0, medals: {} },
   { id: 1, maxCities: 2, prestige: 3_000, medals: { [ItemId.CROSS_MEDAL]: 1 } },
   { id: 2, maxCities: 3, prestige: 10_000, medals: { [ItemId.ROSE_MEDAL]: 1 } },
@@ -26,7 +26,8 @@ export const TITLES: TitleDef[] = [
   { id: 9, maxCities: 10, prestige: 8_000_000, medals: { [ItemId.NATION_MEDAL]: 5 } },
 ];
 
-export const titleOf = (id: number): TitleDef => TITLES[Math.max(0, Math.min(TITLES.length - 1, id))];
+/** The title by id, clamped to the ones there are. */
+export const titleOf = (id: number): TitleDef => TITLES[Math.max(0, Math.min(TITLES.length - 1, id))] ?? TITLES[0];
 export const maxCitiesFor = (title: number) => titleOf(title).maxCities;
 /** Valleys a city may occupy: one per Town Hall level. */
 export const maxValleysFor = (townHallLevel: number) => townHallLevel;

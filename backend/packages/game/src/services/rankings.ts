@@ -40,18 +40,21 @@ type AllianceRankRow = Paged & {
 type HeroRankRow = Paged & { id: number; name: string; level: number; power: number; management: number; stratagem: number; kind: string };
 type CastleRankRow = Paged & { id: number; name: string; population: number; kind: string; alliance: string | null; level: number };
 
-const PLAYER_SORT: Record<number, string> = {
+/** The ORDER BY of a ranking's sort type, or the default one. */
+const orderBy = (sorts: Record<number, string>, sortType: number, fallback: string) => sql.raw(sorts[sortType] ?? fallback);
+
+const PLAYER_SORT = {
   1: 'title desc, prestige desc',
   2: 'prestige desc',
   3: 'honor desc',
   4: 'cities desc, prestige desc',
   5: 'population desc',
-};
+} satisfies Record<number, string>;
 
 /** rank.getPlayerRank — sortType 1 title, 2 prestige, 3 honor, 4 cities, 5 population. */
 export async function playerRanking(ctx: Ctx, sortType: number, pageNo: number, pageSize: number, key = '') {
   const { page, size, offset } = paging(pageNo, pageSize);
-  const order = sql.raw(PLAYER_SORT[sortType] ?? PLAYER_SORT[2]);
+  const order = orderBy(PLAYER_SORT, sortType, PLAYER_SORT[2]);
   const rows = await ctx.tx.execute<PlayerRankRow>(sql`
     with ranked as (
       select p.id, p.name, p.prestige, p.honor, p.title, p.population, p.alliance_rank, p.flag, p.face_url,
@@ -85,12 +88,12 @@ export async function playerRanking(ctx: Ctx, sortType: number, pageNo: number, 
   };
 }
 
-const ALLIANCE_SORT: Record<number, string> = { 1: 'member_count desc, prestige desc', 2: 'prestige desc', 3: 'honor desc' };
+const ALLIANCE_SORT = { 1: 'member_count desc, prestige desc', 2: 'prestige desc', 3: 'honor desc' } satisfies Record<number, string>;
 
 /** rank.getAllianceRank — sortType 1 members, 2 prestige, 3 honor. */
 export async function allianceRanking(ctx: Ctx, sortType: number, pageNo: number, pageSize: number, key = '') {
   const { page, size, offset } = paging(pageNo, pageSize);
-  const order = sql.raw(ALLIANCE_SORT[sortType] ?? ALLIANCE_SORT[1]);
+  const order = orderBy(ALLIANCE_SORT, sortType, ALLIANCE_SORT[1]);
   const rows = await ctx.tx.execute<AllianceRankRow>(sql`
     with numbered as (
       select a.*, (select name from players where id = a.leader_player_id) as leader,
@@ -117,12 +120,12 @@ export async function allianceRanking(ctx: Ctx, sortType: number, pageNo: number
   };
 }
 
-const HERO_SORT: Record<number, string> = { 1: 'level desc', 2: 'management desc', 3: 'power desc', 4: 'stratagem desc' };
+const HERO_SORT = { 1: 'level desc', 2: 'management desc', 3: 'power desc', 4: 'stratagem desc' } satisfies Record<number, string>;
 
 /** rank.getHeroRank — sortType 1 grade, 2 management, 3 power, 4 stratagem. */
 export async function heroRanking(ctx: Ctx, sortType: number, pageNo: number, pageSize: number, key = '') {
   const { page, size, offset } = paging(pageNo, pageSize);
-  const order = sql.raw(HERO_SORT[sortType] ?? HERO_SORT[1]);
+  const order = orderBy(HERO_SORT, sortType, HERO_SORT[1]);
   const rows = await ctx.tx.execute<HeroRankRow>(sql`
     with numbered as (
       select h.id, h.name, h.level, h.power, h.management, h.stratagem, p.name as kind,

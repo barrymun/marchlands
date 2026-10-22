@@ -180,7 +180,7 @@ export function itemInfo(id: string): ItemInfo | undefined {
 }
 
 /** Every item a player can hold, by category (the client sorts by name in the player's language). */
-export const ITEM_INFO: ItemInfo[] = ITEMS.map((i) => itemInfo(i.id)!).sort((a, b) => a.category - b.category || a.id.localeCompare(b.id));
+export const ITEM_INFO: ItemInfo[] = ITEMS.flatMap((i) => itemInfo(i.id) ?? []).sort((a, b) => a.category - b.category || a.id.localeCompare(b.id));
 
 /** The shop categories items fall in (item `type`), in order; the client names them (data-item-categories). */
 export const ITEM_CATEGORY_IDS: number[] = [...new Set(ITEMS.map((i) => i.type))].sort((a, b) => a - b);
@@ -225,6 +225,9 @@ export function medalSources(level: number): MedalSources {
       key: e.kind === 'chest' ? e.key : null,
     });
   }
-  const quests = QUEST_CATALOGUE.filter((q) => q.award.items?.[id]).map((q) => ({ questId: q.id, count: q.award.items![id] }));
+  const quests = QUEST_CATALOGUE.flatMap((q) => {
+    const count = q.award.items?.[id];
+    return count ? [{ questId: q.id, count }] : [];
+  });
   return { attacks, containers, quests };
 }

@@ -16,7 +16,7 @@ import {
   type ResourceSet,
   TechType,
 } from '@marchlands/core';
-import { accounts, heroes } from '@marchlands/db';
+import { accounts, heroes, one } from '@marchlands/db';
 
 import { openOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
@@ -68,10 +68,12 @@ export async function setTechnology(ctx: Ctx, playerName: string, techId: number
 export async function addHero(ctx: Ctx, cityId: number, playerId: number, innLevel: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const g = createRandomHero(Math.max(1, Math.min(20, innLevel)), ctx.rng);
-  const [row] = await ctx.tx
-    .insert(heroes)
-    .values({ ...heroValues(g), playerId, cityId: b.city.id, createdAt: ctx.now })
-    .returning();
+  const row = one(
+    await ctx.tx
+      .insert(heroes)
+      .values({ ...heroValues(g), playerId, cityId: b.city.id, createdAt: ctx.now })
+      .returning(),
+  );
   await saveHero(ctx, row); // applies the lord's gear
   pushHero(ctx, playerId, row, 0);
   return row.id;

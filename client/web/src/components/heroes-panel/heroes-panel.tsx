@@ -36,6 +36,7 @@ import { Switch } from '@/components/ui/switch';
 import { useCommand } from '@/hooks/use-game';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { errorMessage } from '@/lib/api';
+import { moved } from '@/lib/arrays';
 import { fmt, percent, signedRate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -79,10 +80,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   });
   const moveHero = (from: number, to: number) => {
     if (to < 0 || to >= city.heros.length || from === to) return;
-    const ids = city.heros.map((h) => h.id);
-    const [id] = ids.splice(from, 1);
-    ids.splice(to, 0, id);
-    reorder.mutate(ids);
+    reorder.mutate(moved(city.heros, from, to).map((h) => h.id));
   };
   // a row drags only from its handle (the rest of the row has buttons and the rename field)
   const [armed, setArmed] = useState<number | null>(null);

@@ -5,7 +5,7 @@ import { and, asc, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm'
 
 import { PushCmd } from '@marchlands/contracts';
 import { AllianceRank, BALANCE, buildingLevel, BuildingType, GameError, HOUR, type Message, msg, ref, Relation, scaled } from '@marchlands/core';
-import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, players } from '@marchlands/db';
+import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, one, players } from '@marchlands/db';
 
 import { openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -76,7 +76,7 @@ async function announce(ctx: Ctx, allianceId: number, message: Message, opts: { 
 }
 
 async function joinPlayer(ctx: Ctx, p: PlayerRow, a: AllianceRow, rank: number) {
-  const [{ n }] = await ctx.tx.select({ n: count() }).from(players).where(eq(players.allianceId, a.id));
+  const { n } = one(await ctx.tx.select({ n: count() }).from(players).where(eq(players.allianceId, a.id)));
   if (Number(n) >= a.maxMembers) throw new GameError(msg('alliance.full'), -99);
   p.allianceId = a.id;
   p.allianceRank = rank;
@@ -112,7 +112,7 @@ export async function myAlliance(ctx: Ctx, playerId: number) {
   if (!p.allianceId) return null;
   const a = await getAlliance(ctx, p.allianceId);
   const leader = a.leaderPlayerId ? await getPlayer(ctx, a.leaderPlayerId).catch(() => null) : null;
-  const [{ n }] = await ctx.tx.select({ n: count() }).from(players).where(eq(players.allianceId, a.id));
+  const { n } = one(await ctx.tx.select({ n: count() }).from(players).where(eq(players.allianceId, a.id)));
   return {
     ...(await relationLists(ctx, a.id)),
     myRank: p.allianceRank,
@@ -164,7 +164,7 @@ export async function listAlliances(ctx: Ctx, key: string, pageNo: number, pageS
   const size = Math.min(50, Math.max(1, pageSize));
   const page = Math.max(1, pageNo);
   const where = key ? ilike(alliances.name, `%${key.replace(/[%_]/g, '')}%`) : undefined;
-  const [{ n }] = await ctx.tx.select({ n: count() }).from(alliances).where(where);
+  const { n } = one(await ctx.tx.select({ n: count() }).from(alliances).where(where));
   const rows = await ctx.tx
     .select()
     .from(alliances)
@@ -261,10 +261,12 @@ export async function createAlliance(ctx: Ctx, playerId: number, cityId: number,
   spendResources(b.city, { gold: BALANCE.allianceCreateGold }, msg('common.notEnoughGold'), -99);
   ctx.stat(playerId, cityId, { 'spent.other.gold': BALANCE.allianceCreateGold });
   await saveCity(ctx, b.city);
-  const [a] = await ctx.tx
-    .insert(alliances)
-    .values({ name, founderName: p.name, leaderPlayerId: p.id, maxMembers: BALANCE.allianceMaxMembers, memberCount: 1, createdAt: ctx.now })
-    .returning();
+  const a = one(
+    await ctx.tx
+      .insert(alliances)
+      .values({ name, founderName: p.name, leaderPlayerId: p.id, maxMembers: BALANCE.allianceMaxMembers, memberCount: 1, createdAt: ctx.now })
+      .returning(),
+  );
   await joinPlayer(ctx, p, a, AllianceRank.HOST);
   await announce(ctx, a.id, msg('alliance.event.created', { name }));
   return { id: a.id, msg: msg('alliance.event.created', { name }) };
@@ -301,7 +303,7 @@ export async function leaveAlliance(ctx: Ctx, playerId: number, opts: { force?: 
   const p = await getPlayer(ctx, playerId, { lock: true });
   const allianceId = requireMember(p);
   const a = await getAlliance(ctx, allianceId, true);
-  const [{ n }] = await ctx.tx.select({ n: count() }).from(players).where(eq(players.allianceId, allianceId));
+  const { n } = one(await ctx.tx.select({ n: count() }).from(players).where(eq(players.allianceId, allianceId)));
   if (p.allianceRank === AllianceRank.HOST && Number(n) > 1 && !opts.force) {
     throw new GameError(msg('alliance.hostMustTransfer'), -99);
   }
@@ -525,10 +527,12 @@ export async function setRank(ctx: Ctx, playerId: number, userName: string, rank
   if (me.allianceRank >= target.allianceRank || me.allianceRank >= rank) throw new GameError(msg('alliance.rankTooLow'), -42);
   const limit = RANK_LIMITS[rank];
   if (limit) {
-    const [{ n }] = await ctx.tx
-      .select({ n: count() })
-      .from(players)
-      .where(and(eq(players.allianceId, me.allianceId!), eq(players.allianceRank, rank)));
+    const { n } = one(
+      await ctx.tx
+        .select({ n: count() })
+        .from(players)
+        .where(and(eq(players.allianceId, me.allianceId!), eq(players.allianceRank, rank))),
+    );
     if (Number(n) >= limit) throw new GameError(msg('alliance.rankLimit', { count: limit, rank: ref.rank(rank) }), -99);
   }
   const code = rank < target.allianceRank ? 'alliance.event.promoted' : 'alliance.event.demoted';
@@ -597,7 +601,9 @@ export async function massMail(ctx: Ctx, playerId: number, title: string, conten
  * neutrality are one-sided; war is mutual, announced to everyone and has a 24h cooldown.
  */
 export async function setRelation(ctx: Ctx, playerId: number, targetName: string, type: number) {
-  if (![1, 2, 3].includes(type)) throw new GameError(msg('alliance.invalidRelation'), -99);
+  // ally, neutral or enemy: the three relations a player sets
+  const relationMsg = RELATION_MSGS[type];
+  if (!relationMsg) throw new GameError(msg('alliance.invalidRelation'), -99);
   const me = await getPlayer(ctx, playerId);
   requireRank(me, AllianceRank.VICE_HOST);
   const mine = await getAlliance(ctx, me.allianceId!, true);
@@ -607,7 +613,7 @@ export async function setRelation(ctx: Ctx, playerId: number, targetName: string
     .select()
     .from(allianceRelations)
     .where(and(eq(allianceRelations.allianceId, mine.id), eq(allianceRelations.targetAllianceId, target.id)));
-  if (cur?.relation === type) throw new GameError(msg('alliance.alreadyRelation', { relation: RELATION_MSGS[type] }), -99);
+  if (cur?.relation === type) throw new GameError(msg('alliance.alreadyRelation', { relation: relationMsg }), -99);
   const upsert = async (from: number, to: number, relation: number) =>
     ctx.tx
       .insert(allianceRelations)
@@ -631,7 +637,7 @@ export async function setRelation(ctx: Ctx, playerId: number, targetName: string
   } else {
     await upsert(mine.id, target.id, type);
   }
-  await announce(ctx, target.id, msg('alliance.event.relationSet', { name: mine.name, relation: RELATION_MSGS[type] }));
+  await announce(ctx, target.id, msg('alliance.event.relationSet', { name: mine.name, relation: relationMsg }));
 }
 
 /** alliance.dropAllianceFriendshipRelation */

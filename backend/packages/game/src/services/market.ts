@@ -31,11 +31,11 @@ import {
   ReportType,
   scaled,
 } from '@marchlands/core';
-import { marketOrders, marketShipments, marketTrades, pgArray, worldState } from '@marchlands/db';
+import { marketOrders, marketShipments, marketTrades, one, pgArray, worldState } from '@marchlands/db';
 
 import { openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
-import { escrowGold, GOLD, loadMerchant, MERCHANT_KEY, resKey, ship, tradeStat, withFee } from '#/engine/market.ts';
+import { basicResource, escrowGold, GOLD, loadMerchant, MERCHANT_KEY, resKey, ship, tradeStat, withFee } from '#/engine/market.ts';
 import { createReport } from '#/engine/reports.ts';
 import { gainResources, pushResources, spendGold } from '#/helpers.ts';
 import { saveCity } from '#/repo.ts';
@@ -48,7 +48,7 @@ function orderBean(o: OrderRow) {
   return {
     id: o.id,
     resType: o.resType,
-    resourceName: BASIC_RESOURCES[o.resType],
+    resourceName: basicResource(o.resType),
     tradeType: o.side,
     price: o.price,
     amount: o.amount,
@@ -59,8 +59,10 @@ function orderBean(o: OrderRow) {
 }
 
 function assertResType(resType: number): BasicResource {
-  if (!(Number.isInteger(resType) && resType >= 0 && resType <= 3)) throw new GameError(msg('market.invalidResource'), -99);
-  return BASIC_RESOURCES[resType];
+  // any other number, fractions included, finds nothing
+  const res = BASIC_RESOURCES[resType];
+  if (res === undefined) throw new GameError(msg('market.invalidResource'), -99);
+  return res;
 }
 
 function merchantQuoteBean(res: BasicResource, state: Partial<MerchantState>, now: number) {
@@ -93,7 +95,11 @@ function planFills(side: number, qty: number, limit: number, offers: OrderRow[],
   let r = ref;
   let i = 0;
   for (let guard = 0; remaining > 0 && guard < 10_000; guard++) {
-    while (i < offers.length && offers[i].amount - offers[i].filled - used(fills, offers[i]) <= 0) i++;
+    // skip the resting orders this trade has already used up
+    for (; i < offers.length; i++) {
+      const x = offers[i];
+      if (x && x.amount - x.filled - used(fills, x) > 0) break;
+    }
     const o = offers[i];
     const playerOk = !!o && better(o.price, limit);
     if (playerOk && better(o.price, merchantMarginal(r, buy ? 'buy' : 'sell'))) {
@@ -378,10 +384,12 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
 
   let order: OrderRow | null = null;
   if (rest > 0) {
-    [order] = await ctx.tx
-      .insert(marketOrders)
-      .values({ playerId, cityId, resType: o.resType, side: o.side, price, amount: o.amount, filled: plan.filled, createdAt: ctx.now })
-      .returning();
+    order = one(
+      await ctx.tx
+        .insert(marketOrders)
+        .values({ playerId, cityId, resType: o.resType, side: o.side, price, amount: o.amount, filled: plan.filled, createdAt: ctx.now })
+        .returning(),
+    );
   }
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
@@ -402,7 +410,7 @@ export async function cancelOrder(ctx: Ctx, playerId: number, orderId: number) {
   if (!o) throw new GameError(msg('market.orderNotFound'), -99, 404);
   const left = o.amount - o.filled;
   if (o.side === MarketSide.BUY) gainResources(b.city, { gold: escrowGold(left, o.price) });
-  else gainResources(b.city, { [BASIC_RESOURCES[o.resType]]: left });
+  else gainResources(b.city, { [basicResource(o.resType)]: left });
   await ctx.tx.delete(marketOrders).where(eq(marketOrders.id, orderId));
   pushResources(ctx, b);
   await saveCity(ctx, b.city);

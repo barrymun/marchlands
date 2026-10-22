@@ -36,6 +36,8 @@ export function ActivityDock({ city, variant }: { city: CityBean; variant: 'floa
   const groups = GROUPS.map(({ id, icon: Icon, label }) => {
     const list = shown.filter((j) => j.group === id);
     if (!list.length) return null;
+    // the first job past the ones shown opens the full list
+    const firstHidden = list[PER_GROUP];
     return (
       <section key={id} className="grid gap-1.5">
         <h3 className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
@@ -44,8 +46,8 @@ export function ActivityDock({ city, variant }: { city: CityBean; variant: 'floa
         {list.slice(0, PER_GROUP).map((j) => (
           <JobRow key={j.key} job={j} now={now} />
         ))}
-        {list.length > PER_GROUP && (
-          <button type="button" className="text-left text-[11px] text-muted-foreground hover:underline" onClick={list[PER_GROUP].open}>
+        {firstHidden && (
+          <button type="button" className="text-left text-[11px] text-muted-foreground hover:underline" onClick={firstHidden.open}>
             {t('more', { n: list.length - PER_GROUP })}
           </button>
         )}

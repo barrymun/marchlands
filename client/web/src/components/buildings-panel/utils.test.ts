@@ -3,10 +3,20 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { BuildingBean } from '@marchlands/api-client';
 import { BALANCE, BuildingType, TOWN_HALL_POSITION, TroopType } from '@marchlands/core';
 
-import { OUTSIDE, VIEW_KEY } from '@/components/buildings-panel/constants';
-import { fieldSlots, fieldWorkers, readView, saveView, townState, townWalkers } from '@/components/buildings-panel/utils';
+import { CITY_ART, OUTSIDE, VIEW_KEY } from '@/components/buildings-panel/constants';
+import { cityArt, fieldSlots, fieldWorkers, readView, saveView, townState, townWalkers } from '@/components/buildings-panel/utils';
 
 const building = (positionId: number, typeId: number, level: number): BuildingBean => ({ positionId, typeId, level, status: 0, startTime: 0, endTime: 0 });
+
+describe(cityArt.name, () => {
+  it('gives the URL of a city view piece by file name', () => {
+    expect(cityArt('grass.png')).toBe(CITY_ART['grass.png']);
+    expect(cityArt('grass.png')).not.toBe('');
+  });
+  it("gives '' for a file there is none of", () => {
+    expect(cityArt('no-such-piece.png')).toBe('');
+  });
+});
 
 describe(fieldSlots.name, () => {
   it('unlocks the base slots without a Town Hall', () => {

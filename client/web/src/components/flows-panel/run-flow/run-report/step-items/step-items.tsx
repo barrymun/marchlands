@@ -8,12 +8,11 @@ import { cn } from '@/lib/utils';
 export function StepItems({ items }: { items: StepItem[] }) {
   const { t } = useTranslation('flows-panel');
   const reasons = new Set(items.map((i) => JSON.stringify(i.detail)));
-  if (items.length > 1 && reasons.size === 1 && !items[0].ok) {
+  const [first] = items;
+  if (first && items.length > 1 && reasons.size === 1 && !first.ok) {
     return (
       <div className="grid gap-1">
-        <span className="text-amber-700 dark:text-amber-400">
-          {t('runFlow.report.allItems', { n: items.length, detail: translateMessage(items[0].detail) })}
-        </span>
+        <span className="text-amber-700 dark:text-amber-400">{t('runFlow.report.allItems', { n: items.length, detail: translateMessage(first.detail) })}</span>
         <span className="flex flex-wrap gap-1">
           {items.map((i) => (
             <span key={i.label} className="rounded bg-muted px-1.5 py-px tabular-nums">

@@ -19,8 +19,8 @@ import { troopName } from '@/lib/game-data';
 
 export function MilitaryPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['military-panel', 'common']);
-  const garrison = Object.entries(TROOP_KEYS).map(([id, key]) => ({ id: Number(id), count: city.troop[key], injured: city.injuredTroop[key] }));
-  const forts = Object.entries(FORT_KEYS).map(([id, key]) => ({ id: Number(id), count: city.fortification[key] }));
+  const garrison = Object.entries(TROOP_KEYS).map(([id, key]) => ({ id: Number(id), count: city.troop[key] ?? 0, injured: city.injuredTroop[key] ?? 0 }));
+  const forts = Object.entries(FORT_KEYS).map(([id, key]) => ({ id: Number(id), count: city.fortification[key] ?? 0 }));
   const wallCap = wallCapacity(city.buildings);
   const wallUsed = usedWallSpace(city.fortification, []);
   // the troop or fortification being dismissed

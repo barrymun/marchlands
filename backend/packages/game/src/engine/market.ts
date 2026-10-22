@@ -7,6 +7,7 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BASIC_RESOURCES,
+  type BasicResource,
   MarketSide,
   merchantAsk,
   merchantBid,
@@ -17,7 +18,7 @@ import {
   msg,
   ReportType,
 } from '@marchlands/core';
-import { marketOrders, marketShipments, marketTrades, worldState } from '@marchlands/db';
+import { marketOrders, marketShipments, marketTrades, one, worldState } from '@marchlands/db';
 
 import { openCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -26,7 +27,13 @@ import { gainResources, pushResources } from '#/helpers.ts';
 import { citiesOf, saveCity } from '#/repo.ts';
 
 export const GOLD = 4;
-export const resKey = (t: number) => (t === GOLD ? 'gold' : BASIC_RESOURCES[t]);
+/** The basic resource a market resType names (0 food … 3 iron). Orders and shipments hold only valid ones (checked when an order is made), so another is a bug. */
+export function basicResource(resType: number): BasicResource {
+  const res = BASIC_RESOURCES[resType];
+  if (res === undefined) throw new Error(`unknown market resource type ${resType}`);
+  return res;
+}
+export const resKey = (t: number) => (t === GOLD ? 'gold' : basicResource(t));
 
 export const escrowGold = (amount: number, price: number) => Math.ceil(amount * price * (1 + BALANCE.marketFee));
 export const withFee = (gold: number) => Math.ceil(gold * (1 + BALANCE.marketFee));
@@ -57,19 +64,21 @@ export function tradeStat(ctx: Ctx, playerId: number, cityId: number, bought: bo
 }
 
 export async function ship(ctx: Ctx, s: { playerId: number; cityId: number; orderId: number; resType: number; amount: number; price: number; ms: number }) {
-  const [row] = await ctx.tx
-    .insert(marketShipments)
-    .values({
-      playerId: s.playerId,
-      cityId: s.cityId,
-      orderId: s.orderId,
-      resType: s.resType,
-      amount: s.amount,
-      price: s.price,
-      startTime: ctx.now,
-      endTime: ctx.now + s.ms,
-    })
-    .returning();
+  const row = one(
+    await ctx.tx
+      .insert(marketShipments)
+      .values({
+        playerId: s.playerId,
+        cityId: s.cityId,
+        orderId: s.orderId,
+        resType: s.resType,
+        amount: s.amount,
+        price: s.price,
+        startTime: ctx.now,
+        endTime: ctx.now + s.ms,
+      })
+      .returning(),
+  );
   ctx.schedule({ type: 'shipment', dueAt: row.endTime, playerId: s.playerId, cityId: s.cityId, refKey: `shipment:${row.id}`, payload: { shipmentId: row.id } });
   return row;
 }
@@ -82,8 +91,7 @@ export async function ship(ctx: Ctx, s: { playerId: number; cityId: number; orde
 export async function merchantSweep(ctx: Ctx) {
   const state = await loadMerchant(ctx, true);
   let changed = false;
-  for (let resType = 0; resType < BASIC_RESOURCES.length; resType++) {
-    const res = BASIC_RESOURCES[resType];
+  for (const [resType, res] of BASIC_RESOURCES.entries()) {
     let ref = merchantReference(res, state[res], ctx.now);
     let moved = false;
     const crossed = async (side: number, bound: number) =>

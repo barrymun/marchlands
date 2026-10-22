@@ -17,7 +17,7 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const [alg, n, rr, pp, salt, hash] = stored.split('$');
-  if (alg !== 'scrypt' || !hash) return false;
+  if (alg !== 'scrypt' || salt === undefined || !hash) return false;
   const expected = Buffer.from(hash, 'base64url');
   try {
     const key = await scrypt(password, Buffer.from(salt, 'base64url'), expected.length, { N: Number(n), r: Number(rr), p: Number(pp) });

@@ -22,7 +22,7 @@ import {
   TROOP_KEY_LIST,
   type TroopCounts,
 } from '@marchlands/core';
-import { armies, cities, heroes, mails, marketOrders, pgArray, players, reports, tiles } from '@marchlands/db';
+import { armies, cities, heroes, mails, marketOrders, one, pgArray, players, reports, tiles } from '@marchlands/db';
 
 import { openOwnCity, viewOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -51,7 +51,7 @@ import { visibleArmies } from '#/services/armies.ts';
 export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePlayerBody): Promise<PlayerRow> {
   const [existing] = await ctx.tx.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
   if (existing) {
-    const [{ n }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, existing.id));
+    const { n } = one(await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, existing.id)));
     if (Number(n) > 0) throw new GameError(msg('player.accountExists'), -86, 409);
   }
   const name = cleanName(input.userName, 1, 20, msg('common.playerName'));
@@ -73,24 +73,28 @@ export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePla
     Object.assign(player, { name, flag, faceUrl, sex: input.sex, beginner: true, status: 0 });
     await savePlayer(ctx, player);
   } else {
-    [player] = await ctx.tx
-      .insert(players)
-      .values({
-        accountId,
-        name,
-        flag,
-        faceUrl,
-        sex: input.sex,
-        items: { [ItemId.WELCOME_PACKAGE]: 1 },
-        createdAt: ctx.now,
-        lastLoginAt: ctx.now,
-      })
-      .returning();
+    player = one(
+      await ctx.tx
+        .insert(players)
+        .values({
+          accountId,
+          name,
+          flag,
+          faceUrl,
+          sex: input.sex,
+          items: { [ItemId.WELCOME_PACKAGE]: 1 },
+          createdAt: ctx.now,
+          lastLoginAt: ctx.now,
+        })
+        .returning(),
+    );
   }
-  const [city] = await ctx.tx
-    .insert(cities)
-    .values(initialCity(player.id, tileId, castleName, ctx.now))
-    .returning();
+  const city = one(
+    await ctx.tx
+      .insert(cities)
+      .values(initialCity(player.id, tileId, castleName, ctx.now))
+      .returning(),
+  );
   await ctx.tx
     .update(tiles)
     .set({ cityId: city.id, type: TileType.CASTLE, ownerPlayerId: player.id, ownerCityId: null, troops: null, forts: null, state: null, updatedAt: ctx.now })
@@ -253,8 +257,8 @@ export async function startFurlough(ctx: Ctx, playerId: number, days: number, ci
   if (!Number.isInteger(days) || days < 1 || days > MAX_HOLIDAY_DAYS) throw new GameError(msg('player.holiday.invalidDays', { max: MAX_HOLIDAY_DAYS }), -99);
   const b = await openOwnCity(ctx, playerId, cityId);
   const p = b.player;
-  const outgoing = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.playerId, playerId));
-  if (Number(outgoing[0].n) > 0) throw new GameError(msg('player.holiday.troopsOut'), -77);
+  const { n: outgoing } = one(await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.playerId, playerId)));
+  if (Number(outgoing) > 0) throw new GameError(msg('player.holiday.troopsOut'), -77);
   spendGold(b.city, days * goldForCents(BALANCE.furloughCentsPerDay));
   ctx.stat(playerId, cityId, { 'spent.other.gold': days * goldForCents(BALANCE.furloughCentsPerDay) });
   setBuff(ctx, p, BuffId.HOLIDAY, msg('buff.holiday'), ctx.now + days * DAY);

@@ -38,7 +38,7 @@ import {
   tavernRefreshCost,
   TechType,
 } from '@marchlands/core';
-import { heroes } from '@marchlands/db';
+import { heroes, one } from '@marchlands/db';
 
 import { type CityBundle, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -55,10 +55,12 @@ async function fillTavern(ctx: Ctx, b: CityBundle, regenerate: boolean) {
   const out = [...plan.keep];
   for (let i = 0; i < plan.add; i++) {
     const g = createRandomHero(plan.heroInnLevel, ctx.rng);
-    const [row] = await ctx.tx
-      .insert(heroes)
-      .values({ ...heroValues(g), playerId: null, cityId: b.city.id, inTavern: true, createdAt: ctx.now })
-      .returning();
+    const row = one(
+      await ctx.tx
+        .insert(heroes)
+        .values({ ...heroValues(g), playerId: null, cityId: b.city.id, inTavern: true, createdAt: ctx.now })
+        .returning(),
+    );
     out.push(row);
   }
   return out;

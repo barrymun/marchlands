@@ -4,7 +4,7 @@ import { count, eq } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import { type BuffId, type BuffState, GameError, hasResources, type Message, msg, RESOURCE_KEYS, type Resources } from '@marchlands/core';
-import { alliances, cities } from '@marchlands/db';
+import { alliances, cities, one } from '@marchlands/db';
 
 import { type CityBundle, cityStats } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
@@ -102,7 +102,7 @@ export function pushCity(ctx: Ctx, b: CityBundle) {
 }
 
 export async function playerInfoOf(ctx: Ctx, p: PlayerRow) {
-  const [{ n }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, p.id));
+  const { n } = one(await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, p.id)));
   let allianceName = '';
   if (p.allianceId) {
     const [a] = await ctx.tx.select({ name: alliances.name }).from(alliances).where(eq(alliances.id, p.allianceId));

@@ -34,7 +34,7 @@ import {
   type TroopCounts,
   TroopType,
 } from '@marchlands/core';
-import { armies, cities, heroes, players } from '@marchlands/db';
+import { armies, cities, heroes, one, players } from '@marchlands/db';
 
 import { type CityBundle, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -75,7 +75,7 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
   if (totalResources(resources) > armyLoad(troops, b.player.research)) throw new GameError(msg('army.overloaded'), -99);
   if (buildingLevel(b.city.buildings, BuildingType.RALLY_SPOT) < 1)
     throw new GameError(msg('army.rallySpotRequired', { building: ref.building(BuildingType.RALLY_SPOT) }), -51);
-  const [{ n: out }] = await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId));
+  const { n: out } = one(await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId)));
   const armyCap = maxArmies(b.city.buildings);
   if (Number(out) >= armyCap) throw new GameError(msg('army.armyLimit', { building: ref.building(BuildingType.RALLY_SPOT), count: armyCap }), -51);
   const troopCap = maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now));
@@ -128,11 +128,13 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
     }
     case Mission.BUILD_CITY: {
       if (target.type !== TileType.FLAT || target.cityId != null || target.ownerCityId != null) throw new GameError(msg('army.buildOnFlat'), -13);
-      const [{ n: cityCount }] = await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, playerId));
-      const [{ n: pending }] = await ctx.tx
-        .select({ n: count() })
-        .from(armies)
-        .where(and(eq(armies.playerId, playerId), eq(armies.mission, Mission.BUILD_CITY), eq(armies.direction, ArmyDirection.FORWARD)));
+      const { n: cityCount } = one(await ctx.tx.select({ n: count() }).from(cities).where(eq(cities.playerId, playerId)));
+      const { n: pending } = one(
+        await ctx.tx
+          .select({ n: count() })
+          .from(armies)
+          .where(and(eq(armies.playerId, playerId), eq(armies.mission, Mission.BUILD_CITY), eq(armies.direction, ArmyDirection.FORWARD))),
+      );
       if (Number(cityCount) + Number(pending) >= maxCitiesFor(b.player.title)) throw new GameError(msg('army.cityLimit'), -99);
       if (BASIC_RESOURCES.some((k) => resources[k] < BALANCE.newCityMinResource))
         throw new GameError(msg('army.newCityResources', { amount: BALANCE.newCityMinResource, resources: BASIC_RESOURCES.map((k) => ref.resource(k)) }), -99);
@@ -152,27 +154,29 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
   b.city.troops = addTroops(b.city.troops, troops, -1);
   const ms = armyMarchMs(b, b.city.tileId, target.id, troops, ownTarget);
   const restTime = Math.min(BALANCE.maxRestTimeMs, Math.max(0, Math.floor(Number(input.restTime ?? 0)) * 1000));
-  const [army] = await ctx.tx
-    .insert(armies)
-    .values({
-      playerId,
-      cityId,
-      heroId: hero?.id ?? null,
-      mission,
-      direction: ArmyDirection.FORWARD,
-      startTileId: b.city.tileId,
-      targetTileId: target.id,
-      targetPlayerId: ownerId,
-      troops,
-      resources,
-      startTime: ctx.now,
-      reachTime: ctx.now + ms,
-      restTime,
-      startPosName: cityPosition(b.city.name, b.city.tileId),
-      targetPosName: await tilePosition(ctx, target),
-      createdAt: ctx.now,
-    })
-    .returning();
+  const army = one(
+    await ctx.tx
+      .insert(armies)
+      .values({
+        playerId,
+        cityId,
+        heroId: hero?.id ?? null,
+        mission,
+        direction: ArmyDirection.FORWARD,
+        startTileId: b.city.tileId,
+        targetTileId: target.id,
+        targetPlayerId: ownerId,
+        troops,
+        resources,
+        startTime: ctx.now,
+        reachTime: ctx.now + ms,
+        restTime,
+        startPosName: cityPosition(b.city.name, b.city.tileId),
+        targetPosName: await tilePosition(ctx, target),
+        createdAt: ctx.now,
+      })
+      .returning(),
+  );
   if (hero) {
     hero.status = HeroStatus.ATTACK;
     await saveHero(ctx, hero);

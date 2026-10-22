@@ -3,7 +3,7 @@
 import { and, count, desc, eq, inArray } from 'drizzle-orm';
 
 import { GameError, MailType, msg } from '@marchlands/core';
-import { mails } from '@marchlands/db';
+import { mails, one } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { pushMailCounts } from '#/engine/mail.ts';
@@ -59,7 +59,7 @@ export async function listMail(ctx: Ctx, playerId: number, type: number, pageNo:
   const me = await getPlayer(ctx, playerId);
   const page = Math.max(1, pageNo || 1);
   const where = and(eq(mails.playerId, playerId), eq(mails.type, type));
-  const [{ n }] = await ctx.tx.select({ n: count() }).from(mails).where(where);
+  const { n } = one(await ctx.tx.select({ n: count() }).from(mails).where(where));
   const rows = await ctx.tx
     .select()
     .from(mails)

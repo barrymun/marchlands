@@ -234,27 +234,44 @@ export function healHonorCost(troops: Partial<Record<string, number>>): number {
 
 /** Proportionally shrink several troop groups so their per-type totals equal `after`. */
 export function distributeLosses(groups: TroopCounts[], before: TroopCounts, after: TroopCounts): TroopCounts[] {
-  const out = groups.map((g) => ({ ...g }));
+  return distributeLossesAmong(groups, (g) => g, before, after).map((r) => r.troops);
+}
+
+/**
+ * `distributeLosses` over whatever holds the troops (a city, the armies stationed there): each holder with the troops
+ * it has left, in the same order, so a caller never matches the results up by position.
+ */
+export function distributeLossesAmong<H>(
+  holders: readonly H[],
+  troopsOf: (h: H) => TroopCounts,
+  before: TroopCounts,
+  after: TroopCounts,
+): { holder: H; troops: TroopCounts }[] {
+  // each group beside the copy that takes its share of the losses
+  const rows = holders.map((holder) => {
+    const orig = troopsOf(holder);
+    return { holder, orig, out: { ...orig } };
+  });
   for (const k of TROOP_KEY_LIST) {
     const b = before[k] ?? 0;
     if (b <= 0) continue;
     const target = after[k] ?? 0;
     let assigned = 0;
-    for (const g of out) {
+    for (const { out: g } of rows) {
       const v = Math.floor(((g[k] ?? 0) * target) / b);
       g[k] = v;
       assigned += v;
     }
     // hand out the rounding remainder to the largest groups
     let rest = target - assigned;
-    const order = out.map((_, i) => i).sort((x, y) => (groups[y][k] ?? 0) - (groups[x][k] ?? 0));
-    for (const i of order) {
+    const order = [...rows].sort((x, y) => (y.orig[k] ?? 0) - (x.orig[k] ?? 0));
+    for (const r of order) {
       if (rest <= 0) break;
-      if ((out[i][k] ?? 0) < (groups[i][k] ?? 0)) {
-        out[i][k] = (out[i][k] ?? 0) + 1;
+      if ((r.out[k] ?? 0) < (r.orig[k] ?? 0)) {
+        r.out[k] = (r.out[k] ?? 0) + 1;
         rest--;
       }
     }
   }
-  return out.map((g) => Object.fromEntries(Object.entries(g).filter(([, v]) => (v ?? 0) > 0)) as TroopCounts);
+  return rows.map(({ holder, out }) => ({ holder, troops: Object.fromEntries(Object.entries(out).filter(([, v]) => (v ?? 0) > 0)) }));
 }

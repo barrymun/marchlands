@@ -40,7 +40,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   const scouting = Number(mission) === Mission.SCOUT;
   const [resources, setResources] = useState<Partial<Record<(typeof RES)[number], string>>>({});
   // only scouts go on a scouting mission
-  const available = Object.entries(TROOP_KEYS).filter(([, key]) => city.troop[key] > 0 && (!scouting || key === 'scouter'));
+  const available = Object.entries(TROOP_KEYS).filter(([, key]) => (city.troop[key] ?? 0) > 0 && (!scouting || key === 'scouter'));
   const idleHeroes = city.heros.filter((h) => h.status === HeroStatus.IDLE && !h.seized);
   const troopBody = typedAmounts(scouting ? { scouter: troops.scouter } : troops);
   // troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)
@@ -175,7 +175,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
               <span className="flex items-center gap-2">
                 <TroopBadge id={Number(id)} />
                 <span>
-                  {troopName(Number(id))} <span className="text-muted-foreground">({fmtExact(city.troop[key])})</span>
+                  {troopName(Number(id))} <span className="text-muted-foreground">({fmtExact(city.troop[key] ?? 0)})</span>
                 </span>
               </span>
               <div className="flex items-center gap-1">
@@ -193,7 +193,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
                   onClick={() => {
                     // room left in the army without this type, so "All" never goes over the Rally Spot limit
                     const others = chosen - Number(troopBody[key] ?? 0);
-                    setTroops({ ...troops, [key]: String(Math.max(0, Math.min(city.troop[key], cap - others))) });
+                    setTroops({ ...troops, [key]: String(Math.max(0, Math.min(city.troop[key] ?? 0, cap - others))) });
                   }}
                 >
                   {t('common:actions.all')}

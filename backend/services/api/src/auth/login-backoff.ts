@@ -53,7 +53,10 @@ export class LoginBackoff {
     // re-inserted, so the map stays in order of the last wrong password
     this.tries.delete(key);
     this.tries.set(key, { fails, lastAt: now, until });
-    if (this.tries.size > MAX_TRACKED) this.tries.delete(this.tries.keys().next().value!);
+    if (this.tries.size > MAX_TRACKED) {
+      const oldest = this.tries.keys().next();
+      if (!oldest.done) this.tries.delete(oldest.value);
+    }
   }
 
   /** The right password: the username starts again. */

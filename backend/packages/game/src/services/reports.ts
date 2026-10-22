@@ -4,7 +4,7 @@
 import { and, count, desc, eq, inArray } from 'drizzle-orm';
 
 import { GameError, msg, type ReportBody, ReportBodySchema } from '@marchlands/core';
-import { reports } from '@marchlands/db';
+import { one, reports } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { pushReportCounts } from '#/engine/reports.ts';
@@ -29,7 +29,7 @@ export async function listReports(ctx: Ctx, playerId: number, type: number | nul
   if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) throw new GameError(msg('common.invalidData'), -99);
   const page = Math.max(1, pageNo || 1);
   const where = type == null ? eq(reports.playerId, playerId) : and(eq(reports.playerId, playerId), eq(reports.typeId, type));
-  const [{ n }] = await ctx.tx.select({ n: count() }).from(reports).where(where);
+  const { n } = one(await ctx.tx.select({ n: count() }).from(reports).where(where));
   const rows = await ctx.tx
     .select()
     .from(reports)

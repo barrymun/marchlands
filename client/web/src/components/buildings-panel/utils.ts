@@ -1,11 +1,19 @@
 import type { BuildingBean } from '@marchlands/api-client';
 import { TOWN_HALL_POSITION, TroopType, unlockedOuterSlots } from '@marchlands/core';
 
-import { VIEW_KEY } from '@/components/buildings-panel/constants';
+import { CITY_ART, VIEW_KEY } from '@/components/buildings-panel/constants';
 import type { CityView } from '@/components/buildings-panel/types';
 import type { TownState } from '@/components/iso-anim/types';
 
 /** The city's Town Hall level and how many field slots outside the walls it unlocks. */
+/**
+ * The URL of a city view piece by file name (CITY_ART), or '' when there is none, which never loads, so the scene
+ * draws nothing there. lib/game-art.test.ts checks every piece the scene asks for is there.
+ */
+export function cityArt(file: string): string {
+  return CITY_ART[file] ?? '';
+}
+
 export function fieldSlots(buildings: BuildingBean[]): { townHall: number; unlocked: number } {
   const townHall = buildings.find((b) => b.positionId === TOWN_HALL_POSITION)?.level ?? 0;
   return { townHall, unlocked: unlockedOuterSlots(townHall) };

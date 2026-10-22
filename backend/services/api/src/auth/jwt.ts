@@ -22,13 +22,13 @@ export function signToken(claims: Omit<TokenClaims, 'iat' | 'exp'>, secret: stri
 }
 
 export function verifyToken(token: string, secret: string): TokenClaims | null {
-  const parts = token.split('.');
-  if (parts.length !== 3 || parts[0] !== HEADER) return null;
-  const expected = createHmac('sha256', secret).update(`${parts[0]}.${parts[1]}`).digest();
-  const given = Buffer.from(parts[2], 'base64url');
+  const [head, body, signature, ...extra] = token.split('.');
+  if (head !== HEADER || body === undefined || signature === undefined || extra.length > 0) return null;
+  const expected = createHmac('sha256', secret).update(`${head}.${body}`).digest();
+  const given = Buffer.from(signature, 'base64url');
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
   try {
-    const claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')) as TokenClaims;
+    const claims = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as TokenClaims;
     if (typeof claims.sub !== 'number' || typeof claims.exp !== 'number' || claims.exp * 1000 < Date.now()) return null;
     return claims;
   } catch {
