@@ -32,6 +32,7 @@ The authoritative types are `PushMessage` (a union discriminated on `cmd`), `Pus
 | `server.NewReport` | `{ count, army_count, trade_count, other_count }` | unread report counts |
 | `server.TradesUpdate` | `{ resType, amount, price }` | one of the lord's market orders was filled |
 | `server.TransingTradeUpdate` | `{ id, delivered, resType, amount, castleId }` | a market shipment arrived |
+| `server.MarketUpdate` | `{ resTypes }` | (marchlands) sent to everyone connected: these resources' book, prices or candles changed (a player's order, the factions' auction each minute); open market screens refetch |
 | `server.ChannelChatMsg` | `{ msg, languageType, fromUser, fromId, channel, ownitemid, time }` | world or beginner chat (`channel`: `world` / `beginner`) |
 | `server.AllianceChatMsg` | same, `channel: "alliance"` | alliance chat |
 | `server.PrivateChatMessage` | `{ msg, chatType, ownitemid, fromUser, fromId, time }` | whisper (`chatType` and `ownitemid` are always 0) |

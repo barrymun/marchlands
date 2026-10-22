@@ -115,7 +115,8 @@ Whenever something changes a city's rates, the city is settled first. Examples a
 | `alliances`, `alliance_relations`, `alliance_requests`, `alliance_events` | alliances |
 | `player_relations` | friends and blocks |
 | `market_orders`, `market_shipments` | order book with escrow; goods and gold in transit |
-| `quest_progress`, `world_state` | claimed quests; world metadata and cached zone stats |
+| `market_trades`, `market_candles` | (marchlands) every fill with a player in it; the world's price candles of a minute, an hour and a day, which the Market page reads |
+| `quest_progress`, `world_state` | claimed quests; world metadata, cached zone stats and the NPC factions' economy (`npc-economy`: each group's stock and gold) |
 | `player_stats` | (marchlands) lord statistics: one row per lord, city (0 = lord-wide) and day, or month once older than 60 days; `counters` jsonb (see [Statistics](#statistics)) |
 | `flows` | (marchlands) a lord's saved flows: actions, cities and the `repeat` switch, plus the current run's state (`status`, `next_action`, `army_ids`, `wait_until`, `held_since`, `last_run`) |
 
