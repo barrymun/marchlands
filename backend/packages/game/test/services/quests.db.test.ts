@@ -87,7 +87,7 @@ describe(quests.questList.name, () => {
         questId: TOWN_HALL_2.id,
         groupId: TOWN_HALL_2.groupId,
         description: TOWN_HALL_2.description,
-        targets: [{ text: questTargetMessage(TOWN_HALL_2.targets[0]), finished: false }],
+        targets: [{ text: questTargetMessage(TOWN_HALL_2.targets[0]!), finished: false }],
         award: TOWN_HALL_2.award,
         isFinish: false,
         claimed: false,
@@ -193,7 +193,7 @@ describe(quests.claimQuest.name, () => {
       const before = await resources(g, a.cityId);
       expect(await quests.claimQuest(g, a.id, TOWN_HALL_2.id, a.cityId)).toEqual(TOWN_HALL_2.award);
       const after = await resources(g, a.cityId);
-      for (const k of RESOURCE_KEYS) expect(after[k]).toBe(before[k] + (TOWN_HALL_2.award.resources![k] ?? 0));
+      for (const k of RESOURCE_KEYS) expect(after[k]).toBe(before[k]! + (TOWN_HALL_2.award.resources![k] ?? 0));
       expect(g.pushes(PushCmd.RESOURCE_UPDATE).at(-1)).toMatchObject({ playerIds: [a.id], data: { castleId: a.cityId } });
       expect((await quests.questList(g, a.id, TOWN_HALL_2.groupId)).find((q) => q.questId === TOWN_HALL_2.id)!.claimed).toBe(true);
     }));
@@ -251,7 +251,7 @@ describe(quests.claimDailyGift.name, () => {
       const before = await resources(g, a.cityId);
       expect(await quests.claimDailyGift(g, a.id, a.cityId)).toEqual({ resources: BALANCE.dailyGift });
       const after = await resources(g, a.cityId);
-      for (const k of RESOURCE_KEYS) expect(after[k]).toBe(before[k] + (BALANCE.dailyGift[k] ?? 0));
+      for (const k of RESOURCE_KEYS) expect(after[k]).toBe(before[k]! + BALANCE.dailyGift[k]);
       expect((await reloadPlayer(g, a)).misc.dailyGiftDay).toBe('2026-01-01');
       expect(g.pushes(PushCmd.RESOURCE_UPDATE).at(-1)).toMatchObject({ playerIds: [a.id], data: { castleId: a.cityId } });
       expect(g._stats.get(`${a.id}|${a.cityId}`)).toMatchObject(

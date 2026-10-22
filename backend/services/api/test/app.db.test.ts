@@ -94,7 +94,7 @@ describe('the /ws socket', () => {
         await ws.next();
         await settle(api);
         const [row] = await api.db.select({ lastSeenAt: players.lastSeenAt }).from(players).where(eq(players.id, p.playerId));
-        expect(row.lastSeenAt).toBeGreaterThan(0);
+        expect(row!.lastSeenAt).toBeGreaterThan(0);
         ws.terminate();
       });
     }));

@@ -195,8 +195,8 @@ export const cities = pgTable(
     troopQueues: jsonb('troop_queues').$type<TroopQueueState[]>().notNull().default([]),
     fortQueue: jsonb('fort_queue').$type<FortQueueState>().notNull().default({ nextQueueId: 1, queue: [] }),
     /** production work-rate per resource (percent of workers assigned), and store percentages */
-    workRates: jsonb('work_rates').$type<ResourceSet>().notNull().default({ gold: 100, food: 100, wood: 100, stone: 100, iron: 100 }),
-    storePercent: jsonb('store_percent').$type<ResourceSet>().notNull().default({ gold: 0, food: 25, wood: 25, stone: 25, iron: 25 }),
+    workRates: jsonb('work_rates').$type<Partial<ResourceSet>>().notNull().default({ gold: 100, food: 100, wood: 100, stone: 100, iron: 100 }),
+    storePercent: jsonb('store_percent').$type<Partial<ResourceSet>>().notNull().default({ gold: 0, food: 25, wood: 25, stone: 25, iron: 25 }),
     misc: jsonb('misc').$type<CityMisc>().notNull().default({}),
     createdAt: ms('created_at').notNull(),
   },

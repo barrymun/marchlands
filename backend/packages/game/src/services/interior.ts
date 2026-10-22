@@ -65,7 +65,7 @@ export async function setStorePercent(ctx: Ctx, playerId: number, cityId: number
     if (!Number.isInteger(v) || v < 0 || v > 100) throw new GameError(msg('city.invalidStorePercent'), -99);
     next[r] = v;
   }
-  if (BASIC_RESOURCES.reduce((s, r) => s + next[r], 0) > 100) throw new GameError(msg('city.storePercentTotal'), -99);
+  if (BASIC_RESOURCES.reduce((s, r) => s + (next[r] ?? 0), 0) > 100) throw new GameError(msg('city.storePercentTotal'), -99);
   b.city.storePercent = next;
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
@@ -134,7 +134,7 @@ export async function productionBreakdown(ctx: Ctx, playerId: number, cityId: nu
     bonus: s.bonus[r],
     armyConsumption: r === 'food' ? Math.round(s.upkeep) : 0,
     totalOutput: Math.round(s.rates[r]),
-    commenceRate: b.city.workRates[r],
+    commenceRate: b.city.workRates[r] ?? 100,
     maxLabour: s.workers[r],
     storage: s.storage[r],
   }));

@@ -37,7 +37,7 @@ async function trader(api: TestApi, name?: string) {
   return p;
 }
 
-const cityRes = async (api: TestApi, p: { token: string }) => (await api.ok<PlayerState>('GET', 'player', { token: p.token })).castles[0].resource;
+const cityRes = async (api: TestApi, p: { token: string }) => (await api.ok<PlayerState>('GET', 'player', { token: p.token })).castles[0]!.resource;
 
 describe('authentication', () => {
   it('every market route needs a token', () =>
@@ -219,7 +219,7 @@ describe('GET /market/shipments', () => {
               endTime: expect.any(Number),
             },
           ]);
-          expect(list[0].endTime).toBeGreaterThan(Date.now());
+          expect(list[0]!.endTime).toBeGreaterThan(Date.now());
         }),
       ),
     ));
@@ -233,9 +233,9 @@ describe('POST /market/shipments/:shipmentId/speedup', () => {
           const { buyer } = await shipped(api);
           const [s] = await api.ok<MarketShipment[]>('GET', 'market/shipments', { token: buyer.token });
           const gold = (await cityRes(api, buyer)).gold;
-          expect(await api.ok('POST', `market/shipments/${s.id}/speedup`, { token: buyer.token })).toBeNull();
+          expect(await api.ok('POST', `market/shipments/${s!.id}/speedup`, { token: buyer.token })).toBeNull();
           const [after] = await api.ok<MarketShipment[]>('GET', 'market/shipments', { token: buyer.token });
-          expect(after.endTime).toBeLessThanOrEqual(Date.now());
+          expect(after!.endTime).toBeLessThanOrEqual(Date.now());
           expect((await cityRes(api, buyer)).gold).toBeLessThan(gold);
         }),
       ),
@@ -247,7 +247,7 @@ describe('POST /market/shipments/:shipmentId/speedup', () => {
         apiTest(async (api) => {
           const { buyer, seller } = await shipped(api);
           const [s] = await api.ok<MarketShipment[]>('GET', 'market/shipments', { token: buyer.token });
-          await api.refused('POST', `market/shipments/${s.id}/speedup`, 'market.shipmentNotFound', { token: seller.token, status: 404 });
+          await api.refused('POST', `market/shipments/${s!.id}/speedup`, 'market.shipmentNotFound', { token: seller.token, status: 404 });
           await expectInvalid(api, buyer.token, [{ method: 'POST', url: 'market/shipments/abc/speedup' }]);
         }),
       ),

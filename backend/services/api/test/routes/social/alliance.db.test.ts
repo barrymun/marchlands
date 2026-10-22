@@ -157,7 +157,7 @@ describe('POST /alliance', () => {
       const r = await api.ok<CreateAllianceResult>('POST', 'alliance', { token: host.token, body: { cityId: host.cityId, allianceName: 'Order' } });
       expect(r).toEqual({ id: expect.any(Number), msg: { code: 'alliance.event.created', params: { name: 'Order' } } });
       expect(await rankOf(api, host)).toMatchObject({ allianceId: r.id, allianceRank: AllianceRank.HOST });
-      expect((await api.ok<{ castles: { resource: { gold: number } }[] }>('GET', 'player', { token: host.token })).castles[0].resource.gold).toBe(0);
+      expect((await api.ok<{ castles: { resource: { gold: number } }[] }>('GET', 'player', { token: host.token })).castles[0]!.resource.gold).toBe(0);
     }));
 
   it('refuses without the gold, a name taken (409), and validates the body', () =>
@@ -412,7 +412,7 @@ describe('POST /alliance/members/rank', () => {
     apiTest(async (api) => {
       const { host, member } = await withMember(api);
       expect(await api.ok('POST', 'alliance/members/rank', { token: host.token, body: { userName: 'Member', rank: AllianceRank.OFFICER } })).toBeNull();
-      expect((await rankOf(api, member)).allianceRank).toBe(AllianceRank.OFFICER);
+      expect((await rankOf(api, member))!.allianceRank).toBe(AllianceRank.OFFICER);
     }));
 
   it('refuses a rank outside 5-8, a rank above the actor, and validates the body', () =>
@@ -436,8 +436,8 @@ describe('POST /alliance/members/host', () => {
       expect(a.body.ok).toBe(-88);
       await api.ok('POST', 'alliance/members/rank', { token: host.token, body: { userName: 'Member', rank: AllianceRank.VICE_HOST } });
       expect(await api.ok('POST', 'alliance/members/host', { token: host.token, body: { userName: 'Member' } })).toBeNull();
-      expect((await rankOf(api, member)).allianceRank).toBe(AllianceRank.HOST);
-      expect((await rankOf(api, host)).allianceRank).toBe(AllianceRank.VICE_HOST);
+      expect((await rankOf(api, member))!.allianceRank).toBe(AllianceRank.HOST);
+      expect((await rankOf(api, host))!.allianceRank).toBe(AllianceRank.VICE_HOST);
     }));
 });
 
@@ -447,7 +447,7 @@ describe('POST /alliance/members/kick', () => {
       const { host, member } = await withMember(api);
       await api.refused('POST', 'alliance/members/kick', 'alliance.kickHigherRank', { token: member.token, body: { userName: 'Host' }, status: 400 });
       expect(await api.ok('POST', 'alliance/members/kick', { token: host.token, body: { userName: 'Member' } })).toBeNull();
-      expect((await rankOf(api, member)).allianceId).toBeNull();
+      expect((await rankOf(api, member))!.allianceId).toBeNull();
       await api.refused('POST', 'alliance/members/kick', 'alliance.memberNotFound', { token: host.token, body: { userName: 'Member' }, status: 400 });
     }));
 });

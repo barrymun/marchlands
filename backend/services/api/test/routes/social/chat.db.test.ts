@@ -105,8 +105,8 @@ describe('GET /chat/:channel', () => {
       const p = await api.player();
       await api.ok('POST', 'chat/world', { token: p.token, body: { msg: 'first' } });
       const [first] = await api.ok<ChatHistory>('GET', 'chat/world', { token: p.token });
-      expect(await api.ok('GET', `chat/world?since=${first.time}`, { token: p.token })).toEqual([]);
-      expect(await api.ok('GET', `chat/world?since=${first.time - 1}`, { token: p.token })).toEqual([first]);
+      expect(await api.ok('GET', `chat/world?since=${first!.time}`, { token: p.token })).toEqual([]);
+      expect(await api.ok('GET', `chat/world?since=${first!.time - 1}`, { token: p.token })).toEqual([first]);
     }));
 
   it('validates the channel and the query', () =>

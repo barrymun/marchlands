@@ -22,7 +22,7 @@ describe(patchHeroes.name, () => {
   it('does not change the list it was given', () => {
     const list = [hero(1)];
     patchHeroes(list, hero(1, 5), 0);
-    expect(list[0].level).toBe(1);
+    expect(list[0]!.level).toBe(1);
   });
 });
 
@@ -36,8 +36,8 @@ describe(patchPlayerHeroes.name, () => {
 
   it('patches only the hero list of the given city', () => {
     const out = patchPlayerHeroes(player, 11, hero(2, 7), 0);
-    expect(out.castles[0].heros).toBe(player.castles[0].heros);
-    expect(out.castles[1].heros[0].level).toBe(7);
+    expect(out.castles[0]!.heros).toBe(player.castles[0]!.heros);
+    expect(out.castles[1]!.heros[0]!.level).toBe(7);
   });
   it('leaves the player unchanged for a city it does not own', () => {
     expect(patchPlayerHeroes(player, 99, hero(3), 0).castles).toEqual(player.castles);

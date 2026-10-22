@@ -36,7 +36,7 @@ async function queuePush(api: TestApi, playerIds: number[], items: { id: string;
     else ctx.broadcast(PushCmd.ITEM_UPDATE, { items });
   });
   const [row] = await api.db.select({ id: pushMessages.id }).from(pushMessages).orderBy(desc(pushMessages.id)).limit(1);
-  return row.id;
+  return row!.id;
 }
 
 /** What a commit would announce, sent outside the test transaction. */

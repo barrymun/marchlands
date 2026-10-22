@@ -72,7 +72,7 @@ describe(processOne.name, () => {
     workerTest(async (db, log) => {
       expect(await processOne(db, { log })).toBe(false);
 
-      const later = await addEvent(db, { type: 'unknown.type', dueAt: Date.now() + 60_000 });
+      const later = (await addEvent(db, { type: 'unknown.type', dueAt: Date.now() + 60_000 }))!;
       expect(await processOne(db, { log })).toBe(false);
       expect(await eventRow(db, later.id)).toEqual(later);
       expect(log).not.toHaveBeenCalled();
@@ -90,7 +90,7 @@ describe(processOne.name, () => {
 
       expect(await processOne(db, { log })).toBe(true);
 
-      expect(await eventRow(db, ev.id)).toBeUndefined();
+      expect(await eventRow(db, ev!.id)).toBeUndefined();
       const player = await runGame(db, (ctx) => getPlayer(ctx, p.id));
       expect(player.buffs.map((b) => b.id)).not.toContain(BuffId.ATTACK);
       // the buff update and the player info were flushed to the outbox with the state
@@ -104,8 +104,8 @@ describe(processOne.name, () => {
     workerTest(async (db, log) => {
       const now = Date.now();
       // buff.expire with an unknown buff id is a no-op: the event is consumed and nothing else changes
-      const second = await addEvent(db, { type: 'buff.expire', dueAt: now - 1000, payload: { buffId: 'none' } });
-      const first = await addEvent(db, { type: 'buff.expire', dueAt: now - 2000, payload: { buffId: 'none' } });
+      const second = (await addEvent(db, { type: 'buff.expire', dueAt: now - 1000, payload: { buffId: 'none' } }))!;
+      const first = (await addEvent(db, { type: 'buff.expire', dueAt: now - 2000, payload: { buffId: 'none' } }))!;
 
       expect(await processOne(db, { log })).toBe(true);
       expect(await eventRow(db, first.id)).toBeUndefined();
@@ -136,13 +136,13 @@ describe(processOne.name, () => {
 
   it('backs a failing event off: the claim is undone, the error recorded and the event due again 5 s later', () =>
     workerTest(async (db, log) => {
-      const ev = await addEvent(db, { type: 'unknown.type', dueAt: Date.now() - 1000 });
+      const ev = (await addEvent(db, { type: 'unknown.type', dueAt: Date.now() - 1000 }))!;
 
       const before = Date.now();
       expect(await processOne(db, { log })).toBe(true);
       const after = Date.now();
 
-      const row = await eventRow(db, ev.id);
+      const row = (await eventRow(db, ev.id))!;
       expect(row).toMatchObject({ type: 'unknown.type', attempts: 1, lastError: 'unknown timed event type unknown.type' });
       expect(row.dueAt).toBeGreaterThanOrEqual(before + 5000);
       expect(row.dueAt).toBeLessThanOrEqual(after + 5000);
@@ -154,11 +154,11 @@ describe(processOne.name, () => {
 
   it('doubles the back-off with each attempt and gives up after MAX_ATTEMPTS', () =>
     workerTest(async (db, log) => {
-      const ev = await addEvent(db, { type: 'unknown.type', dueAt: Date.now() - 1000 });
+      const ev = (await addEvent(db, { type: 'unknown.type', dueAt: Date.now() - 1000 }))!;
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
         const before = Date.now();
         expect(await processOne(db, { log })).toBe(true);
-        const row = await eventRow(db, ev.id);
+        const row = (await eventRow(db, ev.id))!;
         expect(row.attempts).toBe(attempt);
         // the delay uses the attempts before this one: 5 s, 10 s, 20 s …
         expect(row.dueAt - before).toBeGreaterThanOrEqual(5000 * 2 ** (attempt - 1));
@@ -179,8 +179,8 @@ describe(processOne.name, () => {
   it('skips an exhausted event and takes the next one that is due', () =>
     workerTest(async (db, log) => {
       const now = Date.now();
-      const exhausted = await addEvent(db, { type: 'buff.expire', dueAt: now - 2000, attempts: MAX_ATTEMPTS, payload: { buffId: 'none' } });
-      const next = await addEvent(db, { type: 'buff.expire', dueAt: now - 1000, attempts: MAX_ATTEMPTS - 1, payload: { buffId: 'none' } });
+      const exhausted = (await addEvent(db, { type: 'buff.expire', dueAt: now - 2000, attempts: MAX_ATTEMPTS, payload: { buffId: 'none' } }))!;
+      const next = (await addEvent(db, { type: 'buff.expire', dueAt: now - 1000, attempts: MAX_ATTEMPTS - 1, payload: { buffId: 'none' } }))!;
 
       expect(await processOne(db, { log })).toBe(true);
       expect(await eventRow(db, next.id)).toBeUndefined();
@@ -190,11 +190,11 @@ describe(processOne.name, () => {
   it('backs off an event whose handler hit a database error, and the connection carries on', () =>
     workerTest(async (db, log) => {
       // a shipment id that is not a number: the handler's query fails in Postgres and aborts the game transaction
-      const ev = await addEvent(db, { type: 'shipment', dueAt: Date.now() - 1000, payload: { shipmentId: 'x' } });
+      const ev = (await addEvent(db, { type: 'shipment', dueAt: Date.now() - 1000, payload: { shipmentId: 'x' } }))!;
 
       expect(await processOne(db, { log })).toBe(true);
 
-      const row = await eventRow(db, ev.id);
+      const row = (await eventRow(db, ev.id))!;
       expect(row.attempts).toBe(1);
       expect(row.lastError).toMatch(/^Failed query: select .* from "market_shipments"/);
       expect(row.lastError!.length).toBeLessThanOrEqual(500);

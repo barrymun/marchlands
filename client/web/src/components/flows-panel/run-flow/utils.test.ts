@@ -28,8 +28,8 @@ describe(withPreview.name, () => {
 
   it('puts the report on that flow only, with the time it ran', () => {
     const [a, b] = withPreview([flow('a'), flow('b')], 'b', report, NOW)!;
-    expect(a.lastPreview).toBeNull();
-    expect(b.lastPreview).toEqual({ at: NOW, cities: [], skippedCities: report.skippedCities });
+    expect(a!.lastPreview).toBeNull();
+    expect(b!.lastPreview).toEqual({ at: NOW, cities: [], skippedCities: report.skippedCities });
   });
 
   it('leaves an empty cache empty', () => {

@@ -133,7 +133,7 @@ describe(training.productionQueues.name, () => {
       await training.train(g, p.id, p.cityId, FortType.TRAP, 5, WALLS_QUEUE);
       const r = await training.productionQueues(g, p.id, p.cityId, true);
       expect(r.capacity).toBe(2);
-      expect(r.wallSpace).toEqual({ used: 10 * BALANCE.fortSpace[FortType.ARCHER_TOWER] + 5 * BALANCE.fortSpace[FortType.TRAP], max: BALANCE.wallSpace[2] });
+      expect(r.wallSpace).toEqual({ used: 10 * BALANCE.fortSpace[FortType.ARCHER_TOWER]! + 5 * BALANCE.fortSpace[FortType.TRAP]!, max: BALANCE.wallSpace[2] });
       expect(r.queues[0]).toMatchObject({ positionId: WALLS_QUEUE, allProduceQueue: [{ type: FortType.TRAP, num: 5 }] });
     }));
 
@@ -176,14 +176,14 @@ describe(training.train.name, () => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [1]);
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
-      const due = g.events('train')[0].dueAt;
+      const due = g.events('train')[0]!.dueAt;
       await g.runDue(due - 1);
       expect((await reloadCity(g, p.cityId)).troops.peasants ?? 0).toBe(0);
 
       expect(await g.runDue(due)).toBe(1);
       const city = await reloadCity(g, p.cityId);
       expect(city.troops.peasants).toBe(10);
-      expect(city.troopQueues[0].queue).toEqual([]);
+      expect(city.troopQueues[0]!.queue).toEqual([]);
       expect((await reloadPlayer(g, p)).prestige).toBe(10 * prestigeOf(PrestigeAction.TRAIN, WORKER, 1, 1));
       expect(g.pushes(PushCmd.TROOP_UPDATE).at(-1)?.data).toMatchObject({ castleId: p.cityId, troop: { peasants: 10 } });
       expect(g.events('train')).toEqual([]);
@@ -204,7 +204,7 @@ describe(training.train.name, () => {
       await g.runDue(end1);
       const [second] = await queueOf(g, p, 0);
       expect(second).toMatchObject({ queueId: 2, startTime: end1, endTime: end1 + ms2 });
-      expect(g.events('train')[0].dueAt).toBe(end1 + ms2);
+      expect(g.events('train')[0]!.dueAt).toBe(end1 + ms2);
 
       await g.runDue(end1 + ms2);
       expect((await reloadCity(g, p.cityId)).troops).toMatchObject({ peasants: 10, militia: 5 });
@@ -218,7 +218,7 @@ describe(training.train.name, () => {
       await heroes.appointMayor(g, p.id, heroId);
       const before = await getHero(g, heroId);
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
-      await g.runDue(g.events('train')[0].dueAt);
+      await g.runDue(g.events('train')[0]!.dueAt);
       const gain = 10 * prestigeOf(PrestigeAction.TRAIN, WORKER, 1, 1);
       const exp = 10 * unitExp(WORKER) * BALANCE.heroExpPerTrain;
       expect((await getHero(g, heroId)).experience).toBeCloseTo(before.experience + gain + exp, 6);
@@ -252,7 +252,7 @@ describe(training.train.name, () => {
       const share = 1 - BALANCE.trainCostReduction;
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
       expectResources(resourcesOf(await reloadCity(g, p.cityId)), minus(resourcesOf(before), trainCost(WORKER, 10, share)));
-      expect((await queueOf(g, p, 0))[0].paidShare).toBe(share);
+      expect((await queueOf(g, p, 0))[0]!.paidShare).toBe(share);
     }));
 
   it('trains fortifications at the walls, at full cost', () =>
@@ -266,9 +266,9 @@ describe(training.train.name, () => {
       expect(q).toMatchObject({ positionId: WALLS_QUEUE, allProduceQueue: [{ type: FortType.TRAP, num: 10 }] });
       expectResources(resourcesOf(await reloadCity(g, p.cityId)), minus(resourcesOf(before), trainCost(FortType.TRAP, 10)));
       expect(g.pushes(PushCmd.FORTIFICATIONS_QUEUE_UPDATE).at(-1)?.data).toMatchObject({ castleId: p.cityId, positionId: WALLS_QUEUE });
-      expect(g.events('train')[0].refKey).toBe(`train:${p.cityId}:${WALLS_QUEUE}`);
+      expect(g.events('train')[0]!.refKey).toBe(`train:${p.cityId}:${WALLS_QUEUE}`);
 
-      await g.runDue(g.events('train')[0].dueAt);
+      await g.runDue(g.events('train')[0]!.dueAt);
       const city = await reloadCity(g, p.cityId);
       expect(city.forts).toEqual({ trap: 10 });
       expect(city.fortQueue).toEqual({ queue: [], nextQueueId: 2 });
@@ -458,7 +458,7 @@ describe(training.trainSplit.name, () => {
       const r = await training.trainSplit(g, p.id, p.cityId, WORKER, 30);
       const counts = Object.fromEntries(r.batches.map((b) => [b.positionId, b.count]));
       expect(counts).toEqual(Object.fromEntries(expected.map((e) => [e.positionId, e.count])));
-      expect(counts[1]).toBeGreaterThan(counts[0]);
+      expect(counts[1]).toBeGreaterThan(counts[0]!);
       // the busy barracks' share waits behind its first batch
       expect((await queueOf(g, p, 0))[1]).toMatchObject({ count: counts[0], startTime: 0, endTime: 0 });
     }));
@@ -567,12 +567,12 @@ describe(training.speedupTraining.name, () => {
       await giveItems(g, p, { [ItemId.NAPOLEONS_DIARY]: 2 });
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
       const [head] = await queueOf(g, p, 0);
-      const cut = Math.floor((head.endTime - head.startTime) * BALANCE.items.batchSpeedupShare);
+      const cut = Math.floor((head!.endTime - head!.startTime) * BALANCE.items.batchSpeedupShare);
       await training.speedupTraining(g, p.id, p.cityId, 0, 1);
 
-      expect((await queueOf(g, p, 0))[0]).toMatchObject({ startTime: head.startTime - cut, endTime: head.endTime - cut });
+      expect((await queueOf(g, p, 0))[0]).toMatchObject({ startTime: head!.startTime - cut, endTime: head!.endTime - cut });
       expect((await reloadPlayer(g, p)).items[ItemId.NAPOLEONS_DIARY]).toBe(1);
-      expect(g.events('train')[0].dueAt).toBe(head.endTime - cut);
+      expect(g.events('train')[0]!.dueAt).toBe(head!.endTime - cut);
       expect(g.pushes(PushCmd.ITEM_UPDATE).at(-1)?.data).toEqual({ items: [{ id: ItemId.NAPOLEONS_DIARY, count: 1 }] });
     }));
 
@@ -595,7 +595,7 @@ describe(training.speedupTraining.name, () => {
       await giveItems(g, p, { [ItemId.NAPOLEONS_DIARY]: 4 });
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
       for (let i = 0; i < 4; i++) await training.speedupTraining(g, p.id, p.cityId, 0, 1);
-      expect((await queueOf(g, p, 0))[0].endTime).toBe(g.now);
+      expect((await queueOf(g, p, 0))[0]!.endTime).toBe(g.now);
       expect(await g.runDue()).toBe(1);
       expect((await reloadCity(g, p.cityId)).troops.peasants).toBe(10);
     }));
@@ -612,7 +612,7 @@ describe(training.speedupTraining.name, () => {
       await training.speedupTraining(g, p.id, p.cityId, 0, 2);
       expect((await queueOf(g, p, 0))[1]).toMatchObject({ costTime: full - cut, fullTime: full, startTime: 0, endTime: 0 });
 
-      const end1 = g.events('train')[0].dueAt;
+      const end1 = g.events('train')[0]!.dueAt;
       await g.runDue(end1);
       expect((await queueOf(g, p, 0))[0]).toMatchObject({ queueId: 2, startTime: end1 - cut, endTime: end1 + full - cut });
     }));
@@ -671,7 +671,7 @@ describe(training.disbandTroops.name, () => {
       await shop.useItem(g, p.id, ItemId.QUARTERMASTERS_SEAL, null);
       const share = 1 - BALANCE.trainCostReduction;
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
-      await g.runDue(g.events('train')[0].dueAt);
+      await g.runDue(g.events('train')[0]!.dueAt);
       expect((await reloadPlayer(g, p)).misc.refundCredit).toEqual({ peasants: 10 * share });
 
       const before = await reloadCity(g, p.cityId);
@@ -725,7 +725,7 @@ describe(training.destroyForts.name, () => {
       const p = await createTestPlayer(g);
       await withWalls(g, p, 1);
       await training.train(g, p.id, p.cityId, FortType.TRAP, 10, WALLS_QUEUE);
-      await g.runDue(g.events('train')[0].dueAt);
+      await g.runDue(g.events('train')[0]!.dueAt);
       expect((await reloadPlayer(g, p)).misc.refundCredit).toEqual({ trap: 10 });
       const before = await reloadCity(g, p.cityId);
       await training.destroyForts(g, p.id, p.cityId, FortType.TRAP, 4);

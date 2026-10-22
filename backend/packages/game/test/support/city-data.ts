@@ -38,7 +38,7 @@ export async function insertArmy(
       createdAt: g.now,
     })
     .returning();
-  return row;
+  return row!;
 }
 
 /** Give the city a free valley of this type (as occupying one does); returns its id. */
@@ -49,8 +49,8 @@ export async function holdValley(g: TestGame, p: TestPlayer, type: number, cityI
     .where(and(eq(tiles.type, type), isNull(tiles.cityId), isNull(tiles.ownerCityId)))
     .orderBy(asc(tiles.id))
     .limit(1);
-  await g.tx.update(tiles).set({ ownerCityId: cityId, ownerPlayerId: p.id }).where(eq(tiles.id, row.id));
-  return row.id;
+  await g.tx.update(tiles).set({ ownerCityId: cityId, ownerPlayerId: p.id }).where(eq(tiles.id, row!.id));
+  return row!.id;
 }
 
 /** Switch starvation desertion on for the tests of the enclosing describe block. */

@@ -11,7 +11,6 @@ import {
   HeroStatus,
   mayorProductionBonus,
   msg,
-  type ResourceSet,
   stateOf,
   TileType,
   tileXY,
@@ -145,7 +144,7 @@ describe(resourceBean.name, () => {
   });
 
   it('a work rate the city never set counts as 100%', () => {
-    const b = producingCity({ city: { workRates: { gold: 100, wood: 50 } as ResourceSet } });
+    const b = producingCity({ city: { workRates: { gold: 100, wood: 50 } } });
     expect(resourceBean(b, cityStats(b, T0)).food.workRate).toBe(100);
   });
 

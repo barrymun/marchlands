@@ -21,7 +21,7 @@ async function mailed(api: TestApi) {
   const to = await api.player('Receiver');
   await api.ok('POST', 'mail', { token: from.token, body: { to: 'Receiver', title: 'Greetings', content: 'Well met' } });
   const list = await api.ok<MailList>('GET', 'mail', { token: to.token });
-  return { from, to, mailId: list.mails[0].mailid };
+  return { from, to, mailId: list.mails[0]!.mailid };
 }
 
 describe('authentication', () => {

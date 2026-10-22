@@ -212,7 +212,7 @@ describe(alliance.apply.name, () => {
       expect(await alliance.myApplication(g, p.id)).toEqual({ allianceName: b.name, applyTime: g.now });
       expect(await alliance.applications(g, a.host.id)).toEqual([]);
       expect((await alliance.applications(g, b.host.id)).map((x) => x.userName)).toEqual([p.name]);
-      expect((await alliance.events(g, b.host.id))[0].message).toEqual(msg('alliance.event.applied', { name: p.name }));
+      expect((await alliance.events(g, b.host.id))[0]!.message).toEqual(msg('alliance.event.applied', { name: p.name }));
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE).at(-1)).toMatchObject({ playerIds: [b.host.id] });
     }));
 
@@ -273,7 +273,7 @@ describe(alliance.applications.name, () => {
       const a = await createTestAlliance(g);
       const p = await withEmbassy(g, await createTestPlayer(g));
       await alliance.apply(g, p.id, a.name);
-      expect((await alliance.applications(g, a.host.id))[0].castleCount).toBe(1);
+      expect((await alliance.applications(g, a.host.id))[0]!.castleCount).toBe(1);
     }));
 
   it('needs Presbyter or above', () =>

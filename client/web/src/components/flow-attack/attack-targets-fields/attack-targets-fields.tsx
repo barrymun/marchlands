@@ -59,7 +59,7 @@ export function AttackTargetsFields({
       {preset && (
         <p className="text-xs text-muted-foreground">
           {Object.entries(preset.troops)
-            .map(([k, n]) => `${fmtExact(n ?? 0)} ${troopName(Number(Object.entries(TROOP_KEYS).find(([, key]) => key === k)?.[0]))}`)
+            .map(([k, n]) => `${fmtExact(n)} ${troopName(Number(Object.entries(TROOP_KEYS).find(([, key]) => key === k)?.[0]))}`)
             .join(', ')}
         </p>
       )}

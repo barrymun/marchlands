@@ -61,7 +61,7 @@ describe('buildingInfo', () => {
     const unlocks = buildingInfo(BuildingType.BARRACKS).unlocks;
     expect(unlocks.length).toBeGreaterThan(0);
     for (const u of unlocks) expect(Object.keys(u).sort()).toEqual(['id', 'kind', 'level']);
-    for (let i = 1; i < unlocks.length; i++) expect(unlocks[i].level).toBeGreaterThanOrEqual(unlocks[i - 1].level);
+    for (let i = 1; i < unlocks.length; i++) expect(unlocks[i]!.level).toBeGreaterThanOrEqual(unlocks[i - 1]!.level);
     expect(unlocks).toContainEqual(expect.objectContaining({ kind: 'troop', id: TroopType.WARRIOR }));
   });
 

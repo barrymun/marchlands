@@ -19,8 +19,8 @@ export async function sendMail(ctx: Ctx, playerId: number, toName: string, rawTi
   const target = await findPlayerByName(ctx, toName);
   if (!target) throw new GameError(msg('common.playerNamedNotFound', { name: toName }), -41, 404);
   if (target.id === playerId) throw new GameError(msg('mail.toSelf'), -21);
-  const title = escapeHtml(String(rawTitle ?? '').trim()).slice(0, 100);
-  const content = escapeHtml(String(rawContent ?? '').trim()).slice(0, 5000);
+  const title = escapeHtml(rawTitle.trim()).slice(0, 100);
+  const content = escapeHtml(rawContent.trim()).slice(0, 5000);
   if (!title || !content) throw new GameError(msg('mail.titleAndContentRequired'), -99);
   if (!(await isBlocked(ctx, target.id, sender.id))) {
     await ctx.tx

@@ -24,7 +24,7 @@ describe(alliance.setRank.name, () => {
       g.advance(1000);
       await alliance.setRank(g, a.host.id, m.name, AllianceRank.OFFICER);
       expect(await reloadPlayer(g, m)).toMatchObject({ allianceRank: AllianceRank.OFFICER });
-      expect((await alliance.events(g, m.id))[0].message).toEqual(
+      expect((await alliance.events(g, m.id))[0]!.message).toEqual(
         msg('alliance.event.demoted', { actor: a.host.name, name: m.name, rank: ref.rank(AllianceRank.OFFICER) }),
       );
     }));
@@ -164,7 +164,7 @@ describe(alliance.massMail.name, () => {
       for (const p of [a.host, m]) {
         const [mailRow] = (await mail.listMail(g, p.id, MailType.INBOX, 1, 10)).mails;
         expect(mailRow).toMatchObject({ title: '[Alliance] Muster', sender: officer.name, playerId: officer.id });
-        expect((await mail.readMail(g, p.id, mailRow.mailid)).content).toBe('At dawn.');
+        expect((await mail.readMail(g, p.id, mailRow!.mailid)).content).toBe('At dawn.');
       }
       expect((await mail.listMail(g, officer.id, MailType.INBOX, 1, 10)).mails).toEqual([]);
       expect((await mail.listMail(g, outsider.id, MailType.INBOX, 1, 10)).mails).toEqual([]);

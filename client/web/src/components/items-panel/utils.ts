@@ -6,8 +6,11 @@ import { i18n } from '@/lib/i18n';
 
 /** Gold price of an entry when one of its items is for sale (itemGoldPrice: there are no cents). */
 export function goldPriceOf(e: { ids: string[] }): { id: string; price: number } | null {
-  const id = e.ids.find((x) => itemGoldPrice(x) != null);
-  return id ? { id, price: itemGoldPrice(id)! } : null;
+  for (const id of e.ids) {
+    const price = itemGoldPrice(id);
+    if (price != null) return { id, price };
+  }
+  return null;
 }
 
 /** What an item gave, in the current locale: "5 × Name, 50,000 food, 1,500 Archer", or "nothing". */

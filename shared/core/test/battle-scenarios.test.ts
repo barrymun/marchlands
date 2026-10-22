@@ -47,10 +47,11 @@ function fight(atk: Side, def: Defender) {
     rounds,
     kills,
     /** where an attacking group stands after round `r` */
-    attackerAt: (r: number, key: TroopKey) => rounds[r].attacker[at(key)].location,
-    defenderAt: (r: number, key: TroopKey) => rounds[r].defender[at(key)].location,
+    attackerAt: (r: number, key: TroopKey) => rounds[r]!.attacker[at(key)]!.location,
+    defenderAt: (r: number, key: TroopKey) => rounds[r]!.defender[at(key)]!.location,
     /** defending troops of a type killed in round `r` */
-    defenderLost: (r: number, key: TroopKey) => (r === 0 ? (def.troops[key] ?? 0) : rounds[r - 1].defender[at(key)].count) - rounds[r].defender[at(key)].count,
+    defenderLost: (r: number, key: TroopKey) =>
+      (r === 0 ? (def.troops[key] ?? 0) : rounds[r - 1]!.defender[at(key)]!.count) - rounds[r]!.defender[at(key)]!.count,
   };
 }
 
@@ -251,7 +252,7 @@ describe(simulateBattle.name, () => {
         { research: RESEARCH_10, troops: { ballista: 500 } },
         { research: {}, troops: npc.troops, forts: npc.forts, wallLevel: 5 },
       );
-      const stops = rounds.map((r) => r.attacker[at('ballista')].location);
+      const stops = rounds.map((r) => r.attacker[at('ballista')]!.location);
       const standOff = Math.max(...stops);
       expect(kills).toEqual([]);
       expect(outcome.attackerTroops[at('ballista')]).toBe(500);

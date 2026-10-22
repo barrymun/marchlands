@@ -9,7 +9,7 @@ import { signToken } from '#/auth/jwt.ts';
 import { LoginBackoff } from '#/auth/login-backoff.ts';
 import { hashPassword, verifyPassword } from '#/auth/password.ts';
 import { SignUpProofs } from '#/auth/signup-proof.ts';
-import { authenticate, secured, tags, type ZApp } from '#/http.ts';
+import { authenticate, claimsOf, secured, tags, type ZApp } from '#/http.ts';
 
 /** Public routes cannot use doc(): same envelope, no `security`. */
 const responses = <T extends z.ZodType>(data: T) => ({ 200: Ok(data), '4xx': ErrorResponse, '5xx': ErrorResponse });
@@ -91,7 +91,7 @@ export default async function authRoutes(app: ZApp) {
         return reply.status(401).send({ ok: -2, error: msg('auth.wrongPassword') });
       }
       backoff.succeeded(username);
-      if (acc.status !== 0) return reply.status(403).send({ ok: -99, error: msg('auth.banned', { reason: acc.banReason ?? '' }) });
+      if (acc.status !== 0) return reply.status(403).send({ ok: -99, error: msg('auth.banned', { reason: acc.banReason }) });
       const isAdmin = acc.isAdmin || config.adminUsernames.includes(acc.username.toLowerCase());
       await db.update(accounts).set({ lastLoginAt: Date.now(), lastLoginIp: req.ip, isAdmin }).where(eq(accounts.id, acc.id));
       await db.update(players).set({ lastLoginAt: Date.now(), lastSeenAt: Date.now() }).where(eq(players.accountId, acc.id));
@@ -106,7 +106,7 @@ export default async function authRoutes(app: ZApp) {
       const [acc] = await db
         .select({ id: accounts.id, username: accounts.username, email: accounts.email, isAdmin: accounts.isAdmin, createdAt: accounts.createdAt })
         .from(accounts)
-        .where(eq(accounts.id, req.claims!.sub));
+        .where(eq(accounts.id, claimsOf(req).sub));
       if (!acc) throw new GameError(msg('auth.accountNotFound'), -2, 401);
       const [p] = await db.select({ id: players.id, name: players.name }).from(players).where(eq(players.accountId, acc.id));
       return { ok: 1 as const, data: { ...acc, player: p ?? null } };
@@ -120,7 +120,7 @@ export default async function authRoutes(app: ZApp) {
       const [acc] = await db
         .select({ id: accounts.id, isAdmin: accounts.isAdmin, status: accounts.status })
         .from(accounts)
-        .where(eq(accounts.id, req.claims!.sub));
+        .where(eq(accounts.id, claimsOf(req).sub));
       if (!acc || acc.status !== 0) throw new GameError(msg('auth.notLoggedIn'), -2, 401);
       return { ok: 1 as const, data: await issue(acc.id, acc.isAdmin) };
     },

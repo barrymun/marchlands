@@ -99,7 +99,7 @@ describe(expireHeroBuff.name, () => {
       const id = await addHero(g, p);
       await giveItems(g, p, { [ItemId.ART_OF_WAR]: 1 });
       await heroes.useHeroItem(g, p.id, id, ItemId.ART_OF_WAR);
-      const end = (await getHero(g, id)).buffs[0].endTime;
+      const end = (await getHero(g, id)).buffs[0]!.endTime;
       await expireHeroBuff(g, id, HeroBuffId.STRATAGEM);
       expect((await getHero(g, id)).buffs).toHaveLength(1);
       await expireHeroBuff(g, id, HeroBuffId.POWER); // no such boost

@@ -99,7 +99,8 @@ export async function processArmy(ctx: Ctx, armyId: number) {
   if (peek.direction === ArmyDirection.STAY) {
     // camping with a time limit: go home once it is over
     if (peek.restTime > 0 && ctx.now >= peek.reachTime + peek.restTime) {
-      const a = (await getArmy(ctx, armyId, { lock: true }))!;
+      const a = await getArmy(ctx, armyId, { lock: true });
+      if (!a) throw new Error(`army ${armyId} is gone`); // read just above (peek)
       await sendBack(ctx, a, await homeMarchMs(ctx, a, a.targetTileId));
       await notifyArmyParties(ctx, a);
     }
@@ -233,7 +234,8 @@ async function returnHome(ctx: Ctx, a: ArmyRow) {
     await deleteArmy(ctx, a);
     return;
   }
-  const b = (await openCity(ctx, homeId))!;
+  const b = await openCity(ctx, homeId);
+  if (!b) throw new Error(`army ${a.id}'s home city ${homeId} is gone`);
   b.city.troops = addTroops(b.city.troops, a.troops);
   gainResources(b.city, a.resources);
   if (hero && hero.capturedByPlayerId == null) {
@@ -441,12 +443,11 @@ function guardHeroOf(ctx: Ctx, state: Record<string, number>, maxLevel: number, 
 
 /** Lazily (re)generate an unowned valley's garrison: regenerates 6 minutes after it was last touched. */
 function valleyDefenders(ctx: Ctx, tile: TileRow): TroopCounts {
-  const stale = !tile.troops || ctx.now - (tile.state?.regenAt ?? 0) >= regenMs();
-  if (stale) {
-    tile.troops = valleyGarrison(tile.level, ctx.rng);
-    tile.state = { ...(tile.state ?? {}), regenAt: ctx.now };
-  }
-  return tile.troops!;
+  if (tile.troops && ctx.now - (tile.state?.regenAt ?? 0) < regenMs()) return tile.troops;
+  const troops = valleyGarrison(tile.level, ctx.rng);
+  tile.troops = troops;
+  tile.state = { ...(tile.state ?? {}), regenAt: ctx.now };
+  return troops;
 }
 
 function npcState(ctx: Ctx, tile: TileRow): { state: NpcState; troops: TroopCounts; forts: FortCounts } {
@@ -692,7 +693,7 @@ function battleStats(
     defender?: { playerId: number; cityId: number; injured?: TroopCounts } | null;
   },
 ) {
-  const fortsLost = r.forts?.lost ?? {};
+  const fortsLost = r.forts.lost;
   const won = r.attackerWon;
   ctx.stat(a.playerId, a.cityId, {
     ...prefixed('killed', r.defender.lost),

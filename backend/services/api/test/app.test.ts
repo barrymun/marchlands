@@ -130,15 +130,15 @@ describe('API docs', () => {
     }
     expect(ids.length).toBeGreaterThan(50);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(spec.paths['/api/v1/auth/login'].post?.operationId).toBe('postAuthLogin');
+    expect(spec.paths['/api/v1/auth/login']!.post?.operationId).toBe('postAuthLogin');
   });
 
   it('marks the secured operations, and leaves registering and logging in public', async () => {
     const spec = (await build()).swagger() as unknown as Spec;
-    expect(spec.paths['/api/v1/auth/register'].post?.security).toBeUndefined();
-    expect(spec.paths['/api/v1/auth/login'].post?.security).toBeUndefined();
-    expect(spec.paths['/api/v1/auth/me'].get?.security).toEqual([{ bearerAuth: [] }]);
-    expect(spec.paths['/api/v1/player'].get?.security).toEqual([{ bearerAuth: [] }]);
+    expect(spec.paths['/api/v1/auth/register']!.post?.security).toBeUndefined();
+    expect(spec.paths['/api/v1/auth/login']!.post?.security).toBeUndefined();
+    expect(spec.paths['/api/v1/auth/me']!.get?.security).toEqual([{ bearerAuth: [] }]);
+    expect(spec.paths['/api/v1/player']!.get?.security).toEqual([{ bearerAuth: [] }]);
   });
 });
 

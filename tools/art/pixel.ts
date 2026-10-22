@@ -121,6 +121,12 @@ export const PALETTE = {
 export type Colour = keyof typeof PALETTE;
 const NAMES = Object.keys(PALETTE) as Colour[];
 const INDEX = new Map(NAMES.map((n, i) => [n, i]));
+/** A colour's palette index; every Colour is in the palette, so a miss is a typo in a drawing. */
+function indexOf(c: Colour): number {
+  const i = INDEX.get(c);
+  if (i === undefined) throw new Error(`no colour ${c} in the palette`);
+  return i;
+}
 
 export type Pt = readonly [number, number];
 
@@ -172,7 +178,7 @@ export class PixelCanvas {
   set(x: number, y: number, c: Colour) {
     x = Math.floor(x);
     y = Math.floor(y);
-    if (x >= 0 && x < this.size && y >= 0 && y < this.size) this.px[y * this.size + x] = INDEX.get(c)!;
+    if (x >= 0 && x < this.size && y >= 0 && y < this.size) this.px[y * this.size + x] = indexOf(c);
   }
 
   get(x: number, y: number): Colour {
@@ -264,7 +270,7 @@ export class PixelCanvas {
         });
         if (open) edge.push(y * n + x);
       }
-    for (const i of edge) this.px[i] = INDEX.get('outline')!;
+    for (const i of edge) this.px[i] = indexOf('outline');
   }
 
   /** The sprite as a PNG holding only the colours it uses (so a new palette colour doesn't change other sprites). */
@@ -274,7 +280,7 @@ export class PixelCanvas {
     return indexedPng(
       this.size,
       this.size,
-      this.px.map((i) => remap.get(i)!),
+      this.px.map((i) => remap.get(i) ?? 0), // every index is in `used`
       used.map((i) => PALETTE[NAMES[i]]),
     );
   }

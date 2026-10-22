@@ -118,7 +118,7 @@ describe('POST /player', () => {
       const [row] = await api.db.select().from(players).where(eq(players.accountId, a.accountId));
       expect(row).toMatchObject({ id: created.playerInfo.id, name: 'Founder' });
       // the new token works where a player is needed
-      expect((await api.ok<PlayerState>('GET', 'player', { token: created.token })).playerInfo.id).toBe(row.id);
+      expect((await api.ok<PlayerState>('GET', 'player', { token: created.token })).playerInfo.id).toBe(row!.id);
     }));
 
   it('refuses a second player for the account, and a name already taken', () =>
@@ -158,7 +158,7 @@ describe('GET /player', () => {
       const p = await api.player();
       await api.db.update(players).set({ lastLoginAt: 1 }).where(eq(players.id, p.playerId));
       await state(api, p);
-      expect((await playerRow(api, p)).lastLoginAt).toBeGreaterThan(1);
+      expect((await playerRow(api, p))!.lastLoginAt).toBeGreaterThan(1);
     }));
 });
 
@@ -206,7 +206,7 @@ describe('POST /player/flag', () => {
     apiTest(async (api) => {
       const p = await api.player();
       expect(await api.ok('POST', 'player/flag', { token: p.token, body: { flag: 'NEW' } })).toBeNull();
-      expect((await playerRow(api, p)).flag).toBe('NEW');
+      expect((await playerRow(api, p))!.flag).toBe('NEW');
       await api.refused('POST', 'player/flag', 'player.invalidFlag', { token: p.token, body: { flag: 'TOOLONG' }, status: 400 });
       await expectInvalid(api, p.token, [{ method: 'POST', url: 'player/flag', body: { flag: 5 } }]);
     }));
@@ -217,7 +217,7 @@ describe('POST /player/rename', () => {
     apiTest(async (api) => {
       const p = await api.player('Before');
       await api.ok('POST', 'player/rename', { token: p.token, body: { userName: 'After' } });
-      expect((await playerRow(api, p)).name).toBe('After');
+      expect((await playerRow(api, p))!.name).toBe('After');
       expect((await state(api, p)).nextRenameAt).toBeGreaterThan(Date.now());
       const a = await api.refused('POST', 'player/rename', 'player.renameCooldown', { token: p.token, body: { userName: 'Again' }, status: 400 });
       expect(a.body.error?.params).toEqual({ count: expect.any(Number) });
@@ -237,7 +237,7 @@ describe('POST /player/gender', () => {
     apiTest(async (api) => {
       const p = await api.player();
       await api.ok('POST', 'player/gender', { token: p.token, body: { sex: 1 } });
-      expect((await playerRow(api, p)).sex).toBe(1);
+      expect((await playerRow(api, p))!.sex).toBe(1);
       await api.refused('POST', 'player/gender', 'player.sameGender', { token: p.token, body: { sex: 1 }, status: 400 });
     }));
 
@@ -284,7 +284,7 @@ describe('POST /player/furlough', () => {
       const s = await state(api, p);
       expect(s.furlough).toBe(true);
       expect(s.buffs.map((b) => b.id)).toContain(BuffId.HOLIDAY);
-      expect(s.castles[0].resource.gold).toBeLessThan(1_000_000);
+      expect(s.castles[0]!.resource.gold).toBeLessThan(1_000_000);
     }));
 
   it('refuses a number of days out of range, and validates the body', () =>
@@ -359,9 +359,9 @@ describe('POST /player/bookmarks', () => {
       const p = await api.player();
       await api.player('Marked');
       const { castles } = await api.ok<PublicPlayerInfo>('GET', 'players/Marked', { token: p.token });
-      const tileId = castles[0].fieldId;
+      const tileId = castles[0]!.fieldId;
       const list = await api.ok<CastleSign[]>('POST', 'player/bookmarks', { token: p.token, body: { tileId } });
-      expect(list).toEqual([expect.objectContaining({ tileId, name: 'Marked City', x: castles[0].x, y: castles[0].y })]);
+      expect(list).toEqual([expect.objectContaining({ tileId, name: 'Marked City', x: castles[0]!.x, y: castles[0]!.y })]);
       expect(await api.ok('GET', 'player/bookmarks', { token: p.token })).toEqual(list);
     }));
 
@@ -379,8 +379,8 @@ describe('DELETE /player/bookmarks/:tileId', () => {
       const p = await api.player();
       await api.player('Unmarked');
       const { castles } = await api.ok<PublicPlayerInfo>('GET', 'players/Unmarked', { token: p.token });
-      await api.ok('POST', 'player/bookmarks', { token: p.token, body: { tileId: castles[0].fieldId } });
-      expect(await api.ok('DELETE', `player/bookmarks/${castles[0].fieldId}`, { token: p.token })).toEqual([]);
+      await api.ok('POST', 'player/bookmarks', { token: p.token, body: { tileId: castles[0]!.fieldId } });
+      expect(await api.ok('DELETE', `player/bookmarks/${castles[0]!.fieldId}`, { token: p.token })).toEqual([]);
       await expectInvalid(api, p.token, [{ method: 'DELETE', url: 'player/bookmarks/abc' }]);
     }));
 });
@@ -421,7 +421,7 @@ describe('DELETE /player/army-presets/:presetId', () => {
     apiTest(async (api) => {
       const p = await api.player();
       const [preset] = await api.ok<ArmyPreset[]>('POST', 'player/army-presets', { token: p.token, body: { name: 'Gone', troops: { scouter: 1 } } });
-      expect(await api.ok('DELETE', `player/army-presets/${preset.id}`, { token: p.token })).toEqual([]);
+      expect(await api.ok('DELETE', `player/army-presets/${preset!.id}`, { token: p.token })).toEqual([]);
     }));
 });
 
@@ -480,7 +480,7 @@ describe('DELETE /player/flows/:flowId', () => {
   it('deletes a flow and answers the list', () =>
     apiTest(async (api) => {
       const p = await api.player();
-      const f = await mayorFlow(api, p);
+      const f = (await mayorFlow(api, p))!;
       expect(await api.ok('DELETE', `player/flows/${f.id}`, { token: p.token })).toEqual([]);
     }));
 });
@@ -489,18 +489,18 @@ describe('POST /player/flows/:flowId/run', () => {
   it('runs the flow now and answers what each city did', () =>
     apiTest(async (api) => {
       const p = await api.player();
-      const f = await mayorFlow(api, p);
+      const f = (await mayorFlow(api, p))!;
       const r = await api.ok<FlowRunReport>('POST', `player/flows/${f.id}/run`, { token: p.token, body: {} });
       expect(r).toMatchObject({ preview: false, flow: { id: f.id }, skippedCities: [] });
       expect(r.cities).toEqual([expect.objectContaining({ cityId: p.cityId, ok: true, error: null })]);
       const [after] = await api.ok<Flow[]>('GET', 'player/flows', { token: p.token });
-      expect(after.runs).toBe(1);
+      expect(after!.runs).toBe(1);
     }));
 
   it('previews without running', () =>
     apiTest(async (api) => {
       const p = await api.player();
-      const f = await mayorFlow(api, p);
+      const f = (await mayorFlow(api, p))!;
       const r = await api.ok<FlowRunReport>('POST', `player/flows/${f.id}/run`, { token: p.token, body: { preview: true } });
       expect(r).toMatchObject({ preview: true, flow: null, cities: [expect.objectContaining({ cityId: p.cityId })] });
       const [after] = await api.ok<Flow[]>('GET', 'player/flows', { token: p.token });
@@ -522,12 +522,12 @@ describe('POST /player/flows/:flowId/repeat', () => {
   it('switches repeat on and off', () =>
     apiTest(async (api) => {
       const p = await api.player();
-      const f = await mayorFlow(api, p);
+      const f = (await mayorFlow(api, p))!;
       const [on] = await api.ok<Flow[]>('POST', `player/flows/${f.id}/repeat`, { token: p.token, body: { repeat: true } });
       expect(on).toMatchObject({ id: f.id, repeat: true });
-      expect(on.runs).toBeGreaterThan(0);
+      expect(on!.runs).toBeGreaterThan(0);
       const [off] = await api.ok<Flow[]>('POST', `player/flows/${f.id}/repeat`, { token: p.token, body: { repeat: false } });
-      expect(off.repeat).toBe(false);
+      expect(off!.repeat).toBe(false);
     }));
 
   it('answers 404 for an unknown flow, and validates the body', () =>
@@ -542,7 +542,7 @@ describe('POST /player/flows/:flowId/stop', () => {
   it('stops a repeating flow', () =>
     apiTest(async (api) => {
       const p = await api.player();
-      const f = await mayorFlow(api, p);
+      const f = (await mayorFlow(api, p))!;
       await api.ok('POST', `player/flows/${f.id}/repeat`, { token: p.token, body: { repeat: true } });
       const [stopped] = await api.ok<Flow[]>('POST', `player/flows/${f.id}/stop`, { token: p.token });
       expect(stopped).toMatchObject({ id: f.id, repeat: false, status: 'idle' });

@@ -33,7 +33,7 @@ function LoggedIn() {
     <Routes>
       <Route path="/create" element={noLord ? <CreateLordPage /> : <Navigate to="/" replace />} />
       <Route path="/cities/:cityId/*" element={noLord ? <Navigate to="/create" replace /> : <GamePage />} />
-      <Route path="*" element={noLord ? <Navigate to="/create" replace /> : <Navigate to={`/cities/${player.data!.castles[0]?.id ?? 0}`} replace />} />
+      <Route path="*" element={noLord ? <Navigate to="/create" replace /> : <Navigate to={`/cities/${player.data?.castles[0]?.id ?? 0}`} replace />} />
     </Routes>
   );
 }

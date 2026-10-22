@@ -77,7 +77,7 @@ describe(`${dropCapturedTarget.name} (through combat)`, () => {
       const fa = await newFlow(g, a, { name: 'Take', actions: [{ type: 'attackTargets', presetId: preset, targets: { [a.cityId]: [npc] } }] });
       const fb = await newFlow(g, b, { name: 'Farm', actions: [attack({ [b.cityId]: [npc, 5] })] });
       await runFlowIn(g, a, fa.id);
-      await g.runDue(g.events('army')[0].dueAt);
+      await g.runDue(g.events('army')[0]!.dueAt);
 
       expect((await getTile(g, npc)).ownerPlayerId).toBe(a.id);
       expect((await flowOf(g, a, fa.id)).actions[0]).toMatchObject({ targets: { [a.cityId]: [] } });

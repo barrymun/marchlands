@@ -8,8 +8,7 @@ import {
   BALANCE,
   buildingLevel,
   BuildingType,
-  FORT_KEYS,
-  type FortKey,
+  fortKeyOf,
   PrestigeAction,
   prestigeOf,
   type TrainBatch,
@@ -108,7 +107,7 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
   while (queue[0] && queue[0].endTime > 0 && queue[0].endTime <= ctx.now) {
     const head = queue[0];
     const fort = positionId === WALLS_QUEUE;
-    const key = fort ? (FORT_KEYS[head.troopId as keyof typeof FORT_KEYS] as FortKey | undefined) : troopKey(head.troopId);
+    const key = fort ? fortKeyOf(head.troopId) : troopKey(head.troopId);
     if (key) {
       if (fort) b.city.forts = addForts(b.city.forts, { [key]: head.count });
       else b.city.troops = addTroops(b.city.troops, { [key]: head.count });

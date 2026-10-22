@@ -15,7 +15,7 @@ type Tile = { id: number; type: number; level: number; cityId: number | null; ow
 
 const where = async (api: TestApi, p: Lord) => {
   const [c] = await api.db.select({ tileId: cities.tileId }).from(cities).where(eq(cities.id, p.cityId));
-  return { tileId: c.tileId, x: c.tileId % BALANCE.mapSize, y: Math.floor(c.tileId / BALANCE.mapSize) };
+  return { tileId: c!.tileId, x: c!.tileId % BALANCE.mapSize, y: Math.floor(c!.tileId / BALANCE.mapSize) };
 };
 const area = (x: number, y: number, r: number) => ({ x1: String(x - r), y1: String(y - r), x2: String(x + r), y2: String(y + r) });
 
@@ -103,16 +103,16 @@ describe('GET /map/tiles/{tileId}', () => {
         .from(tiles)
         .where(and(between(tiles.id, tileId - 40, tileId + 40), isNull(tiles.cityId), isNull(tiles.ownerCityId), ne(tiles.type, TileType.NPC)))
         .limit(1);
-      await patchTile(api, free.id, { type: TileType.GRASS, level: 3 });
-      const at = tileXY(free.id);
+      await patchTile(api, free!.id, { type: TileType.GRASS, level: 3 });
+      const at = tileXY(free!.id);
       const found = await api.ok<Tile[]>('GET', 'map/search', {
         token: a.token,
         query: { x: String(at.x), y: String(at.y), radius: '1', type: String(TileType.GRASS) },
       });
-      const valley = found.find((t) => t.id === free.id);
+      const valley = found.find((t) => t.id === free!.id);
       expect(valley).toMatchObject({ type: TileType.GRASS, level: 3, cityId: null, ownerCityId: null });
-      expect(await api.ok('GET', `map/tiles/${free.id}`, { token: a.token })).toMatchObject({
-        id: free.id,
+      expect(await api.ok('GET', `map/tiles/${free!.id}`, { token: a.token })).toMatchObject({
+        id: free!.id,
         type: TileType.GRASS,
         level: 3,
         npc: false,
@@ -120,10 +120,10 @@ describe('GET /map/tiles/{tileId}', () => {
         upgradeCost: valleyUpgradeCost(3),
       });
       // at the top level there is nothing left to upgrade
-      await patchTile(api, free.id, { level: BALANCE.valleyUpgrade.maxLevel });
-      expect(await api.ok('GET', `map/tiles/${free.id}`, { token: a.token })).toMatchObject({ owner: null, upgradeCost: null });
-      await patchTile(api, free.id, { ownerCityId: b.cityId, ownerPlayerId: b.playerId });
-      expect(await api.ok('GET', `map/tiles/${free.id}`, { token: a.token })).toMatchObject({
+      await patchTile(api, free!.id, { level: BALANCE.valleyUpgrade.maxLevel });
+      expect(await api.ok('GET', `map/tiles/${free!.id}`, { token: a.token })).toMatchObject({ owner: null, upgradeCost: null });
+      await patchTile(api, free!.id, { ownerCityId: b.cityId, ownerPlayerId: b.playerId });
+      expect(await api.ok('GET', `map/tiles/${free!.id}`, { token: a.token })).toMatchObject({
         owner: { cityId: b.cityId, playerId: b.playerId, userName: b.name, cityName: `${b.name} City` },
         upgradeCost: null,
       });

@@ -62,7 +62,7 @@ const HERO_ATTRIBUTES = [
 ] as const satisfies readonly { key: AttributeKey; stat: GearStat; label: string; short: string; value: (h: HeroBean) => number; tone: string }[];
 
 /** The attribute entry for a field name ('power' | 'management' | 'stratagem'). */
-export const attributeOfStat = (stat: GearStat) => HERO_ATTRIBUTES.find((a) => a.stat === stat)!;
+export const attributeOfStat = (stat: GearStat) => HERO_ATTRIBUTES.find((a) => a.stat === stat) ?? HERO_ATTRIBUTES[0]; // there is one for each stat
 
 export type HeroAttributeValue = (typeof HERO_ATTRIBUTES)[number] & { v: number };
 

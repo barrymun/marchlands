@@ -55,20 +55,28 @@ async function expireBuff(ctx: Ctx, playerId: number, buffId: BuffId) {
   if (!activeBuff(p, buffId, ctx.now)) await pushPlayerInfo(ctx, p);
 }
 
+/** A column an event of this type is always scheduled with (ctx.schedule); missing means a bug, so the event fails. */
+function scheduledWith(ev: EventRow, value: number | null, what: string): number {
+  if (value == null) throw new Error(`timed event ${ev.id} (${ev.type}) has no ${what}`);
+  return value;
+}
+
 export async function dispatchEvent(ctx: Ctx, ev: EventRow): Promise<void> {
-  const p = ev.payload ?? {};
+  const p = ev.payload;
+  const playerId = () => scheduledWith(ev, ev.playerId, 'playerId');
+  const cityId = () => scheduledWith(ev, ev.cityId, 'cityId');
   switch (ev.type) {
     case 'building':
-      return completeBuilding(ctx, ev.cityId!, num(p.positionId));
+      return completeBuilding(ctx, cityId(), num(p.positionId));
     case 'research':
-      return completeResearch(ctx, ev.playerId!, num(p.techId));
+      return completeResearch(ctx, playerId(), num(p.techId));
     case 'train':
-      return completeTraining(ctx, ev.cityId!, num(p.positionId));
+      return completeTraining(ctx, cityId(), num(p.positionId));
     case 'army':
       await processArmy(ctx, num(p.armyId));
       return;
     case 'buff.expire':
-      return BUFF_IDS.includes(p.buffId as BuffId) ? expireBuff(ctx, ev.playerId!, p.buffId as BuffId) : undefined;
+      return BUFF_IDS.includes(p.buffId as BuffId) ? expireBuff(ctx, playerId(), p.buffId as BuffId) : undefined;
     case 'hero.buff':
       return expireHeroBuff(ctx, num(p.heroId), String(p.attr));
     case 'shipment':
@@ -76,15 +84,15 @@ export async function dispatchEvent(ctx: Ctx, ev: EventRow): Promise<void> {
     case 'flow.heal':
       return runScheduledHeal(
         ctx,
-        ev.playerId!,
-        ev.cityId!,
+        playerId(),
+        cityId(),
         p.payWith === 'honor' ? 'honor' : 'resources',
         Array.isArray(p.armyIds) ? p.armyIds.map(Number).filter(Number.isInteger) : [],
       );
     case 'flow.resume':
-      return resumeFlow(ctx, ev.playerId!, String(p.flowId));
+      return resumeFlow(ctx, playerId(), String(p.flowId));
     case 'flow.queue':
-      return runQueue(ctx, ev.playerId!);
+      return runQueue(ctx, playerId());
     default:
       throw new Error(`unknown timed event type ${ev.type}`);
   }

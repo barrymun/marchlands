@@ -56,7 +56,7 @@ function lastAttack(
   reports: readonly { title: { code: string }; targetPos: { code: string; params?: Record<string, unknown> } | null; eventTime: number }[],
 ): number | null {
   const hits = reports.filter(
-    (r) => ATTACKED.has(r.title.code) && r.targetPos?.code === 'world.position.city' && r.targetPos.params?.x === city.x && r.targetPos.params?.y === city.y,
+    (r) => ATTACKED.has(r.title.code) && r.targetPos?.code === 'world.position.city' && r.targetPos.params?.x === city.x && r.targetPos.params.y === city.y,
   );
   return hits.length ? Math.max(...hits.map((r) => r.eventTime)) : null;
 }

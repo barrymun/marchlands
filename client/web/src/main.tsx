@@ -19,7 +19,10 @@ const queryClient = new QueryClient({
 // the chosen locale's text first (a locale other than English is a separate file)
 await i18nReady;
 
-createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root');
+if (!root) throw new Error('index.html has no #root');
+
+createRoot(root).render(
   <StrictMode>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="marchlands-theme">
       <QueryClientProvider client={queryClient}>

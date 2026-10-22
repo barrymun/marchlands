@@ -3,7 +3,17 @@
 
 import { BALANCE, goldForCents, scaled } from '#/balance.ts';
 import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEYS, TroopType } from '#/constants.ts';
-import { buildingConfig, buildingMaxLevel, ITEMS, type Requirements, researchConfig, researchMaxLevel, troopConfig } from '#/data/index.ts';
+import {
+  buildingConfig,
+  type BuildingLevelConfig,
+  buildingMaxLevel,
+  ITEMS,
+  type Requirements,
+  researchConfig,
+  researchMaxLevel,
+  troopConfig,
+  type TroopConfig,
+} from '#/data/index.ts';
 import { buildingCount, buildingLevel, type MayorStats, researchLevel } from '#/economy.ts';
 import { GameError } from '#/errors.ts';
 import { itemGoldPrice } from '#/items.ts';
@@ -212,7 +222,14 @@ export function assertCanConstruct({ typeId, positionId, buildings, research, it
   }
 }
 
-export function assertCanUpgrade(b: BuildingState | undefined, buildings: BuildingState[], research: ResearchState, items: ItemCounts, maxConcurrent = 1) {
+/** Refuses an upgrade that can't start now; else the building and its next level's config. */
+export function assertCanUpgrade(
+  b: BuildingState | undefined,
+  buildings: BuildingState[],
+  research: ResearchState,
+  items: ItemCounts,
+  maxConcurrent = 1,
+): { building: BuildingState; next: BuildingLevelConfig } {
   if (!b) throw new GameError(msg('building.notFound'), -99, 404);
   if (b.status !== 0) {
     throw new GameError(msg('building.statusChanged'), -45);
@@ -224,6 +241,7 @@ export function assertCanUpgrade(b: BuildingState | undefined, buildings: Buildi
   if (!requirementsMet(checkRequirements(cfg.requires, buildings, research, items))) {
     throw new GameError(msg('building.requirementsNotMet'), -99);
   }
+  return { building: b, next: cfg };
 }
 
 export function assertCanResearch(techId: number, buildings: BuildingState[], research: ResearchState, items: ItemCounts) {
@@ -238,13 +256,22 @@ export function assertCanResearch(techId: number, buildings: BuildingState[], re
   }
 }
 
-export function assertCanTrain(troopId: number, count: number, buildings: BuildingState[], research: ResearchState, items: ItemCounts, fort: boolean) {
+/** Refuses training that can't start; else the troop's config. */
+export function assertCanTrain(
+  troopId: number,
+  count: number,
+  buildings: BuildingState[],
+  research: ResearchState,
+  items: ItemCounts,
+  fort: boolean,
+): TroopConfig {
   if (!Number.isInteger(count) || count < 1) throw new GameError(msg('common.invalidAmount'), -99);
   const cfg = troopConfig(troopId);
   if (!cfg || cfg.inside !== (fort ? 2 : 1)) throw new GameError(msg('common.invalidTroopType'), -99);
   if (!requirementsMet(checkRequirements(cfg.requires, buildings, research, items))) {
     throw new GameError(msg('building.troopRequirementsNotMet'), -99);
   }
+  return cfg;
 }
 
 /** Wall space used by fortifications (built and queued). */
@@ -430,7 +457,8 @@ export function healCost(troops: Partial<Record<string, number>>): Resources {
   let cost: Resources = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
   for (const [key, n] of Object.entries(troops)) {
     if (!n) continue;
-    const id = TROOP_ID_BY_KEY[key as keyof typeof TROOP_ID_BY_KEY];
+    // any key may come in (the troops are a client's or stored); only troop keys have an id
+    const id = (TROOP_ID_BY_KEY as Partial<Record<string, number>>)[key];
     if (!id) throw new GameError(msg('common.invalidTroopType'), -99);
     const c = scaleResources(trainCost(id, n), BALANCE.healCostShare);
     cost = { gold: cost.gold + c.gold, food: cost.food + c.food, wood: cost.wood + c.wood, stone: cost.stone + c.stone, iron: cost.iron + c.iron };

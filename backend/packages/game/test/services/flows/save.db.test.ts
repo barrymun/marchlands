@@ -64,8 +64,8 @@ describe(flows.saveFlow.name, () => {
       const list = await flows.saveFlow(g, p.id, { name: '  Morning  ', actions: [mayor, { type: 'trainTroops', troopId: TroopType.WARRIOR, amount: 'max' }] });
       expect(list).toHaveLength(1);
       expect(list[0]).toMatchObject({ name: 'Morning', cities: 'all', repeat: false, status: 'idle' });
-      expect(list[0].id).toMatch(/^[0-9a-z]+$/);
-      expect(list[0].actions).toEqual([mayor, { type: 'trainTroops', troopId: TroopType.WARRIOR, amount: 'max' }]);
+      expect(list[0]!.id).toMatch(/^[0-9a-z]+$/);
+      expect(list[0]!.actions).toEqual([mayor, { type: 'trainTroops', troopId: TroopType.WARRIOR, amount: 'max' }]);
     }));
 
   it('keeps only chosen cities that are the player’s own, once each', () =>
@@ -208,7 +208,7 @@ describe(flows.saveFlow.name, () => {
       for (let i = 0; i < 30; i++) await flows.saveFlow(g, p.id, { name: `F${i}`, actions: [mayor] });
       await expectRefused(flows.saveFlow(g, p.id, { name: 'One more', actions: [mayor] }), msg('flow.tooMany', { count: 30 }));
       const [first] = await flows.listFlows(g, p.id);
-      expect((await flows.saveFlow(g, p.id, { id: first.id, name: 'Edited', actions: [mayor] }))[0].name).toBe('Edited');
+      expect((await flows.saveFlow(g, p.id, { id: first!.id, name: 'Edited', actions: [mayor] }))[0]!.name).toBe('Edited');
     }));
 });
 

@@ -73,7 +73,7 @@ describe(game.name, () => {
       });
       await expect(refused).rejects.toBeInstanceOf(GameError);
       const [row] = await api.db.select({ banReason: accounts.banReason }).from(accounts).where(eq(accounts.id, p.accountId));
-      expect(row.banReason).toBe('');
+      expect(row!.banReason).toBe('');
     }));
 });
 

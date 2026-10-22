@@ -136,7 +136,7 @@ function makeApi(app: TestApi['app'], db: Db): TestApi {
       // a fresh token names the player (the API reads it from the token, or looks it up)
       const relog = await api.ok<Omit<Session, 'username'>>('POST', 'auth/login', { body: { username: s.username, password: 'test-password' } });
       const state = await api.ok<{ castles: { id: number }[] }>('GET', 'player', { token: relog.token });
-      return { ...relog, username: s.username, playerId: relog.playerId!, cityId: state.castles[0].id };
+      return { ...relog, username: s.username, playerId: relog.playerId!, cityId: state.castles[0]!.id };
     },
     game: (fn) => runGame(db, fn, { retries: 0 }),
   };

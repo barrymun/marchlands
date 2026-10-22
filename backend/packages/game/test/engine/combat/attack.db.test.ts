@@ -160,7 +160,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
         const { armyId } = await send(g, p, { targetTileId: target, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId });
         sent.push({ heroId, loyalty: (await getHero(g, heroId)).loyalty, armyId });
       }
-      await arrive(g, sent[0].armyId);
+      await arrive(g, sent[0]!.armyId);
       const heroes = [];
       for (const s of sent) heroes.push(await expectWipedHero(g, s.heroId, s.loyalty, p, q));
       const captured = heroes.filter((h) => h.status === HeroStatus.SEIZED);
@@ -186,7 +186,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
         const { armyId } = await send(g, p, { targetTileId: target, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId });
         sent.push({ heroId, loyalty: (await getHero(g, heroId)).loyalty, armyId });
       }
-      await arrive(g, sent[0].armyId);
+      await arrive(g, sent[0]!.armyId);
       for (const s of sent) expect((await expectWipedHero(g, s.heroId, s.loyalty, p, null)).status).toBe(HeroStatus.IDLE);
     }));
 
@@ -292,11 +292,11 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       const { p, q, go } = await battle(g, { lightCavalry: 5000 }, { militia: 10 });
       await setBuildings(g, q, [[-2, BuildingType.WALLS, 4]]);
       await training.train(g, q.id, q.cityId, FortType.TRAP, 100, training.WALLS_QUEUE);
-      await g.runDue(g.events('train')[0].dueAt);
+      await g.runDue(g.events('train')[0]!.dueAt);
       expect((await reloadCity(g, q.cityId)).forts).toEqual({ trap: 100 });
       const armyId = await go();
       await arrive(g, armyId);
-      const b = battleOf((await reportsOf(g, p.id))[0], 'city');
+      const b = battleOf((await reportsOf(g, p.id))[0]!, 'city');
       expect(b.defender.wallLevel).toBe(4);
       expect(b.defender.forts).toMatchObject({ before: { trap: 100 } });
       expect((await reloadCity(g, q.cityId)).forts).toEqual(b.defender.forts!.after);

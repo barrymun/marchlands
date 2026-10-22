@@ -55,7 +55,8 @@ export function ItemsPanel({ city }: { city: CityBean }) {
     .filter((e) => !ownedOnly || e.owned > 0)
     .filter((e) => !q || nameOf(e).toLowerCase().includes(q) || translateMessage(e.info.description).toLowerCase().includes(q))
     // alphabetical only, so buying or using an item never moves it
-    .sort((a, b) => nameOf(a).localeCompare(nameOf(b)));
+    .sort((a, b) => nameOf(a).localeCompare(nameOf(b)))
+    .map((e) => ({ ...e, gold: goldPriceOf(e), medalLevel: medalLevelOf(e.ids) }));
   const ownedTotal = entries.filter((e) => e.owned > 0).length;
   const buffs = player.data?.buffs ?? [];
 
@@ -134,24 +135,25 @@ export function ItemsPanel({ city }: { city: CityBean }) {
                 <ActiveBonus ids={e.ids} buffs={player.data?.buffs ?? []} />
               </div>
               <div className="flex shrink-0 gap-1">
-                {goldPriceOf(e) && (
+                {e.gold && (
                   <Button
                     size="xs"
                     variant={e.owned === 0 ? 'default' : 'outline'}
-                    disabled={city.resource.gold < goldPriceOf(e)!.price || buyGold.isPending}
+                    disabled={city.resource.gold < e.gold.price || buyGold.isPending}
                     title={
-                      city.resource.gold < goldPriceOf(e)!.price
-                        ? t('notEnoughGold', { city: city.name, price: fmtExact(goldPriceOf(e)!.price) })
+                      city.resource.gold < e.gold.price
+                        ? t('notEnoughGold', { city: city.name, price: fmtExact(e.gold.price) })
                         : t('buyWithGold', { city: city.name })
                     }
                     onClick={() =>
+                      e.gold &&
                       buyGold.mutate(
-                        { path: { cityId: city.id }, body: { itemId: goldPriceOf(e)!.id, amount: 1 } },
+                        { path: { cityId: city.id }, body: { itemId: e.gold.id, amount: 1 } },
                         { onSuccess: () => toast.success(t('bought', { item: nameOf(e) })) },
                       )
                     }
                   >
-                    {t('buyFor', { price: fmt(goldPriceOf(e)!.price) })}
+                    {t('buyFor', { price: fmt(e.gold.price) })}
                   </Button>
                 )}
                 {e.info.use === 'direct' && (
@@ -164,7 +166,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
             <div className={cn('grid gap-1.5', e.owned === 0 && 'opacity-60')}>
               <p className="text-sm text-muted-foreground">{translateMessage(e.info.description)}</p>
               {e.info.howTo && <p className="text-xs text-muted-foreground italic">{translateMessage(e.info.howTo)}</p>}
-              {medalLevelOf(e.ids) != null && <MedalSourcesInfo level={medalLevelOf(e.ids)!} />}
+              {e.medalLevel != null && <MedalSourcesInfo level={e.medalLevel} />}
             </div>
           </div>
         ))}

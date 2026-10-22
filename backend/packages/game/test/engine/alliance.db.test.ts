@@ -18,8 +18,8 @@ describe(refreshAllianceStats.name, () => {
       await g.tx.update(players).set({ prestige: 50, honor: 10 }).where(eq(players.id, m.id));
 
       await refreshAllianceStats(g);
-      const s = await allianceRow(g, small.id);
-      const b = await allianceRow(g, big.id);
+      const s = (await allianceRow(g, small.id))!;
+      const b = (await allianceRow(g, big.id))!;
       expect(s).toMatchObject({ prestige: 100, honor: 1, memberCount: 1, cityCount: 1 });
       expect(b).toMatchObject({ prestige: 120, honor: 20, memberCount: 2, cityCount: 2 });
       expect(b.prestigeRank).toBeLessThan(s.prestigeRank);

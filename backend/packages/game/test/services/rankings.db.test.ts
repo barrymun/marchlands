@@ -201,7 +201,7 @@ describe(rankings.heroRanking.name, () => {
       const captured = await addHero(g, a);
       await g.tx.update(heroTable).set({ capturedByPlayerId: b.id }).where(eq(heroTable.id, captured));
       const [hero] = await g.tx.select().from(heroTable).where(eq(heroTable.id, kept));
-      expect((await rankings.heroRanking(g, 1, 1, 10)).beans.map((x) => x.name)).toEqual([hero.name]);
+      expect((await rankings.heroRanking(g, 1, 1, 10)).beans.map((x) => x.name)).toEqual([hero!.name]);
     }));
 
   it('searches hero names', () =>
@@ -209,9 +209,9 @@ describe(rankings.heroRanking.name, () => {
       const a = await createTestPlayer(g);
       for (let i = 0; i < 3; i++) await addHero(g, a);
       const [first] = await g.tx.select().from(heroTable);
-      const found = await rankings.heroRanking(g, 1, 1, 10, first.name.toUpperCase());
-      expect(found.beans.map((x) => x.name)).toContain(first.name);
-      expect(found.beans.every((x) => x.name.toLowerCase().includes(first.name.toLowerCase()))).toBe(true);
+      const found = await rankings.heroRanking(g, 1, 1, 10, first!.name.toUpperCase());
+      expect(found.beans.map((x) => x.name)).toContain(first!.name);
+      expect(found.beans.every((x) => x.name.toLowerCase().includes(first!.name.toLowerCase()))).toBe(true);
       expect((await rankings.heroRanking(g, 1, 1, 10, 'zzzz-no-hero')).totalPage).toBe(0);
       await expectRefused(rankings.heroRanking(g, 1, 1, 51), msg('common.invalidData'));
     }));
@@ -249,7 +249,7 @@ describe(rankings.castleRanking.name, () => {
         ['Alda City', 1],
         ['Cato City', 0],
       ]);
-      expect(r.beans[2].grade).toBe('Level 0');
+      expect(r.beans[2]!.grade).toBe('Level 0');
     }));
 
   it('searches city names and pages', () =>

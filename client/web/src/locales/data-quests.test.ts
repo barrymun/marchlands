@@ -46,12 +46,12 @@ describe('quest descriptions and targets', () => {
   it('names the buildings, troops and numbers from the quest data', () => {
     const q = (id: number) => QUEST_CATALOGUE.find((x) => x.id === id)!;
     expect(translateMessage(q(1000).description)).toBe('Upgrade your Town Hall to level 2.');
-    expect(translateMessage(questTargetMessage(q(1000).targets[0]))).toBe('Town Hall level 2');
+    expect(translateMessage(questTargetMessage(q(1000).targets[0]!))).toBe('Town Hall level 2');
     expect(translateMessage(q(1014).description)).toBe('Own 5 Farm fields.');
-    expect(translateMessage(questTargetMessage(q(1014).targets[0]))).toBe('5 × Farm at level 1 or higher');
-    expect(translateMessage(questTargetMessage(q(1025).targets[0]))).toBe('100 × Warrior');
-    expect(translateMessage(questTargetMessage(q(1026).targets[0]))).toBe('100 × Trap');
-    expect(translateMessage(questTargetMessage(q(1030).targets[0]))).toBe('10,000 prestige');
+    expect(translateMessage(questTargetMessage(q(1014).targets[0]!))).toBe('5 × Farm at level 1 or higher');
+    expect(translateMessage(questTargetMessage(q(1025).targets[0]!))).toBe('100 × Warrior');
+    expect(translateMessage(questTargetMessage(q(1026).targets[0]!))).toBe('100 × Trap');
+    expect(translateMessage(questTargetMessage(q(1030).targets[0]!))).toBe('10,000 prestige');
     expect(translateMessage(questTargetMessage({ kind: 'cities', count: 1 }))).toBe('Own 1 city');
   });
 });

@@ -17,7 +17,7 @@ const files = import.meta.glob<Tree>('./*/*.json', { eager: true, import: 'defau
 const byLocale: Record<string, Record<string, Tree>> = {};
 for (const [file, json] of Object.entries(files)) {
   const [, locale, ns] = file.match(/^\.\/([^/]+)\/([^/]+)\.json$/)!;
-  (byLocale[locale] ??= {})[ns] = json;
+  (byLocale[locale!] ??= {})[ns!] = json;
 }
 
 /** Every leaf as 'a.b.c' -> text. */
@@ -38,7 +38,7 @@ const tags = (text: string) => [...new Set(text.match(/<\/?\s*[\w-]+\s*\/?>/g) ?
 /** The plural forms a language uses (en: one, other; ja: other). */
 const pluralForms = (locale: string) => new Intl.PluralRules(locale).resolvedOptions().pluralCategories;
 
-const source = byLocale[DEFAULT_LOCALE];
+const source = byLocale[DEFAULT_LOCALE]!;
 const namespaces = Object.keys(source).sort();
 const full = LOCALES.filter((l) => l !== DEFAULT_LOCALE && !OVERRIDE_LOCALES.includes(l));
 
@@ -58,18 +58,18 @@ describe('locale files', () => {
 
   it('have no empty text', () => {
     for (const locale of LOCALES)
-      for (const ns of namespaces) for (const [key, text] of flatten(byLocale[locale][ns])) expect(text.trim(), `${locale} ${ns}:${key}`).not.toBe('');
+      for (const ns of namespaces) for (const [key, text] of flatten(byLocale[locale]![ns]!)) expect(text.trim(), `${locale} ${ns}:${key}`).not.toBe('');
   });
 
   it('say "player", never "lord" or "lady", in English (AGENTS.md, Ground rules)', () => {
     for (const locale of [DEFAULT_LOCALE, ...OVERRIDE_LOCALES])
-      for (const [ns, tree] of Object.entries(byLocale[locale]))
+      for (const [ns, tree] of Object.entries(byLocale[locale]!))
         for (const [key, text] of flatten(tree)) expect(text, `${locale} ${ns}:${key}`).not.toMatch(/\b(?:lords?|lady|ladies)\b/i);
   });
 
   it('en-GB gives every plural key all of its English forms', () => {
     for (const ns of namespaces) {
-      const keys = [...flatten(source[ns]).keys()];
+      const keys = [...flatten(source[ns]!).keys()];
       for (const key of keys.filter((k) => PLURAL.test(k)))
         for (const form of pluralForms(DEFAULT_LOCALE)) expect(keys, `${ns}:${base(key)}_${form}`).toContain(`${base(key)}_${form}`);
     }
@@ -79,8 +79,8 @@ describe('locale files', () => {
     describe(locale, () => {
       it('has every en-GB key, and no others', () => {
         for (const ns of namespaces) {
-          const want = [...new Set([...flatten(source[ns]).keys()].map(base))].sort();
-          const have = [...new Set([...flatten(byLocale[locale][ns]).keys()].map(base))].sort();
+          const want = [...new Set([...flatten(source[ns]!).keys()].map(base))].sort();
+          const have = [...new Set([...flatten(byLocale[locale]![ns]!).keys()].map(base))].sort();
           expect(have, ns).toEqual(want);
         }
       });
@@ -88,8 +88,8 @@ describe('locale files', () => {
       it(`writes plural keys in exactly the forms ${locale} uses`, () => {
         const forms = pluralForms(locale);
         for (const ns of namespaces) {
-          const keys = [...flatten(byLocale[locale][ns]).keys()];
-          const plural = new Set([...flatten(source[ns]).keys()].filter((k) => PLURAL.test(k)).map(base));
+          const keys = [...flatten(byLocale[locale]![ns]!).keys()];
+          const plural = new Set([...flatten(source[ns]!).keys()].filter((k) => PLURAL.test(k)).map(base));
           for (const b of plural) {
             const got = keys.filter((k) => base(k) === b && PLURAL.test(k)).map((k) => k.match(PLURAL)![1]);
             expect(got.sort(), `${ns}:${b}`).toEqual([...forms].sort());
@@ -99,8 +99,8 @@ describe('locale files', () => {
 
       it('keeps the same {{placeholders}} and <tags> as en-GB', () => {
         for (const ns of namespaces) {
-          const src = flatten(source[ns]);
-          for (const [key, text] of flatten(byLocale[locale][ns])) {
+          const src = flatten(source[ns]!);
+          for (const [key, text] of flatten(byLocale[locale]![ns]!)) {
             const en = src.get(key) ?? src.get(`${base(key)}_other`)!;
             expect(placeholders(text), `${ns}:${key}`).toEqual(placeholders(en));
             expect(tags(text), `${ns}:${key}`).toEqual(tags(en));
@@ -114,8 +114,8 @@ describe('locale files', () => {
     describe(locale, () => {
       it('only overrides keys that exist in en-GB, keeping their {{placeholders}} and <tags>', () => {
         for (const ns of namespaces) {
-          const src = flatten(source[ns]);
-          for (const [key, text] of flatten(byLocale[locale][ns])) {
+          const src = flatten(source[ns]!);
+          for (const [key, text] of flatten(byLocale[locale]![ns]!)) {
             expect(src.has(key), `${ns}:${key}`).toBe(true);
             expect(placeholders(text), `${ns}:${key}`).toEqual(placeholders(src.get(key) ?? ''));
             expect(tags(text), `${ns}:${key}`).toEqual(tags(src.get(key) ?? ''));
@@ -149,7 +149,7 @@ describe('locale files', () => {
     it('have no text for codes the server no longer sends', () => {
       const codes = new Set<string>(MSG_CODES);
       for (const area of areas)
-        for (const key of flatten(source[`msg-${area}`]).keys()) expect(codes.has(`${area}.${base(key)}`), `msg-${area}:${key}`).toBe(true);
+        for (const key of flatten(source[`msg-${area}`]!).keys()) expect(codes.has(`${area}.${base(key)}`), `msg-${area}:${key}`).toBe(true);
     });
   });
 });

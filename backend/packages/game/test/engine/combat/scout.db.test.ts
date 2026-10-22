@@ -61,7 +61,7 @@ describe(`${processArmy.name}: scouting a barbarian city`, () => {
       const tile = await getTile(g, npc.id);
       expect(tile).toMatchObject({ troops: fresh.troops, forts: fresh.forts, updatedAt: g.now });
       expect(tile.state).toMatchObject({ ...fresh.state, heroSeed: expect.any(Number) });
-      const guard = guardOf(tile.state!.heroSeed, npc.level * 10);
+      const guard = guardOf(tile.state!.heroSeed!, npc.level * 10);
 
       const report = await lastReport(g, p.id, 'report.title.scoutReport');
       expect(report).toMatchObject({ isAttack: true, armyType: Mission.SCOUT });
@@ -104,7 +104,7 @@ describe(`${processArmy.name}: scouting a valley`, () => {
       await arrive(g, bean.armyId);
       const tile = await getTile(g, valley.id);
       expect(tile.state).toMatchObject({ regenAt: g.now, heroSeed: expect.any(Number) });
-      const guard = guardOf(tile.state!.heroSeed, 20);
+      const guard = guardOf(tile.state!.heroSeed!, 20);
       expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'valley')).toEqual({
         target: 'valley',
         type: valley.type,

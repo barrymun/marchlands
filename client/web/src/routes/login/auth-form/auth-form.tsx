@@ -26,13 +26,16 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     const form = new FormData(e.currentTarget);
     const username = formText(form, 'username');
     const password = formText(form, 'password');
+    // the button waits for the sign-up's proof, so a sign-up always has it here
+    const proof = signUp.proof;
+    if (mode === 'register' && !proof) return;
     setBusy(true);
     setError(null);
     try {
       const { data: session } =
-        mode === 'login'
+        mode === 'login' || !proof
           ? await postAuthLogin({ body: { username, password }, throwOnError: true })
-          : await postAuthRegister({ body: { username, password, email: formText(form, 'email'), proof: signUp.proof! }, throwOnError: true });
+          : await postAuthRegister({ body: { username, password, email: formText(form, 'email'), proof }, throwOnError: true });
       qc.clear();
       tokenStore.set(session.token);
       void navigate(session.hasPlayer ? '/' : '/create', { replace: true });

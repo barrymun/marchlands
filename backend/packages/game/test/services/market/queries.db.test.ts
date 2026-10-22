@@ -182,11 +182,11 @@ describe(market.history.name, () => {
         const buy2 = merchantSells(sell.ref, 10);
         const [p1, p2, p3] = [buy1.gold / 100_000, sell.gold / 200_000, buy2.gold / 10];
         const [c] = (await market.history(g, Res.WOOD)).candles;
-        expect(c.open).toBeCloseTo(p1, 12);
-        expect(c.close).toBeCloseTo(p3, 12);
-        expect(c.high).toBeCloseTo(Math.max(p1, p2, p3), 12);
-        expect(c.low).toBeCloseTo(Math.min(p1, p2, p3), 12);
-        expect(c.volume).toBe(300_010);
+        expect(c!.open).toBeCloseTo(p1, 12);
+        expect(c!.close).toBeCloseTo(p3, 12);
+        expect(c!.high).toBeCloseTo(Math.max(p1, p2, p3), 12);
+        expect(c!.low).toBeCloseTo(Math.min(p1, p2, p3), 12);
+        expect(c!.volume).toBe(300_010);
       }),
     ));
 

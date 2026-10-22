@@ -1,6 +1,6 @@
 # Checked lookups: `noUncheckedIndexedAccess`
 
-**Status:** being built: phases 1 to 4 done (2026-10-22), all source code is clean; tests are next. TODO.md item: *Turn on `noUncheckedIndexedAccess`* (Code quality and security, phase 3 of the October 2026 tooling review).
+**Status:** built (2026-10-22), every phase below: the flag is on in both tsconfigs, `!` is banned in source code, and `no-unnecessary-condition` is on. TODO.md: *Lookups that can miss are typed as such* (Done, 2026-10-22); phase 6 is the item *Ban `!` in source code, then turn on `no-unnecessary-condition`* (Code quality and security).
 
 **The aim:** a lookup that can miss is typed as one that can miss. Today `BALANCE.fortSpace[id]`, `rows[0]`, `troops[i]` and `m[1]` are typed as always there, so a missing entry only shows up at run time, as `undefined` flowing into the game's maths or a `TypeError`. With TypeScript's `noUncheckedIndexedAccess`, reading through an index (an array position, a record by key) gives `T | undefined`, and the code has to say what happens when it misses.
 
@@ -40,6 +40,8 @@ Each lookup the flag reports is one of these. The fix depends on whether it can 
 
 ## Decided
 
+- **`no-unnecessary-condition` on, with stored-data reads typed honestly** (2026-10-22): a fallback the types say is dead is either removed (the value is always there) or its type is fixed (it can be missing); a disable with the reason only where the rule can't follow the code.
+
 - **Tests are fixed too, with `!` allowed in them, and keep one tsconfig** (2026-10-21). A lookup that misses in a test already fails the test, so `rows[0]!.x` costs nothing there, while a second tsconfig for tests would stop ESLint's project service from finding their project (it would have to list both projects, which is slower). Every file then follows the same flag.
 - **Fix in chunks with the flag off, then turn it on** (2026-10-21). Each chunk (a package, or a few files) is its own change; the flag goes on in a tsconfig only when that whole project reports nothing. In between, a check keeps finished folders finished: `tools/dev/check-index-access.mjs`, run by `npm run typecheck`, runs `tsc --noUncheckedIndexedAccess` and fails on any error in a folder listed as done (`DONE` in the script). This avoids splitting the tsconfigs, and it goes once both flags are on.
 - **Order: core, then the backend's source, the client's source, and tests** (2026-10-21). Core first because both projects compile it; within core, the battle simulator first.
@@ -67,8 +69,18 @@ Each lookup the flag reports is one of these. The fix depends on whether it can 
    - Troop and fortification counts by key fall back to 0: the generated client types those records with plain string keys (`TroopBean` is `Record<TroopKey, number>` in the contracts).
    - The check now runs the client project too: about 8 s for both.
    - The client's source has 23 `!` of its own, for phase 6.
-5. **Tests,** mostly as `rows[0]!.x` (Decided). Then the flag goes on in `tsconfig.base.json` and `client/web/tsconfig.json`, the ratchet script goes, and AGENTS.md says how lookups are written (the patterns above, shortened).
-6. **Lint:** remove the `!` already in source code (about 60 in the backend, 23 in the client; core has none) and turn on `@typescript-eslint/no-non-null-assertion` in `src`; then `no-unnecessary-condition`: re-measure, fix what's real, turn it on in `eslint.config.js`.
+5. **Tests, then the flag on** (done 2026-10-22).
+   - About 1,200 errors. A codemod (the TypeScript compiler API, run until nothing changed) added `!` where a possibly missing value is made rather than at each use: on the initializer of `const x = list[i]`, else on the expression. About 25 more were fixed by hand (`const [{ n }] = …` rows, the JWT's parts, regex groups).
+   - At the source first: `lords(api, n)` and `valleysNear(g, cityId, n)` return `Tuple<T, N>` (`backend/packages/game/test/support/tuple.ts`), so `const [a, b] = await lords(api, 2)` needs no `!`; that alone took about 560 off.
+   - `noUncheckedIndexedAccess` is on in `tsconfig.base.json` and `client/web/tsconfig.json`; `tools/dev/check-index-access.mjs` is gone; AGENTS.md (Formatting and linting, Lookups can miss) has the patterns.
+6. **Lint.**
+   - **`!` banned in source code** (done 2026-10-22). The 87 `!` outside tests (backend, client, tools) are gone, and `@typescript-eslint/no-non-null-assertion` is on everywhere but tests and shadcn/ui. Most were a value a guard had already checked: the guards now return what they checked (`requireRank` the alliance id, `assertCanUpgrade` the building and its next level, `assertCanTrain` the troop's config, `claimsOf(req)` the token's claims, `scheduledWith` an event's player or city). Filter-then-`!` became `flatMap`; a value that could really be missing became a check that throws an internal error (a gone army or home city, an event scheduled without its player) or refuses (a hero not in its city). The art script's palette lookups go through `indexOf`.
+   - **`no-unnecessary-condition` on** (done 2026-10-22, in the type-aware files, tests included). The 52 findings (178 before the flag):
+     - Casts that hid a miss became honest lookups: `fortKeyOf` and `troopKey` instead of `FORT_KEYS[id as keyof typeof FORT_KEYS]` (the dismiss dialog, training, `destroyForts`), `TROOP_ID_BY_KEY` read as a partial record in `healCost`, and `syncHeroBuffs` narrowing `b.id` instead of casting it.
+     - Fallbacks on values that are always there went: `notNull` columns (hero and player `buffs`, an event's `payload`, a flow's `cities`, `banReason`), contract fields the API always sends, and string parameters the API validates.
+     - Where a missing value is meant to be handled, the type now says so: `workRates` and `storePercent` are `Partial<ResourceSet>` (schema and core's city type), since a work rate a city never set counts as 100% (a dto test specifies it; it used to fake the partial object with a cast). Removing those fallbacks broke that test, which is how this was found.
+     - `sanitizeTroops` takes `null | undefined` as well, so its fallback is honest.
+     - Four lines where the rule can't follow the code carry a disable with the reason: the worker's `claimed` (set inside a callback) and `game()` / `anon()` in `http.ts` (a `void` result sent as `null`).
 
 ## Open questions
 

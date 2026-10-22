@@ -74,7 +74,7 @@ export function SideView({
           </TableBody>
         </Table>
       )}
-      {side.injured && Object.values(side.injured).some((n) => (n ?? 0) > 0) && (
+      {side.injured && Object.values(side.injured).some((n) => n > 0) && (
         <div className="text-xs">
           <span className="text-muted-foreground">{t('side.injured')}</span>
           <TroopList troops={side.injured} /> <span className="text-muted-foreground">{t('side.healHint')}</span>

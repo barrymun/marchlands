@@ -41,8 +41,14 @@ export function extensionFor(slot: Slot, active: Buff | undefined, counts: Map<s
   if (slot.extend === false) return null;
   const ids = slotItems(slot);
   const order = active?.itemId && ids.includes(active.itemId) ? [active.itemId, ...ids.filter((i) => i !== active.itemId)] : ids;
-  const owned = order.find((i) => (counts.get(i) ?? 0) > 0);
-  if (owned) return { kind: 'use', itemId: owned, owned: counts.get(owned)! };
-  const buy = order.find((i) => itemGoldPrice(i) != null);
-  return buy ? { kind: 'buy', itemId: buy, price: itemGoldPrice(buy)! } : null;
+  // the first one held, else the first one for sale
+  for (const itemId of order) {
+    const owned = counts.get(itemId) ?? 0;
+    if (owned > 0) return { kind: 'use', itemId, owned };
+  }
+  for (const itemId of order) {
+    const price = itemGoldPrice(itemId);
+    if (price != null) return { kind: 'buy', itemId, price };
+  }
+  return null;
 }

@@ -32,8 +32,8 @@ describe(`${flows.runFlow.name} (preview)`, () => {
       expect(r).toMatchObject({ preview: true, flow: null, skippedCities: [] });
       expect(r.cities).toHaveLength(1);
       expect(r.cities[0]).toMatchObject({ cityId: p.cityId, cityName: before.name, ok: true, error: null });
-      expect(codes(r.cities[0].steps)).toEqual(['flow.step.mayor', 'flow.step.training', 'flow.step.moreActions']);
-      expect(r.cities[0].steps[2]).toEqual({
+      expect(codes(r.cities[0]!.steps)).toEqual(['flow.step.mayor', 'flow.step.training', 'flow.step.moreActions']);
+      expect(r.cities[0]!.steps[2]).toEqual({
         action: msg('flow.action.wait', { time: dur(5 * 60_000) }),
         ok: true,
         detail: msg('flow.step.moreActions', { count: 1 }),
@@ -64,7 +64,7 @@ describe(`${flows.runFlow.name} (preview)`, () => {
       await withHero(g, p);
       const f = await newFlow(g, p, { name: 'Mayor', actions: [mayor, waitTime] });
       const r = await runFlowIn(g, p, f.id, undefined, true);
-      expect(r.cities[0].steps.at(-1)?.detail).toEqual(msg('flow.step.runEnds'));
+      expect(r.cities[0]!.steps.at(-1)?.detail).toEqual(msg('flow.step.runEnds'));
     }));
 
   it('shows a city that fails with its error, the failed step and no wait note', () =>
@@ -74,7 +74,7 @@ describe(`${flows.runFlow.name} (preview)`, () => {
       const f = await newFlow(g, p, { name: 'Bad', actions: [mayor, train5, waitTime, mayor] });
       const [city] = (await runFlowIn(g, p, f.id, undefined, true)).cities;
       expect(city).toMatchObject({ ok: false, error: noBarracks });
-      expect(city.steps.map((s) => [s.detail.code, s.ok])).toEqual([
+      expect(city!.steps.map((s) => [s.detail.code, s.ok])).toEqual([
         ['flow.step.mayor', true],
         ['flow.cannotTrain', false],
       ]);
@@ -140,7 +140,7 @@ describe(flows.runFlow.name, () => {
       expect(r.flow).toEqual(await flowOf(g, p, f.id));
       expect(r.flow).toMatchObject({ status: 'idle', runs: 1, nextAction: 0, queuedAt: T0, lastPreview: null, stopReason: null });
       expect(r.flow?.lastRun).toEqual({ run: 1, startedAt: T0, finishedAt: T0, cities: r.cities, skippedCities: [] });
-      expect(codes(r.cities[0].steps)).toEqual(['flow.step.mayor', 'flow.step.training']);
+      expect(codes(r.cities[0]!.steps)).toEqual(['flow.step.mayor', 'flow.step.training']);
 
       expect((await heroesOfCity(g, p.cityId)).find((h) => h.id === heroId)?.status).toBe(HeroStatus.MAYOR);
       expect(g.events('train')).toHaveLength(1);
@@ -156,7 +156,7 @@ describe(flows.runFlow.name, () => {
       g.advance(1000);
       const r = await runFlowIn(g, p, f.id);
       expect(r.flow).toMatchObject({ runs: 2, lastRun: { run: 2, startedAt: T0 + 1000 } });
-      expect(codes(r.cities[0].steps)).toEqual(['flow.step.alreadyMayor']);
+      expect(codes(r.cities[0]!.steps)).toEqual(['flow.step.alreadyMayor']);
     }));
 
   it('pauses at a timed wait and carries on when it ends', () =>
@@ -167,7 +167,7 @@ describe(flows.runFlow.name, () => {
       const r = await runFlowIn(g, p, f.id);
       expect(r.flow).toMatchObject({ status: 'waiting', nextAction: 2, waitUntil: T0 + 300_000 });
       const wait = { action: msg('flow.action.wait', { time: dur(300_000) }), ok: true, detail: msg('flow.step.waiting', { time: dur(300_000) }) };
-      expect(r.cities[0].steps[1]).toEqual(wait);
+      expect(r.cities[0]!.steps[1]).toEqual(wait);
       expect(r.flow?.lastRun?.finishedAt).toBeNull();
       expect(g.events('flow.resume')).toMatchObject([{ dueAt: T0 + 300_000, playerId: p.id, payload: { flowId: f.id } }]);
 
@@ -175,7 +175,7 @@ describe(flows.runFlow.name, () => {
       const done = await flowOf(g, p, f.id);
       expect(done).toMatchObject({ status: 'idle', nextAction: 0, waitUntil: 0, runs: 1 });
       expect(done.lastRun?.finishedAt).toBe(T0 + 300_000);
-      expect(codes(done.lastRun!.cities[0].steps)).toEqual(['flow.step.mayor', 'flow.step.waiting', 'flow.step.alreadyMayor']);
+      expect(codes(done.lastRun!.cities[0]!.steps)).toEqual(['flow.step.mayor', 'flow.step.waiting', 'flow.step.alreadyMayor']);
     }));
 
   it('carries straight on past an armies-home wait when no army is out', () =>
@@ -185,7 +185,7 @@ describe(flows.runFlow.name, () => {
       const f = await newFlow(g, p, { name: 'Waits', actions: [mayor, { type: 'wait', until: 'armiesHome' }, mayor] });
       const r = await runFlowIn(g, p, f.id);
       expect(r.flow?.status).toBe('idle');
-      expect(codes(r.cities[0].steps)).toEqual(['flow.step.mayor', 'flow.step.noArmiesOut', 'flow.step.alreadyMayor']);
+      expect(codes(r.cities[0]!.steps)).toEqual(['flow.step.mayor', 'flow.step.noArmiesOut', 'flow.step.alreadyMayor']);
       expect(g.events('flow.resume')).toEqual([]);
     }));
 
@@ -201,10 +201,10 @@ describe(flows.runFlow.name, () => {
       });
       const r = await runFlowIn(g, p, f.id);
       const [army] = g.events('army');
-      const march = army.dueAt - T0;
+      const march = army!.dueAt - T0;
       // an army still marching out needs about as long again to come back
       expect(r.flow).toMatchObject({ status: 'waiting', nextAction: 2, waitUntil: T0 + 2 * march });
-      expect(r.cities[0].steps[1].detail).toEqual(msg('flow.step.waiting', { time: dur(Math.ceil((2 * march) / 60_000) * 60_000) }));
+      expect(r.cities[0]!.steps[1]!.detail).toEqual(msg('flow.step.waiting', { time: dur(Math.ceil((2 * march) / 60_000) * 60_000) }));
       expect(g.events('flow.resume')).toMatchObject([{ dueAt: T0 + 2 * march }]);
 
       await g.runDue(T0 + 2 * march + 10_000);
@@ -286,7 +286,7 @@ describe(flows.runFlow.name, () => {
       await withHero(g, p);
       const [valley] = await valleysNear(g, p.cityId);
       await armies.sendArmy(g, p.id, p.cityId, { targetTileId: valley, mission: Mission.ATTACK, troops: { militia: 100 }, heroId });
-      const march = g.events('army')[0].dueAt - T0;
+      const march = g.events('army')[0]!.dueAt - T0;
       const f = await newFlow(g, p, { name: 'Mayor', actions: [mayor] });
 
       const r = await runFlowIn(g, p, f.id);
@@ -296,6 +296,6 @@ describe(flows.runFlow.name, () => {
 
       await g.runDue(T0 + 2 * march + 10_000);
       expect(await flowOf(g, p, f.id)).toMatchObject({ status: 'idle', heldSince: 0, lastRun: { finishedAt: expect.any(Number) } });
-      expect(codes((await flowOf(g, p, f.id)).lastRun!.cities[0].steps)).toEqual(['flow.step.mayor']);
+      expect(codes((await flowOf(g, p, f.id)).lastRun!.cities[0]!.steps)).toEqual(['flow.step.mayor']);
     }));
 });

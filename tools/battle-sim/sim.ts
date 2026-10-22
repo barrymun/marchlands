@@ -67,7 +67,7 @@ const millions = (n: number) => `${(n / 1e6).toFixed(2)}M`;
 const count = (n: number) => Math.round(n).toLocaleString('en-US');
 const units = (t: Partial<Record<TroopKey, number>>) =>
   TROOP_KEY_LIST.filter((k) => (t[k] ?? 0) >= 0.5)
-    .map((k) => `${k} ${count(t[k]!)}`)
+    .map((k) => `${k} ${count(t[k] ?? 0)}`)
     .join(', ') || 'none';
 
 function parseTroops(spec: string): TroopCounts {

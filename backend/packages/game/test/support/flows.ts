@@ -11,6 +11,7 @@ import { armies, flows, player as players } from '#/index.ts';
 import { getCity, saveCity } from '#/repo.ts';
 import { addHero, setBuildings, setCityStats, type TestPlayer } from '#test/support/factories.ts';
 import type { TestGame } from '#test/support/game.ts';
+import type { Tuple } from '#test/support/tuple.ts';
 
 export type FlowInput = { id?: string | null; name: string; actions: unknown[]; cities?: 'all' | number[] };
 
@@ -74,7 +75,7 @@ export async function armyPreset(g: TestGame, p: TestPlayer, name: string, troop
 }
 
 /** Valleys no one holds close to the city (not flat land, which cannot be attacked), nearest first. */
-export async function valleysNear(g: TestGame, cityId: number, count = 1) {
+export async function valleysNear<N extends number = 1>(g: TestGame, cityId: number, count = 1 as N): Promise<Tuple<number, N>> {
   const c = await getCity(g, cityId);
   const { x, y } = tileXY(c.tileId);
   const near: number[] = [];
@@ -96,7 +97,8 @@ export async function valleysNear(g: TestGame, cityId: number, count = 1) {
   const dist = (id: number) => Math.abs(tileXY(id).x - x) + Math.abs(tileXY(id).y - y);
   const ids = rows.map((r) => r.id).sort((a, b) => dist(a) - dist(b));
   if (ids.length < count) throw new Error(`valleysNear: only ${ids.length} valleys near city ${cityId}`);
-  return ids.slice(0, count);
+  // checked above: there are `count` of them
+  return ids.slice(0, count) as Tuple<number, N>;
 }
 
 /** A city ready to farm: Rally Spot, militia and a hero. */

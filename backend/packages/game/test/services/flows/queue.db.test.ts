@@ -129,7 +129,7 @@ describe(flows.stopFlow.name, () => {
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE)).toEqual([]);
       expect(g.pushes(PushCmd.FLOW_UPDATE).at(-1)?.data).toEqual({ flowId: f.id, status: 'idle' });
       // the mayor it appointed stays
-      expect((await flowOf(g, p, f.id)).lastRun?.cities[0].steps[0].detail.code).toBe('flow.step.mayor');
+      expect((await flowOf(g, p, f.id)).lastRun?.cities[0]!.steps[0]!.detail.code).toBe('flow.step.mayor');
     }));
 
   it('takes a repeating flow out of the queue', () =>

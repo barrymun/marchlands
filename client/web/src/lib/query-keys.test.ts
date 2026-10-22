@@ -33,7 +33,7 @@ describe(allMarketQueries.name, () => {
     ]);
   });
   it('matches the books of every resource (no parameters on the per-resource keys)', () => {
-    const [[book]] = allMarketQueries();
+    const [book] = allMarketQueries()[0]!;
     expect(book).not.toHaveProperty('path');
   });
 });

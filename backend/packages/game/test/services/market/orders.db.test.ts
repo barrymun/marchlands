@@ -188,8 +188,8 @@ describe(market.placeOrder.name, () => {
             { playerIds: [b.id], cmd: PushCmd.TRADES_UPDATE, data: { resType: Res.WOOD, amount: 5000, price: base } },
           ]);
           const [report] = (await reports.listReports(g, b.id, ReportType.TRADE, 1, 10)).reports;
-          expect(report.title).toEqual(msg('report.title.tradeCompleted'));
-          expect((await reports.readReport(g, b.id, report.id)).content).toEqual({
+          expect(report!.title).toEqual(msg('report.title.tradeCompleted'));
+          expect((await reports.readReport(g, b.id, report!.id)).content).toEqual({
             kind: 'trade',
             trade: { side: 'sell', resource: 'wood', amount: 5000, price: base, gold: paid },
           });

@@ -250,7 +250,7 @@ export function IsoGrid({
         </span>
       )}
       {tiles
-        .filter((tile) => (tile.kind === 'slot' || tile.kind === 'gate') && tile.pos != null)
+        .filter((tile): tile is typeof tile & { pos: number } => (tile.kind === 'slot' || tile.kind === 'gate') && tile.pos != null)
         .sort((a, b) => depthOf(a.col, a.row) - depthOf(b.col, b.row))
         .map((tile) => {
           const p = vp.at(tile.col, tile.row);
@@ -266,11 +266,11 @@ export function IsoGrid({
                 width: (TILE_W / 2) * span * zoom,
                 height: (TILE_H / 2) * span * zoom,
               }}
-              onFocus={() => setHover(tile.pos!)}
+              onFocus={() => setHover(tile.pos)}
               onBlur={() => setHover(null)}
               onClick={(e) => {
                 e.stopPropagation();
-                onSelect(tile.pos!);
+                onSelect(tile.pos);
               }}
             />
           );

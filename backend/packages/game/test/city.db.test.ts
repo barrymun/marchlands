@@ -152,7 +152,7 @@ describe(settle.name, () => {
       const p = await createTestPlayer(g);
       await addHero(g, p);
       const b0 = await openOwnCity(g, p.id, p.cityId);
-      const salary = b0.heroes[0].level * BALANCE.heroSalaryPerLevel;
+      const salary = b0.heroes[0]!.level * BALANCE.heroSalaryPerLevel;
       g.advance(HOUR);
       expect((await openOwnCity(g, p.id, p.cityId)).city.gold).toBeCloseTo(START + BASE_TAX - salary, 6);
     }));
@@ -226,7 +226,7 @@ describe(settleAndReport.name, () => {
         },
       ]);
       const [row] = await g.tx.select().from(reportRows).where(eq(reportRows.playerId, p.id));
-      expect(row.startPos).toEqual(msg('world.position.city', { name: b.city.name, x, y }));
+      expect(row!.startPos).toEqual(msg('world.position.city', { name: b.city.name, x, y }));
     }));
 
   it('files nothing while the troops are fed', () =>
@@ -273,7 +273,7 @@ describe(openOwnCity.name, () => {
         g.advance(HOUR);
         const b = await openOwnCity(g, p.id, p.cityId);
         const [d] = await desertions(g, p);
-        expect(d.troops.archer).toBe(100 - b.city.troops.archer!);
+        expect(d!.troops.archer).toBe(100 - b.city.troops.archer!);
       }));
   });
 });
@@ -373,7 +373,7 @@ describe(viewOwnCity.name, () => {
         expect(left).toBeLessThan(100);
         expect(await reloadCity(g, p.cityId)).toMatchObject({ resourcesAt: g.now, troops: { archer: left } });
         const [d] = await desertions(g, p);
-        expect(d.troops).toEqual({ archer: 100 - left });
+        expect(d!.troops).toEqual({ archer: 100 - left });
       }));
 
     it("only views another player's city, even with deserters", () =>

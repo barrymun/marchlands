@@ -374,7 +374,7 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
       body: { kind: 'trade', trade: { side: buy ? 'sell' : 'buy', resource: res, amount: f.qty, price: other.price, gold } },
     });
   }
-  const hit = plan.fills.filter((f) => f.other).map((f) => f.other!.id);
+  const hit = plan.fills.flatMap((f) => (f.other ? [f.other.id] : []));
   if (hit.length) await ctx.tx.execute(sql`delete from market_orders where filled >= amount and id = any(${pgArray(hit)}::int[])`);
 
   if (sum.merchantFilled > 0) {

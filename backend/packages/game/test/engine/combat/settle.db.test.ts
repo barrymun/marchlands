@@ -34,9 +34,9 @@ describe(`${processArmy.name}: settlers`, () => {
       const [, city] = await citiesOf(g, p.id);
       const name = `${p.name.slice(0, 12)} 2`;
       expect(city).toMatchObject({ name, playerId: p.id, tileId: flat.id, troops: { carriage: 10, lightCavalry: 5 }, ...goods });
-      expect(await getTile(g, flat.id)).toMatchObject({ type: TileType.CASTLE, cityId: city.id, ownerPlayerId: p.id, ownerCityId: null });
-      expect(await getHero(g, heroId)).toMatchObject({ cityId: city.id, status: HeroStatus.MAYOR });
-      expect(g.pushes(PushCmd.CASTLE_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { castleBean: expect.objectContaining({ id: city.id }) } });
+      expect(await getTile(g, flat.id)).toMatchObject({ type: TileType.CASTLE, cityId: city!.id, ownerPlayerId: p.id, ownerCityId: null });
+      expect(await getHero(g, heroId)).toMatchObject({ cityId: city!.id, status: HeroStatus.MAYOR });
+      expect(g.pushes(PushCmd.CASTLE_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { castleBean: expect.objectContaining({ id: city!.id }) } });
 
       const report = await lastReport(g, p.id, 'report.title.newCityFounded');
       expect(report).toMatchObject({

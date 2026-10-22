@@ -40,7 +40,7 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
   const qc = useQueryClient();
   const cities = usePlayer().data?.castles ?? [];
   // starts from the flow's saved cities; changing them here applies to this run only
-  const [targets, setTargets] = useState<Targets>(flow.cities ?? 'all');
+  const [targets, setTargets] = useState<Targets>(flow.cities);
   const own = new Set(cities.map((c) => c.id));
   // all cities: those with a hero (the server skips the others)
   const picked = targets === 'all' ? cities.filter(hasHero).map((c) => c.id) : targets.filter((id) => own.has(id));
@@ -139,7 +139,7 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
             </Button>
           )}
         </div>
-        {flow.lastPreview ? <LastPreview flow={flow} /> : flow.lastRun && <LastRun flow={flow} />}
+        {flow.lastPreview ? <LastPreview preview={flow.lastPreview} /> : flow.lastRun && <LastRun run={flow.lastRun} />}
       </CardContent>
     </Card>
   );

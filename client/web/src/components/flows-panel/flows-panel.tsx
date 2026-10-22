@@ -63,7 +63,7 @@ export function FlowsPanel({ city }: { city: CityBean }) {
   });
 
   const startNew = () => setEditing({ id: null, name: '', actions: [keyed({ type: 'setMayor', stat: 'power' })], cities: 'all' });
-  const startEdit = (f: Flow) => setEditing({ id: f.id, name: f.name, actions: f.actions.map(keyed), cities: f.cities ?? 'all' });
+  const startEdit = (f: Flow) => setEditing({ id: f.id, name: f.name, actions: f.actions.map(keyed), cities: f.cities });
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
@@ -151,7 +151,7 @@ export function FlowsPanel({ city }: { city: CityBean }) {
                 </ol>
                 <StatusLine flow={selected} />
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {t('detail.runsOn')} <CitiesSummary targets={selected.cities ?? 'all'} />
+                  {t('detail.runsOn')} <CitiesSummary targets={selected.cities} />
                 </p>
                 {selected.actions.some((a) => a.type === 'attackTargets' && !a.presetId) && (
                   <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">{t('detail.noArmy')}</p>

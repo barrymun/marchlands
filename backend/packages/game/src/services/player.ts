@@ -58,10 +58,10 @@ export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePla
   const castleName = cleanName(input.castleName, 1, 20, msg('common.cityName'));
   assertClean(name);
   assertClean(castleName);
-  const flag = String(input.flag ?? '').trim();
+  const flag = input.flag.trim();
   if (flag.length < 1 || flag.length > 5) throw new GameError(msg('common.invalidData'), -87);
   if (![0, 1].includes(input.sex)) throw new GameError(msg('common.invalidData'), -87);
-  const faceUrl = String(input.faceUrl ?? '').slice(0, 100);
+  const faceUrl = input.faceUrl.slice(0, 100);
   if (!Number.isInteger(input.zone) || input.zone < -1 || input.zone > 15) throw new GameError(msg('common.invalidData'), -87);
   const taken = await findPlayerByName(ctx, name);
   if (taken && taken.id !== existing?.id) throw new GameError(msg('player.nameTaken'), -88, 409);
@@ -179,7 +179,7 @@ export async function changeFace(ctx: Ctx, playerId: number, faceUrl: string, se
 /** city.modifyFlag; (marchlands) free (orig: a National Flag each time). */
 export async function changeFlag(ctx: Ctx, playerId: number, flag: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  const f = String(flag ?? '').trim();
+  const f = flag.trim();
   if (f.length < 1 || f.length > 5) throw new GameError(msg('player.invalidFlag'), -87);
   p.flag = f;
   await savePlayer(ctx, p);
@@ -425,14 +425,16 @@ export async function saveArmyPreset(ctx: Ctx, playerId: number, name: string, t
   const existing = list.find((x) => x.name.toLowerCase() === clean.toLowerCase());
   if (!existing && list.length >= MAX_PRESETS) throw new GameError(msg('player.preset.tooMany', { count: MAX_PRESETS }), -99);
   const preset = { id: existing?.id ?? `${ctx.now.toString(36)}${Math.floor(ctx.rng.next() * 1e6).toString(36)}`, name: clean, troops };
-  p.misc = { ...p.misc, armyPresets: existing ? list.map((x) => (x.id === existing.id ? preset : x)) : [...list, preset] };
+  const armyPresets = existing ? list.map((x) => (x.id === existing.id ? preset : x)) : [...list, preset];
+  p.misc = { ...p.misc, armyPresets };
   await savePlayer(ctx, p);
-  return p.misc.armyPresets!;
+  return armyPresets;
 }
 
 export async function deleteArmyPreset(ctx: Ctx, playerId: number, id: string) {
   const p = await getPlayer(ctx, playerId, { lock: true });
-  p.misc = { ...p.misc, armyPresets: (p.misc.armyPresets ?? []).filter((x) => x.id !== id) };
+  const armyPresets = (p.misc.armyPresets ?? []).filter((x) => x.id !== id);
+  p.misc = { ...p.misc, armyPresets };
   await savePlayer(ctx, p);
-  return p.misc.armyPresets!;
+  return armyPresets;
 }

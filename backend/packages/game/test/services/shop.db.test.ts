@@ -185,7 +185,7 @@ describe(shop.useItem.name, () => {
         const p = await createTestPlayer(g);
         await giveItems(g, p, { [box]: 1 });
         const r = await shop.useItem(g, p.id, box, null);
-        const medals = BALANCE.items.medalBoxes[box].map(medalId);
+        const medals = BALANCE.items.medalBoxes[box]!.map(medalId);
         expect(Object.keys(r.granted!.items!).sort()).toEqual(medals.sort());
         const player = await reloadPlayer(g, p);
         expect(player.items[box]).toBeUndefined();
@@ -259,8 +259,8 @@ describe(shop.useItem.name, () => {
       expect(r.hero).toMatchObject({ level: q.level });
       const [hero] = await heroesOfCity(g, p.cityId);
       expect(hero).toMatchObject({ id: r.hero!.id, playerId: p.id, inTavern: false, level: q.level, upgradeExp: upgradeExpFor(q.level), remainPoint: q.level });
-      expect(hero.loyalty).toBe(BALANCE.heroMaxLoyalty);
-      for (const v of [hero.basePower, hero.baseManagement, hero.baseStratagem]) expect(v).toBeGreaterThanOrEqual(q.minStat);
+      expect(hero!.loyalty).toBe(BALANCE.heroMaxLoyalty);
+      for (const v of [hero!.basePower, hero!.baseManagement, hero!.baseStratagem]) expect(v).toBeGreaterThanOrEqual(q.minStat);
       expect(g.pushes(PushCmd.HERO_UPDATE).at(-1)?.data).toMatchObject({ castleId: p.cityId, updateType: 0 });
       expect(await count(g, p, ItemId.HERO_PACKAGE)).toBe(1);
 

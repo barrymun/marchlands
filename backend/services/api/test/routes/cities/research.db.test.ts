@@ -11,7 +11,7 @@ import { apiTest, type TestApi } from '#test/support/api.ts';
 import { expectInvalid, itGuards, type Lord, lords, RICH, setBuildings, setResources } from '#test/support/city-fixtures.ts';
 
 const playerRow = async (api: TestApi, id: number) => (await api.db.select().from(players).where(eq(players.id, id)))[0];
-const gold = async (api: TestApi, cityId: number) => (await api.db.select({ gold: cities.gold }).from(cities).where(eq(cities.id, cityId)))[0].gold;
+const gold = async (api: TestApi, cityId: number) => (await api.db.select({ gold: cities.gold }).from(cities).where(eq(cities.id, cityId)))[0]!.gold;
 
 /** An Academy, the Farm and Sawmill Agriculture and Lumbering need, and the resources to research. */
 async function academy(api: TestApi, p: Lord) {
@@ -56,7 +56,7 @@ describe('POST /cities/{cityId}/research', () => {
       const r = await start(api, a, TechType.AGRICULTURE);
       expect(r).toMatchObject({ typeId: TechType.AGRICULTURE, level: 0, castleId: a.cityId, startTime: expect.any(Number) });
       expect(r.endTime).toBeGreaterThan(Date.now());
-      expect((await playerRow(api, a.playerId)).research[TechType.AGRICULTURE]).toMatchObject({ level: 0, cityId: a.cityId, endTime: r.endTime });
+      expect((await playerRow(api, a.playerId))!.research[TechType.AGRICULTURE]).toMatchObject({ level: 0, cityId: a.cityId, endTime: r.endTime });
     }));
 
   it('refuses a malformed body, a city without an Academy and a research already running', () =>
@@ -92,11 +92,11 @@ describe('DELETE /cities/{cityId}/research', () => {
       await start(api, a, TechType.AGRICULTURE);
       await start(api, a, TechType.LUMBERING);
       expect(await api.ok('DELETE', `cities/${a.cityId}/research`, { token: a.token, query: { techId: String(TechType.LUMBERING) } })).toBeNull();
-      const research = (await playerRow(api, a.playerId)).research;
+      const research = (await playerRow(api, a.playerId))!.research;
       expect(research[TechType.LUMBERING]).toEqual({ level: 0 });
-      expect(research[TechType.AGRICULTURE].endTime).toBeGreaterThan(0);
+      expect(research[TechType.AGRICULTURE]!.endTime).toBeGreaterThan(0);
       expect(await api.ok('DELETE', `cities/${a.cityId}/research`, { token: a.token })).toBeNull();
-      expect((await playerRow(api, a.playerId)).research[TechType.AGRICULTURE]).toEqual({ level: 0 });
+      expect((await playerRow(api, a.playerId))!.research[TechType.AGRICULTURE]).toEqual({ level: 0 });
     }));
 
   it('refuses a malformed techId and a city with nothing to cancel', () =>

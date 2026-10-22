@@ -52,7 +52,7 @@ async function newAccount(g: TestGame): Promise<number> {
     .insert(accounts)
     .values({ username: `player_test_${n}_${g.now}`, email: `player_test_${n}_${g.now}@example.test`, passwordHash: 'x', createdAt: g.now })
     .returning();
-  return a.id;
+  return a!.id;
 }
 
 const input = (name: string, extra: Partial<CreatePlayerBody> = {}): CreatePlayerBody => ({
@@ -110,16 +110,16 @@ describe(player.createPlayer.name, () => {
       expect(p.faceUrl).toHaveLength(100);
 
       const [city] = await g.tx.select().from(cities).where(eq(cities.playerId, p.id));
-      expect(city).toMatchObject(initialCity(p.id, city.tileId, 'Alice City', g.now));
-      expect(stateOf(city.tileId)).toBe(3);
-      expect(await getTile(g, city.tileId)).toMatchObject({ type: TileType.CASTLE, cityId: city.id, ownerPlayerId: p.id, ownerCityId: null });
+      expect(city).toMatchObject(initialCity(p.id, city!.tileId, 'Alice City', g.now));
+      expect(stateOf(city!.tileId)).toBe(3);
+      expect(await getTile(g, city!.tileId)).toMatchObject({ type: TileType.CASTLE, cityId: city!.id, ownerPlayerId: p.id, ownerCityId: null });
     }));
 
   it('tidies the spaces in names', () =>
     game(async (g) => {
       const p = await player.createPlayer(g, await newAccount(g), input('  Ann   Lee ', { castleName: ' Lee   Keep ' }));
       expect(p.name).toBe('Ann Lee');
-      expect((await player.playerState(g, p.id)).castles[0].name).toBe('Lee Keep');
+      expect((await player.playerState(g, p.id)).castles[0]!.name).toBe('Lee Keep');
     }));
 
   it('rejects bad names', () =>
@@ -166,7 +166,7 @@ describe(player.createPlayer.name, () => {
       expect(p).toMatchObject({ id: a.id, name: a.name, flag: 'NEW', sex: 1, beginner: true, status: 0 });
       const state = await player.playerState(g, a.id);
       expect(state.castles).toHaveLength(1);
-      expect(state.castles[0].name).toBe(`${a.name} City`);
+      expect(state.castles[0]!.name).toBe(`${a.name} City`);
     }));
 });
 
@@ -229,7 +229,7 @@ describe(player.playerState.name, () => {
       await player.changeGender(g, a.id, 1);
       await player.saveTutorialStep(g, a.id, 7);
       const [npc] = await freeTiles(g, TileType.NPC);
-      const armyId = await sendScout(g, a, npc.id);
+      const armyId = await sendScout(g, a, npc!.id);
       const s = await player.playerState(g, a.id);
       expect(s).toMatchObject({
         furlough: true,
@@ -368,7 +368,7 @@ describe(player.promoteTitle.name, () => {
   it('promotes with enough prestige, consuming the medals but not the prestige', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      const next = TITLES[1];
+      const next = TITLES[1]!;
       await setPrestige(g, a, next.prestige);
       await giveItems(g, a, { ...next.medals, [ItemId.ROSE_MEDAL]: 1 });
       expect(await player.promoteTitle(g, a.id)).toEqual({ titleId: 1 });
@@ -383,11 +383,11 @@ describe(player.promoteTitle.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       await admin.setPlayerFlags(g, a.name, { title: 2 });
-      const next = TITLES[3];
+      const next = TITLES[3]!;
       await setPrestige(g, a, next.prestige - 1);
       await expectRefused(player.promoteTitle(g, a.id), msg('player.title.prestigeRequired', { prestige: next.prestige }));
       await setPrestige(g, a, next.prestige);
-      const [[medal, n]] = Object.entries(next.medals);
+      const [medal, n] = Object.entries(next.medals)[0]!;
       await giveItems(g, a, { [medal]: n - 1 });
       await expectRefused(player.promoteTitle(g, a.id), msg('player.title.notEnoughMedals'));
       expect((await reloadPlayer(g, a)).items[medal]).toBe(n - 1);
@@ -463,7 +463,7 @@ describe(player.startFurlough.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const [npc] = await freeTiles(g, TileType.NPC);
-      await sendScout(g, a, npc.id);
+      await sendScout(g, a, npc!.id);
       await expectRefused(player.startFurlough(g, a.id, 1, a.cityId), msg('player.holiday.troopsOut'));
     }));
 
@@ -592,18 +592,18 @@ describe(player.restartPlayer.name, () => {
       const tileId = (await getCity(g, a.cityId)).tileId;
       const heroId = await addHero(g, a);
       const [npc] = await freeTiles(g, TileType.NPC);
-      await sendScout(g, a, npc.id);
+      await sendScout(g, a, npc!.id);
       await giveItems(g, a, { [ItemId.CROSS_MEDAL]: 2 });
       await admin.setTechnology(g, a.name, 1, 3);
       await setPrestige(g, a, 5000);
       await admin.setPlayerFlags(g, a.name, { beginner: false, title: 2 });
-      await player.addCastleSign(g, a.id, npc.id);
+      await player.addCastleSign(g, a.id, npc!.id);
       await sendSystemMail(g, a.id, 'Hello', 'x');
       await createReport(g, { playerId: a.id, title: msg('report.title.scoutReport'), body: { kind: 'text', text: msg('report.oldFormat') } });
       await g.tx.insert(timedEvents).values({ type: 'research', dueAt: g.now + HOUR, playerId: a.id, payload: {}, createdAt: g.now });
       // a valley held by the city
       const [valley] = await freeTiles(g, TileType.FOREST);
-      await g.tx.update(tiles).set({ ownerCityId: a.cityId, ownerPlayerId: a.id }).where(eq(tiles.id, valley.id));
+      await g.tx.update(tiles).set({ ownerCityId: a.cityId, ownerPlayerId: a.id }).where(eq(tiles.id, valley!.id));
 
       g.advance(HOUR);
       await player.restartPlayer(g, a.id);
@@ -623,7 +623,7 @@ describe(player.restartPlayer.name, () => {
       });
       expect(await player.playerState(g, a.id)).toMatchObject({ castles: [], newMailCount: 0, newReportCount: 0, selfArmys: [] });
       expect(await getTile(g, tileId)).toMatchObject({ type: TileType.FLAT, cityId: null, ownerPlayerId: null });
-      expect(await getTile(g, valley.id)).toMatchObject({ ownerCityId: null, ownerPlayerId: null });
+      expect(await getTile(g, valley!.id)).toMatchObject({ ownerCityId: null, ownerPlayerId: null });
       expect(await g.tx.select().from(heroes).where(eq(heroes.id, heroId))).toEqual([]);
       expect(await g.tx.select().from(armyRows).where(eq(armyRows.playerId, a.id))).toEqual([]);
       expect(await g.tx.select().from(mails).where(eq(mails.playerId, a.id))).toEqual([]);
@@ -642,7 +642,7 @@ describe(player.restartPlayer.name, () => {
       g.advance(1000);
       await player.restartPlayer(g, b.id);
       const [back] = await g.tx.select().from(armyRows).where(eq(armyRows.id, armyId));
-      const march = sent.reachTime - sent.startTime;
+      const march = sent!.reachTime - sent!.startTime;
       expect(back).toMatchObject({ direction: ArmyDirection.BACKWARD, startTime: g.now, reachTime: g.now + march, restTime: 0 });
       expect(g.events('army').find((e) => e.refKey === `army:${armyId}`)).toMatchObject({ dueAt: g.now + march, playerId: a.id, payload: { armyId } });
     }));
@@ -681,10 +681,10 @@ describe(player.addCastleSign.name, () => {
       const cityTile = (await getCity(g, b.cityId)).tileId;
       const [npc] = await freeTiles(g, TileType.NPC);
       await player.addCastleSign(g, a.id, cityTile);
-      const list = await player.addCastleSign(g, a.id, npc.id);
+      const list = await player.addCastleSign(g, a.id, npc!.id);
       expect(list).toEqual([
         { tileId: cityTile, type: TileType.CASTLE, name: `${b.name} City`, ...tileXY(cityTile) },
-        { tileId: npc.id, type: TileType.NPC, ...tileXY(npc.id) },
+        { tileId: npc!.id, type: TileType.NPC, ...tileXY(npc!.id) },
       ]);
       expect((await reloadPlayer(g, a)).castleSigns).toEqual(list);
     }));
@@ -693,8 +693,8 @@ describe(player.addCastleSign.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const [npc] = await freeTiles(g, TileType.NPC);
-      await player.addCastleSign(g, a.id, npc.id);
-      expect(await player.addCastleSign(g, a.id, npc.id)).toHaveLength(1);
+      await player.addCastleSign(g, a.id, npc!.id);
+      expect(await player.addCastleSign(g, a.id, npc!.id)).toHaveLength(1);
     }));
 
   it('rejects a tile with no city on it, or off the map', () =>
@@ -702,7 +702,7 @@ describe(player.addCastleSign.name, () => {
       const a = await createTestPlayer(g);
       const [flat] = await freeTiles(g, TileType.FLAT);
       const [forest] = await freeTiles(g, TileType.FOREST);
-      for (const id of [flat.id, forest.id, BALANCE.mapSize * BALANCE.mapSize, -1])
+      for (const id of [flat!.id, forest!.id, BALANCE.mapSize * BALANCE.mapSize, -1])
         await expectRefused(player.addCastleSign(g, a.id, id), msg('common.invalidCoordinates'));
     }));
 
@@ -711,9 +711,9 @@ describe(player.addCastleSign.name, () => {
       const a = await createTestPlayer(g);
       const npcs = await freeTiles(g, TileType.NPC, 101);
       for (const t of npcs.slice(0, 100)) await player.addCastleSign(g, a.id, t.id);
-      await expectRefused(player.addCastleSign(g, a.id, npcs[100].id), msg('player.bookmark.tooMany', { count: 100 }));
+      await expectRefused(player.addCastleSign(g, a.id, npcs[100]!.id), msg('player.bookmark.tooMany', { count: 100 }));
       // one already kept is still fine
-      expect(await player.addCastleSign(g, a.id, npcs[0].id)).toHaveLength(100);
+      expect(await player.addCastleSign(g, a.id, npcs[0]!.id)).toHaveLength(100);
     }));
 });
 
@@ -722,11 +722,11 @@ describe(player.removeCastleSign.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const [n1, n2] = await freeTiles(g, TileType.NPC, 2);
-      await player.addCastleSign(g, a.id, n1.id);
-      await player.addCastleSign(g, a.id, n2.id);
-      expect((await player.removeCastleSign(g, a.id, n1.id)).map((s) => s.tileId)).toEqual([n2.id]);
-      expect((await player.removeCastleSign(g, a.id, 12345)).map((s) => s.tileId)).toEqual([n2.id]);
-      expect((await reloadPlayer(g, a)).castleSigns.map((s) => s.tileId)).toEqual([n2.id]);
+      await player.addCastleSign(g, a.id, n1!.id);
+      await player.addCastleSign(g, a.id, n2!.id);
+      expect((await player.removeCastleSign(g, a.id, n1!.id)).map((s) => s.tileId)).toEqual([n2!.id]);
+      expect((await player.removeCastleSign(g, a.id, 12345)).map((s) => s.tileId)).toEqual([n2!.id]);
+      expect((await reloadPlayer(g, a)).castleSigns.map((s) => s.tileId)).toEqual([n2!.id]);
     }));
 });
 
@@ -757,7 +757,7 @@ describe(player.saveArmyPreset.name, () => {
       const [raid] = await player.saveArmyPreset(g, a.id, 'Raid', { archer: 100 });
       await player.saveArmyPreset(g, a.id, 'Scout', { scouter: 1 });
       const list = await player.saveArmyPreset(g, a.id, 'RAID', { pikemen: 50 });
-      expect(list).toEqual([{ id: raid.id, name: 'RAID', troops: { pikemen: 50 } }, expect.objectContaining({ name: 'Scout' })]);
+      expect(list).toEqual([{ id: raid!.id, name: 'RAID', troops: { pikemen: 50 } }, expect.objectContaining({ name: 'Scout' })]);
     }));
 
   it('rejects a bad name, bad counts and an empty army', () =>
@@ -792,7 +792,7 @@ describe(player.deleteArmyPreset.name, () => {
       const [raid] = await player.saveArmyPreset(g, a.id, 'Raid', { archer: 100 });
       await player.saveArmyPreset(g, a.id, 'Scout', { scouter: 1 });
       expect((await player.deleteArmyPreset(g, a.id, 'nope')).map((x) => x.name)).toEqual(['Raid', 'Scout']);
-      expect((await player.deleteArmyPreset(g, a.id, raid.id)).map((x) => x.name)).toEqual(['Scout']);
+      expect((await player.deleteArmyPreset(g, a.id, raid!.id)).map((x) => x.name)).toEqual(['Scout']);
       expect((await player.armyPresets(g, a.id)).map((x) => x.name)).toEqual(['Scout']);
     }));
 });

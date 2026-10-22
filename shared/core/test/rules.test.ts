@@ -274,9 +274,9 @@ describe('heroes & world', () => {
     const b = generateMap('x', 100);
     expect(Buffer.from(a).equals(Buffer.from(b))).toBe(true);
     const counts: Record<number, number> = {};
-    for (let i = 0; i < a.length; i += 2) counts[a[i]] = (counts[a[i]] ?? 0) + 1;
-    expect(counts[10] / 10_000).toBeGreaterThan(0.3);
-    expect(counts[12] / 10_000).toBeGreaterThan(0.05);
+    for (let i = 0; i < a.length; i += 2) counts[a[i]!] = (counts[a[i]!] ?? 0) + 1;
+    expect(counts[10]! / 10_000).toBeGreaterThan(0.3);
+    expect(counts[12]! / 10_000).toBeGreaterThan(0.05);
   });
   it('states are a 4x4 grid', () => {
     expect(stateOf(0)).toBe(0);
@@ -285,7 +285,7 @@ describe('heroes & world', () => {
   });
   it('valley garrisons grow with level', () => {
     const rng = seededRng('valley');
-    const total = (lvl: number) => Object.values(valleyGarrison(lvl, rng)).reduce((s, n) => s + (n ?? 0), 0);
+    const total = (lvl: number) => Object.values(valleyGarrison(lvl, rng)).reduce((s, n) => s + n, 0);
     expect(total(8)).toBeGreaterThan(total(1));
   });
 });
@@ -499,7 +499,7 @@ describe('hero attribute boosts', () => {
     h.power = 161;
     expect(syncHeroBuffs(h)).toBe(true);
     expect(h.powerBuffAdded).toBe(41);
-    expect(h.buffs[0].param).toBe(41);
+    expect(h.buffs[0]!.param).toBe(41);
     expect(h.managementBuffAdded).toBe(0);
   });
 });

@@ -67,16 +67,17 @@ function requirementsView(b: CityBundle, typeId: number, level: number) {
 /** castle.getAvailableBuildingListInside / Outside / getAvailableBuildingBean (walls). */
 export async function availableBuildings(ctx: Ctx, playerId: number, cityId: number, area: 'inside' | 'outside' | 'walls') {
   const b = await ownView(ctx, playerId, cityId);
-  const types = [...new Set(BUILDINGS.filter((x) => x.level === 1).map((x) => x.typeId))].filter((t) => {
-    const cfg = buildingConfig(t, 1)!;
+  // each type's first level, in the order BUILDINGS lists them
+  const firstLevels = [...new Map(BUILDINGS.filter((x) => x.level === 1).map((x) => [x.typeId, x])).values()].filter((cfg) => {
+    const t = cfg.typeId;
     if (cfg.inside === 3) return false;
     if (area === 'outside') return canPlace(t, 1001);
     if (area === 'walls') return t === BuildingType.WALLS || t === BuildingType.TOWN_HALL;
     return canPlace(t, 0);
   });
   const list = [];
-  for (const t of types) {
-    const cfg = buildingConfig(t, 1)!;
+  for (const cfg of firstLevels) {
+    const t = cfg.typeId;
     const count = b.city.buildings.filter((x) => x.typeId === t).length;
     if (cfg.limit > 0 && count >= cfg.limit) continue;
     const view = requirementsView(b, t, 1);
@@ -148,12 +149,11 @@ export async function construct(ctx: Ctx, playerId: number, cityId: number, type
 export async function upgrade(ctx: Ctx, playerId: number, cityId: number, positionId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const bld = findBuilding(b.city.buildings, positionId);
-  assertCanUpgrade(bld, b.city.buildings, b.player.research, b.player.items, maxConcurrent(b, ctx.now));
-  const cfg = buildingConfig(bld!.typeId, bld!.level + 1)!;
+  const { building, next: cfg } = assertCanUpgrade(bld, b.city.buildings, b.player.research, b.player.items, maxConcurrent(b, ctx.now));
   spendResources(b.city, cfg.cost);
   ctx.stat(playerId, cityId, prefixed('spent.building', cfg.cost));
-  const ms = buildTimeMs(bld!.typeId, bld!.level + 1, mayorStats(b.heroes), b.player.research);
-  const next: BuildingState = { ...bld!, status: BuildingStatus.BUILDING, startTime: ctx.now, endTime: ctx.now + ms };
+  const ms = buildTimeMs(building.typeId, building.level + 1, mayorStats(b.heroes), b.player.research);
+  const next: BuildingState = { ...building, status: BuildingStatus.BUILDING, startTime: ctx.now, endTime: ctx.now + ms };
   b.city.buildings = b.city.buildings.map((x) => (x.positionId === positionId ? next : x));
   scheduleBuilding(ctx, b, next);
   pushBuilding(ctx, b, next);
@@ -189,15 +189,14 @@ export async function cancel(ctx: Ctx, playerId: number, cityId: number, positio
   const b = await openOwnCity(ctx, playerId, cityId);
   const bld = findBuilding(b.city.buildings, positionId);
   if (!bld || bld.status === BuildingStatus.IDLE) throw new GameError(msg('building.notInProgress'), -99);
-  const paid = buildingConfig(bld.typeId, bld.level + 1)!.cost;
+  // a building under way is going to its next level, which has a config (it was checked when it started)
+  const paid = buildingConfig(bld.typeId, bld.level + 1)?.cost ?? {};
   gainResources(b.city, paid, BALANCE.cancelBuildRefund);
   ctx.stat(playerId, cityId, prefixed('spent.building', paid, -BALANCE.cancelBuildRefund));
-  let after: BuildingState | null = null;
-  if (bld.level === 0) b.city.buildings = b.city.buildings.filter((x) => x.positionId !== positionId);
-  else {
-    after = { ...bld, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 };
-    b.city.buildings = b.city.buildings.map((x) => (x.positionId === positionId ? after! : x));
-  }
+  const after: BuildingState | null = bld.level === 0 ? null : { ...bld, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 };
+  b.city.buildings = after
+    ? b.city.buildings.map((x) => (x.positionId === positionId ? after : x))
+    : b.city.buildings.filter((x) => x.positionId !== positionId);
   ctx.unschedule(refKey(cityId, positionId));
   pushBuilding(ctx, b, after ?? { positionId, typeId: 0, level: 0, status: 0, startTime: 0, endTime: 0 });
   pushResources(ctx, b);

@@ -50,9 +50,7 @@ describe('message percentages', () => {
   it('are sent as shares, never as percent numbers', () => {
     const found = described.flatMap((m) => params(m)).filter(([code, k]) => SHARE_PARAMS.has(k) || (code === 'techInfo.summary.medicine' && k === 'max'));
     expect(found.length).toBeGreaterThan(50);
-    const numbers = found
-      .filter(([, , v]) => typeof v !== 'object' || v === null || !('share' in v))
-      .map(([code, k, v]) => `${code} ${k}=${JSON.stringify(v)}`);
+    const numbers = found.filter(([, , v]) => typeof v !== 'object' || !('share' in v)).map(([code, k, v]) => `${code} ${k}=${JSON.stringify(v)}`);
     expect(numbers).toEqual([]);
   });
 

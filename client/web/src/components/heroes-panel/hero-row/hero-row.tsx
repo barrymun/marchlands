@@ -36,9 +36,10 @@ export function HeroRow({
   const [draft, setDraft] = useState(hero.name);
   const save = async () => {
     const name = draft.trim();
-    if (!name || name === hero.name) return setEditing(false);
+    // renaming is only offered with onRename
+    if (!name || name === hero.name || !onRename) return setEditing(false);
     try {
-      await onRename!(name);
+      await onRename(name);
       setEditing(false);
     } catch {
       /* the error is toasted; keep editing */

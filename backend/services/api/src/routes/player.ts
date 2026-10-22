@@ -39,7 +39,7 @@ import { one, players } from '@marchlands/db';
 import { flows, player, runGame, shop, statistics, world } from '@marchlands/game';
 
 import { signToken } from '#/auth/jwt.ts';
-import { authenticate, doc, game, playerIdOf, tags, type ZApp } from '#/http.ts';
+import { authenticate, claimsOf, doc, game, playerIdOf, tags, type ZApp } from '#/http.ts';
 
 export default async function playerRoutes(app: ZApp) {
   app.addHook('onRequest', authenticate);
@@ -56,12 +56,12 @@ export default async function playerRoutes(app: ZApp) {
   }));
 
   app.post('/player', s('Create the lord and first city (common.createNewPlayer)', PlayerCreated, { body: CreatePlayerBody }), async (req) => {
-    const accountId = req.claims!.sub;
+    const accountId = claimsOf(req).sub;
     const result = await runGame(app.deps.db, async (ctx) => {
       const p = await player.createPlayer(ctx, accountId, req.body);
       return { playerId: p.id, state: await player.playerState(ctx, p.id) };
     });
-    const token = signToken({ sub: accountId, pid: result.playerId, adm: req.claims!.adm }, app.deps.config.jwtSecret, app.deps.config.jwtTtl);
+    const token = signToken({ sub: accountId, pid: result.playerId, adm: claimsOf(req).adm }, app.deps.config.jwtSecret, app.deps.config.jwtTtl);
     return { ok: 1 as const, data: { token, ...result.state } };
   });
 

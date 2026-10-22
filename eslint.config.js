@@ -50,6 +50,8 @@ export default tseslint.config(
     rules: {
       // `_name` marks an argument or binding kept on purpose
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+      // a lookup that can miss says what happens (AGENTS.md, Lookups can miss); tests may assert with `!`
+      '@typescript-eslint/no-non-null-assertion': 'error',
       'array-callback-return': 'error',
       // == null (null or undefined) is allowed, every other comparison is ===
       eqeqeq: ['error', 'smart'],
@@ -68,6 +70,8 @@ export default tseslint.config(
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
     rules: {
       '@typescript-eslint/no-deprecated': 'error',
+      // a check the types say can't fail is dead code, or a type that hides a miss (AGENTS.md, Lookups can miss)
+      '@typescript-eslint/no-unnecessary-condition': 'error',
       // an async function without await is how Fastify plugins are written, and how a function meets a type that returns a promise
       '@typescript-eslint/require-await': 'off',
       // a switch over a union covers every member, or has a default
@@ -85,6 +89,8 @@ export default tseslint.config(
     rules: {
       // tests read API responses and fixtures as untyped JSON, and check methods were called (expect(timer.unref))
       '@typescript-eslint/unbound-method': 'off',
+      // a miss fails the test anyway
+      '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
@@ -233,7 +239,7 @@ export default tseslint.config(
   {
     // shadcn/ui components export their variants next to the component
     files: ['client/web/src/components/ui/**'],
-    rules: { 'react-refresh/only-export-components': 'off' },
+    rules: { 'react-refresh/only-export-components': 'off', '@typescript-eslint/no-non-null-assertion': 'off' },
   },
   prettier,
 );

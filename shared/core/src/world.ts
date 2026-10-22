@@ -172,7 +172,7 @@ export function regenerateNpc(level: number, state: NpcState, troops: TroopCount
   s.loyalty = Math.min(t.loyalty, s.loyalty + loyaltyTicks);
   if (ticks <= 0) return { state: s, troops, forts };
   const regen = BALANCE.npcGoldMatchesTopResource ? RESOURCE_KEYS : BASIC_RESOURCES;
-  for (const r of regen) s[r] = Math.min(t.resources[r], (s[r] ?? 0) + (t.resources[r] / 80) * ticks);
+  for (const r of regen) s[r] = Math.min(t.resources[r], s[r] + (t.resources[r] / 80) * ticks);
   const tr: TroopCounts = { ...troops };
   for (const [k, max] of Object.entries(t.troops) as [keyof TroopCounts, number][]) {
     tr[k] = Math.min(max, (tr[k] ?? 0) + Math.floor(max / 10) * ticks);

@@ -8,7 +8,7 @@ describe(pgArray.name, () => {
   it('Postgres reads back the strings it was given', async () => {
     const values = ['a', 'b c', 'say "hi"', 'back\\slash', '{x,y}', 'NULL', '', 'ünï'];
     const r = await testDb().execute<{ v: string[] }>(sql`select ${pgArray(values)}::text[] as v`);
-    expect(r.rows[0].v).toEqual(values);
+    expect(r.rows[0]!.v).toEqual(values);
   });
 
   it('Postgres reads back the numbers it was given, and an empty array', async () => {
@@ -18,7 +18,7 @@ describe(pgArray.name, () => {
 
   it('works as one parameter in `= any(...)`', async () => {
     const r = await testDb().execute<{ hit: boolean }>(sql`select 'b' = any(${pgArray(['a', 'b'])}::text[]) as hit`);
-    expect(r.rows[0].hit).toBe(true);
+    expect(r.rows[0]!.hit).toBe(true);
   });
 });
 

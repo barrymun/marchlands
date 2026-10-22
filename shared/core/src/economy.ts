@@ -64,7 +64,8 @@ export interface EconomyCity {
   taxRate: number;
   buildings: BuildingState[];
   troops: TroopCounts;
-  workRates: ResourceSet;
+  /** a rate the city never set counts as 100% */
+  workRates: Partial<ResourceSet>;
   misc: CityMisc;
 }
 
@@ -414,7 +415,7 @@ export function cityResources(city: EconomyCity): ResourceSet {
 }
 
 /** Resources a warehouse shields from plunder (per resource). */
-export function protectedResources(buildings: BuildingState[], storePercent: ResourceSet): ResourceSet {
+export function protectedResources(buildings: BuildingState[], storePercent: Partial<ResourceSet>): ResourceSet {
   const level = buildingLevel(buildings, BuildingType.WAREHOUSE);
   const cap = BALANCE.warehouseProtectPerLevel[level] ?? 0;
   const out = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };

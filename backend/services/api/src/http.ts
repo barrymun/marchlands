@@ -76,20 +76,29 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
 export async function accountRefusal(db: Db, accountId: number) {
   const [acc] = await db.select({ status: accounts.status, banReason: accounts.banReason }).from(accounts).where(eq(accounts.id, accountId));
   if (!acc) return { status: 401, ok: -2, error: msg('auth.accountNotFound') };
-  if (acc.status !== 0) return { status: 403, ok: -99, error: msg('auth.banned', { reason: acc.banReason ?? '' }) };
+  if (acc.status !== 0) return { status: 403, ok: -99, error: msg('auth.banned', { reason: acc.banReason }) };
   return null;
+}
+
+/** The token's claims on a route behind `authenticate`, which sets them; refused as not logged in otherwise. */
+export function claimsOf(req: FastifyRequest): TokenClaims {
+  if (!req.claims) throw new GameError(msg('auth.notLoggedIn'), -2, 401);
+  return req.claims;
 }
 
 /** Resolve the lord of the authenticated account (404 until common.createNewPlayer). */
 export async function playerIdOf(db: Db, req: FastifyRequest): Promise<number> {
-  const accountId = req.claims!.sub;
+  const accountId = claimsOf(req).sub;
   const [row] = await db.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
   if (!row) throw new GameError(msg('auth.needPlayer'), -4, 404);
   return row.id;
 }
 
 export async function requireAdmin(req: FastifyRequest) {
-  const [row] = await req.server.deps.db.select({ admin: accounts.isAdmin }).from(accounts).where(eq(accounts.id, req.claims!.sub));
+  const [row] = await req.server.deps.db
+    .select({ admin: accounts.isAdmin })
+    .from(accounts)
+    .where(eq(accounts.id, claimsOf(req).sub));
   if (!row?.admin) throw new GameError(msg('common.adminsOnly'), -42, 403);
 }
 
@@ -101,12 +110,14 @@ export async function game<T>(req: FastifyRequest, fn: (ctx: Ctx, playerId: numb
   const db = req.server.deps.db;
   const playerId = await playerIdOf(db, req);
   const data = await runGame(db, (ctx) => fn(ctx, playerId));
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- T may be void: a command answers undefined, sent as null
   return { ok: 1, data: (data ?? null) as Data<T> };
 }
 
 /** Run a world-level operation (no lord required). */
 export async function anon<T>(req: FastifyRequest, fn: (ctx: Ctx) => Promise<T>): Promise<{ ok: 1; data: Data<T> }> {
   const data = await runGame(req.server.deps.db, fn);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- as in game(): T may be void
   return { ok: 1, data: (data ?? null) as Data<T> };
 }
 

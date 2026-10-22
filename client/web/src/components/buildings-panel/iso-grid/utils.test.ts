@@ -128,7 +128,7 @@ describe(fieldLayout.name, () => {
     expect(tiles).toHaveLength(40);
     expect(tiles.slice(0, 3).every((t) => t.kind === 'slot')).toBe(true);
     expect(tiles.slice(3).every((t) => t.kind === 'locked')).toBe(true);
-    expect(tiles[0].pos).toBe(1001);
+    expect(tiles[0]!.pos).toBe(1001);
   });
 
   it('locks every field with nothing unlocked, and none with all of them', () => {

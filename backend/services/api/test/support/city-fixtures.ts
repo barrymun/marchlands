@@ -6,6 +6,7 @@ import { expect, it } from 'vitest';
 
 import type { ResourceSet } from '@marchlands/core';
 import { admin, alliance, runGame } from '@marchlands/game';
+import type { Tuple } from '@marchlands/game/test/support/tuple.ts';
 import { getArmy, getHero, getTile, type HeroRow, processArmy, saveHero, saveTile, type TileRow } from '@marchlands/game/testing';
 
 import { apiTest, type Session, type TestApi } from '#test/support/api.ts';
@@ -18,14 +19,15 @@ export type Lord = Session & { playerId: number; cityId: number; name: string };
 export const RICH: ResourceSet = { gold: 10_000_000, food: 10_000_000, wood: 10_000_000, stone: 10_000_000, iron: 10_000_000 };
 
 /** The operator first (the first account of a test), then `n` ordinary players. */
-export async function lords(api: TestApi, n: number): Promise<Lord[]> {
+export async function lords<N extends number>(api: TestApi, n: N): Promise<Tuple<Lord, N>> {
   await api.operator();
   const out: Lord[] = [];
   for (let i = 0; i < n; i++) {
     const name = `Lord${++serial}x${i}`;
     out.push({ ...(await api.player(name)), name });
   }
-  return out;
+  // n players were pushed, which TypeScript can't count
+  return out as Tuple<Lord, N>;
 }
 
 /** Put buildings in a city: [positionId, typeId, level]. Town Hall is position -1, Walls -2. */

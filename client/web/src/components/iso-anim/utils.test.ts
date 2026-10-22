@@ -74,7 +74,7 @@ import {
 import type { PixelArt } from '@/components/iso-viewport/types';
 
 /** How many pixels of a frame are drawn. */
-const drawn = (a: PixelArt) => a.data.filter((_, i) => i % 4 === 3 && a.data[i] > 0).length;
+const drawn = (a: PixelArt) => a.data.filter((_, i) => i % 4 === 3 && a.data[i]! > 0).length;
 /** The colour of a frame's pixel, or null when it's empty. */
 const at = (a: PixelArt, x: number, y: number) => {
   const i = (y * a.w + x) * 4;
@@ -201,7 +201,7 @@ describe(glowFrame.name, () => {
     const f = glowFrame(2, 3).art;
     expect([f.w, f.h]).toEqual([1, 3]);
     expect(drawn(f)).toBe(3);
-    expect(f.data[3]).toBeGreaterThan(glowFrame(0, 3).art.data[3]);
+    expect(f.data[3]).toBeGreaterThan(glowFrame(0, 3).art.data[3]!);
   });
 });
 
@@ -337,9 +337,9 @@ describe(constructionOverlays.name, () => {
   it("lays the scaffolding with its anchor on the tile's middle", () => {
     const [o] = constructionOverlays({ key: 'b3', col: 2, row: 1 }, 0);
     expect(o).toMatchObject({ key: 'b3:build', col: 2, row: 1 });
-    const f = constructionFrame(o.art.id === constructionFrame(0, 1).art.id ? 0 : 1, 1);
-    expect([o.x, o.y]).toEqual([-f.ax, -f.ay]);
-    expect(constructionOverlays({ key: 'th', col: 0, row: 0, size: 128 }, 0)[0].art.w).toBeGreaterThan(o.art.w);
+    const f = constructionFrame(o!.art.id === constructionFrame(0, 1).art.id ? 0 : 1, 1);
+    expect([o!.x, o!.y]).toEqual([-f.ax, -f.ay]);
+    expect(constructionOverlays({ key: 'th', col: 0, row: 0, size: 128 }, 0)[0]!.art.w).toBeGreaterThan(o!.art.w);
   });
 });
 
@@ -376,7 +376,7 @@ describe(streetsOf.name, () => {
     const s = streetsOf(grid);
     expect(s.nodes).toHaveLength(16);
     expect(s.nodes[0]).toEqual({ col: -0.5, row: -0.5 });
-    expect(s.links[0].map((i) => s.nodes[i])).toEqual([
+    expect(s.links[0]!.map((i) => s.nodes[i])).toEqual([
       { col: 0.5, row: -0.5 },
       { col: -0.5, row: 0.5 },
     ]);
@@ -397,7 +397,7 @@ describe(walkerRoute.name, () => {
   it('walks ROUTE_STEPS steps from crossing to joined crossing, the same for the same seed', () => {
     const route = walkerRoute(s, 5);
     expect(route).toHaveLength(ROUTE_STEPS + 1);
-    for (let i = 1; i < route.length; i++) expect(s.links[route[i - 1]]).toContain(route[i]);
+    for (let i = 1; i < route.length; i++) expect(s.links[route[i - 1]!]).toContain(route[i]);
     expect(walkerRoute(s, 5)).toEqual(route);
   });
 
@@ -616,10 +616,10 @@ describe(particlesAt.name, () => {
     const [r0, r1] = [particlesAt('rain', 0, 800, 600)[0], particlesAt('rain', 100, 800, 600)[0]];
     const [s0, s1] = [particlesAt('snow', 0, 800, 600)[0], particlesAt('snow', 100, 800, 600)[0]];
     const dy = (a: { y: number }, b: { y: number }) => (b.y - a.y + 600) % 600;
-    expect(dy(r0, r1)).toBeGreaterThan(30);
-    expect(dy(s0, s1)).toBeLessThan(10);
-    expect(r0.len).toBeGreaterThan(0);
-    expect(s0.len).toBe(0);
+    expect(dy(r0!, r1!)).toBeGreaterThan(30);
+    expect(dy(s0!, s1!)).toBeLessThan(10);
+    expect(r0!.len).toBeGreaterThan(0);
+    expect(s0!.len).toBe(0);
   });
 });
 
@@ -743,7 +743,7 @@ describe(armyOverlays.name, () => {
     const o = armyOverlays(marching, 800, { col: 0, row: 0 }, 0, 500);
     expect(o.map((x) => x.key)).toEqual(['army7', 'army8']);
     expect(o[0]).toMatchObject({ col: 5, row: 0 });
-    expect(o[1].art.id).toContain('enemy');
+    expect(o[1]!.art.id).toContain('enemy');
   });
 });
 
@@ -769,7 +769,7 @@ describe(workerOverlays.name, () => {
       ['v1:worker', 3, 4],
       ['v2:worker', 9, 9],
     ]);
-    expect(o[0].art.id.startsWith('walker')).toBe(true);
+    expect(o[0]!.art.id.startsWith('walker')).toBe(true);
   });
 });
 

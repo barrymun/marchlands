@@ -38,7 +38,7 @@ import {
 import { game, type TestGame } from '#test/support/game.ts';
 
 /** Max population of a city with one cottage of this level. */
-const maxPopWithCottage = (level: number) => BALANCE.basePopulation + BALANCE.cottagePopulation[level];
+const maxPopWithCottage = (level: number) => BALANCE.basePopulation + BALANCE.cottagePopulation[level]!;
 
 /** A free flat tile (no city, not held by one), away from `avoid`. */
 async function freeFlat(g: TestGame, avoid: number[] = []): Promise<number> {
@@ -57,7 +57,7 @@ async function freeValley(g: TestGame): Promise<number> {
     .from(tiles)
     .where(and(eq(tiles.type, TileType.FOREST), isNull(tiles.cityId), isNull(tiles.ownerCityId)))
     .limit(1);
-  return row.id;
+  return row!.id;
 }
 
 /** `a` sends a scout at `b`'s city: an army out of a's city, and foreign troops headed for b's. */
@@ -148,9 +148,9 @@ describe(interior.setStorePercent.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       const before = (await reloadCity(g, p.cityId)).storePercent;
-      const total = BASIC_RESOURCES.reduce((s, r) => s + before[r], 0);
-      await expectRefused(interior.setStorePercent(g, p.id, p.cityId, { food: before.food + 101 - total }), msg('city.storePercentTotal'));
-      await interior.setStorePercent(g, p.id, p.cityId, { food: before.food + 100 - total });
+      const total = BASIC_RESOURCES.reduce((s, r) => s + before[r]!, 0);
+      await expectRefused(interior.setStorePercent(g, p.id, p.cityId, { food: before.food! + 101 - total }), msg('city.storePercentTotal'));
+      await interior.setStorePercent(g, p.id, p.cityId, { food: before.food! + 100 - total });
     }));
 
   it('takes whole numbers from 0 to 100', () =>
@@ -250,8 +250,8 @@ describe(interior.productionBreakdown.name, () => {
           storage: s.storage[r],
         })),
       );
-      expect(rows[0].armyConsumption).toBeGreaterThan(0);
-      expect(rows[0].fieldOutput).toBeGreaterThan(0);
+      expect(rows[0]!.armyConsumption).toBeGreaterThan(0);
+      expect(rows[0]!.fieldOutput).toBeGreaterThan(0);
     }));
 
   it("refuses another lord's city", () =>

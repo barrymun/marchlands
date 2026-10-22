@@ -151,7 +151,7 @@ export function LordForm({ city }: { city?: CityBean }) {
                   variant={owned > 0 ? 'default' : 'outline'}
                   disabled={!city || !!truceBuff || !!truceCooldown || truce.isPending || (owned === 0 && city.resource.gold < truceGold)}
                   title={owned > 0 ? undefined : city ? t('common:boughtWithCityGold', { city: city.name }) : t('truce.boughtWithAny')}
-                  onClick={() => truce.mutate({ body: { itemId: TRUCE, cityId: city!.id } })}
+                  onClick={() => city && truce.mutate({ body: { itemId: TRUCE, cityId: city.id } })}
                 >
                   {itemName(TRUCE)} · {owned > 0 ? t('truce.owned', { n: owned }) : t('common:gold', { gold: fmt(truceGold) })}
                 </Button>

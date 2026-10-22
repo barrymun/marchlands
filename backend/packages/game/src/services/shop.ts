@@ -56,7 +56,8 @@ export async function buyItemWithGold(ctx: Ctx, playerId: number, cityId: number
   if (!Number.isInteger(amount) || amount < 1 || amount > 1000) throw new GameError(msg('common.invalidAmount'), -28);
   const b = await openOwnCity(ctx, playerId, cityId);
   // dayLimit on items with a short validity is a per-day purchase cap (orig: unenforced)
-  const cfg = itemConfig(itemId)!;
+  const cfg = itemConfig(itemId);
+  if (!cfg) throw new GameError(msg('item.notForSale'), -99); // it has a price, so it's an item
   if (cfg.dayLimit > 0 && cfg.dayLimit <= 1) {
     const day = today(ctx.now);
     const rec = b.player.misc.dailyLimits?.[itemId];

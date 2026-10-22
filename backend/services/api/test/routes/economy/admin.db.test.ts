@@ -78,7 +78,7 @@ describe('PUT /admin/cities/:cityId/resources', () => {
     apiTest(async (api) => {
       const { op, p } = await setup(api);
       expect(await api.ok('PUT', `admin/cities/${p.cityId}/resources`, { token: op.token, body: { playerId: p.playerId, gold: 12_345 } })).toBeNull();
-      expect((await state(api, p)).castles[0].resource.gold).toBe(12_345);
+      expect((await state(api, p)).castles[0]!.resource.gold).toBe(12_345);
     }));
 
   it("refuses a city that is not the player's (403), and validates the request", () =>
@@ -104,7 +104,9 @@ describe('PUT /admin/cities/:cityId/buildings', () => {
       const { op, p } = await setup(api);
       const body = { playerId: p.playerId, positionId: 3, typeId: BuildingType.MARKETPLACE, level: 2 };
       expect(await api.ok('PUT', `admin/cities/${p.cityId}/buildings`, { token: op.token, body })).toBeNull();
-      expect((await state(api, p)).castles[0].buildings).toContainEqual(expect.objectContaining({ positionId: 3, typeId: BuildingType.MARKETPLACE, level: 2 }));
+      expect((await state(api, p)).castles[0]!.buildings).toContainEqual(
+        expect.objectContaining({ positionId: 3, typeId: BuildingType.MARKETPLACE, level: 2 }),
+      );
       await api.refused('PUT', `admin/cities/${p.cityId}/buildings`, 'admin.invalidLevel', { token: op.token, body: { ...body, level: 99 }, status: 400 });
       await expectInvalid(api, op.token, [{ method: 'PUT', url: `admin/cities/${p.cityId}/buildings`, body: { ...body, level: undefined } }]);
     }));
@@ -213,7 +215,7 @@ describe('PUT /admin/cities/:cityId/stats', () => {
       const { op, p } = await setup(api);
       const body = { playerId: p.playerId, population: 500, troops: { archer: 40 } };
       expect(await api.ok('PUT', `admin/cities/${p.cityId}/stats`, { token: op.token, body })).toBeNull();
-      expect((await state(api, p)).castles[0].troop).toMatchObject({ archer: 40 });
+      expect((await state(api, p)).castles[0]!.troop).toMatchObject({ archer: 40 });
       await expectInvalid(api, op.token, [{ method: 'PUT', url: `admin/cities/${p.cityId}/stats`, body: { ...body, troops: { archer: -1 } } }]);
     }));
 });

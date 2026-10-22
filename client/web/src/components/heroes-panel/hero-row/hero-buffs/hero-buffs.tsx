@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 export function HeroBuffs({ hero }: { hero: HeroBean }) {
   const { t } = useTranslation('heroes-panel');
   const now = useNow();
-  const active = (hero.buffs ?? []).filter((b) => b.id !== HeroBuffId.HOME_CITY && b.endTime > now);
+  const active = hero.buffs.filter((b) => b.id !== HeroBuffId.HOME_CITY && b.endTime > now);
   if (!active.length) return null;
   return (
     <div className="mt-1 flex flex-wrap gap-1">

@@ -6,10 +6,9 @@ import { RunReport } from '@/components/flows-panel/run-flow/run-report/run-repo
 import { ago } from '@/components/flows-panel/run-flow/utils';
 import { useNow } from '@/hooks/use-now';
 
-export function LastRun({ flow }: { flow: Flow }) {
+export function LastRun({ run: r }: { run: NonNullable<Flow['lastRun']> }) {
   const { t } = useTranslation('flows-panel');
   const now = useNow(10_000);
-  const r = flow.lastRun!;
   return (
     <RunReport
       title={

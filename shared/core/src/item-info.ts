@@ -213,7 +213,7 @@ export function medalSources(level: number): MedalSources {
     if (!price) continue;
     // random contents: look at many openings
     const rng = seededRng(`medal-sources:${item.id}`);
-    const counts = Array.from({ length: e.kind === 'box' ? 200 : 1 }, () => (e.kind === 'box' ? e.contents(rng) : e.contents())?.items?.[id] ?? 0);
+    const counts = Array.from({ length: e.kind === 'box' ? 200 : 1 }, () => (e.kind === 'box' ? e.contents(rng) : e.contents()).items?.[id] ?? 0);
     const held = counts.filter((n) => n > 0);
     if (!held.length) continue;
     containers.push({

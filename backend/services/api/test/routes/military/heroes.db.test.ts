@@ -32,9 +32,9 @@ const HALL = 3;
 
 type Hero = { id: number; name: string; status: number; level: number; loyalty: number; experience: number; power: number; locked: boolean };
 
-const gold = async (api: TestApi, cityId: number) => (await api.db.select({ gold: cities.gold }).from(cities).where(eq(cities.id, cityId)))[0].gold;
+const gold = async (api: TestApi, cityId: number) => (await api.db.select({ gold: cities.gold }).from(cities).where(eq(cities.id, cityId)))[0]!.gold;
 const heroRow = async (api: TestApi, id: number) => (await api.db.select().from(heroes).where(eq(heroes.id, id)))[0];
-const items = async (api: TestApi, p: Lord) => (await api.db.select({ items: players.items }).from(players).where(eq(players.id, p.playerId)))[0].items;
+const items = async (api: TestApi, p: Lord) => (await api.db.select({ items: players.items }).from(players).where(eq(players.id, p.playerId)))[0]!.items;
 
 /** An Inn and a Feasting Hall (hero slots), and gold. */
 async function heroHall(api: TestApi, p: Lord, inn = 5, hall = 5) {
@@ -122,8 +122,8 @@ describe('POST /cities/{cityId}/tavern/{heroId}/hire', () => {
       const [a] = await lords(api, 1);
       await heroHall(api, a);
       const { heros } = await api.ok<{ heros: Hero[] }>('GET', `cities/${a.cityId}/tavern`, { token: a.token });
-      const hero = await api.ok<Hero>('POST', `cities/${a.cityId}/tavern/${heros[0].id}/hire`, { token: a.token });
-      expect(hero).toMatchObject({ id: heros[0].id, name: heros[0].name, cityId: a.cityId, status: HeroStatus.IDLE });
+      const hero = await api.ok<Hero>('POST', `cities/${a.cityId}/tavern/${heros[0]!.id}/hire`, { token: a.token });
+      expect(hero).toMatchObject({ id: heros[0]!.id, name: heros[0]!.name, cityId: a.cityId, status: HeroStatus.IDLE });
       expect(await heroRow(api, hero.id)).toMatchObject({ playerId: a.playerId, inTavern: false });
     }));
 
@@ -134,7 +134,7 @@ describe('POST /cities/{cityId}/tavern/{heroId}/hire', () => {
       const { heros } = await api.ok<{ heros: Hero[] }>('GET', `cities/${a.cityId}/tavern`, { token: a.token });
       await expectInvalid(api, a.token, [['POST', `cities/${a.cityId}/tavern/abc/hire`]]);
       const own = await addHero(api, a);
-      await api.refused('POST', `cities/${a.cityId}/tavern/${heros[0].id}/hire`, 'hero.noVacancy', { token: a.token, status: 400 });
+      await api.refused('POST', `cities/${a.cityId}/tavern/${heros[0]!.id}/hire`, 'hero.noVacancy', { token: a.token, status: 400 });
       await setBuildings(api, a, [[HALL, BuildingType.FEASTING_HALL, 3]]);
       await api.refused('POST', `cities/${a.cityId}/tavern/${own}/hire`, 'common.heroNotFound', { token: a.token, status: 404 });
     }));
@@ -149,7 +149,7 @@ describe('DELETE /cities/{cityId}/mayor', () => {
       const id = await addHero(api, a);
       await api.ok('POST', `heroes/${id}/mayor`, { token: a.token });
       expect(await api.ok('DELETE', `cities/${a.cityId}/mayor`, { token: a.token })).toBeNull();
-      expect((await heroRow(api, id)).status).toBe(HeroStatus.IDLE);
+      expect((await heroRow(api, id))!.status).toBe(HeroStatus.IDLE);
     }));
 
   it('refuses a city without a mayor', () =>
@@ -223,7 +223,7 @@ describe('PUT /heroes/{heroId}/lock', () => {
       const [a] = await lords(api, 1);
       const id = await addHero(api, a);
       expect(await api.ok('PUT', `heroes/${id}/lock`, { token: a.token, body: { locked: true } })).toMatchObject({ id, locked: true });
-      expect((await heroRow(api, id)).locked).toBe(true);
+      expect((await heroRow(api, id))!.locked).toBe(true);
       expect(await api.ok('PUT', `heroes/${id}/lock`, { token: a.token, body: { locked: false } })).toMatchObject({ id, locked: false });
     }));
 
@@ -243,7 +243,7 @@ describe('PUT /heroes/{heroId}/gear-stat', () => {
       const [a] = await lords(api, 1);
       const id = await addHero(api, a);
       expect(await api.ok('PUT', `heroes/${id}/gear-stat`, { token: a.token, body: { stat: 'stratagem' } })).toMatchObject({ id, gearStat: 'stratagem' });
-      expect((await api.ok<{ heros: { id: number; gearStat: string }[] }>('GET', `cities/${a.cityId}`, { token: a.token })).heros[0].gearStat).toBe(
+      expect((await api.ok<{ heros: { id: number; gearStat: string }[] }>('GET', `cities/${a.cityId}`, { token: a.token })).heros[0]!.gearStat).toBe(
         'stratagem',
       );
     }));
@@ -301,8 +301,8 @@ describe('POST /heroes/{heroId}/mayor', () => {
       const second = await addHero(api, a);
       expect(await api.ok('POST', `heroes/${first}/mayor`, { token: a.token })).toBeNull();
       expect(await api.ok('POST', `heroes/${second}/mayor`, { token: a.token })).toBeNull();
-      expect((await heroRow(api, first)).status).toBe(HeroStatus.IDLE);
-      expect((await heroRow(api, second)).status).toBe(HeroStatus.MAYOR);
+      expect((await heroRow(api, first))!.status).toBe(HeroStatus.IDLE);
+      expect((await heroRow(api, second))!.status).toBe(HeroStatus.MAYOR);
     }));
 
   it('refuses a hero away from the city', () =>
@@ -395,7 +395,7 @@ describe('POST /heroes/{heroId}/level-up', () => {
       await patchHero(api, id, { experience: h.upgradeExp });
       const bean = await api.ok<Hero>('POST', `heroes/${id}/level-up`, { token: a.token });
       expect(bean.level).toBeGreaterThan(h.level);
-      expect((await heroRow(api, id)).level).toBe(bean.level);
+      expect((await heroRow(api, id))!.level).toBe(bean.level);
     }));
 
   it('refuses a hero without the experience', () =>
@@ -465,7 +465,7 @@ describe('PATCH /heroes/{heroId}', () => {
       const [a] = await lords(api, 1);
       const id = await addHero(api, a);
       expect(await api.ok('PATCH', `heroes/${id}`, { token: a.token, body: { name: '  Aldric   the Bold ' } })).toMatchObject({ id, name: 'Aldric the Bold' });
-      expect((await heroRow(api, id)).name).toBe('Aldric the Bold');
+      expect((await heroRow(api, id))!.name).toBe('Aldric the Bold');
     }));
 
   it('refuses a malformed body and a bad name', () =>

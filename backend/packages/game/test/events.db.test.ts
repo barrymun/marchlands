@@ -92,7 +92,7 @@ describe(`${dispatchEvent.name}: buff.expire`, () => {
       await giveItems(g, p, { [ItemId.TRUCE_AGREEMENT]: 1 });
       await players.startTruce(g, p.id, ItemId.TRUCE_AGREEMENT, p.cityId);
       expect((await reloadPlayer(g, p)).status).toBe(PlayerStatus.TRUCE);
-      const end = (await reloadPlayer(g, p)).buffs[0].endTime;
+      const end = (await reloadPlayer(g, p)).buffs[0]!.endTime;
 
       await g.runDue(end);
       const row = await reloadPlayer(g, p);
@@ -149,7 +149,7 @@ describe(`${dispatchEvent.name}: buff.expire`, () => {
       const plain = await make();
       await giveItems(g, boosted, { [ItemId.PLOWSHARES]: 1 });
       await shop.useItem(g, boosted.id, ItemId.PLOWSHARES, null);
-      const end = (await reloadPlayer(g, boosted)).buffs[0].endTime;
+      const end = (await reloadPlayer(g, boosted)).buffs[0]!.endTime;
 
       await g.runDue(end);
       expect((await reloadCity(g, boosted.cityId)).resourcesAt).toBe(end);
@@ -176,7 +176,14 @@ describe(`${dispatchEvent.name}: work in progress`, () => {
       const [ev] = g.events('building');
       g._events.clear();
       g.advance(bean.endTime - g.now);
-      await dispatchEvent(g, { id: 1, type: ev.type, dueAt: ev.dueAt, playerId: ev.playerId ?? null, cityId: ev.cityId ?? null, payload: ev.payload ?? {} });
+      await dispatchEvent(g, {
+        id: 1,
+        type: ev!.type,
+        dueAt: ev!.dueAt,
+        playerId: ev!.playerId ?? null,
+        cityId: ev!.cityId ?? null,
+        payload: ev!.payload ?? {},
+      });
       expect((await reloadCity(g, p.cityId)).buildings).toContainEqual(expect.objectContaining({ positionId: 0, typeId: BuildingType.COTTAGE, level: 1 }));
     }));
 
@@ -185,10 +192,10 @@ describe(`${dispatchEvent.name}: work in progress`, () => {
       const p = await createTestPlayer(g);
       await buildings.construct(g, p.id, p.cityId, BuildingType.COTTAGE, 0);
       const [ev] = g.events('building');
-      await g.runDue(ev.dueAt);
+      await g.runDue(ev!.dueAt);
       const before = (await reloadCity(g, p.cityId)).buildings;
       g._pushes.length = 0;
-      await dispatchEvent(g, { id: 1, type: 'building', dueAt: ev.dueAt, playerId: p.id, cityId: p.cityId, payload: ev.payload ?? {} });
+      await dispatchEvent(g, { id: 1, type: 'building', dueAt: ev!.dueAt, playerId: p.id, cityId: p.cityId, payload: ev!.payload ?? {} });
       expect((await reloadCity(g, p.cityId)).buildings).toEqual(before);
       expect(g.pushes()).toEqual([]);
     }));

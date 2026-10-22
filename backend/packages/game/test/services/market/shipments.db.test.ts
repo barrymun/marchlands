@@ -14,7 +14,7 @@ describe(market.speedupShipment.name, () => {
       withMerchantCurve(() =>
         game(async (g) => {
           const [a, b] = [await createTrader(g), await createTrader(g, {}, 2)];
-          const s = await shipWoodTo(g, a, b);
+          const s = (await shipWoodTo(g, a, b))!;
           expect(s.endTime).toBe(g.now + scaled(Math.floor(HOUR / 2)));
           expect(g.events('shipment')).toMatchObject([{ dueAt: s.endTime, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } }]);
           const gold0 = (await reloadCity(g, b.cityId)).gold;
@@ -38,7 +38,7 @@ describe(market.speedupShipment.name, () => {
       withMerchantCurve(() =>
         game(async (g) => {
           const [a, b] = [await createTrader(g), await createTrader(g)];
-          const s = await shipWoodTo(g, a, b);
+          const s = (await shipWoodTo(g, a, b))!;
           await expectRefused(market.speedupShipment(g, a.id, s.id), msg('market.shipmentNotFound'));
           await expectRefused(market.speedupShipment(g, b.id, s.id + 1000), msg('market.shipmentNotFound'));
           await setResources(g, b, { gold: 0 });

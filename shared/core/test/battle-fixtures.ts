@@ -19,7 +19,7 @@ const parseList = (s: string) => {
   const out = new Array(12).fill(0);
   for (const part of s.split(',').filter(Boolean)) {
     const [i, n] = part.split('_').map(Number);
-    out[i] = n;
+    out[i!] = n;
   }
   return out;
 };
@@ -42,11 +42,11 @@ export function loadBattleCases(): BattleCase[] {
     cases.push({
       file: current,
       line,
-      atk: parseList(parts[0]),
-      def: parseList(parts[1]),
+      atk: parseList(parts[0]!),
+      def: parseList(parts[1]!),
       rounds: Number(parts[2]),
-      atkLoss: parseList(parts[3]),
-      defLoss: parseList(parts[4]),
+      atkLoss: parseList(parts[3]!),
+      defLoss: parseList(parts[4]!),
     });
   }
   return cases;

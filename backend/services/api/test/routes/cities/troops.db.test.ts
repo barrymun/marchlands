@@ -13,7 +13,7 @@ import { apiTest, type TestApi } from '#test/support/api.ts';
 import { expectInvalid, giveItems, itGuards, type Lord, lords, RICH, setBuildings, setCityStats, setResources } from '#test/support/city-fixtures.ts';
 
 const cityRow = async (api: TestApi, id: number) => (await api.db.select().from(cities).where(eq(cities.id, id)))[0];
-const items = async (api: TestApi, p: Lord) => (await api.db.select({ items: players.items }).from(players).where(eq(players.id, p.playerId)))[0].items;
+const items = async (api: TestApi, p: Lord) => (await api.db.select({ items: players.items }).from(players).where(eq(players.id, p.playerId)))[0]!.items;
 
 const BARRACKS = 2;
 const BARRACKS_2 = 4;
@@ -119,11 +119,11 @@ describe('POST /cities/{cityId}/troops/train', () => {
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       await garrison(api, a);
-      const before = await cityRow(api, a.cityId);
+      const before = (await cityRow(api, a.cityId))!;
       const q = await train(api, a, TroopType.WARRIOR, 10);
       expect(q).toMatchObject({ positionId: BARRACKS, allProduceQueue: [{ queueId: expect.any(Number), type: TroopType.WARRIOR, num: 10 }] });
-      expect(q.allProduceQueue[0].endTime).toBeGreaterThan(Date.now());
-      const after = await cityRow(api, a.cityId);
+      expect(q.allProduceQueue[0]!.endTime).toBeGreaterThan(Date.now());
+      const after = (await cityRow(api, a.cityId))!;
       expect(after.troopQueues).toContainEqual(
         expect.objectContaining({ positionId: BARRACKS, queue: [expect.objectContaining({ troopId: TroopType.WARRIOR })] }),
       );
@@ -154,7 +154,7 @@ describe('POST /cities/{cityId}/troops/train', () => {
       await garrison(api, a);
       const r = await api.call('POST', `cities/${a.cityId}/troops/train`, { token: a.token, body: { troopId: FortType.TRAP, count: 1, positionId: WALLS } });
       expect(r.status).toBe(400);
-      expect((await cityRow(api, a.cityId)).fortQueue.queue).toEqual([]);
+      expect((await cityRow(api, a.cityId))!.fortQueue.queue).toEqual([]);
     }));
 });
 
@@ -171,7 +171,7 @@ describe('POST /cities/{cityId}/fortifications/train', () => {
         body: { troopId: FortType.TRAP, count: 5, positionId: BARRACKS },
       });
       expect(q).toMatchObject({ positionId: WALLS, allProduceQueue: [{ type: FortType.TRAP, num: 5 }] });
-      expect((await cityRow(api, a.cityId)).fortQueue.queue).toEqual([expect.objectContaining({ troopId: FortType.TRAP, count: 5 })]);
+      expect((await cityRow(api, a.cityId))!.fortQueue.queue).toEqual([expect.objectContaining({ troopId: FortType.TRAP, count: 5 })]);
     }));
 
   it('refuses a malformed body and a troop', () =>
@@ -199,14 +199,14 @@ describe('POST /cities/{cityId}/troops/train-many', () => {
         { troopId: TroopType.WARRIOR, count: 40 },
       ];
       expect(await api.ok('POST', `cities/${a.cityId}/troops/train-many`, { token: a.token, body: { orders } })).toEqual({ orders: 2, units: 70 });
-      const queues = (await cityRow(api, a.cityId)).troopQueues;
+      const queues = (await cityRow(api, a.cityId))!.troopQueues;
       expect(queues.map((q) => q.positionId).sort()).toEqual([BARRACKS, BARRACKS_2]);
       const one = await api.ok('POST', `cities/${a.cityId}/troops/train-many`, {
         token: a.token,
         body: { orders: [{ troopId: TroopType.WARRIOR, count: 5 }], split: false, positionId: BARRACKS_2 },
       });
       expect(one).toEqual({ orders: 1, units: 5 });
-      expect((await cityRow(api, a.cityId)).troopQueues.find((q) => q.positionId === BARRACKS_2)?.queue).toHaveLength(3);
+      expect((await cityRow(api, a.cityId))!.troopQueues.find((q) => q.positionId === BARRACKS_2)?.queue).toHaveLength(3);
     }));
 
   it('refuses a malformed body and a type ordered twice', () =>
@@ -237,7 +237,7 @@ describe('POST /cities/{cityId}/fortifications/train-many', () => {
         body: { orders: [{ troopId: FortType.TRAP, count: 4 }] },
       });
       expect(res).toEqual({ orders: 1, units: 4 });
-      expect((await cityRow(api, a.cityId)).fortQueue.queue).toEqual([expect.objectContaining({ troopId: FortType.TRAP, count: 4 })]);
+      expect((await cityRow(api, a.cityId))!.fortQueue.queue).toEqual([expect.objectContaining({ troopId: FortType.TRAP, count: 4 })]);
     }));
 
   it('refuses a troop', () =>
@@ -260,8 +260,8 @@ describe('DELETE /cities/{cityId}/troops/queues/{positionId}/{queueId}', () => {
       const [a] = await lords(api, 1);
       await garrison(api, a);
       const { allProduceQueue } = await train(api, a);
-      expect(await api.ok('DELETE', `cities/${a.cityId}/troops/queues/${BARRACKS}/${allProduceQueue[0].queueId}`, { token: a.token })).toBeNull();
-      expect((await cityRow(api, a.cityId)).troopQueues.find((q) => q.positionId === BARRACKS)?.queue).toEqual([]);
+      expect(await api.ok('DELETE', `cities/${a.cityId}/troops/queues/${BARRACKS}/${allProduceQueue[0]!.queueId}`, { token: a.token })).toBeNull();
+      expect((await cityRow(api, a.cityId))!.troopQueues.find((q) => q.positionId === BARRACKS)?.queue).toEqual([]);
     }));
 
   it('refuses malformed ids and an unknown batch', () =>
@@ -283,8 +283,8 @@ describe('DELETE /cities/{cityId}/fortifications/queues/{positionId}/{queueId}',
       const [a] = await lords(api, 1);
       await garrison(api, a);
       const { allProduceQueue } = await trainForts(api, a);
-      expect(await api.ok('DELETE', `cities/${a.cityId}/fortifications/queues/${WALLS}/${allProduceQueue[0].queueId}`, { token: a.token })).toBeNull();
-      expect((await cityRow(api, a.cityId)).fortQueue.queue).toEqual([]);
+      expect(await api.ok('DELETE', `cities/${a.cityId}/fortifications/queues/${WALLS}/${allProduceQueue[0]!.queueId}`, { token: a.token })).toBeNull();
+      expect((await cityRow(api, a.cityId))!.fortQueue.queue).toEqual([]);
     }));
 
   it('refuses an unknown batch', () =>
@@ -302,9 +302,9 @@ describe('POST /cities/{cityId}/troops/queues/{positionId}/{queueId}/speedup', (
       const [a] = await lords(api, 1);
       await garrison(api, a);
       await giveItems(api, a, { [ItemId.NAPOLEONS_DIARY]: 1 });
-      const batch = (await train(api, a, TroopType.WARRIOR, 500)).allProduceQueue[0];
+      const batch = (await train(api, a, TroopType.WARRIOR, 500)).allProduceQueue[0]!;
       expect(await api.ok('POST', `cities/${a.cityId}/troops/queues/${BARRACKS}/${batch.queueId}/speedup`, { token: a.token })).toBeNull();
-      const after = (await cityRow(api, a.cityId)).troopQueues.find((q) => q.positionId === BARRACKS)!.queue[0];
+      const after = (await cityRow(api, a.cityId))!.troopQueues.find((q) => q.positionId === BARRACKS)!.queue[0]!;
       expect(after.endTime).toBeLessThan(batch.endTime);
       expect((await items(api, a))[ItemId.NAPOLEONS_DIARY]).toBeUndefined();
     }));
@@ -325,9 +325,9 @@ describe('POST /cities/{cityId}/fortifications/queues/{positionId}/{queueId}/spe
       const [a] = await lords(api, 1);
       await garrison(api, a);
       await giveItems(api, a, { [ItemId.ARCHIMEDES_NOTE]: 2 });
-      const batch = (await trainForts(api, a, 50)).allProduceQueue[0];
+      const batch = (await trainForts(api, a, 50)).allProduceQueue[0]!;
       expect(await api.ok('POST', `cities/${a.cityId}/fortifications/queues/${WALLS}/${batch.queueId}/speedup`, { token: a.token })).toBeNull();
-      expect((await cityRow(api, a.cityId)).fortQueue.queue[0].endTime).toBeLessThan(batch.endTime);
+      expect((await cityRow(api, a.cityId))!.fortQueue.queue[0]!.endTime).toBeLessThan(batch.endTime);
       expect((await items(api, a))[ItemId.ARCHIMEDES_NOTE]).toBe(1);
     }));
 
@@ -352,7 +352,7 @@ describe('POST /cities/{cityId}/troops/train-split', () => {
       expect(res.batches.map((b) => b.positionId).sort()).toEqual([BARRACKS, BARRACKS_2]);
       expect(res.batches.reduce((s, b) => s + b.count, 0)).toBe(100);
       expect(res.finishAt).toBeGreaterThan(Date.now());
-      expect((await cityRow(api, a.cityId)).troopQueues).toHaveLength(2);
+      expect((await cityRow(api, a.cityId))!.troopQueues).toHaveLength(2);
     }));
 
   it('refuses a malformed body and a city whose barracks queues are full', () =>
@@ -379,7 +379,7 @@ describe('POST /cities/{cityId}/troops/disband', () => {
       const [a] = await lords(api, 1);
       await setCityStats(api, a, { troops: { militia: 10 } });
       expect(await api.ok('POST', `cities/${a.cityId}/troops/disband`, { token: a.token, body: { troopId: TroopType.WARRIOR, count: 4 } })).toBeNull();
-      expect((await cityRow(api, a.cityId)).troops).toMatchObject({ militia: 6 });
+      expect((await cityRow(api, a.cityId))!.troops).toMatchObject({ militia: 6 });
     }));
 
   it('refuses a malformed body and more troops than the city has', () =>
@@ -403,7 +403,7 @@ describe('POST /cities/{cityId}/fortifications/destroy', () => {
       const [a] = await lords(api, 1);
       await patchCity(api, a.cityId, { forts: { trap: 5 } });
       expect(await api.ok('POST', `cities/${a.cityId}/fortifications/destroy`, { token: a.token, body: { troopId: FortType.TRAP, count: 2 } })).toBeNull();
-      expect((await cityRow(api, a.cityId)).forts).toEqual({ trap: 3 });
+      expect((await cityRow(api, a.cityId))!.forts).toEqual({ trap: 3 });
     }));
 
   it('refuses a malformed body and a troop', () =>
@@ -453,7 +453,7 @@ describe('POST /cities/{cityId}/troops/injured/disband', () => {
       const [a] = await lords(api, 1);
       await patchCity(api, a.cityId, { injuredTroops: { militia: 10 } });
       expect(await api.ok('POST', `cities/${a.cityId}/troops/injured/disband`, { token: a.token, body: { troops: { militia: 4 } } })).toBeNull();
-      expect((await cityRow(api, a.cityId)).injuredTroops).toEqual({ militia: 6 });
+      expect((await cityRow(api, a.cityId))!.injuredTroops).toEqual({ militia: 6 });
     }));
 
   it('refuses a malformed body and more than are injured', () =>

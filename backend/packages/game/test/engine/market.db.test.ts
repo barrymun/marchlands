@@ -18,7 +18,7 @@ describe(deliverShipment.name, () => {
     withMerchantCurve(() =>
       game(async (g) => {
         const [a, b] = [await createTrader(g), await createTrader(g)];
-        const s = await shipWoodTo(g, a, b);
+        const s = (await shipWoodTo(g, a, b))!;
         g._pushes.length = 0;
         await deliverShipment(g, s.id);
         expect(await reloadCity(g, b.cityId)).toMatchObject({ wood: 1_001_000 });
@@ -38,8 +38,8 @@ describe(deliverShipment.name, () => {
         await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, type: 'market' });
         const [s] = await market.myShipments(g, b.id);
         expect(s).toMatchObject({ resType: GOLD, amount: Math.floor(1000 * offerPrice()) });
-        await deliverShipment(g, s.id);
-        expect(await reloadCity(g, b.cityId)).toMatchObject({ gold: 1_000_000 + s.amount, wood: 999_000 });
+        await deliverShipment(g, s!.id);
+        expect(await reloadCity(g, b.cityId)).toMatchObject({ gold: 1_000_000 + s!.amount, wood: 999_000 });
       }),
     ));
 
@@ -48,7 +48,7 @@ describe(deliverShipment.name, () => {
       withMerchantCurve(() =>
         game(async (g) => {
           const [a, b] = [await createTrader(g), await createTrader(g)];
-          const s = await shipWoodTo(g, a, b);
+          const s = (await shipWoodTo(g, a, b))!;
           g.advance(s.endTime - g.now - 1);
           await deliverShipment(g, s.id);
           expect(await market.myShipments(g, b.id)).toHaveLength(1);
@@ -63,7 +63,7 @@ describe(deliverShipment.name, () => {
     withMerchantCurve(() =>
       game(async (g) => {
         const [a, b, other] = [await createTrader(g), await createTrader(g), await createTrader(g)];
-        const s = await shipWoodTo(g, a, b);
+        const s = (await shipWoodTo(g, a, b))!;
         await g.tx.update(marketShipments).set({ cityId: other.cityId }).where(eq(marketShipments.id, s.id));
         await deliverShipment(g, s.id);
         expect(await reloadCity(g, b.cityId)).toMatchObject({ wood: 1_001_000 });
@@ -76,7 +76,7 @@ describe(deliverShipment.name, () => {
     withMerchantCurve(() =>
       game(async (g) => {
         const [a, b, other] = [await createTrader(g), await createTrader(g), await createTrader(g)];
-        const s = await shipWoodTo(g, a, b);
+        const s = (await shipWoodTo(g, a, b))!;
         await g.tx.update(cities).set({ playerId: other.id }).where(eq(cities.id, b.cityId));
         await deliverShipment(g, s.id);
         expect(await market.myShipments(g, b.id)).toEqual([]);
@@ -130,7 +130,7 @@ describe(merchantSweep.name, () => {
           { playerIds: [b.id], cmd: PushCmd.TRADES_UPDATE, data: { resType: Res.WOOD, amount: 1000, price: f.gold / 1000 } },
         ]);
         const [report] = (await reports.listReports(g, b.id, ReportType.TRADE, 1, 10)).reports;
-        expect((await reports.readReport(g, b.id, report.id)).content).toEqual({
+        expect((await reports.readReport(g, b.id, report!.id)).content).toEqual({
           kind: 'trade',
           trade: { side: 'buy', resource: 'wood', amount: 1000, price: f.gold / 1000, gold: Math.floor(f.gold) },
         });

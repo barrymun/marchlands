@@ -64,7 +64,7 @@ export async function openSocket(app: FastifyInstance, url: string, timeoutMs = 
           setTimeout(resolve, 50);
         });
       }
-      return frames[read++];
+      return frames[read++]!; // the loop above waited for it
     },
     send: (data) => ws.send(typeof data === 'string' ? data : JSON.stringify(data)),
     close() {

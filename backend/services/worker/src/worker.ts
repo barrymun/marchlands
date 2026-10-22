@@ -44,6 +44,7 @@ export async function processOne(db: Db, opts: { log: Log }): Promise<boolean> {
       { retries: 3 },
     );
   } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- set inside the transaction's callback, which the rule can't follow
     if (!claimed) throw err;
     const ev = claimed as EventRow;
     opts.log('error', 'event failed', { id: ev.id, type: ev.type, error: String((err as Error).stack ?? err) });
@@ -52,6 +53,7 @@ export async function processOne(db: Db, opts: { log: Log }): Promise<boolean> {
       update timed_events set attempts = attempts + 1, last_error = ${String((err as Error).message).slice(0, 500)},
         due_at = ${Date.now()} + 5000 * power(2, attempts) where id = ${ev.id}`);
   }
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- as above
   return claimed != null;
 }
 

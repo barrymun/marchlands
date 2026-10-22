@@ -8,7 +8,7 @@ import {
   postCitiesFortificationsDestroyMutation,
   postCitiesTroopsDisbandMutation,
 } from '@marchlands/api-client';
-import { BALANCE, disbandRefund, FORT_KEYS, type FortKey, TROOP_KEYS, type TroopKey } from '@marchlands/core';
+import { BALANCE, disbandRefund, fortKeyOf, troopKey as troopKeyOf } from '@marchlands/core';
 
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog';
 import { CostList } from '@/components/cost-list/cost-list';
@@ -28,8 +28,8 @@ export function DismissDialog({ city, unitId, onClose }: { city: CityBean; unitI
   const player = usePlayer();
   const [amount, setAmount] = useState('');
   const id = useSticky(unitId) ?? 0;
-  const fortKey: FortKey | undefined = FORT_KEYS[id as keyof typeof FORT_KEYS];
-  const troopKey: TroopKey | undefined = TROOP_KEYS[id as keyof typeof TROOP_KEYS];
+  const fortKey = fortKeyOf(id);
+  const troopKey = troopKeyOf(id);
   const key = fortKey ?? troopKey;
   const have = (fortKey ? city.fortification[fortKey] : troopKey ? city.troop[troopKey] : 0) ?? 0;
   const count = dismissCount(amount, have);

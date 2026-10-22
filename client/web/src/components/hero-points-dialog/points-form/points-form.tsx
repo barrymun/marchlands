@@ -34,8 +34,8 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
   const bonusGain = (added: number) => mayorProductionBonus(heroManagement(hero) + added) - mayorProductionBonus(heroManagement(hero));
   const mayorGain = (added: number) => Math.round(fieldOutput * bonusGain(added));
   const total = (k: StatKey) => {
-    const s = STATS.find((x) => x.key === k)!;
-    return hero[k] + hero[s.added] + hero[s.buff];
+    const s = STATS.find((x) => x.key === k); // StatKey is one of STATS' keys
+    return s ? hero[k] + hero[s.added] + hero[s.buff] : hero[k];
   };
 
   return (

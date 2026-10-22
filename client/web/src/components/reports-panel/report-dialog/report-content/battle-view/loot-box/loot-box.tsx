@@ -20,7 +20,7 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
       </div>
     );
   }
-  const entries = (['gold', 'food', 'wood', 'stone', 'iron'] as const).map((k) => [k, Math.floor(b.plunder[k] ?? 0)] as const);
+  const entries = (['gold', 'food', 'wood', 'stone', 'iron'] as const).map((k) => [k, Math.floor(b.plunder[k])] as const);
   const total = entries.reduce((s, [, n]) => s + n, 0);
   return (
     <div className="grid gap-1.5 rounded-md bg-muted/50 p-3">

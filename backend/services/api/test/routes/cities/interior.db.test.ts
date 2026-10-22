@@ -29,7 +29,7 @@ describe('GET /cities/{cityId}', () => {
         heros: [],
         fields: [],
       });
-      expect(city.fieldId).toBe((await cityRow(api, a.cityId)).tileId);
+      expect(city.fieldId).toBe((await cityRow(api, a.cityId))!.tileId);
     }));
 
   it('refuses a malformed city id', () =>
@@ -81,7 +81,7 @@ describe('PATCH /cities/{cityId}', () => {
       const bad = await api.refused('PATCH', `cities/${a.cityId}`, 'common.nameInvalid', { token: a.token, body: { name: 'No<tags>' }, status: 400 });
       expect(bad.body).toMatchObject({ ok: -87, error: { params: { what: { code: 'common.cityName' } } } });
       await api.refused('PATCH', `cities/${a.cityId}`, 'city.invalidLogo', { token: a.token, body: { logoUrl: 'https://example.test/x.png' }, status: 400 });
-      expect((await cityRow(api, a.cityId)).name).toBe(`${a.name} City`);
+      expect((await cityRow(api, a.cityId))!.name).toBe(`${a.name} City`);
     }));
 });
 
@@ -92,7 +92,7 @@ describe('PUT /cities/{cityId}/tax', () => {
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       expect(await api.ok('PUT', `cities/${a.cityId}/tax`, { token: a.token, body: { rate: 35 } })).toBeNull();
-      expect((await cityRow(api, a.cityId)).taxRate).toBe(35);
+      expect((await cityRow(api, a.cityId))!.taxRate).toBe(35);
     }));
 
   it('refuses a malformed body and a rate out of range', () =>
@@ -123,7 +123,7 @@ describe('PUT /cities/{cityId}/work-rates', () => {
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       expect(await api.ok('PUT', `cities/${a.cityId}/work-rates`, { token: a.token, body: { food: 40, iron: 0 } })).toBeNull();
-      expect((await cityRow(api, a.cityId)).workRates).toMatchObject({ food: 40, wood: 100, stone: 100, iron: 0 });
+      expect((await cityRow(api, a.cityId))!.workRates).toMatchObject({ food: 40, wood: 100, stone: 100, iron: 0 });
     }));
 
   it('refuses a malformed body and a rate out of range', () =>
@@ -141,7 +141,7 @@ describe('PUT /cities/{cityId}/store-percent', () => {
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       expect(await api.ok('PUT', `cities/${a.cityId}/store-percent`, { token: a.token, body: { food: 40, wood: 10 } })).toBeNull();
-      expect((await cityRow(api, a.cityId)).storePercent).toMatchObject({ food: 40, wood: 10, stone: 25, iron: 25 });
+      expect((await cityRow(api, a.cityId))!.storePercent).toMatchObject({ food: 40, wood: 10, stone: 25, iron: 25 });
     }));
 
   it('refuses a malformed body and a total above 100', () =>
@@ -158,10 +158,10 @@ describe('POST /cities/{cityId}/comfort', () => {
   it('a blessing turns gold into food; a second comfort waits for the cooldown', () =>
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
-      const before = await cityRow(api, a.cityId);
+      const before = (await cityRow(api, a.cityId))!;
       const res = await api.ok<{ freeBlessing: boolean }>('POST', `cities/${a.cityId}/comfort`, { token: a.token, body: { typeId: 3 } });
       expect(res).toEqual({ freeBlessing: expect.any(Boolean) });
-      const after = await cityRow(api, a.cityId);
+      const after = (await cityRow(api, a.cityId))!;
       expect(after.gold).toBeLessThan(before.gold);
       expect(after.food).toBeGreaterThan(before.food);
       const r = await api.refused('POST', `cities/${a.cityId}/comfort`, 'city.comfortCooldown', { token: a.token, body: { typeId: 3 }, status: 400 });
@@ -209,7 +209,7 @@ describe('POST /cities/{cityId}/move', () => {
       const flat = await api.game((ctx) => pickOpenFlat(ctx, -1));
       const moved = await api.ok('POST', `cities/${a.cityId}/move`, { token: a.token, body: { targetTileId: flat } });
       expect(moved).toEqual({ fieldId: flat, x: expect.any(Number), y: expect.any(Number) });
-      expect((await cityRow(api, a.cityId)).tileId).toBe(flat);
+      expect((await cityRow(api, a.cityId))!.tileId).toBe(flat);
       const again = await api.game((ctx) => pickOpenFlat(ctx, -1));
       const r = await api.refused('POST', `cities/${a.cityId}/move`, 'city.teleportCooldown', { token: a.token, body: { targetTileId: again }, status: 400 });
       expect(r.body.ok).toBe(-90);
@@ -222,7 +222,7 @@ describe('POST /cities/{cityId}/move', () => {
         ['POST', `cities/${a.cityId}/move`, { body: {} }],
         ['POST', `cities/${a.cityId}/move`, { body: { targetTileId: -3 } }],
       ]);
-      const taken = (await cityRow(api, b.cityId)).tileId;
+      const taken = (await cityRow(api, b.cityId))!.tileId;
       const r = await api.refused('POST', `cities/${a.cityId}/move`, 'city.notFreeFlat', { token: a.token, body: { targetTileId: taken }, status: 400 });
       expect(r.body.ok).toBe(-25);
     }));

@@ -53,7 +53,7 @@ describe(runScheduledHeal.name, () => {
       const heroId = await farmingCity(g, p);
       await setInjured(g, p.cityId, injured);
       const armyId = await sendOut(g, p, heroId);
-      const reach = g.events('army')[0].dueAt;
+      const reach = g.events('army')[0]!.dueAt;
       await runScheduledHeal(g, p.id, p.cityId, 'resources', [armyId]);
       expect(g.events('flow.heal')).toEqual([
         // still marching out: about as long again to come back
@@ -109,8 +109,8 @@ describe(runScheduledHeal.name, () => {
       });
       await runFlowIn(g, p, f.id);
       const [heal] = g.events('flow.heal');
-      await armies.recallArmy(g, p.id, (heal.payload as { armyIds: number[] }).armyIds[0]);
-      await g.runDue(heal.dueAt);
+      await armies.recallArmy(g, p.id, (heal!.payload as { armyIds: number[] }).armyIds[0]!);
+      await g.runDue(heal!.dueAt);
       expect(g.events()).toEqual([]);
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE).at(-1)?.data).toMatchObject({ msg: { code: 'flow.healDone' } });
       expect((await reloadCity(g, p.cityId)).injuredTroops).toEqual({});

@@ -16,11 +16,11 @@ describe(refreshZoneStats.name, () => {
     game(async (g) => {
       const stats = await refreshZoneStats(asDb(g));
       expect(stats.map((s) => s.id)).toEqual(Array.from({ length: BALANCE.stateGrid ** 2 }, (_, i) => i));
-      const [{ open }] = (
+      const { open } = (
         await g.tx.execute<{ open: number }>(
           sql`select count(*)::int as open from tiles where type = ${TileType.FLAT} and city_id is null and owner_city_id is null`,
         )
-      ).rows;
+      ).rows[0]!;
       expect(stats.reduce((n, s) => n + s.openFlats, 0)).toBe(Number(open));
       for (const s of stats) {
         expect(s.castleCount).toBeGreaterThanOrEqual(s.playerCount);
@@ -28,14 +28,14 @@ describe(refreshZoneStats.name, () => {
         expect(s.settled).toBeLessThanOrEqual(1);
       }
       const [cached] = await g.tx.select().from(worldState).where(eq(worldState.key, 'zones'));
-      expect(cached.value).toEqual(stats);
+      expect(cached!.value).toEqual(stats);
     }));
 
   it('a new city takes an open flat of its zone', () =>
     game(async (g) => {
-      const before = (await refreshZoneStats(asDb(g)))[5];
+      const before = (await refreshZoneStats(asDb(g)))[5]!;
       await createTestPlayer(g, { zone: 5 });
-      const after = (await refreshZoneStats(asDb(g)))[5];
+      const after = (await refreshZoneStats(asDb(g)))[5]!;
       expect(after).toMatchObject({ playerCount: before.playerCount + 1, castleCount: before.castleCount + 1, openFlats: before.openFlats - 1 });
       expect(after.settled).toBeGreaterThan(before.settled);
     }));

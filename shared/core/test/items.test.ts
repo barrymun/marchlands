@@ -36,17 +36,17 @@ describe('SPEEDUP_ITEMS', () => {
 
   it('has every speed-up of BALANCE.items.speedups, at its price in cents', () => {
     expect(Object.keys(SPEEDUP_ITEMS).sort()).toEqual(Object.keys(items.speedups).sort());
-    for (const [id, s] of Object.entries(items.speedups)) expect(SPEEDUP_ITEMS[id].cents, id).toBe(s.cents);
+    for (const [id, s] of Object.entries(items.speedups)) expect(SPEEDUP_ITEMS[id]!.cents, id).toBe(s.cents);
   });
 
   it('cuts a fixed time, whatever is left', () => {
-    expect(SPEEDUP_ITEMS[ItemId.BEGINNER_GUIDELINES].reduce(10 * HOUR, rng(0.5))).toBe(15 * MINUTE);
-    expect(SPEEDUP_ITEMS[ItemId.INTERMEDIATE_GUIDELINES].reduce(0, rng(0.5))).toBe(2.5 * HOUR);
+    expect(SPEEDUP_ITEMS[ItemId.BEGINNER_GUIDELINES]!.reduce(10 * HOUR, rng(0.5))).toBe(15 * MINUTE);
+    expect(SPEEDUP_ITEMS[ItemId.INTERMEDIATE_GUIDELINES]!.reduce(0, rng(0.5))).toBe(2.5 * HOUR);
   });
 
   it('cuts a random whole number of hours in the cutHours range', () => {
-    const [min, max] = items.speedups[ItemId.MASTER_GUIDELINES].cutHours!;
-    const reduce = SPEEDUP_ITEMS[ItemId.MASTER_GUIDELINES].reduce;
+    const [min, max] = items.speedups[ItemId.MASTER_GUIDELINES]!.cutHours!;
+    const reduce = SPEEDUP_ITEMS[ItemId.MASTER_GUIDELINES]!.reduce;
     expect(reduce(0, rng(0))).toBe(min * HOUR);
     expect(reduce(0, rng(0.999_999))).toBe(max * HOUR);
     const r = seededRng('speedup');
@@ -57,8 +57,8 @@ describe('SPEEDUP_ITEMS', () => {
   });
 
   it('cuts a share of the total time', () => {
-    expect(SPEEDUP_ITEMS[ItemId.ULTIMATE_GUIDELINES].reduce(10 * HOUR, rng(0))).toBe(10 * HOUR * items.speedups[ItemId.ULTIMATE_GUIDELINES].cutShare!);
-    expect(SPEEDUP_ITEMS[SpeedupId.HALF_TIME].reduce(4 * HOUR, rng(0))).toBe(2 * HOUR);
+    expect(SPEEDUP_ITEMS[ItemId.ULTIMATE_GUIDELINES]!.reduce(10 * HOUR, rng(0))).toBe(10 * HOUR * items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!);
+    expect(SPEEDUP_ITEMS[SpeedupId.HALF_TIME]!.reduce(4 * HOUR, rng(0))).toBe(2 * HOUR);
   });
 
   it('costs its gold price when the player has none', () => {
@@ -130,11 +130,11 @@ describe('item descriptions', () => {
     expect(itemInfo(ItemId.FREEDOM_MEDAL)!.description.params).toEqual({ amount: items.medalLoyalty[ItemId.FREEDOM_MEDAL], max: BALANCE.heroMaxLoyalty });
     expect(itemInfo(ItemId.EXCALIBUR)!.description.params).toMatchObject({ percent: { share: items.heroAttributeBuff.bonus } });
     expect(itemInfo(ItemId.JUNIOR_MEDAL_BOX)!.description.params).toMatchObject({ min: items.medalBoxCount.min, max: items.medalBoxCount.max });
-    const box = items.heroBoxes[ItemId.HERO_PACKAGE];
+    const box = items.heroBoxes[ItemId.HERO_PACKAGE]!;
     expect(itemInfo(ItemId.HERO_PACKAGE)!.description.params).toMatchObject({ level: box.level, minStat: box.minStat });
     expect(itemInfo(ItemId.EPITOME_OF_MILITARY_SCIENCE)!.description.params).toEqual({
-      percent: { share: items.experienceBooks[ItemId.EPITOME_OF_MILITARY_SCIENCE].share },
-      min: items.experienceBooks[ItemId.EPITOME_OF_MILITARY_SCIENCE].min,
+      percent: { share: items.experienceBooks[ItemId.EPITOME_OF_MILITARY_SCIENCE]!.share },
+      min: items.experienceBooks[ItemId.EPITOME_OF_MILITARY_SCIENCE]!.min,
     });
   });
 });
@@ -155,7 +155,7 @@ describe(civilCodePopulation.name, () => {
 
 describe(loyaltyAfterMedal.name, () => {
   it('adds the loyalty of the medal, up to BALANCE.heroMaxLoyalty', () => {
-    expect(loyaltyAfterMedal(10, ItemId.LION_MEDAL)).toBe(10 + items.medalLoyalty[ItemId.LION_MEDAL]);
+    expect(loyaltyAfterMedal(10, ItemId.LION_MEDAL)).toBe(10 + items.medalLoyalty[ItemId.LION_MEDAL]!);
     expect(loyaltyAfterMedal(BALANCE.heroMaxLoyalty - 5, ItemId.NATION_MEDAL)).toBe(BALANCE.heroMaxLoyalty);
   });
   it('adds nothing for an item that is not a medal', () => {
@@ -175,7 +175,7 @@ describe(heroAttributeBuffEnd.name, () => {
 describe(createBoxHero.name, () => {
   it('is a hero of the box level with full loyalty and its level in unspent points', () => {
     const rng = seededRng('box-hero');
-    const q = items.heroBoxes[ItemId.HERO_PACKAGE];
+    const q = items.heroBoxes[ItemId.HERO_PACKAGE]!;
     for (let i = 0; i < 100; i++) {
       const h = createBoxHero(ItemId.HERO_PACKAGE, rng);
       expect(h).toMatchObject({ level: q.level, upgradeExp: upgradeExpFor(q.level), remainPoint: q.level, loyalty: BALANCE.heroMaxLoyalty, experience: 0 });
@@ -185,7 +185,7 @@ describe(createBoxHero.name, () => {
   });
   it('raises each low base attribute to minStat + 0 … heroBoxStatSpread', () => {
     const rng = seededRng('box-spread');
-    const q = items.heroBoxes[ItemId.HERO_PACKAGE];
+    const q = items.heroBoxes[ItemId.HERO_PACKAGE]!;
     const seen = new Set<number>();
     for (let i = 0; i < 2_000; i++) {
       const h = createBoxHero(ItemId.HERO_PACKAGE, rng);

@@ -123,7 +123,7 @@ describe(social.worldChat.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       await social.worldChat(g, a.id, 'Hi', 'beginner');
-      expect(g.pushes(PushCmd.CHANNEL_CHAT_MESSAGE)[0].data).toMatchObject({ channel: 'beginner' });
+      expect(g.pushes(PushCmd.CHANNEL_CHAT_MESSAGE)[0]!.data).toMatchObject({ channel: 'beginner' });
       expect(await social.chatHistory(g, a.id, 'world')).toEqual([]);
       expect((await social.chatHistory(g, a.id, 'beginner')).map((m) => m.msg)).toEqual(['Hi']);
     }));
@@ -133,8 +133,8 @@ describe(social.worldChat.name, () => {
       const a = await createTestPlayer(g);
       await social.worldChat(g, a.id, `<b>"Tom" & 'Jerry'</b>`);
       const escaped = '&lt;b&gt;&quot;Tom&quot; &amp; &#39;Jerry&#39;&lt;/b&gt;';
-      expect(g.pushes(PushCmd.CHANNEL_CHAT_MESSAGE)[0].data).toMatchObject({ msg: escaped });
-      expect((await social.chatHistory(g, a.id, 'world'))[0].msg).toBe(escaped);
+      expect(g.pushes(PushCmd.CHANNEL_CHAT_MESSAGE)[0]!.data).toMatchObject({ msg: escaped });
+      expect((await social.chatHistory(g, a.id, 'world'))[0]!.msg).toBe(escaped);
     }));
 
   it('accepts 300 characters and rejects more, and rejects an empty message', () =>
@@ -205,7 +205,7 @@ describe(social.allianceChat.name, () => {
           data: { msg: 'For the &lt;Order&gt;', languageType: 0, fromUser: b.name, fromId: b.id, channel: 'alliance', time: T0 },
         },
       ]);
-      expect(g.pushes(PushCmd.ALLIANCE_CHAT_MESSAGE)[0].playerIds).toHaveLength(2);
+      expect(g.pushes(PushCmd.ALLIANCE_CHAT_MESSAGE)[0]!.playerIds).toHaveLength(2);
       expect((await social.chatHistory(g, a.id, 'alliance')).map((m) => m.msg)).toEqual(['For the &lt;Order&gt;']);
       expect(await social.chatHistory(g, outsider.id, 'alliance')).toEqual([]);
     }));
@@ -295,7 +295,7 @@ describe(social.chatHistory.name, () => {
       }
       const list = await social.chatHistory(g, a.id, 'world');
       expect(list).toHaveLength(100);
-      expect(list[0].msg).toBe('M3');
+      expect(list[0]!.msg).toBe('M3');
       expect(list.at(-1)!.msg).toBe('M102');
     }));
 

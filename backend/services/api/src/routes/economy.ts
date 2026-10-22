@@ -75,9 +75,12 @@ export default async function economyRoutes(app: ZApp) {
         research: RESEARCH,
         troops: TROOPS,
         // names are not sent: the client names items, quests and titles by id in the player's language
-        items: ITEMS.map(({ cost: _cents, buyable: _buyable, canGamble: _gamble, name: _name, ...i }) => {
-          const { description, use, howTo } = itemInfo(i.id)!;
-          return { ...i, goldPrice: itemGoldPrice(i.id), description, use, howTo };
+        // every item has its info (core builds it from the same list)
+        items: ITEMS.flatMap(({ cost: _cents, buyable: _buyable, canGamble: _gamble, name: _name, ...i }) => {
+          const info = itemInfo(i.id);
+          if (!info) return [];
+          const { description, use, howTo } = info;
+          return [{ ...i, goldPrice: itemGoldPrice(i.id), description, use, howTo }];
         }),
         questGroups: QUESTS.map(({ name: _name, description: _description, ...q }) => q),
         titles: TITLES,

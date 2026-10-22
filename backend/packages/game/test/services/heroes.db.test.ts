@@ -170,13 +170,13 @@ describe(heroes.hire.name, () => {
       await heroBuildings(g, p, 3);
       const [offer] = (await heroes.tavern(g, p.id, p.cityId)).heros;
       await setResources(g, p, { gold: 100_000 });
-      const bean = await heroes.hire(g, p.id, p.cityId, offer.id);
-      expect(bean).toMatchObject({ id: offer.id, status: HeroStatus.IDLE, cityId: p.cityId });
-      expect(await getHero(g, offer.id)).toMatchObject({ playerId: p.id, inTavern: false, status: HeroStatus.IDLE });
-      expect(await gold(g, p)).toBe(100_000 - heroHireCost(offer.level));
-      expect((await heroes.listHeroes(g, p.id, p.cityId)).heroes.map((h) => h.id)).toEqual([offer.id]);
+      const bean = await heroes.hire(g, p.id, p.cityId, offer!.id);
+      expect(bean).toMatchObject({ id: offer!.id, status: HeroStatus.IDLE, cityId: p.cityId });
+      expect(await getHero(g, offer!.id)).toMatchObject({ playerId: p.id, inTavern: false, status: HeroStatus.IDLE });
+      expect(await gold(g, p)).toBe(100_000 - heroHireCost(offer!.level));
+      expect((await heroes.listHeroes(g, p.id, p.cityId)).heroes.map((h) => h.id)).toEqual([offer!.id]);
       expect((await heroes.tavern(g, p.id, p.cityId)).heros).toHaveLength(3); // the Inn offers a new hero
-      expect(lastHeroPush(g)).toMatchObject({ playerIds: [p.id], data: { castleId: p.cityId, hero: { id: offer.id }, updateType: 0 } });
+      expect(lastHeroPush(g)).toMatchObject({ playerIds: [p.id], data: { castleId: p.cityId, hero: { id: offer!.id }, updateType: 0 } });
     }));
 
   it('refuses without a free slot', () =>
@@ -186,7 +186,7 @@ describe(heroes.hire.name, () => {
       await addHero(g, p);
       const [offer] = (await heroes.tavern(g, p.id, p.cityId)).heros;
       await setResources(g, p, { gold: 100_000 });
-      await expectRefused(heroes.hire(g, p.id, p.cityId, offer.id), msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }));
+      await expectRefused(heroes.hire(g, p.id, p.cityId, offer!.id), msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }));
     }));
 
   it('refuses a hero that is not on offer in that city', () =>
@@ -198,7 +198,7 @@ describe(heroes.hire.name, () => {
       await setResources(g, a, { gold: 100_000 });
       const [elsewhere] = (await heroes.tavern(g, b.id, b.cityId)).heros;
       const hired = await addHero(g, a);
-      await expectRefused(heroes.hire(g, a.id, a.cityId, elsewhere.id), msg('common.heroNotFound'));
+      await expectRefused(heroes.hire(g, a.id, a.cityId, elsewhere!.id), msg('common.heroNotFound'));
       await expectRefused(heroes.hire(g, a.id, a.cityId, hired), msg('common.heroNotFound'));
       await expectRefused(heroes.hire(g, a.id, a.cityId, 999_999_999), msg('common.heroNotFound'));
     }));
@@ -208,9 +208,9 @@ describe(heroes.hire.name, () => {
       const p = await createTestPlayer(g);
       await heroBuildings(g, p, 2);
       const [offer] = (await heroes.tavern(g, p.id, p.cityId)).heros;
-      await setResources(g, p, { gold: heroHireCost(offer.level) - 1 });
-      await expectRefused(heroes.hire(g, p.id, p.cityId, offer.id), msg('common.notEnoughGold'));
-      expect((await getHero(g, offer.id)).inTavern).toBe(true);
+      await setResources(g, p, { gold: heroHireCost(offer!.level) - 1 });
+      await expectRefused(heroes.hire(g, p.id, p.cityId, offer!.id), msg('common.notEnoughGold'));
+      expect((await getHero(g, offer!.id)).inTavern).toBe(true);
     }));
 });
 
@@ -257,7 +257,7 @@ describe(heroes.setHeroLocked.name, () => {
       await heroBuildings(g, a, 1);
       const [offer] = (await heroes.tavern(g, a.id, a.cityId)).heros;
       await expectRefused(heroes.setHeroLocked(g, b.id, await addHero(g, a), true), msg('common.heroNotFound'));
-      await expectRefused(heroes.setHeroLocked(g, a.id, offer.id, true), msg('common.heroNotFound'));
+      await expectRefused(heroes.setHeroLocked(g, a.id, offer!.id, true), msg('common.heroNotFound'));
     }));
 });
 
@@ -656,7 +656,7 @@ describe(heroes.useHeroItem.name, () => {
       expect(bean.managementBuffAdded).toBeGreaterThan(0);
       expect(await gold(g, p)).toBe(0);
       expect(g.pushes(PushCmd.RESOURCE_UPDATE)).toHaveLength(pushes + 1);
-      await g.runDue(g.events('hero.buff')[0].dueAt);
+      await g.runDue(g.events('hero.buff')[0]!.dueAt);
       expect((await getHero(g, id)).managementBuffAdded).toBe(0);
       expect(g.pushes(PushCmd.RESOURCE_UPDATE)).toHaveLength(pushes + 2);
     }));

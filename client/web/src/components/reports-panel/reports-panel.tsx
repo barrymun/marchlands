@@ -23,7 +23,7 @@ export function ReportsPanel() {
   const [tab, setTab] = useState<(typeof TABS)[number]['id']>('all');
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState<number | null>(null);
-  const type = TABS.find((tb) => tb.id === tab)!.type;
+  const type = (TABS.find((tb) => tb.id === tab) ?? TABS[0]).type; // tab is one of TABS' ids
   const unread = useUnreadReports();
   const list = useQuery({
     ...getReportsOptions({ query: { type: type ?? undefined, pageNo: page, pageSize: PAGE_SIZE } }),

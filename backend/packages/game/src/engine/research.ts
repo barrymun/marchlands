@@ -48,7 +48,7 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
     ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: home.city.id, hero: heroBean(mayor), updateType: 2 });
   }
   await savePlayer(ctx, p);
-  ctx.push(playerId, PushCmd.RESEARCH_COMPLETE_UPDATE, { castleId: r.cityId!, typeId: techId, level });
+  ctx.push(playerId, PushCmd.RESEARCH_COMPLETE_UPDATE, { castleId: r.cityId ?? home?.city.id ?? 0, typeId: techId, level });
   for (const b of bundles) pushResources(ctx, b);
   await pushPlayerInfo(ctx, p);
   // Hero Enhancement raises every hero's gear (gear.ts)

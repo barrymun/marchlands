@@ -51,8 +51,8 @@ describe('city patches', () => {
     seed(getPlayerQueryKey(), { castles: [city(7)] });
     const hero = { id: 1, level: 5 } as HeroBean;
     handle(PushCmd.HERO_UPDATE, { castleId: 7, hero, updateType: 0 }, qc);
-    expect(qc.getQueryData<CityBean>(cityKey(7))?.heros[0].level).toBe(5);
-    expect(qc.getQueryData<GetPlayerResponse>(getPlayerQueryKey())?.castles[0].heros[0].level).toBe(5);
+    expect(qc.getQueryData<CityBean>(cityKey(7))?.heros[0]!.level).toBe(5);
+    expect(qc.getQueryData<GetPlayerResponse>(getPlayerQueryKey())?.castles[0]!.heros[0]!.level).toBe(5);
   });
 });
 

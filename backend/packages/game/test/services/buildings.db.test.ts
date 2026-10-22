@@ -344,9 +344,9 @@ describe(buildings.speedup.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await giveItems(g, p, { [ItemId.BEGINNER_GUIDELINES]: 1 });
-      const before = (await reloadPlayer(g, p)).items[ItemId.BEGINNER_GUIDELINES];
+      const before = (await reloadPlayer(g, p)).items[ItemId.BEGINNER_GUIDELINES]!;
       const built = await buildings.upgrade(g, p.id, p.cityId, -1);
-      const cut = BALANCE.items.speedups[ItemId.BEGINNER_GUIDELINES].cutMs!;
+      const cut = BALANCE.items.speedups[ItemId.BEGINNER_GUIDELINES]!.cutMs!;
       expect(built.endTime - built.startTime).toBeGreaterThan(cut);
       const gold = (await stock(g, p)).gold;
       const bean = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.BEGINNER_GUIDELINES);
@@ -364,7 +364,7 @@ describe(buildings.speedup.name, () => {
       const before = await stock(g, p);
       await buildings.speedup(g, p.id, p.cityId, -1, ItemId.BEGINNER_GUIDELINES);
       expect((await stored(g, p)).gold).toBe(before.gold - speedupItemGold(ItemId.BEGINNER_GUIDELINES));
-      expect(await buildingAt(g, p, -1)).toMatchObject({ endTime: built.endTime - BALANCE.items.speedups[ItemId.BEGINNER_GUIDELINES].cutMs! });
+      expect(await buildingAt(g, p, -1)).toMatchObject({ endTime: built.endTime - BALANCE.items.speedups[ItemId.BEGINNER_GUIDELINES]!.cutMs! });
       await setResources(g, p, { gold: 0 });
       await expectRefused(
         buildings.speedup(g, p.id, p.cityId, -1, ItemId.BEGINNER_GUIDELINES),
@@ -378,7 +378,7 @@ describe(buildings.speedup.name, () => {
       await giveItems(g, p, { [ItemId.ULTIMATE_GUIDELINES]: 2 });
       const built = await buildings.upgrade(g, p.id, p.cityId, -1);
       const total = built.endTime - built.startTime;
-      const cut = scaled(total * BALANCE.items.speedups[ItemId.ULTIMATE_GUIDELINES].cutShare!);
+      const cut = scaled(total * BALANCE.items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!);
       const once = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.ULTIMATE_GUIDELINES);
       expect(once).toMatchObject({ endTime: built.endTime - cut, startTime: built.startTime - cut });
       const twice = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.ULTIMATE_GUIDELINES);

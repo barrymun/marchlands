@@ -49,7 +49,7 @@ describe(alliance.createAlliance.name, () => {
       const p = await createTestPlayer(g);
       await setResources(g, p, { gold: BALANCE.allianceCreateGold });
       const { id } = await alliance.createAlliance(g, p.id, p.cityId, 'Ördnung_1.-ä');
-      expect((await allianceRow(g, id)).name).toBe('Ördnung_1.-ä');
+      expect((await allianceRow(g, id))!.name).toBe('Ördnung_1.-ä');
     }));
 
   it('rejects a name that is too short, too long, has other characters or a bad word', () =>
@@ -101,7 +101,7 @@ describe(alliance.setInfo.name, () => {
     game(async (g) => {
       const a = await createTestAlliance(g);
       await alliance.setInfo(g, a.host.id, { note: 'n'.repeat(2001), intro: 'i'.repeat(2500), motd: 'm'.repeat(501) });
-      const row = await allianceRow(g, a.id);
+      const row = (await allianceRow(g, a.id))!;
       expect([row.note.length, row.intro.length, row.motd.length]).toEqual([2000, 2000, 500]);
     }));
 
@@ -197,7 +197,7 @@ describe(alliance.leaveAlliance.name, () => {
       expect(await reloadPlayer(g, heir)).toMatchObject({ allianceRank: AllianceRank.HOST });
       expect(await allianceRow(g, a.id)).toMatchObject({ leaderPlayerId: heir.id });
       expect(await reloadPlayer(g, a.host)).toMatchObject({ allianceId: null });
-      expect((await alliance.events(g, heir.id))[0].message).toEqual(msg('alliance.event.left', { name: a.host.name }));
+      expect((await alliance.events(g, heir.id))[0]!.message).toEqual(msg('alliance.event.left', { name: a.host.name }));
     }));
 
   it('rejects a player in no alliance', () =>

@@ -16,7 +16,7 @@ describe('battle simulator', () => {
       const r = simulateBattle({ research: {}, troops: c.atk }, { research: {}, troops: c.def }, { rng: noRng });
       let good = r.totalRounds === c.rounds;
       for (let i = 0; i < 12 && good; i++) {
-        if (r.attackerTroops[i] !== c.atk[i] - c.atkLoss[i] || r.defenderTroops[i] !== c.def[i] - c.defLoss[i]) good = false;
+        if (r.attackerTroops[i] !== c.atk[i]! - c.atkLoss[i]! || r.defenderTroops[i] !== c.def[i]! - c.defLoss[i]!) good = false;
       }
       if (!good && failures.length < 10) failures.push(`${c.file}: ${c.line}`);
     }

@@ -61,7 +61,7 @@ describe(npcTemplate.name, () => {
     for (let level = 1; level <= 10; level++) {
       const used = usedWallSpace(npcTemplate(level).forts, []);
       expect(wallCapacity(npcCityBuildings(level))).toBe(BALANCE.wallSpace[level]);
-      expect(used, `level ${level}`).toBeLessThanOrEqual(BALANCE.wallSpace[level]);
+      expect(used, `level ${level}`).toBeLessThanOrEqual(BALANCE.wallSpace[level]!);
     }
   });
 });

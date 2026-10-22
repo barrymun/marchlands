@@ -137,7 +137,7 @@ async function attackTargets(
 /** Heal every injured troop in the city (resources or honor); fails, rolling the city back, if it cannot pay for all of them. */
 async function healAll(ctx: Ctx, playerId: number, cityId: number, payWith: 'resources' | 'honor'): Promise<Message> {
   const b = await openOwnCity(ctx, playerId, cityId);
-  const injured = Object.fromEntries(Object.entries(b.city.injuredTroops).filter(([, n]) => (n ?? 0) > 0)) as Record<string, number>;
+  const injured = Object.fromEntries(Object.entries(b.city.injuredTroops).filter(([, n]) => n > 0)) as Record<string, number>;
   const total = Object.values(injured).reduce((s, n) => s + n, 0);
   if (!total) return msg('flow.step.noInjured');
   await cureInjured(ctx, playerId, cityId, injured, payWith);
@@ -287,7 +287,7 @@ async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<
     : msg('flow.step.trainingDone', { amount: count, troop, count: barracks });
 }
 
-const citiesWanted = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => f.cityOverride ?? f.cities ?? 'all';
+const citiesWanted = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => f.cityOverride ?? f.cities;
 export const usesAllCities = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => citiesWanted(f) === 'all';
 
 /**
@@ -377,7 +377,7 @@ export async function runPart(ctx: Ctx, playerId: number, f: FlowRow, from: numb
       error = err instanceof GameError ? err.msg : msg('flow.cityFailed');
       if (!(err instanceof GameError)) console.error('flow run failed', err);
     }
-    out.push({ cityId, cityName: names.get(cityId)!, ok: error == null, error, steps });
+    out.push({ cityId, cityName: names.get(cityId) ?? '', ok: error == null, error, steps });
   }
   return out;
 }
@@ -495,7 +495,7 @@ async function startRun(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCit
     run: f.runs,
     startedAt: ctx.now,
     finishedAt: null,
-    cities: cities.map((cityId) => ({ cityId, cityName: names.get(cityId)!, ok: true, error: null, steps: [] })),
+    cities: cities.map((cityId) => ({ cityId, cityName: names.get(cityId) ?? '', ok: true, error: null, steps: [] })),
     skippedCities: skipped,
   };
   if (!cities.length) {

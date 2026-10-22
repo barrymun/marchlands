@@ -11,7 +11,7 @@ import { apiTest, type TestApi } from '#test/support/api.ts';
 import { expectInvalid, itGuards, type Lord, lords, RICH, setBuildings, setResources } from '#test/support/city-fixtures.ts';
 
 const cityRow = async (api: TestApi, id: number) => (await api.db.select().from(cities).where(eq(cities.id, id)))[0];
-const buildingAt = async (api: TestApi, cityId: number, positionId: number) => (await cityRow(api, cityId)).buildings.find((x) => x.positionId === positionId);
+const buildingAt = async (api: TestApi, cityId: number, positionId: number) => (await cityRow(api, cityId))!.buildings.find((x) => x.positionId === positionId);
 
 /** A cottage under construction at position 0. */
 async function building(api: TestApi, p: Lord) {
@@ -77,14 +77,14 @@ describe('POST /cities/{cityId}/buildings', () => {
   it('starts a construction and pays for it', () =>
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
-      const before = await cityRow(api, a.cityId);
+      const before = (await cityRow(api, a.cityId))!;
       const bean = await api.ok<{ endTime: number }>('POST', `cities/${a.cityId}/buildings`, {
         token: a.token,
         body: { typeId: BuildingType.COTTAGE, positionId: 0 },
       });
       expect(bean).toMatchObject({ positionId: 0, typeId: BuildingType.COTTAGE, level: 0, status: BuildingStatus.BUILDING });
       expect(bean.endTime).toBeGreaterThan(Date.now());
-      const after = await cityRow(api, a.cityId);
+      const after = (await cityRow(api, a.cityId))!;
       expect(after.buildings).toContainEqual(expect.objectContaining({ positionId: 0, typeId: BuildingType.COTTAGE, status: BuildingStatus.BUILDING }));
       expect(after.wood).toBeLessThan(before.wood);
     }));
@@ -135,10 +135,10 @@ describe('POST /cities/{cityId}/buildings/{positionId}/demolish', () => {
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       await setBuildings(api, a, [[20, BuildingType.COTTAGE, 3]]);
-      const before = await cityRow(api, a.cityId);
+      const before = (await cityRow(api, a.cityId))!;
       const bean = await api.ok('POST', `cities/${a.cityId}/buildings/20/demolish`, { token: a.token });
       expect(bean).toMatchObject({ positionId: 20, typeId: 0, level: 0 });
-      const after = await cityRow(api, a.cityId);
+      const after = (await cityRow(api, a.cityId))!;
       expect(after.buildings.some((x) => x.positionId === 20)).toBe(false);
       expect(after.wood).toBeGreaterThan(before.wood);
     }));
@@ -197,12 +197,12 @@ describe('POST /cities/{cityId}/buildings/{positionId}/speedup', () => {
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       const started = await building(api, a);
-      const gold = (await cityRow(api, a.cityId)).gold;
+      const gold = (await cityRow(api, a.cityId))!.gold;
       const bean = await api.ok<{ endTime: number }>('POST', `cities/${a.cityId}/buildings/0/speedup`, { token: a.token, body: { itemId: SpeedupId.GOLD } });
       expect(bean).toMatchObject({ positionId: 0, typeId: BuildingType.COTTAGE, status: BuildingStatus.BUILDING });
       expect(bean.endTime).toBeLessThan(started.endTime);
       expect(bean.endTime).toBeLessThanOrEqual(Date.now());
-      expect((await cityRow(api, a.cityId)).gold).toBeLessThan(gold);
+      expect((await cityRow(api, a.cityId))!.gold).toBeLessThan(gold);
     }));
 
   it('refuses a malformed body and an unknown speed-up', () =>

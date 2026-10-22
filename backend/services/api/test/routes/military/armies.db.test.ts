@@ -71,13 +71,13 @@ async function stationed(api: TestApi, a: Lord, b: Lord) {
   await warCity(api, b);
   await allies(api, a, b);
   await api.ok('PATCH', `cities/${b.cityId}`, { token: b.token, body: { allowAlliance: true } });
-  const target = (await cityRow(api, b.cityId)).tileId;
+  const target = (await cityRow(api, b.cityId))!.tileId;
   const army = await api.ok<Army>('POST', `cities/${a.cityId}/armies`, {
     token: a.token,
     body: { targetTileId: target, mission: Mission.REINFORCE, troops: { lightCavalry: 100 } },
   });
   await arrive(api, army.armyId);
-  expect((await armyRow(api, army.armyId)).direction).toBe(ArmyDirection.STAY);
+  expect((await armyRow(api, army.armyId))!.direction).toBe(ArmyDirection.STAY);
   return army.armyId;
 }
 
@@ -91,7 +91,7 @@ describe('GET /armies', () => {
       await warCity(api, b);
       const scout = await api.ok<Army>('POST', `cities/${a.cityId}/armies`, {
         token: a.token,
-        body: { targetTileId: (await cityRow(api, b.cityId)).tileId, mission: Mission.SCOUT, troops: { scouter: 10 } },
+        body: { targetTileId: (await cityRow(api, b.cityId))!.tileId, mission: Mission.SCOUT, troops: { scouter: 10 } },
       });
       expect(await api.ok('GET', 'armies', { token: a.token })).toEqual({
         self: [expect.objectContaining({ armyId: scout.armyId, missionType: Mission.SCOUT, troop: expect.objectContaining({ scouter: 10 }) })],
@@ -125,8 +125,8 @@ describe('POST /cities/{cityId}/armies', () => {
         troop: expect.objectContaining({ lightCavalry: 100 }),
       });
       expect(await armyRow(api, army.armyId)).toMatchObject({ playerId: a.playerId, targetTileId: valley.id, troops: { lightCavalry: 100 } });
-      expect((await cityRow(api, a.cityId)).troops).toMatchObject({ lightCavalry: 4900 });
-      expect((await api.db.select().from(heroes).where(eq(heroes.id, heroId)))[0].status).toBe(HeroStatus.ATTACK);
+      expect((await cityRow(api, a.cityId))!.troops).toMatchObject({ lightCavalry: 4900 });
+      expect((await api.db.select().from(heroes).where(eq(heroes.id, heroId)))[0]!.status).toBe(HeroStatus.ATTACK);
     }));
 
   it('refuses a malformed body', () =>
@@ -153,7 +153,7 @@ describe('POST /cities/{cityId}/armies', () => {
       const send = (body: object) => ({ token: a.token, body: { targetTileId: valley.id, mission: Mission.ATTACK, heroId, ...body }, status: 400 });
       expect((await api.refused('POST', url, 'army.insufficientTroops', send({ troops: { lightCavalry: 5001 } }))).body.ok).toBe(-29);
       expect((await api.refused('POST', url, 'army.heroRequiredAttack', send({ troops: { lightCavalry: 1 }, heroId: null }))).body.ok).toBe(-71);
-      const own = (await cityRow(api, a.cityId)).tileId;
+      const own = (await cityRow(api, a.cityId))!.tileId;
       expect((await api.refused('POST', url, 'army.invalidTarget', send({ troops: { lightCavalry: 1 }, targetTileId: own }))).body.ok).toBe(-13);
       await api.refused('POST', url, 'common.invalidCoordinates', { ...send({ troops: { lightCavalry: 1 }, targetTileId: 2_000_000_000 }), status: 404 });
     }));
@@ -171,7 +171,7 @@ describe('POST /armies/{armyId}/recall', () => {
         armyId: army.armyId,
         direction: ArmyDirection.BACKWARD,
       });
-      expect((await armyRow(api, army.armyId)).direction).toBe(ArmyDirection.BACKWARD);
+      expect((await armyRow(api, army.armyId))!.direction).toBe(ArmyDirection.BACKWARD);
       await api.refused('POST', `armies/${army.armyId}/recall`, 'army.alreadyReturning', { token: a.token, status: 400 });
     }));
 
@@ -183,7 +183,7 @@ describe('POST /armies/{armyId}/recall', () => {
       await expectInvalid(api, b.token, [['POST', 'armies/x/recall']]);
       await api.refused('POST', `armies/${army.armyId}/recall`, 'army.notFound', { token: b.token, status: 404 });
       await api.refused('POST', 'armies/2000000000/recall', 'army.notFound', { token: b.token, status: 404 });
-      expect((await armyRow(api, army.armyId)).direction).toBe(ArmyDirection.FORWARD);
+      expect((await armyRow(api, army.armyId))!.direction).toBe(ArmyDirection.FORWARD);
     }));
 
   it('answers an id past the integer range as an unknown army', () =>
@@ -202,7 +202,7 @@ describe('POST /armies/{armyId}/dismiss', () => {
       const armyId = await stationed(api, a, b);
       expect(await api.ok('GET', 'armies', { token: b.token })).toMatchObject({ friend: [expect.objectContaining({ armyId, direction: ArmyDirection.STAY })] });
       expect(await api.ok('POST', `armies/${armyId}/dismiss`, { token: b.token })).toBeNull();
-      expect((await armyRow(api, armyId)).direction).toBe(ArmyDirection.BACKWARD);
+      expect((await armyRow(api, armyId))!.direction).toBe(ArmyDirection.BACKWARD);
     }));
 
   it('refuses an army that is not a guest of the player', () =>
@@ -211,7 +211,7 @@ describe('POST /armies/{armyId}/dismiss', () => {
       const armyId = await stationed(api, a, b);
       await expectInvalid(api, b.token, [['POST', 'armies/-1/dismiss']]);
       await api.refused('POST', `armies/${armyId}/dismiss`, 'army.notFound', { token: a.token, status: 404 });
-      expect((await armyRow(api, armyId)).direction).toBe(ArmyDirection.STAY);
+      expect((await armyRow(api, armyId))!.direction).toBe(ArmyDirection.STAY);
     }));
 });
 
@@ -297,7 +297,7 @@ describe('DELETE /valleys/{tileId}', () => {
       await api.refused('DELETE', `valleys/${valley.id}`, 'army.valleyNotHeld', { token: a.token, status: 400 });
       await patchTile(api, valley.id, { ownerCityId: b.cityId, ownerPlayerId: b.playerId });
       await api.refused('DELETE', `valleys/${valley.id}`, 'army.valleyNotHeld', { token: a.token, status: 400 });
-      expect((await tileRow(api, valley.id)).ownerPlayerId).toBe(b.playerId);
+      expect((await tileRow(api, valley.id))!.ownerPlayerId).toBe(b.playerId);
     }));
 
   it('answers an id past the integer range as an unknown tile', () =>
@@ -317,8 +317,8 @@ describe('POST /valleys/{tileId}/upgrade', () => {
       const valley = await valleyNear(api, a);
       const res = await api.ok<{ gold: number }>('POST', `valleys/${valley.id}/upgrade`, { token: a.token, body: { cityId: a.cityId } });
       expect(res).toEqual({ tileId: valley.id, level: 2, gold: expect.any(Number), nextCost: expect.any(Number) });
-      expect((await tileRow(api, valley.id)).level).toBe(2);
-      expect((await cityRow(api, a.cityId)).gold).toBeCloseTo(RICH.gold - res.gold, 0);
+      expect((await tileRow(api, valley.id))!.level).toBe(2);
+      expect((await cityRow(api, a.cityId))!.gold).toBeCloseTo(RICH.gold - res.gold, 0);
     }));
 
   it('refuses a malformed body, a held valley and a city', () =>
@@ -330,7 +330,7 @@ describe('POST /valleys/{tileId}/upgrade', () => {
         ['POST', `valleys/${valley.id}/upgrade`, { body: {} }],
         ['POST', `valleys/${valley.id}/upgrade`, { body: { cityId: String(a.cityId) } }],
       ]);
-      await api.refused('POST', `valleys/${(await cityRow(api, b.cityId)).tileId}/upgrade`, 'army.upgradeTarget', {
+      await api.refused('POST', `valleys/${(await cityRow(api, b.cityId))!.tileId}/upgrade`, 'army.upgradeTarget', {
         token: a.token,
         body: { cityId: a.cityId },
         status: 400,

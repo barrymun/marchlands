@@ -31,7 +31,7 @@ describe(mail.sendMail.name, () => {
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, '  <b>Hi</b>  ', '<script>x</script>');
       const [m] = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
-      const read = await mail.readMail(g, b.id, m.mailid);
+      const read = await mail.readMail(g, b.id, m!.mailid);
       expect(read.title).toBe('&lt;b&gt;Hi&lt;/b&gt;');
       expect(read.content).toBe('&lt;script&gt;x&lt;/script&gt;');
     }));
@@ -86,7 +86,7 @@ describe(mail.readMail.name, () => {
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, 'Hi', 'there');
       const [m] = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
-      expect(await mail.readMail(g, b.id, m.mailid)).toMatchObject({ content: 'there', isRead: true });
+      expect(await mail.readMail(g, b.id, m!.mailid)).toMatchObject({ content: 'there', isRead: true });
       expect(await mail.mailCounts(g, b.id)).toMatchObject({ count: 0 });
     }));
 
@@ -96,7 +96,7 @@ describe(mail.readMail.name, () => {
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, 'Hi', 'there');
       const [m] = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
-      await expectRefused(mail.readMail(g, a.id, m.mailid), msg('mail.notFound'));
+      await expectRefused(mail.readMail(g, a.id, m!.mailid), msg('mail.notFound'));
     }));
 });
 
@@ -108,8 +108,8 @@ describe(mail.markMailRead.name, () => {
       await mail.sendMail(g, a.id, b.name, 'One', 'x');
       await mail.sendMail(g, a.id, b.name, 'Two', 'x');
       const mails = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
-      await mail.markMailRead(g, a.id, [mails[0].mailid]); // not a's mail: no effect
-      await mail.markMailRead(g, b.id, [mails[0].mailid]);
+      await mail.markMailRead(g, a.id, [mails[0]!.mailid]); // not a's mail: no effect
+      await mail.markMailRead(g, b.id, [mails[0]!.mailid]);
       expect(await mail.mailCounts(g, b.id)).toMatchObject({ count: 1 });
     }));
 });
@@ -121,9 +121,9 @@ describe(mail.deleteMail.name, () => {
       const b = await createTestPlayer(g);
       await mail.sendMail(g, a.id, b.name, 'Hi', 'x');
       const [m] = (await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails;
-      await mail.deleteMail(g, a.id, [m.mailid]);
+      await mail.deleteMail(g, a.id, [m!.mailid]);
       expect((await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails).toHaveLength(1);
-      await mail.deleteMail(g, b.id, [m.mailid]);
+      await mail.deleteMail(g, b.id, [m!.mailid]);
       expect((await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails).toHaveLength(0);
       expect((await mail.listMail(g, a.id, MailType.SENT, 1, 10)).mails).toHaveLength(1);
     }));

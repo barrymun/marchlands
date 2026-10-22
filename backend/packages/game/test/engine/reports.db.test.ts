@@ -81,8 +81,8 @@ describe(reportDesertion.name, () => {
   /** the stored desertion (read from the row: opening the report would mark it read) */
   const desertion = async (g: TestGame, id: number) => {
     const [row] = await g.tx.select().from(reportRows).where(eq(reportRows.id, id));
-    if (row.body.kind !== 'desertion') throw new Error('not a desertion report');
-    return row.body.desertion;
+    if (row!.body.kind !== 'desertion') throw new Error('not a desertion report');
+    return row!.body.desertion;
   };
 
   it('files a "Troops Deserted" army report for the city', () =>

@@ -122,7 +122,7 @@ describe(flushStats.name, () => {
     const { db, execute, flushes } = fakeDb();
     expect(await flushStats(db)).toBe(4);
     expect(execute).toHaveBeenCalledTimes(1);
-    expect(sorted(flushes[0])).toEqual([
+    expect(sorted(flushes[0]!)).toEqual([
       { player_id: 1, city_id: 0, period: '2026-01-01', counters: { 'wins.npc': 3, 'wins.pvp': 1 } },
       { player_id: 1, city_id: 0, period: '2026-01-02', counters: { 'wins.npc': 4 } },
       { player_id: 1, city_id: 10, period: '2026-01-01', counters: { 'trained.archer': 5 } },
@@ -134,7 +134,7 @@ describe(flushStats.name, () => {
     bufferStats(pending({ '1|0': { 'produced.food': 10.4, 'produced.wood': 0.2, 'produced.gold': 2.5 } }), '2026-01-01');
     const { db, flushes } = fakeDb();
     await flushStats(db);
-    expect(flushes[0][0].counters).toEqual({ 'produced.food': 10, 'produced.gold': 3 });
+    expect(flushes[0]![0]!.counters).toEqual({ 'produced.food': 10, 'produced.gold': 3 });
   });
 
   it('empties the buffer once written', async () => {
@@ -176,7 +176,7 @@ describe(startStatsFlusher.name, () => {
     bufferStats(pending({ '1|0': { 'wins.npc': 2 } }), '2026-01-01');
     await stop();
     expect(flushes).toHaveLength(2);
-    expect(flushes[1][0].counters).toEqual({ 'wins.npc': 2 });
+    expect(flushes[1]![0]!.counters).toEqual({ 'wins.npc': 2 });
 
     bufferStats(pending({ '1|0': { 'wins.npc': 3 } }), '2026-01-01');
     await vi.advanceTimersByTimeAsync(5000);

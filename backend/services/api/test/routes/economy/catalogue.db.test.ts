@@ -69,7 +69,7 @@ describe('POST /cities/:cityId/shop/gold', () => {
       expect(r).toEqual({ itemId: ItemId.WAR_HORN, count: 2, gold: price * 2 });
       const s = await state(api, p);
       expect(s.items).toContainEqual({ id: ItemId.WAR_HORN, count: 2 });
-      expect(s.castles[0].resource.gold).toBe(1_000_000 - price * 2);
+      expect(s.castles[0]!.resource.gold).toBe(1_000_000 - price * 2);
     }));
 
   it("refuses an item not for sale, another player's city (403), and validates the body", () =>
@@ -103,7 +103,7 @@ describe('GET /quests', () => {
       const p = await api.player();
       const all = await api.ok<QuestBean[]>('GET', 'quests', { token: p.token });
       expect(all[0]).toMatchObject({ questId: expect.any(Number), groupId: expect.any(Number), description: { code: expect.any(String) }, claimed: false });
-      const groupId = all[0].groupId;
+      const groupId = all[0]!.groupId;
       const one = await api.ok<QuestBean[]>('GET', `quests?groupId=${groupId}`, { token: p.token });
       expect(one.length).toBeGreaterThan(0);
       expect(one.every((q) => q.groupId === groupId)).toBe(true);
@@ -116,9 +116,9 @@ describe('POST /quests/:questId/claim', () => {
     apiTest(async (api) => {
       const p = await api.player();
       const quest = (await api.ok<QuestBean[]>('GET', 'quests', { token: p.token })).find((q) => q.isFinish && !q.claimed)!;
-      const gold = (await state(api, p)).castles[0].resource.gold;
+      const gold = (await state(api, p)).castles[0]!.resource.gold;
       expect(await api.ok('POST', `quests/${quest.questId}/claim`, { token: p.token, body: { cityId: p.cityId } })).toEqual(quest.award);
-      expect((await state(api, p)).castles[0].resource.gold).toBeGreaterThanOrEqual(gold + (quest.award.resources?.gold ?? 0));
+      expect((await state(api, p)).castles[0]!.resource.gold).toBeGreaterThanOrEqual(gold + (quest.award.resources?.gold ?? 0));
       await api.refused('POST', `quests/${quest.questId}/claim`, 'quest.alreadyClaimed', { token: p.token, body: { cityId: p.cityId }, status: 400 });
     }));
 
@@ -141,7 +141,7 @@ describe('POST /quests/daily-gift', () => {
       const p = await api.player();
       await api.game((ctx) => admin.setResources(ctx, p.cityId, p.playerId, { gold: 0 }));
       expect(await api.ok('POST', 'quests/daily-gift', { token: p.token, body: { cityId: p.cityId } })).toEqual({ resources: BALANCE.dailyGift });
-      expect((await state(api, p)).castles[0].resource.gold).toBeGreaterThanOrEqual(BALANCE.dailyGift.gold);
+      expect((await state(api, p)).castles[0]!.resource.gold).toBeGreaterThanOrEqual(BALANCE.dailyGift.gold);
       await api.refused('POST', 'quests/daily-gift', 'quest.dailyGiftClaimed', { token: p.token, body: { cityId: p.cityId }, status: 400 });
       await expectInvalid(api, p.token, [{ method: 'POST', url: 'quests/daily-gift', body: { cityId: 'home' } }]);
     }));

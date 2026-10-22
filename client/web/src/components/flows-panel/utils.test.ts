@@ -7,7 +7,7 @@ import { currentAction, hasHero, keyed, strip } from '@/components/flows-panel/u
 
 const ACTIONS: FlowAction[] = [
   { type: 'setMayor', stat: 'management' },
-  { type: 'trainTroops', troopId: FLOW_TROOP_IDS[0], amount: 'max' },
+  { type: 'trainTroops', troopId: FLOW_TROOP_IDS[0]!, amount: 'max' },
   { type: 'attackTargets', presetId: 'p1', targets: { '1': [5, 9] } },
   { type: 'healTroops', payWith: 'resources', when: 'armiesHome' },
   { type: 'wait', until: 'time', minutes: 10 },
@@ -41,11 +41,11 @@ describe(keyed.name, () => {
   });
 
   it('gives every call a new, increasing key, even for the same action', () => {
-    const a = ACTIONS[0];
+    const a = ACTIONS[0]!;
     const keys = [keyed(a), keyed(a), keyed(a)].map((d) => Number(d.key.slice(1)));
     expect(new Set(keys).size).toBe(3);
-    expect(keys[1]).toBe(keys[0] + 1);
-    expect(keys[2]).toBe(keys[1] + 1);
+    expect(keys[1]).toBe(keys[0]! + 1);
+    expect(keys[2]).toBe(keys[1]! + 1);
   });
 
   it('does not change the action it is given', () => {
@@ -71,7 +71,7 @@ describe(strip.name, () => {
   });
 
   it('returns a new object without touching the draft', () => {
-    const d = keyed(ACTIONS[2]);
+    const d = keyed(ACTIONS[2]!);
     const a = strip(d);
     expect(a).not.toBe(d);
     expect(d.key).toBeDefined();

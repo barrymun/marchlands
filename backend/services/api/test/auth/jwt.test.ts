@@ -20,7 +20,7 @@ describe(signToken.name, () => {
   it('signs an HS256 JWT with the claims, iat and exp', () => {
     vi.useFakeTimers({ now: T0 });
     const token = signToken({ sub: 7, pid: 42, adm: true }, SECRET, 3600);
-    const [header, body, sig] = token.split('.');
+    const [header, body, sig] = token.split('.') as [string, string, string];
     expect(JSON.parse(Buffer.from(header, 'base64url').toString())).toEqual({ alg: 'HS256', typ: 'JWT' });
     expect(JSON.parse(Buffer.from(body, 'base64url').toString())).toEqual({ sub: 7, pid: 42, adm: true, iat: T0 / 1000, exp: T0 / 1000 + 3600 });
     expect(sig).toBe(createHmac('sha256', SECRET).update(`${header}.${body}`).digest('base64url'));
@@ -48,12 +48,12 @@ describe(verifyToken.name, () => {
   });
 
   it('refuses a token whose claims or signature were tampered with', () => {
-    const [header, body, sig] = signToken({ sub: 7, adm: false }, SECRET, 60).split('.');
+    const [header, body, sig] = signToken({ sub: 7, adm: false }, SECRET, 60).split('.') as [string, string, string];
     const claims = JSON.parse(Buffer.from(body, 'base64url').toString());
     expect(verifyToken(`${header}.${b64({ ...claims, adm: true })}.${sig}`, SECRET)).toBeNull();
     expect(verifyToken(`${header}.${b64({ ...claims, sub: 8 })}.${sig}`, SECRET)).toBeNull();
     const flipped = Buffer.from(sig, 'base64url');
-    flipped[0] ^= 1;
+    flipped[0]! ^= 1;
     expect(verifyToken(`${header}.${body}.${flipped.toString('base64url')}`, SECRET)).toBeNull();
     expect(verifyToken(`${header}.${body}.${sig.slice(0, -4)}`, SECRET)).toBeNull();
     expect(verifyToken(`${header}.${body}.`, SECRET)).toBeNull();

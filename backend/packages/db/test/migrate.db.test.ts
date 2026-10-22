@@ -8,7 +8,7 @@ import { testDb } from '#test/support/db.ts';
 
 const journal = JSON.parse(readFileSync(new URL('../migrations/meta/_journal.json', import.meta.url), 'utf8')) as { entries: { tag: string }[] };
 
-const applied = async () => (await testDb().execute<{ n: number }>(sql`select count(*)::int as n from drizzle.__drizzle_migrations`)).rows[0].n;
+const applied = async () => (await testDb().execute<{ n: number }>(sql`select count(*)::int as n from drizzle.__drizzle_migrations`)).rows[0]!.n;
 
 describe(runMigrations.name, () => {
   // the test setup migrated the database already: running again finds nothing to apply and changes nothing

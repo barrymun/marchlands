@@ -13,7 +13,7 @@ import {
   disbandRefund,
   findBuilding,
   FORT_ID_BY_KEY,
-  FORT_KEYS,
+  fortKeyOf,
   GameError,
   getGameSpeed,
   healCost,
@@ -72,7 +72,7 @@ export async function trainableList(ctx: Ctx, playerId: number, cityId: number, 
     const checks = checkRequirements(t.requires, b.city.buildings, b.player.research, b.player.items);
     return {
       typeId: t.troopId,
-      key: fort ? FORT_KEYS[t.troopId as keyof typeof FORT_KEYS] : troopKey(t.troopId),
+      key: fort ? fortKeyOf(t.troopId) : troopKey(t.troopId),
       ...t.cost,
       costShare,
       population: t.population,
@@ -109,7 +109,7 @@ export async function productionQueues(ctx: Ctx, playerId: number, cityId: numbe
 export async function train(ctx: Ctx, playerId: number, cityId: number, troopId: number, count: number, positionId: number) {
   const fort = positionId === WALLS_QUEUE;
   const b = await openOwnCity(ctx, playerId, cityId);
-  assertCanTrain(troopId, count, b.city.buildings, b.player.research, b.player.items, fort);
+  const cfg = assertCanTrain(troopId, count, b.city.buildings, b.player.research, b.player.items, fort);
   const building = fort ? findBuilding(b.city.buildings, -2) : findBuilding(b.city.buildings, positionId);
   if (!building || building.typeId !== (fort ? BuildingType.WALLS : BuildingType.BARRACKS) || building.level < 1) {
     throw new GameError(
@@ -121,7 +121,6 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
   }
   const { queue, nextQueueId } = queueOf(b, positionId);
   if (queue.length >= building.level) throw new GameError(msg('training.queueFull'), -99);
-  const cfg = troopConfig(troopId)!;
   if (fort) {
     const space = usedWallSpace(b.city.forts, queue) + count * (BALANCE.fortSpace[troopId] ?? 1);
     if (space > wallCapacity(b.city.buildings)) throw new GameError(msg('training.wallSpaceFull'), -99);
@@ -188,8 +187,7 @@ export async function trainMany(
  */
 export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, troopId: number, count: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  assertCanTrain(troopId, count, b.city.buildings, b.player.research, b.player.items, false);
-  const cfg = troopConfig(troopId)!;
+  const cfg = assertCanTrain(troopId, count, b.city.buildings, b.player.research, b.player.items, false);
   if (cfg.inside === 2) throw new GameError(msg('training.fortsAtWalls'), -99);
   const lanes: SplitLane[] = [];
   for (const x of b.city.buildings) {
@@ -306,7 +304,7 @@ export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, 
 
 /** fortifications.destructWallProtect. (marchlands) Refunds like disbandTroops (orig: nothing). */
 export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, fortId: number, count: number) {
-  const key = FORT_KEYS[fortId as keyof typeof FORT_KEYS];
+  const key = fortKeyOf(fortId);
   if (!key) throw new GameError(msg('training.invalidFort'), -99);
   if (!Number.isInteger(count) || count < 1) throw new GameError(msg('common.invalidAmount'), -99);
   const b = await openOwnCity(ctx, playerId, cityId);

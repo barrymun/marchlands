@@ -216,7 +216,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
   }
   // valleys held by a city (any lord, the viewer included), with the holder and its relation
   const held = rows.filter((t) => t.ownerCityId != null && t.cityId == null && t.type !== TileType.NPC && t.type !== TileType.FLAT);
-  const holderIds = [...new Set(held.map((t) => t.ownerCityId!))];
+  const holderIds = [...new Set(held.flatMap((t) => (t.ownerCityId == null ? [] : [t.ownerCityId])))];
   const holders = holderIds.length
     ? await ctx.tx
         .select({ id: cities.id, name: cities.name, playerId: cities.playerId, userName: players.name, allianceId: players.allianceId })
@@ -232,9 +232,13 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
   const relationOf = new Map<number, number>();
   const valleys = [];
   for (const t of held) {
-    const h = holderById.get(t.ownerCityId!);
+    const h = t.ownerCityId == null ? undefined : holderById.get(t.ownerCityId);
     if (!h) continue;
-    if (!relationOf.has(h.playerId)) relationOf.set(h.playerId, viewerId ? await relationBetween(ctx, viewerId, h.playerId) : Relation.NO_RELATION);
+    let relation = relationOf.get(h.playerId);
+    if (relation === undefined) {
+      relation = viewerId ? await relationBetween(ctx, viewerId, h.playerId) : Relation.NO_RELATION;
+      relationOf.set(h.playerId, relation);
+    }
     const { x, y } = tileXY(t.id);
     valleys.push({
       id: t.id,
@@ -247,7 +251,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
       playerId: h.playerId,
       userName: h.userName,
       allianceName: h.allianceId ? (holderAlliances.get(h.allianceId) ?? '') : '',
-      relation: relationOf.get(h.playerId)!,
+      relation,
     });
   }
   return { x1, y1, x2, y2, mapStr, castles, valleys };

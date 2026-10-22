@@ -70,7 +70,7 @@ export function hasTroops(have: TroopCounts, need: TroopCounts): boolean {
 }
 
 /** Validate a client-supplied troop object: known keys, non-negative integers, total > 0. */
-export function sanitizeTroops(input: Record<string, unknown>, allowEmpty = false): TroopCounts {
+export function sanitizeTroops(input: Record<string, unknown> | null | undefined, allowEmpty = false): TroopCounts {
   const out: TroopCounts = {};
   for (const [k, v] of Object.entries(input ?? {})) {
     if (!(TROOP_KEY_LIST as string[]).includes(k)) throw new GameError(msg('common.unknownTroopType', { key: k }), -99);
@@ -273,5 +273,5 @@ export function distributeLossesAmong<H>(
       }
     }
   }
-  return rows.map(({ holder, out }) => ({ holder, troops: Object.fromEntries(Object.entries(out).filter(([, v]) => (v ?? 0) > 0)) }));
+  return rows.map(({ holder, out }) => ({ holder, troops: Object.fromEntries(Object.entries(out).filter(([, v]) => v > 0)) }));
 }

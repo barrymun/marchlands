@@ -54,7 +54,7 @@ export function PriceHistory({ resType }: { resType: number }) {
           ) : (
             <Table>
               <TableBody>
-                {h!.trades.map((tr) => (
+                {(h?.trades ?? []).map((tr) => (
                   <TableRow key={tr.id}>
                     <TableCell className={cn('tabular-nums', tr.takerSide === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive')}>
                       {fmtPrice(tr.price)}

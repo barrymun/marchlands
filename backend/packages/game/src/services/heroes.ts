@@ -86,7 +86,7 @@ export async function reorderHeroes(ctx: Ctx, playerId: number, cityId: number, 
   await own(ctx, playerId, cityId);
   const list = await heroesOfCity(ctx, cityId, { lock: true });
   const byId = new Map(list.map((h) => [h.id, h]));
-  const first = [...new Set(heroIds)].filter((id) => byId.has(id)).map((id) => byId.get(id)!);
+  const first = [...new Set(heroIds)].flatMap((id) => byId.get(id) ?? []);
   const order = [...first, ...list.filter((h) => !first.includes(h))];
   for (const [i, h] of order.entries()) {
     if (h.sortOrder !== i + 1)
@@ -179,7 +179,8 @@ export async function setHeroLocked(ctx: Ctx, playerId: number, heroId: number, 
 export async function appointMayor(ctx: Ctx, playerId: number, heroId: number) {
   const pre = await ownHero(ctx, playerId, heroId);
   const b = await openOwnCity(ctx, playerId, pre.cityId);
-  const h = b.heroes.find((x) => x.id === heroId)!;
+  const h = b.heroes.find((x) => x.id === heroId);
+  if (!h) throw new GameError(msg('common.heroNotFound'), -99, 404);
   if (h.status !== HeroStatus.IDLE && h.status !== HeroStatus.MAYOR) throw new GameError(msg('hero.notIdle'), -80);
   for (const other of b.heroes) {
     if (other.status === HeroStatus.MAYOR && other.id !== heroId) {
@@ -251,7 +252,7 @@ export async function levelUp(ctx: Ctx, playerId: number, heroId: number) {
   const city = await openMayorCity(ctx, h);
   const levels = levelUpAll(h);
   if (levels === 0) throw new GameError(msg('hero.notEnoughExperience'), -99);
-  ctx.stat(playerId, h.cityId ?? 0, { 'levels.hero': levels });
+  ctx.stat(playerId, h.cityId, { 'levels.hero': levels });
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
   await closeMayorCity(ctx, city, h);
@@ -297,7 +298,8 @@ export async function reward(ctx: Ctx, playerId: number, heroId: number) {
   const pre = await ownHero(ctx, playerId, heroId);
   if (pre.loyalty >= BALANCE.heroMaxLoyalty) throw new GameError(msg('hero.fullyLoyal'), -99);
   const b = await openOwnCity(ctx, playerId, pre.cityId);
-  const h = b.heroes.find((x) => x.id === heroId)!;
+  const h = b.heroes.find((x) => x.id === heroId);
+  if (!h) throw new GameError(msg('common.heroNotFound'), -99, 404);
   spendResources(b.city, { gold: heroAwardCost(h.level) }, msg('common.notEnoughGold'), -99);
   ctx.stat(playerId, b.city.id, { 'spent.heroes.gold': heroAwardCost(h.level) });
   h.loyalty = Math.min(BALANCE.heroMaxLoyalty, h.loyalty + 5);

@@ -208,8 +208,8 @@ describe(alliance.militarySituation.name, () => {
       const m = await addMember(g, a);
       const outsider = await createTestPlayer(g);
       const stranger = await createTestPlayer(g);
-      const out = await insertArmy(g, m, outsider);
-      const incoming = await insertArmy(g, outsider, a.host);
+      const out = (await insertArmy(g, m, outsider))!;
+      const incoming = (await insertArmy(g, outsider, a.host))!;
       await insertArmy(g, outsider, stranger);
 
       const list = await alliance.militarySituation(g, a.host.id);

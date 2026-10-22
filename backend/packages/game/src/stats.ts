@@ -98,7 +98,7 @@ export async function flushStats(db: Db): Promise<number> {
 /** Flush the buffer every `ms`; the returned function stops the timer and flushes what is left. */
 export function startStatsFlusher(db: Db, ms: number, onError: (err: unknown) => void = () => {}): () => Promise<void> {
   const timer = setInterval(() => void flushStats(db).catch(onError), ms);
-  timer.unref?.();
+  timer.unref();
   return async () => {
     clearInterval(timer);
     await flushStats(db).catch(onError);

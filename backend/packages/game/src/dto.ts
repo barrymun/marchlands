@@ -73,7 +73,7 @@ export function heroBean(h: HeroRow): HeroBean {
     seized: h.capturedByPlayerId != null,
     gearStat: heroGearStat(h),
     locked: h.locked,
-    buffs: (h.buffs ?? []).map((b) => ({ id: b.id, desc: b.desc, endTime: b.endTime, param: b.param })),
+    buffs: h.buffs.map((b) => ({ id: b.id, desc: b.desc, endTime: b.endTime, param: b.param })),
   };
 }
 

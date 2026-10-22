@@ -100,7 +100,7 @@ describe(reports.readReport.name, () => {
         .insert(reportRows)
         .values({ playerId: a.id, title: msg('report.title.scoutReport'), body: { kind: 'xml', xml: '<report/>' } as unknown as ReportBody, eventTime: g.now })
         .returning();
-      expect((await reports.readReport(g, a.id, row.id)).content).toEqual({ kind: 'text', text: msg('report.oldFormat') });
+      expect((await reports.readReport(g, a.id, row!.id)).content).toEqual({ kind: 'text', text: msg('report.oldFormat') });
     }));
 
   it("cannot read another player's report or one that does not exist", () =>

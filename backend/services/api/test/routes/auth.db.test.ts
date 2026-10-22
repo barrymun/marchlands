@@ -50,7 +50,7 @@ describe('POST /auth/register', () => {
       expect(second.isAdmin).toBe(false);
       const [row] = await api.db.select().from(accounts).where(eq(accounts.id, second.accountId));
       expect(row).toMatchObject({ username: 'bob', email: 'bob@example.test', isAdmin: false });
-      expect(row.passwordHash).not.toContain('test-password');
+      expect(row!.passwordHash).not.toContain('test-password');
     }));
 
   it('refuses a username or email already taken, in any case', () =>
@@ -133,7 +133,7 @@ describe('POST /auth/register', () => {
         body: { username: '  dave  ', password: 'test-password', email: 'dave@example.test', proof: await api.signUpProof() },
       });
       const [row] = await api.db.select().from(accounts).where(eq(accounts.id, s.accountId));
-      expect(row.username).toBe('dave');
+      expect(row!.username).toBe('dave');
     }));
 
   it('issues a token naming the account, marked for operators only', () =>
@@ -170,7 +170,7 @@ describe('POST /auth/login', () => {
       expect(session).toMatchObject({ accountId: s.accountId, playerId: null, hasPlayer: false, isAdmin: true });
       expect(claimsOf(session.token)).toMatchObject({ sub: s.accountId });
       const [row] = await api.db.select().from(accounts).where(eq(accounts.id, s.accountId));
-      expect(row.lastLoginAt).toBeGreaterThan(0);
+      expect(row!.lastLoginAt).toBeGreaterThan(0);
     }));
 
   it('names the player in the session and the token once there is one', () =>
@@ -182,7 +182,7 @@ describe('POST /auth/login', () => {
       expect(session).toMatchObject({ accountId: p.accountId, playerId: p.playerId, hasPlayer: true, isAdmin: false });
       expect(claimsOf(session.token)).toMatchObject({ sub: p.accountId, pid: p.playerId });
       const [row] = await api.db.select({ lastLoginAt: players.lastLoginAt }).from(players).where(eq(players.id, p.playerId));
-      expect(row.lastLoginAt).toBeGreaterThan(0);
+      expect(row!.lastLoginAt).toBeGreaterThan(0);
     }));
 
   it('refuses a wrong password and an unknown username alike, with 401 auth.wrongPassword', () =>
@@ -241,7 +241,7 @@ describe('POST /auth/login', () => {
         expect(await post('auth/login', { username: 'kim', password: 'test-password' })).toMatchObject({ isAdmin: true });
       });
       const [row] = await api.db.select().from(accounts).where(eq(accounts.id, s.accountId));
-      expect(row.isAdmin).toBe(true);
+      expect(row!.isAdmin).toBe(true);
       expect(await login(api, 'kim')).toMatchObject({ isAdmin: true });
     }));
 });
@@ -279,8 +279,8 @@ describe('POST /auth/refresh', () => {
       expect(claimsOf(s.token)).not.toHaveProperty('pid');
       const fresh = await api.ok<AuthSession>('POST', 'auth/refresh', { token: s.token });
       const [p] = await api.db.select({ id: players.id }).from(players).where(eq(players.accountId, s.accountId));
-      expect(fresh).toMatchObject({ accountId: s.accountId, playerId: p.id, hasPlayer: true, isAdmin: false });
-      expect(claimsOf(fresh.token)).toMatchObject({ sub: s.accountId, pid: p.id });
+      expect(fresh).toMatchObject({ accountId: s.accountId, playerId: p!.id, hasPlayer: true, isAdmin: false });
+      expect(claimsOf(fresh.token)).toMatchObject({ sub: s.accountId, pid: p!.id });
     }));
 
   it('marks the token of an operator', () =>

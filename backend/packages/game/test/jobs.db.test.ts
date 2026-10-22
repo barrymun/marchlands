@@ -69,9 +69,9 @@ describe(zonesJob.name, () => {
       await db.delete(worldState).where(eq(worldState.key, 'zones'));
       await zonesJob(db);
       const [row] = await db.select().from(worldState).where(eq(worldState.key, 'zones'));
-      const zones = row.value as ZoneStats[];
+      const zones = row!.value as ZoneStats[];
       expect(zones).toHaveLength(BALANCE.stateGrid ** 2);
-      const [{ castles }] = (await db.execute<{ castles: number }>(sql`select count(*)::int as castles from ${tiles} where city_id is not null`)).rows;
+      const { castles } = (await db.execute<{ castles: number }>(sql`select count(*)::int as castles from ${tiles} where city_id is not null`)).rows[0]!;
       expect(zones.reduce((s, z) => s + z.playerCount, 0)).toBe(castles);
       expect(castles).toBeGreaterThan(0);
     }));
@@ -91,7 +91,7 @@ describe(beginnerJob.name, () => {
         .select()
         .from(mails)
         .where(inArray(mails.playerId, [old.id, young.id]));
-      expect(sent.filter((m) => m.system?.title?.code === 'player.mail.protectionExpired.title').map((m) => m.playerId)).toEqual([old.id]);
+      expect(sent.filter((m) => m.system?.title.code === 'player.mail.protectionExpired.title').map((m) => m.playerId)).toEqual([old.id]);
     }));
 
   it('protection lasts real time, whatever the game speed', () =>
@@ -197,9 +197,9 @@ describe(heroGearJob.name, () => {
 
       expect(await heroGearJob(db)).toBeGreaterThanOrEqual(1);
       const [h] = await db.select().from(heroes).where(eq(heroes.id, id));
-      const stat = heroGearStat(h);
-      expect(h[`${stat}Added`]).toBe(heroGearBonus(30, { level: 3, stars: {} }));
-      expect([h.powerAdded, h.managementAdded, h.stratagemAdded].filter((n) => n > 0)).toHaveLength(1);
+      const stat = heroGearStat(h!);
+      expect(h![`${stat}Added`]).toBe(heroGearBonus(30, { level: 3, stars: {} }));
+      expect([h!.powerAdded, h!.managementAdded, h!.stratagemAdded].filter((n) => n > 0)).toHaveLength(1);
       expect(await heroGearJob(db)).toBe(0);
     }));
 });

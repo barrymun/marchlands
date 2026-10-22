@@ -126,10 +126,10 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
 
       const [, keep] = await citiesOf(g, p.id);
       expect(keep).toMatchObject({ name: `${p.name.slice(0, 12)} Keep`, tileId: npc.id, playerId: p.id, buildings: npcCityBuildings(1) });
-      expect(keep.population).toBe(npcTemplate(1).population);
+      expect(keep!.population).toBe(npcTemplate(1).population);
       expect(await getTile(g, npc.id)).toMatchObject({
         type: TileType.CASTLE,
-        cityId: keep.id,
+        cityId: keep!.id,
         ownerPlayerId: p.id,
         ownerCityId: null,
         troops: null,
@@ -137,7 +137,7 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
         state: null,
       });
       expect((await reloadPlayer(g, p)).prestige - prestige).toBeGreaterThanOrEqual(1000);
-      expect(g.pushes(PushCmd.CASTLE_UPDATE).some((x) => (x.data as { castleBean: { id: number } }).castleBean.id === keep.id)).toBe(true);
+      expect(g.pushes(PushCmd.CASTLE_UPDATE).some((x) => (x.data as { castleBean: { id: number } }).castleBean.id === keep!.id)).toBe(true);
     }));
 
   it('not captured when the lord has no room for another city', () =>

@@ -31,9 +31,9 @@ export async function createTestPlayer(g: TestGame, opts: { name?: string; zone?
     .insert(accounts)
     .values({ username: `test_${n}_${g.now}`, email: `test_${n}_${g.now}@example.test`, passwordHash: 'x', isAdmin: !!opts.admin, createdAt: g.now })
     .returning();
-  const p = await players.createPlayer(g, account.id, { userName: name, castleName: `${name} City`, flag: 'T', faceUrl: '', sex: 0, zone: opts.zone ?? -1 });
+  const p = await players.createPlayer(g, account!.id, { userName: name, castleName: `${name} City`, flag: 'T', faceUrl: '', sex: 0, zone: opts.zone ?? -1 });
   const [city] = await citiesOf(g, p.id);
-  return { id: p.id, accountId: account.id, name, cityId: city.id };
+  return { id: p.id, accountId: account!.id, name, cityId: city!.id };
 }
 
 /** Put buildings in a city: [positionId, typeId, level] (level 0 removes). Town Hall is position -1, Walls -2. */
@@ -76,8 +76,8 @@ export async function addCity(g: TestGame, p: TestPlayer, name = `${p.name} Two`
     .insert(cities)
     .values(initialCity(p.id, tile, name, g.now))
     .returning();
-  await g.tx.update(tiles).set({ cityId: city.id, type: TileType.CASTLE, ownerPlayerId: p.id, updatedAt: g.now }).where(eq(tiles.id, tile));
-  return city.id;
+  await g.tx.update(tiles).set({ cityId: city!.id, type: TileType.CASTLE, ownerPlayerId: p.id, updatedAt: g.now }).where(eq(tiles.id, tile));
+  return city!.id;
 }
 
 /** Set a city's injured troops (as a battle with Medicine leaves them). */

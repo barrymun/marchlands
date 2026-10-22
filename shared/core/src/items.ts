@@ -212,7 +212,7 @@ export const heroBuffBase = (h: Omit<BuffedHero, 'buffs'>, attr: 'power' | 'mana
 export function syncHeroBuffs(h: BuffedHero): boolean {
   let changed = false;
   h.buffs = h.buffs.map((b) => {
-    const attr = b.id as 'power' | 'management' | 'stratagem';
+    const attr = b.id;
     if (attr !== 'power' && attr !== 'management' && attr !== 'stratagem') return b;
     const amount = heroBuffAmount(heroBuffBase(h, attr));
     if (h[`${attr}BuffAdded`] !== amount) {

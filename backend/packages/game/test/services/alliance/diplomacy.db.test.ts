@@ -49,8 +49,8 @@ describe(alliance.setRelation.name, () => {
       expect(ids((await relationsOf(g, a)).enemyList)).toEqual([b.id]);
       expect(await relationsOf(g, b)).toMatchObject({ friendlyList: [], enemyList: [{ id: a.id }] });
       const until = g.now + scaled(BALANCE.allianceWarCooldownMs);
-      expect((await allianceRow(g, a.id)).warCooldownUntil).toBe(until);
-      expect((await allianceRow(g, b.id)).warCooldownUntil).toBe(until);
+      expect((await allianceRow(g, a.id))!.warCooldownUntil).toBe(until);
+      expect((await allianceRow(g, b.id))!.warCooldownUntil).toBe(until);
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE)[0]).toEqual({
         playerIds: [],
         cmd: PushCmd.SYSTEM_INFO_MESSAGE,

@@ -146,7 +146,7 @@ describe(resumeFlow.name, () => {
       await resumeFlow(g, p.id, f.id);
       const done = await flowOf(g, p, f.id);
       expect(done).toMatchObject({ status: 'idle', nextAction: 0, lastRun: { finishedAt: T0 + 600_000 } });
-      expect(done.lastRun?.cities[0].steps.map((s) => s.detail.code)).toEqual([
+      expect(done.lastRun?.cities[0]!.steps.map((s) => s.detail.code)).toEqual([
         'flow.step.mayor',
         'flow.step.waiting',
         'flow.step.alreadyMayor',
@@ -186,7 +186,7 @@ describe(resumeFlow.name, () => {
       });
       await runFlowIn(g, p, f.id);
       const [army] = g.events('army');
-      const armyId = army.payload!.armyId as number;
+      const armyId = army!.payload!.armyId as number;
       await armies.recallArmy(g, p.id, armyId); // back at T0 + 1s
       await resumeFlow(g, p.id, f.id);
       expect(await flowOf(g, p, f.id)).toMatchObject({ status: 'waiting', nextAction: 2, waitUntil: T0 + 5_000 });

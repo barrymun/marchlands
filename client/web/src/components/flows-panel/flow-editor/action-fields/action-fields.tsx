@@ -35,7 +35,7 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
             <SelectItem value="honor">{t('actionFields.heal.honor')}</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={action.when ?? 'now'} onValueChange={(v) => onChange({ ...action, when: v as 'now' | 'armiesHome' })}>
+        <Select value={action.when} onValueChange={(v) => onChange({ ...action, when: v as 'now' | 'armiesHome' })}>
           <SelectTrigger size="sm" className="w-52">
             <SelectValue />
           </SelectTrigger>
