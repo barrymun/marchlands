@@ -9,6 +9,7 @@ export * from '#/errors.ts';
 export * from '#/messages/index.ts';
 export * from '#/messages/schema.ts';
 export * from '#/heroes.ts';
+export * from '#/hero-names.ts';
 export * from '#/gear.ts';
 export * from '#/flows.ts';
 export * from '#/items.ts';

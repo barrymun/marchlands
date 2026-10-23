@@ -9,6 +9,7 @@ Design documents for large planned features, kept while they are worked out and 
 
 | Document | Feature | Status |
 |---|---|---|
+| [hero-names.md](hero-names.md) | Hero names by the state the city stands in, with a place or a father's name, travellers from other states, and a gender for every hero | Phase 1 built |
 | [market-and-factions.md](market-and-factions.md) | Market overhaul: NPC cities trading, factions, historical cities as seats of power, events, trading scripts, new charts | Phases 1–3 built (charts and the merchant, the faction data, NPC trade); reputation next |
 | [town-animations.md](town-animations.md) | Animated town, fields and map: smoke, sails and wheels, walkers, construction, buildings showing what they're doing, day and night, weather, marching armies | Built |
 | [unchecked-index-access.md](unchecked-index-access.md) | `noUncheckedIndexedAccess`: lookups that can miss typed as such, in chunks (core, backend, client, tests), then `no-unnecessary-condition` | Built |

@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, BuildingType, createGuardHero, HeroStatus, maxValleysFor, Mission, msg, ref, seededRng } from '@marchlands/core';
+import { ArmyDirection, BuildingType, createGuardHero, HeroStatus, maxValleysFor, Mission, msg, ref, seededRng, stateOf } from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
 import { getHero, getTile, valleysOfCity } from '#/repo.ts';
@@ -78,7 +78,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const tile = await getTile(g, valley.id);
       expect(tile.ownerPlayerId).toBeNull();
       expect(tile.troops).toEqual(b.defender.troops.after);
-      const guard = createGuardHero(20, seededRng(`guard:${tile.state!.heroSeed}`));
+      const guard = createGuardHero(20, seededRng(`guard:${tile.state!.heroSeed}`), stateOf(tile.id));
       expect(b.defender.hero).toMatchObject({ name: guard.name, level: guard.level });
       expect(await armyRow(g, armyId)).toBeUndefined();
       await expectWipedHero(g, heroId, loyalty, p, null);

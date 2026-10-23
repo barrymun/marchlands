@@ -84,7 +84,7 @@ export function researchAt(level: number): ResearchState {
 }
 
 function lordHero(lord: Lord): HeroStats {
-  const h = createGuardHero(lord.heroLevel, seededRng('lord-hero'));
+  const h = createGuardHero(lord.heroLevel, seededRng('lord-hero'), 0);
   const hero = { ...h, level: lord.heroLevel, power: lord.power, stratagem: lord.stratagem, gearStat: lord.gearStat, powerBuffAdded: 0, stratagemBuffAdded: 0 };
   syncHeroGear(hero, lordGearOf(lord));
   return hero;
@@ -144,7 +144,7 @@ export function attackNpc(troops: TroopCounts, opts: { level?: number; seeds?: n
   };
   for (let s = 0; s < seeds; s++) {
     // a fresh garrison and guard hero, as after a regeneration
-    const guard = createGuardHero(level * 10, seededRng(`guard:${s}`));
+    const guard = createGuardHero(level * 10, seededRng(`guard:${s}`), 0);
     const r = resolveCombat(
       { troops, research, hero, attackBonus: lord.attackItem ? ITEM_BONUS : 0, defenseBonus: lord.defenseItem ? ITEM_BONUS : 0 },
       { troops: { ...t.troops }, research: {}, hero: guard, forts: { ...t.forts }, wallLevel: level },
@@ -188,7 +188,7 @@ export function traceNpc(troops: TroopCounts, opts: { level?: number; seed?: num
       attackBonus: lord.attackItem ? ITEM_BONUS : 0,
       defenseBonus: lord.defenseItem ? ITEM_BONUS : 0,
     },
-    { troops: { ...t.troops }, research: {}, hero: createGuardHero(level * 10, seededRng(`guard:${s}`)), forts: { ...t.forts }, wallLevel: level },
+    { troops: { ...t.troops }, research: {}, hero: createGuardHero(level * 10, seededRng(`guard:${s}`), 0), forts: { ...t.forts }, wallLevel: level },
     seededRng(`battle:${s}`),
     (e) => events.push(e),
   );

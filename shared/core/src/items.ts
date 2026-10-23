@@ -143,11 +143,11 @@ export const heroBoxQuality = (itemId: string) => BALANCE.items.heroBoxes[itemId
 
 /**
  * The hero in a hero box: a random hero at the box's level with full loyalty and its level in unspent
- * points, each base attribute raised to at least minStat + 0 … heroBoxStatSpread.
+ * points, each base attribute raised to at least minStat + 0 … heroBoxStatSpread. Named as the Inn of `city` would name it.
  */
-export function createBoxHero(itemId: string, rng: Rng): GeneratedHero {
+export function createBoxHero(itemId: string, rng: Rng, city: { state: number; taken?: ReadonlySet<string> }): GeneratedHero {
   const q = heroBoxQuality(itemId);
-  const g = createRandomHero(1, rng);
+  const g = createRandomHero(1, rng, city);
   const bump = (v: number) => Math.max(v, q.minStat + randInt(rng, 0, BALANCE.items.heroBoxStatSpread));
   const basePower = bump(g.basePower);
   const baseManagement = bump(g.baseManagement);

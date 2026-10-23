@@ -16,13 +16,14 @@ import {
   type Message,
   msg,
   ref,
+  stateOf,
 } from '@marchlands/core';
 import { heroes, one } from '@marchlands/db';
 
 import { type CityBundle, cityStats, openOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
 import { heroBean, troopBean } from '#/dto.ts';
-import { heroSlots, heroValues, pushHero } from '#/engine/heroes.ts';
+import { heroSlots, heroValues, pushHero, takenHeroNames } from '#/engine/heroes.ts';
 import { settleAllCities } from '#/engine/research.ts';
 import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources, setBuff } from '#/helpers.ts';
 import { getPlayer, type PlayerRow, saveCity, savePlayer } from '#/repo.ts';
@@ -173,7 +174,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
             await ctx.tx
               .insert(heroes)
               .values({
-                ...heroValues(createBoxHero(itemId, ctx.rng)),
+                ...heroValues(createBoxHero(itemId, ctx.rng, { state: stateOf(city.city.tileId), taken: await takenHeroNames(ctx, p.id, city.city.id) })),
                 playerId: p.id,
                 cityId: city.city.id,
                 inTavern: false,

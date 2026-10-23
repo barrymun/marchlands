@@ -16,6 +16,12 @@ Notes on how the original Evony worked, gathered from player guides, wikis and f
 | [colonies.md](colonies.md) | Colonising players' cities: suzerains, tribute, the daily policies (draft, disarm, population, discord), uprisings | Age 2 | [features/market-and-factions.md](../features/market-and-factions.md), Historical cities (a model for a seat's powers) |
 | [npc-cities.md](npc-cities.md) | NPC city garrisons by level, compared with our `NPC_TABLE`: the same but for one cell | Age 2 against Age 1 | `shared/core/src/world.ts` |
 
+## Heroes
+
+| Note | What it covers | Version | Used by |
+|---|---|---|---|
+| [famous-historical-heroes.md](famous-historical-heroes.md) | Famous historical heroes: how they were found and captured, and all 636 with their four attributes (from a spreadsheet), with a first pass at the ones who fit the Marchlands | Age 2 | [TODO.md](../../TODO.md), Famous historical heroes |
+
 ## Combat
 
 | Note | What it covers | Version | Used by |

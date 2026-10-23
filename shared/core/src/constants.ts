@@ -165,6 +165,13 @@ export const HeroStatus = {
 } as const;
 export type HeroStatus = (typeof HeroStatus)[keyof typeof HeroStatus];
 
+/** A player's or hero's sex (playerInfo.sex, heroes.sex). */
+export const Sex = {
+  MALE: 0,
+  FEMALE: 1,
+} as const;
+export type Sex = (typeof Sex)[keyof typeof Sex];
+
 export const Mission = {
   TRANSPORT: 1,
   REINFORCE: 2,

@@ -1,12 +1,12 @@
 // Periodic maintenance run by the worker.
 
-import { and, eq, isNotNull, lt, sql } from 'drizzle-orm';
+import { and, asc, eq, isNotNull, lt, sql } from 'drizzle-orm';
 
-import { BALANCE, CandlePeriod } from '@marchlands/core';
-import { type Db, heroes, players } from '@marchlands/db';
+import { BALANCE, CandlePeriod, heroName, stateOf } from '@marchlands/core';
+import { cities, type Db, heroes, players } from '@marchlands/db';
 
 import { runGame } from '#/context.ts';
-import { resyncHeroGear } from '#/engine/heroes.ts';
+import { resyncHeroGear, takenHeroNames } from '#/engine/heroes.ts';
 import { merchantSweep } from '#/engine/market.ts';
 import { npcTradeTick } from '#/engine/npc-economy.ts';
 import { checkBeginner } from '#/engine/player.ts';
@@ -80,4 +80,26 @@ export async function heroGearJob(db: Db): Promise<number> {
   let changed = 0;
   for (const { id } of owners) if (id != null) changed += await runGame(db, (ctx) => resyncHeroGear(ctx, id));
   return changed;
+}
+
+/**
+ * (marchlands) Give the heroes still waiting in an Inn under a name from the old generator ("Aldric the Bold") a name
+ * and sex from the new one, for their city's state (heroName), keeping their stats; run at worker start-up. New names
+ * never have an epithet, so each hero is renamed once. Returns how many.
+ */
+export async function innNamesJob(db: Db): Promise<number> {
+  return runGame(db, async (ctx) => {
+    const offers = await ctx.tx
+      .select({ id: heroes.id, cityId: heroes.cityId, playerId: cities.playerId, tileId: cities.tileId })
+      .from(heroes)
+      .innerJoin(cities, eq(cities.id, heroes.cityId))
+      .where(and(eq(heroes.inTavern, true), sql`${heroes.name} ~ '^[A-Za-z]+ the [A-Za-z]+$'`))
+      .orderBy(asc(heroes.id));
+    for (const h of offers) {
+      const taken = await takenHeroNames(ctx, h.playerId, h.cityId);
+      const { name, sex } = heroName(ctx.rng, stateOf(h.tileId), { travellers: true, taken });
+      await ctx.tx.update(heroes).set({ name, sex }).where(eq(heroes.id, h.id));
+    }
+    return offers.length;
+  });
 }

@@ -8,6 +8,7 @@ import { heroes, research } from '#/index.ts';
 import { getHero } from '#/repo.ts';
 import { addCity, addHero, createTestPlayer, reloadCity, reloadPlayer, setResearch, setTownHall } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
+import { patchHero } from '#test/support/heroes.ts';
 import { res, researchOf, stock, withAcademy } from '#test/support/research.ts';
 
 const { AGRICULTURE, LUMBERING, HERO_ENHANCEMENT } = TechType;
@@ -85,6 +86,8 @@ describe(completeResearch.name, () => {
       const p = await createTestPlayer(g);
       await withAcademy(g, p);
       const hero = await addHero(g, p, 5);
+      // gear needs a hero of level 10 or more (gearTier)
+      await patchHero(g, hero, { level: 30 });
       const before = await getHero(g, hero);
       const out = await research.startResearch(g, p.id, p.cityId, HERO_ENHANCEMENT);
       await g.runDue(out.endTime);

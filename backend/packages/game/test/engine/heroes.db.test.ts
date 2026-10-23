@@ -13,10 +13,11 @@ import { heroBuildings, lastHeroPush, patchHero, patchPlayer, pushedHeroes } fro
 
 describe(heroValues.name, () => {
   it('takes the stored columns of a generated hero', () => {
-    const generated = createRandomHero(3, seededRng('values'));
+    const generated = createRandomHero(3, seededRng('values'), { state: 0 });
     const v = heroValues(generated);
     expect(v).toEqual({
       name: generated.name,
+      sex: generated.sex,
       logoUrl: generated.logoUrl,
       level: generated.level,
       experience: generated.experience,

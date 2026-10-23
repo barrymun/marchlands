@@ -1,7 +1,7 @@
 // Hero helpers shared with other services: pushes, hero slots, the tavern, mayors, gear and
 // expiring hero buffs.
 
-import { and, eq } from 'drizzle-orm';
+import { and, eq, or } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import { buildingLevel, BuildingType, type GeneratedHero, HeroBuffId, HeroStatus, syncHeroGear } from '@marchlands/core';
@@ -22,6 +22,7 @@ export const heroSlots = (b: CityBundle) => buildingLevel(b.city.buildings, Buil
 export function heroValues(g: GeneratedHero) {
   return {
     name: g.name,
+    sex: g.sex,
     logoUrl: g.logoUrl,
     level: g.level,
     experience: g.experience,
@@ -35,6 +36,15 @@ export function heroValues(g: GeneratedHero) {
     stratagem: g.stratagem,
     remainPoint: g.remainPoint,
   };
+}
+
+/** (marchlands) Names a new Inn offer shouldn't repeat: the player's heroes and the city's other offers. */
+export async function takenHeroNames(ctx: Ctx, playerId: number, cityId: number): Promise<Set<string>> {
+  const rows = await ctx.tx
+    .select({ name: heroes.name })
+    .from(heroes)
+    .where(or(eq(heroes.playerId, playerId), and(eq(heroes.cityId, cityId), eq(heroes.inTavern, true))));
+  return new Set(rows.map((r) => r.name));
 }
 
 export async function clearTavern(ctx: Ctx, cityId: number) {

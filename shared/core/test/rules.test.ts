@@ -246,7 +246,7 @@ describe('heroes & world', () => {
   it('tavern heroes keep the point invariant', () => {
     const rng = seededRng('heroes');
     for (let i = 0; i < 200; i++) {
-      const h = createRandomHero(10, rng);
+      const h = createRandomHero(10, rng, { state: 0 });
       expect(h.power + h.management + h.stratagem).toBe(h.basePower + h.baseManagement + h.baseStratagem + h.level);
       expect(h.level).toBeLessThanOrEqual(50);
     }
@@ -261,7 +261,7 @@ describe('heroes & world', () => {
     expect(innHeroMaxLevel(1)).toBe(BALANCE.inn.heroLevelsPerInnLevel);
     expect(innHeroMaxLevel(10)).toBe(50);
     const rng = seededRng('inn-3');
-    for (let i = 0; i < 200; i++) expect(createRandomHero(3, rng).level).toBeLessThanOrEqual(innHeroMaxLevel(3));
+    for (let i = 0; i < 200; i++) expect(createRandomHero(3, rng, { state: 0 }).level).toBeLessThanOrEqual(innHeroMaxLevel(3));
   });
   it('field slots: outerSlotsBase plus outerSlotsPerTownHall per Town Hall level, up to the 40 positions', () => {
     expect(unlockedOuterSlots(0)).toBe(BALANCE.outerSlotsBase);

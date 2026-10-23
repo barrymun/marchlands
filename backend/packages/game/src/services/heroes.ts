@@ -15,6 +15,7 @@ import {
   gearStarLimit,
   type GearStat,
   HERO_ATTRIBUTE_ITEMS,
+  HERO_NAME_MAX,
   heroAtMaxLevel,
   heroAttributeBuffEnd,
   heroAwardCost,
@@ -34,6 +35,7 @@ import {
   loyaltyAfterMedal,
   msg,
   ref,
+  stateOf,
   tavernRefill,
   tavernRefreshCost,
   TechType,
@@ -43,7 +45,7 @@ import { heroes, one } from '@marchlands/db';
 import { type CityBundle, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { heroBean } from '#/dto.ts';
-import { clearTavern, closeMayorCity, heroSlots, heroValues, openMayorCity, pushHero, resyncHeroGear } from '#/engine/heroes.ts';
+import { clearTavern, closeMayorCity, heroSlots, heroValues, openMayorCity, pushHero, resyncHeroGear, takenHeroNames } from '#/engine/heroes.ts';
 import { addItem, assertClean, cleanName, consumeItem, itemCount, pushResources, spendGold, spendResources } from '#/helpers.ts';
 import { findCity, getHero, getPlayer, heroesOfCity, type HeroRow, saveCity, saveHero, savePlayer } from '#/repo.ts';
 
@@ -53,8 +55,10 @@ async function fillTavern(ctx: Ctx, b: CityBundle, regenerate: boolean) {
   const plan = tavernRefill(current, buildingLevel(b.city.buildings, BuildingType.INN));
   for (const h of plan.drop) await ctx.tx.delete(heroes).where(eq(heroes.id, h.id));
   const out = [...plan.keep];
+  const city = { state: stateOf(b.city.tileId), taken: await takenHeroNames(ctx, b.city.playerId, b.city.id) };
   for (let i = 0; i < plan.add; i++) {
-    const g = createRandomHero(plan.heroInnLevel, ctx.rng);
+    const g = createRandomHero(plan.heroInnLevel, ctx.rng, city);
+    city.taken.add(g.name);
     const row = one(
       await ctx.tx
         .insert(heroes)
@@ -359,7 +363,7 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
 /** hero.changeName */
 export async function renameHero(ctx: Ctx, playerId: number, heroId: number, name: string) {
   const h = await ownHero(ctx, playerId, heroId);
-  const n = cleanName(name, 1, 20, msg('common.heroName'));
+  const n = cleanName(name, 1, HERO_NAME_MAX, msg('common.heroName'));
   assertClean(n);
   h.name = n;
   await saveHero(ctx, h);

@@ -177,7 +177,7 @@ describe(createBoxHero.name, () => {
     const rng = seededRng('box-hero');
     const q = items.heroBoxes[ItemId.HERO_PACKAGE]!;
     for (let i = 0; i < 100; i++) {
-      const h = createBoxHero(ItemId.HERO_PACKAGE, rng);
+      const h = createBoxHero(ItemId.HERO_PACKAGE, rng, { state: 0 });
       expect(h).toMatchObject({ level: q.level, upgradeExp: upgradeExpFor(q.level), remainPoint: q.level, loyalty: BALANCE.heroMaxLoyalty, experience: 0 });
       for (const base of [h.basePower, h.baseManagement, h.baseStratagem]) expect(base).toBeGreaterThanOrEqual(q.minStat);
       expect([h.power, h.management, h.stratagem]).toEqual([h.basePower, h.baseManagement, h.baseStratagem]);
@@ -188,13 +188,13 @@ describe(createBoxHero.name, () => {
     const q = items.heroBoxes[ItemId.HERO_PACKAGE]!;
     const seen = new Set<number>();
     for (let i = 0; i < 2_000; i++) {
-      const h = createBoxHero(ItemId.HERO_PACKAGE, rng);
+      const h = createBoxHero(ItemId.HERO_PACKAGE, rng, { state: 0 });
       for (const base of [h.basePower, h.baseManagement, h.baseStratagem]) if (base <= q.minStat + items.heroBoxStatSpread) seen.add(base - q.minStat);
     }
     expect([...seen].sort((a, b) => a - b)).toEqual(Array.from({ length: items.heroBoxStatSpread + 1 }, (_, i) => i));
   });
   it('uses the fallback for a box that is not listed', () => {
-    expect(createBoxHero('unknown.box', seededRng('x')).level).toBe(items.heroBoxFallback.level);
+    expect(createBoxHero('unknown.box', seededRng('x'), { state: 0 }).level).toBe(items.heroBoxFallback.level);
   });
 });
 

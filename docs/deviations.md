@@ -82,7 +82,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 | A mayor's politics adds 1% production per point; hero attack adds 1% troop attack per point; mayor attributes cut build / research time ×0.995 per point without limit | *(design change)* soft caps for geared heroes, each a toggle: above `BALANCE.heroSoftCap.knee` (200) the production bonus (`production`) and battle attack (`battle`) count √(200 × attribute) instead of the attribute (1,250 → 500); construction and research keep at least 10% of their time (`BALANCE.heroTimeFloor`, null to turn off). Training is never capped |
 | `hero.levelUp` takes one level per call | *(design change)* one call takes every level the experience pays for (`levelUpAll`), +1 attribute point each |
 | The Rally Spot army limits were never enforced | at most one army per Rally Spot level, each of at most 10,000 troops per level (100,000 at level 10; a War Ensign adds 25%), as in Evony |
-| Fixed hero names like `"Test Name453160"` | name and portrait generator |
+| Fixed hero names like `"Test Name453160"` | name and portrait generator. Names follow the state the hero comes from, in its culture and spelt with plain letters: a first name with a real place of the state, a father's name, or both, in the culture's own form ("Gero von Meissen", "Ugo di Guido", "Jitka Borivojova"); half the heroes are women (`heroes.sex`, not shown); about 1 Inn hero in 5 is a traveller from another state, mostly a neighbouring one (`heroName`, `shared/core/src/hero-names.ts`; [features/hero-names.md](features/hero-names.md)) |
 
 ## Gaps filled
 

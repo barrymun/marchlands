@@ -219,6 +219,8 @@ export const heroes = pgTable(
     /** true while the hero is only offered in the city's inn */
     inTavern: boolean('in_tavern').notNull().default(false),
     name: text('name').notNull(),
+    /** (marchlands) Sex: 0 male, 1 female, as players' (the name implies it; not shown yet) */
+    sex: smallint('sex').notNull().default(0),
     logoUrl: text('logo_url').notNull(),
     /** HeroStatus */
     status: smallint('status').notNull().default(0),

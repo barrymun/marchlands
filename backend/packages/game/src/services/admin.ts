@@ -14,13 +14,14 @@ import {
   researchMaxLevel,
   RESOURCE_KEYS,
   type ResourceSet,
+  stateOf,
   TechType,
 } from '@marchlands/core';
 import { accounts, heroes, one } from '@marchlands/db';
 
 import { openOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
-import { heroValues, pushHero, resyncHeroGear } from '#/engine/heroes.ts';
+import { heroValues, pushHero, resyncHeroGear, takenHeroNames } from '#/engine/heroes.ts';
 import { sendSystemMail } from '#/engine/mail.ts';
 import { addItem, pushCity, pushPlayerInfo } from '#/helpers.ts';
 import { findPlayerByName, getPlayer, saveCity, saveHero, savePlayer } from '#/repo.ts';
@@ -67,7 +68,10 @@ export async function setTechnology(ctx: Ctx, playerName: string, techId: number
 
 export async function addHero(ctx: Ctx, cityId: number, playerId: number, innLevel: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  const g = createRandomHero(Math.max(1, Math.min(20, innLevel)), ctx.rng);
+  const g = createRandomHero(Math.max(1, Math.min(20, innLevel)), ctx.rng, {
+    state: stateOf(b.city.tileId),
+    taken: await takenHeroNames(ctx, playerId, b.city.id),
+  });
   const row = one(
     await ctx.tx
       .insert(heroes)

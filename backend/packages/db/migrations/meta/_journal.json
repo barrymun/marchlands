@@ -204,6 +204,13 @@
       "when": 1792677844519,
       "tag": "0028_market_trades_npc",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792735704216,
+      "tag": "0029_hero_sex",
+      "breakpoints": true
     }
   ]
 }

@@ -82,6 +82,7 @@ export function heroRow(over: Partial<HeroRow> = {}): HeroRow {
     cityId: 1,
     inTavern: false,
     name: 'Hero',
+    sex: 0,
     logoUrl: 'images/icon/hero/1.png',
     status: HeroStatus.IDLE,
     level: 1,

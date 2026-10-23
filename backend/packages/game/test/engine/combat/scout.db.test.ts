@@ -12,6 +12,7 @@ import {
   Mission,
   npcBuildings,
   seededRng,
+  stateOf,
   TechType,
   TileType,
 } from '@marchlands/core';
@@ -38,7 +39,7 @@ import {
 import { addHero, cityBundle, reloadCity, setBuildings, setResearch } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 
-const guardOf = (seed: number, maxLevel: number) => createGuardHero(maxLevel, seededRng(`guard:${seed}`));
+const guardOf = (tileId: number, seed: number, maxLevel: number) => createGuardHero(maxLevel, seededRng(`guard:${seed}`), stateOf(tileId));
 
 /** p scouts q's city with `scouts` (q has `defenders` scouts); returns the army id. */
 async function scoutCity(g: TestGame, scouts: number, defenders: number, opts: { extra?: Record<string, number> } = {}) {
@@ -61,7 +62,7 @@ describe(`${processArmy.name}: scouting a barbarian city`, () => {
       const tile = await getTile(g, npc.id);
       expect(tile).toMatchObject({ troops: fresh.troops, forts: fresh.forts, updatedAt: g.now });
       expect(tile.state).toMatchObject({ ...fresh.state, heroSeed: expect.any(Number) });
-      const guard = guardOf(tile.state!.heroSeed!, npc.level * 10);
+      const guard = guardOf(tile.id, tile.state!.heroSeed!, npc.level * 10);
 
       const report = await lastReport(g, p.id, 'report.title.scoutReport');
       expect(report).toMatchObject({ isAttack: true, armyType: Mission.SCOUT });
@@ -104,7 +105,7 @@ describe(`${processArmy.name}: scouting a valley`, () => {
       await arrive(g, bean.armyId);
       const tile = await getTile(g, valley.id);
       expect(tile.state).toMatchObject({ regenAt: g.now, heroSeed: expect.any(Number) });
-      const guard = guardOf(tile.state!.heroSeed!, 20);
+      const guard = guardOf(tile.id, tile.state!.heroSeed!, 20);
       expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'valley')).toEqual({
         target: 'valley',
         type: valley.type,

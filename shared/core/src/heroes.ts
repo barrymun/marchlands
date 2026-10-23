@@ -1,7 +1,9 @@
 // Hero generation and progression (orig spitfire::RandomStat / CreateRandomHero, Hero.cpp).
 
 import { BALANCE } from '#/balance.ts';
-import { pick, randInt, type Rng } from '#/rng.ts';
+import type { Sex } from '#/constants.ts';
+import { heroName } from '#/hero-names.ts';
+import { pick, randInt, type Rng, seededRng } from '#/rng.ts';
 
 export interface HeroStats {
   level: number;
@@ -25,6 +27,7 @@ export interface HeroStats {
 
 export interface GeneratedHero extends HeroStats {
   name: string;
+  sex: Sex;
   logoUrl: string;
 }
 
@@ -104,73 +107,7 @@ export function randomStat(rng: Rng): number {
   return 10;
 }
 
-const FIRST_NAMES = [
-  'Aldric',
-  'Baldwin',
-  'Cedric',
-  'Conrad',
-  'Edmund',
-  'Godfrey',
-  'Gunther',
-  'Hector',
-  'Leopold',
-  'Lothar',
-  'Magnus',
-  'Odo',
-  'Otto',
-  'Rainald',
-  'Roland',
-  'Siegfried',
-  'Tancred',
-  'Theobald',
-  'Ulric',
-  'Walter',
-  'Adela',
-  'Beatrix',
-  'Cunigunde',
-  'Edith',
-  'Gisela',
-  'Hildegard',
-  'Isolde',
-  'Mathilda',
-  'Richenza',
-  'Sibylla',
-  'Arnulf',
-  'Bertram',
-  'Dietrich',
-  'Eckhart',
-  'Florian',
-  'Gerold',
-  'Heinrich',
-  'Ivo',
-  'Konrad',
-  'Ludwig',
-];
-const EPITHETS = [
-  'the Bold',
-  'the Wise',
-  'the Just',
-  'the Stern',
-  'the Fair',
-  'the Young',
-  'the Elder',
-  'the Lion',
-  'the Hammer',
-  'the Pious',
-  'the Brave',
-  'the Swift',
-  'the Iron',
-  'the Red',
-  'the Black',
-  'the Tall',
-  'the Silent',
-  'the Shrewd',
-];
 const FACES = Array.from({ length: 30 }, (_, i) => `images/icon/player/faceA${i + 1}.jpg`);
-
-export function randomHeroName(rng: Rng): string {
-  return `${pick(rng, FIRST_NAMES)} ${pick(rng, EPITHETS)}`;
-}
 
 /** Heroes the Inn offers at `innLevel`: one per level, up to BALANCE.inn.maxOffers. */
 export function innOffers(innLevel: number): number {
@@ -185,9 +122,11 @@ export function innHeroMaxLevel(innLevel: number): number {
 /**
  * Tavern hero for an Inn of `innLevel` (orig CreateRandomHero): level 1..5*inn, `level`
  * attribute points spread randomly over power/management/stratagem on top of base rolls.
- * Fixes the original's bug where base stratagem could be dropped.
+ * Fixes the original's bug where base stratagem could be dropped. (marchlands) Named for the
+ * city's state, now and then a traveller's (heroName), avoiding the names in `taken`.
  */
-export function createRandomHero(innLevel: number, rng: Rng): GeneratedHero {
+export function createRandomHero(innLevel: number, rng: Rng, city: { state: number; taken?: ReadonlySet<string> }): GeneratedHero {
+  const { name, sex } = heroName(rng, city.state, { travellers: true, taken: city.taken });
   const level = randInt(rng, 1, Math.max(1, innHeroMaxLevel(innLevel)));
   const baseManagement = randomStat(rng);
   const baseStratagem = randomStat(rng);
@@ -199,7 +138,8 @@ export function createRandomHero(innLevel: number, rng: Rng): GeneratedHero {
   remain -= m;
   const s = remain;
   return {
-    name: randomHeroName(rng),
+    name,
+    sex,
     logoUrl: pick(rng, FACES),
     level,
     experience: 0,
@@ -221,12 +161,18 @@ export function createRandomHero(innLevel: number, rng: Rng): GeneratedHero {
   };
 }
 
-/** Temporary defending hero of an NPC city (orig NpcCity::ResetHero) or valley (ValleyData::Reset). */
-export function createGuardHero(maxLevel: number, rng: Rng): GeneratedHero {
+/**
+ * Temporary defending hero of an NPC city (orig NpcCity::ResetHero) or valley (ValleyData::Reset) in `state`, named for
+ * it. The name comes from its own generator seeded by two draws, as many as the old names took, so a seed kept on a
+ * tile still gives the same level and stats.
+ */
+export function createGuardHero(maxLevel: number, rng: Rng, state: number): GeneratedHero {
+  const { name, sex } = heroName(seededRng(`${rng.next()}:${rng.next()}`), state);
   const level = randInt(rng, 1, Math.max(1, maxLevel));
   const power = 30 + randInt(rng, 0, 29);
   return {
-    name: randomHeroName(rng),
+    name,
+    sex,
     logoUrl: pick(rng, FACES),
     level,
     experience: 0,

@@ -19,7 +19,7 @@ import {
 } from '@marchlands/db';
 
 import { type ZoneStats } from '#/engine/world.ts';
-import { beginnerJob, cleanupJob, heroGearJob, market, merchantJob, rankingsJob, statsJob, zonesJob } from '#/index.ts';
+import { beginnerJob, cleanupJob, heroGearJob, innNamesJob, market, merchantJob, rankingsJob, statsJob, zonesJob } from '#/index.ts';
 import { getPlayer, savePlayer } from '#/repo.ts';
 import { statDay } from '#/stats.ts';
 import { createTestAlliance } from '#test/support/alliance.ts';
@@ -231,5 +231,26 @@ describe(heroGearJob.name, () => {
       expect(h![`${stat}Added`]).toBe(heroGearBonus(30, { level: 3, stars: {} }));
       expect([h!.powerAdded, h!.managementAdded, h!.stratagemAdded].filter((n) => n > 0)).toHaveLength(1);
       expect(await heroGearJob(db)).toBe(0);
+    }));
+});
+
+describe(innNamesJob.name, () => {
+  it("renames the Inn's heroes still under the old generator's names, keeping their stats, and leaves hired heroes be", () =>
+    inTestTx(async (db) => {
+      const { offer, hired } = await arrange(db, async (g) => {
+        const p = await createTestPlayer(g);
+        return { offer: await addHero(g, p), hired: await addHero(g, p) };
+      });
+      await db.update(heroes).set({ name: 'Aldric the Bold', inTavern: true, playerId: null }).where(eq(heroes.id, offer));
+      await db.update(heroes).set({ name: 'Isolde the Fair' }).where(eq(heroes.id, hired));
+      const [before] = await db.select().from(heroes).where(eq(heroes.id, offer));
+
+      expect(await innNamesJob(db)).toBe(1);
+      const [after] = await db.select().from(heroes).where(eq(heroes.id, offer));
+      expect(after!.name).not.toMatch(/ the /);
+      expect({ ...after, name: '', sex: 0 }).toEqual({ ...before, name: '', sex: 0 });
+      const [kept] = await db.select().from(heroes).where(eq(heroes.id, hired));
+      expect(kept!.name).toBe('Isolde the Fair');
+      expect(await innNamesJob(db)).toBe(0);
     }));
 });

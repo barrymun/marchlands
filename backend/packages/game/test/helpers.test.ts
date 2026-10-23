@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { BuffId, type BuffState, GameError, type Message, msg } from '@marchlands/core';
+import { BuffId, type BuffState, GameError, HERO_NAME_MAX, heroNameParts, type Message, msg } from '@marchlands/core';
 
 import { activeBuff, addPrestige, assertClean, cleanName, escapeHtml, gainResources, itemCount, spendGold, spendResources, textOf } from '#/helpers.ts';
 import { type CityRow, type PlayerRow } from '#/repo.ts';
@@ -169,6 +169,14 @@ describe(assertClean.name, () => {
 
   it('accepts other names', () => {
     expect(() => assertClean('Camelot')).not.toThrow();
+  });
+
+  it('accepts every part of a generated hero name, as a rename would', () => {
+    const { first, fathers, places } = heroNameParts();
+    for (const part of [...first, ...fathers, ...places]) {
+      expect(() => assertClean(part), part).not.toThrow();
+      expect(cleanName(part, 1, HERO_NAME_MAX), part).toBe(part);
+    }
   });
 });
 

@@ -1,4 +1,5 @@
-// Game clock. Seeds the world on first boot and re-applies hero gear (heroGearJob), then:
+// Game clock. Seeds the world on first boot, re-applies hero gear (heroGearJob) and renames Inn heroes still under
+// the old generator's names (innNamesJob), then:
 //  - claims due timed events (FOR UPDATE SKIP LOCKED, so several workers can run side by side)
 //    and processes each in its own transaction;
 //  - runs periodic jobs (rankings, zone stats, beginner expiry, merchant sweep, the factions' trade, cleanup).
@@ -8,7 +9,19 @@ import { sql } from 'drizzle-orm';
 
 import { BALANCE, setGameSpeed } from '@marchlands/core';
 import { connect, one, timedEvents } from '@marchlands/db';
-import { beginnerJob, cleanupJob, heroGearJob, merchantJob, npcTradeJob, rankingsJob, startStatsFlusher, statsJob, world, zonesJob } from '@marchlands/game';
+import {
+  beginnerJob,
+  cleanupJob,
+  heroGearJob,
+  innNamesJob,
+  merchantJob,
+  npcTradeJob,
+  rankingsJob,
+  startStatsFlusher,
+  statsJob,
+  world,
+  zonesJob,
+} from '@marchlands/game';
 
 import { eventLoop, every as everyUntilStopped, log, processOne } from '#/worker.ts';
 
@@ -33,6 +46,8 @@ async function main() {
   log('info', 'world ready', { ...info });
   // heroes store their gear points: bring them in line with the current gear rules
   log('info', 'hero gear synced', { heroes: await heroGearJob(db) });
+  // heroes waiting in an Inn under the old generator's names get new ones (docs/features/hero-names.md)
+  log('info', 'inn heroes renamed', { heroes: await innNamesJob(db) });
   const { n } = one(await db.select({ n: sql<number>`count(*)` }).from(timedEvents));
   log('info', 'worker started', { pendingEvents: Number(n), gameSpeed: Number(process.env.GAME_SPEED ?? 1) });
 
