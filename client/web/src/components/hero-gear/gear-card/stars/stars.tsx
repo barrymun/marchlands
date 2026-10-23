@@ -1,24 +1,24 @@
-import { Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { maxStars } from '@/components/hero-gear/constants';
-import { cn } from '@/lib/utils';
+import { GEAR_ART } from '@/components/hero-gear/gear-card/constants';
+import { starKind } from '@/components/hero-gear/gear-card/stars/utils';
+import { gearStarFile } from '@/lib/game-art';
 
+/** A piece's stars in pixel art, two rows of five: red in use, orange waiting above the research level (`used`), grey not yet bought. */
 export function Stars({ count, used }: { count: number; used?: number }) {
   const { t } = useTranslation('hero-gear');
   return (
-    <div className="flex gap-px" aria-label={t('stars.label', { n: count, count: maxStars })}>
+    <div className="grid w-fit grid-cols-5 gap-px" aria-label={t('stars.label', { n: count, count: maxStars })}>
       {Array.from({ length: maxStars }, (_, i) => (
-        <Star
+        <img
           key={i}
-          className={cn(
-            'size-3',
-            i < count
-              ? used == null || i < used
-                ? 'fill-amber-400 text-amber-500'
-                : 'fill-amber-200 text-amber-300 dark:fill-amber-900 dark:text-amber-800'
-              : 'text-muted-foreground/40',
-          )}
+          src={GEAR_ART[gearStarFile(starKind(i, count, used))]}
+          alt=""
+          width={18}
+          height={18}
+          decoding="async"
+          className="[image-rendering:pixelated]"
         />
       ))}
     </div>

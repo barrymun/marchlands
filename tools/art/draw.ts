@@ -6,8 +6,9 @@
 // (tools/art/walls.ts) to client/web/src/assets/walls/, and the troops (tools/art/troops.ts) and fortifications
 // (tools/art/fortifications.ts) to client/web/src/assets/units/ as <name>.png, the troop badges (tools/art/badges.ts)
 // to client/web/src/assets/badges/, the resource icons (tools/art/resources.ts) to client/web/src/assets/resources/,
-// and the isometric city view's ground and walls (tools/art/city.ts) and its grand Town Hall
-// (tools/art/buildings/town-hall.ts) to client/web/src/assets/city/.
+// the isometric city view's ground and walls (tools/art/city.ts) and its grand Town Hall
+// (tools/art/buildings/town-hall.ts) to client/web/src/assets/city/, and the hero gear (tools/art/gear.ts: each piece at
+// every gear level, the backdrops and the stars; `gear`) to client/web/src/assets/gear/.
 // A building with moving parts (windmill sails, a water wheel) also gets a bare sprite without them,
 // <name>-<band>-bare.png, which the animated town draws them turning over. Where each sprite's moving parts stand
 // (its spots, tools/art/pixel.ts) goes to client/web/src/assets/spots.json, keyed by <folder>/<file>.
@@ -40,6 +41,7 @@ import { warehouse } from './buildings/warehouse.ts';
 import { workshop } from './buildings/workshop.ts';
 import { CITY_GROUND_DRAWINGS, CITY_WALL_DRAWINGS } from './city.ts';
 import { FORT_DRAWINGS } from './fortifications.ts';
+import { GEAR_BACKDROP, GEAR_DRAWINGS, GEAR_STAR } from './gear.ts';
 import { IsoCanvas } from './iso.ts';
 import type { PixelCanvas, Spot } from './pixel.ts';
 import { RESOURCE_DRAWINGS } from './resources.ts';
@@ -52,6 +54,11 @@ import {
   buildingArtFile,
   cityGroundFile,
   cityWallFile,
+  GEAR_ART_LEVELS,
+  GEAR_STAR_KINDS,
+  gearArtFile,
+  gearBackdropFile,
+  gearStarFile,
   grandTownHallFile,
   resourceArtFile,
   tileArtFile,
@@ -169,6 +176,15 @@ if (!wanted.size || wanted.has('city')) {
   console.log(`drew city walls (${Object.keys(CITY_WALL_DRAWINGS).length} pieces × ${ART_BANDS.length} bands)`);
   for (const { band } of ART_BANDS) save('city', grandTownHallFile(band), grandTownHall[band]);
   console.log(`drew city/town-hall (${ART_BANDS.length} bands)`);
+}
+
+if (!wanted.size || wanted.has('gear')) {
+  fs.mkdirSync(path.join(ASSETS, 'gear'), { recursive: true });
+  for (const [piece, drawing] of Object.entries(GEAR_DRAWINGS))
+    for (const level of GEAR_ART_LEVELS) save('gear', gearArtFile(piece, level), () => drawing(level));
+  for (const level of GEAR_ART_LEVELS) save('gear', gearBackdropFile(level), () => GEAR_BACKDROP(level));
+  for (const kind of GEAR_STAR_KINDS) save('gear', gearStarFile(kind), () => GEAR_STAR(kind));
+  console.log(`drew gear (${Object.keys(GEAR_DRAWINGS).join(', ')} × ${GEAR_ART_LEVELS.length} levels, backdrops, stars)`);
 }
 
 fs.writeFileSync(SPOTS_FILE, JSON.stringify(Object.fromEntries(Object.entries(spots).sort(([a], [b]) => a.localeCompare(b)))) + '\n');

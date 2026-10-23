@@ -18,6 +18,7 @@ import {
 import { i18n } from '@/lib/i18n';
 import { lazyComponent } from '@/lib/lazy';
 import type { PageId, PanelId, ViewId } from '@/lib/nav';
+import { MayorPicker } from '@/routes/game/mayor-chip/constants';
 
 /** A place in the game's menus: its id (lib/nav.ts), its icon, and its name in the current locale. */
 const place = <const Id extends ViewId | PageId | PanelId>(id: Id, icon: LucideIcon) => ({
@@ -34,7 +35,6 @@ export const VIEWS = [place('town', Castle), place('fields', Wheat), place('map'
 /** The panels that open over the view, in the order of the menu. */
 export const PANELS = [
   place('military', Swords),
-  place('heroes', UsersRound),
   place('research', FlaskConical),
   place('items', Backpack),
   place('armies', Flag),
@@ -42,13 +42,22 @@ export const PANELS = [
 ] as const;
 
 /** The pages that take the viewport's place, in the order of the menu. */
-export const PAGES = [place('reports', ScrollText), place('market', Scale), place('flows', Workflow), place('stats', ChartColumn)] as const;
+export const PAGES = [
+  place('heroes', UsersRound),
+  place('reports', ScrollText),
+  place('market', Scale),
+  place('flows', Workflow),
+  place('stats', ChartColumn),
+] as const;
 
 /** The width a page keeps: lines and tables stay readable on a big screen. Views use the whole viewport. */
 export const PAGE_WIDTH = 'max-w-7xl';
 
-// Every screen but the town and the fields (the one a visit starts on) loads its code on first use; usePreloadPanels
-// fetches them all once the page is up, so opening one normally finds it loaded.
+/** Pages that use the viewport's whole width instead: the Heroes page, its heroes' rows and gear in columns. */
+export const FULL_WIDTH_PAGES: readonly PageId[] = ['heroes'];
+
+// Every screen but the town and the fields (the one a visit starts on) loads its code on first use, as does the mayor
+// chip's quick swap; usePreloadPanels fetches them all once the page is up, so opening one normally finds it loaded.
 export const MilitaryPanel = lazyComponent(() => import('@/components/military-panel/military-panel').then((m) => m.MilitaryPanel));
 export const HeroesPanel = lazyComponent(() => import('@/components/heroes-panel/heroes-panel').then((m) => m.HeroesPanel));
 export const ResearchPanel = lazyComponent(() => import('@/components/research-panel/research-panel').then((m) => m.ResearchPanel));
@@ -73,4 +82,5 @@ export const LAZY_PANELS = [
   FlowsPanel,
   StatsPanel,
   MapPanel,
+  MayorPicker,
 ];

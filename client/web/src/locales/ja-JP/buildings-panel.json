@@ -46,7 +46,8 @@
     "demolish": "解体",
     "confirmAllTitle": "{{name}}（Lv {{level}}）を解体しますか？",
     "confirmAll": "建物全体が一度に失われます。この操作は取り消せません。",
-    "confirmAllRefund": "建物全体が一度に失われ、{{refund}} が戻ります。この操作は取り消せません。"
+    "confirmAllRefund": "建物全体が一度に失われ、{{refund}} が戻ります。この操作は取り消せません。",
+    "innHeroes": "英雄を雇う"
   },
   "mayor": {
     "none": "市長がいません: 「英雄」で政治の高い英雄を市長に任命すると建設が速くなります。",

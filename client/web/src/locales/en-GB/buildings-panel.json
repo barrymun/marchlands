@@ -47,7 +47,8 @@
     "demolish": "Demolish",
     "confirmAllTitle": "Demolish {{name}} (Lv {{level}})?",
     "confirmAll": "The whole building goes at once. This cannot be undone.",
-    "confirmAllRefund": "The whole building goes at once, returning {{refund}}. This cannot be undone."
+    "confirmAllRefund": "The whole building goes at once, returning {{refund}}. This cannot be undone.",
+    "innHeroes": "Hire heroes"
   },
   "mayor": {
     "none": "No mayor: appoint one with high Politics in Heroes to build faster.",

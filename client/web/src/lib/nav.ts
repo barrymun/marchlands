@@ -8,9 +8,9 @@ import { isOuterPosition } from '@marchlands/core';
 /** The views of the viewport, in the order of the switch. */
 export const VIEW_IDS = ['town', 'fields', 'map'] as const;
 /** The heavier screens, each a page in the viewport's place. */
-const PAGE_IDS = ['reports', 'market', 'flows', 'stats'] as const;
+const PAGE_IDS = ['heroes', 'reports', 'market', 'flows', 'stats'] as const;
 /** The lighter screens, each a panel over the view. */
-export const PANEL_IDS = ['military', 'heroes', 'research', 'items', 'armies', 'factions'] as const;
+export const PANEL_IDS = ['military', 'research', 'items', 'armies', 'factions'] as const;
 
 export type ViewId = (typeof VIEW_IDS)[number];
 export type PageId = (typeof PAGE_IDS)[number];
@@ -20,6 +20,11 @@ export type PanelId = (typeof PANEL_IDS)[number];
 /** Whether an address part names a view or a page. */
 export function isScreen(s: string): s is ScreenId {
   return (VIEW_IDS as readonly string[]).includes(s) || (PAGE_IDS as readonly string[]).includes(s);
+}
+
+/** The page a `panel` parameter names, for a screen that was a panel before it became a page (`?panel=heroes`). */
+export function pageOfPanel(panel: string | null): PageId | null {
+  return panel && (PAGE_IDS as readonly string[]).includes(panel) ? (panel as PageId) : null;
 }
 
 /** Whether a `panel` parameter names a panel. */

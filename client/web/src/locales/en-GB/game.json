@@ -48,6 +48,12 @@
   "mayor": {
     "label": "Mayor",
     "attributesHint": "Politics: production and build speed · Attack: training · Intelligence: research",
-    "appointHint": "Appoint a mayor in Heroes to speed up production, building, training and research."
+    "appointHint": "Appoint a mayor in Heroes to speed up production, building, training and research.",
+    "pick": "Choose a mayor",
+    "appoint": "Make mayor",
+    "appointed": "Mayor appointed",
+    "none": "No hero is at home to make mayor.",
+    "toInn": "Hire at the Inn",
+    "allHeroes": "All heroes"
   }
 }

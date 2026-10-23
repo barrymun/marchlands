@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { CircleCheck } from 'lucide-react';
+import { CircleCheck, UsersRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -16,6 +16,7 @@ import {
   postCitiesBuildingsSpeedupMutation,
   postCitiesBuildingsUpgradeMutation,
 } from '@marchlands/api-client';
+import { BuildingType } from '@marchlands/core';
 
 import { refundText } from '@/components/buildings-panel/building-dialog/building-detail/utils';
 import { MayorBuildExp } from '@/components/buildings-panel/building-dialog/mayor-build-exp/mayor-build-exp';
@@ -32,6 +33,7 @@ import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/di
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCommand } from '@/hooks/use-game';
+import { useGameNav } from '@/hooks/use-game-nav';
 import { buildingName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { STATUS_DONE } from '@/lib/tones';
@@ -39,6 +41,7 @@ import { cn } from '@/lib/utils';
 
 export function BuildingDetail({ city, building, onDone }: { city: CityBean; building: BuildingBean; onDone: () => void }) {
   const { t } = useTranslation(['buildings-panel', 'common']);
+  const nav = useGameNav();
   const pos = building.positionId;
   const path = { cityId: city.id, positionId: pos };
   const info = useQuery(getCitiesBuildingsByPositionIdOptions({ path }));
@@ -71,6 +74,20 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
         </DialogTitle>
         <DialogDescription>{t('detail.slot', { pos })}</DialogDescription>
       </DialogHeader>
+      {building.typeId === BuildingType.INN && building.level > 0 && (
+        // the Inn's heroes are on the Heroes page
+        <Button
+          size="sm"
+          variant="outline"
+          className="justify-self-start"
+          onClick={() => {
+            nav.go('heroes', { tab: 'inn' });
+            onDone();
+          }}
+        >
+          <UsersRound /> {t('detail.innHeroes')}
+        </Button>
+      )}
       {working ? (
         <div className="grid gap-3">
           <p className="text-sm">{t('detail.upgrading', { level: building.level + 1 })}</p>

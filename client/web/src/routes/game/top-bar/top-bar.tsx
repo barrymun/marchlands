@@ -76,7 +76,7 @@ export function TopBar({ city, status, onDialog }: { city?: CityBean; status: 'o
         </DropdownMenu>
         {city && (
           <div className="hidden sm:block">
-            <MayorChip mayor={mayor} onClick={() => nav.open('heroes')} />
+            <MayorChip city={city} mayor={mayor} />
           </div>
         )}
         <nav aria-label={t('viewSwitch')} className="mx-auto hidden gap-1 rounded-lg bg-muted p-1 lg:flex">

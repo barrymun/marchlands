@@ -42,7 +42,7 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
   - Troops and fortifications: all 12 troops and 5 fortifications are drawn (32×32, side on, `tools/art/troops.ts` and `tools/art/fortifications.ts`) and shown in the Military panel's garrison and defences tables and training cards.
   - Troop badges: a 24×24 badge per troop (`tools/art/badges.ts`) in the garrison table and the send-army dialog.
   - Resource icons: gold, food, lumber, stone and iron are drawn (16×16, `tools/art/resources.ts`) and shown in the resource bar in place of the Lucide icons.
-  - Still to draw: hero gear. The 14 pieces (weapon, shield, mount, necklace, charm, ring, head, shoulder, chest, back, gauntlets, belt, legs, feet; `GEAR_PIECES` in `shared/core/src/gear.ts`) have no art: one sprite per piece, richer with the level band like the buildings, the stars shown over it rather than drawn in. Shown in the Heroes panel's gear (`components/hero-gear/`) and the hero items dialog.
+  - Hero gear (design: [docs/features/hero-gear-art.md](docs/features/hero-gear-art.md)): all 14 pieces are drawn at all 11 gear levels (0–10, `tools/art/gear.ts` and `tools/art/gear/`) on a backdrop per level, with pixel-art stars, on the gear card. Not shown yet on the hero card's gear line or in the hero items dialog.
   - Still to draw: items. The 53 items (`ItemId`, `shared/core/src/item-ids.ts`) have no art: one icon each, drawn side on like the troops (`tools/art/`, a `PixelCanvas`); medals by level can share a drawing with the level marked. Shown in the Items panel and wherever an item is offered or used (hero items, speed-ups, boosts).
   - Revisit an image service (imgproxy behind nginx's cache, or a CDN) if art changes need to ship without a redeploy, sizes must vary freely (a zoomable map), or images are combined per player (a city with its alliance flag).
 - [ ] **Chat in the client.**
@@ -61,6 +61,12 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
     - **A setting in Player settings**, with a plain note (e.g. "Uses your device's time zone to show your local weather. Your location is never asked for or stored."), worded in every locale.
     - **Personal, not the world's:** the map, other players' views and any game event keep the game's weather; when acts of god exist, a game storm overrides the real sky, since it's part of the game. If anything fails (no zone, the service down), the town falls back to the game's weather.
   - To decide: on or off by default; which weather service, and its terms and credit; how often to refresh; whether to add fog and overcast skies; whether sunrise and sunset ship first.
+- [ ] **A Heroes page.** Design: [docs/features/heroes-page.md](docs/features/heroes-page.md).
+  - Now (phase 1, 2026-10-23): heroes are a page with two tabs, the city's heroes beside its Inn, and the gear (`components/heroes-panel/`), the mayor chip opens a quick mayor swap, and the Inn's building links to the Inn tab.
+  - Next: the Heroes tab as a roster beside a character sheet with the gear round a pixel-art figure (a man or a woman, as the hero is), and later the famous heroes.
+- [ ] **Heroes page: the figure wearing its gear (a spike first).**
+  - The idea: the hero's figure on the Heroes page drawn wearing each of its 14 gear pieces at the level it can use, as Diablo's and World of Warcraft's character screens do, instead of the icons standing round a plain figure ([docs/features/heroes-page.md](docs/features/heroes-page.md)).
+  - To work out: layered sprites per piece and level for a man and a woman (14 × 11 × 2 drawings, on a shared body so they line up), their size against the game art budget, and whether a few levels can share a drawing.
 
 ## Code quality and security
 

@@ -8,11 +8,6 @@
     "levelUp": "{{name}} reached level {{level}}",
     "levelUpMulti": "{{name}} reached level {{level}} (+{{levels}} levels, +{{levels}} points)"
   },
-  "mayor": {
-    "bonus": "Mayor bonus +{{pct}} production · {{rate}}",
-    "asMayor": "As mayor: +{{pct}} production · {{rate}}",
-    "versus": "({{diff}} vs {{name}})"
-  },
   "status": {
     "idle": "Idle",
     "mayor": "Mayor",
@@ -71,5 +66,9 @@
     "description": "{{name}} (Lv {{level}}, Att {{att}} · Pol {{pol}} · Int {{int}}) will leave your city for good. This cannot be undone.",
     "keep": "Keep {{name}}",
     "confirm": "Dismiss"
+  },
+  "tabs": {
+    "heroes": "Heroes",
+    "gear": "Gear"
   }
 }

@@ -1,9 +1,10 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { isPanel, isScreen, type PanelId, screenHref, type ScreenId } from '@/lib/nav';
+import { isPanel, isScreen, pageOfPanel, type PanelId, screenHref, type ScreenId } from '@/lib/nav';
 
 /**
  * The game's place (lib/nav.ts) and the moves between places: the city, the screen in the viewport (null when the
- * address names none, which the game page redirects), and the panel open over it.
+ * address names none, which the game page redirects), and the panel open over it. A page's own `tab` is in its
+ * search parameters (`/cities/12/heroes?tab=gear`): go there with `go(page, { tab })`.
  */
 export function useGameNav() {
   const params = useParams();
@@ -19,6 +20,8 @@ export function useGameNav() {
     part,
     screen,
     panel,
+    /** a page asked for as a panel (an old address: heroes were a panel), which the game page redirects */
+    pageAsPanel: pageOfPanel(wanted),
     /** Show a view or a page (closing any panel), with search parameters (a building to open). */
     go: (to: ScreenId, params?: Record<string, string>) => void navigate(screenHref(cityId, to, params)),
     /** Open a panel over the current screen; the browser's back button closes it. */

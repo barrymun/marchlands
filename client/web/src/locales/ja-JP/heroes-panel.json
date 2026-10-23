@@ -8,11 +8,6 @@
     "levelUp": "{{name}} がレベル {{level}} に到達しました",
     "levelUpMulti": "{{name}} がレベル {{level}} に到達しました（+{{levels}} レベル、+{{levels}} ポイント）"
   },
-  "mayor": {
-    "bonus": "市長ボーナス 生産 +{{pct}} · {{rate}}",
-    "asMayor": "市長なら: 生産 +{{pct}} · {{rate}}",
-    "versus": "（{{name}} 比 {{diff}}）"
-  },
   "status": {
     "idle": "待機中",
     "mayor": "市長",
@@ -69,5 +64,9 @@
     "description": "{{name}}（Lv {{level}}、攻 {{att}} · 政 {{pol}} · 知 {{int}}）は都市を永久に去ります。この操作は取り消せません。",
     "keep": "{{name}} を残す",
     "confirm": "解雇"
+  },
+  "tabs": {
+    "heroes": "英雄",
+    "gear": "装備"
   }
 }

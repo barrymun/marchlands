@@ -48,7 +48,7 @@ Libraries on npm (checked 2026-10-23):
 - **Travellers** (2026-10-23): an Inn sometimes offers a hero from another state's culture, so a player whose cities are all in one state still sees variety.
 - **The Inn's refresh doesn't change** (2026-10-23): offers stay until the player pays to refresh them.
 - **Heroes made before the change** (2026-10-23): hired heroes keep their names. Heroes still waiting in an Inn get a new name and gender from the new generator, and keep their stats.
-- **Gender isn't shown** (2026-10-23): the name implies it. It's stored for later (portraits, text), not sent to the client, and players can't change it.
+- **Gender isn't shown** (2026-10-23): the name implies it. It's stored for later (portraits, text), not sent to the client, and players can't change it. *Changed 2026-10-23:* the Heroes page's figure needs it, so the hero bean will carry `sex` (docs/features/heroes-page.md); still not shown as text, and still not changeable.
 - **Travellers: about 1 in 5** (2026-10-23), mostly from the neighbouring states, but from any state now and then.
 - **Fathers' names in each culture's form** (2026-10-23), as in the table below: Gero Liudolfs, Thierry fiz Gozelo, Jaromir Borivojuv and Jitka Borivojova, Ugo di Guido, Popko Ubbena.
 

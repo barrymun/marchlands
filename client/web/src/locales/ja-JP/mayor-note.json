@@ -1,0 +1,5 @@
+{
+  "bonus": "市長ボーナス 生産 +{{pct}} · {{rate}}",
+  "asMayor": "市長なら: 生産 +{{pct}} · {{rate}}",
+  "versus": "（{{name}} 比 {{diff}}）"
+}

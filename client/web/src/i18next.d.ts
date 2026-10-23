@@ -38,6 +38,7 @@ import type login from '@/locales/en-GB/login.json';
 import type lordDialog from '@/locales/en-GB/lord-dialog.json';
 import type mapPanel from '@/locales/en-GB/map-panel.json';
 import type marketPanel from '@/locales/en-GB/market-panel.json';
+import type mayorNote from '@/locales/en-GB/mayor-note.json';
 import type militaryPanel from '@/locales/en-GB/military-panel.json';
 import type msgAdmin from '@/locales/en-GB/msg-admin.json';
 import type msgAlliance from '@/locales/en-GB/msg-alliance.json';
@@ -135,6 +136,7 @@ declare module 'i18next' {
       'iso-viewport': typeof isoViewport;
       'map-panel': typeof mapPanel;
       'market-panel': typeof marketPanel;
+      'mayor-note': typeof mayorNote;
       'military-panel': typeof militaryPanel;
       'reports-panel': typeof reportsPanel;
       requirements: typeof requirements;

@@ -120,3 +120,30 @@ export function cityWallFile(band: number, piece: CityWallPiece): string {
 export function grandTownHallFile(band: number): string {
   return `town-hall-${band}.png`;
 }
+
+/** Hero gear levels with art: 0 (no Hero Enhancement yet) to 10, each its own look and backdrop colour. */
+export const GEAR_ART_LEVELS: readonly number[] = Array.from({ length: 11 }, (_, i) => i);
+
+/** A gear piece's sprite at a gear level (`weapon-3.png`, in assets/gear/); levels above 10 use 10's. */
+export function gearArtFile(piece: string, level: number): string {
+  return `${piece}-${gearArtLevel(level)}.png`;
+}
+
+/** The backdrop every piece stands on at a gear level (`backdrop-3.png`). */
+export function gearBackdropFile(level: number): string {
+  return `backdrop-${gearArtLevel(level)}.png`;
+}
+
+/** The gear level whose art a level shows: 0 to 10. */
+function gearArtLevel(level: number): number {
+  return Math.max(0, Math.min(GEAR_ART_LEVELS.length - 1, Math.floor(level)));
+}
+
+/** A gear star: in use, waiting above the research level, or not yet bought. */
+export const GEAR_STAR_KINDS = ['used', 'waiting', 'empty'] as const;
+export type GearStarKind = (typeof GEAR_STAR_KINDS)[number];
+
+/** A gear star's sprite (`star-used.png`, in assets/gear/). */
+export function gearStarFile(kind: GearStarKind): string {
+  return `star-${kind}.png`;
+}

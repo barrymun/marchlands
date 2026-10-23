@@ -12,7 +12,7 @@ import { errorMessage } from '@/lib/api';
 import { isPanel, legacyTarget, screenHref, VIEW_IDS } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 import { BottomBar } from '@/routes/game/bottom-bar/bottom-bar';
-import { FlowsPanel, MapPanel, MarketPanel, PAGE_WIDTH, ReportsPanel, StatsPanel } from '@/routes/game/constants';
+import { FlowsPanel, FULL_WIDTH_PAGES, HeroesPanel, MapPanel, MarketPanel, PAGE_WIDTH, ReportsPanel, StatsPanel } from '@/routes/game/constants';
 import { usePreloadPanels } from '@/routes/game/hooks';
 import { PanelSheet } from '@/routes/game/panel-sheet/panel-sheet';
 import { SideBar } from '@/routes/game/side-bar/side-bar';
@@ -21,7 +21,7 @@ import { TopBar } from '@/routes/game/top-bar/top-bar';
 
 /**
  * The game, laid out like the original but for any screen: a top bar (the city, the Town · Fields · Map switch, the
- * account), the viewport showing a view (the town, the fields, the map) or a page (reports, market, flows, stats),
+ * account), the viewport showing a view (the town, the fields, the map) or a page (heroes, reports, market, flows, stats),
  * and on a desktop a sidebar (cities, resources, troops at home, queues) and a bottom bar (the player, the menu) that
  * stay the same everywhere; on a phone a tab bar and a menu instead. The lighter screens open as panels over the view
  * (lib/nav.ts).
@@ -39,10 +39,14 @@ export function GamePage() {
     const to = legacyTarget(nav.part);
     return <Navigate to={screenHref(nav.cityId, to.screen, to.panel && isPanel(to.panel) ? { panel: to.panel } : undefined)} replace />;
   }
+  // a screen that was a panel before it became a page (heroes) goes to the page
+  if (nav.pageAsPanel) return <Navigate to={screenHref(nav.cityId, nav.pageAsPanel)} replace />;
   // a view fills the viewport edge to edge (the town and fields scroll themselves when shown as cards); a page scrolls inside it;
-  // the market is a trading terminal: on a wide screen it fills the viewport like a view, its panes scrolling themselves
+  // the market is a trading terminal: on a wide screen it fills the viewport like a view, its panes scrolling themselves;
+  // most pages keep a readable width, a few (FULL_WIDTH_PAGES) use the whole viewport
   const isView = (VIEW_IDS as readonly string[]).includes(nav.screen);
   const isTerminal = nav.screen === 'market';
+  const isFullWidth = (FULL_WIDTH_PAGES as readonly string[]).includes(nav.screen);
 
   return (
     <div className="flex h-svh flex-col bg-muted/30">
@@ -51,7 +55,11 @@ export function GamePage() {
         <main className={cn('min-w-0 flex-1', isView ? 'overflow-hidden' : isTerminal ? 'overflow-y-auto xl:overflow-hidden' : 'overflow-y-auto')}>
           <div
             className={
-              isView ? 'h-full' : isTerminal ? 'p-2 pb-24 sm:pb-24 lg:pb-2 xl:h-full' : cn('mx-auto p-3 pb-24 sm:p-4 sm:pb-24 lg:px-6 lg:pb-6', PAGE_WIDTH)
+              isView
+                ? 'h-full'
+                : isTerminal
+                  ? 'p-2 pb-24 sm:pb-24 lg:pb-2 xl:h-full'
+                  : cn('mx-auto p-3 pb-24 sm:p-4 sm:pb-24 lg:px-6 lg:pb-6', !isFullWidth && PAGE_WIDTH)
             }
           >
             {city.error && <p className="text-sm text-destructive">{errorMessage(city.error)}</p>}
@@ -62,6 +70,7 @@ export function GamePage() {
                 {nav.screen === 'town' && <BuildingsPanel city={city.data} area="inside" />}
                 {nav.screen === 'fields' && <BuildingsPanel city={city.data} area="fields" />}
                 {nav.screen === 'map' && <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />}
+                {nav.screen === 'heroes' && <HeroesPanel city={city.data} />}
                 {nav.screen === 'reports' && <ReportsPanel />}
                 {nav.screen === 'market' && <MarketPanel city={city.data} />}
                 {nav.screen === 'flows' && <FlowsPanel city={city.data} />}

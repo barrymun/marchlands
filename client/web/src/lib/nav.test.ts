@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isPanel, isScreen, legacyTarget, PANEL_IDS, screenHref, viewOf } from '@/lib/nav';
+import { isPanel, isScreen, legacyTarget, pageOfPanel, PANEL_IDS, screenHref, viewOf } from '@/lib/nav';
 
 describe(isScreen.name, () => {
   it('knows the views and the pages', () => {
@@ -7,6 +7,7 @@ describe(isScreen.name, () => {
     expect(isScreen('fields')).toBe(true);
     expect(isScreen('map')).toBe(true);
     expect(isScreen('reports')).toBe(true);
+    expect(isScreen('heroes')).toBe(true);
   });
 
   it('turns down panels, old tabs and anything else', () => {
@@ -20,7 +21,20 @@ describe(isPanel.name, () => {
   it('knows the panels, and nothing else', () => {
     for (const p of PANEL_IDS) expect(isPanel(p)).toBe(true);
     expect(isPanel('map')).toBe(false);
+    expect(isPanel('heroes')).toBe(false);
     expect(isPanel('nonsense')).toBe(false);
+  });
+});
+
+describe(pageOfPanel.name, () => {
+  it('names the page a panel became', () => {
+    expect(pageOfPanel('heroes')).toBe('heroes');
+  });
+
+  it('gives nothing for a panel, a view, or no parameter', () => {
+    expect(pageOfPanel('research')).toBeNull();
+    expect(pageOfPanel('town')).toBeNull();
+    expect(pageOfPanel(null)).toBeNull();
   });
 });
 

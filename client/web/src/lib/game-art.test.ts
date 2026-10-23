@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { BASIC_RESOURCES, buildingMaxLevel, BuildingType, FortType, TileType, TroopType } from '@marchlands/core';
+import { BASIC_RESOURCES, buildingMaxLevel, BuildingType, FortType, GEAR_PIECE_IDS, TileType, TroopType } from '@marchlands/core';
 
 import {
   ART_BANDS,
@@ -15,6 +15,11 @@ import {
   CITY_WALL_PIECES,
   cityGroundFile,
   cityWallFile,
+  GEAR_ART_LEVELS,
+  GEAR_STAR_KINDS,
+  gearArtFile,
+  gearBackdropFile,
+  gearStarFile,
   grandTownHallFile,
   RESOURCE_ART_KEYS,
   resourceArtFile,
@@ -35,6 +40,7 @@ const UNIT_DIR = path.resolve(import.meta.dirname, '../assets/units');
 const RESOURCE_DIR = path.resolve(import.meta.dirname, '../assets/resources');
 const BADGE_DIR = path.resolve(import.meta.dirname, '../assets/badges');
 const CITY_DIR = path.resolve(import.meta.dirname, '../assets/city');
+const GEAR_DIR = path.resolve(import.meta.dirname, '../assets/gear');
 const SPOTS: Record<string, { k: string }[]> = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, '../assets/spots.json'), 'utf8'));
 /** Whether a sprite has parts the animated town draws turning (and so a bare twin). */
 const moving = (file: string) => (SPOTS[`buildings/${file}`] ?? []).some((s) => s.k === 'sails' || s.k === 'wheel' || s.k === 'sheep');
@@ -188,5 +194,41 @@ describe('city view art', () => {
       ...ART_BANDS.flatMap(({ band }) => [...CITY_WALL_PIECES.map((piece) => cityWallFile(band, piece)), grandTownHallFile(band)]),
     ].sort();
     expect(fs.readdirSync(CITY_DIR).sort()).toEqual(expected);
+  });
+});
+
+describe(gearArtFile.name, () => {
+  it('names the file after the piece and the gear level, 0 to 10', () => {
+    expect(gearArtFile('weapon', 0)).toBe('weapon-0.png');
+    expect(gearArtFile('feet', 10)).toBe('feet-10.png');
+  });
+
+  it('shows level 10 above it, and level 0 below it', () => {
+    expect(gearArtFile('weapon', 12)).toBe('weapon-10.png');
+    expect(gearArtFile('weapon', -1)).toBe('weapon-0.png');
+  });
+});
+
+describe(gearBackdropFile.name, () => {
+  it('names the backdrop after the gear level, within 0 to 10', () => {
+    expect(gearBackdropFile(3)).toBe('backdrop-3.png');
+    expect(gearBackdropFile(11)).toBe('backdrop-10.png');
+  });
+});
+
+describe(gearStarFile.name, () => {
+  it('names the star after its kind', () => {
+    expect(gearStarFile('waiting')).toBe('star-waiting.png');
+  });
+});
+
+describe('gear art', () => {
+  it('has every piece at every gear level, a backdrop for every level, every kind of star, and nothing else', () => {
+    const expected = [
+      ...GEAR_PIECE_IDS.flatMap((piece) => GEAR_ART_LEVELS.map((level) => gearArtFile(piece, level))),
+      ...GEAR_ART_LEVELS.map(gearBackdropFile),
+      ...GEAR_STAR_KINDS.map(gearStarFile),
+    ].sort();
+    expect(fs.readdirSync(GEAR_DIR).sort()).toEqual(expected);
   });
 });
