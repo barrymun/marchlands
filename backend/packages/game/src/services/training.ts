@@ -282,8 +282,8 @@ export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number
 // ---------------------------------------------------------------------------------------------
 
 /**
- * troop.disbandTroop: dismissed troops return to the population. (marchlands) They also return BALANCE.disbandRefund of
- * their training cost, up to the player's refund credit (disbandRefund in core; orig: nothing).
+ * troop.disbandTroop. (marchlands) Dismissed troops return to the population (orig: not), and BALANCE.disbandRefund of
+ * their training cost, up to the player's refund credit (disbandRefund in core; orig: one unit's full cost, a bug).
  */
 export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, troopId: number, count: number) {
   const key = troopKey(troopId);
@@ -302,7 +302,7 @@ export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, 
   await savePlayer(ctx, b.player);
 }
 
-/** fortifications.destructWallProtect. (marchlands) Refunds like disbandTroops (orig: nothing). */
+/** fortifications.destructWallProtect. (marchlands) Refunds like disbandTroops (orig: one unit's full cost, a bug). */
 export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, fortId: number, count: number) {
   const key = fortKeyOf(fortId);
   if (!key) throw new GameError(msg('training.invalidFort'), -99);

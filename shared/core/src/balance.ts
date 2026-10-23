@@ -114,7 +114,8 @@ export const BALANCE = {
   cancelTrainQueuedRefund: 1, // (orig)
   /**
    * (marchlands) share of the training cost disbanding troops or destroying fortifications returns, for as many units
-   * as the player's refund credit covers (disbandRefund in construction.ts). (evony) disbanding returned nothing
+   * as the player's refund credit covers (disbandRefund in construction.ts). (orig) one unit's full cost however many
+   * went, a bug; (evony) disbanding is thought to have returned nothing
    */
   disbandRefund: 0.9,
   outerSlotsBase: 10, // (orig intended) field slots = 10 + 3*TownHall
