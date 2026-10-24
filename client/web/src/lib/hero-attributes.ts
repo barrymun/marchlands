@@ -2,7 +2,7 @@
 // (Running item bonuses are purple: tones.ts.)
 
 import type { HeroBean } from '@marchlands/api-client';
-import { type GearStat, heroManagement, heroPower, heroStratagem } from '@marchlands/core';
+import { type GearStat, type HeroBuffId, heroManagement, heroPower, heroStratagem } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /** Badge colours (background + text, light and dark) per attribute. */
@@ -63,6 +63,9 @@ const HERO_ATTRIBUTES = [
 
 /** The attribute entry for a field name ('power' | 'management' | 'stratagem'). */
 export const attributeOfStat = (stat: GearStat) => HERO_ATTRIBUTES.find((a) => a.stat === stat) ?? HERO_ATTRIBUTES[0]; // there is one for each stat
+
+/** The attribute a hero boost raises (its id is the attribute's field name); none for a captive's home city. */
+export const attributeOfBuff = (id: HeroBuffId) => HERO_ATTRIBUTES.find((a) => a.stat === id);
 
 export type HeroAttributeValue = (typeof HERO_ATTRIBUTES)[number] & { v: number };
 

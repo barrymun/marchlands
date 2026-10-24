@@ -9,7 +9,8 @@ Design documents for large planned features, kept while they are worked out and 
 
 | Document | Feature | Status |
 |---|---|---|
-| [heroes-page.md](heroes-page.md) | Heroes as a page of their own: a roster beside a character sheet with the gear round a pixel-art figure, the Inn beside the heroes, the gear a tab | Phase 1 built (the page and its tabs); phase 2 next |
+| [heroes-page.md](heroes-page.md) | Heroes as a page of their own: a roster beside a character sheet with a pixel-art figure wearing its gear, the Inn beside the heroes, the gear a tab | Phases 1–2 built (the page, the roster and character sheet); famous heroes next |
+| [hero-figure-art.md](hero-figure-art.md) | The hero on the Heroes page drawn wearing its 14 gear pieces at its level, a man or a woman, in pixel art | Built |
 | [hero-gear-art.md](hero-gear-art.md) | Hero gear icons: 14 pieces at every level 0–10, a colour per level, pixel-art stars | Built |
 | [hero-names.md](hero-names.md) | Hero names by the state the city stands in, with a place or a father's name, travellers from other states, and a gender for every hero | Phase 1 built |
 | [market-and-factions.md](market-and-factions.md) | Market overhaul: NPC cities trading, factions, historical cities as seats of power, events, trading scripts, new charts | Phases 1–3 built (charts and the merchant, the faction data, NPC trade); reputation next |

@@ -23,6 +23,7 @@ import {
   type FortCounts,
   heroGearStat,
   populationDirection,
+  Sex,
   stateOf,
   tileXY,
   TROOP_KEY_LIST,
@@ -72,6 +73,7 @@ export function heroBean(h: HeroRow): HeroBean {
     cityId: h.cityId,
     seized: h.capturedByPlayerId != null,
     gearStat: heroGearStat(h),
+    sex: h.sex === Sex.FEMALE ? Sex.FEMALE : Sex.MALE,
     locked: h.locked,
     buffs: h.buffs.map((b) => ({ id: b.id, desc: b.desc, endTime: b.endTime, param: b.param })),
   };

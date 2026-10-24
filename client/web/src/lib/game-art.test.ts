@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { BASIC_RESOURCES, buildingMaxLevel, BuildingType, FortType, GEAR_PIECE_IDS, TileType, TroopType } from '@marchlands/core';
+import { BASIC_RESOURCES, buildingMaxLevel, BuildingType, FortType, GEAR_PIECE_IDS, Sex, TileType, TroopType } from '@marchlands/core';
 
 import {
   ART_BANDS,
@@ -15,6 +15,15 @@ import {
   CITY_WALL_PIECES,
   cityGroundFile,
   cityWallFile,
+  FIGURE_HAIR_COLOURS,
+  FIGURE_HAIR_STYLES,
+  FIGURE_SKIN_TONES,
+  figureCapeFile,
+  figureHairFile,
+  figureHelmFile,
+  figureLegsFile,
+  figureSkinFile,
+  figureUpperFile,
   GEAR_ART_LEVELS,
   GEAR_STAR_KINDS,
   gearArtFile,
@@ -41,6 +50,7 @@ const RESOURCE_DIR = path.resolve(import.meta.dirname, '../assets/resources');
 const BADGE_DIR = path.resolve(import.meta.dirname, '../assets/badges');
 const CITY_DIR = path.resolve(import.meta.dirname, '../assets/city');
 const GEAR_DIR = path.resolve(import.meta.dirname, '../assets/gear');
+const FIGURE_DIR = path.resolve(import.meta.dirname, '../assets/figure');
 const SPOTS: Record<string, { k: string }[]> = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, '../assets/spots.json'), 'utf8'));
 /** Whether a sprite has parts the animated town draws turning (and so a bare twin). */
 const moving = (file: string) => (SPOTS[`buildings/${file}`] ?? []).some((s) => s.k === 'sails' || s.k === 'wheel' || s.k === 'sheep');
@@ -230,5 +240,72 @@ describe('gear art', () => {
       ...GEAR_STAR_KINDS.map(gearStarFile),
     ].sort();
     expect(fs.readdirSync(GEAR_DIR).sort()).toEqual(expected);
+  });
+});
+
+describe(figureCapeFile.name, () => {
+  it('names the cape after the gear level, within 0 to 10', () => {
+    expect(figureCapeFile(3)).toBe('cape-3.png');
+    expect(figureCapeFile(12)).toBe('cape-10.png');
+  });
+});
+
+describe(figureHelmFile.name, () => {
+  it('names the helm after the gear level, within 0 to 10', () => {
+    expect(figureHelmFile(0)).toBe('helm-0.png');
+    expect(figureHelmFile(-1)).toBe('helm-0.png');
+  });
+});
+
+describe(figureLegsFile.name, () => {
+  it('names the legs after the sex and the gear level', () => {
+    expect(figureLegsFile(Sex.MALE, 5)).toBe('legs-m-5.png');
+    expect(figureLegsFile(Sex.FEMALE, 10)).toBe('legs-f-10.png');
+  });
+});
+
+describe(figureUpperFile.name, () => {
+  it('names the upper body after the sex and the gear level, within 0 to 10', () => {
+    expect(figureUpperFile(Sex.FEMALE, 2)).toBe('upper-f-2.png');
+    expect(figureUpperFile(Sex.MALE, 11)).toBe('upper-m-10.png');
+  });
+});
+
+describe(figureSkinFile.name, () => {
+  it('names the skin after the sex and the tone', () => {
+    expect(figureSkinFile(Sex.MALE, 'olive')).toBe('skin-m-olive.png');
+    expect(figureSkinFile(Sex.FEMALE, 'pale')).toBe('skin-f-pale.png');
+  });
+});
+
+describe(figureHairFile.name, () => {
+  it('names the hair after the style and the colour', () => {
+    expect(figureHairFile('braid', 'auburn')).toBe('hair-braid-auburn.png');
+  });
+});
+
+describe('figure art', () => {
+  it('has every gear layer at every level for each sex, every skin tone, every hairstyle in every colour, and nothing else', () => {
+    const sexes = [Sex.MALE, Sex.FEMALE];
+    const expected = [
+      ...GEAR_ART_LEVELS.flatMap((level) => [
+        figureCapeFile(level),
+        figureHelmFile(level),
+        ...sexes.flatMap((sex) => [figureLegsFile(sex, level), figureUpperFile(sex, level)]),
+      ]),
+      ...sexes.flatMap((sex) => [
+        ...FIGURE_SKIN_TONES.map((tone) => figureSkinFile(sex, tone)),
+        ...FIGURE_HAIR_STYLES[sex].flatMap((style) => FIGURE_HAIR_COLOURS.map((colour) => figureHairFile(style, colour))),
+      ]),
+    ].sort();
+    expect(fs.readdirSync(FIGURE_DIR).sort()).toEqual(expected);
+  });
+
+  it('marks where every cape stirs, and the stones that glow at level 10 only', () => {
+    for (const level of GEAR_ART_LEVELS) expect(SPOTS[`figure/${figureCapeFile(level)}`]?.map((s) => s.k)).toEqual(['sway']);
+    for (const sex of [Sex.MALE, Sex.FEMALE]) {
+      expect(SPOTS[`figure/${figureUpperFile(sex, 10)}`]?.every((s) => s.k === 'stone')).toBe(true);
+      expect(SPOTS[`figure/${figureUpperFile(sex, 9)}`]).toBeUndefined();
+    }
   });
 });

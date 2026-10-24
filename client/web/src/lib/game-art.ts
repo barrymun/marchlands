@@ -2,9 +2,10 @@
 // src/assets/buildings/, the walls' frame pieces per level band in src/assets/walls/, one sprite per valley type and
 // level band in src/assets/tiles/, one sprite per troop and fortification type in src/assets/units/, one badge per
 // troop type in src/assets/badges/, one icon per resource in src/assets/resources/, and the isometric city view's
-// ground and wall pieces in src/assets/city/. The art scripts in tools/art import this file, so it uses no `@/` imports.
+// ground and wall pieces in src/assets/city/, the hero gear in src/assets/gear/ and the hero figure's layers in
+// src/assets/figure/. The art scripts in tools/art import this file, so it uses no `@/` imports.
 
-import { buildingConfig, BuildingType, FortType, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
+import { buildingConfig, BuildingType, FortType, Sex, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
 
 /** The level bands the art changes at (a building's or a valley's level): 1-3, 4-6, 7-9 and 10. */
 export const ART_BANDS = [
@@ -146,4 +147,49 @@ export type GearStarKind = (typeof GEAR_STAR_KINDS)[number];
 /** A gear star's sprite (`star-used.png`, in assets/gear/). */
 export function gearStarFile(kind: GearStarKind): string {
   return `star-${kind}.png`;
+}
+
+/**
+ * The hero figure (docs/features/hero-figure-art.md): layers stacked back to front, all 96×96 in assets/figure/. The
+ * gear layers go by gear level (0 to 10, like the icons), the legs and upper body by sex too (a woman's own cut); the
+ * skin by sex and tone, the hair by style (a man's or a woman's) and colour.
+ */
+export const FIGURE_SKIN_TONES = ['pale', 'fair', 'olive', 'brown'] as const;
+export type FigureSkinTone = (typeof FIGURE_SKIN_TONES)[number];
+export const FIGURE_HAIR_COLOURS = ['black', 'brown', 'auburn', 'blond', 'grey'] as const;
+export type FigureHairColour = (typeof FIGURE_HAIR_COLOURS)[number];
+/** Hairstyles by sex: a man's short hair with or without a beard, a woman's loose or braided. */
+export const FIGURE_HAIR_STYLES = { [Sex.MALE]: ['short', 'beard'], [Sex.FEMALE]: ['loose', 'braid'] } as const;
+export type FigureHairStyle = (typeof FIGURE_HAIR_STYLES)[Sex][number];
+
+const sexKey = (sex: Sex) => (sex === Sex.FEMALE ? 'f' : 'm');
+
+/** The cape behind the figure at a gear level (`cape-3.png`; bat wings at 10). */
+export function figureCapeFile(level: number): string {
+  return `cape-${gearArtLevel(level)}.png`;
+}
+
+/** The legs and boots at a gear level (`legs-f-3.png`). */
+export function figureLegsFile(sex: Sex, level: number): string {
+  return `legs-${sexKey(sex)}-${gearArtLevel(level)}.png`;
+}
+
+/** The skin: head, neck and hands (`skin-m-olive.png`). */
+export function figureSkinFile(sex: Sex, tone: FigureSkinTone): string {
+  return `skin-${sexKey(sex)}-${tone}.png`;
+}
+
+/** Everything worn above the legs bar the helm, at a gear level (`upper-m-3.png`). */
+export function figureUpperFile(sex: Sex, level: number): string {
+  return `upper-${sexKey(sex)}-${gearArtLevel(level)}.png`;
+}
+
+/** A hairstyle in a colour (`hair-braid-auburn.png`), over the upper body and under the helm. */
+export function figureHairFile(style: FigureHairStyle, colour: FigureHairColour): string {
+  return `hair-${style}-${colour}.png`;
+}
+
+/** The helm at a gear level (`helm-3.png`), the top layer. */
+export function figureHelmFile(level: number): string {
+  return `helm-${gearArtLevel(level)}.png`;
 }

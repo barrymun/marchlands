@@ -8,8 +8,8 @@ import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postGearStarMutation } fr
 import { BALANCE, GEAR_PIECES, gearSetBonus, gearSetStars, gearStarCost, gearStarLimit, TechType } from '@marchlands/core';
 
 import { levelPoints, maxLevel, maxStars, setBonus } from '@/components/hero-gear/constants';
-import { GearIcon } from '@/components/hero-gear/gear-card/gear-icon/gear-icon';
-import { Stars } from '@/components/hero-gear/gear-card/stars/stars';
+import { GearIcon } from '@/components/hero-gear/gear-icon/gear-icon';
+import { Stars } from '@/components/hero-gear/stars/stars';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';

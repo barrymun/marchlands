@@ -52,8 +52,18 @@ export function MayorChip({ city, mayor }: { city: CityBean; mayor?: HeroBean })
           )}
         </TooltipContent>
       </Tooltip>
-      {/* as tall as the room below the chip allows (it follows the window's size); only the list of heroes scrolls */}
-      <PopoverContent align="start" collisionPadding={8} className="max-h-(--radix-popover-content-available-height) w-80">
+      {/* as tall as the room below the chip allows (it follows the window's size); only the list of heroes scrolls. Focus
+          goes to the popover itself, not its first Make mayor, whose tooltip would open with it. */}
+      <PopoverContent
+        align="start"
+        collisionPadding={8}
+        tabIndex={-1}
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          (e.currentTarget as HTMLElement).focus();
+        }}
+        className="max-h-(--radix-popover-content-available-height) w-80 outline-none"
+      >
         <Suspense fallback={<Skeleton className="h-24" />}>
           <MayorPicker city={city} onDone={() => setOpen(false)} />
         </Suspense>

@@ -1,0 +1,14 @@
+{
+  "strongest": "Strongest attribute: {{label}}",
+  "gear": "Gear +{{total}} on {{label}} · tier {{tier}}/{{max}}",
+  "boost": "{{label}} +{{amount}} · {{time}} left",
+  "status": {
+    "idle": "Idle",
+    "mayor": "Mayor",
+    "marching": "Marching",
+    "captive": "Captive",
+    "returning": "Returning"
+  },
+  "unspent_one": "{{count}} attribute point to spend",
+  "unspent_other": "{{count}} attribute points to spend"
+}

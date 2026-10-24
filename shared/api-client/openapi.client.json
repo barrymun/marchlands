@@ -924,6 +924,14 @@
             ],
             "description": "(marchlands) attribute the lord's gear boosts on this hero"
           },
+          "sex": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "(marchlands) 0 a man, 1 a woman: the figure the Heroes page draws (never shown as text)"
+          },
           "buffs": {
             "type": "array",
             "items": {
@@ -986,6 +994,7 @@
           "experience",
           "seized",
           "gearStat",
+          "sex",
           "buffs"
         ]
       },
@@ -12394,6 +12403,14 @@
             ],
             "description": "(marchlands) attribute the lord's gear boosts on this hero"
           },
+          "sex": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "(marchlands) 0 a man, 1 a woman: the figure the Heroes page draws (never shown as text)"
+          },
           "buffs": {
             "type": "array",
             "items": {
@@ -12457,6 +12474,7 @@
           "experience",
           "seized",
           "gearStat",
+          "sex",
           "buffs"
         ],
         "additionalProperties": false

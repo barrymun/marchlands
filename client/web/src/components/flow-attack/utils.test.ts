@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { CityBean } from '@marchlands/api-client';
-import { FLOW_MAX_TARGETS_PER_CITY, HeroStatus } from '@marchlands/core';
+import { FLOW_MAX_TARGETS_PER_CITY, HeroStatus, Sex } from '@marchlands/core';
 
 import { idleHeroes, targetCap } from '@/components/flow-attack/utils';
 
@@ -35,6 +35,7 @@ const hero = (status: HeroStatus, seized = false): Hero => ({
   experience: 0,
   seized,
   gearStat: 'power',
+  sex: Sex.MALE,
   buffs: [],
 });
 

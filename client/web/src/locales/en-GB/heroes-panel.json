@@ -2,18 +2,10 @@
   "toast": {
     "hired": "Hero hired",
     "rerolled": "New heroes at the Inn",
-    "mayorAppointed": "Mayor appointed",
     "renamed": "Hero renamed",
     "dismissed": "Hero dismissed",
     "levelUp": "{{name}} reached level {{level}}",
     "levelUpMulti": "{{name}} reached level {{level}} (+{{levels}} levels, +{{levels}} points)"
-  },
-  "status": {
-    "idle": "Idle",
-    "mayor": "Mayor",
-    "marching": "Marching",
-    "captive": "Captive",
-    "returning": "Returning"
   },
   "heroes": {
     "title": "Your heroes",
@@ -28,7 +20,6 @@
     "lock": "Lock",
     "levelUp": "Level up",
     "levelUpMulti": "Level up ×{{times}} → Lv {{level}}",
-    "makeMayor": "Make mayor",
     "dismiss": "Dismiss",
     "lockedHint": "Locked: unlock the hero to dismiss them"
   },
@@ -70,5 +61,17 @@
   "tabs": {
     "heroes": "Heroes",
     "gear": "Gear"
+  },
+  "view": {
+    "label": "Show heroes as",
+    "sheet": "Sheet",
+    "list": "List"
+  },
+  "sheet": {
+    "figure": "{{name}} wearing level {{level}} gear",
+    "piece": "{{piece}}, level {{level}}: open the gear"
+  },
+  "roster": {
+    "drag": "Drag to reorder (or Alt with ↑ / ↓)"
   }
 }

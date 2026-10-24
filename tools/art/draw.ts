@@ -8,7 +8,9 @@
 // to client/web/src/assets/badges/, the resource icons (tools/art/resources.ts) to client/web/src/assets/resources/,
 // the isometric city view's ground and walls (tools/art/city.ts) and its grand Town Hall
 // (tools/art/buildings/town-hall.ts) to client/web/src/assets/city/, and the hero gear (tools/art/gear.ts: each piece at
-// every gear level, the backdrops and the stars; `gear`) to client/web/src/assets/gear/.
+// every gear level, the backdrops and the stars; `gear`) to client/web/src/assets/gear/, and the hero figure's layers
+// (tools/art/figure.ts: the gear at every level for each sex, the skin tones and the hairstyles; `figure`) to
+// client/web/src/assets/figure/.
 // A building with moving parts (windmill sails, a water wheel) also gets a bare sprite without them,
 // <name>-<band>-bare.png, which the animated town draws them turning over. Where each sprite's moving parts stand
 // (its spots, tools/art/pixel.ts) goes to client/web/src/assets/spots.json, keyed by <folder>/<file>.
@@ -17,7 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { BuildingType } from '@marchlands/core';
+import { BuildingType, Sex } from '@marchlands/core';
 
 import { BADGE_DRAWINGS } from './badges.ts';
 import { academy } from './buildings/academy.ts';
@@ -40,6 +42,8 @@ import { grandTownHall, townHall } from './buildings/town-hall.ts';
 import { warehouse } from './buildings/warehouse.ts';
 import { workshop } from './buildings/workshop.ts';
 import { CITY_GROUND_DRAWINGS, CITY_WALL_DRAWINGS } from './city.ts';
+import { hair, skin } from './figure/body.ts';
+import { FIGURE_GEAR } from './figure.ts';
 import { FORT_DRAWINGS } from './fortifications.ts';
 import { GEAR_BACKDROP, GEAR_DRAWINGS, GEAR_STAR } from './gear.ts';
 import { IsoCanvas } from './iso.ts';
@@ -54,6 +58,15 @@ import {
   buildingArtFile,
   cityGroundFile,
   cityWallFile,
+  FIGURE_HAIR_COLOURS,
+  FIGURE_HAIR_STYLES,
+  FIGURE_SKIN_TONES,
+  figureCapeFile,
+  figureHairFile,
+  figureHelmFile,
+  figureLegsFile,
+  figureSkinFile,
+  figureUpperFile,
   GEAR_ART_LEVELS,
   GEAR_STAR_KINDS,
   gearArtFile,
@@ -185,6 +198,25 @@ if (!wanted.size || wanted.has('gear')) {
   for (const level of GEAR_ART_LEVELS) save('gear', gearBackdropFile(level), () => GEAR_BACKDROP(level));
   for (const kind of GEAR_STAR_KINDS) save('gear', gearStarFile(kind), () => GEAR_STAR(kind));
   console.log(`drew gear (${Object.keys(GEAR_DRAWINGS).join(', ')} × ${GEAR_ART_LEVELS.length} levels, backdrops, stars)`);
+}
+
+if (!wanted.size || wanted.has('figure')) {
+  fs.mkdirSync(path.join(ASSETS, 'figure'), { recursive: true });
+  const sexes = [Sex.MALE, Sex.FEMALE];
+  for (const level of GEAR_ART_LEVELS) {
+    save('figure', figureCapeFile(level), () => FIGURE_GEAR.cape(level));
+    save('figure', figureHelmFile(level), () => FIGURE_GEAR.helm(level));
+    for (const sex of sexes) {
+      save('figure', figureLegsFile(sex, level), () => FIGURE_GEAR.legs(sex, level));
+      save('figure', figureUpperFile(sex, level), () => FIGURE_GEAR.upper(sex, level));
+    }
+  }
+  for (const sex of sexes) {
+    for (const tone of FIGURE_SKIN_TONES) save('figure', figureSkinFile(sex, tone), () => skin(sex, tone));
+    for (const style of FIGURE_HAIR_STYLES[sex])
+      for (const colour of FIGURE_HAIR_COLOURS) save('figure', figureHairFile(style, colour), () => hair(style, colour));
+  }
+  console.log(`drew figure (cape, helm, legs and upper body × ${GEAR_ART_LEVELS.length} levels, skin tones, hairstyles)`);
 }
 
 fs.writeFileSync(SPOTS_FILE, JSON.stringify(Object.fromEntries(Object.entries(spots).sort(([a], [b]) => a.localeCompare(b)))) + '\n');

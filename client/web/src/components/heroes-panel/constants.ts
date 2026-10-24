@@ -1,27 +1,14 @@
-import { HeroStatus } from '@marchlands/core';
-import { i18n } from '@/lib/i18n';
-
-/** A hero's status as a label, in the current locale. */
-export const STATUS: Record<number, string> = {
-  get [HeroStatus.IDLE]() {
-    return i18n.t('heroes-panel:status.idle');
-  },
-  get [HeroStatus.MAYOR]() {
-    return i18n.t('heroes-panel:status.mayor');
-  },
-  get [HeroStatus.ATTACK]() {
-    return i18n.t('heroes-panel:status.marching');
-  },
-  get [HeroStatus.SEIZED]() {
-    return i18n.t('heroes-panel:status.captive');
-  },
-  get [HeroStatus.RETURN]() {
-    return i18n.t('heroes-panel:status.returning');
-  },
-};
-
 /**
  * The Heroes page's tabs, in order; the first is shown when the address names none or one it doesn't know. `?tab=inn`
  * (the Inn's building, the mayor chip) shows the heroes with the Inn brought into view.
  */
 export const HERO_TABS = ['heroes', 'gear'] as const;
+
+/** How the Heroes tab can show the heroes, in the order of their buttons: a roster beside a character sheet, or cards. */
+export const HERO_VIEWS = ['sheet', 'list'] as const;
+
+/** Where this browser remembers the chosen view (localStorage). */
+export const HERO_VIEW_KEY = 'marchlands-heroes-view';
+
+/** Screens at least this wide may show the sheet (Tailwind's md); narrower ones always show the cards. */
+export const HERO_VIEW_QUERY = '(min-width: 768px)';

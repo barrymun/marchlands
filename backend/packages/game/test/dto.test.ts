@@ -11,6 +11,7 @@ import {
   HeroStatus,
   mayorProductionBonus,
   msg,
+  Sex,
   stateOf,
   TileType,
   tileXY,
@@ -76,6 +77,11 @@ describe(heroBean.name, () => {
     expect(bean).toMatchObject({ id: h.id, experience: 99, gearStat: 'management', seized: false, buffs: [boost] });
     expect(HeroBean.parse(bean)).toEqual(bean);
     expect(heroBean(heroRow({ gearStat: 'stratagem', capturedByPlayerId: 2 }))).toMatchObject({ gearStat: 'stratagem', seized: true });
+  });
+
+  it("carries the hero's sex for its figure", () => {
+    expect(heroBean(heroRow({ sex: Sex.FEMALE })).sex).toBe(Sex.FEMALE);
+    expect(heroBean(heroRow({ sex: Sex.MALE })).sex).toBe(Sex.MALE);
   });
 
   it("leaves out the hero's lord, Inn and order", () => {

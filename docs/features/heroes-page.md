@@ -1,6 +1,6 @@
 # Heroes page
 
-**Status:** phase 1 built 2026-10-23 (the page with its tabs, the mayor popover, the Inn's button); phase 2 (the roster and character sheet) next. TODO.md item: *A Heroes page*.
+**Status:** phase 1 built 2026-10-23 (the page with its tabs, the mayor popover, the Inn's button); phase 2 built 2026-10-24 (the roster and character sheet, with the figure wearing its gear, and the Sheet · List switch); the famous heroes next. TODO.md item: *A Heroes page*.
 
 **The aim:** give heroes a screen of their own, like Reports, Market and Flows, instead of the panel that slides over the town. Heroes are growing: 14 gear pieces with art, stars, generated names, and later famous historical heroes and perhaps portraits. A page has room for a roster and a full character sheet per hero.
 
@@ -38,7 +38,9 @@
 - **The Inn beside the heroes, not a tab of its own** (2026-10-23, after phase 1): with three tabs, each held a single card and left too much empty space. The Heroes tab now has the city's heroes on the left and its Inn on the right (stacked on a narrow screen), and the tabs are **Heroes · Gear**.
 - **The figure matches the hero shown** (2026-10-23): the sheet shows the selected hero, the mayor when the page opens, and the figure is a man or a woman as that hero is.
 - **Hero sex goes to the client** (2026-10-23): the hero bean gains `sex` for the figure (the hero names design had kept it server-side while nothing showed it).
-- **The figure doesn't wear the gear, for now** (2026-10-23): the 14 icons stand round a plain figure. Drawing the figure wearing each piece at its level, as Diablo does, is far more art (layered sprites per piece and level, for a man and a woman), so it's a spike of its own (TODO.md, *Heroes page: the figure wearing its gear*).
+- ~~**The figure doesn't wear the gear, for now**~~ (2026-10-23, reversed 2026-10-24): first the 14 icons were to stand round a plain figure, with the figure wearing the gear a later spike.
+- **The figure wears its gear** (2026-10-24): the sheet's figure is drawn wearing all 14 pieces at the hero's level, the icons still round it for the stars. A hero wears every piece at one level, so it's 11 looks per body rather than 14 × 11 drawings. 2D pixel art drawn in code, no 3D library. The art's design: [hero-figure-art.md](hero-figure-art.md).
+- **Sheet · List from `md` up, the list on phones** (2026-10-24): the Heroes tab gets a switch between the roster and sheet and today's hero cards, remembered in `localStorage` like the town's Scene · Grid; below `md` it always shows the cards. This replaces the phone layout proposed below (the roster opening a sheet over it).
 - **Each piece at the hero's own level** (2026-10-23): the sheet shows the gear this hero can use (its gear tier: a level 25 hero uses level 2), not the level researched.
 - **A quick mayor swap on the mayor chip** (2026-10-23): a popover under the chip lists the city's heroes, each with what it would add to production as mayor and a Make mayor button, and a link to the page; the player stays in the town. It's a Radix popover (shadcn's `Popover`, from the `radix-ui` package already installed), which works by touch on a tablet. Below `sm` the top bar hides the chip, so on a phone the swap is on the page, where the mayor is shown first.
 
@@ -75,7 +77,7 @@ The page at the viewport's whole width, its tabs along the top: **Heroes · Gear
 - **Heroes tab:** the roster on the left, the city's heroes in the player's order (drag or arrows), each a compact row: name, level, status and attributes; the mayor is chosen when the page opens. The selected hero's sheet on the right: name (rename in place), level and experience, status and city; the figure, a man or a woman as the hero is, with each piece's icon round it at the level this hero can use (its gear tier) and its stars; attributes with points to spend and what boosts them; buffs and items; the mayor note; and the actions. The selected hero is in the address (`?hero=123`), so it can be linked to and the back button works.
 - **The Inn,** beside the roster or below it: the city's offers, with hire, refresh and the mayor note against the city's mayor. The Inn's building dialog has a button that opens the page there.
 - **Gear tab:** today's gear card with room: each piece large, its stars and next star's cost, the set bonus and how far each piece is from the next star level.
-- **On a phone:** the tabs on top; the roster fills the screen, and choosing a hero opens its sheet over it (back returns to the roster); the figure and its slots shrink to fit, or become a grid of the 14 pieces.
+- **On a phone:** today's hero cards and the Inn below them, as now, with no sheet (Decided, 2026-10-24). *(First proposed: the roster filling the screen and a hero's sheet opening over it.)*
 
 ## Open questions
 
@@ -90,13 +92,21 @@ Both rounds (2026-10-23) are recorded under Decided: a page, the city in view on
 - `heroes` is a page (`PAGE_IDS` in `lib/nav.ts`, first in `PAGES`); an old `?panel=heroes` address redirects to it (`pageOfPanel`, `game.tsx`).
 - `HeroesPanel` (`components/heroes-panel/`) shows two tabs, the tab in a `tab` search parameter (`heroesTab`): **Heroes**, the city's heroes (`hero-list/`, as before) on the left and its Inn (`inn/`) on the right, stacked on a narrow screen; and **Gear** (`GearCard`). `?tab=inn` (from the Inn's building or the mayor chip) shows the Heroes tab and scrolls the Inn into view. (First built as three tabs, Heroes · Inn · Gear; merged the same day.)
 - What a hero adds or would add as mayor is `MayorNote` (`components/mayor-note/`, its own namespace), on top of `lib/mayor.ts` (`fieldOutput`, `mayorShare`, `mayorGain`), shared by both tabs and the popover.
-- The mayor chip opens `MayorPicker` (`routes/game/mayor-chip/mayor-picker/`) in a popover (shadcn `Popover`, added with the project's shadcn CLI): the mayor and the idle heroes with their mayor notes and a Make mayor button, a way to the Inn when none is idle, and to the page. Its content loads on first use (`mayor-chip/constants.ts`, preloaded with the screens), since the top bar is in the first page's code: Radix's popover still adds about 0.5 kB there (the `app` budget: 114.35 of 115 kB).
+- The mayor chip opens `MayorPicker` (`routes/game/mayor-chip/mayor-picker/`) in a popover (shadcn `Popover`, added with the project's shadcn CLI): the mayor and the idle heroes with their mayor notes and a Make mayor button (since 2026-10-24 the roster's rows, `HeroSummary`, below), a way to the Inn when none is idle, and to the page. Its content loads on first use (`mayor-chip/constants.ts`, preloaded with the screens), since the top bar is in the first page's code: Radix's popover still adds about 0.5 kB there (the `app` budget: 114.35 of 115 kB then, 114.85 after phase 2).
 - The Inn's building dialog has a Hire heroes button to the page's Inn.
 - The page uses the viewport's whole width (`FULL_WIDTH_PAGES`, 2026-10-23), not `PAGE_WIDTH`. The popover is as tall as the room below the chip allows (following the window's size), only its list scrolling, with a thin scrollbar, when the screen is too short for every hero.
+
+## Built (phase 2)
+
+- **Sheet · List** (`HeroesPanel`): from `md` (`HERO_VIEW_QUERY`) a switch beside the tabs picks the Sheet or the List, remembered in `localStorage` (`readHeroView`, `saveHeroView`, `HERO_VIEW_KEY`); narrower, always the List. In the Sheet the Inn sits below, or beside it on a very wide screen (`2xl`).
+- **The Sheet** (`hero-sheet/`): the roster (`roster/`, a few lines a hero in the player's order (`HeroSummary`): name and a dot when it has points to spend; level, status and the soonest boost to run out; the strongest attribute and the gear bonus, with the mayor's bonus or Make mayor at the right; each in full on hover) beside the selected hero's `CharacterSheet`: its name (renamed in place), experience, the `PaperDoll` (the figure wearing its gear with the 14 pieces round it, [hero-figure-art.md](hero-figure-art.md)), its attributes, gear bonus, mayor note, boosts and actions. The hero is the `hero` search parameter (`sheetHero`: else the mayor, else the first), replaced rather than pushed, so the back button leaves the page rather than stepping through heroes.
+- **Shared by both views:** `HeroActions` (status, points, items, lock, level up, make mayor, dismiss, with their dialogs) and `HeroName` (the name with rename in place), moved out of the list; the experience bar, attributes and boosts moved up to `heroes-panel/`, and `GearIcon`, `Stars` (now also at 9 px) and `GEAR_ART` up to `hero-gear/`.
+- **The roster reorders too** (2026-10-24, first left to the List): a row drags by its handle, and Alt with the up or down arrow moves the focused hero; the List's cards keep their arrows. Both use `useHeroOrder` (`heroes-panel/hooks.ts`).
+- **Roster rows in short** (2026-10-24): the List's card details, cut to what fits a narrow column (the other attributes, loyalty, tier and the gear's attribute choice are on the sheet).
+- **One row for the roster and the mayor swap** (2026-10-24): the roster's row (`HeroSummary`, `components/hero-summary/`: name and points; level, status and the soonest boost to run out, `BoostChip`; the strongest attribute and gear bonus, `HeroStats`, with the mayor's bonus or Make mayor bottom right) is also every row of the mayor popover, so the two look and behave alike and share their tests. Make mayor is one button everywhere (`MakeMayorButton`, with what the hero would add against the mayor now on hover), the List's cards included.
 
 ## Phases
 
 1. **A page with today's content** (built 2026-10-23): move `heroes` from the panels to the pages (`lib/nav.ts`, `PAGES`, `game.tsx`; `?panel=heroes` redirects), with the current cards in two tabs (the heroes beside the Inn, and the gear); the mayor chip's quick swap; the button in the Inn's building dialog.
-2. **Roster and character sheet:** the two-column Heroes tab with the figure (a man and a woman, drawn in code) and the gear round it at the hero's own level; hero sex in the API.
+2. **Roster and character sheet** (built 2026-10-24): the two-column Heroes tab with the figure wearing its gear at the hero's own level ([hero-figure-art.md](hero-figure-art.md)) and the icons round it; the Sheet · List switch from `md` up; hero sex in the API.
 3. **Famous heroes:** a tab of their own when that feature is built (TODO.md, Famous historical heroes).
-4. **Maybe later:** the figure wearing its gear (TODO.md).

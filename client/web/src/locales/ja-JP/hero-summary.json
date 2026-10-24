@@ -1,0 +1,13 @@
+{
+  "strongest": "最も高い能力: {{label}}",
+  "gear": "装備 +{{total}}（{{label}}）· ティア {{tier}}/{{max}}",
+  "boost": "{{label}} +{{amount}} · 残り {{time}}",
+  "status": {
+    "idle": "待機中",
+    "mayor": "市長",
+    "marching": "行軍中",
+    "captive": "捕虜",
+    "returning": "帰還中"
+  },
+  "unspent_other": "未使用の能力ポイント {{count}}"
+}

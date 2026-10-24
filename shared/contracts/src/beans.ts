@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 
-import { BUFF_IDS, BuildingStateSchema, HERO_BUFF_IDS, MessageSchema } from '@marchlands/core';
+import { BUFF_IDS, BuildingStateSchema, HERO_BUFF_IDS, MessageSchema, Sex } from '@marchlands/core';
 
 import { FortBean, Ms, ResourceAmounts, TroopBean } from '#/common.ts';
 import { ArmyRow, HeroRow, PlayerRow, TileRow } from '#/rows.ts';
@@ -39,6 +39,7 @@ export const HeroBean = HeroRow.pick({
     experience: z.number().int(),
     seized: z.boolean().describe('held captive by another lord'),
     gearStat: z.enum(['power', 'management', 'stratagem']).describe("(marchlands) attribute the lord's gear boosts on this hero"),
+    sex: z.literal([Sex.MALE, Sex.FEMALE]).describe('(marchlands) 0 a man, 1 a woman: the figure the Heroes page draws (never shown as text)'),
     buffs: z
       .array(
         z.object({

@@ -96,6 +96,10 @@ export type HeroBeanInput = {
      */
     gearStat: 'power' | 'management' | 'stratagem';
     /**
+     * (marchlands) 0 a man, 1 a woman: the figure the Heroes page draws (never shown as text)
+     */
+    sex: 0 | 1;
+    /**
      * active attribute boosts (24 real hours each, unaffected by GAME_SPEED)
      */
     buffs: Array<{
@@ -3389,6 +3393,10 @@ export type HeroBean = {
      * (marchlands) attribute the lord's gear boosts on this hero
      */
     gearStat: 'power' | 'management' | 'stratagem';
+    /**
+     * (marchlands) 0 a man, 1 a woman: the figure the Heroes page draws (never shown as text)
+     */
+    sex: 0 | 1;
     /**
      * active attribute boosts (24 real hours each, unaffected by GAME_SPEED)
      */
