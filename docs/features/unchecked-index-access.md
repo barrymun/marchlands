@@ -1,6 +1,6 @@
 # Checked lookups: `noUncheckedIndexedAccess`
 
-**Status:** built (2026-10-22), every phase below: the flag is on in both tsconfigs, `!` is banned in source code, and `no-unnecessary-condition` is on. TODO.md: *Lookups that can miss are typed as such* (Done, 2026-10-22); phase 6 is the item *Ban `!` in source code, then turn on `no-unnecessary-condition`* (Code quality and security).
+**Status:** built (2026-10-22), every phase below: the flag is on in both tsconfigs, `!` is banned in source code, and `no-unnecessary-condition` is on. TODO.md, Done: *Lookups that can miss are typed as such*, *No `!` in source code* and *`no-unnecessary-condition` on* (all 2026-10-22).
 
 **The aim:** a lookup that can miss is typed as one that can miss. Today `BALANCE.fortSpace[id]`, `rows[0]`, `troops[i]` and `m[1]` are typed as always there, so a missing entry only shows up at run time, as `undefined` flowing into the game's maths or a `TypeError`. With TypeScript's `noUncheckedIndexedAccess`, reading through an index (an array position, a record by key) gives `T | undefined`, and the code has to say what happens when it misses.
 

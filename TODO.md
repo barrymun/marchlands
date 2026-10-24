@@ -69,12 +69,12 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
 Phases 2 to 4 of the October 2026 tooling review; phase 1 (type-aware linting and the convention rules) is in Done.
 
 - [ ] **An emergency ceiling on gameplay routes, off by default (to decide).**
-  - Now: nothing limits gameplay requests, on purpose: an engaged player must never meet a limit. Sign-in is guarded on its own (wrong passwords wait, in Done).
+  - Now: nothing limits gameplay requests as a whole, on purpose: an engaged player must never meet a limit. Sign-in is guarded on its own (wrong passwords wait, in Done), and one action has a limit of its own: placing and cancelling market orders, 10 a minute (`BALANCE.marketOrderLimit`), far above what a player trading by hand needs.
   - Idea: a per-player limit set far above anything a person does, turned on only during an incident (a runaway script hammering the server), documented in docs/deployment.md. Measure what the client really sends first (map panning loads 21×21 chunks, queue polling, flows). If the limiter fails, it lets requests through.
 - [ ] **Dependency updates with Renovate.**
   - Now: dependencies are updated by hand, and the two-week rule (AGENTS.md, Ground rules) is checked by hand.
   - Plan: Renovate with `minimumReleaseAge: "14 days"` and pinned versions (`rangeStrategy: "pin"`), grouped so updates come as a few pull requests.
-  - To decide first: CI runs only when started by hand (`workflow_dispatch` in `.github/workflows/ci.yml`), so Renovate's pull requests would go untested unless CI also runs on `pull_request`.
+  - To decide first: CI stays off on GitHub for now, to save its cost (`workflow_dispatch` only in `.github/workflows/ci.yml`), and runs locally with act (`npm run ci:local`). So Renovate's pull requests aren't tested by themselves: each would be checked out and run through `npm run ci:local` before merging, or wait until CI runs on `pull_request`.
 - [ ] **Browser tests with Playwright.**
   - Now: the client's tests are pure functions in plain Node; the only end-to-end checks are `tools/smoke/*.mjs`, against the API.
   - Plan: a small Playwright suite against the running stack (log in, build, train, send an army) with axe accessibility checks, using temporary `fx_…` accounts deleted afterwards (AGENTS.md, Running stack).

@@ -1,5 +1,5 @@
 # CI: every check AGENTS.md asks for before a change is finished. Run it locally with act: npm run ci:local
-# (AGENTS.md, Local CI). Manual trigger only, so GitHub never runs it by itself; to turn on CI on GitHub, add
+# (AGENTS.md, Local CI). Manual trigger only, so GitHub never runs it by itself (to save its cost for now); to turn on CI on GitHub, add
 #   push: { branches: [main] }
 #   pull_request:
 # under `on`.
