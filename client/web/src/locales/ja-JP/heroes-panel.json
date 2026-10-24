@@ -67,7 +67,14 @@
   },
   "sheet": {
     "figure": "レベル{{level}}の装備を身につけた{{name}}",
-    "piece": "{{piece}}（レベル{{level}}）：装備を開く"
+    "piece": "{{piece}}（レベル{{level}}）：装備を開く",
+    "figure3d": "レベル{{level}}の装備を身につけた{{name}}（ドラッグか矢印キーで回転）",
+    "figureMode": {
+      "label": "主人公の表示",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "figureLoading": "主人公を描いています…"
   },
   "roster": {
     "drag": "ドラッグで並べ替え（Alt + ↑ / ↓ でも可）"

@@ -9,6 +9,9 @@ Design notes and known quirks to come back to. Each entry says what happens now,
   - *Make scripting pay less:* the game's own automation (flows, farm lists) already does much of what bots did, so a player gains little from a script.
   - *Detect it:* patterns no person keeps up (actions at all hours without a break, reaction times of milliseconds), shown to the server operator to look at, never acted on automatically.
   - *Decide the rules:* what's allowed (a player's own helper scripts?) and what happens to a player caught breaking them.
+- **More for the 3D hero.** The 3D figure ([features/hero-3d.md](features/hero-3d.md)) shows only on the Heroes page's character sheet, and its gear icons don't point at it. Two ideas from its design, left as nice-to-haves once the figure was done:
+  - *A piece lit when its icon is hovered:* the meshes are already named after their pieces (`buildFigure`, `paper-doll/hero-figure-3d/utils.ts`), so hovering an icon in `PaperDoll` could tint those meshes (a uniform in the toon material, as the glow is).
+  - *The 3D hero elsewhere:* the Inn's offers, or the famous heroes once they exist (TODO.md). Each would load three.js too, so it suits a screen that shows one hero at a time.
 
 ## Known quirks
 
@@ -18,6 +21,9 @@ Design notes and known quirks to come back to. Each entry says what happens now,
 - **Rescheduling a timed event keeps its old player and city.** `flush` (`backend/packages/game/src/context.ts`) upserts a timed event by its ref key, updating its time, payload and type but not `player_id` / `city_id`. No caller reuses a key for another player or city today.
 - **A failed stats write loses fractions.** When `flushStats` (`backend/packages/game/src/stats.ts`) fails it puts the counters back for the next try, but already rounded.
 - **An empty `?techId=` reads as tech 0.** The research speed-up cost route coerces an empty query value to 0 and answers `research.notResearching` for it, instead of refusing the request.
+- **The 3D hero's frame time on a tablet is unmeasured.** A frame takes about 0.5 ms to draw on an M5 Pro (Chrome), it redraws about 12 times a second at rest and at the screen's rate while dragged or acting ([features/hero-3d.md](features/hero-3d.md), phases 1 and 4), but no tablet or phone was to hand to measure. Reduced motion (it stands still, doesn't act and stays where it's turned) was likewise only checked in code and tests, as the test browser can't ask for it. To do on a device: drag the figure and tap through the actions, with and without reduced motion.
+- **A woman's braid hides behind her near pauldron in 3D.** The braid runs from behind the ear over the near shoulder (`buildFigure`, the hair section), and at rest the pauldron and the sword arm cover most of it, so only a strip down the neck shows; the 2D figure shows it down the chest. Moving its end further in front and towards the middle would show it. Left as a look to tune, not a fault.
+- **The 3D swing is the least clear action.** It strikes forward and down (`ACTION_KEYS.swing`, `paper-doll/hero-figure-3d/constants.ts`), which the three-quarter view foreshortens, so it reads less than the salute and the shield. Adding a turn about z (a sweep across the body) would show more; only numbers to change. Left as a look to tune.
 
 ## Operations
 

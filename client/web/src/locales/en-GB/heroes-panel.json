@@ -69,7 +69,14 @@
   },
   "sheet": {
     "figure": "{{name}} wearing level {{level}} gear",
-    "piece": "{{piece}}, level {{level}}: open the gear"
+    "piece": "{{piece}}, level {{level}}: open the gear",
+    "figure3d": "{{name}} wearing level {{level}} gear: drag it or use the arrow keys to turn it",
+    "figureMode": {
+      "label": "Draw the hero in",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "figureLoading": "Drawing the hero…"
   },
   "roster": {
     "drag": "Drag to reorder (or Alt with ↑ / ↓)"

@@ -34,6 +34,13 @@ export default [
     gzip: true,
   },
   {
+    // the hero's 3D figure (three.js, most of it; docs/features/hero-3d.md), loaded only when the figure is drawn in 3D
+    name: 'hero 3d',
+    path: 'dist/assets/hero-figure-3d-*.js',
+    limit: '165 kB',
+    gzip: true,
+  },
+  {
     // every sprite (buildings, walls, map tiles, units and resource icons in src/assets, AGENTS.md Client, Game art), loaded as the
     // screens show them. PNG is already compressed, so this counts the files as they are. Sized for the real pixel art,
     // about 3 kB a building sprite (a troop is about 0.3 kB)

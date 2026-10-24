@@ -31,7 +31,7 @@ The bodies share one skeleton (shoulders, hips, hands and head in the same place
 
 ## Decided
 
-- **2D pixel art, drawn in code** (2026-10-24), like every other sprite. No 3D library: a renderer such as three.js (about 150 kB gzipped) and model files would break the pixel-art look and the game's lightness on slow connections.
+- **2D pixel art, drawn in code** (2026-10-24), like every other sprite. No 3D library: a renderer such as three.js (about 150 kB gzipped) and model files would break the pixel-art look and the game's lightness on slow connections. *Changed the same day:* a 3D hero in three.js, rendered pixelated and loaded only with it, is planned in [hero-3d.md](hero-3d.md), with this figure as its fallback.
 - **The figure wears its gear** (2026-10-24), replacing the plain figure with the icons round it that phase 2 first planned. The 14 icons still stand round the figure, since they carry the stars and the star button.
 - **At the hero's own level** (2026-10-24, from heroes-page.md): `min(gearTier(level), researched level)`. A hero below level 10 wears level 0, the blue-steel set with a wooden sword.
 - **Our own art only** (2026-10-23, heroes-page.md): the original game's art is a reference for style, never traced or converted.
