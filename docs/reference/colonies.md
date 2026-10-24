@@ -1,6 +1,6 @@
 # Colonies and suzerains in Evony Age 2
 
-**Version:** Evony Age 2. Age 1 had no colonies. Recorded as a model for what a historic city's holder might do with the cities round it (features/market-and-factions.md, Historical cities: tribute, drafting).
+**Version:** Evony Age 2. Age 1 had no colonies. Recorded as a model for what a historic city's holder might do with the cities round it ([features/historical-cities.md](../features/historical-cities.md): tribute, drafting).
 
 **Sources** (read 2026-10-19; facts in our own words):
 

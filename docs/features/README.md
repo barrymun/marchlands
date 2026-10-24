@@ -13,6 +13,7 @@ Design documents for large planned features, kept while they are worked out and 
 | [hero-figure-art.md](hero-figure-art.md) | The hero on the Heroes page drawn wearing its 14 gear pieces at its level, a man or a woman, in pixel art | Built |
 | [hero-gear-art.md](hero-gear-art.md) | Hero gear icons: 14 pieces at every level 0–10, a colour per level, pixel-art stars | Built |
 | [hero-names.md](hero-names.md) | Hero names by the state the city stands in, with a place or a father's name, travellers from other states, and a gender for every hero | Phase 1 built |
-| [market-and-factions.md](market-and-factions.md) | Market overhaul: NPC cities trading, factions, historical cities as seats of power, events, trading scripts, new charts | Phases 1–3 built (charts and the merchant, the faction data, NPC trade); reputation next |
+| [historical-cities.md](historical-cities.md) | Historical cities at levels 12–18 as seats of power over areas of the map: capture, the daily draft, tribute, titles, borders between factions | Design only |
+| [market-and-factions.md](market-and-factions.md) | Market overhaul: NPC cities trading, factions, events, trading scripts, new charts (seats of power moved to historical-cities.md) | Phases 1–3 built (charts and the merchant, the faction data, NPC trade); reputation next |
 | [town-animations.md](town-animations.md) | Animated town, fields and map: smoke, sails and wheels, walkers, construction, buildings showing what they're doing, day and night, weather, marching armies | Built |
 | [unchecked-index-access.md](unchecked-index-access.md) | `noUncheckedIndexedAccess`: lookups that can miss typed as such, in chunks (core, backend, client, tests), then `no-unnecessary-condition` | Built |
