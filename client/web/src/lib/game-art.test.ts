@@ -26,9 +26,11 @@ import {
   figureUpperFile,
   GEAR_ART_LEVELS,
   GEAR_STAR_KINDS,
+  GEAR_TWIN_PARTS,
   gearArtFile,
   gearBackdropFile,
   gearStarFile,
+  gearTwinFile,
   grandTownHallFile,
   RESOURCE_ART_KEYS,
   resourceArtFile,
@@ -226,6 +228,13 @@ describe(gearBackdropFile.name, () => {
   });
 });
 
+describe(gearTwinFile.name, () => {
+  it('names a twin after its sprite and its part, within 0 to 10', () => {
+    expect(gearTwinFile('head', 4, 'bare')).toBe('head-4-bare.png');
+    expect(gearTwinFile('head', 12, 'plume')).toBe('head-10-plume.png');
+  });
+});
+
 describe(gearStarFile.name, () => {
   it('names the star after its kind', () => {
     expect(gearStarFile('waiting')).toBe('star-waiting.png');
@@ -233,9 +242,15 @@ describe(gearStarFile.name, () => {
 });
 
 describe('gear art', () => {
-  it('has every piece at every gear level, a backdrop for every level, every kind of star, and nothing else', () => {
+  it('has every piece at every gear level, the twins of those with a part that moves alone, a backdrop for every level, every kind of star, and nothing else', () => {
     const expected = [
       ...GEAR_PIECE_IDS.flatMap((piece) => GEAR_ART_LEVELS.map((level) => gearArtFile(piece, level))),
+      // a sprite with a part that moves alone has its twins
+      ...GEAR_PIECE_IDS.flatMap((piece) =>
+        GEAR_ART_LEVELS.filter((level) => (SPOTS[`gear/${gearArtFile(piece, level)}`] ?? []).some((s) => s.k === 'sway')).flatMap((level) =>
+          GEAR_TWIN_PARTS.map((part) => gearTwinFile(piece, level, part)),
+        ),
+      ),
       ...GEAR_ART_LEVELS.map(gearBackdropFile),
       ...GEAR_STAR_KINDS.map(gearStarFile),
     ].sort();

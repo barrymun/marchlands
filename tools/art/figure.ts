@@ -11,9 +11,9 @@ import { figureLegs } from './figure/legs.ts';
 import { figureUpper } from './figure/upper.ts';
 import type { PixelCanvas } from './pixel.ts';
 
-/** Drop the stones' spots below level 10, where nothing glows. */
+/** Drop the stones' spots below level 10, where nothing glows, and the gear icons' glints (`gem`), which the figure doesn't use. */
 function glowing(c: PixelCanvas, level: number): PixelCanvas {
-  if (level < 10) c.spots.splice(0, c.spots.length, ...c.spots.filter((s) => s.k !== 'stone'));
+  c.spots.splice(0, c.spots.length, ...c.spots.filter((s) => s.k !== 'gem' && (level >= 10 || s.k !== 'stone')));
   return c;
 }
 

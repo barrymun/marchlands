@@ -19,7 +19,7 @@ import { ring } from './gear/ring.ts';
 import { shield } from './gear/shield.ts';
 import { shoulder } from './gear/shoulder.ts';
 import { weapon } from './gear/weapon.ts';
-import { type Colour, PixelCanvas } from './pixel.ts';
+import { type Colour, PixelCanvas, type Spot } from './pixel.ts';
 import { disc } from './shapes.ts';
 import type { GearStarKind } from '../../client/web/src/lib/game-art.ts';
 
@@ -54,6 +54,7 @@ function backdrop(level: number): PixelCanvas {
       [8, 25, 1],
       [17, 3, 1],
     ] as const) {
+      c.spot('star', [x, y], r);
       c.set(x, y, 'sparkle');
       for (let i = 1; i <= r; i++)
         for (const [dx, dy] of [
@@ -95,23 +96,29 @@ function star(kind: GearStarKind): PixelCanvas {
   return c;
 }
 
+/**
+ * A piece's drawing, keeping only the glints (`gem` and `shine` spots) still showing once it is finished: a stone
+ * drawn over, or turned to outline, has nothing left to flare.
+ */
+const showing =
+  (draw: (level: number) => PixelCanvas) =>
+  (level: number): PixelCanvas => {
+    const c = draw(level);
+    const hidden = (s: Spot) => (s.k === 'gem' || s.k === 'shine') && ['clear', 'outline'].includes(c.get(s.x, s.y));
+    for (let i = c.spots.length - 1; i >= 0; i--) if (hidden(c.spots[i])) c.spots.splice(i, 1);
+    return c;
+  };
+
 /** Every gear piece, by piece id (GEAR_PIECES in shared/core gear.ts): a drawing for each gear level. */
-export const GEAR_DRAWINGS: Record<string, (level: number) => PixelCanvas> = {
-  weapon,
-  shield,
-  mount,
-  necklace,
-  charm,
-  ring,
-  head,
-  shoulder,
-  chest,
-  back,
-  gauntlets,
-  belt,
-  legs,
-  feet,
-};
+export const GEAR_DRAWINGS: Record<string, (level: number) => PixelCanvas> = Object.fromEntries(
+  Object.entries({ weapon, shield, mount, necklace, charm, ring, head, shoulder, chest, back, gauntlets, belt, legs, feet }).map(([piece, draw]) => [
+    piece,
+    showing(draw),
+  ]),
+);
+
+/** The pieces with a part that moves alone, drawn whole, `bare` or as the part: their twins (lib/game-art.ts, gearTwinFile). */
+export const GEAR_TWINS: Record<string, (level: number, part: 'bare' | 'plume') => PixelCanvas> = { head };
 
 export const GEAR_BACKDROP = backdrop;
 export const GEAR_STAR = star;

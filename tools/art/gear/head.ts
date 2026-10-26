@@ -4,7 +4,7 @@
 // horns and a glowing slit.
 
 import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
-import { BLUE, canvas, fill, GOLD, horn, look, plume, type Shades, spike, STEEL, trimmed } from './common.ts';
+import { BLUE, canvas, fill, GOLD, horn, look, plume, type Shades, shine, spike, STEEL, trimmed } from './common.ts';
 
 /** A helm's shell: straight sides, a rounded top from `top`, down to `bottom`. */
 function shell(left: number, right: number, top: number, bottom: number): Pt[] {
@@ -17,7 +17,11 @@ function shell(left: number, right: number, top: number, bottom: number): Pt[] {
   return [...arc, [right, bottom], [left, bottom]];
 }
 
-export function head(level: number): PixelCanvas {
+/**
+ * The head at a gear level: whole, or, for the helm with a plume (from 4), `bare` without the plume or the `plume`
+ * alone, the twins the icon moves the plume with (docs/features/gear-animations.md).
+ */
+export function head(level: number, part?: 'bare' | 'plume'): PixelCanvas {
   const c = canvas('head', level);
   const L = look(level);
   if (level === 0) {
@@ -56,9 +60,19 @@ export function head(level: number): PixelCanvas {
     ] as const)
       c.set(x, y, 'steelDark');
   if (level >= 3) for (let y = top + 1; y < sy; y++) c.set(16, y, L.trim[1]);
-  if (level >= 10) c.set(13, sy, 'sparkle');
+  if (level >= 10) shine(c, 13, sy);
   // a plume in the level's colour from 4, horns from 8, filled so the outline goes round them
-  if (level >= 4) plume(c, [17, top], [24, 1], -2, 2.4, L.accent);
+  if (part === 'plume') {
+    const alone = canvas('head', level);
+    plume(alone, [17, top], [24, 1], -2, 2.4, L.accent);
+    alone.outline();
+    return alone;
+  }
+  if (level >= 4 && part !== 'bare') {
+    plume(c, [17, top], [24, 1], -2, 2.4, L.accent);
+    // it sways from its base, the tip most
+    c.spot('sway', [17, top], top - 1);
+  }
   if (L.horns) {
     horn(c, [10, top + 6], [2, top - 5], 5, L.trim);
     horn(c, [22, top + 6], [30, top - 5], 5, L.trim);

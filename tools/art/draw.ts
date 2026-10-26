@@ -45,7 +45,7 @@ import { CITY_GROUND_DRAWINGS, CITY_WALL_DRAWINGS } from './city.ts';
 import { hair, skin } from './figure/body.ts';
 import { FIGURE_GEAR } from './figure.ts';
 import { FORT_DRAWINGS } from './fortifications.ts';
-import { GEAR_BACKDROP, GEAR_DRAWINGS, GEAR_STAR } from './gear.ts';
+import { GEAR_BACKDROP, GEAR_DRAWINGS, GEAR_STAR, GEAR_TWINS } from './gear.ts';
 import { IsoCanvas } from './iso.ts';
 import type { PixelCanvas, Spot } from './pixel.ts';
 import { RESOURCE_DRAWINGS } from './resources.ts';
@@ -69,9 +69,11 @@ import {
   figureUpperFile,
   GEAR_ART_LEVELS,
   GEAR_STAR_KINDS,
+  GEAR_TWIN_PARTS,
   gearArtFile,
   gearBackdropFile,
   gearStarFile,
+  gearTwinFile,
   grandTownHallFile,
   resourceArtFile,
   tileArtFile,
@@ -195,6 +197,11 @@ if (!wanted.size || wanted.has('gear')) {
   fs.mkdirSync(path.join(ASSETS, 'gear'), { recursive: true });
   for (const [piece, drawing] of Object.entries(GEAR_DRAWINGS))
     for (const level of GEAR_ART_LEVELS) save('gear', gearArtFile(piece, level), () => drawing(level));
+  // a piece whose part sways alone also gets its twins: without the part, and the part alone (no spots of their own)
+  for (const [piece, twin] of Object.entries(GEAR_TWINS))
+    for (const level of GEAR_ART_LEVELS)
+      if ((spots[`gear/${gearArtFile(piece, level)}`] ?? []).some((s) => s.k === 'sway'))
+        for (const part of GEAR_TWIN_PARTS) fs.writeFileSync(path.join(ASSETS, 'gear', gearTwinFile(piece, level, part)), twin(level, part).png());
   for (const level of GEAR_ART_LEVELS) save('gear', gearBackdropFile(level), () => GEAR_BACKDROP(level));
   for (const kind of GEAR_STAR_KINDS) save('gear', gearStarFile(kind), () => GEAR_STAR(kind));
   console.log(`drew gear (${Object.keys(GEAR_DRAWINGS).join(', ')} × ${GEAR_ART_LEVELS.length} levels, backdrops, stars)`);

@@ -4,7 +4,7 @@
 // crimson armour with glowing eyes and two horns.
 
 import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
-import { canvas, fill, horn, look, plume, type Shades, sweep, trimmed } from './common.ts';
+import { canvas, fill, horn, look, plume, type Shades, shine, sweep, trimmed } from './common.ts';
 
 const CHESTNUT: Shades = ['horseHi', 'horse', 'horseDark'];
 const GREY: Shades = ['graniteL', 'stoneTop', 'stoneL'];
@@ -77,8 +77,8 @@ export function mount(level: number): PixelCanvas {
   );
   c.outline();
   // eye and nostril
-  const eye: Colour = level >= 10 ? 'sparkle' : 'gear0Dark';
-  c.set(15, 11, eye);
+  if (level >= 10) shine(c, 15, 11);
+  else c.set(15, 11, 'gear0Dark');
   if (level >= 10) c.set(14, 11, 'gear10Hi');
   c.set(6, 21, 'gear0Dark');
   // halter, bridle and bit
@@ -92,5 +92,7 @@ export function mount(level: number): PixelCanvas {
     c.set(7, 22, 'steelHi');
   }
   if (level >= 3) for (let i = 0; i < 4; i++) c.set(14 - i * 2, 9 + i * 4, L.trim[0]);
+  // the head nods from the top of the neck, the muzzle lifting most
+  c.spot('nod', [20, 13], 16);
   return c;
 }

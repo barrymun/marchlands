@@ -130,6 +130,18 @@ export function gearArtFile(piece: string, level: number): string {
   return `${piece}-${gearArtLevel(level)}.png`;
 }
 
+/**
+ * A gear sprite split where one part moves alone (docs/features/gear-animations.md, the pieces' own movement): the piece
+ * without the part (`bare`) and the part by itself (the helm's `plume`), drawn whenever the sprite has a `sway` spot.
+ */
+export const GEAR_TWIN_PARTS = ['bare', 'plume'] as const;
+export type GearTwinPart = (typeof GEAR_TWIN_PARTS)[number];
+
+/** One of a gear sprite's twins (`head-4-bare.png`, `head-4-plume.png`). */
+export function gearTwinFile(piece: string, level: number, part: GearTwinPart): string {
+  return `${piece}-${gearArtLevel(level)}-${part}.png`;
+}
+
 /** The backdrop every piece stands on at a gear level (`backdrop-3.png`). */
 export function gearBackdropFile(level: number): string {
   return `backdrop-${gearArtLevel(level)}.png`;

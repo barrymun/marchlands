@@ -1,6 +1,6 @@
 # Hero gear art
 
-**Status:** built 2026-10-23: all 14 pieces at all 11 levels, the backdrops, the stars and the gear card. TODO.md item: *Images for buildings, troops, gear, items, etc.*, Still to draw: hero gear.
+**Status:** built 2026-10-23: all 14 pieces at all 11 levels, the backdrops, the stars and the gear card. TODO.md item: *Images for buildings, troops, gear, items, etc.*, Still to draw: hero gear. Since 2026-10-26 the icons move ([gear-animations.md](gear-animations.md)): the scripts also record spots for it (each stone's glint, level 10's points of light, a glowing blade, the backdrop's stars and the moving pieces' pivots) and draw the helm's twins from level 4 (`head-N-bare.png`, `head-N-plume.png`), the sprites themselves unchanged.
 
 **The aim:** an icon for each of the 14 gear pieces (`GEAR_PIECES`, `shared/core/src/gear.ts`) at every gear level, 0 (no Hero Enhancement yet) to 10, so the gear visibly grows grander as the player researches it, as it did in Evony Age 2.
 

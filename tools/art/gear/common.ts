@@ -89,10 +89,12 @@ export function ring(c: PixelCanvas, cx: number, cy: number, rx: number, ry: num
 
 /**
  * A cut stone round (x, y): `r` 1 is two by two, larger a disc, its lower right in shade and a white glint at its top
- * left, so a stone in the level's colour still shows on that level's backdrop.
+ * left, so a stone in the level's colour still shows on that level's backdrop. The glint is recorded as a `gem` spot
+ * (`n` the stone's radius), where the gear icon makes it flare and the stone glow.
  */
 export function gem(c: PixelCanvas, x: number, y: number, r: number, [hi, mid, dark]: Shades) {
   if (r <= 1) {
+    c.spot('gem', [Math.floor(x), Math.floor(y)], r);
     c.set(x, y, 'sparkle');
     c.set(x + 1, y, mid);
     c.set(x, y + 1, mid);
@@ -103,9 +105,16 @@ export function gem(c: PixelCanvas, x: number, y: number, r: number, [hi, mid, d
   disc(c, x, y, r, dark);
   disc(c, x - r * 0.3, y - r * 0.3, r * 0.55, mid);
   const g = Math.round(r / 2);
+  c.spot('gem', [Math.floor(x - g), Math.floor(y - g)], r);
   c.set(x - g, y - g, 'sparkle');
   c.set(x - g + 1, y - g, hi);
   c.set(x - g, y - g + 1, hi);
+}
+
+/** A point of white light (level 10's glowing eyes and slits), recorded as a `shine` spot so the icon can make it glint. */
+export function shine(c: PixelCanvas, x: number, y: number) {
+  c.set(x, y, 'sparkle');
+  c.spot('shine', [Math.floor(x), Math.floor(y)]);
 }
 
 /** A heart of size `s` round (cx, cy), its point down, coloured per pixel. */

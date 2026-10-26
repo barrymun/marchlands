@@ -4,10 +4,12 @@
 
 import type { PixelCanvas } from '../pixel.ts';
 import { disc } from '../shapes.ts';
-import { canvas, fill, gem, look, setStone, spike } from './common.ts';
+import { canvas, fill, gem, look, setStone, shine, spike } from './common.ts';
 
 export function charm(level: number): PixelCanvas {
   const c = canvas('charm', level);
+  // the tag or the drops swing as one below where they hang from the cord or the hooks
+  c.spot('swing', [16, level === 0 ? 11 : 13]);
   if (level === 0) {
     // a gold tag, engraved, hung from a loop of cord
     fill(
@@ -69,7 +71,7 @@ export function charm(level: number): PixelCanvas {
       spike(c, [x - 3, 17], [x - 5, 13], L.trim);
       spike(c, [x + 3, 17], [x + 5, 13], L.trim);
     }
-    if (level >= 10) c.set(x - 1, 15, 'sparkle');
+    if (level >= 10) shine(c, x - 1, 15);
   }
   return c;
 }

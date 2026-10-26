@@ -51,6 +51,8 @@ export function back(level: number): PixelCanvas {
         c.line(root, tip, 'gear0Dark');
     spike(c, [16 - 13, 4], [16 - 15, 0], STEEL);
     spike(c, [16 + 13, 4], [16 + 15, 0], STEEL);
+    // the wings flap from their root, the tips lifting most
+    c.spot('flap', root, 14);
     return c;
   }
   const cloth: Shades = level === 0 ? BLUE : level === 1 ? ['bannerHi', 'banner', 'bannerDark'] : level === 2 ? ['hood', 'hoodDark', 'gear0'] : L.accent;
@@ -76,5 +78,8 @@ export function back(level: number): PixelCanvas {
     spike(c, [10, 5], [7, 1], L.trim);
     spike(c, [22, 5], [25, 1], L.trim);
   }
+  // the cape stirs below the rod or collar, the hem most
+  const hung = level === 0 ? 6 : 9;
+  c.spot('stir', [16, hung], 29 - hung);
   return c;
 }

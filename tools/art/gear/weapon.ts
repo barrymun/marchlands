@@ -25,6 +25,8 @@ interface Sword {
   gem?: number;
   /** runes along the blade, in the gem's colour */
   runes?: boolean;
+  /** its edges, fuller or runes are drawn glowing: the icon makes the blade pulse */
+  glows?: boolean;
 }
 
 const SWORD_GOLD = ['gold', 'gold', 'goldDark'] as const;
@@ -99,6 +101,7 @@ const SWORDS: Sword[] = [
     blade: STEEL,
     wave: 0.5,
     edges: 'gear6Hi',
+    glows: true,
     guard: { half: 5, colours: SWORD_GOLD, up: 2 },
     grips: ['gear6Dark', 'gear0'],
     pommel: SWORD_GOLD,
@@ -112,6 +115,7 @@ const SWORDS: Sword[] = [
     blade: STEEL,
     edges: 'gear7Hi',
     runes: true,
+    glows: true,
     guard: { half: 5, colours: SWORD_GOLD, up: 2, horns: true },
     grips: ['gear7Dark', 'gear0'],
     pommel: SWORD_GOLD,
@@ -125,6 +129,7 @@ const SWORDS: Sword[] = [
     blade: STEEL,
     fuller: 'gear8Hi',
     edges: 'steelHi',
+    glows: true,
     guard: { half: 5.5, colours: SWORD_GOLD, up: 2.5, horns: true },
     grips: ['gear8Dark', 'gear0'],
     pommel: SWORD_GOLD,
@@ -202,11 +207,15 @@ export function weapon(level: number): PixelCanvas {
   if (s.gem != null) {
     const [hi, mid] = tier(s.gem);
     c.set(px, py, mid);
+    c.spot('gem', [Math.floor(px), Math.floor(py)], 1);
     if (s.gem >= 4) {
       c.set(guardAt[0], guardAt[1], mid);
       c.set(guardAt[0] - 1, guardAt[1], hi);
+      c.spot('gem', [Math.floor(guardAt[0] - 1), Math.floor(guardAt[1])], 1);
     }
   }
+  // a glowing blade: from the guard up the diagonal, `n` long and `m` its half-width
+  if (s.glows) c.spot('blade', guardAt, s.length - s.grip, s.width);
   c.outline();
   // the guard's horns after the outline, so they stay thin: two pixels wide, curling towards the tip
   if (s.guard.horns)

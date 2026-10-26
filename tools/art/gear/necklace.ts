@@ -5,7 +5,7 @@
 
 import type { Colour, PixelCanvas } from '../pixel.ts';
 import { disc } from '../shapes.ts';
-import { canvas, gem, heart, lit, look, setStone, type Shades, spike } from './common.ts';
+import { canvas, gem, heart, lit, look, setStone, type Shades, shine, spike } from './common.ts';
 
 /** The chain at `t` (0 to 1), from the top left down to the bottom middle and back up. */
 const chain = (t: number): [number, number] => [5 + 22 * t, 4 + 15 * (1 - (2 * t - 1) ** 2)];
@@ -16,6 +16,9 @@ export function necklace(level: number): PixelCanvas {
   const links: readonly Colour[] = level === 0 ? ['bannerHi', 'bannerDark'] : level <= 2 ? ['steelHi', 'steelDark'] : [L.trim[0], L.trim[2]];
   const r = level === 0 ? 3 : level === 1 ? 0 : level === 2 ? 2 : 2 + level * 0.25;
   const py = 21 + r * 0.6;
+  // the pendant swings as one below its top (the heart's, or the stone's setting), the chain taking up the step
+  const pendantTop = level >= 10 ? py - 5.6 * 1.2 : py - r - (level >= 3 ? 1.8 : 0);
+  c.spot('swing', [16, Math.floor(pendantTop) - 1]);
   // the pendant, before the outline
   if (level === 0) disc(c, 16, py, r, 'fire', 'roofD');
   else if (level === 2) disc(c, 16, py, r, 'steel', 'steelDark');
@@ -23,7 +26,7 @@ export function necklace(level: number): PixelCanvas {
     // a crimson heart set in silver
     heart(c, 16, py, 5.6, lit(16, py, 5, L.trim));
     heart(c, 16, py, 3.8, (x, y) => (x + y < 16 + py - 2 ? 'gear10' : 'gear10Dark'));
-    c.set(14, py - 2, 'sparkle');
+    shine(c, 14, py - 2);
   } else if (level >= 3) setStone(c, 16, py, r, L.trim, L.accent);
   if (level >= 6)
     for (const t of [0.28, 0.72]) {

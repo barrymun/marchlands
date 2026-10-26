@@ -3,7 +3,7 @@
 // from 7, gilded at 9, and at 10 a crimson band with silver claws and a glowing stone.
 
 import type { PixelCanvas } from '../pixel.ts';
-import { ring as band, BRONZE, canvas, look, setStone, type Shades, spike, STEEL } from './common.ts';
+import { ring as band, BRONZE, canvas, look, setStone, type Shades, shine, spike, STEEL } from './common.ts';
 
 export function ring(level: number): PixelCanvas {
   const c = canvas('ring', level);
@@ -28,6 +28,6 @@ export function ring(level: number): PixelCanvas {
     spike(c, [16 - r, 11], [16 - r - 1, 7], L.trim);
     spike(c, [16 + r, 11], [16 + r + 1, 7], L.trim);
   }
-  if (level >= 10) c.set(15, 8, 'sparkle');
+  if (level >= 10) shine(c, 15, 8);
   return c;
 }
