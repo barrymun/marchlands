@@ -4,7 +4,7 @@
   "strong": "Strong in",
   "short": "Short of",
   "gold": "Gold",
-  "goldOf": "{{gold}} of {{treasury}}",
+  "goldUsual": "{{gold}} (usually {{treasury}})",
   "temperament": {
     "trading": "Traders",
     "warlike": "Warlike",

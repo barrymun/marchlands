@@ -4,7 +4,7 @@
   "strong": "豊富な資源",
   "short": "不足している資源",
   "gold": "金",
-  "goldOf": "{{gold}} / {{treasury}}",
+  "goldUsual": "{{gold}}（通常 {{treasury}}）",
   "temperament": {
     "trading": "交易好き",
     "warlike": "好戦的",

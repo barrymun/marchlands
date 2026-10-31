@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { getFactionsOptions } from '@marchlands/api-client';
 import { BALANCE, FACTIONS, factionSpread } from '@marchlands/core';
 
+import { goldBar } from '@/components/factions-panel/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { FACTION_STYLE, standingText, standingTierName, standingTone } from '@/lib/factions';
 import { fmt, percent, resourceLabel } from '@/lib/format';
 import { factionName, zoneName } from '@/lib/game-data';
@@ -14,7 +14,8 @@ import { cn } from '@/lib/utils';
 
 /**
  * The NPC factions (core's factions.ts): the zones each holds, what it is strong in and short of, how it behaves, its
- * gold against its treasury (what it pays players selling to it with; it refills over about a game day), and the
+ * gold beside its treasury (what it pays players selling to it with, and the level it drifts back to over about a game
+ * day: trade can leave it far above or below), and the
  * player's standing with it (core's reputation.ts) with what that does to the factions' prices for their cities there.
  */
 export function FactionsPanel() {
@@ -31,6 +32,7 @@ export function FactionsPanel() {
         {FACTIONS.map((f) => {
           const g = golds?.find((x) => x.id === f.id);
           const spread = g && factionSpread(g.standing);
+          const bar = g && goldBar(g.gold, g.treasury);
           return (
             <Card key={f.id} size="sm">
               <CardHeader>
@@ -58,12 +60,16 @@ export function FactionsPanel() {
                       </dd>
                     </>
                   )}
-                  {g && g.treasury > 0 && (
+                  {g && bar && g.treasury > 0 && (
                     <>
                       <dt className="text-muted-foreground">{t('gold')}</dt>
                       <dd className="grid gap-1">
-                        <span className="tabular-nums">{t('goldOf', { gold: fmt(g.gold), treasury: fmt(g.treasury) })}</span>
-                        <Progress value={Math.min(100, (100 * g.gold) / g.treasury)} aria-label={t('gold')} />
+                        <span className="tabular-nums">{t('goldUsual', { gold: fmt(g.gold), treasury: fmt(g.treasury) })}</span>
+                        {/* the gold, with a mark at its usual level; the text above says the same for screen readers */}
+                        <div aria-hidden className="relative h-1 w-full rounded-full bg-muted">
+                          <div className="h-full rounded-full bg-primary" style={{ width: `${bar.fill * 100}%` }} />
+                          <div className="absolute -inset-y-0.5 w-0.5 -translate-x-1/2 rounded-full bg-foreground" style={{ left: `${bar.mark * 100}%` }} />
+                        </div>
                       </dd>
                     </>
                   )}
