@@ -88,10 +88,18 @@ export function claimsOf(req: FastifyRequest): TokenClaims {
 
 /** Resolve the lord of the authenticated account (404 until common.createNewPlayer). */
 export async function playerIdOf(db: Db, req: FastifyRequest): Promise<number> {
-  const accountId = claimsOf(req).sub;
-  const [row] = await db.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
-  if (!row) throw new GameError(msg('auth.needPlayer'), -4, 404);
-  return row.id;
+  const id = await maybePlayerIdOf(db, req);
+  if (id == null) throw new GameError(msg('auth.needPlayer'), -4, 404);
+  return id;
+}
+
+/** The signed-in account's player, or null for an account that hasn't made one yet. */
+export async function maybePlayerIdOf(db: Db, req: FastifyRequest): Promise<number | null> {
+  const [row] = await db
+    .select({ id: players.id })
+    .from(players)
+    .where(eq(players.accountId, claimsOf(req).sub));
+  return row?.id ?? null;
 }
 
 export async function requireAdmin(req: FastifyRequest) {

@@ -5,10 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { type BattleReport } from '@marchlands/core';
 
 import { Badge } from '@/components/ui/badge';
+import { standingText } from '@/lib/factions';
 import { fmtExact, resourceLabel } from '@/lib/format';
-import { itemName } from '@/lib/game-data';
+import { factionName, itemName } from '@/lib/game-data';
 
-/** What the attacker took: per resource and in total (valleys hold nothing). */
+/** What the attacker took: per resource and in total (valleys hold nothing); against a barbarian city, its loyalty and the attacker's standing with a faction. */
 export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }) {
   const { t } = useTranslation(['reports-panel', 'common']);
   const mine = b.attacker.player === me;
@@ -62,6 +63,11 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
         <div className="text-xs text-muted-foreground">
           {t('loot.loyalty', { damage: fmtExact(b.loyaltyDamage), left: fmtExact(b.loyaltyLeft) })}
           {b.captured && t('loot.captured')}
+        </div>
+      )}
+      {'standing' in b && b.standing && mine && (
+        <div className="text-xs text-muted-foreground">
+          {t('loot.standing', { faction: factionName(b.standing.faction), change: standingText(b.standing.change), standing: standingText(b.standing.now) })}
         </div>
       )}
     </div>

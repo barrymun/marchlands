@@ -40,7 +40,10 @@
     "unlimited": "unlimited",
     "merchant": "merchant",
     "factions": "factions",
-    "factionsDepth": "How much they trade before their price reaches the merchant's"
+    "factionsDepth": "How much they trade before their price reaches the merchant's",
+    "terms": "Through the {{faction}}: {{tier}} ({{standing}}), their spread {{spread}}",
+    "refused": "The {{faction}} won't trade with this city: {{tier}} ({{standing}})",
+    "termsHint": "A city trades with the factions through the faction holding its land, and your standing with it sets their spread. At {{refuse}} or below it won't trade with you; the merchant and other players still will."
   },
   "priceHistory": {
     "ranges": {

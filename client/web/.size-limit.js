@@ -13,10 +13,12 @@ export default [
   {
     // the game's own code for the first page; a jump here usually means a zod schema module came in (AGENTS.md,
     // Shared code). Raised from 110 kB (2026-10-20) for the isometric viewport's animation layer (overlays and the
-    // redraw clock); the animations themselves load after the first page (components/iso-anim/hooks.ts)
+    // redraw clock); the animations themselves load after the first page (components/iso-anim/hooks.ts). Raised to
+    // 118 kB (2026-10-31) for faction standing (115.56 kB): en-GB's text for every screen, and BALANCE, ship here, so
+    // new text anywhere grows this chunk (docs/backlog.md, English text in the first page)
     name: 'app',
     path: 'dist/assets/app-*.js',
-    limit: '115 kB',
+    limit: '118 kB',
     gzip: true,
   },
   {

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { MarketFactions, MarketMerchant, MarketPriceLevel } from '@marchlands/api-client';
 
+import { FactionTerms } from '@/components/market-panel/book-panel/order-book/faction-terms/faction-terms';
 import { type BookRow, bookSide, spreadOf } from '@/components/market-panel/book-panel/order-book/utils';
 import type { Side } from '@/components/market-panel/types';
 import { fmtPrice } from '@/components/market-panel/utils';
@@ -15,7 +16,7 @@ import { cn } from '@/lib/utils';
  * bar behind each row for the depth up to it, and the world price and the spread in the middle. Players' levels, the
  * NPC factions' price (with how much they trade before the merchant's band's edge) and the merchant's sit together.
  * Clicking a player's level prepares the opposite order at its price; clicking the factions or the merchant prepares
- * an instant order.
+ * an instant order. Under it, the terms the factions give the city in view.
  */
 export function OrderBook({
   buyers,
@@ -72,6 +73,7 @@ export function OrderBook({
         </span>
       </div>
       {bids.map((r) => row(r, false))}
+      {factions && <FactionTerms factions={factions} />}
     </div>
   );
 }

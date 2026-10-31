@@ -215,7 +215,13 @@ export const PlaceOrderBody = z.object({
   price: z.number().optional().describe('gold per unit; required for limit orders'),
   type: z.enum(['limit', 'market']).default('limit').describe('limit: unfilled part rests on the book; market: fill now at the best prices, nothing rests'),
 });
+/** The player's city whose terms with the factions a book, quote or affordable amount uses (the base spread without one). */
+const cityQuery = {
+  cityId: zId.optional().describe("the player's city to trade from: the factions' prices follow the player's standing with its home faction"),
+};
+export const MarketBookQuery = z.object(cityQuery);
 export const MarketQuoteQuery = z.object({
+  ...cityQuery,
   side: z.coerce.number().int(),
   amount: z.coerce.number().int(),
   price: z.coerce.number().optional(),
@@ -225,7 +231,7 @@ export const MarketHistoryQuery = z.object({
   period: z.enum(CANDLE_PERIODS).default('hour').describe('candle length in real time'),
   limit: z.coerce.number().int().min(1).max(2000).default(500).describe('the most recent candles, at most this many'),
 });
-export const MarketAffordableQuery = z.object({ gold: z.coerce.number().int().min(0).max(1e15).describe('the gold to spend, fee included') });
+export const MarketAffordableQuery = z.object({ ...cityQuery, gold: z.coerce.number().int().min(0).max(1e15).describe('the gold to spend, fee included') });
 export const OrderIdParams = z.object({ orderId: zId });
 export const ShipmentIdParams = z.object({ shipmentId: zId });
 
@@ -253,8 +259,15 @@ export const MarketFactions = z
     buys: int().describe("units they buy before their price reaches the band's edge"),
     sellers: z.array(MarketPriceLevel).describe("what they sell in a few price steps up to the band's edge, best first"),
     buyers: z.array(MarketPriceLevel).describe("what they buy in a few price steps down to the band's edge, best first"),
+    spread: z.number().nullable().describe('the spread in these quotes (half each way), set by the standing with the home faction; null when they refuse'),
+    refused: z.boolean().describe("the city's home faction won't trade with it: nothing to buy or sell"),
+    faction: z.enum(FACTION_IDS).nullable().describe("the city's home faction, the one holding its zone; null without a city"),
+    standing: z.number().nullable().describe("the player's standing with it, -100 to 100; null without a city"),
   })
-  .meta({ id: 'MarketFactions', description: 'the NPC factions: they trade from their shared stock along their price curve' });
+  .meta({
+    id: 'MarketFactions',
+    description: "the NPC factions: they trade from their shared stock along their price curve, on the terms a city's home faction gives",
+  });
 export type MarketFactions = z.infer<typeof MarketFactions>;
 
 export const MarketOrderBook = z
@@ -360,6 +373,7 @@ export const FactionGold = z
     id: z.enum(FACTION_IDS),
     gold: int().describe('the gold the faction holds now: it pays players selling to it with this'),
     treasury: int().describe("what its gold drifts back to: its members' gold in the NPC table"),
+    standing: z.number().describe("the player's standing with it, -100 to 100, drifting back to 0"),
   })
   .meta({ id: 'FactionGold' });
 export type FactionGold = z.infer<typeof FactionGold>;

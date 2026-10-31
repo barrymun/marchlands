@@ -37,7 +37,7 @@ export function MarketPanel({ city }: { city: CityBean }) {
   // a phone's trade sheet
   const [trading, setTrading] = useState(false);
   const book = useQuery({
-    ...getMarketByResTypeOptions({ path: { resType } }),
+    ...getMarketByResTypeOptions({ path: { resType }, query: { cityId: city.id } }),
     placeholderData: keepPreviousData,
   });
   const range = RANGES[rangeId];

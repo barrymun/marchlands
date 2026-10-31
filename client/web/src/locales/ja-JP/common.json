@@ -112,5 +112,12 @@
   "errors": {
     "network": "サーバーに接続できません。接続を確認してもう一度お試しください。",
     "unexpected": "問題が発生しました。もう一度お試しください。"
+  },
+  "standing": {
+    "hostile": "敵対",
+    "unfriendly": "非友好",
+    "neutral": "中立",
+    "friendly": "友好",
+    "honoured": "崇敬"
   }
 }

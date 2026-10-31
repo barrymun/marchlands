@@ -20,6 +20,7 @@ export * from '#/tech-info.ts';
 export * from '#/building-info.ts';
 export * from '#/troop-info.ts';
 export * from '#/quests.ts';
+export * from '#/reputation.ts';
 export * from '#/resources.ts';
 export * from '#/rng.ts';
 export * from '#/time.ts';

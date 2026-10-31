@@ -11,6 +11,7 @@ import {
   addTroops,
   ArmyDirection,
   armyLoad,
+  attackStanding,
   BALANCE,
   type BattleExtra,
   BuffId,
@@ -69,6 +70,7 @@ import { plunderNpc } from '#/engine/npc-economy.ts';
 import { initialCity, isProtected } from '#/engine/player.ts';
 import { isFriendly, relationBetween } from '#/engine/relations.ts';
 import { createReport } from '#/engine/reports.ts';
+import { addStanding } from '#/engine/reputation.ts';
 import { activeBuff, addItem, addPrestige, gainResources, pushCity, pushResources } from '#/helpers.ts';
 import {
   armiesStationedAt,
@@ -944,12 +946,14 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   let loot: ResourceSet = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
   let loyaltyDamage = 0;
   let captured = false;
+  // (marchlands) a city no player holds belongs to a faction or is a bandit camp on one's land (core reputation.ts)
+  const unheld = tile.ownerCityId == null;
   const state = { ...npc.state, heroSeed: seedHolder.heroSeed };
   if (r.attackerWon) {
     loot = plunder({ gold: state.gold, food: state.food, wood: state.wood, stone: state.stone, iron: state.iron }, lootCapacity(a, r.attacker.after, attacker));
     for (const k of Object.keys(loot) as (keyof ResourceSet)[]) state[k] -= loot[k];
     // (marchlands) a faction member's plunder lowers its group's stock, and so moves the factions' prices
-    if (tile.ownerCityId == null) await plunderNpc(ctx, tile.id, tile.level, loot);
+    if (unheld) await plunderNpc(ctx, tile.id, tile.level, loot);
     const [lo, hi] = BALANCE.npcLoyaltyDamagePerAttack;
     loyaltyDamage = randInt(ctx.rng, lo, hi);
     state.loyalty = Math.max(0, state.loyalty - loyaltyDamage);
@@ -963,6 +967,9 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     }
   }
   if (!captured) await saveTile(ctx, tile);
+  // (marchlands) attacking a member costs standing with its faction; a won attack on a bandit camp earns a little
+  const moved = unheld ? attackStanding(tile.id, tile.level, r.attackerWon, captured) : null;
+  const standing = moved && { faction: moved.faction.id, change: moved.change, now: await addStanding(ctx, attacker.id, moved.faction.id, moved.change) };
   attacker.honor += r.attackerHonor;
   const medals = r.attackerWon ? awardMedals(ctx, attacker, tile.level) : {};
   await savePlayer(ctx, attacker);
@@ -985,7 +992,15 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
       forts: r.forts,
       wallLevel: tile.level,
     },
-    { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured, level: tile.level, ...(Object.keys(medals).length ? { medals } : {}) },
+    {
+      plunder: loot,
+      loyaltyDamage,
+      loyaltyLeft: Math.floor(state.loyalty),
+      captured,
+      level: tile.level,
+      ...(Object.keys(medals).length ? { medals } : {}),
+      ...(standing ? { standing } : {}),
+    },
   );
   await createReport(ctx, {
     playerId: a.playerId,

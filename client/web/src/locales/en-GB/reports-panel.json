@@ -87,7 +87,8 @@
     "medalsFound": "Medals found:",
     "medalsAttackerFound": "Medals the attacker found:",
     "loyalty": "Loyalty −{{damage}} (now {{left}})",
-    "captured": " · City captured"
+    "captured": " · City captured",
+    "standing": "Standing with the {{faction}} {{change}} (now {{standing}})"
   },
   "desertion": {
     "intro": "{{city}} ran out of food, so troops deserted: 10% of every troop type for each game hour the upkeep went unpaid (a game hour is {{gameHour}}).",

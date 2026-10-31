@@ -86,7 +86,8 @@
     "medalsFound": "発見したメダル:",
     "medalsAttackerFound": "攻撃側が発見したメダル:",
     "loyalty": "民忠 −{{damage}}（現在 {{left}}）",
-    "captured": " · 都市を占領"
+    "captured": " · 都市を占領",
+    "standing": "{{faction}}との評判 {{change}}（現在 {{standing}}）"
   },
   "desertion": {
     "intro": "{{city}} で食料が尽きたため、部隊が脱走しました。維持費が支払われなかったゲーム内1時間ごとに、各兵種の10%が脱走します（ゲーム内1時間は{{gameHour}}）。",

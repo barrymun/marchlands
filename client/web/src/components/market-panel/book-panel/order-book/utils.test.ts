@@ -2,7 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { bookSide, spreadOf } from '@/components/market-panel/book-panel/order-book/utils';
 
 const merchant = { reference: 1, base: 1, bid: 0.85, ask: 1.15 };
-const factions = { price: 1, ask: 1.01, bid: 0.99, sells: 300, buys: 500, sellers: [], buyers: [] };
+const factions = {
+  price: 1,
+  ask: 1.01,
+  bid: 0.99,
+  sells: 300,
+  buys: 500,
+  sellers: [],
+  buyers: [],
+  spread: 0.02,
+  refused: false,
+  faction: null,
+  standing: null,
+};
 
 describe(bookSide.name, () => {
   it('lists sellers highest price first, adding up their depth from the lowest price', () => {

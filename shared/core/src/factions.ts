@@ -5,18 +5,8 @@
 // data-factions namespace, keyed by FactionId.
 
 import { BALANCE } from '#/balance.ts';
-import type { ResourceKey } from '#/constants.ts';
+import { FactionId, type ResourceKey } from '#/constants.ts';
 import { stateOf } from '#/world.ts';
-
-export const FactionId = {
-  SAXON_LEAGUE: 'saxon',
-  LOTHARINGIAN_CROWN: 'lotharingian',
-  FRANCONIAN_HEARTLAND: 'franconian',
-  BOHEMIAN_CROWN: 'bohemian',
-  ITALIAN_LEAGUE: 'italian',
-} as const;
-export type FactionId = (typeof FactionId)[keyof typeof FactionId];
-export const FACTION_IDS = Object.values(FactionId) as [FactionId, ...FactionId[]];
 
 /** How a faction behaves towards others: trade, war, or neither. */
 export const FactionTemperament = {

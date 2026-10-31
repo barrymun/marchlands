@@ -6,6 +6,7 @@ import { z } from 'zod';
 import {
   BUFF_IDS,
   BuildingStatus,
+  FACTION_IDS,
   FLOW_MAX_TARGETS_PER_CITY,
   FLOW_MAX_WAIT_MINUTES,
   FORT_KEY_LIST,
@@ -252,6 +253,8 @@ export const BattleNpcExtraSchema = BattlePlunderSchema.extend({
   loyaltyLeft: z.number(),
   captured: z.boolean(),
   level: z.number().int(),
+  /** (marchlands) the attacker's standing with the faction the city belongs to (a member) or whose land it's on (a bandit camp), when it changed */
+  standing: z.object({ faction: z.enum(FACTION_IDS), change: z.number(), now: z.number() }).optional(),
 });
 export const BattleValleyExtraSchema = z.object({
   occupied: z.boolean(),

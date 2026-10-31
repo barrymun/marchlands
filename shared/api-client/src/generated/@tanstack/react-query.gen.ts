@@ -2692,7 +2692,7 @@ export const getConfigStaticOptions = (options?: Options<GetConfigStaticData>) =
 export const getMarketByResTypeQueryKey = (options: Options<GetMarketByResTypeData>) => createQueryKey('getMarketByResType', options);
 
 /**
- * Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades)
+ * Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades); the factions on the terms a city gets
  */
 export const getMarketByResTypeOptions = (options: Options<GetMarketByResTypeData>) => queryOptions<GetMarketByResTypeResponse, GetMarketByResTypeError, GetMarketByResTypeResponse, ReturnType<typeof getMarketByResTypeQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -2746,7 +2746,7 @@ export const getMarketHistoryOptions = (options: Options<GetMarketHistoryData>) 
 export const getFactionsQueryKey = (options?: Options<GetFactionsData>) => createQueryKey('getFactions', options);
 
 /**
- * The NPC factions' gold now and their treasuries
+ * The NPC factions' gold now, their treasuries and the player's standing with each (0 for an account without a player)
  */
 export const getFactionsOptions = (options?: Options<GetFactionsData>) => queryOptions<GetFactionsResponse, GetFactionsError, GetFactionsResponse, ReturnType<typeof getFactionsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {

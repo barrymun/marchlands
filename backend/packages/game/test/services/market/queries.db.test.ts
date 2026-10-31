@@ -45,7 +45,7 @@ describe(market.orderBook.name, () => {
       await offer(b, 20, P * 2);
       await market.placeOrder(g, a.id, a.cityId, { resType: Res.FOOD, side: MarketSide.BUY, amount: 999, price: merchantBase('food') / 2 });
 
-      const book = await market.orderBook(g, Res.WOOD, 2);
+      const book = await market.orderBook(g, Res.WOOD, undefined, 2);
       expect(book.buyers).toEqual([
         { price: P / 2, amount: 150 },
         { price: P / 4, amount: 10 },

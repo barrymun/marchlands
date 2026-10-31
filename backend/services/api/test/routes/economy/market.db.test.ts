@@ -87,6 +87,24 @@ describe('GET /market/:resType', () => {
     }));
 });
 
+describe('GET /market/:resType?cityId=', () => {
+  it("answers the book on the terms one of the player's cities gets, and refuses another player's city", () =>
+    apiTest(async (api) => {
+      const p = await trader(api);
+      const q = await trader(api);
+      const book = await api.ok<MarketOrderBook>('GET', `market/${WOOD}?cityId=${p.cityId}`, { token: p.token });
+      expect(book).toMatchObject({ resType: WOOD, buyers: [], sellers: [] });
+      await api.refused('GET', `market/${WOOD}?cityId=${q.cityId}`, 'common.invalidCastle', { token: p.token, status: 403 });
+      await expectInvalid(api, p.token, [{ method: 'GET', url: `market/${WOOD}?cityId=x` }]);
+    }));
+
+  it('needs a player for a city', () =>
+    apiTest(async (api) => {
+      const a = await accountWithoutPlayer(api);
+      await api.refused('GET', `market/${WOOD}?cityId=1`, 'auth.needPlayer', { token: a.token, status: 404 });
+    }));
+});
+
 describe('GET /market/:resType/quote', () => {
   it('previews an order without trading', () =>
     apiTest(async (api) => {
@@ -148,6 +166,14 @@ describe('GET /factions', () => {
       const a = await accountWithoutPlayer(api);
       const list = await api.ok<FactionGold[]>('GET', 'factions', { token: a.token });
       expect(list.map((f) => f.id)).toEqual(['saxon', 'lotharingian', 'franconian', 'bohemian', 'italian']);
+      expect(list.every((f) => f.standing === 0)).toBe(true);
+    }));
+
+  it("answers the player's standing with each faction", () =>
+    apiTest(async (api) => {
+      const p = await trader(api);
+      const list = await api.ok<FactionGold[]>('GET', 'factions', { token: p.token });
+      expect(list.map((f) => f.standing)).toEqual([0, 0, 0, 0, 0]);
     }));
 });
 

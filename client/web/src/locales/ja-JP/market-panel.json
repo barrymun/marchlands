@@ -40,7 +40,10 @@
     "unlimited": "無制限",
     "merchant": "商人",
     "factions": "勢力",
-    "factionsDepth": "価格が商人の価格に達するまでに取引する量"
+    "factionsDepth": "価格が商人の価格に達するまでに取引する量",
+    "terms": "{{faction}}経由：{{tier}}（{{standing}}）、スプレッド {{spread}}",
+    "refused": "{{faction}}はこの都市と取引しません：{{tier}}（{{standing}}）",
+    "termsHint": "都市はその土地を治める勢力を通じて勢力と取引し、その勢力との評判がスプレッドを決めます。評判が{{refuse}}以下になると取引を拒否されますが、商人や他のプレイヤーとは引き続き取引できます。"
   },
   "priceHistory": {
     "ranges": {

@@ -554,6 +554,26 @@ export const playerRelations = pgTable(
 // Economy
 // ---------------------------------------------------------------------------------------------
 
+/**
+ * (marchlands) A lord's standing with an NPC faction (core reputation.ts): its value when last set (it drifts back to 0
+ * as it is read), and what trading with the factions gained on the last game day it gained any (capped per day).
+ */
+export const factionStanding = pgTable(
+  'faction_standing',
+  {
+    playerId: integer('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    /** core FactionId */
+    factionId: text('faction_id').notNull(),
+    value: doublePrecision('value').notNull(),
+    at: ms('at').notNull(),
+    tradeDay: integer('trade_day').notNull().default(0),
+    tradeGained: doublePrecision('trade_gained').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.playerId, t.factionId] })],
+);
+
 /** Marketplace order book. Escrowed at creation (gold for bids, goods for offers). */
 export const marketOrders = pgTable(
   'market_orders',

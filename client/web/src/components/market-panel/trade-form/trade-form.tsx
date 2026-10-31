@@ -66,7 +66,13 @@ export function TradeForm({
   const quote = useQuery({
     ...getMarketQuoteOptions({
       path: { resType },
-      query: { side: deferred.side, amount: deferred.qty, type: deferred.mode, price: deferred.mode === 'limit' ? deferred.unit : undefined },
+      query: {
+        cityId: city.id,
+        side: deferred.side,
+        amount: deferred.qty,
+        type: deferred.mode,
+        price: deferred.mode === 'limit' ? deferred.unit : undefined,
+      },
     }),
     enabled: ready,
     placeholderData: keepPreviousData,
@@ -80,7 +86,7 @@ export function TradeForm({
   // walks the book); until it answers, what it buys from the merchant alone, a lower bound
   const gold = useDeferredValue(Math.floor(city.resource.gold));
   const buyable = useQuery({
-    ...getMarketAffordableOptions({ path: { resType }, query: { gold } }),
+    ...getMarketAffordableOptions({ path: { resType }, query: { cityId: city.id, gold } }),
     enabled: side === 0 && mode === 'market',
     placeholderData: keepPreviousData,
   });

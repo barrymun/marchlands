@@ -1662,7 +1662,7 @@ export const deleteAllianceRelationsByName = <ThrowOnError extends boolean = fal
 export const getConfigStatic = <ThrowOnError extends boolean = false>(options?: Options<GetConfigStaticData, ThrowOnError>): RequestResult<GetConfigStaticResponses, GetConfigStaticErrors, ThrowOnError> => (options?.client ?? client).get<GetConfigStaticResponses, GetConfigStaticErrors, ThrowOnError>({ url: '/api/v1/config/static', ...options });
 
 /**
- * Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades)
+ * Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades); the factions on the terms a city gets
  */
 export const getMarketByResType = <ThrowOnError extends boolean = false>(options: Options<GetMarketByResTypeData, ThrowOnError>): RequestResult<GetMarketByResTypeResponses, GetMarketByResTypeErrors, ThrowOnError> => (options.client ?? client).get<GetMarketByResTypeResponses, GetMarketByResTypeErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -1689,7 +1689,7 @@ export const getMarketHistory = <ThrowOnError extends boolean = false>(options: 
 });
 
 /**
- * The NPC factions' gold now and their treasuries
+ * The NPC factions' gold now, their treasuries and the player's standing with each (0 for an account without a player)
  */
 export const getFactions = <ThrowOnError extends boolean = false>(options?: Options<GetFactionsData, ThrowOnError>): RequestResult<GetFactionsResponses, GetFactionsErrors, ThrowOnError> => (options?.client ?? client).get<GetFactionsResponses, GetFactionsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

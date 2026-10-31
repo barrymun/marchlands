@@ -8,6 +8,7 @@ import {
   armyLoad,
   BALANCE,
   freshNpcState,
+  homeFaction,
   injuredOf,
   Mission,
   msg,
@@ -21,6 +22,7 @@ import {
 } from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
+import { standingsOf } from '#/engine/reputation.ts';
 import { admin } from '#/index.ts';
 import { citiesOf, getHero, getTile } from '#/repo.ts';
 import { armyRow, expectWipedHero, roundTrip, send, tileNear, warrior } from '#test/support/armies.ts';
@@ -156,5 +158,41 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
       const tile = await getTile(g, npc.id);
       expect(tile).toMatchObject({ type: TileType.NPC, cityId: null });
       expect((tile.state as unknown as NpcState).loyalty).toBe(0);
+    }));
+});
+
+describe(`${processArmy.name}: standing with the factions`, () => {
+  const R = BALANCE.reputation;
+  const member = BALANCE.factions.minLevel;
+
+  it('attacking a faction member costs standing with its faction, even when the attack fails', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g);
+      const npc = await tileNear(g, p.cityId, TileType.NPC, { level: member });
+      const home = homeFaction(npc.id);
+      const { battle: b } = await attack(g, p, heroId, npc.id, 5);
+      expect(b.result).toBe('defenderWon');
+      const change = -R.attackPerLevel * member;
+      expect(b.standing).toEqual({ faction: home?.id, change, now: change });
+      expect((await standingsOf(g, p.id))[home!.id]).toBeCloseTo(change);
+    }));
+
+  it("a won attack on a bandit camp earns a little standing with the faction whose land it's on", () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g);
+      const npc = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
+      const { battle: b } = await attack(g, p, heroId, npc.id);
+      expect(b.result).toBe('attackerWon');
+      expect(b.standing).toEqual({ faction: homeFaction(npc.id)?.id, change: R.banditPerLevel, now: R.banditPerLevel });
+    }));
+
+  it('a lost attack on a bandit camp changes no standing', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g);
+      const npc = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
+      const { battle: b } = await attack(g, p, heroId, npc.id, 5);
+      expect(b.result).toBe('defenderWon');
+      expect(b.standing).toBeUndefined();
+      expect(Object.values(await standingsOf(g, p.id)).every((s) => s === 0)).toBe(true);
     }));
 });

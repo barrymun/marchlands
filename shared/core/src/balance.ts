@@ -293,6 +293,29 @@ export const BALANCE = {
     ticker: { keep: 50, perResource: 2 },
   },
   /**
+   * (marchlands) standing with each NPC faction (reputation.ts), from -max to max, starting at 0. A city trades with the
+   * factions through the faction holding its zone, at a spread set by the player's standing with it. Game time.
+   */
+  reputation: {
+    max: 100,
+    /** half of a standing fades back to 0 in this long */
+    driftHalfLifeMs: 3 * DAY,
+    /** at or below this the home faction won't trade with the city */
+    refuseBelow: -50,
+    /** the factions' spread for players (npcTrade.playerSpread at 0) at standing `max` and at `refuseBelow`; never below 0, or a round trip would pay */
+    spread: { best: 0, worst: 0.1 },
+    /** lost for any attack on a faction member, per member level */
+    attackPerLevel: 0.3,
+    /** lost for capturing a member, on top of the attack */
+    capture: 20,
+    /** gained for a won attack on a bandit camp (below factions.minLevel), per level, with the faction whose land it's on */
+    banditPerLevel: 0.1,
+    /** gained for trading with the factions: one point per `goldPerPoint` traded, at most `maxPerDay` a game day */
+    trade: { goldPerPoint: 20_000_000, maxPerDay: 5 },
+    /** where the bands players see begin: hostile is at refuseBelow or lower */
+    tiers: { unfriendly: -10, friendly: 10, honoured: 50 },
+  },
+  /**
    * (marchlands) computer merchant: always buys and sells every resource, in any amount. It sells at
    * its reference price x (1 + spread/2) and buys at x (1 - spread/2), so players' orders inside the
    * spread beat it: a market of last resort.

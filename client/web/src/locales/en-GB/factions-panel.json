@@ -9,5 +9,10 @@
     "trading": "Traders",
     "warlike": "Warlike",
     "insular": "Keeps to itself"
-  }
+  },
+  "standingIntro": "Attacking a faction's cities lowers your standing with it; a won attack on bandits on its land, and trading with the factions from a city in its lands, raise it. Standing drifts back to neutral over time.",
+  "standing": "Your standing",
+  "standingValue": "{{tier}} ({{standing}})",
+  "terms": "Your cities in its lands trade with the factions at a spread of {{spread}}.",
+  "refuses": "It won't trade with your cities in its lands."
 }

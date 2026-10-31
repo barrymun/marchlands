@@ -231,8 +231,8 @@ All paths are relative to the server root. Names in parentheses are the original
 | Method | Path | Description |
 |---|---|---|
 | POST | `/api/v1/cities/{cityId}/market/orders` | Place an order: side 0 buy, 1 sell; limit or market; settles instantly (trade.newTrade); limited per player |
-| GET | `/api/v1/factions` | The NPC factions' gold now and their treasuries |
-| GET | `/api/v1/market/{resType}` | Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades) |
+| GET | `/api/v1/factions` | The NPC factions' gold now, their treasuries and the player's standing with each (0 for an account without a player) |
+| GET | `/api/v1/market/{resType}` | Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades); the factions on the terms a city gets |
 | GET | `/api/v1/market/{resType}/affordable` | The most units an amount of gold buys now with an instant order, the fee included |
 | GET | `/api/v1/market/{resType}/history` | Recent trades and price candles of a minute, an hour or a day (real time) |
 | GET | `/api/v1/market/{resType}/quote` | Preview an order: what would trade now, at what average price, and what would rest |

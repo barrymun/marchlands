@@ -26,6 +26,7 @@ import {
   GoldShopBuyResult,
   MarketAffordable,
   MarketAffordableQuery,
+  MarketBookQuery,
   MarketHistory,
   MarketHistoryQuery,
   MarketMyTrade,
@@ -58,7 +59,7 @@ import {
 import { BALANCE, BUILDINGS, dur, getGameSpeed, itemGoldPrice, itemInfo, ITEMS, msg, QUESTS, RESEARCH, TITLES, TROOPS } from '@marchlands/core';
 import { admin, factions, market, quests, rankings, runGame, shop } from '@marchlands/game';
 
-import { anon, authenticate, claimsOf, type Data, doc, game, requireAdmin, tags, type ZApp, zCityParams } from '#/http.ts';
+import { anon, authenticate, claimsOf, type Data, doc, game, maybePlayerIdOf, requireAdmin, tags, type ZApp, zCityParams } from '#/http.ts';
 import { OrderLimit } from '#/market/order-limit.ts';
 
 export default async function economyRoutes(app: ZApp) {
@@ -115,8 +116,16 @@ export default async function economyRoutes(app: ZApp) {
     // ---- market ----
     secure.get(
       '/market/:resType',
-      s(tags.market, 'Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades)', MarketOrderBook, { params: MarketResTypeParams }),
-      (req) => anon(req, (ctx) => market.orderBook(ctx, req.params.resType)),
+      s(tags.market, 'Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades); the factions on the terms a city gets', MarketOrderBook, {
+        params: MarketResTypeParams,
+        querystring: MarketBookQuery,
+      }),
+      (req) => {
+        const { cityId } = req.query;
+        return cityId == null
+          ? anon(req, (ctx) => market.orderBook(ctx, req.params.resType))
+          : game(req, (ctx, pid) => market.orderBook(ctx, req.params.resType, { playerId: pid, cityId }));
+      },
     );
     secure.get(
       '/market/:resType/quote',
@@ -134,8 +143,17 @@ export default async function economyRoutes(app: ZApp) {
       }),
       (req) => anon(req, (ctx) => market.history(ctx, req.params.resType, req.query.period, req.query.limit)),
     );
-    secure.get('/factions', s(tags.market, "The NPC factions' gold now and their treasuries", z.array(FactionGold)), (req) =>
-      anon(req, (ctx) => factions.list(ctx)),
+    secure.get(
+      '/factions',
+      s(
+        tags.market,
+        "The NPC factions' gold now, their treasuries and the player's standing with each (0 for an account without a player)",
+        z.array(FactionGold),
+      ),
+      async (req) => {
+        const pid = await maybePlayerIdOf(req.server.deps.db, req);
+        return anon(req, (ctx) => factions.list(ctx, pid));
+      },
     );
     secure.get('/market/summary', s(tags.market, "Every resource's price now, the merchant's quotes and its last 24 hours", z.array(MarketSummary)), (req) =>
       anon(req, (ctx) => market.summary(ctx)),
@@ -146,7 +164,7 @@ export default async function economyRoutes(app: ZApp) {
         params: MarketResTypeParams,
         querystring: MarketAffordableQuery,
       }),
-      (req) => game(req, (ctx, pid) => market.affordable(ctx, pid, req.params.resType, req.query.gold)),
+      (req) => game(req, (ctx, pid) => market.affordable(ctx, pid, req.params.resType, req.query.gold, req.query.cityId)),
     );
     secure.get('/market/trades/mine', s(tags.market, "The player's latest trades, newest first", z.array(MarketMyTrade)), (req) =>
       game(req, (ctx, pid) => market.myTrades(ctx, pid)),

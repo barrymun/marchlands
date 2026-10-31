@@ -6755,6 +6755,32 @@
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
+                          },
+                          "standing": {
+                            "type": "object",
+                            "properties": {
+                              "faction": {
+                                "type": "string",
+                                "enum": [
+                                  "saxon",
+                                  "lotharingian",
+                                  "franconian",
+                                  "bohemian",
+                                  "italian"
+                                ]
+                              },
+                              "change": {
+                                "type": "number"
+                              },
+                              "now": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "faction",
+                              "change",
+                              "now"
+                            ]
                           }
                         },
                         "required": [
@@ -10171,6 +10197,42 @@
               "$ref": "#/components/schemas/MarketPriceLevelInput"
             },
             "description": "what they buy in a few price steps down to the band's edge, best first"
+          },
+          "spread": {
+            "description": "the spread in these quotes (half each way), set by the standing with the home faction; null when they refuse",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "refused": {
+            "type": "boolean",
+            "description": "the city's home faction won't trade with it: nothing to buy or sell"
+          },
+          "faction": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "saxon",
+                  "lotharingian",
+                  "franconian",
+                  "bohemian",
+                  "italian"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the city's home faction, the one holding its zone; null without a city"
+          },
+          "standing": {
+            "description": "the player's standing with it, -100 to 100; null without a city",
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
@@ -10180,9 +10242,13 @@
           "sells",
           "buys",
           "sellers",
-          "buyers"
+          "buyers",
+          "spread",
+          "refused",
+          "faction",
+          "standing"
         ],
-        "description": "the NPC factions: they trade from their shared stock along their price curve"
+        "description": "the NPC factions: they trade from their shared stock along their price curve, on the terms a city's home faction gives"
       },
       "MarketOrderBookInput": {
         "type": "object",
@@ -10759,12 +10825,17 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
             "description": "what its gold drifts back to: its members' gold in the NPC table"
+          },
+          "standing": {
+            "type": "number",
+            "description": "the player's standing with it, -100 to 100, drifting back to 0"
           }
         },
         "required": [
           "id",
           "gold",
-          "treasury"
+          "treasury",
+          "standing"
         ]
       },
       "MarketMyTradeInput": {
@@ -18371,6 +18442,33 @@
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
+                          },
+                          "standing": {
+                            "type": "object",
+                            "properties": {
+                              "faction": {
+                                "type": "string",
+                                "enum": [
+                                  "saxon",
+                                  "lotharingian",
+                                  "franconian",
+                                  "bohemian",
+                                  "italian"
+                                ]
+                              },
+                              "change": {
+                                "type": "number"
+                              },
+                              "now": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "faction",
+                              "change",
+                              "now"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [
@@ -21877,6 +21975,42 @@
               "$ref": "#/components/schemas/MarketPriceLevel"
             },
             "description": "what they buy in a few price steps down to the band's edge, best first"
+          },
+          "spread": {
+            "description": "the spread in these quotes (half each way), set by the standing with the home faction; null when they refuse",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "refused": {
+            "type": "boolean",
+            "description": "the city's home faction won't trade with it: nothing to buy or sell"
+          },
+          "faction": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "saxon",
+                  "lotharingian",
+                  "franconian",
+                  "bohemian",
+                  "italian"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "the city's home faction, the one holding its zone; null without a city"
+          },
+          "standing": {
+            "description": "the player's standing with it, -100 to 100; null without a city",
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
@@ -21886,10 +22020,14 @@
           "sells",
           "buys",
           "sellers",
-          "buyers"
+          "buyers",
+          "spread",
+          "refused",
+          "faction",
+          "standing"
         ],
         "additionalProperties": false,
-        "description": "the NPC factions: they trade from their shared stock along their price curve"
+        "description": "the NPC factions: they trade from their shared stock along their price curve, on the terms a city's home faction gives"
       },
       "MarketOrderBook": {
         "type": "object",
@@ -22479,12 +22617,17 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
             "description": "what its gold drifts back to: its members' gold in the NPC table"
+          },
+          "standing": {
+            "type": "number",
+            "description": "the player's standing with it, -100 to 100, drifting back to 0"
           }
         },
         "required": [
           "id",
           "gold",
-          "treasury"
+          "treasury",
+          "standing"
         ],
         "additionalProperties": false
       },
@@ -35662,11 +35805,20 @@
     "/api/v1/market/{resType}": {
       "get": {
         "operationId": "getMarketByResType",
-        "summary": "Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades)",
+        "summary": "Order book: 0 food, 1 wood, 2 stone, 3 iron (trade.searchTrades); the factions on the terms a city gets",
         "tags": [
           "market"
         ],
         "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "cityId",
+            "required": false,
+            "description": "the player's city to trade from: the factions' prices follow the player's standing with its home faction"
+          },
           {
             "schema": {
               "type": "integer",
@@ -35741,6 +35893,15 @@
           "market"
         ],
         "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "cityId",
+            "required": false,
+            "description": "the player's city to trade from: the factions' prices follow the player's standing with its home faction"
+          },
           {
             "schema": {
               "type": "integer",
@@ -35952,7 +36113,7 @@
     "/api/v1/factions": {
       "get": {
         "operationId": "getFactions",
-        "summary": "The NPC factions' gold now and their treasuries",
+        "summary": "The NPC factions' gold now, their treasuries and the player's standing with each (0 for an account without a player)",
         "tags": [
           "market"
         ],
@@ -36087,6 +36248,15 @@
           "market"
         ],
         "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "cityId",
+            "required": false,
+            "description": "the player's city to trade from: the factions' prices follow the player's standing with its home faction"
+          },
           {
             "schema": {
               "type": "integer",

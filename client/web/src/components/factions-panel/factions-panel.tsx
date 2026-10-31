@@ -2,19 +2,20 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { getFactionsOptions } from '@marchlands/api-client';
-import { BALANCE, FACTIONS } from '@marchlands/core';
+import { BALANCE, FACTIONS, factionSpread } from '@marchlands/core';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { FACTION_STYLE } from '@/lib/factions';
-import { fmt, resourceLabel } from '@/lib/format';
+import { FACTION_STYLE, standingText, standingTierName, standingTone } from '@/lib/factions';
+import { fmt, percent, resourceLabel } from '@/lib/format';
 import { factionName, zoneName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
 /**
- * The NPC factions (core's factions.ts): the zones each holds, what it is strong in and short of, how it behaves, and
- * its gold against its treasury (what it pays players selling to it with; it refills over about a game day).
+ * The NPC factions (core's factions.ts): the zones each holds, what it is strong in and short of, how it behaves, its
+ * gold against its treasury (what it pays players selling to it with; it refills over about a game day), and the
+ * player's standing with it (core's reputation.ts) with what that does to the factions' prices for their cities there.
  */
 export function FactionsPanel() {
   const { t } = useTranslation(['factions-panel', 'common']);
@@ -22,10 +23,14 @@ export function FactionsPanel() {
   const list = (items: string[]) => items.join(t('common:list.separator'));
   return (
     <div className="grid gap-4">
-      <p className="text-sm text-muted-foreground">{t('intro', { level: BALANCE.factions.minLevel })}</p>
+      <div className="grid gap-1 text-sm text-muted-foreground">
+        <p>{t('intro', { level: BALANCE.factions.minLevel })}</p>
+        <p>{t('standingIntro')}</p>
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
         {FACTIONS.map((f) => {
           const g = golds?.find((x) => x.id === f.id);
+          const spread = g && factionSpread(g.standing);
           return (
             <Card key={f.id} size="sm">
               <CardHeader>
@@ -42,6 +47,17 @@ export function FactionsPanel() {
                   <dd>{list(f.strong.map(resourceLabel))}</dd>
                   <dt className="text-muted-foreground">{t('short')}</dt>
                   <dd>{list(f.short.map(resourceLabel))}</dd>
+                  {g && (
+                    <>
+                      <dt className="text-muted-foreground">{t('standing')}</dt>
+                      <dd className="grid gap-0.5">
+                        <span className={cn('tabular-nums', standingTone(g.standing))}>
+                          {t('standingValue', { tier: standingTierName(g.standing), standing: standingText(g.standing) })}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{spread == null ? t('refuses') : t('terms', { spread: percent(spread, 1) })}</span>
+                      </dd>
+                    </>
+                  )}
                   {g && g.treasury > 0 && (
                     <>
                       <dt className="text-muted-foreground">{t('gold')}</dt>

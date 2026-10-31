@@ -11,8 +11,9 @@
 
 import { BALANCE, getGameSpeed } from '#/balance.ts';
 import { BASIC_RESOURCES, type BasicResource } from '#/constants.ts';
+import { FACTION_IDS, type FactionId } from '#/constants.ts';
 import { VALLEY_RESOURCE } from '#/economy.ts';
-import { FACTION_IDS, type FactionId, factionOfZone } from '#/factions.ts';
+import { factionOfZone } from '#/factions.ts';
 import type { Rng } from '#/rng.ts';
 import { HOUR } from '#/time.ts';
 import { npcTableGold, npcTemplate } from '#/world.ts';
@@ -299,13 +300,14 @@ function madeUpTrades(groups: readonly NpcGroup[], fill: number[], resource: Bas
 
 // ---------------------------------------------------------------------------------------------
 // Players trading with the factions: along the auction's price curve over the world's stock, the factions selling a
-// little above it and buying a little below (BALANCE.npcTrade.playerSpread), never past the band's edge.
+// little above it and buying a little below, never past the band's edge. The spread is BALANCE.npcTrade.playerSpread,
+// or what the player's standing with the city's home faction makes it (reputation.ts, factionSpread).
 // ---------------------------------------------------------------------------------------------
 
-/** What the factions charge or pay at a world stock: the curve's price (unclamped) ± half the player spread. */
-export function factionMarginal(target: number, stock: number, side: 'buy' | 'sell'): number {
+/** What the factions charge or pay at a world stock: the curve's price (unclamped) ± half the player's spread. */
+export function factionMarginal(target: number, stock: number, side: 'buy' | 'sell', spread: number = cfg().playerSpread): number {
   const p = stock > 0 ? (target / stock) ** priceExponent() : Infinity;
-  const half = cfg().playerSpread / 2;
+  const half = spread / 2;
   return side === 'buy' ? p * (1 + half) : p * (1 - half);
 }
 
@@ -327,8 +329,8 @@ export interface FactionFill {
  * The factions sell up to `qty` units to a player, while their price stays at most `limit` and inside the band
  * (Infinity: up to the band). `target` and `stock` are the world's.
  */
-export function factionSells(target: number, stock: number, qty: number, limit = Infinity): FactionFill {
-  const half = cfg().playerSpread / 2;
+export function factionSells(target: number, stock: number, qty: number, limit = Infinity, spread: number = cfg().playerSpread): FactionFill {
+  const half = spread / 2;
   const bound = Math.min(limit, priceBand().high) / (1 + half);
   // the stock at which their price reaches the bound
   const lowest = target * bound ** (-1 / priceExponent());
@@ -340,8 +342,8 @@ export function factionSells(target: number, stock: number, qty: number, limit =
  * The factions buy up to `qty` units from a player, while their price stays at least `limit` and inside the band, and
  * for at most `budget` gold (what they hold).
  */
-export function factionBuys(target: number, stock: number, qty: number, limit = 0, budget = Infinity): FactionFill {
-  const half = cfg().playerSpread / 2;
+export function factionBuys(target: number, stock: number, qty: number, limit = 0, budget = Infinity, spread: number = cfg().playerSpread): FactionFill {
+  const half = spread / 2;
   const e = priceExponent();
   const bound = Math.max(limit, priceBand().low) / (1 - half);
   const highest = target * bound ** (-1 / e);

@@ -8,8 +8,10 @@ import {
   factionMarginal,
   groupKey,
   groupTarget,
+  homeFaction,
   MarketSide,
   MINUTE,
+  msg,
   priceBand,
   stateOf,
   TileType,
@@ -19,7 +21,10 @@ import {
 import { marketCandles, marketOrders, tiles } from '@marchlands/db';
 
 import { loadNpcEconomy, npcGroups, npcTradeTick, plunderNpc, saveNpcEconomy } from '#/engine/npc-economy.ts';
+import { addStanding, standingsOf } from '#/engine/reputation.ts';
 import { market } from '#/index.ts';
+import { getCity } from '#/repo.ts';
+import { expectRefused } from '#test/support/expect.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 import { createTrader, Res } from '#test/support/market.ts';
 
@@ -183,5 +188,84 @@ describe(plunderNpc.name, () => {
       await plunderNpc(g, member.id, BALANCE.factions.minLevel - 1, { iron: 10_000 });
       const now = await loadNpcEconomy(g, false);
       expect(now?.stock[key]?.iron).toBeCloseTo(was - 10_000, 0);
+    }));
+});
+
+describe("standing and the factions' prices", () => {
+  const R = BALANCE.reputation;
+  const order = { resType: Res.WOOD, side: MarketSide.BUY, amount: 50_000, type: 'market' } as const;
+
+  /** A trader and its home faction, the player's standing with it moved by `standing`. */
+  async function trader(g: TestGame, standing = 0, res = {}) {
+    const p = await createTrader(g, res);
+    const home = homeFaction((await getCity(g, p.cityId)).tileId);
+    if (!home) throw new Error('no home faction');
+    if (standing) await addStanding(g, p.id, home.id, standing);
+    return { p, home };
+  }
+
+  it("prices a city's trade with the factions by its player's standing with its home faction", () =>
+    game(async (g) => {
+      const econ = await trading(g);
+      const { target, stock } = worldTotals(econ, econ.groups, 'wood');
+      const { p: neutral } = await trader(g);
+      const { p: honoured } = await trader(g, R.max);
+      const base = await market.quote(g, neutral.id, { ...order, cityId: neutral.cityId });
+      const best = await market.quote(g, honoured.id, { ...order, cityId: honoured.cityId });
+      expect(best.factionsFilled).toBe(50_000);
+      expect(best.avgPrice).toBeLessThan(base.avgPrice!);
+      expect(best.avgPrice).toBeCloseTo(factionMarginal(target, stock, 'buy', R.spread.best), 3);
+      // without a city the quote is at the base spread
+      expect(await market.quote(g, honoured.id, order)).toEqual(base);
+      const { order: _o, ...placed } = await market.placeOrder(g, honoured.id, honoured.cityId, order);
+      expect(placed).toEqual(best);
+    }));
+
+  it('leaves a city out when its home faction is hostile: the merchant and players still trade with it', () =>
+    game(async (g) => {
+      await trading(g);
+      const { p, home } = await trader(g, -R.max);
+      const placed = await market.placeOrder(g, p.id, p.cityId, order);
+      expect(placed).toMatchObject({ filled: 50_000, factionsFilled: 0, merchantFilled: 50_000 });
+      const { factions } = await market.orderBook(g, Res.WOOD, { playerId: p.id, cityId: p.cityId });
+      expect(factions).toMatchObject({ refused: true, faction: home.id, ask: null, bid: null, sellers: [], buyers: [], spread: null });
+      expect((await market.orderBook(g, Res.WOOD)).factions).toMatchObject({ refused: false, faction: null, standing: null });
+    }));
+
+  it("refuses the book of another player's city", () =>
+    game(async (g) => {
+      await trading(g);
+      const { p } = await trader(g);
+      const { p: other } = await trader(g);
+      await expectRefused(market.orderBook(g, Res.WOOD, { playerId: other.id, cityId: p.cityId }), msg('common.invalidCastle'));
+    }));
+
+  it('raises standing with the home faction for gold traded with the factions, up to the daily cap', () =>
+    game(async (g) => {
+      await trading(g);
+      const { goldPerPoint, maxPerDay } = R.trade;
+      const { p, home } = await trader(g, 0, { gold: goldPerPoint * 20 });
+      const placed = await market.placeOrder(g, p.id, p.cityId, { ...order, amount: goldPerPoint / 2 });
+      const paid = placed.gold - placed.fee;
+      expect((await standingsOf(g, p.id))[home.id]).toBeCloseTo(paid / goldPerPoint, 2);
+      await market.placeOrder(g, p.id, p.cityId, { ...order, amount: goldPerPoint * 10 });
+      expect((await standingsOf(g, p.id))[home.id]).toBeCloseTo(maxPerDay, 5);
+    }));
+
+  it("fills a resting order only once its city's home faction will trade with it", () =>
+    game(async (g) => {
+      await trading(g);
+      const { p, home } = await trader(g, -R.max);
+      // a bid between the factions' ask and the merchant's: refused, it rests rather than filling
+      const placed = await market.placeOrder(g, p.id, p.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, price: 1.1 });
+      expect(placed.filled).toBe(0);
+      g.advance(MINUTE);
+      await npcTradeTick(g);
+      expect((await market.myOrders(g, p.id))[0]?.dealedTotal).toBe(0);
+      // back to about neutral: the next tick fills it
+      await addStanding(g, p.id, home.id, R.max);
+      g.advance(MINUTE);
+      await npcTradeTick(g);
+      expect(await market.myOrders(g, p.id)).toEqual([]);
     }));
 });

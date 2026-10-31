@@ -116,5 +116,12 @@
   "errors": {
     "network": "Couldn't reach the server. Check your connection and try again.",
     "unexpected": "Something went wrong. Please try again."
+  },
+  "standing": {
+    "hostile": "Hostile",
+    "unfriendly": "Unfriendly",
+    "neutral": "Neutral",
+    "friendly": "Friendly",
+    "honoured": "Honoured"
   }
 }

@@ -276,3 +276,14 @@ export const FLOW_MAX_TARGETS_PER_CITY = 10;
 
 /** Longest a flow's "wait" action can wait (real time). */
 export const FLOW_MAX_WAIT_MINUTES = 7 * 24 * 60;
+
+/** (marchlands) The NPC factions (factions.ts has what each holds and is like). Stored in faction_standing and sent to the client. */
+export const FactionId = {
+  SAXON_LEAGUE: 'saxon',
+  LOTHARINGIAN_CROWN: 'lotharingian',
+  FRANCONIAN_HEARTLAND: 'franconian',
+  BOHEMIAN_CROWN: 'bohemian',
+  ITALIAN_LEAGUE: 'italian',
+} as const;
+export type FactionId = (typeof FactionId)[keyof typeof FactionId];
+export const FACTION_IDS = Object.values(FactionId) as [FactionId, ...FactionId[]];

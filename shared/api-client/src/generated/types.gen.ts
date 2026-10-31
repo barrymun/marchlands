@@ -1952,6 +1952,11 @@ export type ReportDetailInput = {
             loyaltyLeft: number;
             captured: boolean;
             level: number;
+            standing?: {
+                faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
+                change: number;
+                now: number;
+            };
         } | {
             result: 'attackerWon' | 'defenderWon' | 'draw';
             rounds: number;
@@ -2791,7 +2796,7 @@ export type MarketMerchantInput = {
 };
 
 /**
- * the NPC factions: they trade from their shared stock along their price curve
+ * the NPC factions: they trade from their shared stock along their price curve, on the terms a city's home faction gives
  */
 export type MarketFactionsInput = {
     /**
@@ -2822,6 +2827,22 @@ export type MarketFactionsInput = {
      * what they buy in a few price steps down to the band's edge, best first
      */
     buyers: Array<MarketPriceLevelInput>;
+    /**
+     * the spread in these quotes (half each way), set by the standing with the home faction; null when they refuse
+     */
+    spread: number | null;
+    /**
+     * the city's home faction won't trade with it: nothing to buy or sell
+     */
+    refused: boolean;
+    /**
+     * the city's home faction, the one holding its zone; null without a city
+     */
+    faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian' | null;
+    /**
+     * the player's standing with it, -100 to 100; null without a city
+     */
+    standing: number | null;
 };
 
 export type MarketOrderBookInput = {
@@ -3054,6 +3075,10 @@ export type FactionGoldInput = {
      * what its gold drifts back to: its members' gold in the NPC table
      */
     treasury: number;
+    /**
+     * the player's standing with it, -100 to 100, drifting back to 0
+     */
+    standing: number;
 };
 
 export type MarketMyTradeInput = {
@@ -5250,6 +5275,11 @@ export type ReportDetail = {
             loyaltyLeft: number;
             captured: boolean;
             level: number;
+            standing?: {
+                faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
+                change: number;
+                now: number;
+            };
         } | {
             result: 'attackerWon' | 'defenderWon' | 'draw';
             rounds: number;
@@ -6089,7 +6119,7 @@ export type MarketMerchant = {
 };
 
 /**
- * the NPC factions: they trade from their shared stock along their price curve
+ * the NPC factions: they trade from their shared stock along their price curve, on the terms a city's home faction gives
  */
 export type MarketFactions = {
     /**
@@ -6120,6 +6150,22 @@ export type MarketFactions = {
      * what they buy in a few price steps down to the band's edge, best first
      */
     buyers: Array<MarketPriceLevel>;
+    /**
+     * the spread in these quotes (half each way), set by the standing with the home faction; null when they refuse
+     */
+    spread: number | null;
+    /**
+     * the city's home faction won't trade with it: nothing to buy or sell
+     */
+    refused: boolean;
+    /**
+     * the city's home faction, the one holding its zone; null without a city
+     */
+    faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian' | null;
+    /**
+     * the player's standing with it, -100 to 100; null without a city
+     */
+    standing: number | null;
 };
 
 export type MarketOrderBook = {
@@ -6352,6 +6398,10 @@ export type FactionGold = {
      * what its gold drifts back to: its members' gold in the NPC table
      */
     treasury: number;
+    /**
+     * the player's standing with it, -100 to 100, drifting back to 0
+     */
+    standing: number;
 };
 
 export type MarketMyTrade = {
@@ -11872,7 +11922,12 @@ export type GetMarketByResTypeData = {
     path: {
         resType: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * the player's city to trade from: the factions' prices follow the player's standing with its home faction
+         */
+        cityId?: number;
+    };
     url: '/api/v1/market/{resType}';
 };
 
@@ -11904,6 +11959,10 @@ export type GetMarketQuoteData = {
         resType: number;
     };
     query: {
+        /**
+         * the player's city to trade from: the factions' prices follow the player's standing with its home faction
+         */
+        cityId?: number;
         side: number;
         amount: number;
         price?: number;
@@ -12038,6 +12097,10 @@ export type GetMarketAffordableData = {
         resType: number;
     };
     query: {
+        /**
+         * the player's city to trade from: the factions' prices follow the player's standing with its home faction
+         */
+        cityId?: number;
         /**
          * the gold to spend, fee included
          */

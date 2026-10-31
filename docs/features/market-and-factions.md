@@ -1,6 +1,6 @@
 # Market overhaul: NPC trade, factions and new charts
 
-**Status:** phases 1 (charts and the merchant), 2 (the faction data) and 3 (NPC trade) built 2026-10-22; reputation is next. The rest is design. TODO.md item: *Overhaul the marketplace mechanics.*
+**Status:** phases 1 (charts and the merchant), 2 (the faction data) and 3 (NPC trade) built 2026-10-22; phase 4 (reputation) built 2026-10-31, its rules in Decided. The rest is design. TODO.md item: *Overhaul the marketplace mechanics.*
 
 **The aim:** a market that feels alive. NPC cities trade with each other all the time, so prices move for reasons players can see and influence: plunder, war, shortages. The charts and a live ticker show it. NPC cities belong to factions, which remember how each player has treated them.
 
@@ -60,6 +60,15 @@
   - **Players trade along the curve, with a ±1% spread:** players buy from and sell to the factions' shared stock along the auction's own price curve, factions selling 1% above it and buying 1% below, as far as the curve goes before the band's edge (about a quarter of the world's stock); past it the merchant is cheaper. A big order simply pays more as it fills.
   - **Gold** (decided 2026-10-22): each group's treasury is its members' gold in the NPC table (55,000 at level 1 to 1,500,000 at level 10, not the food-matching gold NPC cities hold for plunder): about 15B across the factions on the dev stack's map. A group makes and uses 2% of its treasury per game hour (the Italian League making 50% more, the world balanced) and drifts back to it like its stock, so a drained faction recovers over about a game day. In the auction a group buys only what its gold pays for; players selling to the factions are paid only while the factions hold gold, and the merchant buys the rest. On the dev stack's map gold halves the food the factions trade with each other (poorer groups can't buy all they want); prices behave as before.
 - **Phase order: seats of power straight after factions** ([historical-cities.md](historical-cities.md) since 2026-10-24), with the ballista rule change before them (2026-10-20; changed 2026-10-22, below). Taking a seat is a fight against fortifications, and most of a seat's value (capture, the daily draft, the title, bigger armies) doesn't need NPC trade; its tribute from trade and market rights arrive with NPC trade. The ballista rule change ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)) also makes farming cheaper, so it changes how fast resources enter the game, and should be settled before NPC trade is tuned.
+- **Reputation's rules** (decided 2026-10-31, phase 4; numbers in `BALANCE.reputation`):
+  - **Standing:** each player has a standing with each faction, from -100 to 100, starting at 0 and drifting back towards 0 (half-life 3 game days). Stored as a row per player and faction they've dealt with (`faction_standing`), the value and when it was last set; the drift is worked out when read, so no job runs.
+  - **Prices go through the city's home faction.** Players trade with the factions' pooled stock (phase 3), not with one faction, so a city trades with them through the faction holding its zone: its nearest market, as Membership's Players note says. The player's standing with that faction sets the spread that city gets. (Rejected: splitting the pool into five faction rows with their own stock, which brings in regional prices, still an open question, and changes the auction, the book and its chart; and a spread weighted by each faction's share of the stock, which players couldn't follow.) So raiding your neighbours hurts your own market, and raiding far away doesn't, until relations between factions (phase 6) make rivals care.
+  - **The spread:** today's 2% (1% each way) at 0; narrowing to none at 100 (the factions trade at their curve price); widening to 10% at -50. Never below none: a negative spread would let a player buy and sell straight back at a profit.
+  - **Refusal:** at -50 or below the home faction won't trade with that city at all. The merchant and other players still do, and the book shows the factions row as closed to it.
+  - **What lowers it:** every attack on a member (a barbarian city from level 5, won or lost), 0.3 a level (1.5 at level 5, 3 at level 10), with the faction it belongs to; capturing one, another 20.
+  - **What raises it:** a won attack on a bandit camp (levels 1-4), 0.1 a level, with the faction whose land it's on (answering the open question: farming bandits slowly earns goodwill and is a way to mend standing); and trading with the factions, 1 a 20M gold traded with the city's home faction, at most 5 a game day.
+  - **Shown to players:** their standing with each faction, its band (hostile, unfriendly, neutral, friendly, honoured) and what it does to their prices, on the Factions panel; the factions row of the book and every quote for the city in view; the change in each battle report against a member or a bandit camp.
+  - **Not in this phase:** rivals gaining standing (needs relations between factions, phase 6), retaliation, and what standing lets a player see (Ideas from a real trading terminal).
 - **Factions trade, and player actions move their prices:** plunder a faction's cities and its stock falls, so its prices rise. Two factions at war stop trading with each other and demand iron, so shortages appear. A live ticker shows the NPC trades ("The Saxon League bought 2M iron at 0.62").
 
 ## How every NPC city can trade without flooding the database
@@ -227,6 +236,33 @@ Players write scripts that trade for them: buy below a price, keep a stock betwe
 - **What a script is told:** the same things a player sees: prices, the order book, its own cities' stock, forecasts, events, faction standing. Never the hidden state of the simulation.
 - **Logs:** each run is logged (what it saw, what it did, why it stopped), so players can debug their scripts and the server can be audited.
 
+### Ideas from a real trading terminal (Fincept Terminal, 2026-10-31)
+
+[Fincept Terminal](https://github.com/Fincept-Corporation/FinceptTerminal) is an open-source finance terminal (C++ and Qt, AGPL-3.0, its name a trademark): equity research, portfolios, quant tools, AI agents, brokers, news and global data. Read from its website and README for features a game market could borrow. Only the ideas are taken: none of its code, text or branding (its licence and trademark rule that out anyway).
+
+**What fits, cheapest first:**
+
+- **More order types** (its bracket, OCO and GTT orders). Today an order is limit or market and rests until filled or cancelled (`market_orders` has no expiry):
+  - *good till a time*: a resting order that cancels itself, a timed event like the rest;
+  - *stop-loss and take-profit*: an order that waits off the book until the price crosses a level, then places itself;
+  - *one cancels the other*: two orders where a fill of one cancels the other.
+
+  These are the first level of trading scripts (Standing orders and rules, above) as plain order options. They're checked on the ticks and sweeps that already run (`npcTradeJob`, `npcSweep`), and each counts against the order limit like any order.
+- **Price alerts and a watchlist** (its Watchlist): a player marks a resource and a price and gets a push and a toast when the world price crosses it. Cheap, and useful to players who don't trade often. The alerts are kept per player, a few at most.
+- **A market news feed** (its News and Geopolitics): short notices that say why prices move, made from what the game already knows. "Raids on the Saxon League's cities: its lumber stock is down 20%", "The Bohemian Crown is short of food". Later, "War between the Saxon League and the Bohemian Crown", seats taken and acts of god. They go in the ticker beside the factions' trades. This is what the market's aim asks for: prices moving for reasons players can see.
+- **A ledger of the player's trading** (its Portfolio and risk metrics): profit and loss on their trades, average buy and sell prices per resource, gold spent on fees, and what their stock is worth at today's price. All of it comes from their `market_trades` rows (so it interacts with pruning old trades, TODO.md).
+- **Market actions in flows** (its Node Editor and workflows): flows already chain actions over a player's cities (`attackTargets`, `trainTroops`, `healTroops`, `setMayor`, `wait`; [architecture.md](../architecture.md), Flows). A *buy* or *sell* action ("sell lumber above 1.05, keep 5M") would give players automated trading inside a system they already know, before any script language. A visual node editor is more than a phone can show well; flows' list of steps suits every screen.
+- **What standing lets you see** (its Global Data and Relationship Map): an economy screen per faction, its stock against its target, its treasury, what it's short of, and later its relations with the other factions. How much a player sees grows with their standing (phase 4) or with a seat in the area ([historical-cities.md](historical-cities.md), Knowledge), so information is something to earn.
+
+**Bigger, for later phases:**
+
+- **Forward contracts** (its derivatives): agree today to buy or sell an amount at a fixed price on a set day, the gold or resources held until then. With acts of god and the almanac's forecasts this is real hedging ("lock in food before the forecast drought"). Needs care: escrow for both sides, what happens when a side can't pay or deliver, and a cap on size.
+- **A trading season and leaderboard** (its Alpha Arena, strategies compared head to head): ranked by trading profit over a season, with a title or medal as the prize. There is no leaderboard of any kind yet (the Stats page shows only the player's own figures), so this would be the first.
+- **Testing a rule before it runs** (its backtesting and paper trading): a script or market flow run against the last week's candles to show what it would have done. Cheap once scripts exist, since candles are kept.
+- **Caravans on the map** (its Maritime vessel tracking): already an idea under NPC economy (Regional prices), which this backs: trade you can see moving is trade you can raid.
+
+**What doesn't fit:** company research and valuation (statements, DCF, M&A), the volatility surface and options, fixed income, a spreadsheet, notes and file management, and AI agents. The game has four resources and gold, not thousands of instruments. An AI advisor would cost money per player, and wouldn't be the same for every player, which matters for fairness.
+
 ## Phases
 
 In this order (decided 2026-10-20; NPC trade moved before reputation and seats on 2026-10-22):
@@ -254,7 +290,13 @@ In this order (decided 2026-10-20; NPC trade moved before reputation and seats o
    - **The factions' gold** (2026-10-22): each group holds gold (`NpcEconomy.gold`, `groupTreasury`, `worldGold`), as decided above. The order book's factions row buys only what their gold pays for, and the Factions panel shows each faction's gold against its treasury (`GET /factions`).
    - **The phone trading flow** (2026-10-22): on a phone the trade form opens in a sheet from Buy and Sell kept at the bottom of the screen, or from a row of the order book, and a finger dragging up or down on the chart scrolls the page (`handleScroll.vertTouchDrag` off; across still pans the chart). Below the wide terminal (`xl`) the panes grow to their content and only the page scrolls, so a finger on the order book or a list never gets caught in it; the longer lists (trades, the factions' trades, the player's orders and trades) show their first 12 rows and a Show more.
    - **Live updates** (2026-10-22): the Market page doesn't poll. Each tick, each order placed or cancelled and each fill of the merchant's sweep broadcasts `server.MarketUpdate` with the resources that moved (`ctx.broadcast`, to everyone connected; market data is public); the client marks those resources' book, history, quote and affordable queries and the summary stale, so only what is on screen refetches. Pushes sent while a socket was down are lost, so the client refreshes every market query when it reconnects (`usePushSync`). With many traders the broadcasts could be throttled to one per resource per few seconds.
-4. **Reputation.** Standing with each faction from combat (plunder, conquest), and standing shifting that faction's prices.
+4. **Reputation.** **Built 2026-10-31**, with the rules and numbers in Decided, above:
+   - The rules in core (`shared/core/src/reputation.ts`: `standingNow`, `changeStanding`, `factionSpread`, `standingTier`, `attackStanding`, `tradeStanding`, `homeFaction`), every number in `BALANCE.reputation`. The factions' price functions take the spread (`factionMarginal`, `factionSells`, `factionBuys`).
+   - A `faction_standing` row per player and faction (migration 0030): the value, when it was set, and the standing trade gained on the last game day. The backend's `engine/reputation.ts` reads and changes it (`standingsOf`, `addStanding`, `tradedWithFactions`) and works out each city's terms (`cityTerms`).
+   - The market: the book, a quote and the affordable amount take the city (`cityId`, optional; the base spread without one), placing an order uses its own, and the factions fill each resting order at its city's spread (`npcSweep`); a refused city gets the book's factions row closed (`refused`). Gold traded with the factions raises standing with the city's home faction.
+   - Combat: `attackNpc` changes standing for any attack on an unheld barbarian city, and the battle report carries the change (`standing`).
+   - The client: standing with each faction (its band, value and what it does to prices) on the Factions panel, the city's terms under the order book, and the change in battle reports. The `app` size budget went from 115 to 118 kB (backlog: English text in the first page).
+   - deviations.md: standing with the factions.
 5. **The ballista rule change, then seats of power.**
    - First the rule change: traps hit only ground troops, and ranged groups stop once the wall is in range ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)). **Done 2026-10-20.**
    - The seats themselves are now their own design, with their own phases: [historical-cities.md](historical-cities.md) (2026-10-24).
@@ -268,7 +310,6 @@ Each phase records its rule changes in deviations.md (*(design change)*) and its
 
 ## Open questions
 
-- **Bandits and standing** (phase 4): should clearing bandits raise standing with the faction whose land they're on?
 - **NPC trade, later:** candles per faction or per region (with prices by region, below).
 - **Prices:** one world price per resource, or prices by region with travel time?
 - **Retaliation:** prices only, reinforcing their cities, or raiding yours?
@@ -278,3 +319,4 @@ Each phase records its rule changes in deviations.md (*(design change)*) and its
 - **Forecasts:** how often are they right? Can research or a building improve them?
 - **Scripts:** which level to aim for (rules, a language, TypeScript)? Which building or hero runs them, and what limits come with its level?
 - **Outside bots:** keep the API open to them, with the same limits as in-game scripts? Or ask players not to use them?
+- **Ideas from Fincept Terminal** (Ideas being weighed): which to take, and in which phase? The order types, alerts and news feed are small and could come before or alongside reputation; market actions in flows could replace the first level of trading scripts. Should stop orders and alerts be free, or gated by the Marketplace's level?

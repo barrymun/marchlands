@@ -1,7 +1,8 @@
 // (marchlands) The NPC economy's state and its tick (core's npc-economy.ts has the rules). The state is one
 // world_state row; the groups are counted from the map each tick (members upgraded or captured change them); each
 // zone's land is counted once, when the state is first made. A tick adds the factions' auction to the price candles,
-// and the factions then fill players' resting orders their new price has crossed.
+// and the factions then fill players' resting orders their new price has crossed, at the spread each order's city gets
+// (engine/reputation.ts).
 
 import { eq, sql } from 'drizzle-orm';
 
@@ -34,6 +35,7 @@ import { worldState } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { addToCandles, crossedOrders, settleResting } from '#/engine/market.ts';
+import { cityTerms, tradedWithFactions } from '#/engine/reputation.ts';
 
 const NPC_ECONOMY_KEY = 'npc-economy';
 
@@ -117,8 +119,8 @@ export async function npcTradeTick(ctx: Ctx) {
 
 /**
  * The factions fill players' resting orders their price has crossed, as the merchant does: bids at or above what they
- * sell at, offers at or below what they buy at, along their curve, each at its own price at most. Returns the economy
- * with what they sold or bought.
+ * sell at, offers at or below what they buy at, along their curve, each at its own price at most and at the spread its
+ * city gets (none for a city its home faction won't trade with). Returns the economy with what they sold or bought.
  */
 async function npcSweep(ctx: Ctx, econ: NpcEconomy): Promise<NpcEconomy> {
   let next = econ;
@@ -128,11 +130,20 @@ async function npcSweep(ctx: Ctx, econ: NpcEconomy): Promise<NpcEconomy> {
       const { target } = worldTotals(next, next.groups, r);
       let { stock } = worldTotals(next, next.groups, r);
       let { gold } = worldGold(next, next.groups);
-      for (const o of await crossedOrders(ctx, resType, side, factionMarginal(target, stock, buy ? 'buy' : 'sell'))) {
+      // every order the best spread would fill; each is then filled at its own city's
+      const orders = await crossedOrders(ctx, resType, side, factionMarginal(target, stock, buy ? 'buy' : 'sell', BALANCE.reputation.spread.best));
+      const terms = await cityTerms(
+        ctx,
+        orders.map((o) => o.cityId),
+      );
+      for (const o of orders) {
+        const t = terms.get(o.cityId);
+        if (t?.spread == null) continue;
         const left = o.amount - o.filled;
-        const f = buy ? factionSells(target, stock, left, o.price) : factionBuys(target, stock, left, o.price, gold);
+        const f = buy ? factionSells(target, stock, left, o.price, t.spread) : factionBuys(target, stock, left, o.price, gold, t.spread);
         if (f.qty <= 0) continue;
         await settleResting(ctx, o, f.qty, f.gold, true);
+        await tradedWithFactions(ctx, o.playerId, t.tileId, f.gold);
         next = (buy ? takeFromGroups : giveToGroups)(next, next.groups, r, f.qty, f.gold);
         stock += buy ? -f.qty : f.qty;
         gold += buy ? f.gold : -f.gold;
