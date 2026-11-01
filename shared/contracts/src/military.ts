@@ -208,3 +208,58 @@ export const ValleyUpgradeResult = z
   .object({ tileId: z.number().int(), level: z.number().int(), gold: z.number().describe('gold paid'), nextCost: z.number().nullable() })
   .meta({ id: 'ValleyUpgradeResult' });
 export type ValleyUpgradeResult = z.infer<typeof ValleyUpgradeResult>;
+
+// ---- wave plans (camp times, docs/features/camp-times.md) ----
+
+export const PlanParams = z.object({ planId: zId });
+export const PlanWaveParams = z.object({ planId: zId, waveId: zId });
+export const CreatePlanBody = z.object({
+  name: z.string().max(40),
+  targetTileId: zId,
+  landAt: z.number().int().positive().describe('the second its waves land (epoch ms; rounded down to the second)'),
+  shared: z.boolean().describe("shared with the player's alliance, whose members add and send their own waves"),
+});
+export type CreatePlanBody = z.infer<typeof CreatePlanBody>;
+export const AddPlanWaveBody = z.object({
+  cityId: zId,
+  mission: z.number().int().describe('3 scout or 5 attack'),
+  troops: zTroops,
+  heroId: z.number().int().nullish(),
+});
+export type AddPlanWaveBody = z.infer<typeof AddPlanWaveBody>;
+export const PlanCreated = z.object({ id: z.number().int() }).meta({ id: 'PlanCreated' });
+export const MovePlanWaveBody = z.object({ by: z.union([z.literal(-1), z.literal(1)]).describe('-1 one place earlier, 1 one place later') });
+
+export const PlanWave = z
+  .object({
+    id: z.number().int(),
+    playerId: z.number().int(),
+    player: z.string().describe("its player's name"),
+    cityId: z.number().int(),
+    city: z.string(),
+    heroId: z.number().int().nullable(),
+    hero: z.string().nullable().describe("the hero's name, for the player's own waves; null otherwise or without one"),
+    mission: z.number().int(),
+    troops: zTroops,
+    position: z.number().int().describe('its place in the order: it lands this many ms into the plan’s second'),
+    armyId: z.number().int().nullable().describe('the army it became once sent; null until then'),
+    marchMs: z.number().int().nullable().describe("the player's own unsent wave: its march now, so when it must leave; null otherwise"),
+  })
+  .meta({ id: 'PlanWave' });
+export type PlanWave = z.infer<typeof PlanWave>;
+
+export const PlanBean = z
+  .object({
+    id: z.number().int(),
+    name: z.string(),
+    playerId: z.number().int().describe('its maker'),
+    player: z.string(),
+    shared: z.boolean(),
+    targetTileId: z.number().int(),
+    x: z.number().int(),
+    y: z.number().int(),
+    landAt: z.number().int(),
+    waves: z.array(PlanWave).describe('in landing order'),
+  })
+  .meta({ id: 'PlanBean' });
+export type PlanBean = z.infer<typeof PlanBean>;

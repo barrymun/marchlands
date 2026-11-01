@@ -260,6 +260,13 @@
       "when": 1793560763593,
       "tag": "0036_seat_shared_at",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793561496649,
+      "tag": "0037_war_plans",
+      "breakpoints": true
     }
   ]
 }

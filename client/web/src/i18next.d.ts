@@ -68,6 +68,7 @@ import type msgTechInfo from '@/locales/en-GB/msg-techInfo.json';
 import type msgTraining from '@/locales/en-GB/msg-training.json';
 import type msgTroopInfo from '@/locales/en-GB/msg-troopInfo.json';
 import type msgWorld from '@/locales/en-GB/msg-world.json';
+import type plansPanel from '@/locales/en-GB/plans-panel.json';
 import type reportsPanel from '@/locales/en-GB/reports-panel.json';
 import type requirements from '@/locales/en-GB/requirements.json';
 import type researchPanel from '@/locales/en-GB/research-panel.json';
@@ -107,6 +108,7 @@ declare module 'i18next' {
       'msg-flow': typeof msgFlow;
       'msg-quest': typeof msgQuest;
       'msg-world': typeof msgWorld;
+      'plans-panel': typeof plansPanel;
       'msg-mail': typeof msgMail;
       'msg-social': typeof msgSocial;
       'msg-item': typeof msgItem;

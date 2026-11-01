@@ -1,5 +1,6 @@
 import {
   Backpack,
+  CalendarClock,
   Castle,
   ChartColumn,
   Flag,
@@ -38,6 +39,7 @@ export const PANELS = [
   place('research', FlaskConical),
   place('items', Backpack),
   place('armies', Flag),
+  place('plans', CalendarClock),
   place('factions', Landmark),
 ] as const;
 
@@ -64,6 +66,7 @@ export const ResearchPanel = lazyComponent(() => import('@/components/research-p
 export const ItemsPanel = lazyComponent(() => import('@/components/items-panel/items-panel').then((m) => m.ItemsPanel));
 export const MarketPanel = lazyComponent(() => import('@/components/market-panel/market-panel').then((m) => m.MarketPanel));
 export const ArmiesPanel = lazyComponent(() => import('@/components/armies-panel/armies-panel').then((m) => m.ArmiesPanel));
+export const PlansPanel = lazyComponent(() => import('@/components/plans-panel/plans-panel').then((m) => m.PlansPanel));
 export const FactionsPanel = lazyComponent(() => import('@/components/factions-panel/factions-panel').then((m) => m.FactionsPanel));
 export const ReportsPanel = lazyComponent(() => import('@/components/reports-panel/reports-panel').then((m) => m.ReportsPanel));
 export const FlowsPanel = lazyComponent(() => import('@/components/flows-panel/flows-panel').then((m) => m.FlowsPanel));
@@ -77,6 +80,7 @@ export const LAZY_PANELS = [
   ItemsPanel,
   MarketPanel,
   ArmiesPanel,
+  PlansPanel,
   FactionsPanel,
   ReportsPanel,
   FlowsPanel,

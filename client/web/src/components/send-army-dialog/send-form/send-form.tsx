@@ -19,6 +19,7 @@ import {
 
 import { MISSION_NAMES } from '@/components/armies-panel/constants';
 import { Countdown } from '@/components/countdown/countdown';
+import { AddToPlan } from '@/components/send-army-dialog/send-form/add-to-plan/add-to-plan';
 import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
 import { RES } from '@/components/send-army-dialog/send-form/constants';
 import { LandAt } from '@/components/send-army-dialog/send-form/land-at/land-at';
@@ -251,6 +252,12 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
           </div>
         )}
         <LandAt marchMs={marchMs} value={landAt} onChange={setLandAt} />
+        <AddToPlan
+          cityId={city.id}
+          target={target}
+          wave={chosen > 0 && !over ? { mission: Number(mission), troops: troopBody, heroId: heroId === 'none' ? null : Number(heroId) } : null}
+          arriveAt={arriveAt}
+        />
         {estimate.data && (
           <p className="text-sm text-muted-foreground">{t('form.estimate', { time: duration(estimate.data.marchTime), load: fmt(estimate.data.load) })}</p>
         )}

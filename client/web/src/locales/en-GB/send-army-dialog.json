@@ -50,5 +50,14 @@
     "invalid": "Enter a date and a time.",
     "tooSoon": "Too soon: the march takes {{time}}.",
     "tooLate": "At most {{time}} ahead."
+  },
+  "plan": {
+    "title": "Wave plan",
+    "pick": "Plan",
+    "option": "{{name}}, lands {{time}}",
+    "add": "Add to plan",
+    "new": "Add to a new plan landing {{time}}",
+    "shared": "Share with my alliance",
+    "added": "Added to the plan"
   }
 }

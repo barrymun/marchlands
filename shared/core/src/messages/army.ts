@@ -1,5 +1,21 @@
 // Sending and recalling armies, and why a march turned back (see index.ts).
 export const ARMY_MESSAGES = {
+  /** wave plans (camp times): no such plan, or not one the player can see */
+  planNotFound: [],
+  /** the player already keeps BALANCE.warPlans.maxPlans plans */
+  planLimit: ['count'],
+  /** a plan holds BALANCE.warPlans.maxWaves waves at most */
+  planWaveLimit: ['count'],
+  /** only the plan's maker may do that (delete it, reorder its waves) */
+  planNotOwner: [],
+  /** a plan shared with an alliance needs one */
+  planNoAlliance: [],
+  /** a plan's waves attack or scout */
+  planMission: [],
+  /** the wave was sent already */
+  planWaveSent: [],
+  /** a plan's landing second is past, or too far ahead */
+  planLandAt: ['time'],
   invalidMission: [],
   insufficientTroops: [],
   /** more resources than the troops can carry */

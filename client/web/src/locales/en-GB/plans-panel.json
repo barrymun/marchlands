@@ -1,0 +1,25 @@
+{
+  "intro": "Plan waves to land on one target in one second, in order: the trap clearers first, then the main army, then the loyalty waves. Add a wave from the send-army dialog (set a landing time, then Add to a new plan or to one landing on that target). Each wave lands a thousandth of a second after the one before, so the order holds whoever sends first; each player sends their own.",
+  "empty": "No plans yet.",
+  "shared": "Shared with your alliance",
+  "by": "Made by {{player}}",
+  "lands": "({{x}}, {{y}}), landing {{time}}",
+  "noWaves": "No waves yet: add one from the send-army dialog.",
+  "wave": "{{mission}} from {{city}} ({{player}})",
+  "status": {
+    "sent": "Sent",
+    "waiting": "Waiting for {{player}} to send it",
+    "late": "Too late: it can no longer land in time",
+    "leaves": "Must leave at {{time}}"
+  },
+  "earlier": "Land one place earlier",
+  "later": "Land one place later",
+  "remove": "Take out of the plan",
+  "sendMine_one": "Send my wave",
+  "sendMine_other": "Send my {{count, number}} waves",
+  "sent": "Waves sent: they wait at home and leave in time",
+  "delete": "Delete plan",
+  "deleteTitle": "Delete this plan?",
+  "deleteDescription": "Its waves not yet sent are dropped; armies already sent march on.",
+  "deleted": "Plan deleted"
+}

@@ -142,6 +142,13 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/cities/{cityId}/armies/estimate` | March time and carry capacity preview |
 | GET | `/api/v1/cities/{cityId}/armies/params` | March/load bonuses and army cap (army.getTroopParam) |
 | GET | `/api/v1/cities/{cityId}/stationed` | Allied troops stationed here (army.getStayAllianceArmys) |
+| GET | `/api/v1/plans` | The player's wave plans and those shared with their alliance, with their waves in landing order |
+| POST | `/api/v1/plans` | Make a wave plan: a target and the second its waves land |
+| DELETE | `/api/v1/plans/{planId}` | Delete a wave plan (its maker only); armies already sent march on |
+| POST | `/api/v1/plans/{planId}/waves` | Add one of the player's armies to a plan, last in its order |
+| DELETE | `/api/v1/plans/{planId}/waves/{waveId}` | Take an unsent wave out of a plan (its player's, or any by the plan's maker) |
+| POST | `/api/v1/plans/{planId}/waves/{waveId}/move` | Move an unsent wave one place earlier or later (the plan’s maker only) |
+| POST | `/api/v1/plans/{planId}/waves/{waveId}/send` | Send one of the player's waves: it waits at home and lands its place in the order into the plan's second |
 
 ## map
 

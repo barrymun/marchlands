@@ -94,6 +94,8 @@ export async function cleanupJob(db: Db) {
   const keep = BALANCE.marketCandles.keepMs;
   await db.execute(sql`delete from market_candles where period = ${CandlePeriod.MINUTE} and start < ${now - keep.minute}`);
   await db.execute(sql`delete from market_candles where period = ${CandlePeriod.HOUR} and start < ${now - keep.hour}`);
+  // (marchlands) wave plans whose landing second is long past (their waves go with them)
+  await db.execute(sql`delete from war_plans where land_at < ${now - BALANCE.warPlans.keepMs}`);
 }
 
 /**

@@ -17,10 +17,12 @@ export default [
     // 118 kB (2026-10-31) for faction standing (115.56 kB): en-GB's text for every screen, and BALANCE, ship here, so
     // new text anywhere grows this chunk (docs/backlog.md, English text in the first page). Raised to 120 kB
     // (2026-11-01, at 118.34 kB) for the historic cities: their names, camp times' landing time, the seats' draft
-    // controls and reports, and their text
+    // controls and reports, and their text. Raised to 124 kB (2026-11-01, at 120.12 kB) for holding the historic cities
+    // (a seat's loyalty and upkeep, ruled states on the map) and the wave planner: the Plans panel loads on first use,
+    // but its English text and the planner's place in the send-army dialog ship here
     name: 'app',
     path: 'dist/assets/app-*.js',
-    limit: '120 kB',
+    limit: '124 kB',
     gzip: true,
   },
   {

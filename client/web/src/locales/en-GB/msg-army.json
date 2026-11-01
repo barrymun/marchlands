@@ -41,5 +41,15 @@
   "upgradeTarget": "Only valleys and barbarian cities can be upgraded.",
   "upgradeHeld": "Only valleys nobody holds can be upgraded.",
   "valleyMaxLevel": "This valley is already level {{level}}, the highest.",
-  "barbarianCityMaxLevel": "This barbarian city is already level {{level}}, the highest."
+  "barbarianCityMaxLevel": "This barbarian city is already level {{level}}, the highest.",
+  "planNotFound": "No such plan.",
+  "planLimit_one": "You can keep at most {{count, number}} plan.",
+  "planLimit_other": "You can keep at most {{count, number}} plans.",
+  "planWaveLimit_one": "A plan holds at most {{count, number}} wave.",
+  "planWaveLimit_other": "A plan holds at most {{count, number}} waves.",
+  "planNotOwner": "Only the player who made the plan can do that.",
+  "planNoAlliance": "Join an alliance to share a plan.",
+  "planMission": "A plan’s waves attack or scout.",
+  "planWaveSent": "That wave was sent already.",
+  "planLandAt": "A plan lands in the future, at most {{time}} ahead."
 }

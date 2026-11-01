@@ -65,8 +65,11 @@ function armyMarchMs(b: CityBundle, fromTile: number, toTile: number, troops: Tr
   return ownTarget ? Math.max(1000, Math.floor(ms / reliefMultiplier(b.city.buildings))) : ms;
 }
 
-/** army.newArmy */
-export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input: SendArmyBody) {
+/**
+ * army.newArmy. `opts.landOffsetMs` lands an army set to land at a second that many milliseconds into it: a wave plan's
+ * place in its order (services/plans.ts), so its waves land in that order whoever sends first.
+ */
+export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input: SendArmyBody, opts: { landOffsetMs?: number } = {}) {
   const b = await openOwnCity(ctx, playerId, cityId);
   const mission = input.mission;
   if (![1, 2, 3, 4, 5].includes(mission)) throw new GameError(msg('army.invalidMission'), -99);
@@ -158,7 +161,7 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
 
   const ms = armyMarchMs(b, b.city.tileId, target.id, troops, ownTarget);
   // camp times: an army set to land at a time lands at the start of that second; it waits at home and leaves in time
-  const land = input.arriveAt != null ? Math.floor(input.arriveAt / 1000) * 1000 : null;
+  const land = input.arriveAt != null ? Math.floor(input.arriveAt / 1000) * 1000 + (opts.landOffsetMs ?? 0) : null;
   if (land != null && land - ms < ctx.now) throw new GameError(msg('army.landTooSoon', { time: dur(ms) }), -99);
   if (land != null && land - ctx.now > BALANCE.landAtMaxAheadMs) throw new GameError(msg('army.landTooLate', { time: dur(BALANCE.landAtMaxAheadMs) }), -99);
   const leaves = land != null ? land - ms : ctx.now;

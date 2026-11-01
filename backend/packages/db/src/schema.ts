@@ -590,6 +590,55 @@ export const factionStanding = pgTable(
   (t) => [primaryKey({ columns: [t.playerId, t.factionId] })],
 );
 
+/**
+ * (marchlands) A wave plan (docs/features/camp-times.md, phases 2 and 3): waves from a player's cities, or their
+ * alliance's when shared, landing on one target at one second, in the plan's order.
+ */
+export const warPlans = pgTable(
+  'war_plans',
+  {
+    id: serial('id').primaryKey(),
+    playerId: integer('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    /** shared with this alliance's members, who add and send their own waves; null for the player's own plan */
+    allianceId: integer('alliance_id'),
+    name: text('name').notNull(),
+    targetTileId: integer('target_tile_id').notNull(),
+    /** the second its waves land (epoch ms, a whole second) */
+    landAt: ms('land_at').notNull(),
+    createdAt: ms('created_at').notNull(),
+  },
+  (t) => [index('war_plans_player_idx').on(t.playerId), index('war_plans_alliance_idx').on(t.allianceId)],
+);
+
+/** (marchlands) A wave of a plan: one player's army from one of their cities, sent when its player sends it. */
+export const warPlanWaves = pgTable(
+  'war_plan_waves',
+  {
+    id: serial('id').primaryKey(),
+    planId: integer('plan_id')
+      .notNull()
+      .references(() => warPlans.id, { onDelete: 'cascade' }),
+    playerId: integer('player_id')
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    cityId: integer('city_id')
+      .notNull()
+      .references(() => cities.id, { onDelete: 'cascade' }),
+    heroId: integer('hero_id'),
+    /** Mission: attack or scout */
+    mission: smallint('mission').notNull(),
+    troops: jsonb('troops').$type<TroopCounts>().notNull(),
+    /** its place in the plan's order: it lands this many milliseconds into the plan's second */
+    position: smallint('position').notNull(),
+    /** the army it became once sent; null until then */
+    armyId: integer('army_id'),
+    createdAt: ms('created_at').notNull(),
+  },
+  (t) => [index('war_plan_waves_plan_idx').on(t.planId)],
+);
+
 /** Marketplace order book. Escrowed at creation (gold for bids, goods for offers). */
 export const marketOrders = pgTable(
   'market_orders',

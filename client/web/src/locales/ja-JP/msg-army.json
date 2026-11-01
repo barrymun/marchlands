@@ -38,5 +38,13 @@
   "upgradeTarget": "アップグレードできるのは領地と蛮族の都市だけです。",
   "upgradeHeld": "アップグレードできるのは誰も占領していない領地だけです。",
   "valleyMaxLevel": "この領地はすでに最高のレベル{{level}}です。",
-  "barbarianCityMaxLevel": "この蛮族の都市はすでに最高のレベル{{level}}です。"
+  "barbarianCityMaxLevel": "この蛮族の都市はすでに最高のレベル{{level}}です。",
+  "planNotFound": "その計画はありません。",
+  "planLimit_other": "計画は最大{{count, number}}件までです。",
+  "planWaveLimit_other": "1つの計画には最大{{count, number}}波までです。",
+  "planNotOwner": "それができるのは計画を作ったプレイヤーだけです。",
+  "planNoAlliance": "計画を共有するには同盟に加入してください。",
+  "planMission": "計画の波は攻撃か偵察です。",
+  "planWaveSent": "その波はすでに送られています。",
+  "planLandAt": "計画の着弾は未来で、最大{{time}}先までです。"
 }

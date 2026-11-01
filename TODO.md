@@ -32,9 +32,6 @@ Planned work for future updates. Ideas still being weighed and known quirks are 
   - Feed the armies, builds and tactics from old Evony Age 1 guides into Marchlands and see whether they still work.
   - Some results will differ because of the rules we changed on purpose ([docs/deviations.md](docs/deviations.md)); that's acceptable, but note where and why.
   - Battle strategies can be run with the battle sims (`npm run sim`, `tools/battle-sim`); record findings in [docs/battle-sims](docs/battle-sims/README.md).
-- [ ] **Camp times: a wave planner.** Design: [docs/features/camp-times.md](docs/features/camp-times.md), phases 2 and 3.
-  - Now (phase 1, 2026-11-01): an army can be set to land at a chosen second in UTC; it waits at home, and armies landing together fight in the order sent.
-  - Plan: a planner listing waves from one or more of a player's cities (troops, hero, order) landing on one target at one time, then plans an alliance shares.
 
 ## Client
 
@@ -78,6 +75,7 @@ Phases 2 to 4 of the October 2026 tooling review; phase 1 (type-aware linting an
 
 Newest first, with the date it was finished.
 
+- 2026-11-01: **Camp times: the wave planner and alliance plans.** A plan is a target and a landing second with waves in order, the player's own or shared with their alliance; waves are added from the send-army dialog, each player sends their own from the new Plans panel (which says when each must leave), and every wave lands a millisecond after the one before so the order holds whoever sends first ([docs/features/camp-times.md](docs/features/camp-times.md), phases 2 and 3).
 - 2026-11-01: **Historical cities: upkeep, unrest and alliance sharing.** Each seat costs gold and food every real hour, a quarter more for each other seat held; a seat with too few troops at home or out of gold or food loses a loyalty point every 12 minutes for each and at 0 rises up, standing again as a historic city nobody holds; a quarter of its tribute goes to the holder's alliance, paid to the other members hourly. The seat's tile card shows its loyalty, what it lacks and its upkeep.
 - 2026-11-01: **Historical cities: a state under a player ruler.** While a player holds a state's capital its barbarian cities are cut off from their faction: they stop trading, attacking or drafting them costs no standing, and they pay the ruler 5 gold a real hour per member level (about 42,000 for a state). The Factions panel, the map's tint and tile cards show it. Retaliation by angry factions is noted for later (*Angry factions*).
 - 2026-11-01: **Historical cities: faction standing.** Attacking an unheld historic city costs standing with the faction whose state it stands in (as attacking a member does), capturing it 20 more (40 for a capital or Atlantis) while that faction's rivals each give half that to the captor, and each draft costs 1 with the drafted city's faction; battle and draft reports show the changes.

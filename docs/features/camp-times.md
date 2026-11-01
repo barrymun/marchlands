@@ -1,6 +1,6 @@
 # Camp times: armies that land at a chosen second
 
-**Status:** phase 1 built 2026-11-01 (landing at a chosen second, in order, by the server's clock); the wave planner and alliance plans are later phases. Started 2026-11-01. TODO.md item: *Camp times: arrive at an exact time.* Wanted first for the historical cities ([historical-cities.md](historical-cities.md)), whose garrisons refill between waves: breaking one takes many armies landing together, in a set order.
+**Status:** phases 1 to 3 built 2026-11-01: landing at a chosen second, in order, by the server's clock; the wave planner; plans shared with an alliance. Started 2026-11-01. TODO.md item: *Camp times: arrive at an exact time.* Wanted first for the historical cities ([historical-cities.md](historical-cities.md)), whose garrisons refill between waves: breaking one takes many armies landing together, in a set order.
 
 **The aim:** a player sends an army to land on a tile at a time they choose, to the second, so that waves from several cities (theirs, and later their alliance's) arrive together and in order: the trap clearers, then the main army, then the loyalty waves.
 
@@ -25,6 +25,12 @@
 - **Up to 24 hours ahead** (`BALANCE.landAtMaxAheadMs`), like the rest time.
 - **Ties keep their order, and each arrival is fought as of its landing time** (2026-11-01). The worker takes due events by `due_at`, then `id`. An arrival against a barbarian city or a free valley meets the garrison as it stood at `reachTime` (`npcState`, `valleyDefenders` in `engine/combat.ts`), not when the worker got to it, so a busy worker can't give it extra seconds of refill; built with the per-second refill (deviations.md, NPC cities). Other clocks (buffs running out, players' cities) still read the worker's time, a fraction of a second later.
 - **Rest time stays as it is** (camping at the target after landing, not offered in the dialog).
+- **The wave planner and alliance plans** (2026-11-01, built the same day; our design, the maintainer asked for both):
+  - **A plan** is a target, a landing second (UTC, up to 24 hours ahead) and a name, the player's own or shared with their alliance (`war_plans`, migration 0037). A player keeps at most 10 (`BALANCE.warPlans.maxPlans`); a plan goes a day after its second (`keepMs`, the cleanup job).
+  - **Its waves** are armies set out but not sent: a city, troops, a hero, attack or scout (`war_plan_waves`), at most 100 a plan. They're added from the send-army dialog (Add to plan, or Add to a new plan landing at the time set), and anyone who can see the plan adds their own.
+  - **Order whoever sends first:** each wave lands its place in the plan's order in milliseconds into the plan's second (`sendArmy`'s `landOffsetMs`), so a plan's waves land in its order however its members' sends interleave. The plan's maker reorders waves not yet sent, never past a sent one (its millisecond is fixed).
+  - **Each player sends their own** waves (one, or all still in time), from the Plans panel (`components/plans-panel/`), which shows when each of their waves must leave; nobody sends for another, and nothing leaves by itself. A sent wave is an ordinary army set to land then, waiting at home.
+  - Who may do what: the maker deletes the plan and reorders; a wave's player or the maker takes an unsent wave out.
 
 ## The design (proposed)
 
@@ -57,5 +63,5 @@
 ## Phases
 
 1. **Land at a time** (built 2026-11-01): the server side (holding an army, leaving on time, the order of ties, fighting at `reachTime`), the dialog's landing time in UTC, server time on screen and the client's clock corrected. Tested with the database tests (`test/services/armies-land-at.db.test.ts`; the worker's order in `worker.db.test.ts`) and the dialog on the running stack. Not yet: the waiting army in the armies list and its target's view, tried in the browser (a new account has no Rally Spot).
-2. **The wave planner,** for one player's cities.
-3. **Alliance plans.**
+2. **The wave planner,** for one player's cities: built 2026-11-01 (Decided; `services/plans.ts`, `GET/POST /plans`, the Plans panel, Add to plan in the send-army dialog; `test/services/plans.db.test.ts`).
+3. **Alliance plans:** built 2026-11-01 with the planner (a plan shared with the maker's alliance).

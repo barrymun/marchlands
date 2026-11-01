@@ -25,4 +25,5 @@ export * as quests from '#/services/quests.ts';
 export * as rankings from '#/services/rankings.ts';
 export * as admin from '#/services/admin.ts';
 export * as flows from '#/services/flows.ts';
+export * as plans from '#/services/plans.ts';
 export * as statistics from '#/services/statistics.ts';

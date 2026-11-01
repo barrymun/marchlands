@@ -237,6 +237,12 @@ export const BALANCE = {
   },
   /** (marchlands) how far ahead an army can be set to land at a chosen time (camp times; real time) */
   landAtMaxAheadMs: 24 * HOUR,
+  /**
+   * (marchlands) wave plans (camp times, docs/features/camp-times.md): the most plans a player keeps (their own and
+   * shared), waves a plan holds (each lands a millisecond after the one before, so fewer than 1,000), and how long a plan
+   * stays after its landing second
+   */
+  warPlans: { maxPlans: 10, maxWaves: 100, keepMs: DAY },
   /** (evony) loyalty damage per successful attack on a barbarian city (before capture); lords' cities have no loyalty */
   npcLoyaltyDamagePerAttack: [10, 15],
   /** (evony) attacking army must kill all defenders and bring this loyalty to 0 to capture */

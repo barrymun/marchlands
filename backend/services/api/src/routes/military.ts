@@ -1,9 +1,13 @@
 // Heroes, armies, map and valleys.
 
+import { z } from 'zod';
+
 import {
+  AddPlanWaveBody,
   ArmyBean,
   ArmyParams,
   CityHeroList,
+  CreatePlanBody,
   Empty,
   GearPieceParams,
   HeroBean,
@@ -20,6 +24,11 @@ import {
   MapView,
   MarchEstimate,
   MarchEstimateBody,
+  MovePlanWaveBody,
+  PlanBean,
+  PlanCreated,
+  PlanParams,
+  PlanWaveParams,
   RenameHeroBody,
   SendArmyBody,
   StationedArmyList,
@@ -32,7 +41,8 @@ import {
   ValleyUpgradeResult,
   VisibleArmies,
 } from '@marchlands/contracts';
-import { armies, combat, heroes, world } from '@marchlands/game';
+import { armies, combat, heroes, plans, world } from '@marchlands/game';
+
 import { anon, authenticate, doc, game, playerIdOf, tags, type ZApp, zCityParams } from '#/http.ts';
 
 export default async function militaryRoutes(app: ZApp) {
@@ -124,6 +134,40 @@ export default async function militaryRoutes(app: ZApp) {
       body: SendArmyBody,
     }),
     (req) => game(req, (ctx, pid) => armies.sendArmy(ctx, pid, req.params.cityId, req.body)),
+  );
+  // ---- wave plans (camp times, docs/features/camp-times.md) ----
+  app.get(
+    '/plans',
+    s(tags.armies, "The player's wave plans and those shared with their alliance, with their waves in landing order", z.array(PlanBean)),
+    (req) => game(req, (ctx, pid) => plans.list(ctx, pid)),
+  );
+  app.post('/plans', s(tags.armies, 'Make a wave plan: a target and the second its waves land', PlanCreated, { body: CreatePlanBody }), (req) =>
+    game(req, (ctx, pid) => plans.create(ctx, pid, req.body)),
+  );
+  app.delete('/plans/:planId', s(tags.armies, 'Delete a wave plan (its maker only); armies already sent march on', Empty, { params: PlanParams }), (req) =>
+    game(req, (ctx, pid) => plans.remove(ctx, pid, req.params.planId)),
+  );
+  app.post(
+    '/plans/:planId/waves',
+    s(tags.armies, "Add one of the player's armies to a plan, last in its order", PlanCreated, { params: PlanParams, body: AddPlanWaveBody }),
+    (req) => game(req, (ctx, pid) => plans.addWave(ctx, pid, req.params.planId, req.body)),
+  );
+  app.delete(
+    '/plans/:planId/waves/:waveId',
+    s(tags.armies, "Take an unsent wave out of a plan (its player's, or any by the plan's maker)", Empty, { params: PlanWaveParams }),
+    (req) => game(req, (ctx, pid) => plans.removeWave(ctx, pid, req.params.planId, req.params.waveId)),
+  );
+  app.post(
+    '/plans/:planId/waves/:waveId/move',
+    s(tags.armies, 'Move an unsent wave one place earlier or later (the plan’s maker only)', Empty, { params: PlanWaveParams, body: MovePlanWaveBody }),
+    (req) => game(req, (ctx, pid) => plans.moveWave(ctx, pid, req.params.planId, req.params.waveId, req.body.by)),
+  );
+  app.post(
+    '/plans/:planId/waves/:waveId/send',
+    s(tags.armies, "Send one of the player's waves: it waits at home and lands its place in the order into the plan's second", ArmyBean, {
+      params: PlanWaveParams,
+    }),
+    (req) => game(req, (ctx, pid) => plans.sendWave(ctx, pid, req.params.planId, req.params.waveId)),
   );
   app.post('/armies/:armyId/recall', s(tags.armies, 'Recall (army.callBackArmy)', ArmyBean, { params: ArmyParams }), (req) =>
     game(req, (ctx, pid) => armies.recallArmy(ctx, pid, req.params.armyId)),
