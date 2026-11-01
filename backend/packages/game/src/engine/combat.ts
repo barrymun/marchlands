@@ -18,6 +18,7 @@ import {
   buildingLevel,
   BuildingType,
   type CombatResult,
+  countsDiffer,
   createGuardHero,
   distributeLossesAmong,
   type FortCounts,
@@ -33,6 +34,7 @@ import {
   type Message,
   Mission,
   msg,
+  nextRefillAt,
   npcBuildings,
   npcCityBuildings,
   type NpcState,
@@ -40,6 +42,7 @@ import {
   protectedResources,
   randInt,
   ref,
+  refillCounts,
   regenerateNpc,
   type ReportBody,
   ReportType,
@@ -446,21 +449,37 @@ function guardHeroOf(ctx: Ctx, tile: TileRow, state: Record<string, number>, max
   return createGuardHero(maxLevel, seededRng(`guard:${state.heroSeed}`), stateOf(tile.id));
 }
 
-/** Lazily (re)generate an unowned valley's garrison: regenerates 6 minutes after it was last touched. */
-function valleyDefenders(ctx: Ctx, tile: TileRow): TroopCounts {
-  if (tile.troops && ctx.now - (tile.state?.regenAt ?? 0) < regenMs()) return tile.troops;
-  const troops = valleyGarrison(tile.level, ctx.rng);
-  tile.troops = troops;
-  tile.state = { ...(tile.state ?? {}), regenAt: ctx.now };
-  return troops;
+/**
+ * An unowned valley's garrison as of `at`. (marchlands) After a fight it comes back a little every second, whole again
+ * one regeneration interval later (BALANCE.npcRegenMs, deviations.md); a new garrison is rolled only once the old one
+ * is whole and has stood that long. A garrison is rolled from a seed kept in the tile's state (`rollSeed`), so it can
+ * be rolled again to know what full is.
+ */
+function valleyDefenders(ctx: Ctx, tile: TileRow, at: number): TroopCounts {
+  const state = (tile.state ??= {});
+  const period = regenMs();
+  const full = state.rollSeed != null ? valleyGarrison(tile.level, seededRng(`valley:${state.rollSeed}`)) : null;
+  if (tile.troops && full) {
+    const from = state.refillAt ?? state.regenAt ?? at;
+    const troops = refillCounts(tile.troops, full, at - from, 1, period);
+    const whole = !countsDiffer(troops, full);
+    if (!whole || at - (state.regenAt ?? 0) < period) {
+      state.refillAt = nextRefillAt(tile.troops, troops, full, from, at);
+      tile.troops = troops;
+      return troops;
+    }
+  }
+  state.rollSeed = randInt(ctx.rng, 1, 2_147_483_646);
+  state.regenAt = at;
+  state.refillAt = at;
+  tile.troops = valleyGarrison(tile.level, seededRng(`valley:${state.rollSeed}`));
+  return tile.troops;
 }
 
-function npcState(ctx: Ctx, tile: TileRow): { state: NpcState; troops: TroopCounts; forts: FortCounts } {
-  if (!tile.state || tile.state.regenAt == null || !tile.troops) {
-    const fresh = freshNpcState(tile.level, ctx.now);
-    return fresh;
-  }
-  return regenerateNpc(tile.level, tile.state as unknown as NpcState, tile.troops, tile.forts ?? {}, ctx.now);
+/** A barbarian city's state, garrison and fortifications as of `at` (an army's landing time: deviations.md, Camp times). */
+function npcState(tile: TileRow, at: number): { state: NpcState; troops: TroopCounts; forts: FortCounts } {
+  if (!tile.state || tile.state.regenAt == null || !tile.troops) return freshNpcState(tile.level, at);
+  return regenerateNpc(tile.level, tile.state as unknown as NpcState, tile.troops, tile.forts ?? {}, at);
 }
 
 async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
@@ -476,7 +495,7 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
   };
 
   if (tile.cityId == null && tile.type === TileType.NPC) {
-    const npc = npcState(ctx, tile);
+    const npc = npcState(tile, a.reachTime);
     const state = { ...(npc.state as unknown as Record<string, number>), heroSeed: tile.state?.heroSeed } as Record<string, number>;
     const guard = guardHeroOf(ctx, tile, state, tile.level * 10, true);
     Object.assign(tile, { state, troops: npc.troops, forts: npc.forts, updatedAt: ctx.now });
@@ -519,7 +538,7 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
       defenders = sumTroops(stationed.map((s) => s.troops));
       ownerName = (await getPlayer(ctx, tile.ownerPlayerId)).name;
     } else if (tile.type !== TileType.FLAT) {
-      defenders = valleyDefenders(ctx, tile);
+      defenders = valleyDefenders(ctx, tile, a.reachTime);
       guard = guardHeroOf(ctx, tile, (tile.state ??= {}), VALLEY_GUARD_LEVEL, true);
       await saveTile(ctx, tile);
     } else defenders = {};
@@ -929,7 +948,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
 async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const tile = await getTile(ctx, a.targetTileId, { lock: true });
   const hero = await heroOf(ctx, a);
-  const npc = npcState(ctx, tile);
+  const npc = npcState(tile, a.reachTime);
   const seedHolder = { heroSeed: tile.state?.heroSeed } as Record<string, number>;
   const guard = guardHeroOf(ctx, tile, seedHolder, tile.level * 10);
   const r = resolveCombat(
@@ -1070,7 +1089,7 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     defenderId = tile.ownerPlayerId;
     defenderName = (await getPlayer(ctx, defenderId)).name;
   } else {
-    valleyTroops = valleyDefenders(ctx, tile);
+    valleyTroops = valleyDefenders(ctx, tile, a.reachTime);
     groups = [valleyTroops];
   }
   const defTroops = sumTroops(groups);

@@ -15,6 +15,7 @@ import {
   npcCityBuildings,
   type NpcState,
   npcTemplate,
+  refillCounts,
   regenerateNpc,
   TechType,
   TileType,
@@ -25,9 +26,9 @@ import { processArmy } from '#/engine/combat.ts';
 import { standingsOf } from '#/engine/reputation.ts';
 import { admin } from '#/index.ts';
 import { citiesOf, getHero, getTile } from '#/repo.ts';
-import { armyRow, expectWipedHero, roundTrip, send, tileNear, warrior } from '#test/support/armies.ts';
+import { armyRow, battleOf, expectWipedHero, lastReport, roundTrip, send, tileNear, warrior } from '#test/support/armies.ts';
 import { attack } from '#test/support/combat.ts';
-import { reloadCity, reloadPlayer, setResearch } from '#test/support/factories.ts';
+import { addHero, reloadCity, reloadPlayer, setResearch } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
 
 const KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
@@ -108,6 +109,33 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
       expect(tile.troops).toEqual(now.troops);
       expect(tile.forts).toEqual(now.forts);
       expect(Object.values(expected.troops).some((n) => n > 0)).toBe(true);
+    }));
+
+  it('its troops come back a little every second after a battle (deviations.md)', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g);
+      const npc = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
+      const { battle } = await attack(g, p, heroId, npc.id);
+      const hitAt = g.now;
+      const scout = await send(g, p, { targetTileId: npc.id, mission: Mission.SCOUT, troops: { scouter: 5 } });
+      await g.runDue(scout.reachTime);
+      const back = refillCounts(battle.defender.troops.after, npcTemplate(1).troops, scout.reachTime - hitAt, 0.1, BALANCE.npcRegenMs);
+      expect((await getTile(g, npc.id)).troops).toEqual(back);
+    }));
+
+  it('a battle is fought as of the army’s landing time, however late the worker takes it (deviations.md, Camp times)', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g);
+      const npc = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
+      const { battle: first } = await attack(g, p, heroId, npc.id);
+      const hitAt = g.now;
+      const second = await send(g, p, { targetTileId: npc.id, mission: Mission.ATTACK, troops: { lightCavalry: 2000 }, heroId: await addHero(g, p) });
+      // the worker takes the arrival an hour late, when the garrison would be whole again
+      g.advance(second.reachTime - g.now + 3_600_000);
+      await g.runDue();
+      const b = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), 'npc');
+      const atLanding = refillCounts(first.defender.troops.after, npcTemplate(1).troops, second.reachTime - hitAt, 0.1, BALANCE.npcRegenMs);
+      expect(b.defender.troops.before).toEqual(atLanding);
     }));
 
   it('captured once its loyalty is gone, when the lord has room for another city', () =>

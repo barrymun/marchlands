@@ -148,8 +148,10 @@ export interface NpcState {
   iron: number;
   loyalty: number;
   population: number;
-  /** last regeneration boundary */
+  /** last regeneration boundary (resources) */
   regenAt: number;
+  /** (marchlands) when the troops and fortifications last caught up (they refill by the second); regenAt until set */
+  refillAt?: number;
   /** last loyalty regeneration boundary (real time, see BALANCE.npcLoyaltyRegenRealTime) */
   loyaltyAt?: number;
   /** seed of the defending hero, so every scout and attack meets the same one (combat.ts guardHeroOf) */
@@ -159,39 +161,74 @@ export interface NpcState {
 export function freshNpcState(level: number, now: number): { state: NpcState; troops: TroopCounts; forts: FortCounts } {
   const t = npcTemplate(level);
   return {
-    state: { ...t.resources, loyalty: t.loyalty, population: t.population, regenAt: now, loyaltyAt: now },
+    state: { ...t.resources, loyalty: t.loyalty, population: t.population, regenAt: now, loyaltyAt: now, refillAt: now },
     troops: { ...t.troops },
     forts: { ...t.forts },
   };
 }
 
 /**
- * Lazily apply NPC regeneration (orig every 6 min: food/wood/stone/iron +max/80, troops and forts
- * +max/10, loyalty +1; gold does not regenerate unless BALANCE.npcGoldMatchesTopResource). Loyalty can run on real time instead
- * (BALANCE.npcLoyaltyRegenRealTime), so a faster game does not undo attacks faster.
+ * (marchlands) Counts (troops, fortifications) caught up towards `full`: `share` of each full count for every `periodMs`
+ * that passed in `elapsedMs`, a little every second rather than in steps (deviations.md), whole units only and never
+ * past full. Types in `full` the counts lack start from 0.
+ */
+export function refillCounts<K extends string>(
+  current: Partial<Record<K, number>>,
+  full: Partial<Record<K, number>>,
+  elapsedMs: number,
+  share: number,
+  periodMs: number,
+): Partial<Record<K, number>> {
+  const out = { ...current };
+  const k = (share * Math.max(0, elapsedMs)) / periodMs;
+  for (const [key, max] of Object.entries(full) as [K, number][]) out[key] = Math.min(max, (current[key] ?? 0) + Math.floor(max * k));
+  return out;
+}
+
+/** Whether any count differs between two sets of counts (a missing count is 0). */
+export const countsDiffer = (a: Partial<Record<string, number>>, b: Partial<Record<string, number>>) =>
+  Object.keys({ ...a, ...b }).some((k) => (a[k] ?? 0) !== (b[k] ?? 0));
+
+/**
+ * When the refill clock stands after catching `before` up to `after` (refillCounts) at `now`: it moves on to `now` once
+ * something came back, or when there's nothing to refill (so the next loss counts from now, not from long ago); while
+ * less than a unit has come back it stays, so frequent touches don't lose the fraction.
+ * @internal
+ */
+export function nextRefillAt(
+  before: Partial<Record<string, number>>,
+  after: Partial<Record<string, number>>,
+  full: Partial<Record<string, number>>,
+  from: number,
+  now: number,
+) {
+  return countsDiffer(before, after) || !countsDiffer(after, full) ? Math.max(from, now) : from;
+}
+
+/**
+ * Lazily apply NPC regeneration (orig every 6 min: food/wood/stone/iron +max/80, troops and forts +max/10, loyalty
+ * +1; gold does not regenerate unless BALANCE.npcGoldMatchesTopResource). Loyalty can run on real time instead
+ * (BALANCE.npcLoyaltyRegenRealTime), so a faster game does not undo attacks faster. (marchlands) Troops and
+ * fortifications come back by the second at the same rate (refillCounts), from `refillAt`; resources and loyalty keep
+ * their steps.
  */
 export function regenerateNpc(level: number, state: NpcState, troops: TroopCounts, forts: FortCounts, now: number) {
   const t = npcTemplate(level);
   const tick = Math.max(1000, scaled(BALANCE.npcRegenMs));
-  const ticks = Math.floor((now - state.regenAt) / tick);
+  const ticks = Math.max(0, Math.floor((now - state.regenAt) / tick));
   // loyalty recovers +1 per npcRegenMs of real time (unaffected by GAME_SPEED) when npcLoyaltyRegenRealTime is on
   const loyaltyTick = BALANCE.npcLoyaltyRegenRealTime ? BALANCE.npcRegenMs : tick;
   const loyaltyFrom = state.loyaltyAt ?? state.regenAt;
   const loyaltyTicks = Math.max(0, Math.floor((now - loyaltyFrom) / loyaltyTick));
-  if (ticks <= 0 && loyaltyTicks <= 0) return { state, troops, forts };
-  const s = { ...state, regenAt: state.regenAt + Math.max(0, ticks) * tick, loyaltyAt: loyaltyFrom + loyaltyTicks * loyaltyTick };
+  const refillFrom = state.refillAt ?? state.regenAt;
+  const tr = refillCounts(troops, t.troops, now - refillFrom, 0.1, tick);
+  const fo = refillCounts(forts, t.forts, now - refillFrom, 0.1, tick);
+  const refillAt = nextRefillAt(troops, tr, t.troops, refillFrom, now) === now || nextRefillAt(forts, fo, t.forts, refillFrom, now) === now ? now : refillFrom;
+  if (ticks <= 0 && loyaltyTicks <= 0 && refillAt === refillFrom) return { state, troops, forts };
+  const s = { ...state, regenAt: state.regenAt + ticks * tick, loyaltyAt: loyaltyFrom + loyaltyTicks * loyaltyTick, refillAt };
   s.loyalty = Math.min(t.loyalty, s.loyalty + loyaltyTicks);
-  if (ticks <= 0) return { state: s, troops, forts };
   const regen = BALANCE.npcGoldMatchesTopResource ? RESOURCE_KEYS : BASIC_RESOURCES;
   for (const r of regen) s[r] = Math.min(t.resources[r], s[r] + (t.resources[r] / 80) * ticks);
-  const tr: TroopCounts = { ...troops };
-  for (const [k, max] of Object.entries(t.troops) as [keyof TroopCounts, number][]) {
-    tr[k] = Math.min(max, (tr[k] ?? 0) + Math.floor(max / 10) * ticks);
-  }
-  const fo: FortCounts = { ...forts };
-  for (const [k, max] of Object.entries(t.forts) as [keyof FortCounts, number][]) {
-    fo[k] = Math.min(max, (fo[k] ?? 0) + Math.floor(max / 10) * ticks);
-  }
   return { state: s, troops: tr, forts: fo };
 }
 

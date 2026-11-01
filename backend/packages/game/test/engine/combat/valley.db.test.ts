@@ -4,7 +4,20 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, BuildingType, createGuardHero, HeroStatus, maxValleysFor, Mission, msg, ref, seededRng, stateOf } from '@marchlands/core';
+import {
+  ArmyDirection,
+  BALANCE,
+  BuildingType,
+  createGuardHero,
+  HeroStatus,
+  maxValleysFor,
+  Mission,
+  msg,
+  ref,
+  refillCounts,
+  seededRng,
+  stateOf,
+} from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
 import { getHero, getTile, valleysOfCity } from '#/repo.ts';
@@ -46,6 +59,31 @@ async function heldValley(g: TestGame, garrison: Record<string, number>) {
 }
 
 describe(`${processArmy.name}: attacking a valley`, () => {
+  it('a free valley’s garrison comes back a little every second, whole one regeneration interval after the battle (deviations.md)', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g);
+      const valley = await valleyNear(g, p.cityId, { level: 3 });
+      // too few to win: the valley keeps what survives
+      const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 10 });
+      const b = battleOf(report, 'valley');
+      expect(b.result).toBe('defenderWon');
+      const hitAt = g.now;
+      const full = b.defender.troops.before;
+      expect(b.defender.troops.after).not.toEqual(full);
+
+      const look = async (at: number) => {
+        const scout = await send(g, p, { targetTileId: valley.id, mission: Mission.SCOUT, troops: { scouter: 1 } });
+        g.advance(Math.max(0, at - scout.reachTime));
+        await g.runDue(Math.max(at, scout.reachTime));
+        return (await getTile(g, valley.id)).troops;
+      };
+      const soon = hitAt + 60_000;
+      const seen = await look(soon);
+      expect(seen).toEqual(refillCounts(b.defender.troops.after, full, g.now - hitAt, 1, BALANCE.npcRegenMs));
+      // whole again after the interval, the same garrison
+      expect(await look(hitAt + BALANCE.npcRegenMs + 60_000)).toEqual(full);
+    }));
+
   it('a free valley won is occupied by the army’s city', () =>
     game(async (g) => {
       const { p, heroId } = await warrior(g, { lightCavalry: 40_000 });

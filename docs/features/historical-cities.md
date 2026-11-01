@@ -19,10 +19,11 @@
 - **The ballista rule change first** (2026-10-20, done the same day): traps hit only ground troops, and ranged groups stop once the wall is in range ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md); deviations.md). Taking a seat is a fight against fortifications, so the rule had to be settled first.
 - **Garrisons refill every second** (2026-11-01): a historic city's troops and fortifications come back a little every second, at 10% of the full garrison every 6 minutes in all (about 311 warriors a second at level 12), as Age 2's seem to have done, not in our NPC cities' 6-minute steps. Every second between waves then costs the attacker, so landing waves together matters ([camp-times.md](camp-times.md)).
 - **Historic cities have research** (2026-11-01, from the simulations): every research at 10 but Archery, which stays at 0, with Age 2's garrisons, fortifications and heroes as they were. Without research the garrison barely fought back and a level 12 fell to one wave of archers; with Archery 10 too, its catapults and ballistae outranged every attacker and a level 16 could only be taken on a day with rams ([battle-sims/historic-cities.md](../battle-sims/historic-cities.md), Tuning).
-- **Every NPC city and valley refills every second too** (2026-11-01, the maintainer): one rule for all of them, little by little, with the historic cities harsher only because their garrisons are bigger. A rule change of its own, built before the seats (TODO.md, *NPC garrisons refill every second*), and recorded in deviations.md then. Today an NPC city gains 10% of its troops and fortifications every 6 game minutes in one step, and a valley rolls a whole new garrison 6 minutes after its last one (`valleyDefenders`, `engine/combat.ts`). To settle when it's built:
-  - the valleys' rate: 10% a 6 minutes like the cities (full in an hour, where today it's whole again after 6 minutes), or whole in 6 minutes, a little at a time;
-  - whether resources (1/80 a 6 minutes) and loyalty (1 a 6 real minutes) go by the second too, or only troops and fortifications;
-  - farming changes: a level 10 hit again a few minutes later meets a part-refilled garrison rather than the same one ([battle-sims/npc-level-10.md](../battle-sims/npc-level-10.md) to re-check), and the medal trick of hitting a valley the moment it rolls a new garrison ([reference/aeroagg-complete-guide.md](../reference/aeroagg-complete-guide.md), Medals and gems) goes.
+- **Every NPC city and valley refills every second too** (2026-11-01, the maintainer): one rule for all of them, little by little, with the historic cities harsher only because their garrisons are bigger. Built 2026-11-01 (deviations.md, NPC cities), as settled with the maintainer that day:
+  - a valley is whole again 6 minutes after a battle (its pace today), a little every second, and only then rolls a new garrison;
+  - only troops and fortifications go by the second; resources (1/80 a 6 minutes) and loyalty (1 a 6 real minutes) keep their steps;
+  - farming changes: a level 10 hit again within the hour meets a part-refilled garrison ([battle-sims/npc-level-10.md](../battle-sims/npc-level-10.md) notes it), and the medal trick of hitting a valley the moment it rolls a new garrison ([reference/aeroagg-complete-guide.md](../reference/aeroagg-complete-guide.md), Medals and gems) is gone.
+- **The seats as decided with the maintainer** (2026-11-01): all 1,936 level 12s (Age 2's grid), and loyalty starting at 100 with 3 taken a win (about 34 loyalty waves, as Age 2's 30 to 40).
 - **Spikes first, jump to coordinates the first of them** (2026-11-01; Phases).
 - **Its place in the market's phases** (2026-10-20, changed 2026-10-22): first planned straight after the faction data, since most of a seat's value (capture, the daily draft, the title, bigger armies) doesn't need NPC trade. On 2026-10-22 NPC trade and reputation moved ahead of it. NPC trade is built, so a seat's tribute from trade and its market rights can come with it. Whether it waits for reputation is open (below).
 
@@ -126,9 +127,8 @@ A seat is a tile like any NPC city. Its holder is the tile's existing `owner_cit
 
 ## Open questions
 
-- **The seats:** all four levels follow Age 2 (proposed). Keep all 1,936 level 12s, or fewer?
+- **The seats:** all four levels follow Age 2, all 1,936 level 12s included (Decided).
 - **The garrisons:** keep the daily rotation (it changes what to send, not whether a city can be taken)?
-- **Loyalty:** where it starts and what a win takes; it decides how many cities a siege needs.
 - **Capture:** does a captured seat become the player's city, as in Age 2, and so count against the city limit? How hard is it to take (its garrison and fortifications against a level 10's)?
 - **The draft:** what share of each city's troops (50%?), how often (once a day, or Age 2's 4 for a level 12), and what happens to drafted troops when the seat is lost?
 - **Drafting players:** Age 2 let a historic city's holder draft other players' cities in range. Leave that out (the proposal), or allow it with protection (reinforcements, beginners)?

@@ -180,7 +180,11 @@ export const BALANCE = {
   npcLoyaltyDamagePerAttack: [10, 15],
   /** (evony) attacking army must kill all defenders and bring this loyalty to 0 to capture */
   npcLoyaltyStart: { low: 80, high: 90 },
-  /** (orig) NPC/valley regeneration interval */
+  /**
+   * (orig) NPC/valley regeneration interval: an NPC city's resources (+1/80) and loyalty (+1) come back each interval;
+   * (marchlands) its troops and fortifications come back 10% of full each interval but a little every second, and a
+   * valley's garrison is whole again one interval after it was hit, also a little every second (deviations.md)
+   */
   npcRegenMs: 6 * MINUTE,
   /** (marchlands) barbarian city loyalty recovers +1 per npcRegenMs of real time, not game time */
   npcLoyaltyRegenRealTime: true as boolean,

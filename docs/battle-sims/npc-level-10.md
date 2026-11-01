@@ -14,7 +14,7 @@
 | Guard hero | Random, level 1 to 100 |
 | Loot | 19M gold, 19M food, 600k each of lumber, stone and iron (39.8M) |
 
-The city refills its troops and fortifications every 6 game minutes (6 seconds at `GAME_SPEED` 60), so every attack meets the full garrison.
+The city refills its troops and fortifications by 10% of full every 6 game minutes (6 seconds at `GAME_SPEED` 60), so an attack an hour after the last meets the full garrison, as these simulations assume. *(Since 2026-11-01 the refill comes a little every second rather than in 6-minute steps, deviations.md: a city hit again sooner meets a partly refilled garrison, a lighter fight than these.)*
 
 ## The best army
 

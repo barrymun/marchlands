@@ -23,7 +23,7 @@
 - **Historic cities refill every second** (2026-11-01, [historical-cities.md](historical-cities.md)), so a gap between waves always costs the attacker and landing them together is worth the precision.
 - **A landing time, entered in UTC** (2026-11-01): the send-army dialog takes a date and a time to the second (UTC), offers a round minute just after the soonest landing, and shows when the army will leave. It stays set after sending, so the next wave lands in the same second.
 - **Up to 24 hours ahead** (`BALANCE.landAtMaxAheadMs`), like the rest time.
-- **Ties keep their order; the battle is still fought when the worker gets to it** (2026-11-01). The worker takes due events by `due_at`, then `id`, and an arrival is fought at `ctx.now`, a fraction of a second after `reachTime` (250 ms at most when idle). With today's 6-minute refills that can't change a result; when NPC garrisons refill every second (TODO.md) an arrival should be fought as of its `reachTime`, so a busy worker can't hand the garrison extra seconds. That goes with the per-second refill.
+- **Ties keep their order, and each arrival is fought as of its landing time** (2026-11-01). The worker takes due events by `due_at`, then `id`. An arrival against a barbarian city or a free valley meets the garrison as it stood at `reachTime` (`npcState`, `valleyDefenders` in `engine/combat.ts`), not when the worker got to it, so a busy worker can't give it extra seconds of refill; built with the per-second refill (deviations.md, NPC cities). Other clocks (buffs running out, players' cities) still read the worker's time, a fraction of a second later.
 - **Rest time stays as it is** (camping at the target after landing, not offered in the dialog).
 
 ## The design (proposed)
@@ -52,7 +52,6 @@
 
 ## Open questions
 
-- **Fighting at the landing time:** fight each arrival as of its `reachTime` (its refills, loyalty, buffs running out) rather than when the worker takes it; with the per-second refill (Decided).
 - **Things that change a march on the way:** Marchlands has none (Age 2's stratagems slowed or sped marching armies; we have no stratagems, [reference/items.md](../reference/items.md)). If one is ever added, a landing time would no longer hold.
 
 ## Phases

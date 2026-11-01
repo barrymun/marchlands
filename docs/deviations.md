@@ -18,7 +18,7 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
   - Hero capture rule: d100 > loyalty, needs a free Feasting Hall slot.
 - **March time** (`CalcTroopSpeed`): the slowest unit decides; Compass +10% per level on foot, Horseback Riding +5% per level on mounted and siege, both capped by the Academy level.
 - **Battle simulator.** A float32-exact port of `EvonyAge1BattleCalc`, verified against all 36,567 regression cases (`npm test`).
-- **NPC cities.** The level 1–10 table, layout and regeneration (`max/80` resources, `max/10` troops and forts every 6 min). Valley garrisons follow `ValleyData::Reset`.
+- **NPC cities.** The level 1–10 table, layout and regeneration (`max/80` resources every 6 min). Valley garrisons follow `ValleyData::Reset`. *(design change, 2026-11-01)* Troops and fortifications come back by the second rather than in 6-minute steps: a barbarian city's at `max/10` every 6 game minutes as before but a little each second (`refillCounts`, `regenerateNpc`, `refillAt` in the tile's state), and a free valley's whole again 6 game minutes after a battle, also by the second, a new garrison rolled only once the old one is whole and has stood 6 minutes (from a seed in the tile's state, `valleyDefenders`), where the original rolled a whole new one 6 minutes after the last. Resources and loyalty keep their steps. A gap between waves always lets some troops back, which is what makes landing waves together pay (docs/features/historical-cities.md). Every arrival is fought as of its landing time, so a busy worker doesn't give a garrison extra seconds.
 - **Other.** Comfort (blessing and population raising: costs, effects, 15-minute cooldown); the 4×4 state grid.
 
 ## Bugs fixed
