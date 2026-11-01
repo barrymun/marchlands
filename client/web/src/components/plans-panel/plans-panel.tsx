@@ -17,13 +17,13 @@ export function PlansPanel() {
   const playerId = usePlayer().data?.playerInfo.id;
   return (
     <div className="grid gap-4">
-      <p className="text-sm text-muted-foreground">{t('intro')}</p>
+      <p className="max-w-md text-sm text-muted-foreground">{t('intro')}</p>
       {plans.isPending || playerId == null ? (
         <Skeleton className="h-40" />
       ) : plans.data?.length ? (
         plans.data.map((p) => <PlanCard key={p.id} plan={p} playerId={playerId} />)
       ) : (
-        <p className="text-sm text-muted-foreground">{t('empty')}</p>
+        <p className="max-w-md text-sm text-muted-foreground">{t('empty')}</p>
       )}
     </div>
   );

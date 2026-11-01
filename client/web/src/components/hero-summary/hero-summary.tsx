@@ -63,7 +63,7 @@ export function HeroSummary({
       </span>
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums">
         {t('common:level.short', { level: hero.level })}
-        {mayor ? <Badge className="h-4 px-1.5 text-[10px]">{statusLabel(hero)}</Badge> : <span>{statusLabel(hero)}</span>}
+        {mayor ? <Badge className="h-4 px-1.5 text-[11px]">{statusLabel(hero)}</Badge> : <span>{statusLabel(hero)}</span>}
         <BoostChip hero={hero} now={now} className="ml-auto" />
       </span>
       <span className="flex min-h-6 items-center gap-1.5 text-xs tabular-nums">

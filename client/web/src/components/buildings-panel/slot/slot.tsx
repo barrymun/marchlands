@@ -59,11 +59,11 @@ export function Slot({
           ) : (
             <span className="line-clamp-2 px-1 text-xs font-medium">{name}</span>
           )}
-          <span className="absolute bottom-1 left-1 rounded bg-background/85 px-1 text-[10px] leading-4 font-medium tabular-nums">
+          <span className="absolute bottom-1 left-1 rounded bg-background/85 px-1 text-[11px] leading-4 font-medium tabular-nums">
             {t('common:level.short', { level: building.level })}
           </span>
           {busy && (
-            <span className="absolute top-1 right-1 rounded bg-background/85 px-1 text-[10px] leading-4 text-amber-600 tabular-nums">
+            <span className="absolute top-1 right-1 rounded bg-background/85 px-1 text-[11px] leading-4 text-amber-600 tabular-nums">
               <Countdown endTime={building.endTime} />
             </span>
           )}

@@ -74,11 +74,11 @@ export function WalledCity({ byPos, onSelect }: { byPos: Map<number, BuildingBea
               )}
               style={art('gate', 32)}
             >
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-background/85 px-1 text-[10px] leading-4 font-medium whitespace-nowrap tabular-nums">
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-background/85 px-1 text-[11px] leading-4 font-medium whitespace-nowrap tabular-nums">
                 {t('common:level.short', { level: walls.level })}
               </span>
               {walls.status !== 0 && (
-                <span className="absolute -top-5 left-1/2 -translate-x-1/2 rounded bg-background/85 px-1 text-[10px] leading-4 whitespace-nowrap text-amber-600 tabular-nums">
+                <span className="absolute -top-5 left-1/2 -translate-x-1/2 rounded bg-background/85 px-1 text-[11px] leading-4 whitespace-nowrap text-amber-600 tabular-nums">
                   <Countdown endTime={walls.endTime} />
                 </span>
               )}

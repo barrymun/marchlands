@@ -127,8 +127,8 @@ export function ItemsPanel({ city }: { city: CityBean }) {
             <div className="grid min-w-0 flex-1 gap-1.5">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  {/* items not owned are dimmed, but never their buttons (a Buy button must not look disabled) or the active bonus */}
-                  <div className={cn('flex flex-wrap items-center gap-2', e.owned === 0 && 'opacity-60')}>
+                  {/* an item not owned shows it by its dimmed icon and outlined count: its text stays readable, and its buttons must not look disabled */}
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">{nameOf(e)}</span>
                     <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
                       ×{fmtExact(e.owned)}
@@ -166,7 +166,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
                   )}
                 </div>
               </div>
-              <div className={cn('grid gap-1.5', e.owned === 0 && 'opacity-60')}>
+              <div className="grid gap-1.5">
                 <p className="text-sm text-muted-foreground">{translateMessage(e.info.description)}</p>
                 {e.info.howTo && <p className="text-xs text-muted-foreground italic">{translateMessage(e.info.howTo)}</p>}
                 {e.medalLevel != null && <MedalSourcesInfo level={e.medalLevel} />}
