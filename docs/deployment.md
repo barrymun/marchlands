@@ -35,8 +35,19 @@ Setting `COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml` in `.env` (the
 
 - **OS:** any 64-bit Linux that Docker supports (Ubuntu LTS or Debian is simplest). x86-64 or ARM64 both work:
   the images are built on the machine itself.
-- **Memory:** 2 GB at least, 4 GB comfortable. Postgres is tuned for about that (`db/postgresql.conf`:
-  `shared_buffers` 256 MB, `effective_cache_size` 768 MB); the API and worker use about 100 MB each.
+- **CPU and memory:** 2 vCPUs and 4 GB are comfortable for a few hundred players online at once; 2 GB is the
+  least. Postgres is tuned for 4 GB (`db/postgresql.conf`: `shared_buffers` 256 MB, `effective_cache_size`
+  768 MB). The API uses about 100 MB idle and 250 MB under load, the worker about 70 MB, and Postgres
+  300–400 MB. Building the images on the machine needs the most memory of anything here.
+  - Measured with the load test (`npm run load`, November 2026, on an Apple M5 Pro): 300 simulated players made
+    about 100 requests a second, with the API at 22 % of a core, Postgres at 12 % and the worker at 1 %. A cloud
+    vCPU is slower, perhaps two to three times, which comes to about one vCPU in all.
+  - The API is one Node process, so it uses one core however many the machine has. If that core is ever full
+    (an estimate: 500–700 players online on a VPS), run a second API replica: every replica delivers pushes to
+    the sockets it holds.
+  - Not covered by the load test: big battles and many armies landing at once (the worker), world chat (sent to
+    every connected player), and a database after months of play. Run the load test on the machine before
+    inviting players ([Maintenance scripts](#maintenance-scripts)).
 - **Disk:** 20 GB or more. The database is small (a backup is a few MB) but images, build cache, logs and
   backups add up.
 - **Network:** a fixed IP or a DNS name. For HTTPS, a domain whose DNS points at the machine, and ports 80 and 443
