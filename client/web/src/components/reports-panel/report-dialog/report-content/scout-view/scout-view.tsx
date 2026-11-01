@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import type { ReportBody } from '@marchlands/core';
+import { type ReportBody, TileType } from '@marchlands/core';
 
 import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
 import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
@@ -13,7 +13,7 @@ export function ScoutView({ scout: s }: { scout: Extract<ReportBody, { kind: 'sc
   if (s.target === 'npc') {
     return (
       <div className="grid gap-1.5 text-sm">
-        <Line label={t('labels.target')}>{t('barbarianCity', { level: s.level })}</Line>
+        <Line label={t('labels.target')}>{t('common:level.named', { name: tileName(s.historic ? TileType.HISTORIC : TileType.NPC), level: s.level })}</Line>
         <Line label={t('labels.guardHero')}>{t('common:level.named', { name: s.hero.name, level: s.hero.level })}</Line>
         <Line label={t('labels.troops')}>
           <TroopList troops={s.troops} />

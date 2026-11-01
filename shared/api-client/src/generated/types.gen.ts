@@ -1991,6 +1991,7 @@ export type ReportDetailInput = {
             loyaltyLeft: number;
             captured: boolean;
             level: number;
+            historic?: boolean;
             standing?: {
                 faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
                 change: number;
@@ -2087,6 +2088,7 @@ export type ReportDetailInput = {
         scout: {
             target: 'npc';
             level: number;
+            historic?: boolean;
             success: boolean;
             loyalty: number;
             population: number;
@@ -5366,6 +5368,7 @@ export type ReportDetail = {
             loyaltyLeft: number;
             captured: boolean;
             level: number;
+            historic?: boolean;
             standing?: {
                 faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
                 change: number;
@@ -5462,6 +5465,7 @@ export type ReportDetail = {
         scout: {
             target: 'npc';
             level: number;
+            historic?: boolean;
             success: boolean;
             loyalty: number;
             population: number;

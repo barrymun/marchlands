@@ -257,6 +257,8 @@ export const BattleNpcExtraSchema = BattlePlunderSchema.extend({
   loyaltyLeft: z.number(),
   captured: z.boolean(),
   level: z.number().int(),
+  /** (marchlands) a historic city (levels 12 to 18) rather than a barbarian city */
+  historic: z.boolean().optional(),
   /** (marchlands) the attacker's standing with the faction the city belongs to (a member) or whose land it's on (a bandit camp), when it changed */
   standing: z.object({ faction: z.enum(FACTION_IDS), change: z.number(), now: z.number() }).optional(),
 });
@@ -285,6 +287,8 @@ export const ScoutReportSchema = z.union([
   z.object({
     target: z.literal('npc'),
     level: z.number().int(),
+    /** (marchlands) a historic city (levels 12 to 18) rather than a barbarian city */
+    historic: z.boolean().optional(),
     success: z.boolean(),
     loyalty: z.number(),
     population: z.number(),

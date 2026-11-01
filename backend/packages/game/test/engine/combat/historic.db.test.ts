@@ -218,14 +218,15 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
     game(async (g) => {
       const { p, q, seat, cityId, attack } = await heldSeat(g);
       const pHero = await addHero(g, p, 1, cityId);
-      // as the waves before it left it: 3 loyalty as it lands
-      const r = await attack(async (at) => saveCity(g, { ...(await getCity(g, cityId)), loyalty: 3, loyaltyAt: at }));
+      // as the waves before it left it: 3 loyalty as it lands; its holder had turned drafting by itself off
+      const r = await attack(async (at) => saveCity(g, { ...(await getCity(g, cityId)), loyalty: 3, loyaltyAt: at, draftAuto: false }));
       expect(r.seat).toMatchObject({ loyaltyLeft: 0, captured: true });
       expect(await getCity(g, cityId)).toMatchObject({
         playerId: q.id,
         historicLevel: 12,
         loyalty: BALANCE.historic.loyalty,
         truceUntil: g.now + BALANCE.historic.truceMs,
+        draftAuto: true,
       });
       expect((await getTile(g, seat.id)).ownerPlayerId).toBe(q.id);
       expect((await getHero(g, pHero)).cityId).toBe(p.cityId);

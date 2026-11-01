@@ -18,7 +18,6 @@
   },
   "none": "none",
   "walls": "· Walls Lv {{level}}",
-  "barbarianCity": "Barbarian city Lv {{level}}",
   "labels": {
     "from": "From",
     "to": "To",

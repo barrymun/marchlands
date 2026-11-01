@@ -11,7 +11,7 @@ import { tileName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 
 export function BattleView({ battle: b }: { battle: BattleReport }) {
-  const { t } = useTranslation('reports-panel');
+  const { t } = useTranslation(['reports-panel', 'common']);
   const player = usePlayer();
   const me = player.data?.playerInfo.userName;
   const myWin = (b.result === 'attackerWon' && b.attacker.player === me) || (b.result === 'defenderWon' && b.defender.player === me);
@@ -36,7 +36,7 @@ export function BattleView({ battle: b }: { battle: BattleReport }) {
             })}
           </span>
         )}
-        {'level' in b && <span>{t('barbarianCity', { level: b.level })}</span>}
+        {'level' in b && <span>{t('common:level.named', { name: tileName(b.historic ? TileType.HISTORIC : TileType.NPC), level: b.level })}</span>}
         {'city' in b && <span>{b.city}</span>}
       </div>
       <div className="grid items-start gap-4 md:grid-cols-2">
@@ -44,7 +44,10 @@ export function BattleView({ battle: b }: { battle: BattleReport }) {
         <SideView
           title={t('battle.defender')}
           side={b.defender}
-          player={b.defender.player || ('valley' in b ? t('battle.valleyDefenders') : 'level' in b ? tileName(TileType.NPC) : undefined)}
+          player={
+            b.defender.player ||
+            ('valley' in b ? t('battle.valleyDefenders') : 'level' in b ? tileName(b.historic ? TileType.HISTORIC : TileType.NPC) : undefined)
+          }
           forts={b.defender.forts}
           wallLevel={b.defender.wallLevel}
         />

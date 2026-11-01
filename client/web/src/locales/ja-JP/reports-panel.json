@@ -18,7 +18,6 @@
   },
   "none": "なし",
   "walls": "· 城壁 Lv {{level}}",
-  "barbarianCity": "蛮族の都市 Lv {{level}}",
   "labels": {
     "from": "出発地",
     "to": "目的地",

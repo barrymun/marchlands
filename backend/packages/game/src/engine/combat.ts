@@ -550,6 +550,7 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
         scout: {
           target: 'npc',
           level,
+          historic: true,
           success: true,
           loyalty: Math.floor(hc.state.loyalty),
           population: hc.state.population,
@@ -1008,7 +1009,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
 
 /**
  * A held historic city taken (docs/features/historical-cities.md): it becomes the winner's, whole but for its troops
- * (lost in the battle; any kept home go too), under a new truce and at full loyalty. What its old holder had there moves
+ * (lost in the battle; any kept home go too), under a new truce and at full loyalty, drafting by itself. What its old holder had there moves
  * to their oldest other city: heroes, armies out, market orders and shipments; with no other city, they're gone.
  * Valleys it held go free (their troops head home), allies' troops stationed in it go home, and armies already marching
  * on it now march on the winner.
@@ -1068,6 +1069,8 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
     truceUntil: ctx.now + BALANCE.historic.truceMs,
     loyalty: BALANCE.historic.loyalty,
     loyaltyAt: ctx.now,
+    // its new holder starts drafting by itself, the default; the drafts made today still count against the seat
+    draftAuto: true,
   });
   await saveCity(ctx, city);
   await ctx.tx.update(tiles).set({ ownerPlayerId: winner.id, updatedAt: ctx.now }).where(eq(tiles.id, city.tileId));
@@ -1234,13 +1237,13 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
       ...(await attackerBonuses(ctx, attacker, a)),
     },
     {
-      player: '', // the historic city itself: the client names it
+      player: '', // the historic city itself: the client names it (`historic`)
       hero: { id: 0, name: guard.name, level: guard.level, logoUrl: guard.logoUrl },
       troops: { before: r.defender.before, lost: r.defender.lost, after: r.defender.after },
       forts: r.forts,
       wallLevel: level,
     },
-    { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured, level },
+    { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured, level, historic: true },
   );
   await createReport(ctx, {
     playerId: a.playerId,

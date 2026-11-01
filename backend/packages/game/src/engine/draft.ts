@@ -25,7 +25,7 @@ import { tiles } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { troopBean } from '#/dto.ts';
-import { tilePosition } from '#/engine/armies.ts';
+import { cityPosition, tilePosition } from '#/engine/armies.ts';
 import { npcState } from '#/engine/combat.ts';
 import { createReport } from '#/engine/reports.ts';
 import { type CityRow, saveCity, saveTile, type TileRow } from '#/repo.ts';
@@ -96,7 +96,7 @@ export async function draft(ctx: Ctx, city: CityRow, tile: TileRow, opts: { auto
     playerId: city.playerId,
     title: msg('report.title.draft'),
     startPos: target,
-    targetPos: target,
+    targetPos: cityPosition(city.name, city.tileId),
     body: { kind: 'draft', draft: { cityId: city.id, city: city.name, target, level: tile.level, troops, auto: opts.auto, scouted: opts.scouted } },
   });
   ctx.push(city.playerId, PushCmd.TROOP_UPDATE, { castleId: city.id, troop: troopBean(city.troops) });

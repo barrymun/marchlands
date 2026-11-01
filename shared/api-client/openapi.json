@@ -6856,6 +6856,9 @@
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
                           },
+                          "historic": {
+                            "type": "boolean"
+                          },
                           "standing": {
                             "type": "object",
                             "properties": {
@@ -7406,6 +7409,9 @@
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
+                          },
+                          "historic": {
+                            "type": "boolean"
                           },
                           "success": {
                             "type": "boolean"
@@ -18718,6 +18724,9 @@
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
                           },
+                          "historic": {
+                            "type": "boolean"
+                          },
                           "standing": {
                             "type": "object",
                             "properties": {
@@ -19282,6 +19291,9 @@
                             "type": "integer",
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
+                          },
+                          "historic": {
+                            "type": "boolean"
                           },
                           "success": {
                             "type": "boolean"
