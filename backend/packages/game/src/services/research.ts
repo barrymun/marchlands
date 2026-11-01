@@ -22,6 +22,7 @@ import {
   researchTimeMs,
   scaled,
   SPEEDUP_ITEMS,
+  speedupCut,
   SpeedupId,
   speedupItemGold,
   TECH_IDS,
@@ -161,7 +162,7 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
     const eff = SPEEDUP_ITEMS[itemId];
     if (!eff) throw new GameError(msg('common.invalidSpeedup'), -99);
     useItemOrGold(ctx, p, b.city, itemId, speedupItemGold(itemId));
-    reduce = scaled(eff.reduce(end - (r.startTime ?? ctx.now), () => ctx.rng.next()));
+    reduce = speedupCut(eff, end - (r.startTime ?? ctx.now), () => ctx.rng.next());
   }
   const newEnd = Math.max(ctx.now, end - reduce);
   // (marchlands) the start moves back by the time saved, like construction (buildings.ts speedup)

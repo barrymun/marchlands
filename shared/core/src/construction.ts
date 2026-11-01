@@ -351,8 +351,10 @@ export function prestigeOf(action: number, id: number, level: number, townHallLe
 export interface SpeedupEffect {
   /** (orig) price in cents; charged in gold (goldForCents) when the player has none of the item */
   cents: number;
-  /** ms removed from the remaining time, given the total duration */
+  /** ms removed from the remaining time, given the total duration: game time for a fixed cut, a share of `totalMs` otherwise */
   reduce(totalMs: number, rng: () => number): number;
+  /** cuts a share of the job's whole time (`cutShare`) rather than a fixed time */
+  byShare: boolean;
 }
 
 /** The speed-up items (BALANCE.items.speedups). */
@@ -365,9 +367,16 @@ export const SPEEDUP_ITEMS: Record<string, SpeedupEffect> = Object.fromEntries(
         : cutHours
           ? (_t, rng) => (cutHours[0] + Math.floor(rng() * (cutHours[1] - cutHours[0] + 1))) * HOUR
           : () => cutMs ?? 0;
-    return [id, { cents: s.cents, reduce }];
+    return [id, { cents: s.cents, reduce, byShare: cutShare != null }];
   }),
 );
+
+/**
+ * The real ms a speed-up item takes off a job whose whole time is `totalMs` (real ms, as stored): a share of it as it
+ * is, a fixed cut (game time) scaled to real time by the game speed.
+ */
+export const speedupCut = (eff: SpeedupEffect, totalMs: number, rng: () => number) =>
+  eff.byShare ? eff.reduce(totalMs, rng) : scaled(eff.reduce(totalMs, rng));
 
 /**
  * A training batch after Napoleon's Diary / Archimedes' Note: BALANCE.items.batchSpeedupShare of its full

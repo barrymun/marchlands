@@ -191,11 +191,14 @@ export function scoutOf<K extends keyof ScoutKinds>(r: { body: ReportBody }, kin
 /** A hero whose army was wiped out: 5 loyalty less, then either captured by the captor or idle at home. */
 export async function expectWipedHero(g: TestGame, heroId: number, loyaltyBefore: number, home: TestPlayer, captor: TestPlayer | null) {
   const h = await getHero(g, heroId);
-  expect(h.loyalty).toBe(Math.max(0, loyaltyBefore - 5));
   if (h.status === HeroStatus.SEIZED) {
+    // a captive's loyalty to its owner is gone (the original's rule), so its captor can persuade it
     expect(captor).not.toBeNull();
-    expect(h).toMatchObject({ cityId: captor!.cityId, capturedByPlayerId: captor!.id });
-  } else expect(h).toMatchObject({ status: HeroStatus.IDLE, cityId: home.cityId, capturedByPlayerId: null });
+    expect(h).toMatchObject({ cityId: captor!.cityId, capturedByPlayerId: captor!.id, loyalty: 0 });
+  } else {
+    expect(h.loyalty).toBe(Math.max(0, loyaltyBefore - 5));
+    expect(h).toMatchObject({ status: HeroStatus.IDLE, cityId: home.cityId, capturedByPlayerId: null });
+  }
   return h;
 }
 

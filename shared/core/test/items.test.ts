@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
   BALANCE,
   civilCodePopulation,
@@ -21,7 +21,9 @@ import {
   medalId,
   MINUTE,
   seededRng,
+  setGameSpeed,
   SPEEDUP_ITEMS,
+  speedupCut,
   SpeedupId,
   speedupItemGold,
   speedUpTrainBatch,
@@ -63,6 +65,18 @@ describe('SPEEDUP_ITEMS', () => {
 
   it('costs its gold price when the player has none', () => {
     for (const [id, s] of Object.entries(items.speedups)) expect(speedupItemGold(id), id).toBe(itemGoldPrice(id) ?? goldForCents(s.cents));
+  });
+});
+
+describe(speedupCut.name, () => {
+  afterEach(() => setGameSpeed(1));
+
+  it('takes a share of a job as it is, and a fixed cut scaled by the game speed', () => {
+    setGameSpeed(60);
+    // a job of 10 real minutes (10 game hours at speed 60)
+    const total = 10 * MINUTE;
+    expect(speedupCut(SPEEDUP_ITEMS[ItemId.ULTIMATE_GUIDELINES]!, total, () => 0)).toBe(total * items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!);
+    expect(speedupCut(SPEEDUP_ITEMS[ItemId.INTERMEDIATE_GUIDELINES]!, total, () => 0)).toBe((2.5 * HOUR) / 60);
   });
 });
 

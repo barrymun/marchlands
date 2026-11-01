@@ -6,6 +6,7 @@ A knowledge base of battle findings: how the battle engine behaves in practice, 
 |---|---|
 | [mechanics.md](mechanics.md) | How a field battle plays out: positions, targeting, fortifications, and the quirks that decide losses |
 | [npc-level-10.md](npc-level-10.md) | Farming level 10 barbarian cities: the best army, items and hero, and why losses can't reach zero |
+| [old-guides.md](old-guides.md) | The old guides' strategies (ballista farming, AeroAgg's waves, suicide waves, walls) run through the simulator: which still work and why |
 | [historic-cities.md](historic-cities.md) | Breaking historic cities of levels 12 to 18 (before they exist): what a siege takes, the weakest attacker that can, and how much the gaps between waves matter |
 
 ## Hero attributes

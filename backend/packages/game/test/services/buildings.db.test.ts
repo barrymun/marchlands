@@ -378,7 +378,7 @@ describe(buildings.speedup.name, () => {
       await giveItems(g, p, { [ItemId.ULTIMATE_GUIDELINES]: 2 });
       const built = await buildings.upgrade(g, p.id, p.cityId, -1);
       const total = built.endTime - built.startTime;
-      const cut = scaled(total * BALANCE.items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!);
+      const cut = total * BALANCE.items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!;
       const once = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.ULTIMATE_GUIDELINES);
       expect(once).toMatchObject({ endTime: built.endTime - cut, startTime: built.startTime - cut });
       const twice = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.ULTIMATE_GUIDELINES);

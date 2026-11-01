@@ -28,6 +28,7 @@ import {
   requirementsMet,
   scaled,
   SPEEDUP_ITEMS,
+  speedupCut,
   SpeedupId,
   speedupItemGold,
   unlockedOuterSlots,
@@ -227,7 +228,7 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
     const eff = SPEEDUP_ITEMS[itemId];
     if (!eff) throw new GameError(msg('common.invalidSpeedup'), -99);
     useItemOrGold(ctx, b.player, b.city, itemId, speedupItemGold(itemId));
-    reduce = scaled(eff.reduce(total, () => ctx.rng.next()));
+    reduce = speedupCut(eff, total, () => ctx.rng.next());
   }
   pushResources(ctx, b);
   // (marchlands) the start moves back by the time saved: the job keeps its length, so its progress bar jumps

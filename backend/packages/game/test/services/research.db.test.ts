@@ -365,7 +365,7 @@ describe(research.speedupResearch.name, () => {
       await withAcademy(g, p);
       await giveItems(g, p, { [ItemId.ULTIMATE_GUIDELINES]: 5 });
       const out = await research.startResearch(g, p.id, p.cityId, HERO_ENHANCEMENT);
-      const cut = scaled((out.endTime - out.startTime) * BALANCE.items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!);
+      const cut = (out.endTime - out.startTime) * BALANCE.items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!;
       expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.ULTIMATE_GUIDELINES)).toEqual({ endTime: out.endTime - cut });
       expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.ULTIMATE_GUIDELINES)).toEqual({ endTime: out.endTime - 2 * cut });
       for (let i = 0; i < 2; i++) await research.speedupResearch(g, p.id, p.cityId, ItemId.ULTIMATE_GUIDELINES);

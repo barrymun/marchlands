@@ -172,7 +172,7 @@ export const BALANCE = {
   compassSpeedPerLevel: 0.1, // (orig) foot speed +10%/level
   horsebackSpeedPerLevel: 0.05, // (orig) mounted speed +5%/level
   logisticsLoadPerLevel: 0.1, // (evony) +10% load per level
-  /** (evony) reinforcement / scout / transport to own or allied cities move this much faster */
+  /** (evony) the longest an army may camp at its target before it comes home (real time) */
   maxRestTimeMs: 24 * HOUR,
   /**
    * (marchlands) historic cities, levels 12 to 18 (docs/features/historical-cities.md; garrisons from Age 2,

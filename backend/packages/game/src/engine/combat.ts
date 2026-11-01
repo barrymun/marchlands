@@ -614,7 +614,11 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
   const stationed = await armiesStationedAt(ctx, tile.id, { lock: true });
   const cityScouts = def.city.goOutForBattle ? (def.city.troops.scouter ?? 0) : 0;
   const defScouts = cityScouts + stationed.reduce((s, x) => s + (x.troops.scouter ?? 0), 0);
-  const defHero = bestHero([...def.heroes.filter((h) => h.playerId === def.player.id && (h.status === 0 || h.status === 1))]);
+  // the strongest of the city's own heroes and those of armies stationed there, as for an attack
+  const defHero = bestHero([
+    ...def.heroes.filter((h) => h.playerId === def.player.id && h.status <= HeroStatus.MAYOR),
+    ...(await heroesOfArmies(ctx, stationed)),
+  ]);
   const result = resolveCombat(
     { troops: { scouter: a.troops.scouter ?? 0 }, research: scoutOwner.research, hero },
     { troops: { scouter: defScouts }, research: def.player.research, hero: defHero },
@@ -703,7 +707,7 @@ async function disbandEmptyArmy(ctx: Ctx, s: ArmyRow) {
 
 /**
  * The whole army died. Its hero loses 5 loyalty and may be captured by a defending city with a
- * free Feasting Hall slot (chance: d100 > loyalty); otherwise it limps home at once.
+ * free Feasting Hall slot (chance: d100 > loyalty), its loyalty then 0; otherwise it limps home at once.
  */
 async function armyWiped(ctx: Ctx, a: ArmyRow, hero: HeroRow | null, captor: CityBundle | null): Promise<{ captured: boolean }> {
   let captured = false;
@@ -716,6 +720,8 @@ async function armyWiped(ctx: Ctx, a: ArmyRow, hero: HeroRow | null, captor: Cit
         cityId: captor.city.id,
         status: HeroStatus.SEIZED,
         capturedByPlayerId: captor.player.id,
+        // as the original's battle handler: a captive's loyalty to its owner is gone, so it can be persuaded
+        loyalty: 0,
         powerBuffAdded: 0,
         managementBuffAdded: 0,
         stratagemBuffAdded: 0,
