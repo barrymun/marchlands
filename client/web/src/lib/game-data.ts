@@ -17,6 +17,14 @@ export const buildingName = (typeId: number) => dataName('data-buildings', typeI
 export const techName = (id: number) => dataName('data-techs', id, () => i18n.t('common:fallback.tech', { id }));
 export const itemName = (id: string) => dataName('data-items', id, () => id);
 export const titleName = (id: number) => dataName('data-titles', id, () => String(id));
+/**
+ * A historic city's name, by its place (`x,y`), or null: level 14s, 16s and Atlantis have names, level 12s don't
+ * (docs/reference/historic-cities.md, Names).
+ */
+export const historicName = (x: number, y: number): string | null => {
+  const opts = { ns: 'data-historic', keySeparator: false } as never;
+  return i18n.exists(`${x},${y}`, opts) ? (i18n.t(`${x},${y}`, opts) as unknown as string) : null;
+};
 export const tileName = (type: number) => dataName('data-tiles', type, () => i18n.t('common:fallback.tile', { id: type }));
 export const zoneName = (id: number) => dataName('data-zones', id, () => String(id));
 export const factionName = (id: FactionId) => dataName('data-factions', id, () => id);

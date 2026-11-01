@@ -3,12 +3,13 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { AllianceRank, BALANCE, FACTION_IDS, FactionId, msg, ref, TileType } from '@marchlands/core';
+import { AllianceRank, BALANCE, FACTION_IDS, FactionId, historicCities, msg, ref, TileType } from '@marchlands/core';
 
-import { factionName, rankName, tileName, zoneName } from '@/lib/game-data';
+import { factionName, historicName, rankName, tileName, zoneName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
 import factionsGB from '@/locales/en-GB/data-factions.json';
+import historicGB from '@/locales/en-GB/data-historic.json';
 import ranksGB from '@/locales/en-GB/data-ranks.json';
 import tilesGB from '@/locales/en-GB/data-tiles.json';
 import zonesGB from '@/locales/en-GB/data-zones.json';
@@ -75,5 +76,22 @@ describe('positions', () => {
     expect(translateMessage(msg('world.position.place', { tile: ref.tile(TileType.FLAT), x: 1, y: 2 }))).toBe('Flat (1,2)');
     await i18n.changeLanguage('ja-JP');
     expect(translateMessage(msg('world.position.tile', { tile: ref.tile(TileType.NPC), level: 5, x: 1, y: 2 }))).toBe('蛮族の都市 Lv.5 (1,2)');
+  });
+});
+
+describe('data-historic', () => {
+  it('names every historic city of level 14 and up but Romagna’s last two, which the source’s map shows as Atlantis, and no level 12', () => {
+    const named = historicCities()
+      .filter((c) => c.level > 12 && !(c.y === 759 && (c.x === 693 || c.x === 759)))
+      .map((c) => `${c.x},${c.y}`);
+    expect(Object.keys(historicGB).sort()).toEqual(named.sort());
+  });
+
+  it('is looked up by place, and a level 12 has no name', async () => {
+    expect(historicName(0, 0)).toBe('Atlantis');
+    expect(historicName(300, 100)).toBe('Beijing');
+    expect(historicName(9, 9)).toBeNull();
+    await i18n.changeLanguage('ja-JP');
+    expect(historicName(300, 100)).toBe('北京');
   });
 });

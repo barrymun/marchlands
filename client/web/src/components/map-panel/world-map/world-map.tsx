@@ -12,10 +12,10 @@ import type { Piece } from '@/components/iso-viewport/types';
 import { spriteBox } from '@/components/iso-viewport/utils';
 import { GRASS, RELATION_STYLE } from '@/components/map-panel/constants';
 import { relationGroup } from '@/components/map-panel/utils';
+import { placeName } from '@/components/map-panel/utils';
 import type { WorldMapData } from '@/components/map-panel/world-map/hooks';
 import { wrap } from '@/components/map-panel/world-map/utils';
 import { FACTION_STYLE } from '@/lib/factions';
-import { tileName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
 /**
@@ -90,7 +90,12 @@ export function WorldMap({
     const held = owned.get(id);
     const foreign = area.valleys.get(id);
     return [
-      t('tile.summary', { type: tileName(info.type), level: info.level, x: wrap(x, mapSize), y: wrap(y, mapSize) }),
+      t('tile.summary', {
+        type: placeName({ type: info.type, x: wrap(x, mapSize), y: wrap(y, mapSize) }),
+        level: info.level,
+        x: wrap(x, mapSize),
+        y: wrap(y, mapSize),
+      }),
       held && t('tile.heldByYou', { city: held.cityName }),
       !held &&
         foreign &&

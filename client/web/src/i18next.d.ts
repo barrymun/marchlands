@@ -14,6 +14,7 @@ import type createLord from '@/locales/en-GB/create-lord.json';
 import type dataBuildings from '@/locales/en-GB/data-buildings.json';
 import type dataFactions from '@/locales/en-GB/data-factions.json';
 import type dataGear from '@/locales/en-GB/data-gear.json';
+import type dataHistoric from '@/locales/en-GB/data-historic.json';
 import type dataItemCategories from '@/locales/en-GB/data-item-categories.json';
 import type dataItems from '@/locales/en-GB/data-items.json';
 import type dataQuests from '@/locales/en-GB/data-quests.json';
@@ -90,6 +91,7 @@ declare module 'i18next' {
       'data-gear': typeof dataGear;
       'data-ranks': typeof dataRanks;
       'data-zones': typeof dataZones;
+      'data-historic': typeof dataHistoric;
       'data-tiles': typeof dataTiles;
       'data-titles': typeof dataTitles;
       'data-techs': typeof dataTechs;

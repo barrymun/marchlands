@@ -7,7 +7,7 @@
 1. *Maps / Coordinates of Historic Cities*, EvonyAge2 fan site: <https://age2evony.weebly.com/the-map.html>. Each state's level 14 and 16 cities as a picture with coordinates.
 2. *Evony Age 2 Map – Beginners Guide*, Evony Age 2 blog (18 May 2015): <https://evony-age2.blogspot.com/2015/05/evony-age-2-map.html>. The states' bounds and capitals, Atlantis, and the spacing rules for level 14 and level 12 cities.
 3. *Capture Level 12 Historic City – Advanced Guide*, same blog: <https://evony-age2.blogspot.com/2015/05/capture-level-12-historic-city-advanced.html>. A level 12's draft area, garrison, and how players took one.
-4. *Level 14 and 16 Historic City Map – Advanced Guide*, same blog: <https://evony-age2.blogspot.com/2015/05/level-14-and-16-historic-city-map.html>. A single picture: a grid of all 144 level 14 and 16 cities, each with its coordinates and a name (real-world cities, such as Troia and Algiers). The names are only in the picture, and aren't transcribed here.
+4. *Level 14 and 16 Historic City Map – Advanced Guide*, same blog: <https://evony-age2.blogspot.com/2015/05/level-14-and-16-historic-city-map.html>. A single picture: a grid of all 144 level 14 and 16 cities, each with its coordinates and a name (real-world cities, such as Tirana and Algiers), transcribed under Names.
 5. A player's summary, passed on by the maintainer: Atlantis is the only level 18 historic city and Evony's main capital, at (0, 0) in Friesland.
 6. *Avoid Drafting with Troop Exchange – Advanced Guide*, same blog as 2: <https://evony-age2.blogspot.com/2015/05/avoid-drafting-with-troop-exchange.html>. Players being drafted by level 14, 16 and 18 holders, and how they avoided it.
 7. *Draft*, Evony Wiki (Fandom, CC BY-NC-SA): <https://evony.fandom.com/wiki/Draft>. Who can draft whom (a stub).
@@ -184,13 +184,36 @@ What a historic city's holder drafted, and from whom (sources 3, 6, 7 and 13):
 - **Reinforcements are safe.** Troops sent to reinforce another city can't be drafted. Players hid their armies by swapping them with a nearby ally, which also kept them close enough to recall quickly for an attack.
 - **Colonies were drafted the same way,** by the player who had colonised them; see [colonies.md](colonies.md).
 
+## Names
+
+Source 4's picture names every level 14 and 16 city and Atlantis, with its coordinates (read 2026-11-01, transcribed here). Level 12s have no names. In the picture Atlantis's label fills the cells of Romagna's last two level 14s, (693, 759) and (759, 759), so those two have none (source 1 labels them "Atlantis" too). A few of the picture's spellings are corrected here: Bujumburu (Bujumbura), Andora La Vella (Andorra la Vella), Santa Fe De Bogata (Santa Fe de Bogota), Bandir Seri Begawan (Bandar Seri Begawan), Anman (Amman), Valetta (Valletta), kigali (Kigali). Its other choices stay: Loyang, Maynila, Berne, Ulan Bator, Saint John. The game's names are in `client/web/src/locales/<locale>/data-historic.json`, keyed by place.
+
+| State | Level 16 (and Atlantis) | Level 14s |
+|---|---|---|
+| Friesland | Atlantis (0, 0); Washington, D.C. (100, 100) | Tirana (33, 33), Algiers (99, 33), Kabul (165, 33), Saint John (33, 99), Port Moresby (165, 99), Sarajevo (33, 165), Gaborone (99, 165), Thimphu (165, 165) |
+| Saxony | Beijing (300, 100) | Buenos Aires (231, 33), Abu Dhabi (297, 33), Muscat (363, 33), Nassau (231, 99), Brasilia (363, 99), Bujumbura (231, 165), Pyongyang (297, 165), Malabo (363, 165) |
+| North March | Loyang (500, 100) | Baku (429, 33), Addis Ababa (495, 33), Dublin (561, 33), Minsk (429, 99), Brussels (561, 99), Copenhagen (429, 165), Dili (495, 165), Lome (561, 165) |
+| Bohemia | Moscow (700, 100) | Tallinn (627, 33), Andorra la Vella (693, 33), Luanda (759, 33), Lima (627, 99), Warsaw (759, 99), Roseau (627, 165), Quito (693, 165), Asmara (759, 165) |
+| Lower Lorraine | Prague (100, 300) | Maynila (33, 231), Suva (99, 231), Helsinki (165, 231), Astana (33, 297), Djibouti (165, 297), Moroni (33, 363), Pristina (99, 363), Kuwait City (165, 363) |
+| Franconia | Berlin (300, 300) | Praia (231, 231), Brazzaville (297, 231), Kinshasa (363, 231), Bishkek (231, 297), Bissau (363, 297), Zagreb (231, 363), Nairobi (297, 363), Riga (363, 363) |
+| Thuringia | Vienna (500, 300) | Santa Fe de Bogota (429, 231), St. George's (495, 231), Tbilisi (561, 231), Accra (429, 297), Phnom Penh (561, 297), Maseru (429, 363), Vientiane (495, 363), Vilnius (561, 363) |
+| Moravia | London (700, 300) | St. Peter Port (627, 231), Havana (693, 231), Georgetown (759, 231), Harare (627, 297), Doha (759, 297), Monrovia (627, 363), Tripoli (693, 363), Vaduz (759, 363) |
+| Upper Lorraine | Paris (100, 500) | Luxembourg (33, 429), Kigali (99, 429), Bucharest (165, 429), Palikir (33, 495), Chisinau (165, 495), Oslo (33, 561), Lisbon (99, 561), Stockholm (165, 561) |
+| Swabia | Rome (300, 500) | Antananarivo (231, 429), Male (297, 429), Valletta (363, 429), Rabat (231, 495), Maputo (363, 495), Berne (231, 561), Apia (297, 561), Belgrade (363, 561) |
+| Bavaria | Athens (500, 500) | Bamako (429, 429), Skopje (495, 429), Port Louis (561, 429), Mexico City (429, 495), Kathmandu (561, 495), Freetown (429, 561), Dakar (495, 561), Nicosia (561, 561) |
+| Carinthia | Cairo (700, 500) | Nouakchott (627, 429), Ulan Bator (693, 429), Dhaka (759, 429), Niamey (627, 495), Alofi (759, 495), Victoria (627, 561), Riyadh (693, 561), San Marino (759, 561) |
+| Burgundy | Ottawa (100, 700) | Bratislava (33, 627), Ljubljana (99, 627), Khartoum (165, 627), Port Vila (33, 693), Bandar Seri Begawan (165, 693), Damascus (33, 759), Yerevan (99, 759), Sana'a (165, 759) |
+| Lombardy | Jerusalem (300, 700) | Paramaribo (231, 627), Mogadishu (297, 627), Dushanbe (363, 627), Kampala (231, 693), Montevideo (363, 693), Baghdad (231, 759), Tehran (297, 759), Amman (363, 759) |
+| Tuscany | Canberra (500, 700) | Bangkok (429, 627), Nuku'alofa (495, 627), Port of Spain (561, 627), Tashkent (429, 693), El Aaiun (561, 693), Hanoi (429, 759), Lusaka (495, 759), N'Djamena (561, 759) |
+| Romagna | Islamabad (700, 700) | Tunis (627, 627), Ankara (693, 627), Ashgabat (759, 627), Singapore (627, 693), Budapest (759, 693), Bangui (627, 759) |
+
 ## More named historic cities
 
 Sources 8 and 10 name Atlantis at (0, 0) and two more, with their coordinates but not their levels:
 - St. Gallen at (369, 657), in Lombardy;
 - Vigevano at (567, 747), which falls in Tuscany by the coordinates (the wiki lists its state as "Vigevano").
 
-Both lie on the level 12 grid (369 = 9 + 18 × 20, 657 = 9 + 18 × 36; 567 = 9 + 18 × 31, 747 = 9 + 18 × 41), so both are surely level 12s, which supports reading that grid across the whole map. No level 14 or 16 name is given as text anywhere (sources 1 and 4 are pictures).
+Both lie on the level 12 grid (369 = 9 + 18 × 20, 657 = 9 + 18 × 36; 567 = 9 + 18 × 31, 747 = 9 + 18 × 41), so both are surely level 12s, which supports reading that grid across the whole map.
 
 ## Other material
 
