@@ -2,16 +2,21 @@
 
 **Version:** Evony Age 2. Age 1, which Marchlands follows, had no historic cities, so adding them is itself a deviation (record it in [deviations.md](../deviations.md) when they're built).
 
-**Sources** (all read 2026-10-19; facts below are in our own words):
+**Sources** (1–8 read 2026-10-19, 9–13 on 2026-11-01; facts below are in our own words):
 
 1. *Maps / Coordinates of Historic Cities*, EvonyAge2 fan site: <https://age2evony.weebly.com/the-map.html>. Each state's level 14 and 16 cities as a picture with coordinates.
 2. *Evony Age 2 Map – Beginners Guide*, Evony Age 2 blog (18 May 2015): <https://evony-age2.blogspot.com/2015/05/evony-age-2-map.html>. The states' bounds and capitals, Atlantis, and the spacing rules for level 14 and level 12 cities.
 3. *Capture Level 12 Historic City – Advanced Guide*, same blog: <https://evony-age2.blogspot.com/2015/05/capture-level-12-historic-city-advanced.html>. A level 12's draft area, garrison, and how players took one.
-4. *Level 14 and 16 Historic City Map – Advanced Guide*, same blog: <https://evony-age2.blogspot.com/2015/05/level-14-and-16-historic-city-map.html>. A single picture: a grid of all 144 level 14 and 16 cities, each with its coordinates and a name (real-world cities, such as Troia and Algiers). The names aren't transcribed here.
+4. *Level 14 and 16 Historic City Map – Advanced Guide*, same blog: <https://evony-age2.blogspot.com/2015/05/level-14-and-16-historic-city-map.html>. A single picture: a grid of all 144 level 14 and 16 cities, each with its coordinates and a name (real-world cities, such as Troia and Algiers). The names are only in the picture, and aren't transcribed here.
 5. A player's summary, passed on by the maintainer: Atlantis is the only level 18 historic city and Evony's main capital, at (0, 0) in Friesland.
 6. *Avoid Drafting with Troop Exchange – Advanced Guide*, same blog as 2: <https://evony-age2.blogspot.com/2015/05/avoid-drafting-with-troop-exchange.html>. Players being drafted by level 14, 16 and 18 holders, and how they avoided it.
 7. *Draft*, Evony Wiki (Fandom, CC BY-NC-SA): <https://evony.fandom.com/wiki/Draft>. Who can draft whom (a stub).
 8. *Historic City*, Evony Wiki: <https://evony.fandom.com/wiki/Historic_City>. A short list of named historic cities (a stub).
+9. *Historic Cities*, H 'n' T's Evony Age II Guide (8 October 2010): <https://evonyageii.wordpress.com/2010/10/08/historic-cities/>. The only source with the garrisons of levels 14, 16 and 18, each level's area of power, and a wave plan for a level 12. A second post on the same blog, *Taking a HC12 in 30 Seconds or Less* (29 December 2010), is password-protected and wasn't read.
+10. *Historical City*, Evony Archive wiki (Fandom): <https://evony-archive.fandom.com/wiki/Evony.wikia.com/wiki/Historical_City>. Two short paragraphs: fields, areas of power, Atlantis.
+11. *HC Breaking and Taking*, Evony Helper (undated, levels 12–18 so Age 2): <https://evonyhelper.weebly.com/hc-breaking-and-taking.html>. The daily rotation, regeneration, a stage-by-stage plan, and the rules of holding.
+12. *Camp Time / Lag Time*, same site: <https://evonyhelper.weebly.com/camp-time-lag-time.html>. How players timed an arrival to the second.
+13. *How to cap level 12 historic city*, All About Evony (4 December 2012, edited 31 August 2014): <https://allaboutevony.blogspot.com/2012/12/how-to-cap-level-12-historic-city.html>. Wave plans by hero attack, regeneration per second, the draft's share.
 
 ## The map and its states
 
@@ -69,23 +74,19 @@ One per state, at the state's exact middle, **(x0 + 100, y0 + 100)** (sources 1 
 | 14 | Tuscany | 429, 495, 561 | 627, 693, 759 |
 | 15 | Romagna | 627, 693, 759 | 627, 693, 759 |
 
-For Friesland that's (33, 33), (99, 33), (165, 33), (33, 99), (165, 99), (33, 165), (99, 165), (165, 165). Source 1 shows Romagna's (693, 759) and (759, 759) as "Atlantis" (see Atlantis, above).
+For Friesland that's (33, 33), (99, 33), (165, 33), (33, 99), (165, 99), (33, 165), (99, 165), (165, 165). Source 1 shows Romagna's (693, 759) and (759, 759) as "Atlantis" (see Atlantis, above). Source 9 lists Carinthia's eight, which match the grid (one, (629, 429), is surely a slip for (627, 429)).
+
+**Flags:** source 9 gives each level a flag colour: red at level 12, green at 14, blue at 16 and gold at 18.
 
 ## Level 12
 
-**Every 18 tiles from offset 9** (source 2), so at offsets 9, 27, 45, 63, 81, 99, 117, 135, 153, 171 and 189 within a state, across and down.
+**Every 18 tiles from offset 9** (sources 2, 9 and 11), so at offsets 9, 27, 45, 63, 81, 99, 117, 135, 153, 171 and 189 within a state, across and down: 11 × 11 = 121 per state, **1,936** on the map.
 
-Our reading of that rule (the source gives only the rule, not a list):
-- It makes 11 × 11 = 121 places per state, 1,936 on the map.
-- Exactly one of them, (99, 99) in each state, sits next to the state capital at (100, 100). The game most likely had no level 12 there, which would leave 120 per state, 1,920 in all.
+- **One stands beside each capital:** (x0 + 99, y0 + 99), next to the level 16 at (x0 + 100, y0 + 100), is a level 12 too. Source 9 says the middle of the level 14 grid ((99, 99), (297, 297) …) holds a level 12, and source 11 counts 1,936 level 12s, the full 121 a state. (Before 2026-11-01 this note guessed there was none there.)
 - Others come within 6 tiles of a level 14, for example (27, 27) by (33, 33), but none lands on one.
+- Source 13 says "every 9 miles", which is probably a slip for the 9-tile draft radius.
 
-**Holding one** (source 3):
-- **Draft area:** 18 × 18 tiles, given in the guide's draft range as 19 × 19, 9 tiles in any direction (about 12.7 to the corners). That's the cell round the city, so the level 12 cells tile each state.
-- **Four drafts a day.**
-- **A launching point:** players used them to attack the bigger historic cities.
-
-**The largest army a historic city could send** (source 3; the War Ensign item adds a quarter):
+**The largest army a historic city could send** (source 3; the War Ensign item adds a quarter). Source 13 says holding a historic city raised the Rally Spot's limit by a quarter, which is where 125,000 comes from (100,000 × 1.25); 150,000 and 200,000 fit a half and double.
 
 | Launched from | Army | With War Ensign |
 |---|---|---|
@@ -93,51 +94,118 @@ Our reading of that rule (the source gives only the rule, not a list):
 | Level 14 | 150,000 | 187,500 |
 | Level 16 | 200,000 (implied) | 250,000 |
 
-**Garrison of a level 12** (source 3). It changed daily at random: warriors and archers always, and pikemen or swordsmen on alternate days.
+## Garrisons
 
-| Troops | | Fortifications | |
-|---|---|---|---|
-| Warrior | 1,120,000 | Traps | 22,000 |
-| Pikeman or Swordsman | 162,666 | Abatis | 11,000 |
-| Archer | 42,807 | Archer Tower | 6,666 |
-| Cavalry or Cataphract | 108,444 | Rolling Logs | 6,000 |
-| Battering Ram, Ballista or Catapult | 14,640 | Defensive Trebuchet | 5,000 |
+**Troops** by level (source 9; level 12 also sources 3, 11 and 13). Every type is 2.5 times the level below, and level 18 twice level 16, except the archers, 4 times from level 12 to 14:
 
-**Taking one** (source 3, in short):
-1. Players sent dozens of small waves first to use up the traps.
-2. Then one or more large waves broke the garrison: ballistae, or pikemen and archers.
-3. Then 30–40 or more small "loyalty" waves brought its loyalty to zero and captured it.
+| Troops | Level 12 | Level 14 | Level 16 | Level 18 (Atlantis) |
+|---|---|---|---|---|
+| Warrior | 1,120,000 | 2,800,000 | 7,000,000 | 14,000,000 |
+| Swordsman or Pikeman | 162,666 | 406,666 | 1,016,665 | 2,033,330 |
+| Archer | 42,807 | 171,228 | 428,070 | 856,140 |
+| Cavalry or Cataphract | 108,444 | 271,111 | 677,777 | 1,355,555 |
+| Battering Ram, Ballista or Catapult | 14,640 | 36,600 | 91,500 | 183,000 |
 
-Stronger heroes, a War Ensign and launching from a bigger historic city meant fewer waves. A captured historic city became the player's own city: players launched attacks from it and teleported other cities next to it. This is the same loyalty-to-zero capture Marchlands keeps for barbarian cities (deviations.md).
+Source 9 prints the level 14 archers as 171,288 and the level 12 cavalry as 108,404; both are surely slips (171,228 × 2.5 is its level 16 figure exactly, and the other sources give 108,444).
 
-## Drafting
+**Fortifications** are the same at every level (source 9): 22,000 traps, 11,000 abatis, 6,666 archer towers, 6,000 rolling logs and 5,000 defensive trebuchets. No source gives the walls' level.
 
-What a historic city's holder drafted, and from whom (sources 3, 6 and 7):
+**The hero:** a level 12 is defended by a level 100 King or Queen (source 11); a combat calculator gave them Attack / Intelligence from 110 / 500 at level 12 to 300 / 1,650 at level 18 (Other material, below).
 
-- **From players as well as NPCs.** A holder could draft from other players' cities within the city's range, and from NPC cities there too, taking a share of the troops in each. Players were routinely drafted by the holders of level 14s, 16s and Atlantis.
-- **The range grows with the city's level.** A level 12's is its 18 × 18 cell, with 4 drafts a day (source 3). The sources give no range or count for the bigger cities.
+**The daily rotation** (sources 3, 9 and 11): at each daily maintenance three swaps happen independently: swordsmen or pikemen, cavalry or cataphracts, and the siege engine (ram, ballista or catapult). Warriors and archers never change, so there are 12 garrisons. Players scouted once a day and attacked on a weak day: pikemen, cavalry and rams (sources 3, 11 and 13; source 9 preferred swordsmen and rams).
+
+## Regeneration
+
+- **Troops come back at 10% of the full garrison every 6 minutes** (source 11), so a wiped city is full again within an hour. Source 13's table for a level 12 is exactly that, per second: about 311 warriors, 45 swordsmen or pikemen, 12 archers, 30 cavalry or cataphracts and 4 siege engines. That's the same rule as ordinary NPC cities (and ours, `regenerateNpc`). Whether it came back in 6-minute steps or a little every second isn't stated, but AeroAgg's wave table ([aeroagg-complete-guide.md](aeroagg-complete-guide.md), Historic city waves) spreads the archer waves against a level 16 or 18 "over several seconds to land on respawns", which suggests troops came back every second.
+- **Fortifications** (source 11, unclear): traps, rolling logs and defensive trebuchets are used up when they fire, archer towers aren't, and abatis only harm cavalry. It also says the walls' fortifications repair "at 18%" without saying how often, and doesn't square that with the ones used up.
+- **Loyalty:** no source says whether or how fast it recovers.
+
+## Taking one
+
+### The waves
+
+Every plan has the same shape: wear down the traps, break the garrison with large waves, then send many small waves to bring loyalty to zero.
+
+- **Source 9** (2010): 4–5 heroes with 125+ leadership and 300+ attack, from 3–6 cities a few tiles away.
+  1. 30–50 waves of 5,000–10,000 warriors, against the traps.
+  2. Four waves of about 120,000 archers with thin layers of other troops, then a 92,000 wave to make sure: the first kills the cavalry, the archers and half the swordsmen, the next ones the warriors.
+  3. Loyalty waves of 5,000 archers and 10,000 warriors.
+  In all 330,000–580,000 warriors and 575,000 archers.
+- **Source 11** (all research at 10; 11 heroes, 5 of them level 100 with 300+ attack; Excalibur, Penicillin, a horn):
+  1. 30 waves of 3,000 warriors (35 with weaker heroes), all lost, scouting until about 500 traps are left.
+  2. 2 waves of 90,000 pikemen and 10,000 warriors, against the cavalry.
+  3. 1 wave of 80,000 archers with thin layers, against the pikemen.
+  4. 3 waves of 95,000 archers, against the archers.
+  5. Waves of 95,000 archers with thin layers until the warriors are gone.
+  6. Loyalty waves.
+  The troops it fought in order: traps, cavalry, pikemen, archers (with the towers), warriors, siege engines.
+- **Source 13** (level 100 heroes, every gear piece at 9 stars):
+  - **300–350 attack:** 15 heroes; 5 waves of 76,000 warriors and 24,000 pikemen (the cavalry die), 2 of 96,000 archers, 8 of 95,000 archers with 1,000-troop layers of every type (broken), then loyalty waves of 20,000 archers and 20,000 warriors. An army of 1M archers, 500,000 warriors and 125,000 pikemen. **400 attack:** the same with one pikeman wave fewer.
+  - **500+ attack** (12-star gear advised): one wave of 117,000–125,000 ballistae breaks it, 3 waves of 95,000 archers clean up, then the loyalty waves. Ballistae are lost to the defensive trebuchets and archer towers (the towers outrange them): about 12,000 with 12-star gear, 25,000–35,000 with 9 stars at 450 attack.
+  - No trap-clearing waves.
+- **Source 3:** from a level 16 with a War Ensign and 800+ attack (9 stars at least), 250,000 pikemen then 250,000 archers break a level 12 in two waves (about 7,000 archers lost), and several level 12s can be taken in a day.
+
+**Loyalty:** no source gives its starting value or what a win takes. 30 to 40 or more loyalty waves were needed once the garrison was broken (source 3: send at least 40, and have a city ready to teleport near for more). Sizes: 10,000 archers and 20,000 warriors (source 3), 20,000 and 20,000 (source 13), 50,000 and 50,000 falling to 20,000 and 20,000 (source 11), the warriors as a shield and no cavalry. Hero strength doesn't matter for them (source 3). Since the garrison keeps refilling (311 warriors a second at level 12), loyalty waves had to keep winning against it, hence their size.
+
+### Timing
+
+- **Waves land seconds apart:** 1–3 seconds (source 9), at least 1 and at most 20 seconds (source 13). Source 9's lost post claims a whole level 12 in under 30 seconds. With 10% of the garrison back every 6 minutes, a pause lets it refill.
+- **Source 11 disagrees:** it scouts after every stage and heals between them by hand. Either each stage was a burst of its own, or its method is looser.
+- **Camp time** (source 12): the send dialog showed when an army would arrive, and players set a *camp time*, minutes to wait before marching, so it arrived at a chosen clock time (all waves for 20:00:00, say). They first measured the server's lag by hitting a nearby valley or NPC city and comparing the expected arrival with the battle report's time (3 seconds late in the example), and set their times that much earlier. Precision was to the second, from several cities near the target, each timing its own waves.
+- **The clock:** the landing time the game showed followed the player's own computer clock, not the server's ([aeroagg-complete-guide.md](aeroagg-complete-guide.md), Camp time), one more reason to measure the lag first.
+- No source mentions an alliance rally.
+
+### Requirements
+
+- **A title:** source 11 says a King or Queen title was needed, which needed a captured level 10 NPC city first. Players grew a throwaway city to level 10 beside the historic city and abandoned it to make one. Keep two free city slots (the NPC city and the historic one).
+- A level 10 Rally Spot (source 11). Source 9 says to unmount all heroes, without saying why.
+
+## Holding one
+
+- **A 24-hour truce** on capture, at every level (source 11, and the combat guides). A player's own truce never covers a historic city, and it can't be teleported (source 11). After the truce only its troops defend it, and it can be taken back the same way (sources 11 and 13).
+- **Inside:** no buildings once captured (source 9). Its fields are empty but for one of each resource at the city's level; the rest can be built up to its level (sources 9, 10 and 13). Its own loot is only like a level 10 NPC city's (source 13).
+- **Its area of power** (sources 3, 9, 10 and 13):
+
+  | Level | Area |
+  |---|---|
+  | 12 | 9 tiles in every direction, an 18 × 18 cell (sources 3 and 13; source 9 says 22 × 17) |
+  | 14 | its 66-tile cell (source 9) |
+  | 16 | its state (source 9) |
+  | 18 | the whole map (sources 9 and 10) |
+
+- **Policies in the area** (sources 9 and 13), against every city in it, the colony powers ([colonies.md](colonies.md)): draft, disarm, sow discord, move population, and levying food or gold. Four policies a day in all, and the holder needed the rank of Princess.
+
+### Drafting
+
+What a historic city's holder drafted, and from whom (sources 3, 6, 7 and 13):
+
+- **From players as well as NPCs.** A holder could draft from other players' cities within the city's area, and from NPC cities there too. Players were routinely drafted by the holders of level 14s, 16s and Atlantis, who could draft from any city on the map (source 10).
+- **The share:** a draft took 5% of the target city's largest troop type (source 13). A player's city could be drafted once a day; an NPC city several times (4 drafts of 5% from a level 10's 400,000 warriors is about 80,000 a day). In place of a draft, a policy could take 10% of a city's food or gold.
 - **Reinforcements are safe.** Troops sent to reinforce another city can't be drafted. Players hid their armies by swapping them with a nearby ally, which also kept them close enough to recall quickly for an attack.
 - **Colonies were drafted the same way,** by the player who had colonised them; see [colonies.md](colonies.md).
 
 ## More named historic cities
 
-Source 8 names two more, with their coordinates but not their levels:
+Sources 8 and 10 name Atlantis at (0, 0) and two more, with their coordinates but not their levels:
 - St. Gallen at (369, 657), in Lombardy;
 - Vigevano at (567, 747), which falls in Tuscany by the coordinates (the wiki lists its state as "Vigevano").
 
-Neither lies on a level 14 place, nor on the level 12 grid as we read it (offsets 9, 27 … 189). So either they are level 12s and the "every 18 tiles" rule was only approximate, or the coordinates are wrong. Treat the level 12 list above as a pattern to start from, not a record of the real game.
+Neither lies on a level 14 place, nor on the level 12 grid. So either they are level 12s and the "every 18 tiles" rule was only approximate, or the coordinates are wrong. Treat the level 12 list above as a pattern to start from, not a record of the real game. No level 14 or 16 name is given as text anywhere (sources 1 and 4 are pictures).
 
-## From the combat guides
+## Other material
 
 [combat-guides.md](combat-guides.md), Other material, adds:
 - the heroes a combat calculator gave historic cities: Attack / Intelligence 110 / 500 at level 12 up to 300 / 1,650 at level 18;
 - the troop types in their garrisons by level;
 - a 24-hour truce after one is captured.
 
+Atlantis: only two Age 2 servers had seen it taken by October 2010, each by a whole alliance (source 9); players saw holding it as the end of a server (source 10).
+
 ## Not covered yet
 
-- The draft range and drafts a day of a level 14, 16 or 18, and what share of the troops a draft took.
-- Whether holding one gave tribute or a title.
-- The weebly site's front page has a document on "undraftable numbers" (probably how many troops are safe from a draft), an embedded file that hasn't been read.
+- Loyalty: its starting value, what a win takes, and whether it recovers.
+- The walls' level and the King or Queen's attributes.
+- The policies a day of a level 14, 16 or 18 (beyond their areas).
+- What happens to a historic city that is released or abandoned.
+- The weebly site's "undraftable numbers" document and its historic heroes spreadsheet, both files that weren't opened.
 - evonyage2help.com, linked from source 2's blog as a strategy guide, no longer loads.
-- The garrisons of level 14, 16 and 18 cities.

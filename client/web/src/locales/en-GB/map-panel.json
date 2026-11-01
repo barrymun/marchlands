@@ -1,6 +1,13 @@
 {
   "title": "Map ({{x}}, {{y}})",
   "toolbar": "Map controls",
+  "goTo": {
+    "open": "Map at ({{x}}, {{y}}): go to coordinates",
+    "label": "Go to coordinates",
+    "placeholder": "x, y",
+    "go": "Go",
+    "invalid": "Type two numbers, such as 300, 120."
+  },
   "pan": {
     "left": "Move left",
     "up": "Move up",

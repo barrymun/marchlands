@@ -12,7 +12,7 @@ Notes on how the original Evony worked, gathered from player guides, wikis and f
 
 | Note | What it covers | Version | Used by |
 |---|---|---|---|
-| [historic-cities.md](historic-cities.md) | Historic cities: where every level (12, 14, 16, 18) stands, the state capitals, drafting, a level 12's garrison and capture | Age 2 | [features/historical-cities.md](../features/historical-cities.md) |
+| [historic-cities.md](historic-cities.md) | Historic cities: where every level (12, 14, 16, 18) stands, the state capitals, the garrisons of every level, their daily rotation and regeneration, how players broke and took them (waves, timing with camp time), holding and drafting | Age 2 | [features/historical-cities.md](../features/historical-cities.md), [features/camp-times.md](../features/camp-times.md) |
 | [colonies.md](colonies.md) | Colonising players' cities: suzerains, tribute, the daily policies (draft, disarm, population, discord), uprisings | Age 2 | [features/historical-cities.md](../features/historical-cities.md) (a model for a seat's powers) |
 | [npc-cities.md](npc-cities.md) | NPC city garrisons by level, compared with our `NPC_TABLE`: the same but for one cell | Age 2 against Age 1 | `shared/core/src/world.ts` |
 

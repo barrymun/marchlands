@@ -17,6 +17,7 @@ import { CityDialog } from '@/components/city-dialog/city-dialog';
 import { useIsoViewport } from '@/components/iso-viewport/hooks';
 import type { PanDirection, ViewPoint } from '@/components/iso-viewport/types';
 import { panStep, spriteAt, tileAt } from '@/components/iso-viewport/utils';
+import { GoToCoords } from '@/components/map-panel/go-to-coords/go-to-coords';
 import { HeldValleys } from '@/components/map-panel/held-valleys/held-valleys';
 import { MapLegend } from '@/components/map-panel/map-legend/map-legend';
 import { TileCard } from '@/components/map-panel/tile-card/tile-card';
@@ -35,9 +36,10 @@ import { allOf } from '@/lib/query-keys';
 import { cn } from '@/lib/utils';
 
 /**
- * The world map filling the viewport, everything else floating over it: a toolbar (where the map is, the arrows, back
- * to the city, this city's valleys, the key), the selected tile's card, and the valleys or the key when asked for. On
- * a phone the tile's card and the lists share the top of the map, one at a time.
+ * The world map filling the viewport, everything else floating over it: a toolbar (where the map is, which opens a box
+ * to go to any coordinates, the arrows, back to the city, this city's valleys, the key), the selected tile's card, and
+ * the valleys or the key when asked for. On a phone the tile's card and the lists share the top of the map, one at a
+ * time.
  */
 export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number }) {
   const { t } = useTranslation(['map-panel', 'common']);
@@ -119,7 +121,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
         aria-label={t('toolbar')}
         className="absolute top-2 left-2 flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1 rounded-lg border bg-background/90 p-1 shadow backdrop-blur"
       >
-        <span className="px-1.5 text-sm font-medium tabular-nums">{t('title', { x: wrap(Math.round(centre.x)), y: wrap(Math.round(centre.y)) })}</span>
+        <GoToCoords x={wrap(Math.round(centre.x))} y={wrap(Math.round(centre.y))} mapSize={mapSize} onGoTo={goTo} />
         <Button size="icon-xs" variant="ghost" onClick={() => pan('left')} aria-label={t('pan.left')}>
           <ArrowLeft />
         </Button>
