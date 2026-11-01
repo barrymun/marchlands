@@ -150,7 +150,7 @@ A seat is a tile like any NPC city. Its holder is the tile's existing `owner_cit
 
 - **More benefits:** forecasts and relief from acts of god, when the market's later phases bring them.
 - **A state's NPC members** when a player holds its level 16: still the faction's, paying tribute to the player, or the player's own?
-- **Famous guards:** famous historical heroes (TODO.md) guarding the seats, once that feature exists.
+- **Famous guards:** famous historical heroes guarding the seats: proposed in the spike, [famous-heroes.md](famous-heroes.md), with a roster of 17 for the capitals and Atlantis.
 
 ## Phases
 
