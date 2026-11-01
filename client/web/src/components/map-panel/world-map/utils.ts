@@ -1,7 +1,9 @@
-import { SPRITE, TILE_W } from '@/components/iso-viewport/constants';
+import { mapLevelOf } from '@marchlands/core';
+
+import { TILE_W } from '@/components/iso-viewport/constants';
 import type { Camera, View } from '@/components/iso-viewport/types';
 import { nextZoom, spriteBox, tileAt, tileOrigin, zoomsFor } from '@/components/iso-viewport/utils';
-import { CHUNK, MIN_TILES_ACROSS, START_STEPS_OUT } from '@/components/map-panel/world-map/constants';
+import { CHUNK, HISTORIC_SPRITE, MIN_TILES_ACROSS, START_STEPS_OUT } from '@/components/map-panel/world-map/constants';
 import type { ChunkArea, TileInfo } from '@/components/map-panel/world-map/types';
 
 /** `v` brought into 0 … size - 1, the map wrapping round at its edges. */
@@ -14,9 +16,10 @@ export function wrap(v: number, size: number): number {
  * piece), back to front.
  */
 export function visibleTiles(cam: Camera, view: View): { x: number; y: number }[] {
-  // a sprite reaches its anchor's height above its tile's middle and the rest of it below; half a tile either side
-  const box = spriteBox();
-  const [top, bottom, side] = [-box.top * cam.zoom, (SPRITE + box.top) * cam.zoom, (TILE_W / 2) * cam.zoom];
+  // a sprite reaches its anchor's height above its tile's middle and the rest of it below; half a tile either side (the
+  // tallest sprites, the historic cities', decide how far)
+  const box = spriteBox(HISTORIC_SPRITE);
+  const [top, bottom, side] = [-box.top * cam.zoom, (HISTORIC_SPRITE + box.top) * cam.zoom, (TILE_W / 2) * cam.zoom];
   const corners = [
     tileAt({ x: -side, y: -bottom }, cam, view),
     tileAt({ x: view.w + side, y: -bottom }, cam, view),
@@ -48,14 +51,18 @@ export function chunksFor(tiles: readonly { x: number; y: number }[], size: numb
   return [...keys.values()];
 }
 
-/** The tiles of a loaded square, by tile id: `mapStr` holds two hex digits per tile (type, level), row by row. */
+/**
+ * The tiles of a loaded square, by tile id: `mapStr` holds two hex digits per tile (type, level), row by row; a historic
+ * city's level comes halved (core mapLevelDigit).
+ */
 export function decodeTiles(area: ChunkArea & { mapStr: string }, size: number): Map<number, TileInfo> {
   const tiles = new Map<number, TileInfo>();
   const w = area.x2 - area.x1 + 1;
   for (let i = 0; i * 2 < area.mapStr.length; i++) {
     const x = wrap(area.x1 + (i % w), size);
     const y = wrap(area.y1 + Math.floor(i / w), size);
-    tiles.set(y * size + x, { type: parseInt(area.mapStr.charAt(i * 2), 16), level: parseInt(area.mapStr.charAt(i * 2 + 1), 16) });
+    const type = parseInt(area.mapStr.charAt(i * 2), 16);
+    tiles.set(y * size + x, { type, level: mapLevelOf(type, parseInt(area.mapStr.charAt(i * 2 + 1), 16)) });
   }
   return tiles;
 }

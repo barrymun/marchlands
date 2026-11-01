@@ -1,7 +1,20 @@
 import { and, eq, isNull } from 'drizzle-orm';
 import { describe, expect, it, vi } from 'vitest';
 
-import { BALANCE, MAP_VIEW_MAX, msg, Relation, relationPermissions, stateOf, tileId, TileType, tileXY, valleyUpgradeCost } from '@marchlands/core';
+import {
+  BALANCE,
+  historicCities,
+  MAP_VIEW_MAX,
+  mapLevelDigit,
+  msg,
+  Relation,
+  relationPermissions,
+  stateOf,
+  tileId,
+  TileType,
+  tileXY,
+  valleyUpgradeCost,
+} from '@marchlands/core';
 import { tiles, worldState } from '@marchlands/db';
 import { testDb } from '@marchlands/db/test/support/db.ts';
 
@@ -53,7 +66,7 @@ async function expectedMapStr(g: TestGame, ids: number[], castleLevel: (cityId: 
   let s = '';
   for (const id of ids) {
     const t = await getTile(g, id);
-    s += t.cityId != null ? hex(TileType.CASTLE) + hex(castleLevel(t.cityId)) : hex(t.type) + hex(t.level);
+    s += t.cityId != null ? hex(TileType.CASTLE) + hex(castleLevel(t.cityId)) : hex(t.type) + hex(mapLevelDigit(t.type, t.level));
   }
   return s;
 }
@@ -90,6 +103,26 @@ describe(world.zoneStats.name, () => {
       expect(fresh).toHaveLength(BALANCE.stateGrid ** 2);
       await createTestPlayer(g, { zone: 2 });
       expect(await world.zoneStats(asDb(g))).toEqual(fresh); // cached: the new city is not counted yet
+    }));
+});
+
+describe('historic cities on the map', () => {
+  it('stand at their places: Atlantis at (0, 0), the capitals, and every level 14 and 12', () =>
+    game(async (g) => {
+      expect(await getTile(g, tileId(0, 0))).toMatchObject({ type: TileType.HISTORIC, level: 18 });
+      expect(await getTile(g, tileId(300, 500))).toMatchObject({ type: TileType.HISTORIC, level: 16 });
+      const rows = await g.tx.select({ id: tiles.id, level: tiles.level }).from(tiles).where(eq(tiles.type, TileType.HISTORIC));
+      const expected = historicCities().map((c) => ({ id: tileId(c.x, c.y), level: c.level }));
+      expect(rows.sort((a, b) => a.id - b.id)).toEqual(expected.sort((a, b) => a.id - b.id));
+    }));
+
+  it('are sent in the map string with half their level, which fits one hex digit', () =>
+    game(async (g) => {
+      const p = await createTestPlayer(g);
+      const view = await world.mapView(g, p.id, 95, 95, 105, 105);
+      // (100, 100), the capital, is the 6th tile of the 6th row
+      const i = 2 * (5 * 11 + 5);
+      expect(view.mapStr.slice(i, i + 2)).toBe(hex(TileType.HISTORIC) + '8');
     }));
 });
 

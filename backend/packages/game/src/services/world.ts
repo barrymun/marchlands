@@ -11,7 +11,9 @@ import {
   BALANCE,
   GameError,
   generateMap,
+  historicCities,
   MAP_VIEW_MAX,
+  mapLevelDigit,
   msg,
   Relation,
   relationPermissions,
@@ -87,6 +89,13 @@ export async function ensureWorld(db: Db, opts: { source: 'generated' | 'legacy'
         insert into tiles (id, type, level)
         select * from unnest(${pgArray(ids)}::int[], ${pgArray(types)}::smallint[], ${pgArray(levels)}::smallint[])`);
     }
+    // (marchlands) historic cities stand at fixed places on every world (core historic.ts; an existing world got them
+    // from migration 0031)
+    const seats = historicCities(size);
+    await tx.execute(sql`
+      update tiles set type = ${TileType.HISTORIC}, level = seat.level
+      from unnest(${pgArray(seats.map((s) => s.y * size + s.x))}::int[], ${pgArray(seats.map((s) => s.level))}::smallint[]) as seat(id, level)
+      where tiles.id = seat.id`);
     const info: WorldInfo = { mapSize: size, source: opts.source, seed: opts.seed, createdAt: Date.now() };
     await tx.insert(worldState).values({ key: WORLD_KEY, value: info, updatedAt: Date.now() });
     log(`world seeded: ${total} tiles in ${Date.now() - started}ms`);
@@ -208,7 +217,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
         });
       }
     } else {
-      mapStr += hex(t.type) + hex(t.level);
+      mapStr += hex(t.type) + hex(mapLevelDigit(t.type, t.level));
       if (t.type === TileType.NPC) {
         castles.push({ id, x, y, npc: true, level: t.level, zoneId, ...relationPermissions(Relation.NO_RELATION) });
       }

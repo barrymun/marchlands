@@ -218,6 +218,13 @@
       "when": 1793485992546,
       "tag": "0030_faction_standing",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793545446907,
+      "tag": "0031_historic_cities",
+      "breakpoints": true
     }
   ]
 }

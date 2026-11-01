@@ -59,7 +59,7 @@ export function TileCard({
   const side = tile?.type === TileType.NPC ? (isFactionLevel(tile.level) ? factionOfZone(tile.zoneId) : null) : undefined;
   /** what can be scouted on a tile (empty land has nothing to see) */
   const kindOf = (t: NonNullable<typeof tile>): SendTarget['kind'] =>
-    t.type === TileType.CASTLE ? 'city' : t.type === TileType.NPC ? 'npc' : t.type === TileType.FLAT ? undefined : 'valley';
+    t.type === TileType.CASTLE ? 'city' : t.type === TileType.NPC || t.type === TileType.HISTORIC ? 'npc' : t.type === TileType.FLAT ? undefined : 'valley';
   const missionsFor = (t: NonNullable<typeof tile>): number[] => {
     const m: number[] = [];
     if (t.canLoot || t.canOccupy) m.push(Mission.ATTACK);

@@ -9,3 +9,6 @@ export const START_STEPS_OUT = 2;
 
 /** How many tiles an arrow button moves the map: diagonally in tile terms, straight up, down or across on screen. */
 export const PAN_STEP = 4;
+
+/** The historic cities' map sprites are this big, taller than every other tile's (lib/game-art.ts historicArtFile). */
+export const HISTORIC_SPRITE = 96;

@@ -81,6 +81,12 @@ describe(decodeTiles.name, () => {
     expect(tiles.get(21 * 800 + 11)).toEqual({ type: 12, level: 3 });
   });
 
+  it('reads a historic city’s level back from its halved digit', () => {
+    const tiles = decodeTiles({ x1: 0, y1: 0, x2: 1, y2: 0, mapStr: 'd9d6' }, 800);
+    expect(tiles.get(0)).toEqual({ type: 13, level: 18 });
+    expect(tiles.get(1)).toEqual({ type: 13, level: 12 });
+  });
+
   it('wraps a square that runs past the map edge', () => {
     const tiles = decodeTiles({ x1: 799, y1: 0, x2: 800, y2: 0, mapStr: '1121' }, 800);
     expect(tiles.get(799)).toEqual({ type: 1, level: 1 });

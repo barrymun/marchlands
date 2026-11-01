@@ -1,13 +1,15 @@
 import { useQueries } from '@tanstack/react-query';
 
 import { getMapOptions, type MapCastle, type MapHeldValley } from '@marchlands/api-client';
+import { TileType } from '@marchlands/core';
 
 import type { Viewport } from '@/components/iso-viewport/hooks';
 import type { Drawable } from '@/components/iso-viewport/types';
 import { TILE_ART } from '@/components/map-panel/constants';
+import { HISTORIC_SPRITE } from '@/components/map-panel/world-map/constants';
 import type { ChunkArea, TileInfo } from '@/components/map-panel/world-map/types';
 import { chunksFor, decodeTiles, visibleTiles, wrap } from '@/components/map-panel/world-map/utils';
-import { artBand, tileArtFile } from '@/lib/game-art';
+import { artBand, HISTORIC_ART_LEVELS, historicArtFile, tileArtFile } from '@/lib/game-art';
 
 /** How long a loaded square of the map counts as fresh before it is fetched again when it comes back into view. */
 const FRESH_MS = 30_000;
@@ -48,11 +50,12 @@ export function useWorldMap(vp: Viewport, mapSize: number) {
   const tiles = visible.map((v) => {
     const id = idOf(v.x, v.y);
     const info = area.tiles.get(id);
-    const file = info ? tileArtFile(info.type, artBand(info.level)) : undefined;
-    return { ...v, id, info, src: file ? TILE_ART[file] : undefined, file: file ? `tiles/${file}` : undefined };
+    const historic = info?.type === TileType.HISTORIC ? HISTORIC_ART_LEVELS.find((l) => l === info.level) : undefined;
+    const file = historic ? historicArtFile(historic) : info ? tileArtFile(info.type, artBand(info.level)) : undefined;
+    return { ...v, id, info, size: historic ? HISTORIC_SPRITE : undefined, src: file ? TILE_ART[file] : undefined, file: file ? `tiles/${file}` : undefined };
   });
   const sprites: (Drawable & { id: number; file?: string })[] = tiles.flatMap((t) =>
-    t.src ? [{ key: `${t.x},${t.y}`, col: t.x, row: t.y, src: t.src, id: t.id, file: t.file }] : [],
+    t.src ? [{ key: `${t.x},${t.y}`, col: t.x, row: t.y, src: t.src, id: t.id, file: t.file, size: t.size }] : [],
   );
   return { area, tiles, sprites, idOf };
 }

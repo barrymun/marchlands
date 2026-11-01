@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, historicCities, historicDay, historicGarrison, historicLevelAt, historicRallyBonus, historicResearch, TechType } from '#/index.ts';
+import {
+  BALANCE,
+  historicCities,
+  historicDay,
+  historicGarrison,
+  historicGuard,
+  historicLevelAt,
+  historicRallyBonus,
+  historicResearch,
+  historicState,
+  mapLevelDigit,
+  mapLevelOf,
+  TechType,
+  TileType,
+} from '#/index.ts';
 
 describe(historicLevelAt.name, () => {
   it('puts Atlantis at (0, 0), a capital in the middle of every state, 14s every 66 tiles and 12s every 18', () => {
@@ -71,5 +85,56 @@ describe(historicResearch.name, () => {
 describe(historicRallyBonus.name, () => {
   it('adds a quarter a level step above 10', () => {
     expect([12, 14, 16, 18].map((l) => historicRallyBonus(l as 12 | 14 | 16 | 18))).toEqual([0.25, 0.5, 0.75, 1]);
+  });
+});
+
+describe(mapLevelDigit.name, () => {
+  it('halves a historic city’s level so it fits one hex digit, and mapLevelOf reads it back', () => {
+    for (const level of [12, 14, 16, 18]) {
+      const digit = mapLevelDigit(TileType.HISTORIC, level);
+      expect(digit).toBeLessThan(16);
+      expect(mapLevelOf(TileType.HISTORIC, digit)).toBe(level);
+    }
+    expect(mapLevelDigit(TileType.NPC, 10)).toBe(10);
+    expect(mapLevelOf(TileType.NPC, 10)).toBe(10);
+  });
+});
+
+describe(historicState.name, () => {
+  const DAY_MS = 86_400_000;
+  const at = 20_000 * DAY_MS + 3_600_000;
+
+  it('starts whole, with the day’s garrison and full loyalty', () => {
+    const s = historicState(12, 4567, null, at);
+    expect(s.troops).toEqual(historicGarrison(12, historicDay(4567, 20_000)).troops);
+    expect(s.forts).toEqual(BALANCE.historic.forts);
+    expect(s.state).toMatchObject({ loyalty: BALANCE.historic.loyalty, day: 20_000 });
+  });
+
+  it('refills by the second, and stands whole again with the next day’s garrison, keeping its loyalty', () => {
+    const fresh = historicState(12, 4567, null, at);
+    const hit = { state: { ...fresh.state, loyalty: 40 }, troops: {}, forts: {} };
+    const later = historicState(12, 4567, hit, at + 36_000);
+    // 10% every 6 minutes: 36 seconds bring back 1%
+    expect(later.troops.militia).toBe(11_200);
+    expect(later.state.loyalty).toBe(40);
+    const tomorrow = historicState(12, 4567, hit, at + DAY_MS);
+    expect(tomorrow.troops).toEqual(historicGarrison(12, historicDay(4567, 20_001)).troops);
+    expect(tomorrow.state).toMatchObject({ loyalty: 40, day: 20_001 });
+  });
+
+  it('gets loyalty back a point every 6 real minutes, up to its own full', () => {
+    const fresh = historicState(14, 99, null, at);
+    const low = { state: { ...fresh.state, loyalty: 98 }, troops: fresh.troops, forts: fresh.forts };
+    expect(historicState(14, 99, low, at + 6 * 60_000).state.loyalty).toBe(99);
+    expect(historicState(14, 99, low, at + 60 * 60_000).state.loyalty).toBe(BALANCE.historic.loyalty);
+  });
+});
+
+describe(historicGuard.name, () => {
+  it('is level 100 with the level’s Attack and Intelligence, the same every time', () => {
+    const g = historicGuard(16, 1234);
+    expect(g).toMatchObject({ level: 100, power: 200, stratagem: 1_100 });
+    expect(historicGuard(16, 1234).name).toBe(g.name);
   });
 });

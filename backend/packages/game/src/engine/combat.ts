@@ -26,6 +26,12 @@ import {
   HeroBuffId,
   heroPower,
   HeroStatus,
+  HISTORIC_LEVELS,
+  historicGuard,
+  type HistoricLevel,
+  historicResearch,
+  historicState,
+  type HistoricState,
   injuredOf,
   ItemId,
   maxArmyTroops,
@@ -528,6 +534,40 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     return finishScout(ctx, a, a.troops);
   }
 
+  if (tile.cityId == null && tile.type === TileType.HISTORIC) {
+    const level = historicLevel(tile);
+    const hc = historicOf(tile, a.reachTime);
+    const guard = historicGuard(level, tile.id);
+    Object.assign(tile, { state: hc.state, troops: hc.troops, forts: hc.forts, updatedAt: ctx.now });
+    await saveTile(ctx, tile);
+    await createReport(ctx, {
+      ...reportBase,
+      body: {
+        kind: 'scout',
+        scout: {
+          target: 'npc',
+          level,
+          success: true,
+          loyalty: Math.floor(hc.state.loyalty),
+          population: hc.state.population,
+          resources: {
+            gold: Math.floor(hc.state.gold),
+            food: Math.floor(hc.state.food),
+            wood: Math.floor(hc.state.wood),
+            stone: Math.floor(hc.state.stone),
+            iron: Math.floor(hc.state.iron),
+          },
+          troops: hc.troops,
+          fortifications: hc.forts,
+          wallLevel: level,
+          buildings: npcBuildings(10),
+          hero: { name: guard.name, level: guard.level },
+        },
+      },
+    });
+    return finishScout(ctx, a, a.troops);
+  }
+
   if (tile.cityId == null) {
     // valley or empty land
     let defenders: TroopCounts;
@@ -789,6 +829,7 @@ async function arriveAttack(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const tile = await getTile(ctx, a.targetTileId);
   if (tile.cityId != null) return attackCity(ctx, a, attacker, tile.cityId);
   if (tile.type === TileType.NPC) return attackNpc(ctx, a, attacker);
+  if (tile.type === TileType.HISTORIC) return attackHistoric(ctx, a, attacker);
   if (tile.type !== TileType.FLAT) return attackValley(ctx, a, attacker);
   return turnBack(ctx, a, msg('army.nothingToAttack'));
 }
@@ -1020,6 +1061,89 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
       ...(Object.keys(medals).length ? { medals } : {}),
       ...(standing ? { standing } : {}),
     },
+  );
+  await createReport(ctx, {
+    playerId: a.playerId,
+    title: msg(r.attackerWon ? 'report.title.attackSucceeded' : 'report.title.attackFailed'),
+    isAttack: true,
+    armyType: Mission.ATTACK,
+    startPos: a.startPosName,
+    targetPos: a.targetPosName,
+    body,
+  });
+  if (totalTroops(r.attacker.after) <= 0) {
+    await armyWiped(ctx, a, hero, null);
+    return;
+  }
+  await returnWithLoot(ctx, a, r.attacker.after, loot);
+}
+
+/** A historic city tile's level (its row holds one of HISTORIC_LEVELS). */
+function historicLevel(tile: TileRow): HistoricLevel {
+  return HISTORIC_LEVELS.find((l) => l === tile.level) ?? 12;
+}
+
+/** A historic city's state, garrison and fortifications as of `at` (an army's landing time). */
+function historicOf(tile: TileRow, at: number) {
+  const stored = tile.state && tile.troops ? { state: tile.state as unknown as HistoricState, troops: tile.troops, forts: tile.forts ?? {} } : null;
+  return historicState(historicLevel(tile), tile.id, stored, at);
+}
+
+/**
+ * An attack on a historic city (docs/features/historical-cities.md): its garrison, research and hero, its loot a level
+ * 10's, and each win takes BALANCE.historic.loyaltyPerWin off its loyalty. No faction stands behind it yet, and
+ * capturing one at 0 loyalty comes with the next phase.
+ */
+async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
+  const tile = await getTile(ctx, a.targetTileId, { lock: true });
+  const level = historicLevel(tile);
+  const hero = await heroOf(ctx, a);
+  const hc = historicOf(tile, a.reachTime);
+  const guard = historicGuard(level, tile.id);
+  const r = resolveCombat(
+    {
+      troops: a.troops,
+      research: attacker.research,
+      hero,
+      attackBonus: buffBonus(attacker, BuffId.ATTACK, ctx.now),
+      defenseBonus: buffBonus(attacker, BuffId.DEFENSE, ctx.now),
+    },
+    { troops: hc.troops, research: historicResearch(), hero: guard, forts: hc.forts, wallLevel: level },
+    ctx.rng,
+  );
+  let loot: ResourceSet = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
+  let loyaltyDamage = 0;
+  const state = { ...hc.state };
+  if (r.attackerWon) {
+    loot = plunder({ gold: state.gold, food: state.food, wood: state.wood, stone: state.stone, iron: state.iron }, lootCapacity(a, r.attacker.after, attacker));
+    for (const k of Object.keys(loot) as (keyof ResourceSet)[]) state[k] -= loot[k];
+    loyaltyDamage = Math.min(state.loyalty, BALANCE.historic.loyaltyPerWin);
+    state.loyalty -= loyaltyDamage;
+  }
+  Object.assign(tile, { troops: r.defender.after, forts: r.forts.after, state, updatedAt: ctx.now });
+  await saveTile(ctx, tile);
+  attacker.honor += r.attackerHonor;
+  await savePlayer(ctx, attacker);
+  await grantHeroExp(ctx, hero, r.attackerHeroExp);
+  const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
+  battleStats(ctx, a, r, 'npc', { injured, loot, captured: false, level });
+  const body = battleBody(
+    r,
+    {
+      player: attacker.name,
+      hero: heroSummary(hero),
+      troops: { before: r.attacker.before, lost: r.attacker.lost, after: r.attacker.after },
+      injured,
+      ...(await attackerBonuses(ctx, attacker, a)),
+    },
+    {
+      player: '', // the historic city itself: the client names it
+      hero: { id: 0, name: guard.name, level: guard.level, logoUrl: guard.logoUrl },
+      troops: { before: r.defender.before, lost: r.defender.lost, after: r.defender.after },
+      forts: r.forts,
+      wallLevel: level,
+    },
+    { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured: false, level },
   );
   await createReport(ctx, {
     playerId: a.playerId,
