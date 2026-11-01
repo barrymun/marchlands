@@ -26,7 +26,7 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
   // the troop or fortification being dismissed
   const [dismissing, setDismissing] = useState<number | null>(null);
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+    <div className="grid gap-4 lg:grid-cols-2">
       <div className="grid content-start gap-4">
         <Card>
           <CardHeader className="pb-2">
