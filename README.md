@@ -80,7 +80,7 @@ marchlands/
 │   └── spec/                 reverse-engineering specs of the original server
 └── tools/
     ├── legacy-import/        converts the original MySQL dumps into data files
-    ├── smoke/                end-to-end scenario tests against a running stack
+    ├── smoke/                end-to-end scenario tests and a load test against a running stack
     └── docs/                 doc generators
 ```
 

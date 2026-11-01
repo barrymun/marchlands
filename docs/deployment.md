@@ -281,6 +281,10 @@ They connect with `DATABASE_URL` from `.env` (Postgres on `127.0.0.1`).
   deletes operators. Never delete players with hand-written SQL.
 - `npm run smoke`: end-to-end checks against a running API (`API=http://127.0.0.1:3000`); they create test
   players, so delete those afterwards.
+- `npm run load -- --players 100 --minutes 5`: a load test, simulated players using the game as the web client
+  does, with requests per second and latency per endpoint. It creates players `fx_load_001` … (kept for the next
+  run; `--cleanup` deletes them at the end) and loads the server for real, so run it on a live server only before
+  inviting players. `--server-stats` adds the containers' CPU and Postgres transactions (on the server itself).
 
 ## Configuration
 

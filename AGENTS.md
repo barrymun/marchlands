@@ -52,6 +52,7 @@ Run from the repo root.
 | `npm run sim -- …` | battle simulations, see [docs/battle-sims](docs/battle-sims/README.md) |
 | `npm run delete-player -- <username>… [--yes]` | delete test accounts the way the game does (their valleys released, castles back to flat land); lists what it would delete until run with `--yes`. Never deletes admin accounts. |
 | `API=http://localhost:3100 node tools/smoke/smoke.mjs` (also `war.mjs`, `market.mjs`) | end-to-end checks against the running stack |
+| `API=http://localhost:3100 npm run load -- [--players 100] [--minutes 5] [--server-stats] [--cleanup]` | load test (`tools/smoke/load.mjs`): simulated players (`fx_load_NNN`, kept for the next run unless `--cleanup`) open screens and push sockets as the web client does; prints requests per second and latency per endpoint, the pushes, and with `--server-stats` the stack's CPU and Postgres transactions. The requests follow the client's: change it when the client's queries or push handlers change what they fetch |
 
 Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and `npm run format:check` all pass, and `npm run test:db` when the change touches the backend.
 
