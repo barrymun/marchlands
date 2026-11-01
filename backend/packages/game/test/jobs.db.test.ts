@@ -10,11 +10,13 @@ import {
   heroes,
   mails,
   marketCandles,
+  marketTrades,
   players,
   playerStats,
   pushMessages,
   reports,
   tiles,
+  warPlans,
   worldState,
 } from '@marchlands/db';
 
@@ -210,6 +212,23 @@ describe(cleanupJob.name, () => {
         { period: CandlePeriod.HOUR, start: now - keep.hour + MIN },
         { period: CandlePeriod.MINUTE, start: now - keep.minute + MIN },
       ]);
+    }));
+
+  it('drops market trades older than BALANCE.marketTrades.keepMs, and wave plans a day past their landing second', () =>
+    inTestTx(async (db) => {
+      const now = Date.now();
+      const p = await arrange(db, (g) => createTestPlayer(g));
+      const keep = BALANCE.marketTrades.keepMs;
+      const trade = (resType: number, createdAt: number) => ({ resType, price: 1, amount: 1, gold: 1, takerSide: 0, buyerPlayerId: p.id, createdAt });
+      await db.insert(marketTrades).values([trade(Res.FOOD, now - keep - 1000), trade(Res.IRON, now - keep - 1000), trade(Res.FOOD, now - keep + 60_000)]);
+      const plan = (landAt: number) => ({ playerId: p.id, name: 'Old', targetTileId: 1, landAt, createdAt: landAt - DAY });
+      await db.insert(warPlans).values([plan(now - BALANCE.warPlans.keepMs - 1000), plan(now - 1000)]);
+
+      await cleanupJob(db);
+      const trades = await db.select({ createdAt: marketTrades.createdAt }).from(marketTrades).where(eq(marketTrades.buyerPlayerId, p.id));
+      expect(trades.map((t) => t.createdAt)).toEqual([now - keep + 60_000]);
+      const plans = await db.select({ landAt: warPlans.landAt }).from(warPlans).where(eq(warPlans.playerId, p.id));
+      expect(plans.map((x) => x.landAt)).toEqual([now - 1000]);
     }));
 });
 

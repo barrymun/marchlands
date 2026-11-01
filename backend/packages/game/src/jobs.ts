@@ -2,7 +2,7 @@
 
 import { and, asc, eq, isNotNull, lt, sql } from 'drizzle-orm';
 
-import { autoDraftsDue, BALANCE, CandlePeriod, draftsUsed, heroName, stateOf } from '@marchlands/core';
+import { autoDraftsDue, BALANCE, BASIC_RESOURCES, CandlePeriod, draftsUsed, heroName, stateOf } from '@marchlands/core';
 import { cities, type Db, heroes, players } from '@marchlands/db';
 
 import { runGame } from '#/context.ts';
@@ -94,6 +94,10 @@ export async function cleanupJob(db: Db) {
   const keep = BALANCE.marketCandles.keepMs;
   await db.execute(sql`delete from market_candles where period = ${CandlePeriod.MINUTE} and start < ${now - keep.minute}`);
   await db.execute(sql`delete from market_candles where period = ${CandlePeriod.HOUR} and start < ${now - keep.hour}`);
+  // (marchlands) trades older than BALANCE.marketTrades.keepMs, a resource at a time so the delete walks
+  // market_trades_res_time_idx
+  for (const resType of BASIC_RESOURCES.keys())
+    await db.execute(sql`delete from market_trades where res_type = ${resType} and created_at < ${now - BALANCE.marketTrades.keepMs}`);
   // (marchlands) wave plans whose landing second is long past (their waves go with them)
   await db.execute(sql`delete from war_plans where land_at < ${now - BALANCE.warPlans.keepMs}`);
 }

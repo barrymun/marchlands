@@ -332,6 +332,11 @@ export const BALANCE = {
    */
   marketCandles: { keepMs: { minute: 7 * DAY, hour: 90 * DAY } },
   /**
+   * (marchlands) trades with a player in them (market_trades) are kept this long (real time), then pruned by the
+   * cleanup job: players see their last 50 and a market its last 30, and the candles keep the price history
+   */
+  marketTrades: { keepMs: 180 * DAY },
+  /**
    * (marchlands) NPC factions (factions.ts): NPC cities from `minLevel` up belong to the faction holding their
    * zone; lower ones are unaligned bandits (no faction, no trade, no standing lost by attacking them)
    */
