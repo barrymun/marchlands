@@ -101,5 +101,13 @@
     "auto": "Draft by itself",
     "used": "{{used}} of {{max}} drafts today",
     "button": "Draft into {{city}} ({{used}}/{{max}})"
+  },
+  "seat": {
+    "loyalty": "Loyalty {{loyalty}} / {{max}}",
+    "truce": "Under its truce: no unrest yet",
+    "garrison": "Fewer than {{troops}} troops at home: losing loyalty",
+    "unpaid": "Out of gold or food for its upkeep: losing loyalty",
+    "upkeep": "Upkeep {{gold}} gold and {{food}} food an hour",
+    "shared": "Your alliance gets {{gold}} gold an hour of its tribute"
   }
 }

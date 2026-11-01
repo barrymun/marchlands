@@ -9,7 +9,8 @@
     "taxSold": "税 {{rate}}%（生産物を売却）",
     "heroSalaries": "英雄の給料",
     "tribute": "歴史都市の貢納",
-    "stateTribute": "州の貢納"
+    "stateTribute": "州の貢納",
+    "seatUpkeep": "歴史都市の維持費"
   },
   "breakdown": {
     "base": "基本",
@@ -19,7 +20,8 @@
     "mayor": "市長 {{name}} +{{percent}}",
     "valleys": "領地 +{{percent}}",
     "upkeep": "部隊維持費",
-    "tax": "税（金で売却）"
+    "tax": "税（金で売却）",
+    "seatUpkeep": "歴史都市の維持費"
   },
   "rows": {
     "perRealHour": "実時間1時間あたり（ゲーム速度 {{speed}}×）"

@@ -216,6 +216,24 @@ export const BALANCE = {
      * capital this much gold a real hour per member level instead (a member of level 7 pays 35; Tuscany's about 42,000)
      */
     stateTribute: { perMemberLevel: 5 },
+    /**
+     * what holding costs, each real hour, out of the seat city: gold and food by level, the whole times
+     * 1 + risePerSeat for each other seat the player holds (a second seat makes both cost 25% more). Unpaid (the seat out
+     * of gold or food) it loses loyalty (unrest)
+     */
+    upkeep: {
+      gold: { 12: 1_000, 14: 3_000, 16: 10_000, 18: 30_000 } as Record<12 | 14 | 16 | 18, number>,
+      food: { 12: 100_000, 14: 250_000, 16: 600_000, 18: 1_500_000 } as Record<12 | 14 | 16 | 18, number>,
+      risePerSeat: 0.25,
+    },
+    /**
+     * unrest: a seat with fewer troops at home than `garrison` for its level, or out of gold or food for its upkeep,
+     * loses a loyalty point each `msPerPoint` (real time) for each, and doesn't recover; at 0 it rebels and stands again
+     * as a historic city nobody holds
+     */
+    unrest: { msPerPoint: 12 * MINUTE, garrison: { 12: 5_000, 14: 10_000, 16: 20_000, 18: 50_000 } as Record<12 | 14 | 16 | 18, number> },
+    /** the share of a seat's tribute (and a capital's state tribute) its holder's alliance gets, paid to the other members every real hour */
+    allianceShare: 0.25,
   },
   /** (marchlands) how far ahead an army can be set to land at a chosen time (camp times; real time) */
   landAtMaxAheadMs: 24 * HOUR,

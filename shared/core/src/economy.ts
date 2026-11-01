@@ -91,6 +91,8 @@ export interface EconomyContext {
   buffs: BuffState[];
   /** troops of this city currently away (marching/stationed): still eat */
   awayTroops: TroopCounts;
+  /** (marchlands) a held historic city: how many seats its holder holds (its upkeep rises with each), and whether the holder's alliance shares its tribute */
+  seats?: { held: number; shared: boolean };
 }
 
 export interface BonusParts {
@@ -128,6 +130,10 @@ export interface CityStats {
   tribute: number;
   /** (marchlands) gold per hour a state's capital gets from its state's barbarian cities (core stateTribute, per real hour) */
   stateTribute: number;
+  /** (marchlands) gold per hour of the tributes its holder's alliance gets (BALANCE.historic.allianceShare; not in tribute or stateTribute) */
+  tributeShared: number;
+  /** (marchlands) gold and food per hour a held historic city's upkeep costs (BALANCE.historic.upkeep, per real hour) */
+  seatUpkeep: { gold: number; food: number };
   /** (marchlands) field output per hour the tax rate takes and sells to the merchant */
   taxed: Record<BasicResource, number>;
   heroSalary: number;
@@ -267,10 +273,20 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   const taxIncome = baseTax + taxConverted;
   // (marchlands) a held historic city's tribute, paid per real hour like salaries
   const seat = city.historicLevel as 12 | 14 | 16 | 18 | null | undefined;
-  const tribute = seat && seat in BALANCE.historic.tribute ? BALANCE.historic.tribute[seat] / getGameSpeed() : 0;
+  const level = seat && seat in BALANCE.historic.tribute ? seat : null;
+  const fullTribute = level ? BALANCE.historic.tribute[level] / getGameSpeed() : 0;
   // (marchlands) and a capital's, from its state's barbarian cities
-  const stateTribute = (city.stateTribute ?? 0) / getGameSpeed();
-  rates.gold = taxIncome + tribute + stateTribute - heroSalary;
+  const fullStateTribute = (city.stateTribute ?? 0) / getGameSpeed();
+  // (marchlands) the holder's alliance takes its share of both; holding costs gold and food, more with each seat held
+  const kept = ctx.seats?.shared ? 1 - BALANCE.historic.allianceShare : 1;
+  const tribute = fullTribute * kept;
+  const stateTribute = fullStateTribute * kept;
+  const tributeShared = fullTribute + fullStateTribute - tribute - stateTribute;
+  const { upkeep: u } = BALANCE.historic;
+  const rise = 1 + u.risePerSeat * Math.max(0, (ctx.seats?.held ?? 1) - 1);
+  const seatUpkeep = level ? { gold: (u.gold[level] * rise) / getGameSpeed(), food: (u.food[level] * rise) / getGameSpeed() } : { gold: 0, food: 0 };
+  rates.food -= seatUpkeep.food;
+  rates.gold = taxIncome + tribute + stateTribute - heroSalary - seatUpkeep.gold;
 
   return {
     maxPopulation,
@@ -288,6 +304,8 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
     taxBuff,
     tribute,
     stateTribute,
+    tributeShared,
+    seatUpkeep,
     taxed,
     heroSalary,
     upkeep,
@@ -314,6 +332,8 @@ export interface SettleFlows {
   upkeep: number;
   /** gold paid to heroes */
   salaries: number;
+  /** (marchlands) gold and food a held historic city's upkeep took */
+  seatUpkeep: { gold: number; food: number };
 }
 
 const emptyFlows = (): SettleFlows => ({
@@ -322,6 +342,7 @@ const emptyFlows = (): SettleFlows => ({
   taxed: { food: 0, wood: 0, stone: 0, iron: 0 },
   upkeep: 0,
   salaries: 0,
+  seatUpkeep: { gold: 0, food: 0 },
 });
 
 const MAX_TICKS_DETAILED = 5000;
@@ -369,8 +390,11 @@ function integrate(city: EconomyCity, stats: CityStats, dtMs: number, result: Se
   for (const r of BASIC_RESOURCES) {
     const delta = stats.rates[r] * hours;
     const eat = r === 'food' ? stats.upkeep * hours : 0;
+    // (marchlands) a held historic city's food upkeep: counted apart from what troops eat
+    const seatFood = r === 'food' ? stats.seatUpkeep.food * hours : 0;
+    f.seatUpkeep.food += seatFood;
     const cur = city[r];
-    f.produced[r] += delta + eat + stats.taxed[r] * hours;
+    f.produced[r] += delta + eat + seatFood + stats.taxed[r] * hours;
     f.taxed[r] += stats.taxed[r] * hours;
     if (delta >= 0) {
       // production never pushes a stock above storage, but never removes an over-cap stock either
@@ -392,6 +416,7 @@ function integrate(city: EconomyCity, stats: CityStats, dtMs: number, result: Se
   const gold = city.gold + stats.rates.gold * hours;
   f.produced.gold += (stats.taxIncome + stats.tribute + stats.stateTribute) * hours;
   f.salaries += gold < 0 ? Math.max(0, city.gold + (stats.taxIncome + stats.tribute + stats.stateTribute) * hours) : stats.heroSalary * hours;
+  f.seatUpkeep.gold += stats.seatUpkeep.gold * hours;
   city.gold = Math.max(0, gold);
 }
 

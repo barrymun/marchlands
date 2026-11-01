@@ -91,6 +91,7 @@ import {
   armiesStationedAt,
   type ArmyRow,
   citiesOf,
+  type CityRow,
   findCity,
   getArmy,
   getHero,
@@ -1017,42 +1018,45 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
  * Valleys it held go free (their troops head home), allies' troops stationed in it go home, and armies already marching
  * on it now march on the winner.
  */
-async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: number) {
-  const city = def.city;
-  const loser = def.player;
-  const fallback = (await citiesOf(ctx, loser.id)).filter((c) => c.id !== city.id).sort((p, q) => p.id - q.id)[0];
+/**
+ * A held historic city's holder leaves it (taken by a rival, or risen up): their heroes, armies, market orders and
+ * shipments go to their oldest other city (or are gone, with none), its valleys go free, and allies' troops stationed in
+ * it go home.
+ */
+export async function evacuateSeat(ctx: Ctx, city: CityRow, loserId: number) {
+  const fallback = (await citiesOf(ctx, loserId)).filter((c) => c.id !== city.id).sort((p, q) => p.id - q.id)[0];
   // the old holder's heroes and armies out, orders and shipments, to their other city
   const theirs = await ctx.tx
     .select()
     .from(armies)
-    .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loser.id)));
+    .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loserId)));
   if (fallback) {
     await ctx.tx
       .update(heroes)
       .set({ cityId: fallback.id })
-      .where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loser.id)));
+      .where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loserId)));
     await ctx.tx
       .update(heroes)
       .set({ status: HeroStatus.IDLE })
-      .where(and(eq(heroes.cityId, fallback.id), eq(heroes.status, HeroStatus.MAYOR), eq(heroes.playerId, loser.id)));
+      .where(and(eq(heroes.cityId, fallback.id), eq(heroes.status, HeroStatus.MAYOR), eq(heroes.playerId, loserId)));
     await ctx.tx
       .update(armies)
       .set({ cityId: fallback.id })
-      .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loser.id)));
+      .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loserId)));
     await ctx.tx
       .update(marketOrders)
       .set({ cityId: fallback.id })
-      .where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loser.id)));
+      .where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loserId)));
     await ctx.tx
       .update(marketShipments)
       .set({ cityId: fallback.id })
-      .where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loser.id)));
+      .where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loserId)));
   } else {
     for (const a of theirs) ctx.unschedule(armyRef(a.id));
-    await ctx.tx.delete(armies).where(and(eq(armies.cityId, city.id), eq(armies.playerId, loser.id)));
-    await ctx.tx.delete(heroes).where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loser.id)));
-    await ctx.tx.delete(marketOrders).where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loser.id)));
-    await ctx.tx.delete(marketShipments).where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loser.id)));
+    await ctx.tx.delete(armies).where(and(eq(armies.cityId, city.id), eq(armies.playerId, loserId)));
+    await ctx.tx.delete(heroes).where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loserId)));
+    await ctx.tx.delete(marketOrders).where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loserId)));
+    await ctx.tx.delete(marketShipments).where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loserId)));
   }
   // valleys it held go free; allies' troops stationed in it go home; armies marching on it now march on the winner
   for (const v of await ctx.tx.select().from(tiles).where(eq(tiles.ownerCityId, city.id))) {
@@ -1060,6 +1064,12 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
     await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, troops: null, state: null, updatedAt: ctx.now }).where(eq(tiles.id, v.id));
   }
   for (const s of await armiesStationedAt(ctx, city.tileId, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, city.tileId));
+}
+
+async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: number) {
+  const city = def.city;
+  const loser = def.player;
+  await evacuateSeat(ctx, city, loser.id);
   await ctx.tx
     .update(armies)
     .set({ targetPlayerId: winner.id })

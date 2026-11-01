@@ -18,6 +18,7 @@ import {
   merchantJob,
   npcTradeJob,
   rankingsJob,
+  seatsJob,
   startStatsFlusher,
   statsJob,
   world,
@@ -58,6 +59,7 @@ async function main() {
   every('merchant', 10_000, () => merchantJob(db));
   // (marchlands) held historic cities draft by themselves through the day (engine/draft.ts)
   every('draft', 60_000, () => draftJob(db));
+  every('seats', 60_000, () => seatsJob(db));
   every('npc-trade', BALANCE.npcTrade.tickMs, () => npcTradeJob(db));
   every('cleanup', 10 * 60_000, () => cleanupJob(db));
   every('stats', 60 * 60_000, () => statsJob(db));

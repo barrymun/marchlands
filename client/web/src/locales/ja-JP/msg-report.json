@@ -23,9 +23,11 @@
     "valleyLost": "領地を失った",
     "valleyDefended": "領地を防衛",
     "tradeCompleted": "取引完了",
-    "troopsDeserted": "兵が脱走"
+    "troopsDeserted": "兵が脱走",
+    "seatRebelled": "歴史都市の反乱"
   },
   "notFound": "報告書が見つかりません。",
   "oldFormat": "この報告書は古い形式で保存されているため表示できません。",
-  "cityFounded": "{{name}}が建設されました。"
+  "cityFounded": "{{name}}が建設されました。",
+  "seatRebelled": "レベル{{level}}の歴史都市{{name}}が反乱を起こしました。駐留部隊、または維持費の金や食料が足りない間に忠誠度が0になりました。誰も保持していない歴史都市に戻りました。そこにいた英雄と軍はあなたの別の都市へ移りました。"
 }

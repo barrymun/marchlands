@@ -9,7 +9,8 @@
     "taxSold": "Tax {{rate}}% (sold output)",
     "heroSalaries": "Hero salaries",
     "tribute": "Historic city tribute",
-    "stateTribute": "State tribute"
+    "stateTribute": "State tribute",
+    "seatUpkeep": "Historic city upkeep"
   },
   "breakdown": {
     "base": "Base",
@@ -19,7 +20,8 @@
     "mayor": "Mayor {{name}} +{{percent}}",
     "valleys": "Valleys +{{percent}}",
     "upkeep": "Troop upkeep",
-    "tax": "Tax (sold for gold)"
+    "tax": "Tax (sold for gold)",
+    "seatUpkeep": "Historic city upkeep"
   },
   "rows": {
     "perRealHour": "Per real hour (game speed {{speed}}×)"

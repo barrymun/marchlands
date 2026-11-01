@@ -1,5 +1,7 @@
 // Loading a city together with everything its economy depends on, and settling it to "now".
 
+import { and, count, eq, isNotNull, ne } from 'drizzle-orm';
+
 import { PushCmd } from '@marchlands/contracts';
 import {
   addTroops,
@@ -18,6 +20,7 @@ import {
   tileXY,
   type TroopCounts,
 } from '@marchlands/core';
+import { cities, one, players } from '@marchlands/db';
 
 import type { Ctx } from '#/context.ts';
 import { troopBean } from '#/dto.ts';
@@ -46,6 +49,8 @@ export interface CityBundle {
   awayTroops: TroopCounts;
   /** set by viewCity: troops the in-memory settle found deserting (not yet saved or reported) */
   deserted?: TroopCounts;
+  /** (marchlands) a held historic city: how many seats its holder holds, and whether their alliance shares its tribute */
+  seats?: { held: number; shared: boolean };
 }
 
 export function mayorOf(heroes: HeroRow[]): HeroRow | undefined {
@@ -67,6 +72,7 @@ export function economyContext(b: CityBundle): EconomyContext {
     valleys: b.valleys.map((v) => ({ type: v.type, level: v.level })),
     buffs: b.player.buffs,
     awayTroops: b.awayTroops,
+    ...(b.seats ? { seats: b.seats } : {}),
   };
 }
 
@@ -81,7 +87,28 @@ export async function loadBundle(ctx: Ctx, city: CityRow, player: PlayerRow): Pr
   const armies = await armiesOfCity(ctx, city.id);
   let away: TroopCounts = {};
   for (const a of armies) away = addTroops(away, a.troops);
-  return { player, city, heroes, valleys, awayTroops: away };
+  const seats = city.historicLevel == null ? undefined : await seatsOf(ctx, player);
+  return { player, city, heroes, valleys, awayTroops: away, ...(seats ? { seats } : {}) };
+}
+
+/** (marchlands) How many historic cities a player holds, and whether they're in an alliance with anyone else (who then share their tribute). */
+async function seatsOf(ctx: Ctx, player: PlayerRow): Promise<{ held: number; shared: boolean }> {
+  const held = one(
+    await ctx.tx
+      .select({ n: count() })
+      .from(cities)
+      .where(and(eq(cities.playerId, player.id), isNotNull(cities.historicLevel))),
+  ).n;
+  const others =
+    player.allianceId == null
+      ? 0
+      : one(
+          await ctx.tx
+            .select({ n: count() })
+            .from(players)
+            .where(and(eq(players.allianceId, player.allianceId), ne(players.id, player.id))),
+        ).n;
+  return { held: Number(held), shared: Number(others) > 0 };
 }
 
 /**

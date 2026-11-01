@@ -23,9 +23,11 @@
     "valleyLost": "Valley Lost",
     "valleyDefended": "Valley Defended",
     "tradeCompleted": "Trade Completed",
-    "troopsDeserted": "Troops Deserted"
+    "troopsDeserted": "Troops Deserted",
+    "seatRebelled": "Historic City Rebelled"
   },
   "notFound": "Report not found.",
   "oldFormat": "This report was saved in an older format and cannot be shown.",
-  "cityFounded": "{{name}} has been founded."
+  "cityFounded": "{{name}} has been founded.",
+  "seatRebelled": "{{name}}, your level {{level}} historic city, rose up: its loyalty fell to 0 while it lacked troops at home or gold and food for its upkeep. It stands again as a historic city nobody holds. Your heroes and armies there went to your other city."
 }

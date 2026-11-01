@@ -21,7 +21,10 @@ import {
   mapLevelOf,
   maxArmyTroops,
   seatLoyalty,
+  seatNeglect,
+  SeatNeglect,
   seatTitle,
+  seatUnrest,
   stateTribute,
   TechType,
   TileType,
@@ -275,5 +278,33 @@ describe(stateTribute.name, () => {
       ]),
     ).toBe((50 + 20) * per);
     expect(stateTribute([])).toBe(0);
+  });
+});
+
+describe(seatNeglect.name, () => {
+  const G = BALANCE.historic.unrest.garrison[12];
+
+  it('names what a seat lacks: troops at home, then gold or food', () => {
+    expect(seatNeglect(12, { troops: { militia: G }, gold: 1, food: 1 })).toEqual([]);
+    expect(seatNeglect(12, { troops: { militia: G - 1 }, gold: 1, food: 1 })).toEqual([SeatNeglect.GARRISON]);
+    expect(seatNeglect(12, { troops: { militia: G }, gold: 0, food: 1 })).toEqual([SeatNeglect.UPKEEP]);
+    expect(seatNeglect(12, { troops: {}, gold: 1, food: 0 })).toEqual([SeatNeglect.GARRISON, SeatNeglect.UPKEEP]);
+  });
+});
+
+describe(seatUnrest.name, () => {
+  const step = BALANCE.historic.unrest.msPerPoint;
+
+  it('recovers as seatLoyalty does when nothing is lacking', () => {
+    expect(seatUnrest(90, 0, BALANCE.npcRegenMs * 2, 0)).toEqual(seatLoyalty(90, 0, BALANCE.npcRegenMs * 2));
+  });
+
+  it('loses a point a step for each thing lacking, keeping the part-step', () => {
+    expect(seatUnrest(100, 0, step * 2.5, 1)).toEqual({ loyalty: 98, loyaltyAt: step * 2 });
+    expect(seatUnrest(100, 0, step * 2.5, 2)).toEqual({ loyalty: 95, loyaltyAt: step * 2.5 });
+  });
+
+  it('stops at 0', () => {
+    expect(seatUnrest(3, 0, step * 10, 1)).toEqual({ loyalty: 0, loyaltyAt: step * 10 });
   });
 });

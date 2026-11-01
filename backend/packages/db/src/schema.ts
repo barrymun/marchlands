@@ -212,6 +212,8 @@ export const cities = pgTable(
     draftsUsed: smallint('drafts_used').notNull().default(0),
     /** (marchlands) a state's capital held by a player: the gold a real hour its state's barbarian cities pay it, set by the factions' tick */
     stateTribute: integer('state_tribute').notNull().default(0),
+    /** (marchlands) a held historic city: when its holder's alliance was last paid its share of the tribute (real ms; 0 never) */
+    sharedAt: ms('shared_at').notNull().default(0),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [uniqueIndex('cities_tile_idx').on(t.tileId), index('cities_player_idx').on(t.playerId)],

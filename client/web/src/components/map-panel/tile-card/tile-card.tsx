@@ -10,6 +10,7 @@ import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add-to-farm-button';
 import { MedalOdds } from '@/components/map-panel/medal-odds/medal-odds';
 import { SeatDraft } from '@/components/map-panel/tile-card/seat-draft/seat-draft';
+import { SeatStatus } from '@/components/map-panel/tile-card/seat-status/seat-status';
 import { placeName } from '@/components/map-panel/utils';
 import { ValleyUpgrade } from '@/components/map-panel/valley-upgrade/valley-upgrade';
 import type { SendTarget } from '@/components/send-army-dialog/types';
@@ -61,6 +62,7 @@ export function TileCard({
   const scouts = city.troop.scouter ?? 0;
   // the player's historic cities, which draft from barbarian cities in their areas
   const seats = (usePlayer().data?.castles ?? []).filter((c) => c.historicLevel != null);
+  const ownSeat = seats.find((c) => c.fieldId === tileId);
   // a barbarian city's side: the faction holding its zone, or none for a bandit below the faction level
   // (marchlands) or, in a state a player rules, cut off from it
   const ruler = tile?.type === TileType.NPC && isFactionLevel(tile.level) ? rulers.get(tile.zoneId) : undefined;
@@ -141,6 +143,7 @@ export function TileCard({
           {(tile.type === TileType.NPC || (tile.type === TileType.CASTLE && tile.canLoot)) && <MedalOdds level={tile.level} />}
           {'owner' in tile && tile.owner && <p>{t('info.heldBy', { city: tile.owner.cityName, player: tile.owner.userName })}</p>}
           <SeatDraft tile={{ id: tile.id, type: tile.type, held: 'owner' in tile && !!tile.owner }} seats={seats} />
+          {ownSeat && <SeatStatus seat={ownSeat} />}
           {here && (
             <div className="flex items-center gap-2">
               <ConfirmButton

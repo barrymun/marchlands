@@ -44,3 +44,9 @@ Design notes and known quirks to come back to. Each entry says what happens now,
   - *A service worker* caching the hashed files: instant repeat visits and some offline tolerance, at the cost of update handling (a new deploy must replace the cached app).
   - *Rendering on slow phones*: the Map tab renders about 250 buttons and Items about 95; virtualising long lists would help low-end devices if they feel slow.
   - *WebAssembly: considered, not worth it.* The client is a DOM interface fed by the API; its time goes to the network and rendering, not computation, and WebAssembly can't touch the DOM (it calls through JavaScript). Rust UI frameworks ship larger first downloads, and a rewrite would drop React, Radix and i18next. WebAssembly only pays for heavy computation in the browser (a client-side battle preview, if the TypeScript simulator ever proves too slow there), as one module, not the app.
+
+## A seat's alliance share between payouts
+
+- **What happens:** while a seat's holder is in an alliance with others, their tribute is a quarter lower and the quarter is paid to the other members every whole real hour (`shareTribute`, `backend/packages/game/src/engine/unrest.ts`). If the holder leaves the alliance, or the others leave, before the hour is up, what accrued since the last payout is paid to nobody.
+- **Why left:** at most an hour's share (500 gold at level 12, 15,000 at Atlantis), and paying it on leaving would mean hooking every way out of an alliance. Paying every minute instead would cost a city write per member per seat each minute.
+

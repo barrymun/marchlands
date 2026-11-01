@@ -538,6 +538,7 @@
               "report.title.cityAttacked",
               "report.title.attackRepelled",
               "report.title.seatLost",
+              "report.title.seatRebelled",
               "report.title.draft",
               "report.title.reinforcementsFought",
               "report.title.valleyOccupied",
@@ -547,6 +548,7 @@
               "report.title.troopsDeserted",
               "report.notFound",
               "report.oldFormat",
+              "report.seatRebelled",
               "report.cityFounded",
               "army.invalidMission",
               "army.insufficientTroops",
@@ -1053,6 +1055,10 @@
             "type": "number",
             "description": "troop food upkeep per game hour (negative; 0 for other resources), 2 decimals"
           },
+          "seatUpkeep": {
+            "type": "number",
+            "description": "(marchlands) a held historic city's food upkeep per game hour (negative; 0 for other resources), 2 decimals"
+          },
           "tax": {
             "type": "number",
             "description": "(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals"
@@ -1082,6 +1088,7 @@
           "valley",
           "buff",
           "upkeep",
+          "seatUpkeep",
           "tax",
           "techBonus",
           "mayorBonus",
@@ -1197,6 +1204,24 @@
             "maximum": 9007199254740991,
             "description": "(marchlands) gold per game hour a state's capital gets from its state's barbarian cities (part of goldRate)"
           },
+          "tributeShared": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour of those tributes the holder's alliance gets instead (not in goldRate)"
+          },
+          "seatUpkeepGold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour a held historic city's upkeep costs (part of goldRate)"
+          },
+          "seatUpkeepFood": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) food per game hour a held historic city's upkeep costs (part of foodRate)"
+          },
           "herosSalary": {
             "type": "number"
           },
@@ -1246,6 +1271,9 @@
           "taxItemShare",
           "tribute",
           "stateTribute",
+          "tributeShared",
+          "seatUpkeepGold",
+          "seatUpkeepFood",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -1411,6 +1439,23 @@
             "maximum": 9007199254740991,
             "description": "drafts a historic city has made today (UTC)"
           },
+          "seatLoyalty": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "a held historic city's loyalty now: rivals' wins and unrest take it down, and at 0 it's lost"
+          },
+          "seatNeglect": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "garrison",
+                "upkeep"
+              ]
+            },
+            "description": "what a held historic city lacks, losing it loyalty: troops at home, gold or food for its upkeep"
+          },
           "createdAt": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -1438,6 +1483,8 @@
           "truceUntil",
           "draftAuto",
           "draftsUsed",
+          "seatLoyalty",
+          "seatNeglect",
           "createdAt"
         ]
       },
@@ -12499,6 +12546,7 @@
               "report.title.cityAttacked",
               "report.title.attackRepelled",
               "report.title.seatLost",
+              "report.title.seatRebelled",
               "report.title.draft",
               "report.title.reinforcementsFought",
               "report.title.valleyOccupied",
@@ -12508,6 +12556,7 @@
               "report.title.troopsDeserted",
               "report.notFound",
               "report.oldFormat",
+              "report.seatRebelled",
               "report.cityFounded",
               "army.invalidMission",
               "army.insufficientTroops",
@@ -13021,6 +13070,10 @@
             "type": "number",
             "description": "troop food upkeep per game hour (negative; 0 for other resources), 2 decimals"
           },
+          "seatUpkeep": {
+            "type": "number",
+            "description": "(marchlands) a held historic city's food upkeep per game hour (negative; 0 for other resources), 2 decimals"
+          },
           "tax": {
             "type": "number",
             "description": "(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals"
@@ -13050,6 +13103,7 @@
           "valley",
           "buff",
           "upkeep",
+          "seatUpkeep",
           "tax",
           "techBonus",
           "mayorBonus",
@@ -13167,6 +13221,24 @@
             "maximum": 9007199254740991,
             "description": "(marchlands) gold per game hour a state's capital gets from its state's barbarian cities (part of goldRate)"
           },
+          "tributeShared": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour of those tributes the holder's alliance gets instead (not in goldRate)"
+          },
+          "seatUpkeepGold": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour a held historic city's upkeep costs (part of goldRate)"
+          },
+          "seatUpkeepFood": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) food per game hour a held historic city's upkeep costs (part of foodRate)"
+          },
           "herosSalary": {
             "type": "number"
           },
@@ -13216,6 +13288,9 @@
           "taxItemShare",
           "tribute",
           "stateTribute",
+          "tributeShared",
+          "seatUpkeepGold",
+          "seatUpkeepFood",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -13383,6 +13458,23 @@
             "maximum": 9007199254740991,
             "description": "drafts a historic city has made today (UTC)"
           },
+          "seatLoyalty": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "a held historic city's loyalty now: rivals' wins and unrest take it down, and at 0 it's lost"
+          },
+          "seatNeglect": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "garrison",
+                "upkeep"
+              ]
+            },
+            "description": "what a held historic city lacks, losing it loyalty: troops at home, gold or food for its upkeep"
+          },
           "createdAt": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -13410,6 +13502,8 @@
           "truceUntil",
           "draftAuto",
           "draftsUsed",
+          "seatLoyalty",
+          "seatNeglect",
           "createdAt"
         ],
         "additionalProperties": false

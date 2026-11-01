@@ -72,6 +72,7 @@ export const ResourceLine = z
         valley: z.number().int().describe('from occupied valleys'),
         buff: z.number().int().describe('from production items'),
         upkeep: z.number().describe('troop food upkeep per game hour (negative; 0 for other resources), 2 decimals'),
+        seatUpkeep: z.number().describe("(marchlands) a held historic city's food upkeep per game hour (negative; 0 for other resources), 2 decimals"),
         tax: z.number().describe('(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals'),
         techBonus: z.number().describe('bonus share from research'),
         mayorBonus: z.number().describe("bonus share from the mayor's politics"),
@@ -98,6 +99,9 @@ export const ResourceBean = z
     taxItemShare: z.number().describe('that item bonus, as a share of the base tax (0.25 = +25%)'),
     tribute: z.number().int().describe("(marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)"),
     stateTribute: z.number().int().describe("(marchlands) gold per game hour a state's capital gets from its state's barbarian cities (part of goldRate)"),
+    tributeShared: z.number().int().describe("(marchlands) gold per game hour of those tributes the holder's alliance gets instead (not in goldRate)"),
+    seatUpkeepGold: z.number().int().describe("(marchlands) gold per game hour a held historic city's upkeep costs (part of goldRate)"),
+    seatUpkeepFood: z.number().int().describe("(marchlands) food per game hour a held historic city's upkeep costs (part of foodRate)"),
     herosSalary: z.number(),
     troopCostFood: z.number().describe('troop food upkeep per game hour, 2 decimals'),
     curPopulation: z.number().int(),
@@ -139,6 +143,10 @@ export const CityBean = z
     truceUntil: Ms.describe('a historic city is under truce until then (0: none)'),
     draftAuto: z.boolean().describe('a historic city drafts by itself'),
     draftsUsed: z.number().int().describe('drafts a historic city has made today (UTC)'),
+    seatLoyalty: z.number().int().describe("a held historic city's loyalty now: rivals' wins and unrest take it down, and at 0 it's lost"),
+    seatNeglect: z
+      .array(z.enum(['garrison', 'upkeep']))
+      .describe('what a held historic city lacks, losing it loyalty: troops at home, gold or food for its upkeep'),
     createdAt: Ms,
   })
   .meta({ id: 'CityBean' });

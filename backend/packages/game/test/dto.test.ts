@@ -121,6 +121,7 @@ describe(resourceBean.name, () => {
       valley: Math.round(FARM_2 * valley),
       buff: Math.round(FARM_2 * buff),
       upkeep: -10 * ARCHER_UPKEEP,
+      seatUpkeep: 0,
       tax: -Math.round(gross * 10) / 100,
       techBonus: share,
       mayorBonus: mayor,

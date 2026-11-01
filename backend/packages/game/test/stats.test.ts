@@ -81,6 +81,7 @@ describe(noteSettle.name, () => {
     taxed: { food: 0, wood: 2 * n, stone: 0, iron: 0 },
     upkeep: 3 * n,
     salaries: 4 * n,
+    seatUpkeep: { gold: 0, food: 0 },
   });
 
   it('adds up what settling a city produced and paid until takeSettle takes it, once', () => {

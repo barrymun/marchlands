@@ -54,10 +54,11 @@ export default [
     brotli: false,
   },
   {
-    // a language other than English, loaded only when chosen
+    // a language other than English, loaded only when chosen. Raised to 40 kB (2026-11-01, at 35.02 kB): every screen's
+    // text grows it, the historic cities' holding rules the last; it loads only for players who choose Japanese
     name: 'Japanese',
     path: 'dist/assets/ja-JP-*.js',
-    limit: '35 kB',
+    limit: '40 kB',
     gzip: true,
   },
 ];

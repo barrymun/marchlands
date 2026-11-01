@@ -12,6 +12,7 @@ import { merchantSweep } from '#/engine/market.ts';
 import { npcTradeTick } from '#/engine/npc-economy.ts';
 import { checkBeginner } from '#/engine/player.ts';
 import { refreshRankings } from '#/engine/rankings.ts';
+import { tendSeat } from '#/engine/unrest.ts';
 import { refreshZoneStats } from '#/engine/world.ts';
 import { getCity, getPlayer, getTile, savePlayer } from '#/repo.ts';
 import { compactStats } from '#/stats.ts';
@@ -60,6 +61,12 @@ export async function draftJob(db: Db) {
       await draft(ctx, city, await getTile(ctx, target.tile.id, { lock: true }), { auto: true, scouted: target.scouted });
     });
   }
+}
+
+/** (marchlands) Every held historic city's minute: unrest, rising up, and its alliance's share of the tribute (engine/unrest.ts). */
+export async function seatsJob(db: Db) {
+  const seats = await db.select({ id: cities.id }).from(cities).where(isNotNull(cities.historicLevel));
+  for (const { id } of seats) await runGame(db, (ctx) => tendSeat(ctx, id));
 }
 
 /** The computer merchant fills resting market orders its price has crossed. */

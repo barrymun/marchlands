@@ -23,7 +23,10 @@ import {
   FORT_KEY_LIST,
   type FortCounts,
   heroGearStat,
+  HISTORIC_LEVELS,
   populationDirection,
+  seatNeglect,
+  seatUnrest,
   Sex,
   stateOf,
   tileXY,
@@ -92,6 +95,7 @@ function productionBreakdownOf(stats: CityStats, r: (typeof BASIC_RESOURCES)[num
     valley: Math.round(fields * p.valley),
     buff: Math.round(fields * p.buff),
     upkeep: r === 'food' ? -round2(stats.upkeep) : 0,
+    seatUpkeep: r === 'food' && stats.seatUpkeep.food ? -round2(stats.seatUpkeep.food) : 0,
     tax: -round2(stats.taxed[r]),
     techBonus: p.tech,
     mayorBonus: p.mayor,
@@ -130,6 +134,9 @@ export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
     taxItemShare: stats.taxBuff ? BALANCE.resourceBuffBonus : 0,
     tribute: Math.round(stats.tribute),
     stateTribute: Math.round(stats.stateTribute),
+    tributeShared: Math.round(stats.tributeShared),
+    seatUpkeepGold: Math.round(stats.seatUpkeep.gold),
+    seatUpkeepFood: Math.round(stats.seatUpkeep.food),
     herosSalary: round2(stats.heroSalary),
     troopCostFood: round2(stats.upkeep),
     curPopulation: Math.floor(c.population),
@@ -146,6 +153,9 @@ export function cityBean(b: CityBundle, now: number): CityBean {
   const stats = cityStats(b, now);
   const c = b.city;
   const { x, y } = tileXY(c.tileId);
+  // (marchlands) a held historic city: what it lacks (none under its truce), and its loyalty with that
+  const seat = HISTORIC_LEVELS.find((l) => l === c.historicLevel);
+  const neglect = seat && c.truceUntil <= now ? seatNeglect(seat, c) : [];
   return {
     id: c.id,
     name: c.name,
@@ -168,6 +178,8 @@ export function cityBean(b: CityBundle, now: number): CityBean {
     truceUntil: c.truceUntil,
     draftAuto: c.draftAuto,
     draftsUsed: draftsUsed(c, now),
+    seatLoyalty: seat ? seatUnrest(c.loyalty, c.loyaltyAt, now, neglect.length).loyalty : c.loyalty,
+    seatNeglect: neglect,
     createdAt: c.createdAt,
   };
 }
