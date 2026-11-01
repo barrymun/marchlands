@@ -7,6 +7,7 @@ import { BALANCE, experienceItemGain, HERO_ATTRIBUTE_ITEMS, heroAtMaxLevel, hero
 import { Countdown } from '@/components/countdown/countdown';
 import { ATTR_LABEL } from '@/components/hero-items-dialog/hero-items/constants';
 import { experienceItems, isLoyaltyFull, loyaltyMedals } from '@/components/hero-items-dialog/hero-items/utils';
+import { ItemIcon } from '@/components/item-icon/item-icon';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCity, useCommand } from '@/hooks/use-game';
@@ -31,8 +32,9 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
     const owned = inv.count(itemId);
     const price = heroItemGoldPrice(itemId, hero.upgradeExp);
     return (
-      <div key={itemId} className={cn('flex items-center justify-between gap-2 rounded-md border p-2 text-sm', extra.className)}>
-        <div>
+      <div key={itemId} className={cn('flex items-center gap-2 rounded-md border p-2 text-sm', extra.className)}>
+        <ItemIcon id={itemId} />
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5 font-medium">
             {itemName(itemId)} <span className="font-normal text-muted-foreground">×{owned}</span>
             {extra.badge}

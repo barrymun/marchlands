@@ -192,6 +192,10 @@ export const PALETTE = {
   wait: [246, 150, 30],
   waitDark: [170, 90, 10],
   sparkle: [255, 255, 255],
+  // items (tools/art/items.ts): bronze for the lowest medals and the Junior Medal Box
+  bronzeHi: [226, 166, 104],
+  bronze: [184, 116, 60],
+  bronzeDark: [118, 70, 34],
 } as const satisfies Record<string, Rgb>;
 
 export type Colour = keyof typeof PALETTE;

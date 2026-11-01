@@ -1,9 +1,9 @@
-import { Medal } from 'lucide-react';
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type BattleReport } from '@marchlands/core';
 
+import { ItemIcon } from '@/components/item-icon/item-icon';
 import { Badge } from '@/components/ui/badge';
 import { standingText } from '@/lib/factions';
 import { fmtExact, resourceLabel } from '@/lib/format';
@@ -51,8 +51,8 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
           {Object.entries(b.medals)
             .sort(([a], [z]) => z.localeCompare(a))
             .map(([id, n]) => (
-              <Badge key={id} variant="secondary" className="gap-1 font-normal">
-                <Medal className="size-3 text-amber-500" />
+              <Badge key={id} variant="secondary" className="gap-1 py-0 pl-0.5 font-normal">
+                <ItemIcon id={id} />
                 {itemName(id)}
                 {n > 1 && ` ×${n}`}
               </Badge>

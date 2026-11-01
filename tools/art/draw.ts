@@ -47,6 +47,7 @@ import { FIGURE_GEAR } from './figure.ts';
 import { FORT_DRAWINGS } from './fortifications.ts';
 import { GEAR_BACKDROP, GEAR_DRAWINGS, GEAR_STAR, GEAR_TWINS } from './gear.ts';
 import { IsoCanvas } from './iso.ts';
+import { ITEM_DRAWINGS } from './items.ts';
 import type { PixelCanvas, Spot } from './pixel.ts';
 import { RESOURCE_DRAWINGS } from './resources.ts';
 import { TILE_DRAWINGS } from './tiles.ts';
@@ -75,6 +76,7 @@ import {
   gearStarFile,
   gearTwinFile,
   grandTownHallFile,
+  itemArtFile,
   resourceArtFile,
   tileArtFile,
   troopBadgeFile,
@@ -225,6 +227,15 @@ if (!wanted.size || wanted.has('figure')) {
   }
   console.log(`drew figure (cape, helm, legs and upper body × ${GEAR_ART_LEVELS.length} levels, skin tones, hairstyles)`);
 }
+
+fs.mkdirSync(path.join(ASSETS, 'items'), { recursive: true });
+for (const [id, drawing] of Object.entries(ITEM_DRAWINGS)) {
+  const file = itemArtFile(id);
+  if (!file) throw new Error(`no file name for item ${id}`);
+  if (wanted.size && !wanted.has('items') && !wanted.has(file.replace(/\.png$/, ''))) continue;
+  fs.writeFileSync(path.join(ASSETS, 'items', file), drawing().png());
+}
+if (!wanted.size || wanted.has('items')) console.log(`drew items (${Object.keys(ITEM_DRAWINGS).length} icons)`);
 
 fs.writeFileSync(SPOTS_FILE, JSON.stringify(Object.fromEntries(Object.entries(spots).sort(([a], [b]) => a.localeCompare(b)))) + '\n');
 console.log(`wrote spots.json (${Object.keys(spots).length} sprites)`);

@@ -7,6 +7,7 @@ import { type CityBean, getCitiesByCityIdQueryKey, getPlayerQueryKey, postCities
 import { ITEM_CATEGORY_IDS, ITEM_INFO } from '@marchlands/core';
 
 import { ActiveEffects } from '@/components/active-effects/active-effects';
+import { ItemIcon } from '@/components/item-icon/item-icon';
 import { ActiveBonus } from '@/components/items-panel/active-bonus/active-bonus';
 import { ALL } from '@/components/items-panel/constants';
 import { MedalSourcesInfo } from '@/components/items-panel/medal-sources-info/medal-sources-info';
@@ -121,52 +122,55 @@ export function ItemsPanel({ city }: { city: CityBean }) {
       </div>
       <div className="grid gap-2 md:grid-cols-2">
         {shown.map((e) => (
-          <div key={e.ids[0]} className="grid gap-1.5 rounded-md border bg-card p-3">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex flex-wrap items-center gap-2">
-                {/* items not owned are dimmed, but never their buttons (a Buy button must not look disabled) or the active bonus */}
-                <div className={cn('flex flex-wrap items-center gap-2', e.owned === 0 && 'opacity-60')}>
-                  <span className="font-medium">{nameOf(e)}</span>
-                  <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
-                    ×{fmtExact(e.owned)}
-                  </Badge>
-                  {category === ALL && <span className="text-xs text-muted-foreground">{itemCategoryName(e.info.category)}</span>}
+          <div key={e.ids[0]} className="flex gap-3 rounded-md border bg-card p-3">
+            <ItemIcon id={e.info.id} size={64} className={cn('size-8 sm:size-16', e.owned === 0 && 'opacity-60')} />
+            <div className="grid min-w-0 flex-1 gap-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* items not owned are dimmed, but never their buttons (a Buy button must not look disabled) or the active bonus */}
+                  <div className={cn('flex flex-wrap items-center gap-2', e.owned === 0 && 'opacity-60')}>
+                    <span className="font-medium">{nameOf(e)}</span>
+                    <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
+                      ×{fmtExact(e.owned)}
+                    </Badge>
+                    {category === ALL && <span className="text-xs text-muted-foreground">{itemCategoryName(e.info.category)}</span>}
+                  </div>
+                  <ActiveBonus ids={e.ids} buffs={player.data?.buffs ?? []} />
                 </div>
-                <ActiveBonus ids={e.ids} buffs={player.data?.buffs ?? []} />
+                <div className="flex shrink-0 gap-1">
+                  {e.gold && (
+                    <Button
+                      size="xs"
+                      variant={e.owned === 0 ? 'default' : 'outline'}
+                      disabled={city.resource.gold < e.gold.price || buyGold.isPending}
+                      title={
+                        city.resource.gold < e.gold.price
+                          ? t('notEnoughGold', { city: city.name, price: fmtExact(e.gold.price) })
+                          : t('buyWithGold', { city: city.name })
+                      }
+                      onClick={() =>
+                        e.gold &&
+                        buyGold.mutate(
+                          { path: { cityId: city.id }, body: { itemId: e.gold.id, amount: 1 } },
+                          { onSuccess: () => toast.success(t('bought', { item: nameOf(e) })) },
+                        )
+                      }
+                    >
+                      {t('buyFor', { price: fmt(e.gold.price) })}
+                    </Button>
+                  )}
+                  {e.info.use === 'direct' && (
+                    <Button size="xs" disabled={e.owned === 0 || use.isPending} onClick={() => applyEntry(e)}>
+                      {t('common:actions.use')}
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="flex shrink-0 gap-1">
-                {e.gold && (
-                  <Button
-                    size="xs"
-                    variant={e.owned === 0 ? 'default' : 'outline'}
-                    disabled={city.resource.gold < e.gold.price || buyGold.isPending}
-                    title={
-                      city.resource.gold < e.gold.price
-                        ? t('notEnoughGold', { city: city.name, price: fmtExact(e.gold.price) })
-                        : t('buyWithGold', { city: city.name })
-                    }
-                    onClick={() =>
-                      e.gold &&
-                      buyGold.mutate(
-                        { path: { cityId: city.id }, body: { itemId: e.gold.id, amount: 1 } },
-                        { onSuccess: () => toast.success(t('bought', { item: nameOf(e) })) },
-                      )
-                    }
-                  >
-                    {t('buyFor', { price: fmt(e.gold.price) })}
-                  </Button>
-                )}
-                {e.info.use === 'direct' && (
-                  <Button size="xs" disabled={e.owned === 0 || use.isPending} onClick={() => applyEntry(e)}>
-                    {t('common:actions.use')}
-                  </Button>
-                )}
+              <div className={cn('grid gap-1.5', e.owned === 0 && 'opacity-60')}>
+                <p className="text-sm text-muted-foreground">{translateMessage(e.info.description)}</p>
+                {e.info.howTo && <p className="text-xs text-muted-foreground italic">{translateMessage(e.info.howTo)}</p>}
+                {e.medalLevel != null && <MedalSourcesInfo level={e.medalLevel} />}
               </div>
-            </div>
-            <div className={cn('grid gap-1.5', e.owned === 0 && 'opacity-60')}>
-              <p className="text-sm text-muted-foreground">{translateMessage(e.info.description)}</p>
-              {e.info.howTo && <p className="text-xs text-muted-foreground italic">{translateMessage(e.info.howTo)}</p>}
-              {e.medalLevel != null && <MedalSourcesInfo level={e.medalLevel} />}
             </div>
           </div>
         ))}

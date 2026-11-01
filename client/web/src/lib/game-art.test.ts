@@ -3,7 +3,19 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { BASIC_RESOURCES, buildingMaxLevel, BuildingType, FortType, GEAR_PIECE_IDS, Sex, TileType, TroopType } from '@marchlands/core';
+import {
+  BASIC_RESOURCES,
+  buildingMaxLevel,
+  BuildingType,
+  FortType,
+  GEAR_PIECE_IDS,
+  ITEM_IDS,
+  ItemId,
+  medalId,
+  Sex,
+  TileType,
+  TroopType,
+} from '@marchlands/core';
 
 import {
   ART_BANDS,
@@ -32,6 +44,7 @@ import {
   gearStarFile,
   gearTwinFile,
   grandTownHallFile,
+  itemArtFile,
   RESOURCE_ART_KEYS,
   resourceArtFile,
   TILE_ART_TYPES,
@@ -53,6 +66,7 @@ const BADGE_DIR = path.resolve(import.meta.dirname, '../assets/badges');
 const CITY_DIR = path.resolve(import.meta.dirname, '../assets/city');
 const GEAR_DIR = path.resolve(import.meta.dirname, '../assets/gear');
 const FIGURE_DIR = path.resolve(import.meta.dirname, '../assets/figure');
+const ITEM_DIR = path.resolve(import.meta.dirname, '../assets/items');
 const SPOTS: Record<string, { k: string }[]> = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, '../assets/spots.json'), 'utf8'));
 /** Whether a sprite has parts the animated town draws turning (and so a bare twin). */
 const moving = (file: string) => (SPOTS[`buildings/${file}`] ?? []).some((s) => s.k === 'sails' || s.k === 'wheel' || s.k === 'sheep');
@@ -165,6 +179,23 @@ describe('resource icons', () => {
   it('has an icon for gold and every basic resource, and nothing else', () => {
     expect([...RESOURCE_ART_KEYS].sort()).toEqual(['gold', ...BASIC_RESOURCES].sort());
     expect(fs.readdirSync(RESOURCE_DIR).sort()).toEqual(RESOURCE_ART_KEYS.map(resourceArtFile).sort());
+  });
+});
+
+describe(itemArtFile.name, () => {
+  it('names the icon after the item', () => {
+    expect(itemArtFile(ItemId.NAPOLEONS_DIARY)).toBe('napoleons-diary.png');
+    expect(itemArtFile(medalId(1))).toBe('cross-medal.png');
+  });
+
+  it('has no icon for an item the game does not have', () => {
+    expect(itemArtFile('consume.transaction.1')).toBeNull();
+  });
+});
+
+describe('item icons', () => {
+  it('has an icon for every item, and nothing else', () => {
+    expect(fs.readdirSync(ITEM_DIR).sort()).toEqual(ITEM_IDS.map((id) => itemArtFile(id)).sort());
   });
 });
 

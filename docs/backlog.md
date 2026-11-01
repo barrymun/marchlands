@@ -12,6 +12,8 @@ Design notes and known quirks to come back to. Each entry says what happens now,
 - **More for the 3D hero.** The 3D figure ([features/hero-3d.md](features/hero-3d.md)) shows only on the Heroes page's character sheet, and its gear icons don't point at it. Two ideas from its design, left as nice-to-haves once the figure was done:
   - *A piece lit when its icon is hovered:* the meshes are already named after their pieces (`buildFigure`, `paper-doll/hero-figure-3d/utils.ts`), so hovering an icon in `PaperDoll` could tint those meshes (a uniform in the toon material, as the glow is).
   - *The 3D hero elsewhere:* the Inn's offers, or the famous heroes once they exist (TODO.md). Each would load three.js too, so it suits a screen that shows one hero at a time.
+- **An image service for the art.** The sprites are small PNGs committed to the repo and served by nginx as hashed files (AGENTS.md, Game art), about 160 kB in all, so no image server is needed. Revisit one (imgproxy behind nginx's cache, or a CDN) if art must change without a redeploy, sizes must vary freely (a zoomable map), or images are combined per player (a city with its alliance flag).
+- **Icons in small places.** The gear icons aren't on the Heroes page's List cards (their gear line is text) or in the hero items dialog, and the item icons aren't on the speed-up buttons (`components/speedup-options/`) or the Items panel's active effects (`components/active-effects/`): those are a line of small text, and a 32 px sprite shown at 16 drops every other pixel. A 16×16 drawing of each would fit them, if they are wanted there.
 
 ## Known quirks
 

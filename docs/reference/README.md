@@ -22,6 +22,12 @@ Notes on how the original Evony worked, gathered from player guides, wikis and f
 |---|---|---|---|
 | [famous-historical-heroes.md](famous-historical-heroes.md) | Famous historical heroes: how they were found and captured, and all 636 with their four attributes (from a spreadsheet), with a first pass at the ones who fit the Marchlands | Age 2 | [TODO.md](../../TODO.md), Famous historical heroes |
 
+## Items
+
+| Note | What it covers | Version | Used by |
+|---|---|---|---|
+| [items.md](items.md) | Every item on the wiki's list (items, speed-ups, production, chests, stratagems) and the medals: what each did, its price in cents, and whether Marchlands kept it | Age 1, with Age 2's items marked | `shared/core/src/item-ids.ts`, [features/item-art.md](../features/item-art.md) |
+
 ## Combat
 
 | Note | What it covers | Version | Used by |

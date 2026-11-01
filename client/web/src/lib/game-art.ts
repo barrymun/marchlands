@@ -3,9 +3,10 @@
 // level band in src/assets/tiles/, one sprite per troop and fortification type in src/assets/units/, one badge per
 // troop type in src/assets/badges/, one icon per resource in src/assets/resources/, and the isometric city view's
 // ground and wall pieces in src/assets/city/, the hero gear in src/assets/gear/ and the hero figure's layers in
-// src/assets/figure/. The art scripts in tools/art import this file, so it uses no `@/` imports.
+// src/assets/figure/, and one icon per item in src/assets/items/. The art scripts in tools/art import this file, so it uses
+// no `@/` imports.
 
-import { buildingConfig, BuildingType, FortType, Sex, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
+import { buildingConfig, BuildingType, FortType, ItemId, Sex, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
 
 /** The level bands the art changes at (a building's or a valley's level): 1-3, 4-6, 7-9 and 10. */
 export const ART_BANDS = [
@@ -93,6 +94,14 @@ export type ResourceKey = (typeof RESOURCE_ART_KEYS)[number];
 /** A resource icon's file name: `wood.png`. */
 export function resourceArtFile(key: ResourceKey): string {
   return `${key}.png`;
+}
+
+const ITEM_SLUGS = new Map<string, string>(Object.entries(ItemId).map(([key, id]) => [id, key.toLowerCase().replaceAll('_', '-')]));
+
+/** An item's icon file name (every item has one), after its ItemId name: `napoleons-diary.png`, `cross-medal.png`; null for an item the game doesn't have. */
+export function itemArtFile(id: string): string | null {
+  const slug = ITEM_SLUGS.get(id);
+  return slug ? `${slug}.png` : null;
 }
 
 /** The isometric city view's ground: grass tiles, and the markers laid over it for an empty plot and a locked field. */

@@ -10,6 +10,7 @@ Design documents for large planned features, kept while they are worked out and 
 | Document | Feature | Status |
 |---|---|---|
 | [gear-animations.md](gear-animations.md) | Hero gear icons that move by level (glinting stones, pulsing glows, level 10's twinkling backdrop), five pieces that move by themselves (a cape, wings, a nodding mount, a plume, swinging pendants), and bursts when a star or a level is added | Built |
+| [item-art.md](item-art.md) | Item icons: one pixel-art icon per item, its steps showing as more or finer, shown wherever items are listed | Built |
 | [heroes-page.md](heroes-page.md) | Heroes as a page of their own: a roster beside a character sheet with a pixel-art figure wearing its gear, the Inn beside the heroes, the gear a tab | Phases 1–2 built (the page, the roster and character sheet); famous heroes next |
 | [hero-3d.md](hero-3d.md) | The hero on the character sheet as a low-poly 3D figure in three.js, rendered pixelated, turned by dragging, with the 2D figure as its fallback | Built (a tablet's frame time and ideas left in the backlog) |
 | [hero-figure-art.md](hero-figure-art.md) | The hero on the Heroes page drawn wearing its 14 gear pieces at its level, a man or a woman, in pixel art | Built |
