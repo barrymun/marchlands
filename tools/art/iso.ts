@@ -637,10 +637,13 @@ export class IsoCanvas extends PixelCanvas {
     for (let y = y0; y <= y0 + d; y += 2) this.set(...this.p(x0 + w, y, z + 1), 'stoneTop');
   }
 
-  /** A banner on a pole standing at a screen point. */
-  banner([sx, sy]: Pt, h: number) {
-    this.spot('banner', [sx + 1, sy - h], h);
+  /**
+   * A banner on a pole standing at a screen point, red unless given another colour. Only red ones record a `banner` spot:
+   * the animated town's flapping banner is red.
+   */
+  banner([sx, sy]: Pt, h: number, colour: Colour = 'banner') {
+    if (colour === 'banner') this.spot('banner', [sx + 1, sy - h], h);
     this.line([sx, sy], [sx, sy - h], 'outline');
-    for (let y = 0; y < 3; y++) for (let x = 1; x <= 3; x++) this.set(sx + x, sy - h + y, y === 2 && x === 3 ? 'clear' : 'banner');
+    for (let y = 0; y < 3; y++) for (let x = 1; x <= 3; x++) this.set(sx + x, sy - h + y, y === 2 && x === 3 ? 'clear' : colour);
   }
 }

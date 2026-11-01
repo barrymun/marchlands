@@ -50,7 +50,7 @@ import { IsoCanvas } from './iso.ts';
 import { ITEM_DRAWINGS } from './items.ts';
 import type { PixelCanvas, Spot } from './pixel.ts';
 import { RESOURCE_DRAWINGS } from './resources.ts';
-import { TILE_DRAWINGS } from './tiles.ts';
+import { HISTORIC_DRAWINGS, TILE_DRAWINGS } from './tiles.ts';
 import { TROOP_DRAWINGS } from './troops.ts';
 import { WALL_DRAWINGS } from './walls.ts';
 import {
@@ -76,6 +76,8 @@ import {
   gearStarFile,
   gearTwinFile,
   grandTownHallFile,
+  HISTORIC_ART_LEVELS,
+  historicArtFile,
   itemArtFile,
   resourceArtFile,
   tileArtFile,
@@ -150,6 +152,11 @@ function draw(drawings: Record<number, Drawing>, dir: string, fileOf: (type: num
 
 draw(BUILDINGS, 'buildings', buildingArtFile);
 draw(TILE_DRAWINGS, 'tiles', tileArtFile);
+
+if (!wanted.size || wanted.has('historic')) {
+  for (const level of HISTORIC_ART_LEVELS) save('tiles', historicArtFile(level), HISTORIC_DRAWINGS[level]);
+  console.log(`drew tiles/historic (${HISTORIC_ART_LEVELS.length} levels)`);
+}
 
 if (!wanted.size || wanted.has('walls')) {
   fs.mkdirSync(path.join(ASSETS, 'walls'), { recursive: true });

@@ -67,7 +67,7 @@
 
 ### On the map
 
-- **Their own sprites,** one per level, from the maintainer's screenshots of the original's (2026-11-01) as a reference for style, never traced or converted: a square stone fortress with red flags at level 12, a taller keep with green-roofed towers at 14, a larger keep with spires and blue flags at 16, and a grand gothic castle with gold flags at 18, its walls greener with moss each level. The flag colours are Age 2's (red, green, blue, gold; reference, Level 14). Drawn in `tools/art/tiles.ts` like the castles and barbarian camps (64×64, the tile's middle at (32, 46)), perhaps larger than one tile for the bigger ones (to decide).
+- **Their own sprites,** one per level (drawn 2026-11-01, `client/web/src/assets/tiles/historic-12.png` … `historic-18.png`, `historic` in `tools/art/tiles.ts`), from the maintainer's screenshots of the original's as a reference for style, never traced or converted: a square stone fortress with corner towers and red flags at level 12, green-roofed towers and a green-roofed keep at 14, slate spires and blue flags at 16, and pale spires round a gold-domed keep under gold flags at 18, moss growing up the walls more each level. The flag colours are Age 2's (red, green, blue, gold; reference, Level 14). One tile each, but **taller than anything else on the map** (asked 2026-11-01), each level taller than the last and Atlantis tallest: 96×96 rather than the other tiles' 64×64, with the tile's middle at (48, 70), where `spriteBox(96)` puts it, so the map draws them with `size: 96`. The map isn't changed until the cities exist. Only the level 12's red flags are animated for now (the town's flapping banner is red).
 - **Finding one:** the coordinates on the world map's toolbar open a box to jump to any x and y (built 2026-11-01). Later, perhaps, a list of the historic cities near you.
 
 ### Testing how they're broken
@@ -142,7 +142,7 @@ A seat is a tile like any NPC city. Its holder is the tile's existing `owner_cit
 **Spikes first** (2026-11-01), each its own TODO item, to settle the numbers and the tools before the seats are built:
 
 - **A. Jump to coordinates** on the world map: done 2026-11-01 (the coordinates on the map's toolbar open a box to type any x and y).
-- **B. The art:** the four historic city sprites (On the map, above).
+- **B. The art:** done 2026-11-01, the four historic city sprites (On the map, above).
 - **C. Simulations of breaking one:** done 2026-11-01 (Testing how they're broken, above): `npm run sim -- siege`, its findings, and the cities' research tuned so every level and every day can be taken at a rising cost. Loyalty's numbers are still open.
 - **D. Camp times** ([camp-times.md](camp-times.md), its phase 1): armies landing at a chosen second, in order. Needed before players can break one as the simulations do.
 

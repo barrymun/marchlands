@@ -55,6 +55,14 @@ export function tileArtFile(type: number, band: number): string {
   return `${TILE_SLUGS.get(type) ?? `tile-${type}`}-${band}.png`;
 }
 
+/** The levels of the historic cities, each with a map sprite of its own (docs/features/historical-cities.md, On the map). */
+export const HISTORIC_ART_LEVELS = [12, 14, 16, 18] as const;
+
+/** A historic city's map sprite, in the tiles folder: `historic-12.png`. */
+export function historicArtFile(level: (typeof HISTORIC_ART_LEVELS)[number]): string {
+  return `historic-${level}.png`;
+}
+
 /**
  * The pieces the walls' frame round the city is made of, for each level band: `wall` repeats along the back and front
  * walls, `side` down the side walls (mirrored on the right), `corner` is a tower and `gate` the gatehouse.

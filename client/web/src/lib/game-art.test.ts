@@ -44,6 +44,8 @@ import {
   gearStarFile,
   gearTwinFile,
   grandTownHallFile,
+  HISTORIC_ART_LEVELS,
+  historicArtFile,
   itemArtFile,
   RESOURCE_ART_KEYS,
   resourceArtFile,
@@ -129,11 +131,17 @@ describe(tileArtFile.name, () => {
 });
 
 describe('tile sprites', () => {
-  it('has a sprite for every valley type, castles and barbarian camps, at every band, and nothing else', () => {
+  it('has a sprite for every valley type, castles and barbarian camps at every band, and the historic cities, and nothing else', () => {
     expect(TILE_ART_TYPES).toContain(TileType.CASTLE);
     expect(TILE_ART_TYPES).toContain(TileType.NPC);
-    const expected = TILE_ART_TYPES.flatMap((t) => ART_BANDS.map(({ band }) => tileArtFile(t, band))).sort();
+    const expected = [...TILE_ART_TYPES.flatMap((t) => ART_BANDS.map(({ band }) => tileArtFile(t, band))), ...HISTORIC_ART_LEVELS.map(historicArtFile)].sort();
     expect(fs.readdirSync(TILE_DIR).sort()).toEqual(expected);
+  });
+});
+
+describe(historicArtFile.name, () => {
+  it('names the file after the level', () => {
+    expect(historicArtFile(18)).toBe('historic-18.png');
   });
 });
 

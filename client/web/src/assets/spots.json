@@ -1060,6 +1060,14 @@
   ],
   "tiles/desert-3.png": [{ "k": "rock", "x": 32, "y": 38, "n": 4, "m": 4 }],
   "tiles/desert-4.png": [{ "k": "rock", "x": 33, "y": 36, "n": 7, "m": 6 }],
+  "tiles/historic-12.png": [
+    { "k": "banner", "x": 49, "y": 38, "n": 5 },
+    { "k": "banner", "x": 49, "y": 44, "n": 6 },
+    { "k": "banner", "x": 72, "y": 49, "n": 5 },
+    { "k": "banner", "x": 26, "y": 49, "n": 5 },
+    { "k": "banner", "x": 49, "y": 61, "n": 5 }
+  ],
+  "tiles/historic-18.png": [{ "k": "dome", "x": 48, "y": 35, "n": 11 }],
   "tiles/lake-1.png": [{ "k": "water", "x": 32, "y": 46, "n": 4.5 }],
   "tiles/lake-2.png": [{ "k": "water", "x": 32, "y": 46, "n": 7 }],
   "tiles/lake-3.png": [{ "k": "water", "x": 32, "y": 46, "n": 9 }],
