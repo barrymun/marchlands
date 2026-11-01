@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, BASIC_RESOURCES, faction, FACTION_IDS, FactionId, factionOfZone, factionRivals, FACTIONS, isFactionLevel, npcFaction } from '#/index.ts';
+import {
+  BALANCE,
+  BASIC_RESOURCES,
+  faction,
+  FACTION_IDS,
+  FactionId,
+  factionOfZone,
+  factionRivals,
+  FACTIONS,
+  isFactionLevel,
+  npcFaction,
+  stateFaction,
+} from '#/index.ts';
 
 const ZONES = BALANCE.stateGrid ** 2;
 /** The tile at (x, y). */
@@ -100,5 +112,19 @@ describe(factionRivals.name, () => {
       expect(rivals(f.id)).not.toContain(f.id);
       for (const r of factionRivals(f.id)) expect(rivals(r.id)).toContain(f.id);
     }
+  });
+});
+
+describe(stateFaction.name, () => {
+  it("is the zone's faction, or none in a state a player rules", () => {
+    expect(stateFaction(14)?.id).toBe(FactionId.ITALIAN_LEAGUE);
+    expect(stateFaction(14, new Set([14]))).toBeNull();
+    expect(stateFaction(13, new Set([14]))?.id).toBe(FactionId.ITALIAN_LEAGUE);
+  });
+
+  it('cuts a ruled state’s members off from their faction', () => {
+    const tuscany = tile(500, 700);
+    expect(npcFaction(tuscany, 10)?.id).toBe(FactionId.ITALIAN_LEAGUE);
+    expect(npcFaction(tuscany, 10, new Set([14]))).toBeNull();
   });
 });

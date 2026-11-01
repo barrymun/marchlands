@@ -126,6 +126,13 @@ describe('economy', () => {
     expect(computeCityStats(city(), ctx(), 0).tribute).toBe(0);
   });
 
+  it("(marchlands) a state's capital brings its state's tribute too, per real hour", () => {
+    const s = computeCityStats(city({ historicLevel: 16, stateTribute: 42_000 }), ctx(), 0);
+    expect(s.stateTribute).toBe(42_000);
+    expect(s.rates.gold).toBe(5 + BALANCE.historic.tribute[16] + 42_000);
+    expect(computeCityStats(city(), ctx(), 0).stateTribute).toBe(0);
+  });
+
   it('(marchlands) the tax rate sells that share of field output to the merchant; the base tax stays', () => {
     const c = city({ population: 1000, buildings: [{ positionId: 1001, typeId: 7, level: 3, status: 0, startTime: 0, endTime: 0 }] });
     const free = computeCityStats(c, ctx(), 0);

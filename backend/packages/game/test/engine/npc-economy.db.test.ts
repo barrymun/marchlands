@@ -184,8 +184,8 @@ describe(plunderNpc.name, () => {
       if (!member) throw new Error('no faction member on the test map');
       const key = groupKey(stateOf(member.id), member.level);
       const was = econ.stock[key]?.iron ?? 0;
-      await plunderNpc(g, member.id, member.level, { iron: 10_000 });
-      await plunderNpc(g, member.id, BALANCE.factions.minLevel - 1, { iron: 10_000 });
+      await plunderNpc(g, member.id, member.level, { iron: 10_000 }, new Set());
+      await plunderNpc(g, member.id, BALANCE.factions.minLevel - 1, { iron: 10_000 }, new Set());
       const now = await loadNpcEconomy(g, false);
       expect(now?.stock[key]?.iron).toBeCloseTo(was - 10_000, 0);
     }));

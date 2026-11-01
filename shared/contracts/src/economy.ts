@@ -378,6 +378,17 @@ export const FactionGold = z
   .meta({ id: 'FactionGold' });
 export type FactionGold = z.infer<typeof FactionGold>;
 
+export const StateRuler = z
+  .object({
+    zoneId: int().describe('the state (zone) ruled'),
+    playerId: int(),
+    player: z.string().describe("the ruler's name"),
+    cityId: int().describe('its capital, the held level 16 historic city'),
+    tribute: int().describe('the gold a real hour its barbarian cities pay the capital, cut off from their faction'),
+  })
+  .meta({ id: 'StateRuler' });
+export type StateRuler = z.infer<typeof StateRuler>;
+
 export const MarketMyTrade = z
   .object({
     id: int(),

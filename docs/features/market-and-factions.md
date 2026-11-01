@@ -300,7 +300,7 @@ In this order (decided 2026-10-20; NPC trade moved before reputation and seats o
 5. **The ballista rule change, then seats of power.**
    - First the rule change: traps hit only ground troops, and ranged groups stop once the wall is in range ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md)). **Done 2026-10-20.**
    - The seats themselves are now their own design, with their own phases: [historical-cities.md](historical-cities.md) (2026-10-24).
-6. **Relations between factions and retaliation.** Wars, embargoes, reinforcements, and seats changing hands between factions. Then, maybe, raids, caravans and regional prices.
+6. **Relations between factions and retaliation.** Wars, embargoes, reinforcements, and seats changing hands between factions. Then, maybe, raids, caravans and regional prices. **Put off** (2026-11-01, the maintainer): retaliation stays the prices reputation already sets; reinforcing members, raiding players' cities and wars between factions are a TODO.md item (*Angry factions*) for later. What is built: a player holding a state's capital cuts the state off from its faction ([historical-cities.md](historical-cities.md), phase 4).
 7. **Acts of god.** Scheduled events, their effects on cities and NPC groups, the almanac's forecasts, weather in the map and the town. They can start any time after phase 3, once there are NPC prices for them to move.
 8. **Trading scripts.**
    - The API's rate limits come first (in phase 1).

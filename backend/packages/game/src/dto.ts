@@ -129,6 +129,7 @@ export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
     taxItemBonus: Math.round(stats.taxBuff),
     taxItemShare: stats.taxBuff ? BALANCE.resourceBuffBonus : 0,
     tribute: Math.round(stats.tribute),
+    stateTribute: Math.round(stats.stateTribute),
     herosSalary: round2(stats.heroSalary),
     troopCostFood: round2(stats.upkeep),
     curPopulation: Math.floor(c.population),

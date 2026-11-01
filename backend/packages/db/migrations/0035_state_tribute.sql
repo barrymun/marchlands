@@ -1,0 +1,1 @@
+ALTER TABLE "cities" ADD COLUMN "state_tribute" integer DEFAULT 0 NOT NULL;

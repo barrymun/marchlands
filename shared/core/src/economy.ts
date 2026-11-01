@@ -69,6 +69,8 @@ export interface EconomyCity {
   misc: CityMisc;
   /** (marchlands) a held historic city: its level, for its tribute */
   historicLevel?: number | null;
+  /** (marchlands) a state's capital held by a player: the gold a real hour its state's barbarian cities pay (core stateTribute) */
+  stateTribute?: number;
 }
 
 export interface MayorStats {
@@ -124,6 +126,8 @@ export interface CityStats {
   taxBuff: number;
   /** (marchlands) gold per hour a held historic city's tribute brings (BALANCE.historic.tribute, per real hour) */
   tribute: number;
+  /** (marchlands) gold per hour a state's capital gets from its state's barbarian cities (core stateTribute, per real hour) */
+  stateTribute: number;
   /** (marchlands) field output per hour the tax rate takes and sells to the merchant */
   taxed: Record<BasicResource, number>;
   heroSalary: number;
@@ -264,7 +268,9 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   // (marchlands) a held historic city's tribute, paid per real hour like salaries
   const seat = city.historicLevel as 12 | 14 | 16 | 18 | null | undefined;
   const tribute = seat && seat in BALANCE.historic.tribute ? BALANCE.historic.tribute[seat] / getGameSpeed() : 0;
-  rates.gold = taxIncome + tribute - heroSalary;
+  // (marchlands) and a capital's, from its state's barbarian cities
+  const stateTribute = (city.stateTribute ?? 0) / getGameSpeed();
+  rates.gold = taxIncome + tribute + stateTribute - heroSalary;
 
   return {
     maxPopulation,
@@ -281,6 +287,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
     taxConverted,
     taxBuff,
     tribute,
+    stateTribute,
     taxed,
     heroSalary,
     upkeep,
@@ -383,8 +390,8 @@ function integrate(city: EconomyCity, stats: CityStats, dtMs: number, result: Se
     }
   }
   const gold = city.gold + stats.rates.gold * hours;
-  f.produced.gold += (stats.taxIncome + stats.tribute) * hours;
-  f.salaries += gold < 0 ? Math.max(0, city.gold + (stats.taxIncome + stats.tribute) * hours) : stats.heroSalary * hours;
+  f.produced.gold += (stats.taxIncome + stats.tribute + stats.stateTribute) * hours;
+  f.salaries += gold < 0 ? Math.max(0, city.gold + (stats.taxIncome + stats.tribute + stats.stateTribute) * hours) : stats.heroSalary * hours;
   city.gold = Math.max(0, gold);
 }
 

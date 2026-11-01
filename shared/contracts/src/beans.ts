@@ -97,6 +97,7 @@ export const ResourceBean = z
     taxItemBonus: z.number().int().describe('gold per game hour the Gold Production item adds to the base tax (part of taxIncome)'),
     taxItemShare: z.number().describe('that item bonus, as a share of the base tax (0.25 = +25%)'),
     tribute: z.number().int().describe("(marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)"),
+    stateTribute: z.number().int().describe("(marchlands) gold per game hour a state's capital gets from its state's barbarian cities (part of goldRate)"),
     herosSalary: z.number(),
     troopCostFood: z.number().describe('troop food upkeep per game hour, 2 decimals'),
     curPopulation: z.number().int(),

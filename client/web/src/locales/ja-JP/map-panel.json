@@ -47,7 +47,9 @@
   "faction": {
     "memberTitle": "{{faction}}に属しています",
     "bandits": "山賊",
-    "banditsTitle": "レベル{{level}}未満：どの勢力にも属さない山賊"
+    "banditsTitle": "レベル{{level}}未満：どの勢力にも属さない山賊",
+    "ruled": "{{player}}の統治下",
+    "ruledTitle": "{{player}}がこの州の首都を保持しているため、{{faction}}から切り離されています"
   },
   "release": {
     "title": "この領地を放棄しますか？",

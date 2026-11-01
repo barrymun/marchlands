@@ -47,7 +47,9 @@
   "faction": {
     "memberTitle": "Belongs to the {{faction}}",
     "bandits": "Bandits",
-    "banditsTitle": "Below level {{level}}: bandits, loyal to no faction"
+    "banditsTitle": "Below level {{level}}: bandits, loyal to no faction",
+    "ruled": "Ruled by {{player}}",
+    "ruledTitle": "Cut off from the {{faction}}: {{player}} holds this state's capital"
   },
   "release": {
     "title": "Release this valley?",

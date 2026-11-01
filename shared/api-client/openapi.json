@@ -1191,6 +1191,12 @@
             "maximum": 9007199254740991,
             "description": "(marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)"
           },
+          "stateTribute": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour a state's capital gets from its state's barbarian cities (part of goldRate)"
+          },
           "herosSalary": {
             "type": "number"
           },
@@ -1239,6 +1245,7 @@
           "taxItemBonus",
           "taxItemShare",
           "tribute",
+          "stateTribute",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -11179,6 +11186,45 @@
           "standing"
         ]
       },
+      "StateRulerInput": {
+        "type": "object",
+        "properties": {
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the state (zone) ruled"
+          },
+          "playerId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "player": {
+            "type": "string",
+            "description": "the ruler's name"
+          },
+          "cityId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "its capital, the held level 16 historic city"
+          },
+          "tribute": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the gold a real hour its barbarian cities pay the capital, cut off from their faction"
+          }
+        },
+        "required": [
+          "zoneId",
+          "playerId",
+          "player",
+          "cityId",
+          "tribute"
+        ]
+      },
       "MarketMyTradeInput": {
         "type": "object",
         "properties": {
@@ -13115,6 +13161,12 @@
             "maximum": 9007199254740991,
             "description": "(marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)"
           },
+          "stateTribute": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour a state's capital gets from its state's barbarian cities (part of goldRate)"
+          },
           "herosSalary": {
             "type": "number"
           },
@@ -13163,6 +13215,7 @@
           "taxItemBonus",
           "taxItemShare",
           "tribute",
+          "stateTribute",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -23349,6 +23402,46 @@
           "gold",
           "treasury",
           "standing"
+        ],
+        "additionalProperties": false
+      },
+      "StateRuler": {
+        "type": "object",
+        "properties": {
+          "zoneId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the state (zone) ruled"
+          },
+          "playerId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "player": {
+            "type": "string",
+            "description": "the ruler's name"
+          },
+          "cityId": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "its capital, the held level 16 historic city"
+          },
+          "tribute": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the gold a real hour its barbarian cities pay the capital, cut off from their faction"
+          }
+        },
+        "required": [
+          "zoneId",
+          "playerId",
+          "player",
+          "cityId",
+          "tribute"
         ],
         "additionalProperties": false
       },
@@ -37079,6 +37172,71 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/FactionGold"
+                      }
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/factions/rulers": {
+      "get": {
+        "operationId": "getFactionsRulers",
+        "summary": "The states players rule by holding their capital: their barbarian cities are cut off from their faction and pay the ruler",
+        "tags": [
+          "market"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/StateRuler"
                       }
                     }
                   },

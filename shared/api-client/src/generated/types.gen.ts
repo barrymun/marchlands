@@ -224,6 +224,10 @@ export type ResourceBeanInput = {
      * (marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)
      */
     tribute: number;
+    /**
+     * (marchlands) gold per game hour a state's capital gets from its state's barbarian cities (part of goldRate)
+     */
+    stateTribute: number;
     herosSalary: number;
     /**
      * troop food upkeep per game hour, 2 decimals
@@ -3189,6 +3193,26 @@ export type FactionGoldInput = {
     standing: number;
 };
 
+export type StateRulerInput = {
+    /**
+     * the state (zone) ruled
+     */
+    zoneId: number;
+    playerId: number;
+    /**
+     * the ruler's name
+     */
+    player: string;
+    /**
+     * its capital, the held level 16 historic city
+     */
+    cityId: number;
+    /**
+     * the gold a real hour its barbarian cities pay the capital, cut off from their faction
+     */
+    tribute: number;
+};
+
 export type MarketMyTradeInput = {
     id: number;
     resType: number;
@@ -3665,6 +3689,10 @@ export type ResourceBean = {
      * (marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)
      */
     tribute: number;
+    /**
+     * (marchlands) gold per game hour a state's capital gets from its state's barbarian cities (part of goldRate)
+     */
+    stateTribute: number;
     herosSalary: number;
     /**
      * troop food upkeep per game hour, 2 decimals
@@ -6628,6 +6656,26 @@ export type FactionGold = {
      * the player's standing with it, -100 to 100, drifting back to 0
      */
     standing: number;
+};
+
+export type StateRuler = {
+    /**
+     * the state (zone) ruled
+     */
+    zoneId: number;
+    playerId: number;
+    /**
+     * the ruler's name
+     */
+    player: string;
+    /**
+     * its capital, the held level 16 historic city
+     */
+    cityId: number;
+    /**
+     * the gold a real hour its barbarian cities pay the capital, cut off from their faction
+     */
+    tribute: number;
 };
 
 export type MarketMyTrade = {
@@ -12373,6 +12421,35 @@ export type GetFactionsResponses = {
 };
 
 export type GetFactionsResponse = GetFactionsResponses[keyof GetFactionsResponses];
+
+export type GetFactionsRulersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/factions/rulers';
+};
+
+export type GetFactionsRulersErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Default Response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type GetFactionsRulersError = GetFactionsRulersErrors[keyof GetFactionsRulersErrors];
+
+export type GetFactionsRulersResponses = {
+    /**
+     * Default Response
+     */
+    200: Array<StateRuler>;
+};
+
+export type GetFactionsRulersResponse = GetFactionsRulersResponses[keyof GetFactionsRulersResponses];
 
 export type GetMarketSummaryData = {
     body?: never;

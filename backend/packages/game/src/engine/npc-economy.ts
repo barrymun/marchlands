@@ -14,16 +14,17 @@ import {
   factionMarginal,
   factionSells,
   giveToGroups,
-  isFactionLevel,
   landFactors,
   MarketSide,
   newNpcEconomy,
   type NpcEconomy,
+  npcFaction,
   type NpcGroup,
   npcTick,
   plunderGroup,
   seededRng,
   stateOf,
+  stateTribute,
   type Stock,
   takeFromGroups,
   TileType,
@@ -33,9 +34,12 @@ import {
 } from '@marchlands/core';
 import { worldState } from '@marchlands/db';
 
+import { openCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { addToCandles, crossedOrders, settleResting } from '#/engine/market.ts';
 import { cityTerms, tradedWithFactions } from '#/engine/reputation.ts';
+import { type StateRuler, stateRulers } from '#/engine/seats.ts';
+import { getCity, saveCity } from '#/repo.ts';
 
 const NPC_ECONOMY_KEY = 'npc-economy';
 
@@ -90,7 +94,11 @@ export async function saveNpcEconomy(ctx: Ctx, econ: NpcEconomy) {
  * re-run.
  */
 export async function npcTradeTick(ctx: Ctx) {
-  const groups = await npcGroups(ctx);
+  // (marchlands) a state a player rules (its capital held) is cut off: its members don't trade, and pay its ruler instead
+  const all = await npcGroups(ctx);
+  const rulers = await stateRulers(ctx);
+  await payStateTributes(ctx, rulers, all);
+  const groups = all.filter((g) => !rulers.has(g.zone));
   const was = await loadNpcEconomy(ctx, true);
   if (!was) {
     await saveNpcEconomy(ctx, newNpcEconomy(groups, await zoneLand(ctx), ctx.now));
@@ -115,6 +123,19 @@ export async function npcTradeTick(ctx: Ctx) {
   }
   // every market moved: open market screens refresh
   ctx.broadcast(PushCmd.MARKET_UPDATE, { resTypes: [...BASIC_RESOURCES.keys()] });
+}
+
+/** Sets each ruled state's capital's tribute from its members now (core stateTribute), settling the capital first. */
+async function payStateTributes(ctx: Ctx, rulers: ReadonlyMap<number, StateRuler>, groups: readonly NpcGroup[]) {
+  for (const r of rulers.values()) {
+    const tribute = Math.round(stateTribute(groups.filter((g) => g.zone === r.zoneId)));
+    const peek = await getCity(ctx, r.cityId);
+    if (peek.stateTribute === tribute) continue;
+    const b = await openCity(ctx, r.cityId);
+    if (!b) continue;
+    b.city.stateTribute = tribute;
+    await saveCity(ctx, b.city);
+  }
 }
 
 /**
@@ -154,8 +175,8 @@ async function npcSweep(ctx: Ctx, econ: NpcEconomy): Promise<NpcEconomy> {
 }
 
 /** What players took from a faction member (a barbarian city from the faction level up) lowers its group's stock. */
-export async function plunderNpc(ctx: Ctx, tileId: number, level: number, taken: Partial<Stock>) {
-  if (!isFactionLevel(level)) return;
+export async function plunderNpc(ctx: Ctx, tileId: number, level: number, taken: Partial<Stock>, ruled: ReadonlySet<number>) {
+  if (!npcFaction(tileId, level, ruled)) return;
   const econ = await loadNpcEconomy(ctx, true);
   if (!econ) return;
   await saveNpcEconomy(ctx, plunderGroup(econ, { zone: stateOf(tileId), level, members: 0 }, taken));

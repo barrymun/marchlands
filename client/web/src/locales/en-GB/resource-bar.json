@@ -8,7 +8,8 @@
     "baseTax": "Base tax",
     "taxSold": "Tax {{rate}}% (sold output)",
     "heroSalaries": "Hero salaries",
-    "tribute": "Historic city tribute"
+    "tribute": "Historic city tribute",
+    "stateTribute": "State tribute"
   },
   "breakdown": {
     "base": "Base",

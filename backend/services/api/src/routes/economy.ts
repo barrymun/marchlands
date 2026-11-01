@@ -54,6 +54,7 @@ import {
   RankingQuery,
   ShipmentIdParams,
   ShopCategory,
+  StateRuler,
   StaticConfig,
 } from '@marchlands/contracts';
 import { BALANCE, BUILDINGS, dur, getGameSpeed, itemGoldPrice, itemInfo, ITEMS, msg, QUESTS, RESEARCH, TITLES, TROOPS } from '@marchlands/core';
@@ -154,6 +155,15 @@ export default async function economyRoutes(app: ZApp) {
         const pid = await maybePlayerIdOf(req.server.deps.db, req);
         return anon(req, (ctx) => factions.list(ctx, pid));
       },
+    );
+    secure.get(
+      '/factions/rulers',
+      s(
+        tags.market,
+        'The states players rule by holding their capital: their barbarian cities are cut off from their faction and pay the ruler',
+        z.array(StateRuler),
+      ),
+      (req) => anon(req, (ctx) => factions.rulers(ctx)),
     );
     secure.get('/market/summary', s(tags.market, "Every resource's price now, the merchant's quotes and its last 24 hours", z.array(MarketSummary)), (req) =>
       anon(req, (ctx) => market.summary(ctx)),

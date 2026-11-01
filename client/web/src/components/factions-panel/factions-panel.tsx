@@ -7,6 +7,7 @@ import { BALANCE, FACTIONS, factionSpread } from '@marchlands/core';
 import { goldBar } from '@/components/factions-panel/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useStateRulers } from '@/hooks/use-state-rulers';
 import { FACTION_STYLE, standingText, standingTierName, standingTone } from '@/lib/factions';
 import { fmt, percent, resourceLabel } from '@/lib/format';
 import { factionName, zoneName } from '@/lib/game-data';
@@ -21,12 +22,14 @@ import { cn } from '@/lib/utils';
 export function FactionsPanel() {
   const { t } = useTranslation(['factions-panel', 'common']);
   const golds = useQuery(getFactionsOptions()).data;
+  const rulers = useStateRulers();
   const list = (items: string[]) => items.join(t('common:list.separator'));
   return (
     <div className="grid gap-4">
       <div className="grid gap-1 text-sm text-muted-foreground">
         <p>{t('intro', { level: BALANCE.factions.minLevel })}</p>
         <p>{t('standingIntro')}</p>
+        <p>{t('rulersIntro')}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {FACTIONS.map((f) => {
@@ -42,6 +45,10 @@ export function FactionsPanel() {
                   <Badge variant="outline">{t(`temperament.${f.temperament}`)}</Badge>
                 </CardTitle>
                 <CardDescription>{t('zones', { zones: list(f.zones.map(zoneName)) })}</CardDescription>
+                {f.zones.flatMap((z) => {
+                  const r = rulers.get(z);
+                  return r ? [<CardDescription key={z}>{t('ruled', { state: zoneName(z), player: r.player, tribute: fmt(r.tribute) })}</CardDescription>] : [];
+                })}
               </CardHeader>
               <CardContent className="grid gap-2 text-sm">
                 <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">

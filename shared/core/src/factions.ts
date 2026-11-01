@@ -77,5 +77,12 @@ export function factionRivals(id: FactionId): Faction[] {
 /** Whether an NPC city of this level belongs to a faction (from BALANCE.factions.minLevel), rather than being a bandit. */
 export const isFactionLevel = (level: number) => level >= BALANCE.factions.minLevel;
 
-/** The faction an NPC city on this tile belongs to, or null for a bandit below BALANCE.factions.minLevel. */
-export const npcFaction = (tileId: number, level: number): Faction | null => (isFactionLevel(level) ? factionOfZone(stateOf(tileId)) : null);
+/**
+ * The faction a zone's NPC cities answer to: the one holding it, unless a player rules the state (holds its capital),
+ * which cuts them off (`ruled`, the zones players rule; docs/features/historical-cities.md).
+ */
+export const stateFaction = (zone: number, ruled?: ReadonlySet<number>): Faction | null => (ruled?.has(zone) ? null : factionOfZone(zone));
+
+/** The faction an NPC city on this tile belongs to, or null for a bandit below BALANCE.factions.minLevel or in a state a player rules. */
+export const npcFaction = (tileId: number, level: number, ruled?: ReadonlySet<number>): Faction | null =>
+  isFactionLevel(level) ? stateFaction(stateOf(tileId), ruled) : null;

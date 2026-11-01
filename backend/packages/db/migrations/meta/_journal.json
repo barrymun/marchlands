@@ -246,6 +246,13 @@
       "when": 1793550006075,
       "tag": "0034_historic_city_draft",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1793560211084,
+      "tag": "0035_state_tribute",
+      "breakpoints": true
     }
   ]
 }

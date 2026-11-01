@@ -80,6 +80,7 @@ export function ResourceBar({ resource, mayor, stacked }: { resource: ResourceBe
                     ...(r.taxItemBonus ? [[t('itemBonus', { percent: percent(r.taxItemShare) }), r.taxItemBonus, ITEM_BONUS_TEXT_INVERTED] as Row] : []),
                     ...(r.taxConverted ? [[t('gold.taxSold', { rate: r.taxRate }), r.taxConverted] as Row] : []),
                     ...(r.tribute ? [[t('gold.tribute'), r.tribute] as Row] : []),
+                    ...(r.stateTribute ? [[t('gold.stateTribute'), r.stateTribute] as Row] : []),
                     ...(r.herosSalary ? [[t('gold.heroSalaries'), -r.herosSalary] as Row] : []),
                   ]}
                   total={r.goldRate}

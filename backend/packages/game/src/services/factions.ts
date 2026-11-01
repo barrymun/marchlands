@@ -1,11 +1,15 @@
 // (marchlands) The NPC factions (core factions.ts) as players see them: the gold each holds against its treasury, and
 // the player's standing with each (core reputation.ts).
 
+import { inArray } from 'drizzle-orm';
+
 import { factionOfZone, FACTIONS, groupKey, groupTreasury } from '@marchlands/core';
+import { cities, players } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { loadNpcEconomy } from '#/engine/npc-economy.ts';
 import { standingsOf } from '#/engine/reputation.ts';
+import { stateRulers } from '#/engine/seats.ts';
 
 /**
  * Every faction's gold now and its treasury (what its gold drifts back to), from its groups, and the player's standing
@@ -25,4 +29,37 @@ export async function list(ctx: Ctx, playerId: number | null) {
     }
     return { id: f.id, gold: Math.floor(gold), treasury: Math.floor(treasury), standing: standing?.[f.id] ?? 0 };
   });
+}
+
+/** The states players rule (their capitals held), cut off from their faction: who rules each, and the tribute it pays. */
+export async function rulers(ctx: Ctx) {
+  const ruled = [...(await stateRulers(ctx)).values()];
+  if (!ruled.length) return [];
+  const names = new Map(
+    (
+      await ctx.tx
+        .select({ id: players.id, name: players.name })
+        .from(players)
+        .where(
+          inArray(
+            players.id,
+            ruled.map((r) => r.playerId),
+          ),
+        )
+    ).map((p) => [p.id, p.name]),
+  );
+  const tributes = new Map(
+    (
+      await ctx.tx
+        .select({ id: cities.id, tribute: cities.stateTribute })
+        .from(cities)
+        .where(
+          inArray(
+            cities.id,
+            ruled.map((r) => r.cityId),
+          ),
+        )
+    ).map((c) => [c.id, c.tribute]),
+  );
+  return ruled.map((r) => ({ ...r, player: names.get(r.playerId) ?? '', tribute: tributes.get(r.cityId) ?? 0 })).sort((a, b) => a.zoneId - b.zoneId);
 }

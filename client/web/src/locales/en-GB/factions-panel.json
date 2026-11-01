@@ -14,5 +14,7 @@
   "standing": "Your standing",
   "standingValue": "{{tier}} ({{standing}})",
   "terms": "Your cities in its lands trade with the factions at a spread of {{spread}}.",
-  "refuses": "It won't trade with your cities in its lands."
+  "refuses": "It won't trade with your cities in its lands.",
+  "ruled": "{{state}} is ruled by {{player}}: its barbarian cities are cut off from the faction and pay {{tribute}} gold an hour to the capital.",
+  "rulersIntro": "A player holding a state's capital rules the state: its barbarian cities leave their faction, stop trading, and pay the ruler instead. Attacking or drafting them costs no standing."
 }

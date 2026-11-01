@@ -191,3 +191,10 @@ export function historicGuard(level: HistoricLevel, tileId: number) {
   const h = createGuardHero(100, seededRng(`historic-guard:${tileId}`), stateOf(tileId));
   return { ...h, level: 100, power, powerAdded: 0, powerBuffAdded: 0, stratagem, stratagemAdded: 0, stratagemBuffAdded: 0 };
 }
+
+/**
+ * The gold a real hour a state's ruler gets from its barbarian cities, cut off from their faction: BALANCE.historic.
+ * stateTribute.perMemberLevel for each level of each member (`groups`: the state's members by level).
+ */
+export const stateTribute = (groups: readonly { level: number; members: number }[]) =>
+  groups.reduce((sum, g) => sum + g.level * g.members, 0) * BALANCE.historic.stateTribute.perMemberLevel;

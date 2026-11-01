@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { type CityBean, getMapTilesByTileIdOptions } from '@marchlands/api-client';
-import { BALANCE, factionOfZone, isFactionLevel, Mission, TileType, VALLEY_TYPES } from '@marchlands/core';
+import { BALANCE, FACTION_IDS, factionOfZone, isFactionLevel, Mission, TileType, VALLEY_TYPES } from '@marchlands/core';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add-to-farm-button';
@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePlayer } from '@/hooks/use-game';
+import { useStateRulers } from '@/hooks/use-state-rulers';
 import { copyText } from '@/lib/clipboard';
 import { FACTION_STYLE } from '@/lib/factions';
 import { fmt } from '@/lib/format';
@@ -55,12 +56,15 @@ export function TileCard({
 }) {
   const { t } = useTranslation(['map-panel', 'common']);
   const info = useQuery(getMapTilesByTileIdOptions({ path: { tileId } }));
+  const rulers = useStateRulers();
   const tile = info.data;
   const scouts = city.troop.scouter ?? 0;
   // the player's historic cities, which draft from barbarian cities in their areas
   const seats = (usePlayer().data?.castles ?? []).filter((c) => c.historicLevel != null);
   // a barbarian city's side: the faction holding its zone, or none for a bandit below the faction level
-  const side = tile?.type === TileType.NPC ? (isFactionLevel(tile.level) ? factionOfZone(tile.zoneId) : null) : undefined;
+  // (marchlands) or, in a state a player rules, cut off from it
+  const ruler = tile?.type === TileType.NPC && isFactionLevel(tile.level) ? rulers.get(tile.zoneId) : undefined;
+  const side = tile?.type === TileType.NPC && !ruler ? (isFactionLevel(tile.level) ? factionOfZone(tile.zoneId) : null) : undefined;
   /** what can be scouted on a tile (empty land has nothing to see) */
   const kindOf = (t: NonNullable<typeof tile>): SendTarget['kind'] =>
     t.type === TileType.CASTLE ? 'city' : t.type === TileType.NPC || t.type === TileType.HISTORIC ? 'npc' : t.type === TileType.FLAT ? undefined : 'valley';
@@ -110,6 +114,14 @@ export function TileCard({
               <Badge variant="outline" title={t('faction.memberTitle', { faction: factionName(side.id) })}>
                 <span aria-hidden className={cn('size-2 rounded-sm', FACTION_STYLE[side.id].swatch)} />
                 {factionName(side.id)}
+              </Badge>
+            )}
+            {ruler && (
+              <Badge
+                variant="outline"
+                title={t('faction.ruledTitle', { faction: factionName(factionOfZone(tile.zoneId)?.id ?? FACTION_IDS[0]), player: ruler.player })}
+              >
+                {t('faction.ruled', { player: ruler.player })}
               </Badge>
             )}
             {side === null && (

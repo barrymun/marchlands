@@ -30,6 +30,7 @@ import { cityPosition, tilePosition } from '#/engine/armies.ts';
 import { npcState } from '#/engine/combat.ts';
 import { createReport } from '#/engine/reports.ts';
 import { addStanding } from '#/engine/reputation.ts';
+import { ruledZones } from '#/engine/seats.ts';
 import { type CityRow, saveCity, saveTile, type TileRow } from '#/repo.ts';
 
 /** A held historic city's level, or null for any other city. */
@@ -94,7 +95,7 @@ export async function draft(ctx: Ctx, city: CityRow, tile: TileRow, opts: { auto
   Object.assign(city, { troops: addTroops(city.troops, troops), draftDay: Math.floor(ctx.now / DAY), draftsUsed: draftsUsed(city, ctx.now) + 1 });
   await saveCity(ctx, city);
   // (marchlands) drafting from a faction's member costs standing with it (core draftStanding)
-  const moved = draftStanding(tile.id, tile.level);
+  const moved = draftStanding(tile.id, tile.level, await ruledZones(ctx));
   const standing = moved && { faction: moved.faction.id, change: moved.change, now: await addStanding(ctx, city.playerId, moved.faction.id, moved.change) };
   const target = await tilePosition(ctx, tile);
   await createReport(ctx, {

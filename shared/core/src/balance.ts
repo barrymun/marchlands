@@ -211,6 +211,11 @@ export const BALANCE = {
     tribute: { 12: 2_000, 14: 6_000, 16: 20_000, 18: 60_000 } as Record<12 | 14 | 16 | 18, number>,
     /** shares of the market fee (BALANCE.marketFee) paid to the holder of the buyer's state's capital, and of Atlantis */
     feeShare: { capital: 0.2, atlantis: 0.1 },
+    /**
+     * a state's ruler (its capital's holder): the state's barbarian cities are cut off from their faction and pay the
+     * capital this much gold a real hour per member level instead (a member of level 7 pays 35; Tuscany's about 42,000)
+     */
+    stateTribute: { perMemberLevel: 5 },
   },
   /** (marchlands) how far ahead an army can be set to land at a chosen time (camp times; real time) */
   landAtMaxAheadMs: 24 * HOUR,

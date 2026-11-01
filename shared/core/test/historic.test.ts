@@ -22,6 +22,7 @@ import {
   maxArmyTroops,
   seatLoyalty,
   seatTitle,
+  stateTribute,
   TechType,
   TileType,
 } from '#/index.ts';
@@ -261,5 +262,18 @@ describe(seatTitle.name, () => {
       ]),
     ).toBeNull();
     expect(seatTitle([])).toBeNull();
+  });
+});
+
+describe(stateTribute.name, () => {
+  it('pays per member level, by BALANCE.historic.stateTribute', () => {
+    const per = BALANCE.historic.stateTribute.perMemberLevel;
+    expect(
+      stateTribute([
+        { level: 5, members: 10 },
+        { level: 10, members: 2 },
+      ]),
+    ).toBe((50 + 20) * per);
+    expect(stateTribute([])).toBe(0);
   });
 });

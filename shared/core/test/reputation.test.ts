@@ -192,3 +192,18 @@ describe(draftStanding.name, () => {
     expect(draftStanding(ROMAGNA, BALANCE.factions.minLevel - 1)).toBeNull();
   });
 });
+
+describe('standing in a state a player rules', () => {
+  const ruled = new Set([0]);
+
+  it('costs and earns nothing there: its cities are cut off from their faction', () => {
+    expect(attackStanding(FRIESLAND, 10, true, true, ruled)).toBeNull();
+    expect(attackStanding(FRIESLAND, 3, true, false, ruled)).toBeNull();
+    expect(seatStanding(FRIESLAND, 12, true, ruled)).toBeNull();
+    expect(draftStanding(FRIESLAND, 10, ruled)).toBeNull();
+  });
+
+  it('leaves other states as they were', () => {
+    expect(draftStanding(ROMAGNA, 10, ruled)?.faction.id).toBe(FactionId.ITALIAN_LEAGUE);
+  });
+});

@@ -15,6 +15,7 @@ import { relationGroup } from '@/components/map-panel/utils';
 import { placeName } from '@/components/map-panel/utils';
 import type { WorldMapData } from '@/components/map-panel/world-map/hooks';
 import { wrap } from '@/components/map-panel/world-map/utils';
+import { useStateRulers } from '@/hooks/use-state-rulers';
 import { FACTION_STYLE } from '@/lib/factions';
 import { cn } from '@/lib/utils';
 
@@ -54,6 +55,7 @@ export function WorldMap({
   // the map at a moment, once the animation code has loaded: campfires and glints on the tiles, a worker on each of the
   // player's valleys, and the armies the player can see on the march, back to front; and the sky over the camera's state
   const anim = useAnimations();
+  const rulers = useStateRulers();
   const armies = useQuery({ ...getArmiesOptions(), enabled: !!anim });
   const marching = [
     ...(armies.data?.self ?? []).map((army) => ({ army, side: 'own' as const })),
@@ -133,7 +135,9 @@ export function WorldMap({
       <svg className="pointer-events-none absolute inset-0 size-full" aria-hidden>
         {factions &&
           tiles.map((d) => {
-            const f = factionOfZone(stateOf(d.id, mapSize));
+            const zone = stateOf(d.id, mapSize);
+            // a state a player rules is no faction's
+            const f = rulers.has(zone) ? null : factionOfZone(zone);
             return f && <polygon key={`z${d.x},${d.y}`} points={diamond(d.x, d.y)} className={FACTION_STYLE[f.id].tint} />;
           })}
         {outlines.map((o) => (
