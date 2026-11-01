@@ -5,7 +5,7 @@
 //   npm run sim -- trace [--preset archers-best | --troops ...] [--seed 3]
 //   npm run sim -- presets
 //   npm run sim -- siege --plan age2-staged,age2-ballista [--level 12] [--day pikemen,lightCavalry,batteringRam] [--gap 1]
-//     [--loyalty 100 --loyalty-per-win 3] [--wall 12] [--refill 0.1] [--seeds 10]   (plans: plans.ts; a historic city's
+//     [--loyalty 100 --loyalty-per-win 3] [--wall 12] [--refill 0.1] [--city-research 10] [--seeds 10]   (plans: plans.ts; a historic city's
 //     garrison refilling every second between waves, siege.ts)
 //
 // Common options: --level 10 (barbarian city level), --seeds N, and the lord: --research 10, the hero
@@ -19,7 +19,7 @@ import { GEAR_STATS, type GearStat, TROOP_KEY_LIST, type TroopCounts, type Troop
 import { armySize, attackNpc, DEFAULT_LORD, type Lord, lordGearPoints, type Summary, traceNpc } from './lib.ts';
 import { PLANS } from './plans.ts';
 import { PRESETS } from './presets.ts';
-import { HISTORIC_LEVELS, type HistoricLevel, type Rotation, runSiege, type SiegeResult } from './siege.ts';
+import { CITY_RESEARCH, HISTORIC_LEVELS, type HistoricLevel, historicResearch, type Rotation, runSiege, type SiegeResult } from './siege.ts';
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -54,6 +54,7 @@ const { positionals, values } = parseArgs({
     'loyalty-per-win': { type: 'string', default: '3' },
     wall: { type: 'string' },
     refill: { type: 'string', default: '0.1' },
+    'city-research': { type: 'string' },
   },
 });
 
@@ -196,9 +197,10 @@ if (command === 'presets') {
     loyalty: Number(values.loyalty),
     loyaltyPerWin: Number(values['loyalty-per-win']),
     refillShare: Number(values.refill),
+    research: historicResearch(num(values['city-research'], CITY_RESEARCH)),
   };
   console.log(
-    `${describeLord().replace(/ · barbarian city level \d+$/, '')}\nhistoric city level ${siegeLevel} (${foot}, ${horse}, ${siege}), wall ${opts.wallLevel ?? siegeLevel}, ` +
+    `${describeLord().replace(/ · barbarian city level \d+$/, '')}\nhistoric city level ${siegeLevel} (${foot}, ${horse}, ${siege}), research ${num(values['city-research'], CITY_RESEARCH)} but Archery 0, wall ${opts.wallLevel ?? siegeLevel}, ` +
       `loyalty ${opts.loyalty} less ${opts.loyaltyPerWin} a win, ${opts.refillShare * 100}% back every 6 minutes · ${seeds} sieges each\n`,
   );
   for (const name of names) {

@@ -9,8 +9,10 @@ import {
   type FortCounts,
   type FortKey,
   injuredOf,
+  type ResearchState,
   resolveCombat,
   seededRng,
+  TechType,
   TROOP_KEY_LIST,
   type TroopCounts,
   type TroopKey,
@@ -41,6 +43,18 @@ const TROOPS: Record<HistoricLevel, [number, number, number, number, number]> = 
 /** The same fortifications at every level (source 9). */
 const FORTS: FortCounts = { trap: 22_000, abatis: 11_000, arrowTower: 6_666, rollingLogs: 6_000, rockfall: 5_000 };
 
+/**
+ * The city's research (2026-11-01, docs/battle-sims/historic-cities.md, Tuning): every research at this level but
+ * Archery, which stays at 0. Without research the garrison's archers and cavalry can't reach archers that outrange them,
+ * and only the fortifications fight back; with Archery 10 its catapults and ballistae outrange every attacker, and a
+ * level 16 or 18 can only be broken on the days it has rams.
+ */
+export const CITY_RESEARCH = 10;
+
+export function historicResearch(level = CITY_RESEARCH): ResearchState {
+  return { ...researchAt(level), [TechType.ARCHERY]: { level: 0 } };
+}
+
 /** The defending hero's Attack and Intelligence by level, as AeroCalc set them (reference, Other material). */
 const HERO: Record<HistoricLevel, [number, number]> = { 12: [110, 500], 14: [150, 800], 16: [200, 1100], 18: [300, 1650] };
 
@@ -56,14 +70,16 @@ function historicHero(level: HistoricLevel) {
 }
 
 /**
- * One stage of a plan: the same wave sent `waves` times, or until the garrison is broken (no troops left) or the city
- * captured (loyalty at 0), at most `max` waves. `gap` overrides the plan's seconds between waves.
+ * One stage of a plan: the same wave sent `waves` times, or until the garrison is broken (no troops left), one troop
+ * type is cleared (`target`) or the city captured (loyalty at 0), at most `max` waves. `gap` overrides the plan's
+ * seconds between waves.
  */
 export interface Stage {
   name: string;
   troops: TroopCounts;
   waves?: number;
-  until?: 'broken' | 'captured';
+  until?: 'broken' | 'cleared' | 'captured';
+  target?: TroopKey;
   max?: number;
   gap?: number;
   /** the hero's own Attack for this stage's waves (cheap trap waves can go with weak heroes); default the lord's */
@@ -88,6 +104,8 @@ export interface SiegeOptions {
   loyaltyPerWin?: number;
   /** a share of the full garrison back every 6 minutes, spread over every second (0.1) */
   refillShare?: number;
+  /** the city's research, historicResearch(CITY_RESEARCH) unless given */
+  research?: ResearchState;
   seed?: number;
 }
 
@@ -101,6 +119,7 @@ export interface StageResult {
   deadValue: number;
   /** the garrison, fortifications and loyalty when the stage ends */
   troopsLeft: number;
+  left: TroopCounts;
   forts: FortCounts;
   loyalty: number;
   /** seconds from the first wave to this stage's last */
@@ -128,6 +147,7 @@ export function runSiege(plan: Plan, o: SiegeOptions): SiegeResult {
   const lord = o.lord ?? DEFAULT_LORD;
   const research = researchAt(lord.researchLevel);
   const full = historicGarrison(o.level, o.day);
+  const cityResearch = o.research ?? historicResearch();
   // the simulations run at GAME_SPEED 1: 6 real minutes
   const refillPerSecond = (o.refillShare ?? 0.1) / (BALANCE.npcRegenMs / 1000);
   // the garrison as fractions, so a refill of less than one unit a second adds up; battles see whole units
@@ -150,12 +170,25 @@ export function runSiege(plan: Plan, o: SiegeOptions): SiegeResult {
   const troopsLeft = () => Object.values(troops).reduce((s, v) => s + Math.floor(v), 0);
 
   for (const stage of plan.stages) {
-    const result: StageResult = { name: stage.name, waves: 0, wins: 0, lost: {}, lostValue: 0, deadValue: 0, troopsLeft: 0, forts: {}, loyalty, endsAt: t };
+    const result: StageResult = {
+      name: stage.name,
+      waves: 0,
+      wins: 0,
+      lost: {},
+      lostValue: 0,
+      deadValue: 0,
+      troopsLeft: 0,
+      left: {},
+      forts: {},
+      loyalty,
+      endsAt: t,
+    };
     const max = stage.until ? (stage.max ?? 100) : (stage.waves ?? 1);
     const waveHero = stage.power != null ? lordHero({ ...lord, power: stage.power }) : lordHero(lord);
     largestWave = Math.max(largestWave, armySize(stage.troops));
     for (let i = 0; i < max; i++) {
       if (stage.until === 'broken' && troopsLeft() === 0) break;
+      if (stage.until === 'cleared' && stage.target && (troops[stage.target] ?? 0) < 1) break;
       if (loyalty <= 0) break;
       if (!first) {
         const gap = stage.gap ?? plan.gap;
@@ -167,7 +200,7 @@ export function runSiege(plan: Plan, o: SiegeOptions): SiegeResult {
       const defForts = whole(forts) as FortCounts;
       const r = resolveCombat(
         { troops: stage.troops, research, hero: waveHero, attackBonus: lord.attackItem ? ITEM_BONUS : 0, defenseBonus: lord.defenseItem ? ITEM_BONUS : 0 },
-        { troops: defTroops, research: {}, hero, forts: defForts, wallLevel: o.wallLevel ?? o.level },
+        { troops: defTroops, research: cityResearch, hero, forts: defForts, wallLevel: o.wallLevel ?? o.level },
         rng,
       );
       // the losses come off the fractional garrison, keeping what refilled below one unit
@@ -186,6 +219,7 @@ export function runSiege(plan: Plan, o: SiegeOptions): SiegeResult {
       if (stage.until === 'captured' && loyalty <= 0) break;
     }
     result.troopsLeft = troopsLeft();
+    result.left = whole(troops);
     result.forts = whole(forts);
     result.loyalty = Math.max(0, loyalty);
     result.endsAt = t;

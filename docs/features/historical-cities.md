@@ -18,6 +18,7 @@
 - **A design of its own** (2026-10-24): moved out of the market and factions design. It ties into the factions (seats move borders, taking one costs standing), but it is a feature in its own right, mostly about combat and holding land, and can be built apart from the market's later phases.
 - **The ballista rule change first** (2026-10-20, done the same day): traps hit only ground troops, and ranged groups stop once the wall is in range ([reference/ballista-farming-and-wall-range.md](../reference/ballista-farming-and-wall-range.md); deviations.md). Taking a seat is a fight against fortifications, so the rule had to be settled first.
 - **Garrisons refill every second** (2026-11-01): a historic city's troops and fortifications come back a little every second, at 10% of the full garrison every 6 minutes in all (about 311 warriors a second at level 12), as Age 2's seem to have done, not in our NPC cities' 6-minute steps. Every second between waves then costs the attacker, so landing waves together matters ([camp-times.md](camp-times.md)).
+- **Historic cities have research** (2026-11-01, from the simulations): every research at 10 but Archery, which stays at 0, with Age 2's garrisons, fortifications and heroes as they were. Without research the garrison barely fought back and a level 12 fell to one wave of archers; with Archery 10 too, its catapults and ballistae outranged every attacker and a level 16 could only be taken on a day with rams ([battle-sims/historic-cities.md](../battle-sims/historic-cities.md), Tuning).
 - **Every NPC city and valley refills every second too** (2026-11-01, the maintainer): one rule for all of them, little by little, with the historic cities harsher only because their garrisons are bigger. A rule change of its own, built before the seats (TODO.md, *NPC garrisons refill every second*), and recorded in deviations.md then. Today an NPC city gains 10% of its troops and fortifications every 6 game minutes in one step, and a valley rolls a whole new garrison 6 minutes after its last one (`valleyDefenders`, `engine/combat.ts`). To settle when it's built:
   - the valleys' rate: 10% a 6 minutes like the cities (full in an hour, where today it's whole again after 6 minutes), or whole in 6 minutes, a little at a time;
   - whether resources (1/80 a 6 minutes) and loyalty (1 a 6 real minutes) go by the second too, or only troops and fortifications;
@@ -61,8 +62,8 @@
 
 - **A daily rotation,** as in Age 2: swordsmen or pikemen, cavalry or cataphracts, and one of the three siege engines, changed each day, so scouting first pays (12 garrisons). Worked out from the date and the city's position, so nothing is stored.
 - **Refilling:** 10% of the full garrison every 6 minutes, like our NPC cities and Age 2's, but a little every second rather than in steps (Decided).
-- **Loyalty, the hero and the walls** aren't in any source: to set from the simulations (below). A level 10 NPC city starts at 90 loyalty and loses 10 to 15 a win (`BALANCE.npcLoyaltyStart`, `npcLoyaltyDamagePerAttack`), so about 7 wins take it; Age 2's level 12 took 30 to 40 or more loyalty waves.
-- These are the numbers to start from; the simulations say whether they make a fight worth having against our battle engine, which differs from Age 2's (traps and ranged troops against walls, deviations.md).
+- **Their research** (Decided): every research at 10 but Archery. **Loyalty** isn't in any source; the simulations take 100 and 3 a win. A level 10 NPC city starts at 90 loyalty and loses 10 to 15 a win (`BALANCE.npcLoyaltyStart`, `npcLoyaltyDamagePerAttack`), so about 7 wins take it; Age 2's level 12 took 30 to 40 or more loyalty waves.
+- The walls and the hero are as Age 2's (the walls at the city's level, the hero AeroCalc's); the simulations found neither changes much.
 
 ### On the map
 
@@ -79,11 +80,11 @@ Before any of it is built, the battle simulations (`tools/battle-sim`, [docs/bat
   - the weakest attacker that can do it: hero attack and level, gear level and stars, research, items (War Ensign, horns);
   - how much the timing matters: the same plan with waves 1, 5, 20 and 60 seconds apart, and across a refill;
   - whether Age 2's plans (reference, Taking one) still work, and what a level 12 then is worth against a level 10 NPC city.
-- **Findings** (2026-11-01, [battle-sims/historic-cities.md](../battle-sims/historic-cities.md)), with Age 2's garrisons refilling every second and 3 loyalty a win:
-  - **Every level can be broken by plain archer waves,** whatever the hero; gear and research only change the cost. The maintainer's account breaks a level 12 with one wave (28M lost in all), a 14 with 3 (237M), a 16 with 10 (1.06 billion, 1.1M archers) and an 18 with 20 (2.27 billion, 2.4M archers). An ungeared hero takes about twice the waves.
-  - **Levels 12 and 14 are too soft:** a level 12 costs about five hits on a level 10 barbarian city. To try: bigger garrisons (more archers and cavalry), more trebuchets and towers, a stronger hero, or higher walls.
-  - **Timing pays in the loyalty phase:** waves a minute apart make the loyalty waves fail against the refill at level 18, three minutes apart at 16.
-  - **Loyalty sets how many cities a siege needs:** 34 wins at 3 a win is 4 cities' armies (10 each with Rally Spot 10) even when one wave breaks the garrison.
+- **Findings** (2026-11-01, [battle-sims/historic-cities.md](../battle-sims/historic-cities.md)), with Age 2's garrisons refilling every second, the cities' research (Decided) and 3 loyalty a win:
+  - **Every level can be broken with archer waves,** whatever the hero; gear and research only change the cost. The maintainer's account breaks a level 12 with 2 waves (123M lost), a 14 with 7, a 16 with 19 (2.1 billion, about 2M archers) and an 18 with 39 (4.4 billion); an ungeared hero takes about twice the waves. Each level is about 2.5 times the one below, like the garrisons.
+  - **The daily garrison changes what to send:** pikemen waves first on a cataphract day, then archers.
+  - **Timing pays in the loyalty phase:** waves a minute apart make the loyalty waves fail against the refill at levels 16 and 18, three minutes apart at 14.
+  - **Loyalty sets how many cities a siege needs:** 34 wins at 3 a win is 4 cities' armies (10 each with Rally Spot 10) even at level 12; a level 18 takes 7 to 9.
 
 ### What holding a seat brings
 
@@ -126,7 +127,7 @@ A seat is a tile like any NPC city. Its holder is the tile's existing `owner_cit
 ## Open questions
 
 - **The seats:** all four levels follow Age 2 (proposed). Keep all 1,936 level 12s, or fewer?
-- **The garrisons:** Age 2's are too soft at levels 12 and 14 in our battles (the simulations): how to make them harder (more troops, more fortifications, a stronger hero, higher walls)? Keep the daily rotation?
+- **The garrisons:** keep the daily rotation (it changes what to send, not whether a city can be taken)?
 - **Loyalty:** where it starts and what a win takes; it decides how many cities a siege needs.
 - **Capture:** does a captured seat become the player's city, as in Age 2, and so count against the city limit? How hard is it to take (its garrison and fortifications against a level 10's)?
 - **The draft:** what share of each city's troops (50%?), how often (once a day, or Age 2's 4 for a level 12), and what happens to drafted troops when the seat is lost?
@@ -142,7 +143,7 @@ A seat is a tile like any NPC city. Its holder is the tile's existing `owner_cit
 
 - **A. Jump to coordinates** on the world map: done 2026-11-01 (the coordinates on the map's toolbar open a box to type any x and y).
 - **B. The art:** the four historic city sprites (On the map, above).
-- **C. Simulations of breaking one:** done 2026-11-01 (Testing how they're broken, above): `npm run sim -- siege` and its findings. The garrisons of levels 12 and 14 need tuning, and loyalty its numbers.
+- **C. Simulations of breaking one:** done 2026-11-01 (Testing how they're broken, above): `npm run sim -- siege`, its findings, and the cities' research tuned so every level and every day can be taken at a rising cost. Loyalty's numbers are still open.
 - **D. Camp times** ([camp-times.md](camp-times.md), its phase 1): armies landing at a chosen second, in order. Needed before players can break one as the simulations do.
 
 Then:

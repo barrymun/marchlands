@@ -65,7 +65,17 @@ export const PLANS: Record<string, Plan> = {
     name: 'The level 10 farming army, wave after wave',
     gap: 1,
     stages: [
-      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: 'broken', max: 60 },
+      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: 'broken', max: 150 },
+      { name: 'loyalty', troops: loyaltyWave, until: 'captured', max: 100 },
+    ],
+  },
+  /** For a day with cataphracts, which ride down archers: pikemen first until they're gone (AeroAgg's table), then archers. */
+  'pikes-archers': {
+    name: 'Pikemen until the cataphracts are gone, then the farming army',
+    gap: 1,
+    stages: [
+      { name: 'pikemen', troops: { pikemen: 125_000 }, until: 'cleared', target: 'heavyCavalry', max: 30 },
+      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: 'broken', max: 150 },
       { name: 'loyalty', troops: loyaltyWave, until: 'captured', max: 100 },
     ],
   },
