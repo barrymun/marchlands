@@ -8,63 +8,32 @@ import {
   createGuardHero,
   type FortCounts,
   type FortKey,
+  type HistoricDay,
+  historicGarrison,
+  historicHeroStats,
+  type HistoricLevel,
+  historicResearch,
   injuredOf,
   type ResearchState,
   resolveCombat,
   seededRng,
-  TechType,
   TROOP_KEY_LIST,
   type TroopCounts,
   type TroopKey,
 } from '@marchlands/core';
 import { armySize, DEFAULT_LORD, ITEM_BONUS, type Lord, lordHero, researchAt, unitValue } from './lib.ts';
 
-export const HISTORIC_LEVELS = [12, 14, 16, 18] as const;
-export type HistoricLevel = (typeof HISTORIC_LEVELS)[number];
-
-/** The troops that change each day: one of each pair, and one of the three siege engines. */
-export interface Rotation {
-  foot: 'pikemen' | 'swordsmen';
-  horse: 'lightCavalry' | 'heavyCavalry';
-  siege: 'batteringRam' | 'ballista' | 'catapult';
-}
+export { HISTORIC_LEVELS, type HistoricLevel } from '@marchlands/core';
+export type Rotation = HistoricDay;
 
 /** The weakest day, the one Age 2 players waited for (sources 3, 11 and 13). */
 export const WEAK_DAY: Rotation = { foot: 'pikemen', horse: 'lightCavalry', siege: 'batteringRam' };
 
-/** Age 2's garrisons by level: warriors, the day's foot troop, archers, the day's horse, the day's siege engine. */
-const TROOPS: Record<HistoricLevel, [number, number, number, number, number]> = {
-  12: [1_120_000, 162_666, 42_807, 108_444, 14_640],
-  14: [2_800_000, 406_666, 171_228, 271_111, 36_600],
-  16: [7_000_000, 1_016_665, 428_070, 677_777, 91_500],
-  18: [14_000_000, 2_033_330, 856_140, 1_355_555, 183_000],
-};
-
-/** The same fortifications at every level (source 9). */
-const FORTS: FortCounts = { trap: 22_000, abatis: 11_000, arrowTower: 6_666, rollingLogs: 6_000, rockfall: 5_000 };
-
-/**
- * The city's research (2026-11-01, docs/battle-sims/historic-cities.md, Tuning): every research at this level but
- * Archery, which stays at 0. Without research the garrison's archers and cavalry can't reach archers that outrange them,
- * and only the fortifications fight back; with Archery 10 its catapults and ballistae outrange every attacker, and a
- * level 16 or 18 can only be broken on the days it has rams.
- */
-export const CITY_RESEARCH = 10;
-
-export function historicResearch(level = CITY_RESEARCH): ResearchState {
-  return { ...researchAt(level), [TechType.ARCHERY]: { level: 0 } };
-}
-
-/** The defending hero's Attack and Intelligence by level, as AeroCalc set them (reference, Other material). */
-const HERO: Record<HistoricLevel, [number, number]> = { 12: [110, 500], 14: [150, 800], 16: [200, 1100], 18: [300, 1650] };
-
-export function historicGarrison(level: HistoricLevel, day: Rotation): { troops: TroopCounts; forts: FortCounts } {
-  const [warriors, foot, archers, horse, siege] = TROOPS[level];
-  return { troops: { militia: warriors, [day.foot]: foot, archer: archers, [day.horse]: horse, [day.siege]: siege }, forts: { ...FORTS } };
-}
+/** The city's research level (every research but Archery; core historicResearch). */
+export const CITY_RESEARCH = BALANCE.historic.researchLevel;
 
 function historicHero(level: HistoricLevel) {
-  const [power, stratagem] = HERO[level];
+  const [power, stratagem] = historicHeroStats(level);
   const h = createGuardHero(100, seededRng(`historic-hero:${level}`), 0);
   return { ...h, level: 100, power, powerAdded: 0, powerBuffAdded: 0, stratagem, stratagemAdded: 0, stratagemBuffAdded: 0 };
 }
@@ -149,12 +118,12 @@ export function runSiege(plan: Plan, o: SiegeOptions): SiegeResult {
   const full = historicGarrison(o.level, o.day);
   const cityResearch = o.research ?? historicResearch();
   // the simulations run at GAME_SPEED 1: 6 real minutes
-  const refillPerSecond = (o.refillShare ?? 0.1) / (BALANCE.npcRegenMs / 1000);
+  const refillPerSecond = (o.refillShare ?? BALANCE.historic.refillShare) / (BALANCE.npcRegenMs / 1000);
   // the garrison as fractions, so a refill of less than one unit a second adds up; battles see whole units
   const troops: Record<string, number> = { ...full.troops };
   const forts: Record<string, number> = { ...full.forts };
-  let loyalty = o.loyalty ?? 100;
-  const perWin = o.loyaltyPerWin ?? 3;
+  let loyalty = o.loyalty ?? BALANCE.historic.loyalty;
+  const perWin = o.loyaltyPerWin ?? BALANCE.historic.loyaltyPerWin;
   const hero = historicHero(o.level);
   const rng = seededRng(`siege:${o.seed ?? 0}`);
   let t = 0;

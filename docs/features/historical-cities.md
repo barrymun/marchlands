@@ -24,6 +24,12 @@
   - only troops and fortifications go by the second; resources (1/80 a 6 minutes) and loyalty (1 a 6 real minutes) keep their steps;
   - farming changes: a level 10 hit again within the hour meets a part-refilled garrison ([battle-sims/npc-level-10.md](../battle-sims/npc-level-10.md) notes it), and the medal trick of hitting a valley the moment it rolls a new garrison ([reference/aeroagg-complete-guide.md](../reference/aeroagg-complete-guide.md), Medals and gems) is gone.
 - **The seats as decided with the maintainer** (2026-11-01): all 1,936 level 12s (Age 2's grid), and loyalty starting at 100 with 3 taken a win (about 34 loyalty waves, as Age 2's 30 to 40).
+- **Capturing and holding one** (2026-11-01, the maintainer):
+  - **A captured seat becomes the player's city,** counting against the title's city limit. Inside, every building is level 10, the layout of a captured level 10 barbarian city (`npcCityBuildings(10)`); its fields go up to the seat's level (a level 14 has level 14 farms), with yields carried on in proportion past level 10. Its level can't be raised for gold as a barbarian city's can. (Our reading of the maintainer's "players cannot upgrade historical cities like NPCs".)
+  - **Its Rally Spot sends a quarter more a level step**, without items: 125,000 troops from a level 12, 150,000 from a 14, 175,000 from a 16 and 200,000 from Atlantis. A War Ensign adds its quarter on top (our reading, as Age 2's table did: 156,250 from a level 12).
+  - **Holding limits:** at most 3 level 12s, 2 level 14s, 1 level 16 and 1 level 18 per player, each also needing a free city slot.
+  - **Drafting** from barbarian cities in its area only, never players' cities, at 20% (Age 2 took 5%) of the largest troop type; Atlantis drafts from anywhere. Later: there's a fair amount of work to it.
+  - Age 2's rules kept unless changed: a 24-hour truce on capture that a player's own truce never covers, no teleporting, and it can be taken back the same way.
 - **Spikes first, jump to coordinates the first of them** (2026-11-01; Phases).
 - **Its place in the market's phases** (2026-10-20, changed 2026-10-22): first planned straight after the faction data, since most of a seat's value (capture, the daily draft, the title, bigger armies) doesn't need NPC trade. On 2026-10-22 NPC trade and reputation moved ahead of it. NPC trade is built, so a seat's tribute from trade and its market rights can come with it. Whether it waits for reputation is open (below).
 
@@ -37,8 +43,8 @@
 |---|---|---|---|---|
 | Level 18 | 1, Atlantis | the whole world, lightly | (0, 0), in Friesland. The map wraps, so this is where the corners of Friesland, Bohemia, Burgundy and Romagna meet | Age 2 |
 | Level 16 | 16, one per state | its state, 200 × 200 tiles | the middle of each state, (x0 + 100, y0 + 100): (100, 100), (300, 100) … (700, 700) | Age 2, exactly |
-| Level 14 | 128, eight per state | its cell of a 3 × 3 grid over the state, about 66 × 66 tiles (the middle cell is the level 16's) | (x0 + a, y0 + b) for a and b in {33, 99, 165}, except (99, 99) | Age 2, exactly |
-| Level 12 | 1,936, 121 per state | its 18 × 18 cell (Age 2's draft area, 4 drafts a day) | every 18 tiles from offset 9 across and down, (x0 + 9, y0 + 9) … (x0 + 189, y0 + 189), one of them (x0 + 99, y0 + 99) beside the capital | Age 2's rule and count |
+| Level 14 | 128, eight per state | its cell of a 3 × 3 grid over the state, about 66 × 66 tiles (the middle cell is the level 16's) | every 66 tiles from 33 across the whole map, x and y in {33, 99 … 759}, except each state's middle place by its capital | Age 2, exactly |
+| Level 12 | 1,936, 121 per state | its 18 × 18 cell (Age 2's draft area, 4 drafts a day) | every 18 tiles from 9 across the whole map, x and y in {9, 27 … 783}, one of them beside each capital, (99, 99) … | Age 2's rule and count |
 
 - Every position is the original's (Age 2), and they already fit our map: the same 16 states on the same 200 × 200 grid (`stateOf`).
 - **1,936 level 12s is a lot,** against 51,217 ordinary NPC cities. In Age 2 they were the common first prize and a stepping stone towards the bigger cities. We could keep them all, or use fewer (every other place), which leaves a level 12's draft area 36 × 36 instead.
@@ -61,7 +67,7 @@
 | Ram, ballista or catapult | 14,640 | 36,600 | 91,500 | 183,000 |
 | Fortifications (every level) | 22,000 traps, 11,000 abatis, 6,666 archer towers, 6,000 rolling logs, 5,000 defensive trebuchets | | | |
 
-- **A daily rotation,** as in Age 2: swordsmen or pikemen, cavalry or cataphracts, and one of the three siege engines, changed each day, so scouting first pays (12 garrisons). Worked out from the date and the city's position, so nothing is stored.
+- **A daily rotation,** as in Age 2 (kept: the simulations found it changes what to send, not whether a city can be taken): swordsmen or pikemen, cavalry or cataphracts, and one of the three siege engines, changed each day, so scouting first pays (12 garrisons). Worked out from the date and the city's position, so nothing is stored.
 - **Refilling:** 10% of the full garrison every 6 minutes, like our NPC cities and Age 2's, but a little every second rather than in steps (Decided).
 - **Their research** (Decided): every research at 10 but Archery. **Loyalty** isn't in any source; the simulations take 100 and 3 a win. A level 10 NPC city starts at 90 loyalty and loses 10 to 15 a win (`BALANCE.npcLoyaltyStart`, `npcLoyaltyDamagePerAttack`), so about 7 wins take it; Age 2's level 12 took 30 to 40 or more loyalty waves.
 - The walls and the hero are as Age 2's (the walls at the city's level, the hero AeroCalc's); the simulations found neither changes much.
@@ -127,14 +133,10 @@ A seat is a tile like any NPC city. Its holder is the tile's existing `owner_cit
 
 ## Open questions
 
-- **The seats:** all four levels follow Age 2, all 1,936 level 12s included (Decided).
-- **The garrisons:** keep the daily rotation (it changes what to send, not whether a city can be taken)?
-- **Capture:** does a captured seat become the player's city, as in Age 2, and so count against the city limit? How hard is it to take (its garrison and fortifications against a level 10's)?
-- **The draft:** what share of each city's troops (50%?), how often (once a day, or Age 2's 4 for a level 12), and what happens to drafted troops when the seat is lost?
-- **Drafting players:** Age 2 let a historic city's holder draft other players' cities in range. Leave that out (the proposal), or allow it with protection (reinforcements, beginners)?
+- **The draft:** how often (Age 2's four policies a day?), and what happens to drafted troops when the seat is lost? (Its share, 20% of the largest troop type from barbarian cities only, is decided.)
 - **The benefits:** what does each seat bring, and how much? What does the level 18 bring?
 - **A state's NPC members** when a player holds its level 16: still the faction's, paying tribute to the player, or the player's own?
-- **Holding:** what limits it (upkeep, one level 16 per player, unrest)? Are benefits shared with the holder's alliance?
+- **Holding:** besides the per-level limits (Decided), does it cost upkeep, and can a neglected one rise up? Are benefits shared with the holder's alliance?
 - **Famous guards:** famous historical heroes (TODO.md) guarding the seats, once that feature exists.
 
 ## Phases

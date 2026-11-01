@@ -53,7 +53,7 @@ One per state, at the state's exact middle, **(x0 + 100, y0 + 100)** (sources 1 
 
 ## Level 14
 
-**Eight per state, 128 in all,** every 66 tiles from offset 33 (sources 1 and 2): at (x0 + a, y0 + b) for a and b in {33, 99, 165}, every pairing except the middle (99, 99), where the state capital stands instead. They lie on a 3 × 3 grid of cells about 66 tiles wide, with the capital in the middle cell.
+**Eight per state, 128 in all,** every 66 tiles from 33 across the whole map (sources 1 and 2): x and y in {33, 99, 165, 231 … 759}, three to a state each way, every pairing except a state's middle place ((99, 99), (297, 297) …, by the capital), where a level 12 stands instead. So only in Friesland are they at a state's own offsets 33, 99 and 165; in Saxony they're 31, 97 and 163 in (the table). They lie on a 3 × 3 grid of cells about 66 tiles wide in each state, with the capital in the middle cell. *(Corrected 2026-11-01: this note first read the rule as offsets 33, 99 and 165 within every state, which the table below contradicts.)*
 
 | Id | State | Level 14 x | Level 14 y |
 |---|---|---|---|
@@ -80,9 +80,9 @@ For Friesland that's (33, 33), (99, 33), (165, 33), (33, 99), (165, 99), (33, 16
 
 ## Level 12
 
-**Every 18 tiles from offset 9** (sources 2, 9 and 11), so at offsets 9, 27, 45, 63, 81, 99, 117, 135, 153, 171 and 189 within a state, across and down: 11 × 11 = 121 per state, **1,936** on the map.
+**Every 18 tiles from 9 across the whole map** (sources 2, 9 and 11): x and y in {9, 27, 45 … 783}, 44 × 44 = **1,936** on the map, 121 a state. *(Corrected 2026-11-01: first read as offsets within each state; the whole-map grid is the one that puts a level 12 in each state's middle place of the level 14 grid, as source 9 says, and the wiki's two named cities on it, below.)*
 
-- **One stands beside each capital:** (x0 + 99, y0 + 99), next to the level 16 at (x0 + 100, y0 + 100), is a level 12 too. Source 9 says the middle of the level 14 grid ((99, 99), (297, 297) …) holds a level 12, and source 11 counts 1,936 level 12s, the full 121 a state. (Before 2026-11-01 this note guessed there was none there.)
+- **One stands beside each capital:** (99, 99), (297, 297), (495, 495) and (693, 693), and the other middle places of the level 14 grid, (99, 297) and so on, next to the capitals at (100, 100) …, are level 12s. Source 9 says so, and source 11 counts 1,936.
 - Others come within 6 tiles of a level 14, for example (27, 27) by (33, 33), but none lands on one.
 - Source 13 says "every 9 miles", which is probably a slip for the 9-tile draft radius.
 
@@ -190,7 +190,7 @@ Sources 8 and 10 name Atlantis at (0, 0) and two more, with their coordinates bu
 - St. Gallen at (369, 657), in Lombardy;
 - Vigevano at (567, 747), which falls in Tuscany by the coordinates (the wiki lists its state as "Vigevano").
 
-Neither lies on a level 14 place, nor on the level 12 grid. So either they are level 12s and the "every 18 tiles" rule was only approximate, or the coordinates are wrong. Treat the level 12 list above as a pattern to start from, not a record of the real game. No level 14 or 16 name is given as text anywhere (sources 1 and 4 are pictures).
+Both lie on the level 12 grid (369 = 9 + 18 × 20, 657 = 9 + 18 × 36; 567 = 9 + 18 × 31, 747 = 9 + 18 × 41), so both are surely level 12s, which supports reading that grid across the whole map. No level 14 or 16 name is given as text anywhere (sources 1 and 4 are pictures).
 
 ## Other material
 

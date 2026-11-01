@@ -11,6 +11,8 @@ export const TileType = {
   FLAT: 10,
   CASTLE: 11,
   NPC: 12,
+  /** (marchlands) a historic city, levels 12 to 18 (docs/features/historical-cities.md) */
+  HISTORIC: 13,
 } as const;
 export type TileType = (typeof TileType)[keyof typeof TileType];
 

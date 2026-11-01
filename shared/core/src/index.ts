@@ -27,6 +27,7 @@ export * from '#/time.ts';
 export * from '#/titles.ts';
 export * from '#/troops.ts';
 export * from '#/types.ts';
+export * from '#/historic.ts';
 export * from '#/world.ts';
 export * from '#/battle/simulator.ts';
 export * from '#/battle/resolve.ts';

@@ -174,6 +174,36 @@ export const BALANCE = {
   logisticsLoadPerLevel: 0.1, // (evony) +10% load per level
   /** (evony) reinforcement / scout / transport to own or allied cities move this much faster */
   maxRestTimeMs: 24 * HOUR,
+  /**
+   * (marchlands) historic cities, levels 12 to 18 (docs/features/historical-cities.md; garrisons from Age 2,
+   * docs/reference/historic-cities.md, and tuned in docs/battle-sims/historic-cities.md)
+   */
+  historic: {
+    /** troops by level: warriors, the day's foot troop (swordsmen or pikemen), archers, the day's horse, the day's siege engine */
+    troops: {
+      12: [1_120_000, 162_666, 42_807, 108_444, 14_640],
+      14: [2_800_000, 406_666, 171_228, 271_111, 36_600],
+      16: [7_000_000, 1_016_665, 428_070, 677_777, 91_500],
+      18: [14_000_000, 2_033_330, 856_140, 1_355_555, 183_000],
+    } as Record<12 | 14 | 16 | 18, readonly [number, number, number, number, number]>,
+    /** the same fortifications at every level */
+    forts: { trap: 22_000, abatis: 11_000, arrowTower: 6_666, rollingLogs: 6_000, rockfall: 5_000 },
+    /** the defending hero's Attack and Intelligence by level (AeroCalc's) */
+    hero: { 12: [110, 500], 14: [150, 800], 16: [200, 1_100], 18: [300, 1_650] } as Record<12 | 14 | 16 | 18, readonly [number, number]>,
+    /** every research at this level but Archery, which stays at 0 so its catapults don't outrange every attacker */
+    researchLevel: 10,
+    /** loyalty at the start, and what each won attack takes off it */
+    loyalty: 100,
+    loyaltyPerWin: 3,
+    /** troops and fortifications back each npcRegenMs, a little every second */
+    refillShare: 0.1,
+    /** a held one's Rally Spot sends this much more an army for each level step above 10 (12: +25% … 18: +100%) */
+    rallyBonusPerStep: 0.25,
+    /** the most a player may hold, by level */
+    holdLimit: { 12: 3, 14: 2, 16: 1, 18: 1 } as Record<12 | 14 | 16 | 18, number>,
+    /** a draft takes this share of a barbarian city's largest troop type */
+    draftShare: 0.2,
+  },
   /** (marchlands) how far ahead an army can be set to land at a chosen time (camp times; real time) */
   landAtMaxAheadMs: 24 * HOUR,
   /** (evony) loyalty damage per successful attack on a barbarian city (before capture); lords' cities have no loyalty */

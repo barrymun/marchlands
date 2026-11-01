@@ -14,12 +14,12 @@
 
 import { parseArgs } from 'node:util';
 
-import { GEAR_STATS, type GearStat, TROOP_KEY_LIST, type TroopCounts, type TroopKey } from '@marchlands/core';
+import { GEAR_STATS, type GearStat, historicResearch, TROOP_KEY_LIST, type TroopCounts, type TroopKey } from '@marchlands/core';
 
 import { armySize, attackNpc, DEFAULT_LORD, type Lord, lordGearPoints, type Summary, traceNpc } from './lib.ts';
 import { PLANS } from './plans.ts';
 import { PRESETS } from './presets.ts';
-import { CITY_RESEARCH, HISTORIC_LEVELS, type HistoricLevel, historicResearch, type Rotation, runSiege, type SiegeResult } from './siege.ts';
+import { CITY_RESEARCH, HISTORIC_LEVELS, type HistoricLevel, type Rotation, runSiege, type SiegeResult } from './siege.ts';
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
