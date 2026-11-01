@@ -133,7 +133,7 @@ export async function deleteFlow(ctx: Ctx, playerId: number, flowId: string): Pr
 /** Thrown at the end of a preview so its transaction rolls back. */
 class PreviewRollback extends Error {}
 
-const runCitiesOf = async (ctx: Ctx, playerId: number, f: Pick<FlowRow, 'cities' | 'cityOverride'>) => (await planCities(ctx, playerId, f)).cities;
+const runCitiesOf = async (ctx: Ctx, playerId: number, f: Pick<FlowRow, 'cities' | 'cityOverride' | 'actions'>) => (await planCities(ctx, playerId, f)).cities;
 
 /**
  * Run a flow (Run button): it joins the queue, on `cityIds` for this run ('all', or by default the flow's

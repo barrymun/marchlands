@@ -2,7 +2,7 @@
 
 import { and, asc, eq, isNotNull, lt, sql } from 'drizzle-orm';
 
-import { autoDraftsDue, BALANCE, BASIC_RESOURCES, CandlePeriod, draftsUsed, heroName, stateOf } from '@marchlands/core';
+import { BALANCE, BASIC_RESOURCES, CandlePeriod, draftsUsed, heroName, nextAutoDraftAt, stateOf } from '@marchlands/core';
 import { cities, type Db, heroes, players } from '@marchlands/db';
 
 import { runGame } from '#/context.ts';
@@ -14,7 +14,7 @@ import { checkBeginner } from '#/engine/player.ts';
 import { refreshRankings } from '#/engine/rankings.ts';
 import { tendSeat } from '#/engine/unrest.ts';
 import { refreshZoneStats } from '#/engine/world.ts';
-import { getCity, getPlayer, getTile, savePlayer } from '#/repo.ts';
+import { getCity, getPlayer, getTile, saveCity, savePlayer } from '#/repo.ts';
 import { compactStats } from '#/stats.ts';
 
 export async function rankingsJob(db: Db) {
@@ -43,8 +43,10 @@ export async function beginnerJob(db: Db) {
 }
 
 /**
- * (marchlands) Held historic cities that draft by themselves make the drafts due by now (one at the start of each part
- * of the UTC day, engine/draft.ts), one each a run, aimed at the strongest barbarian city in their area.
+ * (marchlands) Held historic cities that draft by themselves draft once their next draft is due (the start of each
+ * part of the UTC day after they were captured or switched to drafting by themselves, core nextAutoDraftAt), aimed at
+ * the strongest barbarian city in their area (engine/draft.ts). A seat with no drafts left today waits for the next
+ * part; one with nothing in its area to draft from tries again each run.
  */
 export async function draftJob(db: Db) {
   const seats = await db
@@ -55,10 +57,14 @@ export async function draftJob(db: Db) {
     await runGame(db, async (ctx) => {
       const city = await getCity(ctx, id, { lock: true });
       const level = seatLevelOf(city);
-      if (!level || !city.draftAuto || draftsUsed(city, ctx.now) >= Math.min(autoDraftsDue(ctx.now), BALANCE.historic.draftsPerDay)) return;
-      const target = await pickDraftTarget(ctx, city, level);
-      if (!target) return;
-      await draft(ctx, city, await getTile(ctx, target.tile.id, { lock: true }), { auto: true, scouted: target.scouted });
+      if (!level || !city.draftAuto || ctx.now < city.draftNextAt) return;
+      if (draftsUsed(city, ctx.now) < BALANCE.historic.draftsPerDay) {
+        const target = await pickDraftTarget(ctx, city, level);
+        if (!target) return;
+        await draft(ctx, city, await getTile(ctx, target.tile.id, { lock: true }), { auto: true, scouted: target.scouted });
+      }
+      city.draftNextAt = nextAutoDraftAt(ctx.now);
+      await saveCity(ctx, city);
     });
   }
 }

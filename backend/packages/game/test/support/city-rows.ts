@@ -75,6 +75,7 @@ export function cityRow(over: Partial<CityRow> = {}): CityRow {
     draftAuto: true,
     draftDay: 0,
     draftsUsed: 0,
+    draftNextAt: 0,
     stateTribute: 0,
     sharedAt: 0,
     createdAt: T0,

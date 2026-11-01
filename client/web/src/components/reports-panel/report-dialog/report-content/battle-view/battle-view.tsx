@@ -39,7 +39,7 @@ export function BattleView({ battle: b }: { battle: BattleReport }) {
         {'level' in b && <span>{t('common:level.named', { name: tileName(b.historic ? TileType.HISTORIC : TileType.NPC), level: b.level })}</span>}
         {'city' in b && <span>{b.city}</span>}
       </div>
-      <div className="grid items-start gap-4 md:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <SideView title={t('battle.attacker')} side={b.attacker} />
         <SideView
           title={t('battle.defender')}

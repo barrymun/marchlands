@@ -16,6 +16,7 @@ import {
   homeFaction,
   Mission,
   msg,
+  nextAutoDraftAt,
   ref,
   TileType,
   tileXY,
@@ -144,6 +145,8 @@ describe(`${processArmy.name}: capturing a historic city`, () => {
       expect(tile).toMatchObject({ type: TileType.CASTLE, ownerPlayerId: p.id });
       const city = await getCity(g, tile.cityId!);
       expect(city).toMatchObject({ playerId: p.id, historicLevel: 12, truceUntil: g.now + BALANCE.historic.truceMs });
+      // it drafts by itself from the next part of the day, not making up the parts before its capture
+      expect(city).toMatchObject({ draftAuto: true, draftNextAt: nextAutoDraftAt(g.now) });
       expect(city.buildings).toEqual(historicCityBuildings(12));
       // its Rally Spot (level 10) sends a quarter more
       expect((await armies.troopParams(g, p.id, city.id)).maxTroops).toBe(125_000);
@@ -240,6 +243,7 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
         loyalty: BALANCE.historic.loyalty,
         truceUntil: g.now + BALANCE.historic.truceMs,
         draftAuto: true,
+        draftNextAt: nextAutoDraftAt(g.now),
       });
       expect((await getTile(g, seat.id)).ownerPlayerId).toBe(q.id);
       expect((await getHero(g, pHero)).cityId).toBe(p.cityId);

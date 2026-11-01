@@ -42,6 +42,7 @@ import {
   type Message,
   Mission,
   msg,
+  nextAutoDraftAt,
   nextRefillAt,
   npcBuildings,
   npcCityBuildings,
@@ -1088,8 +1089,10 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
     truceUntil: ctx.now + BALANCE.historic.truceMs,
     loyalty: BALANCE.historic.loyalty,
     loyaltyAt: ctx.now,
-    // its new holder starts drafting by itself, the default; the drafts made today still count against the seat
+    // its new holder starts drafting by itself, the default, from the next part of the day; the drafts made today
+    // still count against the seat
     draftAuto: true,
+    draftNextAt: nextAutoDraftAt(ctx.now),
   });
   await saveCity(ctx, city);
   await ctx.tx.update(tiles).set({ ownerPlayerId: winner.id, updatedAt: ctx.now }).where(eq(tiles.id, city.tileId));
@@ -1333,6 +1336,8 @@ async function captureHistoric(ctx: Ctx, attacker: PlayerRow, tile: TileRow, lev
         truceUntil: ctx.now + BALANCE.historic.truceMs,
         loyalty: BALANCE.historic.loyalty,
         loyaltyAt: ctx.now,
+        // drafting by itself (the default) from the next part of the day
+        draftNextAt: nextAutoDraftAt(ctx.now),
       })
       .returning(),
   );

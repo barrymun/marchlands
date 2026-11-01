@@ -100,6 +100,7 @@
     "done": "Troops drafted",
     "auto": "Draft by itself",
     "used": "{{used}} of {{max}} drafts today",
+    "next": "next at {{time}} UTC",
     "button": "Draft into {{city}} ({{used}}/{{max}})"
   },
   "seat": {

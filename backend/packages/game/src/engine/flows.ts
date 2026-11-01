@@ -17,6 +17,9 @@ import { and, asc, eq, gt, inArray, isNotNull, isNull, lt, ne, sql } from 'drizz
 import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
+  BALANCE,
+  buildingLevel,
+  BuildingType,
   checkRequirements,
   dur,
   type FlowAction,
@@ -28,16 +31,19 @@ import {
   hasTroops,
   healCost,
   healHonorCost,
+  heroHireCost,
   heroManagement,
   heroPower,
   HeroStatus,
   heroStratagem,
+  hiredHeroName,
   maxTrainableCount,
   type Message,
   Mission,
   msg,
   ref,
   requirementsMet,
+  tavernRefreshCost,
   tileXY,
   troopConfig,
   troopCostShare,
@@ -46,8 +52,10 @@ import { armies, flows as flowsTable, heroes as heroesTable, timedEvents } from 
 
 import { cityStats, openOwnCity } from '#/city.ts';
 import { type Ctx, isRetryable, savepoint } from '#/context.ts';
+import { fillTavern, heroSlots, hireOffer, rerollTavern } from '#/engine/heroes.ts';
 import { hasTrainingRoom } from '#/engine/training.ts';
-import { citiesOf, getPlayer } from '#/repo.ts';
+import { pushResources } from '#/helpers.ts';
+import { citiesOf, getPlayer, type HeroRow, saveCity } from '#/repo.ts';
 import { sendArmy } from '#/services/armies.ts';
 import { appointMayor } from '#/services/heroes.ts';
 import { cureInjured, trainSplit } from '#/services/training.ts';
@@ -234,8 +242,63 @@ export async function runScheduledHeal(ctx: Ctx, playerId: number, cityId: numbe
   ctx.push(playerId, PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: false, noSenderSystemInfo: false, msg: told });
 }
 
+const BASE_VALUE = { power: (h: HeroRow) => h.basePower, management: (h: HeroRow) => h.baseManagement, stratagem: (h: HeroRow) => h.baseStratagem } as const;
+
+/**
+ * Hire heroes born with at least `min` of an attribute from the city's Inn until the city has `count` of the player's
+ * own heroes that good (the ones already there count): the best of its offers first, re-rolling it for gold until
+ * enough are hired (or the Feasting Hall is full), the run's `maxGold` would be passed, the city is out of gold or it
+ * has re-rolled BALANCE.flowHireMaxRerolls times. Each is named after what it was hired for (ATK - 76). Stopping short
+ * isn't a failure: the step says why and the flow carries on, so a repeating flow goes on until every city has its count.
+ */
+async function hireHeroes(ctx: Ctx, playerId: number, cityId: number, a: Extract<FlowAction, { type: 'hireHeroes' }>): Promise<ActionOutcome> {
+  const b = await openOwnCity(ctx, playerId, cityId);
+  const inn = buildingLevel(b.city.buildings, BuildingType.INN);
+  if (inn < 1) return { detail: msg('hero.needInn', { building: ref.building(BuildingType.INN) }), skipped: true };
+  const base = BASE_VALUE[a.stat];
+  const have = b.heroes.filter((h) => h.playerId === playerId && h.capturedByPlayerId == null && base(h) >= a.min).length;
+  if (have >= a.count) return { detail: msg('flow.step.hireTargetMet', { count: have, stat: ref.stat(a.stat), min: a.min }), skipped: true };
+  const want = Math.min(a.count - have, heroSlots(b) - b.heroes.length);
+  if (want < 1) return { detail: msg('flow.step.hallFull', { building: ref.building(BuildingType.FEASTING_HALL) }), skipped: true };
+  let offers = await fillTavern(ctx, b, false);
+  let spent = 0;
+  let rerolls = 0;
+  let hired = 0;
+  let stop: Message | null = null;
+  for (;;) {
+    for (const h of offers.filter((o) => base(o) >= a.min).sort((x, y) => base(y) - base(x))) {
+      if (hired >= want) break;
+      const cost = heroHireCost(h.level);
+      if (spent + cost > a.maxGold) stop = msg('flow.hireStop.cap', { gold: a.maxGold });
+      else if (b.city.gold < cost) stop = msg('flow.hireStop.gold');
+      else {
+        await hireOffer(ctx, b, h, hiredHeroName(a.stat, base(h)));
+        spent += cost;
+        hired++;
+      }
+    }
+    // a good offer it couldn't pay for stays at the Inn rather than being re-rolled away
+    if (hired >= want || stop) break;
+    const cost = tavernRefreshCost(inn);
+    if (rerolls >= BALANCE.flowHireMaxRerolls) stop = msg('flow.hireStop.rerolls', { count: rerolls });
+    else if (spent + cost > a.maxGold) stop = msg('flow.hireStop.cap', { gold: a.maxGold });
+    else if (b.city.gold < cost) stop = msg('flow.hireStop.gold');
+    if (stop) break;
+    offers = await rerollTavern(ctx, b);
+    spent += cost;
+    rerolls++;
+  }
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
+  const said = { count: hired, stat: ref.stat(a.stat), min: a.min, gold: spent, rerolls: msg('flow.rerolls', { count: rerolls }) };
+  if (hired >= want) return msg('flow.step.hired', said);
+  const detail = msg('flow.step.hiredSome', { ...said, requested: want, reason: stop ?? msg('flow.hireStop.gold') });
+  return hired ? detail : { detail, skipped: true };
+}
+
 async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<FlowAction, { type: 'wait' }>, run: CityRun): Promise<ActionOutcome> {
   if (a.type === 'attackTargets') return attackTargets(ctx, playerId, cityId, a, run);
+  if (a.type === 'hireHeroes') return hireHeroes(ctx, playerId, cityId, a);
   if (a.type === 'healTroops') return a.when === 'armiesHome' ? healWhenHome(ctx, playerId, cityId, a.payWith, run) : healAll(ctx, playerId, cityId, a.payWith);
   if (a.type === 'setMayor') {
     const b = await openOwnCity(ctx, playerId, cityId);
@@ -293,15 +356,16 @@ export const usesAllCities = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => ci
 /**
  * Cities a run starts on: the ones chosen for it, or the flow's own. 'all' is every city the lord has
  * now that has a hero of theirs (a city just captured has none, and every mayor action would fail
- * there); the others are `skipped`, with why, for the run's report.
+ * there), or every city when the flow hires heroes; the others are `skipped`, with why, for the run's report.
  */
 export async function planCities(
   ctx: Ctx,
   playerId: number,
-  f: Pick<FlowRow, 'cities' | 'cityOverride'>,
+  f: Pick<FlowRow, 'cities' | 'cityOverride' | 'actions'>,
 ): Promise<{ cities: number[]; skipped: FlowSkippedCity[] }> {
   const own = await citiesOf(ctx, playerId);
   const wanted = citiesWanted(f);
+  if (wanted === 'all' && f.actions.some((a) => a.type === 'hireHeroes')) return { cities: own.map((c) => c.id), skipped: [] };
   if (wanted === 'all') {
     const rows = await ctx.tx
       .selectDistinct({ cityId: heroesTable.cityId })

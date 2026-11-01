@@ -178,6 +178,7 @@ export function cityBean(b: CityBundle, now: number): CityBean {
     truceUntil: c.truceUntil,
     draftAuto: c.draftAuto,
     draftsUsed: draftsUsed(c, now),
+    draftNextAt: c.draftNextAt,
     seatLoyalty: seat ? seatUnrest(c.loyalty, c.loyaltyAt, now, neglect.length).loyalty : c.loyalty,
     seatNeglect: neglect,
     createdAt: c.createdAt,

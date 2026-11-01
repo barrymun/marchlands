@@ -89,8 +89,39 @@ The horn (+20% attack) is worth about two waves at level 18 and nothing at 12; r
 
 A siege lands 35 to 81 waves within a minute or so, each its own army with its own hero. A city with Rally Spot 10 has at most 10 armies out at once (`BALANCE.rallySpotArmiesPerLevel`) and its Feasting Hall 10 heroes, so a level 12 takes 4 cities' armies and a level 18 7 to 9, near the "3–6 cities" Age 2 players launched from. Loyalty waves are 33 of them at every level, so what a win takes off loyalty decides how many cities a small siege needs.
 
+## One landing second
+
+*Simulated 2026-11-01 against the game as built, for the level 12 at (207, 405) on the dev stack, with the maintainer's account (research 10, 16 heroes at about 1,220 Attack, the horn and the War Ensign running).*
+
+**At `GAME_SPEED` 60, as on the dev stack, the garrison refills 60 times as fast** as in the runs above: 10% every 6 real seconds (`historicState` refills by `scaled(npcRegenMs)`), so a gap of a few seconds costs what a few minutes do at speed 1 (`--refill 6` simulates it). Loyalty comes back by real time (a point every 6 real minutes) and doesn't matter within a siege.
+
+**The wave planner lands a plan's waves a millisecond apart** (camp times), so a whole siege lands inside one second and nothing refills between waves. Then the loyalty waves meet an empty garrison and can be tiny. The `one-second` plan: the farming army until the garrison breaks, then waves of 5,000 archers alone until it's captured. Losses for the whole siege, 5 sieges each:
+
+| Plan, waves apart | Swordsmen, light cavalry, ballistae | Pikemen, light cavalry, rams | Pikemen, cataphracts, catapults |
+|---|---|---|---|
+| `one-second`, 1 ms | 35 waves, 119M | 35 waves, 119M | 36 waves, 261M |
+| `archers-best` (20k archers + 20k warriors), 1 ms | 35 waves, 122M | 35 waves, 122M | 36 waves, 264M |
+| `age2-ballista`, 1 ms | 34 waves, 171M | 34 waves, 171M | 34 waves, 170M |
+| `one-second`, 1 s | 35 waves, 135M | 35 waves, 135M | 36 waves, 277M |
+| 5,000 archers led by Inn heroes, 1 s | fails | fails | fails |
+| `archers-best`, 5 s | 35 waves, 418M | 36 waves, 508M | 37 waves, 787M |
+| 5,000 archers, 5 s | fails | fails | fails |
+
+- **Two breaking waves** on a light cavalry day: the first dies whole and leaves the garrison weak enough for the second. A cataphract day takes a third, or one wave of 117,000 ballistae, which is then the cheapest (170M against 261M).
+- **Loyalty waves:** 100 loyalty at 3 a win is 34 wins, the breaking win and 33 more. Warriors in a loyalty wave die to the rolling logs the breaking waves leave; archers alone lose almost nothing (0.1M for all 33).
+- **Inn heroes do as well as the best** in the loyalty waves landed a millisecond apart *(script: a fresh level 1 hero, no gear, no horn)*, so the 33 loyalty waves don't need the strong heroes, only a hero each. A second apart, they fail with Inn heroes and win with strong ones.
+- **Warriors alone don't do:** 1,000-warrior waves with Inn heroes never win; 10,000 win only a millisecond apart.
+- **Armies:** 35 waves are 35 armies and 35 heroes, from 4 cities at Rally Spot 10 and Feasting Hall 10.
+
+Before the last win can capture, the attacker needs a free city slot (`maxCitiesFor(title)`) and room under `holdLimit`: otherwise the city stays at 0 loyalty for the next wave.
+
+```bash
+npm run sim -- siege --plan one-second,archers-best,age2-ballista --level 12 --day pikemen,lightCavalry,batteringRam --gap 0.001 --refill 6 --seeds 5
+```
+
+The Inn-hero runs used a one-off script giving the loyalty stage its own lord (`Lord` with `power: 20`, `heroLevel: 1`, no gear, no item).
+
 ## Not covered yet
 
-- Loyalty's numbers (its start, what a win takes), which set how many cities a siege needs.
-- The heroes leading the cheap waves: every wave here gets the lord's best hero.
 - Defending a captured city, and retaking one.
+- The levels above 12 at game speed 60, in one landing second.

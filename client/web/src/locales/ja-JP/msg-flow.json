@@ -36,10 +36,12 @@
     "attack_other": "{{count, number}}か所の目標を攻撃",
     "attackFrom_other": "{{cities}}から{{count, number}}か所の目標を攻撃",
     "train": "{{troop}}を{{amount}}訓練",
-    "trainMax": "{{troop}}を最大数訓練"
+    "trainMax": "{{troop}}を最大数訓練",
+    "hireHeroes_other": "{{stat}}{{min}}以上の英雄が都市に{{count, number}}人になるまで雇う（1回の実行で1都市あたり最大{{gold}}金）"
   },
   "cityCount_other": "{{count, number}}都市",
   "resourceAmount": "{{resource}} {{amount}}",
+  "rerolls_other": "{{count, number}}回の入れ替え",
   "step": {
     "noTargets": "この都市には目標が登録されていません",
     "armyGone": "スキップ: 保存済みの部隊がもう存在しません",
@@ -58,6 +60,10 @@
     "trainingPartial_other": "{{troop}}を{{amount}}訓練中（{{requested}}のうち{{amount}}のみ可能、兵舎{{count, number}}か所、完了まで{{time}}）",
     "trainingPartialDone_other": "{{troop}}を{{amount}}訓練中（{{requested}}のうち{{amount}}のみ可能、兵舎{{count, number}}か所、すぐに完了）",
     "noArmiesOut": "出撃中の部隊なし: 続行しました",
+    "hallFull": "スキップ: {{building}}に空きがありません",
+    "hireTargetMet_other": "スキップ: この都市には{{stat}}{{min}}以上の英雄がすでに{{count, number}}人います",
+    "hired_other": "{{stat}}{{min}}以上の英雄を{{count, number}}人雇いました（{{gold}}金、{{rerolls}}）",
+    "hiredSome_other": "{{stat}}{{min}}以上の英雄を、まだ必要な{{requested}}人のうち{{count, number}}人雇いました（{{gold}}金、{{rerolls}}）: {{reason}}",
     "waiting": "約{{time}}待機中",
     "moreActions_other": "このあと{{count, number}}個のアクション（プレビュー対象外）",
     "runEnds": "このあと実行は終了します"
@@ -68,5 +74,10 @@
     "notEnoughTroops": "スキップ: 「{{army}}」に必要な兵が足りません",
     "refused": "スキップ: {{reason}}"
   },
-  "skipNoHero": "この都市には英雄がいません（「すべての都市」ではスキップされます）"
+  "skipNoHero": "この都市には英雄がいません（「すべての都市」ではスキップされます）",
+  "hireStop": {
+    "cap": "上限の{{gold}}金に達しました",
+    "gold": "都市の金が足りません",
+    "rerolls_other": "{{count, number}}回入れ替えたので停止しました"
+  }
 }

@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { PushCmd } from '@marchlands/contracts';
 import { ArmyDirection, BuildingType, HeroStatus, marchTimeMs, Mission, msg, ref, TechType, TileType, tileXY } from '@marchlands/core';
 
-import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner, tilePosition } from '#/engine/armies.ts';
+import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner, tilePosition, visibleArmies } from '#/engine/armies.ts';
 import { type ArmyRow, getHero, getTile } from '#/repo.ts';
 import { armyRow, arrive, lastPush, send, tileNear, valleyNear, warrior } from '#test/support/armies.ts';
-import { cityBundle, reloadCity, setBuildings, setResearch } from '#test/support/factories.ts';
+import { addHero, cityBundle, reloadCity, setBuildings, setResearch } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
 
 describe(tilePosition.name, () => {
@@ -66,6 +66,23 @@ describe(notifyArmyParties.name, () => {
       await notifyArmyParties(g, { playerId: p.id, targetPlayerId: null });
       await notifyArmyParties(g, { playerId: p.id, targetPlayerId: p.id });
       expect(g.pushes(PushCmd.SELF_ARMIES_UPDATE)).toHaveLength(2);
+    }));
+});
+
+describe(visibleArmies.name, () => {
+  it('lists armies in the order they land, not the order they were sent', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g);
+      const second = await addHero(g, p);
+      const third = await addHero(g, p);
+      const npc = await tileNear(g, p.cityId, TileType.NPC);
+      const land = Math.ceil((g.now + 3_600_000) / 1000) * 1000;
+      const at = (s: number, hero: number) =>
+        send(g, p, { targetTileId: npc.id, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId: hero, arriveAt: land + s * 1000 });
+      const late = await at(8, heroId);
+      const early = await at(0, second);
+      const middle = await at(2, third);
+      expect((await visibleArmies(g, p.id)).self.map((a) => a.armyId)).toEqual([early.armyId, middle.armyId, late.armyId]);
     }));
 });
 

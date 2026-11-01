@@ -95,6 +95,8 @@ export const BALANCE = {
   tavernRefreshGoldPerInnLevel: 1000,
   /** (orig) the Inn offers one hero per level, up to `maxOffers`, each of level 1 to `heroLevelsPerInnLevel` x Inn level */
   inn: { maxOffers: 10, heroLevelsPerInnLevel: 5 },
+  /** (marchlands) the most times a flow's "hire heroes" action re-rolls one city's Inn a run, whatever its gold cap */
+  flowHireMaxRerolls: 200,
   heroAwardCostPerLevel: 100, // (orig)
 
   // comfort (orig); (marchlands) the levy is removed

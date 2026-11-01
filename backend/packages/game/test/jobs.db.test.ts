@@ -1,7 +1,7 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { autoDraftsDue, BALANCE, CandlePeriod, heroGearBonus, heroGearStat, MarketSide, merchantBase, msg, setGameSpeed, TechType } from '@marchlands/core';
+import { BALANCE, CandlePeriod, heroGearBonus, heroGearStat, MarketSide, merchantBase, msg, nextAutoDraftAt, setGameSpeed, TechType } from '@marchlands/core';
 import {
   allianceEvents,
   alliances,
@@ -22,7 +22,7 @@ import {
 
 import { type ZoneStats } from '#/engine/world.ts';
 import { beginnerJob, cleanupJob, draftJob, heroGearJob, innNamesJob, market, merchantJob, rankingsJob, statsJob, zonesJob } from '#/index.ts';
-import { getCity, getPlayer, savePlayer } from '#/repo.ts';
+import { getCity, getPlayer, saveCity, savePlayer } from '#/repo.ts';
 import { statDay } from '#/stats.ts';
 import { createTestAlliance } from '#test/support/alliance.ts';
 import { addHero, createTestPlayer, setCityStats, setResearch, type TestPlayer } from '#test/support/factories.ts';
@@ -276,7 +276,7 @@ describe(innNamesJob.name, () => {
 });
 
 describe(draftJob.name, () => {
-  it('a seat drafting by itself makes the draft due by now; one turned to manual makes none', () =>
+  it('a seat drafting by itself drafts when its draft is due, then waits for the next part of the day; one turned to manual makes none', () =>
     inTestTx(async (db) => {
       const { auto, manual } = await arrange(db, async (g) => {
         const auto = await createTestPlayer(g);
@@ -285,12 +285,29 @@ describe(draftJob.name, () => {
         await makeSeat(g, manual, { auto: false });
         return { auto, manual };
       });
+      const before = Date.now();
       await draftJob(db);
-      const used = async (p: TestPlayer) => arrange(db, async (g) => (await getCity(g, p.cityId)).draftsUsed);
-      expect(await used(auto)).toBe(1);
-      expect(await used(manual)).toBe(0);
-      // one draft a run: run again, and it makes a second only if the day is far enough on for one to be due
+      const seat = async (p: TestPlayer) => arrange(db, async (g) => getCity(g, p.cityId));
+      expect((await seat(auto)).draftsUsed).toBe(1);
+      expect((await seat(manual)).draftsUsed).toBe(0);
+      const next = (await seat(auto)).draftNextAt;
+      expect(next === nextAutoDraftAt(before) || next === nextAutoDraftAt(Date.now())).toBe(true);
+      // not due again until then: the day's other drafts aren't made up at once
       await draftJob(db);
-      expect(await used(auto)).toBe(Math.min(2, autoDraftsDue(Date.now())));
+      expect((await seat(auto)).draftsUsed).toBe(1);
+    }));
+
+  it('a seat with no drafts left today makes none, and waits for the next part of the day', () =>
+    inTestTx(async (db) => {
+      const p = await arrange(db, async (g) => {
+        const p = await createTestPlayer(g);
+        const city = await makeSeat(g, p);
+        await saveCity(g, { ...city, draftDay: Math.floor(Date.now() / DAY), draftsUsed: BALANCE.historic.draftsPerDay });
+        return p;
+      });
+      await draftJob(db);
+      const city = await arrange(db, async (g) => getCity(g, p.cityId));
+      expect(city.draftsUsed).toBe(BALANCE.historic.draftsPerDay);
+      expect(city.draftNextAt).toBeGreaterThan(Date.now() - 60_000);
     }));
 });

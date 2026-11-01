@@ -210,6 +210,8 @@ export const cities = pgTable(
     draftAuto: boolean('draft_auto').notNull().default(true),
     draftDay: integer('draft_day').notNull().default(0),
     draftsUsed: smallint('drafts_used').notNull().default(0),
+    /** (marchlands) when a held historic city drafting by itself next drafts (core nextAutoDraftAt); 0 at once */
+    draftNextAt: ms('draft_next_at').notNull().default(0),
     /** (marchlands) a state's capital held by a player: the gold a real hour its state's barbarian cities pay it, set by the factions' tick */
     stateTribute: integer('state_tribute').notNull().default(0),
     /** (marchlands) a held historic city: when its holder's alliance was last paid its share of the tribute (real ms; 0 never) */

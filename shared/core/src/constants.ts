@@ -279,6 +279,12 @@ export const FLOW_MAX_TARGETS_PER_CITY = 10;
 /** Longest a flow's "wait" action can wait (real time). */
 export const FLOW_MAX_WAIT_MINUTES = 7 * 24 * 60;
 
+/** The most heroes a flow's "hire heroes" action may aim for in a city (a level 10 Feasting Hall's places). */
+export const FLOW_MAX_HIRES = 10;
+
+/** The highest base attribute an Inn hero can be born with (heroes.ts randomStat). */
+export const HERO_BASE_STAT_MAX = 79;
+
 /** (marchlands) The NPC factions (factions.ts has what each holds and is like). Stored in faction_standing and sent to the client. */
 export const FactionId = {
   SAXON_LEAGUE: 'saxon',

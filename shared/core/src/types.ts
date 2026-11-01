@@ -7,10 +7,12 @@ import {
   BUFF_IDS,
   BuildingStatus,
   FACTION_IDS,
+  FLOW_MAX_HIRES,
   FLOW_MAX_TARGETS_PER_CITY,
   FLOW_MAX_WAIT_MINUTES,
   FORT_KEY_LIST,
   type FortKey,
+  HERO_BASE_STAT_MAX,
   HERO_BUFF_IDS,
   RESOURCE_KEYS,
   TROOP_KEY_LIST,
@@ -140,7 +142,7 @@ export type ArmyPreset = z.infer<typeof ArmyPresetSchema>;
 
 /**
  * (marchlands) One action of a flow (flows.ts): appoint the city's best hero by an attribute as mayor,
- * train troops, attack a target list, heal, or wait (the whole flow pauses, every city together).
+ * train troops, attack a target list, heal, hire heroes from the Inn, or wait (the whole flow pauses, every city together).
  */
 export const FlowActionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('setMayor'), stat: z.enum(['power', 'management', 'stratagem']).describe('attribute the new mayor is best at') }),
@@ -159,6 +161,20 @@ export const FlowActionSchema = z.discriminatedUnion('type', [
     presetId: z.string().describe('saved army sent at each target'),
     /** each city's own targets (city id -> tile ids), attacked in order with its idle heroes, strongest Attack first */
     targets: z.record(z.string(), z.array(z.number().int()).max(FLOW_MAX_TARGETS_PER_CITY)),
+  }),
+  z.object({
+    type: z.literal('hireHeroes'),
+    stat: z.enum(['power', 'management', 'stratagem']).describe('the attribute the heroes must have'),
+    min: z.number().int().min(1).max(HERO_BASE_STAT_MAX).describe('the least base value of that attribute (what the hero was born with)'),
+    count: z
+      .number()
+      .int()
+      .min(1)
+      .max(FLOW_MAX_HIRES)
+      .describe(
+        "hire until the city has this many of the player's heroes that good (those already there count); the Feasting Hall's free places also limit it",
+      ),
+    maxGold: z.number().int().min(1).describe('the most gold a run may spend in each city on re-rolling the Inn and hiring'),
   }),
   z.object({
     type: z.literal('wait'),

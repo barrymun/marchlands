@@ -69,6 +69,18 @@ export const PLANS: Record<string, Plan> = {
       { name: 'loyalty', troops: loyaltyWave, until: 'captured', max: 100 },
     ],
   },
+  /**
+   * The whole siege in one wave plan, every wave landing a millisecond after the last (`--gap 0.001`): nothing refills,
+   * so loyalty waves of archers alone lose almost nothing (docs/battle-sims/historic-cities.md, One landing second).
+   */
+  'one-second': {
+    name: 'The farming army, then small archer waves, all in one landing second',
+    gap: 0.001,
+    stages: [
+      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: 'broken', max: 150 },
+      { name: 'loyalty', troops: { archer: 5_000 }, until: 'captured', max: 100 },
+    ],
+  },
   /** For a day with cataphracts, which ride down archers: pikemen first until they're gone (AeroAgg's table), then archers. */
   'pikes-archers': {
     name: 'Pikemen until the cataphracts are gone, then the farming army',

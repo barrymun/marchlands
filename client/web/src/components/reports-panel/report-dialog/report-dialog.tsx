@@ -44,7 +44,7 @@ export function ReportDialog({ reportId, onClose }: { reportId: number | null; o
   const r = detail.data;
   return (
     <Dialog open={reportId != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-2xl lg:max-w-5xl">
         <DialogHeader>
           <DialogTitle>{r ? translateMessage(r.title) : t('dialog.title')}</DialogTitle>
           <DialogDescription>

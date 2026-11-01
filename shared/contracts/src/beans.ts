@@ -143,6 +143,7 @@ export const CityBean = z
     truceUntil: Ms.describe('a historic city is under truce until then (0: none)'),
     draftAuto: z.boolean().describe('a historic city drafts by itself'),
     draftsUsed: z.number().int().describe('drafts a historic city has made today (UTC)'),
+    draftNextAt: Ms.describe('when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)'),
     seatLoyalty: z.number().int().describe("a held historic city's loyalty now: rivals' wins and unrest take it down, and at 0 it's lost"),
     seatNeglect: z
       .array(z.enum(['garrison', 'upkeep']))

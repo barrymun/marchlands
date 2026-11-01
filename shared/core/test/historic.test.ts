@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  autoDraftsDue,
   BALANCE,
   BuildingStatus,
   BuildingType,
@@ -20,9 +19,10 @@ import {
   mapLevelDigit,
   mapLevelOf,
   maxArmyTroops,
+  nextAutoDraftAt,
   seatLoyalty,
-  seatNeglect,
   SeatNeglect,
+  seatNeglect,
   seatTitle,
   seatUnrest,
   stateTribute,
@@ -230,13 +230,18 @@ describe(draftsUsed.name, () => {
   });
 });
 
-describe(autoDraftsDue.name, () => {
-  it('is one at the start of each quarter of the UTC day', () => {
-    const day = 20_000 * 86_400_000;
-    expect(autoDraftsDue(day)).toBe(1);
-    expect(autoDraftsDue(day + 6 * 3_600_000 - 1)).toBe(1);
-    expect(autoDraftsDue(day + 6 * 3_600_000)).toBe(2);
-    expect(autoDraftsDue(day + 23 * 3_600_000)).toBe(4);
+describe(nextAutoDraftAt.name, () => {
+  const day = 20_000 * 86_400_000;
+  const h = 3_600_000;
+  it('is the start of the next quarter of the UTC day', () => {
+    expect(nextAutoDraftAt(day)).toBe(day + 6 * h);
+    expect(nextAutoDraftAt(day + 6 * h - 1)).toBe(day + 6 * h);
+    expect(nextAutoDraftAt(day + 6 * h)).toBe(day + 12 * h);
+  });
+
+  it('goes on to the next day after the last quarter, without making up the parts before', () => {
+    // captured at 22:22: the next draft is at midnight, not at once
+    expect(nextAutoDraftAt(day + 22 * h + 22 * 60_000)).toBe(day + 24 * h);
   });
 });
 

@@ -172,8 +172,15 @@ export function draftTake(troops: TroopCounts): { key: keyof TroopCounts; count:
 /** Drafts a seat has made on the UTC day of `now` (its count is for one day, `draftDay`). */
 export const draftsUsed = (c: { draftDay: number; draftsUsed: number }, now: number) => (c.draftDay === Math.floor(now / DAY) ? c.draftsUsed : 0);
 
-/** How many drafts a seat drafting by itself should have made by `now` today: one at the start of each equal part of the day. */
-export const autoDraftsDue = (now: number) => Math.floor((now % DAY) / (DAY / BALANCE.historic.draftsPerDay)) + 1;
+/**
+ * When a seat drafting by itself next drafts, from `at`: the start of the next equal part of the UTC day
+ * (BALANCE.historic.draftsPerDay parts). A seat captured or switched to drafting by itself partway through a part waits
+ * for the next one, rather than making up the parts it wasn't drafting in.
+ */
+export const nextAutoDraftAt = (at: number) => {
+  const part = DAY / BALANCE.historic.draftsPerDay;
+  return (Math.floor(at / part) + 1) * part;
+};
 
 /**
  * A held historic city's loyalty as of `at`: rivals' wins take it down (BALANCE.historic.loyaltyPerWin), and it comes

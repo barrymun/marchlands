@@ -7,7 +7,6 @@ import {
   BALANCE,
   buildingLevel,
   BuildingType,
-  createRandomHero,
   experienceItemGain,
   GameError,
   GEAR_STATS,
@@ -23,7 +22,6 @@ import {
   heroBuffBase,
   heroBuffDesc,
   HeroBuffId,
-  heroHireCost,
   heroItemGoldPrice,
   heroPointCap,
   HeroStatus,
@@ -35,40 +33,17 @@ import {
   loyaltyAfterMedal,
   msg,
   ref,
-  stateOf,
-  tavernRefill,
   tavernRefreshCost,
   TechType,
 } from '@marchlands/core';
-import { heroes, one } from '@marchlands/db';
+import { heroes } from '@marchlands/db';
 
 import { type CityBundle, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { heroBean } from '#/dto.ts';
-import { clearTavern, closeMayorCity, heroSlots, heroValues, openMayorCity, pushHero, resyncHeroGear, takenHeroNames } from '#/engine/heroes.ts';
+import { closeMayorCity, fillTavern, heroSlots, hireOffer, openMayorCity, pushHero, rerollTavern, resyncHeroGear } from '#/engine/heroes.ts';
 import { addItem, assertClean, cleanName, consumeItem, itemCount, pushResources, spendGold, spendResources } from '#/helpers.ts';
 import { findCity, getHero, getPlayer, heroesOfCity, type HeroRow, saveCity, saveHero, savePlayer } from '#/repo.ts';
-
-async function fillTavern(ctx: Ctx, b: CityBundle, regenerate: boolean) {
-  if (regenerate) await clearTavern(ctx, b.city.id);
-  const current = regenerate ? [] : await heroesOfCity(ctx, b.city.id, { tavern: true });
-  const plan = tavernRefill(current, buildingLevel(b.city.buildings, BuildingType.INN));
-  for (const h of plan.drop) await ctx.tx.delete(heroes).where(eq(heroes.id, h.id));
-  const out = [...plan.keep];
-  const city = { state: stateOf(b.city.tileId), taken: await takenHeroNames(ctx, b.city.playerId, b.city.id) };
-  for (let i = 0; i < plan.add; i++) {
-    const g = createRandomHero(plan.heroInnLevel, ctx.rng, city);
-    city.taken.add(g.name);
-    const row = one(
-      await ctx.tx
-        .insert(heroes)
-        .values({ ...heroValues(g), playerId: null, cityId: b.city.id, inTavern: true, createdAt: ctx.now })
-        .returning(),
-    );
-    out.push(row);
-  }
-  return out;
-}
 
 async function own(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewCity(ctx, cityId);
@@ -126,11 +101,9 @@ export async function refreshTavern(ctx: Ctx, playerId: number, cityId: number) 
   const b = await openOwnCity(ctx, playerId, cityId);
   const inn = buildingLevel(b.city.buildings, BuildingType.INN);
   if (inn < 1) throw new GameError(msg('hero.needInn', { building: ref.building(BuildingType.INN) }), -99);
-  spendResources(b.city, { gold: tavernRefreshCost(inn) }, msg('common.notEnoughGold'), -99);
-  ctx.stat(b.player.id, b.city.id, { 'spent.heroes.gold': tavernRefreshCost(inn) });
+  const offers = await rerollTavern(ctx, b);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
-  const offers = await fillTavern(ctx, b, true);
   return tavernBean(b, offers);
 }
 
@@ -140,11 +113,7 @@ export async function hire(ctx: Ctx, playerId: number, cityId: number, heroId: n
   if (heroSlots(b) <= b.heroes.length) throw new GameError(msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }), -99);
   const h = await getHero(ctx, heroId, { lock: true });
   if (!h.inTavern || h.cityId !== cityId) throw new GameError(msg('common.heroNotFound'), -99, 404);
-  spendResources(b.city, { gold: heroHireCost(h.level) }, msg('common.notEnoughGold'), -99);
-  ctx.stat(playerId, cityId, { 'spent.heroes.gold': heroHireCost(h.level), 'heroes.hired': 1 });
-  Object.assign(h, { inTavern: false, playerId, status: HeroStatus.IDLE });
-  await saveHero(ctx, h);
-  pushHero(ctx, playerId, h, 0);
+  await hireOffer(ctx, b, h);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
   return heroBean(h);

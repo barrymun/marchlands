@@ -267,6 +267,13 @@
       "when": 1793561496649,
       "tag": "0037_war_plans",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1793572679146,
+      "tag": "0038_seat_draft_next_at",
+      "breakpoints": true
     }
   ]
 }

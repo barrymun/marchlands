@@ -1,7 +1,7 @@
 // Army helpers shared with combat and flows: event references, positions, notifying both sides,
 // marching home and the armies a lord can see.
 
-import { eq, or } from 'drizzle-orm';
+import { asc, eq, or } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import { ArmyDirection, buildingLevel, BuildingType, HeroStatus, marchTimeMs, type Message, Mission, msg, ref, TileType, tileXY } from '@marchlands/core';
@@ -84,7 +84,7 @@ export async function homeMarchMs(ctx: Ctx, a: ArmyRow, fromTile: number): Promi
 /**
  * self: my armies; friend: other lords' armies stationed at or reinforcing/transporting to me;
  * enemy: hostile armies heading for me (troop details need a Beacon Tower). Another lord's army still waiting at home
- * to land at a chosen time isn't seen until it sets off.
+ * to land at a chosen time isn't seen until it sets off. Each list is in the order the armies land (or landed).
  */
 export async function visibleArmies(ctx: Ctx, playerId: number) {
   const rows = await ctx.tx
@@ -92,7 +92,8 @@ export async function visibleArmies(ctx: Ctx, playerId: number) {
     .from(armies)
     .leftJoin(heroes, eq(heroes.id, armies.heroId))
     .innerJoin(players, eq(players.id, armies.playerId))
-    .where(or(eq(armies.playerId, playerId), eq(armies.targetPlayerId, playerId)));
+    .where(or(eq(armies.playerId, playerId), eq(armies.targetPlayerId, playerId)))
+    .orderBy(asc(armies.reachTime), asc(armies.id));
   const myCities = await ctx.tx.select({ id: cities.id, buildings: cities.buildings }).from(cities).where(eq(cities.playerId, playerId));
   const beacon = Math.max(0, ...myCities.map((c) => buildingLevel(c.buildings, BuildingType.BEACON_TOWER)));
   const self = [];

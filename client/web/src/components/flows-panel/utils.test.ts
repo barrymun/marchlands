@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
 import { FLOW_TROOP_IDS } from '@marchlands/core';
 
-import { currentAction, hasHero, keyed, strip } from '@/components/flows-panel/utils';
+import { currentAction, hasHero, hiresHeroes, keyed, strip } from '@/components/flows-panel/utils';
 
 const ACTIONS: FlowAction[] = [
   { type: 'setMayor', stat: 'management' },
@@ -110,5 +110,16 @@ describe(hasHero.name, () => {
 
   it('is false when every hero there is held captive', () => {
     expect(hasHero(city(true, true))).toBe(false);
+  });
+});
+
+describe(hiresHeroes.name, () => {
+  it('is true when any action hires heroes', () => {
+    expect(hiresHeroes([{ type: 'setMayor' }, { type: 'hireHeroes' }])).toBe(true);
+  });
+
+  it('is false for a flow without a hire action, or none at all', () => {
+    expect(hiresHeroes([{ type: 'setMayor' }, { type: 'wait' }])).toBe(false);
+    expect(hiresHeroes([])).toBe(false);
   });
 });

@@ -6,14 +6,27 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { usePlayer } from '@/hooks/use-game';
 
-/** All cities (including ones gained later; a city with no hero is skipped), or a selection of one or more cities. */
-export function CityPicker({ value, onChange, currentCityId }: { value: Targets; onChange: (t: Targets) => void; currentCityId?: number }) {
+/**
+ * All cities (including ones gained later; a city with no hero is skipped unless the flow `hires` heroes), or a
+ * selection of one or more cities.
+ */
+export function CityPicker({
+  value,
+  onChange,
+  currentCityId,
+  hires = false,
+}: {
+  value: Targets;
+  onChange: (t: Targets) => void;
+  currentCityId?: number;
+  hires?: boolean;
+}) {
   const { t } = useTranslation('flows-panel');
   const cities = usePlayer().data?.castles ?? [];
   const all = value === 'all';
   const chosen = new Set(all ? [] : value);
   const set = (id: number, on: boolean) => onChange(on ? [...chosen, id] : [...chosen].filter((x) => x !== id));
-  const noHero = cities.filter((c) => !hasHero(c)).length;
+  const noHero = hires ? 0 : cities.filter((c) => !hasHero(c)).length;
   return (
     <div className="grid gap-1.5">
       <Label className="text-xs">{t('cityPicker.label')}</Label>

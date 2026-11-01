@@ -46,6 +46,7 @@
       "trainTroops": "Train troops",
       "attackTargets": "Attack targets",
       "healTroops": "Heal troops",
+      "hireHeroes": "Hire heroes",
       "wait": "Wait"
     }
   },
@@ -68,6 +69,13 @@
     "train": {
       "label": "Train",
       "amount": "Amount"
+    },
+    "hire": {
+      "sentence": "Hire until the city has <count/> heroes with <stat/> of at least <min/> and spend at most <gold/> gold a city each run",
+      "count": "Heroes the city should have",
+      "min": "Least base value",
+      "gold": "Most gold a city each run",
+      "hint": "Heroes already in the city count. Base values go up to {{max}}. The Inn's offers are re-rolled until enough are found; with Repeat on, the flow carries on each run until every city has its heroes. Each hero hired is named after its attribute and base value, like ATK - 76."
     }
   },
   "runFlow": {

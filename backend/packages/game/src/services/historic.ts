@@ -1,7 +1,7 @@
 // (marchlands) A held historic city's daily draft, as its holder chooses (docs/features/historical-cities.md): draft
 // from a barbarian city in its area by hand, or let it draft by itself (the default, jobs.ts draftJob).
 
-import { BALANCE, draftsUsed, GameError, inSeatArea, msg } from '@marchlands/core';
+import { BALANCE, draftsUsed, GameError, inSeatArea, msg, nextAutoDraftAt } from '@marchlands/core';
 
 import { openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -24,10 +24,11 @@ export async function draftNow(ctx: Ctx, playerId: number, cityId: number, tileI
   return { troops };
 }
 
-/** Let a seat draft by itself, or only when its holder chooses. */
+/** Let a seat draft by itself (from the next part of the day), or only when its holder chooses. */
 export async function setDraftAuto(ctx: Ctx, playerId: number, cityId: number, auto: boolean) {
   const b = await openOwnCity(ctx, playerId, cityId);
   if (!seatLevelOf(b.city)) throw new GameError(msg('city.notHistoric'), -99);
+  if (auto && !b.city.draftAuto) b.city.draftNextAt = nextAutoDraftAt(ctx.now);
   b.city.draftAuto = auto;
   await saveCity(ctx, b.city);
   pushCity(ctx, await viewCity(ctx, cityId));

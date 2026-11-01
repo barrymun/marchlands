@@ -1,7 +1,7 @@
-import { HeartPulse, Hourglass } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { HeartPulse, Hourglass, UserPlus } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { FLOW_MAX_WAIT_MINUTES, FLOW_TROOP_IDS } from '@marchlands/core';
+import { FLOW_MAX_HIRES, FLOW_MAX_WAIT_MINUTES, FLOW_TROOP_IDS, HERO_BASE_STAT_MAX } from '@marchlands/core';
 
 import { AttackTargetsFields } from '@/components/flow-attack/attack-targets-fields/attack-targets-fields';
 import { FLOW_STATS } from '@/components/flows-panel/flow-editor/action-fields/constants';
@@ -15,7 +15,7 @@ import { troopName } from '@/lib/game-data';
 import { attributeOfStat } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
 
-/** The inputs of one action: which attribute for "set mayor"; troop type and amount (or max) for "train". */
+/** The inputs of one action: which attribute for "set mayor"; troop type and amount (or max) for "train"; how many, how good and how much gold for "hire heroes". */
 export function ActionFields({ action, cities, onChange }: { action: Draft; cities: Targets; onChange: (a: Draft) => void }) {
   const { t } = useTranslation(['flows-panel', 'common']);
   if (action.type === 'attackTargets') {
@@ -74,6 +74,62 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
             {action.minutes >= 60 && <span className="text-xs text-muted-foreground">({shortDuration(action.minutes * 60_000)})</span>}
           </>
         )}
+      </div>
+    );
+  }
+  if (action.type === 'hireHeroes') {
+    const number = (v: string, min: number, max: number) => Math.min(max, Math.max(min, Number(v.replace(/\D/g, '')) || min));
+    return (
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <UserPlus className="size-4 text-muted-foreground" />
+        <Trans
+          t={t}
+          i18nKey="actionFields.hire.sentence"
+          components={{
+            count: (
+              <Input
+                className="h-8 w-16"
+                inputMode="numeric"
+                aria-label={t('actionFields.hire.count')}
+                value={String(action.count)}
+                onChange={(e) => onChange({ ...action, count: number(e.target.value, 1, FLOW_MAX_HIRES) })}
+              />
+            ),
+            stat: (
+              <Select value={action.stat} onValueChange={(v) => onChange({ ...action, stat: v as Stat })}>
+                <SelectTrigger size="sm" className={cn('w-36 font-medium', attributeOfStat(action.stat).tone)}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FLOW_STATS.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {attributeOfStat(s).label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ),
+            min: (
+              <Input
+                className="h-8 w-16"
+                inputMode="numeric"
+                aria-label={t('actionFields.hire.min')}
+                value={String(action.min)}
+                onChange={(e) => onChange({ ...action, min: number(e.target.value, 1, HERO_BASE_STAT_MAX) })}
+              />
+            ),
+            gold: (
+              <Input
+                className="h-8 w-32"
+                inputMode="numeric"
+                aria-label={t('actionFields.hire.gold')}
+                value={String(action.maxGold)}
+                onChange={(e) => onChange({ ...action, maxGold: number(e.target.value, 1, Number.MAX_SAFE_INTEGER) })}
+              />
+            ),
+          }}
+        />
+        <span className="w-full text-xs text-muted-foreground">{t('actionFields.hire.hint', { max: HERO_BASE_STAT_MAX })}</span>
       </div>
     );
   }

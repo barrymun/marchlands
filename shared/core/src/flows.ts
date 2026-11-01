@@ -4,6 +4,13 @@ import { TROOPS } from '#/data/index.ts';
 import { dur, type Message, msg, ref } from '#/messages/index.ts';
 import type { FlowAction } from '#/types.ts';
 
+/**
+ * The name a flow's "hire heroes" action gives a hero it hires: the attribute's short form and the hero's base value
+ * (ATK - 76), as players name their heroes. A name, so not translated.
+ */
+export const hiredHeroName = (stat: 'power' | 'management' | 'stratagem', base: number) => `${HIRE_NAME_TAGS[stat]} - ${base}`;
+const HIRE_NAME_TAGS = { power: 'ATK', management: 'POL', stratagem: 'INT' } as const;
+
 /** Troops a flow can train (everything trained in barracks; fortifications are not troops). */
 export const FLOW_TROOP_IDS: readonly number[] = TROOPS.filter((t) => t.inside === 1).map((t) => t.troopId);
 
@@ -59,6 +66,7 @@ export function flowActionMessage(a: FlowAction): Message {
     if (a.payWith === 'honor') return msg(home ? 'flow.action.healHonourHome' : 'flow.action.healHonour');
     return msg(home ? 'flow.action.healResourcesHome' : 'flow.action.healResources');
   }
+  if (a.type === 'hireHeroes') return msg('flow.action.hireHeroes', { count: a.count, stat: ref.stat(a.stat), min: a.min, gold: a.maxGold });
   if (a.type === 'wait') return a.until === 'armiesHome' ? msg('flow.action.waitArmiesHome') : msg('flow.action.wait', { time: dur(a.minutes * 60_000) });
   if (a.type === 'attackTargets') {
     const lists = Object.values(a.targets).filter((t) => t.length);

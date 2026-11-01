@@ -7,11 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useCommand } from '@/hooks/use-game';
+import { utcClock } from '@/lib/format';
 
 /**
  * The daily draft of the player's historic cities (docs/features/historical-cities.md), on a tile's card: on a
  * barbarian city nobody holds, a Draft button for each of their seats whose area it lies in; on one of their seats,
- * whether it drafts by itself, and how many drafts it has made today.
+ * whether it drafts by itself, how many drafts it has made today, and when it next drafts by itself.
  */
 export function SeatDraft({ tile, seats }: { tile: { id: number; type: number; held: boolean }; seats: CityBean[] }) {
   const { t } = useTranslation('map-panel');
@@ -32,6 +33,9 @@ export function SeatDraft({ tile, seats }: { tile: { id: number; type: number; h
         />
         <Label htmlFor={`draft-auto-${own.id}`}>{t('draft.auto')}</Label>
         <span className="text-xs text-muted-foreground tabular-nums">{t('draft.used', { used: own.draftsUsed, max })}</span>
+        {own.draftAuto && own.draftNextAt > 0 && (
+          <span className="text-xs text-muted-foreground tabular-nums">· {t('draft.next', { time: utcClock(own.draftNextAt) })}</span>
+        )}
       </div>
     );
   }

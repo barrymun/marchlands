@@ -7,7 +7,7 @@ import { FLOW_TROOP_IDS } from '@marchlands/core';
 import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
 import { ActionFields } from '@/components/flows-panel/flow-editor/action-fields/action-fields';
 import type { Draft, EditDraft } from '@/components/flows-panel/types';
-import { keyed } from '@/components/flows-panel/utils';
+import { hiresHeroes, keyed } from '@/components/flows-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -66,7 +66,7 @@ export function FlowEditor({
             onChange={(e) => onChange({ ...draft, name: e.target.value })}
           />
         </div>
-        <CityPicker value={draft.cities} onChange={(cities) => onChange({ ...draft, cities })} />
+        <CityPicker value={draft.cities} onChange={(cities) => onChange({ ...draft, cities })} hires={hiresHeroes(draft.actions)} />
         <ol className="grid gap-2">
           {draft.actions.map((a, i) => (
             <li
@@ -156,6 +156,14 @@ export function FlowEditor({
             onClick={() => setActions([...draft.actions, keyed({ type: 'healTroops', payWith: 'resources', when: 'armiesHome' })])}
           >
             <Plus /> {t('flowEditor.add.healTroops')}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={locked || draft.actions.length >= 20}
+            onClick={() => setActions([...draft.actions, keyed({ type: 'hireHeroes', stat: 'power', min: 70, count: 1, maxGold: 1_000_000 })])}
+          >
+            <Plus /> {t('flowEditor.add.hireHeroes')}
           </Button>
           <Button
             size="sm"

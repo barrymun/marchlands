@@ -39,11 +39,15 @@
     "attackFrom_one": "Attack {{count, number}} target from {{cities}}",
     "attackFrom_other": "Attack {{count, number}} targets from {{cities}}",
     "train": "Train {{amount}} {{troop}}",
-    "trainMax": "Train max {{troop}}"
+    "trainMax": "Train max {{troop}}",
+    "hireHeroes_one": "Hire until the city has {{count, number}} hero with {{stat}} {{min}}+ (up to {{gold}} gold a city a run)",
+    "hireHeroes_other": "Hire until the city has {{count, number}} heroes with {{stat}} {{min}}+ (up to {{gold}} gold a city a run)"
   },
   "cityCount_one": "{{count, number}} city",
   "cityCount_other": "{{count, number}} cities",
   "resourceAmount": "{{amount}} {{resource}}",
+  "rerolls_one": "{{count, number}} re-roll",
+  "rerolls_other": "{{count, number}} re-rolls",
   "step": {
     "noTargets": "No targets listed for this city",
     "armyGone": "Skipped: the saved army no longer exists",
@@ -69,6 +73,13 @@
     "trainingPartialDone_one": "Training {{amount}} {{troop}} (only {{amount}} of {{requested}} affordable) in {{count, number}} barracks, done now",
     "trainingPartialDone_other": "Training {{amount}} {{troop}} (only {{amount}} of {{requested}} affordable) in {{count, number}} barracks, done now",
     "noArmiesOut": "No armies out: carried on",
+    "hallFull": "Skipped: the {{building}} is full",
+    "hireTargetMet_one": "Skipped: the city already has {{count, number}} hero with {{stat}} {{min}}+",
+    "hireTargetMet_other": "Skipped: the city already has {{count, number}} heroes with {{stat}} {{min}}+",
+    "hired_one": "Hired {{count, number}} hero with {{stat}} {{min}}+ for {{gold}} gold ({{rerolls}})",
+    "hired_other": "Hired {{count, number}} heroes with {{stat}} {{min}}+ for {{gold}} gold ({{rerolls}})",
+    "hiredSome_one": "Hired {{count, number}} of the {{requested}} heroes still needed with {{stat}} {{min}}+ for {{gold}} gold ({{rerolls}}): {{reason}}",
+    "hiredSome_other": "Hired {{count, number}} of the {{requested}} heroes still needed with {{stat}} {{min}}+ for {{gold}} gold ({{rerolls}}): {{reason}}",
     "waiting": "Waiting ~{{time}}",
     "moreActions_one": "Then {{count, number}} more action (not previewed)",
     "moreActions_other": "Then {{count, number}} more actions (not previewed)",
@@ -80,5 +91,11 @@
     "notEnoughTroops": "skipped: not enough troops for \"{{army}}\"",
     "refused": "skipped: {{reason}}"
   },
-  "skipNoHero": "No hero in this city (all cities skips it)"
+  "skipNoHero": "No hero in this city (all cities skips it)",
+  "hireStop": {
+    "cap": "the gold limit of {{gold}} was reached",
+    "gold": "the city is out of gold",
+    "rerolls_one": "stopped after {{count, number}} re-roll",
+    "rerolls_other": "stopped after {{count, number}} re-rolls"
+  }
 }

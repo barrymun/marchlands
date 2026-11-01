@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { BALANCE, msg, npcFaction, npcTemplate, TileType } from '@marchlands/core';
+import { BALANCE, msg, nextAutoDraftAt, npcFaction, npcTemplate, TileType } from '@marchlands/core';
 
 import { historic } from '#/index.ts';
 import { getCity, getTile } from '#/repo.ts';
@@ -69,7 +69,11 @@ describe(historic.setDraftAuto.name, () => {
       await historic.setDraftAuto(g, p.id, p.cityId, false);
       expect((await getCity(g, p.cityId)).draftAuto).toBe(false);
       await historic.setDraftAuto(g, p.id, p.cityId, true);
-      expect((await getCity(g, p.cityId)).draftAuto).toBe(true);
+      // switched on, it drafts from the next part of the day; switching on again changes nothing
+      expect(await getCity(g, p.cityId)).toMatchObject({ draftAuto: true, draftNextAt: nextAutoDraftAt(g.now) });
+      g.advance(7 * 3_600_000);
+      await historic.setDraftAuto(g, p.id, p.cityId, true);
+      expect((await getCity(g, p.cityId)).draftNextAt).toBe(nextAutoDraftAt(g.now - 7 * 3_600_000));
       expect((await getTile(g, (await getCity(g, p.cityId)).tileId)).type).toBe(TileType.CASTLE);
     }));
 });

@@ -26,7 +26,7 @@ import { LastPreview } from '@/components/flows-panel/run-flow/last-preview/last
 import { LastRun } from '@/components/flows-panel/run-flow/last-run/last-run';
 import { withPreview } from '@/components/flows-panel/run-flow/utils';
 import type { Targets } from '@/components/flows-panel/types';
-import { hasHero } from '@/components/flows-panel/utils';
+import { hasHero, hiresHeroes } from '@/components/flows-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -42,8 +42,9 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
   // starts from the flow's saved cities; changing them here applies to this run only
   const [targets, setTargets] = useState<Targets>(flow.cities);
   const own = new Set(cities.map((c) => c.id));
-  // all cities: those with a hero (the server skips the others)
-  const picked = targets === 'all' ? cities.filter(hasHero).map((c) => c.id) : targets.filter((id) => own.has(id));
+  // all cities: those with a hero (the server skips the others), or every city when the flow hires heroes
+  const hires = hiresHeroes(flow.actions);
+  const picked = targets === 'all' ? cities.filter((c) => hires || hasHero(c)).map((c) => c.id) : targets.filter((id) => own.has(id));
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: getPlayerFlowsQueryKey() });
     // heroes, resources, population and queues changed in the cities that ran
@@ -117,7 +118,7 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
         <CardDescription>{t('runFlow.description')}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
-        <CityPicker value={targets} onChange={setTargets} currentCityId={currentCityId} />
+        <CityPicker value={targets} onChange={setTargets} currentCityId={currentCityId} hires={hires} />
         <label className="flex items-start gap-2 text-sm">
           <Switch className="mt-0.5" checked={flow.repeat} disabled={busy} onCheckedChange={(on) => repeat.mutate(on)} />
           <span className="grid gap-0.5">

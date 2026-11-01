@@ -49,6 +49,8 @@ export const FLOW_MESSAGES = {
   'action.attackFrom': ['count', 'cities'],
   'action.train': ['amount', 'troop'],
   'action.trainMax': ['troop'],
+  /** `gold`: the most a run may spend in each city */
+  'action.hireHeroes': ['count', 'stat', 'min', 'gold'],
   cityCount: ['count'],
   resourceAmount: ['amount', 'resource'],
 
@@ -73,6 +75,18 @@ export const FLOW_MESSAGES = {
   'step.trainingPartial': ['amount', 'requested', 'troop', 'count', 'time'],
   'step.trainingPartialDone': ['amount', 'requested', 'troop', 'count'],
   'step.noArmiesOut': [],
+  'step.hallFull': ['building'],
+  /** the city already has `count` heroes that good */
+  'step.hireTargetMet': ['count', 'stat', 'min'],
+  /** `rerolls`: a rerolls message; `gold`: what the city spent */
+  'step.hired': ['count', 'stat', 'min', 'gold', 'rerolls'],
+  /** fewer than the city still needed (`requested`): `reason` is a hireStop.* message */
+  'step.hiredSome': ['count', 'requested', 'stat', 'min', 'gold', 'rerolls', 'reason'],
+  rerolls: ['count'],
+  /** why a hire step stopped short: the run's gold cap, the city's gold, or BALANCE.flowHireMaxRerolls */
+  'hireStop.cap': ['gold'],
+  'hireStop.gold': [],
+  'hireStop.rerolls': ['count'],
   /** `time`: about how long */
   'step.waiting': ['time'],
   /** a preview's last step: `count` actions after the first wait were not previewed */

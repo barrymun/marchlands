@@ -353,6 +353,7 @@
               "flow.action.attackFrom",
               "flow.action.train",
               "flow.action.trainMax",
+              "flow.action.hireHeroes",
               "flow.cityCount",
               "flow.resourceAmount",
               "flow.step.noTargets",
@@ -372,6 +373,14 @@
               "flow.step.trainingPartial",
               "flow.step.trainingPartialDone",
               "flow.step.noArmiesOut",
+              "flow.step.hallFull",
+              "flow.step.hireTargetMet",
+              "flow.step.hired",
+              "flow.step.hiredSome",
+              "flow.rerolls",
+              "flow.hireStop.cap",
+              "flow.hireStop.gold",
+              "flow.hireStop.rerolls",
               "flow.step.waiting",
               "flow.step.moreActions",
               "flow.step.runEnds",
@@ -1447,6 +1456,10 @@
             "maximum": 9007199254740991,
             "description": "drafts a historic city has made today (UTC)"
           },
+          "draftNextAt": {
+            "type": "number",
+            "description": "when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)"
+          },
           "seatLoyalty": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -1491,6 +1504,7 @@
           "truceUntil",
           "draftAuto",
           "draftsUsed",
+          "draftNextAt",
           "seatLoyalty",
           "seatNeglect",
           "createdAt"
@@ -3250,6 +3264,49 @@
               "type",
               "presetId",
               "targets"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "hireHeroes"
+              },
+              "stat": {
+                "type": "string",
+                "enum": [
+                  "power",
+                  "management",
+                  "stratagem"
+                ],
+                "description": "the attribute the heroes must have"
+              },
+              "min": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 79,
+                "description": "the least base value of that attribute (what the hero was born with)"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "description": "hire until the city has this many of the player's heroes that good (those already there count); the Feasting Hall's free places also limit it"
+              },
+              "maxGold": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991,
+                "description": "the most gold a run may spend in each city on re-rolling the Inn and hiring"
+              }
+            },
+            "required": [
+              "type",
+              "stat",
+              "min",
+              "count",
+              "maxGold"
             ]
           },
           {
@@ -12554,6 +12611,7 @@
               "flow.action.attackFrom",
               "flow.action.train",
               "flow.action.trainMax",
+              "flow.action.hireHeroes",
               "flow.cityCount",
               "flow.resourceAmount",
               "flow.step.noTargets",
@@ -12573,6 +12631,14 @@
               "flow.step.trainingPartial",
               "flow.step.trainingPartialDone",
               "flow.step.noArmiesOut",
+              "flow.step.hallFull",
+              "flow.step.hireTargetMet",
+              "flow.step.hired",
+              "flow.step.hiredSome",
+              "flow.rerolls",
+              "flow.hireStop.cap",
+              "flow.hireStop.gold",
+              "flow.hireStop.rerolls",
               "flow.step.waiting",
               "flow.step.moreActions",
               "flow.step.runEnds",
@@ -13659,6 +13725,10 @@
             "maximum": 9007199254740991,
             "description": "drafts a historic city has made today (UTC)"
           },
+          "draftNextAt": {
+            "type": "number",
+            "description": "when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)"
+          },
           "seatLoyalty": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -13703,6 +13773,7 @@
           "truceUntil",
           "draftAuto",
           "draftsUsed",
+          "draftNextAt",
           "seatLoyalty",
           "seatNeglect",
           "createdAt"
@@ -15501,6 +15572,50 @@
               "type",
               "presetId",
               "targets"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "hireHeroes"
+              },
+              "stat": {
+                "type": "string",
+                "enum": [
+                  "power",
+                  "management",
+                  "stratagem"
+                ],
+                "description": "the attribute the heroes must have"
+              },
+              "min": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 79,
+                "description": "the least base value of that attribute (what the hero was born with)"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "description": "hire until the city has this many of the player's heroes that good (those already there count); the Feasting Hall's free places also limit it"
+              },
+              "maxGold": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991,
+                "description": "the most gold a run may spend in each city on re-rolling the Inn and hiring"
+              }
+            },
+            "required": [
+              "type",
+              "stat",
+              "min",
+              "count",
+              "maxGold"
             ],
             "additionalProperties": false
           },
