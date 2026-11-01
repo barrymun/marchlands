@@ -202,6 +202,10 @@ export const cities = pgTable(
     historicLevel: smallint('historic_level'),
     /** (marchlands) a historic city can't be attacked until then (its truce on capture; the player's own truce doesn't cover it) */
     truceUntil: ms('truce_until').notNull().default(0),
+    /** (marchlands) a captured historic city's loyalty: rivals' wins take it down, and at 0 the winner takes the city */
+    loyalty: smallint('loyalty').notNull().default(100),
+    /** when its loyalty last recovered (+1 every BALANCE.npcRegenMs, real time) */
+    loyaltyAt: ms('loyalty_at').notNull().default(0),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [uniqueIndex('cities_tile_idx').on(t.tileId), index('cities_player_idx').on(t.playerId)],

@@ -16,6 +16,8 @@ export const REPORT_MESSAGES = {
   'title.attackFailed': [],
   'title.cityAttacked': [],
   'title.attackRepelled': [],
+  /** a player's historic city taken by the attacker who brought its loyalty to 0 */
+  'title.seatLost': [],
   'title.reinforcementsFought': [],
   'title.valleyOccupied': [],
   'title.valleyLost': [],

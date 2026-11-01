@@ -21,7 +21,7 @@ import {
 
 import { processArmy } from '#/engine/combat.ts';
 import { admin, armies, buildings, interior, player, world } from '#/index.ts';
-import { getCity, getTile, saveTile } from '#/repo.ts';
+import { getCity, getHero, getTile, saveCity, saveTile } from '#/repo.ts';
 import { arrive, battleOf, reportsOf, scoutOf, send, tileNear, warrior } from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { addHero, reloadCity, type TestPlayer } from '#test/support/factories.ts';
@@ -182,5 +182,53 @@ describe(`${processArmy.name}: capturing a historic city`, () => {
       await expectRefused(buildings.demolish(g, p.id, cityId, 1001), msg('building.historicField', { building: ref.building(BuildingType.FARM), level: 12 }));
       await player.restartPlayer(g, p.id);
       expect(await getTile(g, seat.id)).toMatchObject({ type: TileType.HISTORIC, level: 12, cityId: null, ownerPlayerId: null, state: null });
+    }));
+});
+
+describe(`${processArmy.name}: taking a held historic city`, () => {
+  /** p holds a level 12 seat (captured as lastWave does); q, ready to take one too, attacks it once its truce is over. */
+  async function heldSeat(g: TestGame) {
+    const { p, heroId } = await warrior(g, { archer: 60_000 });
+    await admin.setPlayerFlags(g, p.name, { title: 1 });
+    const { seat } = await lastWave(g, p, heroId);
+    const cityId = (await getTile(g, seat.id)).cityId!;
+    const { p: q, heroId: qHero } = await warrior(g, { archer: 60_000 });
+    await admin.setPlayerFlags(g, q.name, { title: 1 });
+    g.advance(BALANCE.historic.truceMs);
+    /** q's attack; `beforeLanding` runs once it's sent, with its landing time */
+    const attack = async (beforeLanding?: (at: number) => Promise<void>) => {
+      const bean = await send(g, q, { targetTileId: seat.id, mission: Mission.ATTACK, troops: { archer: 20_000 }, heroId: qHero });
+      await beforeLanding?.(bean.reachTime);
+      await arrive(g, bean.armyId);
+      return battleOf((await reportsOf(g, q.id)).at(-1)!, 'city');
+    };
+    return { p, q, seat, cityId, attack };
+  }
+
+  it('a rival’s win takes 3 loyalty off it, which comes back over time', () =>
+    game(async (g) => {
+      const { cityId, attack } = await heldSeat(g);
+      const r = await attack();
+      expect(r.result).toBe('attackerWon');
+      expect(r.seat).toEqual({ level: 12, loyaltyDamage: 3, loyaltyLeft: BALANCE.historic.loyalty - 3, captured: false });
+      expect((await getCity(g, cityId)).loyalty).toBe(BALANCE.historic.loyalty - 3);
+    }));
+
+  it('the win that leaves it at 0 hands it to the winner, its old holder’s heroes going to their other city', () =>
+    game(async (g) => {
+      const { p, q, seat, cityId, attack } = await heldSeat(g);
+      const pHero = await addHero(g, p, 1, cityId);
+      // as the waves before it left it: 3 loyalty as it lands
+      const r = await attack(async (at) => saveCity(g, { ...(await getCity(g, cityId)), loyalty: 3, loyaltyAt: at }));
+      expect(r.seat).toMatchObject({ loyaltyLeft: 0, captured: true });
+      expect(await getCity(g, cityId)).toMatchObject({
+        playerId: q.id,
+        historicLevel: 12,
+        loyalty: BALANCE.historic.loyalty,
+        truceUntil: g.now + BALANCE.historic.truceMs,
+      });
+      expect((await getTile(g, seat.id)).ownerPlayerId).toBe(q.id);
+      expect((await getHero(g, pHero)).cityId).toBe(p.cityId);
+      expect((await reportsOf(g, p.id)).at(-1)!.title).toEqual(msg('report.title.seatLost'));
     }));
 });

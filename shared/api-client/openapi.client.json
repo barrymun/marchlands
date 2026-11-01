@@ -532,6 +532,7 @@
               "report.title.attackFailed",
               "report.title.cityAttacked",
               "report.title.attackRepelled",
+              "report.title.seatLost",
               "report.title.reinforcementsFought",
               "report.title.valleyOccupied",
               "report.title.valleyLost",
@@ -6291,6 +6292,31 @@
                           },
                           "city": {
                             "type": "string"
+                          },
+                          "seat": {
+                            "type": "object",
+                            "properties": {
+                              "level": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "loyaltyDamage": {
+                                "type": "number"
+                              },
+                              "loyaltyLeft": {
+                                "type": "number"
+                              },
+                              "captured": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "level",
+                              "loyaltyDamage",
+                              "loyaltyLeft",
+                              "captured"
+                            ]
                           }
                         },
                         "required": [
@@ -12113,6 +12139,7 @@
               "report.title.attackFailed",
               "report.title.cityAttacked",
               "report.title.attackRepelled",
+              "report.title.seatLost",
               "report.title.reinforcementsFought",
               "report.title.valleyOccupied",
               "report.title.valleyLost",
@@ -18003,6 +18030,32 @@
                           },
                           "city": {
                             "type": "string"
+                          },
+                          "seat": {
+                            "type": "object",
+                            "properties": {
+                              "level": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "loyaltyDamage": {
+                                "type": "number"
+                              },
+                              "loyaltyLeft": {
+                                "type": "number"
+                              },
+                              "captured": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "level",
+                              "loyaltyDamage",
+                              "loyaltyLeft",
+                              "captured"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [

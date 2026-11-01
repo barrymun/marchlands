@@ -70,6 +70,8 @@ export function cityRow(over: Partial<CityRow> = {}): CityRow {
     misc: { lastTickAt: T0 },
     historicLevel: null,
     truceUntil: 0,
+    loyalty: 100,
+    loyaltyAt: 0,
     createdAt: T0,
     ...over,
   };

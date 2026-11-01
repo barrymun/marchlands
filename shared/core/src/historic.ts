@@ -131,6 +131,16 @@ export function historicState(
   return { state: { ...npc.state, loyalty, refillAt, day }, troops, forts };
 }
 
+/**
+ * A held historic city's loyalty as of `at`: rivals' wins take it down (BALANCE.historic.loyaltyPerWin), and it comes
+ * back a point every BALANCE.npcRegenMs of real time since `from`, up to BALANCE.historic.loyalty.
+ */
+export function seatLoyalty(loyalty: number, from: number, at: number): { loyalty: number; loyaltyAt: number } {
+  if (loyalty >= BALANCE.historic.loyalty) return { loyalty, loyaltyAt: Math.max(from, at) };
+  const steps = Math.max(0, Math.floor((at - from) / BALANCE.npcRegenMs));
+  return { loyalty: Math.min(BALANCE.historic.loyalty, loyalty + steps), loyaltyAt: from + steps * BALANCE.npcRegenMs };
+}
+
 /** The hero defending a historic city: level 100, with the level's Attack and Intelligence, the same for every visit. */
 export function historicGuard(level: HistoricLevel, tileId: number) {
   const [power, stratagem] = historicHeroStats(level);

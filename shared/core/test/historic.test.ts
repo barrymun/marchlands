@@ -16,6 +16,7 @@ import {
   mapLevelDigit,
   mapLevelOf,
   maxArmyTroops,
+  seatLoyalty,
   TechType,
   TileType,
 } from '#/index.ts';
@@ -171,5 +172,17 @@ describe(maxArmyTroops.name, () => {
     expect(maxArmyTroops(rally10, false, 12)).toBe(125_000);
     expect(maxArmyTroops(rally10, false, 18)).toBe(200_000);
     expect(maxArmyTroops(rally10, true, 12)).toBe(156_250);
+  });
+});
+
+describe(seatLoyalty.name, () => {
+  it('comes back a point every 6 real minutes, up to full', () => {
+    expect(seatLoyalty(40, 0, 6 * 60_000)).toEqual({ loyalty: 41, loyaltyAt: 6 * 60_000 });
+    expect(seatLoyalty(40, 0, 6 * 60_000 - 1)).toEqual({ loyalty: 40, loyaltyAt: 0 });
+    expect(seatLoyalty(99, 0, 60 * 60_000).loyalty).toBe(BALANCE.historic.loyalty);
+  });
+
+  it('keeps its clock with the present while full, so a later loss counts from then', () => {
+    expect(seatLoyalty(BALANCE.historic.loyalty, 0, 5_000)).toEqual({ loyalty: BALANCE.historic.loyalty, loyaltyAt: 5_000 });
   });
 });

@@ -9,7 +9,10 @@ import { standingText } from '@/lib/factions';
 import { fmtExact, resourceLabel } from '@/lib/format';
 import { factionName, itemName } from '@/lib/game-data';
 
-/** What the attacker took: per resource and in total (valleys hold nothing); against a barbarian city, its loyalty and the attacker's standing with a faction. */
+/**
+ * What the attacker took: per resource and in total (valleys hold nothing); against a barbarian city or a held historic
+ * city, its loyalty; and the attacker's standing with a faction.
+ */
 export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }) {
   const { t } = useTranslation(['reports-panel', 'common']);
   const mine = b.attacker.player === me;
@@ -63,6 +66,12 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
         <div className="text-xs text-muted-foreground">
           {t('loot.loyalty', { damage: fmtExact(b.loyaltyDamage), left: fmtExact(b.loyaltyLeft) })}
           {b.captured && t('loot.captured')}
+        </div>
+      )}
+      {'seat' in b && b.seat && (
+        <div className="text-xs text-muted-foreground">
+          {t('loot.loyalty', { damage: fmtExact(b.seat.loyaltyDamage), left: fmtExact(b.seat.loyaltyLeft) })}
+          {b.seat.captured && t('loot.captured')}
         </div>
       )}
       {'standing' in b && b.standing && mine && (

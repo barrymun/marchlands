@@ -247,7 +247,11 @@ const BattlePlunderSchema = z.object({
  * Extra fields of each battle report variant, by target (player city, NPC city, valley).
  * (marchlands) lords' cities have no loyalty and cannot be captured; barbarian cities can.
  */
-export const BattleCityExtraSchema = BattlePlunderSchema.extend({ city: z.string() });
+export const BattleCityExtraSchema = BattlePlunderSchema.extend({
+  city: z.string(),
+  /** (marchlands) a player's captured historic city: its level, and the loyalty the attack took (taken at 0) */
+  seat: z.object({ level: z.number().int(), loyaltyDamage: z.number(), loyaltyLeft: z.number(), captured: z.boolean() }).optional(),
+});
 export const BattleNpcExtraSchema = BattlePlunderSchema.extend({
   loyaltyDamage: z.number(),
   loyaltyLeft: z.number(),

@@ -3,7 +3,7 @@
 // valley/NPC scouting and a scout-vs-scout fight; everything else follows Evony Age 1 and the
 // recommendations in docs/spec/battle.md §7.3.
 
-import { count, eq } from 'drizzle-orm';
+import { and, count, eq } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import {
@@ -32,8 +32,8 @@ import {
   historicGuard,
   type HistoricLevel,
   historicResearch,
-  type HistoricState,
   historicState,
+  type HistoricState,
   injuredOf,
   ItemId,
   maxArmyTroops,
@@ -59,6 +59,7 @@ import {
   type ResourceSet,
   rollMedalDrops,
   scaled,
+  seatLoyalty,
   seededRng,
   stateOf,
   TechType,
@@ -69,7 +70,7 @@ import {
   valleyGarrison,
   WAR_ENSIGN_DESC,
 } from '@marchlands/core';
-import { armies, cities, heroes, one, tiles } from '@marchlands/db';
+import { armies, cities, heroes, marketOrders, marketShipments, one, tiles } from '@marchlands/db';
 
 import { type CityBundle, openCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -82,7 +83,7 @@ import { initialCity, isProtected } from '#/engine/player.ts';
 import { isFriendly, relationBetween } from '#/engine/relations.ts';
 import { createReport } from '#/engine/reports.ts';
 import { addStanding } from '#/engine/reputation.ts';
-import { activeBuff, addItem, addPrestige, gainResources, pushCity, pushResources } from '#/helpers.ts';
+import { activeBuff, addItem, addPrestige, gainResources, pushCity, pushPlayerInfo, pushResources } from '#/helpers.ts';
 import {
   armiesStationedAt,
   type ArmyRow,
@@ -918,8 +919,18 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   }
   def.city.forts = r.forts.after;
 
-  // spoils; (marchlands) lords' cities have no loyalty, so they are plundered but never captured
+  // spoils; (marchlands) lords' cities have no loyalty, so they are plundered but never captured; a captured historic
+  // city has, and the win that leaves it at 0 hands it to the winner (takeSeat, below)
   let loot: ResourceSet = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
+  let seat: { level: number; loyaltyDamage: number; loyaltyLeft: number; captured: boolean } | undefined;
+  const seatLevel = HISTORIC_LEVELS.find((l) => l === def.city.historicLevel);
+  if (seatLevel) {
+    const now = seatLoyalty(def.city.loyalty, def.city.loyaltyAt, a.reachTime);
+    const loyaltyDamage = r.attackerWon ? Math.min(now.loyalty, BALANCE.historic.loyaltyPerWin) : 0;
+    Object.assign(def.city, { loyalty: now.loyalty - loyaltyDamage, loyaltyAt: now.loyaltyAt });
+    const captured = r.attackerWon && def.city.loyalty <= 0 && (await canHoldHistoric(ctx, attacker, seatLevel));
+    seat = { level: seatLevel, loyaltyDamage, loyaltyLeft: def.city.loyalty, captured };
+  }
   if (r.attackerWon) {
     const prot = protectedResources(def.city.buildings, def.city.storePercent);
     const available: ResourceSet = {
@@ -967,6 +978,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     plunder: loot,
     city: def.city.name,
     ...(Object.keys(medals).length ? { medals } : {}),
+    ...(seat ? { seat } : {}),
   });
   const reportCommon = { armyType: Mission.ATTACK, startPos: a.startPosName, targetPos: a.targetPosName, body };
   await createReport(ctx, {
@@ -978,7 +990,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   await createReport(ctx, {
     ...reportCommon,
     playerId: def.player.id,
-    title: msg(r.attackerWon ? 'report.title.cityAttacked' : 'report.title.attackRepelled'),
+    title: msg(seat?.captured ? 'report.title.seatLost' : r.attackerWon ? 'report.title.cityAttacked' : 'report.title.attackRepelled'),
   });
   for (const owner of new Set(stationed.map((s) => s.playerId).filter((id) => id !== def.player.id))) {
     await createReport(ctx, { ...reportCommon, playerId: owner, title: msg('report.title.reinforcementsFought') });
@@ -986,11 +998,84 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   ctx.push(def.player.id, PushCmd.TROOP_UPDATE, { castleId: def.city.id, troop: troopBean(def.city.troops) });
   ctx.push(def.player.id, PushCmd.FORTIFICATIONS_UPDATE, { castleId: def.city.id, fortification: fortBean(def.city.forts) });
   pushResources(ctx, def);
+  if (seat?.captured) await takeSeat(ctx, def, attacker, seat.level);
   if (totalTroops(r.attacker.after) <= 0) {
     await armyWiped(ctx, a, hero, def);
     return;
   }
   await returnWithLoot(ctx, a, r.attacker.after, loot);
+}
+
+/**
+ * A held historic city taken (docs/features/historical-cities.md): it becomes the winner's, whole but for its troops
+ * (lost in the battle; any kept home go too), under a new truce and at full loyalty. What its old holder had there moves
+ * to their oldest other city: heroes, armies out, market orders and shipments; with no other city, they're gone.
+ * Valleys it held go free (their troops head home), allies' troops stationed in it go home, and armies already marching
+ * on it now march on the winner.
+ */
+async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: number) {
+  const city = def.city;
+  const loser = def.player;
+  const fallback = (await citiesOf(ctx, loser.id)).filter((c) => c.id !== city.id).sort((p, q) => p.id - q.id)[0];
+  // the old holder's heroes and armies out, orders and shipments, to their other city
+  const theirs = await ctx.tx
+    .select()
+    .from(armies)
+    .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loser.id)));
+  if (fallback) {
+    await ctx.tx
+      .update(heroes)
+      .set({ cityId: fallback.id })
+      .where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loser.id)));
+    await ctx.tx
+      .update(heroes)
+      .set({ status: HeroStatus.IDLE })
+      .where(and(eq(heroes.cityId, fallback.id), eq(heroes.status, HeroStatus.MAYOR), eq(heroes.playerId, loser.id)));
+    await ctx.tx
+      .update(armies)
+      .set({ cityId: fallback.id })
+      .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loser.id)));
+    await ctx.tx
+      .update(marketOrders)
+      .set({ cityId: fallback.id })
+      .where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loser.id)));
+    await ctx.tx
+      .update(marketShipments)
+      .set({ cityId: fallback.id })
+      .where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loser.id)));
+  } else {
+    for (const a of theirs) ctx.unschedule(armyRef(a.id));
+    await ctx.tx.delete(armies).where(and(eq(armies.cityId, city.id), eq(armies.playerId, loser.id)));
+    await ctx.tx.delete(heroes).where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loser.id)));
+    await ctx.tx.delete(marketOrders).where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loser.id)));
+    await ctx.tx.delete(marketShipments).where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loser.id)));
+  }
+  // valleys it held go free; allies' troops stationed in it go home; armies marching on it now march on the winner
+  for (const v of await ctx.tx.select().from(tiles).where(eq(tiles.ownerCityId, city.id))) {
+    for (const s of await armiesStationedAt(ctx, v.id, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, v.id));
+    await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, troops: null, state: null, updatedAt: ctx.now }).where(eq(tiles.id, v.id));
+  }
+  for (const s of await armiesStationedAt(ctx, city.tileId, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, city.tileId));
+  await ctx.tx
+    .update(armies)
+    .set({ targetPlayerId: winner.id })
+    .where(and(eq(armies.targetTileId, city.tileId), eq(armies.direction, ArmyDirection.FORWARD)));
+  Object.assign(city, {
+    playerId: winner.id,
+    name: `${winner.name.slice(0, 12)} Keep`,
+    troops: {},
+    injuredTroops: {},
+    truceUntil: ctx.now + BALANCE.historic.truceMs,
+    loyalty: BALANCE.historic.loyalty,
+    loyaltyAt: ctx.now,
+  });
+  await saveCity(ctx, city);
+  await ctx.tx.update(tiles).set({ ownerPlayerId: winner.id, updatedAt: ctx.now }).where(eq(tiles.id, city.tileId));
+  addPrestige(winner, 1000 * level);
+  await savePlayer(ctx, winner);
+  pushCity(ctx, await viewCity(ctx, city.id));
+  await pushPlayerInfo(ctx, loser);
+  await notifyArmyParties(ctx, { playerId: loser.id, targetPlayerId: winner.id });
 }
 
 async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
@@ -1200,6 +1285,8 @@ async function captureHistoric(ctx: Ctx, attacker: PlayerRow, tile: TileRow, lev
         population: state.population,
         historicLevel: level,
         truceUntil: ctx.now + BALANCE.historic.truceMs,
+        loyalty: BALANCE.historic.loyalty,
+        loyaltyAt: ctx.now,
       })
       .returning(),
   );
