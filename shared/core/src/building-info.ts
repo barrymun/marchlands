@@ -7,12 +7,13 @@ import { wallHitPoints } from '#/battle/simulator.ts';
 import { BuildingType, FortType } from '#/constants.ts';
 import { isFortType, unlockedOuterSlots } from '#/construction.ts';
 import { buildingConfig, BUILDINGS, RESEARCH, TROOPS } from '#/data/index.ts';
+import { fieldFactorAt } from '#/economy.ts';
 import { innHeroMaxLevel, innOffers } from '#/heroes.ts';
 import { ItemId } from '#/item-ids.ts';
 import { type Message, msg, ref, share } from '#/messages/index.ts';
 import { reliefMultiplier } from '#/troops.ts';
 
-const F = (l: number) => BALANCE.fieldFactor[l] ?? 0;
+const F = (l: number) => fieldFactorAt(l);
 /** the item that lets armies hold more troops (BALANCE.warEnsignTroopBonus) */
 const WAR_ENSIGN = ItemId.WAR_ENSIGN;
 

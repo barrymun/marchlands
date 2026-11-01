@@ -174,6 +174,7 @@ const TELEPORTER = ItemId.CITY_TELEPORTER;
  */
 export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targetTileId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
+  if (b.city.historicLevel) throw new GameError(msg('city.historicCannotMove'), -90);
   if (activeBuff(b.player, BuffId.TELEPORT_COOLDOWN, ctx.now)) throw new GameError(msg('city.teleportCooldown', { item: ref.item(TELEPORTER) }), -90);
   const { n: out } = one(await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId)));
   if (Number(out) > 0) throw new GameError(msg('city.recallTroopsFirst'), -77);

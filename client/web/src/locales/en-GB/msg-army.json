@@ -15,6 +15,7 @@
   "scoutsRequired": "This mission needs at least one {{troop}}.",
   "beginnerProtection_one": "You cannot attack cities while under beginner's protection. It ends {{count, number}} day after registration, or when your {{building}} reaches level {{level}}.",
   "beginnerProtection_other": "You cannot attack cities while under beginner's protection. It ends {{count, number}} days after registration, or when your {{building}} reaches level {{level}}.",
+  "historicTruce": "This historic city was just captured and is under truce for {{time}} more.",
   "truce": "You cannot attack while under truce.",
   "nothingToAttack": "There is nothing to attack there.",
   "buildOnFlat": "You can only build a city on empty flat land.",

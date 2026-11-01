@@ -343,6 +343,21 @@ export async function restartPlayer(ctx: Ctx, playerId: number) {
   await ctx.tx.delete(marketOrders).where(eq(marketOrders.playerId, playerId));
   if (cityIds.length) {
     await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, updatedAt: ctx.now }).where(inArray(tiles.ownerCityId, cityIds));
+    // (marchlands) a captured historic city stands again as one, whole, for the next to take
+    for (const c of cityRows.filter((r) => r.historicLevel != null))
+      await ctx.tx
+        .update(tiles)
+        .set({
+          cityId: null,
+          ownerPlayerId: null,
+          type: TileType.HISTORIC,
+          level: c.historicLevel ?? 12,
+          troops: null,
+          forts: null,
+          state: null,
+          updatedAt: ctx.now,
+        })
+        .where(eq(tiles.id, c.tileId));
     await ctx.tx.update(tiles).set({ cityId: null, ownerPlayerId: null, type: TileType.FLAT, updatedAt: ctx.now }).where(inArray(tiles.cityId, cityIds));
     await ctx.tx.delete(heroes).where(inArray(heroes.cityId, cityIds));
     await ctx.tx.delete(cities).where(inArray(cities.id, cityIds));

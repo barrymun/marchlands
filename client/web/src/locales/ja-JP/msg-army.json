@@ -12,6 +12,7 @@
   "alliedTroopsRefused": "この都市は同盟軍を受け入れていません。",
   "scoutsRequired": "この任務には{{troop}}が1人以上必要です。",
   "beginnerProtection_other": "初心者保護中は都市を攻撃できません。保護は登録から{{count, number}}日後、または{{building}}がレベル{{level}}に達すると終了します。",
+  "historicTruce": "この歴史都市は占領されたばかりで、あと{{time}}休戦中です。",
   "truce": "休戦中は攻撃できません。",
   "nothingToAttack": "そこには攻撃する対象がありません。",
   "buildOnFlat": "都市を建設できるのは空いている平地だけです。",

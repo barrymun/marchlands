@@ -169,8 +169,16 @@ export function troopUpkeep(troops: TroopCounts): number {
   return total;
 }
 
+/**
+ * A resource field's factor F at a level: BALANCE.fieldFactor up to level 10; (marchlands) past it, only a captured
+ * historic city's fields go (docs/features/historical-cities.md), carrying level 10's on in proportion (55 × level / 10).
+ */
+export function fieldFactorAt(level: number): number {
+  const top = BALANCE.fieldFactor.length - 1;
+  return level <= top ? (BALANCE.fieldFactor[level] ?? 0) : ((BALANCE.fieldFactor[top] ?? 0) * level) / top;
+}
+
 export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: number): CityStats {
-  const F = BALANCE.fieldFactor;
   let maxPopulation = BALANCE.basePopulation;
   const base: number = BALANCE.baseStorage;
   const storage: Record<BasicResource, number> = { food: base, wood: base, stone: base, iron: base };
@@ -182,7 +190,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
     if (b.typeId === BuildingType.COTTAGE) maxPopulation += BALANCE.cottagePopulation[b.level] ?? 0;
     const res = RESOURCE_FOR_FIELD[b.typeId];
     if (res) {
-      const f = F[b.level] ?? 0;
+      const f = fieldFactorAt(b.level);
       storage[res] += BALANCE.fieldStoragePerF * f;
       rawProduction[res] += BALANCE.fieldProductionPerF * f;
       workers[res] += BALANCE.fieldWorkersPerF * f;

@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   BALANCE,
+  BuildingStatus,
+  BuildingType,
+  fieldFactorAt,
   historicCities,
+  historicCityBuildings,
   historicDay,
   historicGarrison,
   historicGuard,
@@ -11,6 +15,7 @@ import {
   historicState,
   mapLevelDigit,
   mapLevelOf,
+  maxArmyTroops,
   TechType,
   TileType,
 } from '#/index.ts';
@@ -136,5 +141,35 @@ describe(historicGuard.name, () => {
     const g = historicGuard(16, 1234);
     expect(g).toMatchObject({ level: 100, power: 200, stratagem: 1_100 });
     expect(historicGuard(16, 1234).name).toBe(g.name);
+  });
+});
+
+describe(historicCityBuildings.name, () => {
+  it('has a captured level 10 barbarian city’s buildings, its fields at the seat’s level', () => {
+    const list = historicCityBuildings(14);
+    const fields = list.filter((b) => b.positionId >= 1001);
+    expect(fields).toHaveLength(40);
+    expect(fields.every((b) => b.level === 14)).toBe(true);
+    expect(list.filter((b) => b.positionId < 1001).every((b) => b.level === 10)).toBe(true);
+  });
+});
+
+describe(fieldFactorAt.name, () => {
+  it('follows the table to level 10, then carries level 10’s on in proportion', () => {
+    expect(fieldFactorAt(3)).toBe(BALANCE.fieldFactor[3]);
+    expect(fieldFactorAt(10)).toBe(55);
+    expect(fieldFactorAt(12)).toBe(66);
+    expect(fieldFactorAt(18)).toBe(99);
+  });
+});
+
+describe(maxArmyTroops.name, () => {
+  const rally10 = [{ positionId: 0, typeId: BuildingType.RALLY_SPOT, level: 10, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 }];
+
+  it('sends a quarter more a level step from a held historic city, and a War Ensign adds its quarter on top', () => {
+    expect(maxArmyTroops(rally10)).toBe(100_000);
+    expect(maxArmyTroops(rally10, false, 12)).toBe(125_000);
+    expect(maxArmyTroops(rally10, false, 18)).toBe(200_000);
+    expect(maxArmyTroops(rally10, true, 12)).toBe(156_250);
   });
 });

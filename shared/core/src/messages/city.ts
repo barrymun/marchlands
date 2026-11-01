@@ -11,6 +11,8 @@ export const CITY_MESSAGES = {
   invalidLogo: [],
   /** item: the City Teleporter */
   teleportCooldown: ['item'],
+  /** a captured historic city stays where it stands */
+  historicCannotMove: [],
   recallTroopsFirst: [],
   foreignTroops: [],
   notFreeFlat: [],

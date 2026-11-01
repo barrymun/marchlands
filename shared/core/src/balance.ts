@@ -199,6 +199,8 @@ export const BALANCE = {
     refillShare: 0.1,
     /** a held one's Rally Spot sends this much more an army for each level step above 10 (12: +25% … 18: +100%) */
     rallyBonusPerStep: 0.25,
+    /** a captured one is under truce this long (real time); its holder's own truce never covers it */
+    truceMs: 24 * HOUR,
     /** the most a player may hold, by level */
     holdLimit: { 12: 3, 14: 2, 16: 1, 18: 1 } as Record<12 | 14 | 16 | 18, number>,
     /** a draft takes this share of a barbarian city's largest troop type */

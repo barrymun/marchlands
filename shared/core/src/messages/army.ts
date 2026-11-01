@@ -17,6 +17,8 @@ export const ARMY_MESSAGES = {
   /** the sender is under beginner's protection: it ends after `count` days or at a Town Hall level */
   beginnerProtection: ['count', 'building', 'level'],
   truce: [],
+  /** a historic city just captured is under truce for `time` more */
+  historicTruce: ['time'],
   nothingToAttack: [],
   buildOnFlat: [],
   cityLimit: [],

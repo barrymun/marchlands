@@ -68,6 +68,8 @@ export function cityRow(over: Partial<CityRow> = {}): CityRow {
     workRates: { gold: 100, food: 100, wood: 100, stone: 100, iron: 100 },
     storePercent: { gold: 0, food: 25, wood: 25, stone: 25, iron: 25 },
     misc: { lastTickAt: T0 },
+    historicLevel: null,
+    truceUntil: 0,
     createdAt: T0,
     ...over,
   };

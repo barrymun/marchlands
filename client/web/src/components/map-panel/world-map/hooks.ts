@@ -50,7 +50,9 @@ export function useWorldMap(vp: Viewport, mapSize: number) {
   const tiles = visible.map((v) => {
     const id = idOf(v.x, v.y);
     const info = area.tiles.get(id);
-    const historic = info?.type === TileType.HISTORIC ? HISTORIC_ART_LEVELS.find((l) => l === info.level) : undefined;
+    // a historic city keeps its own sprite once a player holds it (its castle carries its level)
+    const seatLevel = info?.type === TileType.HISTORIC ? info.level : area.castles.get(id)?.historicLevel;
+    const historic = HISTORIC_ART_LEVELS.find((l) => l === seatLevel);
     const file = historic ? historicArtFile(historic) : info ? tileArtFile(info.type, artBand(info.level)) : undefined;
     return { ...v, id, info, size: historic ? HISTORIC_SPRITE : undefined, src: file ? TILE_ART[file] : undefined, file: file ? `tiles/${file}` : undefined };
   });

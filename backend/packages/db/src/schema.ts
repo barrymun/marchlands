@@ -198,6 +198,10 @@ export const cities = pgTable(
     workRates: jsonb('work_rates').$type<Partial<ResourceSet>>().notNull().default({ gold: 100, food: 100, wood: 100, stone: 100, iron: 100 }),
     storePercent: jsonb('store_percent').$type<Partial<ResourceSet>>().notNull().default({ gold: 0, food: 25, wood: 25, stone: 25, iron: 25 }),
     misc: jsonb('misc').$type<CityMisc>().notNull().default({}),
+    /** (marchlands) a captured historic city: its level (12 to 18); null for any other city */
+    historicLevel: smallint('historic_level'),
+    /** (marchlands) a historic city can't be attacked until then (its truce on capture; the player's own truce doesn't cover it) */
+    truceUntil: ms('truce_until').notNull().default(0),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [uniqueIndex('cities_tile_idx').on(t.tileId), index('cities_player_idx').on(t.playerId)],

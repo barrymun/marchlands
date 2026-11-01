@@ -149,10 +149,18 @@ export function armyLoad(troops: TroopCounts, research: ResearchState): number {
   return Math.floor(load * (1 + BALANCE.logisticsLoadPerLevel * researchLevel(research, TechType.LOGISTICS)));
 }
 
-/** Max troops in one army: BALANCE.rallySpotTroopsPerLevel per Rally Spot level, +25% with a War Ensign. */
-export function maxArmyTroops(buildings: BuildingState[], warEnsign = false): number {
+/** (marchlands) How many more troops one army may hold when sent from a held historic city: a quarter a level step above 10. */
+export const historicRallyBonus = (level: number) => ((level - 10) / 2) * BALANCE.historic.rallyBonusPerStep;
+
+/**
+ * Max troops in one army: BALANCE.rallySpotTroopsPerLevel per Rally Spot level; (marchlands) a held historic city's a
+ * quarter more a level step above 10 (125,000 from a level 12 at Rally Spot 10, 200,000 from Atlantis); and a quarter
+ * more again with a War Ensign.
+ */
+export function maxArmyTroops(buildings: BuildingState[], warEnsign = false, historicLevel: number | null = null): number {
   const base = buildingLevel(buildings, BuildingType.RALLY_SPOT) * BALANCE.rallySpotTroopsPerLevel;
-  return Math.floor(base * (warEnsign ? 1 + BALANCE.warEnsignTroopBonus : 1));
+  const seat = historicLevel ? 1 + historicRallyBonus(historicLevel) : 1;
+  return Math.floor(base * seat * (warEnsign ? 1 + BALANCE.warEnsignTroopBonus : 1));
 }
 
 /** Max simultaneous armies a city may have out (Rally Spot level). */

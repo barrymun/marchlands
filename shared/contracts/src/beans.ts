@@ -133,6 +133,8 @@ export const CityBean = z
     fortification: FortBean,
     heros: z.array(HeroBean),
     fields: z.array(ValleyBean),
+    historicLevel: z.number().int().nullable().describe('a captured historic city: its level (12 to 18); null otherwise'),
+    truceUntil: Ms.describe('a historic city is under truce until then (0: none)'),
     createdAt: Ms,
   })
   .meta({ id: 'CityBean' });

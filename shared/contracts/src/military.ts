@@ -122,6 +122,7 @@ export const MapCastle = z
     name: z.string().optional().describe("the city's name; absent for a barbarian city (named by the client from its tile type)"),
     npc: z.boolean(),
     level: z.number().int(),
+    historicLevel: z.number().int().optional().describe("a player's captured historic city: its level (12 to 18)"),
     cityId: z.number().int().optional(),
     playerId: z.number().int().optional(),
     userName: z.string().optional(),

@@ -161,6 +161,8 @@ export function cityBean(b: CityBundle, now: number): CityBean {
     fortification: fortBean(c.forts),
     heros: b.heroes.map(heroBean),
     fields: b.valleys.map(valleyBean),
+    historicLevel: c.historicLevel,
+    truceUntil: c.truceUntil,
     createdAt: c.createdAt,
   };
 }

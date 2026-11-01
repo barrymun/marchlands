@@ -174,6 +174,9 @@ export async function demolish(ctx: Ctx, playerId: number, cityId: number, posit
   if (bld.typeId === BuildingType.TOWN_HALL || bld.typeId === BuildingType.WALLS) {
     throw new GameError(msg('building.cannotDemolish', { building: ref.building(bld.typeId) }), -99);
   }
+  // (marchlands) a captured historic city's fields stand above any level that can be built: keep them
+  if (bld.level > buildingMaxLevel(bld.typeId))
+    throw new GameError(msg('building.historicField', { building: ref.building(bld.typeId), level: bld.level }), -99);
   gainResources(b.city, fullDemolishRefund(bld.typeId, bld.level));
   ctx.stat(playerId, cityId, { 'levels.demolished': bld.level });
   removeBuilding(b, bld);

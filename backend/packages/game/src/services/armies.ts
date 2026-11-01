@@ -79,7 +79,7 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
   const { n: out } = one(await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId)));
   const armyCap = maxArmies(b.city.buildings);
   if (Number(out) >= armyCap) throw new GameError(msg('army.armyLimit', { building: ref.building(BuildingType.RALLY_SPOT), count: armyCap }), -51);
-  const troopCap = maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now));
+  const troopCap = maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now), b.city.historicLevel);
   if (totalTroops(troops) > troopCap) {
     const level = buildingLevel(b.city.buildings, BuildingType.RALLY_SPOT);
     throw new GameError(msg('army.troopLimit', { building: ref.building(BuildingType.RALLY_SPOT), level, count: troopCap }), -51);
@@ -119,9 +119,14 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
         );
       }
       if (ownerId && target.cityId != null) {
-        const owner = await getPlayer(ctx, ownerId);
-        const why = isProtected(owner, ctx.now);
-        if (why) throw new GameError(why, -70);
+        // (marchlands) a captured historic city has a truce of its own; its holder's protection doesn't cover it
+        const city = await getCity(ctx, target.cityId);
+        if (city.historicLevel) {
+          if (city.truceUntil > ctx.now) throw new GameError(msg('army.historicTruce', { time: dur(city.truceUntil - ctx.now) }), -70);
+        } else {
+          const why = isProtected(await getPlayer(ctx, ownerId), ctx.now);
+          if (why) throw new GameError(why, -70);
+        }
       }
       if (activeBuff(b.player, BuffId.TRUCE, ctx.now)) throw new GameError(msg('army.truce'), -70);
       if (target.type === TileType.FLAT && target.cityId == null) throw new GameError(msg('army.nothingToAttack'), -13);
@@ -233,7 +238,7 @@ export async function troopParams(ctx: Ctx, playerId: number, cityId: number) {
     driveSkillParam: researchLevel(r, TechType.HORSEBACK_RIDING) * BALANCE.horsebackSpeedPerLevel,
     transportStationParam: reliefMultiplier(b.city.buildings),
     maxArmies: maxArmies(b.city.buildings),
-    maxTroops: maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now)),
+    maxTroops: maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now), b.city.historicLevel),
   };
 }
 

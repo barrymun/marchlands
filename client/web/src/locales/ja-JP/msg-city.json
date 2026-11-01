@@ -7,6 +7,7 @@
   "notEnoughFood": "食糧が足りません。",
   "invalidComfortType": "無効な慰撫の種類です。",
   "invalidLogo": "無効な都市ロゴです。",
+  "historicCannotMove": "歴史都市は移動できません。",
   "teleportCooldown": "{{item}}はクールダウン中です。",
   "recallTroopsFirst": "都市を移動する前に、すべての部隊を帰還させてください。",
   "foreignTroops": "他のプレイヤーの部隊がこの都市へ進軍中、または駐留しています。",

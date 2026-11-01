@@ -225,6 +225,13 @@
       "when": 1793545446907,
       "tag": "0031_historic_cities",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793547136197,
+      "tag": "0032_historic_city_holders",
+      "breakpoints": true
     }
   ]
 }

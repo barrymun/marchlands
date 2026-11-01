@@ -6,8 +6,8 @@ import { TechType, TileType } from '#/constants.ts';
 import { createGuardHero } from '#/heroes.ts';
 import { pick, seededRng } from '#/rng.ts';
 import { DAY } from '#/time.ts';
-import type { FortCounts, ResearchState, TroopCounts } from '#/types.ts';
-import { freshNpcState, nextRefillAt, type NpcState, refillCounts, regenerateNpc, stateOf } from '#/world.ts';
+import type { BuildingState, FortCounts, ResearchState, TroopCounts } from '#/types.ts';
+import { freshNpcState, nextRefillAt, npcCityBuildings, type NpcState, refillCounts, regenerateNpc, stateOf } from '#/world.ts';
 
 export const HISTORIC_LEVELS = [12, 14, 16, 18] as const;
 export type HistoricLevel = (typeof HISTORIC_LEVELS)[number];
@@ -74,8 +74,13 @@ export function historicResearch(level: number = BALANCE.historic.researchLevel)
 /** The defending hero's Attack and Intelligence. */
 export const historicHeroStats = (level: HistoricLevel) => BALANCE.historic.hero[level];
 
-/** The most troops one army may hold when sent from a held historic city: a quarter more a level step above 10. */
-export const historicRallyBonus = (level: HistoricLevel) => ((level - 10) / 2) * BALANCE.historic.rallyBonusPerStep;
+/**
+ * The buildings of a captured historic city (docs/features/historical-cities.md): a captured level 10 barbarian city's,
+ * all at level 10, but its resource fields at the seat's own level.
+ */
+export function historicCityBuildings(level: HistoricLevel): BuildingState[] {
+  return npcCityBuildings(10).map((b) => (b.positionId >= 1001 ? { ...b, level } : b));
+}
 
 /**
  * The map string's level digit (one hex digit a tile, services/world.ts mapView): a historic city sends half its level

@@ -13,6 +13,7 @@
   "maxLevel": "{{building}} is already at its maximum level.",
   "busy": "This building is busy.",
   "nothingToDemolish": "There is no building to demolish here.",
+  "historicField": "This {{building}} is level {{level}}, a historic city's own level: it could never be built that high again, so it cannot be demolished.",
   "cannotDemolish": "The {{building}} cannot be demolished.",
   "notInProgress": "Nothing is being built or demolished here.",
   "invalidTech": "Invalid technology.",

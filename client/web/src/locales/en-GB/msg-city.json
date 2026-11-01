@@ -7,6 +7,7 @@
   "notEnoughFood": "Not enough food.",
   "invalidComfortType": "Invalid way of comforting.",
   "invalidLogo": "Invalid city logo.",
+  "historicCannotMove": "A historic city cannot be moved.",
   "teleportCooldown": "The {{item}} is cooling down.",
   "recallTroopsFirst": "Recall all of your troops before you move your city.",
   "foreignTroops": "Troops from other players are marching to or stationed in this city.",

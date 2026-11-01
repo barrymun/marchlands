@@ -472,6 +472,7 @@
               "city.invalidComfortType",
               "city.invalidLogo",
               "city.teleportCooldown",
+              "city.historicCannotMove",
               "city.recallTroopsFirst",
               "city.foreignTroops",
               "city.notFreeFlat",
@@ -490,6 +491,7 @@
               "building.busy",
               "building.nothingToDemolish",
               "building.cannotDemolish",
+              "building.historicField",
               "building.notInProgress",
               "building.invalidTech",
               "building.academyNeeded",
@@ -553,6 +555,7 @@
               "army.scoutsRequired",
               "army.beginnerProtection",
               "army.truce",
+              "army.historicTruce",
               "army.nothingToAttack",
               "army.buildOnFlat",
               "army.cityLimit",
@@ -1360,6 +1363,23 @@
               "$ref": "#/components/schemas/ValleyBeanInput"
             }
           },
+          "historicLevel": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "a captured historic city: its level (12 to 18); null otherwise"
+          },
+          "truceUntil": {
+            "type": "number",
+            "description": "a historic city is under truce until then (0: none)"
+          },
           "createdAt": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -1383,6 +1403,8 @@
           "fortification",
           "heros",
           "fields",
+          "historicLevel",
+          "truceUntil",
           "createdAt"
         ]
       },
@@ -1907,6 +1929,12 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "historicLevel": {
+            "description": "a player's captured historic city: its level (12 to 18)",
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "cityId": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -2260,6 +2288,12 @@
             "type": "boolean"
           },
           "level": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "historicLevel": {
+            "description": "a player's captured historic city: its level (12 to 18)",
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
@@ -12019,6 +12053,7 @@
               "city.invalidComfortType",
               "city.invalidLogo",
               "city.teleportCooldown",
+              "city.historicCannotMove",
               "city.recallTroopsFirst",
               "city.foreignTroops",
               "city.notFreeFlat",
@@ -12037,6 +12072,7 @@
               "building.busy",
               "building.nothingToDemolish",
               "building.cannotDemolish",
+              "building.historicField",
               "building.notInProgress",
               "building.invalidTech",
               "building.academyNeeded",
@@ -12100,6 +12136,7 @@
               "army.scoutsRequired",
               "army.beginnerProtection",
               "army.truce",
+              "army.historicTruce",
               "army.nothingToAttack",
               "army.buildOnFlat",
               "army.cityLimit",
@@ -12918,6 +12955,23 @@
               "$ref": "#/components/schemas/ValleyBean"
             }
           },
+          "historicLevel": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "a captured historic city: its level (12 to 18); null otherwise"
+          },
+          "truceUntil": {
+            "type": "number",
+            "description": "a historic city is under truce until then (0: none)"
+          },
           "createdAt": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -12941,6 +12995,8 @@
           "fortification",
           "heros",
           "fields",
+          "historicLevel",
+          "truceUntil",
           "createdAt"
         ],
         "additionalProperties": false
@@ -13476,6 +13532,12 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "historicLevel": {
+            "description": "a player's captured historic city: its level (12 to 18)",
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "cityId": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -13834,6 +13896,12 @@
             "type": "boolean"
           },
           "level": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "historicLevel": {
+            "description": "a player's captured historic city: its level (12 to 18)",
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991

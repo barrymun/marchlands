@@ -3,19 +3,34 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { BALANCE, DAY, historicDay, historicGarrison, type HistoricState, Mission, msg, TileType, tileXY } from '@marchlands/core';
+import {
+  BALANCE,
+  BuildingType,
+  DAY,
+  dur,
+  historicCityBuildings,
+  historicDay,
+  historicGarrison,
+  type HistoricState,
+  Mission,
+  msg,
+  ref,
+  TileType,
+  tileXY,
+} from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
-import { world } from '#/index.ts';
-import { getTile, saveTile } from '#/repo.ts';
-import { arrive, battleOf, reportsOf, scoutOf, send, warrior } from '#test/support/armies.ts';
-import { reloadCity, type TestPlayer } from '#test/support/factories.ts';
+import { admin, armies, buildings, interior, player, world } from '#/index.ts';
+import { getCity, getTile, saveTile } from '#/repo.ts';
+import { arrive, battleOf, reportsOf, scoutOf, send, tileNear, warrior } from '#test/support/armies.ts';
+import { expectRefused } from '#test/support/expect.ts';
+import { addHero, reloadCity, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 
 /** The nearest level 12 historic city to a player's city (they stand every 18 tiles, so one is always near). */
 async function seatNear(g: TestGame, p: TestPlayer) {
   const { x, y } = tileXY((await reloadCity(g, p.cityId)).tileId);
-  const found = (await world.searchTiles(g, x, y, 12, TileType.HISTORIC)).find((t) => t.level === 12);
+  const found = (await world.searchTiles(g, x, y, 30, TileType.HISTORIC)).find((t) => t.level === 12);
   if (!found) throw new Error('no level 12 historic city near');
   return getTile(g, found.id);
 }
@@ -78,5 +93,94 @@ describe(`${processArmy.name}: historic cities`, () => {
       });
       expect(b.plunder.food).toBeGreaterThan(0);
       expect((await getTile(g, seat.id)).type).toBe(TileType.HISTORIC);
+    }));
+});
+
+/** p wins the last loyalty off a level 12 historic city near it (its garrison broken, 3 loyalty left); returns its tile. */
+async function lastWave(g: TestGame, p: TestPlayer, heroId: number) {
+  const seat = await seatNear(g, p);
+  const bean = await send(g, p, { targetTileId: seat.id, mission: Mission.ATTACK, troops: { archer: 60_000 }, heroId });
+  const day = Math.floor(bean.reachTime / DAY);
+  const at = bean.reachTime;
+  const state = {
+    gold: 0,
+    food: 0,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+    loyalty: BALANCE.historic.loyaltyPerWin,
+    population: 0,
+    regenAt: at,
+    loyaltyAt: at,
+    refillAt: at,
+    day,
+  };
+  await saveTile(g, { ...seat, troops: {}, forts: {}, state });
+  await arrive(g, bean.armyId);
+  return { seat, report: battleOf((await reportsOf(g, p.id)).at(-1)!, 'npc') };
+}
+
+describe(`${processArmy.name}: capturing a historic city`, () => {
+  it('the win that leaves it at 0 loyalty makes it the attacker’s city: level 10 buildings, fields at its level, a truce', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g, { archer: 60_000 });
+      await admin.setPlayerFlags(g, p.name, { title: 1 });
+      const { seat, report } = await lastWave(g, p, heroId);
+      expect(report).toMatchObject({ captured: true, loyaltyLeft: 0 });
+      const tile = await getTile(g, seat.id);
+      expect(tile).toMatchObject({ type: TileType.CASTLE, ownerPlayerId: p.id });
+      const city = await getCity(g, tile.cityId!);
+      expect(city).toMatchObject({ playerId: p.id, historicLevel: 12, truceUntil: g.now + BALANCE.historic.truceMs });
+      expect(city.buildings).toEqual(historicCityBuildings(12));
+      // its Rally Spot (level 10) sends a quarter more
+      expect((await armies.troopParams(g, p.id, city.id)).maxTroops).toBe(125_000);
+    }));
+
+  it('is not taken without a free city slot: it stays at 0 loyalty for the next win', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g, { archer: 60_000 });
+      const { seat, report } = await lastWave(g, p, heroId);
+      expect(report).toMatchObject({ captured: false, loyaltyLeft: 0 });
+      expect((await getTile(g, seat.id)).type).toBe(TileType.HISTORIC);
+    }));
+
+  it('is not taken past the limit of its level', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g, { archer: 60_000 * (BALANCE.historic.holdLimit[12] + 1) });
+      await admin.setPlayerFlags(g, p.name, { title: 9 });
+      const held = BALANCE.historic.holdLimit[12];
+      for (let i = 0; i < held; i++) {
+        const { report } = await lastWave(g, p, await addHero(g, p));
+        expect(report.captured).toBe(true);
+      }
+      const { report } = await lastWave(g, p, heroId);
+      expect(report.captured).toBe(false);
+    }));
+
+  it('holds a truce of its own: others are refused until it ends, and then its holder’s protection doesn’t cover it', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g, { archer: 60_000 });
+      await admin.setPlayerFlags(g, p.name, { title: 1 });
+      const { seat } = await lastWave(g, p, heroId);
+      // the holder under beginner protection, which would keep any other city of theirs safe
+      await admin.setPlayerFlags(g, p.name, { beginner: true });
+      const { p: q, heroId: qHero } = await warrior(g);
+      const attack = () => send(g, q, { targetTileId: seat.id, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId: qHero });
+      await expectRefused(attack(), msg('army.historicTruce', { time: dur(BALANCE.historic.truceMs) }));
+      g.advance(BALANCE.historic.truceMs);
+      expect((await attack()).missionType).toBe(Mission.ATTACK);
+    }));
+
+  it('can’t be moved, its high fields can’t be demolished, and a restart leaves it a historic city again', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g, { archer: 60_000 });
+      await admin.setPlayerFlags(g, p.name, { title: 1 });
+      const { seat } = await lastWave(g, p, heroId);
+      const cityId = (await getTile(g, seat.id)).cityId!;
+      const flat = await tileNear(g, p.cityId, TileType.FLAT);
+      await expectRefused(interior.moveCity(g, p.id, cityId, flat.id), msg('city.historicCannotMove'));
+      await expectRefused(buildings.demolish(g, p.id, cityId, 1001), msg('building.historicField', { building: ref.building(BuildingType.FARM), level: 12 }));
+      await player.restartPlayer(g, p.id);
+      expect(await getTile(g, seat.id)).toMatchObject({ type: TileType.HISTORIC, level: 12, cityId: null, ownerPlayerId: null, state: null });
     }));
 });

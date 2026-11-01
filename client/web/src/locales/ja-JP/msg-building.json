@@ -13,6 +13,7 @@
   "maxLevel": "{{building}}はすでに最大レベルです。",
   "busy": "この建物は作業中です。",
   "nothingToDemolish": "ここには取り壊せる建物がありません。",
+  "historicField": "この{{building}}はレベル{{level}}で、歴史都市だけのレベルです。二度と建てられないため取り壊せません。",
   "cannotDemolish": "{{building}}は取り壊せません。",
   "notInProgress": "ここでは建設も取り壊しも行われていません。",
   "invalidTech": "無効な技術です。",

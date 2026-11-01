@@ -20,6 +20,8 @@ export const BUILDING_MESSAGES = {
   busy: [],
   nothingToDemolish: [],
   cannotDemolish: ['building'],
+  /** a captured historic city's field above level 10 couldn't be built again */
+  historicField: ['building', 'level'],
   /** cancel / speed up asked for where nothing is being built or demolished */
   notInProgress: [],
   /** count: minutes the free speed-up covers */

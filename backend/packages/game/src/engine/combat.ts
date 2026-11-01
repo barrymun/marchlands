@@ -21,17 +21,19 @@ import {
   countsDiffer,
   createGuardHero,
   distributeLossesAmong,
+  dur,
   type FortCounts,
   freshNpcState,
   HeroBuffId,
   heroPower,
   HeroStatus,
   HISTORIC_LEVELS,
+  historicCityBuildings,
   historicGuard,
   type HistoricLevel,
   historicResearch,
-  historicState,
   type HistoricState,
+  historicState,
   injuredOf,
   ItemId,
   maxArmyTroops,
@@ -224,7 +226,7 @@ const WAR_ENSIGN = ItemId.WAR_ENSIGN;
 async function attackerBonuses(ctx: Ctx, p: PlayerRow, a: ArmyRow): Promise<{ bonuses?: { desc: Message; itemId?: string }[] }> {
   const list = battleBonuses(p, ctx.now).bonuses ?? [];
   const home = await findCity(ctx, a.cityId);
-  if (home && totalTroops(a.troops) > maxArmyTroops(home.buildings)) {
+  if (home && totalTroops(a.troops) > maxArmyTroops(home.buildings, false, home.historicLevel)) {
     list.push({ desc: WAR_ENSIGN_DESC, itemId: WAR_ENSIGN });
   }
   return list.length ? { bonuses: list } : {};
@@ -861,7 +863,12 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   if (!def) return turnBack(ctx, a, msg('army.cityGone'));
   const relation = await relationBetween(ctx, a.playerId, def.player.id);
   if (isFriendly(relation)) return turnBack(ctx, a, msg('army.cityNowFriendly'));
-  const why = isProtected(def.player, ctx.now);
+  // (marchlands) a captured historic city has a truce of its own; its holder's protection doesn't cover it
+  const why = def.city.historicLevel
+    ? def.city.truceUntil > ctx.now
+      ? msg('army.historicTruce', { time: dur(def.city.truceUntil - ctx.now) })
+      : null
+    : isProtected(def.player, ctx.now);
   if (why) return turnBack(ctx, a, why);
   const tile = await getTile(ctx, def.city.tileId, { lock: true });
   const stationed = await armiesStationedAt(ctx, tile.id, { lock: true });
@@ -1091,8 +1098,9 @@ function historicOf(tile: TileRow, at: number) {
 
 /**
  * An attack on a historic city (docs/features/historical-cities.md): its garrison, research and hero, its loot a level
- * 10's, and each win takes BALANCE.historic.loyaltyPerWin off its loyalty. No faction stands behind it yet, and
- * capturing one at 0 loyalty comes with the next phase.
+ * 10's, and each win takes BALANCE.historic.loyaltyPerWin off its loyalty. The win that leaves it at 0 captures it,
+ * when the attacker has a free city slot and holds fewer seats of its level than BALANCE.historic.holdLimit allows;
+ * otherwise it stays at 0 for the next. No faction stands behind it yet.
  */
 async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const tile = await getTile(ctx, a.targetTileId, { lock: true });
@@ -1121,12 +1129,16 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     state.loyalty -= loyaltyDamage;
   }
   Object.assign(tile, { troops: r.defender.after, forts: r.forts.after, state, updatedAt: ctx.now });
-  await saveTile(ctx, tile);
+  let captured = false;
+  if (r.attackerWon && state.loyalty <= 0 && (await canHoldHistoric(ctx, attacker, level))) {
+    captured = true;
+    await captureHistoric(ctx, attacker, tile, level, state);
+  } else await saveTile(ctx, tile);
   attacker.honor += r.attackerHonor;
   await savePlayer(ctx, attacker);
   await grantHeroExp(ctx, hero, r.attackerHeroExp);
   const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
-  battleStats(ctx, a, r, 'npc', { injured, loot, captured: false, level });
+  battleStats(ctx, a, r, 'npc', { injured, loot, captured, level });
   const body = battleBody(
     r,
     {
@@ -1143,7 +1155,7 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
       forts: r.forts,
       wallLevel: level,
     },
-    { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured: false, level },
+    { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured, level },
   );
   await createReport(ctx, {
     playerId: a.playerId,
@@ -1159,6 +1171,52 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     return;
   }
   await returnWithLoot(ctx, a, r.attacker.after, loot);
+}
+
+/** Whether a player may take a historic city of a level: a free city slot, and fewer of that level than its limit. */
+async function canHoldHistoric(ctx: Ctx, attacker: PlayerRow, level: HistoricLevel) {
+  const held = await ctx.tx.select({ historicLevel: cities.historicLevel }).from(cities).where(eq(cities.playerId, attacker.id));
+  return held.length < maxCitiesFor(attacker.title) && held.filter((c) => c.historicLevel === level).length < BALANCE.historic.holdLimit[level];
+}
+
+/**
+ * A historic city captured (docs/features/historical-cities.md): it becomes the attacker's city, its buildings all
+ * level 10 but its fields at its own level (historicCityBuildings), under a truce of its own for BALANCE.historic.truceMs.
+ */
+async function captureHistoric(ctx: Ctx, attacker: PlayerRow, tile: TileRow, level: HistoricLevel, state: HistoricState) {
+  const name = `${attacker.name.slice(0, 12)} Keep`;
+  const base = initialCity(attacker.id, tile.id, name, ctx.now);
+  const city = one(
+    await ctx.tx
+      .insert(cities)
+      .values({
+        ...base,
+        buildings: historicCityBuildings(level),
+        gold: state.gold,
+        food: state.food,
+        wood: state.wood,
+        stone: state.stone,
+        iron: state.iron,
+        population: state.population,
+        historicLevel: level,
+        truceUntil: ctx.now + BALANCE.historic.truceMs,
+      })
+      .returning(),
+  );
+  Object.assign(tile, {
+    type: TileType.CASTLE,
+    cityId: city.id,
+    ownerPlayerId: attacker.id,
+    ownerCityId: null,
+    troops: null,
+    forts: null,
+    state: null,
+    updatedAt: ctx.now,
+  });
+  await saveTile(ctx, tile);
+  await dropCapturedTarget(ctx, tile.id);
+  pushCity(ctx, await viewCity(ctx, city.id));
+  addPrestige(attacker, 1000 * level);
 }
 
 async function captureNpc(ctx: Ctx, attacker: PlayerRow, tile: TileRow, state: NpcState) {

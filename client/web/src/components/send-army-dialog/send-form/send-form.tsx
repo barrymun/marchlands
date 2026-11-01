@@ -63,7 +63,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   const player = usePlayer();
   const now = useNow();
   const ensign = (player.data?.buffs ?? []).some((b) => b.id === BuffId.WAR_ENSIGN && b.endTime > now);
-  const cap = maxArmyTroops(city.buildings, ensign);
+  const cap = maxArmyTroops(city.buildings, ensign, city.historicLevel);
   const rally = buildingLevel(city.buildings, BuildingType.RALLY_SPOT);
   const chosen = Object.values(troopBody).reduce<number>((t, n) => t + Number(n), 0);
   const over = chosen > cap;
