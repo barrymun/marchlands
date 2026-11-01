@@ -44,7 +44,8 @@
     "goods": "物資",
     "deserted": "脱走",
     "between": "期間",
-    "food": "食料"
+    "food": "食料",
+    "drafted": "徴兵"
   },
   "battle": {
     "victory": "勝利",
@@ -108,5 +109,10 @@
   },
   "trade": {
     "order": "{{resource}} {{amount}}（単価 {{price}}）"
+  },
+  "draft": {
+    "auto": "{{city}}は範囲内で最も強い蛮族の都市から自動で徴兵しました（比べる斥候がいなかったため、同格の中から無作為に選びました）。",
+    "autoScouted_other": "{{city}}は自動で徴兵しました。斥候が範囲内で最も強い蛮族の都市{{count, number}}か所を比べ、部隊が最も多い都市から徴兵しました。",
+    "manual": "{{city}}は範囲内の蛮族の都市から徴兵しました。"
   }
 }

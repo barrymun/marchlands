@@ -132,6 +132,34 @@ export function historicState(
 }
 
 /**
+ * Whether a target tile lies in a historic city's area of power (docs/reference/historic-cities.md, Holding one): 9
+ * tiles every way for a level 12 (its 18 × 18 cell), 33 for a 14 (its 66-tile cell), its state for a 16, and the whole
+ * map for Atlantis. The map wraps.
+ */
+export function inSeatArea(seatTileId: number, level: HistoricLevel, targetTileId: number, mapSize: number = BALANCE.mapSize): boolean {
+  if (level === 18) return true;
+  if (level === 16) return stateOf(seatTileId, mapSize) === stateOf(targetTileId, mapSize);
+  const reach = level === 12 ? 9 : 33;
+  const d = (a: number, b: number) => Math.min(Math.abs(a - b), mapSize - Math.abs(a - b));
+  return d(seatTileId % mapSize, targetTileId % mapSize) <= reach && d(Math.floor(seatTileId / mapSize), Math.floor(targetTileId / mapSize)) <= reach;
+}
+
+/** What a draft takes from a barbarian city's troops: BALANCE.historic.draftShare of its largest troop type, or null if it has none. */
+export function draftTake(troops: TroopCounts): { key: keyof TroopCounts; count: number } | null {
+  let best: { key: keyof TroopCounts; count: number } | null = null;
+  for (const [key, n] of Object.entries(troops) as [keyof TroopCounts, number][]) if (n > 0 && (!best || n > best.count)) best = { key, count: n };
+  if (!best) return null;
+  const count = Math.floor(best.count * BALANCE.historic.draftShare);
+  return count > 0 ? { key: best.key, count } : null;
+}
+
+/** Drafts a seat has made on the UTC day of `now` (its count is for one day, `draftDay`). */
+export const draftsUsed = (c: { draftDay: number; draftsUsed: number }, now: number) => (c.draftDay === Math.floor(now / DAY) ? c.draftsUsed : 0);
+
+/** How many drafts a seat drafting by itself should have made by `now` today: one at the start of each equal part of the day. */
+export const autoDraftsDue = (now: number) => Math.floor((now % DAY) / (DAY / BALANCE.historic.draftsPerDay)) + 1;
+
+/**
  * A held historic city's loyalty as of `at`: rivals' wins take it down (BALANCE.historic.loyaltyPerWin), and it comes
  * back a point every BALANCE.npcRegenMs of real time since `from`, up to BALANCE.historic.loyalty.
  */

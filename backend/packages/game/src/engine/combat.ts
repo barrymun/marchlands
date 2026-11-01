@@ -485,8 +485,8 @@ function valleyDefenders(ctx: Ctx, tile: TileRow, at: number): TroopCounts {
   return tile.troops;
 }
 
-/** A barbarian city's state, garrison and fortifications as of `at` (an army's landing time: deviations.md, Camp times). */
-function npcState(tile: TileRow, at: number): { state: NpcState; troops: TroopCounts; forts: FortCounts } {
+/** A barbarian city's state, garrison and fortifications as of `at` (an army's landing time: deviations.md, Camp times; or a draft's, engine/draft.ts). */
+export function npcState(tile: TileRow, at: number): { state: NpcState; troops: TroopCounts; forts: FortCounts } {
   if (!tile.state || tile.state.regenAt == null || !tile.troops) return freshNpcState(tile.level, at);
   return regenerateNpc(tile.level, tile.state as unknown as NpcState, tile.troops, tile.forts ?? {}, at);
 }

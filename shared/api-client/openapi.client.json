@@ -473,6 +473,11 @@
               "city.invalidLogo",
               "city.teleportCooldown",
               "city.historicCannotMove",
+              "city.notHistoric",
+              "city.noDraftsLeft",
+              "city.draftOutOfArea",
+              "city.draftNotBarbarian",
+              "city.nothingToDraft",
               "city.recallTroopsFirst",
               "city.foreignTroops",
               "city.notFreeFlat",
@@ -533,6 +538,7 @@
               "report.title.cityAttacked",
               "report.title.attackRepelled",
               "report.title.seatLost",
+              "report.title.draft",
               "report.title.reinforcementsFought",
               "report.title.valleyOccupied",
               "report.title.valleyLost",
@@ -1381,6 +1387,16 @@
             "type": "number",
             "description": "a historic city is under truce until then (0: none)"
           },
+          "draftAuto": {
+            "type": "boolean",
+            "description": "a historic city drafts by itself"
+          },
+          "draftsUsed": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "drafts a historic city has made today (UTC)"
+          },
           "createdAt": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -1406,6 +1422,8 @@
           "fields",
           "historicLevel",
           "truceUntil",
+          "draftAuto",
+          "draftsUsed",
           "createdAt"
         ]
       },
@@ -4464,6 +4482,26 @@
           "fieldId",
           "x",
           "y"
+        ]
+      },
+      "DraftResultInput": {
+        "type": "object",
+        "properties": {
+          "troops": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "description": "the troops drafted into the seat"
+          }
+        },
+        "required": [
+          "troops"
         ]
       },
       "BuildingLevelInfoInput": {
@@ -8404,6 +8442,79 @@
                   "kind",
                   "desertion"
                 ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "draft"
+                  },
+                  "draft": {
+                    "type": "object",
+                    "properties": {
+                      "cityId": {
+                        "type": "number"
+                      },
+                      "city": {
+                        "type": "string"
+                      },
+                      "target": {
+                        "$ref": "#/components/schemas/MessageInput"
+                      },
+                      "level": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "troops": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "enum": [
+                            "peasants",
+                            "militia",
+                            "scouter",
+                            "pikemen",
+                            "swordsmen",
+                            "archer",
+                            "carriage",
+                            "lightCavalry",
+                            "heavyCavalry",
+                            "ballista",
+                            "batteringRam",
+                            "catapult"
+                          ]
+                        },
+                        "additionalProperties": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      "auto": {
+                        "type": "boolean"
+                      },
+                      "scouted": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "cityId",
+                      "city",
+                      "target",
+                      "level",
+                      "troops",
+                      "auto",
+                      "scouted"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "draft"
+                ]
               }
             ]
           }
@@ -12080,6 +12191,11 @@
               "city.invalidLogo",
               "city.teleportCooldown",
               "city.historicCannotMove",
+              "city.notHistoric",
+              "city.noDraftsLeft",
+              "city.draftOutOfArea",
+              "city.draftNotBarbarian",
+              "city.nothingToDraft",
               "city.recallTroopsFirst",
               "city.foreignTroops",
               "city.notFreeFlat",
@@ -12140,6 +12256,7 @@
               "report.title.cityAttacked",
               "report.title.attackRepelled",
               "report.title.seatLost",
+              "report.title.draft",
               "report.title.reinforcementsFought",
               "report.title.valleyOccupied",
               "report.title.valleyLost",
@@ -12999,6 +13116,16 @@
             "type": "number",
             "description": "a historic city is under truce until then (0: none)"
           },
+          "draftAuto": {
+            "type": "boolean",
+            "description": "a historic city drafts by itself"
+          },
+          "draftsUsed": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "drafts a historic city has made today (UTC)"
+          },
           "createdAt": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -13024,6 +13151,8 @@
           "fields",
           "historicLevel",
           "truceUntil",
+          "draftAuto",
+          "draftsUsed",
           "createdAt"
         ],
         "additionalProperties": false
@@ -16164,6 +16293,27 @@
           "fieldId",
           "x",
           "y"
+        ],
+        "additionalProperties": false
+      },
+      "DraftResult": {
+        "type": "object",
+        "properties": {
+          "troops": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "description": "the troops drafted into the seat"
+          }
+        },
+        "required": [
+          "troops"
         ],
         "additionalProperties": false
       },
@@ -20203,6 +20353,81 @@
                 "required": [
                   "kind",
                   "desertion"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "draft"
+                  },
+                  "draft": {
+                    "type": "object",
+                    "properties": {
+                      "cityId": {
+                        "type": "number"
+                      },
+                      "city": {
+                        "type": "string"
+                      },
+                      "target": {
+                        "$ref": "#/components/schemas/Message"
+                      },
+                      "level": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "troops": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string",
+                          "enum": [
+                            "peasants",
+                            "militia",
+                            "scouter",
+                            "pikemen",
+                            "swordsmen",
+                            "archer",
+                            "carriage",
+                            "lightCavalry",
+                            "heavyCavalry",
+                            "ballista",
+                            "batteringRam",
+                            "catapult"
+                          ]
+                        },
+                        "additionalProperties": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      "auto": {
+                        "type": "boolean"
+                      },
+                      "scouted": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "cityId",
+                      "city",
+                      "target",
+                      "level",
+                      "troops",
+                      "auto",
+                      "scouted"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "kind",
+                  "draft"
                 ],
                 "additionalProperties": false
               }
@@ -26150,6 +26375,156 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CityMoveResult"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cities/{cityId}/draft": {
+      "post": {
+        "operationId": "postCitiesDraft",
+        "summary": "(marchlands) A held historic city drafts from a barbarian city in its area, as one of its drafts today",
+        "tags": [
+          "city"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tileId": {
+                    "description": "a barbarian city nobody holds, in the seat's area",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "tileId"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "path",
+            "name": "cityId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftResult"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cities/{cityId}/draft/mode": {
+      "post": {
+        "operationId": "postCitiesDraftMode",
+        "summary": "(marchlands) Let a held historic city draft by itself, or only when its holder chooses",
+        "tags": [
+          "city"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "auto": {
+                    "type": "boolean",
+                    "description": "draft by itself (true) or only when its holder chooses"
+                  }
+                },
+                "required": [
+                  "auto"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "path",
+            "name": "cityId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null"
                 }
               }
             }

@@ -44,7 +44,8 @@
     "goods": "Goods",
     "deserted": "Deserted",
     "between": "Between",
-    "food": "Food"
+    "food": "Food",
+    "drafted": "Drafted"
   },
   "battle": {
     "victory": "Victory",
@@ -109,5 +110,11 @@
   },
   "trade": {
     "order": "{{amount}} {{resource}} at {{price}}"
+  },
+  "draft": {
+    "auto": "{{city}} drafted by itself from the strongest barbarian city in its area, picked at random among equals (it had no scout to compare them).",
+    "autoScouted_one": "{{city}} drafted by itself from the strongest barbarian city in its area.",
+    "autoScouted_other": "{{city}} drafted by itself: its scout compared the {{count, number}} strongest barbarian cities in its area, and it drafted from the one with the most troops.",
+    "manual": "{{city}} drafted from a barbarian city in its area."
   }
 }

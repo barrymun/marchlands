@@ -9,12 +9,14 @@ import { BALANCE, factionOfZone, isFactionLevel, Mission, TileType, VALLEY_TYPES
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add-to-farm-button';
 import { MedalOdds } from '@/components/map-panel/medal-odds/medal-odds';
+import { SeatDraft } from '@/components/map-panel/tile-card/seat-draft/seat-draft';
 import { placeName } from '@/components/map-panel/utils';
 import { ValleyUpgrade } from '@/components/map-panel/valley-upgrade/valley-upgrade';
 import type { SendTarget } from '@/components/send-army-dialog/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePlayer } from '@/hooks/use-game';
 import { copyText } from '@/lib/clipboard';
 import { FACTION_STYLE } from '@/lib/factions';
 import { fmt } from '@/lib/format';
@@ -55,6 +57,8 @@ export function TileCard({
   const info = useQuery(getMapTilesByTileIdOptions({ path: { tileId } }));
   const tile = info.data;
   const scouts = city.troop.scouter ?? 0;
+  // the player's historic cities, which draft from barbarian cities in their areas
+  const seats = (usePlayer().data?.castles ?? []).filter((c) => c.historicLevel != null);
   // a barbarian city's side: the faction holding its zone, or none for a bandit below the faction level
   const side = tile?.type === TileType.NPC ? (isFactionLevel(tile.level) ? factionOfZone(tile.zoneId) : null) : undefined;
   /** what can be scouted on a tile (empty land has nothing to see) */
@@ -122,6 +126,7 @@ export function TileCard({
           )}
           {(tile.type === TileType.NPC || (tile.type === TileType.CASTLE && tile.canLoot)) && <MedalOdds level={tile.level} />}
           {'owner' in tile && tile.owner && <p>{t('info.heldBy', { city: tile.owner.cityName, player: tile.owner.userName })}</p>}
+          <SeatDraft tile={{ id: tile.id, type: tile.type, held: 'owner' in tile && !!tile.owner }} seats={seats} />
           {here && (
             <div className="flex items-center gap-2">
               <ConfirmButton

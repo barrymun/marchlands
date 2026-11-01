@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  autoDraftsDue,
   BALANCE,
   BuildingStatus,
   BuildingType,
+  draftsUsed,
+  draftTake,
   fieldFactorAt,
   historicCities,
   historicCityBuildings,
@@ -13,6 +16,7 @@ import {
   historicRallyBonus,
   historicResearch,
   historicState,
+  inSeatArea,
   mapLevelDigit,
   mapLevelOf,
   maxArmyTroops,
@@ -184,5 +188,49 @@ describe(seatLoyalty.name, () => {
 
   it('keeps its clock with the present while full, so a later loss counts from then', () => {
     expect(seatLoyalty(BALANCE.historic.loyalty, 0, 5_000)).toEqual({ loyalty: BALANCE.historic.loyalty, loyaltyAt: 5_000 });
+  });
+});
+
+describe(inSeatArea.name, () => {
+  it('reaches 9 tiles every way from a level 12, 33 from a 14, its state from a 16 and everywhere from Atlantis', () => {
+    const at = (x: number, y: number) => y * 800 + x;
+    expect(inSeatArea(at(99, 99), 12, at(108, 90))).toBe(true);
+    expect(inSeatArea(at(99, 99), 12, at(109, 99))).toBe(false);
+    expect(inSeatArea(at(33, 33), 14, at(66, 0))).toBe(true);
+    expect(inSeatArea(at(33, 33), 14, at(67, 33))).toBe(false);
+    expect(inSeatArea(at(100, 100), 16, at(199, 0))).toBe(true);
+    expect(inSeatArea(at(100, 100), 16, at(200, 0))).toBe(false);
+    expect(inSeatArea(at(0, 0), 18, at(400, 400))).toBe(true);
+  });
+
+  it('wraps round the map’s edges, for a seat moved aside near one', () => {
+    const at = (x: number, y: number) => y * 800 + x;
+    expect(inSeatArea(at(4, 4), 12, at(797, 4))).toBe(true);
+    expect(inSeatArea(at(4, 4), 12, at(794, 4))).toBe(false);
+  });
+});
+
+describe(draftTake.name, () => {
+  it('takes a fifth of the largest troop type', () => {
+    expect(draftTake({ militia: 400_000, archer: 1_000 })).toEqual({ key: 'militia', count: 80_000 });
+    expect(draftTake({ pikemen: 4 })).toBeNull();
+    expect(draftTake({})).toBeNull();
+  });
+});
+
+describe(draftsUsed.name, () => {
+  it('counts the drafts of today only', () => {
+    expect(draftsUsed({ draftDay: 20_000, draftsUsed: 3 }, 20_000 * 86_400_000 + 5)).toBe(3);
+    expect(draftsUsed({ draftDay: 19_999, draftsUsed: 3 }, 20_000 * 86_400_000 + 5)).toBe(0);
+  });
+});
+
+describe(autoDraftsDue.name, () => {
+  it('is one at the start of each quarter of the UTC day', () => {
+    const day = 20_000 * 86_400_000;
+    expect(autoDraftsDue(day)).toBe(1);
+    expect(autoDraftsDue(day + 6 * 3_600_000 - 1)).toBe(1);
+    expect(autoDraftsDue(day + 6 * 3_600_000)).toBe(2);
+    expect(autoDraftsDue(day + 23 * 3_600_000)).toBe(4);
   });
 });

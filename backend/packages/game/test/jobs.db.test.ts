@@ -1,7 +1,7 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { BALANCE, CandlePeriod, heroGearBonus, heroGearStat, MarketSide, merchantBase, msg, setGameSpeed, TechType } from '@marchlands/core';
+import { autoDraftsDue, BALANCE, CandlePeriod, heroGearBonus, heroGearStat, MarketSide, merchantBase, msg, setGameSpeed, TechType } from '@marchlands/core';
 import {
   allianceEvents,
   alliances,
@@ -19,13 +19,14 @@ import {
 } from '@marchlands/db';
 
 import { type ZoneStats } from '#/engine/world.ts';
-import { beginnerJob, cleanupJob, heroGearJob, innNamesJob, market, merchantJob, rankingsJob, statsJob, zonesJob } from '#/index.ts';
-import { getPlayer, savePlayer } from '#/repo.ts';
+import { beginnerJob, cleanupJob, draftJob, heroGearJob, innNamesJob, market, merchantJob, rankingsJob, statsJob, zonesJob } from '#/index.ts';
+import { getCity, getPlayer, savePlayer } from '#/repo.ts';
 import { statDay } from '#/stats.ts';
 import { createTestAlliance } from '#test/support/alliance.ts';
 import { addHero, createTestPlayer, setCityStats, setResearch, type TestPlayer } from '#test/support/factories.ts';
 import type { TestGame } from '#test/support/game.ts';
 import { patchHero } from '#test/support/heroes.ts';
+import { makeSeat } from '#test/support/historic.ts';
 import { createTrader, Res, withMerchantCurve } from '#test/support/market.ts';
 import { arrange, inTestTx } from '#test/support/tx.ts';
 
@@ -252,5 +253,25 @@ describe(innNamesJob.name, () => {
       const [kept] = await db.select().from(heroes).where(eq(heroes.id, hired));
       expect(kept!.name).toBe('Isolde the Fair');
       expect(await innNamesJob(db)).toBe(0);
+    }));
+});
+
+describe(draftJob.name, () => {
+  it('a seat drafting by itself makes the draft due by now; one turned to manual makes none', () =>
+    inTestTx(async (db) => {
+      const { auto, manual } = await arrange(db, async (g) => {
+        const auto = await createTestPlayer(g);
+        const manual = await createTestPlayer(g);
+        await makeSeat(g, auto);
+        await makeSeat(g, manual, { auto: false });
+        return { auto, manual };
+      });
+      await draftJob(db);
+      const used = async (p: TestPlayer) => arrange(db, async (g) => (await getCity(g, p.cityId)).draftsUsed);
+      expect(await used(auto)).toBe(1);
+      expect(await used(manual)).toBe(0);
+      // one draft a run: run again, and it makes a second only if the day is far enough on for one to be due
+      await draftJob(db);
+      expect(await used(auto)).toBe(Math.min(2, autoDraftsDue(Date.now())));
     }));
 });

@@ -15,10 +15,12 @@ export default [
     // Shared code). Raised from 110 kB (2026-10-20) for the isometric viewport's animation layer (overlays and the
     // redraw clock); the animations themselves load after the first page (components/iso-anim/hooks.ts). Raised to
     // 118 kB (2026-10-31) for faction standing (115.56 kB): en-GB's text for every screen, and BALANCE, ship here, so
-    // new text anywhere grows this chunk (docs/backlog.md, English text in the first page)
+    // new text anywhere grows this chunk (docs/backlog.md, English text in the first page). Raised to 120 kB
+    // (2026-11-01, at 118.34 kB) for the historic cities: their names, camp times' landing time, the seats' draft
+    // controls and reports, and their text
     name: 'app',
     path: 'dist/assets/app-*.js',
-    limit: '118 kB',
+    limit: '120 kB',
     gzip: true,
   },
   {

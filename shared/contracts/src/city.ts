@@ -27,6 +27,9 @@ export const TaxRateBody = z.object({ rate: z.number().int() });
 export const ResourcePercentBody = z.object({ food: z.number().int(), wood: z.number().int(), stone: z.number().int(), iron: z.number().int() }).partial();
 export const ComfortBody = z.object({ typeId: z.number().int().describe('3 blessing (gold for food), 4 population raising (food for people)') });
 export const MoveCityBody = z.object({ targetTileId: zId.describe('a free flat') });
+/** (marchlands) the daily draft of a held historic city */
+export const DraftBody = z.object({ tileId: zId.describe("a barbarian city nobody holds, in the seat's area") });
+export const DraftModeBody = z.object({ auto: z.boolean().describe('draft by itself (true) or only when its holder chooses') });
 
 export const AvailableBuildingsQuery = z.object({ area: z.enum(['inside', 'outside', 'walls']).default('inside') });
 export const ConstructBody = z.object({ typeId: z.number().int(), positionId: z.number().int() });
@@ -105,6 +108,8 @@ export type ProductionBreakdown = z.infer<typeof ProductionBreakdown>;
 
 export const CityMoveResult = z.object({ fieldId: int().describe('new tile id'), x: int(), y: int() }).meta({ id: 'CityMoveResult' });
 export type CityMoveResult = z.infer<typeof CityMoveResult>;
+export const DraftResult = z.object({ troops: zTroops.describe('the troops drafted into the seat') }).meta({ id: 'DraftResult' });
+export type DraftResult = z.infer<typeof DraftResult>;
 
 // ---- buildings ----
 

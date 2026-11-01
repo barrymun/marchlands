@@ -19,6 +19,7 @@ import {
   BALANCE,
   BASIC_RESOURCES,
   type CityStats,
+  draftsUsed,
   FORT_KEY_LIST,
   type FortCounts,
   heroGearStat,
@@ -163,6 +164,8 @@ export function cityBean(b: CityBundle, now: number): CityBean {
     fields: b.valleys.map(valleyBean),
     historicLevel: c.historicLevel,
     truceUntil: c.truceUntil,
+    draftAuto: c.draftAuto,
+    draftsUsed: draftsUsed(c, now),
     createdAt: c.createdAt,
   };
 }

@@ -352,6 +352,19 @@ export const TradeReportSchema = z.union([
 export type TradeReport = z.infer<typeof TradeReportSchema>;
 
 /** Troops that deserted a city while it had no food (economy.ts starve). */
+/** (marchlands) Troops a held historic city drafted from a barbarian city (docs/features/historical-cities.md). */
+export const DraftReportSchema = z.object({
+  cityId: z.number(),
+  city: z.string(),
+  /** the barbarian city drafted from: where it stands, and its level */
+  target: MessageSchema,
+  level: z.number().int(),
+  troops: TroopCountsSchema,
+  /** drafted by itself (true) or by its holder */
+  auto: z.boolean(),
+  /** how many of the strongest barbarian cities in its area a scout compared (0: none, or picked at random) */
+  scouted: z.number().int(),
+});
 export const DesertionReportSchema = z.object({
   cityId: z.number(),
   city: z.string(),
@@ -376,6 +389,7 @@ export const ReportBodySchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('trade'), trade: TradeReportSchema }),
   z.object({ kind: z.literal('text'), text: MessageSchema }),
   z.object({ kind: z.literal('desertion'), desertion: DesertionReportSchema }),
+  z.object({ kind: z.literal('draft'), draft: DraftReportSchema }),
 ]);
 export type ReportBody = z.infer<typeof ReportBodySchema>;
 

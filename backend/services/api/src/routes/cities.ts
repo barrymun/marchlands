@@ -13,6 +13,9 @@ import {
   ComfortResult,
   ConstructBody,
   CureInjuredBody,
+  DraftBody,
+  DraftModeBody,
+  DraftResult,
   Empty,
   InjuredTroopsBody,
   MoveCityBody,
@@ -38,7 +41,7 @@ import {
   TroopCountBody,
   UpdateCityBody,
 } from '@marchlands/contracts';
-import { buildings, interior, research, training } from '@marchlands/game';
+import { buildings, historic, interior, research, training } from '@marchlands/game';
 import { authenticate, doc, game, tags, type ZApp, zCityParams } from '#/http.ts';
 
 /**
@@ -99,6 +102,19 @@ export default async function cityRoutes(app: ZApp) {
       body: MoveCityBody,
     }),
     (req) => game(req, (ctx, pid) => interior.moveCity(ctx, pid, req.params.cityId, req.body.targetTileId)),
+  );
+  app.post(
+    '/cities/:cityId/draft',
+    s(tags.city, '(marchlands) A held historic city drafts from a barbarian city in its area, as one of its drafts today', DraftResult, {
+      params: zCityParams,
+      body: DraftBody,
+    }),
+    (req) => game(req, (ctx, pid) => historic.draftNow(ctx, pid, req.params.cityId, req.body.tileId)),
+  );
+  app.post(
+    '/cities/:cityId/draft/mode',
+    s(tags.city, '(marchlands) Let a held historic city draft by itself, or only when its holder chooses', Empty, { params: zCityParams, body: DraftModeBody }),
+    (req) => game(req, (ctx, pid) => historic.setDraftAuto(ctx, pid, req.params.cityId, req.body.auto)),
   );
 
   // ---- buildings ----

@@ -206,6 +206,10 @@ export const cities = pgTable(
     loyalty: smallint('loyalty').notNull().default(100),
     /** when its loyalty last recovered (+1 every BALANCE.npcRegenMs, real time) */
     loyaltyAt: ms('loyalty_at').notNull().default(0),
+    /** (marchlands) a held historic city drafts by itself (true) or as its holder chooses; and how many drafts it made on which UTC day */
+    draftAuto: boolean('draft_auto').notNull().default(true),
+    draftDay: integer('draft_day').notNull().default(0),
+    draftsUsed: smallint('drafts_used').notNull().default(0),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [uniqueIndex('cities_tile_idx').on(t.tileId), index('cities_player_idx').on(t.playerId)],

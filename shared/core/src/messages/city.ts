@@ -13,6 +13,12 @@ export const CITY_MESSAGES = {
   teleportCooldown: ['item'],
   /** a captured historic city stays where it stands */
   historicCannotMove: [],
+  // the daily draft of a held historic city
+  notHistoric: [],
+  noDraftsLeft: ['count'],
+  draftOutOfArea: [],
+  draftNotBarbarian: [],
+  nothingToDraft: [],
   recallTroopsFirst: [],
   foreignTroops: [],
   notFreeFlat: [],

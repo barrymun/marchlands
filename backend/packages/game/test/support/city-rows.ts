@@ -72,6 +72,9 @@ export function cityRow(over: Partial<CityRow> = {}): CityRow {
     truceUntil: 0,
     loyalty: 100,
     loyaltyAt: 0,
+    draftAuto: true,
+    draftDay: 0,
+    draftsUsed: 0,
     createdAt: T0,
     ...over,
   };

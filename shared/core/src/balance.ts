@@ -205,6 +205,8 @@ export const BALANCE = {
     holdLimit: { 12: 3, 14: 2, 16: 1, 18: 1 } as Record<12 | 14 | 16 | 18, number>,
     /** a draft takes this share of a barbarian city's largest troop type */
     draftShare: 0.2,
+    /** drafts a seat may make each UTC day; drafting by itself, one each equal part of the day */
+    draftsPerDay: 4,
   },
   /** (marchlands) how far ahead an army can be set to land at a chosen time (camp times; real time) */
   landAtMaxAheadMs: 24 * HOUR,

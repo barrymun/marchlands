@@ -93,5 +93,11 @@
     "notEnoughGold": "Not enough gold in {{city}}.",
     "npcHint": "Its troops, fortifications, walls, hero and the resources you can plunder all grow to level {{level}}, and it starts afresh at full strength.",
     "valleyHint": "Once held: +{{from}} → +{{to}} production. Its defenders grow stronger with the level too."
+  },
+  "draft": {
+    "done": "Troops drafted",
+    "auto": "Draft by itself",
+    "used": "{{used}} of {{max}} drafts today",
+    "button": "Draft into {{city}} ({{used}}/{{max}})"
   }
 }

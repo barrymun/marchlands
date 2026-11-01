@@ -3,6 +3,7 @@ import type { ReportBody } from '@marchlands/core';
 
 import { BattleView } from '@/components/reports-panel/report-dialog/report-content/battle-view/battle-view';
 import { DesertionView } from '@/components/reports-panel/report-dialog/report-content/desertion-view/desertion-view';
+import { DraftView } from '@/components/reports-panel/report-dialog/report-content/draft-view/draft-view';
 import { MovementView } from '@/components/reports-panel/report-dialog/report-content/movement-view/movement-view';
 import { ScoutView } from '@/components/reports-panel/report-dialog/report-content/scout-view/scout-view';
 import { TradeView } from '@/components/reports-panel/report-dialog/report-content/trade-view/trade-view';
@@ -27,5 +28,7 @@ export function ReportContent({ report }: { report: ReportDetail }) {
       return <p className="text-sm">{translateMessage(body.text)}</p>;
     case 'desertion':
       return <DesertionView desertion={body.desertion} />;
+    case 'draft':
+      return <DraftView draft={body.draft} />;
   }
 }

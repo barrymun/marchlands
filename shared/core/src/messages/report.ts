@@ -18,6 +18,8 @@ export const REPORT_MESSAGES = {
   'title.attackRepelled': [],
   /** a player's historic city taken by the attacker who brought its loyalty to 0 */
   'title.seatLost': [],
+  /** a held historic city drafted troops from a barbarian city */
+  'title.draft': [],
   'title.reinforcementsFought': [],
   'title.valleyOccupied': [],
   'title.valleyLost': [],

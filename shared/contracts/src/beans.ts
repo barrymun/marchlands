@@ -135,6 +135,8 @@ export const CityBean = z
     fields: z.array(ValleyBean),
     historicLevel: z.number().int().nullable().describe('a captured historic city: its level (12 to 18); null otherwise'),
     truceUntil: Ms.describe('a historic city is under truce until then (0: none)'),
+    draftAuto: z.boolean().describe('a historic city drafts by itself'),
+    draftsUsed: z.number().int().describe('drafts a historic city has made today (UTC)'),
     createdAt: Ms,
   })
   .meta({ id: 'CityBean' });

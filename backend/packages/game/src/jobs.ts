@@ -2,17 +2,18 @@
 
 import { and, asc, eq, isNotNull, lt, sql } from 'drizzle-orm';
 
-import { BALANCE, CandlePeriod, heroName, stateOf } from '@marchlands/core';
+import { autoDraftsDue, BALANCE, CandlePeriod, draftsUsed, heroName, stateOf } from '@marchlands/core';
 import { cities, type Db, heroes, players } from '@marchlands/db';
 
 import { runGame } from '#/context.ts';
+import { draft, pickDraftTarget, seatLevelOf } from '#/engine/draft.ts';
 import { resyncHeroGear, takenHeroNames } from '#/engine/heroes.ts';
 import { merchantSweep } from '#/engine/market.ts';
 import { npcTradeTick } from '#/engine/npc-economy.ts';
 import { checkBeginner } from '#/engine/player.ts';
 import { refreshRankings } from '#/engine/rankings.ts';
 import { refreshZoneStats } from '#/engine/world.ts';
-import { getPlayer, savePlayer } from '#/repo.ts';
+import { getCity, getPlayer, getTile, savePlayer } from '#/repo.ts';
 import { compactStats } from '#/stats.ts';
 
 export async function rankingsJob(db: Db) {
@@ -36,6 +37,27 @@ export async function beginnerJob(db: Db) {
       const p = await getPlayer(ctx, id, { lock: true });
       await checkBeginner(ctx, p);
       await savePlayer(ctx, p);
+    });
+  }
+}
+
+/**
+ * (marchlands) Held historic cities that draft by themselves make the drafts due by now (one at the start of each part
+ * of the UTC day, engine/draft.ts), one each a run, aimed at the strongest barbarian city in their area.
+ */
+export async function draftJob(db: Db) {
+  const seats = await db
+    .select({ id: cities.id })
+    .from(cities)
+    .where(and(isNotNull(cities.historicLevel), eq(cities.draftAuto, true)));
+  for (const { id } of seats) {
+    await runGame(db, async (ctx) => {
+      const city = await getCity(ctx, id, { lock: true });
+      const level = seatLevelOf(city);
+      if (!level || !city.draftAuto || draftsUsed(city, ctx.now) >= Math.min(autoDraftsDue(ctx.now), BALANCE.historic.draftsPerDay)) return;
+      const target = await pickDraftTarget(ctx, city, level);
+      if (!target) return;
+      await draft(ctx, city, await getTile(ctx, target.tile.id, { lock: true }), { auto: true, scouted: target.scouted });
     });
   }
 }

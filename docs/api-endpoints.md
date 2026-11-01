@@ -53,6 +53,8 @@ All paths are relative to the server root. Names in parentheses are the original
 | GET | `/api/v1/cities/{cityId}` | City detail (castleBean) |
 | PATCH | `/api/v1/cities/{cityId}` | Rename / logo / defence settings (city.modifyCastleName, army.setArmyGoOut) |
 | POST | `/api/v1/cities/{cityId}/comfort` | Comfort: 3 blessing (gold for food), 4 population raising (food for people) (interior.pacifyPeople) |
+| POST | `/api/v1/cities/{cityId}/draft` | (marchlands) A held historic city drafts from a barbarian city in its area, as one of its drafts today |
+| POST | `/api/v1/cities/{cityId}/draft/mode` | (marchlands) Let a held historic city draft by itself, or only when its holder chooses |
 | POST | `/api/v1/cities/{cityId}/move` | Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned) |
 | GET | `/api/v1/cities/{cityId}/production` | Production breakdown (interior.getResourceProduceData) |
 | PUT | `/api/v1/cities/{cityId}/store-percent` | Warehouse protection split, % (city.modifyStorePercent) |
