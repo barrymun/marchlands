@@ -1,6 +1,6 @@
 # Camp times: armies that land at a chosen second
 
-**Status:** design only, nothing built (started 2026-11-01). TODO.md item: *Camp times: arrive at an exact time.* Wanted first for the historical cities ([historical-cities.md](historical-cities.md)), whose garrisons refill between waves: breaking one takes many armies landing together, in a set order.
+**Status:** phase 1 built 2026-11-01 (landing at a chosen second, in order, by the server's clock); the wave planner and alliance plans are later phases. Started 2026-11-01. TODO.md item: *Camp times: arrive at an exact time.* Wanted first for the historical cities ([historical-cities.md](historical-cities.md)), whose garrisons refill between waves: breaking one takes many armies landing together, in a set order.
 
 **The aim:** a player sends an army to land on a tile at a time they choose, to the second, so that waves from several cities (theirs, and later their alliance's) arrive together and in order: the trap clearers, then the main army, then the loyalty waves.
 
@@ -21,6 +21,10 @@
 - **The army waits at home** (2026-11-01), as with Age 2's camp time: it leaves its city at the moment that lands it on time, and the target sees nothing until it marches.
 - **Armies landing on one tile in the same second fight in the order they were sent** (2026-11-01): no wave number to fill in.
 - **Historic cities refill every second** (2026-11-01, [historical-cities.md](historical-cities.md)), so a gap between waves always costs the attacker and landing them together is worth the precision.
+- **A landing time, entered in UTC** (2026-11-01): the send-army dialog takes a date and a time to the second (UTC), offers a round minute just after the soonest landing, and shows when the army will leave. It stays set after sending, so the next wave lands in the same second.
+- **Up to 24 hours ahead** (`BALANCE.landAtMaxAheadMs`), like the rest time.
+- **Ties keep their order; the battle is still fought when the worker gets to it** (2026-11-01). The worker takes due events by `due_at`, then `id`, and an arrival is fought at `ctx.now`, a fraction of a second after `reachTime` (250 ms at most when idle). With today's 6-minute refills that can't change a result; when NPC garrisons refill every second (TODO.md) an arrival should be fought as of its `reachTime`, so a busy worker can't hand the garrison extra seconds. That goes with the per-second refill.
+- **Rest time stays as it is** (camping at the target after landing, not offered in the dialog).
 
 ## The design (proposed)
 
@@ -48,14 +52,11 @@
 
 ## Open questions
 
-- **Entering it:** a landing time (proposed), or Age 2's camp time, a wait before marching that the player works out themselves? A landing time is what players worked the camp time out for; the dialog can show both.
-- **How far ahead** a landing time can be set: 24 hours, like `restTime`?
-- **What the clock decides at landing:** fight every arrival as of its `reachTime` (proposed), or only make sure ties keep their order?
-- **Rest time:** keep the existing camping at the target (`restTime`) as it is, offer it in the dialog too, or fold it into this?
+- **Fighting at the landing time:** fight each arrival as of its `reachTime` (its refills, loyalty, buffs running out) rather than when the worker takes it; with the per-second refill (Decided).
 - **Things that change a march on the way:** Marchlands has none (Age 2's stratagems slowed or sped marching armies; we have no stratagems, [reference/items.md](../reference/items.md)). If one is ever added, a landing time would no longer hold.
 
 ## Phases
 
-1. **Land at a time:** the server side (holding an army, leaving on time, the order of ties, fighting at `reachTime`), the dialog's landing time in UTC, server time on screen and the client's clock corrected. Tested with the database tests (several waves landing in the same second, in order) and against the running stack.
+1. **Land at a time** (built 2026-11-01): the server side (holding an army, leaving on time, the order of ties, fighting at `reachTime`), the dialog's landing time in UTC, server time on screen and the client's clock corrected. Tested with the database tests (`test/services/armies-land-at.db.test.ts`; the worker's order in `worker.db.test.ts`) and the dialog on the running stack. Not yet: the waiting army in the armies list and its target's view, tried in the browser (a new account has no Rally Spot).
 2. **The wave planner,** for one player's cities.
 3. **Alliance plans.**

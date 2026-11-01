@@ -43,6 +43,10 @@ export const dateTime = (ms: number) => new Date(ms).toLocaleString(i18n.languag
 export const clockTime = (ms: number, short = false) =>
   new Date(ms).toLocaleTimeString(i18n.language, short ? { hour: '2-digit', minute: '2-digit' } : undefined);
 
+/** A time of day in UTC, to the second and on the 24-hour clock in every locale: landing times (camp times). */
+export const utcClock = (ms: number) =>
+  new Date(ms).toLocaleTimeString(i18n.language, { timeZone: 'UTC', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
 /** A day and month in the current locale (11 Oct in en-GB), for chart axes. */
 export const shortDate = (ms: number) => new Date(ms).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' });
 

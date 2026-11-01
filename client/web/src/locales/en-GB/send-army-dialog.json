@@ -40,5 +40,15 @@
     "npc": "Barbarian cities never stop scouts: one is enough. The report shows their troops, fortifications, walls, resources, loyalty, buildings and hero.",
     "valley": "Valleys never stop scouts: one is enough. The report shows the troops guarding it and who holds it.",
     "other": "Only scouts go on a scouting mission."
+  },
+  "landAt": {
+    "toggle": "Land at a set time (UTC)",
+    "serverTime": "Server time {{time}} UTC",
+    "date": "Date (UTC)",
+    "time": "Time (UTC)",
+    "leaves": "Leaves at {{time}} UTC, in <timer/>. Armies landing in the same second fight in the order they were sent.",
+    "invalid": "Enter a date and a time.",
+    "tooSoon": "Too soon: the march takes {{time}}.",
+    "tooLate": "At most {{time}} ahead."
   }
 }

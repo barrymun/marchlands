@@ -42,6 +42,12 @@ export const SendArmyBody = z.object({
   resources: zResources.optional(),
   heroId: z.number().int().nullish(),
   restTime: z.number().int().min(0).optional().describe('seconds to camp before returning (0 = until recalled)'),
+  arriveAt: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('land at this time (epoch ms; the start of its second): the army waits at home and leaves in time to land then. Omitted, it leaves now'),
 });
 export type SendArmyBody = z.infer<typeof SendArmyBody>;
 export const MarchEstimateBody = z.object({ targetTileId: zId, troops: zTroops });

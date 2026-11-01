@@ -16,6 +16,7 @@ import {
   shortDuration,
   signed,
   signedRate,
+  utcClock,
 } from '@/lib/format';
 import { buildingName, troopName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
@@ -196,5 +197,14 @@ describe(clockTime.name, () => {
     await i18n.changeLanguage('en-US');
     expect(clockTime(AT)).toBe('1:04:05 PM');
     expect(clockTime(AT, true)).toBe('01:04 PM');
+  });
+});
+
+describe(utcClock.name, () => {
+  it('writes the time of day in UTC, to the second, on the 24-hour clock', async () => {
+    const at = Date.UTC(2026, 10, 1, 20, 0, 5);
+    expect(utcClock(at)).toBe('20:00:05');
+    await i18n.changeLanguage('en-US');
+    expect(utcClock(at)).toBe('20:00:05');
   });
 });

@@ -17,6 +17,7 @@
     "returning": "Returning",
     "stationed": "Stationed",
     "marching": "Marching",
-    "recall": "Recall"
+    "recall": "Recall",
+    "waiting": "Waiting · leaves in <timer/>, lands {{time}} UTC"
   }
 }

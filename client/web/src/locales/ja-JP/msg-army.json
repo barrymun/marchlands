@@ -21,6 +21,8 @@
   "heroRequiredSettlers": "新しい都市へ向かう開拓者は英雄が率いる必要があります。",
   "notFound": "部隊が見つかりません。",
   "alreadyReturning": "この部隊はすでに帰還中です。",
+  "landTooSoon": "到着まで{{time}}かかります。もっと遅い到着時刻を選んでください。",
+  "landTooLate": "到着時刻は最大{{time}}先までしか設定できません。",
   "unknownMission": "不明な任務です。",
   "destinationNotFriendly": "目的地はもう友好的な都市ではありません。",
   "valleyNoLongerHeld": "この領地はもうあなたの支配下にありません。",

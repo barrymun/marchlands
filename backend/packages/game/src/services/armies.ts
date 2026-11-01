@@ -13,6 +13,7 @@ import {
   buildingLevel,
   BuildingType,
   DAY,
+  dur,
   GameError,
   hasTroops,
   HeroStatus,
@@ -39,7 +40,7 @@ import { armies, cities, heroes, one, players } from '@marchlands/db';
 import { type CityBundle, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { armyBean, troopBean } from '#/dto.ts';
-import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner, tilePosition } from '#/engine/armies.ts';
+import { armyRef, cityPosition, departRef, homeMarchMs, isWaiting, notifyArmyParties, sendBack, tileOwner, tilePosition } from '#/engine/armies.ts';
 import { pushHero } from '#/engine/heroes.ts';
 import { isProtected } from '#/engine/player.ts';
 import { isFriendly, relationBetween } from '#/engine/relations.ts';
@@ -150,9 +151,15 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
   } else if (mission === Mission.ATTACK) throw new GameError(msg('army.heroRequiredAttack'), -71);
   if (mission === Mission.BUILD_CITY && !hero) throw new GameError(msg('army.heroRequiredSettlers'), -71);
 
+  const ms = armyMarchMs(b, b.city.tileId, target.id, troops, ownTarget);
+  // camp times: an army set to land at a time lands at the start of that second; it waits at home and leaves in time
+  const land = input.arriveAt != null ? Math.floor(input.arriveAt / 1000) * 1000 : null;
+  if (land != null && land - ms < ctx.now) throw new GameError(msg('army.landTooSoon', { time: dur(ms) }), -99);
+  if (land != null && land - ctx.now > BALANCE.landAtMaxAheadMs) throw new GameError(msg('army.landTooLate', { time: dur(BALANCE.landAtMaxAheadMs) }), -99);
+  const leaves = land != null ? land - ms : ctx.now;
+
   spendResources(b.city, resources, msg('common.notEnoughResources'), -1);
   b.city.troops = addTroops(b.city.troops, troops, -1);
-  const ms = armyMarchMs(b, b.city.tileId, target.id, troops, ownTarget);
   const restTime = Math.min(BALANCE.maxRestTimeMs, Math.max(0, Math.floor(Number(input.restTime ?? 0)) * 1000));
   const army = one(
     await ctx.tx
@@ -168,8 +175,8 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
         targetPlayerId: ownerId,
         troops,
         resources,
-        startTime: ctx.now,
-        reachTime: ctx.now + ms,
+        startTime: leaves,
+        reachTime: leaves + ms,
         restTime,
         startPosName: cityPosition(b.city.name, b.city.tileId),
         targetPosName: await tilePosition(ctx, target),
@@ -183,10 +190,13 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
     pushHero(ctx, playerId, hero, 2);
   }
   ctx.schedule({ type: 'army', dueAt: army.reachTime, playerId, cityId, refKey: armyRef(army.id), payload: { armyId: army.id } });
+  // a waiting army's target hears of it when it sets off
+  if (isWaiting(army, ctx.now))
+    ctx.schedule({ type: 'army.depart', dueAt: leaves, playerId, cityId, refKey: departRef(army.id), payload: { armyId: army.id } });
   await saveCity(ctx, b.city);
   ctx.push(playerId, PushCmd.TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.troops) });
   pushResources(ctx, b);
-  await notifyArmyParties(ctx, army);
+  await notifyArmyParties(ctx, isWaiting(army, ctx.now) ? { playerId, targetPlayerId: null } : army);
   return armyBean(army, { heroName: hero?.name, heroLevel: hero?.level, king: b.player.name });
 }
 
@@ -195,8 +205,10 @@ export async function recallArmy(ctx: Ctx, playerId: number, armyId: number) {
   const a = await getArmy(ctx, armyId, { lock: true });
   if (!a || a.playerId !== playerId) throw new GameError(msg('army.notFound'), -99, 404);
   if (a.direction === ArmyDirection.BACKWARD) throw new GameError(msg('army.alreadyReturning'), -99);
-  // marching armies walk back the way they came; stationed ones march home from the target
+  // marching armies walk back the way they came (one still waiting at home is back at once); stationed ones march home
+  // from the target
   const ms = a.direction === ArmyDirection.FORWARD ? ctx.now - a.startTime : await homeMarchMs(ctx, a, a.targetTileId);
+  if (isWaiting(a, ctx.now)) ctx.unschedule(departRef(a.id));
   await sendBack(ctx, a, ms);
   await notifyArmyParties(ctx, a);
   return armyBean(a);

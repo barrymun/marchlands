@@ -17,6 +17,7 @@
     "returning": "帰還中",
     "stationed": "駐留中",
     "marching": "行軍中",
-    "recall": "呼び戻す"
+    "recall": "呼び戻す",
+    "waiting": "待機中 · あと<timer/>で出発、{{time}} UTCに到着"
   }
 }

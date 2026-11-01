@@ -42,6 +42,7 @@ import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
 import { patchHeroes, patchPlayerHeroes, resourceName } from '@/lib/push/utils';
 import { allMarketQueries, allOf } from '@/lib/query-keys';
+import { noteServerTime } from '@/lib/server-clock';
 
 type Handler<K extends PushCmd> = (data: PushData<K>, qc: QueryClient) => void;
 
@@ -145,6 +146,10 @@ export const PUSH_HANDLERS: { [K in PushCmd]?: Handler<K> } = {
   },
 
   [PushCmd.SYSTEM_INFO_MESSAGE]: ({ msg }) => toast.info(translateMessage(msg)),
+
+  // the server's clock, for countdowns and landing times
+  [PushCmd.CONNECTED]: ({ serverTime }) => noteServerTime(serverTime),
+  [PushCmd.PONG]: ({ serverTime }) => noteServerTime(serverTime),
 };
 
 /** Subscribe every handler to `client`; returns the unsubscribe functions. */

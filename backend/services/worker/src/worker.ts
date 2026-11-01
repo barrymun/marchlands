@@ -1,6 +1,7 @@
 // The worker's moving parts, given their dependencies so they can be tested (main.ts wires them up):
-//  - processOne claims one due timed event (FOR UPDATE SKIP LOCKED, so several workers can run side by side)
-//    and processes it in its own transaction, backing it off when it fails;
+//  - processOne claims one due timed event (FOR UPDATE SKIP LOCKED, so several workers can run side by side), the
+//    oldest first and, among those due at the same moment, the first scheduled (armies landing together fight in the
+//    order they were sent), and processes it in its own transaction, backing it off when it fails;
 //  - eventLoop drains due events in batches and idles when there are none;
 //  - every runs a periodic job until the worker stops.
 
@@ -33,7 +34,7 @@ export async function processOne(db: Db, opts: { log: Log }): Promise<boolean> {
         }>(sql`
           select id, type, due_at, player_id, city_id, payload from timed_events
           where due_at <= ${ctx.now} and attempts < ${MAX_ATTEMPTS}
-          order by due_at limit 1 for update skip locked`);
+          order by due_at, id limit 1 for update skip locked`);
         const r = rows.rows[0];
         if (!r) return;
         claimed = { id: Number(r.id), type: r.type, dueAt: Number(r.due_at), playerId: r.player_id, cityId: r.city_id, payload: r.payload };

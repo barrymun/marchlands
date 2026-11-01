@@ -10,7 +10,7 @@
 - A barbarian city loses 10 to 15 loyalty for each win against it and is captured at 0 if the attacker's title allows another city, keeping its buildings. Players' cities have no loyalty and can't be captured (*(design change)*, deviations.md).
 - The five NPC factions hold the 16 states (zones), from level 5 up, as fixed data (`shared/core/src/factions.ts`), and trade with each other and with players (market phases 2 and 3). Each player has a standing with each faction (reputation, market phase 4, 2026-10-31), which an attack on a member lowers.
 - **NPC garrisons refill on a clock:** 10% of the full troops and fortifications every 6 game minutes (`BALANCE.npcRegenMs`, `regenerateNpc` in `shared/core/src/world.ts`), and 1 loyalty every 6 real minutes. Age 2's historic cities refilled at the same rate (reference, Regeneration).
-- **Armies can't be timed:** an army leaves the moment it's sent, and armies due at the same moment land in no fixed order ([camp-times.md](camp-times.md), Where things stand).
+- **Armies can be timed** (camp times, 2026-11-01): an army can be set to land at a chosen second, and armies landing together fight in the order sent ([camp-times.md](camp-times.md)).
 - How Age 2 placed and used its historic cities, at every level: [reference/historic-cities.md](../reference/historic-cities.md). Their garrisons against our NPC cities' are in [reference/npc-cities.md](../reference/npc-cities.md). Age 2's colonies are a model for a holder's powers: [reference/colonies.md](../reference/colonies.md). Age 1 had none of this.
 
 ## Decided
@@ -144,7 +144,7 @@ A seat is a tile like any NPC city. Its holder is the tile's existing `owner_cit
 - **A. Jump to coordinates** on the world map: done 2026-11-01 (the coordinates on the map's toolbar open a box to type any x and y).
 - **B. The art:** done 2026-11-01, the four historic city sprites (On the map, above).
 - **C. Simulations of breaking one:** done 2026-11-01 (Testing how they're broken, above): `npm run sim -- siege`, its findings, and the cities' research tuned so every level and every day can be taken at a rising cost. Loyalty's numbers are still open.
-- **D. Camp times** ([camp-times.md](camp-times.md), its phase 1): armies landing at a chosen second, in order. Needed before players can break one as the simulations do.
+- **D. Camp times:** done 2026-11-01 ([camp-times.md](camp-times.md), its phase 1): armies landing at a chosen second, in order, so players can break one as the simulations do.
 
 Then:
 

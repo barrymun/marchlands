@@ -174,6 +174,8 @@ export const BALANCE = {
   logisticsLoadPerLevel: 0.1, // (evony) +10% load per level
   /** (evony) reinforcement / scout / transport to own or allied cities move this much faster */
   maxRestTimeMs: 24 * HOUR,
+  /** (marchlands) how far ahead an army can be set to land at a chosen time (camp times; real time) */
+  landAtMaxAheadMs: 24 * HOUR,
   /** (evony) loyalty damage per successful attack on a barbarian city (before capture); lords' cities have no loyalty */
   npcLoyaltyDamagePerAttack: [10, 15],
   /** (evony) attacking army must kill all defenders and bring this loyalty to 0 to capture */

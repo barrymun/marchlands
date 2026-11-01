@@ -20,6 +20,7 @@ import {
 
 import { builtAt } from '@/lib/build-events';
 import { PUSH_HANDLERS, subscribePushHandlers } from '@/lib/push/handlers';
+import { clockOffset, noteServerTime } from '@/lib/server-clock';
 
 const toast = vi.hoisted(() => Object.assign(vi.fn(), { success: vi.fn(), warning: vi.fn(), info: vi.fn() }));
 vi.mock('sonner', () => ({ toast }));
@@ -128,5 +129,16 @@ describe(subscribePushHandlers.name, () => {
     expect(offs).toHaveLength(subscribed.size);
     subscribed.get(PushCmd.SYSTEM_INFO_MESSAGE)!({ msg: { code: 'admin.broadcast', params: { text: 'Maintenance at noon' } } });
     expect(toast.info).toHaveBeenCalledWith('Maintenance at noon');
+  });
+});
+
+describe('server clock', () => {
+  it('Connected and Pong set how far the server clock is from the device', () => {
+    const now = Date.now();
+    handle(PushCmd.CONNECTED, { playerId: 1, serverTime: now + 60_000 }, qc);
+    expect(clockOffset()).toBeGreaterThan(59_000);
+    handle(PushCmd.PONG, { serverTime: now - 60_000 }, qc);
+    expect(clockOffset()).toBeLessThan(-59_000);
+    noteServerTime(0, 0);
   });
 });

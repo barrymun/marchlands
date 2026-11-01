@@ -24,6 +24,8 @@
   "heroRequiredSettlers": "A hero must lead the settlers to the new city.",
   "notFound": "Army not found.",
   "alreadyReturning": "The army is already returning.",
+  "landTooSoon": "The army needs {{time}} to get there: choose a later landing time.",
+  "landTooLate": "An army can be set to land at most {{time}} ahead.",
   "unknownMission": "Unknown mission.",
   "destinationNotFriendly": "The destination is no longer a friendly city.",
   "valleyNoLongerHeld": "You no longer control this valley.",

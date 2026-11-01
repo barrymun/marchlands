@@ -97,6 +97,7 @@ The original either stubbed these or never answered them.
   - battle reports for every party involved.
 - **Other missions.** Transport (to own or allied cities); reinforcement (merge into your own city, or station with an ally or on your own valley); scouting with intel (more detail with Informatics); founding a new city (needs a hero and `BALANCE.newCityMinResource`, 10,000, of each resource).
 - **Recalling armies**, and sending home allied armies stationed with you.
+- *(design change)* **Camp times** (design: docs/features/camp-times.md; Age 2's "camp time", docs/reference/historic-cities.md, Timing): an army can be set to land at a chosen second, up to 24 hours ahead (`arriveAt` on the send body, `BALANCE.landAtMaxAheadMs`). It waits at home (its troops, hero and Rally Spot slot taken at once) and leaves in time to land at the start of that second; its target sees nothing until it leaves (a timed `army.depart` event), and recalling it before then brings it back within a second. Armies due at the same moment land in the order they were sent (the worker takes timed events by `due_at`, then `id`). The client enters and shows these times in UTC by the server's clock (the push socket's server time, `lib/server-clock.ts`).
 - **Production bonuses.**
   - Agriculture, Lumbering, Masonry and Mining: +10% per effective level.
   - Mayor management: +1% per point.

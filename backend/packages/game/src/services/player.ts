@@ -329,7 +329,8 @@ export async function restartPlayer(ctx: Ctx, playerId: number) {
       .from(armies)
       .where(and(inArray(armies.targetTileId, tileIds), ne(armies.playerId, playerId)));
     for (const g of guests) {
-      const back = Math.max(1000, g.reachTime - g.startTime);
+      // an army still waiting at home to land at a time hasn't left it
+      const back = g.startTime > ctx.now ? 1000 : Math.max(1000, g.reachTime - g.startTime);
       await ctx.tx
         .update(armies)
         .set({ direction: 2, startTime: ctx.now, reachTime: ctx.now + back, restTime: 0 })

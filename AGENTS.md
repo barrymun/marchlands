@@ -360,5 +360,6 @@ The server never sends or stores English for players. Everything it tells a play
 
   Hero attributes have their own colours in `lib/hero-attributes.ts`. Don't reuse a colour for a different meaning.
 - **Confirmations always use a dialog:** `ConfirmDialog` (`components/confirm-dialog/`) or `ConfirmButton` (`components/confirm-button/`). Never use the browser's `confirm()` or a click-twice button. Anything that spends gold or can't be undone asks first.
+- **Landing times are UTC, by the server's clock:** camp times (the send-army dialog's landing time, a waiting army's row) are entered and shown in UTC with `utcClock` (`lib/format.ts`), so players in different time zones agree, and counted from `useServerNow` (`hooks/use-server-now.ts`; the offset the push socket's server time gives, `lib/server-clock.ts`).
 - **Times shown to players are real time.** Rates are per real hour (`signedRate`, `realHourly` in `lib/format.ts`), and `GAME_SPEED` is applied with `scaled()` / `getGameSpeed()` from core.
 - **Remembered UI state** (a collapsed card, Scene or Grid) goes in `localStorage`, wrapped in try/catch, and the UI must still work without it.

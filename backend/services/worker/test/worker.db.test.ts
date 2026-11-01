@@ -68,6 +68,18 @@ async function playerWithBuff(db: Db, endTime: number): Promise<TestPlayer> {
 const buffKey = (p: TestPlayer) => `buff:${p.id}:${BuffId.ATTACK}`;
 
 describe(processOne.name, () => {
+  it('takes events due at the same moment in the order they were scheduled (armies landing together)', () =>
+    workerTest(async (db, log) => {
+      // army.depart for an army that no longer exists does nothing, so only the order of the claims shows
+      const due = Date.now() - 1000;
+      const first = await addEvent(db, { type: 'army.depart', dueAt: due, payload: { armyId: 2_000_000_001 } });
+      const second = await addEvent(db, { type: 'army.depart', dueAt: due, payload: { armyId: 2_000_000_000 } });
+
+      expect(await processOne(db, { log })).toBe(true);
+      expect(await eventRow(db, first!.id)).toBeUndefined();
+      expect(await eventRow(db, second!.id)).toBeDefined();
+    }));
+
   it('is idle when no event is due, and leaves events in the future alone', () =>
     workerTest(async (db, log) => {
       expect(await processOne(db, { log })).toBe(false);

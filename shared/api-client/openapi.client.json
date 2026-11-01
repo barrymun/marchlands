@@ -561,6 +561,8 @@
               "army.heroRequiredSettlers",
               "army.notFound",
               "army.alreadyReturning",
+              "army.landTooSoon",
+              "army.landTooLate",
               "army.unknownMission",
               "army.destinationNotFriendly",
               "army.valleyNoLongerHeld",
@@ -12106,6 +12108,8 @@
               "army.heroRequiredSettlers",
               "army.notFound",
               "army.alreadyReturning",
+              "army.landTooSoon",
+              "army.landTooLate",
               "army.unknownMission",
               "army.destinationNotFriendly",
               "army.valleyNoLongerHeld",
@@ -29665,6 +29669,12 @@
                     "description": "seconds to camp before returning (0 = until recalled)",
                     "type": "integer",
                     "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "arriveAt": {
+                    "description": "land at this time (epoch ms; the start of its second): the army waits at home and leaves in time to land then. Omitted, it leaves now",
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
                     "maximum": 9007199254740991
                   }
                 },

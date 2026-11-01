@@ -3,14 +3,27 @@ import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { type CityBean, getArmiesQueryKey, getCitiesByCityIdQueryKey, postCitiesArmies, postCitiesArmiesEstimate } from '@marchlands/api-client';
-import { armyLoad, BuffId, buildingLevel, BuildingType, heroPower, HeroStatus, maxArmyTroops, Mission, TROOP_KEYS, type TroopKey } from '@marchlands/core';
+import {
+  armyLoad,
+  BuffId,
+  buildingLevel,
+  BuildingType,
+  heroPower,
+  HeroStatus,
+  marchTimeMs,
+  maxArmyTroops,
+  Mission,
+  TROOP_KEYS,
+  type TroopKey,
+} from '@marchlands/core';
 
 import { MISSION_NAMES } from '@/components/armies-panel/constants';
 import { Countdown } from '@/components/countdown/countdown';
 import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
 import { RES } from '@/components/send-army-dialog/send-form/constants';
+import { LandAt } from '@/components/send-army-dialog/send-form/land-at/land-at';
 import { ScoutNote } from '@/components/send-army-dialog/send-form/scout-note/scout-note';
-import { capTroops, defaultHero } from '@/components/send-army-dialog/send-form/utils';
+import { capTroops, defaultHero, landingTime } from '@/components/send-army-dialog/send-form/utils';
 import type { SendTarget } from '@/components/send-army-dialog/types';
 import { TroopBadge } from '@/components/troop-badge/troop-badge';
 import { Button } from '@/components/ui/button';
@@ -39,6 +52,9 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   const troops = capTroops(entered, city.troop);
   const scouting = Number(mission) === Mission.SCOUT;
   const [resources, setResources] = useState<Partial<Record<(typeof RES)[number], string>>>({});
+  // camp times: a landing time in UTC, kept for the next wave so waves land together
+  const [landAt, setLandAt] = useState<{ date: string; time: string } | null>(null);
+  const arriveAt = landAt ? landingTime(landAt.date, landAt.time) : null;
   // only scouts go on a scouting mission
   const available = Object.entries(TROOP_KEYS).filter(([, key]) => (city.troop[key] ?? 0) > 0 && (!scouting || key === 'scouter'));
   const idleHeroes = city.heros.filter((h) => h.status === HeroStatus.IDLE && !h.seized);
@@ -55,6 +71,8 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   const battleBuffs =
     Number(mission) === Mission.ATTACK ? (player.data?.buffs ?? []).filter((b) => (b.id === BuffId.ATTACK || b.id === BuffId.DEFENSE) && b.endTime > now) : [];
   const resourceBody = typedAmounts(resources);
+  // the march as the server works it out (a Relief Station shortens one to your own city, which this leaves out)
+  const marchMs = chosen > 0 ? marchTimeMs(city.fieldId, target.tileId, troopBody, player.data?.research ?? {}, city.buildings) : null;
   const path = { cityId: city.id };
   // carrying capacity of the chosen troops (troop load x Logistics), shared by every resource
   const capacity = armyLoad(troopBody, player.data?.research ?? {});
@@ -83,6 +101,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
           troops: troopBody,
           resources: Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY ? resourceBody : undefined,
           heroId: heroId === 'none' ? null : Number(heroId),
+          arriveAt: arriveAt ?? undefined,
         },
         throwOnError: true,
       });
@@ -231,6 +250,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
             ))}
           </div>
         )}
+        <LandAt marchMs={marchMs} value={landAt} onChange={setLandAt} />
         {estimate.data && (
           <p className="text-sm text-muted-foreground">{t('form.estimate', { time: duration(estimate.data.marchTime), load: fmt(estimate.data.load) })}</p>
         )}
@@ -240,7 +260,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
           {t('form.estimateButton')}
         </Button>
         <Button
-          disabled={!Object.keys(troopBody).length || over || (carriesResources && overloaded) || send.isPending}
+          disabled={!Object.keys(troopBody).length || over || (carriesResources && overloaded) || (landAt != null && arriveAt == null) || send.isPending}
           onClick={() =>
             send.mutate(undefined, {
               // stay open for the next wave: the hero just sent is busy now (an attack picks the next strongest), and the

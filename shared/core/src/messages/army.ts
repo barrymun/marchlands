@@ -25,6 +25,9 @@ export const ARMY_MESSAGES = {
   heroRequiredSettlers: [],
   notFound: [],
   alreadyReturning: [],
+  /** a landing time sooner than the march allows (`time`: the march) or further ahead than allowed (`time`: the limit) */
+  landTooSoon: ['time'],
+  landTooLate: ['time'],
   // why a march turned back (shown in a "Mission aborted" report)
   unknownMission: [],
   destinationNotFriendly: [],

@@ -9,9 +9,20 @@ import { armies, cities, heroes, players } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { armyBean } from '#/dto.ts';
-import { type ArmyRow, findCity, getPlayer, saveArmy, type TileRow } from '#/repo.ts';
+import { type ArmyRow, findCity, getArmy, getPlayer, saveArmy, type TileRow } from '#/repo.ts';
 
 export const armyRef = (id: number) => `army:${id}`;
+/** The timed event that sets off an army waiting to land at a chosen time (camp times). */
+export const departRef = (id: number) => `army-depart:${id}`;
+
+/** An army set to land at a chosen time that hasn't left its city yet: only its own player sees it. */
+export const isWaiting = (a: Pick<ArmyRow, 'direction' | 'startTime'>, now: number) => a.direction === ArmyDirection.FORWARD && a.startTime > now;
+
+/** Timed event "army.depart": a waiting army sets off, so its target sees it coming from now on. */
+export async function departArmy(ctx: Ctx, armyId: number) {
+  const a = await getArmy(ctx, armyId);
+  if (a) await notifyArmyParties(ctx, a);
+}
 
 /** Where a city stands, as a message (army and report positions). */
 export function cityPosition(name: string, tileId: number): Message {
@@ -72,7 +83,8 @@ export async function homeMarchMs(ctx: Ctx, a: ArmyRow, fromTile: number): Promi
 
 /**
  * self: my armies; friend: other lords' armies stationed at or reinforcing/transporting to me;
- * enemy: hostile armies heading for me (troop details need a Beacon Tower).
+ * enemy: hostile armies heading for me (troop details need a Beacon Tower). Another lord's army still waiting at home
+ * to land at a chosen time isn't seen until it sets off.
  */
 export async function visibleArmies(ctx: Ctx, playerId: number) {
   const rows = await ctx.tx
@@ -89,6 +101,7 @@ export async function visibleArmies(ctx: Ctx, playerId: number) {
   for (const { a, heroName, heroLevel, king } of rows) {
     const extra = { heroName: heroName ?? undefined, heroLevel: heroLevel ?? undefined, king };
     if (a.playerId === playerId) self.push(armyBean(a, extra));
+    else if (isWaiting(a, ctx.now)) continue;
     else if ((a.mission === Mission.ATTACK || a.mission === Mission.SCOUT) && a.direction === ArmyDirection.FORWARD) {
       enemy.push(armyBean(a, { ...extra, visible: beacon > 0, heroName: beacon > 1 ? extra.heroName : '' }));
     } else if (a.direction !== ArmyDirection.BACKWARD) friend.push(armyBean(a, extra));

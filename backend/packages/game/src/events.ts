@@ -4,6 +4,7 @@
 import { BALANCE, BUFF_IDS, BuffId, msg } from '@marchlands/core';
 
 import type { Ctx } from '#/context.ts';
+import { departArmy } from '#/engine/armies.ts';
 import { completeBuilding } from '#/engine/buildings.ts';
 import { processArmy } from '#/engine/combat.ts';
 import { resumeFlow, runQueue, runScheduledHeal } from '#/engine/flows.ts';
@@ -75,6 +76,8 @@ export async function dispatchEvent(ctx: Ctx, ev: EventRow): Promise<void> {
     case 'army':
       await processArmy(ctx, num(p.armyId));
       return;
+    case 'army.depart':
+      return departArmy(ctx, num(p.armyId));
     case 'buff.expire':
       return BUFF_IDS.includes(p.buffId as BuffId) ? expireBuff(ctx, playerId(), p.buffId as BuffId) : undefined;
     case 'hero.buff':
