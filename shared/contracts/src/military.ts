@@ -123,6 +123,10 @@ export const MapCastle = z
     npc: z.boolean(),
     level: z.number().int(),
     historicLevel: z.number().int().optional().describe("a player's captured historic city: its level (12 to 18)"),
+    seatTitle: z
+      .object({ level: z.number().int().describe('16: Ruler of the state; 18: Sovereign of Atlantis'), zoneId: z.number().int() })
+      .optional()
+      .describe("(marchlands) its player's title from the historic cities they hold"),
     cityId: z.number().int().optional(),
     playerId: z.number().int().optional(),
     userName: z.string().optional(),

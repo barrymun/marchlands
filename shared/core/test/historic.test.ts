@@ -21,6 +21,7 @@ import {
   mapLevelOf,
   maxArmyTroops,
   seatLoyalty,
+  seatTitle,
   TechType,
   TileType,
 } from '#/index.ts';
@@ -232,5 +233,33 @@ describe(autoDraftsDue.name, () => {
     expect(autoDraftsDue(day + 6 * 3_600_000 - 1)).toBe(1);
     expect(autoDraftsDue(day + 6 * 3_600_000)).toBe(2);
     expect(autoDraftsDue(day + 23 * 3_600_000)).toBe(4);
+  });
+});
+
+describe(seatTitle.name, () => {
+  const at = (x: number, y: number) => y * 800 + x;
+
+  it('makes the holder of a state capital its ruler, and Atlantis’s holder its sovereign over all else', () => {
+    expect(seatTitle([{ historicLevel: 16, tileId: at(300, 100) }])).toEqual({ level: 16, zoneId: 1 });
+    expect(
+      seatTitle([
+        { historicLevel: 12, tileId: at(9, 9) },
+        { historicLevel: 16, tileId: at(300, 100) },
+        { historicLevel: 18, tileId: at(0, 0) },
+      ]),
+    ).toEqual({
+      level: 18,
+      zoneId: 0,
+    });
+  });
+
+  it('gives none for level 12s and 14s, or no seat', () => {
+    expect(
+      seatTitle([
+        { historicLevel: 14, tileId: at(33, 33) },
+        { historicLevel: null, tileId: at(5, 5) },
+      ]),
+    ).toBeNull();
+    expect(seatTitle([])).toBeNull();
   });
 });

@@ -128,6 +128,7 @@ export function resourceBean(b: CityBundle, stats: CityStats): ResourceBean {
     taxConverted: Math.round(stats.taxConverted),
     taxItemBonus: Math.round(stats.taxBuff),
     taxItemShare: stats.taxBuff ? BALANCE.resourceBuffBonus : 0,
+    tribute: Math.round(stats.tribute),
     herosSalary: round2(stats.heroSalary),
     troopCostFood: round2(stats.upkeep),
     curPopulation: Math.floor(c.population),
@@ -176,7 +177,10 @@ export function valleyBean(t: TileRow): ValleyBean {
   return { id: t.id, x, y, type: t.type, level: t.level, ownerCityId: t.ownerCityId };
 }
 
-export function playerInfo(p: PlayerRow, extras: { allianceName?: string; cityCount: number; population?: number }): PlayerInfo {
+export function playerInfo(
+  p: PlayerRow,
+  extras: { allianceName?: string; cityCount: number; population?: number; seatTitle?: PlayerInfo['seatTitle'] },
+): PlayerInfo {
   return {
     id: p.id,
     userName: p.name,
@@ -186,6 +190,7 @@ export function playerInfo(p: PlayerRow, extras: { allianceName?: string; cityCo
     prestige: Math.floor(p.prestige),
     honor: Math.floor(p.honor),
     titleId: p.title,
+    seatTitle: extras.seatTitle ?? null,
     ranking: p.prestigeRank,
     honorRank: p.honorRank,
     allianceId: p.allianceId,

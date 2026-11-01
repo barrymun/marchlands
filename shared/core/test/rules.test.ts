@@ -119,6 +119,13 @@ describe('economy', () => {
     expect(s.rates.gold).toBe(5); // 50 pop * 10% tax
   });
 
+  it('(marchlands) a held historic city brings its tribute in gold, by its level', () => {
+    const s = computeCityStats(city({ historicLevel: 16 }), ctx(), 0);
+    expect(s.tribute).toBe(BALANCE.historic.tribute[16]);
+    expect(s.rates.gold).toBe(5 + BALANCE.historic.tribute[16]);
+    expect(computeCityStats(city(), ctx(), 0).tribute).toBe(0);
+  });
+
   it('(marchlands) the tax rate sells that share of field output to the merchant; the base tax stays', () => {
     const c = city({ population: 1000, buildings: [{ positionId: 1001, typeId: 7, level: 3, status: 0, startTime: 0, endTime: 0 }] });
     const free = computeCityStats(c, ctx(), 0);

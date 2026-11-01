@@ -7,7 +7,8 @@
   "gold": {
     "baseTax": "Base tax",
     "taxSold": "Tax {{rate}}% (sold output)",
-    "heroSalaries": "Hero salaries"
+    "heroSalaries": "Hero salaries",
+    "tribute": "Historic city tribute"
   },
   "breakdown": {
     "base": "Base",

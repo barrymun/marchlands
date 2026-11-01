@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { AllianceRank, BALANCE, FACTION_IDS, FactionId, historicCities, msg, ref, TileType } from '@marchlands/core';
 
-import { factionName, historicName, rankName, tileName, zoneName } from '@/lib/game-data';
+import { factionName, historicName, rankName, seatTitleName, tileName, zoneName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
 import factionsGB from '@/locales/en-GB/data-factions.json';
@@ -93,5 +93,14 @@ describe('data-historic', () => {
     expect(historicName(9, 9)).toBeNull();
     await i18n.changeLanguage('ja-JP');
     expect(historicName(300, 100)).toBe('北京');
+  });
+});
+
+describe('seat titles', () => {
+  it('names a state’s ruler with the state in title case, and Atlantis’s sovereign', async () => {
+    expect(seatTitleName({ level: 16, zoneId: 2 })).toBe('Ruler of North March');
+    expect(seatTitleName({ level: 18, zoneId: 0 })).toBe('Sovereign of Atlantis');
+    await i18n.changeLanguage('ja-JP');
+    expect(seatTitleName({ level: 16, zoneId: 1 })).toBe('ザクセンの統治者');
   });
 });

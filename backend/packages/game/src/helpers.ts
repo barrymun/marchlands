@@ -9,6 +9,7 @@ import { alliances, cities, one } from '@marchlands/db';
 import { type CityBundle, cityStats } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
 import { cityBean, playerInfo, resourceBean } from '#/dto.ts';
+import { seatTitles } from '#/engine/seats.ts';
 import type { CityRow, PlayerRow } from '#/repo.ts';
 
 export function spendResources(city: CityRow, cost: Partial<Resources>, message: Message = msg('common.notEnoughResources'), code = -1) {
@@ -108,7 +109,7 @@ export async function playerInfoOf(ctx: Ctx, p: PlayerRow) {
     const [a] = await ctx.tx.select({ name: alliances.name }).from(alliances).where(eq(alliances.id, p.allianceId));
     allianceName = a?.name ?? '';
   }
-  return playerInfo(p, { cityCount: Number(n), allianceName });
+  return playerInfo(p, { cityCount: Number(n), allianceName, seatTitle: (await seatTitles(ctx, [p.id])).get(p.id) ?? null });
 }
 
 export async function pushPlayerInfo(ctx: Ctx, p: PlayerRow) {

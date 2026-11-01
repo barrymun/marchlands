@@ -7,7 +7,8 @@
   "gold": {
     "baseTax": "基本税収",
     "taxSold": "税 {{rate}}%（生産物を売却）",
-    "heroSalaries": "英雄の給料"
+    "heroSalaries": "英雄の給料",
+    "tribute": "歴史都市の貢納"
   },
   "breakdown": {
     "base": "基本",

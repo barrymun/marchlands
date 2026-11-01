@@ -51,7 +51,20 @@ import { marketCandles, marketOrders, marketShipments, marketTrades, one, pgArra
 
 import { openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
-import { basicResource, escrowGold, GOLD, loadMerchant, logTrade, MERCHANT_KEY, resKey, ship, tradeStat, withFee, WORLD_SCOPE } from '#/engine/market.ts';
+import {
+  basicResource,
+  escrowGold,
+  GOLD,
+  loadMerchant,
+  logTrade,
+  MERCHANT_KEY,
+  payFeeShares,
+  resKey,
+  ship,
+  tradeStat,
+  withFee,
+  WORLD_SCOPE,
+} from '#/engine/market.ts';
 import { loadNpcEconomy, saveNpcEconomy } from '#/engine/npc-economy.ts';
 import { createReport } from '#/engine/reports.ts';
 import { cityTerms, type CityTerms, tradedWithFactions } from '#/engine/reputation.ts';
@@ -536,6 +549,9 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
       sellerPlayerId: buy ? (f.other?.playerId ?? null) : playerId,
       npc: f.source === 'factions',
     });
+    // (marchlands) a player buyer's fee: shares for the holders of their state's capital and of Atlantis
+    const buyerCity = buy ? cityId : f.other?.cityId;
+    if (buyerCity != null) await payFeeShares(ctx, buyerCity, f.gold);
     tradeStat(ctx, playerId, cityId, buy, res, f.qty, gold);
     if (!f.other) continue;
     const other = f.other;

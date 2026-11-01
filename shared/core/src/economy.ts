@@ -67,6 +67,8 @@ export interface EconomyCity {
   /** a rate the city never set counts as 100% */
   workRates: Partial<ResourceSet>;
   misc: CityMisc;
+  /** (marchlands) a held historic city: its level, for its tribute */
+  historicLevel?: number | null;
 }
 
 export interface MayorStats {
@@ -120,6 +122,8 @@ export interface CityStats {
   taxConverted: number;
   /** gold per hour the Gold Production item adds to the base tax (part of taxIncome) */
   taxBuff: number;
+  /** (marchlands) gold per hour a held historic city's tribute brings (BALANCE.historic.tribute, per real hour) */
+  tribute: number;
   /** (marchlands) field output per hour the tax rate takes and sells to the merchant */
   taxed: Record<BasicResource, number>;
   heroSalary: number;
@@ -257,7 +261,10 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
   }
   rates.food -= upkeep;
   const taxIncome = baseTax + taxConverted;
-  rates.gold = taxIncome - heroSalary;
+  // (marchlands) a held historic city's tribute, paid per real hour like salaries
+  const seat = city.historicLevel as 12 | 14 | 16 | 18 | null | undefined;
+  const tribute = seat && seat in BALANCE.historic.tribute ? BALANCE.historic.tribute[seat] / getGameSpeed() : 0;
+  rates.gold = taxIncome + tribute - heroSalary;
 
   return {
     maxPopulation,
@@ -273,6 +280,7 @@ export function computeCityStats(city: EconomyCity, ctx: EconomyContext, now: nu
     taxIncome,
     taxConverted,
     taxBuff,
+    tribute,
     taxed,
     heroSalary,
     upkeep,
@@ -375,8 +383,8 @@ function integrate(city: EconomyCity, stats: CityStats, dtMs: number, result: Se
     }
   }
   const gold = city.gold + stats.rates.gold * hours;
-  f.produced.gold += stats.taxIncome * hours;
-  f.salaries += gold < 0 ? Math.max(0, city.gold + stats.taxIncome * hours) : stats.heroSalary * hours;
+  f.produced.gold += (stats.taxIncome + stats.tribute) * hours;
+  f.salaries += gold < 0 ? Math.max(0, city.gold + (stats.taxIncome + stats.tribute) * hours) : stats.heroSalary * hours;
   city.gold = Math.max(0, gold);
 }
 

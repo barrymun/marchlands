@@ -220,6 +220,10 @@ export type ResourceBeanInput = {
      * that item bonus, as a share of the base tax (0.25 = +25%)
      */
     taxItemShare: number;
+    /**
+     * (marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)
+     */
+    tribute: number;
     herosSalary: number;
     /**
      * troop food upkeep per game hour, 2 decimals
@@ -310,6 +314,16 @@ export type PlayerInfoInput = {
      * nobility title (named by the client)
      */
     titleId: number;
+    /**
+     * (marchlands) the title the historic cities they hold give them
+     */
+    seatTitle: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    } | null;
     ranking: number;
     honorRank: number;
     alliance: string;
@@ -485,6 +499,16 @@ export type MapCastleInput = {
      * a player's captured historic city: its level (12 to 18)
      */
     historicLevel?: number;
+    /**
+     * (marchlands) its player's title from the historic cities they hold
+     */
+    seatTitle?: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    };
     cityId?: number;
     playerId?: number;
     userName?: string;
@@ -606,6 +630,16 @@ export type MapFieldCastleInfoInput = {
      * a player's captured historic city: its level (12 to 18)
      */
     historicLevel?: number;
+    /**
+     * (marchlands) its player's title from the historic cities they hold
+     */
+    seatTitle?: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    };
     cityId?: number;
     playerId?: number;
     userName?: string;
@@ -1144,6 +1178,16 @@ export type PublicPlayerInfoInput = {
      * nobility title (named by the client)
      */
     titleId: number;
+    /**
+     * (marchlands) the title the historic cities they hold give them
+     */
+    seatTitle: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    } | null;
     ranking: number;
     honorRank: number;
     alliance: string;
@@ -3279,6 +3323,16 @@ export type RankingPlayerEntryInput = {
     prestige: number;
     honor: number;
     titleId: number;
+    /**
+     * (marchlands) the title the historic cities they hold give them
+     */
+    seatTitle: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    } | null;
     population: number;
     castleCount: number;
     /**
@@ -3597,6 +3651,10 @@ export type ResourceBean = {
      * that item bonus, as a share of the base tax (0.25 = +25%)
      */
     taxItemShare: number;
+    /**
+     * (marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)
+     */
+    tribute: number;
     herosSalary: number;
     /**
      * troop food upkeep per game hour, 2 decimals
@@ -3687,6 +3745,16 @@ export type PlayerInfo = {
      * nobility title (named by the client)
      */
     titleId: number;
+    /**
+     * (marchlands) the title the historic cities they hold give them
+     */
+    seatTitle: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    } | null;
     ranking: number;
     honorRank: number;
     alliance: string;
@@ -3862,6 +3930,16 @@ export type MapCastle = {
      * a player's captured historic city: its level (12 to 18)
      */
     historicLevel?: number;
+    /**
+     * (marchlands) its player's title from the historic cities they hold
+     */
+    seatTitle?: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    };
     cityId?: number;
     playerId?: number;
     userName?: string;
@@ -3983,6 +4061,16 @@ export type MapFieldCastleInfo = {
      * a player's captured historic city: its level (12 to 18)
      */
     historicLevel?: number;
+    /**
+     * (marchlands) its player's title from the historic cities they hold
+     */
+    seatTitle?: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    };
     cityId?: number;
     playerId?: number;
     userName?: string;
@@ -4521,6 +4609,16 @@ export type PublicPlayerInfo = {
      * nobility title (named by the client)
      */
     titleId: number;
+    /**
+     * (marchlands) the title the historic cities they hold give them
+     */
+    seatTitle: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    } | null;
     ranking: number;
     honorRank: number;
     alliance: string;
@@ -6656,6 +6754,16 @@ export type RankingPlayerEntry = {
     prestige: number;
     honor: number;
     titleId: number;
+    /**
+     * (marchlands) the title the historic cities they hold give them
+     */
+    seatTitle: {
+        /**
+         * 16: Ruler of the state; 18: Sovereign of Atlantis
+         */
+        level: number;
+        zoneId: number;
+    } | null;
     population: number;
     castleCount: number;
     /**

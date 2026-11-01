@@ -1,7 +1,7 @@
 // Marketplace settlement: the computer merchant's sweep, shipments arriving, and the fee, escrow and
 // trade statistics shared with trade.*.
 
-import { and, asc, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import {
@@ -19,8 +19,9 @@ import {
   type MerchantState,
   msg,
   ReportType,
+  stateOf,
 } from '@marchlands/core';
-import { marketCandles, marketOrders, marketShipments, marketTrades, one, worldState } from '@marchlands/db';
+import { cities, marketCandles, marketOrders, marketShipments, marketTrades, one, worldState } from '@marchlands/db';
 
 import { openCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -106,7 +107,10 @@ export async function logTrade(ctx: Ctx, t: Omit<typeof marketTrades.$inferInser
   await addToCandles(ctx, t.resType, { open: t.price, high: t.price, low: t.price, close: t.price, volume: t.amount, gold: t.gold, trades: 1 });
 }
 
-export async function ship(ctx: Ctx, s: { playerId: number; cityId: number; orderId: number; resType: number; amount: number; price: number; ms: number }) {
+export async function ship(
+  ctx: Ctx,
+  s: { playerId: number; cityId: number; orderId: number | null; resType: number; amount: number; price: number; ms: number },
+) {
   const row = one(
     await ctx.tx
       .insert(marketShipments)
@@ -124,6 +128,28 @@ export async function ship(ctx: Ctx, s: { playerId: number; cityId: number; orde
   );
   ctx.schedule({ type: 'shipment', dueAt: row.endTime, playerId: s.playerId, cityId: s.cityId, refKey: `shipment:${row.id}`, payload: { shipmentId: row.id } });
   return row;
+}
+
+/**
+ * (marchlands) Shares of the fee a buyer in `buyerCityId` paid on `gold` of a trade, for the holders of historic
+ * cities (docs/features/historical-cities.md): the holder of the capital of the buyer's state, and of Atlantis
+ * (BALANCE.historic.feeShare), each delivered to the seat as a gold shipment.
+ */
+export async function payFeeShares(ctx: Ctx, buyerCityId: number, gold: number) {
+  const fee = gold * BALANCE.marketFee;
+  if (fee < 1) return;
+  const [buyer] = await ctx.tx.select({ tileId: cities.tileId }).from(cities).where(eq(cities.id, buyerCityId));
+  if (!buyer) return;
+  const seats = await ctx.tx
+    .select({ id: cities.id, playerId: cities.playerId, tileId: cities.tileId, historicLevel: cities.historicLevel })
+    .from(cities)
+    .where(inArray(cities.historicLevel, [16, 18]));
+  for (const s of seats) {
+    const share =
+      s.historicLevel === 18 ? BALANCE.historic.feeShare.atlantis : stateOf(s.tileId) === stateOf(buyer.tileId) ? BALANCE.historic.feeShare.capital : 0;
+    const amount = Math.floor(fee * share);
+    if (amount > 0) await ship(ctx, { playerId: s.playerId, cityId: s.id, orderId: null, resType: GOLD, amount, price: 0, ms: 0 });
+  }
 }
 
 type OrderRow = typeof marketOrders.$inferSelect;
@@ -159,6 +185,7 @@ export async function settleResting(ctx: Ctx, o: OrderRow, qty: number, goldExac
   o.filled += qty;
   if (buy) {
     await ship(ctx, { playerId: o.playerId, cityId: o.cityId, orderId: o.id, resType: o.resType, amount: qty, price, ms: 0 });
+    await payFeeShares(ctx, o.cityId, goldExact);
     const surplus = escrowGold(qty, o.price) - withFee(goldExact);
     if (surplus > 0) await ship(ctx, { playerId: o.playerId, cityId: o.cityId, orderId: o.id, resType: GOLD, amount: surplus, price: 0, ms: 0 });
   } else {

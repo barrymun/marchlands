@@ -58,6 +58,22 @@ export function historicDay(tileId: number, day: number): HistoricDay {
   };
 }
 
+/** A player's title from the historic cities they hold: a state's capital (16) or Atlantis (18), in that state. */
+export interface SeatTitle {
+  level: 16 | 18;
+  /** the state the seat stands in (Atlantis: Friesland's corner) */
+  zoneId: number;
+}
+
+/**
+ * A player's seat title from the historic cities they hold (docs/features/historical-cities.md): Sovereign of Atlantis
+ * when they hold it, else Ruler of the state whose capital they hold; null when they hold neither.
+ */
+export function seatTitle(held: readonly { historicLevel: number | null; tileId: number }[]): SeatTitle | null {
+  const top = held.find((c) => c.historicLevel === 18) ?? held.find((c) => c.historicLevel === 16);
+  return top ? { level: top.historicLevel === 18 ? 18 : 16, zoneId: stateOf(top.tileId) } : null;
+}
+
 /** A historic city's full garrison and fortifications on a day. */
 export function historicGarrison(level: HistoricLevel, day: HistoricDay): { troops: TroopCounts; forts: FortCounts } {
   const [warriors, foot, archers, horse, siege] = BALANCE.historic.troops[level];

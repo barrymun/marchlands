@@ -33,6 +33,7 @@ describe(rankings.playerRanking.name, () => {
           prestige: 100,
           honor: 3,
           titleId: 0,
+          seatTitle: null,
           population: BALANCE.startPopulation,
           castleCount: 1,
           alliance: 'Order',

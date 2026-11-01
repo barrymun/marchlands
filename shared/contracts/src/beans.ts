@@ -96,6 +96,7 @@ export const ResourceBean = z
     taxConverted: z.number().int().describe('(marchlands) gold per game hour the tax rate earns from field output'),
     taxItemBonus: z.number().int().describe('gold per game hour the Gold Production item adds to the base tax (part of taxIncome)'),
     taxItemShare: z.number().describe('that item bonus, as a share of the base tax (0.25 = +25%)'),
+    tribute: z.number().int().describe("(marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)"),
     herosSalary: z.number(),
     troopCostFood: z.number().describe('troop food upkeep per game hour, 2 decimals'),
     curPopulation: z.number().int(),
@@ -148,6 +149,10 @@ export const PlayerInfo = PlayerRow.pick({ id: true, sex: true, flag: true, face
     prestige: z.number().int(),
     honor: z.number().int(),
     titleId: z.number().int().describe('nobility title (named by the client)'),
+    seatTitle: z
+      .object({ level: z.number().int().describe('16: Ruler of the state; 18: Sovereign of Atlantis'), zoneId: z.number().int() })
+      .nullable()
+      .describe('(marchlands) the title the historic cities they hold give them'),
     ranking: z.number().int(),
     honorRank: z.number().int(),
     alliance: z.string(),

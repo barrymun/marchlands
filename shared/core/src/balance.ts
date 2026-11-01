@@ -207,6 +207,10 @@ export const BALANCE = {
     draftShare: 0.2,
     /** drafts a seat may make each UTC day; drafting by itself, one each equal part of the day */
     draftsPerDay: 4,
+    /** gold a held seat pays its holder each real hour, into the seat city */
+    tribute: { 12: 2_000, 14: 6_000, 16: 20_000, 18: 60_000 } as Record<12 | 14 | 16 | 18, number>,
+    /** shares of the market fee (BALANCE.marketFee) paid to the holder of the buyer's state's capital, and of Atlantis */
+    feeShare: { capital: 0.2, atlantis: 0.1 },
   },
   /** (marchlands) how far ahead an army can be set to land at a chosen time (camp times; real time) */
   landAtMaxAheadMs: 24 * HOUR,

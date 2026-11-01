@@ -27,6 +27,7 @@ import { cities, type Db, pgArray, players, tiles, worldState } from '@marchland
 
 import { type Ctx } from '#/context.ts';
 import { relationBetween } from '#/engine/relations.ts';
+import { seatTitles } from '#/engine/seats.ts';
 import { refreshZoneStats, type ZoneStats } from '#/engine/world.ts';
 
 export interface WorldInfo {
@@ -175,6 +176,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
         .where(inArray(cities.id, cityIds))
     : [];
   const cityById = new Map(cityRows.map((c) => [c.id, c]));
+  const titles = await seatTitles(ctx, [...new Set(cityRows.map((c) => c.playerId))]);
   const allianceNames = await allianceNameMap(
     ctx,
     cityRows.map((c) => c.allianceId),
@@ -203,6 +205,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
           npc: false,
           level,
           ...(c.historicLevel ? { historicLevel: c.historicLevel } : {}),
+          ...(titles.has(c.playerId) ? { seatTitle: titles.get(c.playerId) } : {}),
           cityId: c.id,
           playerId: c.playerId,
           userName: c.userName,

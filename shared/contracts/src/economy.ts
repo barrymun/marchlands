@@ -463,6 +463,10 @@ export const RankingPlayerEntry = PlayerRow.pick({ id: true, flag: true, faceUrl
     prestige: int(),
     honor: int(),
     titleId: int(),
+    seatTitle: z
+      .object({ level: z.number().int().describe('16: Ruler of the state; 18: Sovereign of Atlantis'), zoneId: z.number().int() })
+      .nullable()
+      .describe('(marchlands) the title the historic cities they hold give them'),
     population: PlayerRow.shape.population,
     castleCount: int(),
     alliance: z.string().describe('alliance name, empty when none'),

@@ -20,7 +20,7 @@ import { usePlayer } from '@/hooks/use-game';
 import { copyText } from '@/lib/clipboard';
 import { FACTION_STYLE } from '@/lib/factions';
 import { fmt } from '@/lib/format';
-import { factionName, tileName, zoneName } from '@/lib/game-data';
+import { factionName, seatTitleName, tileName, zoneName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
 /**
@@ -97,8 +97,9 @@ export function TileCard({
       {tile && (
         <>
           <div className="flex flex-wrap items-center gap-1">
-            <Badge variant="secondary">{tileName(tile.type)}</Badge>
-            <Badge variant="secondary">{t('common:level.short', { level: tile.level })}</Badge>
+            {/* a player's historic city shows as one, at its own level */}
+            <Badge variant="secondary">{tileName('historicLevel' in tile && tile.historicLevel ? TileType.HISTORIC : tile.type)}</Badge>
+            <Badge variant="secondary">{t('common:level.short', { level: ('historicLevel' in tile && tile.historicLevel) || tile.level })}</Badge>
             <Badge variant="outline">
               ({tile.x}, {tile.y}) · {zoneName(tile.zoneId)}
             </Badge>
@@ -117,6 +118,7 @@ export function TileCard({
               </Badge>
             )}
           </div>
+          {'seatTitle' in tile && tile.seatTitle && <Badge variant="outline">{seatTitleName(tile.seatTitle)}</Badge>}
           {'userName' in tile && tile.userName && (
             <p>
               {tile.allianceName

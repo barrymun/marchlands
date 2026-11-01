@@ -119,5 +119,9 @@
     "neutral": "中立",
     "friendly": "友好",
     "honoured": "崇敬"
+  },
+  "seatTitle": {
+    "ruler": "{{state}}の統治者",
+    "atlantis": "アトランティスの主権者"
   }
 }

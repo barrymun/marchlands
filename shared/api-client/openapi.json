@@ -1185,6 +1185,12 @@
             "type": "number",
             "description": "that item bonus, as a share of the base tax (0.25 = +25%)"
           },
+          "tribute": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)"
+          },
           "herosSalary": {
             "type": "number"
           },
@@ -1232,6 +1238,7 @@
           "taxConverted",
           "taxItemBonus",
           "taxItemShare",
+          "tribute",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -1485,6 +1492,34 @@
             "maximum": 9007199254740991,
             "description": "nobility title (named by the client)"
           },
+          "seatTitle": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+                  },
+                  "zoneId": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "level",
+                  "zoneId"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "(marchlands) the title the historic cities they hold give them"
+          },
           "ranking": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -1536,6 +1571,7 @@
           "prestige",
           "honor",
           "titleId",
+          "seatTitle",
           "ranking",
           "honorRank",
           "alliance",
@@ -1954,6 +1990,27 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "seatTitle": {
+            "description": "(marchlands) its player's title from the historic cities they hold",
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+              },
+              "zoneId": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "level",
+              "zoneId"
+            ]
+          },
           "cityId": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -2316,6 +2373,27 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "seatTitle": {
+            "description": "(marchlands) its player's title from the historic cities they hold",
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+              },
+              "zoneId": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "level",
+              "zoneId"
+            ]
           },
           "cityId": {
             "type": "integer",
@@ -3943,6 +4021,34 @@
             "maximum": 9007199254740991,
             "description": "nobility title (named by the client)"
           },
+          "seatTitle": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+                  },
+                  "zoneId": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "level",
+                  "zoneId"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "(marchlands) the title the historic cities they hold give them"
+          },
           "ranking": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -4039,6 +4145,7 @@
           "prestige",
           "honor",
           "titleId",
+          "seatTitle",
           "ranking",
           "honorRank",
           "alliance",
@@ -11399,6 +11506,34 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "seatTitle": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+                  },
+                  "zoneId": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "level",
+                  "zoneId"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "(marchlands) the title the historic cities they hold give them"
+          },
           "population": {
             "type": "integer",
             "minimum": -2147483648,
@@ -11436,6 +11571,7 @@
           "prestige",
           "honor",
           "titleId",
+          "seatTitle",
           "population",
           "castleCount",
           "alliance",
@@ -12918,6 +13054,12 @@
             "type": "number",
             "description": "that item bonus, as a share of the base tax (0.25 = +25%)"
           },
+          "tribute": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)"
+          },
           "herosSalary": {
             "type": "number"
           },
@@ -12965,6 +13107,7 @@
           "taxConverted",
           "taxItemBonus",
           "taxItemShare",
+          "tribute",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -13221,6 +13364,35 @@
             "maximum": 9007199254740991,
             "description": "nobility title (named by the client)"
           },
+          "seatTitle": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+                  },
+                  "zoneId": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "level",
+                  "zoneId"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "(marchlands) the title the historic cities they hold give them"
+          },
           "ranking": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -13272,6 +13444,7 @@
           "prestige",
           "honor",
           "titleId",
+          "seatTitle",
           "ranking",
           "honorRank",
           "alliance",
@@ -13700,6 +13873,28 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "seatTitle": {
+            "description": "(marchlands) its player's title from the historic cities they hold",
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+              },
+              "zoneId": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "level",
+              "zoneId"
+            ],
+            "additionalProperties": false
+          },
           "cityId": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -14067,6 +14262,28 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "seatTitle": {
+            "description": "(marchlands) its player's title from the historic cities they hold",
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991,
+                "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+              },
+              "zoneId": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "level",
+              "zoneId"
+            ],
+            "additionalProperties": false
           },
           "cityId": {
             "type": "integer",
@@ -15743,6 +15960,35 @@
             "maximum": 9007199254740991,
             "description": "nobility title (named by the client)"
           },
+          "seatTitle": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+                  },
+                  "zoneId": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "level",
+                  "zoneId"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "(marchlands) the title the historic cities they hold give them"
+          },
           "ranking": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -15840,6 +16086,7 @@
           "prestige",
           "honor",
           "titleId",
+          "seatTitle",
           "ranking",
           "honorRank",
           "alliance",
@@ -23387,6 +23634,35 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "seatTitle": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991,
+                    "description": "16: Ruler of the state; 18: Sovereign of Atlantis"
+                  },
+                  "zoneId": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "level",
+                  "zoneId"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "(marchlands) the title the historic cities they hold give them"
+          },
           "population": {
             "type": "integer",
             "minimum": -2147483648,
@@ -23424,6 +23700,7 @@
           "prestige",
           "honor",
           "titleId",
+          "seatTitle",
           "population",
           "castleCount",
           "alliance",

@@ -8,12 +8,12 @@ import { type TestPlayer } from '#test/support/factories.ts';
 import type { TestGame } from '#test/support/game.ts';
 
 /**
- * Make a player's city a held level 12 historic city where it stands (a shortcut past capturing one in battle, which
- * the combat tests cover): its area is then the 9 tiles round it.
+ * Make a player's city a held historic city (level 12 unless given) where it stands: a shortcut past capturing one in
+ * battle, which the combat tests cover. A level 12's area is then the 9 tiles round it.
  */
-export async function makeSeat(g: TestGame, p: TestPlayer, opts: { auto?: boolean } = {}) {
+export async function makeSeat(g: TestGame, p: TestPlayer, opts: { auto?: boolean; level?: 12 | 14 | 16 | 18 } = {}) {
   const city = await getCity(g, p.cityId);
-  await saveCity(g, { ...city, historicLevel: 12, draftAuto: opts.auto ?? true });
+  await saveCity(g, { ...city, historicLevel: opts.level ?? 12, draftAuto: opts.auto ?? true });
   return getCity(g, p.cityId);
 }
 

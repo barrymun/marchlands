@@ -2,8 +2,11 @@
 // queries below page over them with optional case-insensitive name search.
 
 import { sql } from 'drizzle-orm';
+
 import { GameError, msg } from '@marchlands/core';
+
 import { type Ctx } from '#/context.ts';
+import { seatTitles } from '#/engine/seats.ts';
 
 function paging(pageNo: number, pageSize: number) {
   if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 50) throw new GameError(msg('common.invalidData'), -99);
@@ -67,6 +70,10 @@ export async function playerRanking(ctx: Ctx, sortType: number, pageNo: number, 
     where ${key ? sql`name ilike ${like(key)}` : sql`true`}
     order by rank limit ${size} offset ${offset}`);
   const total = Number(rows.rows[0]?.total ?? 0);
+  const titles = await seatTitles(
+    ctx,
+    rows.rows.map((r) => Number(r.id)),
+  );
   return {
     pageNo: page,
     pageSize: size,
@@ -78,6 +85,7 @@ export async function playerRanking(ctx: Ctx, sortType: number, pageNo: number, 
       prestige: Math.floor(Number(r.prestige)),
       honor: Math.floor(Number(r.honor)),
       titleId: Number(r.title),
+      seatTitle: titles.get(Number(r.id)) ?? null,
       population: Number(r.population),
       castleCount: Number(r.cities),
       alliance: r.alliance ?? '',

@@ -123,5 +123,9 @@
     "neutral": "Neutral",
     "friendly": "Friendly",
     "honoured": "Honoured"
+  },
+  "seatTitle": {
+    "ruler": "Ruler of {{state}}",
+    "atlantis": "Sovereign of Atlantis"
   }
 }
