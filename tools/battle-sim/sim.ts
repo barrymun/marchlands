@@ -8,15 +8,30 @@
 //     [--loyalty 100 --loyalty-per-win 3] [--wall 12] [--refill 0.1] [--city-research 10] [--seeds 10]   (plans: plans.ts; a historic city's
 //     garrison refilling every second between waves, siege.ts)
 //
-// Common options: --level 10 (barbarian city level), --seeds N, and the lord: --research 10, the hero
-// --hero-level 100 --power 169 --stratagem 18 (its own points, without gear), the gear --gear-level 10 --stars 10
-// --gear-stat power, --no-attack-item --defense-item (defaults: DEFAULT_LORD in lib.ts).
+// Common options: --level 10 (barbarian city level), --seeds N, and the lord: --research 10 (every research) and
+// --tech archery=3,horseback-riding=8 (some at other levels), the hero --hero-level 100 --power 169 --stratagem 18 (its
+// own points, without gear), the gear --gear-level 10 --stars 10 --gear-stat power, --no-attack-item --defense-item
+// (defaults: DEFAULT_LORD in lib.ts).
+// What defends (compare, grid, trace; Defence in lib.ts): --garrison 0.42 (the share of the barbarian city's troops and
+// fortifications back since the last wave), --defenders militia=1000 or none and --forts arrowTower=18333 or none (in
+// their place: a player's city and wall at --level), --defender-research 10 (a barbarian city has none).
 
 import { parseArgs } from 'node:util';
 
-import { GEAR_STATS, type GearStat, historicResearch, TROOP_KEY_LIST, type TroopCounts, type TroopKey } from '@marchlands/core';
+import {
+  FORT_KEY_LIST,
+  type FortCounts,
+  type FortKey,
+  GEAR_STATS,
+  type GearStat,
+  historicResearch,
+  TechType,
+  TROOP_KEY_LIST,
+  type TroopCounts,
+  type TroopKey,
+} from '@marchlands/core';
 
-import { armySize, attackNpc, DEFAULT_LORD, type Lord, lordGearPoints, type Summary, traceNpc } from './lib.ts';
+import { armySize, attackNpc, DEFAULT_LORD, type Defence, type Lord, lordGearPoints, type Summary, traceNpc } from './lib.ts';
 import { PLANS } from './plans.ts';
 import { PRESETS } from './presets.ts';
 import { CITY_RESEARCH, HISTORIC_LEVELS, type HistoricLevel, type Rotation, runSiege, type SiegeResult } from './siege.ts';
@@ -55,6 +70,11 @@ const { positionals, values } = parseArgs({
     wall: { type: 'string' },
     refill: { type: 'string', default: '0.1' },
     'city-research': { type: 'string' },
+    tech: { type: 'string' },
+    garrison: { type: 'string' },
+    defenders: { type: 'string' },
+    forts: { type: 'string' },
+    'defender-research': { type: 'string' },
   },
 });
 
@@ -63,8 +83,21 @@ const num = (v: string | undefined, fallback: number) => (v != null ? Number(v) 
 const gearStat = values['gear-stat'] ?? DEFAULT_LORD.gearStat;
 if (!GEAR_STATS.includes(gearStat as GearStat)) throw new Error(`bad --gear-stat "${gearStat}": use ${GEAR_STATS.join(', ')}`);
 const researchLevel = num(values.research, DEFAULT_LORD.researchLevel);
+/** --tech archery=3,horseback-riding=8: research by name (TechType, any case, - or _), to its tech id and level. */
+function parseTech(spec: string | undefined): Partial<Record<number, number>> {
+  const out: Partial<Record<number, number>> = {};
+  for (const part of spec?.split(',') ?? []) {
+    const [name = '', n] = part.split('=');
+    const id = (TechType as Record<string, number>)[name.toUpperCase().replace(/-/g, '_')];
+    if (id == null || !Number.isFinite(Number(n))) throw new Error(`bad --tech "${part}": use name=level with names ${Object.keys(TechType).join(', ')}`);
+    out[id] = Number(n);
+  }
+  return out;
+}
+
 const lord: Lord = {
   researchLevel,
+  tech: parseTech(values.tech),
   heroLevel: num(values['hero-level'], DEFAULT_LORD.heroLevel),
   power: num(values.power, DEFAULT_LORD.power),
   stratagem: num(values.stratagem, DEFAULT_LORD.stratagem),
@@ -93,6 +126,27 @@ function parseTroops(spec: string): TroopCounts {
   }
   return t;
 }
+
+/** --forts trap=1000,arrowTower=500, or none. */
+function parseForts(spec: string): FortCounts {
+  const f: FortCounts = {};
+  if (spec === 'none') return f;
+  for (const part of spec.split(',')) {
+    const [k, n] = part.split('=');
+    if (!FORT_KEY_LIST.includes(k as FortKey) || !Number.isFinite(Number(n)))
+      throw new Error(`bad forts "${part}": use key=count with keys ${FORT_KEY_LIST.join(', ')}`);
+    f[k as FortKey] = Number(n);
+  }
+  return f;
+}
+
+/** What defends, from --garrison, --defenders, --forts and --defender-research. */
+const defence: Defence = {
+  ...(values.garrison != null ? { garrison: Number(values.garrison) } : {}),
+  ...(values.defenders != null ? { troops: values.defenders === 'none' ? {} : parseTroops(values.defenders) } : {}),
+  ...(values.forts != null ? { forts: parseForts(values.forts) } : {}),
+  ...(values['defender-research'] != null ? { research: Number(values['defender-research']) } : {}),
+};
 
 /** The armies named by --preset and --troops (default: every preset). */
 function armies(): [string, TroopCounts][] {
@@ -126,7 +180,9 @@ function describeLord() {
   return (
     `lord: research ${lord.researchLevel}, hero Lv ${lord.heroLevel} Attack ${attr('power', lord.power)} / Intelligence ${attr('stratagem', lord.stratagem)} ` +
     `(gear Lv ${lord.gearLevel}, ${lord.gearStars} stars), ` +
-    `attack item ${lord.attackItem ? 'on' : 'off'}, defense item ${lord.defenseItem ? 'on' : 'off'} · barbarian city level ${level}`
+    `attack item ${lord.attackItem ? 'on' : 'off'}, defense item ${lord.defenseItem ? 'on' : 'off'} · barbarian city level ${level}` +
+    (Object.keys(lord.tech ?? {}).length ? ` · research ${JSON.stringify(lord.tech)}` : '') +
+    (Object.keys(defence).length ? ` · defence ${JSON.stringify(defence)}` : '')
   );
 }
 
@@ -137,7 +193,7 @@ if (command === 'presets') {
 } else if (command === 'compare') {
   const seeds = Number(values.seeds ?? 500);
   console.log(`${describeLord()} · ${seeds} battles each\n`);
-  for (const [name, t] of armies()) printSummary(name, attackNpc(t, { level, seeds, lord }));
+  for (const [name, t] of armies()) printSummary(name, attackNpc(t, { level, seeds, lord, defence }));
 } else if (command === 'grid') {
   // every combination of the fodder counts; the main troop fills the rest of the cap (after transporters)
   const seeds = Number(values.seeds ?? 40);
@@ -152,7 +208,7 @@ if (command === 'presets') {
       const t: TroopCounts = { carriage: Number(values.carriage) };
       fodder.forEach((k, i) => (t[k] = c[i]));
       t[main] = Number(values.cap) - armySize(t);
-      return { t, s: attackNpc(t, { level, seeds, lord }) };
+      return { t, s: attackNpc(t, { level, seeds, lord, defence }) };
     })
     .filter((r) => r.s.winPct === 100)
     .sort((a, b) => a.s.lostValue - b.s.lostValue);
@@ -163,7 +219,7 @@ if (command === 'presets') {
   const [name, t] = first;
   console.log(`${describeLord()} · ${name} · seed ${values.seed}\n`);
   const kills: string[] = [];
-  for (const e of traceNpc(t, { level, seed: Number(values.seed), lord })) {
+  for (const e of traceNpc(t, { level, seed: Number(values.seed), lord, defence })) {
     if (e.kind === 'kill') {
       if (e.killed > 0)
         kills.push(

@@ -19,10 +19,11 @@ export default [
     // (2026-11-01, at 118.34 kB) for the historic cities: their names, camp times' landing time, the seats' draft
     // controls and reports, and their text. Raised to 124 kB (2026-11-01, at 120.12 kB) for holding the historic cities
     // (a seat's loyalty and upkeep, ruled states on the map) and the wave planner: the Plans panel loads on first use,
-    // but its English text and the planner's place in the send-army dialog ship here
+    // but its English text and the planner's place in the send-army dialog ship here. Back to 120 kB (2026-11-01, at
+    // 108.54 kB): the English text of the screens that load on first use now loads with them (src/lib/i18n.ts)
     name: 'app',
     path: 'dist/assets/app-*.js',
-    limit: '124 kB',
+    limit: '120 kB',
     gzip: true,
   },
   {

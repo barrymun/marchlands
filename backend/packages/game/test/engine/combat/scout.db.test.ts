@@ -38,6 +38,7 @@ import {
 } from '#test/support/armies.ts';
 import { addHero, cityBundle, reloadCity, setBuildings, setResearch } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
+import { patchHero } from '#test/support/heroes.ts';
 
 const guardOf = (tileId: number, seed: number, maxLevel: number) => createGuardHero(maxLevel, seededRng(`guard:${seed}`), stateOf(tileId));
 
@@ -228,6 +229,34 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
       expect(s).toMatchObject({ success: true, battle: { attackerScouts: { before: 20, after: 20 }, defenderScouts: { before: 0, after: 0 } } });
       expect((await reloadCity(g, q.cityId)).troops.scouter).toBe(2000);
     }));
+
+  it('a hero stationed in the city leads its scouts when it is stronger than the city’s own', () => {
+    /** the same scouting with an ally's hero of `power` stationed in the city; the city's own hero is weak */
+    const defendersLeft = (power: number) =>
+      game(async (g) => {
+        const { p, q, armyId } = await scoutCity(g, 300, 100);
+        for (const h of (await cityBundle(g, q)).heroes) await patchHero(g, h.id, { power: 1, powerAdded: 0 });
+        const { p: ally, heroId: allyHero } = await warrior(g, { scouter: 100 });
+        await patchHero(g, allyHero, { power, powerAdded: 0 });
+        await allies(g, q, ally);
+        await interior.setCityFlags(g, q.id, q.cityId, { allowAlliance: true });
+        const guard = await send(g, ally, {
+          targetTileId: await cityTile(g, q.cityId),
+          mission: Mission.REINFORCE,
+          troops: { scouter: 100 },
+          heroId: allyHero,
+        });
+        await arrive(g, guard.armyId);
+        await arrive(g, armyId);
+        return scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'city').battle.defenderScouts.after;
+      });
+    return (async () => {
+      const weak = await defendersLeft(1);
+      const strong = await defendersLeft(2000);
+      // the same seeded battle, but the strong stationed hero's scouts kill more and lose fewer
+      expect(strong).toBeGreaterThan(weak);
+    })();
+  });
 
   it('allied scouts stationed in the city fight too, sharing the losses', () =>
     game(async (g) => {

@@ -2,7 +2,7 @@
 
 The TODO item *Test the strategies from old game guides*, first pass, 2026-11-01: nine strategies from the guides in [../reference/](../reference/README.md), simulated with `npm run sim` ([README.md](README.md)). Unless said otherwise the lord is the simulator's `DEFAULT_LORD` (research 10, a geared hero of Attack 1,219, the attack item on); where the hero matters, a hero nearer the guides' era was run too (no gear, Attack 100 or 250, no item).
 
-Three set-ups the CLI can't express (separate Archery and Horseback Riding levels, a part-refilled garrison, a player's wall) were run through the game's own `resolveCombat` from a one-off script, not kept in the repository; those are marked *(script)*. That's an idea for the simulator: those three options.
+Three set-ups the simulator couldn't express then (separate Archery and Horseback Riding levels, a part-refilled garrison, a player's wall) were first run from a one-off script, marked *(script)*; the simulator has had options for them since (`--tech`, `--garrison`, `--defenders`, `--forts`, `--defender-research`; [README.md](README.md)), and the commands below rerun them.
 
 ## Results
 
@@ -36,3 +36,14 @@ npm run sim -- compare --level 8 --troops militia=89000,carriage=1000 --troops m
 ```
 
 Levels 2–4 as level 1 with 50, 170 and 250 ballistae (and half); level 8 again with `--power 60 --stratagem 120 --hero-level 50 --gear-level 0 --stars 0 --no-attack-item` and with `--research 6`.
+
+The scripted ones, with the options added since (rows 3, 6 and 8):
+
+```
+npm run sim -- compare --level 5 --gear-level 0 --stars 0 --power 100 --no-attack-item --tech archery=2 --troops ballista=400 --seeds 40
+npm run sim -- compare --level 5 --gear-level 0 --stars 0 --power 100 --no-attack-item --tech archery=9,horseback-riding=3 --troops ballista=400 --seeds 40
+npm run sim -- compare --level 8 --troops militia=20000 --garrison 0.417 --seeds 40
+npm run sim -- compare --level 10 --defenders none --forts arrowTower=18333 --defender-research 10 --troops lightCavalry=100000 --seeds 20
+```
+
+They agree with the script: Archery 2 loses all 400 ballistae, Archery 9 with Horseback Riding 3 none; 20,000 warriors die against a level 8 42% refilled, and lose 283 against one 0.7% refilled; the tower wall costs 100,000 cavalry about 31,000.

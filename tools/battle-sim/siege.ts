@@ -114,7 +114,7 @@ const add = (a: TroopCounts, b: TroopCounts) => {
 /** Run one siege: every stage in order against the garrison, which refills between waves. */
 export function runSiege(plan: Plan, o: SiegeOptions): SiegeResult {
   const lord = o.lord ?? DEFAULT_LORD;
-  const research = researchAt(lord.researchLevel);
+  const research = researchAt(lord.researchLevel, lord.tech);
   const full = historicGarrison(o.level, o.day);
   const cityResearch = o.research ?? historicResearch();
   // the simulations run at GAME_SPEED 1: 6 real minutes

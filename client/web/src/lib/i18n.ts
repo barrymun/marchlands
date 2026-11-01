@@ -25,14 +25,49 @@ export function matchLocale(lng: string | undefined): Locale {
   return LOCALES.find((l) => l.split('-')[0] === language) ?? DEFAULT_LOCALE;
 }
 
-// en-GB (the default and the fallback) and the en-US spellings are bundled with the app:
+// en-GB (the default and the fallback) and the en-US spellings are bundled with the app, but for the screens that load
+// on first use (routes/game/constants.ts): their text loads with them, so the first page doesn't carry it. Their
+// components read it with useTranslation inside a Suspense boundary, which waits for it. The pattern lists are
+// written out because Vite reads them when it builds; LAZY_NAMESPACES names the same files.
 // ../locales/en-GB/common.json -> resources['en-GB'].common
-const files = import.meta.glob<Record<string, unknown>>(['../locales/en-GB/*.json', '../locales/en-US/*.json'], { eager: true, import: 'default' });
+const files = import.meta.glob<Record<string, unknown>>(
+  [
+    '../locales/en-GB/*.json',
+    '../locales/en-US/*.json',
+    '!../locales/*/{military-panel,flows-panel,map-panel,reports-panel,market-panel,send-army-dialog,stats-panel,heroes-panel,hero-gear,flow-attack,items-panel,plans-panel,factions-panel,research-panel,hero-items-dialog}.json',
+  ],
+  { eager: true, import: 'default' },
+);
 const resources: Record<string, Record<string, Record<string, unknown>>> = {};
 for (const [path, json] of Object.entries(files)) {
   const [, locale, ns] = /locales\/([^/]+)\/([^/]+)\.json$/.exec(path) ?? [];
   if (locale && ns) (resources[locale] ??= {})[ns] = json;
 }
+
+/** The English namespaces of the screens that load on first use, loaded with them (the files left out above). */
+const LAZY_NAMESPACES = [
+  'military-panel',
+  'flows-panel',
+  'map-panel',
+  'reports-panel',
+  'market-panel',
+  'send-army-dialog',
+  'stats-panel',
+  'heroes-panel',
+  'hero-gear',
+  'flow-attack',
+  'items-panel',
+  'plans-panel',
+  'factions-panel',
+  'research-panel',
+  'hero-items-dialog',
+] as const;
+const lazyEnglish = import.meta.glob<Record<string, unknown>>(
+  [
+    '../locales/{en-GB,en-US}/{military-panel,flows-panel,map-panel,reports-panel,market-panel,send-army-dialog,stats-panel,heroes-panel,hero-gear,flow-attack,items-panel,plans-panel,factions-panel,research-panel,hero-items-dialog}.json',
+  ],
+  { import: 'default' },
+);
 
 // every other locale is one file of the build (src/locales/<locale>.ts), loaded when chosen
 const lazyLocales = import.meta.glob<Record<string, Record<string, unknown>>>(['../locales/*.ts', '!../locales/*.test.ts'], { import: 'default' });
@@ -41,6 +76,16 @@ const lazyLocalesBackend: BackendModule = {
   type: 'backend',
   init() {},
   read(lng, ns, callback) {
+    // a lazy screen's English text (none: an en-US file it doesn't spell differently)
+    if (lng === 'en-GB' || lng === 'en-US') {
+      const file = lazyEnglish[`../locales/${lng}/${ns}.json`];
+      if (!file) return callback(null, {});
+      file().then(
+        (json) => callback(null, json),
+        (err: unknown) => callback(err instanceof Error ? err : new Error(String(err)), null),
+      );
+      return;
+    }
     const load = lazyLocales[`../locales/${lng}.ts`];
     if (!load) return callback(null, {});
     let files = loading.get(lng);
@@ -81,8 +126,11 @@ export const i18nReady = i18n
     },
   });
 
-// tests (Node, no browser) read every locale's text synchronously
-if (!browser) await i18n.loadLanguages([...LOCALES]);
+// tests (Node, no browser) read every locale's text synchronously, the lazy screens' too
+if (!browser) {
+  await i18n.loadLanguages([...LOCALES]);
+  await i18n.loadNamespaces([...LAZY_NAMESPACES]);
+}
 
 if (browser) {
   const setLang = (lng: string) => document.documentElement.setAttribute('lang', lng);

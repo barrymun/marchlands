@@ -6,6 +6,7 @@ import {
   armyLoad,
   BALANCE,
   createGuardHero,
+  type FortCounts,
   GEAR_PIECES,
   type GearStat,
   heroGearBonus,
@@ -33,6 +34,8 @@ import {
 export interface Lord {
   /** every research at this level */
   researchLevel: number;
+  /** research at other levels than `researchLevel`, by tech id (`--tech archery=3`) */
+  tech?: Partial<Record<number, number>>;
   /** the hero's level: its gear tier is level ÷ 10 */
   heroLevel: number;
   /** hero Attack (power) and Intelligence (stratagem): the hero's own points (base + assigned), without gear */
@@ -77,10 +80,36 @@ export const lordGearPoints = (lord: Lord) => heroGearBonus(lord.heroLevel, lord
 /** The attack / defense item bonus (combat.ts buffBonus). */
 export const ITEM_BONUS = 0.2;
 
-export function researchAt(level: number): ResearchState {
+export function researchAt(level: number, tech: Partial<Record<number, number>> = {}): ResearchState {
   const r: ResearchState = {};
-  for (const id of Object.values(TechType)) r[id] = { level };
+  for (const id of Object.values(TechType)) r[id] = { level: tech[id] ?? level };
   return r;
+}
+
+/**
+ * What defends: a barbarian city of the level as it stands at full strength, unless changed. `garrison` keeps that
+ * share of its troops and fortifications (a city part refilled since the last wave, `--garrison 0.42`); `troops` and
+ * `forts` replace them (a player's city and wall: `--defenders none --forts arrowTower=18333`); `research` gives the
+ * defender every research at that level (a barbarian city has none).
+ */
+export interface Defence {
+  garrison?: number;
+  troops?: TroopCounts;
+  forts?: FortCounts;
+  research?: number;
+}
+
+/** The defending side's troops, fortifications and research for a city of `level` (see Defence). */
+export function defenceOf(level: number, d: Defence = {}): { troops: TroopCounts; forts: FortCounts; research: ResearchState } {
+  const t = npcTemplate(level);
+  const share = d.garrison ?? 1;
+  const part = <K extends string>(c: Partial<Record<K, number>>) =>
+    Object.fromEntries(Object.entries<number | undefined>(c).map(([k, n]) => [k, Math.floor((n ?? 0) * share)])) as Partial<Record<K, number>>;
+  return {
+    troops: d.troops ?? part(t.troops),
+    forts: d.forts ?? part(t.forts),
+    research: d.research != null ? researchAt(d.research) : {},
+  };
 }
 
 export function lordHero(lord: Lord): HeroStats {
@@ -119,13 +148,14 @@ export interface Summary {
 const sourceName = (s: KillSource) => (typeof s === 'number' ? `${TROOP_KEY_LIST[s]} (defender)` : s);
 
 /** Attack a full-strength barbarian city of `level` with `troops`, once per seed (0 .. seeds-1). */
-export function attackNpc(troops: TroopCounts, opts: { level?: number; seeds?: number; lord?: Lord } = {}): Summary {
+export function attackNpc(troops: TroopCounts, opts: { level?: number; seeds?: number; lord?: Lord; defence?: Defence } = {}): Summary {
   const level = opts.level ?? 10;
   const seeds = opts.seeds ?? 500;
   const lord = opts.lord ?? DEFAULT_LORD;
-  const research = researchAt(lord.researchLevel);
+  const research = researchAt(lord.researchLevel, lord.tech);
   const hero = lordHero(lord);
   const t = npcTemplate(level);
+  const def = defenceOf(level, opts.defence);
   const stock = t.resources.gold + t.resources.food + t.resources.wood + t.resources.stone + t.resources.iron;
 
   let wins = 0;
@@ -147,7 +177,7 @@ export function attackNpc(troops: TroopCounts, opts: { level?: number; seeds?: n
     const guard = createGuardHero(level * 10, seededRng(`guard:${s}`), 0);
     const r = resolveCombat(
       { troops, research, hero, attackBonus: lord.attackItem ? ITEM_BONUS : 0, defenseBonus: lord.defenseItem ? ITEM_BONUS : 0 },
-      { troops: { ...t.troops }, research: {}, hero: guard, forts: { ...t.forts }, wallLevel: level },
+      { troops: { ...def.troops }, research: def.research, hero: guard, forts: { ...def.forts }, wallLevel: level },
       seededRng(`battle:${s}`),
       trace,
     );
@@ -174,21 +204,27 @@ export function attackNpc(troops: TroopCounts, opts: { level?: number; seeds?: n
 }
 
 /** One battle, round by round: where each group stands and what was killed. */
-export function traceNpc(troops: TroopCounts, opts: { level?: number; seed?: number; lord?: Lord } = {}): TraceEvent[] {
+export function traceNpc(troops: TroopCounts, opts: { level?: number; seed?: number; lord?: Lord; defence?: Defence } = {}): TraceEvent[] {
   const level = opts.level ?? 10;
   const s = opts.seed ?? 0;
   const lord = opts.lord ?? DEFAULT_LORD;
-  const t = npcTemplate(level);
+  const def = defenceOf(level, opts.defence);
   const events: TraceEvent[] = [];
   resolveCombat(
     {
       troops,
-      research: researchAt(lord.researchLevel),
+      research: researchAt(lord.researchLevel, lord.tech),
       hero: lordHero(lord),
       attackBonus: lord.attackItem ? ITEM_BONUS : 0,
       defenseBonus: lord.defenseItem ? ITEM_BONUS : 0,
     },
-    { troops: { ...t.troops }, research: {}, hero: createGuardHero(level * 10, seededRng(`guard:${s}`), 0), forts: { ...t.forts }, wallLevel: level },
+    {
+      troops: { ...def.troops },
+      research: def.research,
+      hero: createGuardHero(level * 10, seededRng(`guard:${s}`), 0),
+      forts: { ...def.forts },
+      wallLevel: level,
+    },
     seededRng(`battle:${s}`),
     (e) => events.push(e),
   );
