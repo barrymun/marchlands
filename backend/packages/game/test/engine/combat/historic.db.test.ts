@@ -8,10 +8,12 @@ import {
   BuildingType,
   DAY,
   dur,
+  factionRivals,
   historicCityBuildings,
   historicDay,
   historicGarrison,
   type HistoricState,
+  homeFaction,
   Mission,
   msg,
   ref,
@@ -57,6 +59,10 @@ describe(`${processArmy.name}: historic cities`, () => {
       expect(r.title).toEqual(msg('report.title.attackFailed'));
       const b = battleOf(r, 'npc');
       expect(b).toMatchObject({ level: 12, loyaltyDamage: 0, loyaltyLeft: BALANCE.historic.loyalty, captured: false });
+      // even a lost attack costs standing with the faction whose state it stands in
+      const change = -BALANCE.reputation.attackPerLevel * 12;
+      expect(b.standing).toEqual({ faction: homeFaction(seat.id)!.id, change, now: change });
+      expect(b.rivals).toBeUndefined();
       const tile = await getTile(g, seat.id);
       expect(tile.troops).toEqual(b.defender.troops.after);
       expect((tile.state as unknown as HistoricState).loyalty).toBe(BALANCE.historic.loyalty);
@@ -127,6 +133,13 @@ describe(`${processArmy.name}: capturing a historic city`, () => {
       await admin.setPlayerFlags(g, p.name, { title: 1 });
       const { seat, report } = await lastWave(g, p, heroId);
       expect(report).toMatchObject({ captured: true, loyaltyLeft: 0 });
+      // its faction loses the capture's standing too, and its rivals each gain a share of that
+      const R = BALANCE.reputation;
+      const cost = R.capture * R.seat.captureFactor[12];
+      const own = homeFaction(seat.id)!;
+      expect(report.standing).toMatchObject({ faction: own.id, change: -(R.attackPerLevel * 12 + cost) });
+      expect(report.rivals?.map((r) => r.faction)).toEqual(factionRivals(own.id).map((f) => f.id));
+      expect(report.rivals?.every((r) => r.change === cost * R.seat.rivalShare)).toBe(true);
       const tile = await getTile(g, seat.id);
       expect(tile).toMatchObject({ type: TileType.CASTLE, ownerPlayerId: p.id });
       const city = await getCity(g, tile.cityId!);

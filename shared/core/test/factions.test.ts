@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BALANCE, BASIC_RESOURCES, faction, FACTION_IDS, FactionId, factionOfZone, FACTIONS, isFactionLevel, npcFaction } from '#/index.ts';
+import { BALANCE, BASIC_RESOURCES, faction, FACTION_IDS, FactionId, factionOfZone, factionRivals, FACTIONS, isFactionLevel, npcFaction } from '#/index.ts';
 
 const ZONES = BALANCE.stateGrid ** 2;
 /** The tile at (x, y). */
@@ -77,5 +77,28 @@ describe(npcFaction.name, () => {
 
   it('is null for a bandit below the minimum level', () => {
     expect(npcFaction(tile(10, 10), BALANCE.factions.minLevel - 1)).toBeNull();
+  });
+});
+
+describe(factionRivals.name, () => {
+  const rivals = (id: FactionId) =>
+    factionRivals(id)
+      .map((f) => f.id)
+      .sort();
+
+  it('lists the factions holding a zone that borders one of its own', () => {
+    expect(rivals(FactionId.SAXON_LEAGUE)).toEqual([FactionId.BOHEMIAN_CROWN, FactionId.FRANCONIAN_HEARTLAND, FactionId.LOTHARINGIAN_CROWN].sort());
+    expect(rivals(FactionId.ITALIAN_LEAGUE)).toEqual([FactionId.BOHEMIAN_CROWN, FactionId.FRANCONIAN_HEARTLAND, FactionId.LOTHARINGIAN_CROWN].sort());
+  });
+
+  it('gives the Franconian Heartland, the crossroads, every other faction', () => {
+    expect(rivals(FactionId.FRANCONIAN_HEARTLAND)).toEqual(FACTION_IDS.filter((id) => id !== FactionId.FRANCONIAN_HEARTLAND).sort());
+  });
+
+  it('never lists the faction itself, and is symmetric', () => {
+    for (const f of FACTIONS) {
+      expect(rivals(f.id)).not.toContain(f.id);
+      for (const r of factionRivals(f.id)) expect(rivals(r.id)).toContain(f.id);
+    }
   });
 });

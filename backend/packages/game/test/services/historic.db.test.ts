@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { BALANCE, msg, npcTemplate, TileType } from '@marchlands/core';
+import { BALANCE, msg, npcFaction, npcTemplate, TileType } from '@marchlands/core';
 
 import { historic } from '#/index.ts';
 import { getCity, getTile } from '#/repo.ts';
@@ -29,6 +29,17 @@ describe(historic.draftNow.name, () => {
       const r = (await reportsOf(g, p.id)).at(-1)!;
       expect(r.title).toEqual(msg('report.title.draft'));
       expect(r.body).toMatchObject({ kind: 'draft', draft: { cityId: p.cityId, level: target!.level, troops: { [key]: taken }, auto: false } });
+    }));
+
+  it('costs standing with the drafted city’s faction', () =>
+    game(async (g) => {
+      const p = await createTestPlayer(g);
+      await makeSeat(g, p);
+      const target = (await barbariansNear(g, p, true)).find((t) => npcFaction(t.id, t.level))!;
+      await historic.draftNow(g, p.id, p.cityId, target.id);
+      const r = (await reportsOf(g, p.id)).at(-1)!;
+      const change = -BALANCE.reputation.seat.draft;
+      expect(r.body).toMatchObject({ draft: { standing: { faction: npcFaction(target.id, target.level)!.id, change, now: change } } });
     }));
 
   it('refuses a city that isn’t a seat, a barbarian city outside its area, any other tile, and a fifth draft in a day', () =>

@@ -53,6 +53,27 @@ export function faction(id: FactionId): Faction {
   return f;
 }
 
+/** The zones sharing an edge with a zone on the state grid. */
+function zoneNeighbours(zone: number): number[] {
+  const n = BALANCE.stateGrid;
+  const row = Math.floor(zone / n);
+  const col = zone % n;
+  const out: number[] = [];
+  if (row > 0) out.push(zone - n);
+  if (row < n - 1) out.push(zone + n);
+  if (col > 0) out.push(zone - 1);
+  if (col < n - 1) out.push(zone + 1);
+  return out;
+}
+
+/** A faction's rivals: the factions holding a zone that borders one of its own. */
+export function factionRivals(id: FactionId): Faction[] {
+  const own = faction(id);
+  const ids = new Set(own.zones.flatMap(zoneNeighbours).flatMap((z) => factionOfZone(z)?.id ?? []));
+  ids.delete(id);
+  return FACTIONS.filter((f) => ids.has(f.id));
+}
+
 /** Whether an NPC city of this level belongs to a faction (from BALANCE.factions.minLevel), rather than being a bandit. */
 export const isFactionLevel = (level: number) => level >= BALANCE.factions.minLevel;
 

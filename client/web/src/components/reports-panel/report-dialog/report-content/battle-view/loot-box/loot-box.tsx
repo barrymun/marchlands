@@ -79,6 +79,13 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
           {t('loot.standing', { faction: factionName(b.standing.faction), change: standingText(b.standing.change), standing: standingText(b.standing.now) })}
         </div>
       )}
+      {'rivals' in b &&
+        mine &&
+        b.rivals?.map((s) => (
+          <div key={s.faction} className="text-xs text-muted-foreground">
+            {t('loot.standing', { faction: factionName(s.faction), change: standingText(s.change), standing: standingText(s.now) })}
+          </div>
+        ))}
     </div>
   );
 }

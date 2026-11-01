@@ -60,7 +60,9 @@ import {
   rollMedalDrops,
   scaled,
   seatLoyalty,
+  seatStanding,
   seededRng,
+  type StandingChange,
   stateOf,
   TechType,
   TileType,
@@ -1222,6 +1224,9 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     captured = true;
     await captureHistoric(ctx, attacker, tile, level, state);
   } else await saveTile(ctx, tile);
+  // (marchlands) attacking a historic city costs standing with the faction whose state it stands in, capturing it more,
+  // and its rivals thank the captor (core seatStanding)
+  const { standing, rivals } = await seatStandingMoved(ctx, attacker.id, seatStanding(tile.id, level, captured));
   attacker.honor += r.attackerHonor;
   await savePlayer(ctx, attacker);
   await grantHeroExp(ctx, hero, r.attackerHeroExp);
@@ -1243,7 +1248,16 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
       forts: r.forts,
       wallLevel: level,
     },
-    { plunder: loot, loyaltyDamage, loyaltyLeft: Math.floor(state.loyalty), captured, level, historic: true },
+    {
+      plunder: loot,
+      loyaltyDamage,
+      loyaltyLeft: Math.floor(state.loyalty),
+      captured,
+      level,
+      historic: true,
+      ...(standing ? { standing } : {}),
+      ...(rivals.length ? { rivals } : {}),
+    },
   );
   await createReport(ctx, {
     playerId: a.playerId,
@@ -1259,6 +1273,16 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     return;
   }
   await returnWithLoot(ctx, a, r.attacker.after, loot);
+}
+
+/** Applies a historic city's standing changes to the attacker; returns them as the battle report shows them. */
+async function seatStandingMoved(ctx: Ctx, playerId: number, moved: ReturnType<typeof seatStanding>) {
+  if (!moved) return { standing: null, rivals: [] };
+  const apply = async ({ faction, change }: StandingChange) => ({ faction: faction.id, change, now: await addStanding(ctx, playerId, faction.id, change) });
+  const standing = await apply(moved.own);
+  const rivals = [];
+  for (const r of moved.rivals) rivals.push(await apply(r));
+  return { standing, rivals };
 }
 
 /** Whether a player may take a historic city of a level: a free city slot, and fewer of that level than its limit. */

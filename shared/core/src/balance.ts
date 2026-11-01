@@ -356,6 +356,12 @@ export const BALANCE = {
     banditPerLevel: 0.1,
     /** gained for trading with the factions: one point per `goldPerPoint` traded, at most `maxPerDay` a game day */
     trade: { goldPerPoint: 20_000_000, maxPerDay: 5 },
+    /**
+     * historic cities (docs/features/historical-cities.md): an attack on one costs attackPerLevel x its level with the
+     * faction whose state it stands in, capturing it `capture` x its level's factor more, and the factions bordering that
+     * one gain `rivalShare` of the capture's cost; each draft costs `draft` with the drafted city's faction
+     */
+    seat: { captureFactor: { 12: 1, 14: 1, 16: 2, 18: 2 } as Record<12 | 14 | 16 | 18, number>, rivalShare: 0.5, draft: 1 },
     /** where the bands players see begin: hostile is at refuseBelow or lower */
     tiers: { unfriendly: -10, friendly: 10, honoured: 50 },
   },

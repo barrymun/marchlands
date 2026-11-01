@@ -6991,6 +6991,35 @@
                               "change",
                               "now"
                             ]
+                          },
+                          "rivals": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "faction": {
+                                  "type": "string",
+                                  "enum": [
+                                    "saxon",
+                                    "lotharingian",
+                                    "franconian",
+                                    "bohemian",
+                                    "italian"
+                                  ]
+                                },
+                                "change": {
+                                  "type": "number"
+                                },
+                                "now": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "faction",
+                                "change",
+                                "now"
+                              ]
+                            }
                           }
                         },
                         "required": [
@@ -8611,6 +8640,32 @@
                         "type": "integer",
                         "minimum": -9007199254740991,
                         "maximum": 9007199254740991
+                      },
+                      "standing": {
+                        "type": "object",
+                        "properties": {
+                          "faction": {
+                            "type": "string",
+                            "enum": [
+                              "saxon",
+                              "lotharingian",
+                              "franconian",
+                              "bohemian",
+                              "italian"
+                            ]
+                          },
+                          "change": {
+                            "type": "number"
+                          },
+                          "now": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "faction",
+                          "change",
+                          "now"
+                        ]
                       }
                     },
                     "required": [
@@ -19000,6 +19055,36 @@
                               "now"
                             ],
                             "additionalProperties": false
+                          },
+                          "rivals": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "faction": {
+                                  "type": "string",
+                                  "enum": [
+                                    "saxon",
+                                    "lotharingian",
+                                    "franconian",
+                                    "bohemian",
+                                    "italian"
+                                  ]
+                                },
+                                "change": {
+                                  "type": "number"
+                                },
+                                "now": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "faction",
+                                "change",
+                                "now"
+                              ],
+                              "additionalProperties": false
+                            }
                           }
                         },
                         "required": [
@@ -20670,6 +20755,33 @@
                         "type": "integer",
                         "minimum": -9007199254740991,
                         "maximum": 9007199254740991
+                      },
+                      "standing": {
+                        "type": "object",
+                        "properties": {
+                          "faction": {
+                            "type": "string",
+                            "enum": [
+                              "saxon",
+                              "lotharingian",
+                              "franconian",
+                              "bohemian",
+                              "italian"
+                            ]
+                          },
+                          "change": {
+                            "type": "number"
+                          },
+                          "now": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "faction",
+                          "change",
+                          "now"
+                        ],
+                        "additionalProperties": false
                       }
                     },
                     "required": [

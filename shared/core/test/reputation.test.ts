@@ -4,14 +4,17 @@ import {
   BALANCE,
   changeStanding,
   DAY,
+  draftStanding,
   FactionId,
+  factionRivals,
   factionSpread,
   gameDay,
   homeFaction,
+  seatStanding,
   setGameSpeed,
   standingNow,
-  standingTier,
   StandingTier,
+  standingTier,
   tradeStanding,
 } from '#/index.ts';
 
@@ -154,5 +157,38 @@ describe(tradeStanding.name, () => {
 
   it('gives nothing for no gold', () => {
     expect(tradeStanding(0, null, 0).points).toBe(0);
+  });
+});
+
+describe(seatStanding.name, () => {
+  /** Tuscany's capital (a level 16, the Italian League's land) */
+  const TUSCANY = tile(500, 700);
+  const S = R.seat;
+
+  it("costs standing with the state's faction for any attack, by level, with nothing for its rivals", () => {
+    expect(seatStanding(FRIESLAND, 12, false)).toEqual({ own: { faction: homeFaction(FRIESLAND), change: -R.attackPerLevel * 12 }, rivals: [] });
+  });
+
+  it("costs the capture's standing more when it's taken, doubled for a capital, and its rivals gain a share", () => {
+    const moved = seatStanding(TUSCANY, 16, true);
+    const cost = R.capture * S.captureFactor[16];
+    expect(S.captureFactor[16]).toBe(2);
+    expect(moved?.own.faction.id).toBe(FactionId.ITALIAN_LEAGUE);
+    expect(moved?.own.change).toBeCloseTo(-(R.attackPerLevel * 16 + cost));
+    expect(moved?.rivals).toEqual(factionRivals(FactionId.ITALIAN_LEAGUE).map((f) => ({ faction: f, change: cost * S.rivalShare })));
+  });
+
+  it('counts Atlantis, at (0, 0), as the Saxon League’s', () => {
+    expect(seatStanding(0, 18, false)?.own.faction.id).toBe(FactionId.SAXON_LEAGUE);
+  });
+});
+
+describe(draftStanding.name, () => {
+  it("costs standing with a member's faction", () => {
+    expect(draftStanding(ROMAGNA, 10)).toEqual({ faction: homeFaction(ROMAGNA), change: -R.seat.draft });
+  });
+
+  it('costs nothing for a bandit camp', () => {
+    expect(draftStanding(ROMAGNA, BALANCE.factions.minLevel - 1)).toBeNull();
   });
 });

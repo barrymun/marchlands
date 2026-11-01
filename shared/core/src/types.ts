@@ -243,6 +243,8 @@ const BattlePlunderSchema = z.object({
   /** medals the attacker found (item id -> count) */
   medals: z.record(z.string(), z.number()).optional(),
 });
+/** (marchlands) A player's standing with a faction moved: by how much, and where it is now. */
+const StandingMovedSchema = z.object({ faction: z.enum(FACTION_IDS), change: z.number(), now: z.number() });
 /**
  * Extra fields of each battle report variant, by target (player city, NPC city, valley).
  * (marchlands) lords' cities have no loyalty and cannot be captured; barbarian cities can.
@@ -260,7 +262,9 @@ export const BattleNpcExtraSchema = BattlePlunderSchema.extend({
   /** (marchlands) a historic city (levels 12 to 18) rather than a barbarian city */
   historic: z.boolean().optional(),
   /** (marchlands) the attacker's standing with the faction the city belongs to (a member) or whose land it's on (a bandit camp), when it changed */
-  standing: z.object({ faction: z.enum(FACTION_IDS), change: z.number(), now: z.number() }).optional(),
+  standing: StandingMovedSchema.optional(),
+  /** (marchlands) a captured historic city: the standing its faction's rivals gave the attacker */
+  rivals: z.array(StandingMovedSchema).optional(),
 });
 export const BattleValleyExtraSchema = z.object({
   occupied: z.boolean(),
@@ -368,6 +372,8 @@ export const DraftReportSchema = z.object({
   auto: z.boolean(),
   /** how many of the strongest barbarian cities in its area a scout compared (0: none, or picked at random) */
   scouted: z.number().int(),
+  /** the holder's standing with the drafted city's faction, when it changed */
+  standing: StandingMovedSchema.optional(),
 });
 export const DesertionReportSchema = z.object({
   cityId: z.number(),

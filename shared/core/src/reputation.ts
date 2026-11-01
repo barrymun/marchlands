@@ -6,7 +6,7 @@
 // it. Numbers in BALANCE.reputation, game time.
 
 import { BALANCE, getGameSpeed } from '#/balance.ts';
-import { type Faction, factionOfZone, isFactionLevel } from '#/factions.ts';
+import { type Faction, factionOfZone, factionRivals, isFactionLevel, npcFaction } from '#/factions.ts';
 import { DAY } from '#/time.ts';
 import { stateOf } from '#/world.ts';
 
@@ -79,6 +79,32 @@ export function attackStanding(tileId: number, level: number, won: boolean, capt
   if (!f) return null;
   if (isFactionLevel(level)) return { faction: f, change: -(attackPerLevel * level + (captured ? capture : 0)) };
   return won ? { faction: f, change: banditPerLevel * level } : null;
+}
+
+/** A change of standing with one faction. */
+export interface StandingChange {
+  faction: Faction;
+  change: number;
+}
+
+/**
+ * What an attack on an unheld historic city of `level` on this tile does to standing (BALANCE.reputation.seat): the
+ * faction whose state it stands in loses standing for any attack, more when it's captured, and on a capture its rivals
+ * gain a share of that. Null off any faction's land.
+ */
+export function seatStanding(tileId: number, level: 12 | 14 | 16 | 18, captured: boolean): { own: StandingChange; rivals: StandingChange[] } | null {
+  const { attackPerLevel, capture, seat } = cfg();
+  const f = factionOfZone(stateOf(tileId));
+  if (!f) return null;
+  const captureCost = captured ? capture * seat.captureFactor[level] : 0;
+  const rivals = captured ? factionRivals(f.id).map((r) => ({ faction: r, change: captureCost * seat.rivalShare })) : [];
+  return { own: { faction: f, change: -(attackPerLevel * level + captureCost) }, rivals };
+}
+
+/** What drafting from a barbarian city of `level` on this tile costs: standing with its faction, none for a bandit camp. */
+export function draftStanding(tileId: number, level: number): StandingChange | null {
+  const f = npcFaction(tileId, level);
+  return f ? { faction: f, change: -cfg().seat.draft } : null;
 }
 
 /** The game day `now` (real ms) falls in, for the daily cap on standing from trade. */

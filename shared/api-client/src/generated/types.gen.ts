@@ -2041,6 +2041,11 @@ export type ReportDetailInput = {
                 change: number;
                 now: number;
             };
+            rivals?: Array<{
+                faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
+                change: number;
+                now: number;
+            }>;
         } | {
             result: 'attackerWon' | 'defenderWon' | 'draw';
             rounds: number;
@@ -2335,6 +2340,11 @@ export type ReportDetailInput = {
             };
             auto: boolean;
             scouted: number;
+            standing?: {
+                faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
+                change: number;
+                now: number;
+            };
         };
     };
 };
@@ -5472,6 +5482,11 @@ export type ReportDetail = {
                 change: number;
                 now: number;
             };
+            rivals?: Array<{
+                faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
+                change: number;
+                now: number;
+            }>;
         } | {
             result: 'attackerWon' | 'defenderWon' | 'draw';
             rounds: number;
@@ -5766,6 +5781,11 @@ export type ReportDetail = {
             };
             auto: boolean;
             scouted: number;
+            standing?: {
+                faction: 'saxon' | 'lotharingian' | 'franconian' | 'bohemian' | 'italian';
+                change: number;
+                now: number;
+            };
         };
     };
 };
