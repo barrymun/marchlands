@@ -4,6 +4,9 @@
 //   npm run sim -- grid --main archer --fodder peasants,militia [--from 500 --to 4000 --step 250]
 //   npm run sim -- trace [--preset archers-best | --troops ...] [--seed 3]
 //   npm run sim -- presets
+//   npm run sim -- siege --plan age2-staged,age2-ballista [--level 12] [--day pikemen,lightCavalry,batteringRam] [--gap 1]
+//     [--loyalty 100 --loyalty-per-win 3] [--wall 12] [--refill 0.1] [--seeds 10]   (plans: plans.ts; a historic city's
+//     garrison refilling every second between waves, siege.ts)
 //
 // Common options: --level 10 (barbarian city level), --seeds N, and the lord: --research 10, the hero
 // --hero-level 100 --power 169 --stratagem 18 (its own points, without gear), the gear --gear-level 10 --stars 10
@@ -14,7 +17,9 @@ import { parseArgs } from 'node:util';
 import { GEAR_STATS, type GearStat, TROOP_KEY_LIST, type TroopCounts, type TroopKey } from '@marchlands/core';
 
 import { armySize, attackNpc, DEFAULT_LORD, type Lord, lordGearPoints, type Summary, traceNpc } from './lib.ts';
+import { PLANS } from './plans.ts';
 import { PRESETS } from './presets.ts';
+import { HISTORIC_LEVELS, type HistoricLevel, type Rotation, runSiege, type SiegeResult } from './siege.ts';
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -42,6 +47,13 @@ const { positionals, values } = parseArgs({
     cap: { type: 'string', default: '125000' },
     carriage: { type: 'string', default: '3500' },
     top: { type: 'string', default: '10' },
+    plan: { type: 'string' },
+    day: { type: 'string', default: 'pikemen,lightCavalry,batteringRam' },
+    gap: { type: 'string' },
+    loyalty: { type: 'string', default: '100' },
+    'loyalty-per-win': { type: 'string', default: '3' },
+    wall: { type: 'string' },
+    refill: { type: 'string', default: '0.1' },
   },
 });
 
@@ -169,7 +181,50 @@ if (command === 'presets') {
     if (kills.length) console.log(`  ${kills.join('; ')}`);
     kills.length = 0;
   }
+} else if (command === 'siege') {
+  const siegeLevel = (values.level === '10' ? 12 : level) as HistoricLevel;
+  if (!HISTORIC_LEVELS.includes(siegeLevel)) throw new Error(`bad --level ${siegeLevel}: historic cities are ${HISTORIC_LEVELS.join(', ')}`);
+  const [foot, horse, siege] = values.day.split(',');
+  const day = { foot, horse, siege } as Rotation;
+  const seeds = Number(values.seeds ?? 10);
+  const names = values.plan?.split(',') ?? Object.keys(PLANS);
+  const opts = {
+    level: siegeLevel,
+    day,
+    lord,
+    wallLevel: values.wall != null ? Number(values.wall) : undefined,
+    loyalty: Number(values.loyalty),
+    loyaltyPerWin: Number(values['loyalty-per-win']),
+    refillShare: Number(values.refill),
+  };
+  console.log(
+    `${describeLord().replace(/ · barbarian city level \d+$/, '')}\nhistoric city level ${siegeLevel} (${foot}, ${horse}, ${siege}), wall ${opts.wallLevel ?? siegeLevel}, ` +
+      `loyalty ${opts.loyalty} less ${opts.loyaltyPerWin} a win, ${opts.refillShare * 100}% back every 6 minutes · ${seeds} sieges each\n`,
+  );
+  for (const name of names) {
+    const base = PLANS[name];
+    if (!base) throw new Error(`unknown plan "${name}": ${Object.keys(PLANS).join(', ')}`);
+    const plan = values.gap != null ? { ...base, gap: Number(values.gap) } : base;
+    const runs: SiegeResult[] = [];
+    for (let s = 0; s < seeds; s++) runs.push(runSiege(plan, { ...opts, seed: s }));
+    const avg = (f: (r: SiegeResult) => number) => runs.reduce((a, r) => a + f(r), 0) / runs.length;
+    const captured = runs.filter((r) => r.captured).length;
+    console.log(`${name}: ${plan.name}, waves ${plan.gap} s apart`);
+    console.log(
+      `  captured ${captured}/${seeds} · ${avg((r) => r.waves).toFixed(1)} waves · lost ${millions(avg((r) => r.lostValue))} (dead ${millions(avg((r) => r.deadValue))})` +
+        ` · largest wave ${count(Math.max(...runs.map((r) => r.largestWave)))}`,
+    );
+    const [first] = runs;
+    if (!first) continue;
+    for (const st of first.stages)
+      console.log(
+        `    ${st.name.padEnd(9)} ${String(st.waves).padStart(3)} waves, ${String(st.wins).padStart(3)} won · lost ${millions(st.lostValue).padStart(7)}: ${units(st.lost)}` +
+          `\n              then ${count(st.troopsLeft)} troops, traps ${count(st.forts.trap ?? 0)}, towers ${count(st.forts.arrowTower ?? 0)}, ` +
+          `logs ${count(st.forts.rollingLogs ?? 0)}, trebuchets ${count(st.forts.rockfall ?? 0)}, loyalty ${st.loyalty} at ${st.endsAt} s`,
+      );
+    console.log();
+  }
 } else {
-  console.error(`unknown command "${command}": use compare, grid, trace or presets`);
+  console.error(`unknown command "${command}": use compare, grid, trace, siege or presets`);
   process.exit(1);
 }

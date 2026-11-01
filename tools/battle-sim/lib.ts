@@ -75,7 +75,7 @@ export const lordGearOf = (lord: Lord) => ({
 export const lordGearPoints = (lord: Lord) => heroGearBonus(lord.heroLevel, lordGearOf(lord));
 
 /** The attack / defense item bonus (combat.ts buffBonus). */
-const ITEM_BONUS = 0.2;
+export const ITEM_BONUS = 0.2;
 
 export function researchAt(level: number): ResearchState {
   const r: ResearchState = {};
@@ -83,7 +83,7 @@ export function researchAt(level: number): ResearchState {
   return r;
 }
 
-function lordHero(lord: Lord): HeroStats {
+export function lordHero(lord: Lord): HeroStats {
   const h = createGuardHero(lord.heroLevel, seededRng('lord-hero'), 0);
   const hero = { ...h, level: lord.heroLevel, power: lord.power, stratagem: lord.stratagem, gearStat: lord.gearStat, powerBuffAdded: 0, stratagemBuffAdded: 0 };
   syncHeroGear(hero, lordGearOf(lord));
