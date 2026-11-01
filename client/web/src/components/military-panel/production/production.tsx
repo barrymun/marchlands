@@ -208,7 +208,7 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                     >
                       {t('production.boost', {
                         item: itemName(boostItem),
-                        price: inv.count(boostItem) > 0 ? `×${inv.count(boostItem)}` : t('common:gold', { n: fmt(boostGold) }),
+                        price: inv.count(boostItem) > 0 ? `×${inv.count(boostItem)}` : t('common:gold', { gold: fmt(boostGold) }),
                       })}
                     </Button>
                   )}
