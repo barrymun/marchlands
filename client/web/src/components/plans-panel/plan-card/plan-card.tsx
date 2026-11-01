@@ -151,9 +151,11 @@ export function PlanCard({ plan, playerId }: { plan: PlanBean; playerId: number 
           </ol>
         )}
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" disabled={busy || ready.length === 0} onClick={() => send.mutate(ready.map((w) => w.id))}>
-            {t('sendMine', { count: ready.length })}
-          </Button>
+          {ready.length > 0 && (
+            <Button size="sm" disabled={busy} onClick={() => send.mutate(ready.map((w) => w.id))}>
+              {t('sendMine', { count: ready.length })}
+            </Button>
+          )}
           {maker && (
             <ConfirmButton
               size="sm"

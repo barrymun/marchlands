@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useStateRulers } from '@/hooks/use-state-rulers';
 import { FACTION_STYLE, standingText, standingTierName, standingTone } from '@/lib/factions';
 import { fmt, percent, resourceLabel } from '@/lib/format';
-import { factionName, zoneName } from '@/lib/game-data';
+import { factionName, stateName, zoneName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
 /**
@@ -47,7 +47,7 @@ export function FactionsPanel() {
                 <CardDescription>{t('zones', { zones: list(f.zones.map(zoneName)) })}</CardDescription>
                 {f.zones.flatMap((z) => {
                   const r = rulers.get(z);
-                  return r ? [<CardDescription key={z}>{t('ruled', { state: zoneName(z), player: r.player, tribute: fmt(r.tribute) })}</CardDescription>] : [];
+                  return r ? [<CardDescription key={z}>{t('ruled', { state: stateName(z), player: r.player, tribute: fmt(r.tribute) })}</CardDescription>] : [];
                 })}
               </CardHeader>
               <CardContent className="grid gap-2 text-sm">

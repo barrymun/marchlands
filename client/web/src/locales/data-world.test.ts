@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { AllianceRank, BALANCE, FACTION_IDS, FactionId, historicCities, msg, ref, TileType } from '@marchlands/core';
 
-import { factionName, historicName, rankName, seatTitleName, tileName, zoneName } from '@/lib/game-data';
+import { factionName, historicName, rankName, seatTitleName, stateName, tileName, zoneName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
 import factionsGB from '@/locales/en-GB/data-factions.json';
@@ -93,6 +93,12 @@ describe('data-historic', () => {
     expect(historicName(9, 9)).toBeNull();
     await i18n.changeLanguage('ja-JP');
     expect(historicName(300, 100)).toBe('北京');
+  });
+});
+
+describe(stateName.name, () => {
+  it('writes a state’s name in title case', () => {
+    expect(stateName(2)).toBe('North March');
   });
 });
 

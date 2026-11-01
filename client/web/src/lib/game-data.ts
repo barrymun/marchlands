@@ -26,17 +26,18 @@ export const historicName = (x: number, y: number): string | null => {
   return i18n.exists(`${x},${y}`, opts) ? (i18n.t(`${x},${y}`, opts) as unknown as string) : null;
 };
 /**
- * A player's title from the historic cities they hold (Ruler of a state, Sovereign of Atlantis). State names are in
- * capitals, as on the original's map; inside a title they're written in title case (scripts without case are unchanged).
+ * A state's name for use inside a sentence or a title: the data names are in capitals, as on the original's map, so
+ * here they're written in title case (scripts without case are unchanged).
  */
-export const seatTitleName = (title: { level: number; zoneId: number }) => {
-  if (title.level === 18) return i18n.t('common:seatTitle.atlantis');
+export const stateName = (zoneId: number) => {
   const lang = i18n.language;
-  const state = zoneName(title.zoneId)
+  return zoneName(zoneId)
     .toLocaleLowerCase(lang)
     .replace(/(^|\s)(\p{L})/gu, (_m, space: string, letter: string) => space + letter.toLocaleUpperCase(lang));
-  return i18n.t('common:seatTitle.ruler', { state });
 };
+/** A seat title's name: Ruler of a state (its name in title case, stateName), Sovereign of Atlantis. */
+export const seatTitleName = (title: { level: number; zoneId: number }) =>
+  title.level === 18 ? i18n.t('common:seatTitle.atlantis') : i18n.t('common:seatTitle.ruler', { state: stateName(title.zoneId) });
 export const tileName = (type: number) => dataName('data-tiles', type, () => i18n.t('common:fallback.tile', { id: type }));
 export const zoneName = (id: number) => dataName('data-zones', id, () => String(id));
 export const factionName = (id: FactionId) => dataName('data-factions', id, () => id);
