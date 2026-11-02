@@ -11,7 +11,7 @@ How to work in this repository. Read [README.md](README.md) for what Marchlands 
   - When Claude helped with the work, the message ends with a co-author trailer naming the model that did it, given as a second `-m` so it lands in its own paragraph: `git commit -m "Subject" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"`. No other attribution.
 - **New dependencies** are pinned to an exact version (no `^` or `~`) released at least two weeks ago. `.npmrc` sets `save-exact=true`, so `npm i` pins by itself; checking a version's age is still by hand (`npm view <name> time`).
 - **Player-facing language is neutral:** say "player", never "lord" or "lady", in anything a player reads (UI text, item and quest descriptions, error messages, mail). Code identifiers and comments may still say lord.
-- **Terms:** *HC* means a historical city, and *L14 HC* a level 14 one; the code and the game's text call it a *historic city*, and its design also a *seat* ([docs/features/historical-cities.md](docs/features/historical-cities.md), Names). Write the name out in full in player-facing text.
+- **Terms:** *HC* means a historical city, and *L14 HC* a level 14 one; the code and the game's text call it a *historic city*, and its design also a *seat* ([docs/features/historical-cities.md](docs/features/historical-cities.md), Names). Write the name out in full in player-facing text, but for the city list's badge (`HistoricBadge`: "HC", its title in full).
 - **Planned work** is listed in [TODO.md](TODO.md). In the change that finishes an item, move it to the Done section at the bottom (newest first, dated, one line saying what was done).
 - **A large feature gets a design document** in [docs/features/](docs/features/README.md), linked from its TODO item: where things stand, what's decided and why, open questions and phases. Record decisions there as they're made.
 - **Ideas and known quirks for later** go in [docs/backlog.md](docs/backlog.md): what happens now, where, and why it was left.
@@ -363,6 +363,7 @@ The server never sends or stores English for players. Everything it tells a play
   | Needs attention | amber, `WARN_TEXT` |
   | Status | neutral, `STATUS_DONE` |
   | A hero at the maximum level | gold with a trophy, `MAX_LEVEL_TEXT` (`HeroLevel`, `components/hero-level/`) |
+  | A held historic city, by level | its flags' colour (red, dark green, blue, gold), a solid HC badge with a castle, `HISTORIC_TONE` (`HistoricBadge`, `routes/game/historic-badge/`) |
 
   Hero attributes have their own colours in `lib/hero-attributes.ts`. Don't reuse a colour for a different meaning.
 - **Confirmations always use a dialog:** `ConfirmDialog` (`components/confirm-dialog/`) or `ConfirmButton` (`components/confirm-button/`). Never use the browser's `confirm()` or a click-twice button. Anything that spends gold or can't be undone asks first.

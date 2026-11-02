@@ -124,5 +124,7 @@
   "seatTitle": {
     "ruler": "{{state}}の統治者",
     "atlantis": "アトランティスの主権者"
-  }
+  },
+  "historicCity": "レベル{{level}}の歴史都市",
+  "historicCityShort": "歴史"
 }

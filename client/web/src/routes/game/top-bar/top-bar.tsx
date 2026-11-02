@@ -23,6 +23,7 @@ import { useGameNav } from '@/hooks/use-game-nav';
 import { tokenStore } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { VIEWS } from '@/routes/game/constants';
+import { HistoricBadge } from '@/routes/game/historic-badge/historic-badge';
 import { MayorChip } from '@/routes/game/mayor-chip/mayor-chip';
 import { MayorSummary } from '@/routes/game/mayor-summary/mayor-summary';
 import { PlayerSummary } from '@/routes/game/player-summary/player-summary';
@@ -61,11 +62,14 @@ export function TopBar({ city, status, onDialog }: { city?: CityBean; status: 'o
             <DropdownMenuLabel>{t('yourCities')}</DropdownMenuLabel>
             {cities.map((c) => (
               <DropdownMenuItem key={c.id} className="flex-col items-start gap-0.5" onSelect={() => nav.toCity(c.id)}>
-                <span className={cn(c.id === nav.cityId && 'font-semibold')}>
-                  {c.name}{' '}
-                  <span className="text-muted-foreground tabular-nums">
-                    ({c.x},{c.y})
+                <span className="flex items-center gap-1.5">
+                  <span className={cn(c.id === nav.cityId && 'font-semibold')}>
+                    {c.name}{' '}
+                    <span className="text-muted-foreground tabular-nums">
+                      ({c.x},{c.y})
+                    </span>
                   </span>
+                  <HistoricBadge level={c.historicLevel} />
                 </span>
                 <MayorSummary mayor={mayorOf(c.id === nav.cityId && city ? city : c)} />
               </DropdownMenuItem>

@@ -4,7 +4,7 @@
 
 **The aim:** big NPC cities above today's level 10, as prizes for strong players and alliances. **A historical city is the seat of power over an area of the map.** An NPC faction holds it until a player takes it. The bigger the city, the bigger its area and the more it brings its holder.
 
-**Names:** *HC* is short for historical city, as Age 2's players wrote it, and a level is put in front: an *L14 HC* is a level 14 one. The same thing is a *historic city* in the code and the game's text (`TileType.HISTORIC`, `historicLevel`, "Historic city" on the map) and a *seat* (of power) in this design. Player-facing text writes the name out in full; the abbreviation is for these docs, notes and talk between players.
+**Names:** *HC* is short for historical city, as Age 2's players wrote it, and a level is put in front: an *L14 HC* is a level 14 one. The same thing is a *historic city* in the code and the game's text (`TileType.HISTORIC`, `historicLevel`, "Historic city" on the map) and a *seat* (of power) in this design. Player-facing text writes the name out in full; the abbreviation is for these docs, notes and talk between players, and (2026-11-02, the maintainer) the badge marking a held one in the city list and switcher: "HC" with a castle in its flags' colour, the level and full name in its title.
 
 ## Where things stand
 

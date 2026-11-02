@@ -7,6 +7,7 @@
 //   needs attention        amber (WARN_TEXT): no mayor, storage full, skipped steps
 //   status, finished, info neutral with an icon (STATUS_DONE): max level reached, all research complete
 //   a hero at max level    gold with a trophy (MAX_LEVEL_TEXT, HeroLevel): the milestone of the hero's level itself
+//   a held historic city   its flags' colour by level, a solid HC badge with a castle, never plain text (HISTORIC_TONE, HistoricBadge)
 
 /** A running item bonus (production boosts, War Ensign, Vesta's, Quartermaster's …): badge background and text, light and dark. */
 export const ITEM_BONUS_TONE = 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300';
@@ -31,3 +32,16 @@ export const MAX_LEVEL_TEXT = 'text-yellow-700 dark:text-yellow-300';
 
 /** A status or "finished" note (max level, all research complete): neutral text, shown with an icon such as CircleCheck. */
 export const STATUS_DONE = 'text-muted-foreground';
+
+/**
+ * A held historic city's badge by its level: solid, in the colours of its flags on the map (the sprites' palette,
+ * tools/art/pixel.ts: `banner` red at 12, the darker `greenD` at 14 so it isn't the hero's pale Politics green, `blue`
+ * at 16, `gold` at Atlantis), the same in both themes, always a badge with a castle so it isn't read as a gain, loss or
+ * warning.
+ */
+export const HISTORIC_TONE = {
+  12: 'bg-[#b22c2c] text-white',
+  14: 'bg-[#366844] text-white',
+  16: 'bg-[#4870ac] text-white',
+  18: 'bg-[#e8ba48] text-[#3a2a06]',
+} as const satisfies Record<12 | 14 | 16 | 18, string>;

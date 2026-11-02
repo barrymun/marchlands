@@ -128,5 +128,7 @@
   "seatTitle": {
     "ruler": "Ruler of {{state}}",
     "atlantis": "Sovereign of Atlantis"
-  }
+  },
+  "historicCity": "Level {{level}} historic city",
+  "historicCityShort": "HC"
 }
