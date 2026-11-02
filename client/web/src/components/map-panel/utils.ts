@@ -5,6 +5,11 @@ import { FACTION_TINT_KEY } from '@/components/map-panel/constants';
 import type { FarmList, FarmMark, RelationGroup } from '@/components/map-panel/types';
 import { historicName, tileName } from '@/lib/game-data';
 
+/** `v` brought into 0 … size - 1, the map wrapping round at its edges. */
+export function wrap(v: number, size: number): number {
+  return ((v % size) + size) % size;
+}
+
 export const relationGroup = (r: number): RelationGroup =>
   r === Relation.ALLIANCE || r === Relation.ALLY ? 'friend' : r === Relation.ENEMY ? 'enemy' : 'other';
 

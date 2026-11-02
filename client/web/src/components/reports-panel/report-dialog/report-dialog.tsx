@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCommand } from '@/hooks/use-game';
 import { useSticky } from '@/hooks/use-sticky';
+import { isRefusal, retryUnlessRefused } from '@/lib/errors';
 import { dateTime } from '@/lib/format';
 import { translateMessage } from '@/lib/messages';
 import { allOf } from '@/lib/query-keys';
@@ -27,7 +28,14 @@ export function ReportDialog({ reportId, onClose }: { reportId: number | null; o
   const detail = useQuery({
     ...getReportsByReportIdOptions({ path: { reportId: id ?? 0 } }),
     enabled: id != null,
+    retry: retryUnlessRefused,
   });
+  // the report is gone (deleted, or expired since the address was made): close quietly rather than show an empty dialog
+  const gone = reportId != null && isRefusal(detail.error);
+  const close = useEffectEvent(onClose);
+  useEffect(() => {
+    if (gone) close();
+  }, [gone]);
   const remove = useCommand(
     postReportsDeleteMutation(),
     () => [allOf(getReportsQueryKey), getReportsUnreadQueryKey(), allOf(getReportsByReportIdQueryKey)],

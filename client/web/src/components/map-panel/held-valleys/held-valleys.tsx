@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import type { CityBean } from '@marchlands/api-client';
-import { VALLEY_RESOURCE, valleyBonus } from '@marchlands/core';
+import { valleyBonus, valleyResource } from '@marchlands/core';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { percent } from '@/lib/format';
@@ -35,7 +35,7 @@ export function HeldValleys({
       {[...city.fields]
         .sort((a, b) => b.level - a.level || a.type - b.type)
         .map((v) => {
-          const res = VALLEY_RESOURCE[v.type]?.[0];
+          const res = valleyResource(v.type);
           return (
             <div key={v.id} className="flex items-center justify-between gap-2 rounded-md px-2 py-1 hover:bg-muted">
               <button onClick={() => onGoTo(v.x, v.y)} className="flex flex-1 items-center justify-between gap-2 text-left">

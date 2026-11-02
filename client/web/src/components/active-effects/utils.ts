@@ -1,6 +1,6 @@
-import { itemEffect, itemGoldPrice, ITEMS } from '@marchlands/core';
+import { type BuffId, itemEffect, itemGoldPrice, ITEMS } from '@marchlands/core';
 
-import { STORE_KEY } from '@/components/active-effects/constants';
+import { GROUPS, STORE_KEY } from '@/components/active-effects/constants';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
 import { period } from '@/lib/format';
 
@@ -13,6 +13,11 @@ export function readCollapsed(): boolean {
   }
   // phones start collapsed so the item list stays above the fold
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches;
+}
+
+/** The slot of a bonus, or none for a bonus no slot shows. */
+export function slotOf(buff: BuffId): Slot | null {
+  return GROUPS.flatMap((g) => g.slots).find((s) => s.buff === buff) ?? null;
 }
 
 /** Items giving a slot's bonus, longest first. */

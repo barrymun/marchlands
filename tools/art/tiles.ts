@@ -28,7 +28,7 @@ function layered(name: string, band: number, ground: (c: IsoCanvas) => void, obj
   o.outline();
   for (let i = 0; i < c.px.length; i++) if (o.px[i]) c.px[i] = o.px[i];
   c.spots.push(...o.spots);
-  // a bigger sprite keeps its tile's middle three quarters of the way down, as spriteBox places it (96: at (48, 70))
+  // a bigger sprite keeps its tile's middle three quarters of the way down, as spriteBox places it (128: at (64, 94))
   if (size !== SIZE) c.anchor(size / SIZE);
   return c;
 }
@@ -317,6 +317,8 @@ function moss(c: IsoCanvas, share: number) {
 function spireTower(c: IsoCanvas, x: number, y: number, w: number, h: number, roof: number, roofing: Roofing | null, flag: Colour) {
   c.stone(x, y, 0, w, w, h);
   c.windows([x + w / 2], y + w, h - 4, 2, 'outline');
+  // a tall tower gets a lower window too
+  if (h >= 24) c.windows([x + w / 2], y + w, Math.round(h / 2), 2, 'outline');
   if (roofing) {
     c.hipRoof(x, y, w, w, h, roof, 'x', roofing);
     c.banner(c.p(x + w / 2, y + w / 2, h + roof), 4, flag);
@@ -330,19 +332,19 @@ function spireTower(c: IsoCanvas, x: number, y: number, w: number, h: number, ro
  * Historic cities, one sprite per level (docs/features/historical-cities.md, On the map), in the style of the
  * original's but drawn here: level 12 a square stone fortress with corner towers and red flags; 14 a taller keep with
  * green-roofed towers and green flags; 16 a great keep with slate spires and blue flags; 18 a grand castle of pale
- * spires round a gold dome under gold flags. Each fills more of the tile and stands taller than the last, all taller than
- * any castle (Atlantis, the level 18, tallest of all, its spire 54 pixels high), and moss grows up its walls. They're
- * 96×96, their tile's middle at (48, 70).
+ * spires round a gold dome under gold flags. Each fills more of the tile and stands taller than the last, all far taller
+ * than any castle (Atlantis, the level 18 at (0, 0), tallest of all, its spire 83 pixels high), and moss grows up its
+ * walls. Each stays on its own tile, growing only upwards, so they're 128×128, their tile's middle at (64, 94).
  */
 const HISTORIC_STYLE = {
-  12: { o: 3, wall: 8, tower: 5, towerH: 15, roof: 0, roofing: null, keep: 9, keepH: 20, keepRoof: 0, flag: 'banner', moss: 0.025 },
-  14: { o: 2, wall: 9, tower: 5, towerH: 18, roof: 7, roofing: 'green', keep: 10, keepH: 24, keepRoof: 8, flag: 'greenL', moss: 0.05 },
-  16: { o: 1, wall: 10, tower: 6, towerH: 21, roof: 9, roofing: 'slate', keep: 12, keepH: 28, keepRoof: 11, flag: 'blue', moss: 0.08 },
-  18: { o: 1, wall: 11, tower: 6, towerH: 24, roof: 10, roofing: 'canvas', keep: 13, keepH: 30, keepRoof: 0, flag: 'gold', moss: 0.11 },
+  12: { o: 3, wall: 10, tower: 5, towerH: 26, roof: 0, roofing: null, keep: 9, keepH: 32, keepRoof: 0, flag: 'banner', moss: 0.025 },
+  14: { o: 2, wall: 11, tower: 5, towerH: 32, roof: 7, roofing: 'green', keep: 10, keepH: 42, keepRoof: 8, flag: 'greenL', moss: 0.05 },
+  16: { o: 1, wall: 12, tower: 6, towerH: 38, roof: 9, roofing: 'slate', keep: 12, keepH: 52, keepRoof: 11, flag: 'blue', moss: 0.08 },
+  18: { o: 1, wall: 13, tower: 6, towerH: 44, roof: 10, roofing: 'canvas', keep: 13, keepH: 62, keepRoof: 0, flag: 'gold', moss: 0.11 },
 } as const;
 
-/** Historic cities stand taller than every other map sprite, so theirs are 96×96 (drawn with `spriteBox(96)`). */
-const HISTORIC_SIZE = 96;
+/** Historic cities stand taller than every other map sprite, so theirs are 128×128 (drawn with `spriteBox(128)`). */
+const HISTORIC_SIZE = 128;
 
 const HISTORIC_LEVELS = [12, 14, 16, 18] as const;
 
@@ -371,8 +373,11 @@ function historic(level: (typeof HISTORIC_LEVELS)[number]): IsoCanvas {
       const k = st.keep;
       const ko = MID - k / 2 + 1;
       g.stone(ko, ko, 0, k, k, st.keepH);
-      g.windows([ko + k / 3, ko + (2 * k) / 3], ko + k, st.keepH - 6, 3, 'outline');
-      g.windowsSe(ko + k, [ko + k / 3, ko + (2 * k) / 3], st.keepH - 6, 3, 'outline');
+      // a row of windows every 12 pixels down the keep, above the walls
+      for (let z = st.keepH - 6; z > st.wall + 2; z -= 12) {
+        g.windows([ko + k / 3, ko + (2 * k) / 3], ko + k, z, 3, 'outline');
+        g.windowsSe(ko + k, [ko + k / 3, ko + (2 * k) / 3], z, 3, 'outline');
+      }
       if (level === 18) {
         // a gold dome over the keep, a pale spire behind it
         g.crenels(ko, ko, st.keepH, k, k);

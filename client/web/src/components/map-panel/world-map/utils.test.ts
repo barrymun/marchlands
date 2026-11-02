@@ -2,19 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import type { Camera, View } from '@/components/iso-viewport/types';
 import { CHUNK } from '@/components/map-panel/world-map/constants';
-import { chunksFor, decodeTiles, startZoom, visibleTiles, wrap } from '@/components/map-panel/world-map/utils';
+import { chunksFor, decodeTiles, startZoom, visibleTiles } from '@/components/map-panel/world-map/utils';
 
 const view: View = { w: 640, h: 320, dpr: 1 };
 const cam: Camera = { x: 100, y: 200, zoom: 1 };
-
-describe(wrap.name, () => {
-  it('keeps a coordinate on the map', () => {
-    expect(wrap(5, 800)).toBe(5);
-    expect(wrap(800, 800)).toBe(0);
-    expect(wrap(-1, 800)).toBe(799);
-    expect(wrap(-801, 800)).toBe(799);
-  });
-});
 
 describe(visibleTiles.name, () => {
   const tiles = visibleTiles(cam, view);

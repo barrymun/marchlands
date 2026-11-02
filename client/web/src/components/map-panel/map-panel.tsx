@@ -24,7 +24,7 @@ import { GoToCoords } from '@/components/map-panel/go-to-coords/go-to-coords';
 import { HeldValleys } from '@/components/map-panel/held-valleys/held-valleys';
 import { MapLegend } from '@/components/map-panel/map-legend/map-legend';
 import { TileCard } from '@/components/map-panel/tile-card/tile-card';
-import { farmedTiles, farmLists, readFactionTint, saveFactionTint } from '@/components/map-panel/utils';
+import { farmedTiles, farmLists, readFactionTint, saveFactionTint, wrap } from '@/components/map-panel/utils';
 import { PAN_STEP } from '@/components/map-panel/world-map/constants';
 import { useWorldMap } from '@/components/map-panel/world-map/hooks';
 import { startZoom } from '@/components/map-panel/world-map/utils';
@@ -35,7 +35,9 @@ import { Button } from '@/components/ui/button';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { opaqueAt } from '@/hooks/use-images';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { useSearchState } from '@/hooks/use-search-state';
 import { allOf } from '@/lib/query-keys';
+import { MAP_SEARCH } from '@/lib/screen-search';
 import { cn } from '@/lib/utils';
 
 /**
@@ -46,17 +48,20 @@ import { cn } from '@/lib/utils';
  */
 export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number }) {
   const { t } = useTranslation(['map-panel', 'common']);
-  const [selected, setSelected] = useState<number | null>(null);
+  // the place last gone to (the address's `at`): the map opens there again after a reload, with it selected
+  const [search, setSearch] = useSearchState(MAP_SEARCH);
+  const at = search.at && { x: wrap(search.at.x, mapSize), y: wrap(search.at.y, mapSize) };
+  const [selected, setSelected] = useState<number | null>(() => (at ? at.y * mapSize + at.x : null));
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
   const [list, setList] = useState<'valleys' | 'farms' | 'legend' | null>(null);
   const [factions, setFactions] = useState(readFactionTint);
   const [target, setTarget] = useState<SendTarget | null>(null);
   const [moveTo, setMoveTo] = useState<{ x: number; y: number } | null>(null);
   const wide = useMediaQuery('(min-width: 1024px)');
-  const wrap = (v: number) => ((v % mapSize) + mapSize) % mapSize;
-  // the camera starts on the city, at a zoom wide enough to look round; it may go past the edge, which the map wraps
+  // the camera starts on the city, or the place last gone to, at a zoom wide enough to look round; it may go past the
+  // edge, which the map wraps
   const vp = useIsoViewport({
-    start: (view) => ({ x: city.x, y: city.y, zoom: startZoom(view.w, view.dpr) }),
+    start: (view) => ({ ...(at ?? { x: city.x, y: city.y }), zoom: startZoom(view.w, view.dpr) }),
     resetKey: city.id,
     onTap: (p) => {
       const tile = pick(p);
@@ -106,9 +111,15 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     setSelected(id);
     if (!wide) setList(null);
   };
+  // going to a place (the go-to box, a valley, a farming target) keeps it in the address; going home lets it go
   const goTo = (x: number, y: number) => {
     vp.centreOn(x, y);
     select(y * mapSize + x);
+    setSearch({ at: { x, y } });
+  };
+  const goHome = () => {
+    vp.centreOn(city.x, city.y);
+    setSearch({ at: null });
   };
   const pan = (dir: PanDirection) => {
     const { dx, dy } = panStep(dir, PAN_STEP);
@@ -139,7 +150,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
         aria-label={t('toolbar')}
         className="absolute top-2 left-2 flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1 rounded-lg border bg-background/90 p-1 shadow backdrop-blur"
       >
-        <GoToCoords x={wrap(Math.round(centre.x))} y={wrap(Math.round(centre.y))} mapSize={mapSize} onGoTo={goTo} />
+        <GoToCoords x={wrap(Math.round(centre.x), mapSize)} y={wrap(Math.round(centre.y), mapSize)} mapSize={mapSize} onGoTo={goTo} />
         <Button size="icon-xs" variant="ghost" onClick={() => pan('left')} aria-label={t('pan.left')}>
           <ArrowLeft />
         </Button>
@@ -152,7 +163,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
         <Button size="icon-xs" variant="ghost" onClick={() => pan('right')} aria-label={t('pan.right')}>
           <ArrowRight />
         </Button>
-        <Button size="icon-xs" variant="ghost" onClick={() => vp.centreOn(city.x, city.y)} aria-label={t('pan.home')}>
+        <Button size="icon-xs" variant="ghost" onClick={goHome} aria-label={t('pan.home')}>
           <Crosshair />
         </Button>
         <span className="mx-0.5 h-5 w-px bg-border" />

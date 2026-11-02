@@ -1,19 +1,22 @@
-import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { isPanel, isScreen, pageOfPanel, type PanelId, screenHref, type ScreenId } from '@/lib/nav';
+import { useLocation, useNavigate, useParams } from 'react-router';
+import { useSearchState } from '@/hooks/use-search-state';
+import { GAME_SEARCH, isPanel, isScreen, leavingPrefix, type PanelId, screenHref, type ScreenId, type ScreenSearch, ViewId } from '@/lib/nav';
 
 /**
  * The game's place (lib/nav.ts) and the moves between places: the city, the screen in the viewport (null when the
  * address names none, which the game page redirects), and the panel open over it. A page's own `tab` is in its
- * search parameters (`/cities/12/heroes?tab=gear`): go there with `go(page, { tab })`.
+ * search parameters (`/cities/12/heroes?tab=gear`): go there with `go(PageId.HEROES, { tab: HeroTab.GEAR })`, typed by
+ * the page's own parameters (lib/screen-search.ts).
  */
 export function useGameNav() {
   const params = useParams();
   const navigate = useNavigate();
-  const [search, setSearch] = useSearchParams();
+  const location = useLocation();
+  const [search, setSearch] = useSearchState(GAME_SEARCH);
   const cityId = Number(params.cityId);
   const part = params['*'] ?? '';
   const screen = isScreen(part) ? part : null;
-  const wanted = search.get('panel');
+  const wanted = search.panel;
   const panel = wanted && isPanel(wanted) ? wanted : null;
   return {
     cityId,
@@ -21,21 +24,14 @@ export function useGameNav() {
     screen,
     panel,
     /** a page asked for as a panel (an old address: heroes were a panel), which the game page redirects */
-    pageAsPanel: pageOfPanel(wanted),
-    /** Show a view or a page (closing any panel), with search parameters (a building to open). */
-    go: (to: ScreenId, params?: Record<string, string>) => void navigate(screenHref(cityId, to, params)),
-    /** Open a panel over the current screen; the browser's back button closes it. */
-    open: (p: PanelId) =>
-      setSearch((s) => {
-        s.set('panel', p);
-        return s;
-      }),
-    close: () =>
-      setSearch((s) => {
-        s.delete('panel');
-        return s;
-      }),
-    /** Switch to another city, keeping the screen and the panel. */
-    toCity: (id: number) => void navigate(screenHref(id, screen ?? 'town', panel ? { panel } : undefined)),
+    pageAsPanel: wanted && !isPanel(wanted) ? wanted : null,
+    /** Show a view or a page (closing any panel), with its own search parameters (a building to open, a tab). */
+    go: <S extends ScreenId>(to: S, params?: ScreenSearch<S>) => void navigate(screenHref(cityId, to, params)),
+    /** Open a panel over the current screen (in place of one open, whose own parameters go); the back button closes it. */
+    open: (p: PanelId) => setSearch({ panel: p }, { push: true, drop: leavingPrefix(panel, p) }),
+    /** Close the panel, and its own parameters with it. */
+    close: () => setSearch({ panel: null }, { push: true, drop: leavingPrefix(panel, null) }),
+    /** Switch to another city, keeping the screen, the panel and where each was (the whole of the search). */
+    toCity: (id: number) => void navigate({ pathname: screenHref(id, screen ?? ViewId.TOWN), search: location.search }),
   };
 }

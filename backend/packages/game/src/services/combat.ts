@@ -1,6 +1,6 @@
 // valley.* — abandoning and upgrading valleys. Army arrival and battles live in engine/combat.ts.
 
-import { GameError, msg, TileType, VALLEY_TYPES, valleyUpgradeCost } from '@marchlands/core';
+import { canUpgradeTile, GameError, msg, TileType, valleyUpgradeCost } from '@marchlands/core';
 
 import { openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -30,7 +30,7 @@ export async function upgradeValley(ctx: Ctx, playerId: number, cityId: number, 
   const b = await openOwnCity(ctx, playerId, cityId);
   const tile = await getTile(ctx, tileId, { lock: true });
   const npc = tile.type === TileType.NPC;
-  if ((!VALLEY_TYPES.includes(tile.type) && !npc) || tile.cityId != null) throw new GameError(msg('army.upgradeTarget'), -99);
+  if (!canUpgradeTile(tile.type) || tile.cityId != null) throw new GameError(msg('army.upgradeTarget'), -99);
   if (tile.ownerCityId != null) throw new GameError(msg('army.upgradeHeld'), -99);
   const cost = valleyUpgradeCost(tile.level);
   if (cost == null) throw new GameError(msg(npc ? 'army.barbarianCityMaxLevel' : 'army.valleyMaxLevel', { level: tile.level }), -99);

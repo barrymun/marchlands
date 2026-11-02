@@ -9,6 +9,7 @@ import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 
 import {
   BALANCE,
+  canUpgradeTile,
   GameError,
   generateMap,
   historicCities,
@@ -20,7 +21,6 @@ import {
   stateOf,
   TileType,
   tileXY,
-  VALLEY_TYPES,
   valleyUpgradeCost,
 } from '@marchlands/core';
 import { cities, type Db, pgArray, players, tiles, worldState } from '@marchlands/db';
@@ -305,7 +305,7 @@ export async function fieldInfo(ctx: Ctx, viewerId: number | null, tileId: numbe
     owner = c;
   }
   const relation = owner && viewerId ? await relationBetween(ctx, viewerId, owner.playerId) : Relation.NO_RELATION;
-  const upgradeCost = !owner && (VALLEY_TYPES.includes(t.type) || t.type === TileType.NPC) ? valleyUpgradeCost(t.level) : null;
+  const upgradeCost = !owner && canUpgradeTile(t.type) ? valleyUpgradeCost(t.level) : null;
   return { ...base, npc: t.type === TileType.NPC, owner: owner ?? null, relation, upgradeCost, ...relationPermissions(relation) };
 }
 

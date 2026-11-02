@@ -14,11 +14,12 @@ import {
   postPlayerItemsUse,
   postPlayerItemsUseMutation,
 } from '@marchlands/api-client';
+import type { BuffId } from '@marchlands/core';
 
 import { GROUPS, SLOT_BUFFS, STORE_KEY, WARN_MS } from '@/components/active-effects/constants';
 import { SlotCell } from '@/components/active-effects/slot-cell/slot-cell';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
-import { adds, extensionFor, readCollapsed, slotItems } from '@/components/active-effects/utils';
+import { adds, extensionFor, readCollapsed } from '@/components/active-effects/utils';
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -39,8 +40,8 @@ export function ActiveEffects({
   city: CityBean;
   buffs: Buff[];
   counts: Map<string, number>;
-  /** show the items that give a bonus in the list below */
-  onFind: (label: string, itemIds: string[]) => void;
+  /** show the items that give a slot's bonus in the list below */
+  onFind: (buff: BuffId) => void;
 }) {
   const { t } = useTranslation('active-effects');
   const now = useNow();
@@ -102,7 +103,7 @@ export function ActiveEffects({
                   extension={extensionFor(slot, bySlot.get(slot.buff), counts)}
                   busy={use.isPending || buyAndUse.isPending}
                   onExtend={extend}
-                  onFind={() => onFind(slot.label, slotItems(slot))}
+                  onFind={() => onFind(slot.buff)}
                 />
               ))}
             </div>

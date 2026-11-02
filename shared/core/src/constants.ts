@@ -16,8 +16,11 @@ export const TileType = {
 } as const;
 export type TileType = (typeof TileType)[keyof typeof TileType];
 
-/** Valley tile types (can be occupied by a city for production bonuses). */
+/** Valley tile types, flat land included (raised for gold, drawn as valleys). The ones a city can hold are HOLDABLE_VALLEY_TYPES. */
 export const VALLEY_TYPES: readonly number[] = [TileType.FOREST, TileType.DESERT, TileType.HILL, TileType.SWAMP, TileType.GRASS, TileType.LAKE, TileType.FLAT];
+
+/** The valleys a city can hold for their production bonus: every valley type but flat land, which is settled, not held. */
+export const HOLDABLE_VALLEY_TYPES: readonly number[] = VALLEY_TYPES.filter((t) => t !== TileType.FLAT);
 
 export const BuildingType = {
   COTTAGE: 1,
@@ -204,6 +207,28 @@ export const ReportType = {
   OTHER: 2,
 } as const;
 export type ReportType = (typeof ReportType)[keyof typeof ReportType];
+
+/** (marchlands) What a report is about, to filter the list by: battles, scouting, armies coming home, other army movements, the rest. */
+export const ReportKind = {
+  BATTLES: 'battles',
+  SCOUTING: 'scouting',
+  RETURNS: 'returns',
+  MOVEMENTS: 'movements',
+  OTHER: 'other',
+} as const;
+export type ReportKind = (typeof ReportKind)[keyof typeof ReportKind];
+export const REPORT_KINDS = Object.values(ReportKind) as [ReportKind, ...ReportKind[]];
+
+/** (marchlands) Which reports the list shows first. */
+export const ReportOrder = {
+  NEWEST: 'newest',
+  OLDEST: 'oldest',
+} as const;
+export type ReportOrder = (typeof ReportOrder)[keyof typeof ReportOrder];
+export const REPORT_ORDERS = Object.values(ReportOrder) as [ReportOrder, ...ReportOrder[]];
+
+/** The longest report search the server takes (coordinates, or part of a name). */
+export const REPORT_SEARCH_MAX = 60;
 
 export const MarketSide = {
   BUY: 0,

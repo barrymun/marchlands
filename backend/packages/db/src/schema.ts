@@ -100,6 +100,8 @@ export const players = pgTable(
     buffs: jsonb('buffs').$type<BuffState[]>().notNull().default([]),
     castleSigns: jsonb('castle_signs').$type<CastleSign[]>().notNull().default([]),
     misc: jsonb('misc').$type<PlayerMisc>().notNull().default({}),
+    /** (marchlands) file the reports of armies coming home as read (they still go in the list) */
+    autoReadReturns: boolean('auto_read_returns').notNull().default(true),
     /** cached aggregates, refreshed by the ranking job */
     population: integer('population').notNull().default(0),
     prestigeRank: integer('prestige_rank').notNull().default(0),

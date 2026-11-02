@@ -14,6 +14,7 @@ import {
   factionMarginal,
   factionSells,
   giveToGroups,
+  HOLDABLE_VALLEY_TYPES,
   landFactors,
   MarketSide,
   newNpcEconomy,
@@ -28,7 +29,6 @@ import {
   type Stock,
   takeFromGroups,
   TileType,
-  VALLEY_TYPES,
   worldGold,
   worldTotals,
 } from '@marchlands/core';
@@ -61,7 +61,7 @@ export async function npcGroups(ctx: Ctx): Promise<NpcGroup[]> {
 
 /** Each zone's land, from its valleys (core landFactors). */
 async function zoneLand(ctx: Ctx): Promise<Stock[]> {
-  const types = VALLEY_TYPES.filter((t) => t !== TileType.FLAT);
+  const types = [...HOLDABLE_VALLEY_TYPES];
   const rows = await ctx.tx.execute<{ zone: number; type: number; count: number }>(sql`
     select ${zoneSql()} as zone, type, count(*)::int as count from tiles
     where type in (${sql.join(types, sql`, `)}) group by 1, 2`);

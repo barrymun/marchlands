@@ -177,10 +177,12 @@ All paths are relative to the server root. Names in parentheses are the original
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/v1/reports` | Type 0 trade, 1 army, 2 other (report.receiveReportList) |
+| GET | `/api/v1/reports` | Type 0 trade, 1 army, 2 other (report.receiveReportList); (marchlands) searched and filtered |
 | GET | `/api/v1/reports/{reportId}` | Open a report (report.markAsRead) |
 | POST | `/api/v1/reports/delete` | Delete (report.deleteReport) |
 | POST | `/api/v1/reports/read` | Mark read (report.readOverReport); omit ids for all |
+| GET | `/api/v1/reports/settings` | (marchlands) The report settings |
+| POST | `/api/v1/reports/settings` | (marchlands) Change the report settings |
 | GET | `/api/v1/reports/unread` | Unread counters (server.NewReport) |
 
 ## chat

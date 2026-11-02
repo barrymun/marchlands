@@ -7,6 +7,8 @@ import { canAppoint, isMayor } from '@/components/hero-summary/utils';
 import { Button } from '@/components/ui/button';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { useNow } from '@/hooks/use-now';
+import { PageId } from '@/lib/nav';
+import { HeroTab } from '@/lib/screen-search';
 
 /**
  * The quick mayor swap under the mayor chip: the city's heroes at home (the mayor and the idle ones), each with its attributes, gear
@@ -18,8 +20,8 @@ export function MayorPicker({ city, onDone }: { city: CityBean; onDone: () => vo
   const now = useNow();
   const heroes = city.heros.filter((h) => isMayor(h) || canAppoint(h));
   const idle = heroes.some(canAppoint);
-  const go = (tab?: string) => {
-    nav.go('heroes', tab ? { tab } : undefined);
+  const go = (tab?: HeroTab) => {
+    nav.go(PageId.HEROES, tab ? { tab } : undefined);
     onDone();
   };
   return (
@@ -35,7 +37,7 @@ export function MayorPicker({ city, onDone }: { city: CityBean; onDone: () => vo
       </ul>
       <div className="flex flex-wrap justify-end gap-1.5">
         {!idle && (
-          <Button size="xs" variant="outline" onClick={() => go('inn')}>
+          <Button size="xs" variant="outline" onClick={() => go(HeroTab.INN)}>
             {t('mayor.toInn')}
           </Button>
         )}

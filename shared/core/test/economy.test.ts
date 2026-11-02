@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { researchesInCity } from '#/index.ts';
+import { canUpgradeTile, HOLDABLE_VALLEY_TYPES, researchesInCity, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus, valleyResource } from '#/index.ts';
 
 describe(researchesInCity.name, () => {
   it("lists the techs running in that city only, and none that aren't running", () => {
@@ -17,5 +17,61 @@ describe(researchesInCity.name, () => {
 
   it('a tech with no end time is not running, even with a city', () => {
     expect(researchesInCity({ 1: { level: 1, cityId: 10, endTime: 0 } }, 10)).toEqual([]);
+  });
+});
+
+describe(valleyResource.name, () => {
+  it('names the resource each valley type boosts', () => {
+    expect(valleyResource(TileType.FOREST)).toBe('wood');
+    expect(valleyResource(TileType.DESERT)).toBe('stone');
+    expect(valleyResource(TileType.HILL)).toBe('iron');
+    expect(valleyResource(TileType.SWAMP)).toBe('food');
+    expect(valleyResource(TileType.GRASS)).toBe('food');
+    expect(valleyResource(TileType.LAKE)).toBe('food');
+  });
+
+  it('agrees with the table for every valley type', () => {
+    for (const [type, resources] of Object.entries(VALLEY_RESOURCE)) expect(valleyResource(Number(type))).toBe(resources[0] ?? null);
+  });
+
+  it('names none for flat land or a tile that is not a valley', () => {
+    expect(valleyResource(TileType.FLAT)).toBeNull();
+    expect(valleyResource(TileType.CASTLE)).toBeNull();
+    expect(valleyResource(TileType.NPC)).toBeNull();
+  });
+});
+
+describe(valleyBonus.name, () => {
+  it('gives no bonus for a tile that boosts nothing', () => {
+    expect(valleyBonus(TileType.FLAT, 5)).toBe(0);
+    expect(valleyBonus(TileType.CASTLE, 5)).toBe(0);
+  });
+
+  it('gives a valley a bonus that grows with its level', () => {
+    expect(valleyBonus(TileType.FOREST, 2)).toBeGreaterThan(valleyBonus(TileType.FOREST, 1));
+  });
+});
+
+describe(canUpgradeTile.name, () => {
+  it('raises valleys, flat land included, and barbarian cities', () => {
+    for (const type of VALLEY_TYPES) expect(canUpgradeTile(type)).toBe(true);
+    expect(canUpgradeTile(TileType.FLAT)).toBe(true);
+    expect(canUpgradeTile(TileType.NPC)).toBe(true);
+  });
+
+  it('never raises a player city or a historic city', () => {
+    expect(canUpgradeTile(TileType.CASTLE)).toBe(false);
+    expect(canUpgradeTile(TileType.HISTORIC)).toBe(false);
+  });
+});
+
+describe('HOLDABLE_VALLEY_TYPES', () => {
+  it('is every valley type but flat land', () => {
+    expect(HOLDABLE_VALLEY_TYPES).toEqual(VALLEY_TYPES.filter((t) => t !== TileType.FLAT));
+    expect(HOLDABLE_VALLEY_TYPES).not.toContain(TileType.FLAT);
+  });
+
+  it('holds exactly the valleys that boost a resource', () => {
+    for (const type of VALLEY_TYPES) expect(HOLDABLE_VALLEY_TYPES.includes(type)).toBe(valleyResource(type) != null);
   });
 });

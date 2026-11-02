@@ -1926,6 +1926,10 @@ export type ReportListInput = {
     pageNo: number;
     pageSize: number;
     totalPage: number;
+    /**
+     * (marchlands) the reports found, on every page
+     */
+    total: number;
     reports: Array<ReportSummaryInput>;
 };
 
@@ -2452,6 +2456,13 @@ export type ReportDetailInput = {
             };
         };
     };
+};
+
+export type ReportSettingsInput = {
+    /**
+     * reports of armies coming home are filed as read
+     */
+    autoReadReturns: boolean;
 };
 
 export type ChatMessageInput = {
@@ -5492,6 +5503,10 @@ export type ReportList = {
     pageNo: number;
     pageSize: number;
     totalPage: number;
+    /**
+     * (marchlands) the reports found, on every page
+     */
+    total: number;
     reports: Array<ReportSummary>;
 };
 
@@ -6018,6 +6033,13 @@ export type ReportDetail = {
             };
         };
     };
+};
+
+export type ReportSettings = {
+    /**
+     * reports of armies coming home are filed as read
+     */
+    autoReadReturns: boolean;
 };
 
 export type ChatMessage = {
@@ -11408,6 +11430,22 @@ export type GetReportsData = {
         pageNo?: number;
         pageSize?: number;
         type?: number;
+        /**
+         * (marchlands) search: coordinates (`207,405`) find reports from or to that tile; other text finds the names of cities, players and heroes
+         */
+        q?: string;
+        /**
+         * (marchlands) battles, scouting, returns (armies coming home), movements (other marches) or other
+         */
+        kind?: 'battles' | 'scouting' | 'returns' | 'movements' | 'other';
+        /**
+         * (marchlands) true: only unread reports
+         */
+        unread?: 'true' | 'false';
+        /**
+         * (marchlands) newest first (the default) or oldest first
+         */
+        order?: 'newest' | 'oldest';
     };
     url: '/api/v1/reports';
 };
@@ -11462,6 +11500,64 @@ export type GetReportsUnreadResponses = {
 };
 
 export type GetReportsUnreadResponse = GetReportsUnreadResponses[keyof GetReportsUnreadResponses];
+
+export type GetReportsSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reports/settings';
+};
+
+export type GetReportsSettingsErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Default Response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type GetReportsSettingsError = GetReportsSettingsErrors[keyof GetReportsSettingsErrors];
+
+export type GetReportsSettingsResponses = {
+    /**
+     * Default Response
+     */
+    200: ReportSettings;
+};
+
+export type GetReportsSettingsResponse = GetReportsSettingsResponses[keyof GetReportsSettingsResponses];
+
+export type PostReportsSettingsData = {
+    body: ReportSettingsInput;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reports/settings';
+};
+
+export type PostReportsSettingsErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Default Response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type PostReportsSettingsError = PostReportsSettingsErrors[keyof PostReportsSettingsErrors];
+
+export type PostReportsSettingsResponses = {
+    /**
+     * Default Response
+     */
+    200: ReportSettings;
+};
+
+export type PostReportsSettingsResponse = PostReportsSettingsResponses[keyof PostReportsSettingsResponses];
 
 export type GetReportsByReportIdData = {
     body?: never;

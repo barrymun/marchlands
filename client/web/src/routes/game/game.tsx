@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { errorMessage } from '@/lib/api';
-import { isPanel, legacyTarget, screenHref, VIEW_IDS } from '@/lib/nav';
+import { legacyTarget, PageId, screenHref, VIEW_IDS, ViewId } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 import { BottomBar } from '@/routes/game/bottom-bar/bottom-bar';
 import { FlowsPanel, FULL_WIDTH_PAGES, HeroesPanel, MapPanel, MarketPanel, PAGE_WIDTH, ReportsPanel, StatsPanel } from '@/routes/game/constants';
@@ -37,7 +37,7 @@ export function GamePage() {
   // an address naming no view or page (the city's own, or one from before the views) goes where it now lives
   if (!nav.screen) {
     const to = legacyTarget(nav.part);
-    return <Navigate to={screenHref(nav.cityId, to.screen, to.panel && isPanel(to.panel) ? { panel: to.panel } : undefined)} replace />;
+    return <Navigate to={screenHref(nav.cityId, to.screen, undefined, to.panel)} replace />;
   }
   // a screen that was a panel before it became a page (heroes) goes to the page
   if (nav.pageAsPanel) return <Navigate to={screenHref(nav.cityId, nav.pageAsPanel)} replace />;
@@ -45,7 +45,7 @@ export function GamePage() {
   // the market is a trading terminal: on a wide screen it fills the viewport like a view, its panes scrolling themselves;
   // most pages keep a readable width, a few (FULL_WIDTH_PAGES) use the whole viewport
   const isView = (VIEW_IDS as readonly string[]).includes(nav.screen);
-  const isTerminal = nav.screen === 'market';
+  const isTerminal = nav.screen === PageId.MARKET;
   const isFullWidth = (FULL_WIDTH_PAGES as readonly string[]).includes(nav.screen);
 
   return (
@@ -67,14 +67,14 @@ export function GamePage() {
             {city.data && (
               // a screen whose code hasn't arrived yet shows the same placeholder as a city still loading
               <Suspense fallback={<Skeleton className="h-96" />}>
-                {nav.screen === 'town' && <BuildingsPanel city={city.data} area="inside" />}
-                {nav.screen === 'fields' && <BuildingsPanel city={city.data} area="fields" />}
-                {nav.screen === 'map' && <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />}
-                {nav.screen === 'heroes' && <HeroesPanel city={city.data} />}
-                {nav.screen === 'reports' && <ReportsPanel />}
-                {nav.screen === 'market' && <MarketPanel city={city.data} />}
-                {nav.screen === 'flows' && <FlowsPanel city={city.data} />}
-                {nav.screen === 'stats' && <StatsPanel />}
+                {nav.screen === ViewId.TOWN && <BuildingsPanel city={city.data} area="inside" />}
+                {nav.screen === ViewId.FIELDS && <BuildingsPanel city={city.data} area="fields" />}
+                {nav.screen === ViewId.MAP && <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />}
+                {nav.screen === PageId.HEROES && <HeroesPanel city={city.data} />}
+                {nav.screen === PageId.REPORTS && <ReportsPanel />}
+                {nav.screen === PageId.MARKET && <MarketPanel city={city.data} />}
+                {nav.screen === PageId.FLOWS && <FlowsPanel city={city.data} />}
+                {nav.screen === PageId.STATS && <StatsPanel />}
               </Suspense>
             )}
           </div>

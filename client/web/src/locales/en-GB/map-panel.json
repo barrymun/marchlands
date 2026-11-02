@@ -102,7 +102,8 @@
     "button": "Upgrade to Lv {{level}} · {{gold}} gold",
     "notEnoughGold": "Not enough gold in {{city}}.",
     "npcHint": "Its troops, fortifications, walls, hero and the resources you can plunder all grow to level {{level}}, and it starts afresh at full strength.",
-    "valleyHint": "Once held: +{{from}} → +{{to}} production. Its defenders grow stronger with the level too."
+    "valleyHint": "Once held: +{{from}} → +{{to}} {{resource}} production. Its defenders grow stronger with the level too.",
+    "flatHint": "Flat land boosts no production, held or not."
   },
   "draft": {
     "done": "Troops drafted",
@@ -118,5 +119,14 @@
     "unpaid": "Out of gold or food for its upkeep: losing loyalty",
     "upkeep": "Upkeep {{gold}} gold and {{food}} food an hour",
     "shared": "Your alliance gets {{gold}} gold an hour of its tribute"
+  },
+  "valley": {
+    "boost": "+{{bonus}} {{resource}}",
+    "boostTitle": "The city holding this valley produces {{bonus}} more {{resource}}."
+  },
+  "distance": {
+    "away_one": "{{n}} tile away",
+    "away_other": "{{n}} tiles away",
+    "title": "Straight-line distance from {{city}}, which an army's march time is worked out from."
   }
 }

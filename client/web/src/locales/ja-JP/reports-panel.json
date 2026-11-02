@@ -7,11 +7,41 @@
   },
   "markAllRead": "すべて既読にする",
   "markedAllRead": "すべての報告を既読にしました",
-  "noReports": "報告はありません。",
+  "noReports": "報告はまだありません。戦闘、偵察、交易、部隊の帰還がここに報告されます。",
   "previousPage": "前のページ",
   "nextPage": "次のページ",
   "keptFor": "報告は30日間保存されます。",
   "unread": "未読",
+  "found_other": "{{n}}件の報告が見つかりました",
+  "noMatches": "この条件に合う報告はありません。",
+  "columns": {
+    "report": "報告",
+    "time": "日時"
+  },
+  "autoRead": {
+    "label": "帰還を自動で既読",
+    "hint": "帰還した部隊の報告を既読として受け取ります"
+  },
+  "filters": {
+    "search": "検索",
+    "searchPlaceholder": "座標または名前（例：207,405）",
+    "kind": "種類",
+    "order": "並び順",
+    "unread": "未読のみ",
+    "clear": "条件をクリア"
+  },
+  "kinds": {
+    "any": "すべての種類",
+    "battles": "戦闘",
+    "scouting": "偵察",
+    "returns": "帰還",
+    "movements": "援軍と輸送",
+    "other": "その他"
+  },
+  "orders": {
+    "newest": "新しい順",
+    "oldest": "古い順"
+  },
   "dialog": {
     "title": "報告",
     "deleted": "報告を削除しました"

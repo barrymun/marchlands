@@ -6,6 +6,7 @@ import type { CityBean } from '@marchlands/api-client';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useGameNav } from '@/hooks/use-game-nav';
+import { PanelId } from '@/lib/nav';
 import { ArmiesPanel, FactionsPanel, ItemsPanel, MilitaryPanel, PANELS, PlansPanel, ResearchPanel } from '@/routes/game/constants';
 
 /**
@@ -37,12 +38,12 @@ export function PanelSheet({ city }: { city: CityBean }) {
         </SheetHeader>
         <div ref={body} tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto p-4 outline-none">
           <Suspense fallback={<Skeleton className="h-96" />}>
-            {nav.panel === 'military' && <MilitaryPanel city={city} />}
-            {nav.panel === 'research' && <ResearchPanel city={city} />}
-            {nav.panel === 'items' && <ItemsPanel city={city} />}
-            {nav.panel === 'armies' && <ArmiesPanel />}
-            {nav.panel === 'plans' && <PlansPanel />}
-            {nav.panel === 'factions' && <FactionsPanel />}
+            {nav.panel === PanelId.MILITARY && <MilitaryPanel city={city} />}
+            {nav.panel === PanelId.RESEARCH && <ResearchPanel city={city} />}
+            {nav.panel === PanelId.ITEMS && <ItemsPanel city={city} />}
+            {nav.panel === PanelId.ARMIES && <ArmiesPanel />}
+            {nav.panel === PanelId.PLANS && <PlansPanel />}
+            {nav.panel === PanelId.FACTIONS && <FactionsPanel />}
           </Suspense>
         </div>
       </SheetContent>

@@ -29,6 +29,7 @@ export function playerRow(over: Partial<PlayerRow> = {}): PlayerRow {
     buffs: [],
     castleSigns: [],
     misc: {},
+    autoReadReturns: true,
     population: 0,
     prestigeRank: 0,
     honorRank: 0,

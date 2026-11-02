@@ -7,11 +7,42 @@
   },
   "markAllRead": "Mark all read",
   "markedAllRead": "All reports marked as read",
-  "noReports": "No reports.",
+  "noReports": "No reports yet. Battles, scouting, trades and armies coming home are reported here.",
   "previousPage": "Previous page",
   "nextPage": "Next page",
   "keptFor": "Reports are kept for 30 days.",
   "unread": "unread",
+  "found_one": "{{n}} report found",
+  "found_other": "{{n}} reports found",
+  "noMatches": "No reports match these filters.",
+  "columns": {
+    "report": "Report",
+    "time": "Time"
+  },
+  "autoRead": {
+    "label": "Auto-read returns",
+    "hint": "Armies coming home are reported as already read"
+  },
+  "filters": {
+    "search": "Search",
+    "searchPlaceholder": "Coordinates or a name, e.g. 207,405",
+    "kind": "Kind",
+    "order": "Order",
+    "unread": "Unread only",
+    "clear": "Clear filters"
+  },
+  "kinds": {
+    "any": "Any kind",
+    "battles": "Battles",
+    "scouting": "Scouting",
+    "returns": "Returns",
+    "movements": "Reinforcements and transports",
+    "other": "Other"
+  },
+  "orders": {
+    "newest": "Newest first",
+    "oldest": "Oldest first"
+  },
   "dialog": {
     "title": "Report",
     "deleted": "Report deleted"

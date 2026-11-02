@@ -4,7 +4,18 @@
 // (tech, mayor and valley production bonuses, troop food upkeep, starvation).
 
 import { BALANCE, getGameSpeed, scaled } from '#/balance.ts';
-import { BASIC_RESOURCES, type BasicResource, BuffId, BuildingType, RESOURCE_KEYS, TechType, TileType, TROOP_ID_BY_KEY, TROOP_KEY_LIST } from '#/constants.ts';
+import {
+  BASIC_RESOURCES,
+  type BasicResource,
+  BuffId,
+  BuildingType,
+  RESOURCE_KEYS,
+  TechType,
+  TileType,
+  TROOP_ID_BY_KEY,
+  TROOP_KEY_LIST,
+  VALLEY_TYPES,
+} from '#/constants.ts';
 import { troopConfig } from '#/data/index.ts';
 import { mayorProductionBonus } from '#/heroes.ts';
 import { merchantBase } from '#/merchant.ts';
@@ -38,7 +49,16 @@ export const VALLEY_RESOURCE: Record<number, BasicResource[]> = {
   [TileType.FLAT]: [],
 };
 
-/** Production bonus (fraction) of an occupied valley for its resource. */
+/** The resource a valley type boosts for the city holding it; null for flat land, which boosts none, or a tile that isn't a valley. */
+export function valleyResource(type: number): BasicResource | null {
+  return VALLEY_RESOURCE[type]?.[0] ?? null;
+}
+
+/** Whether a tile's level can be raised for gold (while nobody holds it): a valley, flat land included, or a barbarian city. */
+export function canUpgradeTile(type: number): boolean {
+  return VALLEY_TYPES.includes(type) || type === TileType.NPC;
+}
+
 /** Gold to raise an unowned valley from `level` to `level + 1` (null when it is already at the top). */
 export function valleyUpgradeCost(level: number): number | null {
   const { baseGold, maxLevel } = BALANCE.valleyUpgrade;
@@ -46,9 +66,10 @@ export function valleyUpgradeCost(level: number): number | null {
   return baseGold * Math.pow(2, Math.max(0, level - 1));
 }
 
+/** Production bonus (fraction) of an occupied valley for its resource. */
 export function valleyBonus(type: number, level: number): number {
   const table = type === TileType.GRASS ? BALANCE.valleyBonus.grass : type === TileType.LAKE ? BALANCE.valleyBonus.lake : BALANCE.valleyBonus.other;
-  if (!VALLEY_RESOURCE[type]?.length) return 0;
+  if (!valleyResource(type)) return 0;
   return table[Math.min(10, Math.max(0, level))] ?? 0;
 }
 

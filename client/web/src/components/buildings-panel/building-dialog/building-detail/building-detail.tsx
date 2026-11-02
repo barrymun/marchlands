@@ -36,6 +36,8 @@ import { useCommand } from '@/hooks/use-game';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { buildingName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
+import { PageId } from '@/lib/nav';
+import { HeroTab } from '@/lib/screen-search';
 import { STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
@@ -81,7 +83,7 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
           variant="outline"
           className="justify-self-start"
           onClick={() => {
-            nav.go('heroes', { tab: 'inn' });
+            nav.go(PageId.HEROES, { tab: HeroTab.INN });
             onDone();
           }}
         >

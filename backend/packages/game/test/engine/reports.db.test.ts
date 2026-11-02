@@ -35,6 +35,25 @@ describe(createReport.name, () => {
       });
     }));
 
+  it('files an army coming home as read while the player keeps the default, unread once they turn it off', () =>
+    game(async (g) => {
+      const a = await createTestPlayer(g);
+      const back = () => createReport(g, { playerId: a.id, title: msg('report.title.attackReturned'), isBack: true, body: textBody() });
+      const first = await back();
+      const other = await addReport(g, a);
+      await reports.setReportSettings(g, a.id, { autoReadReturns: false });
+      const second = await back();
+      const list = (await reports.listReports(g, a.id, null, 1, 10)).reports;
+      expect(new Map(list.map((r) => [r.id, r.isRead]))).toEqual(
+        new Map([
+          [first, true],
+          [other, false],
+          [second, false],
+        ]),
+      );
+      expect(g.pushes(PushCmd.NEW_REPORT).at(-1)).toMatchObject({ data: { count: 2 } });
+    }));
+
   it('keeps the given type, mission, flags and positions', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
@@ -60,7 +79,8 @@ describe(createReport.name, () => {
         startPos: position,
         targetPos: position,
         eventTime: g.now,
-        isRead: false,
+        // an army coming home is filed as read (the player's default)
+        isRead: true,
       });
     }));
 

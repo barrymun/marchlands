@@ -41,6 +41,7 @@ import {
   ReportIdParams,
   ReportList,
   ReportListQuery,
+  ReportSettings,
   SendMailBody,
   SetAllianceInfoBody,
   SetAllianceRankBody,
@@ -73,11 +74,29 @@ export default async function socialRoutes(app: ZApp) {
   );
 
   // ---- reports ----
-  app.get('/reports', s(tags.reports, 'Type 0 trade, 1 army, 2 other (report.receiveReportList)', ReportList, { querystring: ReportListQuery }), (req) =>
-    game(req, (ctx, pid) => reports.listReports(ctx, pid, req.query.type ?? null, req.query.pageNo, req.query.pageSize)),
+  app.get(
+    '/reports',
+    s(tags.reports, 'Type 0 trade, 1 army, 2 other (report.receiveReportList); (marchlands) searched and filtered', ReportList, {
+      querystring: ReportListQuery,
+    }),
+    (req) =>
+      game(req, (ctx, pid) =>
+        reports.listReports(ctx, pid, req.query.type ?? null, req.query.pageNo, req.query.pageSize, {
+          q: req.query.q,
+          kind: req.query.kind,
+          unread: req.query.unread,
+          order: req.query.order,
+        }),
+      ),
   );
   app.get('/reports/unread', s(tags.reports, 'Unread counters (server.NewReport)', ReportCounts), (req) =>
     game(req, (ctx, pid) => reports.reportCounts(ctx, pid)),
+  );
+  app.get('/reports/settings', s(tags.reports, '(marchlands) The report settings', ReportSettings), (req) =>
+    game(req, (ctx, pid) => reports.reportSettings(ctx, pid)),
+  );
+  app.post('/reports/settings', s(tags.reports, '(marchlands) Change the report settings', ReportSettings, { body: ReportSettings }), (req) =>
+    game(req, (ctx, pid) => reports.setReportSettings(ctx, pid, req.body)),
   );
   app.get('/reports/:reportId', s(tags.reports, 'Open a report (report.markAsRead)', ReportDetail, { params: ReportIdParams }), (req) =>
     game(req, (ctx, pid) => reports.readReport(ctx, pid, req.params.reportId)),

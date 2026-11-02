@@ -3,7 +3,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Relation, TileType } from '@marchlands/core';
 
 import { FACTION_TINT_KEY } from '@/components/map-panel/constants';
-import { farmedTiles, farmLists, placeName, readFactionTint, relationGroup, saveFactionTint } from '@/components/map-panel/utils';
+import { farmedTiles, farmLists, placeName, readFactionTint, relationGroup, saveFactionTint, wrap } from '@/components/map-panel/utils';
+
+describe(wrap.name, () => {
+  it('keeps a coordinate on the map', () => {
+    expect(wrap(5, 800)).toBe(5);
+    expect(wrap(800, 800)).toBe(0);
+    expect(wrap(-1, 800)).toBe(799);
+    expect(wrap(-801, 800)).toBe(799);
+  });
+});
 
 describe(relationGroup.name, () => {
   it('groups alliance members and allies as friends', () => {

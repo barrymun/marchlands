@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -7,9 +7,10 @@ import { type CityBean, getCitiesByCityIdQueryKey, getPlayerQueryKey, postCities
 import { ITEM_CATEGORY_IDS, ITEM_INFO } from '@marchlands/core';
 
 import { ActiveEffects } from '@/components/active-effects/active-effects';
+import { slotItems, slotOf } from '@/components/active-effects/utils';
 import { ItemIcon } from '@/components/item-icon/item-icon';
 import { ActiveBonus } from '@/components/items-panel/active-bonus/active-bonus';
-import { ALL } from '@/components/items-panel/constants';
+import { ALL, ITEM_SEARCH_MAX, ITEMS_SEARCH } from '@/components/items-panel/constants';
 import { MedalSourcesInfo } from '@/components/items-panel/medal-sources-info/medal-sources-info';
 import type { Entry } from '@/components/items-panel/types';
 import { describeGrant, goldPriceOf, medalLevelOf } from '@/components/items-panel/utils';
@@ -20,19 +21,24 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand, usePlayer } from '@/hooks/use-game';
+import { useSearchState, useSearchText } from '@/hooks/use-search-state';
 import { fmt, fmtExact } from '@/lib/format';
 import { itemCategoryName, itemName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
+import { PanelId } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 
 export function ItemsPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['items-panel', 'common']);
   const player = usePlayer();
-  const [category, setCategory] = useState(ALL);
-  const [query, setQuery] = useState('');
-  const [ownedOnly, setOwnedOnly] = useState(false);
-  // set by an inactive Active effects slot: only the items that give that bonus
-  const [effectFilter, setEffectFilter] = useState<{ label: string; ids: string[] } | null>(null);
+  const [s, set] = useSearchState(ITEMS_SEARCH, { panel: PanelId.ITEMS });
+  // the list follows each key; the address once typing pauses
+  const [query, setQuery] = useSearchText(s.q, (text) => set({ q: text }));
+  const category = s.category == null ? ALL : String(s.category);
+  const ownedOnly = s.owned;
+  // asked for by an Active effects slot: only the items that give that bonus
+  const effectSlot = s.effect ? slotOf(s.effect) : null;
+  const effectFilter = effectSlot && { label: effectSlot.label, ids: slotItems(effectSlot) };
   const listRef = useRef<HTMLDivElement>(null);
   const counts = useMemo(() => new Map((player.data?.items ?? []).map((i) => [i.id, i.count])), [player.data?.items]);
 
@@ -85,16 +91,14 @@ export function ItemsPanel({ city }: { city: CityBean }) {
         city={city}
         buffs={buffs}
         counts={counts}
-        onFind={(label, ids) => {
-          setEffectFilter({ label, ids });
-          setCategory(ALL);
+        onFind={(effect) => {
           setQuery('');
-          setOwnedOnly(false);
+          set({ effect, category: null, q: '', owned: false });
           listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }}
       />
       <div ref={listRef} className="flex min-w-0 scroll-mt-4 flex-wrap items-center gap-3">
-        <Tabs value={category} onValueChange={setCategory} className="max-w-full min-w-0">
+        <Tabs value={category} onValueChange={(v) => set({ category: v === ALL ? null : Number(v) })} className="max-w-full min-w-0">
           <TabsList className="max-w-full justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <TabsTrigger value={ALL}>{t('common:actions.all')}</TabsTrigger>
             {ITEM_CATEGORY_IDS.map((c) => (
@@ -104,9 +108,15 @@ export function ItemsPanel({ city }: { city: CityBean }) {
             ))}
           </TabsList>
         </Tabs>
-        <Input className="h-8 min-w-0 flex-1 sm:w-48 sm:flex-none" placeholder={t('search')} value={query} onChange={(e) => setQuery(e.target.value)} />
+        <Input
+          className="h-8 min-w-0 flex-1 sm:w-48 sm:flex-none"
+          placeholder={t('search')}
+          value={query}
+          maxLength={ITEM_SEARCH_MAX}
+          onChange={(e) => setQuery(e.target.value)}
+        />
         <div className="flex items-center gap-2">
-          <Switch id="owned-only" checked={ownedOnly} onCheckedChange={setOwnedOnly} />
+          <Switch id="owned-only" checked={ownedOnly} onCheckedChange={(owned) => set({ owned })} />
           <Label htmlFor="owned-only" className="text-sm font-normal">
             {t('ownedOnly', { n: ownedTotal })}
           </Label>
@@ -114,7 +124,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
         {effectFilter && (
           <Badge variant="secondary" className="gap-1">
             {t('itemsFor', { label: effectFilter.label })}
-            <button type="button" className="-mr-1 rounded-sm opacity-70 hover:opacity-100" aria-label={t('showAll')} onClick={() => setEffectFilter(null)}>
+            <button type="button" className="-mr-1 rounded-sm opacity-70 hover:opacity-100" aria-label={t('showAll')} onClick={() => set({ effect: null })}>
               <X className="size-3" />
             </button>
           </Badge>

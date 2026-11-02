@@ -1,10 +1,10 @@
 // report.* — battle/scout/movement/trade reports. Bodies are structured JSON (the original
 // wrote XML files to disk).
 
-import { and, count, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, or, type SQL, sql } from 'drizzle-orm';
 
-import { GameError, msg, type ReportBody, ReportBodySchema } from '@marchlands/core';
-import { one, reports } from '@marchlands/db';
+import { GameError, msg, type ReportBody, ReportBodySchema, ReportKind, ReportOrder } from '@marchlands/core';
+import { one, players, reports } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { pushReportCounts } from '#/engine/reports.ts';
@@ -24,20 +24,93 @@ const listBean = (r: typeof reports.$inferSelect) => ({
   isRead: r.isRead,
 });
 
-/** report.receiveReportList */
-export async function listReports(ctx: Ctx, playerId: number, type: number | null, pageNo: number, pageSize: number) {
+/** (marchlands) Coordinates typed into the search: `207,405`, `(207, 405)` or `207 405`. */
+const COORDS = /^\(?\s*(\d{1,4})(?:\s|\s*,)\s*(\d{1,4})\s*\)?$/;
+
+/** Where a report's positions (`world.position.*` messages) put a tile's coordinates. */
+const POSITIONS = [sql`${reports.startPos}`, sql`${reports.targetPos}`, sql`${reports.body}->'draft'->'target'`];
+
+/** The names a search looks through: cities and places, players, heroes. */
+const NAMES = sql`concat_ws(' ',
+  ${reports.startPos}->'params'->>'name', ${reports.targetPos}->'params'->>'name', ${reports.title}->'params'->>'name',
+  ${reports.body}->'battle'->'attacker'->>'player', ${reports.body}->'battle'->'defender'->>'player',
+  ${reports.body}->'battle'->'attacker'->'hero'->>'name', ${reports.body}->'battle'->'defender'->'hero'->>'name',
+  ${reports.body}->'battle'->>'city', ${reports.body}->'scout'->>'owner', ${reports.body}->'movement'->'hero'->>'name',
+  ${reports.body}->'movement'->>'from', ${reports.body}->'desertion'->>'city', ${reports.body}->'draft'->>'city')`;
+
+function searchWhere(q: string): SQL {
+  const at = COORDS.exec(q);
+  if (at) {
+    const [, x = '', y = ''] = at;
+    // as JSON text, so 0405 finds 405
+    const [tx, ty] = [String(Number(x)), String(Number(y))];
+    return or(...POSITIONS.map((p) => sql`(${p}->'params'->>'x' = ${tx} and ${p}->'params'->>'y' = ${ty})`)) ?? sql`false`;
+  }
+  return sql`${NAMES} ilike ${`%${q.replace(/[\\%_]/g, '\\$&')}%`}`;
+}
+
+const bodyKind = sql`${reports.body}->>'kind'`;
+const aborted = sql`${reports.title}->>'code' = 'report.title.missionAborted'`;
+
+function kindWhere(kind: ReportKind): SQL {
+  switch (kind) {
+    case ReportKind.BATTLES:
+      return sql`${bodyKind} = 'battle'`;
+    case ReportKind.SCOUTING:
+      return sql`${bodyKind} = 'scout'`;
+    case ReportKind.RETURNS:
+      return eq(reports.isBack, true);
+    case ReportKind.MOVEMENTS:
+      return sql`((${bodyKind} = 'movement' and not ${reports.isBack}) or ${aborted})`;
+    case ReportKind.OTHER:
+      return sql`(${bodyKind} not in ('battle', 'scout', 'movement') and not ${aborted})`;
+  }
+}
+
+export interface ReportFilter {
+  /** coordinates, or part of a name */
+  q?: string;
+  kind?: ReportKind;
+  /** only unread reports */
+  unread?: boolean;
+  /** newest first (the default) or oldest first */
+  order?: ReportOrder;
+}
+
+/** report.receiveReportList; (marchlands) with a search, filters and oldest first */
+export async function listReports(ctx: Ctx, playerId: number, type: number | null, pageNo: number, pageSize: number, filter: ReportFilter = {}) {
   if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) throw new GameError(msg('common.invalidData'), -99);
   const page = Math.max(1, pageNo || 1);
-  const where = type == null ? eq(reports.playerId, playerId) : and(eq(reports.playerId, playerId), eq(reports.typeId, type));
+  const q = filter.q?.trim();
+  const where = and(
+    eq(reports.playerId, playerId),
+    type == null ? undefined : eq(reports.typeId, type),
+    q ? searchWhere(q) : undefined,
+    filter.kind ? kindWhere(filter.kind) : undefined,
+    filter.unread ? eq(reports.isRead, false) : undefined,
+  );
   const { n } = one(await ctx.tx.select({ n: count() }).from(reports).where(where));
   const rows = await ctx.tx
     .select()
     .from(reports)
     .where(where)
-    .orderBy(desc(reports.eventTime), desc(reports.id))
+    .orderBy(...(filter.order === ReportOrder.OLDEST ? [asc(reports.eventTime), asc(reports.id)] : [desc(reports.eventTime), desc(reports.id)]))
     .limit(pageSize)
     .offset((page - 1) * pageSize);
-  return { pageNo: page, pageSize, totalPage: Math.ceil(Number(n) / pageSize), reports: rows.map(listBean) };
+  return { pageNo: page, pageSize, totalPage: Math.ceil(Number(n) / pageSize), total: Number(n), reports: rows.map(listBean) };
+}
+
+/** (marchlands) The player's report settings. */
+export async function reportSettings(ctx: Ctx, playerId: number) {
+  const [p] = await ctx.tx.select({ autoReadReturns: players.autoReadReturns }).from(players).where(eq(players.id, playerId));
+  if (!p) throw new GameError(msg('common.invalidData'), -99, 404);
+  return p;
+}
+
+/** (marchlands) Change the player's report settings; the reports already there stay as they are. */
+export async function setReportSettings(ctx: Ctx, playerId: number, settings: { autoReadReturns: boolean }) {
+  await ctx.tx.update(players).set({ autoReadReturns: settings.autoReadReturns }).where(eq(players.id, playerId));
+  return reportSettings(ctx, playerId);
 }
 
 /** report.markAsRead (open a report) */

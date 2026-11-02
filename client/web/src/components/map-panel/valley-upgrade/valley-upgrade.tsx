@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import type { CityBean } from '@marchlands/api-client';
-import { TileType, valleyBonus } from '@marchlands/core';
+import { TileType, valleyBonus, valleyResource } from '@marchlands/core';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { fmt, fmtExact, percent } from '@/lib/format';
@@ -18,7 +18,7 @@ export function ValleyUpgrade({
   onUpgrade: (tileId: number) => unknown;
   pending: boolean;
 }) {
-  const { t } = useTranslation('map-panel');
+  const { t } = useTranslation(['map-panel', 'common']);
   if (tile.upgradeCost == null)
     return (
       <p className="text-xs text-muted-foreground">
@@ -27,6 +27,8 @@ export function ValleyUpgrade({
     );
   const pct = (l: number) => percent(valleyBonus(tile.type, l));
   const short = city.resource.gold < tile.upgradeCost;
+  // flat land boosts nothing
+  const resource = valleyResource(tile.type);
   return (
     <div className="grid gap-1">
       <div className="flex flex-wrap items-center gap-2">
@@ -47,7 +49,9 @@ export function ValleyUpgrade({
       <span className="text-xs text-muted-foreground">
         {tile.type === TileType.NPC
           ? t('valleyUpgrade.npcHint', { level: tile.level + 1 })
-          : t('valleyUpgrade.valleyHint', { from: pct(tile.level), to: pct(tile.level + 1) })}
+          : resource
+            ? t('valleyUpgrade.valleyHint', { from: pct(tile.level), to: pct(tile.level + 1), resource: t(`common:resourcesInline.${resource}`) })
+            : t('valleyUpgrade.flatHint')}
       </span>
     </div>
   );

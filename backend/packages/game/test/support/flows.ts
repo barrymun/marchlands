@@ -4,7 +4,7 @@ import { and, desc, eq, gt, inArray, isNull } from 'drizzle-orm';
 import { vi } from 'vitest';
 
 import type { PushCmd, PushData } from '@marchlands/contracts';
-import { BuildingType, healCost, Mission, msg, ref, tileId, TileType, tileXY, type TroopCounts, VALLEY_TYPES } from '@marchlands/core';
+import { BuildingType, healCost, HOLDABLE_VALLEY_TYPES, Mission, msg, ref, tileId, tileXY, type TroopCounts } from '@marchlands/core';
 import { pushMessages, tiles, timedEvents } from '@marchlands/db';
 
 import { armies, flows, player as players } from '#/index.ts';
@@ -83,17 +83,7 @@ export async function valleysNear<N extends number = 1>(g: TestGame, cityId: num
   const rows = await g.tx
     .select({ id: tiles.id })
     .from(tiles)
-    .where(
-      and(
-        inArray(tiles.id, near),
-        inArray(
-          tiles.type,
-          VALLEY_TYPES.filter((t) => t !== TileType.FLAT),
-        ),
-        isNull(tiles.ownerCityId),
-        isNull(tiles.cityId),
-      ),
-    );
+    .where(and(inArray(tiles.id, near), inArray(tiles.type, HOLDABLE_VALLEY_TYPES), isNull(tiles.ownerCityId), isNull(tiles.cityId)));
   const dist = (id: number) => Math.abs(tileXY(id).x - x) + Math.abs(tileXY(id).y - y);
   const ids = rows.map((r) => r.id).sort((a, b) => dist(a) - dist(b));
   if (ids.length < count) throw new Error(`valleysNear: only ${ids.length} valleys near city ${cityId}`);

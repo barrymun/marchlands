@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 
-import { MessageSchema } from '@marchlands/core';
+import { MessageSchema, REPORT_KINDS, REPORT_ORDERS, REPORT_SEARCH_MAX } from '@marchlands/core';
 
 import { Ms, zId, zPaging } from '#/common.ts';
 import { AllianceEventRow, AllianceRequestRow, AllianceRow, ArmyRow, ChatMessageRow, MailRow, PlayerRow, ReportRow } from '#/rows.ts';
@@ -45,7 +45,22 @@ export type MailDetail = z.infer<typeof MailDetail>;
 
 // ---- reports ----
 
-export const ReportListQuery = zPaging.extend({ type: z.coerce.number().int().optional() });
+export const ReportListQuery = zPaging.extend({
+  type: z.coerce.number().int().optional(),
+  q: z
+    .string()
+    .trim()
+    .max(REPORT_SEARCH_MAX)
+    .optional()
+    .describe('(marchlands) search: coordinates (`207,405`) find reports from or to that tile; other text finds the names of cities, players and heroes'),
+  kind: z.enum(REPORT_KINDS).optional().describe('(marchlands) battles, scouting, returns (armies coming home), movements (other marches) or other'),
+  unread: z
+    .enum(['true', 'false'])
+    .transform((v) => v === 'true')
+    .optional()
+    .describe('(marchlands) true: only unread reports'),
+  order: z.enum(REPORT_ORDERS).optional().describe('(marchlands) newest first (the default) or oldest first'),
+});
 export const ReportIdParams = z.object({ reportId: zId });
 export const MarkReportsReadBody = z.object({ ids: z.array(z.number().int()).optional() });
 
@@ -64,13 +79,25 @@ export const ReportSummary = ReportRow.pick({ id: true, title: true, armyType: t
 export type ReportSummary = z.infer<typeof ReportSummary>;
 
 export const ReportList = z
-  .object({ pageNo: z.number().int(), pageSize: z.number().int(), totalPage: z.number().int(), reports: z.array(ReportSummary) })
+  .object({
+    pageNo: z.number().int(),
+    pageSize: z.number().int(),
+    totalPage: z.number().int(),
+    total: z.number().int().describe('(marchlands) the reports found, on every page'),
+    reports: z.array(ReportSummary),
+  })
   .meta({ id: 'ReportList' });
 export type ReportList = z.infer<typeof ReportList>;
 
 /** `content` is the stored report body (core ReportBodySchema; battle/scout/movement/trade payloads are opaque). */
 export const ReportDetail = ReportSummary.extend({ content: ReportRow.shape.body }).meta({ id: 'ReportDetail' });
 export type ReportDetail = z.infer<typeof ReportDetail>;
+
+/** (marchlands) The player's report settings. */
+export const ReportSettings = z
+  .object({ autoReadReturns: z.boolean().describe('reports of armies coming home are filed as read') })
+  .meta({ id: 'ReportSettings' });
+export type ReportSettings = z.infer<typeof ReportSettings>;
 
 // ---- chat ----
 

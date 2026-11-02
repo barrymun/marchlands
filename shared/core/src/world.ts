@@ -2,7 +2,7 @@
 // Port of Map.cpp / NpcCity.cpp / Valley.cpp.
 
 import { BALANCE, scaled } from '#/balance.ts';
-import { BASIC_RESOURCES, BuildingStatus, Relation, RESOURCE_KEYS, TileType, TROOP_ID_BY_KEY, VALLEY_TYPES } from '#/constants.ts';
+import { BASIC_RESOURCES, BuildingStatus, Relation, RESOURCE_KEYS, TileType, TROOP_ID_BY_KEY } from '#/constants.ts';
 import { randInt, type Rng, seededRng } from '#/rng.ts';
 import { unitExp } from '#/troops.ts';
 import { type BuildingState, type FortCounts, type ResourceSet, type TroopCounts } from '#/types.ts';
@@ -21,8 +21,6 @@ export function stateBounds(state: number, mapSize: number = BALANCE.mapSize) {
   const row = Math.floor(state / BALANCE.stateGrid);
   return { x1: col * cell, x2: (col + 1) * cell - 1, y1: row * cell, y2: (row + 1) * cell - 1 };
 }
-
-export const isValley = (type: number) => VALLEY_TYPES.includes(type) && type !== TileType.FLAT;
 
 // ---------------------------------------------------------------------------------------------
 // Procedural generation

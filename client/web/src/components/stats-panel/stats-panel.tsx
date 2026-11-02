@@ -3,11 +3,11 @@
 // newest actions can take a few minutes to appear.
 
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getPlayerStatisticsOptions, type LordStatistics } from '@marchlands/api-client';
 
+import { ALL_CITIES, STATS_SEARCH, StatsPeriod } from '@/components/stats-panel/constants';
 import { ItemsUsed } from '@/components/stats-panel/items-used/items-used';
 import { NpcWins } from '@/components/stats-panel/npc-wins/npc-wins';
 import { Resources } from '@/components/stats-panel/resources/resources';
@@ -19,12 +19,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSearchState } from '@/hooks/use-search-state';
 import { dateTime } from '@/lib/format';
 
 export function StatsPanel() {
   const { t } = useTranslation('stats-panel');
-  const [scope, setScope] = useState('all');
-  const [period, setPeriod] = useState<'allTime' | 'last7Days'>('allTime');
+  const [s, set] = useSearchState(STATS_SEARCH);
+  const period = s.period;
   const stats = useQuery({
     ...getPlayerStatisticsOptions(),
     staleTime: 60_000,
@@ -32,7 +33,8 @@ export function StatsPanel() {
   if (stats.isPending) return <Skeleton className="h-64" />;
   if (!stats.data) return <p className="text-sm text-muted-foreground">{t('couldNotLoad')}</p>;
   const data: LordStatistics = stats.data;
-  const city = scope === 'all' ? null : data.cities.find((c) => String(c.cityId) === scope);
+  // a city no longer in the statistics shows them all
+  const city = s.city == null ? null : (data.cities.find((c) => c.cityId === s.city) ?? null);
   const c: Counters = (city ?? data)[period];
 
   return (
@@ -43,12 +45,12 @@ export function StatsPanel() {
           <CardDescription>{data.since ? t('descriptionSince', { date: dateTime(data.since) }) : t('description')}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-3">
-          <Select value={scope} onValueChange={setScope}>
+          <Select value={city ? String(city.cityId) : ALL_CITIES} onValueChange={(v) => set({ city: v === ALL_CITIES ? null : Number(v) })}>
             <SelectTrigger className="w-56">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('allCities')}</SelectItem>
+              <SelectItem value={ALL_CITIES}>{t('allCities')}</SelectItem>
               {data.cities.map((x) => (
                 <SelectItem key={x.cityId} value={String(x.cityId)}>
                   {x.name ?? t('formerCity')}
@@ -57,10 +59,10 @@ export function StatsPanel() {
               ))}
             </SelectContent>
           </Select>
-          <Tabs value={period} onValueChange={(v) => setPeriod(v as typeof period)}>
+          <Tabs value={period} onValueChange={(v) => set({ period: STATS_SEARCH.period.read(v) })}>
             <TabsList>
-              <TabsTrigger value="allTime">{t('allTime')}</TabsTrigger>
-              <TabsTrigger value="last7Days">{t('last7Days')}</TabsTrigger>
+              <TabsTrigger value={StatsPeriod.ALL_TIME}>{t('allTime')}</TabsTrigger>
+              <TabsTrigger value={StatsPeriod.LAST_7_DAYS}>{t('last7Days')}</TabsTrigger>
             </TabsList>
           </Tabs>
         </CardContent>

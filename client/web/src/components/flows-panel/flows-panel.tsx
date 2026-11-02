@@ -13,6 +13,7 @@ import { flowActionMessage } from '@marchlands/core';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { CitiesSummary } from '@/components/flows-panel/cities-summary/cities-summary';
+import { FLOWS_SEARCH } from '@/components/flows-panel/constants';
 import { FlowEditor } from '@/components/flows-panel/flow-editor/flow-editor';
 import { RunFlow } from '@/components/flows-panel/run-flow/run-flow';
 import { StatusBadge } from '@/components/flows-panel/status-badge/status-badge';
@@ -21,6 +22,7 @@ import type { EditDraft } from '@/components/flows-panel/types';
 import { currentAction, keyed, strip } from '@/components/flows-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSearchState } from '@/hooks/use-search-state';
 import { errorMessage } from '@/lib/api';
 import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
@@ -32,7 +34,8 @@ export function FlowsPanel({ city }: { city: CityBean }) {
   const list = flows.data ?? [];
   // the flow being edited: a saved one (id) or a new one (id null)
   const [editing, setEditing] = useState<EditDraft | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [{ flow: selectedId }, set] = useSearchState(FLOWS_SEARCH);
+  const setSelectedId = (flow: string | null) => set({ flow });
   const selected = list.find((f) => f.id === selectedId) ?? null;
 
   const save = useMutation({

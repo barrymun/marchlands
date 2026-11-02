@@ -6180,6 +6180,12 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) the reports found, on every page"
+          },
           "reports": {
             "type": "array",
             "items": {
@@ -6191,6 +6197,7 @@
           "pageNo",
           "pageSize",
           "totalPage",
+          "total",
           "reports"
         ]
       },
@@ -9003,6 +9010,18 @@
           "attack",
           "back",
           "content"
+        ]
+      },
+      "ReportSettingsInput": {
+        "type": "object",
+        "properties": {
+          "autoReadReturns": {
+            "type": "boolean",
+            "description": "reports of armies coming home are filed as read"
+          }
+        },
+        "required": [
+          "autoReadReturns"
         ]
       },
       "ChatMessageInput": {
@@ -18567,6 +18586,12 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "(marchlands) the reports found, on every page"
+          },
           "reports": {
             "type": "array",
             "items": {
@@ -18578,6 +18603,7 @@
           "pageNo",
           "pageSize",
           "totalPage",
+          "total",
           "reports"
         ],
         "additionalProperties": false
@@ -21468,6 +21494,19 @@
           "attack",
           "back",
           "content"
+        ],
+        "additionalProperties": false
+      },
+      "ReportSettings": {
+        "type": "object",
+        "properties": {
+          "autoReadReturns": {
+            "type": "boolean",
+            "description": "reports of armies coming home are filed as read"
+          }
+        },
+        "required": [
+          "autoReadReturns"
         ],
         "additionalProperties": false
       },
@@ -34813,7 +34852,7 @@
     "/api/v1/reports": {
       "get": {
         "operationId": "getReports",
-        "summary": "Type 0 trade, 1 army, 2 other (report.receiveReportList)",
+        "summary": "Type 0 trade, 1 army, 2 other (report.receiveReportList); (marchlands) searched and filtered",
         "tags": [
           "reports"
         ],
@@ -34849,6 +34888,58 @@
             "in": "query",
             "name": "type",
             "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 60
+            },
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "description": "(marchlands) search: coordinates (`207,405`) find reports from or to that tile; other text finds the names of cities, players and heroes"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "battles",
+                "scouting",
+                "returns",
+                "movements",
+                "other"
+              ]
+            },
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "description": "(marchlands) battles, scouting, returns (armies coming home), movements (other marches) or other"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            },
+            "in": "query",
+            "name": "unread",
+            "required": false,
+            "description": "(marchlands) true: only unread reports"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "newest",
+                "oldest"
+              ]
+            },
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "description": "(marchlands) newest first (the default) or oldest first"
           }
         ],
         "security": [
@@ -34934,6 +35025,138 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/ReportCounts"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/settings": {
+      "get": {
+        "operationId": "getReportsSettings",
+        "summary": "(marchlands) The report settings",
+        "tags": [
+          "reports"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportSettings"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "postReportsSettings",
+        "summary": "(marchlands) Change the report settings",
+        "tags": [
+          "reports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportSettingsInput"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportSettings"
                     }
                   },
                   "required": [

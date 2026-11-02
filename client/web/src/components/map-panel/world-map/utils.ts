@@ -3,13 +3,9 @@ import { mapLevelOf } from '@marchlands/core';
 import { TILE_W } from '@/components/iso-viewport/constants';
 import type { Camera, View } from '@/components/iso-viewport/types';
 import { nextZoom, spriteBox, tileAt, tileOrigin, zoomsFor } from '@/components/iso-viewport/utils';
+import { wrap } from '@/components/map-panel/utils';
 import { CHUNK, HISTORIC_SPRITE, MIN_TILES_ACROSS, START_STEPS_OUT } from '@/components/map-panel/world-map/constants';
 import type { ChunkArea, TileInfo } from '@/components/map-panel/world-map/types';
-
-/** `v` brought into 0 … size - 1, the map wrapping round at its edges. */
-export function wrap(v: number, size: number): number {
-  return ((v % size) + size) % size;
-}
 
 /**
  * Every tile whose sprite reaches into the view (unwrapped coordinates, so a view across the map's edge stays in one

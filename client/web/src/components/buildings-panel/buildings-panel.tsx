@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
 
 import type { BuildingBean, CityBean } from '@marchlands/api-client';
 import { isOuterPosition } from '@marchlands/core';
@@ -18,7 +17,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useMotion } from '@/hooks/use-motion';
+import { useSearchState } from '@/hooks/use-search-state';
 import { buildingName } from '@/lib/game-data';
+import { BUILDING_SEARCH } from '@/lib/screen-search';
 import { cn } from '@/lib/utils';
 
 /**
@@ -42,15 +43,15 @@ export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' 
     saveView(v);
   };
   // ?building=<position> (from the activity dock) opens that building's dialog
-  const [search, setSearch] = useSearchParams();
-  const requested = search.get('building');
-  const [opened, setOpened] = useState<string | null>(null);
-  if (requested != null && requested !== opened) {
+  const [{ building: requested }, setSearch] = useSearchState(BUILDING_SEARCH);
+  // the request acted on, once: forgotten when the address lets it go, so asking for the same building again reopens it
+  const [opened, setOpened] = useState<number | null>(null);
+  if (requested !== opened) {
     setOpened(requested);
-    setSelected(Number(requested));
+    if (requested != null) setSelected(requested);
   }
   useEffect(() => {
-    if (requested != null) setSearch((s) => (s.delete('building'), s), { replace: true });
+    if (requested != null) setSearch({ building: null });
   }, [requested, setSearch]);
   const byPos = new Map(city.buildings.map((b) => [b.positionId, b]));
   const { townHall, unlocked: outerSlots } = fieldSlots(city.buildings);

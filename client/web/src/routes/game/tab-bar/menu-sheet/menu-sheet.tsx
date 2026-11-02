@@ -6,6 +6,7 @@ import { useUnreadReports } from '@/components/reports-panel/hooks';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useGameNav } from '@/hooks/use-game-nav';
+import { PageId } from '@/lib/nav';
 import { CityList } from '@/routes/game/city-list/city-list';
 import { PAGES, PANELS } from '@/routes/game/constants';
 import { NavButton } from '@/routes/game/nav-button/nav-button';
@@ -45,7 +46,7 @@ export function MenuSheet({ city, open, onClose }: { city?: CityBean; open: bool
                 icon={p.icon}
                 label={p.label}
                 active={nav.screen === p.id}
-                count={p.id === 'reports' ? unread : undefined}
+                count={p.id === PageId.REPORTS ? unread : undefined}
                 onClick={() => {
                   onClose();
                   nav.go(p.id);

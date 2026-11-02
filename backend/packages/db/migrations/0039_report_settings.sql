@@ -1,0 +1,1 @@
+ALTER TABLE "players" ADD COLUMN "auto_read_returns" boolean DEFAULT true NOT NULL;

@@ -4,7 +4,7 @@ import { and, count, desc, eq, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import { addTroops, type DesertionReport, type Message, msg, type ReportBody, ReportType, type TroopCounts } from '@marchlands/core';
-import { one, reports } from '@marchlands/db';
+import { one, players, reports } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 
@@ -21,7 +21,15 @@ export interface NewReport {
   body: ReportBody;
 }
 
+/** Whether the player files the reports of armies coming home as read (`players.autoReadReturns`). */
+async function autoReadsReturns(ctx: Ctx, playerId: number) {
+  const [p] = await ctx.tx.select({ on: players.autoReadReturns }).from(players).where(eq(players.id, playerId));
+  return p?.on ?? true;
+}
+
 export async function createReport(ctx: Ctx, r: NewReport): Promise<number> {
+  // (marchlands) an army coming home is reported as before, but read already if the player asked for that
+  const isRead = r.isBack === true && (await autoReadsReturns(ctx, r.playerId));
   const row = one(
     await ctx.tx
       .insert(reports)
@@ -36,6 +44,7 @@ export async function createReport(ctx: Ctx, r: NewReport): Promise<number> {
         targetPos: r.targetPos ?? null,
         body: r.body,
         eventTime: ctx.now,
+        isRead,
       })
       .returning({ id: reports.id }),
   );

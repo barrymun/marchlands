@@ -102,7 +102,8 @@
     "button": "Lv {{level}}にアップグレード · {{gold}} 金",
     "notEnoughGold": "{{city}} の金が足りません。",
     "npcHint": "部隊・防御施設・城壁・英雄・略奪できる資源がすべてレベル{{level}}に成長し、全戦力で初期化されます。",
-    "valleyHint": "保有時: 生産 +{{from}} → +{{to}}。レベルに応じて守備隊も強くなります。"
+    "valleyHint": "保有時: {{resource}}生産 +{{from}} → +{{to}}。レベルに応じて守備隊も強くなります。",
+    "flatHint": "平地は保有しても生産を増やしません。"
   },
   "draft": {
     "done": "徴兵しました",
@@ -118,5 +119,13 @@
     "unpaid": "維持費の金か食料が尽きています：忠誠度が下がっています",
     "upkeep": "維持費：毎時 金{{gold}}・食料{{food}}",
     "shared": "同盟は貢納のうち毎時{{gold}}ゴールドを受け取ります"
+  },
+  "valley": {
+    "boost": "{{resource}} +{{bonus}}",
+    "boostTitle": "この谷を保有する都市の{{resource}}生産が{{bonus}}増えます。"
+  },
+  "distance": {
+    "away_other": "{{n}}マス先",
+    "title": "{{city}}からの直線距離です。軍の行軍時間はこの距離から計算されます。"
   }
 }

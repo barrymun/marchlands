@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useUnreadReports } from '@/components/reports-panel/hooks';
 import { useGameNav } from '@/hooks/use-game-nav';
+import { PageId } from '@/lib/nav';
 import { PAGES, PANELS } from '@/routes/game/constants';
 import { NavButton } from '@/routes/game/nav-button/nav-button';
 import { PlayerSummary } from '@/routes/game/player-summary/player-summary';
@@ -27,7 +28,7 @@ export function BottomBar() {
             icon={p.icon}
             label={p.label}
             active={nav.screen === p.id}
-            count={p.id === 'reports' ? unread : undefined}
+            count={p.id === PageId.REPORTS ? unread : undefined}
             onClick={() => nav.go(p.id)}
           />
         ))}

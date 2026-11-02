@@ -1,10 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
-import { Copy, Eye, X } from 'lucide-react';
+import { Copy, Eye, Ruler, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { type CityBean, getMapTilesByTileIdOptions } from '@marchlands/api-client';
-import { BALANCE, FACTION_IDS, factionOfZone, isFactionLevel, Mission, TileType, VALLEY_TYPES } from '@marchlands/core';
+import {
+  BALANCE,
+  canUpgradeTile,
+  FACTION_IDS,
+  factionOfZone,
+  isFactionLevel,
+  Mission,
+  tileDistance,
+  TileType,
+  valleyBonus,
+  valleyResource,
+} from '@marchlands/core';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add-to-farm-button';
@@ -13,6 +24,7 @@ import { SeatDraft } from '@/components/map-panel/tile-card/seat-draft/seat-draf
 import { SeatStatus } from '@/components/map-panel/tile-card/seat-status/seat-status';
 import { placeName } from '@/components/map-panel/utils';
 import { ValleyUpgrade } from '@/components/map-panel/valley-upgrade/valley-upgrade';
+import { ResourceIcon } from '@/components/resource-icon/resource-icon';
 import type { SendTarget } from '@/components/send-army-dialog/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,7 +33,7 @@ import { usePlayer } from '@/hooks/use-game';
 import { useStateRulers } from '@/hooks/use-state-rulers';
 import { copyText } from '@/lib/clipboard';
 import { FACTION_STYLE } from '@/lib/factions';
-import { fmt } from '@/lib/format';
+import { fmt, fmtDecimal, percent } from '@/lib/format';
 import { factionName, seatTitleName, tileName, zoneName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
@@ -61,8 +73,14 @@ export function TileCard({
   const tile = info.data;
   const scouts = city.troop.scouter ?? 0;
   // the player's historic cities, which draft from barbarian cities in their areas
-  const seats = (usePlayer().data?.castles ?? []).filter((c) => c.historicLevel != null);
+  const player = usePlayer();
+  const seats = (player.data?.castles ?? []).filter((c) => c.historicLevel != null);
+  // how far it is from the city in view, as a march measures it; nothing for the city itself
+  const distance = tileId === city.fieldId ? null : tileDistance(city.fieldId, tileId, player.data?.mapSizeX);
   const ownSeat = seats.find((c) => c.fieldId === tileId);
+  const boosted = tile ? valleyResource(tile.type) : null;
+  const boost = tile &&
+    boosted && { resource: boosted, words: { bonus: percent(valleyBonus(tile.type, tile.level)), resource: t(`common:resourcesInline.${boosted}`) } };
   // a barbarian city's side: the faction holding its zone, or none for a bandit below the faction level
   // (marchlands) or, in a state a player rules, cut off from it
   const ruler = tile?.type === TileType.NPC && isFactionLevel(tile.level) ? rulers.get(tile.zoneId) : undefined;
@@ -106,12 +124,25 @@ export function TileCard({
             {/* a player's historic city shows as one, at its own level */}
             <Badge variant="secondary">{tileName('historicLevel' in tile && tile.historicLevel ? TileType.HISTORIC : tile.type)}</Badge>
             <Badge variant="secondary">{t('common:level.short', { level: ('historicLevel' in tile && tile.historicLevel) || tile.level })}</Badge>
+            {/* the resource a valley boosts for the city holding it, at its level */}
+            {boost && (
+              <Badge variant="outline" title={t('valley.boostTitle', boost.words)}>
+                <ResourceIcon resource={boost.resource} />
+                {t('valley.boost', boost.words)}
+              </Badge>
+            )}
             <Badge variant="outline">
               ({tile.x}, {tile.y}) · {zoneName(tile.zoneId)}
             </Badge>
             <Button size="icon-xs" variant="ghost" onClick={() => copyCoords(tile.x, tile.y)} aria-label={t('copy.label')} title={t('copy.label')}>
               <Copy />
             </Button>
+            {distance != null && (
+              <Badge variant="outline" title={t('distance.title', { city: city.name })}>
+                <Ruler aria-hidden />
+                {t('distance.away', { count: distance, n: fmtDecimal(distance, 1) })}
+              </Badge>
+            )}
             {side && (
               <Badge variant="outline" title={t('faction.memberTitle', { faction: factionName(side.id) })}>
                 <span aria-hidden className={cn('size-2 rounded-sm', FACTION_STYLE[side.id].swatch)} />
@@ -160,7 +191,7 @@ export function TileCard({
               <span className="text-xs text-muted-foreground">{t('release.hint')}</span>
             </div>
           )}
-          {'upgradeCost' in tile && !tile.owner && (VALLEY_TYPES.includes(tile.type) || tile.type === TileType.NPC) && (
+          {'upgradeCost' in tile && !tile.owner && canUpgradeTile(tile.type) && (
             <ValleyUpgrade city={city} tile={tile} onUpgrade={onUpgrade} pending={upgrading} />
           )}
           {tile.type === TileType.FLAT && 'owner' in tile && !tile.owner && (

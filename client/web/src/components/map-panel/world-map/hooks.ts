@@ -6,9 +6,10 @@ import { TileType } from '@marchlands/core';
 import type { Viewport } from '@/components/iso-viewport/hooks';
 import type { Drawable } from '@/components/iso-viewport/types';
 import { TILE_ART } from '@/components/map-panel/constants';
+import { wrap } from '@/components/map-panel/utils';
 import { HISTORIC_SPRITE } from '@/components/map-panel/world-map/constants';
 import type { ChunkArea, TileInfo } from '@/components/map-panel/world-map/types';
-import { chunksFor, decodeTiles, visibleTiles, wrap } from '@/components/map-panel/world-map/utils';
+import { chunksFor, decodeTiles, visibleTiles } from '@/components/map-panel/world-map/utils';
 import { artBand, HISTORIC_ART_LEVELS, historicArtFile, tileArtFile } from '@/lib/game-art';
 
 /** How long a loaded square of the map counts as fresh before it is fetched again when it comes back into view. */

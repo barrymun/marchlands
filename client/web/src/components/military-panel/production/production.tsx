@@ -23,7 +23,7 @@ import {
 import { BALANCE, BuildingType, itemGoldPrice, ItemId, researchLevel, TechType, usedWallSpace, wallCapacity } from '@marchlands/core';
 
 import { CostList } from '@/components/cost-list/cost-list';
-import { RES_KEYS } from '@/components/military-panel/production/constants';
+import { MILITARY_SEARCH, ProductionTab, RES_KEYS } from '@/components/military-panel/production/constants';
 import { MayorExpHint } from '@/components/military-panel/production/mayor-exp-hint/mayor-exp-hint';
 import { MayorTrainingHint } from '@/components/military-panel/production/mayor-training-hint/mayor-training-hint';
 import { TrainDiscountHint } from '@/components/military-panel/production/train-discount-hint/train-discount-hint';
@@ -43,9 +43,11 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
+import { useSearchState } from '@/hooks/use-search-state';
 import { fmt, fmtExact, realHourly } from '@/lib/format';
 import { itemName, troopName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
+import { PanelId } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 
 export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
@@ -58,7 +60,12 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const [position, setPosition] = useState<string>('');
   const pos = Number(position || barracks[0]?.positionId || 0);
   const [counts, setCounts] = useState<Record<number, string>>({});
-  const [tab, setTab] = useState<'train' | 'queue'>('train');
+  const [search, set] = useSearchState(MILITARY_SEARCH, { panel: PanelId.MILITARY });
+  const tab = fort ? search.forts : search.troops;
+  const setTab = (v: string) => {
+    const next = (fort ? MILITARY_SEARCH.forts : MILITARY_SEARCH.troops).read(v);
+    set(fort ? { forts: next } : { troops: next });
+  };
   // with several barracks, orders are split so every barracks trains a share in parallel
   const [split, setSplit] = useState(true);
   const splitting = !fort && split && barracks.length > 1;
@@ -174,10 +181,10 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
       <CardContent className="grid gap-3">
         <MayorTrainingHint city={city} fort={fort} />
         {!fort && units[0] && units[0].costShare < 1 && <TrainDiscountHint share={units[0].costShare} />}
-        <Tabs value={tab} onValueChange={(v) => setTab(v as 'train' | 'queue')}>
+        <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
-            <TabsTrigger value="train">{fort ? t('production.build') : t('production.train')}</TabsTrigger>
-            <TabsTrigger value="queue" className="gap-1.5">
+            <TabsTrigger value={ProductionTab.TRAIN}>{fort ? t('production.build') : t('production.train')}</TabsTrigger>
+            <TabsTrigger value={ProductionTab.QUEUE} className="gap-1.5">
               {t('production.inProgress')}
               {batches.length > 0 && (
                 <Badge variant="secondary" className="h-4 min-w-4 px-1 tabular-nums">
@@ -187,10 +194,10 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        {tab === 'queue' && batches.length === 0 && (
+        {tab === ProductionTab.QUEUE && batches.length === 0 && (
           <p className="text-sm text-muted-foreground">{fort ? t('production.nothingBuilding') : t('production.nothingTraining')}</p>
         )}
-        {tab === 'queue' &&
+        {tab === ProductionTab.QUEUE &&
           batches.map((b) => (
             <div key={`${b.positionId}-${b.queueId}`} className="grid gap-1 rounded-md border p-2 text-sm">
               <div className="flex items-center justify-between">
@@ -224,7 +231,7 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
               )}
             </div>
           ))}
-        {tab === 'train' && (
+        {tab === ProductionTab.TRAIN && (
           <form
             className="grid gap-2"
             onSubmit={(e) => {
