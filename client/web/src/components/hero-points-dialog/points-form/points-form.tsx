@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { getCitiesByCityIdQueryKey, getPlayerQueryKey, type HeroBean, postHeroesPointsMutation, postHeroesResetMutation } from '@marchlands/api-client';
 import { heroManagement, HeroStatus, itemGoldPrice, mayorProductionBonus } from '@marchlands/core';
 
+import { HeroLevel } from '@/components/hero-level/hero-level';
 import { HOLY_WATER, STATS } from '@/components/hero-points-dialog/points-form/constants';
 import type { StatKey } from '@/components/hero-points-dialog/points-form/types';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,7 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
     <>
       <DialogHeader>
         <DialogTitle>
-          {hero.name} <span className="font-normal text-muted-foreground">{t('common:level.short', { level: hero.level })}</span>
+          {hero.name} <HeroLevel level={hero.level} />
         </DialogTitle>
         <DialogDescription>{t('pointsLeft', { left, count: hero.remainPoint })}</DialogDescription>
       </DialogHeader>

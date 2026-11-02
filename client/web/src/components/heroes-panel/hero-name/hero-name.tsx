@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { HeroBean } from '@marchlands/api-client';
 
+import { HeroLevel } from '@/components/hero-level/hero-level';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -69,7 +70,7 @@ export function HeroName({
   return (
     <div className={cn('flex items-center gap-1 text-sm font-medium', className)}>
       {leading}
-      {hero.name} <span className="font-normal text-muted-foreground">{t('common:level.short', { level: hero.level })}</span>
+      {hero.name} <HeroLevel level={hero.level} />
       {onRename && (
         <Button
           size="icon-xs"

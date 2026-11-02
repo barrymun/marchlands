@@ -6,6 +6,7 @@
 //   losses, errors         red (LOSS_TEXT): negative rates, failed or rolled-back steps
 //   needs attention        amber (WARN_TEXT): no mayor, storage full, skipped steps
 //   status, finished, info neutral with an icon (STATUS_DONE): max level reached, all research complete
+//   a hero at max level    gold with a trophy (MAX_LEVEL_TEXT, HeroLevel): the milestone of the hero's level itself
 
 /** A running item bonus (production boosts, War Ensign, Vesta's, Quartermaster's …): badge background and text, light and dark. */
 export const ITEM_BONUS_TONE = 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300';
@@ -24,6 +25,9 @@ export const LOSS_TEXT = 'text-destructive';
 
 /** Something that needs the player's attention, as text. */
 export const WARN_TEXT = 'text-amber-700 dark:text-amber-400';
+
+/** A hero's level at the maximum (BALANCE.heroMaxLevel), shown with a trophy by HeroLevel. */
+export const MAX_LEVEL_TEXT = 'text-yellow-700 dark:text-yellow-300';
 
 /** A status or "finished" note (max level, all research complete): neutral text, shown with an icon such as CircleCheck. */
 export const STATUS_DONE = 'text-muted-foreground';

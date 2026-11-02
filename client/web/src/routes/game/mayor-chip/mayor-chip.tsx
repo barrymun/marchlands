@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { CityBean, HeroBean } from '@marchlands/api-client';
 
+import { HeroLevel } from '@/components/hero-level/hero-level';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,7 +29,7 @@ export function MayorChip({ city, mayor }: { city: CityBean; mayor?: HeroBean })
                 <>
                   <span className="text-muted-foreground">{t('mayor.label')}</span>
                   <span className="font-medium">{mayor.name}</span>
-                  <span className="text-muted-foreground tabular-nums">{t('common:level.short', { level: mayor.level })}</span>
+                  <HeroLevel level={mayor.level} />
                   <DominantBadge hero={mayor} />
                 </>
               ) : (

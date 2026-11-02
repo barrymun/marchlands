@@ -7,6 +7,7 @@ import { BALANCE, experienceItemGain, HERO_ATTRIBUTE_ITEMS, heroAtMaxLevel, hero
 import { Countdown } from '@/components/countdown/countdown';
 import { ATTR_LABEL } from '@/components/hero-items-dialog/hero-items/constants';
 import { experienceItems, isLoyaltyFull, loyaltyMedals } from '@/components/hero-items-dialog/hero-items/utils';
+import { HeroLevel } from '@/components/hero-level/hero-level';
 import { ItemIcon } from '@/components/item-icon/item-icon';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -75,7 +76,7 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
     <>
       <DialogHeader>
         <DialogTitle>
-          {t('title', { name: hero.name })} <span className="font-normal text-muted-foreground">{t('common:level.short', { level: hero.level })}</span>
+          {t('title', { name: hero.name })} <HeroLevel level={hero.level} />
         </DialogTitle>
         <DialogDescription>
           {t('summary', {

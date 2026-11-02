@@ -85,6 +85,7 @@
   "level": {
     "short": "Lv {{level}}",
     "ofMax": "Lv {{level}}/{{max}}",
+    "max": "Maximum level",
     "named": "{{name}} Lv {{level}}",
     "namedParens": "{{name}} (Lv {{level}})",
     "next": "Lv {{level}}:",

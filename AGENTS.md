@@ -362,6 +362,7 @@ The server never sends or stores English for players. Everything it tells a play
   | Losses and errors | red, `LOSS_TEXT` |
   | Needs attention | amber, `WARN_TEXT` |
   | Status | neutral, `STATUS_DONE` |
+  | A hero at the maximum level | gold with a trophy, `MAX_LEVEL_TEXT` (`HeroLevel`, `components/hero-level/`) |
 
   Hero attributes have their own colours in `lib/hero-attributes.ts`. Don't reuse a colour for a different meaning.
 - **Confirmations always use a dialog:** `ConfirmDialog` (`components/confirm-dialog/`) or `ConfirmButton` (`components/confirm-button/`). Never use the browser's `confirm()` or a click-twice button. Anything that spends gold or can't be undone asks first.

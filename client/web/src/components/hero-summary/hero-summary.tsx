@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { CityBean, HeroBean } from '@marchlands/api-client';
 
+import { HeroLevel } from '@/components/hero-level/hero-level';
 import { BoostChip } from '@/components/hero-summary/boost-chip/boost-chip';
 import { HeroStats } from '@/components/hero-summary/hero-stats/hero-stats';
 import { canAppoint, isMayor, statusLabel } from '@/components/hero-summary/utils';
@@ -62,7 +63,7 @@ export function HeroSummary({
         {hero.remainPoint > 0 && <span className="size-1.5 shrink-0 rounded-full bg-primary" title={t('unspent', { count: hero.remainPoint })} />}
       </span>
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums">
-        {t('common:level.short', { level: hero.level })}
+        <HeroLevel level={hero.level} />
         {mayor ? <Badge className="h-4 px-1.5 text-[11px]">{statusLabel(hero)}</Badge> : <span>{statusLabel(hero)}</span>}
         <BoostChip hero={hero} now={now} className="ml-auto" />
       </span>
