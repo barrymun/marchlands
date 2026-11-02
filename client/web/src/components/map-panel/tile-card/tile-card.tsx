@@ -188,7 +188,7 @@ export function TileCard({
           )}
           {(tile.type === TileType.NPC || (tile.type === TileType.CASTLE && tile.canLoot)) && <MedalOdds level={tile.level} />}
           {'owner' in tile && tile.owner && <p>{t('info.heldBy', { city: tile.owner.cityName, player: tile.owner.userName })}</p>}
-          <SeatDraft tile={{ id: tile.id, type: tile.type, held: 'owner' in tile && !!tile.owner }} seats={seats} />
+          <SeatDraft tile={{ id: tile.id, type: tile.type, level: tile.level, held: 'owner' in tile && !!tile.owner }} seats={seats} />
           {ownSeat && <SeatStatus seat={ownSeat} />}
           {here && (
             <div className="flex items-center gap-2">

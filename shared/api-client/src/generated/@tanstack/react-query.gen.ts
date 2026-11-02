@@ -766,7 +766,7 @@ export const postCitiesMoveMutation = (options?: Partial<Options<PostCitiesMoveD
 };
 
 /**
- * (marchlands) A held historic city drafts from a barbarian city in its area, as one of its drafts today
+ * (marchlands) A held historic city drafts from a barbarian city in its area (the one given, or the one it would pick by itself), as one of its drafts today
  */
 export const postCitiesDraftMutation = (options?: Partial<Options<PostCitiesDraftData>>): UseMutationOptions<PostCitiesDraftResponse, PostCitiesDraftError, Options<PostCitiesDraftData>> => {
     const mutationOptions: UseMutationOptions<PostCitiesDraftResponse, PostCitiesDraftError, Options<PostCitiesDraftData>> = {

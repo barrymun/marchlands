@@ -19,7 +19,12 @@ export const CITY_MESSAGES = {
   notHistoric: [],
   noDraftsLeft: ['count'],
   draftOutOfArea: [],
-  draftNotBarbarian: [],
+  /** Draft now: no city it may draft from (and hasn't today) is left in the seat's area */
+  noDraftTarget: [],
+  /** a seat drafts only from barbarian cities and lower historic cities nobody holds (canDraftFrom) */
+  draftNotTarget: [],
+  /** a seat drafts from each city at most once a day */
+  draftedToday: [],
   nothingToDraft: [],
   recallTroopsFirst: [],
   foreignTroops: [],

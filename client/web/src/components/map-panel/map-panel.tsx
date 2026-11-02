@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Info, MapPin, Swords } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -65,12 +65,29 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     resetKey: city.id,
     onTap: (p) => {
       const tile = pick(p);
-      if (tile) select(map.idOf(tile.x, tile.y));
+      if (!tile) return;
+      const id = map.idOf(tile.x, tile.y);
+      select(id);
+      pickedOwn(id);
     },
     onHover: (p) => setHover(p ? (pick(p) ?? null) : null),
     onEnter: () => vp.camera && select(map.idOf(Math.round(vp.camera.x), Math.round(vp.camera.y))),
   });
   const map = useWorldMap(vp, mapSize);
+  // the place gone to let go of in the address (the city picked in the switcher or the city list, even this one): back
+  // to the city…
+  const home = !search.at;
+  // …and the card of that place closes with it (a city of the player's picked on the map stays open)
+  const atId = at ? at.y * mapSize + at.x : null;
+  const [lastAt, setLastAt] = useState(atId);
+  if (atId !== lastAt) {
+    setLastAt(atId);
+    if (atId == null && selected === lastAt) setSelected(null);
+  }
+  const centreOnCity = useEffectEvent(() => vp.centreOn(city.x, city.y));
+  useEffect(() => {
+    if (home) centreOnCity();
+  }, [home]);
   /** The tile under a point: the front-most sprite with a pixel there, else the tile whose diamond holds it. */
   const pick = (p: ViewPoint) => {
     if (!vp.camera) return undefined;
@@ -110,6 +127,13 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const select = (id: number) => {
     setSelected(id);
     if (!wide) setList(null);
+  };
+  // after going to a place, picking one of the player's own cities on the map takes its place in the address: this city
+  // lets it go (back home), another becomes it, so a reload opens there
+  const pickedOwn = (tileId: number) => {
+    const own = player.data?.castles.find((c) => c.fieldId === tileId);
+    if (!own || !search.at) return;
+    setSearch({ at: own.id === city.id ? null : { x: own.x, y: own.y } });
   };
   // going to a place (the go-to box, a valley, a farming target, a tile card's Centre here) keeps it in the address; going
   // home lets it go

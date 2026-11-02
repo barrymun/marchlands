@@ -1,0 +1,1 @@
+ALTER TABLE "cities" ADD COLUMN "drafted_tiles" jsonb DEFAULT '[]'::jsonb NOT NULL;

@@ -110,7 +110,10 @@
     "auto": "Draft by itself",
     "used": "{{used}} of {{max}} drafts today",
     "next": "next at {{time}} UTC",
-    "button": "Draft into {{city}} ({{used}}/{{max}})"
+    "button": "Draft into {{city}} ({{used}}/{{max}})",
+    "now": "Draft now",
+    "nowTitle": "Draft at once from the city it would pick by itself: the highest level in its area that it hasn't drafted today, the strongest if it has a scout",
+    "doneToday": "{{city}} has already drafted from here today: each city once a day"
   },
   "seat": {
     "loyalty": "Loyalty {{loyalty}} / {{max}}",

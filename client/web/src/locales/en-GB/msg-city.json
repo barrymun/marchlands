@@ -13,10 +13,12 @@
   "noDraftsLeft_one": "This historic city has made its {{count, number}} draft today.",
   "noDraftsLeft_other": "This historic city has made its {{count, number}} drafts today.",
   "draftOutOfArea": "That barbarian city is outside this historic city's area.",
-  "draftNotBarbarian": "Only barbarian cities nobody holds can be drafted from.",
   "nothingToDraft": "That barbarian city has no troops to draft.",
   "teleportCooldown": "The {{item}} is cooling down.",
   "recallTroopsFirst": "Recall all of your troops before you move your city.",
   "foreignTroops": "Troops from other players are marching to or stationed in this city.",
-  "notFreeFlat": "That tile is not a free flat."
+  "notFreeFlat": "That tile is not a free flat.",
+  "noDraftTarget": "There's no city left in its area to draft from today.",
+  "draftNotTarget": "A historic city drafts only from barbarian cities and lower-level historic cities nobody holds.",
+  "draftedToday": "It has already drafted from this city today: each city once a day."
 }

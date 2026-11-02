@@ -486,7 +486,9 @@
               "city.notHistoric",
               "city.noDraftsLeft",
               "city.draftOutOfArea",
-              "city.draftNotBarbarian",
+              "city.noDraftTarget",
+              "city.draftNotTarget",
+              "city.draftedToday",
               "city.nothingToDraft",
               "city.recallTroopsFirst",
               "city.foreignTroops",
@@ -1457,6 +1459,15 @@
             "maximum": 9007199254740991,
             "description": "drafts a historic city has made today (UTC)"
           },
+          "draftedToday": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "description": "the tiles a historic city has drafted from today (UTC): each at most once a day"
+          },
           "draftNextAt": {
             "type": "number",
             "description": "when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)"
@@ -1505,6 +1516,7 @@
           "truceUntil",
           "draftAuto",
           "draftsUsed",
+          "draftedToday",
           "draftNextAt",
           "seatLoyalty",
           "seatNeglect",
@@ -12764,7 +12776,9 @@
               "city.notHistoric",
               "city.noDraftsLeft",
               "city.draftOutOfArea",
-              "city.draftNotBarbarian",
+              "city.noDraftTarget",
+              "city.draftNotTarget",
+              "city.draftedToday",
               "city.nothingToDraft",
               "city.recallTroopsFirst",
               "city.foreignTroops",
@@ -13746,6 +13760,15 @@
             "maximum": 9007199254740991,
             "description": "drafts a historic city has made today (UTC)"
           },
+          "draftedToday": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "description": "the tiles a historic city has drafted from today (UTC): each at most once a day"
+          },
           "draftNextAt": {
             "type": "number",
             "description": "when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)"
@@ -13794,6 +13817,7 @@
           "truceUntil",
           "draftAuto",
           "draftsUsed",
+          "draftedToday",
           "draftNextAt",
           "seatLoyalty",
           "seatNeglect",
@@ -27538,7 +27562,7 @@
     "/api/v1/cities/{cityId}/draft": {
       "post": {
         "operationId": "postCitiesDraft",
-        "summary": "(marchlands) A held historic city drafts from a barbarian city in its area, as one of its drafts today",
+        "summary": "(marchlands) A held historic city drafts from a barbarian city in its area (the one given, or the one it would pick by itself), as one of its drafts today",
         "tags": [
           "city"
         ],
@@ -27550,13 +27574,10 @@
                 "type": "object",
                 "properties": {
                   "tileId": {
-                    "description": "a barbarian city nobody holds, in the seat's area",
+                    "description": "a barbarian city nobody holds, in the seat's area; without one, the one the seat would pick drafting by itself",
                     "type": "number"
                   }
-                },
-                "required": [
-                  "tileId"
-                ]
+                }
               }
             }
           }

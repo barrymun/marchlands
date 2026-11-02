@@ -76,6 +76,15 @@ const SCREEN_SCHEMAS: Partial<Record<ScreenId, SearchSchema>> = SCREEN_SEARCH;
 /** What a link to a screen may set in its address; nothing for a screen with no parameters of its own. */
 export type ScreenSearch<S extends ScreenId> = S extends keyof typeof SCREEN_SEARCH ? Partial<SearchValues<(typeof SCREEN_SEARCH)[S]>> : never;
 
+/**
+ * The search to keep when switching city: all of it (the screen's tab, filters and page, the panel), but the map's
+ * place (`at`), so the map opens on the city switched to (docs/features/address-state.md).
+ */
+export function searchForCity(search: string): string {
+  const q = writeSearch(MAP_SEARCH, new URLSearchParams(search), { at: null }).toString();
+  return q ? `?${q}` : '';
+}
+
 /** The address of a screen of a city, with its own search parameters (a tab, a building to open) and a panel over it. */
 export function screenHref<S extends ScreenId>(cityId: number, screen: S, search?: ScreenSearch<S>, panel?: PanelId): string {
   let params = new URLSearchParams();

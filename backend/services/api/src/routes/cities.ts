@@ -105,10 +105,15 @@ export default async function cityRoutes(app: ZApp) {
   );
   app.post(
     '/cities/:cityId/draft',
-    s(tags.city, '(marchlands) A held historic city drafts from a barbarian city in its area, as one of its drafts today', DraftResult, {
-      params: zCityParams,
-      body: DraftBody,
-    }),
+    s(
+      tags.city,
+      '(marchlands) A held historic city drafts from a barbarian city in its area (the one given, or the one it would pick by itself), as one of its drafts today',
+      DraftResult,
+      {
+        params: zCityParams,
+        body: DraftBody,
+      },
+    ),
     (req) => game(req, (ctx, pid) => historic.draftNow(ctx, pid, req.params.cityId, req.body.tileId)),
   );
   app.post(

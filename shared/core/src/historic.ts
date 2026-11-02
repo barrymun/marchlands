@@ -160,6 +160,14 @@ export function inSeatArea(seatTileId: number, level: HistoricLevel, targetTileI
   return d(seatTileId % mapSize, targetTileId % mapSize) <= reach && d(Math.floor(seatTileId / mapSize), Math.floor(targetTileId / mapSize)) <= reach;
 }
 
+/**
+ * Whether a seat of `level` may draft from a tile nobody holds (docs/features/historical-cities.md, The daily draft): a
+ * barbarian city, or (marchlands) a historic city of a lower level: a level 12 drafts from barbarian cities only, a 14
+ * from level 12s too, and so on up to Atlantis.
+ */
+export const canDraftFrom = (level: HistoricLevel, target: { type: number; level: number }) =>
+  target.type === TileType.NPC || (target.type === TileType.HISTORIC && target.level < level);
+
 /** What a draft takes from a barbarian city's troops: BALANCE.historic.draftShare of its largest troop type, or null if it has none. */
 export function draftTake(troops: TroopCounts): { key: keyof TroopCounts; count: number } | null {
   let best: { key: keyof TroopCounts; count: number } | null = null;
@@ -168,6 +176,12 @@ export function draftTake(troops: TroopCounts): { key: keyof TroopCounts; count:
   const count = Math.floor(best.count * BALANCE.historic.draftShare);
   return count > 0 ? { key: best.key, count } : null;
 }
+
+/**
+ * The tiles a seat has drafted from on the UTC day of `now` (its list is for one day, `draftDay`): (marchlands) each at
+ * most once a day, so its drafts take from as many different cities.
+ */
+export const draftedToday = (c: { draftDay: number; draftedTiles: number[] }, now: number) => (c.draftDay === Math.floor(now / DAY) ? c.draftedTiles : []);
 
 /** Drafts a seat has made on the UTC day of `now` (its count is for one day, `draftDay`). */
 export const draftsUsed = (c: { draftDay: number; draftsUsed: number }, now: number) => (c.draftDay === Math.floor(now / DAY) ? c.draftsUsed : 0);

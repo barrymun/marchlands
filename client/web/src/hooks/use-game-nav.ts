@@ -1,6 +1,6 @@
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { useSearchState } from '@/hooks/use-search-state';
-import { GAME_SEARCH, isPanel, isScreen, leavingPrefix, type PanelId, screenHref, type ScreenId, type ScreenSearch, ViewId } from '@/lib/nav';
+import { GAME_SEARCH, isPanel, isScreen, leavingPrefix, type PanelId, screenHref, type ScreenId, type ScreenSearch, searchForCity, ViewId } from '@/lib/nav';
 
 /**
  * The game's place (lib/nav.ts) and the moves between places: the city, the screen in the viewport (null when the
@@ -31,7 +31,11 @@ export function useGameNav() {
     open: (p: PanelId) => setSearch({ panel: p }, { push: true, drop: leavingPrefix(panel, p) }),
     /** Close the panel, and its own parameters with it. */
     close: () => setSearch({ panel: null }, { push: true, drop: leavingPrefix(panel, null) }),
-    /** Switch to another city, keeping the screen, the panel and where each was (the whole of the search). */
-    toCity: (id: number) => void navigate({ pathname: screenHref(id, screen ?? ViewId.TOWN), search: location.search }),
+    /**
+     * Switch to a city, keeping the screen, the panel and where each was, but the map's place (searchForCity); picking
+     * the city already shown replaces the address rather than adding a step.
+     */
+    toCity: (id: number) =>
+      void navigate({ pathname: screenHref(id, screen ?? ViewId.TOWN), search: searchForCity(location.search) }, { replace: id === cityId }),
   };
 }

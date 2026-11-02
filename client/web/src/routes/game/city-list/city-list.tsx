@@ -28,7 +28,8 @@ export function CityList({ city, onPick }: { city?: CityBean; onPick?: () => voi
               here ? 'border-primary/60 bg-muted/60' : 'border-transparent',
             )}
             onClick={() => {
-              if (!here) nav.toCity(c.id);
+              // this city too: picking it shows it (the map goes back to it)
+              nav.toCity(c.id);
               onPick?.();
             }}
           >

@@ -3,6 +3,8 @@ import {
   BALANCE,
   BuildingStatus,
   BuildingType,
+  canDraftFrom,
+  draftedToday,
   draftsUsed,
   draftTake,
   fieldFactorAt,
@@ -242,6 +244,25 @@ describe(draftTake.name, () => {
     expect(draftTake({ militia: 400_000, archer: 1_000 })).toEqual({ key: 'militia', count: 80_000 });
     expect(draftTake({ pikemen: 4 })).toBeNull();
     expect(draftTake({})).toBeNull();
+  });
+});
+
+describe(canDraftFrom.name, () => {
+  it('lets every seat draft from barbarian cities, and from historic cities of lower levels only', () => {
+    expect(canDraftFrom(12, { type: TileType.NPC, level: 10 })).toBe(true);
+    expect(canDraftFrom(12, { type: TileType.HISTORIC, level: 12 })).toBe(false);
+    expect(canDraftFrom(14, { type: TileType.HISTORIC, level: 12 })).toBe(true);
+    expect(canDraftFrom(14, { type: TileType.HISTORIC, level: 14 })).toBe(false);
+    expect(canDraftFrom(18, { type: TileType.HISTORIC, level: 16 })).toBe(true);
+    expect(canDraftFrom(18, { type: TileType.CASTLE, level: 10 })).toBe(false);
+    expect(canDraftFrom(18, { type: TileType.FOREST, level: 10 })).toBe(false);
+  });
+});
+
+describe(draftedToday.name, () => {
+  it('lists the tiles drafted from today only', () => {
+    expect(draftedToday({ draftDay: 20_000, draftedTiles: [5, 9] }, 20_000 * 86_400_000 + 5)).toEqual([5, 9]);
+    expect(draftedToday({ draftDay: 19_999, draftedTiles: [5, 9] }, 20_000 * 86_400_000 + 5)).toEqual([]);
   });
 });
 

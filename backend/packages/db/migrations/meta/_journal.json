@@ -288,6 +288,13 @@
       "when": 1793607648391,
       "tag": "0040_historic_names",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1793654040854,
+      "tag": "0041_drafted_tiles",
+      "breakpoints": true
     }
   ]
 }

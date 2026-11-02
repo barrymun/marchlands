@@ -479,7 +479,7 @@ export const postCitiesMove = <ThrowOnError extends boolean = false>(options: Op
 });
 
 /**
- * (marchlands) A held historic city drafts from a barbarian city in its area, as one of its drafts today
+ * (marchlands) A held historic city drafts from a barbarian city in its area (the one given, or the one it would pick by itself), as one of its drafts today
  */
 export const postCitiesDraft = <ThrowOnError extends boolean = false>(options: Options<PostCitiesDraftData, ThrowOnError>): RequestResult<PostCitiesDraftResponses, PostCitiesDraftErrors, ThrowOnError> => (options.client ?? client).post<PostCitiesDraftResponses, PostCitiesDraftErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

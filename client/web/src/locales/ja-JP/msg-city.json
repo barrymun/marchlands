@@ -12,10 +12,12 @@
   "notHistoric": "徴兵できるのは歴史都市だけです。",
   "noDraftsLeft_other": "この歴史都市は今日の徴兵{{count, number}}回を使い切りました。",
   "draftOutOfArea": "その蛮族の都市はこの歴史都市の範囲外です。",
-  "draftNotBarbarian": "徴兵できるのは誰も保有していない蛮族の都市だけです。",
   "nothingToDraft": "その蛮族の都市には徴兵できる部隊がいません。",
   "teleportCooldown": "{{item}}はクールダウン中です。",
   "recallTroopsFirst": "都市を移動する前に、すべての部隊を帰還させてください。",
   "foreignTroops": "他のプレイヤーの部隊がこの都市へ進軍中、または駐留しています。",
-  "notFreeFlat": "そのタイルは空いている平地ではありません。"
+  "notFreeFlat": "そのタイルは空いている平地ではありません。",
+  "noDraftTarget": "今日徴兵できる都市が範囲内に残っていません。",
+  "draftNotTarget": "歴史都市が徴兵できるのは、誰も保持していない蛮族の都市と、より低いレベルの歴史都市だけです。",
+  "draftedToday": "今日はすでにこの都市から徴兵しています。各都市から徴兵できるのは1日1回です。"
 }

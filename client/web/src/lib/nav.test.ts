@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isPanel, isScreen, leavingPrefix, legacyTarget, PageId, PANEL_IDS, PanelId, screenHref, ViewId, viewOf } from '@/lib/nav';
+import { isPanel, isScreen, leavingPrefix, legacyTarget, PageId, PANEL_IDS, PanelId, screenHref, searchForCity, ViewId, viewOf } from '@/lib/nav';
 import { HeroTab, ReportTab } from '@/lib/screen-search';
 
 describe(isScreen.name, () => {
@@ -97,5 +97,14 @@ describe(leavingPrefix.name, () => {
     expect(leavingPrefix(null, PanelId.ITEMS)).toBeUndefined();
     expect(leavingPrefix(null, null)).toBeUndefined();
     expect(leavingPrefix(PanelId.ITEMS, PanelId.ITEMS)).toBeUndefined();
+  });
+});
+
+describe(searchForCity.name, () => {
+  it('keeps everything but the map’s place, so the map opens on the city switched to', () => {
+    expect(searchForCity('?at=231%2C429')).toBe('');
+    expect(searchForCity('?at=231%2C429&panel=items&items.q=horn')).toBe('?panel=items&items.q=horn');
+    expect(searchForCity('?tab=gear&hero=4')).toBe('?tab=gear&hero=4');
+    expect(searchForCity('')).toBe('');
   });
 });

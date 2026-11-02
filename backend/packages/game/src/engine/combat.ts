@@ -1204,8 +1204,8 @@ function historicLevel(tile: TileRow): HistoricLevel {
   return HISTORIC_LEVELS.find((l) => l === tile.level) ?? 12;
 }
 
-/** A historic city's state, garrison and fortifications as of `at` (an army's landing time). */
-function historicOf(tile: TileRow, at: number) {
+/** A historic city's state, garrison and fortifications as of `at` (an army's landing time, a draft). */
+export function historicOf(tile: TileRow, at: number) {
   const stored = tile.state && tile.troops ? { state: tile.state as unknown as HistoricState, troops: tile.troops, forts: tile.forts ?? {} } : null;
   return historicState(historicLevel(tile), tile.id, stored, at);
 }
