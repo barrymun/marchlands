@@ -13,6 +13,7 @@
     "noScouts": "No Scouts in the city: train some in Military.",
     "noTroops": "No troops in the city.",
     "allTitle": "As many as fit in the army",
+    "noneTitle": "None of these in the army",
     "resources": "Resources",
     "carried": "{{loaded}} / {{capacity}} carried",
     "chooseTroops": "Choose troops to carry resources",

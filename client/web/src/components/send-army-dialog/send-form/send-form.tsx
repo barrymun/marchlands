@@ -56,8 +56,9 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   // camp times: a landing time in UTC, kept for the next wave so waves land together
   const [landAt, setLandAt] = useState<{ date: string; time: string } | null>(null);
   const arriveAt = landAt ? landingTime(landAt.date, landAt.time) : null;
-  // only scouts go on a scouting mission
-  const available = Object.entries(TROOP_KEYS).filter(([, key]) => (city.troop[key] ?? 0) > 0 && (!scouting || key === 'scouter'));
+  // every troop type, those the city has none of greyed out; only scouts go on a scouting mission
+  const listed = Object.entries(TROOP_KEYS).filter(([, key]) => !scouting || key === 'scouter');
+  const hasAny = listed.some(([, key]) => (city.troop[key] ?? 0) > 0);
   const idleHeroes = city.heros.filter((h) => h.status === HeroStatus.IDLE && !h.seized);
   const troopBody = typedAmounts(scouting ? { scouter: troops.scouter } : troops);
   // troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)
@@ -188,41 +189,49 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
               <Trans t={t} i18nKey="form.battleBuff" values={{ desc: translateMessage(b.desc) }} components={{ timer: <Countdown endTime={b.endTime} /> }} />
             </p>
           ))}
-          {available.length === 0 && <p className="text-sm text-muted-foreground">{scouting ? t('form.noScouts') : t('form.noTroops')}</p>}
+          {!hasAny && <p className="text-sm text-muted-foreground">{scouting ? t('form.noScouts') : t('form.noTroops')}</p>}
           {scouting && <ScoutNote kind={target.kind} />}
           {/* two to a row from lg (workers and warriors, then scouts and pikemen …), so the dialog needn't scroll */}
           <div className="grid gap-x-8 gap-y-2 lg:grid-cols-2">
-            {available.map(([id, key]) => (
-              <div key={key} className="flex items-center justify-between gap-2 text-sm">
-                <span className="flex items-center gap-2">
-                  <TroopBadge id={Number(id)} />
-                  <span>
-                    {troopName(Number(id))} <span className="text-muted-foreground">({fmtExact(city.troop[key] ?? 0)})</span>
+            {listed.map(([id, key]) => {
+              const have = city.troop[key] ?? 0;
+              return (
+                <div key={key} className={cn('flex items-center justify-between gap-2 text-sm', have === 0 && 'text-muted-foreground')}>
+                  <span className={cn('flex items-center gap-2', have === 0 && 'opacity-60')}>
+                    <TroopBadge id={Number(id)} />
+                    <span>
+                      {troopName(Number(id))} <span className="text-muted-foreground">({fmtExact(have)})</span>
+                    </span>
                   </span>
-                </span>
-                <div className="flex items-center gap-1">
-                  <Input
-                    className="h-8 w-24"
-                    inputMode="numeric"
-                    value={troops[key] ?? ''}
-                    placeholder="0"
-                    onChange={(e) => setTroops(capTroops({ ...troops, [key]: e.target.value.replace(/\D/g, '') }, city.troop))}
-                  />
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    title={t('form.allTitle')}
-                    onClick={() => {
-                      // room left in the army without this type, so "All" never goes over the Rally Spot limit
-                      const others = chosen - Number(troopBody[key] ?? 0);
-                      setTroops({ ...troops, [key]: String(Math.max(0, Math.min(city.troop[key] ?? 0, cap - others))) });
-                    }}
-                  >
-                    {t('common:actions.all')}
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Input
+                      className="h-8 w-24"
+                      inputMode="numeric"
+                      disabled={have === 0}
+                      value={troops[key] ?? ''}
+                      placeholder="0"
+                      onChange={(e) => setTroops(capTroops({ ...troops, [key]: e.target.value.replace(/\D/g, '') }, city.troop))}
+                    />
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      disabled={have === 0}
+                      title={t('form.allTitle')}
+                      onClick={() => {
+                        // room left in the army without this type, so "All" never goes over the Rally Spot limit
+                        const others = chosen - Number(troopBody[key] ?? 0);
+                        setTroops({ ...troops, [key]: String(Math.max(0, Math.min(have, cap - others))) });
+                      }}
+                    >
+                      {t('common:actions.all')}
+                    </Button>
+                    <Button size="xs" variant="ghost" disabled={!troops[key]} title={t('form.noneTitle')} onClick={() => setTroops({ ...troops, [key]: '' })}>
+                      {t('common:actions.none')}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
         {carriesResources && (

@@ -13,6 +13,7 @@
     "noScouts": "都市に斥候がいません: 「軍事」で訓練してください。",
     "noTroops": "都市に兵がいません。",
     "allTitle": "部隊に入るだけ",
+    "noneTitle": "この兵を部隊に入れない",
     "resources": "資源",
     "carried": "{{loaded}} / {{capacity}} 積載",
     "chooseTroops": "資源を運ぶ兵を選んでください",
