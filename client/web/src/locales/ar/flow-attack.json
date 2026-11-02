@@ -1,0 +1,62 @@
+{
+  "addToFarm": {
+    "button": "إضافة إلى قائمة الإغارة",
+    "needsHero": "يحتاج كل هدف إلى بطل متفرغ في هذه المدينة",
+    "defaultName": "قائمة الإغارة",
+    "dialogTitle": "إضافة إلى قائمة الإغارة؟",
+    "willAttack": "ستهاجم {{city}} الخانة {{tile}} ضمن التدفق أدناه.",
+    "noFlow": "لا يوجد تدفق للإغارة بعد: سيبدأ هذا تدفقًا باسم \"{{name}}\" تكون فيه {{tile}} أول هدف لـ{{city}}. اختر الجيش المحفوظ الذي سيُرسَل من قسم التدفقات.",
+    "flow": "التدفق: <b>{{name}}</b>",
+    "alreadyTarget": "{{tile}} هي بالفعل أحد أهداف {{city}} في هذا التدفق.",
+    "addTarget": "إضافة هدف",
+    "start": "بدء قائمة الإغارة",
+    "toasts": {
+      "alreadyIn": "{{tile}} موجودة بالفعل في \"{{flow}}\"",
+      "noIdleHero": "لم يبقَ لدى {{city}} بطل متفرغ لهدف آخر في \"{{flow}}\"",
+      "added": "تمت إضافة {{tile}} إلى \"{{flow}}\" ({{city}}، الهدف {{n}})",
+      "started": "تم بدء \"{{name}}\" بـ{{tile}}",
+      "startedHint": "اختر الجيش المحفوظ الذي سيُرسَل من قسم التدفقات."
+    },
+    "targetCount_zero": "لدى {{city}} {{n}} من {{count}} هدف (هدف لكل بطل متفرغ).",
+    "targetCount_one": "لدى {{city}} {{n}} من {{count}} هدف (هدف لكل بطل متفرغ).",
+    "targetCount_two": "لدى {{city}} {{n}} من {{count}} هدفين (هدف لكل بطل متفرغ).",
+    "targetCount_few": "لدى {{city}} {{n}} من {{count}} أهداف (هدف لكل بطل متفرغ).",
+    "targetCount_many": "لدى {{city}} {{n}} من {{count}} هدفًا (هدف لكل بطل متفرغ).",
+    "targetCount_other": "لدى {{city}} {{n}} من {{count}} هدف (هدف لكل بطل متفرغ)."
+  },
+  "attackTargets": {
+    "attackWith": "الهجوم بجيش محفوظ",
+    "choose": "اختر جيشًا محفوظًا",
+    "noArmies": "لا جيوش محفوظة",
+    "newArmy": "+ جيش جديد",
+    "hint": "تهاجم كل مدينة أهدافها بالترتيب؛ ويقودها أبطالها المتفرغون، الأعلى في الهجوم أولًا. يُتخطّى الهدف (ويواصل التدفق) إذا لم يكن لدى المدينة ما يكفي من القوات، أو بطل، أو مكان في نقطة التجمع."
+  },
+  "cityTargets": {
+    "badFormat": "اكتب الإحداثيات بالشكل x,y",
+    "outOfRange": "تتراوح الإحداثيات من 0 إلى {{max}}",
+    "duplicate": "موجود في القائمة بالفعل",
+    "remove": "إزالة الهدف",
+    "placeholder": "x,y",
+    "addFor": "إضافة هدف لـ{{city}}",
+    "add": "إضافة",
+    "noIdle": "لا أبطال متفرغين في هذه المدينة: يحتاج كل هدف إلى بطل.",
+    "full": "هدف واحد لكل بطل متفرغ: هذه المدينة ممتلئة.",
+    "count_zero": "{{n}} / {{count}} هدف ({{heroes}})",
+    "count_one": "{{n}} / {{count}} هدف ({{heroes}})",
+    "count_two": "{{n}} / {{count}} هدفان ({{heroes}})",
+    "count_few": "{{n}} / {{count}} أهداف ({{heroes}})",
+    "count_many": "{{n}} / {{count}} هدفًا ({{heroes}})",
+    "count_other": "{{n}} / {{count}} هدف ({{heroes}})",
+    "idleHeroes_zero": "{{count}} بطل متفرغ",
+    "idleHeroes_one": "{{count}} بطل متفرغ",
+    "idleHeroes_two": "{{count}} بطلان متفرغان",
+    "idleHeroes_few": "{{count}} أبطال متفرغون",
+    "idleHeroes_many": "{{count}} بطلًا متفرغًا",
+    "idleHeroes_other": "{{count}} بطل متفرغ"
+  },
+  "newArmy": {
+    "label": "جيش محفوظ جديد",
+    "placeholder": "الاسم، مثلًا: طبقات مستوى 10",
+    "save": "حفظ الجيش"
+  }
+}

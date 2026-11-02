@@ -25,7 +25,7 @@ export function CityList({ city, onPick }: { city?: CityBean; onPick?: () => voi
             type="button"
             aria-current={here ? 'true' : undefined}
             className={cn(
-              'grid gap-1 rounded-md border px-2.5 py-1.5 text-left text-sm transition hover:bg-muted',
+              'grid gap-1 rounded-md border px-2.5 py-1.5 text-start text-sm transition hover:bg-muted',
               here ? 'border-primary/60 bg-muted/60' : 'border-transparent',
             )}
             onClick={() => {

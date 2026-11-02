@@ -43,7 +43,10 @@ export function WalledCity({ byPos, onSelect }: { byPos: Map<number, BuildingBea
         <div aria-hidden className="[image-rendering:pixelated]">
           <div className="absolute inset-x-0 top-0 h-8 bg-repeat-x" style={art('wall', 16)} />
           <div className="absolute inset-x-0 bottom-0 h-8 bg-repeat-x" style={art('wall', 16)} />
+          {/* the side walls are a picture (the right one the left mirrored), which doesn't mirror right to left */}
+          {/* eslint-disable-next-line no-restricted-syntax -- a picture, not a layout */}
           <div className="absolute inset-y-0 left-0 w-8 bg-repeat-y" style={art('side', 16)} />
+          {/* eslint-disable-next-line no-restricted-syntax -- a picture, not a layout */}
           <div className="absolute inset-y-0 right-0 w-8 -scale-x-100 bg-repeat-y" style={art('side', 16)} />
           {CORNERS.map((at) => (
             <div key={at} className={cn('absolute size-12', at)} style={art('corner', 24)} />

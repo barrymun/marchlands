@@ -38,7 +38,7 @@ export function HeldValleys({
           const res = valleyResource(v.type);
           return (
             <div key={v.id} className="flex items-center justify-between gap-2 rounded-md px-2 py-1 hover:bg-muted">
-              <button onClick={() => onGoTo(v.x, v.y)} className="flex flex-1 items-center justify-between gap-2 text-left">
+              <button onClick={() => onGoTo(v.x, v.y)} className="flex flex-1 items-center justify-between gap-2 text-start">
                 <span>
                   {t('held.row', { type: tileName(v.type), level: v.level })}{' '}
                   <span className="text-xs text-muted-foreground tabular-nums">

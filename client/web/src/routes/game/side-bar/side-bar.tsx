@@ -13,7 +13,7 @@ import { mayorOf } from '@/routes/game/utils';
 export function SideBar({ city }: { city: CityBean }) {
   const { t } = useTranslation('game');
   return (
-    <aside aria-label={t('sidebar')} className="hidden w-72 shrink-0 overflow-y-auto border-l bg-background/60 p-3 lg:grid lg:content-start lg:gap-4">
+    <aside aria-label={t('sidebar')} className="hidden w-72 shrink-0 overflow-y-auto border-s bg-background/60 p-3 lg:grid lg:content-start lg:gap-4">
       <CityList city={city} />
       <Separator />
       <ResourceBar resource={city.resource} mayor={mayorOf(city)} stacked />

@@ -1,0 +1,59 @@
+{
+  "toast": {
+    "renamed": "تمت إعادة تسمية اللاعب",
+    "genderChanged": "تم تغيير الجنس",
+    "flagChanged": "تم تغيير الراية",
+    "truce": "الهدنة سارية",
+    "promoted": "تمت الترقية"
+  },
+  "summary": "{{title}} · الراية {{flag}}",
+  "name": {
+    "label": "الاسم الجديد",
+    "wait": "إعادة التسمية مجانية مرة واحدة يوميًا: المرة التالية بعد <countdown />.",
+    "free": "مجانًا، مرة واحدة يوميًا، إن لم يكن الاسم مستخدمًا."
+  },
+  "flag": {
+    "label": "الراية الجديدة"
+  },
+  "gender": {
+    "label": "الجنس",
+    "wait": "تغيير الجنس مجاني مرة واحدة يوميًا: المرة التالية بعد <countdown />.",
+    "free": "مجانًا، مرة واحدة يوميًا."
+  },
+  "change": "تغيير",
+  "truce": {
+    "title": "هدنة",
+    "active": "سارية · <countdown />",
+    "cooldown": "فترة انتظار · <countdown />",
+    "description": "لا يمكن مهاجمة مدنك لمدة 12 ساعة، ولا يمكنك الهجوم أيضًا. تليها فترة انتظار.",
+    "boughtWithAny": "تُشترى بذهب المدينة",
+    "owned": "×{{n}}"
+  },
+  "title": {
+    "prestige": "{{amount}} هيبة",
+    "medals": "{{n}} × {{name}}",
+    "current": "اللقب: {{name}}",
+    "cities_zero": "{{cities}} / {{count}} مدينة",
+    "cities_one": "{{cities}} / {{count}} مدينة",
+    "cities_two": "{{cities}} / {{count}} مدينتان",
+    "cities_few": "{{cities}} / {{count}} مدن",
+    "cities_many": "{{cities}} / {{count}} مدينةً",
+    "cities_other": "{{cities}} / {{count}} مدينة",
+    "next": "يرفع لقب {{name}} حدّ مدنك إلى {{max}}. تُستهلك الأوسمة.",
+    "have": "(لديك {{have}})",
+    "promote": "الترقية إلى {{name}}",
+    "all": "كل الألقاب",
+    "highest_zero": "أعلى لقب: حتى {{count}} مدينة.",
+    "highest_one": "أعلى لقب: حتى {{count}} مدينة.",
+    "highest_two": "أعلى لقب: حتى {{count}} مدينتين.",
+    "highest_few": "أعلى لقب: حتى {{count}} مدن.",
+    "highest_many": "أعلى لقب: حتى {{count}} مدينةً.",
+    "highest_other": "أعلى لقب: حتى {{count}} مدينة.",
+    "maxCities_zero": "{{count}} مدينة",
+    "maxCities_one": "{{count}} مدينة",
+    "maxCities_two": "{{count}} مدينتان",
+    "maxCities_few": "{{count}} مدن",
+    "maxCities_many": "{{count}} مدينةً",
+    "maxCities_other": "{{count}} مدينة"
+  }
+}

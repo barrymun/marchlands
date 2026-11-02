@@ -12,13 +12,13 @@ export function Rows({ rows, total }: { rows: Row[]; total: number }) {
       <tbody>
         {rows.map(([label, v, className]) => (
           <tr key={label} className={className}>
-            <td className="pr-4">{label}</td>
-            <td className="text-right">{signedRate(v)}</td>
+            <td className="pe-4">{label}</td>
+            <td className="text-end">{signedRate(v)}</td>
           </tr>
         ))}
         <tr className="border-t font-medium">
-          <td className="pr-4 pt-1">{t('common:table.total')}</td>
-          <td className="pt-1 text-right">{signedRate(total)}</td>
+          <td className="pe-4 pt-1">{t('common:table.total')}</td>
+          <td className="pt-1 text-end">{signedRate(total)}</td>
         </tr>
         {getGameSpeed() !== 1 && (
           <tr>

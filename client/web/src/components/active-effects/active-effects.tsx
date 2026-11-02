@@ -84,7 +84,7 @@ export function ActiveEffects({
         <span className="text-sm font-medium">{t('title')}</span>
         <span className="text-xs text-muted-foreground">{t('active', { n: bySlot.size })}</span>
         {expiring > 0 && <span className={cn('text-xs', WARN_TEXT)}>{t('expiring', { n: expiring })}</span>}
-        <Button variant="ghost" size="xs" className="ml-auto text-muted-foreground" onClick={toggle} aria-expanded={!collapsed}>
+        <Button variant="ghost" size="xs" className="ms-auto text-muted-foreground" onClick={toggle} aria-expanded={!collapsed}>
           {collapsed ? t('show') : t('hide')}
           {collapsed ? <ChevronDown /> : <ChevronUp />}
         </Button>

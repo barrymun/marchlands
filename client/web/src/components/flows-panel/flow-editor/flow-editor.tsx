@@ -96,7 +96,7 @@ export function FlowEditor({
               <GripVertical className={cn('size-4 shrink-0 text-muted-foreground', locked ? 'opacity-30' : 'cursor-grab')} aria-hidden />
               <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] tabular-nums">{i + 1}</span>
               <ActionFields action={a} cities={draft.cities} onChange={(x) => update(i, x)} />
-              <div className="ml-auto flex gap-0.5">
+              <div className="ms-auto flex gap-0.5">
                 <Button size="icon-xs" variant="ghost" aria-label={t('flowEditor.moveUp')} disabled={locked || i === 0} onClick={() => move(i, i - 1)}>
                   <ArrowUp />
                 </Button>

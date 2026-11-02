@@ -28,7 +28,7 @@ export function Resources({ c }: { c: Counters }) {
             <TableRow>
               <TableHead>{t('resources.resource')}</TableHead>
               {RESOURCE_COLUMNS.map((col) => (
-                <TableHead key={col.group} className="text-right">
+                <TableHead key={col.group} className="text-end">
                   {col.label}
                 </TableHead>
               ))}

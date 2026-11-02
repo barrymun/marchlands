@@ -33,9 +33,9 @@ export function SideView({
       .map((k) => (
         <TableRow key={k}>
           <TableCell>{troopLabel(k)}</TableCell>
-          <TableCell className="text-right tabular-nums">{fmtExact(list.before[k] ?? 0)}</TableCell>
-          <TableCell className="text-right tabular-nums text-destructive">{(list.lost[k] ?? 0) > 0 ? `−${fmtExact(list.lost[k] ?? 0)}` : '—'}</TableCell>
-          <TableCell className="text-right tabular-nums">{fmtExact(list.after[k] ?? 0)}</TableCell>
+          <TableCell className="text-end tabular-nums">{fmtExact(list.before[k] ?? 0)}</TableCell>
+          <TableCell className="text-end tabular-nums text-destructive">{(list.lost[k] ?? 0) > 0 ? `−${fmtExact(list.lost[k] ?? 0)}` : '—'}</TableCell>
+          <TableCell className="text-end tabular-nums">{fmtExact(list.after[k] ?? 0)}</TableCell>
         </TableRow>
       ));
   const troopRows = rows(side.troops);
@@ -63,9 +63,9 @@ export function SideView({
           <TableHeader>
             <TableRow>
               <TableHead>{t('common:table.unit')}</TableHead>
-              <TableHead className="text-right">{t('side.before')}</TableHead>
-              <TableHead className="text-right">{t('side.lost')}</TableHead>
-              <TableHead className="text-right">{t('side.after')}</TableHead>
+              <TableHead className="text-end">{t('side.before')}</TableHead>
+              <TableHead className="text-end">{t('side.lost')}</TableHead>
+              <TableHead className="text-end">{t('side.after')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

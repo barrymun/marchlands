@@ -1,0 +1,33 @@
+{
+  "title": {
+    "missionAborted": "أُلغيت المهمة",
+    "scoutReturned": "عاد الاستطلاع",
+    "attackReturned": "عاد الهجوم",
+    "returned": "عاد",
+    "transportReport": "تقرير النقل",
+    "transportReceived": "وصلت شحنة نقل",
+    "reinforcementArrived": "وصل التعزيز",
+    "reinforcementsFrom": "تعزيزات من {{name}}",
+    "newCityFounded": "تأسست مدينة جديدة",
+    "scoutReport": "تقرير الاستطلاع",
+    "enemyScouts": "كشافة العدو",
+    "scoutsRepelled": "صُدّ الكشافة",
+    "attackSucceeded": "نجح الهجوم",
+    "attackFailed": "فشل الهجوم",
+    "cityAttacked": "هوجمت المدينة",
+    "attackRepelled": "صُدّ الهجوم",
+    "seatLost": "فُقدت المدينة التاريخية",
+    "draft": "جُنّدت القوات",
+    "reinforcementsFought": "قاتلت التعزيزات",
+    "valleyOccupied": "احتُل الوادي",
+    "valleyLost": "فُقد الوادي",
+    "valleyDefended": "دوفع عن الوادي",
+    "tradeCompleted": "اكتملت الصفقة",
+    "troopsDeserted": "فرّت القوات",
+    "seatRebelled": "تمردت المدينة التاريخية"
+  },
+  "notFound": "لم يُعثر على التقرير.",
+  "oldFormat": "حُفظ هذا التقرير بتنسيق قديم ولا يمكن عرضه.",
+  "cityFounded": "تأسست {{name}}.",
+  "seatRebelled": "ثارت {{name}}، مدينتك التاريخية من المستوى {{level}}: هبط ولاؤها إلى 0 حين خلت من القوات أو افتقرت إلى الذهب والطعام لنفقاتها. وعادت مدينة تاريخية لا يملكها أحد. وانتقل أبطالك وجيوشك فيها إلى مدينتك الأخرى."
+}

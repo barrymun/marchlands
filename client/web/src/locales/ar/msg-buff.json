@@ -1,0 +1,16 @@
+{
+  "production": "+{{percent}} لإنتاج {{resource}}",
+  "goldIncome": "+{{percent}} لدخل الذهب",
+  "troopAttack": "+{{percent}} لهجوم القوات",
+  "troopDefense": "+{{percent}} لدفاع القوات",
+  "armySize": "تتسع الجيوش لقوات أكثر بنسبة {{percent}}",
+  "buildingQueue": "طابور بناء إضافي",
+  "upkeep": "-{{percent}} من نفقات القوات",
+  "trainingCost": "-{{percent}} من تكلفة تدريب القوات",
+  "truce": "الهدنة سارية",
+  "truceCooldown": "فترة انتظار الهدنة",
+  "teleportCooldown": "فترة انتظار الانتقال",
+  "holiday": "عطلة",
+  "heroStat": "+{{percent}} {{stat}}",
+  "homeCity": "المدينة الأم"
+}

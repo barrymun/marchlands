@@ -47,7 +47,7 @@ export function ActivityDock({ city, variant }: { city: CityBean; variant: 'floa
           <JobRow key={j.key} job={j} now={now} />
         ))}
         {firstHidden && (
-          <button type="button" className="text-left text-[11px] text-muted-foreground hover:underline" onClick={firstHidden.open}>
+          <button type="button" className="text-start text-[11px] text-muted-foreground hover:underline" onClick={firstHidden.open}>
             {t('more', { n: list.length - PER_GROUP })}
           </button>
         )}
@@ -68,7 +68,7 @@ export function ActivityDock({ city, variant }: { city: CityBean; variant: 'floa
       aria-label={t('title')}
       aria-hidden={!visible}
       className={cn(
-        'fixed inset-x-2 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-40 sm:inset-x-auto sm:left-4 sm:w-80',
+        'fixed inset-x-2 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-40 sm:inset-x-auto sm:start-4 sm:w-80',
         'rounded-xl border bg-background/65 shadow-lg backdrop-blur-md supports-[backdrop-filter]:bg-background/55',
         'transition-all duration-300 ease-out',
         visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0',
@@ -76,7 +76,7 @@ export function ActivityDock({ city, variant }: { city: CityBean; variant: 'floa
     >
       <button
         type="button"
-        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs"
+        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-start text-xs"
         aria-expanded={!collapsed}
         onClick={() => setCollapsed(!collapsed)}
       >

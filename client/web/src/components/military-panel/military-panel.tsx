@@ -37,8 +37,8 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('common:table.unit')}</TableHead>
-                  <TableHead className="text-right">{t('garrison.ready')}</TableHead>
-                  <TableHead className="text-right">{t('garrison.injured')}</TableHead>
+                  <TableHead className="text-end">{t('garrison.ready')}</TableHead>
+                  <TableHead className="text-end">{t('garrison.injured')}</TableHead>
                   <TableHead className="w-0">
                     <span className="sr-only">{t('dismiss.actions')}</span>
                   </TableHead>
@@ -53,8 +53,8 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
                         <UnitName id={u.id} />
                       </div>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">{fmtExact(u.count)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{u.injured ? fmtExact(u.injured) : '—'}</TableCell>
+                    <TableCell className="text-end tabular-nums">{fmtExact(u.count)}</TableCell>
+                    <TableCell className="text-end tabular-nums">{u.injured ? fmtExact(u.injured) : '—'}</TableCell>
                     <TableCell className="py-0">
                       {u.count > 0 && (
                         <Button
@@ -84,7 +84,7 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>{t('defenses.defense')}</TableHead>
-                  <TableHead className="text-right">{t('defenses.built')}</TableHead>
+                  <TableHead className="text-end">{t('defenses.built')}</TableHead>
                   <TableHead className="w-0">
                     <span className="sr-only">{t('dismiss.actions')}</span>
                   </TableHead>
@@ -99,7 +99,7 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
                         <UnitName id={f.id} />
                       </div>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">{fmtExact(f.count)}</TableCell>
+                    <TableCell className="text-end tabular-nums">{fmtExact(f.count)}</TableCell>
                     <TableCell className="py-0">
                       {f.count > 0 && (
                         <Button

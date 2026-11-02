@@ -136,14 +136,14 @@ export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' 
             highlight={highlight}
           />
         )}
-        <div className={cn(FLOATING, 'top-2 left-2 grid max-w-[calc(100%-12rem)] gap-1.5 p-2')}>
+        <div className={cn(FLOATING, 'top-2 start-2 grid max-w-[calc(100%-12rem)] gap-1.5 p-2')}>
           <p className="text-sm font-medium">
             {title} {note}
           </p>
           {filter}
           {summary && <p className="text-sm font-medium">{summary}</p>}
         </div>
-        <div className={cn(FLOATING, 'top-2 right-2 p-1')}>{views}</div>
+        <div className={cn(FLOATING, 'top-2 end-2 p-1')}>{views}</div>
         {dialog}
       </div>
     );

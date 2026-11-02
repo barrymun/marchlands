@@ -8,7 +8,7 @@ export function UnitName({ id }: { id: number }) {
   const description = troopDescription(id);
   return (
     <Tooltip>
-      <TooltipTrigger className="cursor-help text-left underline decoration-dotted decoration-muted-foreground/50 underline-offset-2">
+      <TooltipTrigger className="cursor-help text-start underline decoration-dotted decoration-muted-foreground/50 underline-offset-2">
         {troopName(id)}
       </TooltipTrigger>
       {description && <TooltipContent className="max-w-72">{translateMessage(description)}</TooltipContent>}

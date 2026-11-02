@@ -1,0 +1,151 @@
+{
+  "actions": {
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "save": "حفظ",
+    "delete": "حذف",
+    "confirm": "تأكيد",
+    "send": "إرسال",
+    "edit": "تعديل",
+    "max": "الأقصى",
+    "all": "الكل",
+    "none": "لا شيء",
+    "back": "رجوع",
+    "remove": "إزالة",
+    "use": "استخدام",
+    "buy": "شراء",
+    "rename": "إعادة تسمية",
+    "logOut": "تسجيل الخروج"
+  },
+  "resources": {
+    "gold": "ذهب",
+    "food": "طعام",
+    "wood": "خشب",
+    "stone": "حجر",
+    "iron": "حديد"
+  },
+  "resourcesInline": {
+    "gold": "ذهب",
+    "food": "طعام",
+    "wood": "خشب",
+    "stone": "حجر",
+    "iron": "حديد",
+    "goods": "بضائع"
+  },
+  "units": {
+    "days": "{{value}}ي",
+    "hours": "{{value}}س",
+    "minutes": "{{value}}د",
+    "seconds": "{{value}}ث",
+    "perHour": "{{value}}/س"
+  },
+  "time": {
+    "justNow": "الآن",
+    "ago": "منذ {{time}}"
+  },
+  "fallback": {
+    "building": "مبنى {{id}}",
+    "unit": "وحدة {{id}}",
+    "tech": "بحث {{id}}",
+    "tile": "مربع {{id}}"
+  },
+  "genders": {
+    "male": "ذكر",
+    "female": "أنثى"
+  },
+  "heroAttributes": {
+    "politics": "السياسة",
+    "attack": "الهجوم",
+    "intelligence": "الذكاء",
+    "politicsShort": "سيا",
+    "attackShort": "هجو",
+    "intelligenceShort": "ذكا"
+  },
+  "push": {
+    "buildingComplete": "بلغ {{name}} المستوى {{level}}",
+    "researchComplete": "بلغ {{name}} المستوى {{level}}",
+    "hostileArmies_zero": "{{count}} جيوش معادية تقترب",
+    "hostileArmies_one": "{{count}} جيش معادٍ يقترب",
+    "hostileArmies_two": "{{count}} جيشان معاديان يقتربان",
+    "hostileArmies_few": "{{count}} جيوش معادية تقترب",
+    "hostileArmies_many": "{{count}} جيشًا معاديًا يقترب",
+    "hostileArmies_other": "{{count}} جيش معادٍ يقترب",
+    "trade": "صفقة: {{amount}} {{resource}} بسعر {{price}} ذهب",
+    "delivery": "تسليم السوق: وصل {{amount}} {{resource}}",
+    "newReport": "تقرير جديد",
+    "newReportHint": "اطّلع على التقارير."
+  },
+  "language": {
+    "label": "اللغة",
+    "names": {
+      "en-GB": "English (UK)",
+      "en-US": "English (US)",
+      "ja-JP": "日本語",
+      "ar": "العربية"
+    }
+  },
+  "list": {
+    "separator": "، "
+  },
+  "level": {
+    "short": "مستوى {{level}}",
+    "ofMax": "مستوى {{level}}/{{max}}",
+    "max": "المستوى الأقصى",
+    "named": "{{name}} مستوى {{level}}",
+    "namedParens": "{{name}} (مستوى {{level}})",
+    "next": "مستوى {{level}}:",
+    "now": "الآن:",
+    "unlocks": "يفتح: {{list}}",
+    "mayorExp": "يكسب العمدة {{name}} {{exp}} نقطة خبرة عند الاكتمال"
+  },
+  "gold": "{{gold}} ذهب",
+  "amountOf": "{{amount}} {{resource}}",
+  "nothing": "لا شيء",
+  "savedName": "تم حفظ «{{name}}»",
+  "durations": {
+    "days_zero": "{{count}} يوم",
+    "days_one": "{{count}} يوم",
+    "days_two": "{{count}} يومان",
+    "days_few": "{{count}} أيام",
+    "days_many": "{{count}} يومًا",
+    "days_other": "{{count}} يوم",
+    "hours_zero": "{{count}} ساعة",
+    "hours_one": "{{count}} ساعة",
+    "hours_two": "{{count}} ساعتان",
+    "hours_few": "{{count}} ساعات",
+    "hours_many": "{{count}} ساعةً",
+    "hours_other": "{{count}} ساعة"
+  },
+  "noMayor": "لا عمدة",
+  "noHero": "لا بطل",
+  "table": {
+    "total": "المجموع",
+    "unit": "الوحدة"
+  },
+  "boughtWithCityGold": "اشتُري بذهب {{city}}",
+  "nothingYet": "لا شيء بعد.",
+  "noneYet": "لا شيء بعد.",
+  "troops_zero": "{{n}} جندي",
+  "troops_one": "{{n}} جندي",
+  "troops_two": "{{n}} جنديان",
+  "troops_few": "{{n}} جنود",
+  "troops_many": "{{n}} جنديًا",
+  "troops_other": "{{n}} جندي",
+  "errors": {
+    "network": "تعذّر الوصول إلى الخادم. تحقّق من اتصالك وحاول مجددًا.",
+    "unexpected": "حدث خطأ ما. يُرجى المحاولة مجددًا."
+  },
+  "standing": {
+    "hostile": "عدائي",
+    "unfriendly": "غير ودّي",
+    "neutral": "محايد",
+    "friendly": "ودّي",
+    "honoured": "مُبجَّل"
+  },
+  "seatTitle": {
+    "ruler": "حاكم {{state}}",
+    "atlantis": "الحاكم الأعلى لأطلانطس"
+  },
+  "historicCity": "مدينة تاريخية من المستوى {{level}}",
+  "historicCityShort": "م.ت"
+}

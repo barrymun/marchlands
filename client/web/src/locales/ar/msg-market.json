@@ -1,0 +1,12 @@
+{
+  "invalidResource": "لا يمكن تداول هذا المورد.",
+  "invalidSide": "اختر الشراء أو البيع.",
+  "invalidPrice": "هذا السعر غير صالح.",
+  "needMarketplace": "تحتاج إلى {{building}} للتداول.",
+  "nothingToTrade": "لا يوجد ما يُتداول حاليًا.",
+  "tooManyOrders": "طوّر {{building}} لتقديم مزيد من الطلبات.",
+  "notEnoughResource": "لا يكفي ما لديك من {{resource}}.",
+  "slowDown": "أنت تقدّم الطلبات وتلغيها بسرعة كبيرة. حاول مجددًا بعد {{wait}}.",
+  "orderNotFound": "لم يُعثر على الطلب.",
+  "shipmentNotFound": "لم يُعثر على الشحنة."
+}

@@ -25,10 +25,10 @@ export function MyTrades() {
         <TableHeader>
           <TableRow>
             <TableHead>{t('columns.order')}</TableHead>
-            <TableHead className="text-right">{t('columns.price')}</TableHead>
-            <TableHead className="text-right">{t('myTrades.gold')}</TableHead>
-            <TableHead className="text-right">{t('myTrades.with')}</TableHead>
-            <TableHead className="text-right">{t('columns.time')}</TableHead>
+            <TableHead className="text-end">{t('columns.price')}</TableHead>
+            <TableHead className="text-end">{t('myTrades.gold')}</TableHead>
+            <TableHead className="text-end">{t('myTrades.with')}</TableHead>
+            <TableHead className="text-end">{t('columns.time')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -44,10 +44,10 @@ export function MyTrades() {
                     {t('common:amountOf', { amount: fmt(tr.amount), resource: resInline(tr.resType) })}
                   </span>
                 </TableCell>
-                <TableCell className="text-right tabular-nums">{fmtPrice(tr.price)}</TableCell>
-                <TableCell className="text-right tabular-nums">{fmt(tr.gold)}</TableCell>
-                <TableCell className="text-right text-muted-foreground">{t(`myTrades.counterparty.${tr.with}`)}</TableCell>
-                <TableCell className="text-right text-muted-foreground">{dateTime(tr.createdAt)}</TableCell>
+                <TableCell className="text-end tabular-nums">{fmtPrice(tr.price)}</TableCell>
+                <TableCell className="text-end tabular-nums">{fmt(tr.gold)}</TableCell>
+                <TableCell className="text-end text-muted-foreground">{t(`myTrades.counterparty.${tr.with}`)}</TableCell>
+                <TableCell className="text-end text-muted-foreground">{dateTime(tr.createdAt)}</TableCell>
               </TableRow>
             );
           })}

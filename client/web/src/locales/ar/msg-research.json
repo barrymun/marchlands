@@ -1,0 +1,12 @@
+{
+  "notResearching": "لا يجري البحث في {{tech}} في هذه المدينة.",
+  "noResearch": "لا يوجد بحث جارٍ.",
+  "chooseResearch": "يجري البحث في عدة تقنيات: اختر واحدة.",
+  "queueFull_zero": "تبحث هذه المدينة بالفعل في {{count, number}} تقنية.",
+  "queueFull_one": "تبحث هذه المدينة بالفعل في {{count, number}} تقنية.",
+  "queueFull_two": "تبحث هذه المدينة بالفعل في {{count, number}} تقنيتين.",
+  "queueFull_few": "تبحث هذه المدينة بالفعل في {{count, number}} تقنيات.",
+  "queueFull_many": "تبحث هذه المدينة بالفعل في {{count, number}} تقنيةً.",
+  "queueFull_other": "تبحث هذه المدينة بالفعل في {{count, number}} تقنية.",
+  "alreadyResearching": "يجري البحث في {{tech}} بالفعل في مدينة أخرى."
+}

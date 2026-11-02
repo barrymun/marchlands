@@ -1,0 +1,27 @@
+{
+  "toast": {
+    "used": "تم استخدام العنصر",
+    "bought": "تم الشراء بالذهب والاستخدام"
+  },
+  "notEnoughGold": "لا يكفي الذهب في هذه المدينة (المطلوب {{gold}})",
+  "title": "عناصر لـ {{name}}",
+  "maxLevel": "المستوى الأقصى",
+  "experienceProgress": "الخبرة {{exp}} / {{needed}}",
+  "summary": "{{progress}} · الولاء {{loyalty}} · {{gold}} ذهب في هذه المدينة",
+  "experience": {
+    "title": "الخبرة",
+    "gain": "+{{amount}} خبرة",
+    "atMax": "المستوى {{level}} هو الأقصى: لا مزيد من الخبرة"
+  },
+  "boosts": {
+    "title": "معزّزات الصفات",
+    "effect": "{{label}} +{{bonus}} (+{{amount}}، مع العتاد) لمدة {{period}}",
+    "active": "ساري، متبقٍّ <countdown />؛ استخدام آخر يضيف {{period}}",
+    "best": "الأفضل لهذا البطل"
+  },
+  "loyalty": {
+    "title": "أوسمة الولاء",
+    "gain": "+{{amount}} ولاء (الحد الأقصى 100)",
+    "full": "الولاء 100 بالفعل"
+  }
+}

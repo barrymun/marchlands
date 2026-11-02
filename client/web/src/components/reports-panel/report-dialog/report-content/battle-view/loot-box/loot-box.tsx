@@ -54,7 +54,7 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
           {Object.entries(b.medals)
             .sort(([a], [z]) => z.localeCompare(a))
             .map(([id, n]) => (
-              <Badge key={id} variant="secondary" className="gap-1 py-0 pl-0.5 font-normal">
+              <Badge key={id} variant="secondary" className="gap-1 py-0 ps-0.5 font-normal">
                 <ItemIcon id={id} />
                 {itemName(id)}
                 {n > 1 && ` ×${n}`}

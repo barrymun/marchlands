@@ -16,7 +16,7 @@ export function HeroLevel({ level, className }: { level: number; className?: str
       title={max ? t('level.max') : undefined}
     >
       {/* inline, not flex: a flex box takes its baseline from the icon and rides up in a line of text (a dialog title) */}
-      {max && <Trophy className="mr-0.5 inline-block size-[1em] align-[-0.125em]" aria-hidden />}
+      {max && <Trophy className="me-0.5 inline-block size-[1em] align-[-0.125em]" aria-hidden />}
       {t('level.short', { level })}
     </span>
   );

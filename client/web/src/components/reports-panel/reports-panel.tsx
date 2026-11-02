@@ -132,11 +132,11 @@ export function ReportsPanel() {
           <Table className={list.isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
             <TableHeader className="hidden md:table-header-group">
               <TableRow>
-                <TableHead className="w-4 pr-0" />
+                <TableHead className="w-4 pe-0" />
                 <TableHead>{t('columns.report')}</TableHead>
                 <TableHead>{t('labels.from')}</TableHead>
                 <TableHead>{t('labels.to')}</TableHead>
-                <TableHead className="text-right">{t('columns.time')}</TableHead>
+                <TableHead className="text-end">{t('columns.time')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -149,13 +149,13 @@ export function ReportsPanel() {
         {totalPage > 1 && (
           <div className="flex items-center justify-end gap-2 text-sm">
             <Button size="icon-sm" variant="outline" disabled={page <= 1} onClick={() => set({ page: page - 1 })} aria-label={t('previousPage')}>
-              <ChevronLeft />
+              <ChevronLeft className="rtl:-scale-x-100" />
             </Button>
             <span className="tabular-nums text-muted-foreground">
               {page} / {totalPage}
             </span>
             <Button size="icon-sm" variant="outline" disabled={page >= totalPage} onClick={() => set({ page: page + 1 })} aria-label={t('nextPage')}>
-              <ChevronRight />
+              <ChevronRight className="rtl:-scale-x-100" />
             </Button>
           </div>
         )}

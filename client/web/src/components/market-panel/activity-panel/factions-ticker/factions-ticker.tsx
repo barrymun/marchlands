@@ -35,7 +35,7 @@ export function FactionsTicker({ trades }: { trades: MarketNpcTrade[] }) {
           <TableRow>
             <TableHead>{t('ticker.seller')}</TableHead>
             <TableHead>{t('ticker.buyer')}</TableHead>
-            <TableHead className="text-right">{t('ticker.trade')}</TableHead>
+            <TableHead className="text-end">{t('ticker.trade')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="text-xs">
@@ -43,7 +43,7 @@ export function FactionsTicker({ trades }: { trades: MarketNpcTrade[] }) {
             <TableRow key={`${x.at}-${x.seller.zone}-${x.seller.level}-${x.buyer.zone}-${x.buyer.level}`}>
               <TableCell className="whitespace-normal">{group(x.seller)}</TableCell>
               <TableCell className="whitespace-normal">{group(x.buyer)}</TableCell>
-              <TableCell className="text-right whitespace-normal tabular-nums">
+              <TableCell className="text-end whitespace-normal tabular-nums">
                 <span className="flex items-center justify-end gap-1.5">
                   <ResourceIcon resource={x.resource} />
                   {t('ticker.amountAt', { amount: fmt(x.amount), resource: t(`common:resourcesInline.${x.resource}`), price: fmtPrice(x.price) })}

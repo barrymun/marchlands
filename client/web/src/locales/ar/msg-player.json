@@ -1,0 +1,65 @@
+{
+  "accountExists": "لهذا الحساب مدينة بالفعل.",
+  "nameTaken": "اسم اللاعب هذا مستخدم بالفعل.",
+  "sameName": "هذا هو اسمك بالفعل.",
+  "renameCooldown_zero": "يمكنك تغيير اسمك مجددًا بعد {{count, number}} ساعات.",
+  "renameCooldown_one": "يمكنك تغيير اسمك مجددًا بعد {{count, number}} ساعة.",
+  "renameCooldown_two": "يمكنك تغيير اسمك مجددًا بعد {{count, number}} ساعتين.",
+  "renameCooldown_few": "يمكنك تغيير اسمك مجددًا بعد {{count, number}} ساعات.",
+  "renameCooldown_many": "يمكنك تغيير اسمك مجددًا بعد {{count, number}} ساعةً.",
+  "renameCooldown_other": "يمكنك تغيير اسمك مجددًا بعد {{count, number}} ساعة.",
+  "sameGender": "هذا هو جنسك بالفعل.",
+  "genderCooldown_zero": "يمكنك تغيير جنسك مجددًا بعد {{count, number}} ساعات.",
+  "genderCooldown_one": "يمكنك تغيير جنسك مجددًا بعد {{count, number}} ساعة.",
+  "genderCooldown_two": "يمكنك تغيير جنسك مجددًا بعد {{count, number}} ساعتين.",
+  "genderCooldown_few": "يمكنك تغيير جنسك مجددًا بعد {{count, number}} ساعات.",
+  "genderCooldown_many": "يمكنك تغيير جنسك مجددًا بعد {{count, number}} ساعةً.",
+  "genderCooldown_other": "يمكنك تغيير جنسك مجددًا بعد {{count, number}} ساعة.",
+  "invalidSetting": "إعداد غير صالح.",
+  "invalidFlag": "راية غير صالحة.",
+  "title": {
+    "highest": "أنت تحمل أعلى لقب بالفعل.",
+    "prestigeRequired": "يلزم {{prestige}} من الهيبة.",
+    "notEnoughMedals": "لا توجد أوسمة كافية."
+  },
+  "holiday": {
+    "invalidDays": "يجب أن تتراوح مدة العطلة بين 1 و{{max}} من الأيام.",
+    "troopsOut": "يجب أن تستدعي كل قواتك أولًا."
+  },
+  "truce": {
+    "cooldown": "لا تزال هدنتك في فترة الانتظار."
+  },
+  "protected": {
+    "beginner": "هذا اللاعب تحت حماية المبتدئين.",
+    "truce": "هذا اللاعب في هدنة.",
+    "holiday": "هذا اللاعب في عطلة."
+  },
+  "bookmark": {
+    "tooMany_zero": "يمكنك الاحتفاظ بـ{{count, number}} إشارات مرجعية على الأكثر.",
+    "tooMany_one": "يمكنك الاحتفاظ بـ{{count, number}} إشارة مرجعية على الأكثر.",
+    "tooMany_two": "يمكنك الاحتفاظ بـ{{count, number}} إشارتين مرجعيتين على الأكثر.",
+    "tooMany_few": "يمكنك الاحتفاظ بـ{{count, number}} إشارات مرجعية على الأكثر.",
+    "tooMany_many": "يمكنك الاحتفاظ بـ{{count, number}} إشارةً مرجعية على الأكثر.",
+    "tooMany_other": "يمكنك الاحتفاظ بـ{{count, number}} إشارة مرجعية على الأكثر."
+  },
+  "preset": {
+    "nameLength_zero": "امنح الجيش المحفوظ اسمًا لا يتجاوز {{count, number}} أحرف.",
+    "nameLength_one": "امنح الجيش المحفوظ اسمًا لا يتجاوز {{count, number}} حرف.",
+    "nameLength_two": "امنح الجيش المحفوظ اسمًا لا يتجاوز {{count, number}} حرفين.",
+    "nameLength_few": "امنح الجيش المحفوظ اسمًا لا يتجاوز {{count, number}} أحرف.",
+    "nameLength_many": "امنح الجيش المحفوظ اسمًا لا يتجاوز {{count, number}} حرفًا.",
+    "nameLength_other": "امنح الجيش المحفوظ اسمًا لا يتجاوز {{count, number}} حرف.",
+    "tooMany_zero": "يمكنك الاحتفاظ بـ{{count, number}} جيوش محفوظة على الأكثر.",
+    "tooMany_one": "يمكنك الاحتفاظ بـ{{count, number}} جيش محفوظ على الأكثر.",
+    "tooMany_two": "يمكنك الاحتفاظ بـ{{count, number}} جيشين محفوظين على الأكثر.",
+    "tooMany_few": "يمكنك الاحتفاظ بـ{{count, number}} جيوش محفوظة على الأكثر.",
+    "tooMany_many": "يمكنك الاحتفاظ بـ{{count, number}} جيشًا محفوظًا على الأكثر.",
+    "tooMany_other": "يمكنك الاحتفاظ بـ{{count, number}} جيش محفوظ على الأكثر."
+  },
+  "mail": {
+    "protectionExpired": {
+      "title": "انتهت حماية المبتدئين",
+      "content": "انتهت حماية المبتدئين الخاصة بك. يمكن للاعبين الآخرين الآن مهاجمة مدنك، ويمكنك أنت مهاجمة مدنهم. عزّز دفاعاتك وفكّر في الانضمام إلى تحالف."
+    }
+  }
+}

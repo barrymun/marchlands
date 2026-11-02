@@ -98,7 +98,7 @@ export function TopBar({ city, status, onDialog }: { city?: CityBean; status: 'o
             </Button>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-x-3 lg:ml-0">
+        <div className="ms-auto flex items-center gap-x-3 lg:ms-0">
           <Tooltip>
             <TooltipTrigger asChild>
               <span

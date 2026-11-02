@@ -10,18 +10,19 @@ import { PanelId } from '@/lib/nav';
 import { ArmiesPanel, FactionsPanel, ItemsPanel, MilitaryPanel, PANELS, PlansPanel, ResearchPanel } from '@/routes/game/constants';
 
 /**
- * The open panel (lib/nav.ts) as a sheet over the view: from the right on a wide screen, the whole screen on a phone.
+ * The open panel (lib/nav.ts) as a sheet over the view: from the end side on a wide screen (the right, the left right to
+ * left), the whole screen on a phone.
  * Closing it (the cross, Escape, a click outside, the browser's back button) leaves the view as it was.
  */
 export function PanelSheet({ city }: { city: CityBean }) {
-  const { t } = useTranslation('game');
+  const { t, i18n } = useTranslation('game');
   const nav = useGameNav();
   const place = PANELS.find((p) => p.id === nav.panel);
   const body = useRef<HTMLDivElement>(null);
   return (
     <Sheet open={!!place} onOpenChange={(o) => !o && nav.close()}>
       <SheetContent
-        side="right"
+        side={i18n.dir() === 'rtl' ? 'left' : 'right'}
         className="w-full gap-0 sm:max-w-3xl xl:max-w-5xl"
         // focus the panel itself rather than its first control, which would pop that control's tooltip open
         onOpenAutoFocus={(e) => {

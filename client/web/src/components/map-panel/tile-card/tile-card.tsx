@@ -119,7 +119,7 @@ export function TileCard({
     >
       <div className="flex items-start justify-between gap-2">
         <h2 className="font-medium">{tile ? placeName(tile) : <Skeleton className="h-5 w-32" />}</h2>
-        <Button size="icon-xs" variant="ghost" className="-mt-1 -mr-1" onClick={onClose} aria-label={t('common:actions.close')}>
+        <Button size="icon-xs" variant="ghost" className="-mt-1 -me-1" onClick={onClose} aria-label={t('common:actions.close')}>
           <X />
         </Button>
       </div>

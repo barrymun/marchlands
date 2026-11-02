@@ -1,0 +1,58 @@
+{
+  "loading": "جارٍ تحميل لعبتك…",
+  "loadError": "تعذّر تحميل اللعبة",
+  "nav": {
+    "town": "البلدة",
+    "fields": "الحقول",
+    "map": "الخريطة",
+    "military": "الجيش",
+    "heroes": "الأبطال",
+    "research": "البحث",
+    "items": "العناصر",
+    "armies": "الجيوش",
+    "plans": "الخطط",
+    "factions": "الفصائل",
+    "reports": "التقارير",
+    "market": "السوق",
+    "flows": "التدفقات",
+    "stats": "الإحصاءات"
+  },
+  "viewSwitch": "طرق العرض",
+  "mainMenu": "قائمة اللعبة",
+  "menu": "القائمة",
+  "sidebar": "نظرة عامة على المدينة",
+  "panel": "تُفتح فوق العرض؛ أغلقها للعودة.",
+  "troopsHome": {
+    "title": "القوات في المدينة",
+    "none": "لا قوات في المدينة."
+  },
+  "cityFallback": "مدينة",
+  "yourCities": "مدنك",
+  "citySettings": "إعدادات المدينة",
+  "playerStats": "الهيبة {{prestige}} · الترتيب {{rank}} · الشرف {{honor}}",
+  "beginnerProtection": "حماية المبتدئين",
+  "titledName": "{{title}} {{name}}",
+  "liveUpdates": {
+    "aria": "التحديثات الحية {{status}}",
+    "tooltip": "التحديثات الحية: {{status}}",
+    "status": {
+      "open": "متصلة",
+      "connecting": "جارٍ الاتصال",
+      "closed": "مغلقة"
+    }
+  },
+  "account": {
+    "label": "الحساب",
+    "playerSettings": "إعدادات اللاعب",
+    "apiDocs": "توثيق API"
+  },
+  "mayor": {
+    "label": "العمدة",
+    "attributesHint": "السياسة: الإنتاج وسرعة البناء · الهجوم: التدريب · الذكاء: البحث",
+    "appointHint": "عيّن عمدة من صفحة الأبطال لتسريع الإنتاج والبناء والتدريب والبحث.",
+    "pick": "اختر عمدة",
+    "none": "لا يوجد بطل في المدينة لتعيينه عمدة.",
+    "toInn": "وظّف من النُزُل",
+    "allHeroes": "كل الأبطال"
+  }
+}

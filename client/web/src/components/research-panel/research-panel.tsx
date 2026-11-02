@@ -102,7 +102,7 @@ export function ResearchPanel({ city }: { city: CityBean }) {
               <span className="font-medium">
                 {techName(tech.typeId)} <Badge variant="secondary">{t('common:level.ofMax', { level: tech.level, max: tech.maxLevel })}</Badge>
                 {tech.effectiveLevel < tech.level && (
-                  <span className="ml-1 text-xs text-muted-foreground">{t('tech.effective', { level: tech.effectiveLevel })}</span>
+                  <span className="ms-1 text-xs text-muted-foreground">{t('tech.effective', { level: tech.effectiveLevel })}</span>
                 )}
               </span>
               {tech.next && (

@@ -28,7 +28,7 @@ export function Units({ c }: { c: Counters }) {
               <TableRow>
                 <TableHead>{t('common:table.unit')}</TableHead>
                 {UNIT_COLUMNS.map((col) => (
-                  <TableHead key={col.group} className="text-right">
+                  <TableHead key={col.group} className="text-end">
                     {col.label}
                   </TableHead>
                 ))}

@@ -8,7 +8,7 @@ import i18n, { type BackendModule } from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
-export const LOCALES = ['en-GB', 'en-US', 'ja-JP'] as const;
+export const LOCALES = ['en-GB', 'en-US', 'ja-JP', 'ar'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en-GB';
 /** Locales that hold only the keys whose text differs from en-GB (spelling); every other locale is a full translation. */
@@ -16,7 +16,7 @@ export const OVERRIDE_LOCALES: readonly Locale[] = ['en-US'];
 /** localStorage key of the chosen locale */
 const STORAGE_KEY = 'marchlands-locale';
 
-/** The supported locale for a browser language: exact ('en-US'), else by language ('en-AU' -> en-GB, 'ja' -> ja-JP), else en-GB. */
+/** The supported locale for a browser language: exact ('en-US'), else by language ('en-AU' -> en-GB, 'ja' -> ja-JP, 'ar-EG' -> ar), else en-GB. */
 export function matchLocale(lng: string | undefined): Locale {
   if (!lng) return DEFAULT_LOCALE;
   const exact = LOCALES.find((l) => l.toLowerCase() === lng.toLowerCase());
@@ -133,7 +133,11 @@ if (!browser) {
 }
 
 if (browser) {
-  const setLang = (lng: string) => document.documentElement.setAttribute('lang', lng);
+  // the page's language, and its direction: right to left for Arabic (the layout uses start/end classes, so it mirrors)
+  const setLang = (lng: string) => {
+    document.documentElement.setAttribute('lang', lng);
+    document.documentElement.setAttribute('dir', i18n.dir(lng));
+  };
   setLang(i18n.resolvedLanguage ?? DEFAULT_LOCALE);
   i18n.on('languageChanged', setLang);
 }

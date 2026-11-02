@@ -1,0 +1,92 @@
+{
+  "toast": {
+    "hired": "استُؤجر البطل",
+    "rerolled": "أبطال جدد في النُزُل",
+    "renamed": "أُعيدت تسمية البطل",
+    "dismissed": "صُرف البطل",
+    "levelUp": "بلغ {{name}} المستوى {{level}}",
+    "levelUpMulti": "بلغ {{name}} المستوى {{level}} (المستويات +{{levels}}، النقاط +{{levels}})"
+  },
+  "heroes": {
+    "title": "أبطالك",
+    "description": "قاعة الولائم ترفع عدد الأبطال الذين تستطيع المدينة إبقاءهم.",
+    "empty": "لا أبطال بعد. استأجر بطلًا في النُزُل.",
+    "moveUp": "انقل {{name}} لأعلى",
+    "moveDown": "انقل {{name}} لأسفل",
+    "points": "النقاط",
+    "pointsCount": "النقاط ({{points}})",
+    "items": "العناصر",
+    "locked": "مقفل",
+    "lock": "قفل",
+    "levelUp": "رفع المستوى",
+    "levelUpMulti": "رفع المستوى ×{{times}} → مستوى {{level}}",
+    "dismiss": "صرف",
+    "lockedHint": "مقفل: افتح قفل البطل لتصرفه"
+  },
+  "inn": {
+    "title": "النُزُل",
+    "noInn": "ابنِ نُزُلًا لتجنّد الأبطال.",
+    "newOffers": "عروض جديدة ({{gold}} ذهب)",
+    "hire": "استئجار",
+    "freeSlots_zero": "{{count}} خانات أبطال شاغرة.",
+    "freeSlots_one": "{{count}} خانة بطل شاغرة.",
+    "freeSlots_two": "{{count}} خانتا بطل شاغرتان.",
+    "freeSlots_few": "{{count}} خانات أبطال شاغرة.",
+    "freeSlots_many": "{{count}} خانةَ بطل شاغرة.",
+    "freeSlots_other": "{{count}} خانة بطل شاغرة."
+  },
+  "heroRow": {
+    "nameLabel": "اسم البطل",
+    "saveName": "حفظ الاسم",
+    "rename": "إعادة تسمية {{name}}"
+  },
+  "attributes": {
+    "strongest": "أقوى سمة: {{label}}",
+    "loyalty": "الولاء {{loyalty}}",
+    "points_zero": "{{count}} نقاط",
+    "points_one": "{{count}} نقطة",
+    "points_two": "{{count}} نقطتان",
+    "points_few": "{{count}} نقاط",
+    "points_many": "{{count}} نقطةً",
+    "points_other": "{{count}} نقطة"
+  },
+  "expBar": {
+    "maxLevel": "أقصى مستوى {{level}}: ينمو الآن عبر العتاد",
+    "label": "الخبرة",
+    "ready": "جاهز لرفع المستوى",
+    "readyMulti": "جاهز لرفع المستوى ×{{times}}",
+    "progress": "الخبرة {{exp}} / {{needed}} · {{left}} حتى مستوى {{next}}"
+  },
+  "buffs": {
+    "active": "{{label}} +{{amount}} · متبقٍّ {{time}}"
+  },
+  "dismissDialog": {
+    "title": "صرف {{name}}؟",
+    "description": "سيغادر {{name}} (مستوى {{level}}، هجوم {{att}} · سياسة {{pol}} · ذكاء {{int}}) مدينتك نهائيًا. لا يمكن التراجع عن ذلك.",
+    "keep": "إبقاء {{name}}",
+    "confirm": "صرف"
+  },
+  "tabs": {
+    "heroes": "الأبطال",
+    "gear": "العتاد"
+  },
+  "view": {
+    "label": "اعرض الأبطال على شكل",
+    "sheet": "بطاقة",
+    "list": "قائمة"
+  },
+  "sheet": {
+    "figure": "{{name}} يرتدي عتاد المستوى {{level}}",
+    "piece": "{{piece}}، المستوى {{level}}: افتح العتاد",
+    "figure3d": "{{name}} يرتدي عتاد المستوى {{level}}: اسحبه أو استخدم مفاتيح الأسهم لتدويره",
+    "figureMode": {
+      "label": "ارسم البطل بـ",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "figureLoading": "جارٍ رسم البطل…"
+  },
+  "roster": {
+    "drag": "اسحب لإعادة الترتيب (أو Alt مع ↑ / ↓)"
+  }
+}

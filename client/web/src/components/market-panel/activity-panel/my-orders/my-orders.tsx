@@ -28,9 +28,9 @@ export function MyOrders() {
         <TableHeader>
           <TableRow>
             <TableHead>{t('columns.order')}</TableHead>
-            <TableHead className="text-right">{t('columns.price')}</TableHead>
-            <TableHead className="text-right">{t('columns.filled')}</TableHead>
-            <TableHead className="text-right">{t('columns.placed')}</TableHead>
+            <TableHead className="text-end">{t('columns.price')}</TableHead>
+            <TableHead className="text-end">{t('columns.filled')}</TableHead>
+            <TableHead className="text-end">{t('columns.placed')}</TableHead>
             <TableHead />
           </TableRow>
         </TableHeader>
@@ -41,12 +41,12 @@ export function MyOrders() {
                 <Badge variant={o.tradeType === 0 ? 'secondary' : 'outline'}>{o.tradeType === 0 ? t('side.buy') : t('side.sell')}</Badge>{' '}
                 {t('common:amountOf', { amount: fmtExact(o.amount), resource: resInline(o.resType) })}
               </TableCell>
-              <TableCell className="text-right tabular-nums">{fmtPrice(o.price)}</TableCell>
-              <TableCell className="text-right tabular-nums">
+              <TableCell className="text-end tabular-nums">{fmtPrice(o.price)}</TableCell>
+              <TableCell className="text-end tabular-nums">
                 {fmtExact(o.dealedTotal)} / {fmtExact(o.amount)}
               </TableCell>
-              <TableCell className="text-right text-xs text-muted-foreground">{dateTime(o.createdAt)}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-end text-xs text-muted-foreground">{dateTime(o.createdAt)}</TableCell>
+              <TableCell className="text-end">
                 <Button
                   size="icon-xs"
                   variant="ghost"

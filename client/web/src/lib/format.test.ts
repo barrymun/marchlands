@@ -81,6 +81,12 @@ describe(fmt.name, () => {
     expect(fmt(1_234_567)).toBe('123.5万');
     expect(fmt(1234.9)).toBe('1,234');
   });
+
+  it('writes Arabic with Western digits, as the coordinates in code are', async () => {
+    await i18n.changeLanguage('ar');
+    expect(fmt(1234.9)).toMatch(/^1.234$/);
+    expect(fmt(1234.9)).not.toMatch(/[\u0660-\u0669]/);
+  });
 });
 
 describe(fmtExact.name, () => {

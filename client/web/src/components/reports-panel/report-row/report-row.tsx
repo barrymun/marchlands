@@ -14,7 +14,7 @@ export function ReportRow({ report: r, onOpen }: { report: ReportSummary; onOpen
   const to = r.targetPos && translateMessage(r.targetPos);
   return (
     <TableRow className={cn('cursor-pointer', !r.isRead && 'font-medium')} onClick={onOpen}>
-      <TableCell className="w-4 pr-0">{!r.isRead && <span className="block size-2 rounded-full bg-primary" aria-label={t('unread')} />}</TableCell>
+      <TableCell className="w-4 pe-0">{!r.isRead && <span className="block size-2 rounded-full bg-primary" aria-label={t('unread')} />}</TableCell>
       <TableCell>
         <div>{translateMessage(r.title)}</div>
         {(from || to) && (
@@ -27,7 +27,7 @@ export function ReportRow({ report: r, onOpen }: { report: ReportSummary; onOpen
       </TableCell>
       <TableCell className="hidden text-sm font-normal text-muted-foreground md:table-cell">{from}</TableCell>
       <TableCell className="hidden text-sm font-normal text-muted-foreground md:table-cell">{to}</TableCell>
-      <TableCell className="text-right text-xs font-normal whitespace-nowrap text-muted-foreground tabular-nums">{dateTime(r.eventTime)}</TableCell>
+      <TableCell className="text-end text-xs font-normal whitespace-nowrap text-muted-foreground tabular-nums">{dateTime(r.eventTime)}</TableCell>
     </TableRow>
   );
 }

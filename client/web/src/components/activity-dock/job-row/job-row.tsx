@@ -13,7 +13,7 @@ export function JobRow({ job, now }: { job: Job; now: number }) {
     <button
       type="button"
       onClick={job.open}
-      className="grid animate-in gap-1 rounded-md px-1.5 py-1 text-left duration-300 fade-in slide-in-from-left-2 hover:bg-foreground/5"
+      className="grid animate-in gap-1 rounded-md px-1.5 py-1 text-start duration-300 fade-in slide-in-from-start-2 hover:bg-foreground/5"
     >
       <span className="flex items-baseline justify-between gap-2 text-xs">
         <span className="min-w-0 truncate">

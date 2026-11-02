@@ -32,9 +32,9 @@ export function SlotCell({
   const { t } = useTranslation('active-effects');
   if (!active) {
     return (
-      <div className="flex min-w-0 items-center gap-1.5 rounded-md border border-dashed py-0.5 pr-0.5 pl-2 text-xs text-muted-foreground">
+      <div className="flex min-w-0 items-center gap-1.5 rounded-md border border-dashed py-0.5 pe-0.5 ps-2 text-xs text-muted-foreground">
         <span className="truncate">{slot.label}</span>
-        <span className="ml-auto">{t('slotCell.off')}</span>
+        <span className="ms-auto">{t('slotCell.off')}</span>
         <IconButton label={t('slotCell.find')} detail={t('slotCell.findDetail', { label: slot.label.toLowerCase(), boost: slot.boost })} onClick={onFind}>
           <Search />
         </IconButton>
@@ -43,7 +43,7 @@ export function SlotCell({
   }
   const left = active.endTime - now;
   return (
-    <div className="flex min-w-0 items-center gap-1.5 rounded-md border py-0.5 pr-0.5 pl-2 text-xs">
+    <div className="flex min-w-0 items-center gap-1.5 rounded-md border py-0.5 pe-0.5 ps-2 text-xs">
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="flex min-w-0 items-center gap-1.5">
@@ -57,7 +57,7 @@ export function SlotCell({
             : t('slotCell.running', { desc: translateMessage(active.desc), time: duration(left) })}
         </TooltipContent>
       </Tooltip>
-      <span className={cn('ml-auto whitespace-nowrap tabular-nums', left < WARN_MS ? cn('font-medium', WARN_TEXT) : 'text-muted-foreground')}>
+      <span className={cn('ms-auto whitespace-nowrap tabular-nums', left < WARN_MS ? cn('font-medium', WARN_TEXT) : 'text-muted-foreground')}>
         {shortDuration(left)}
       </span>
       {extension ? (

@@ -1,0 +1,17 @@
+{
+  "title": "قيد التنفيذ",
+  "summary": "{{jobs}} · التالي {{next}}",
+  "finishing": "على وشك الانتهاء…",
+  "more": "+{{n}} أخرى",
+  "nothing": "لا شيء قيد التنفيذ",
+  "groups": {
+    "building": "البناء",
+    "research": "البحث",
+    "training": "التدريب"
+  },
+  "job": {
+    "level": "{{name}} ← مستوى {{level}}",
+    "troops": "{{troop}} ×{{amount}}",
+    "queued": "+{{n}} في الطابور"
+  }
+}

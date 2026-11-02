@@ -25,7 +25,7 @@ export function TroopsHome({ city, onPick }: { city: CityBean; onPick?: () => vo
           <button
             key={x.id}
             type="button"
-            className="flex min-w-0 items-center gap-1.5 rounded-md px-1 py-0.5 text-left text-xs transition hover:bg-muted"
+            className="flex min-w-0 items-center gap-1.5 rounded-md px-1 py-0.5 text-start text-xs transition hover:bg-muted"
             title={troopName(x.id)}
             onClick={() => {
               nav.open(PanelId.MILITARY);

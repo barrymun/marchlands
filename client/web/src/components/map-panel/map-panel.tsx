@@ -173,7 +173,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
       <div
         role="toolbar"
         aria-label={t('toolbar')}
-        className="absolute top-2 left-2 flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1 rounded-lg border bg-background/90 p-1 shadow backdrop-blur"
+        className="absolute top-2 start-2 flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1 rounded-lg border bg-background/90 p-1 shadow backdrop-blur"
       >
         <GoToCoords x={wrap(Math.round(centre.x), mapSize)} y={wrap(Math.round(centre.y), mapSize)} mapSize={mapSize} onGoTo={goTo} />
         <Button size="icon-xs" variant="ghost" onClick={() => pan('left')} aria-label={t('pan.left')}>
@@ -224,14 +224,14 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           onGoTo={goTo}
           onRelease={(tileId) => release.mutateAsync({ path: { tileId } })}
           releasing={release.isPending}
-          className={cn(floating, 'top-14 left-2 w-[min(24rem,calc(100%-1rem))]')}
+          className={cn(floating, 'top-14 start-2 w-[min(24rem,calc(100%-1rem))]')}
         />
       )}
       {list === 'farms' && (
-        <FarmTargets lists={farms} mapSize={mapSize} onGoTo={goTo} className={cn(floating, 'top-14 left-2 w-[min(26rem,calc(100%-1rem))]')} />
+        <FarmTargets lists={farms} mapSize={mapSize} onGoTo={goTo} className={cn(floating, 'top-14 start-2 w-[min(26rem,calc(100%-1rem))]')} />
       )}
       {list === 'legend' && (
-        <MapLegend factions={factions} onFactions={tintFactions} className={cn(floating, 'top-14 left-2 w-[min(22rem,calc(100%-1rem))]')} />
+        <MapLegend factions={factions} onFactions={tintFactions} className={cn(floating, 'top-14 start-2 w-[min(22rem,calc(100%-1rem))]')} />
       )}
       {selected != null && (
         <TileCard
@@ -247,7 +247,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           releasing={release.isPending}
           onUpgrade={(tileId) => upgrade.mutateAsync({ path: { tileId }, body: { cityId: city.id } })}
           upgrading={upgrade.isPending}
-          className={cn(floating, 'inset-x-2 top-14 lg:top-2 lg:right-2 lg:left-auto lg:w-88', list && 'hidden lg:grid')}
+          className={cn(floating, 'inset-x-2 top-14 lg:top-2 lg:end-2 lg:start-auto lg:w-88', list && 'hidden lg:grid')}
         />
       )}
       <SendArmyDialog city={city} target={target} onClose={() => setTarget(null)} />

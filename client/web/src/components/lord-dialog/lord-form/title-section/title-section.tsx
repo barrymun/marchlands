@@ -69,9 +69,9 @@ export function TitleSection() {
           <tbody>
             {TITLES.slice(1).map((title) => (
               <tr key={title.id} className={title.id === info.titleId ? 'font-medium text-foreground' : ''}>
-                <td className="pr-2">{titleName(title.id)}</td>
-                <td className="pr-2">{t('title.maxCities', { count: title.maxCities })}</td>
-                <td className="pr-2">{t('title.prestige', { amount: fmtExact(title.prestige) })}</td>
+                <td className="pe-2">{titleName(title.id)}</td>
+                <td className="pe-2">{t('title.maxCities', { count: title.maxCities })}</td>
+                <td className="pe-2">{t('title.prestige', { amount: fmtExact(title.prestige) })}</td>
                 <td>
                   {Object.entries(title.medals)
                     .map(([id, n]) => t('title.medals', { n, name: itemName(id) }))

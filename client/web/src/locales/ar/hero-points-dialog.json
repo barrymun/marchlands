@@ -1,0 +1,36 @@
+{
+  "toast": {
+    "assigned": "تم توزيع النقاط",
+    "reset": "تمت إعادة تعيين النقاط"
+  },
+  "hints": {
+    "politics": "العمدة: الإنتاج وسرعة البناء",
+    "attack": "هجوم الجيش؛ العمدة: سرعة التدريب",
+    "intelligence": "العمدة: سرعة البحث"
+  },
+  "remove": "إنقاص {{label}}",
+  "add": "زيادة {{label}}",
+  "asMayor": "بصفته عمدة: {{rate}} إنتاج (+{{pct}})",
+  "usesHolyWater": "يستهلك 1 ماء مقدس (تملك {{owned}})",
+  "holyWaterGold": "{{gold}} ذهب مقابل ماء مقدس",
+  "reset": "إعادة تعيين",
+  "assignNone": "وزّع النقاط",
+  "assign_zero": "وزّع {{count}} نقطة",
+  "assign_one": "وزّع {{count}} نقطة",
+  "assign_two": "وزّع {{count}} نقطتين",
+  "assign_few": "وزّع {{count}} نقاط",
+  "assign_many": "وزّع {{count}} نقطةً",
+  "assign_other": "وزّع {{count}} نقطة",
+  "pointsLeft_zero": "بقي {{left}} من {{count}} نقطة للتوزيع. يكسب الأبطال نقطة واحدة لكل مستوى.",
+  "pointsLeft_one": "بقي {{left}} من {{count}} نقطة للتوزيع. يكسب الأبطال نقطة واحدة لكل مستوى.",
+  "pointsLeft_two": "بقي {{left}} من {{count}} نقطتين للتوزيع. يكسب الأبطال نقطة واحدة لكل مستوى.",
+  "pointsLeft_few": "بقي {{left}} من {{count}} نقاط للتوزيع. يكسب الأبطال نقطة واحدة لكل مستوى.",
+  "pointsLeft_many": "بقي {{left}} من {{count}} نقطةً للتوزيع. يكسب الأبطال نقطة واحدة لكل مستوى.",
+  "pointsLeft_other": "بقي {{left}} من {{count}} نقطة للتوزيع. يكسب الأبطال نقطة واحدة لكل مستوى.",
+  "resetInfo_zero": "إعادة تعيين {{count}} نقطة موزّعة · {{cost}}",
+  "resetInfo_one": "إعادة تعيين النقطة الموزّعة ({{count}}) · {{cost}}",
+  "resetInfo_two": "إعادة تعيين النقطتين الموزّعتين ({{count}}) · {{cost}}",
+  "resetInfo_few": "إعادة تعيين كل النقاط الموزّعة ({{count}}) · {{cost}}",
+  "resetInfo_many": "إعادة تعيين كل النقاط الموزّعة ({{count}}) · {{cost}}",
+  "resetInfo_other": "إعادة تعيين كل النقاط الموزّعة ({{count}}) · {{cost}}"
+}

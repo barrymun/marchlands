@@ -1,0 +1,23 @@
+{
+  "recalled": "تم استدعاء الجيش",
+  "sections": {
+    "hostile": "الجيوش المعادية",
+    "own": "جيوشك",
+    "allied": "الجيوش الحليفة"
+  },
+  "none": "لا شيء.",
+  "missions": {
+    "transport": "نقل",
+    "reinforce": "تعزيز",
+    "scout": "استطلاع",
+    "buildCity": "بناء مدينة",
+    "attack": "هجوم"
+  },
+  "row": {
+    "returning": "عائد",
+    "stationed": "متمركز",
+    "marching": "في مسيرة",
+    "recall": "استدعاء",
+    "waiting": "في الانتظار · يغادر بعد <timer/>، ويصل {{time}} UTC"
+  }
+}

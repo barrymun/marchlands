@@ -36,6 +36,13 @@ const TYPED = [
 // test files, and the fixtures and support code beside them
 const TESTS = ['**/*.test.ts', '**/test/**/*.ts'];
 
+/**
+ * A Tailwind class with a physical side (ml-2, pr-4, left-2, text-right, border-l, rounded-r-md, slide-in-from-left)
+ * in a class string, as an esquery regex; left-1/2 (centring with a translate) is allowed.
+ */
+const PHYSICAL_CLASS =
+  '/(^|\\s)(\\S*:)?-?(m[lr]|p[lr]|border-[lr]|rounded-[lr]|scroll-[mp][lr])-\\S|(^|\\s)(\\S*:)?(text-(left|right)|border-[lr])(\\s|$)|(^|\\s)(\\S*:)?slide-in-from-(left|right)|(^|\\s)(\\S*:)?-?(left|right)-(?!1\\/2(\\s|$))\\S/';
+
 export default tseslint.config(
   {
     ignores: ['**/node_modules', '**/dist', 'shared/api-client/src/generated', 'backend/packages/db/migrations', 'db'],
@@ -233,6 +240,13 @@ export default tseslint.config(
           "CallExpression[callee.name='useCommand'] > Literal[value=/\\p{L}/u]",
           "CallExpression[callee.name='useCommand'] > TemplateLiteral:has(TemplateElement[value.raw=/\\p{L}/u])",
         ].map((selector) => ({ selector, message: 'Player-facing text goes in the locale files: use t() (see AGENTS.md, Translations).' })),
+        // right-to-left languages (Arabic) mirror the layout, so classes say start and end, never left and right
+        // (AGENTS.md, Translations): ms-/me-, ps-/pe-, start-/end-, text-start/text-end, border-s/e, rounded-s/e. A
+        // centred left-1/2 with its translate stays; a picture that must not mirror disables this with its reason.
+        ...[`Literal[value=${PHYSICAL_CLASS}]`, `TemplateElement[value.raw=${PHYSICAL_CLASS}]`].map((selector) => ({
+          selector,
+          message: 'Use start/end classes (ms-, pe-, start-, text-end …), not left/right, so right-to-left layouts mirror (AGENTS.md, Translations).',
+        })),
       ],
     },
   },

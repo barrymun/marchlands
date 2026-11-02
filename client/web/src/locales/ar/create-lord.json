@@ -1,0 +1,18 @@
+{
+  "title": "أسّس مدينتك",
+  "description": "اختر اسمك ورايتك ومكان استقرارك.",
+  "playerName": "اسم اللاعب",
+  "cityName": "اسم المدينة",
+  "flag": "الراية",
+  "flagPlaceholder": "مثال: EV",
+  "gender": "الجنس",
+  "state": "الولاية",
+  "leastCrowded": "الأقل ازدحامًا (مُستحسن)",
+  "submit": "أسّس المدينة",
+  "zone_zero": "{{name}} · {{count}} لاعب · نسبة الاستيطان {{settled}}",
+  "zone_one": "{{name}} · {{count}} لاعب · نسبة الاستيطان {{settled}}",
+  "zone_two": "{{name}} · {{count}} لاعبان · نسبة الاستيطان {{settled}}",
+  "zone_few": "{{name}} · {{count}} لاعبين · نسبة الاستيطان {{settled}}",
+  "zone_many": "{{name}} · {{count}} لاعبًا · نسبة الاستيطان {{settled}}",
+  "zone_other": "{{name}} · {{count}} لاعب · نسبة الاستيطان {{settled}}"
+}

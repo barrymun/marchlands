@@ -10,4 +10,5 @@ export const WALL_ART: Record<string, string> = Object.fromEntries(
 export const WALL_SCALE = 2;
 
 /** Where the four corner towers sit: centred on the frame's corners, so they stand out past the walls a little. */
+// eslint-disable-next-line no-restricted-syntax -- the walled city is a picture, which doesn't mirror right to left
 export const CORNERS = ['-top-2 -left-2', '-top-2 -right-2', '-bottom-2 -left-2', '-bottom-2 -right-2'] as const;

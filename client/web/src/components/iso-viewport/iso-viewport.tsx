@@ -230,7 +230,7 @@ export function IsoViewport({
     >
       <canvas ref={canvas} width={Math.round(view.w * view.dpr)} height={Math.round(view.h * view.dpr)} className="absolute inset-0 size-full" />
       {camera && children}
-      <div className="absolute right-2 bottom-2 flex flex-col gap-1" onPointerDown={(e) => e.stopPropagation()}>
+      <div className="absolute end-2 bottom-2 flex flex-col gap-1" onPointerDown={(e) => e.stopPropagation()}>
         <Button size="icon-xs" variant="secondary" onClick={() => vp.zoomBy(1)} aria-label={t('zoom.in')}>
           <Plus />
         </Button>

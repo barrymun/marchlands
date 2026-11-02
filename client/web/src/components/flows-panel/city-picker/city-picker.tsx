@@ -41,7 +41,7 @@ export function CityPicker({
         </span>
       </label>
       {!all && (
-        <div className="grid gap-1 pl-6 sm:grid-cols-2">
+        <div className="grid gap-1 ps-6 sm:grid-cols-2">
           {cities.map((c) => (
             <label key={c.id} className="flex items-center gap-2 text-sm">
               <Checkbox checked={chosen.has(c.id)} onCheckedChange={(on) => set(c.id, on === true)} />

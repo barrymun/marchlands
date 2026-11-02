@@ -2,8 +2,14 @@ import { DAY, getGameSpeed, HOUR } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /**
+ * The locale dates and times are written in: the player's, but Arabic with Western digits (0-9), as the coordinates
+ * and times the code writes are.
+ */
+const dateLocale = () => (i18n.language === 'ar' ? 'ar-u-nu-latn' : i18n.language);
+
+/**
  * Number formats for the current locale (made again when the locale changes). English locales share plain
- * 'en' (en-GB alone would write 1.2m for 1.2M); others use their own (ja-JP: 12万).
+ * 'en' (en-GB alone would write 1.2m for 1.2M); others use their own (ja-JP: 12万), Arabic with Western digits.
  */
 let formats: {
   lng: string;
@@ -12,7 +18,7 @@ let formats: {
   decimals: Map<string, Intl.NumberFormat>;
   percents: Map<string, Intl.NumberFormat>;
 } | null = null;
-const numberLocale = () => (i18n.language.startsWith('en') ? 'en' : i18n.language);
+const numberLocale = () => (i18n.language.startsWith('en') ? 'en' : dateLocale());
 function numberFormats() {
   if (formats?.lng !== i18n.language) {
     const locale = numberLocale();
@@ -37,18 +43,18 @@ export function fmtDecimal(n: number, max: number, min = 0): string {
 }
 
 /** A date and time in the current locale (11/10/2026, 13:14:10 in en-GB). */
-export const dateTime = (ms: number) => new Date(ms).toLocaleString(i18n.language);
+export const dateTime = (ms: number) => new Date(ms).toLocaleString(dateLocale());
 
 /** A time of day in the current locale; `short` leaves out the seconds. */
 export const clockTime = (ms: number, short = false) =>
-  new Date(ms).toLocaleTimeString(i18n.language, short ? { hour: '2-digit', minute: '2-digit' } : undefined);
+  new Date(ms).toLocaleTimeString(dateLocale(), short ? { hour: '2-digit', minute: '2-digit' } : undefined);
 
 /** A time of day in UTC, to the second and on the 24-hour clock in every locale: landing times (camp times). */
 export const utcClock = (ms: number) =>
-  new Date(ms).toLocaleTimeString(i18n.language, { timeZone: 'UTC', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  new Date(ms).toLocaleTimeString(dateLocale(), { timeZone: 'UTC', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
 /** A day and month in the current locale (11 Oct in en-GB), for chart axes. */
-export const shortDate = (ms: number) => new Date(ms).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' });
+export const shortDate = (ms: number) => new Date(ms).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short' });
 
 export const fmt = (n: number) => (Math.abs(n) >= 100_000 ? numberFormats().compact.format(n) : numberFormats().whole.format(Math.floor(n)));
 export const fmtExact = (n: number) => numberFormats().whole.format(Math.floor(n));

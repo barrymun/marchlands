@@ -1,0 +1,38 @@
+{
+  "title": "التأثيرات السارية",
+  "active": "{{n}} سارية",
+  "expiring": "{{n}} تنتهي خلال 24 ساعة",
+  "show": "عرض",
+  "hide": "إخفاء",
+  "extended": "تم تمديد {{slot}} بمقدار {{adds}}",
+  "groups": {
+    "production": "الإنتاج",
+    "military": "الجيش",
+    "other": "أخرى"
+  },
+  "slots": {
+    "attack": "الهجوم",
+    "defense": "الدفاع",
+    "training": "التدريب",
+    "upkeep": "النفقات",
+    "army": "الجيش",
+    "buildQueue": "طابور البناء",
+    "truce": "الهدنة"
+  },
+  "on": "مفعّل",
+  "buy": {
+    "title": "تمديد {{slot}}؟",
+    "description": "لا تملك {{item}}. اشترِ واحدًا مقابل {{price}} ذهب من {{city}} واستخدمه الآن لإضافة {{adds}}.",
+    "confirm": "شراء واستخدام · {{price}} ذهب"
+  },
+  "slotCell": {
+    "off": "متوقف",
+    "find": "ابحث عن عناصر",
+    "findDetail": "اعرض العناصر التي تمنح {{label}} {{boost}}",
+    "running": "{{desc}} · متبقٍّ {{time}}",
+    "runningItem": "{{item}}: {{desc}} · متبقٍّ {{time}}",
+    "extend": "تمديد",
+    "useDetail": "استخدم {{item}} (تملك ×{{owned}}): +{{adds}}",
+    "buyDetail": "اشترِ {{item}} مقابل {{price}} ذهب واستخدمه: +{{adds}}"
+  }
+}

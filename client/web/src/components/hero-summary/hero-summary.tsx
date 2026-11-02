@@ -51,7 +51,7 @@ export function HeroSummary({
               onMove(e.key === 'ArrowUp' ? -1 : 1);
             }}
             className={cn(
-              'min-w-0 flex-1 truncate text-left after:absolute after:inset-0 after:rounded-md focus-visible:outline-none',
+              'min-w-0 flex-1 truncate text-start after:absolute after:inset-0 after:rounded-md focus-visible:outline-none',
               current && 'font-medium',
             )}
           >
@@ -65,16 +65,16 @@ export function HeroSummary({
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums">
         <HeroLevel level={hero.level} />
         {mayor ? <Badge className="h-4 px-1.5 text-[11px]">{statusLabel(hero)}</Badge> : <span>{statusLabel(hero)}</span>}
-        <BoostChip hero={hero} now={now} className="ml-auto" />
+        <BoostChip hero={hero} now={now} className="ms-auto" />
       </span>
       <span className="flex min-h-6 items-center gap-1.5 text-xs tabular-nums">
         <HeroStats hero={hero} />
         {mayor && (
-          <span className={cn('ml-auto', GAIN_TEXT)} title={t('mayor-note:bonus', { pct: percent(mayorShare(hero)), rate: signedRate(mayorGain(city, hero)) })}>
+          <span className={cn('ms-auto', GAIN_TEXT)} title={t('mayor-note:bonus', { pct: percent(mayorShare(hero)), rate: signedRate(mayorGain(city, hero)) })}>
             +{percent(mayorShare(hero))}
           </span>
         )}
-        {canAppoint(hero) && <MakeMayorButton hero={hero} city={city} className="relative z-10 ml-auto" />}
+        {canAppoint(hero) && <MakeMayorButton hero={hero} city={city} className="relative z-10 ms-auto" />}
       </span>
     </div>
   );

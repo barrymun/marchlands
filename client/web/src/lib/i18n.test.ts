@@ -12,6 +12,8 @@ describe(matchLocale.name, () => {
     expect(matchLocale('en-AU')).toBe('en-GB');
     expect(matchLocale('en')).toBe('en-GB');
     expect(matchLocale('ja')).toBe('ja-JP');
+    expect(matchLocale('ar-EG')).toBe('ar');
+    expect(matchLocale('ar')).toBe('ar');
   });
 
   it('falls back to en-GB for an unsupported or missing language', () => {

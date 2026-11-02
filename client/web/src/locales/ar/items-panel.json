@@ -1,0 +1,32 @@
+{
+  "received": "{{item}}: حصلت على {{grant}}",
+  "heroJoined": "انضم {{hero}} (مستوى {{level}}) إلى مدينتك",
+  "used": "تم استخدام {{item}}",
+  "bought": "تم شراء {{item}}",
+  "search": "ابحث في العناصر",
+  "ownedOnly": "المملوكة فقط ({{n}})",
+  "itemsFor": "عناصر لـ {{label}}",
+  "showAll": "عرض كل العناصر",
+  "notEnoughGold": "لا يكفي الذهب في {{city}} (المطلوب {{price}})",
+  "buyWithGold": "اشترِ واحدًا بذهب {{city}}",
+  "buyFor": "شراء · {{price}} ذهب",
+  "noMatch": "لا توجد عناصر مطابقة.",
+  "grant": {
+    "amount": "{{amount}} {{name}}"
+  },
+  "activeBonus": {
+    "runningHint": "هذه المكافأة سارية الآن؛ استخدام عنصر آخر يمدّدها",
+    "active": "سارية · <countdown/>",
+    "sameBonus": "المكافأة نفسها سارية بالفعل (متبقٍّ <countdown/>)؛ استخدام هذا يضيف {{adds}}.",
+    "sameBonusFrom": "المكافأة نفسها سارية بالفعل من {{source}} (متبقٍّ <countdown/>)؛ استخدام هذا يضيف {{adds}}."
+  },
+  "medals": {
+    "title": "طرق الحصول عليه",
+    "attacks": "<hl>الهجمات الناجحة</hl> على مدن غير اللاعبين من هذه المستويات (تُحتسب مدينة اللاعب بمستوى دار البلدية فيها)، والفرصة لكل فوز:",
+    "attackChance": "مستوى {{level}} · {{chance}}",
+    "sometimes": "أحيانًا {{range}}",
+    "container": "<hl>{{name}}</hl> ({{amount}}): {{price}} ذهب في المتجر",
+    "containerKey": "<hl>{{name}}</hl> ({{amount}}): {{price}} ذهب في المتجر (يُفتح بـ {{opener}})",
+    "quest": "<hl>مهمة «{{name}}»</hl>: {{n}} (مرة واحدة)"
+  }
+}

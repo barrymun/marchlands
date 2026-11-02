@@ -88,7 +88,7 @@ export function FlowsPanel({ city }: { city: CityBean }) {
               type="button"
               onClick={() => (setSelectedId(f.id), setEditing(null))}
               className={cn(
-                'grid gap-0.5 rounded-md border px-3 py-2 text-left text-sm hover:bg-muted/50',
+                'grid gap-0.5 rounded-md border px-3 py-2 text-start text-sm hover:bg-muted/50',
                 f.id === selectedId && !editing && 'border-primary bg-muted/50',
               )}
             >

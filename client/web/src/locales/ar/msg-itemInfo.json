@@ -1,0 +1,70 @@
+{
+  "period": {
+    "days_zero": "{{count, number}} يوم",
+    "days_one": "{{count, number}} يوم",
+    "days_two": "{{count, number}} يومان",
+    "days_few": "{{count, number}} أيام",
+    "days_many": "{{count, number}} يومًا",
+    "days_other": "{{count, number}} يوم",
+    "hours_zero": "{{count, number}} ساعة",
+    "hours_one": "{{count, number}} ساعة",
+    "hours_two": "{{count, number}} ساعتان",
+    "hours_few": "{{count, number}} ساعات",
+    "hours_many": "{{count, number}} ساعةً",
+    "hours_other": "{{count, number}} ساعة",
+    "minutes_zero": "{{count, number}} دقيقة",
+    "minutes_one": "{{count, number}} دقيقة",
+    "minutes_two": "{{count, number}} دقيقتان",
+    "minutes_few": "{{count, number}} دقائق",
+    "minutes_many": "{{count, number}} دقيقةً",
+    "minutes_other": "{{count, number}} دقيقة"
+  },
+  "speedup": {
+    "time": "يختصر {{time}} من مدة بناء أو بحث.",
+    "hours_zero": "يختصر {{min}}–{{count, number}} ساعة (عشوائيًا) من مدة بناء أو بحث.",
+    "hours_one": "يختصر {{min}}–{{count, number}} ساعة (عشوائيًا) من مدة بناء أو بحث.",
+    "hours_two": "يختصر {{min}}–{{count, number}} ساعتين (عشوائيًا) من مدة بناء أو بحث.",
+    "hours_few": "يختصر {{min}}–{{count, number}} ساعات (عشوائيًا) من مدة بناء أو بحث.",
+    "hours_many": "يختصر {{min}}–{{count, number}} ساعةً (عشوائيًا) من مدة بناء أو بحث.",
+    "hours_other": "يختصر {{min}}–{{count, number}} ساعة (عشوائيًا) من مدة بناء أو بحث.",
+    "percent": "يختصر {{percent}} من المدة الكاملة لبناء أو بحث.",
+    "troopBatch": "يختصر {{percent}} من المدة الكاملة لدفعة تدريب قوات واحدة.",
+    "fortBatch": "يختصر {{percent}} من المدة الكاملة لدفعة تحصينات واحدة."
+  },
+  "loyalty": "يرفع ولاء البطل بمقدار {{amount}} (حتى {{max}}).",
+  "heroStat": "يرفع {{stat}} لبطل واحد بنسبة {{percent}} لمدة {{period}}.",
+  "experience": {
+    "share": "يمنح البطل خبرة: {{percent}} من المستوى التالي، و{{min}} على الأقل.",
+    "level": "يمنح البطل خبرة: مستوى كاملًا، و{{min}} على الأقل."
+  },
+  "holyWater": "يمحو جميع النقاط الموزعة للبطل ليُعاد توزيعها.",
+  "buff": "{{effect}} لمدة {{period}}. استخدام عنصر آخر يمدد المدة.",
+  "grant": "يمنح {{contents}}.",
+  "grantCity": "يمنح {{contents}} للمدينة الحالية.",
+  "contents": {
+    "item": "{{amount}} × {{item}}",
+    "amount": "{{amount}} {{name}}"
+  },
+  "chest": "صندوق مقفل: يحتاج إلى {{key}}. يحتوي على {{contents}}.",
+  "key": "يفتح {{chest}}.",
+  "medalBox": "يحتوي على {{min}}–{{max}} من كل من {{medals}}.",
+  "randomBox": "يحتوي على عناصر عشوائية.",
+  "civilCode": "يضيف {{percent}} من الحد الأقصى للسكان ({{min}} على الأقل) إلى المدينة الحالية.",
+  "cureInjured": "يعالج فورًا جميع القوات الجريحة في المدينة الحالية.",
+  "heroBox": "يجنّد بطلًا من المستوى {{level}} لا تقل أي من سماته الأساسية عن {{minStat}}. يحتاج إلى خانة شاغرة في {{building}}.",
+  "teleporter": "ينقل مدينتك إلى أرض منبسطة شاغرة تختارها، ثم يحتاج إلى فترة انتظار مدتها {{period}}.",
+  "truce": "هدنة: لا يمكن مهاجمة مدنك لمدة {{period}}، ولا يمكنك الهجوم أيضًا.",
+  "notUsable": "لا يمكن استخدامه على هذا الخادم بعد.",
+  "noEffect": "عنصر مناسبات بلا تأثير على هذا الخادم.",
+  "howTo": {
+    "speedup": "استخدمه من بناء جارٍ (في البلدة أو الحقول) أو بحث جارٍ (في البحث).",
+    "troopsSpeedup": "استخدمه على دفعة في طابور التدريب في القسم العسكري.",
+    "fortificationsSpeedup": "استخدمه على دفعة في طابور التحصينات في القسم العسكري.",
+    "cityMove": "استخدمه عبر «انقل المدينة إلى هنا» على أرض منبسطة شاغرة في الخريطة.",
+    "heroesReset": "استخدمه من نافذة نقاط البطل في الأبطال.",
+    "heroesUseItem": "استخدمه من زر عناصر البطل في الأبطال.",
+    "cityTruce": "استخدمه من إعدادات اللاعب (القائمة في الأعلى).",
+    "key": "استخدم {{chest}}؛ يؤخذ المفتاح تلقائيًا.",
+    "welcome": "يحصل كل لاعب جديد على واحد عند البدء، ولا يمكن شراؤه."
+  }
+}

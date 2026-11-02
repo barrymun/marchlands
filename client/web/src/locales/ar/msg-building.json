@@ -1,0 +1,23 @@
+{
+  "invalidBuilding": "مبنى غير صالح.",
+  "notFound": "لم يُعثر على المبنى.",
+  "invalidPosition": "موضع المبنى غير صالح.",
+  "cannotBuild": "لا يمكن بناء هذا المبنى.",
+  "cannotBuildHere": "لا يمكن بناء {{building}} هنا.",
+  "positionTaken": "يوجد مبنى في هذا الموضع بالفعل.",
+  "limitReached": "لا يمكن لهذه المدينة امتلاك {{building}} آخر.",
+  "slotLocked": "هذه الخانة غير مفتوحة بعد.",
+  "queuesBusy": "جميع طوابير البناء مشغولة.",
+  "requirementsNotMet": "متطلبات هذا المبنى غير مستوفاة.",
+  "statusChanged": "تغيّرت حالة هذا المبنى، ربما بسبب تأخر في الشبكة. إن استمرت هذه الرسالة، فيُرجى إعادة تحميل الصفحة.",
+  "maxLevel": "{{building}} في أعلى مستوى له بالفعل.",
+  "busy": "هذا المبنى مشغول.",
+  "nothingToDemolish": "لا يوجد مبنى لهدمه هنا.",
+  "historicField": "هذا الـ{{building}} من المستوى {{level}}، وهو مستوى المدينة التاريخية نفسها: لا يمكن بناؤه بهذا الارتفاع مجددًا، لذا لا يمكن هدمه.",
+  "cannotDemolish": "لا يمكن هدم {{building}}.",
+  "notInProgress": "لا يجري بناء أو هدم أي شيء هنا.",
+  "invalidTech": "تقنية غير صالحة.",
+  "academyNeeded": "عليك بناء {{building}} قبل أن تتمكن من البحث.",
+  "techRequirementsNotMet": "متطلبات هذا البحث غير مستوفاة.",
+  "troopRequirementsNotMet": "متطلبات هذه الوحدة غير مستوفاة."
+}

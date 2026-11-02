@@ -32,7 +32,7 @@ export function NavButton({
     >
       <Icon className="size-5" />
       <span className="whitespace-nowrap">{label}</span>
-      {!!count && <Badge className="absolute -top-0.5 right-1 h-4 min-w-4 px-1 text-[10px] tabular-nums">{count}</Badge>}
+      {!!count && <Badge className="absolute -top-0.5 end-1 h-4 min-w-4 px-1 text-[10px] tabular-nums">{count}</Badge>}
     </button>
   );
 }

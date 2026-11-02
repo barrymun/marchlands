@@ -28,7 +28,7 @@ export function Spending({ c }: { c: Counters }) {
               <TableRow>
                 <TableHead>{t('spending.on')}</TableHead>
                 {RESOURCES.map((r) => (
-                  <TableHead key={r} className="text-right">
+                  <TableHead key={r} className="text-end">
                     {resourceLabel(r)}
                   </TableHead>
                 ))}

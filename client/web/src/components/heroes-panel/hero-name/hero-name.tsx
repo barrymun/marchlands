@@ -85,7 +85,7 @@ export function HeroName({
           <Pencil />
         </Button>
       )}
-      {trailing && <div className="ml-auto flex gap-0.5">{trailing}</div>}
+      {trailing && <div className="ms-auto flex gap-0.5">{trailing}</div>}
     </div>
   );
 }

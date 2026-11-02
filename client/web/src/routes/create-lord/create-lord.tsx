@@ -57,7 +57,7 @@ export function CreateLordPage() {
 
   return (
     <div className="relative flex min-h-svh items-center justify-center bg-muted/40 p-4">
-      <div className="absolute top-3 right-3">
+      <div className="absolute top-3 end-3">
         <ThemeToggle />
       </div>
       <Card className="w-full max-w-md">

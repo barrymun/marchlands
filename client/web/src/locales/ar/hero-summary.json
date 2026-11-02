@@ -1,0 +1,18 @@
+{
+  "strongest": "أقوى صفة: {{label}}",
+  "gear": "العتاد +{{total}} على {{label}} · الرتبة {{tier}}/{{max}}",
+  "boost": "{{label}} +{{amount}} · متبقٍّ {{time}}",
+  "status": {
+    "idle": "متفرغ",
+    "mayor": "العمدة",
+    "marching": "في مسيرة",
+    "captive": "أسير",
+    "returning": "عائد"
+  },
+  "unspent_zero": "{{count}} نقطة لتوزيعها على الصفات",
+  "unspent_one": "{{count}} نقطة لتوزيعها على الصفات",
+  "unspent_two": "{{count}} نقطتان لتوزيعهما على الصفات",
+  "unspent_few": "{{count}} نقاط لتوزيعها على الصفات",
+  "unspent_many": "{{count}} نقطةً لتوزيعها على الصفات",
+  "unspent_other": "{{count}} نقطة لتوزيعها على الصفات"
+}

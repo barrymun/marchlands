@@ -38,7 +38,7 @@ export function MarketBar({ resType, onResType }: { resType: number; onResType: 
                 aria-selected={m.type === resType}
                 onClick={() => onResType(m.type)}
                 className={cn(
-                  'flex min-w-24 shrink-0 flex-col items-start rounded-md px-3 py-1.5 text-left transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none',
+                  'flex min-w-24 shrink-0 flex-col items-start rounded-md px-3 py-1.5 text-start transition-colors hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none',
                   m.type === resType && 'bg-muted',
                 )}
               >
@@ -60,7 +60,7 @@ export function MarketBar({ resType, onResType }: { resType: number; onResType: 
           })}
         </div>
       </div>
-      <dl className="flex flex-wrap gap-x-5 gap-y-1 px-2 xl:ml-auto">
+      <dl className="flex flex-wrap gap-x-5 gap-y-1 px-2 xl:ms-auto">
         {chosen?.day && stat(t('bar.high'), fmtPrice(chosen.day.high))}
         {chosen?.day && stat(t('bar.low'), fmtPrice(chosen.day.low))}
         {chosen?.day && stat(t('bar.volume'), fmt(chosen.day.volume))}

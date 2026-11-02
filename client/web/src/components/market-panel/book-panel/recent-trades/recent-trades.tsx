@@ -18,18 +18,18 @@ export function RecentTrades({ trades }: { trades: MarketTrade[] }) {
     <div className="text-xs">
       <div className="sticky top-0 grid grid-cols-[1fr_1fr_auto_auto] gap-2 bg-card px-2 py-1 text-[11px] text-muted-foreground">
         <span>{t('columns.price')}</span>
-        <span className="text-right">{t('columns.amount')}</span>
-        <span className="w-16 text-right">{t('columns.from')}</span>
-        <span className="w-12 text-right">{t('columns.time')}</span>
+        <span className="text-end">{t('columns.amount')}</span>
+        <span className="w-16 text-end">{t('columns.from')}</span>
+        <span className="w-12 text-end">{t('columns.time')}</span>
       </div>
       {list.shown.map((tr) => (
         <div key={tr.id} className="grid grid-cols-[1fr_1fr_auto_auto] gap-2 px-2 py-0.5 tabular-nums">
           <span className={cn(tr.takerSide === 0 ? GAIN_TEXT : LOSS_TEXT)}>{fmtPrice(tr.price)}</span>
-          <span className="text-right">{fmt(tr.amount)}</span>
-          <span className="w-16 text-right text-[11px] text-muted-foreground">
+          <span className="text-end">{fmt(tr.amount)}</span>
+          <span className="w-16 text-end text-[11px] text-muted-foreground">
             {tr.factions ? t('priceHistory.factions') : tr.merchant ? t('priceHistory.merchant') : t('priceHistory.players')}
           </span>
-          <span className="w-12 text-right text-muted-foreground">{clockTime(tr.createdAt, true)}</span>
+          <span className="w-12 text-end text-muted-foreground">{clockTime(tr.createdAt, true)}</span>
         </div>
       ))}
       <ShowMore hidden={list.hidden} onMore={list.showAll} />

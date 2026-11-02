@@ -1,0 +1,146 @@
+{
+  "noMarketplace": {
+    "title": "السوق",
+    "description": "ابنِ سوقًا في المدينة لتبادل الطعام والخشب والحجر والحديد بالذهب."
+  },
+  "side": {
+    "buy": "شراء",
+    "sell": "بيع"
+  },
+  "columns": {
+    "order": "الأمر",
+    "price": "السعر",
+    "filled": "المُنفَّذ",
+    "placed": "وقت الإدراج",
+    "amount": "الكمية",
+    "from": "من",
+    "time": "الوقت"
+  },
+  "myOrders": {
+    "title": "أوامري المنتظرة",
+    "cancelled": "أُلغي الأمر وأُعيدت البضائع أو الذهب المحجوز",
+    "cancel": "إلغاء الأمر",
+    "none": "لا توجد أوامر منتظرة."
+  },
+  "myTrades": {
+    "title": "صفقاتي",
+    "none": "لا توجد صفقات بعد.",
+    "bought": "شراء",
+    "sold": "بيع",
+    "gold": "الذهب",
+    "with": "مع",
+    "counterparty": {
+      "player": "لاعب",
+      "factions": "الفصائل",
+      "merchant": "التاجر"
+    }
+  },
+  "orderBook": {
+    "player": "لاعب",
+    "unlimited": "غير محدود",
+    "merchant": "التاجر",
+    "factions": "الفصائل",
+    "factionsDepth": "الكمية التي يتداولونها قبل أن يبلغ سعرهم سعر التاجر",
+    "terms": "عبر {{faction}}: {{tier}} ({{standing}})، فارق سعرهم {{spread}}",
+    "refused": "يرفض {{faction}} التداول مع هذه المدينة: {{tier}} ({{standing}})",
+    "termsHint": "تتداول المدينة مع الفصائل عبر الفصيل الذي يملك أرضها، ومكانتك لديه تحدد فارق سعره. عند {{refuse}} أو أدنى لن يتداول معك، لكن التاجر واللاعبين الآخرين سيظلون يتداولون معك."
+  },
+  "priceHistory": {
+    "ranges": {
+      "hour": "ساعة",
+      "day": "يوم",
+      "week": "أسبوع",
+      "month": "شهر"
+    },
+    "merchantSells": "التاجر يبيع",
+    "merchantBuys": "التاجر يشتري",
+    "credit": "الرسوم البيانية من <link>TradingView Lightweight Charts™</link>",
+    "noTrades": "لا توجد صفقات بعد.",
+    "merchant": "التاجر",
+    "players": "اللاعبون",
+    "factions": "الفصائل"
+  },
+  "depth": {
+    "empty": "لا توجد أوامر في الدفتر."
+  },
+  "ticker": {
+    "title": "بين الفصائل",
+    "seller": "البائع",
+    "buyer": "المشتري",
+    "trade": "الصفقة",
+    "amountAt": "{{amount}} {{resource}} بسعر {{price}}",
+    "group": "{{zone}} مستوى {{level}}",
+    "none": "لا توجد صفقات بين الفصائل بعد."
+  },
+  "shipments": {
+    "title": "بضائع في الطريق",
+    "delivered": "تم التسليم",
+    "arrivesIn": "تصل خلال <countdown/>",
+    "deliverNow": "سلّم الآن · {{gold}} ذهب",
+    "none": "لا شيء في الطريق."
+  },
+  "tradeForm": {
+    "title": "تداول {{resource}}",
+    "description": "تُسوّى الصفقات فورًا. رسوم {{fee}} على المشتريات. السوق مستوى {{level}}: {{open}}/{{cap}} أوامر قائمة هنا.",
+    "instant": "فوري",
+    "limit": "حدّد سعري",
+    "amount": "الكمية",
+    "highestPrice": "أعلى سعر (ذهب للوحدة)",
+    "lowestPrice": "أدنى سعر (ذهب للوحدة)",
+    "enterAmount": "أدخل كمية لترى عرض السعر.",
+    "enterAmountAndPrice": "أدخل كمية وسعرًا لترى عرض السعر.",
+    "buyNowQuote": "اشترِ {{amount}} الآن · المتوسط {{price}}",
+    "sellNowQuote": "بِع {{amount}} الآن · المتوسط {{price}}",
+    "goldSpent": "−{{gold}} ذهب",
+    "goldEarned": "+{{gold}} ذهب",
+    "nothingTrades": "لا يُتداول شيء بهذا السعر حاليًا.",
+    "withMerchant": "{{amount}} مع التاجر",
+    "withPlayers": "{{amount}} مع لاعبين آخرين",
+    "inclFee": "شاملًا الرسوم {{fee}}",
+    "waits": "{{amount}} ينتظر في الدفتر بسعر {{price}}",
+    "holds": "يحجز {{amount}} {{resource}}",
+    "available": "{{resource}} المتاح",
+    "limitReached": "بلغت حد الأوامر القائمة: طوّر السوق أو ألغِ أمرًا.",
+    "bought": "اشتريت {{amount}} {{resource}} مقابل {{gold}} ذهب (المتوسط {{price}})",
+    "sold": "بعت {{amount}} {{resource}} مقابل {{gold}} ذهب (المتوسط {{price}})",
+    "waiting": "{{amount}} ينتظر في الدفتر",
+    "buyNow": "اشترِ الآن",
+    "sellNow": "بِع الآن",
+    "placeBuy": "ضع أمر شراء",
+    "placeSell": "ضع أمر بيع",
+    "withFactions": "{{amount}} مع الفصائل",
+    "sheetHint": "اشترِ أو بِع الآن، أو حدّد سعرك."
+  },
+  "bar": {
+    "markets": "الأسواق",
+    "changeCaption": "تغيّر 24 ساعة",
+    "changeTitle": "التغيّر منذ 24 ساعة",
+    "high": "أعلى 24 ساعة",
+    "low": "أدنى 24 ساعة",
+    "volume": "حجم 24 ساعة",
+    "merchant": "التاجر يشتري / يبيع"
+  },
+  "chart": {
+    "views": "الرسم البياني",
+    "price": "السعر",
+    "depth": "العمق",
+    "ranges": "المدى"
+  },
+  "book": {
+    "views": "الدفتر والصفقات",
+    "book": "دفتر الأوامر",
+    "trades": "الصفقات",
+    "worldPrice": "السعر العالمي",
+    "merchantPrice": "سعر التاجر",
+    "spread": "الفارق {{spread}}"
+  },
+  "activity": {
+    "views": "تداولاتك"
+  },
+  "showMore_zero": "عرض {{count}} صفوف إضافية",
+  "showMore_one": "عرض {{count}} صف إضافي",
+  "showMore_two": "عرض {{count}} صفّين إضافيين",
+  "showMore_few": "عرض {{count}} صفوف إضافية",
+  "showMore_many": "عرض {{count}} صفًا إضافيًا",
+  "showMore_other": "عرض {{count}} صف إضافي"
+}

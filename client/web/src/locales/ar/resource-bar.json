@@ -1,0 +1,29 @@
+{
+  "amount": "{{resource}}: {{amount}}",
+  "amountMax": "{{resource}}: {{amount}} / {{max}}",
+  "storageFull": "(المخزن ممتلئ: الإنتاج متوقف)",
+  "itemBonus": "العناصر +{{percent}}",
+  "population": "السكان · {{idle}} عاطلون · كفاءة العمل {{efficiency}}",
+  "gold": {
+    "baseTax": "الضريبة الأساسية",
+    "taxSold": "الضريبة {{rate}}% (الإنتاج المبيع)",
+    "heroSalaries": "رواتب الأبطال",
+    "tribute": "جزية المدينة التاريخية",
+    "stateTribute": "جزية الولاية",
+    "seatUpkeep": "نفقات المدينة التاريخية"
+  },
+  "breakdown": {
+    "base": "الأساس",
+    "fields": "الحقول",
+    "fieldsWorkRate": "الحقول (معدل العمل {{rate}}%)",
+    "technology": "التقنية +{{percent}}",
+    "mayor": "العمدة {{name}} +{{percent}}",
+    "valleys": "الوديان +{{percent}}",
+    "upkeep": "نفقات القوات",
+    "tax": "الضريبة (مبيع مقابل الذهب)",
+    "seatUpkeep": "نفقات المدينة التاريخية"
+  },
+  "rows": {
+    "perRealHour": "لكل ساعة حقيقية (سرعة اللعبة {{speed}}×)"
+  }
+}

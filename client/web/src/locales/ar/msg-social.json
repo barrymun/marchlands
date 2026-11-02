@@ -1,0 +1,12 @@
+{
+  "selfTarget": "لا يمكنك اختيار نفسك.",
+  "emptyMessage": "رسالتك فارغة.",
+  "messageTooLong_zero": "لا يمكن أن تتجاوز الرسالة {{count, number}} حرف.",
+  "messageTooLong_one": "لا يمكن أن تتجاوز الرسالة {{count, number}} حرف.",
+  "messageTooLong_two": "لا يمكن أن تتجاوز الرسالة {{count, number}} حرفين.",
+  "messageTooLong_few": "لا يمكن أن تتجاوز الرسالة {{count, number}} أحرف.",
+  "messageTooLong_many": "لا يمكن أن تتجاوز الرسالة {{count, number}} حرفًا.",
+  "messageTooLong_other": "لا يمكن أن تتجاوز الرسالة {{count, number}} حرف.",
+  "muted": "لا يمكنك الدردشة الآن.",
+  "notInAlliance": "يجب أن تكون عضوًا في تحالف لإرسال رسائل التحالف."
+}

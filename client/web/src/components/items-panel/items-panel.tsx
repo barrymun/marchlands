@@ -124,7 +124,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
         {effectFilter && (
           <Badge variant="secondary" className="gap-1">
             {t('itemsFor', { label: effectFilter.label })}
-            <button type="button" className="-mr-1 rounded-sm opacity-70 hover:opacity-100" aria-label={t('showAll')} onClick={() => set({ effect: null })}>
+            <button type="button" className="-me-1 rounded-sm opacity-70 hover:opacity-100" aria-label={t('showAll')} onClick={() => set({ effect: null })}>
               <X className="size-3" />
             </button>
           </Badge>

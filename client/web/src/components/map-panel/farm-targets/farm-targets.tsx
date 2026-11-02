@@ -40,7 +40,7 @@ export function FarmTargets({
               <button
                 key={tileId}
                 onClick={() => onGoTo(x, y)}
-                className="flex items-center justify-between gap-2 rounded-md px-2 py-1 text-left hover:bg-muted"
+                className="flex items-center justify-between gap-2 rounded-md px-2 py-1 text-start hover:bg-muted"
               >
                 <TileLabel tileId={tileId} />
                 <span className="truncate text-xs text-muted-foreground">{flows.join(t('common:list.separator'))}</span>
