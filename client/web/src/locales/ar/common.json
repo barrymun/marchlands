@@ -147,5 +147,9 @@
     "atlantis": "الحاكم الأعلى لأطلانطس"
   },
   "historicCity": "مدينة تاريخية من المستوى {{level}}",
-  "historicCityShort": "م.ت"
+  "historicCityShort": "م.ت",
+  "range": {
+    "between": "من {{min}} إلى {{max}}",
+    "atLeast": "{{min}} على الأقل"
+  }
 }

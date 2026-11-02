@@ -1,18 +1,20 @@
 import { HeartPulse, Hourglass, UserPlus } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { FLOW_MAX_HIRES, FLOW_MAX_WAIT_MINUTES, FLOW_TROOP_IDS, HERO_BASE_STAT_MAX } from '@marchlands/core';
+import { FLOW_TROOP_IDS, HERO_BASE_STAT_MAX } from '@marchlands/core';
 
 import { AttackTargetsFields } from '@/components/flow-attack/attack-targets-fields/attack-targets-fields';
+import { ACTION_RANGES } from '@/components/flows-panel/constants';
 import { FLOW_STATS } from '@/components/flows-panel/flow-editor/action-fields/constants';
 import type { Stat } from '@/components/flows-panel/flow-editor/action-fields/types';
 import type { Draft, Targets } from '@/components/flows-panel/types';
-import { Input } from '@/components/ui/input';
+import { NumberField } from '@/components/number-field/number-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { shortDuration } from '@/lib/format';
 import { troopName } from '@/lib/game-data';
 import { attributeOfStat } from '@/lib/hero-attributes';
+import { numberText, textNumber } from '@/lib/ranges';
 import { cn } from '@/lib/utils';
 
 /** The inputs of one action: which attribute for "set mayor"; troop type and amount (or max) for "train"; how many, how good and how much gold for "hire heroes". */
@@ -63,12 +65,12 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
         </Select>
         {action.until === 'time' && (
           <>
-            <Input
+            <NumberField
               className="h-8 w-20"
-              inputMode="numeric"
               aria-label={t('actionFields.wait.minutesLabel')}
-              value={String(action.minutes)}
-              onChange={(e) => onChange({ ...action, minutes: Math.min(FLOW_MAX_WAIT_MINUTES, Math.max(1, Number(e.target.value.replace(/\D/g, '')) || 1)) })}
+              range={ACTION_RANGES.waitMinutes}
+              value={numberText(action.minutes)}
+              onChange={(text) => onChange({ ...action, minutes: textNumber(text) })}
             />
             <span>{t('actionFields.wait.minutes')}</span>
             {action.minutes >= 60 && <span className="text-xs text-muted-foreground">({shortDuration(action.minutes * 60_000)})</span>}
@@ -78,7 +80,6 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
     );
   }
   if (action.type === 'hireHeroes') {
-    const number = (v: string, min: number, max: number) => Math.min(max, Math.max(min, Number(v.replace(/\D/g, '')) || min));
     return (
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <UserPlus className="size-4 text-muted-foreground" />
@@ -87,12 +88,12 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
           i18nKey="actionFields.hire.sentence"
           components={{
             count: (
-              <Input
+              <NumberField
                 className="h-8 w-16"
-                inputMode="numeric"
                 aria-label={t('actionFields.hire.count')}
-                value={String(action.count)}
-                onChange={(e) => onChange({ ...action, count: number(e.target.value, 1, FLOW_MAX_HIRES) })}
+                range={ACTION_RANGES.hireCount}
+                value={numberText(action.count)}
+                onChange={(text) => onChange({ ...action, count: textNumber(text) })}
               />
             ),
             stat: (
@@ -110,21 +111,21 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
               </Select>
             ),
             min: (
-              <Input
+              <NumberField
                 className="h-8 w-16"
-                inputMode="numeric"
                 aria-label={t('actionFields.hire.min')}
-                value={String(action.min)}
-                onChange={(e) => onChange({ ...action, min: number(e.target.value, 1, HERO_BASE_STAT_MAX) })}
+                range={ACTION_RANGES.hireMin}
+                value={numberText(action.min)}
+                onChange={(text) => onChange({ ...action, min: textNumber(text) })}
               />
             ),
             gold: (
-              <Input
+              <NumberField
                 className="h-8 w-32"
-                inputMode="numeric"
                 aria-label={t('actionFields.hire.gold')}
-                value={String(action.maxGold)}
-                onChange={(e) => onChange({ ...action, maxGold: number(e.target.value, 1, Number.MAX_SAFE_INTEGER) })}
+                range={ACTION_RANGES.hireGold}
+                value={numberText(action.maxGold)}
+                onChange={(text) => onChange({ ...action, maxGold: textNumber(text) })}
               />
             ),
           }}
@@ -156,13 +157,13 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
       <span>{t('actionFields.train.label')}</span>
-      {!max && (
-        <Input
+      {action.amount !== 'max' && (
+        <NumberField
           className="h-8 w-28"
-          inputMode="numeric"
           aria-label={t('actionFields.train.amount')}
-          value={String(action.amount)}
-          onChange={(e) => onChange({ ...action, amount: Math.max(1, Number(e.target.value.replace(/\D/g, '')) || 1) })}
+          range={ACTION_RANGES.trainAmount}
+          value={numberText(action.amount)}
+          onChange={(text) => onChange({ ...action, amount: textNumber(text) })}
         />
       )}
       <label className="flex items-center gap-1.5 text-xs">

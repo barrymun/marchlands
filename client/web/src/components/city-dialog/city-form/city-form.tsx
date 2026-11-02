@@ -16,6 +16,7 @@ import { TELEPORT } from '@/components/city-dialog/city-form/constants';
 import { TaxRate } from '@/components/city-dialog/city-form/tax-rate/tax-rate';
 import { WorkRates } from '@/components/city-dialog/city-form/work-rates/work-rates';
 import { Countdown } from '@/components/countdown/countdown';
+import { NumberField } from '@/components/number-field/number-field';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -92,8 +93,9 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
               : t('cityForm.teleportPrice', { item: itemName(TELEPORT), price: fmt(price) })}
           </Label>
           <div className="flex gap-2">
-            <Input inputMode="numeric" placeholder="x" value={x} onChange={(e) => setX(e.target.value.replace(/\D/g, ''))} />
-            <Input inputMode="numeric" placeholder="y" value={y} onChange={(e) => setY(e.target.value.replace(/\D/g, ''))} />
+            {/* blank until typed; past the map's edge it shows as invalid with the range, and Teleport waits */}
+            <NumberField placeholder="x" range={{ min: 0, max: size - 1 }} blank value={x} onChange={setX} />
+            <NumberField placeholder="y" range={{ min: 0, max: size - 1 }} blank value={y} onChange={setY} />
             <Button
               disabled={!validXY || !!cooldown || move.isPending || (owned === 0 && city.resource.gold < price)}
               title={owned > 0 ? undefined : t('common:boughtWithCityGold', { city: city.name })}

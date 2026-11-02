@@ -1,7 +1,11 @@
 import { ItemId } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
+import type { NumberRange } from '@/lib/ranges';
 
 export const TELEPORT = ItemId.CITY_TELEPORTER;
+
+/** A rate typed as a whole percent, as the server takes it (the tax and work rates). */
+export const PERCENT_RANGE = { min: 0, max: 100 } as const satisfies NumberRange;
 
 /** Field resource labels ("Lumber"), in the current locale. */
 export const FIELD_LABEL = {

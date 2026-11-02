@@ -127,5 +127,9 @@
     "atlantis": "アトランティスの主権者"
   },
   "historicCity": "レベル{{level}}の歴史都市",
-  "historicCityShort": "歴史"
+  "historicCityShort": "歴史",
+  "range": {
+    "between": "{{min}} から {{max}} まで",
+    "atLeast": "{{min}} 以上"
+  }
 }

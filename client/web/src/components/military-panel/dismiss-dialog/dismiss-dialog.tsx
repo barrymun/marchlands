@@ -13,9 +13,9 @@ import { BALANCE, disbandRefund, fortKeyOf, troopKey as troopKeyOf } from '@marc
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog';
 import { CostList } from '@/components/cost-list/cost-list';
 import { dismissCount } from '@/components/military-panel/dismiss-dialog/utils';
+import { NumberField } from '@/components/number-field/number-field';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useSticky } from '@/hooks/use-sticky';
@@ -83,7 +83,7 @@ export function DismissDialog({ city, unitId, onClose }: { city: CityBean; unitI
                 <Label htmlFor="dismiss-amount">{t('dismiss.amount')}</Label>
                 <span className={cn('text-xs tabular-nums', tooMany ? LOSS_TEXT : 'text-muted-foreground')}>{t('dismiss.have', { n: fmtExact(have) })}</span>
               </div>
-              <Input id="dismiss-amount" inputMode="numeric" autoComplete="off" value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} />
+              <NumberField id="dismiss-amount" autoComplete="off" range={{ min: 1, max: have }} blank value={amount} onChange={setAmount} />
             </div>
             {count > 0 && refundInfo}
             <DialogFooter>

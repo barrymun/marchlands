@@ -7,7 +7,7 @@ import { FLOW_TROOP_IDS } from '@marchlands/core';
 import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
 import { ActionFields } from '@/components/flows-panel/flow-editor/action-fields/action-fields';
 import type { Draft, EditDraft } from '@/components/flows-panel/types';
-import { hiresHeroes, keyed } from '@/components/flows-panel/utils';
+import { actionValid, hiresHeroes, keyed } from '@/components/flows-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -41,10 +41,7 @@ export function FlowEditor({
   };
   const update = (i: number, a: Draft) => setActions(draft.actions.map((x, j) => (j === i ? a : x)));
   const valid =
-    draft.name.trim().length > 0 &&
-    draft.actions.length > 0 &&
-    (draft.cities === 'all' || draft.cities.length > 0) &&
-    draft.actions.every((a) => a.type !== 'attackTargets' || !!a.presetId);
+    draft.name.trim().length > 0 && draft.actions.length > 0 && (draft.cities === 'all' || draft.cities.length > 0) && draft.actions.every(actionValid);
 
   return (
     <Card>

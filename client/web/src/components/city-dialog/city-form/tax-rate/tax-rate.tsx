@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { type CityBean, getCitiesByCityIdQueryKey, putCitiesTaxMutation } from '@marchlands/api-client';
 import { BASIC_RESOURCES, type BasicResource, merchantBase, merchantFixed } from '@marchlands/core';
 
+import { PERCENT_RANGE } from '@/components/city-dialog/city-form/constants';
+import { NumberField } from '@/components/number-field/number-field';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCommand } from '@/hooks/use-game';
 import { signedRate } from '@/lib/format';
+import { textInRange } from '@/lib/ranges';
 
 /**
  * (marchlands) The tax rate sells that share of the city's field output to the merchant as it is produced
@@ -19,7 +21,10 @@ export function TaxRate({ city }: { city: CityBean }) {
   const r = city.resource;
   const [draft, setDraft] = useState<string | null>(null);
   const save = useCommand(putCitiesTaxMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })], t('taxRate.saved'));
-  const rate = Math.min(100, Math.max(0, Number(draft ?? r.taxRate) || 0));
+  const text = draft ?? String(r.taxRate);
+  // kept as typed: out of range it shows as invalid and isn't saved, and the preview stays on the current rate
+  const valid = textInRange(text, PERCENT_RANGE);
+  const rate = valid ? Number(text) : r.taxRate;
   // gross output per game hour: the net rate plus what upkeep and the current tax take
   const gross = Object.fromEntries(BASIC_RESOURCES.map((k) => [k, r[k].increaseRate - r[k].breakdown.upkeep - r[k].breakdown.tax])) as Record<
     BasicResource,
@@ -36,17 +41,11 @@ export function TaxRate({ city }: { city: CityBean }) {
           : t('taxRate.description', { baseTax: signedRate(baseTax) })}
       </p>
       <div className="flex items-center gap-2">
-        <Input
-          id="tax-rate"
-          inputMode="numeric"
-          className="h-8 w-24"
-          value={draft ?? String(r.taxRate)}
-          onChange={(e) => setDraft(e.target.value.replace(/\D/g, '').slice(0, 3))}
-        />
+        <NumberField id="tax-rate" className="h-8 w-24" range={PERCENT_RANGE} value={text} onChange={setDraft} />
         <span className="text-sm text-muted-foreground">%</span>
         <Button
           size="sm"
-          disabled={rate === r.taxRate || save.isPending}
+          disabled={!valid || rate === r.taxRate || save.isPending}
           onClick={() => save.mutate({ path: { cityId: city.id }, body: { rate } }, { onSuccess: () => setDraft(null) })}
         >
           {t('taxRate.save')}

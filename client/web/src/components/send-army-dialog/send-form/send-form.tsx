@@ -19,6 +19,7 @@ import {
 
 import { MISSION_NAMES } from '@/components/armies-panel/constants';
 import { Countdown } from '@/components/countdown/countdown';
+import { NumberField } from '@/components/number-field/number-field';
 import { AddToPlan } from '@/components/send-army-dialog/send-form/add-to-plan/add-to-plan';
 import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
 import { RES } from '@/components/send-army-dialog/send-form/constants';
@@ -38,6 +39,7 @@ import { duration, fmt, fmtExact, resourceLabel } from '@/lib/format';
 import { typedAmounts } from '@/lib/forms';
 import { itemName, troopName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
+import { textInRange } from '@/lib/ranges';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
@@ -48,9 +50,15 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   // an attack is led by the strongest idle hero (by Attack) unless the player picks one; other missions go without
   const [heroId, setHeroId] = useState(() => defaultHero(Number(mission), city.heros));
   const [heroPicked, setHeroPicked] = useState(false);
-  const [entered, setTroops] = useState<Partial<Record<TroopKey, string>>>(target.troops ?? {});
-  // never more than the city has (it has fewer after each wave)
-  const troops = capTroops(entered, city.troop);
+  const [troops, setTroops] = useState<Partial<Record<TroopKey, string>>>(target.troops ?? {});
+  // typing is never capped (more than are home shows as invalid), but after a wave, when the city has fewer, amounts
+  // come down to what is left; by content, as the city refetches every tick with the same troops
+  const home = JSON.stringify(city.troop);
+  const [seenHome, setSeenHome] = useState(home);
+  if (home !== seenHome) {
+    setSeenHome(home);
+    setTroops(capTroops(troops, city.troop));
+  }
   const scouting = Number(mission) === Mission.SCOUT;
   const [resources, setResources] = useState<Partial<Record<(typeof RES)[number], string>>>({});
   // camp times: a landing time in UTC, kept for the next wave so waves land together
@@ -69,6 +77,8 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   const rally = buildingLevel(city.buildings, BuildingType.RALLY_SPOT);
   const chosen = Object.values(troopBody).reduce<number>((t, n) => t + Number(n), 0);
   const over = chosen > cap;
+  // each amount within what is home (blank is none)
+  const troopsValid = listed.every(([, key]) => textInRange(troops[key] ?? '', { min: 0, max: city.troop[key] ?? 0 }, { blank: true }));
   // attack / defense items (Ivory Horn …) that will count in the battle
   const battleBuffs =
     Number(mission) === Mission.ATTACK ? (player.data?.buffs ?? []).filter((b) => (b.id === BuffId.ATTACK || b.id === BuffId.DEFENSE) && b.endTime > now) : [];
@@ -204,13 +214,15 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
                     </span>
                   </span>
                   <div className="flex items-center gap-1">
-                    <Input
+                    <NumberField
                       className="h-8 w-24"
-                      inputMode="numeric"
+                      aria-label={troopName(Number(id))}
                       disabled={have === 0}
                       value={troops[key] ?? ''}
                       placeholder="0"
-                      onChange={(e) => setTroops(capTroops({ ...troops, [key]: e.target.value.replace(/\D/g, '') }, city.troop))}
+                      range={{ min: 0, max: have }}
+                      blank
+                      onChange={(text) => setTroops({ ...troops, [key]: text })}
                     />
                     <Button
                       size="xs"
@@ -269,7 +281,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
         <AddToPlan
           cityId={city.id}
           target={target}
-          wave={chosen > 0 && !over ? { mission: Number(mission), troops: troopBody, heroId: heroId === 'none' ? null : Number(heroId) } : null}
+          wave={chosen > 0 && !over && troopsValid ? { mission: Number(mission), troops: troopBody, heroId: heroId === 'none' ? null : Number(heroId) } : null}
           arriveAt={arriveAt}
         />
         {estimate.data && (
@@ -281,7 +293,9 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
           {t('form.estimateButton')}
         </Button>
         <Button
-          disabled={!Object.keys(troopBody).length || over || (carriesResources && overloaded) || (landAt != null && arriveAt == null) || send.isPending}
+          disabled={
+            !Object.keys(troopBody).length || over || !troopsValid || (carriesResources && overloaded) || (landAt != null && arriveAt == null) || send.isPending
+          }
           onClick={() =>
             send.mutate(undefined, {
               // stay open for the next wave: the hero just sent is busy now (an attack picks the next strongest), and the

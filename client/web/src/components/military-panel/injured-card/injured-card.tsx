@@ -13,11 +13,13 @@ import { BALANCE, healCost, healHonorCost, researchLevel, TechType, TROOP_KEYS, 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { CostList } from '@/components/cost-list/cost-list';
 import { UnitName } from '@/components/military-panel/unit-name/unit-name';
+import { NumberField } from '@/components/number-field/number-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { fmt, fmtExact, percent } from '@/lib/format';
+import { troopName } from '@/lib/game-data';
+import { textInRange } from '@/lib/ranges';
 
 /**
  * Injured troops of this city: defenders that fell while it was attacked survive injured, a share
@@ -33,12 +35,13 @@ export function InjuredCard({ city }: { city: CityBean }) {
     .filter((t) => t.count > 0);
   const medicine = researchLevel(player.data?.research ?? {}, TechType.MEDICINE);
   const share = Math.min(0.5, medicine * BALANCE.medicinePerLevel);
-  // an empty field means "all of them"
-  const chosen = Object.fromEntries(
-    injured
-      .map((t) => [t.key, Math.min(t.count, amounts[t.key] === undefined || amounts[t.key] === '' ? t.count : Number(amounts[t.key]))])
-      .filter(([, n]) => Number(n) > 0),
-  ) as Record<string, number>;
+  // an empty field means "all of them"; more than are injured shows as invalid, and nothing is healed or dismissed until
+  // every amount is in
+  const valid = injured.every((u) => textInRange(amounts[u.key] ?? '', { min: 0, max: u.count }, { blank: true }));
+  const chosen = Object.fromEntries(injured.map((u) => [u.key, amounts[u.key] ? Number(amounts[u.key]) : u.count]).filter(([, n]) => Number(n) > 0)) as Record<
+    string,
+    number
+  >;
   const cost = healCost(chosen);
   const have = {
     gold: city.resource.gold,
@@ -79,12 +82,14 @@ export function InjuredCard({ city }: { city: CityBean }) {
               <span>
                 <UnitName id={u.id} /> <span className="text-muted-foreground">({fmtExact(u.count)})</span>
               </span>
-              <Input
+              <NumberField
                 className="h-8 w-24"
-                inputMode="numeric"
+                aria-label={troopName(u.id)}
                 placeholder={t('injured.allPlaceholder', { n: fmtExact(u.count) })}
+                range={{ min: 0, max: u.count }}
+                blank
                 value={amounts[u.key] ?? ''}
-                onChange={(e) => setAmounts({ ...amounts, [u.key]: e.target.value.replace(/\D/g, '') })}
+                onChange={(text) => setAmounts({ ...amounts, [u.key]: text })}
               />
             </div>
           ))}
@@ -92,7 +97,7 @@ export function InjuredCard({ city }: { city: CityBean }) {
           <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
-              disabled={total <= 0 || !affordable || heal.isPending}
+              disabled={!valid || total <= 0 || !affordable || heal.isPending}
               onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: 'resources' } }, { onSuccess: done })}
             >
               {t('injured.healResources', { n: fmtExact(total) })}
@@ -100,7 +105,7 @@ export function InjuredCard({ city }: { city: CityBean }) {
             <Button
               size="sm"
               variant="secondary"
-              disabled={total <= 0 || honor < honorCost || heal.isPending}
+              disabled={!valid || total <= 0 || honor < honorCost || heal.isPending}
               title={honor < honorCost ? t('injured.notEnoughHonor', { n: fmtExact(honorCost) }) : undefined}
               onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: 'honor' } }, { onSuccess: done })}
             >
@@ -109,7 +114,7 @@ export function InjuredCard({ city }: { city: CityBean }) {
             <ConfirmButton
               size="sm"
               variant="outline"
-              disabled={total <= 0 || dismiss.isPending}
+              disabled={!valid || total <= 0 || dismiss.isPending}
               title={t('injured.dismissTitle', { count: total, n: fmtExact(total) })}
               description={t('injured.dismissDescription')}
               confirmLabel={t('injured.dismiss')}

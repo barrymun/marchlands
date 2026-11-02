@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
-import { FLOW_TROOP_IDS } from '@marchlands/core';
+import { FLOW_MAX_HIRES, FLOW_MAX_WAIT_MINUTES, FLOW_TROOP_IDS, HERO_BASE_STAT_MAX } from '@marchlands/core';
 
-import { currentAction, hasHero, hiresHeroes, keyed, strip } from '@/components/flows-panel/utils';
+import { actionValid, currentAction, hasHero, hiresHeroes, keyed, strip } from '@/components/flows-panel/utils';
 
 const ACTIONS: FlowAction[] = [
   { type: 'setMayor', stat: 'management' },
@@ -121,5 +121,34 @@ describe(hiresHeroes.name, () => {
   it('is false for a flow without a hire action, or none at all', () => {
     expect(hiresHeroes([{ type: 'setMayor' }, { type: 'wait' }])).toBe(false);
     expect(hiresHeroes([])).toBe(false);
+  });
+});
+
+describe(actionValid.name, () => {
+  const hire = { type: 'hireHeroes', count: 3, stat: 'power', min: 50, maxGold: 100_000 } as const satisfies FlowAction;
+
+  it('takes every action with its numbers in range', () => {
+    for (const a of [...ACTIONS, hire]) expect(actionValid(a), a.type).toBe(true);
+  });
+
+  it('refuses a hire with a count, minimum or gold cleared or out of range', () => {
+    expect(actionValid({ ...hire, count: Number.NaN })).toBe(false);
+    expect(actionValid({ ...hire, count: FLOW_MAX_HIRES + 1 })).toBe(false);
+    expect(actionValid({ ...hire, count: FLOW_MAX_HIRES })).toBe(true);
+    expect(actionValid({ ...hire, min: HERO_BASE_STAT_MAX + 1 })).toBe(false);
+    expect(actionValid({ ...hire, min: 0 })).toBe(false);
+    expect(actionValid({ ...hire, maxGold: Number.NaN })).toBe(false);
+  });
+
+  it('checks a wait’s minutes only when it waits for a time', () => {
+    expect(actionValid({ type: 'wait', until: 'time', minutes: FLOW_MAX_WAIT_MINUTES + 1 })).toBe(false);
+    expect(actionValid({ type: 'wait', until: 'time', minutes: Number.NaN })).toBe(false);
+    expect(actionValid({ type: 'wait', until: 'armiesHome', minutes: Number.NaN })).toBe(true);
+  });
+
+  it('takes a train amount or max, and wants an attack’s army', () => {
+    expect(actionValid({ type: 'trainTroops', troopId: FLOW_TROOP_IDS[0]!, amount: Number.NaN })).toBe(false);
+    expect(actionValid({ type: 'trainTroops', troopId: FLOW_TROOP_IDS[0]!, amount: 'max' })).toBe(true);
+    expect(actionValid({ type: 'attackTargets', presetId: '', targets: {} })).toBe(false);
   });
 });
