@@ -92,6 +92,8 @@ export function TileCard({
   const kindOf = (t: NonNullable<typeof tile>): SendTarget['kind'] =>
     t.type === TileType.CASTLE ? 'city' : t.type === TileType.NPC || t.type === TileType.HISTORIC ? 'npc' : t.type === TileType.FLAT ? undefined : 'valley';
   const missionsFor = (t: NonNullable<typeof tile>): number[] => {
+    // the city in view can't send an army to itself
+    if (t.id === city.fieldId) return [];
     const m: number[] = [];
     if (t.canLoot || t.canOccupy) m.push(Mission.ATTACK);
     if (t.canScout && kindOf(t)) m.push(Mission.SCOUT);
