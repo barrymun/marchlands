@@ -128,5 +128,9 @@
     "away_one": "{{n}} tile away",
     "away_other": "{{n}} tiles away",
     "title": "Straight-line distance from {{city}}, which an army's march time is worked out from."
+  },
+  "centre": {
+    "button": "Centre here",
+    "title": "Centre the map on this tile; it opens here again after a reload, until you go back to your city"
   }
 }

@@ -16,7 +16,7 @@
   | Town and Fields views | `building` (a position: opens its dialog once, then goes) | `BUILDING_SEARCH` (`lib/screen-search.ts`) |
   | Stats page | `city`, `period` | `STATS_SEARCH` (`components/stats-panel/constants.ts`) |
   | Flows page | `flow` | `FLOWS_SEARCH` (`components/flows-panel/constants.ts`) |
-  | World map | `at` (the place last gone to: opens there, selected; the crosshair clears it) | `MAP_SEARCH` (`lib/screen-search.ts`) |
+  | World map | `at` (the place last gone to, or centred on with a tile card's Centre here: opens there, selected; the crosshair clears it) | `MAP_SEARCH` (`lib/screen-search.ts`) |
   | Items panel | `items.category`, `items.q`, `items.owned`, `items.effect` | `ITEMS_SEARCH` (`components/items-panel/constants.ts`) |
   | Military panel | `military.troops`, `military.forts` (each production card's tab) | `MILITARY_SEARCH` (`components/military-panel/production/constants.ts`) |
   | Every screen | `panel` | `GAME_SEARCH` (`lib/nav.ts`) |
@@ -65,6 +65,7 @@ An address can stop fitting: reports expire, things are deleted, a version chang
 - **No string names or values** (2026-11-02, the maintainer's rule): the schema types every name and value, fixed values are const objects (`HeroTab.GEAR`), and links are typed per screen. The same rule now holds for the screen and panel ids.
 - **Replace, and push only to close** (2026-11-02): filters, tabs and pages replace the address; opening a report or a panel adds a step.
 - **The map keeps where the player went, not where they look** (2026-11-02, the maintainer: coordinates searched for should survive a reload, and the player can always go back to their city): `at` is written by going somewhere, never by panning or picking a tile, so the address doesn't change on every drag, and the crosshair clears it. A link can open the map on a place (`go(ViewId.MAP, { at: { x, y } })`).
+- **Centring on a tile is asked for** (2026-11-02, the maintainer: a city picked on the map should stay in focus after a reload): the tile card's Centre here goes to the tile as the go-to box does and writes `at`. Picking a tile alone still doesn't, for the reason above.
 - **Switching city keeps the map's `at`** (2026-11-02, the maintainer): the map stays on the place gone to, and its card's distance is now from the city switched to, so switching city compares how far each one is from a target. The crosshair goes to the new city and clears it.
 - **Pages by position, not a cursor** (2026-11-02): page numbers stay. While reports arrive newest first, a page after a reload can start a few rows later; the open report is by id, so it is unaffected. A cursor ("older than report X") would need a server change not worth it here (backlog).
 - **A panel's parameters go with it** (2026-11-02), so the view under a closed panel keeps a clean address.
@@ -78,5 +79,5 @@ An address can stop fitting: reports expire, things are deleted, a version chang
 1. **Done 2026-11-02:** the hook and its `param`s; the Reports page (with its fallbacks) and the Heroes page on it.
 2. **Done 2026-11-02:** typed links (`go`, `screenHref`), `panel` and `building` on the hook, `HeroTab` and `ReportTab`.
 3. **Done 2026-11-02:** Items, Stats, Flows and Military; screen and panel ids as const objects; switching city keeps the address.
-4. **Done 2026-11-02:** the map's place: going to coordinates (the go-to box, a valley, a farming target) writes `at`, the map opens there with the tile selected after a reload, and the crosshair (back to the city) clears it. Only going somewhere moves it: panning and picking tiles leave it, so a reload returns to where the player last asked to go.
+4. **Done 2026-11-02:** the map's place: going to coordinates (the go-to box, a valley, a farming target, a tile card's Centre here) writes `at`, the map opens there with the tile selected after a reload, and the crosshair (back to the city) clears it. Only going somewhere moves it: panning and picking tiles leave it, so a reload returns to where the player last asked to go.
 5. **Next:** links to a report.

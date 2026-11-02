@@ -1,1 +1,6 @@
-{}
+{
+  "centre": {
+    "button": "Center here",
+    "title": "Center the map on this tile; it opens here again after a reload, until you go back to your city"
+  }
+}

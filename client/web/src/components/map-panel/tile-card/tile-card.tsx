@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Copy, Eye, Ruler, X } from 'lucide-react';
+import { Copy, Eye, LocateFixed, Ruler, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -39,7 +39,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * The selected tile, floating over the map: what it is and who holds it, the medal odds of a barbarian camp, and what
- * can be done there (send an army, scout, farm, upgrade, release, move the city).
+ * can be done there (centre the map on it, send an army, scout, farm, upgrade, release, move the city).
  */
 export function TileCard({
   city,
@@ -48,6 +48,7 @@ export function TileCard({
   onClose,
   onSend,
   onMoveTo,
+  onCentre,
   onRelease,
   releasing,
   onUpgrade,
@@ -61,6 +62,8 @@ export function TileCard({
   onClose: () => void;
   onSend: (target: SendTarget) => void;
   onMoveTo: (at: { x: number; y: number }) => void;
+  /** centre the map on the tile and keep it in the address, as going to its coordinates does */
+  onCentre: (x: number, y: number) => void;
   onRelease: (tileId: number) => Promise<unknown>;
   releasing: boolean;
   onUpgrade: (tileId: number) => Promise<unknown>;
@@ -131,18 +134,6 @@ export function TileCard({
                 {t('valley.boost', boost.words)}
               </Badge>
             )}
-            <Badge variant="outline">
-              ({tile.x}, {tile.y}) · {zoneName(tile.zoneId)}
-            </Badge>
-            <Button size="icon-xs" variant="ghost" onClick={() => copyCoords(tile.x, tile.y)} aria-label={t('copy.label')} title={t('copy.label')}>
-              <Copy />
-            </Button>
-            {distance != null && (
-              <Badge variant="outline" title={t('distance.title', { city: city.name })}>
-                <Ruler aria-hidden />
-                {t('distance.away', { count: distance, n: fmtDecimal(distance, 1) })}
-              </Badge>
-            )}
             {side && (
               <Badge variant="outline" title={t('faction.memberTitle', { faction: factionName(side.id) })}>
                 <span aria-hidden className={cn('size-2 rounded-sm', FACTION_STYLE[side.id].swatch)} />
@@ -161,6 +152,28 @@ export function TileCard({
               <Badge variant="outline" title={t('faction.banditsTitle', { level: BALANCE.factions.minLevel })}>
                 {t('faction.bandits')}
               </Badge>
+            )}
+          </div>
+          {/* where it is: the coordinates (copied in the game's notation), its state and how far from the city in view */}
+          <div className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground tabular-nums">
+            <span className="flex items-center">
+              ({tile.x}, {tile.y}) · {zoneName(tile.zoneId)}
+              <Button
+                size="icon-xs"
+                variant="ghost"
+                className="-my-1"
+                onClick={() => copyCoords(tile.x, tile.y)}
+                aria-label={t('copy.label')}
+                title={t('copy.label')}
+              >
+                <Copy />
+              </Button>
+            </span>
+            {distance != null && (
+              <span className="flex items-center gap-1" title={t('distance.title', { city: city.name })}>
+                <Ruler className="size-3" aria-hidden />
+                {t('distance.away', { count: distance, n: fmtDecimal(distance, 1) })}
+              </span>
             )}
           </div>
           {'seatTitle' in tile && tile.seatTitle && <Badge variant="outline">{seatTitleName(tile.seatTitle)}</Badge>}
@@ -199,14 +212,14 @@ export function TileCard({
               {t('info.moveCityHere')}
             </Button>
           )}
-          {missionsFor(tile).length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" onClick={() => onSend({ tileId: tile.id, name: placeName(tile), missions: missionsFor(tile), kind: kindOf(tile) })}>
-                {t('info.sendArmy')}
-              </Button>
-              {missionsFor(tile).includes(Mission.ATTACK) && <AddToFarmButton city={city} tileId={tile.id} tileName={placeName(tile)} />}
-              {missionsFor(tile).includes(Mission.SCOUT) && (
-                <>
+          <div className="flex flex-wrap items-center gap-2">
+            {missionsFor(tile).length > 0 && (
+              <>
+                <Button size="sm" onClick={() => onSend({ tileId: tile.id, name: placeName(tile), missions: missionsFor(tile), kind: kindOf(tile) })}>
+                  {t('info.sendArmy')}
+                </Button>
+                {missionsFor(tile).includes(Mission.ATTACK) && <AddToFarmButton city={city} tileId={tile.id} tileName={placeName(tile)} />}
+                {missionsFor(tile).includes(Mission.SCOUT) && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -227,11 +240,14 @@ export function TileCard({
                   >
                     <Eye /> {t('info.scout')}
                   </Button>
-                  {scouts <= 0 && <span className="text-xs text-muted-foreground">{t('info.noScouts')}</span>}
-                </>
-              )}
-            </div>
-          )}
+                )}
+              </>
+            )}
+            <Button size="sm" variant="outline" onClick={() => onCentre(tile.x, tile.y)} title={t('centre.title')}>
+              <LocateFixed /> {t('centre.button')}
+            </Button>
+          </div>
+          {missionsFor(tile).includes(Mission.SCOUT) && scouts <= 0 && <p className="text-xs text-muted-foreground">{t('info.noScouts')}</p>}
         </>
       )}
     </section>

@@ -111,7 +111,8 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     setSelected(id);
     if (!wide) setList(null);
   };
-  // going to a place (the go-to box, a valley, a farming target) keeps it in the address; going home lets it go
+  // going to a place (the go-to box, a valley, a farming target, a tile card's Centre here) keeps it in the address; going
+  // home lets it go
   const goTo = (x: number, y: number) => {
     vp.centreOn(x, y);
     select(y * mapSize + x);
@@ -217,6 +218,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           onClose={() => setSelected(null)}
           onSend={setTarget}
           onMoveTo={setMoveTo}
+          onCentre={goTo}
           onRelease={(tileId) => release.mutateAsync({ path: { tileId } })}
           releasing={release.isPending}
           onUpgrade={(tileId) => upgrade.mutateAsync({ path: { tileId }, body: { cityId: city.id } })}
