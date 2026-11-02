@@ -7920,7 +7920,12 @@ export type PostPlayerGenderResponses = {
 export type PostPlayerGenderResponse = PostPlayerGenderResponses[keyof PostPlayerGenderResponses];
 
 export type PostPlayerTitlePromoteData = {
-    body?: never;
+    body: {
+        /**
+         * the city whose gold pays
+         */
+        cityId: number;
+    };
     path?: never;
     query?: never;
     url: '/api/v1/player/title/promote';

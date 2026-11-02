@@ -190,37 +190,40 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
           ))}
           {available.length === 0 && <p className="text-sm text-muted-foreground">{scouting ? t('form.noScouts') : t('form.noTroops')}</p>}
           {scouting && <ScoutNote kind={target.kind} />}
-          {available.map(([id, key]) => (
-            <div key={key} className="flex items-center justify-between gap-2 text-sm">
-              <span className="flex items-center gap-2">
-                <TroopBadge id={Number(id)} />
-                <span>
-                  {troopName(Number(id))} <span className="text-muted-foreground">({fmtExact(city.troop[key] ?? 0)})</span>
+          {/* two to a row from lg (workers and warriors, then scouts and pikemen …), so the dialog needn't scroll */}
+          <div className="grid gap-x-8 gap-y-2 lg:grid-cols-2">
+            {available.map(([id, key]) => (
+              <div key={key} className="flex items-center justify-between gap-2 text-sm">
+                <span className="flex items-center gap-2">
+                  <TroopBadge id={Number(id)} />
+                  <span>
+                    {troopName(Number(id))} <span className="text-muted-foreground">({fmtExact(city.troop[key] ?? 0)})</span>
+                  </span>
                 </span>
-              </span>
-              <div className="flex items-center gap-1">
-                <Input
-                  className="h-8 w-24"
-                  inputMode="numeric"
-                  value={troops[key] ?? ''}
-                  placeholder="0"
-                  onChange={(e) => setTroops(capTroops({ ...troops, [key]: e.target.value.replace(/\D/g, '') }, city.troop))}
-                />
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  title={t('form.allTitle')}
-                  onClick={() => {
-                    // room left in the army without this type, so "All" never goes over the Rally Spot limit
-                    const others = chosen - Number(troopBody[key] ?? 0);
-                    setTroops({ ...troops, [key]: String(Math.max(0, Math.min(city.troop[key] ?? 0, cap - others))) });
-                  }}
-                >
-                  {t('common:actions.all')}
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Input
+                    className="h-8 w-24"
+                    inputMode="numeric"
+                    value={troops[key] ?? ''}
+                    placeholder="0"
+                    onChange={(e) => setTroops(capTroops({ ...troops, [key]: e.target.value.replace(/\D/g, '') }, city.troop))}
+                  />
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    title={t('form.allTitle')}
+                    onClick={() => {
+                      // room left in the army without this type, so "All" never goes over the Rally Spot limit
+                      const others = chosen - Number(troopBody[key] ?? 0);
+                      setTroops({ ...troops, [key]: String(Math.max(0, Math.min(city.troop[key] ?? 0, cap - others))) });
+                    }}
+                  >
+                    {t('common:actions.all')}
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
         {carriesResources && (
           <div className="grid gap-2">
@@ -230,25 +233,27 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
                 {capacity > 0 ? t('form.carried', { loaded: fmtExact(loaded), capacity: fmtExact(capacity) }) : t('form.chooseTroops')}
               </span>
             </div>
-            {RES.map((r) => (
-              <div key={r} className="flex items-center justify-between gap-2 text-sm">
-                <span className="capitalize">
-                  {resourceLabel(r)} <span className="text-muted-foreground">({fmtExact(inCity(r))})</span>
-                </span>
-                <div className="flex items-center gap-1">
-                  <Input
-                    className="h-8 w-32"
-                    inputMode="numeric"
-                    placeholder="0"
-                    value={resources[r] ?? ''}
-                    onChange={(e) => setResources({ ...resources, [r]: e.target.value.replace(/\D/g, '') })}
-                  />
-                  <Button size="xs" variant="ghost" disabled={capacity <= 0} title={t('form.maxTitle')} onClick={() => maxOf(r)}>
-                    {t('common:actions.max')}
-                  </Button>
+            <div className="grid gap-x-8 gap-y-2 lg:grid-cols-2">
+              {RES.map((r) => (
+                <div key={r} className="flex items-center justify-between gap-2 text-sm">
+                  <span className="capitalize">
+                    {resourceLabel(r)} <span className="text-muted-foreground">({fmtExact(inCity(r))})</span>
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Input
+                      className="h-8 w-32"
+                      inputMode="numeric"
+                      placeholder="0"
+                      value={resources[r] ?? ''}
+                      onChange={(e) => setResources({ ...resources, [r]: e.target.value.replace(/\D/g, '') })}
+                    />
+                    <Button size="xs" variant="ghost" disabled={capacity <= 0} title={t('form.maxTitle')} onClick={() => maxOf(r)}>
+                      {t('common:actions.max')}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
         <LandAt marchMs={marchMs} value={landAt} onChange={setLandAt} />

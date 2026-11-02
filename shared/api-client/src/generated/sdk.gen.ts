@@ -167,12 +167,16 @@ export const postPlayerGender = <ThrowOnError extends boolean = false>(options: 
 });
 
 /**
- * Promote to the next nobility title
+ * Promote to the next nobility title: prestige, medals and a city's gold
  */
-export const postPlayerTitlePromote = <ThrowOnError extends boolean = false>(options?: Options<PostPlayerTitlePromoteData, ThrowOnError>): RequestResult<PostPlayerTitlePromoteResponses, PostPlayerTitlePromoteErrors, ThrowOnError> => (options?.client ?? client).post<PostPlayerTitlePromoteResponses, PostPlayerTitlePromoteErrors, ThrowOnError>({
+export const postPlayerTitlePromote = <ThrowOnError extends boolean = false>(options: Options<PostPlayerTitlePromoteData, ThrowOnError>): RequestResult<PostPlayerTitlePromoteResponses, PostPlayerTitlePromoteErrors, ThrowOnError> => (options.client ?? client).post<PostPlayerTitlePromoteResponses, PostPlayerTitlePromoteErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/player/title/promote',
-    ...options
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**

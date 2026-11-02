@@ -35,13 +35,14 @@
     "current": "Title: {{name}}",
     "cities_one": "{{cities}} / {{count}} city",
     "cities_other": "{{cities}} / {{count}} cities",
-    "next": "{{name}} raises your city limit to {{max}}. The medals are used up.",
+    "next": "{{name}} raises your city limit to {{max}}. The medals and the gold are used up.",
     "have": "(have {{have}})",
     "promote": "Promote to {{name}}",
     "all": "All titles",
     "highest_one": "The highest title: up to {{count}} city.",
     "highest_other": "The highest title: up to {{count}} cities.",
     "maxCities_one": "{{count}} city",
-    "maxCities_other": "{{count}} cities"
+    "maxCities_other": "{{count}} cities",
+    "haveIn": "(have {{have}} in {{city}})"
   }
 }

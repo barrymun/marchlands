@@ -284,7 +284,7 @@ export const postPlayerGenderMutation = (options?: Partial<Options<PostPlayerGen
 };
 
 /**
- * Promote to the next nobility title
+ * Promote to the next nobility title: prestige, medals and a city's gold
  */
 export const postPlayerTitlePromoteMutation = (options?: Partial<Options<PostPlayerTitlePromoteData>>): UseMutationOptions<PostPlayerTitlePromoteResponse, PostPlayerTitlePromoteError, Options<PostPlayerTitlePromoteData>> => {
     const mutationOptions: UseMutationOptions<PostPlayerTitlePromoteResponse, PostPlayerTitlePromoteError, Options<PostPlayerTitlePromoteData>> = {

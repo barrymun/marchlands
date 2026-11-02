@@ -34,7 +34,7 @@ const PLAYER_ROUTES: RouteCall[] = [
   { method: 'POST', url: 'player/flag', body: { flag: 'F' } },
   { method: 'POST', url: 'player/rename', body: { userName: 'Renamed' } },
   { method: 'POST', url: 'player/gender', body: { sex: 1 } },
-  { method: 'POST', url: 'player/title/promote' },
+  { method: 'POST', url: 'player/title/promote', body: { cityId: 1 } },
   { method: 'POST', url: 'player/tutorial', body: { step: 3 } },
   { method: 'POST', url: 'player/furlough', body: { days: 1, cityId: 1 } },
   { method: 'DELETE', url: 'player/furlough' },
@@ -252,13 +252,15 @@ describe('POST /player/gender', () => {
 });
 
 describe('POST /player/title/promote', () => {
-  it('refuses without the prestige, and at the highest title', () =>
+  it('refuses without the prestige, and at the highest title; the city paying is required', () =>
     apiTest(async (api) => {
       const p = await api.player();
-      const a = await api.refused('POST', 'player/title/promote', 'player.title.prestigeRequired', { token: p.token, status: 400 });
+      const body = { cityId: p.cityId };
+      const a = await api.refused('POST', 'player/title/promote', 'player.title.prestigeRequired', { token: p.token, body, status: 400 });
       expect(a.body.error?.params).toEqual({ prestige: expect.any(Number) });
       await api.game((ctx) => admin.setPlayerFlags(ctx, p.username, { title: 9 }));
-      await api.refused('POST', 'player/title/promote', 'player.title.highest', { token: p.token, status: 400 });
+      await api.refused('POST', 'player/title/promote', 'player.title.highest', { token: p.token, body, status: 400 });
+      await expectInvalid(api, p.token, [{ method: 'POST', url: 'player/title/promote', body: {} }]);
     }));
 });
 

@@ -41,7 +41,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/player/rename` | Rename the lord: free, once a day, if the name is free (city.modifyUserName) |
 | POST | `/api/v1/player/restart` | Delete everything and start over (common.deleteUserAndRestart) |
 | GET | `/api/v1/player/statistics` | The lord's statistics: all time, last 7 days and per city (a few minutes behind) |
-| POST | `/api/v1/player/title/promote` | Promote to the next nobility title |
+| POST | `/api/v1/player/title/promote` | Promote to the next nobility title: prestige, medals and a city's gold |
 | POST | `/api/v1/player/truce` | Truce Agreement (city.setStopWarState) |
 | POST | `/api/v1/player/tutorial` | Store tutorial progress (common.step) |
 | GET | `/api/v1/players/{name}` | Public profile of a lord |

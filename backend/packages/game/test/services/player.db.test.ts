@@ -365,34 +365,42 @@ describe(player.changeGender.name, () => {
 });
 
 describe(player.promoteTitle.name, () => {
-  it('promotes with enough prestige, consuming the medals but not the prestige', () =>
+  it('promotes with enough prestige, consuming the medals and the gold but not the prestige', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
       const next = TITLES[1]!;
       await setPrestige(g, a, next.prestige);
-      await giveItems(g, a, { ...next.medals, [ItemId.ROSE_MEDAL]: 1 });
-      expect(await player.promoteTitle(g, a.id)).toEqual({ titleId: 1 });
+      await setResources(g, a, { gold: next.gold + 5 });
+      await giveItems(g, a, { ...next.medals, [ItemId.LION_MEDAL]: 1 });
+      expect(await player.promoteTitle(g, a.id, a.cityId)).toEqual({ titleId: 1 });
       const p = await reloadPlayer(g, a);
       expect(p).toMatchObject({ title: 1, prestige: next.prestige });
       for (const id of Object.keys(next.medals)) expect(p.items).not.toHaveProperty(id);
-      expect(p.items[ItemId.ROSE_MEDAL]).toBe(1);
+      expect(p.items[ItemId.LION_MEDAL]).toBe(1);
+      expect((await getCity(g, a.cityId)).gold).toBe(5);
       expect(g.pushes(PushCmd.PLAYER_INFO_UPDATE).at(-1)).toMatchObject({ data: { playerInfo: { titleId: 1 } } });
     }));
 
-  it('needs the prestige and the medals of the next title', () =>
+  it('needs the prestige, the medals and the gold of the next title', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
       await admin.setPlayerFlags(g, a.name, { title: 2 });
       const next = TITLES[3]!;
       await setPrestige(g, a, next.prestige - 1);
-      await expectRefused(player.promoteTitle(g, a.id), msg('player.title.prestigeRequired', { prestige: next.prestige }));
+      await expectRefused(player.promoteTitle(g, a.id, a.cityId), msg('player.title.prestigeRequired', { prestige: next.prestige }));
       await setPrestige(g, a, next.prestige);
-      const [medal, n] = Object.entries(next.medals)[0]!;
-      await giveItems(g, a, { [medal]: n - 1 });
-      await expectRefused(player.promoteTitle(g, a.id), msg('player.title.notEnoughMedals'));
+      const [first, ...rest] = Object.entries(next.medals);
+      const [medal, n] = first!;
+      await giveItems(g, a, { [medal]: n - 1, ...Object.fromEntries(rest) });
+      await expectRefused(player.promoteTitle(g, a.id, a.cityId), msg('player.title.notEnoughMedals'));
       expect((await reloadPlayer(g, a)).items[medal]).toBe(n - 1);
       await giveItems(g, a, { [medal]: 1 });
-      expect(await player.promoteTitle(g, a.id)).toEqual({ titleId: 3 });
+      // short of gold: refused, nothing used up
+      await setResources(g, a, { gold: next.gold - 1 });
+      await expectRefused(player.promoteTitle(g, a.id, a.cityId), msg('common.notEnoughGoldFor', { amount: next.gold }));
+      expect((await reloadPlayer(g, a)).items[medal]).toBe(n);
+      await setResources(g, a, { gold: next.gold });
+      expect(await player.promoteTitle(g, a.id, a.cityId)).toEqual({ titleId: 3 });
     }));
 
   it('stops at the highest title', () =>
@@ -400,7 +408,7 @@ describe(player.promoteTitle.name, () => {
       const a = await createTestPlayer(g);
       await admin.setPlayerFlags(g, a.name, { title: TITLES.length - 1 });
       await setPrestige(g, a, 2_000_000_000);
-      await expectRefused(player.promoteTitle(g, a.id), msg('player.title.highest'));
+      await expectRefused(player.promoteTitle(g, a.id, a.cityId), msg('player.title.highest'));
     }));
 });
 

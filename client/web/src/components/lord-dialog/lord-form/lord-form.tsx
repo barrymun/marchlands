@@ -70,7 +70,7 @@ export function LordForm({ city }: { city?: CityBean }) {
         <DialogDescription>{t('summary', { title: info ? titleName(info.titleId) : '', flag: info?.flag ?? '' })}</DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
-        <TitleSection />
+        <TitleSection city={city} />
         <Separator />
         <div className="grid gap-2">
           <Label htmlFor="lord-name">{t('name.label')}</Label>

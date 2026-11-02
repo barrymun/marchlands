@@ -118,7 +118,7 @@ The original either stubbed these or never answered them.
   - *(design change)* **Order limit**: a lord places and cancels at most 10 orders a minute (a burst of 10, then one more every 6 s of real time, `BALANCE.marketOrderLimit`), counted in the API's memory; past it the API answers 429 `market.slowDown` with Retry-After. Quotes are free. So a bot outside the game can't flood the book or out-trade lords by speed.
 - **Walls.** Fortifications take wall space (by Walls level, 1,000 to 55,000): trap 1, abatis 2, archer tower 3, rolling log 4, trebuchet 5, as the Evony wiki's Walls page gives them (`BALANCE.fortSpace`). Every NPC city's garrison (`NPC_TABLE`) fits its wall with these, levels 6–10 about 85–89% full. The NPC table alone would suggest rolling logs 5 and trebuchets 8, which fill levels 7–10 almost exactly; the wiki was preferred as what players saw in the game. Until migration 0025 these were 1, 1, 2, 3 and 4 (a guess): walls left over capacity had the forts that no longer fit taken down, in proportion across types, their full cost returned to the city, and the player was sent a mail.
 - **Items.** A declarative effect for every item in `config_items`: production, attack, defence and upkeep buffs; boxes, chests and keys, Bernini's Hammer (one extra build queue); War Ensign; Civil Code; Penicillin.
-- **Nobility titles** (Knight … Prince) bought with prestige and medals. A title limits how many cities a lord may own.
+- **Nobility titles** (Knight … Prince), as players recorded them (docs/reference/titles.md, `shared/core/src/titles.ts`): prestige from 1,000 doubling to 256,000 (required, not spent), 20,000 to 500,000 gold from the city promoting, and 10 medals of one kind with 5 of the next, used up. A title limits how many cities a lord may own. *(design change)* The original also required a military rank (Lieutenant … General) for each title; Marchlands has no military ranks, so none is required.
 - **Social.** Friends and block list (blocked lords' mail and whispers are dropped); mail delete and bulk read; alliance event log, member circulars, military overview and diplomacy drop.
 - **Quests.** A real catalogue: about 30 beginner quests over the original quest groups, with targets evaluated from game state and claimable awards, plus a daily gift (a fixed bundle of resources).
 - **Beginner protection** really applies (7 days or Town Hall 5). Truce and holiday protect cities, and holiday requires all armies to be home.
@@ -139,7 +139,6 @@ These Evony Age 1 values were not in the original code. They are marked `(evony)
 - market fee and shipment time;
 - curing injured troops at 25% of training cost;
 - the Hero Package contents (hero helms and troop battalions were removed with the Amulet);
-- title requirements;
 - starvation rate.
 
 Adjust them freely.

@@ -39,7 +39,7 @@
     "cities_few": "{{cities}} / {{count}} مدن",
     "cities_many": "{{cities}} / {{count}} مدينةً",
     "cities_other": "{{cities}} / {{count}} مدينة",
-    "next": "يرفع لقب {{name}} حدّ مدنك إلى {{max}}. تُستهلك الأوسمة.",
+    "next": "يرفع لقب {{name}} حدّ مدنك إلى {{max}}. تُستهلك الأوسمة والذهب.",
     "have": "(لديك {{have}})",
     "promote": "الترقية إلى {{name}}",
     "all": "كل الألقاب",
@@ -54,6 +54,7 @@
     "maxCities_two": "{{count}} مدينتان",
     "maxCities_few": "{{count}} مدن",
     "maxCities_many": "{{count}} مدينةً",
-    "maxCities_other": "{{count}} مدينة"
+    "maxCities_other": "{{count}} مدينة",
+    "haveIn": "(لديك {{have}} في {{city}})"
   }
 }

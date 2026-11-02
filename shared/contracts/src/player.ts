@@ -266,6 +266,7 @@ export const PublicPlayerInfo = PlayerInfo.extend({
 export type PublicPlayerInfo = z.infer<typeof PublicPlayerInfo>;
 
 export const TitlePromotion = PlayerInfo.pick({ titleId: true }).meta({ id: 'TitlePromotion' });
+export const PromoteTitleBody = z.object({ cityId: zId.describe('the city whose gold pays') });
 export type TitlePromotion = z.infer<typeof TitlePromotion>;
 
 // ---- items ----

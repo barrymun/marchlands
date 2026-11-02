@@ -16,6 +16,12 @@ Notes on how the original Evony worked, gathered from player guides, wikis and f
 | [colonies.md](colonies.md) | Colonising players' cities: suzerains, tribute, the daily policies (draft, disarm, population, discord), uprisings | Age 2 | [features/historical-cities.md](../features/historical-cities.md) (a model for a seat's powers) |
 | [npc-cities.md](npc-cities.md) | NPC city garrisons by level, compared with our `NPC_TABLE`: the same but for one cell | Age 2 against Age 1 | `shared/core/src/world.ts` |
 
+## Players
+
+| Note | What it covers | Version | Used by |
+|---|---|---|---|
+| [titles.md](titles.md) | Nobility titles (Knight … Prinzessin): cities each allows, and the prestige, gold, medals and military rank each promotion needed, with how the sources agree | Age 2, Age 1 consistent | `shared/core/src/titles.ts` |
+
 ## Heroes
 
 | Note | What it covers | Version | Used by |

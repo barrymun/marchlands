@@ -226,15 +226,23 @@ export async function changeGender(ctx: Ctx, playerId: number, sex: number) {
   await pushPlayerInfo(ctx, p);
 }
 
-/** Promote to the next nobility title (prestige + medals). */
-export async function promoteTitle(ctx: Ctx, playerId: number) {
-  const p = await getPlayer(ctx, playerId, { lock: true });
+/**
+ * Promote to the next nobility title (docs/reference/titles.md): enough prestige (kept), its medals and its gold, paid
+ * from the city the player promotes in.
+ */
+export async function promoteTitle(ctx: Ctx, playerId: number, cityId: number) {
+  const b = await openOwnCity(ctx, playerId, cityId);
+  const p = b.player;
   const next = TITLES[p.title + 1];
   if (!next) throw new GameError(msg('player.title.highest'), -99);
   if (p.prestige < next.prestige) throw new GameError(msg('player.title.prestigeRequired', { prestige: next.prestige }), -99);
   for (const [id, n] of Object.entries(next.medals)) if (itemCount(p, id) < n) throw new GameError(msg('player.title.notEnoughMedals'), -99);
+  spendGold(b.city, next.gold);
+  ctx.stat(playerId, cityId, { 'spent.other.gold': next.gold });
   for (const [id, n] of Object.entries(next.medals)) consumeItem(ctx, p, id, n);
   p.title = next.id;
+  pushResources(ctx, b);
+  await saveCity(ctx, b.city);
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
   return { titleId: p.title };

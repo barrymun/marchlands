@@ -25711,10 +25711,29 @@
     "/api/v1/player/title/promote": {
       "post": {
         "operationId": "postPlayerTitlePromote",
-        "summary": "Promote to the next nobility title",
+        "summary": "Promote to the next nobility title: prestige, medals and a city's gold",
         "tags": [
           "player"
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cityId": {
+                    "description": "the city whose gold pays",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "cityId"
+                ]
+              }
+            }
+          }
+        },
         "security": [
           {
             "bearerAuth": []

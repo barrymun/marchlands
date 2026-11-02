@@ -24,6 +24,7 @@ import {
   PlayerCreated,
   PlayerNameParams,
   PlayerState,
+  PromoteTitleBody,
   PublicPlayerInfo,
   RenamePlayerBody,
   TitlePromotion,
@@ -88,7 +89,11 @@ export default async function playerRoutes(app: ZApp) {
   app.post('/player/gender', s('(marchlands) Change gender: free, once a day', Empty, { body: ChangeGenderBody }), (req) =>
     game(req, (ctx, pid) => player.changeGender(ctx, pid, req.body.sex)),
   );
-  app.post('/player/title/promote', s('Promote to the next nobility title', TitlePromotion), (req) => game(req, (ctx, pid) => player.promoteTitle(ctx, pid)));
+  app.post(
+    '/player/title/promote',
+    s("Promote to the next nobility title: prestige, medals and a city's gold", TitlePromotion, { body: PromoteTitleBody }),
+    (req) => game(req, (ctx, pid) => player.promoteTitle(ctx, pid, req.body.cityId)),
+  );
   app.post('/player/tutorial', s('Store tutorial progress (common.step)', Empty, { body: TutorialStepBody }), (req) =>
     game(req, (ctx, pid) => player.saveTutorialStep(ctx, pid, req.body.step)),
   );
