@@ -72,60 +72,63 @@ export function LordForm({ city }: { city?: CityBean }) {
       <div className="grid gap-4">
         <TitleSection city={city} />
         <Separator />
-        <div className="grid gap-2">
-          <Label htmlFor="lord-name">{t('name.label')}</Label>
-          <div className="flex gap-2">
-            <Input id="lord-name" value={name} maxLength={20} placeholder={info?.userName} onChange={(e) => setName(e.target.value)} />
-            <Button
-              disabled={!name.trim() || renameWait || rename.isPending}
-              onClick={() => rename.mutate({ body: { userName: name.trim() } }, { onSuccess: () => setName('') })}
-            >
-              {t('common:actions.rename')}
-            </Button>
+        {/* the settings two to a row on a desktop: name and flag, then gender and language */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid content-start gap-2">
+            <Label htmlFor="lord-name">{t('name.label')}</Label>
+            <div className="flex gap-2">
+              <Input id="lord-name" value={name} maxLength={20} placeholder={info?.userName} onChange={(e) => setName(e.target.value)} />
+              <Button
+                disabled={!name.trim() || renameWait || rename.isPending}
+                onClick={() => rename.mutate({ body: { userName: name.trim() } }, { onSuccess: () => setName('') })}
+              >
+                {t('common:actions.rename')}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {renameWait ? <Trans t={t} i18nKey="name.wait" components={{ countdown: <Countdown endTime={nextRename} /> }} /> : t('name.free')}
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {renameWait ? <Trans t={t} i18nKey="name.wait" components={{ countdown: <Countdown endTime={nextRename} /> }} /> : t('name.free')}
-          </p>
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="lord-flag">{t('flag.label')}</Label>
-          <div className="flex gap-2">
-            <Input id="lord-flag" value={flag} maxLength={5} placeholder={info?.flag} onChange={(e) => setFlag(e.target.value)} />
-            <Button
-              disabled={!flag.trim() || changeFlag.isPending}
-              onClick={() => changeFlag.mutate({ body: { flag: flag.trim() } }, { onSuccess: () => setFlag('') })}
-            >
-              {t('change')}
-            </Button>
+          <div className="grid content-start gap-2">
+            <Label htmlFor="lord-flag">{t('flag.label')}</Label>
+            <div className="flex gap-2">
+              <Input id="lord-flag" value={flag} maxLength={5} placeholder={info?.flag} onChange={(e) => setFlag(e.target.value)} />
+              <Button
+                disabled={!flag.trim() || changeFlag.isPending}
+                onClick={() => changeFlag.mutate({ body: { flag: flag.trim() } }, { onSuccess: () => setFlag('') })}
+              >
+                {t('change')}
+              </Button>
+            </div>
           </div>
-        </div>
-        <div className="grid gap-2">
-          <Label>{t('gender.label')}</Label>
-          <div className="flex gap-2">
-            <Select value={pickedGender} onValueChange={setGender}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {GENDERS.map((g) => (
-                  <SelectItem key={g.value} value={String(g.value)}>
-                    {g.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              disabled={pickedGender === currentGender || genderWait || changeGender.isPending}
-              onClick={() => changeGender.mutate({ body: { sex: Number(pickedGender) } }, { onSuccess: () => setGender(null) })}
-            >
-              {t('change')}
-            </Button>
+          <div className="grid content-start gap-2">
+            <Label>{t('gender.label')}</Label>
+            <div className="flex gap-2">
+              <Select value={pickedGender} onValueChange={setGender}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {GENDERS.map((g) => (
+                    <SelectItem key={g.value} value={String(g.value)}>
+                      {g.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                disabled={pickedGender === currentGender || genderWait || changeGender.isPending}
+                onClick={() => changeGender.mutate({ body: { sex: Number(pickedGender) } }, { onSuccess: () => setGender(null) })}
+              >
+                {t('change')}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {genderWait ? <Trans t={t} i18nKey="gender.wait" components={{ countdown: <Countdown endTime={nextGender} /> }} /> : t('gender.free')}
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {genderWait ? <Trans t={t} i18nKey="gender.wait" components={{ countdown: <Countdown endTime={nextGender} /> }} /> : t('gender.free')}
-          </p>
+          <LanguageSelect />
         </div>
-        <LanguageSelect />
         <Separator />
         <div className="grid gap-2">
           <div className="flex items-center gap-2 text-sm font-medium">

@@ -8,7 +8,7 @@ import { LOCALES, matchLocale } from '@/lib/i18n';
 export function LanguageSelect() {
   const { t, i18n } = useTranslation('common');
   return (
-    <div className="grid gap-2">
+    <div className="grid content-start gap-2">
       <Label htmlFor="player-language">{t('language.label')}</Label>
       <Select value={matchLocale(i18n.resolvedLanguage)} onValueChange={(lng) => void i18n.changeLanguage(lng)}>
         <SelectTrigger id="player-language" className="w-full">

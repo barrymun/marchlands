@@ -6,7 +6,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 export function LordDialog({ open, onClose, city }: { open: boolean; onClose: () => void; city?: CityBean }) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-md">
+      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-md lg:max-w-3xl">
         <LordForm city={city} />
       </DialogContent>
     </Dialog>
