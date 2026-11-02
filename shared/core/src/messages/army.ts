@@ -58,6 +58,8 @@ export const ARMY_MESSAGES = {
   // why a won valley was not occupied
   homeCityGone: [],
   valleyLimit: ['building'],
+  /** a held historic city holds one valley per its level (maxValleysFor) */
+  seatValleyLimit: ['level'],
   // valleys
   valleyNotHeld: [],
   upgradeTarget: [],

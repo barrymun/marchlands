@@ -34,6 +34,7 @@
   "valleyNowFriendly": "その領地は友好的なプレイヤーのものになりました。",
   "homeCityGone": "あなたの都市はもう存在しません。",
   "valleyLimit": "{{building}}のレベルが足りないため、これ以上領地を占領できません。",
+  "seatValleyLimit": "レベル {{level}} の歴史都市が占領できる領地は {{level}} までです。",
   "valleyNotHeld": "この領地はあなたの支配下にありません。",
   "upgradeTarget": "アップグレードできるのは領地と蛮族の都市だけです。",
   "upgradeHeld": "アップグレードできるのは誰も占領していない領地だけです。",

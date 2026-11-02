@@ -1462,7 +1462,9 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     else {
       const th = buildingLevel(home.city.buildings, BuildingType.TOWN_HALL);
       const { n } = one(await ctx.tx.select({ n: count() }).from(tiles).where(eq(tiles.ownerCityId, home.city.id)));
-      if (Number(n) >= maxValleysFor(th)) reason = msg('army.valleyLimit', { building: ref.building(BuildingType.TOWN_HALL) });
+      const seat = home.city.historicLevel;
+      if (Number(n) >= maxValleysFor(th, seat))
+        reason = seat ? msg('army.seatValleyLimit', { level: seat }) : msg('army.valleyLimit', { building: ref.building(BuildingType.TOWN_HALL) });
       else {
         // remaining stationed armies of the old owner go home
         for (const s of stationed.filter((x) => totalTroops(x.troops) > 0)) await sendBack(ctx, s, await homeMarchMs(ctx, s, tile.id));

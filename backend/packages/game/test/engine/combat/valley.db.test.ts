@@ -20,7 +20,7 @@ import {
 } from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
-import { getHero, getTile, valleysOfCity } from '#/repo.ts';
+import { getHero, getTile, saveTile, valleysOfCity } from '#/repo.ts';
 import {
   allies,
   armyRow,
@@ -39,6 +39,7 @@ import {
 } from '#test/support/armies.ts';
 import { addHero, cityBundle, reloadPlayer, setCityStats, setTownHall, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
+import { makeSeat } from '#test/support/historic.ts';
 
 /** p attacks a valley; runs the march to the battle and returns the army id and p's latest report. */
 async function attack(g: TestGame, p: TestPlayer, heroId: number, tileId: number, troops: Record<string, number> = { lightCavalry: 40_000 }) {
@@ -145,6 +146,28 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       await attack(g, p, heroId, second.id);
       expect((await getTile(g, second.id)).ownerPlayerId).toBe(p.id);
       expect((await valleysOfCity(g, p.cityId)).map((v) => v.id).sort()).toEqual([first.id, second.id].sort());
+    }));
+
+  it('a held historic city holds one valley per its own level, past its Town Hall', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g, { lightCavalry: 40_000 });
+      await makeSeat(g, p, { level: 12 });
+      // holding 11 valleys already (its Town Hall alone would allow 10)
+      for (let i = 0; i < 11; i++) {
+        const v = await valleyNear(g, p.cityId, { level: 1, skip: i });
+        await saveTile(g, { ...v, ownerCityId: p.cityId, ownerPlayerId: p.id });
+      }
+      const twelfth = await valleyNear(g, p.cityId, { level: 1 });
+      const { armyId } = await attack(g, p, heroId, twelfth.id);
+      expect((await getTile(g, twelfth.id)).ownerPlayerId).toBe(p.id);
+      expect(await valleysOfCity(g, p.cityId)).toHaveLength(maxValleysFor(10, 12));
+
+      await roundTrip(g, armyId);
+      await setCityStats(g, p, { troops: { lightCavalry: 40_000 } });
+      const thirteenth = await valleyNear(g, p.cityId, { level: 1 });
+      const { report } = await attack(g, p, heroId, thirteenth.id);
+      expect(battleOf(report, 'valley')).toMatchObject({ result: 'attackerWon', occupied: false, reason: msg('army.seatValleyLimit', { level: 12 }) });
+      expect((await getTile(g, thirteenth.id)).ownerPlayerId).toBeNull();
     }));
 
   it('turns back from a valley it already holds', () =>

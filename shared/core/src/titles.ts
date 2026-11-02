@@ -39,5 +39,8 @@ export const TITLES: [TitleDef, ...TitleDef[]] = [
 /** The title by id, clamped to the ones there are. */
 export const titleOf = (id: number): TitleDef => TITLES[Math.max(0, Math.min(TITLES.length - 1, id))] ?? TITLES[0];
 export const maxCitiesFor = (title: number) => titleOf(title).maxCities;
-/** Valleys a city may occupy: one per Town Hall level. */
-export const maxValleysFor = (townHallLevel: number) => townHallLevel;
+/**
+ * Valleys a city may occupy: one per Town Hall level; (marchlands) a held historic city one per its own level (12 to 18),
+ * past its Town Hall's 10.
+ */
+export const maxValleysFor = (townHallLevel: number, historicLevel: number | null = null) => historicLevel ?? townHallLevel;

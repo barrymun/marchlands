@@ -37,6 +37,7 @@
   "valleyNowFriendly": "The valley now belongs to a friendly player.",
   "homeCityGone": "Your city no longer exists.",
   "valleyLimit": "Your {{building}} level does not allow another valley.",
+  "seatValleyLimit": "A level {{level}} historic city holds at most {{level}} valleys.",
   "valleyNotHeld": "You do not control this valley.",
   "upgradeTarget": "Only valleys and barbarian cities can be upgraded.",
   "upgradeHeld": "Only valleys nobody holds can be upgraded.",
