@@ -31,6 +31,7 @@ import {
   historicCityBuildings,
   historicGuard,
   type HistoricLevel,
+  historicNameAt,
   historicResearch,
   historicState,
   type HistoricState,
@@ -67,6 +68,7 @@ import {
   stateOf,
   TechType,
   TileType,
+  tileXY,
   totalResources,
   totalTroops,
   type TroopCounts,
@@ -1083,7 +1085,7 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
     .where(and(eq(armies.targetTileId, city.tileId), eq(armies.direction, ArmyDirection.FORWARD)));
   Object.assign(city, {
     playerId: winner.id,
-    name: `${winner.name.slice(0, 12)} Keep`,
+    name: seatName(city.tileId, winner),
     troops: {},
     injuredTroops: {},
     truceUntil: ctx.now + BALANCE.historic.truceMs,
@@ -1314,12 +1316,20 @@ async function canHoldHistoric(ctx: Ctx, attacker: PlayerRow, level: HistoricLev
 }
 
 /**
+ * A held historic city's name: its own when it has one (docs/features/historical-cities.md, Names), which it keeps
+ * whoever holds it, else `<holder> Keep` as for any captured city.
+ */
+function seatName(tileId: number, holder: PlayerRow) {
+  const { x, y } = tileXY(tileId);
+  return historicNameAt(x, y) ?? `${holder.name.slice(0, 12)} Keep`;
+}
+
+/**
  * A historic city captured (docs/features/historical-cities.md): it becomes the attacker's city, its buildings all
  * level 10 but its fields at its own level (historicCityBuildings), under a truce of its own for BALANCE.historic.truceMs.
  */
 async function captureHistoric(ctx: Ctx, attacker: PlayerRow, tile: TileRow, level: HistoricLevel, state: HistoricState) {
-  const name = `${attacker.name.slice(0, 12)} Keep`;
-  const base = initialCity(attacker.id, tile.id, name, ctx.now);
+  const base = initialCity(attacker.id, tile.id, seatName(tile.id, attacker), ctx.now);
   const city = one(
     await ctx.tx
       .insert(cities)

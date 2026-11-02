@@ -3,7 +3,7 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { AllianceRank, BALANCE, FACTION_IDS, FactionId, historicCities, msg, ref, TileType } from '@marchlands/core';
+import { AllianceRank, BALANCE, FACTION_IDS, FactionId, HISTORIC_NAMES, historicCities, msg, ref, TileType } from '@marchlands/core';
 
 import { factionName, historicName, rankName, seatTitleName, stateName, tileName, zoneName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
@@ -85,6 +85,10 @@ describe('data-historic', () => {
       .filter((c) => c.level > 12 && !(c.y === 759 && (c.x === 693 || c.x === 759)))
       .map((c) => `${c.x},${c.y}`);
     expect(Object.keys(historicGB).sort()).toEqual(named.sort());
+  });
+
+  it('says in English what core names a held one (HISTORIC_NAMES)', () => {
+    expect(historicGB).toEqual(HISTORIC_NAMES);
   });
 
   it('is looked up by place, and a level 12 has no name', async () => {

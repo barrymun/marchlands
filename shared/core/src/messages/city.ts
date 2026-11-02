@@ -13,6 +13,8 @@ export const CITY_MESSAGES = {
   teleportCooldown: ['item'],
   /** a captured historic city stays where it stands */
   historicCannotMove: [],
+  /** name: a held historic city's own name, which it keeps (docs/features/historical-cities.md, Names) */
+  historicKeepsName: ['name'],
   // the daily draft of a held historic city
   notHistoric: [],
   noDraftsLeft: ['count'],

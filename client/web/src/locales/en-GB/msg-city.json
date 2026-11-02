@@ -7,6 +7,7 @@
   "notEnoughFood": "Not enough food.",
   "invalidComfortType": "Invalid way of comforting.",
   "invalidLogo": "Invalid city logo.",
+  "historicKeepsName": "{{name}} is a historic city and keeps its name.",
   "historicCannotMove": "A historic city cannot be moved.",
   "notHistoric": "Only a historic city can draft troops.",
   "noDraftsLeft_one": "This historic city has made its {{count, number}} draft today.",

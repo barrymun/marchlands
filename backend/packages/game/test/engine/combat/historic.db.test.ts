@@ -9,15 +9,18 @@ import {
   DAY,
   dur,
   factionRivals,
+  historicCities,
   historicCityBuildings,
   historicDay,
   historicGarrison,
+  historicNameAt,
   type HistoricState,
   homeFaction,
   Mission,
   msg,
   nextAutoDraftAt,
   ref,
+  tileDistance,
   TileType,
   tileXY,
 } from '@marchlands/core';
@@ -29,6 +32,18 @@ import { arrive, battleOf, reportsOf, scoutOf, send, tileNear, warrior } from '#
 import { expectRefused } from '#test/support/expect.ts';
 import { addHero, reloadCity, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
+
+/** The nearest historic city with a name of its own to a player's city (a level 14, 16 or Atlantis), and its name. */
+async function namedSeatNear(g: TestGame, p: TestPlayer) {
+  const from = (await reloadCity(g, p.cityId)).tileId;
+  const named = historicCities(BALANCE.mapSize).flatMap(({ x, y }) => {
+    const name = historicNameAt(x, y);
+    return name ? [{ id: y * BALANCE.mapSize + x, name }] : [];
+  });
+  const [nearest] = named.sort((a, b) => tileDistance(from, a.id) - tileDistance(from, b.id));
+  if (!nearest) throw new Error('no named historic city');
+  return { seat: await getTile(g, nearest.id), name: nearest.name };
+}
 
 /** The nearest level 12 historic city to a player's city (they stand every 18 tiles, so one is always near). */
 async function seatNear(g: TestGame, p: TestPlayer) {
@@ -104,8 +119,8 @@ describe(`${processArmy.name}: historic cities`, () => {
 });
 
 /** p wins the last loyalty off a level 12 historic city near it (its garrison broken, 3 loyalty left); returns its tile. */
-async function lastWave(g: TestGame, p: TestPlayer, heroId: number) {
-  const seat = await seatNear(g, p);
+async function lastWave(g: TestGame, p: TestPlayer, heroId: number, target?: Awaited<ReturnType<typeof getTile>>) {
+  const seat = target ?? (await seatNear(g, p));
   const bean = await send(g, p, { targetTileId: seat.id, mission: Mission.ATTACK, troops: { archer: 60_000 }, heroId });
   const day = Math.floor(bean.reachTime / DAY);
   const at = bean.reachTime;
@@ -150,6 +165,27 @@ describe(`${processArmy.name}: capturing a historic city`, () => {
       expect(city.buildings).toEqual(historicCityBuildings(12));
       // its Rally Spot (level 10) sends a quarter more
       expect((await armies.troopParams(g, p.id, city.id)).maxTroops).toBe(125_000);
+    }));
+
+  it('keeps a name of its own, which can’t be changed; one without is named after its captor', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g, { archer: 120_000 });
+      await admin.setPlayerFlags(g, p.name, { title: 2 });
+      // a level 12 has no name of its own
+      const { seat: twelve } = await lastWave(g, p, heroId);
+      const twelveCity = (await getTile(g, twelve.id)).cityId!;
+      expect((await getCity(g, twelveCity)).name).toBe(`${p.name.slice(0, 12)} Keep`);
+      await interior.renameCity(g, p.id, twelveCity, 'Twelve');
+      expect((await getCity(g, twelveCity)).name).toBe('Twelve');
+      // a named one keeps its name: renaming is refused, a new logo isn't
+      const { seat, name } = await namedSeatNear(g, p);
+      const { report } = await lastWave(g, p, await addHero(g, p), seat);
+      expect(report.captured).toBe(true);
+      const cityId = (await getTile(g, seat.id)).cityId!;
+      expect((await getCity(g, cityId)).name).toBe(name);
+      await expectRefused(interior.renameCity(g, p.id, cityId, 'Mine'), msg('city.historicKeepsName', { name }));
+      await interior.renameCity(g, p.id, cityId, undefined, 'images/icon/cityLogo/x.png');
+      expect(await getCity(g, cityId)).toMatchObject({ name, logoUrl: 'images/icon/cityLogo/x.png' });
     }));
 
   it('is not taken without a free city slot: it stays at 0 loyalty for the next win', () =>
@@ -239,6 +275,8 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       expect(r.seat).toMatchObject({ loyaltyLeft: 0, captured: true });
       expect(await getCity(g, cityId)).toMatchObject({
         playerId: q.id,
+        // a level 12 has no name of its own: it's named after its new holder
+        name: `${q.name.slice(0, 12)} Keep`,
         historicLevel: 12,
         loyalty: BALANCE.historic.loyalty,
         truceUntil: g.now + BALANCE.historic.truceMs,

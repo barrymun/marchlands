@@ -186,7 +186,7 @@ What a historic city's holder drafted, and from whom (sources 3, 6, 7 and 13):
 
 ## Names
 
-Source 4's picture names every level 14 and 16 city and Atlantis, with its coordinates (read 2026-11-01, transcribed here). Level 12s have no names. In the picture Atlantis's label fills the cells of Romagna's last two level 14s, (693, 759) and (759, 759), so those two have none (source 1 labels them "Atlantis" too). A few of the picture's spellings are corrected here: Bujumburu (Bujumbura), Andora La Vella (Andorra la Vella), Santa Fe De Bogata (Santa Fe de Bogota), Bandir Seri Begawan (Bandar Seri Begawan), Anman (Amman), Valetta (Valletta), kigali (Kigali). Its other choices stay: Loyang, Maynila, Berne, Ulan Bator, Saint John. The game's names are in `client/web/src/locales/<locale>/data-historic.json`, keyed by place.
+Source 4's picture names every level 14 and 16 city and Atlantis, with its coordinates (read 2026-11-01, transcribed here). Level 12s have no names. In the picture Atlantis's label fills the cells of Romagna's last two level 14s, (693, 759) and (759, 759), so those two have none (source 1 labels them "Atlantis" too). A few of the picture's spellings are corrected here: Bujumburu (Bujumbura), Andora La Vella (Andorra la Vella), Santa Fe De Bogata (Santa Fe de Bogota), Bandir Seri Begawan (Bandar Seri Begawan), Anman (Amman), Valetta (Valletta), kigali (Kigali). Its other choices stay: Loyang, Maynila, Berne, Ulan Bator, Saint John. The game's names are in `shared/core/src/historic-names.ts` (`HISTORIC_NAMES`, which a held one keeps as its city's name) and, for the map, `client/web/src/locales/<locale>/data-historic.json`, both keyed by place.
 
 | State | Level 16 (and Atlantis) | Level 14s |
 |---|---|---|

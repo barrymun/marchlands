@@ -8,6 +8,7 @@ import {
   BuffId,
   dur,
   GameError,
+  historicNameAt,
   itemGoldPrice,
   ItemId,
   msg,
@@ -144,6 +145,10 @@ export async function productionBreakdown(ctx: Ctx, playerId: number, cityId: nu
 export async function renameCity(ctx: Ctx, playerId: number, cityId: number, name?: string, logoUrl?: string) {
   const b = await openOwnCity(ctx, playerId, cityId);
   if (name != null) {
+    // (marchlands) a historic city with a name of its own keeps it (docs/features/historical-cities.md, Names)
+    const { x, y } = tileXY(b.city.tileId);
+    const own = b.city.historicLevel ? historicNameAt(x, y) : null;
+    if (own) throw new GameError(msg('city.historicKeepsName', { name: own }), -90);
     const n = cleanName(name, 1, 20, msg('common.cityName'));
     assertClean(n);
     b.city.name = n;

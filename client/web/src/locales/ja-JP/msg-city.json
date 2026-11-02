@@ -7,6 +7,7 @@
   "notEnoughFood": "食糧が足りません。",
   "invalidComfortType": "無効な慰撫の種類です。",
   "invalidLogo": "無効な都市ロゴです。",
+  "historicKeepsName": "{{name}} は歴史都市のため、名前を変更できません。",
   "historicCannotMove": "歴史都市は移動できません。",
   "notHistoric": "徴兵できるのは歴史都市だけです。",
   "noDraftsLeft_other": "この歴史都市は今日の徴兵{{count, number}}回を使い切りました。",

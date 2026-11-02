@@ -10,7 +10,7 @@ import {
   patchCitiesByCityIdMutation,
   postCitiesMoveMutation,
 } from '@marchlands/api-client';
-import { BALANCE, BuffId, itemGoldPrice } from '@marchlands/core';
+import { BALANCE, BuffId, historicNameAt, itemGoldPrice } from '@marchlands/core';
 
 import { TELEPORT } from '@/components/city-dialog/city-form/constants';
 import { TaxRate } from '@/components/city-dialog/city-form/tax-rate/tax-rate';
@@ -51,6 +51,8 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
   const price = itemGoldPrice(TELEPORT) ?? 0;
   const now = useNow();
   const cooldown = player.data?.buffs.find((b) => b.id === BuffId.TELEPORT_COOLDOWN && b.endTime > now);
+  // a historic city with a name of its own keeps it
+  const ownName = city.historicLevel ? historicNameAt(city.x, city.y) : null;
 
   return (
     <>
@@ -65,18 +67,22 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
         <Separator />
         <TaxRate city={city} />
         <Separator />
-        <div className="grid gap-2">
-          <Label htmlFor="city-name">{t('common:actions.rename')}</Label>
-          <div className="flex gap-2">
-            <Input id="city-name" value={name} maxLength={20} placeholder={city.name} onChange={(e) => setName(e.target.value)} />
-            <Button
-              disabled={!name.trim() || rename.isPending}
-              onClick={() => rename.mutate({ path: { cityId: city.id }, body: { name: name.trim() } }, { onSuccess: () => setName('') })}
-            >
-              {t('common:actions.rename')}
-            </Button>
+        {ownName ? (
+          <p className="text-sm text-muted-foreground">{t('cityForm.keepsName', { name: ownName })}</p>
+        ) : (
+          <div className="grid gap-2">
+            <Label htmlFor="city-name">{t('common:actions.rename')}</Label>
+            <div className="flex gap-2">
+              <Input id="city-name" value={name} maxLength={20} placeholder={city.name} onChange={(e) => setName(e.target.value)} />
+              <Button
+                disabled={!name.trim() || rename.isPending}
+                onClick={() => rename.mutate({ path: { cityId: city.id }, body: { name: name.trim() } }, { onSuccess: () => setName('') })}
+              >
+                {t('common:actions.rename')}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
         <Separator />
         <p className="text-xs text-muted-foreground">{t('cityForm.moveRules')}</p>
         <div className="grid gap-2">

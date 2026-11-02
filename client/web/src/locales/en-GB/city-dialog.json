@@ -6,7 +6,8 @@
     "teleportOwned": "{{item}} · ×{{owned}}: a free flat tile you choose",
     "teleportPrice": "{{item}} · {{price}} gold: a free flat tile you choose",
     "teleport": "Teleport",
-    "cooldown": "Cooling down: next move in <countdown />."
+    "cooldown": "Cooling down: next move in <countdown />.",
+    "keepsName": "{{name}} is a historic city and keeps its name: it can't be renamed."
   },
   "taxRate": {
     "label": "Tax rate",

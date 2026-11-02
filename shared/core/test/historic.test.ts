@@ -6,12 +6,14 @@ import {
   draftsUsed,
   draftTake,
   fieldFactorAt,
+  HISTORIC_NAMES,
   historicCities,
   historicCityBuildings,
   historicDay,
   historicGarrison,
   historicGuard,
   historicLevelAt,
+  historicNameAt,
   historicRallyBonus,
   historicResearch,
   historicState,
@@ -21,14 +23,34 @@ import {
   maxArmyTroops,
   nextAutoDraftAt,
   seatLoyalty,
-  SeatNeglect,
   seatNeglect,
+  SeatNeglect,
   seatTitle,
   seatUnrest,
   stateTribute,
   TechType,
   TileType,
 } from '#/index.ts';
+
+describe(historicNameAt.name, () => {
+  it('names Atlantis, the capitals and the level 14s by place, and no level 12', () => {
+    expect(historicNameAt(0, 0)).toBe('Atlantis');
+    expect(historicNameAt(300, 500)).toBe('Rome');
+    expect(historicNameAt(231, 429)).toBe('Antananarivo');
+    expect(historicNameAt(207, 405)).toBeNull();
+    // Romagna's last two level 14s have none (docs/reference/historic-cities.md, Names)
+    expect(historicNameAt(693, 759)).toBeNull();
+    expect(historicNameAt(1, 1)).toBeNull();
+  });
+
+  it('only names historic cities of level 14 and up, each a name a city may have', () => {
+    for (const [place, name] of Object.entries(HISTORIC_NAMES)) {
+      const [x = -1, y = -1] = place.split(',').map(Number);
+      expect(historicLevelAt(x, y)).toBeGreaterThanOrEqual(14);
+      expect(name.length).toBeLessThanOrEqual(20);
+    }
+  });
+});
 
 describe(historicLevelAt.name, () => {
   it('puts Atlantis at (0, 0), a capital in the middle of every state, 14s every 66 tiles and 12s every 18', () => {
