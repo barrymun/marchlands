@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 import type { CityBean } from '@marchlands/api-client';
 import { tileId as toTileId } from '@marchlands/core';
 
-import { TileLabel } from '@/components/flow-attack/attack-targets-fields/city-targets/tile-label/tile-label';
 import { idleHeroes, targetCap } from '@/components/flow-attack/utils';
+import { TileLabel } from '@/components/tile-label/tile-label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { usePlayer } from '@/hooks/use-game';

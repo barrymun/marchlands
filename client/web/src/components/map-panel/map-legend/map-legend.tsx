@@ -21,6 +21,8 @@ export function MapLegend({ factions, onFactions, className }: { factions: boole
       <div className="flex flex-wrap gap-1">
         <span className="rounded px-1.5 py-0.5 text-[11px] ring-[3px] ring-fuchsia-500 ring-inset">{t('legend.thisCityValleys')}</span>
         <span className="rounded px-1.5 py-0.5 text-[11px] ring-2 ring-violet-300 ring-inset">{t('legend.otherCitiesValleys')}</span>
+        <span className="rounded border-2 border-dashed border-sky-400 px-1.5 py-0.5 text-[11px]">{t('legend.thisCityFarms')}</span>
+        <span className="rounded border-2 border-dashed border-sky-200/80 px-1.5 py-0.5 text-[11px]">{t('legend.otherCitiesFarms')}</span>
         <span className="rounded px-1.5 py-0.5 text-[11px] ring-2 ring-amber-400 ring-inset">{t('legend.thisCity')}</span>
         {Object.values(RELATION_STYLE).map((r) => (
           <span key={r.label} className={cn('rounded px-1.5 py-0.5 text-[11px]', r.ring)}>

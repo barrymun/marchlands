@@ -32,6 +32,7 @@
     "heldByYou": "Held by your city {{city}}",
     "heldBy": "Held by {{city}} ({{player}})",
     "heldByAlliance": "Held by {{city}} ({{player}}, {{alliance}})",
+    "farmedBy": "In the farming list of {{cities}}",
     "loading": "({{x}},{{y}}) loading"
   },
   "info": {
@@ -69,6 +70,8 @@
     "title": "Key",
     "thisCityValleys": "This city's valleys",
     "otherCitiesValleys": "Your other cities' valleys",
+    "thisCityFarms": "This city's farm targets",
+    "otherCitiesFarms": "Your other cities' farm targets",
     "thisCity": "This city",
     "relationValleys": "{{relation}} valleys",
     "factions": "Factions",
@@ -79,6 +82,11 @@
     "none": "None yet: attack a valley to occupy it (up to your Town Hall level).",
     "row": "{{type}} Lv {{level}}",
     "bonus": "+{{bonus}} {{resource}}"
+  },
+  "farms": {
+    "title": "Farming lists",
+    "cityHere": "{{city}} (this city)",
+    "none": "No farm targets yet: open any tile you can attack and choose Add to farming list."
   },
   "medalOdds": {
     "one": "Win: {{chance}} chance of a {{medal}} medal.",

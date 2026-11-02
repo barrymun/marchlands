@@ -9,7 +9,7 @@ import { usePlayer } from '@/hooks/use-game';
 
 /** "(x,y) Barbarian city Lv 10" for a tile. */
 export function TileLabel({ tileId }: { tileId: number }) {
-  const { t } = useTranslation(['flow-attack', 'common']);
+  const { t } = useTranslation('common');
   const mapSize = usePlayer().data?.mapSizeX ?? 800;
   const { x, y } = tileXY(tileId, mapSize);
   const info = useQuery({
@@ -18,7 +18,7 @@ export function TileLabel({ tileId }: { tileId: number }) {
   });
   return (
     <span className="tabular-nums">
-      ({x},{y}) {info.data && <span className="text-muted-foreground">{t('common:level.named', { name: placeName(info.data), level: info.data.level })}</span>}
+      ({x},{y}) {info.data && <span className="text-muted-foreground">{t('level.named', { name: placeName(info.data), level: info.data.level })}</span>}
     </span>
   );
 }

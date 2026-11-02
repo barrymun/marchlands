@@ -1,4 +1,5 @@
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Info, MapPin } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Info, MapPin, Swords } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +10,7 @@ import {
   getCitiesByCityIdQueryKey,
   getMapQueryKey,
   getMapTilesByTileIdQueryKey,
+  getPlayerFlowsOptions,
   getPlayerQueryKey,
   postValleysUpgradeMutation,
 } from '@marchlands/api-client';
@@ -17,11 +19,12 @@ import { CityDialog } from '@/components/city-dialog/city-dialog';
 import { useIsoViewport } from '@/components/iso-viewport/hooks';
 import type { PanDirection, ViewPoint } from '@/components/iso-viewport/types';
 import { panStep, spriteAt, tileAt } from '@/components/iso-viewport/utils';
+import { FarmTargets } from '@/components/map-panel/farm-targets/farm-targets';
 import { GoToCoords } from '@/components/map-panel/go-to-coords/go-to-coords';
 import { HeldValleys } from '@/components/map-panel/held-valleys/held-valleys';
 import { MapLegend } from '@/components/map-panel/map-legend/map-legend';
 import { TileCard } from '@/components/map-panel/tile-card/tile-card';
-import { readFactionTint, saveFactionTint } from '@/components/map-panel/utils';
+import { farmedTiles, farmLists, readFactionTint, saveFactionTint } from '@/components/map-panel/utils';
 import { PAN_STEP } from '@/components/map-panel/world-map/constants';
 import { useWorldMap } from '@/components/map-panel/world-map/hooks';
 import { startZoom } from '@/components/map-panel/world-map/utils';
@@ -37,15 +40,15 @@ import { cn } from '@/lib/utils';
 
 /**
  * The world map filling the viewport, everything else floating over it: a toolbar (where the map is, which opens a box
- * to go to any coordinates, the arrows, back to the city, this city's valleys, the key), the selected tile's card, and
- * the valleys or the key when asked for. On a phone the tile's card and the lists share the top of the map, one at a
+ * to go to any coordinates, the arrows, back to the city, this city's valleys, the farming lists, the key), the selected
+ * tile's card, and the valleys, the farming lists or the key when asked for. On a phone the tile's card and the lists share the top of the map, one at a
  * time.
  */
 export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number }) {
   const { t } = useTranslation(['map-panel', 'common']);
   const [selected, setSelected] = useState<number | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
-  const [list, setList] = useState<'valleys' | 'legend' | null>(null);
+  const [list, setList] = useState<'valleys' | 'farms' | 'legend' | null>(null);
   const [factions, setFactions] = useState(readFactionTint);
   const [target, setTarget] = useState<SendTarget | null>(null);
   const [moveTo, setMoveTo] = useState<{ x: number; y: number } | null>(null);
@@ -77,6 +80,11 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const owned = new Map<number, { cityName: string; here: boolean }>();
   for (const c of player.data?.castles ?? []) if (c.id !== city.id) for (const v of c.fields) owned.set(v.id, { cityName: c.name, here: false });
   for (const v of city.fields) owned.set(v.id, { cityName: city.name, here: true });
+  // the farming lists (flows' attack targets): this city's, then the lord's other cities'
+  const flows = useQuery(getPlayerFlowsOptions());
+  const farms = farmLists(flows.data ?? [], player.data?.castles ?? [], city.id);
+  const farmed = farmedTiles(farms);
+  const farmedHere = farms.find((l) => l.here)?.targets.length ?? 0;
   const release = useCommand(
     deleteValleysByTileIdMutation(),
     () => [
@@ -106,7 +114,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     const { dx, dy } = panStep(dir, PAN_STEP);
     vp.panBy(dx, dy);
   };
-  const toggle = (which: 'valleys' | 'legend') => setList((l) => (l === which ? null : which));
+  const toggle = (which: 'valleys' | 'farms' | 'legend') => setList((l) => (l === which ? null : which));
   const tintFactions = (on: boolean) => {
     setFactions(on);
     saveFactionTint(on);
@@ -115,7 +123,17 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
 
   return (
     <div className="relative h-full min-h-80 overflow-hidden">
-      <WorldMap vp={vp} map={map} mapSize={mapSize} selected={selected} hover={hover} home={{ x: city.x, y: city.y }} owned={owned} factions={factions} />
+      <WorldMap
+        vp={vp}
+        map={map}
+        mapSize={mapSize}
+        selected={selected}
+        hover={hover}
+        home={{ x: city.x, y: city.y }}
+        owned={owned}
+        farms={farmed}
+        factions={factions}
+      />
       <div
         role="toolbar"
         aria-label={t('toolbar')}
@@ -149,6 +167,11 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           <span className="tabular-nums">{city.fields.length}</span>
           <span className="sr-only">{t('held.title', { city: city.name })}</span>
         </Button>
+        <Button size="xs" variant={list === 'farms' ? 'secondary' : 'ghost'} aria-pressed={list === 'farms'} onClick={() => toggle('farms')} className="gap-1">
+          <Swords />
+          <span className="tabular-nums">{farmedHere}</span>
+          <span className="sr-only">{t('farms.title')}</span>
+        </Button>
         <Button
           size="icon-xs"
           variant={list === 'legend' ? 'secondary' : 'ghost'}
@@ -167,6 +190,9 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           releasing={release.isPending}
           className={cn(floating, 'top-14 left-2 w-[min(24rem,calc(100%-1rem))]')}
         />
+      )}
+      {list === 'farms' && (
+        <FarmTargets lists={farms} mapSize={mapSize} onGoTo={goTo} className={cn(floating, 'top-14 left-2 w-[min(26rem,calc(100%-1rem))]')} />
       )}
       {list === 'legend' && (
         <MapLegend factions={factions} onFactions={tintFactions} className={cn(floating, 'top-14 left-2 w-[min(22rem,calc(100%-1rem))]')} />

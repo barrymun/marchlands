@@ -32,6 +32,7 @@
     "heldByYou": "自分の都市 {{city}} が保有",
     "heldBy": "{{city}}（{{player}}）が保有",
     "heldByAlliance": "{{city}}（{{player}}、{{alliance}}）が保有",
+    "farmedBy": "{{cities}}の略奪リストに登録",
     "loading": "（{{x}},{{y}}）読み込み中"
   },
   "info": {
@@ -69,6 +70,8 @@
     "title": "凡例",
     "thisCityValleys": "この都市の領地",
     "otherCitiesValleys": "他の自都市の領地",
+    "thisCityFarms": "この都市の略奪目標",
+    "otherCitiesFarms": "他の都市の略奪目標",
     "thisCity": "この都市",
     "relationValleys": "{{relation}}の領地",
     "factions": "勢力",
@@ -79,6 +82,11 @@
     "none": "まだありません。領地を攻撃して占領しましょう（市役所レベルまで）。",
     "row": "{{type}} Lv {{level}}",
     "bonus": "{{resource}} +{{bonus}}"
+  },
+  "farms": {
+    "title": "略奪リスト",
+    "cityHere": "{{city}}（この都市）",
+    "none": "略奪目標はまだありません。攻撃できるタイルを開き、「略奪リストに追加」を選んでください。"
   },
   "medalOdds": {
     "one": "勝利時: {{chance}}の確率で{{medal}} メダル。",

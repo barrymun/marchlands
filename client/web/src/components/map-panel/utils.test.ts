@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Relation, TileType } from '@marchlands/core';
 
 import { FACTION_TINT_KEY } from '@/components/map-panel/constants';
-import { placeName, readFactionTint, relationGroup, saveFactionTint } from '@/components/map-panel/utils';
+import { farmedTiles, farmLists, placeName, readFactionTint, relationGroup, saveFactionTint } from '@/components/map-panel/utils';
 
 describe(relationGroup.name, () => {
   it('groups alliance members and allies as friends', () => {
@@ -82,5 +82,56 @@ describe(saveFactionTint.name, () => {
       },
     });
     expect(() => saveFactionTint(true)).not.toThrow();
+  });
+});
+
+const cities = [
+  { id: 1, name: 'Home' },
+  { id: 2, name: 'North' },
+  { id: 3, name: 'Idle' },
+];
+const attack = (targets: Record<string, number[]>) => ({ type: 'attackTargets' as const, presetId: 'p', targets });
+const flows = [
+  { name: 'Farm A', actions: [{ type: 'setMayor' as const, stat: 'power' as const }, attack({ '1': [100, 101], '2': [200] })] },
+  { name: 'Farm B', actions: [attack({ '2': [200, 201], '9': [900] })] },
+];
+
+describe(farmLists.name, () => {
+  it("lists the open city's targets first, then the other cities', each target once with the flows listing it", () => {
+    expect(farmLists(flows, cities, 2)).toEqual([
+      {
+        cityId: 2,
+        cityName: 'North',
+        here: true,
+        targets: [
+          { tileId: 200, flows: ['Farm A', 'Farm B'] },
+          { tileId: 201, flows: ['Farm B'] },
+        ],
+      },
+      {
+        cityId: 1,
+        cityName: 'Home',
+        here: false,
+        targets: [
+          { tileId: 100, flows: ['Farm A'] },
+          { tileId: 101, flows: ['Farm A'] },
+        ],
+      },
+    ]);
+  });
+
+  it('leaves out cities with no targets, cities the player no longer has, and flows that do not attack', () => {
+    expect(farmLists([{ name: 'Mayor', actions: [{ type: 'setMayor', stat: 'power' }] }], cities, 1)).toEqual([]);
+    expect(farmLists(flows, cities, 3).map((l) => l.cityId)).toEqual([1, 2]);
+  });
+});
+
+describe(farmedTiles.name, () => {
+  it('marks each target with whether the open city farms it and every city that does', () => {
+    const shared = farmLists([...flows, { name: 'Farm C', actions: [attack({ '1': [200] })] }], cities, 1);
+    const marks = farmedTiles(shared);
+    expect(marks.get(200)).toEqual({ here: true, cities: ['Home', 'North'] });
+    expect(marks.get(201)).toEqual({ here: false, cities: ['North'] });
+    expect(marks.has(900)).toBe(false);
   });
 });

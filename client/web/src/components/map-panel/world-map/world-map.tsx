@@ -11,8 +11,10 @@ import { IsoViewport } from '@/components/iso-viewport/iso-viewport';
 import type { Piece } from '@/components/iso-viewport/types';
 import { spriteBox } from '@/components/iso-viewport/utils';
 import { GRASS, RELATION_STYLE } from '@/components/map-panel/constants';
+import type { FarmMark } from '@/components/map-panel/types';
 import { relationGroup } from '@/components/map-panel/utils';
 import { placeName } from '@/components/map-panel/utils';
+import { FARM_OUTLINE } from '@/components/map-panel/world-map/constants';
 import type { WorldMapData } from '@/components/map-panel/world-map/hooks';
 import { wrap } from '@/components/map-panel/world-map/utils';
 import { useStateRulers } from '@/hooks/use-state-rulers';
@@ -22,8 +24,9 @@ import { cn } from '@/lib/utils';
 /**
  * The world map, isometric like the original: continuous grass with every valley, castle and barbarian camp standing
  * on it, in a viewport (drag, zoom with the buttons, wheel or pinch; it loads the squares coming into view and wraps
- * round the world's edge). Your valleys, other players' valleys, your city and the selected tile are outlined;
- * players' castles carry their flag and name, and the tile under the pointer is named with its level and holder.
+ * round the world's edge). Your valleys, other players' valleys, your farming lists' targets (`farms`, dashed), your
+ * city and the selected tile are outlined; players' castles carry their flag and name, and the tile under the pointer
+ * is named with its level, its holder and the cities farming it.
  * With `factions` on, the land is tinted by the faction holding each zone.
  */
 export function WorldMap({
@@ -34,6 +37,7 @@ export function WorldMap({
   hover,
   home,
   owned,
+  farms,
   factions,
 }: {
   vp: Viewport;
@@ -43,6 +47,7 @@ export function WorldMap({
   hover: { x: number; y: number } | null;
   home: { x: number; y: number };
   owned: ReadonlyMap<number, { cityName: string; here: boolean }>;
+  farms: ReadonlyMap<number, FarmMark>;
   factions: boolean;
 }) {
   const { t } = useTranslation(['map-panel', 'common']);
@@ -91,6 +96,7 @@ export function WorldMap({
     if (!info) return t('tile.loading', { x: wrap(x, mapSize), y: wrap(y, mapSize) });
     const held = owned.get(id);
     const foreign = area.valleys.get(id);
+    const farmed = farms.get(id);
     return [
       t('tile.summary', {
         type: placeName({ type: info.type, x: wrap(x, mapSize), y: wrap(y, mapSize) }),
@@ -105,18 +111,21 @@ export function WorldMap({
         (foreign.allianceName
           ? t('tile.heldByAlliance', { city: foreign.cityName, player: foreign.userName, alliance: foreign.allianceName })
           : t('tile.heldBy', { city: foreign.cityName, player: foreign.userName })),
+      farmed && t('tile.farmedBy', { cities: farmed.cities.join(t('common:list.separator')) }),
     ]
       .filter(Boolean)
       .join(' · ');
   };
 
-  // outlines: other players' valleys by relation, your valleys, your city, then the selection on top
+  // outlines: other players' valleys by relation, your valleys, your farm targets (dashed), your city, then the selection on top
   const outlines = tiles.flatMap((d) => {
     const held = owned.get(d.id);
     const foreign = !held ? area.valleys.get(d.id) : undefined;
-    const lines: { key: string; className: string; width: number }[] = [];
+    const farmed = farms.get(d.id);
+    const lines: { key: string; className: string; width: number; dash?: string }[] = [];
     if (foreign && foreign.relation !== Relation.SELF) lines.push({ key: 'f', className: RELATION_STYLE[relationGroup(foreign.relation)].stroke, width: 2 });
     if (held) lines.push({ key: 'h', className: held.here ? 'stroke-fuchsia-500' : 'stroke-violet-300', width: held.here ? 3 : 2 });
+    if (farmed) lines.push({ key: 'r', ...(farmed.here ? FARM_OUTLINE.here : FARM_OUTLINE.other) });
     if (wrap(d.x, mapSize) === home.x && wrap(d.y, mapSize) === home.y) lines.push({ key: 'c', className: 'stroke-amber-400', width: 2.5 });
     if (d.id === selected) lines.push({ key: 's', className: 'stroke-primary', width: 2.5 });
     return lines.map((l) => ({ ...l, key: `${d.x},${d.y}${l.key}`, x: d.x, y: d.y }));
@@ -141,7 +150,7 @@ export function WorldMap({
             return f && <polygon key={`z${d.x},${d.y}`} points={diamond(d.x, d.y)} className={FACTION_STYLE[f.id].tint} />;
           })}
         {outlines.map((o) => (
-          <polygon key={o.key} points={diamond(o.x, o.y)} className={cn('fill-none', o.className)} strokeWidth={o.width} />
+          <polygon key={o.key} points={diamond(o.x, o.y)} className={cn('fill-none', o.className)} strokeWidth={o.width} strokeDasharray={o.dash} />
         ))}
         {hover && <polygon points={diamond(hover.x, hover.y)} className="fill-white/10 stroke-amber-200" strokeWidth={1.5} />}
       </svg>
