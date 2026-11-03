@@ -12,6 +12,7 @@ import {
   ItemId,
   MessageSchema,
   ResearchStateSchema,
+  TREND_KEYS,
 } from '@marchlands/core';
 import { accounts } from '@marchlands/db/schema';
 
@@ -286,6 +287,7 @@ export type UseItemResult = z.infer<typeof UseItemResult>;
 // ---- statistics ----
 
 const StatCounters = z.record(z.string(), z.number()).describe('counter key (`group.detail`, see core stats.ts) -> amount');
+const StatTrend = z.record(z.enum(TREND_KEYS), z.array(z.number())).describe('each headline number (core trends.ts) day by day, one value for each of `days`');
 
 export const LordStatistics = z
   .object({
@@ -298,9 +300,12 @@ export const LordStatistics = z
         owned: z.boolean(),
         allTime: StatCounters,
         last7Days: StatCounters,
+        trend: StatTrend,
       }),
     ),
     since: Ms.nullable().describe('when counting began (nothing before it is counted)'),
+    days: z.array(z.string()).describe('the UTC days the trends cover (YYYY-MM-DD), oldest first, ending today'),
+    trend: StatTrend,
   })
   .meta({ id: 'LordStatistics', description: "(marchlands) the lord's statistics; written in batches, so up to a few minutes behind" });
 export type LordStatistics = z.infer<typeof LordStatistics>;

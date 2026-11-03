@@ -4632,6 +4632,35 @@
                     "type": "number"
                   },
                   "description": "counter key (`group.detail`, see core stats.ts) -> amount"
+                },
+                "trend": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "enum": [
+                      "attacksWon",
+                      "defensesWon",
+                      "honor",
+                      "enemies",
+                      "trained",
+                      "captured"
+                    ]
+                  },
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "attacksWon",
+                    "defensesWon",
+                    "honor",
+                    "enemies",
+                    "trained",
+                    "captured"
+                  ],
+                  "description": "each headline number (core trends.ts) day by day, one value for each of `days`"
                 }
               },
               "required": [
@@ -4639,7 +4668,8 @@
                 "name",
                 "owned",
                 "allTime",
-                "last7Days"
+                "last7Days",
+                "trend"
               ]
             }
           },
@@ -4654,13 +4684,51 @@
               }
             ],
             "description": "when counting began (nothing before it is counted)"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "the UTC days the trends cover (YYYY-MM-DD), oldest first, ending today"
+          },
+          "trend": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "enum": [
+                "attacksWon",
+                "defensesWon",
+                "honor",
+                "enemies",
+                "trained",
+                "captured"
+              ]
+            },
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "attacksWon",
+              "defensesWon",
+              "honor",
+              "enemies",
+              "trained",
+              "captured"
+            ],
+            "description": "each headline number (core trends.ts) day by day, one value for each of `days`"
           }
         },
         "required": [
           "allTime",
           "last7Days",
           "cities",
-          "since"
+          "since",
+          "days",
+          "trend"
         ],
         "description": "(marchlands) the lord's statistics; written in batches, so up to a few minutes behind"
       },
@@ -17016,6 +17084,35 @@
                     "type": "number"
                   },
                   "description": "counter key (`group.detail`, see core stats.ts) -> amount"
+                },
+                "trend": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "enum": [
+                      "attacksWon",
+                      "defensesWon",
+                      "honor",
+                      "enemies",
+                      "trained",
+                      "captured"
+                    ]
+                  },
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "attacksWon",
+                    "defensesWon",
+                    "honor",
+                    "enemies",
+                    "trained",
+                    "captured"
+                  ],
+                  "description": "each headline number (core trends.ts) day by day, one value for each of `days`"
                 }
               },
               "required": [
@@ -17023,7 +17120,8 @@
                 "name",
                 "owned",
                 "allTime",
-                "last7Days"
+                "last7Days",
+                "trend"
               ],
               "additionalProperties": false
             }
@@ -17039,13 +17137,51 @@
               }
             ],
             "description": "when counting began (nothing before it is counted)"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "the UTC days the trends cover (YYYY-MM-DD), oldest first, ending today"
+          },
+          "trend": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "enum": [
+                "attacksWon",
+                "defensesWon",
+                "honor",
+                "enemies",
+                "trained",
+                "captured"
+              ]
+            },
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "attacksWon",
+              "defensesWon",
+              "honor",
+              "enemies",
+              "trained",
+              "captured"
+            ],
+            "description": "each headline number (core trends.ts) day by day, one value for each of `days`"
           }
         },
         "required": [
           "allTime",
           "last7Days",
           "cities",
-          "since"
+          "since",
+          "days",
+          "trend"
         ],
         "additionalProperties": false,
         "description": "(marchlands) the lord's statistics; written in batches, so up to a few minutes behind"

@@ -1404,11 +1404,27 @@ export type LordStatisticsInput = {
         last7Days: {
             [key: string]: number;
         };
+        /**
+         * each headline number (core trends.ts) day by day, one value for each of `days`
+         */
+        trend: {
+            [key: string]: Array<number>;
+        };
     }>;
     /**
      * when counting began (nothing before it is counted)
      */
     since: number | null;
+    /**
+     * the UTC days the trends cover (YYYY-MM-DD), oldest first, ending today
+     */
+    days: Array<string>;
+    /**
+     * each headline number (core trends.ts) day by day, one value for each of `days`
+     */
+    trend: {
+        [key: string]: Array<number>;
+    };
 };
 
 export type TrainSplitResultInput = {
@@ -4985,11 +5001,27 @@ export type LordStatistics = {
         last7Days: {
             [key: string]: number;
         };
+        /**
+         * each headline number (core trends.ts) day by day, one value for each of `days`
+         */
+        trend: {
+            [key: string]: Array<number>;
+        };
     }>;
     /**
      * when counting began (nothing before it is counted)
      */
     since: number | null;
+    /**
+     * the UTC days the trends cover (YYYY-MM-DD), oldest first, ending today
+     */
+    days: Array<string>;
+    /**
+     * each headline number (core trends.ts) day by day, one value for each of `days`
+     */
+    trend: {
+        [key: string]: Array<number>;
+    };
 };
 
 export type TrainSplitResult = {

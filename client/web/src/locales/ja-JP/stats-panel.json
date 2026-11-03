@@ -22,7 +22,9 @@
     "trained": "訓練した部隊",
     "fell_other": "{{n}} が戦死",
     "citiesCaptured": "占領した都市",
-    "valleys_other": "占領した領地 {{n}}"
+    "valleys_other": "占領した領地 {{n}}",
+    "onDay": "{{date}}: {{value}}",
+    "trend_other": "過去 {{count}} 日間の日ごとの推移"
   },
   "winsByLevel": {
     "title": "レベル別の勝利",

@@ -37,6 +37,10 @@ export function StatsPanel() {
   // a city no longer in the statistics shows them all
   const city = s.city == null ? null : (data.cities.find((c) => c.cityId === s.city) ?? null);
   const c: Counters = (city ?? data)[period];
+  // the trends over the period shown: 7 days, or all the days sent
+  const shownDays = period === StatsPeriod.LAST_7_DAYS ? 7 : data.days.length;
+  const days = data.days.slice(-shownDays);
+  const trend = Object.fromEntries(Object.entries((city ?? data).trend).map(([k, v]) => [k, v.slice(-shownDays)]));
 
   return (
     <div className="grid gap-4">
@@ -69,7 +73,7 @@ export function StatsPanel() {
         </div>
       </header>
 
-      <Headline c={c} />
+      <Headline c={c} days={days} trend={trend} />
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <WinsByLevel c={c} />
         <Enemies c={c} />

@@ -42,7 +42,14 @@
     "valleys_two": "واديان محتلان ({{n}})",
     "valleys_few": "{{n}} وديان محتلة",
     "valleys_many": "{{n}} واديًا محتلًا",
-    "valleys_other": "{{n}} وادٍ محتل"
+    "valleys_other": "{{n}} وادٍ محتل",
+    "onDay": "{{date}}: {{value}}",
+    "trend_zero": "يومًا بيوم خلال آخر {{count}} يوم",
+    "trend_one": "يومًا بيوم خلال آخر يوم ({{count}})",
+    "trend_two": "يومًا بيوم خلال آخر يومين ({{count}})",
+    "trend_few": "يومًا بيوم خلال آخر {{count}} أيام",
+    "trend_many": "يومًا بيوم خلال آخر {{count}} يومًا",
+    "trend_other": "يومًا بيوم خلال آخر {{count}} يوم"
   },
   "winsByLevel": {
     "title": "الانتصارات حسب المستوى",

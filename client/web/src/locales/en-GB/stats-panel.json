@@ -26,7 +26,10 @@
     "fell_other": "{{n}} fell for good",
     "citiesCaptured": "Cities captured",
     "valleys_one": "{{n}} valley occupied",
-    "valleys_other": "{{n}} valleys occupied"
+    "valleys_other": "{{n}} valleys occupied",
+    "onDay": "{{date}}: {{value}}",
+    "trend_one": "Day by day over the last {{count}} day",
+    "trend_other": "Day by day over the last {{count}} days"
   },
   "winsByLevel": {
     "title": "Wins by level",
