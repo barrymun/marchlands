@@ -20,21 +20,45 @@ export interface HistoricDay {
 }
 
 /**
- * The historic city's level at a map position, or null (docs/reference/historic-cities.md). Atlantis (18) at (0, 0);
- * each state's capital (16) in its middle; level 14s every 66 tiles from 33 across the whole map, three to a state
- * each way, but none in a state's middle place, by its capital; and level 12s every 18 tiles from 9, also across the
- * whole map (44 × 44 = 1,936), which puts one in each of those middle places.
+ * The two level 14 places Age 2 left empty: Romagna's last two, which its map shows under Atlantis's label and which
+ * have no name (docs/reference/historic-cities.md, Names).
  */
-export function historicLevelAt(x: number, y: number, mapSize: number = BALANCE.mapSize): HistoricLevel | null {
+const EMPTY_14 = new Set(['693,759', '759,759']);
+
+/** No level 12 stands this close (in tiles, straight line) to a bigger historic city, as on the live map. */
+const LEVEL_12_CLEARANCE = 9;
+
+/** The level of the bigger historic city (18, 16 or 14) at a map position, or null. */
+function biggerLevelAt(x: number, y: number, mapSize: number): Exclude<HistoricLevel, 12> | null {
   if (x === 0 && y === 0) return 18;
   const cell = mapSize / BALANCE.stateGrid;
   if (x % cell === cell / 2 && y % cell === cell / 2) return 16;
   const on14 = (v: number) => v >= 33 && (v - 33) % 66 === 0;
-  // every third place of the level 14 grid is a state's middle one: a level 12 stands there instead
+  // every third place of the level 14 grid is a state's middle one, by its capital: no level 14 there
   const middle = (v: number) => ((v - 33) / 66) % 3 === 1;
-  if (on14(x) && on14(y) && !(middle(x) && middle(y))) return 14;
+  return on14(x) && on14(y) && !(middle(x) && middle(y)) && !EMPTY_14.has(`${x},${y}`) ? 14 : null;
+}
+
+/** Whether a bigger historic city stands within LEVEL_12_CLEARANCE of a position (the nearest of each grid is enough). */
+function nearBigger(x: number, y: number, mapSize: number): boolean {
+  const cell = mapSize / BALANCE.stateGrid;
+  const near = (bx: number, by: number) => Math.hypot(bx - x, by - y) <= LEVEL_12_CLEARANCE && biggerLevelAt(bx, by, mapSize) != null;
+  const grid14 = (v: number) => 33 + 66 * Math.round((v - 33) / 66);
+  return near(0, 0) || near(Math.floor(x / cell) * cell + cell / 2, Math.floor(y / cell) * cell + cell / 2) || near(grid14(x), grid14(y));
+}
+
+/**
+ * The historic city's level at a map position, or null (docs/reference/historic-cities.md). Atlantis (18) at (0, 0);
+ * each state's capital (16) in its middle; level 14s every 66 tiles from 33 across the whole map, three to a state each
+ * way, but none in a state's middle place, by its capital, nor at Romagna's last two places (EMPTY_14): 126; and level
+ * 12s every 18 tiles from 9, also across the whole map, but none within 9 tiles of a bigger one, as on the live map
+ * (44 × 44 = 1,936 places, 1,795 of them held).
+ */
+export function historicLevelAt(x: number, y: number, mapSize: number = BALANCE.mapSize): HistoricLevel | null {
+  const bigger = biggerLevelAt(x, y, mapSize);
+  if (bigger) return bigger;
   const on12 = (v: number) => v >= 9 && (v - 9) % 18 === 0;
-  return on12(x) && on12(y) ? 12 : null;
+  return on12(x) && on12(y) && !nearBigger(x, y, mapSize) ? 12 : null;
 }
 
 /** Every historic city's position and level on a map. */

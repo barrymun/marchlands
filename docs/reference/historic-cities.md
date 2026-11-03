@@ -82,7 +82,7 @@ For Friesland that's (33, 33), (99, 33), (165, 33), (33, 99), (165, 99), (33, 16
 
 **Every 18 tiles from 9 across the whole map** (sources 2, 9 and 11): x and y in {9, 27, 45 … 783}, 44 × 44 = **1,936** on the map, 121 a state. *(Corrected 2026-11-01: first read as offsets within each state; the whole-map grid is the one that puts a level 12 in each state's middle place of the level 14 grid, as source 9 says, and the wiki's two named cities on it, below.)*
 
-- **One stands beside each capital:** (99, 99), (297, 297), (495, 495) and (693, 693), and the other middle places of the level 14 grid, (99, 297) and so on, next to the capitals at (100, 100) …, are level 12s. Source 9 says so, and source 11 counts 1,936.
+- **One stands beside each capital:** (99, 99), (297, 297), (495, 495) and (693, 693), and the other middle places of the level 14 grid, (99, 297) and so on, next to the capitals at (100, 100) …, are level 12s. Source 9 says so, and source 11 counts 1,936. *(Superseded 2026-11-03: the live map had no level 12 within 9 tiles of a bigger historic city, so none beside the capitals but Islamabad's: [historic-cities-level-12-names.md](historic-cities-level-12-names.md), How many there were.)*
 - Others come within 6 tiles of a level 14, for example (27, 27) by (33, 33), but none lands on one.
 - Source 13 says "every 9 miles", which is probably a slip for the 9-tile draft radius.
 
@@ -186,7 +186,7 @@ What a historic city's holder drafted, and from whom (sources 3, 6, 7 and 13):
 
 ## Names
 
-Source 4's picture names every level 14 and 16 city and Atlantis, with its coordinates (read 2026-11-01, transcribed here). Level 12s have no names. In the picture Atlantis's label fills the cells of Romagna's last two level 14s, (693, 759) and (759, 759), so those two have none (source 1 labels them "Atlantis" too). A few of the picture's spellings are corrected here: Bujumburu (Bujumbura), Andora La Vella (Andorra la Vella), Santa Fe De Bogata (Santa Fe de Bogota), Bandir Seri Begawan (Bandar Seri Begawan), Anman (Amman), Valetta (Valletta), kigali (Kigali). Its other choices stay: Loyang, Maynila, Berne, Ulan Bator, Saint John. The game's names are in `shared/core/src/historic-names.ts` (`HISTORIC_NAMES`, which a held one keeps as its city's name) and, for the map, `client/web/src/locales/<locale>/data-historic.json`, both keyed by place.
+Source 4's picture names every level 14 and 16 city and Atlantis, with its coordinates (read 2026-11-01, transcribed here). It leaves out the level 12s, but they had names too (found 2026-11-03): mostly towns of North America and elsewhere, a few small countries' capitals, listed for seven of the sixteen states in a forum post, transcribed in [historic-cities-level-12-names.md](historic-cities-level-12-names.md). In the picture Atlantis's label fills the cells of Romagna's last two level 14s, (693, 759) and (759, 759), so those two have none (source 1 labels them "Atlantis" too). A few of the picture's spellings are corrected here: Bujumburu (Bujumbura), Andora La Vella (Andorra la Vella), Santa Fe De Bogata (Santa Fe de Bogota), Bandir Seri Begawan (Bandar Seri Begawan), Anman (Amman), Valetta (Valletta), kigali (Kigali). Its other choices stay: Loyang, Maynila, Berne, Ulan Bator, Saint John. The game's names are in `shared/core/src/historic-names.ts` (`HISTORIC_NAMES`, which a held one keeps as its city's name) and, for the map, `client/web/src/locales/<locale>/data-historic.json`, both keyed by place.
 
 | State | Level 16 (and Atlantis) | Level 14s |
 |---|---|---|

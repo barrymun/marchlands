@@ -67,9 +67,22 @@ describe(historicLevelAt.name, () => {
     expect(historicLevelAt(207, 9)).toBe(12);
   });
 
-  it('has a level 12 in each state’s middle place of the level 14 grid, as source 9 said', () => {
-    for (const v of [99, 297, 495, 693]) expect(historicLevelAt(v, v)).toBe(12);
-    expect(historicLevelAt(99, 297)).toBe(12);
+  it('leaves no level 12 within 9 tiles of a bigger one, as on the live map', () => {
+    // beside Washington, D.C. (100, 100), Tirana (33, 33) and Harare (627, 297)
+    expect(historicLevelAt(99, 99)).toBeNull();
+    expect(historicLevelAt(27, 27)).toBeNull();
+    expect(historicLevelAt(621, 297)).toBeNull();
+    // just past it: 12.7 from Atlantis, 9.9 from Islamabad (700, 700), 17 from Tirana
+    expect(historicLevelAt(9, 9)).toBe(12);
+    expect(historicLevelAt(693, 693)).toBe(12);
+    expect(historicLevelAt(45, 45)).toBe(12);
+  });
+
+  it('leaves Romagna’s last two level 14 places empty, and the level 12s beside them standing', () => {
+    expect(historicLevelAt(693, 759)).toBeNull();
+    expect(historicLevelAt(759, 759)).toBeNull();
+    expect(historicLevelAt(693, 765)).toBe(12);
+    expect(historicLevelAt(765, 765)).toBe(12);
   });
 
   it('puts the wiki’s two named cities, St. Gallen and Vigevano, on level 12 places', () => {
@@ -86,11 +99,11 @@ describe(historicLevelAt.name, () => {
 });
 
 describe(historicCities.name, () => {
-  it('lists 2,081: one Atlantis, 16 capitals, 128 level 14s and 1,936 level 12s', () => {
+  it('lists 1,938: one Atlantis, 16 capitals, 126 level 14s and 1,795 level 12s, as on the live map', () => {
     const all = historicCities();
     const count = (level: number) => all.filter((c) => c.level === level).length;
-    expect(all).toHaveLength(2081);
-    expect([count(18), count(16), count(14), count(12)]).toEqual([1, 16, 128, 1936]);
+    expect(all).toHaveLength(1938);
+    expect([count(18), count(16), count(14), count(12)]).toEqual([1, 16, 126, 1795]);
   });
 });
 
