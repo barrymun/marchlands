@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Camera, Outline, View } from '@/components/iso-viewport/types';
+import type { Camera, Outline, Piece, View } from '@/components/iso-viewport/types';
 import {
   clampToScene,
   clampZoom,
@@ -7,8 +7,11 @@ import {
   fitZoom,
   isOutline,
   isOverlay,
+  layOutlines,
   nextZoom,
+  type OutlineContext,
   outlineHalves,
+  type OutlineLayer,
   outlinePoints,
   panStep,
   sceneBox,
@@ -329,5 +332,183 @@ describe(outlinePoints.name, () => {
       { x: 768, y: 384 - 64 },
       { x: 768 + 128, y: 384 },
     ]);
+  });
+});
+
+/** A stand-in 2D context that notes what is drawn on it. */
+function fakeContext() {
+  const calls: string[] = [];
+  const ctx: OutlineContext = {
+    globalCompositeOperation: 'source-over',
+    filter: 'none',
+    globalAlpha: 1,
+    strokeStyle: '',
+    lineWidth: 1,
+    lineCap: 'butt',
+    imageSmoothingEnabled: true,
+    setLineDash: (dash) => calls.push(`dash ${[...dash].join(',')}`),
+    beginPath: () => calls.push('begin'),
+    moveTo: (x, y) => calls.push(`move ${x},${y}`),
+    lineTo: (x, y) => calls.push(`line ${x},${y}`),
+    stroke: () =>
+      calls.push(`stroke ${typeof ctx.strokeStyle === 'string' ? ctx.strokeStyle : 'pattern'} ${ctx.lineWidth} ${ctx.lineCap} ${ctx.globalCompositeOperation}`),
+  };
+  return { ctx, calls };
+}
+
+/**
+ * A stand-in scene canvas of a size, and the layer canvas: laying a layer of no size throws, as the browser's
+ * drawImage does ("The image argument is a canvas element with a width or height of 0").
+ */
+function fakeCanvases(width: number, height: number) {
+  const lay = fakeContext();
+  const layer: OutlineLayer<OutlineContext> = { width: 300, height: 150, getContext: () => lay.ctx };
+  const laid: OutlineLayer<OutlineContext>[] = [];
+  const target = {
+    canvas: { width, height },
+    drawImage(image: OutlineLayer<OutlineContext>) {
+      if (image.width === 0 || image.height === 0) throw new Error('InvalidStateError: a canvas element with a width or height of 0');
+      laid.push(image);
+    },
+  };
+  return { target, layer, lay, laid };
+}
+
+const sprite: Piece = { key: 's', col: 100, row: 200, src: 'castle.png' };
+const back = outline;
+const front: Outline = { ...outline, key: 'of', half: 'front' };
+
+describe(layOutlines.name, () => {
+  it.each([
+    [0, 0],
+    [0, 320],
+    [640, 0],
+  ])('draws nothing on a view of no size (%i by %i) rather than throwing', (w, h) => {
+    const { target, layer, lay, laid } = fakeCanvases(w, h);
+    const erased: Piece[] = [];
+    expect(() =>
+      layOutlines(
+        target,
+        layer,
+        [back, sprite, front],
+        cam,
+        view,
+        () => 'red',
+        (_, p) => erased.push(p),
+      ),
+    ).not.toThrow();
+    expect(
+      layOutlines(
+        target,
+        layer,
+        [back, sprite, front],
+        cam,
+        view,
+        () => 'red',
+        (_, p) => erased.push(p),
+      ),
+    ).toBe(false);
+    expect(laid).toEqual([]);
+    expect(lay.calls).toEqual([]);
+    expect(erased).toEqual([]);
+  });
+
+  it('draws nothing without outlines', () => {
+    const { target, layer, lay, laid } = fakeCanvases(640, 320);
+    expect(
+      layOutlines(
+        target,
+        layer,
+        [sprite],
+        cam,
+        view,
+        () => 'red',
+        () => undefined,
+      ),
+    ).toBe(false);
+    expect(laid).toEqual([]);
+    expect(lay.calls).toEqual([]);
+  });
+
+  it('sizes the layer to the scene and lays it over it once', () => {
+    const { target, layer, laid } = fakeCanvases(640, 320);
+    expect(
+      layOutlines(
+        target,
+        layer,
+        [back, sprite, front],
+        cam,
+        view,
+        () => 'red',
+        () => undefined,
+      ),
+    ).toBe(true);
+    expect([layer.width, layer.height]).toEqual([640, 320]);
+    expect(laid).toEqual([layer]);
+  });
+
+  it('strokes each half through its corners in its colour, width and dashes, in device pixels', () => {
+    const { target, layer, lay } = fakeCanvases(1280, 640);
+    const dashed: Outline = { ...front, className: 'stroke-sky-400', width: 2.5, dash: [5, 3] };
+    layOutlines(
+      target,
+      layer,
+      [back, dashed],
+      cam,
+      { ...view, dpr: 2 },
+      (c) => (c === 'stroke-sky-400' ? 'blue' : 'red'),
+      () => undefined,
+    );
+    expect(lay.calls).toEqual([
+      'dash ',
+      'begin',
+      'move 576,320',
+      'line 640,288',
+      'line 704,320',
+      'stroke red 4 round source-over',
+      'dash 10,6',
+      'begin',
+      'move 704,320',
+      'line 640,352',
+      'line 576,320',
+      'stroke blue 5 butt source-over',
+    ]);
+  });
+
+  it('asks for each colour once', () => {
+    const { target, layer } = fakeCanvases(640, 320);
+    const asked: string[] = [];
+    layOutlines(
+      target,
+      layer,
+      [back, front, { ...back, col: 101 }],
+      cam,
+      view,
+      (c) => (asked.push(c), 'red'),
+      () => undefined,
+    );
+    expect(asked).toEqual(['stroke-primary']);
+  });
+
+  it('erases with the pieces after an outline, never those before the first', () => {
+    const { target, layer, lay } = fakeCanvases(640, 320);
+    const behind: Piece = { ...sprite, key: 'behind' };
+    const inFront: Piece = { ...sprite, key: 'front' };
+    const erased: [string, string][] = [];
+    layOutlines(
+      target,
+      layer,
+      [behind, back, sprite, front, inFront],
+      cam,
+      view,
+      () => 'red',
+      (l, p) => erased.push([p.key, l.globalCompositeOperation]),
+    );
+    expect(erased).toEqual([
+      ['s', 'destination-out'],
+      ['front', 'destination-out'],
+    ]);
+    // and an outline after an erasing piece is drawn normally again
+    expect(lay.calls.filter((c) => c.startsWith('stroke'))).toEqual(['stroke red 2 round source-over', 'stroke red 2 round source-over']);
   });
 });

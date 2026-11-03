@@ -11,7 +11,7 @@ import {
   dragged,
   isOutline,
   isOverlay,
-  outlinePoints,
+  layOutlines,
   overlayRect,
   panStep,
   spriteBox,
@@ -134,40 +134,10 @@ export function IsoViewport({
       for (const s of pieces) if (isOverlay(s) && s.light) draw(ctx, s);
       ctx.globalAlpha = 1;
     }
-    // the outlines, on a layer of their own laid over the night: each in the scene's order, and every piece after it
-    // erasing what of it the piece covers, so a building hides the edges behind it and not the ones in front
+    // the outlines, on a layer of their own laid over the night, each hidden by what stands in front of it
     if (pieces.some(isOutline)) {
       const layer = (outlineLayer.current ??= document.createElement('canvas'));
-      [layer.width, layer.height] = [width, height];
-      const lay = layer.getContext('2d');
-      if (lay) {
-        lay.imageSmoothingEnabled = false;
-        const strokes = new Map<string, string>();
-        let started = false;
-        for (const s of pieces) {
-          if (isOutline(s)) {
-            if (!strokes.has(s.className)) strokes.set(s.className, strokeOf(s.className));
-            const [first, ...rest] = outlinePoints(s, camera, view);
-            if (!first) continue;
-            lay.globalCompositeOperation = 'source-over';
-            lay.filter = 'none';
-            lay.globalAlpha = 1;
-            lay.strokeStyle = strokes.get(s.className) ?? 'transparent';
-            lay.lineWidth = s.width * view.dpr;
-            lay.lineCap = s.dash ? 'butt' : 'round';
-            lay.setLineDash((s.dash ?? []).map((n) => n * view.dpr));
-            lay.beginPath();
-            lay.moveTo(first.x, first.y);
-            for (const p of rest) lay.lineTo(p.x, p.y);
-            lay.stroke();
-            started = true;
-          } else if (started) {
-            lay.globalCompositeOperation = 'destination-out';
-            draw(lay, s);
-          }
-        }
-        ctx.drawImage(layer, 0, 0);
-      }
+      layOutlines(ctx, layer, pieces, camera, view, strokeOf, draw);
     }
     if (!skyNow) return;
     const px = Math.max(1, Math.round(view.dpr));

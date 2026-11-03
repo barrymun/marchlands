@@ -48,6 +48,83 @@ export function outlinePoints(o: Outline, cam: Camera, view: View): ViewPoint[] 
   return o.half === 'back' ? [left, { x: p.x, y: p.y - h }, right] : [right, { x: p.x, y: p.y + h }, left];
 }
 
+/** What drawing a layer of outlines needs of a 2D context (a canvas's, or a stand-in in tests). */
+export type OutlineContext = Pick<
+  CanvasRenderingContext2D,
+  | 'globalCompositeOperation'
+  | 'filter'
+  | 'globalAlpha'
+  | 'strokeStyle'
+  | 'lineWidth'
+  | 'lineCap'
+  | 'imageSmoothingEnabled'
+  | 'setLineDash'
+  | 'beginPath'
+  | 'moveTo'
+  | 'lineTo'
+  | 'stroke'
+>;
+
+/** The canvas the outlines are drawn on before they're laid over the scene (an offscreen one, or a stand-in in tests). */
+export interface OutlineLayer<X extends OutlineContext> {
+  width: number;
+  height: number;
+  getContext(contextId: '2d'): X | null;
+}
+
+/**
+ * Lays the outlines among `pieces` over the scene drawn on `target`: each stroked on `layer` in the pieces' order, and
+ * every piece after the first erasing what of the outlines before it the piece covers (`erase` draws it, the layer set
+ * to `destination-out`), so a building hides the edges behind it and not the ones in front. Colours come from
+ * `strokeOf` (a CSS class's stroke), asked once a class. Nothing is drawn, and false returned, with no outlines or
+ * while the view has no size: a canvas of no size can't be drawn (the browser throws).
+ */
+export function layOutlines<X extends OutlineContext, L extends OutlineLayer<X>>(
+  target: { readonly canvas: { width: number; height: number }; drawImage(image: NoInfer<L>, dx: number, dy: number): void },
+  layer: L,
+  pieces: readonly Piece[],
+  cam: Camera,
+  view: View,
+  strokeOf: (className: string) => string,
+  erase: (lay: X, piece: Piece) => void,
+): boolean {
+  const { width, height } = target.canvas;
+  if (width <= 0 || height <= 0 || !pieces.some(isOutline)) return false;
+  [layer.width, layer.height] = [width, height];
+  const lay = layer.getContext('2d');
+  if (!lay) return false;
+  lay.imageSmoothingEnabled = false;
+  const strokes = new Map<string, string>();
+  let started = false;
+  for (const s of pieces) {
+    if (!isOutline(s)) {
+      if (started) {
+        lay.globalCompositeOperation = 'destination-out';
+        erase(lay, s);
+      }
+      continue;
+    }
+    const [first, ...rest] = outlinePoints(s, cam, view);
+    if (!first) continue;
+    const stroke = strokes.get(s.className) ?? strokeOf(s.className);
+    strokes.set(s.className, stroke);
+    lay.globalCompositeOperation = 'source-over';
+    lay.filter = 'none';
+    lay.globalAlpha = 1;
+    lay.strokeStyle = stroke;
+    lay.lineWidth = s.width * view.dpr;
+    lay.lineCap = s.dash ? 'butt' : 'round';
+    lay.setLineDash((s.dash ?? []).map((n) => n * view.dpr));
+    lay.beginPath();
+    lay.moveTo(first.x, first.y);
+    for (const p of rest) lay.lineTo(p.x, p.y);
+    lay.stroke();
+    started = true;
+  }
+  target.drawImage(layer, 0, 0);
+  return true;
+}
+
 /** Where an overlay is drawn, in device pixels: its tile's middle, moved by its offset in art pixels. */
 export function overlayRect(o: Overlay, cam: Camera, view: View): { x: number; y: number; w: number; h: number } {
   const k = cam.zoom * view.dpr;
