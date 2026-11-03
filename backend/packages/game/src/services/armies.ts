@@ -24,6 +24,7 @@ import {
   Mission,
   msg,
   ref,
+  reliefMarchMs,
   reliefMultiplier,
   researchLevel,
   type ResourceSet,
@@ -62,7 +63,7 @@ function cleanResources(r: Partial<ResourceSet> | undefined): ResourceSet {
 /** March duration, including the Relief Station bonus between a lord's own cities. */
 function armyMarchMs(b: CityBundle, fromTile: number, toTile: number, troops: TroopCounts, ownTarget: boolean) {
   const ms = marchTimeMs(fromTile, toTile, troops, b.player.research, b.city.buildings);
-  return ownTarget ? Math.max(1000, Math.floor(ms / reliefMultiplier(b.city.buildings))) : ms;
+  return ownTarget ? reliefMarchMs(ms, b.city.buildings) : ms;
 }
 
 /**

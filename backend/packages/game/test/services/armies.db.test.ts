@@ -15,6 +15,7 @@ import {
   Mission,
   msg,
   ref,
+  reliefMarchMs,
   reliefMultiplier,
   TechType,
   TileType,
@@ -24,7 +25,22 @@ import {
 import { armyRef, cityPosition, homeMarchMs, tilePosition } from '#/engine/armies.ts';
 import { admin, armies, interior, player, shop } from '#/index.ts';
 import { getHero } from '#/repo.ts';
-import { allies, armyRow, arrive, lastPush, lastReport, NO_RESOURCES, send, tileNear, valleyNear, WAR_ZONE, warCity, warrior } from '#test/support/armies.ts';
+import {
+  allies,
+  armyRow,
+  arrive,
+  cityTile,
+  lastPush,
+  lastReport,
+  NO_RESOURCES,
+  secondCity,
+  send,
+  tileNear,
+  valleyNear,
+  WAR_ZONE,
+  warCity,
+  warrior,
+} from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import {
   addHero,
@@ -137,6 +153,37 @@ describe(armies.sendArmy.name, () => {
       await arrive(g, a.armyId);
       const r = await send(g, p, { targetTileId: valley.id, mission: Mission.REINFORCE, troops: { lightCavalry: 1 } });
       expect(r.reachTime - r.startTime).toBe(Math.max(1000, Math.floor(ms / reliefMultiplier(b.city.buildings))));
+    }));
+
+  it('marches home from its own city as fast as it went, with a Relief Station', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g);
+      const second = await secondCity(g, p, heroId);
+      await setBuildings(g, p, [[5, BuildingType.RELIEF_STATION, 10]]);
+      const troops = { carriage: 5 };
+      const a = await send(g, p, { targetTileId: await cityTile(g, second), mission: Mission.TRANSPORT, troops, resources: { food: 100 } });
+      const b = await cityBundle(g, p);
+      const ms = marchTimeMs(await cityTile(g, second), b.city.tileId, troops, b.player.research, b.city.buildings);
+      expect(reliefMultiplier(b.city.buildings)).toBe(6);
+      await arrive(g, a.armyId);
+      const back = await armyRow(g, a.armyId);
+      expect(back?.direction).toBe(ArmyDirection.BACKWARD);
+      expect(back && back.reachTime - back.startTime).toBe(reliefMarchMs(ms, b.city.buildings));
+      expect(back && back.reachTime - back.startTime).toBe(a.reachTime - a.startTime);
+    }));
+
+  it('marches home from anywhere else at its own pace, Relief Station or not', () =>
+    game(async (g) => {
+      const { p } = await warrior(g);
+      await setBuildings(g, p, [[5, BuildingType.RELIEF_STATION, 10]]);
+      const npc = await tileNear(g, p.cityId, TileType.NPC);
+      const troops = { scouter: 1 };
+      const a = await send(g, p, { targetTileId: npc.id, mission: Mission.SCOUT, troops });
+      const b = await cityBundle(g, p);
+      await arrive(g, a.armyId);
+      const back = await armyRow(g, a.armyId);
+      expect(back?.direction).toBe(ArmyDirection.BACKWARD);
+      expect(back && back.reachTime - back.startTime).toBe(marchTimeMs(npc.id, b.city.tileId, troops, b.player.research, b.city.buildings));
     }));
 
   it('tells the defender an army is coming', () =>

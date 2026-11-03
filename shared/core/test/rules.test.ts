@@ -5,6 +5,7 @@ import {
   buildCost,
   buildingConfig,
   buildingHeroExp,
+  BuildingStatus,
   BuildingType,
   buildTimeMs,
   coinsForSpeedup,
@@ -50,6 +51,7 @@ import {
   prestigeOf,
   randomStat,
   regenerateNpc,
+  reliefMarchMs,
   researchConfig,
   researchCost,
   researchHeroExp,
@@ -329,6 +331,14 @@ describe('armies', () => {
   });
   it('slowest unit decides speed', () => {
     expect(marchTimeMs(0, 10, { lightCavalry: 1, catapult: 1 }, {}, [])).toBe(Math.floor((10 * 60_000) / 80) * 1000);
+  });
+  it("a Relief Station speeds marches between a player's own places by its multiplier, never under a second", () => {
+    const relief = (level: number) => [{ positionId: 0, typeId: BuildingType.RELIEF_STATION, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 }];
+    expect(reliefMarchMs(600_000, [])).toBe(600_000);
+    expect(reliefMarchMs(600_000, relief(1))).toBe(300_000);
+    expect(reliefMarchMs(600_000, relief(10))).toBe(100_000);
+    expect(reliefMarchMs(1001, relief(10))).toBe(1000);
+    expect(reliefMarchMs(5000, relief(4))).toBe(1666);
   });
   it('troop table rows 8-10 carry transporter/cavalry/cataphract stats', () => {
     expect(troopConfig(8)?.load).toBe(5000);

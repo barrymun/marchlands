@@ -180,6 +180,12 @@ export function reliefMultiplier(buildings: BuildingState[]): number {
 }
 
 /**
+ * A march between a player's own places (to their own city or valley, and home from one) sped up by the Relief Station of
+ * the city it belongs to; at least a second.
+ */
+export const reliefMarchMs = (ms: number, buildings: BuildingState[]) => Math.max(1000, Math.floor(ms / reliefMultiplier(buildings)));
+
+/**
  * "Experience" weight per unit, by troop / fortification id (orig Utils::TROOP_EXPS). The original
  * has no values for fortifications; they get ~1.35 × their resource cost, the same ratio as troops.
  */

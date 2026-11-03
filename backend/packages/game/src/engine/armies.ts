@@ -4,12 +4,25 @@
 import { asc, eq, or } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, buildingLevel, BuildingType, HeroStatus, marchTimeMs, type Message, Mission, msg, ref, TileType, tileXY } from '@marchlands/core';
+import {
+  ArmyDirection,
+  buildingLevel,
+  BuildingType,
+  HeroStatus,
+  marchTimeMs,
+  type Message,
+  Mission,
+  msg,
+  ref,
+  reliefMarchMs,
+  TileType,
+  tileXY,
+} from '@marchlands/core';
 import { armies, cities, heroes, players } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { armyBean } from '#/dto.ts';
-import { type ArmyRow, findCity, getArmy, getPlayer, saveArmy, type TileRow } from '#/repo.ts';
+import { type ArmyRow, findCity, getArmy, getPlayer, getTile, saveArmy, type TileRow } from '#/repo.ts';
 
 export const armyRef = (id: number) => `army:${id}`;
 /** The timed event that sets off an army waiting to land at a chosen time (camp times). */
@@ -69,12 +82,17 @@ export async function sendBack(ctx: Ctx, a: ArmyRow, marchMs: number) {
   ctx.schedule({ type: 'army', dueAt: a.reachTime, playerId: a.playerId, cityId: a.cityId, refKey: armyRef(a.id), payload: { armyId: a.id } });
 }
 
-/** Return march time from wherever the army is to its home city. */
+/**
+ * Return march time from wherever the army is to its home city. (marchlands) From one of the player's own places (a
+ * city they hold, their valley) the home city's Relief Station speeds it, as it does the march out (docs/deviations.md).
+ */
 export async function homeMarchMs(ctx: Ctx, a: ArmyRow, fromTile: number): Promise<number> {
   const home = await findCity(ctx, a.cityId);
   if (!home) return 1000;
   const p = await getPlayer(ctx, a.playerId);
-  return marchTimeMs(fromTile, home.tileId, a.troops, p.research, home.buildings);
+  const ms = marchTimeMs(fromTile, home.tileId, a.troops, p.research, home.buildings);
+  const own = (await tileOwner(ctx, await getTile(ctx, fromTile))) === a.playerId;
+  return own ? reliefMarchMs(ms, home.buildings) : ms;
 }
 
 // ---------------------------------------------------------------------------------------------
