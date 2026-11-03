@@ -10,6 +10,8 @@ export interface SendTarget {
   troops?: Partial<Record<TroopKey, string>>;
   /** what is at the target, for the scouting note */
   kind?: 'city' | 'npc' | 'valley';
+  /** the player's own city or valley: the sending city's Relief Station speeds the march there, as the server works it out */
+  own?: boolean;
 }
 
 /**

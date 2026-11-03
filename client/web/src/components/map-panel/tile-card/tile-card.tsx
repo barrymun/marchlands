@@ -11,6 +11,7 @@ import {
   factionOfZone,
   isFactionLevel,
   Mission,
+  Relation,
   tileDistance,
   TileType,
   valleyBonus,
@@ -217,7 +218,12 @@ export function TileCard({
           <div className="flex flex-wrap items-center gap-2">
             {missionsFor(tile).length > 0 && (
               <>
-                <Button size="sm" onClick={() => onSend({ tileId: tile.id, name: placeName(tile), missions: missionsFor(tile), kind: kindOf(tile) })}>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    onSend({ tileId: tile.id, name: placeName(tile), missions: missionsFor(tile), kind: kindOf(tile), own: tile.relation === Relation.SELF })
+                  }
+                >
                   {t('info.sendArmy')}
                 </Button>
                 {missionsFor(tile).includes(Mission.ATTACK) && <AddToFarmButton city={city} tileId={tile.id} tileName={placeName(tile)} />}
@@ -237,6 +243,7 @@ export function TileCard({
                         mission: Mission.SCOUT,
                         troops: { scouter: String(n) },
                         kind,
+                        own: tile.relation === Relation.SELF,
                       });
                     }}
                   >

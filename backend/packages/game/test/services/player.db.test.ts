@@ -9,9 +9,11 @@ import {
   BuildingType,
   DAY,
   goldForCents,
+  HeroStatus,
   HOUR,
   itemGoldPrice,
   ItemId,
+  marchTimeMs,
   Mission,
   msg,
   PlayerStatus,
@@ -24,14 +26,17 @@ import {
 } from '@marchlands/core';
 import { accounts, alliances, armies as armyRows, cities, heroes, mails, reports as reportRows, tiles, timedEvents } from '@marchlands/db';
 
+import { departRef } from '#/engine/armies.ts';
 import { sendSystemMail } from '#/engine/mail.ts';
 import { initialCity, isProtected } from '#/engine/player.ts';
 import { createReport } from '#/engine/reports.ts';
-import { admin, alliance, armies, mail, player, reports } from '#/index.ts';
-import { getCity, getPlayer, getTile, savePlayer } from '#/repo.ts';
+import { admin, alliance, armies, interior, mail, player, reports } from '#/index.ts';
+import { getCity, getHero, getPlayer, getTile, savePlayer } from '#/repo.ts';
+import { allies, arrive, send, warrior } from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import {
   addHero,
+  cityBundle,
   createTestPlayer,
   giveItems,
   reloadCity,
@@ -639,21 +644,68 @@ describe(player.restartPlayer.name, () => {
       expect(await g.tx.select().from(timedEvents).where(eq(timedEvents.playerId, a.id))).toEqual([]);
     }));
 
-  it('sends home the armies of others headed for its cities', () =>
-    game(async (g) => {
-      const a = await createTestPlayer(g);
-      const b = await createTestPlayer(g);
-      await admin.setPlayerFlags(g, a.name, { beginner: false });
-      await admin.setPlayerFlags(g, b.name, { beginner: false });
-      const armyId = await sendScout(g, a, (await getCity(g, b.cityId)).tileId);
-      const [sent] = await g.tx.select().from(armyRows).where(eq(armyRows.id, armyId));
-      g.advance(1000);
-      await player.restartPlayer(g, b.id);
-      const [back] = await g.tx.select().from(armyRows).where(eq(armyRows.id, armyId));
-      const march = sent!.reachTime - sent!.startTime;
-      expect(back).toMatchObject({ direction: ArmyDirection.BACKWARD, startTime: g.now, reachTime: g.now + march, restTime: 0 });
-      expect(g.events('army').find((e) => e.refKey === `army:${armyId}`)).toMatchObject({ dueAt: g.now + march, playerId: a.id, payload: { armyId } });
-    }));
+  describe("others' armies on their way to, waiting for or stationed in its cities", () => {
+    /** Two players at war and a scout of a's headed for b's city (which has no scouts to stop it). */
+    async function headedFor(g: TestGame, opts: { arriveAt?: number } = {}) {
+      const { p: a, heroId } = await warrior(g);
+      const { p: b } = await warrior(g, {});
+      const target = (await getCity(g, b.cityId)).tileId;
+      const bean = await send(g, a, { targetTileId: target, mission: Mission.SCOUT, troops: { scouter: 1 }, ...opts });
+      return { a, b, heroId, armyId: bean.armyId, sent: bean };
+    }
+    const row = async (g: TestGame, id: number) => (await g.tx.select().from(armyRows).where(eq(armyRows.id, id)))[0];
+    const eventOf = (g: TestGame, id: number) => g.events('army').find((e) => e.refKey === `army:${id}`);
+
+    it('one marching there turns back the way it came, as a recall does', () =>
+      game(async (g) => {
+        const { a, b, armyId, sent } = await headedFor(g);
+        const marched = Math.floor((sent.reachTime - sent.startTime) / 3);
+        g.advance(marched);
+        await player.restartPlayer(g, b.id);
+        expect(await row(g, armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, startTime: g.now, reachTime: g.now + marched, restTime: 0 });
+        expect(eventOf(g, armyId)).toMatchObject({ dueAt: g.now + marched, playerId: a.id, payload: { armyId } });
+      }));
+
+    it('one waiting at home to land at a time is back at once, its departure cancelled', () =>
+      game(async (g) => {
+        const { b, armyId } = await headedFor(g, { arriveAt: g.now + DAY / 2 });
+        expect(g.events('army.depart').some((e) => e.refKey === departRef(armyId))).toBe(true);
+        await player.restartPlayer(g, b.id);
+        expect(await row(g, armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, startTime: g.now, reachTime: g.now + 1000 });
+        expect(g.events('army.depart').some((e) => e.refKey === departRef(armyId))).toBe(false);
+      }));
+
+    it('one already heading home carries on as it was', () =>
+      game(async (g) => {
+        const { b, armyId } = await headedFor(g);
+        await arrive(g, armyId);
+        const before = await row(g, armyId);
+        expect(before?.direction).toBe(ArmyDirection.BACKWARD);
+        g.advance(1000);
+        await player.restartPlayer(g, b.id);
+        expect(await row(g, armyId)).toEqual(before);
+        expect(eventOf(g, armyId)?.dueAt).toBe(before?.reachTime);
+      }));
+
+    it('one stationed there marches home from the city, its hero returning', () =>
+      game(async (g) => {
+        const { p: a, heroId } = await warrior(g);
+        const { p: b } = await warrior(g);
+        await allies(g, a, b);
+        await interior.setCityFlags(g, b.id, b.cityId, { allowAlliance: true });
+        const host = (await getCity(g, b.cityId)).tileId;
+        const bean = await send(g, a, { targetTileId: host, mission: Mission.REINFORCE, troops: { lightCavalry: 100 }, heroId });
+        await arrive(g, bean.armyId);
+        const stationed = await row(g, bean.armyId);
+        expect(stationed?.direction).toBe(ArmyDirection.STAY);
+        const home = await cityBundle(g, a);
+        const march = marchTimeMs(host, home.city.tileId, { lightCavalry: 100 }, home.player.research, home.city.buildings);
+        g.advance(HOUR);
+        await player.restartPlayer(g, b.id);
+        expect(await row(g, bean.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, startTime: g.now, reachTime: g.now + march });
+        expect((await getHero(g, heroId)).status).toBe(HeroStatus.RETURN);
+      }));
+  });
 
   it('leaves the alliance, disbanding it when the player was its last member', () =>
     game(async (g) => {

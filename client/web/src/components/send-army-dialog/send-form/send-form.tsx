@@ -21,6 +21,7 @@ import {
   marchTimeMs,
   maxArmyTroops,
   Mission,
+  reliefMarchMs,
   TROOP_KEYS,
   type TroopKey,
 } from '@marchlands/core';
@@ -99,8 +100,9 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
   const battleBuffs =
     Number(mission) === Mission.ATTACK ? (player.data?.buffs ?? []).filter((b) => (b.id === BuffId.ATTACK || b.id === BuffId.DEFENSE) && b.endTime > now) : [];
   const resourceBody = typedAmounts(resources);
-  // the march as the server works it out (a Relief Station shortens one to your own city, which this leaves out)
-  const marchMs = chosen > 0 ? marchTimeMs(city.fieldId, target.tileId, troopBody, player.data?.research ?? {}, city.buildings) : null;
+  // the march as the server works it out (armyMarchMs): to the player's own city or valley a Relief Station shortens it
+  const rawMarchMs = chosen > 0 ? marchTimeMs(city.fieldId, target.tileId, troopBody, player.data?.research ?? {}, city.buildings) : null;
+  const marchMs = rawMarchMs != null && target.own ? reliefMarchMs(rawMarchMs, city.buildings) : rawMarchMs;
   const path = { cityId: city.id };
   // carrying capacity of the chosen troops (troop load x Logistics), shared by every resource
   const capacity = armyLoad(troopBody, player.data?.research ?? {});

@@ -5,6 +5,7 @@ import { and, count, eq, inArray, ne, sql } from 'drizzle-orm';
 
 import { type CreatePlayerBody } from '@marchlands/contracts';
 import {
+  ArmyDirection,
   BALANCE,
   BuffId,
   type CastleSign,
@@ -27,6 +28,7 @@ import { armies, cities, heroes, mails, marketOrders, one, pgArray, players, rep
 import { openOwnCity, viewOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { buffsArray, cityBean, itemsArray } from '#/dto.ts';
+import { notifyArmyParties, turnHome } from '#/engine/armies.ts';
 import { initialCity } from '#/engine/player.ts';
 import { relationBetween } from '#/engine/relations.ts';
 import { pickOpenFlat } from '#/engine/world.ts';
@@ -329,21 +331,18 @@ export async function restartPlayer(ctx: Ctx, playerId: number) {
   let p = await getPlayer(ctx, playerId, { lock: true });
   const cityRows = await citiesOf(ctx, playerId, { lock: true });
   const cityIds = cityRows.map((c) => c.id);
-  // armies of others stationed in my cities go home
+  // armies of others on their way to my cities, waiting to leave for them or stationed in them go home as a recall
+  // sends them (turnHome); ones already heading home carry on
   if (cityIds.length) {
     const tileIds = cityRows.map((c) => c.tileId);
     const guests = await ctx.tx
       .select()
       .from(armies)
-      .where(and(inArray(armies.targetTileId, tileIds), ne(armies.playerId, playerId)));
+      .where(and(inArray(armies.targetTileId, tileIds), ne(armies.playerId, playerId), ne(armies.direction, ArmyDirection.BACKWARD)))
+      .for('update');
     for (const g of guests) {
-      // an army still waiting at home to land at a time hasn't left it
-      const back = g.startTime > ctx.now ? 1000 : Math.max(1000, g.reachTime - g.startTime);
-      await ctx.tx
-        .update(armies)
-        .set({ direction: 2, startTime: ctx.now, reachTime: ctx.now + back, restTime: 0 })
-        .where(eq(armies.id, g.id));
-      ctx.schedule({ type: 'army', dueAt: ctx.now + back, playerId: g.playerId, refKey: `army:${g.id}`, payload: { armyId: g.id } });
+      await turnHome(ctx, g);
+      await notifyArmyParties(ctx, g);
     }
   }
   await ctx.tx.execute(sql`delete from timed_events where player_id = ${playerId} or city_id = any(${pgArray(cityIds)}::int[])`);

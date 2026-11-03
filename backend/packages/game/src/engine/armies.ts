@@ -83,6 +83,16 @@ export async function sendBack(ctx: Ctx, a: ArmyRow, marchMs: number) {
 }
 
 /**
+ * Turn an army home as a recall does: one marching walks back the way it came (one still waiting at home to leave is
+ * back at once, its departure cancelled), one stationed marches home from its target.
+ */
+export async function turnHome(ctx: Ctx, a: ArmyRow) {
+  const ms = a.direction === ArmyDirection.FORWARD ? ctx.now - a.startTime : await homeMarchMs(ctx, a, a.targetTileId);
+  if (isWaiting(a, ctx.now)) ctx.unschedule(departRef(a.id));
+  await sendBack(ctx, a, ms);
+}
+
+/**
  * Return march time from wherever the army is to its home city. (marchlands) From one of the player's own places (a
  * city they hold, their valley) the home city's Relief Station speeds it, as it does the march out (docs/deviations.md).
  */

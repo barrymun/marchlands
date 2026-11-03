@@ -41,7 +41,7 @@ import { armies, cities, heroes, one, players } from '@marchlands/db';
 import { type CityBundle, openOwnCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { armyBean, troopBean } from '#/dto.ts';
-import { armyRef, cityPosition, departRef, homeMarchMs, isWaiting, notifyArmyParties, sendBack, tileOwner, tilePosition } from '#/engine/armies.ts';
+import { armyRef, cityPosition, departRef, homeMarchMs, isWaiting, notifyArmyParties, sendBack, tileOwner, tilePosition, turnHome } from '#/engine/armies.ts';
 import { pushHero } from '#/engine/heroes.ts';
 import { isProtected } from '#/engine/player.ts';
 import { isFriendly, relationBetween } from '#/engine/relations.ts';
@@ -214,11 +214,7 @@ export async function recallArmy(ctx: Ctx, playerId: number, armyId: number) {
   const a = await getArmy(ctx, armyId, { lock: true });
   if (!a || a.playerId !== playerId) throw new GameError(msg('army.notFound'), -99, 404);
   if (a.direction === ArmyDirection.BACKWARD) throw new GameError(msg('army.alreadyReturning'), -99);
-  // marching armies walk back the way they came (one still waiting at home is back at once); stationed ones march home
-  // from the target
-  const ms = a.direction === ArmyDirection.FORWARD ? ctx.now - a.startTime : await homeMarchMs(ctx, a, a.targetTileId);
-  if (isWaiting(a, ctx.now)) ctx.unschedule(departRef(a.id));
-  await sendBack(ctx, a, ms);
+  await turnHome(ctx, a);
   await notifyArmyParties(ctx, a);
   return armyBean(a);
 }
