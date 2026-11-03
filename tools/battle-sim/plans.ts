@@ -81,6 +81,31 @@ export const PLANS: Record<string, Plan> = {
       { name: 'loyalty', troops: { archer: 5_000 }, until: 'captured', max: 100 },
     ],
   },
+  /**
+   * `one-second` with the breaking waves' 3,250 warriors and workers swapped for 1,000 each of five foot types, which
+   * spread the garrison's hits better: fewer breaking waves at level 18 (docs/battle-sims/historic-cities.md, Atlantis).
+   */
+  'one-second-layered': {
+    name: 'Archers in five thin layers, then small archer waves, all in one landing second',
+    gap: 0.001,
+    stages: [
+      { name: 'break', troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') }, until: 'broken', max: 150 },
+      { name: 'loyalty', troops: { archer: 1_000 }, until: 'captured', max: 100 },
+    ],
+  },
+  /**
+   * Siege engines first: the city's own archers, ballistae and catapults have no Archery research, so attacking
+   * catapults outrange its whole garrison; then archers in thin layers, every wave full so nothing small meets what's
+   * left (docs/battle-sims/historic-cities.md, Atlantis in one landing second).
+   */
+  'one-second-catapults': {
+    name: 'Catapults until the garrison breaks, then layered archers, all in one landing second',
+    gap: 0.001,
+    stages: [
+      { name: 'catapults', troops: { catapult: 125_000 }, until: 'broken', max: 150 },
+      { name: 'loyalty', troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') }, until: 'captured', max: 100 },
+    ],
+  },
   /** For a day with cataphracts, which ride down archers: pikemen first until they're gone (AeroAgg's table), then archers. */
   'pikes-archers': {
     name: 'Pikemen until the cataphracts are gone, then the farming army',

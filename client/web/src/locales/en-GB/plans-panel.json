@@ -1,10 +1,10 @@
 {
-  "intro": "Plan waves to land on one target in one second, in order: the trap clearers first, then the main army, then the loyalty waves. Add a wave from the send-army dialog (set a landing time, then Add to a new plan or to one landing on that target). Each wave lands a thousandth of a second after the one before, so the order holds whoever sends first; each player sends their own.",
+  "intro": "Plan waves to land on one target in one second, in order: the trap clearers first, then the main army, then the loyalty waves. Start a plan below, then add waves to it from any of your cities. Each wave lands a thousandth of a second after the one before, so the order holds whoever sends first; each player sends their own.",
   "empty": "No plans yet.",
   "shared": "Shared with your alliance",
   "by": "Made by {{player}}",
   "lands": "({{x}}, {{y}}), landing {{time}}",
-  "noWaves": "No waves yet: add one from the send-army dialog.",
+  "noWaves": "No waves yet: add one with Add a wave.",
   "wave": "{{mission}} from {{city}} ({{player}})",
   "status": {
     "sent": "Sent",
@@ -21,5 +21,29 @@
   "delete": "Delete plan",
   "deleteTitle": "Delete this plan?",
   "deleteDescription": "Its waves not yet sent are dropped; armies already sent march on.",
-  "deleted": "Plan deleted"
+  "deleted": "Plan deleted",
+  "addWave": "Add a wave",
+  "edit": "Edit",
+  "show": "Show waves",
+  "hide": "Hide waves",
+  "summary_one": "{{count, number}} wave, {{sent, number}} sent",
+  "summary_other": "{{count, number}} waves, {{sent, number}} sent",
+  "newPlan": "New plan",
+  "form": {
+    "serverTime": "Server time {{time}} UTC",
+    "name": "Name",
+    "namePlaceholder": "e.g. Rome",
+    "x": "Target x",
+    "y": "Target y",
+    "date": "Date (UTC)",
+    "time": "Landing time (UTC)",
+    "invalid": "Enter a date and a time.",
+    "past": "That time has passed.",
+    "tooFar": "At most {{time}} ahead.",
+    "shared": "Share with my alliance",
+    "create": "Create plan",
+    "created": "Plan created",
+    "saved": "Plan saved",
+    "fixed": "Waves of this plan were sent already, so its target and landing time stay as they are."
+  }
 }

@@ -192,13 +192,18 @@ export function inSeatArea(seatTileId: number, level: HistoricLevel, targetTileI
 export const canDraftFrom = (level: HistoricLevel, target: { type: number; level: number }) =>
   target.type === TileType.NPC || (target.type === TileType.HISTORIC && target.level < level);
 
-/** What a draft takes from a barbarian city's troops: BALANCE.historic.draftShare of its largest troop type, or null if it has none. */
-export function draftTake(troops: TroopCounts): { key: keyof TroopCounts; count: number } | null {
-  let best: { key: keyof TroopCounts; count: number } | null = null;
-  for (const [key, n] of Object.entries(troops) as [keyof TroopCounts, number][]) if (n > 0 && (!best || n > best.count)) best = { key, count: n };
-  if (!best) return null;
-  const count = Math.floor(best.count * BALANCE.historic.draftShare);
-  return count > 0 ? { key: best.key, count } : null;
+/**
+ * What a draft takes from a city's troops: BALANCE.historic.draftShare of every troop type, rounded down, or null if
+ * that leaves nothing. (2026-11-03, the maintainer: every type, not only its largest, which was always a historic city's
+ * warriors.)
+ */
+export function draftTake(troops: TroopCounts): TroopCounts | null {
+  const taken: TroopCounts = {};
+  for (const [key, n] of Object.entries(troops) as [keyof TroopCounts, number][]) {
+    const count = Math.floor(n * BALANCE.historic.draftShare);
+    if (count > 0) taken[key] = count;
+  }
+  return Object.keys(taken).length ? taken : null;
 }
 
 /**

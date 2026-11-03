@@ -7,7 +7,7 @@ A knowledge base of battle findings: how the battle engine behaves in practice, 
 | [mechanics.md](mechanics.md) | How a field battle plays out: positions, targeting, fortifications, and the quirks that decide losses |
 | [npc-level-10.md](npc-level-10.md) | Farming level 10 barbarian cities: the best army, items and hero, and why losses can't reach zero |
 | [old-guides.md](old-guides.md) | The old guides' strategies (ballista farming, AeroAgg's waves, suicide waves, walls) run through the simulator: which still work and why |
-| [historic-cities.md](historic-cities.md) | Breaking historic cities of levels 12 to 18 (before they exist): what a siege takes, the weakest attacker that can, and how much the gaps between waves matter |
+| [historic-cities.md](historic-cities.md) | Breaking historic cities of levels 12 to 18: what a siege takes, the weakest attacker that can, how much the gaps between waves matter, and Atlantis in one landing second (what troops to send) |
 
 ## Hero attributes
 
@@ -33,7 +33,7 @@ npm run sim -- compare --preset archers-old,archers-best --sources
 | `grid --main archer --fodder peasants,militia --from 500 --to 4000 --step 250` | Tries every fodder combination, filling the rest of the 125k cap (`--cap`, after `--carriage` transporters) with the main troop. Shows the cheapest winners. |
 | `trace --preset archers-best --seed 3` | One battle round by round: positions, the towers and wall, and every kill. |
 | `presets` | Lists the named armies |
-| `siege --plan archers-best,age2-ballista --level 16 --gap 1` | Waves fought one after another against a historic city whose garrison keeps its losses and refills every second (`siege.ts`, plans in `plans.ts`); `--day`, `--loyalty`, `--loyalty-per-win`, `--wall` and `--refill` set the city. See [historic-cities.md](historic-cities.md). |
+| `siege --plan archers-best,age2-ballista --level 16 --gap 1` | Waves fought one after another against a historic city whose garrison keeps its losses and refills every second (`siege.ts`, plans in `plans.ts`); `--day`, `--loyalty`, `--loyalty-per-win`, `--wall` and `--refill` set the city (`--refill 0` for waves landing in one second: the game refills in whole steps). See [historic-cities.md](historic-cities.md). |
 
 - **Common options:** `--level` (barbarian city level, default 10) and `--seeds`.
 - **The lord:** `--research` (every research at that level) and `--tech archery=3,horseback-riding=8` (some at other levels, by `TechType` name), the hero (`--hero-level`, and `--power` and `--stratagem`: its own points, without gear), the lord's gear (`--gear-level` for Hero Enhancement, which follows `--research` unless given, `--stars` on every piece, and `--gear-stat` for the attribute it boosts), `--no-attack-item` and `--defense-item`. The defaults are the maintainer's account on 2026-10-16; see `DEFAULT_LORD` in `lib.ts`.

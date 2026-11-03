@@ -121,7 +121,70 @@ npm run sim -- siege --plan one-second,archers-best,age2-ballista --level 12 --d
 
 The Inn-hero runs used a one-off script giving the loyalty stage its own lord (`Lord` with `power: 20`, `heroLevel: 1`, no gear, no item).
 
+## Atlantis in one landing second
+
+*Simulated 2026-11-03 against the game as built, for Atlantis (0, 0) with the maintainer's own armies on the dev stack: research 10, the horn and the defence item running, and each wave led by one of its city's heroes (level 100, about 1,220 Attack; one a city about 1,530 with Excalibur). A one-off script fought the waves one after another as `attackHistoric` does (`resolveCombat`, the day's garrison from `historicState`, the city's guard and research), a millisecond apart, over the 30 daily garrisons from 2026-11-04.*
+
+**Checked against a real siege first:** the same script for the maintainer's 56-wave plan on Rome (level 16, the same day) said the garrison breaks on wave 13 and the city is captured on wave 46. The siege as it landed broke on wave 14 and captured on wave 47.
+
+**The waves:** 90, the most 9 cities send at once (10 armies a city at Rally Spot 10, `BALANCE.rallySpotArmiesPerLevel`, and 10 heroes): 10 of 187,500 from a held level 14, 10 of 156,250 from a held level 12, and 70 of 125,000 (the seats' Rally Spots, `rallyBonusPerStep`; the War Ensign everywhere). The plan's limit is 100 waves (`BALANCE.warPlans.maxWaves`). The biggest waves and the strongest heroes go first. Every wave is the same mix of troops; once the garrison breaks, each one wins without loss and takes 3 loyalty.
+
+**What to send: archers with 1,000 each of five foot types.** The breaking waves, by what they carry besides archers (every daily garrison):
+
+| Each wave carries, besides archers | Breaks on wave | Loyalty 0 on wave | Lost |
+|---|---|---|---|
+| **1,000 each of workers, warriors, scouts, swordsmen and pikemen** | **26–33** | **59–66** | **4.2M–5.0M** |
+| the same and 1,000 each of light cavalry, cataphracts, transporters and ballistae | 26–33 | 59–66 | 4.1M–5.0M |
+| 1,000 each of workers, warriors and scouts | 30–38 | 63–71 | 4.6M–5.6M |
+| 250 of each of the five | 29–38 | 62–71 | 4.5M–5.6M |
+| 3,000 of each of the five | 27–37 | 60–70 | 4.2M–5.5M |
+| 1.4% warriors and 1.2% workers (the farming army's shape) | 30–37 | 63–70 | 4.6M–5.5M |
+| nothing (archers alone) | 42–61 | 75–90; 11 of 30 days not within 90 waves | 6.1M–8.5M |
+| 10% warriors | 46–53 | 79–86 | 6.6M–7.5M |
+| 10% pikemen | 45–63 | 78–83; 13 days not within 90 | 6.5M–8.7M |
+| pikemen or swordsmen alone | never: about 17M of the garrison left after 90 waves | | 12.2M |
+
+- **Thin layers of several types beat a thicker one of a few:** the garrison spreads its hits over every type in the wave, and each layer takes a share of them before the archers do. Five layers of 1,000 save 4 waves over the farming army's warriors and workers, and about 0.4M troops; more types add nothing, and thicker layers only cost more troops. The same holds with one hero, 125,000-troop waves and no defence item.
+- **Openers don't pay at level 18:** pikemen waves until the cataphracts are gone (`pikes-archers`, AeroAgg's advice) cost 5 to 7 more waves on a cataphract day (66 became 73), and one wave of 207,000 ballistae first saves 1.
+- **The day:** light cavalry days are the cheapest (loyalty 0 on wave 59–64, the cheapest with pikemen and catapults), cataphract days 64–66. There's no day this plan can't take.
+- **Loyalty waves can be tiny, but shouldn't be:** once the garrison and its towers are gone, 1,000 archers win as well as 125,000, and nothing is lost either way. But a plan is set before it lands: if the garrison holds a wave or two longer than planned, small waves meet what's left and die. In the simulator, with the waves switching to 5,000 archers as soon as the garrison's troops were gone, 2 of 5 daily garrisons left a few thousand arrow towers standing and every loyalty wave failed. Full waves throughout cost nothing more.
+- **More waves:** a held level 16 sends 218,750; with archers and level 100 heroes moved to it, its 10 waves save about 5 (with the farming army's shape). Excalibur on every hero saves 1 to 2, or 2 to 5 with the level 16's waves.
+- **Capturing it** needs a free city slot: a player at Prince with 10 cities, the most any title allows, breaks Atlantis and leaves it at 0 loyalty but can't take it (TODO.md, Abandoning a city).
+
+**Siege engines first: far fewer waves, three to four times the resources.** The city's research leaves Archery at 0 (Tuning, above), so its archers, ballistae and catapults reach no further than they do untrained, while an attacker with Archery 10 shoots from further off: attacking catapults outrange the whole garrison, and ballistae nearly do. Engines in the first waves (the biggest armies), then the layered archers, every daily garrison:
+
+| The first waves | Breaks on wave | Loyalty 0 on wave | Lost | Their cost (resources) |
+|---|---|---|---|---|
+| None: layered archers throughout | 26–33 | 59–66 | 4.2M–5.0M archers and decoys | 4.0–4.8 billion |
+| 1 of catapults | 22–31 | 55–64 | 3.6M–4.8M, 188,000 of them catapults | |
+| 3 of catapults | 12–25 | 45–58 | 2.1M–4.0M, 563,000 of them catapults | |
+| **10 of catapults** | **5–6** | **38–39** | **0.76M–0.95M catapults** | **14.7–18.3 billion** |
+| 10 of ballistae | 6–8 | 39–41 | 1.0M–1.35M ballistae | 7.4–9.9 billion |
+| 10 of catapults from a held level 16 (218,750 a wave), with level 100 heroes moved there | 4–5 | 37–38 | 0.69M–0.92M catapults | 13.3–17.6 billion |
+| 10 of ballistae from a held level 16 | 5–7 | 38–40 | 0.95M–1.37M ballistae | 6.9–10.0 billion |
+
+- **The engine waves die whole until about the fifth,** each killing a share of the garrison from out of its reach; then one wins. A catapult costs 19,200 resources to train and a ballista 7,300, against an archer's 950, so the siege takes 25 waves fewer for three to four times the resources (catapults) or twice (ballistae). With Medicine 10, half of what an attack loses comes home injured (`attackersGetInjured`), so the losses above are half dead.
+- **Engines go first, catapults before ballistae.** After 32 layered archer waves, 8 catapult waves from the held level 16 and 8 ballista waves from the held level 14 only finish what the archers nearly did (loyalty 0 on wave 63–66, 4.0M–4.3M lost); after 16, on wave 51. First, the catapults break the garrison on wave 4–5 and loyalty is 0 on wave 37–38, the ballistae behind them adding nothing; ballistae first, on wave 6–8 and 39–41. Scouts instead of the archers, with or without decoys, do worse (68–70): they hardly hurt the garrison.
+- **Mixing doesn't help** (the held level 16's waves): decoy layers in the engine waves change nothing, and half ballistae, half archers is worse than either (40–46 waves).
+- **What it takes in armies:** 38 waves are 4 cities' armies and heroes, against 6 or 7 for archers, and the engines have to be trained first: about 1.1 million catapults for the 6 waves of 187,500 it takes, or 1.5 million ballistae for 8.
+
+```bash
+npm run sim -- siege --plan one-second-catapults,one-second-layered --level 18 --day pikemen,lightCavalry,catapult --gap 0.001 --refill 0 --seeds 3
+```
+
+With the simulator's lord and 125,000 a wave, `one-second-catapults` breaks the garrison with 7 catapult waves (9 on a day with cataphracts and rams) and takes 40 to 42 waves in all, losing 0.76M to 1.01M catapults (14.7 to 19.4 billion), against `one-second-layered`'s 64 to 71 waves (3.5 to 4.4 billion).
+
+Whether siege engines should be this good against historic cities is a balance question, not settled here: it follows from the decision to leave their Archery at 0.
+
+**Refill inside one second: none.** The game refills a historic city in whole steps, 10% of the full garrison every `scaled(npcRegenMs)` (6 seconds at game speed 60, `historicState`), counted from its first battle of the day. So a siege landing within a second meets no refill, unless the city was attacked earlier that day and a step falls inside the siege: then 10% of the garrison comes back at once. The simulator spreads the refill evenly instead (`--refill`), about 230 warriors a millisecond at level 18 and game speed 60, which is enough to hide the layers' gain: model a siege in one landing second with `--refill 0`. The runs in One landing second above used `--refill 6`, a small error at level 12.
+
+```bash
+npm run sim -- siege --plan one-second,one-second-layered,pikes-archers --level 18 --day pikemen,heavyCavalry,catapult --gap 0.001 --refill 0 --seeds 3
+```
+
+That run, with the simulator's lord (one hero for every wave, 125,000 a wave, no defence item): `one-second-layered` breaks on wave 34 and captures on wave 68 (3.9 billion lost), `one-second` breaks the garrison's troops on wave 40 but leaves towers its 5,000-archer loyalty waves can't beat, and `pikes-archers` takes 81 waves (5.1 billion).
+
 ## Not covered yet
 
 - Defending a captured city, and retaking one.
-- The levels above 12 at game speed 60, in one landing second.
+- Level 14 at game speed 60, in one landing second.

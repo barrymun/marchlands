@@ -7,7 +7,8 @@
     "teleportPrice": "{{item}}・{{price}} 金: 選んだ空き平地へ",
     "teleport": "移転",
     "cooldown": "クールダウン中: 次の移転まで <countdown />。",
-    "keepsName": "{{name}} は歴史都市のため、名前を変更できません。"
+    "keepsName": "{{name}} は歴史都市のため、名前を変更できません。",
+    "cannotMove": "{{name}} は歴史都市のため、移転できません。"
   },
   "taxRate": {
     "label": "税率",

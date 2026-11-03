@@ -38,7 +38,7 @@ export function BuildList({ city, positionId, onDone }: { city: CityBean; positi
       </DialogHeader>
       <MayorBuildHint city={city} />
       {list.isPending && <Skeleton className="h-32" />}
-      <div className="grid gap-2">
+      <div className="grid items-start gap-2 md:grid-cols-2">
         {options.map((b) => (
           <div key={b.typeId} className="grid gap-2 rounded-md border p-3">
             <div className="flex items-center justify-between gap-2">
@@ -64,7 +64,7 @@ export function BuildList({ city, positionId, onDone }: { city: CityBean; positi
             <Requirements list={b.requirements.filter((r) => !r.ok)} />
           </div>
         ))}
-        {list.data && options.length === 0 && <p className="text-sm text-muted-foreground">{t('buildList.nothing')}</p>}
+        {list.data && options.length === 0 && <p className="text-sm text-muted-foreground md:col-span-2">{t('buildList.nothing')}</p>}
       </div>
     </>
   );

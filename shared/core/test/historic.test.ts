@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  assertCanUpgrade,
   BALANCE,
+  buildingConfig,
+  buildingMaxLevel,
+  type BuildingState,
   BuildingStatus,
   BuildingType,
   canDraftFrom,
@@ -8,6 +12,9 @@ import {
   draftsUsed,
   draftTake,
   fieldFactorAt,
+  fullDemolishRefund,
+  GameError,
+  HISTORIC_LEVELS,
   HISTORIC_NAMES,
   historicCities,
   historicCityBuildings,
@@ -27,8 +34,8 @@ import {
   maxArmyTroops,
   nextAutoDraftAt,
   seatLoyalty,
-  SeatNeglect,
   seatNeglect,
+  SeatNeglect,
   seatTitle,
   seatUnrest,
   stateTribute,
@@ -229,6 +236,91 @@ describe(fieldFactorAt.name, () => {
   });
 });
 
+const FIELDS = [BuildingType.FARM, BuildingType.SAWMILL, BuildingType.QUARRY, BuildingType.IRONMINE] as const;
+const INSIDE = [BuildingType.TOWN_HALL, BuildingType.COTTAGE, BuildingType.BARRACKS, BuildingType.WAREHOUSE, BuildingType.WALLS] as const;
+const idle = (typeId: number, level: number): BuildingState => ({ positionId: 1001, typeId, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 });
+/** What upgrading a building in a city of `historicLevel` (null: an ordinary city) is refused with, or null when it may start. */
+const upgradeRefusal = (b: BuildingState, historicLevel: number | null) => {
+  try {
+    assertCanUpgrade(b, [b], {}, {}, 1, historicLevel);
+    return null;
+  } catch (e) {
+    if (e instanceof GameError) return e.msg.code;
+    throw e;
+  }
+};
+
+describe(buildingMaxLevel.name, () => {
+  it('stops every building at level 10 in an ordinary city', () => {
+    for (const t of [...FIELDS, ...INSIDE]) expect(buildingMaxLevel(t)).toBe(10);
+  });
+
+  it('lets a historic city’s fields go up to its own level and no further', () => {
+    for (const level of HISTORIC_LEVELS) for (const t of FIELDS) expect(buildingMaxLevel(t, level)).toBe(level);
+  });
+
+  it('keeps everything but the fields at level 10 in a historic city', () => {
+    for (const level of HISTORIC_LEVELS) for (const t of INSIDE) expect(buildingMaxLevel(t, level)).toBe(10);
+  });
+});
+
+describe(`${assertCanUpgrade.name} in a historic city`, () => {
+  it('raises a field to the city’s own level, one level at a time', () => {
+    for (const level of HISTORIC_LEVELS)
+      for (const t of FIELDS)
+        for (let l = 10; l < level; l++) {
+          expect(upgradeRefusal(idle(t, l), level)).toBeNull();
+          expect(assertCanUpgrade(idle(t, l), [idle(t, l)], {}, {}, 1, level).next.level).toBe(l + 1);
+        }
+  });
+
+  it('refuses a field past the city’s own level: no level 13 in a level 12, no 15 in a 14, no 17 in a 16', () => {
+    for (const level of HISTORIC_LEVELS) for (const t of FIELDS) expect(upgradeRefusal(idle(t, level), level)).toBe('building.maxLevel');
+  });
+
+  it('refuses a field already above the city’s level, as a lower seat’s never could be', () => {
+    expect(upgradeRefusal(idle(BuildingType.FARM, 16), 14)).toBe('building.maxLevel');
+    expect(upgradeRefusal(idle(BuildingType.SAWMILL, 14), 12)).toBe('building.maxLevel');
+  });
+
+  it('refuses a field past level 10 in an ordinary city', () => {
+    for (const t of FIELDS) expect(upgradeRefusal(idle(t, 10), null)).toBe('building.maxLevel');
+  });
+
+  it('refuses every other building past level 10, whatever the city’s level', () => {
+    for (const level of HISTORIC_LEVELS) for (const t of INSIDE) expect(upgradeRefusal(idle(t, 10), level)).toBe('building.maxLevel');
+  });
+});
+
+describe(`${buildingConfig.name} for a historic city’s fields`, () => {
+  it('doubles each level’s cost and time past 10, up to 18', () => {
+    for (const t of FIELDS) {
+      const top = buildingConfig(t, 10);
+      expect(top).toBeDefined();
+      for (let l = 11; l <= 18; l++) {
+        const f = BALANCE.historic.fieldLevelStep ** (l - 10);
+        expect(buildingConfig(t, l)).toEqual({
+          ...top,
+          level: l,
+          buildTime: top!.buildTime * f,
+          cost: Object.fromEntries(Object.entries(top!.cost).map(([k, v]) => [k, v * f])),
+        });
+      }
+      expect(buildingConfig(t, 19)).toBeUndefined();
+    }
+  });
+
+  it('has no level past 10 for any other building', () => {
+    for (const t of INSIDE) expect(buildingConfig(t, 11)).toBeUndefined();
+  });
+
+  it('refunds a demolished field’s levels past 10 like the rest', () => {
+    const third = (n: number) => n * BALANCE.demolishRefund;
+    const cost = (l: number) => buildingConfig(BuildingType.FARM, l)!.cost.food;
+    expect(fullDemolishRefund(BuildingType.FARM, 14).food).toBeCloseTo(third([...Array(14).keys()].reduce((s, i) => s + cost(i + 1), 0)));
+  });
+});
+
 describe(maxArmyTroops.name, () => {
   const rally10 = [{ positionId: 0, typeId: BuildingType.RALLY_SPOT, level: 10, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 }];
 
@@ -272,8 +364,19 @@ describe(inSeatArea.name, () => {
 });
 
 describe(draftTake.name, () => {
-  it('takes a fifth of the largest troop type', () => {
-    expect(draftTake({ militia: 400_000, archer: 1_000 })).toEqual({ key: 'militia', count: 80_000 });
+  it('takes a fifth of every troop type, rounded down', () => {
+    expect(draftTake({ militia: 400_000, archer: 1_000, pikemen: 9 })).toEqual({ militia: 80_000, archer: 200, pikemen: 1 });
+    expect(draftTake(historicGarrison(14, { foot: 'swordsmen', horse: 'heavyCavalry', siege: 'catapult' }).troops)).toEqual({
+      militia: 560_000,
+      swordsmen: 81_333,
+      archer: 34_245,
+      heavyCavalry: 54_222,
+      catapult: 7_320,
+    });
+  });
+
+  it('leaves out a type too small to give a whole troop, and takes nothing from a city with none', () => {
+    expect(draftTake({ militia: 10, pikemen: 4 })).toEqual({ militia: 2 });
     expect(draftTake({ pikemen: 4 })).toBeNull();
     expect(draftTake({})).toBeNull();
   });

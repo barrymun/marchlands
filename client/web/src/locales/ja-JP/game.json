@@ -23,8 +23,7 @@
   "sidebar": "都市の概要",
   "panel": "画面の上に開きます。閉じると元の画面に戻ります。",
   "troopsHome": {
-    "title": "城内の部隊",
-    "none": "城内に部隊はいません。"
+    "title": "城内の部隊"
   },
   "cityFallback": "都市",
   "yourCities": "自分の都市",

@@ -220,6 +220,7 @@ export const CreatePlanBody = z.object({
   shared: z.boolean().describe("shared with the player's alliance, whose members add and send their own waves"),
 });
 export type CreatePlanBody = z.infer<typeof CreatePlanBody>;
+export const UpdatePlanBody = CreatePlanBody.describe('the plan as it should be: the target and landing second change only while no wave is sent');
 export const AddPlanWaveBody = z.object({
   cityId: zId,
   mission: z.number().int().describe('3 scout or 5 attack'),

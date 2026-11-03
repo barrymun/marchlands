@@ -144,6 +144,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | GET | `/api/v1/cities/{cityId}/stationed` | Allied troops stationed here (army.getStayAllianceArmys) |
 | GET | `/api/v1/plans` | The player's wave plans and those shared with their alliance, with their waves in landing order |
 | POST | `/api/v1/plans` | Make a wave plan: a target and the second its waves land |
+| PATCH | `/api/v1/plans/{planId}` | Change a wave plan (its maker only): its target and landing second only while no wave is sent |
 | DELETE | `/api/v1/plans/{planId}` | Delete a wave plan (its maker only); armies already sent march on |
 | POST | `/api/v1/plans/{planId}/waves` | Add one of the player's armies to a plan, last in its order |
 | DELETE | `/api/v1/plans/{planId}/waves/{waveId}` | Take an unsent wave out of a plan (its player's, or any by the plan's maker) |

@@ -1,6 +1,7 @@
 // Static game configuration converted from the legacy `config_*` tables
 // (tools/legacy-import/convert.mjs). Treat as read-only.
 
+import { BALANCE } from '#/balance.ts';
 import { BuildingType, TechType } from '#/constants.ts';
 import buildingRows from '#/data/legacy/buildings.json' with { type: 'json' };
 import itemRows from '#/data/legacy/items.json' with { type: 'json' };
@@ -79,6 +80,23 @@ export interface QuestConfig {
 // (marchlands) the original's level-10 upgrades also needed a Michelangelo's Script item; here they
 // need only resources, time and the usual prerequisites (the Script is removed)
 export const BUILDINGS = (buildingRows as BuildingLevelConfig[]).map((b) => (!b.requires.items.length ? b : { ...b, requires: { ...b.requires, items: [] } }));
+/** The resource fields, which a historic city builds past level 10. */
+const SEAT_FIELD_TYPES: readonly number[] = [BuildingType.FARM, BuildingType.SAWMILL, BuildingType.QUARRY, BuildingType.IRONMINE];
+/** The highest historic city's level, and so the highest a field can go. */
+const SEAT_TOP_LEVEL = 18;
+/**
+ * (marchlands) a historic city's fields past level 10 (docs/features/historical-cities.md, Fields): each level costs
+ * and takes BALANCE.historic.fieldLevelStep times the one before, as levels 1 to 10 double, with level 10's
+ * requirements. Only a seat of at least that level builds them (`buildingMaxLevel`); they're not in BUILDINGS, so
+ * every list of what can be built stays as it was.
+ */
+const SEAT_FIELD_LEVELS: BuildingLevelConfig[] = BUILDINGS.filter((b) => b.level === 10 && SEAT_FIELD_TYPES.includes(b.typeId)).flatMap((top) =>
+  Array.from({ length: SEAT_TOP_LEVEL - top.level }, (_, i) => {
+    const f = BALANCE.historic.fieldLevelStep ** (i + 1);
+    const cost = Object.fromEntries(Object.entries(top.cost).map(([k, v]) => [k, v * f])) as Resources;
+    return { ...top, level: top.level + 1 + i, buildTime: top.buildTime * f, cost };
+  }),
+);
 /**
  * (marchlands) Hero Enhancement (gear.ts): twice Military Science's cost and time, level N needs Academy level N.
  */
@@ -193,7 +211,7 @@ const EXTRA_ITEMS: ItemConfig[] = [
 export const ITEMS = [...(itemRows as ItemConfig[]).filter((i) => !isRemovedItem(i.id)), ...EXTRA_ITEMS];
 export const QUESTS = questRows as QuestConfig[];
 
-const buildingIndex = new Map<string, BuildingLevelConfig>(BUILDINGS.map((b) => [`${b.typeId}:${b.level}`, b]));
+const buildingIndex = new Map<string, BuildingLevelConfig>([...BUILDINGS, ...SEAT_FIELD_LEVELS].map((b) => [`${b.typeId}:${b.level}`, b]));
 const researchIndex = new Map<string, ResearchLevelConfig>(RESEARCH.map((r) => [`${r.techId}:${r.level}`, r]));
 const troopIndex = new Map<number, TroopConfig>(TROOPS.map((t) => [t.troopId, t]));
 const itemIndex = new Map<string, ItemConfig>(ITEMS.map((i) => [i.id, i]));
@@ -202,10 +220,14 @@ const itemIndex = new Map<string, ItemConfig>(ITEMS.map((i) => [i.id, i]));
 export function buildingConfig(typeId: number, level: number): BuildingLevelConfig | undefined {
   return buildingIndex.get(`${typeId}:${level}`);
 }
-export function buildingMaxLevel(typeId: number): number {
+/**
+ * The highest level a building can be built to: its last in BUILDINGS, but (marchlands) a historic city's fields go up to
+ * the city's own level (`historicLevel`, docs/features/historical-cities.md, Fields).
+ */
+export function buildingMaxLevel(typeId: number, historicLevel: number | null = null): number {
   let max = 0;
   for (const b of BUILDINGS) if (b.typeId === typeId && b.level > max) max = b.level;
-  return max;
+  return historicLevel != null && SEAT_FIELD_TYPES.includes(typeId) ? Math.max(max, Math.min(historicLevel, SEAT_TOP_LEVEL)) : max;
 }
 export function isBuildingType(typeId: number): boolean {
   return buildingIndex.has(`${typeId}:1`);

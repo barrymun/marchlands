@@ -508,7 +508,6 @@
               "building.busy",
               "building.nothingToDemolish",
               "building.cannotDemolish",
-              "building.historicField",
               "building.notInProgress",
               "building.invalidTech",
               "building.academyNeeded",
@@ -570,6 +569,8 @@
               "army.planMission",
               "army.planWaveSent",
               "army.planLandAt",
+              "army.planMoveSent",
+              "army.planKeepShared",
               "army.invalidMission",
               "army.insufficientTroops",
               "army.overloaded",
@@ -12799,7 +12800,6 @@
               "building.busy",
               "building.nothingToDemolish",
               "building.cannotDemolish",
-              "building.historicField",
               "building.notInProgress",
               "building.invalidTech",
               "building.academyNeeded",
@@ -12861,6 +12861,8 @@
               "army.planMission",
               "army.planWaveSent",
               "army.planLandAt",
+              "army.planMoveSent",
+              "army.planKeepShared",
               "army.invalidMission",
               "army.insufficientTroops",
               "army.overloaded",
@@ -31536,6 +31538,97 @@
       }
     },
     "/api/v1/plans/{planId}": {
+      "patch": {
+        "operationId": "patchPlansByPlanId",
+        "summary": "Change a wave plan (its maker only): its target and landing second only while no wave is sent",
+        "tags": [
+          "armies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 40
+                  },
+                  "targetTileId": {
+                    "type": "number"
+                  },
+                  "landAt": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "the second its waves land (epoch ms; rounded down to the second)"
+                  },
+                  "shared": {
+                    "type": "boolean",
+                    "description": "shared with the player's alliance, whose members add and send their own waves"
+                  }
+                },
+                "required": [
+                  "name",
+                  "targetTileId",
+                  "landAt",
+                  "shared"
+                ],
+                "description": "the plan as it should be: the target and landing second change only while no wave is sent"
+              }
+            }
+          },
+          "description": "the plan as it should be: the target and landing second change only while no wave is sent"
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "path",
+            "name": "planId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "operationId": "deletePlansByPlanId",
         "summary": "Delete a wave plan (its maker only); armies already sent march on",

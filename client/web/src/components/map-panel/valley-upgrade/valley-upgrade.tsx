@@ -40,6 +40,7 @@ export function ValleyUpgrade({
           description={t('valleyUpgrade.description', { city: city.name, gold: fmtExact(tile.upgradeCost) })}
           confirmLabel={t('valleyUpgrade.confirm', { gold: fmt(tile.upgradeCost) })}
           destructive={false}
+          focusConfirm
           onConfirm={() => onUpgrade(tile.id)}
         >
           {t('valleyUpgrade.button', { level: tile.level + 1, gold: fmt(tile.upgradeCost) })}

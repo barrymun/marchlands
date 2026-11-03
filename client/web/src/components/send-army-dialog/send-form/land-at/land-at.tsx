@@ -3,12 +3,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { BALANCE } from '@marchlands/core';
 
 import { Countdown } from '@/components/countdown/countdown';
-import { firstLanding, landingTime, utcFields } from '@/components/send-army-dialog/send-form/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useServerNow } from '@/hooks/use-server-now';
 import { duration, utcClock } from '@/lib/format';
+import { firstLanding, landingTime, utcFields } from '@/lib/landing-time';
 import { clockOffset } from '@/lib/server-clock';
 import { LOSS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';

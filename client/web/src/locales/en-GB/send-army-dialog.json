@@ -19,7 +19,15 @@
     "chooseTroops": "Choose troops to carry resources",
     "maxTitle": "As much as the troops can still carry",
     "estimate": "March {{time}} · Carries {{load}}",
-    "estimateButton": "Estimate"
+    "estimateButton": "Estimate",
+    "planTitle": "Add a wave",
+    "planDescription": "From {{from}} to {{to}}, landing {{time}} UTC",
+    "from": "From",
+    "plannedNote": "Troops and heroes already in your waves not yet sent are left out.",
+    "planLeaves": "Must leave at {{time}} UTC, in <timer/>.",
+    "planLate": "Too late: the march takes {{time}}, longer than is left.",
+    "addToPlan": "Add to plan",
+    "added": "Wave added to the plan"
   },
   "presets": {
     "deleted": "Preset deleted",
@@ -51,14 +59,5 @@
     "invalid": "Enter a date and a time.",
     "tooSoon": "Too soon: the march takes {{time}}.",
     "tooLate": "At most {{time}} ahead."
-  },
-  "plan": {
-    "title": "Wave plan",
-    "pick": "Plan",
-    "option": "{{name}}, lands {{time}}",
-    "add": "Add to plan",
-    "new": "Add to a new plan landing {{time}}",
-    "shared": "Share with my alliance",
-    "added": "Added to the plan"
   }
 }

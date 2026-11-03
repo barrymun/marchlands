@@ -14,6 +14,7 @@ export function ConfirmButton({
   confirmLabel,
   cancelLabel,
   destructive,
+  focusConfirm,
   onConfirm,
   ...button
 }: ConfirmProps & Omit<ComponentProps<typeof Button>, 'title' | 'onClick'> & { buttonTitle?: string }) {
@@ -30,6 +31,7 @@ export function ConfirmButton({
         confirmLabel={confirmLabel}
         cancelLabel={cancelLabel}
         destructive={destructive}
+        focusConfirm={focusConfirm}
         onConfirm={onConfirm}
       />
     </>

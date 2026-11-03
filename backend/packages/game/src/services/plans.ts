@@ -119,31 +119,56 @@ export async function list(ctx: Ctx, playerId: number): Promise<PlanBean[]> {
   return out;
 }
 
-/** A new plan: a target and the second its waves land, the player's own or shared with their alliance. */
-export async function create(ctx: Ctx, playerId: number, body: CreatePlanBody) {
+/** A landing second as given (rounded down to the second): in the future, and at most BALANCE.landAtMaxAheadMs ahead. */
+function landingSecond(ctx: Ctx, raw: number): number {
+  const landAt = Math.floor(raw / 1000) * 1000;
+  if (landAt <= ctx.now || landAt - ctx.now > BALANCE.landAtMaxAheadMs)
+    throw new GameError(msg('army.planLandAt', { time: dur(BALANCE.landAtMaxAheadMs) }), -99);
+  return landAt;
+}
+
+/** A plan's name, target and alliance (if shared) as the player gave them, checked. */
+async function planFields(ctx: Ctx, playerId: number, body: Omit<CreatePlanBody, 'landAt'>) {
   const player = await getPlayer(ctx, playerId);
   const name = cleanName(body.name, 1, 40, msg('common.name'));
   await getTile(ctx, body.targetTileId);
-  const landAt = Math.floor(body.landAt / 1000) * 1000;
-  if (landAt <= ctx.now || landAt - ctx.now > BALANCE.landAtMaxAheadMs)
-    throw new GameError(msg('army.planLandAt', { time: dur(BALANCE.landAtMaxAheadMs) }), -99);
   if (body.shared && player.allianceId == null) throw new GameError(msg('army.planNoAlliance'), -99);
+  return { name, targetTileId: body.targetTileId, allianceId: body.shared ? player.allianceId : null };
+}
+
+/** A new plan: a target and the second its waves land, the player's own or shared with their alliance. */
+export async function create(ctx: Ctx, playerId: number, body: CreatePlanBody) {
+  const fields = { ...(await planFields(ctx, playerId, body)), landAt: landingSecond(ctx, body.landAt) };
   const mine = (await visiblePlans(ctx, playerId)).filter((p) => p.playerId === playerId);
   if (mine.length >= BALANCE.warPlans.maxPlans) throw new GameError(msg('army.planLimit', { count: BALANCE.warPlans.maxPlans }), -99);
   const plan = one(
     await ctx.tx
       .insert(warPlans)
-      .values({
-        playerId,
-        allianceId: body.shared ? player.allianceId : null,
-        name,
-        targetTileId: body.targetTileId,
-        landAt,
-        createdAt: ctx.now,
-      })
+      .values({ playerId, ...fields, createdAt: ctx.now })
       .returning(),
   );
   return { id: plan.id };
+}
+
+/**
+ * Changes a plan (its maker only): its name and sharing at any time; its target and landing second only while none of
+ * its waves is sent (a sent wave's army is set to land there, then). It stays shared while other players have waves in
+ * it, which they'd no longer see.
+ */
+export async function update(ctx: Ctx, playerId: number, planId: number, body: CreatePlanBody) {
+  const plan = await planFor(ctx, playerId, planId);
+  if (plan.playerId !== playerId) throw new GameError(msg('army.planNotOwner'), -99, 403);
+  const waves = await ctx.tx.select().from(warPlanWaves).where(eq(warPlanWaves.planId, plan.id));
+  const fields = await planFields(ctx, playerId, body);
+  // the landing second is checked only when it changes: a rename needn't be refused as the second nears
+  const retimed = Math.floor(body.landAt / 1000) * 1000 !== plan.landAt;
+  if ((retimed || fields.targetTileId !== plan.targetTileId) && waves.some((w) => w.armyId != null)) throw new GameError(msg('army.planMoveSent'), -99);
+  const landAt = retimed ? landingSecond(ctx, body.landAt) : plan.landAt;
+  if (fields.allianceId == null && waves.some((w) => w.playerId !== playerId)) throw new GameError(msg('army.planKeepShared'), -99);
+  await ctx.tx
+    .update(warPlans)
+    .set({ ...fields, landAt })
+    .where(eq(warPlans.id, plan.id));
 }
 
 /** Deletes a plan and its waves (its maker only); armies already sent march on. */

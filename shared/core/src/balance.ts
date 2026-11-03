@@ -203,9 +203,11 @@ export const BALANCE = {
     rallyBonusPerStep: 0.25,
     /** a captured one is under truce this long (real time); its holder's own truce never covers it */
     truceMs: 24 * HOUR,
+    /** each field level past 10 a held one builds costs and takes this many times the one before (levels 1 to 10 double) */
+    fieldLevelStep: 2,
     /** the most a player may hold, by level */
     holdLimit: { 12: 3, 14: 2, 16: 1, 18: 1 } as Record<12 | 14 | 16 | 18, number>,
-    /** a draft takes this share of a barbarian city's largest troop type */
+    /** a draft takes this share of every troop type of the city it drafts from */
     draftShare: 0.2,
     /** drafts a seat may make each UTC day; drafting by itself, one each equal part of the day */
     draftsPerDay: 4,

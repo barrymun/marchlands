@@ -16,6 +16,10 @@ export const ARMY_MESSAGES = {
   planWaveSent: [],
   /** a plan's landing second is past, or too far ahead */
   planLandAt: ['time'],
+  /** a plan with a wave sent keeps its target and landing second */
+  planMoveSent: [],
+  /** a shared plan with other players' waves stays shared */
+  planKeepShared: [],
   invalidMission: [],
   insufficientTroops: [],
   /** more resources than the troops can carry */

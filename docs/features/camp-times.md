@@ -27,10 +27,16 @@
 - **Rest time stays as it is** (camping at the target after landing, not offered in the dialog).
 - **The wave planner and alliance plans** (2026-11-01, built the same day; our design, the maintainer asked for both):
   - **A plan** is a target, a landing second (UTC, up to 24 hours ahead) and a name, the player's own or shared with their alliance (`war_plans`, migration 0037). A player keeps at most 10 (`BALANCE.warPlans.maxPlans`); a plan goes a day after its second (`keepMs`, the cleanup job).
-  - **Its waves** are armies set out but not sent: a city, troops, a hero, attack or scout (`war_plan_waves`), at most 100 a plan. They're added from the send-army dialog (Add to plan, or Add to a new plan landing at the time set), and anyone who can see the plan adds their own.
+  - **Its waves** are armies set out but not sent: a city, troops, a hero, attack or scout (`war_plan_waves`), at most 100 a plan. Anyone who can see the plan adds their own.
   - **Order whoever sends first:** each wave lands its place in the plan's order in milliseconds into the plan's second (`sendArmy`'s `landOffsetMs`), so a plan's waves land in its order however its members' sends interleave. The plan's maker reorders waves not yet sent, never past a sent one (its millisecond is fixed).
   - **Each player sends their own** waves (one, or all still in time), from the Plans panel (`components/plans-panel/`), which shows when each of their waves must leave; nobody sends for another, and nothing leaves by itself. A sent wave is an ordinary army set to land then, waiting at home.
-  - Who may do what: the maker deletes the plan and reorders; a wave's player or the maker takes an unsent wave out.
+  - Who may do what: the maker changes, deletes and reorders the plan; a wave's player or the maker takes an unsent wave out.
+- **Plans are managed from the Plans panel alone** (2026-11-03, the maintainer asked: it was easy to miss that a plan could only be started from the send-army dialog once a landing time was set):
+  - **New plan** (`plans-panel/plan-form/`): a name, the target's x and y, and the landing date and time in UTC by the server's clock, offered about an hour ahead; shared with the alliance by a switch.
+  - **Edit** (its maker, the same form, `plans.update`, `PATCH /plans/{planId}`): the name and sharing at any time; the target and landing second only while none of its waves is sent, since a sent wave's army is set to land there, then. A new second is checked like a new plan's, one left as it was never is (a rename near or after the second). It stays shared while other players have waves in it, which they'd otherwise lose sight of.
+  - **Add a wave** on a plan's card (`plan-card/add-wave/`) opens the send-army form in plan mode (`SendForm`'s `slot`): the city shown first, any other picked in it; attack or scout; its saved armies; and when the wave must leave to land in its place, refused once its march no longer fits. It stays open for the next wave.
+  - **What a wave may take** leaves out the troops and heroes the city already has in the player's unsent waves, across all their plans (`plannedFrom`, `freeTroops`): nothing is held until a wave is sent, so without this the same troops could be planned twice and a send fail later.
+  - The send-army dialog on the map no longer adds to plans; it sends, at a set time if asked.
 
 ## The design (proposed)
 
@@ -63,5 +69,5 @@
 ## Phases
 
 1. **Land at a time** (built 2026-11-01): the server side (holding an army, leaving on time, the order of ties, fighting at `reachTime`), the dialog's landing time in UTC, server time on screen and the client's clock corrected. Tested with the database tests (`test/services/armies-land-at.db.test.ts`; the worker's order in `worker.db.test.ts`) and the dialog on the running stack. Not yet: the waiting army in the armies list and its target's view, tried in the browser (a new account has no Rally Spot).
-2. **The wave planner,** for one player's cities: built 2026-11-01 (Decided; `services/plans.ts`, `GET/POST /plans`, the Plans panel, Add to plan in the send-army dialog; `test/services/plans.db.test.ts`).
+2. **The wave planner,** for one player's cities: built 2026-11-01 (Decided; `services/plans.ts`, `GET/POST /plans`, the Plans panel, where plans are started and waves added since 2026-11-03; `test/services/plans.db.test.ts`).
 3. **Alliance plans:** built 2026-11-01 with the planner (a plan shared with the maker's alliance).

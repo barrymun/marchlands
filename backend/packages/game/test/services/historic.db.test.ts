@@ -13,22 +13,26 @@ import { game } from '#test/support/game.ts';
 import { barbariansNear, makeSeat } from '#test/support/historic.ts';
 
 describe(historic.draftNow.name, () => {
-  it('takes a fifth of a barbarian city’s largest troop type in the seat’s area into the seat', () =>
+  it('takes a fifth of every troop type of a barbarian city in the seat’s area into the seat', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       await makeSeat(g, p);
       const [target] = await barbariansNear(g, p, true);
       const full = npcTemplate(target!.level).troops;
-      const [key, most] = Object.entries(full).sort((a, b) => b[1] - a[1])[0]!;
-      const taken = Math.floor(most * BALANCE.historic.draftShare);
+      const taken = Object.fromEntries(Object.entries(full).map(([k, n]) => [k, Math.floor(n * BALANCE.historic.draftShare)]));
+      expect(Object.keys(taken).length).toBeGreaterThan(1);
 
-      expect(await historic.draftNow(g, p.id, p.cityId, target!.id)).toEqual({ troops: { [key]: taken } });
-      expect((await getCity(g, p.cityId)).troops[key as 'militia']).toBe(taken);
-      expect((await getCity(g, p.cityId)).draftsUsed).toBe(1);
-      expect((await getTile(g, target!.id)).troops![key as 'militia']).toBe(most - taken);
+      expect(await historic.draftNow(g, p.id, p.cityId, target!.id)).toEqual({ troops: taken });
+      const seat = await getCity(g, p.cityId);
+      const left = (await getTile(g, target!.id)).troops!;
+      for (const [k, n] of Object.entries(taken)) {
+        expect(seat.troops[k as 'militia']).toBe(n);
+        expect(left[k as 'militia']).toBe(full[k as 'militia']! - n);
+      }
+      expect(seat.draftsUsed).toBe(1);
       const r = (await reportsOf(g, p.id)).at(-1)!;
       expect(r.title).toEqual(msg('report.title.draft'));
-      expect(r.body).toMatchObject({ kind: 'draft', draft: { cityId: p.cityId, level: target!.level, troops: { [key]: taken }, auto: false } });
+      expect(r.body).toMatchObject({ kind: 'draft', draft: { cityId: p.cityId, level: target!.level, troops: taken, auto: false } });
     }));
 
   it('without a barbarian city given, drafts from the one it would pick by itself: the highest level in its area', () =>
@@ -111,10 +115,13 @@ describe(historic.draftNow.name, () => {
       await expectRefused(historic.draftNow(g, p.id, p.cityId, twelve!.id), msg('city.draftNotTarget'));
       await makeSeat(g, p, { level: 14 });
       const { troops } = await historic.draftNow(g, p.id, p.cityId, twelve!.id);
+      // a fifth of each of its five troop types: warriors, the day's foot, archers, the day's horse and siege engine
       const full = historicGarrison(12, historicDay(twelve!.id, Math.floor(g.now / DAY))).troops;
-      const [key, most] = Object.entries(full).sort((a, b) => b[1] - a[1])[0]!;
-      expect(troops).toEqual({ [key]: Math.floor(most * BALANCE.historic.draftShare) });
-      expect((await getTile(g, twelve!.id)).troops![key as 'militia']).toBe(most - Math.floor(most * BALANCE.historic.draftShare));
+      const taken = Object.fromEntries(Object.entries(full).map(([k, n]) => [k, Math.floor(n * BALANCE.historic.draftShare)]));
+      expect(Object.keys(taken)).toHaveLength(5);
+      expect(troops).toEqual(taken);
+      const left = (await getTile(g, twelve!.id)).troops!;
+      for (const [k, n] of Object.entries(taken)) expect(left[k as 'militia']).toBe(full[k as 'militia']! - n);
     }));
 });
 

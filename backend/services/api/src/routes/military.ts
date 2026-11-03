@@ -36,6 +36,7 @@ import {
   TavernOffers,
   TileParams,
   TroopParams,
+  UpdatePlanBody,
   UseHeroItemBody,
   ValleyUpgradeBody,
   ValleyUpgradeResult,
@@ -143,6 +144,14 @@ export default async function militaryRoutes(app: ZApp) {
   );
   app.post('/plans', s(tags.armies, 'Make a wave plan: a target and the second its waves land', PlanCreated, { body: CreatePlanBody }), (req) =>
     game(req, (ctx, pid) => plans.create(ctx, pid, req.body)),
+  );
+  app.patch(
+    '/plans/:planId',
+    s(tags.armies, 'Change a wave plan (its maker only): its target and landing second only while no wave is sent', Empty, {
+      params: PlanParams,
+      body: UpdatePlanBody,
+    }),
+    (req) => game(req, (ctx, pid) => plans.update(ctx, pid, req.params.planId, req.body)),
   );
   app.delete('/plans/:planId', s(tags.armies, 'Delete a wave plan (its maker only); armies already sent march on', Empty, { params: PlanParams }), (req) =>
     game(req, (ctx, pid) => plans.remove(ctx, pid, req.params.planId)),

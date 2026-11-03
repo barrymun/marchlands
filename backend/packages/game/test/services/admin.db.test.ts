@@ -22,6 +22,7 @@ import { getHero } from '#/repo.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { createTestPlayer, reloadCity, reloadPlayer } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
+import { makeSeat } from '#test/support/historic.ts';
 
 describe(admin.grantItems.name, () => {
   it('adds items to what the player has, and takes them away with a negative count', () =>
@@ -94,6 +95,15 @@ describe(admin.setBuilding.name, () => {
       await expectRefused(admin.setBuilding(g, a.cityId, a.id, 5, BuildingType.COTTAGE, -1), msg('admin.invalidLevel', { max }));
       // an unknown building type has no levels at all
       await expectRefused(admin.setBuilding(g, a.cityId, a.id, 5, 999, 1), msg('admin.invalidLevel', { max: 0 }));
+    }));
+
+  it('sets a historic city’s fields up to its own level and no further, and everything else up to 10', () =>
+    game(async (g) => {
+      const a = await createTestPlayer(g);
+      await makeSeat(g, a, { level: 14 });
+      await admin.setBuilding(g, a.cityId, a.id, 1001, BuildingType.FARM, 14);
+      await expectRefused(admin.setBuilding(g, a.cityId, a.id, 1001, BuildingType.FARM, 15), msg('admin.invalidLevel', { max: 14 }));
+      await expectRefused(admin.setBuilding(g, a.cityId, a.id, 5, BuildingType.COTTAGE, 11), msg('admin.invalidLevel', { max: 10 }));
     }));
 });
 

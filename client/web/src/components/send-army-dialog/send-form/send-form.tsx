@@ -2,7 +2,15 @@ import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { type CityBean, getArmiesQueryKey, getCitiesByCityIdQueryKey, postCitiesArmies, postCitiesArmiesEstimate } from '@marchlands/api-client';
+import {
+  type CityBean,
+  getArmiesQueryKey,
+  getCitiesByCityIdQueryKey,
+  getPlansQueryKey,
+  postCitiesArmies,
+  postCitiesArmiesEstimate,
+  postPlansWaves,
+} from '@marchlands/api-client';
 import {
   armyLoad,
   BuffId,
@@ -20,13 +28,12 @@ import {
 import { MISSION_NAMES } from '@/components/armies-panel/constants';
 import { Countdown } from '@/components/countdown/countdown';
 import { NumberField } from '@/components/number-field/number-field';
-import { AddToPlan } from '@/components/send-army-dialog/send-form/add-to-plan/add-to-plan';
 import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
 import { RES } from '@/components/send-army-dialog/send-form/constants';
 import { LandAt } from '@/components/send-army-dialog/send-form/land-at/land-at';
 import { ScoutNote } from '@/components/send-army-dialog/send-form/scout-note/scout-note';
-import { capTroops, defaultHero, landingTime } from '@/components/send-army-dialog/send-form/utils';
-import type { SendTarget } from '@/components/send-army-dialog/types';
+import { capTroops, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
+import type { PlanSlot, SendTarget } from '@/components/send-army-dialog/types';
 import { TroopBadge } from '@/components/troop-badge/troop-badge';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -35,29 +42,38 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
-import { duration, fmt, fmtExact, resourceLabel } from '@/lib/format';
+import { useServerNow } from '@/hooks/use-server-now';
+import { duration, fmt, fmtExact, resourceLabel, utcClock } from '@/lib/format';
 import { typedAmounts } from '@/lib/forms';
 import { itemName, troopName } from '@/lib/game-data';
+import { landingTime } from '@/lib/landing-time';
 import { translateMessage } from '@/lib/messages';
 import { textInRange } from '@/lib/ranges';
-import { ITEM_BONUS_TEXT } from '@/lib/tones';
+import { clockOffset } from '@/lib/server-clock';
+import { ITEM_BONUS_TEXT, LOSS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
-/** Send an army to the target. The dialog stays open after sending, so more waves can follow. */
-export function SendForm({ city, target }: { city: CityBean; target: SendTarget }) {
+/**
+ * Send an army to the target. The dialog stays open after sending, so more waves can follow. With a `slot` (the Plans
+ * panel) it adds a wave to that plan instead, from troops and heroes not already in the player's unsent waves.
+ */
+export function SendForm({ city, target, slot }: { city: CityBean; target: SendTarget; slot?: PlanSlot }) {
   const { t } = useTranslation(['send-army-dialog', 'common']);
+  // a wave plan's other waves keep their heroes and troops until they're sent
+  const heroes = slot ? city.heros.filter((h) => !slot.planned.heroIds.includes(h.id)) : city.heros;
+  const free = slot ? freeTroops(city.troop, slot.planned.troops) : city.troop;
   const [mission, setMission] = useState(String(target.mission ?? target.missions[0]));
   // an attack is led by the strongest idle hero (by Attack) unless the player picks one; other missions go without
-  const [heroId, setHeroId] = useState(() => defaultHero(Number(mission), city.heros));
+  const [heroId, setHeroId] = useState(() => defaultHero(Number(mission), heroes));
   const [heroPicked, setHeroPicked] = useState(false);
   const [troops, setTroops] = useState<Partial<Record<TroopKey, string>>>(target.troops ?? {});
   // typing is never capped (more than are home shows as invalid), but after a wave, when the city has fewer, amounts
   // come down to what is left; by content, as the city refetches every tick with the same troops
-  const home = JSON.stringify(city.troop);
+  const home = JSON.stringify(free);
   const [seenHome, setSeenHome] = useState(home);
   if (home !== seenHome) {
     setSeenHome(home);
-    setTroops(capTroops(troops, city.troop));
+    setTroops(capTroops(troops, free));
   }
   const scouting = Number(mission) === Mission.SCOUT;
   const [resources, setResources] = useState<Partial<Record<(typeof RES)[number], string>>>({});
@@ -66,8 +82,8 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   const arriveAt = landAt ? landingTime(landAt.date, landAt.time) : null;
   // every troop type, those the city has none of greyed out; only scouts go on a scouting mission
   const listed = Object.entries(TROOP_KEYS).filter(([, key]) => !scouting || key === 'scouter');
-  const hasAny = listed.some(([, key]) => (city.troop[key] ?? 0) > 0);
-  const idleHeroes = city.heros.filter((h) => h.status === HeroStatus.IDLE && !h.seized);
+  const hasAny = listed.some(([, key]) => (free[key] ?? 0) > 0);
+  const idleHeroes = heroes.filter((h) => h.status === HeroStatus.IDLE && !h.seized);
   const troopBody = typedAmounts(scouting ? { scouter: troops.scouter } : troops);
   // troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)
   const player = usePlayer();
@@ -78,7 +94,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
   const chosen = Object.values(troopBody).reduce<number>((t, n) => t + Number(n), 0);
   const over = chosen > cap;
   // each amount within what is home (blank is none)
-  const troopsValid = listed.every(([, key]) => textInRange(troops[key] ?? '', { min: 0, max: city.troop[key] ?? 0 }, { blank: true }));
+  const troopsValid = listed.every(([, key]) => textInRange(troops[key] ?? '', { min: 0, max: free[key] ?? 0 }, { blank: true }));
   // attack / defense items (Ivory Horn …) that will count in the battle
   const battleBuffs =
     Number(mission) === Mission.ATTACK ? (player.data?.buffs ?? []).filter((b) => (b.id === BuffId.ATTACK || b.id === BuffId.DEFENSE) && b.endTime > now) : [];
@@ -123,14 +139,58 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
     t('form.dispatched'),
   );
   const carriesResources = Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY;
+  // a plan's wave: when it must leave to land in its place, which its march may already have passed
+  const serverNow = useServerNow();
+  const leaves = slot && marchMs != null ? slot.landAt + slot.position - marchMs : null;
+  const late = leaves != null && leaves < serverNow;
+  const add = useCommand(
+    async (plan: PlanSlot) => {
+      await postPlansWaves({
+        path: { planId: plan.planId },
+        body: { cityId: city.id, mission: Number(mission), troops: troopBody, heroId: heroId === 'none' ? null : Number(heroId) },
+        throwOnError: true,
+      });
+    },
+    () => [getPlansQueryKey()],
+    t('form.added'),
+  );
+  // after a wave goes (sent, or added to the plan) the dialog stays open for the next: the hero just used is busy (an
+  // attack picks the next strongest), and the resources it carried are gone; troop amounts are capped to what is left
+  const nextWave = () => {
+    setHeroId(defaultHero(Number(mission), heroes, heroId === 'none' ? undefined : Number(heroId)));
+    setHeroPicked(false);
+    setResources({});
+  };
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{t('form.title')}</DialogTitle>
-        <DialogDescription>{t('form.description', { from: city.name, to: target.name })}</DialogDescription>
+        <DialogTitle>{slot ? t('form.planTitle') : t('form.title')}</DialogTitle>
+        <DialogDescription>
+          {slot
+            ? t('form.planDescription', { from: city.name, to: target.name, time: utcClock(slot.landAt) })
+            : t('form.description', { from: city.name, to: target.name })}
+        </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
+        {slot && (
+          <div className="grid gap-2">
+            <Label>{t('form.from')}</Label>
+            <Select value={String(city.id)} onValueChange={(c) => slot.onCity(Number(c))}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {slot.cities.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">{t('form.plannedNote')}</p>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <div className="grid gap-2">
             <Label>{t('form.mission')}</Label>
@@ -138,7 +198,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
               value={mission}
               onValueChange={(m) => {
                 setMission(m);
-                if (!heroPicked) setHeroId(defaultHero(Number(m), city.heros));
+                if (!heroPicked) setHeroId(defaultHero(Number(m), heroes));
               }}
             >
               <SelectTrigger className="w-full">
@@ -204,7 +264,7 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
           {/* two to a row from lg (workers and warriors, then scouts and pikemen …), so the dialog needn't scroll */}
           <div className="grid gap-x-8 gap-y-2 lg:grid-cols-2">
             {listed.map(([id, key]) => {
-              const have = city.troop[key] ?? 0;
+              const have = free[key] ?? 0;
               return (
                 <div key={key} className={cn('flex items-center justify-between gap-2 text-sm', have === 0 && 'text-muted-foreground')}>
                   <span className={cn('flex items-center gap-2', have === 0 && 'opacity-60')}>
@@ -277,13 +337,24 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
             </div>
           </div>
         )}
-        <LandAt marchMs={marchMs} value={landAt} onChange={setLandAt} />
-        <AddToPlan
-          cityId={city.id}
-          target={target}
-          wave={chosen > 0 && !over && troopsValid ? { mission: Number(mission), troops: troopBody, heroId: heroId === 'none' ? null : Number(heroId) } : null}
-          arriveAt={arriveAt}
-        />
+        {slot ? (
+          leaves != null && (
+            <p className={cn('text-xs tabular-nums', late ? LOSS_TEXT : 'text-muted-foreground')}>
+              {late ? (
+                t('form.planLate', { time: duration(marchMs ?? 0) })
+              ) : (
+                <Trans
+                  t={t}
+                  i18nKey="form.planLeaves"
+                  values={{ time: utcClock(leaves) }}
+                  components={{ timer: <Countdown endTime={leaves - clockOffset()} /> }}
+                />
+              )}
+            </p>
+          )
+        ) : (
+          <LandAt marchMs={marchMs} value={landAt} onChange={setLandAt} />
+        )}
         {estimate.data && (
           <p className="text-sm text-muted-foreground">{t('form.estimate', { time: duration(estimate.data.marchTime), load: fmt(estimate.data.load) })}</p>
         )}
@@ -292,24 +363,28 @@ export function SendForm({ city, target }: { city: CityBean; target: SendTarget 
         <Button variant="outline" disabled={!Object.keys(troopBody).length} onClick={() => estimate.mutate()}>
           {t('form.estimateButton')}
         </Button>
-        <Button
-          disabled={
-            !Object.keys(troopBody).length || over || !troopsValid || (carriesResources && overloaded) || (landAt != null && arriveAt == null) || send.isPending
-          }
-          onClick={() =>
-            send.mutate(undefined, {
-              // stay open for the next wave: the hero just sent is busy now (an attack picks the next strongest), and the
-              // resources it carried are gone; troop amounts are capped to what is left once the city refreshes
-              onSuccess: () => {
-                setHeroId(defaultHero(Number(mission), city.heros, heroId === 'none' ? undefined : Number(heroId)));
-                setHeroPicked(false);
-                setResources({});
-              },
-            })
-          }
-        >
-          {t('common:actions.send')}
-        </Button>
+        {slot ? (
+          <Button
+            disabled={!Object.keys(troopBody).length || over || !troopsValid || late || add.isPending}
+            onClick={() => add.mutate(slot, { onSuccess: nextWave })}
+          >
+            {t('form.addToPlan')}
+          </Button>
+        ) : (
+          <Button
+            disabled={
+              !Object.keys(troopBody).length ||
+              over ||
+              !troopsValid ||
+              (carriesResources && overloaded) ||
+              (landAt != null && arriveAt == null) ||
+              send.isPending
+            }
+            onClick={() => send.mutate(undefined, { onSuccess: nextWave })}
+          >
+            {t('common:actions.send')}
+          </Button>
+        )}
       </DialogFooter>
     </>
   );

@@ -19,7 +19,15 @@
     "chooseTroops": "資源を運ぶ兵を選んでください",
     "maxTitle": "兵がまだ運べるだけ",
     "estimate": "行軍 {{time}} · 積載 {{load}}",
-    "estimateButton": "見積もり"
+    "estimateButton": "見積もり",
+    "planTitle": "波を追加",
+    "planDescription": "{{from}}から{{to}}へ、{{time}} UTC着弾",
+    "from": "出発都市",
+    "plannedNote": "まだ送っていない波に入っている部隊と英雄は除かれます。",
+    "planLeaves": "{{time}} UTCに出発する必要があります（あと<timer/>）。",
+    "planLate": "間に合いません：行軍に{{time}}かかり、残り時間より長くなります。",
+    "addToPlan": "計画に追加",
+    "added": "波を計画に追加しました"
   },
   "presets": {
     "deleted": "プリセットを削除しました",
@@ -50,14 +58,5 @@
     "invalid": "日付と時刻を入力してください。",
     "tooSoon": "早すぎます。行軍に{{time}}かかります。",
     "tooLate": "最大{{time}}先までです。"
-  },
-  "plan": {
-    "title": "作戦計画",
-    "pick": "計画",
-    "option": "{{name}}（着弾 {{time}}）",
-    "add": "計画に追加",
-    "new": "{{time}}着弾の新しい計画に追加",
-    "shared": "同盟と共有",
-    "added": "計画に追加しました"
   }
 }

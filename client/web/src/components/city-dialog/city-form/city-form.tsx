@@ -85,31 +85,37 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
           </div>
         )}
         <Separator />
-        <p className="text-xs text-muted-foreground">{t('cityForm.moveRules')}</p>
-        <div className="grid gap-2">
-          <Label>
-            {owned > 0
-              ? t('cityForm.teleportOwned', { item: itemName(TELEPORT), owned })
-              : t('cityForm.teleportPrice', { item: itemName(TELEPORT), price: fmt(price) })}
-          </Label>
-          <div className="flex gap-2">
-            {/* blank until typed; past the map's edge it shows as invalid with the range, and Teleport waits */}
-            <NumberField placeholder="x" range={{ min: 0, max: size - 1 }} blank value={x} onChange={setX} />
-            <NumberField placeholder="y" range={{ min: 0, max: size - 1 }} blank value={y} onChange={setY} />
-            <Button
-              disabled={!validXY || !!cooldown || move.isPending || (owned === 0 && city.resource.gold < price)}
-              title={owned > 0 ? undefined : t('common:boughtWithCityGold', { city: city.name })}
-              onClick={() => move.mutate({ path: { cityId: city.id }, body: { targetTileId: ty * size + tx } }, { onSuccess: onDone })}
-            >
-              {t('cityForm.teleport')}
-            </Button>
-          </div>
-          {cooldown && (
-            <p className="text-xs text-muted-foreground">
-              <Trans t={t} i18nKey="cityForm.cooldown" components={{ countdown: <Countdown endTime={cooldown.endTime} /> }} />
-            </p>
-          )}
-        </div>
+        {city.historicLevel ? (
+          <p className="text-sm text-muted-foreground">{t('cityForm.cannotMove', { name: city.name })}</p>
+        ) : (
+          <>
+            <p className="text-xs text-muted-foreground">{t('cityForm.moveRules')}</p>
+            <div className="grid gap-2">
+              <Label>
+                {owned > 0
+                  ? t('cityForm.teleportOwned', { item: itemName(TELEPORT), owned })
+                  : t('cityForm.teleportPrice', { item: itemName(TELEPORT), price: fmt(price) })}
+              </Label>
+              <div className="flex gap-2">
+                {/* blank until typed; past the map's edge it shows as invalid with the range, and Teleport waits */}
+                <NumberField placeholder="x" range={{ min: 0, max: size - 1 }} blank value={x} onChange={setX} />
+                <NumberField placeholder="y" range={{ min: 0, max: size - 1 }} blank value={y} onChange={setY} />
+                <Button
+                  disabled={!validXY || !!cooldown || move.isPending || (owned === 0 && city.resource.gold < price)}
+                  title={owned > 0 ? undefined : t('common:boughtWithCityGold', { city: city.name })}
+                  onClick={() => move.mutate({ path: { cityId: city.id }, body: { targetTileId: ty * size + tx } }, { onSuccess: onDone })}
+                >
+                  {t('cityForm.teleport')}
+                </Button>
+              </div>
+              {cooldown && (
+                <p className="text-xs text-muted-foreground">
+                  <Trans t={t} i18nKey="cityForm.cooldown" components={{ countdown: <Countdown endTime={cooldown.endTime} /> }} />
+                </p>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </>
   );

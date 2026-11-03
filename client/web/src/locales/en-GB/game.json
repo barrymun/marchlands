@@ -23,8 +23,7 @@
   "sidebar": "City overview",
   "panel": "Opens over the view; close it to go back.",
   "troopsHome": {
-    "title": "Troops at home",
-    "none": "No troops at home."
+    "title": "Troops at home"
   },
   "cityFallback": "City",
   "yourCities": "Your cities",

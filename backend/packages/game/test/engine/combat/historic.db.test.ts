@@ -19,7 +19,6 @@ import {
   Mission,
   msg,
   nextAutoDraftAt,
-  ref,
   tileDistance,
   TileType,
   tileXY,
@@ -224,7 +223,7 @@ describe(`${processArmy.name}: capturing a historic city`, () => {
       expect((await attack()).missionType).toBe(Mission.ATTACK);
     }));
 
-  it('can’t be moved, its high fields can’t be demolished, and a restart leaves it a historic city again', () =>
+  it('can’t be moved, its fields can be demolished, and a restart leaves it a historic city again', () =>
     game(async (g) => {
       const { p, heroId } = await warrior(g, { archer: 60_000 });
       await admin.setPlayerFlags(g, p.name, { title: 1 });
@@ -232,7 +231,11 @@ describe(`${processArmy.name}: capturing a historic city`, () => {
       const cityId = (await getTile(g, seat.id)).cityId!;
       const flat = await tileNear(g, p.cityId, TileType.FLAT);
       await expectRefused(interior.moveCity(g, p.id, cityId, flat.id), msg('city.historicCannotMove'));
-      await expectRefused(buildings.demolish(g, p.id, cityId, 1001), msg('building.historicField', { building: ref.building(BuildingType.FARM), level: 12 }));
+      // its fields stand at its own level, and can be demolished and built back up to it (services/buildings-seat.db.test.ts)
+      const field = (await getCity(g, cityId)).buildings.find((b) => b.positionId === 1001);
+      expect(field).toMatchObject({ typeId: BuildingType.FARM, level: 12 });
+      await buildings.demolish(g, p.id, cityId, 1001);
+      expect((await getCity(g, cityId)).buildings.some((b) => b.positionId === 1001)).toBe(false);
       await player.restartPlayer(g, p.id);
       expect(await getTile(g, seat.id)).toMatchObject({ type: TileType.HISTORIC, level: 12, cityId: null, ownerPlayerId: null, state: null });
     }));

@@ -52,5 +52,7 @@
   "planNoAlliance": "Join an alliance to share a plan.",
   "planMission": "A plan’s waves attack or scout.",
   "planWaveSent": "That wave was sent already.",
-  "planLandAt": "A plan lands in the future, at most {{time}} ahead."
+  "planLandAt": "A plan lands in the future, at most {{time}} ahead.",
+  "planMoveSent": "Waves of this plan were sent already: its target and landing time can no longer change.",
+  "planKeepShared": "Other players have waves in this plan, so it stays shared."
 }

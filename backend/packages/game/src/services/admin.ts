@@ -51,7 +51,9 @@ export async function setResources(ctx: Ctx, cityId: number, playerId: number, r
 
 export async function setBuilding(ctx: Ctx, cityId: number, playerId: number, positionId: number, typeId: number, level: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
-  if (level < 0 || level > buildingMaxLevel(typeId)) throw new GameError(msg('admin.invalidLevel', { max: buildingMaxLevel(typeId) }), -99);
+  // a historic city's fields go up to its own level, as building them does
+  const max = buildingMaxLevel(typeId, b.city.historicLevel);
+  if (level < 0 || level > max) throw new GameError(msg('admin.invalidLevel', { max }), -99);
   const rest = b.city.buildings.filter((x) => x.positionId !== positionId);
   b.city.buildings = level === 0 ? rest : [...rest, { positionId, typeId, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 }];
   await saveCity(ctx, b.city);

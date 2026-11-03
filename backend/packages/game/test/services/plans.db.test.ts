@@ -39,6 +39,77 @@ describe(plans.create.name, () => {
     }));
 });
 
+describe(plans.update.name, () => {
+  it('changes the name, target, landing second and sharing', () =>
+    game(async (g) => {
+      const { p } = await warrior(g);
+      const { p: q } = await warrior(g);
+      await allies(g, p, q);
+      const { id, landAt } = await planOn(g, p);
+      const elsewhere = await tileNear(g, p.cityId, TileType.NPC, { skip: 1 });
+      await plans.update(g, p.id, id, { name: 'Take Rome', targetTileId: elsewhere.id, landAt: landAt + HOUR + 999, shared: true });
+      expect(await plans.list(g, q.id)).toMatchObject([{ id, name: 'Take Rome', targetTileId: elsewhere.id, landAt: landAt + HOUR, shared: true }]);
+    }));
+
+  it('is its maker’s alone', () =>
+    game(async (g) => {
+      const { p } = await warrior(g);
+      const { p: q } = await warrior(g);
+      await allies(g, p, q);
+      const { id, landAt, target } = await planOn(g, p, true);
+      await expectRefused(plans.update(g, q.id, id, { name: 'Mine', targetTileId: target.id, landAt, shared: true }), msg('army.planNotOwner'));
+    }));
+
+  it('keeps the target and landing second once a wave is sent, but can still be renamed', () =>
+    game(async (g) => {
+      const { p } = await warrior(g);
+      const { id, landAt, target } = await planOn(g, p);
+      const w = await plans.addWave(g, p.id, id, { cityId: p.cityId, mission: Mission.SCOUT, troops: { scouter: 1 } });
+      await plans.sendWave(g, p.id, id, w.id);
+      const body = { name: 'Break it', targetTileId: target.id, landAt, shared: false };
+      await expectRefused(plans.update(g, p.id, id, { ...body, landAt: landAt + 60_000 }), msg('army.planMoveSent'));
+      const other = await tileNear(g, p.cityId, TileType.NPC, { skip: 1 });
+      await expectRefused(plans.update(g, p.id, id, { ...body, targetTileId: other.id }), msg('army.planMoveSent'));
+      await plans.update(g, p.id, id, { ...body, name: 'Renamed' });
+      expect(await plans.list(g, p.id)).toMatchObject([{ name: 'Renamed', targetTileId: target.id, landAt }]);
+    }));
+
+  it('checks a new landing second, but not one left as it was however near', () =>
+    game(async (g) => {
+      const { p } = await warrior(g);
+      const { id, landAt, target } = await planOn(g, p);
+      const body = { name: 'Break it', targetTileId: target.id, landAt, shared: false };
+      await expectRefused(plans.update(g, p.id, id, { ...body, landAt: g.now - 1000 }), msg('army.planLandAt', { time: dur(BALANCE.landAtMaxAheadMs) }));
+      await expectRefused(
+        plans.update(g, p.id, id, { ...body, landAt: g.now + BALANCE.landAtMaxAheadMs + 1000 }),
+        msg('army.planLandAt', { time: dur(BALANCE.landAtMaxAheadMs) }),
+      );
+      g.advance(HOUR + 1000);
+      await plans.update(g, p.id, id, { ...body, name: 'Too late to move' });
+      expect((await plans.list(g, p.id))[0]?.name).toBe('Too late to move');
+    }));
+
+  it('stays shared while other players have waves in it, and needs an alliance to share', () =>
+    game(async (g) => {
+      const { p } = await warrior(g);
+      const { p: q } = await warrior(g);
+      const { p: loner } = await warrior(g);
+      await allies(g, p, q);
+      const { id, landAt, target } = await planOn(g, p, true);
+      const body = { name: 'Break it', targetTileId: target.id, landAt, shared: false };
+      const theirs = await plans.addWave(g, q.id, id, { cityId: q.cityId, mission: Mission.SCOUT, troops: { scouter: 1 } });
+      await expectRefused(plans.update(g, p.id, id, body), msg('army.planKeepShared'));
+      await plans.removeWave(g, q.id, id, theirs.id);
+      await plans.update(g, p.id, id, body);
+      expect(await plans.list(g, q.id)).toEqual([]);
+      const own = await planOn(g, loner);
+      await expectRefused(
+        plans.update(g, loner.id, own.id, { ...body, targetTileId: own.target.id, landAt: own.landAt, shared: true }),
+        msg('army.planNoAlliance'),
+      );
+    }));
+});
+
 describe(plans.sendWave.name, () => {
   it('lands each wave its place in the order, in milliseconds, into the plan’s second', () =>
     game(async (g) => {

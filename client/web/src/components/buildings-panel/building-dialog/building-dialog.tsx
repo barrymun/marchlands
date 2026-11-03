@@ -22,7 +22,8 @@ export function BuildingDialog({
   const empty = !bld || bld.typeId === 0;
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg">
+      {/* the list of what to build is wide enough for its cards side by side; a building's own page stays narrow */}
+      <DialogContent className={`max-h-[85svh] overflow-y-auto ${empty ? 'sm:max-w-2xl lg:max-w-4xl' : 'sm:max-w-lg'}`}>
         {pos != null &&
           (empty ? (
             <BuildList city={city} positionId={pos} onDone={onClose} />

@@ -1,7 +1,7 @@
 // (marchlands) The daily draft of a held historic city (docs/features/historical-cities.md, Capturing and holding
 // one): BALANCE.historic.draftsPerDay drafts a UTC day, each from a different city nobody holds in its area (a
-// barbarian city, or a historic city of a lower level: canDraftFrom), taking BALANCE.historic.draftShare of its largest
-// troop type into the seat. A seat drafts by itself unless its holder turned that off (draftJob, jobs.ts), aiming at
+// barbarian city, or a historic city of a lower level: canDraftFrom), taking BALANCE.historic.draftShare of each of its
+// troop types into the seat. A seat drafts by itself unless its holder turned that off (draftJob, jobs.ts), aiming at
 // the strongest it hasn't drafted today; its holder can always choose one (services/historic.ts).
 
 import { and, eq, isNull, lt, notInArray, or, sql } from 'drizzle-orm';
@@ -91,15 +91,14 @@ export async function pickDraftTarget(ctx: Ctx, city: CityRow, level: HistoricLe
 }
 
 /**
- * Draft from a city into a seat (both locked): BALANCE.historic.draftShare of its largest troop type, as its garrison
- * stands now, counted against the seat's drafts today and noted as drafted today. Returns what was drafted, or null if
+ * Draft from a city into a seat (both locked): BALANCE.historic.draftShare of each troop type, as its garrison stands
+ * now, counted against the seat's drafts today and noted as drafted today. Returns what was drafted, or null if
  * it had no troops.
  */
 export async function draft(ctx: Ctx, city: CityRow, tile: TileRow, opts: { auto: boolean; scouted: number }) {
   const npc = garrisonOf(tile, ctx.now);
-  const take = draftTake(npc.troops);
-  if (!take) return null;
-  const troops = { [take.key]: take.count };
+  const troops = draftTake(npc.troops);
+  if (!troops) return null;
   Object.assign(tile, { state: npc.state, troops: addTroops(npc.troops, troops, -1), forts: npc.forts, updatedAt: ctx.now });
   await saveTile(ctx, tile);
   Object.assign(city, {

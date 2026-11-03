@@ -1,7 +1,7 @@
 // The one way the client asks "are you sure?": a dialog with Cancel and a confirm button. Never the
 // browser's confirm() or a click-twice button.
 
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ConfirmProps } from '@/components/confirm-dialog/types';
@@ -17,12 +17,14 @@ export function ConfirmDialog({
   confirmLabel,
   cancelLabel,
   destructive = true,
+  focusConfirm = false,
   disabled = false,
   onConfirm,
   children,
 }: ConfirmProps & { open: boolean; onOpenChange: (open: boolean) => void; disabled?: boolean; children?: ReactNode }) {
   const { t } = useTranslation('common');
   const [busy, setBusy] = useState(false);
+  const confirmButton = useRef<HTMLButtonElement>(null);
   const confirm = async () => {
     setBusy(true);
     try {
@@ -36,7 +38,14 @@ export function ConfirmDialog({
   };
   return (
     <Dialog open={open} onOpenChange={(o) => !busy && onOpenChange(o)}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        onOpenAutoFocus={(e) => {
+          if (!focusConfirm) return;
+          e.preventDefault();
+          confirmButton.current?.focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
@@ -46,7 +55,7 @@ export function ConfirmDialog({
           <Button variant="outline" disabled={busy} onClick={() => onOpenChange(false)}>
             {cancelLabel ?? t('actions.cancel')}
           </Button>
-          <Button variant={destructive ? 'destructive' : 'default'} disabled={busy || disabled} onClick={() => void confirm()}>
+          <Button ref={confirmButton} variant={destructive ? 'destructive' : 'default'} disabled={busy || disabled} onClick={() => void confirm()}>
             {confirmLabel}
           </Button>
         </DialogFooter>

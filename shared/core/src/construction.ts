@@ -222,20 +222,24 @@ export function assertCanConstruct({ typeId, positionId, buildings, research, it
   }
 }
 
-/** Refuses an upgrade that can't start now; else the building and its next level's config. */
+/**
+ * Refuses an upgrade that can't start now; else the building and its next level's config. `historicLevel` is the city's
+ * when it is a held historic city, whose fields go up to that level and no further (`buildingMaxLevel`).
+ */
 export function assertCanUpgrade(
   b: BuildingState | undefined,
   buildings: BuildingState[],
   research: ResearchState,
   items: ItemCounts,
   maxConcurrent = 1,
+  historicLevel: number | null = null,
 ): { building: BuildingState; next: BuildingLevelConfig } {
   if (!b) throw new GameError(msg('building.notFound'), -99, 404);
   if (b.status !== 0) {
     throw new GameError(msg('building.statusChanged'), -45);
   }
   if (isConstructing(buildings, maxConcurrent)) throw new GameError(msg('building.queuesBusy'), -48);
-  if (b.level >= buildingMaxLevel(b.typeId)) throw new GameError(msg('building.maxLevel', { building: ref.building(b.typeId) }), -99);
+  if (b.level >= buildingMaxLevel(b.typeId, historicLevel)) throw new GameError(msg('building.maxLevel', { building: ref.building(b.typeId) }), -99);
   const cfg = buildingConfig(b.typeId, b.level + 1);
   if (!cfg) throw new GameError(msg('building.requirementsNotMet'), -99);
   if (!requirementsMet(checkRequirements(cfg.requires, buildings, research, items))) {
