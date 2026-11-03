@@ -167,17 +167,18 @@ describe(`${processArmy.name}: capturing a historic city`, () => {
       expect((await armies.troopParams(g, p.id, city.id)).maxTroops).toBe(125_000);
     }));
 
-  it('keeps a name of its own, which can’t be changed; one without is named after its captor', () =>
+  it('keeps its own name at every level, which can’t be changed', () =>
     game(async (g) => {
       const { p, heroId } = await warrior(g, { archer: 120_000 });
       await admin.setPlayerFlags(g, p.name, { title: 2 });
-      // a level 12 has no name of its own
+      // a level 12 has its own name too (recorded or invented, LEVEL_12_NAMES)
       const { seat: twelve } = await lastWave(g, p, heroId);
       const twelveCity = (await getTile(g, twelve.id)).cityId!;
-      expect((await getCity(g, twelveCity)).name).toBe(`${p.name.slice(0, 12)} Keep`);
-      await interior.renameCity(g, p.id, twelveCity, 'Twelve');
-      expect((await getCity(g, twelveCity)).name).toBe('Twelve');
-      // a named one keeps its name: renaming is refused, a new logo isn't
+      const { x: tx, y: ty } = tileXY(twelve.id);
+      const twelveName = historicNameAt(tx, ty)!;
+      expect((await getCity(g, twelveCity)).name).toBe(twelveName);
+      await expectRefused(interior.renameCity(g, p.id, twelveCity, 'Twelve'), msg('city.historicKeepsName', { name: twelveName }));
+      // a level 14: renaming is refused, a new logo isn't
       const { seat, name } = await namedSeatNear(g, p);
       const { report } = await lastWave(g, p, await addHero(g, p), seat);
       expect(report.captured).toBe(true);
@@ -275,8 +276,8 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       expect(r.seat).toMatchObject({ loyaltyLeft: 0, captured: true });
       expect(await getCity(g, cityId)).toMatchObject({
         playerId: q.id,
-        // a level 12 has no name of its own: it's named after its new holder
-        name: `${q.name.slice(0, 12)} Keep`,
+        // it keeps its own name under its new holder
+        name: historicNameAt(tileXY(seat.id).x, tileXY(seat.id).y),
         historicLevel: 12,
         loyalty: BALANCE.historic.loyalty,
         truceUntil: g.now + BALANCE.historic.truceMs,

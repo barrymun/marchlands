@@ -10,7 +10,7 @@ import {
   patchCitiesByCityIdMutation,
   postCitiesMoveMutation,
 } from '@marchlands/api-client';
-import { BALANCE, BuffId, historicNameAt, itemGoldPrice } from '@marchlands/core';
+import { BALANCE, BuffId, itemGoldPrice } from '@marchlands/core';
 
 import { TELEPORT } from '@/components/city-dialog/city-form/constants';
 import { TaxRate } from '@/components/city-dialog/city-form/tax-rate/tax-rate';
@@ -52,8 +52,8 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
   const price = itemGoldPrice(TELEPORT) ?? 0;
   const now = useNow();
   const cooldown = player.data?.buffs.find((b) => b.id === BuffId.TELEPORT_COOLDOWN && b.endTime > now);
-  // a historic city with a name of its own keeps it
-  const ownName = city.historicLevel ? historicNameAt(city.x, city.y) : null;
+  // a held historic city keeps its own name (every one has one; the server refuses a rename)
+  const ownName = city.historicLevel ? city.name : null;
 
   return (
     <>

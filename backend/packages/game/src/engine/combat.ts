@@ -1316,8 +1316,8 @@ async function canHoldHistoric(ctx: Ctx, attacker: PlayerRow, level: HistoricLev
 }
 
 /**
- * A held historic city's name: its own when it has one (docs/features/historical-cities.md, Names), which it keeps
- * whoever holds it, else `<holder> Keep` as for any captured city.
+ * A held historic city's name: its own (docs/features/historical-cities.md, Names), which it keeps whoever holds it.
+ * Every place on Age 2's grid has one; `<holder> Keep`, as for any captured city, is for a seat off it.
  */
 function seatName(tileId: number, holder: PlayerRow) {
   const { x, y } = tileXY(tileId);

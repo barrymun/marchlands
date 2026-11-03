@@ -1,5 +1,5 @@
 import type { CityBean, Flow } from '@marchlands/api-client';
-import { Relation, TileType } from '@marchlands/core';
+import { historicNameAt, Relation, TileType } from '@marchlands/core';
 
 import { FACTION_TINT_KEY } from '@/components/map-panel/constants';
 import type { FarmList, FarmMark, RelationGroup } from '@/components/map-panel/types';
@@ -14,11 +14,12 @@ export const relationGroup = (r: number): RelationGroup =>
   r === Relation.ALLIANCE || r === Relation.ALLY ? 'friend' : r === Relation.ENEMY ? 'enemy' : 'other';
 
 /**
- * What a map tile is called: a city by its name, a historic city of level 14 and up by its own (given its place),
- * anything else (barbarian cities and level 12 historic cities included) by its tile type.
+ * What a map tile is called: a city by its name, a historic city by its own, given its place (a level 14, 16 or 18's in
+ * the player's language, a level 12's as it is, from core: they load with the map, not the first page), anything else
+ * by its tile type.
  */
 export const placeName = (t: { type: number; name?: string; x?: number; y?: number }): string =>
-  t.name || (t.type === TileType.HISTORIC && t.x != null && t.y != null ? historicName(t.x, t.y) : null) || tileName(t.type);
+  t.name || (t.type === TileType.HISTORIC && t.x != null && t.y != null ? (historicName(t.x, t.y) ?? historicNameAt(t.x, t.y)) : null) || tileName(t.type);
 
 /** Whether this browser last chose to tint the map by faction; off until it did. */
 export function readFactionTint(): boolean {

@@ -15,6 +15,39 @@ The level 12 historic cities had names in Age 2, like the higher levels. The onl
 - **What they're called:** mostly towns and cities of North America (Friesland, Saxony, North March, Bohemia), the Pacific, South America, Turkey and Korea (Lower Lorraine, Franconia) and Europe (Burgundy), with small countries' capitals along the top row of the map (Beirut, Vatican City, Panama City …), where the higher levels are named after national capitals.
 - **Checked against the grid** (every 18 tiles from 9): 838 of the 847 places in these states are named once and correctly; the exceptions are below, by state. Spellings are kept as posted (Frederiction, Jacksonvile, Villede Qu?bec …), as the game's own may have differed.
 
+## The theme (worked out 2026-11-03)
+
+Laid out as the client's list runs (one sequence, row by row from west to east across the whole map, 44 places a row, the empty places near bigger cities included), the names are **real towns and cities, a country at a time, on a rough tour of the world**:
+
+| Rows (y) | What they are |
+|---|---|
+| 9 | Capitals of small countries (Beirut, Vatican City, Banjul, Majuro …), then the largest US cities from Philadelphia on |
+| 27–117 | US cities, by population (Fort Worth, Baltimore … Killeen) |
+| 117 | Puerto Rico (San Juan, Bayamón, Ponce …), then Mexico |
+| 117–207 | Canada, **alphabetical** from Abbotsford to Yellowknife (each row carries on from the last) |
+| 207 | Morocco, Tunisia, Egypt (Marrakech … Port Said); the rest of the row unknown |
+| 225–261 | Venezuela, Paraguay, Brazil (partly alphabetical), Chile, Argentina |
+| 279–297 | Australia by state (New South Wales alphabetical, Victoria, Queensland: Townsville; Western Australia, South Australia, Tasmania, the Northern Territory), then New Zealand |
+| 315–351 | Malaysia, the Philippines, Cambodia, Laos, Myanmar, Vietnam, Indonesia, Mongolia, North and South Korea, Japan |
+| 369–387 | Ancient Levant (Palmyra, Ugarit), Turkey **alphabetical** (Adana … Zonguldak), Iran, ancient Mesopotamia (Persepolis, Babylon, Ur) |
+| 405–567 | Unknown: no name found in these ten rows |
+| 585 | Czech towns (Jihlava, Chomutov, Přerov) |
+| 603–639 | Norway, **alphabetical** (Fredrikstad … Tvedestrand) |
+| 657 | Sweden, then Switzerland (St. Gallen) |
+| 675–693 | Slovenia (alphabetical), Ukraine |
+| 711–765 | Greece, then Italy (Ravenna … Vigevano … Acireale) |
+| 783 | England, alphabetical (Liverpool … Sheffield), ending at Hong Kong (783, 783) |
+
+Only a row's first 11 or 22 places are known in most rows, so where a country runs alphabetically the gaps can be read from its neighbours (Canada's and Norway's runs carry on across the unknown states). Of the 1,013 level 12s still unnamed after migration 0042, 609 lie in rows with known names around them, where the country is clear or nearly so, and 404 in the ten unknown rows, 405 to 567, where the countries between Iran and Iraq (row 387) and the Czech Republic (row 585) can only be guessed.
+
+## The full list, with invented names (2026-11-03)
+
+**[historic-cities-level-12.json](historic-cities-level-12.json)** names every one of the 1,795 level 12s on the map, each with where its name comes from (`source`): `forum-2010` (779, and 4 `forum-2010, place guessed`), `live-2026` (5), `wiki` (2) and **`invented` (1,005)**. The invented names are made up by us in the game's style, not the game's: if the real list turns up (the client's `Lang2` table), they are the ones to replace.
+
+- **How they were made:** each unknown place got a real town or city of the country its neighbours in the client's order point to (above, The theme), carrying on a run's alphabetical order where it is alphabetical, written in plain letters without diacritics, at most 20 characters, and no name twice anywhere on the map (the bigger cities' names included). National capitals were avoided.
+- **Where the countries are a guess:** in the ten rows with no recorded name (405 to 567), and the ends of rows 387 and 585, the tour is ours: the Levant (rest of 387), Saudi Arabia and the Gulf (405), India (423), Pakistan, Bangladesh, Sri Lanka and Nepal (441), China (459), more China, Taiwan and Central Asia (477), Russia (495), West Africa, Rwanda, Burundi, Malawi, Madagascar and Mauritius (513), southern Africa (531), Germany (549), Poland, Austria, Hungary and Slovakia (567), then Slovakia, the Czech towns, Denmark and Norway from A (585). Elsewhere the country follows the recorded names around it.
+- **The doubled places settled:** the 2010 list gave two names to five places. The alphabetical Canadian run places Qikiqtarjuaq (once Broughton Island) at (225, 135), Cartwright at (351, 135), Eastmain at (765, 135) and Kingston at (765, 153); in the US row 81 New Haven, Bellevue, Carrollton and Columbia are placed at (603, 81), (747, 81), (675, 81) and (783, 81) by guess. The four typos with one possible fix are corrected (Castries at (387, 9), Rosario at (369, 261), Imbe at (369, 225), Antofagasta at (387, 243)).
+
 ## Friesland
 
 San Jose (9, 9), Beirut (27, 9), New Delhi (45, 9), Asuncion (63, 9), Panama City (81, 9), Belmopan (99, 9), Ouagadougou (117, 9), Santo Domingo (135, 9), Vatican City (153, 9), Banjul (171, 9), Port au Prince (189, 9), Fort Worth (9, 27), Baltimore (27, 27), Charlotte (45, 27), El Paso (63, 27), Milwaukee (81, 27), Boston (99, 27), Seattle (117, 27), Denver (135, 27), Louisville (153, 27), Las Vegas (171, 27), Nashville (189, 27), Corpus Christi (9, 45), Newark (27, 45), Anchorage (45, 45), Buffalo (63, 45), St.Paul (81, 45), Lexington (99, 45), Plano (117, 45), Fort Wayne (135, 45), St.Petersburg (153, 45), Glendale (171, 45), Jersey City (189, 45), Huntington Beach (9, 63), Irvine (27, 63), Des Moines (45, 63), Great Rapids (63, 63), Richmond (81, 63), Mobile (99, 63), Gilbert (117, 63), Augusta (135, 63), Fort Lauderdale (153, 63), Amarillo (171, 63), Oxnard (189, 63), Hollywood (9, 81), Salinas (27, 81), Hampton (45, 81), Pasadena (63, 81), Port St.Lucie (81, 81), Naperville (99, 81), Joliet (117, 81), Sioux Falls (135, 81), Torrance (153, 81), Peoria (171, 81), Lancaster (189, 81), Flint (9, 99), Vallejo (27, 99), Evansville (45, 99), Inglewood (63, 99), Abilene (81, 99), Olathe (99, 99), Lansing (117, 99), Lafayette (135, 99), Provo (153, 99), Visalia (171, 99), Ann Arbor (189, 99), Elgin (9, 117), Berkeley (27, 117), Portsmouth (45, 117), Cambridge (63, 117), Daly City (81, 117), Antioch (99, 117), Green Bay (117, 117), West Jordan (135, 117), Billings (153, 117), San Juan (171, 117), Bayamon (189, 117), Antigonish (9, 135), Arctic Bay (27, 135), Arctic Red River (45, 135), Atlin (63, 135), Baker Lake (81, 135), Barrie (99, 135), Bathurst Inlet (117, 135), Beaver Creek (135, 135), Big Lake (153, 135), Brampton (171, 135), Brandon (189, 135), Eureka (9, 153), Flin Flon (27, 153), FondduLac (45, 153), Fontas (63, 153), Fort Chipewyan (81, 153), Fort Franklin (99, 153), Fort Good Hope (117, 153), Fort McMurray (135, 153), Fort Nelson (153, 153), Fort Resolution (171, 153), Fort St.John (189, 153), Kitchener (9, 171), Kuujjuaq (27, 171), Kuujjuarapik (45, 171), La Ronge (63, 171), Langley (81, 171), Lethbridge (99, 171), Lillooet (117, 171), Lower Post (135, 171), Lynn Lake (153, 171), Manning (171, 171), Markham (189, 171), Prince Rupert (9, 189), Rankin Inlet (27, 189), Red Deer (45, 189), Regina (63, 189), Reindeer Station (81, 189), Resolute (99, 189), Revelstoke (117, 189), Richmond Hill (135, 189), Riviere-du-Loup (153, 189), Ross River (171, 189), Sachs Harbour (189, 189).

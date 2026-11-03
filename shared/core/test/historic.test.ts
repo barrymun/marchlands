@@ -20,13 +20,15 @@ import {
   historicResearch,
   historicState,
   inSeatArea,
+  INVENTED_LEVEL_12,
+  LEVEL_12_NAMES,
   mapLevelDigit,
   mapLevelOf,
   maxArmyTroops,
   nextAutoDraftAt,
   seatLoyalty,
-  seatNeglect,
   SeatNeglect,
+  seatNeglect,
   seatTitle,
   seatUnrest,
   stateTribute,
@@ -35,22 +37,39 @@ import {
 } from '#/index.ts';
 
 describe(historicNameAt.name, () => {
-  it('names Atlantis, the capitals and the level 14s by place, and no level 12', () => {
+  it('names every historic city by its place, the level 12s too, and nothing else', () => {
     expect(historicNameAt(0, 0)).toBe('Atlantis');
     expect(historicNameAt(300, 500)).toBe('Rome');
     expect(historicNameAt(231, 429)).toBe('Antananarivo');
-    expect(historicNameAt(207, 405)).toBeNull();
-    // Romagna's last two level 14s have none (docs/reference/historic-cities.md, Names)
-    expect(historicNameAt(693, 759)).toBeNull();
+    expect(historicNameAt(9, 9)).toBe('San Jose');
+    expect(historicNameAt(243, 585)).toBe('Jihlava');
+    // the places with no historic city: off the grids, beside a bigger city, Romagna's empty level 14s
     expect(historicNameAt(1, 1)).toBeNull();
+    expect(historicNameAt(99, 99)).toBeNull();
+    expect(historicNameAt(693, 759)).toBeNull();
   });
 
-  it('only names historic cities of level 14 and up, each a name a city may have', () => {
-    for (const [place, name] of Object.entries(HISTORIC_NAMES)) {
+  it('has a name for each of the 1,938 historic cities, only at their places, none twice', () => {
+    const all = historicCities();
+    for (const { x, y } of all) expect(historicNameAt(x, y), `${x},${y}`).not.toBeNull();
+    const places = [...Object.keys(HISTORIC_NAMES), ...Object.keys(LEVEL_12_NAMES)];
+    expect(places).toHaveLength(all.length);
+    for (const place of places) {
       const [x = -1, y = -1] = place.split(',').map(Number);
-      expect(historicLevelAt(x, y)).toBeGreaterThanOrEqual(14);
-      expect(name.length).toBeLessThanOrEqual(20);
+      expect(historicLevelAt(x, y), place).toBe(place in LEVEL_12_NAMES ? 12 : historicLevelAt(x, y));
+      expect(historicLevelAt(x, y), place).not.toBeNull();
     }
+    const names = [...Object.values(HISTORIC_NAMES), ...Object.values(LEVEL_12_NAMES)];
+    expect(new Set(names.map((n) => n.toLowerCase())).size).toBe(names.length);
+  });
+
+  it('marks the level 12 names we invented: 1,005 of the 1,795, all level 12 places', () => {
+    expect(INVENTED_LEVEL_12.size).toBe(1005);
+    for (const place of INVENTED_LEVEL_12) expect(place in LEVEL_12_NAMES, place).toBe(true);
+    expect(INVENTED_LEVEL_12.has('207,405')).toBe(true);
+    expect(INVENTED_LEVEL_12.has('9,9')).toBe(false);
+    // ours fit what a player may type (the game's own may run longer: Sao Jose do Rio Preto)
+    for (const place of INVENTED_LEVEL_12) expect(LEVEL_12_NAMES[place]?.length ?? 99, place).toBeLessThanOrEqual(20);
   });
 });
 

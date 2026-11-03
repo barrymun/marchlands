@@ -41,10 +41,13 @@ describe(placeName.name, () => {
     expect(placeName({ type: TileType.NPC })).toBe('Barbarian city');
     expect(placeName({ type: TileType.GRASS })).toBe('Grassland');
     expect(placeName({ type: TileType.FLAT, name: '' })).toBe('Flat');
-    // a historic city by its own name from level 14, by its type at level 12
+    // a historic city by its own name, at every level
     expect(placeName({ type: TileType.HISTORIC, x: 0, y: 0 })).toBe('Atlantis');
     expect(placeName({ type: TileType.HISTORIC, x: 33, y: 33 })).toBe('Tirana');
-    expect(placeName({ type: TileType.HISTORIC, x: 9, y: 9 })).toBe('Historic city');
+    expect(placeName({ type: TileType.HISTORIC, x: 9, y: 9 })).toBe('San Jose');
+    expect(placeName({ type: TileType.HISTORIC, x: 207, y: 405 })).toBe('Najran');
+    // and by its type where none stands (not a historic place)
+    expect(placeName({ type: TileType.HISTORIC, x: 1, y: 1 })).toBe('Historic city');
   });
 });
 
