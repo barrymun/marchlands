@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import type { Camera, View } from '@/components/iso-viewport/types';
+import type { Camera, Outline, View } from '@/components/iso-viewport/types';
 import {
   clampToScene,
   clampZoom,
   dragged,
   fitZoom,
+  isOutline,
+  isOverlay,
   nextZoom,
+  outlineHalves,
+  outlinePoints,
   panStep,
   sceneBox,
   sceneCentre,
@@ -272,5 +276,58 @@ describe(spriteAt.name, () => {
     const p = viewPoint(100, 200, cam, view);
     expect(spriteAt(p, drawn, cam, view, () => false)).toBeUndefined();
     expect(spriteAt({ x: 0, y: 0 }, drawn, cam, view, () => true)).toBeUndefined();
+  });
+});
+
+const outline: Outline = { key: 'o', col: 100, row: 200, half: 'back', className: 'stroke-primary', width: 2 };
+
+describe(isOutline.name, () => {
+  it('tells half an outline from a sprite and an overlay', () => {
+    expect(isOutline(outline)).toBe(true);
+    expect(isOutline({ key: 's', col: 0, row: 0, src: 'a.png' })).toBe(false);
+    expect(isOutline({ key: 'v', col: 0, row: 0, x: 0, y: 0, art: { id: 'a', w: 1, h: 1, data: new Uint8ClampedArray(4) } })).toBe(false);
+  });
+});
+
+describe(isOverlay.name, () => {
+  it('tells an overlay from a sprite and half an outline', () => {
+    expect(isOverlay({ key: 'v', col: 0, row: 0, x: 0, y: 0, art: { id: 'a', w: 1, h: 1, data: new Uint8ClampedArray(4) } })).toBe(true);
+    expect(isOverlay({ key: 's', col: 0, row: 0, src: 'a.png' })).toBe(false);
+    expect(isOverlay(outline)).toBe(false);
+  });
+});
+
+describe(outlineHalves.name, () => {
+  it('splits an outline into its back and front halves, keyed apart, the rest kept', () => {
+    const [back, front] = outlineHalves({ key: 'o', col: 3, row: 4, className: 'stroke-sky-400', width: 2.5, dash: [5, 3] });
+    expect(back).toEqual({ key: 'ob', col: 3, row: 4, className: 'stroke-sky-400', width: 2.5, dash: [5, 3], half: 'back' });
+    expect(front).toEqual({ key: 'of', col: 3, row: 4, className: 'stroke-sky-400', width: 2.5, dash: [5, 3], half: 'front' });
+  });
+});
+
+describe(outlinePoints.name, () => {
+  it('runs the back half from the left corner over the top to the right corner', () => {
+    expect(outlinePoints(outline, cam, view)).toEqual([
+      { x: 288, y: 160 },
+      { x: 320, y: 144 },
+      { x: 352, y: 160 },
+    ]);
+  });
+
+  it('runs the front half from the right corner under the bottom to the left corner', () => {
+    expect(outlinePoints({ ...outline, half: 'front' }, cam, view)).toEqual([
+      { x: 352, y: 160 },
+      { x: 320, y: 176 },
+      { x: 288, y: 160 },
+    ]);
+  });
+
+  it('follows the tile, the zoom and the device pixel ratio', () => {
+    const [left, top, right] = outlinePoints({ ...outline, col: 101 }, { ...cam, zoom: 2 }, { ...view, dpr: 2 });
+    expect([left, top, right]).toEqual([
+      { x: 768 - 128, y: 384 },
+      { x: 768, y: 384 - 64 },
+      { x: 768 + 128, y: 384 },
+    ]);
   });
 });

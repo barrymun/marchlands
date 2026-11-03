@@ -1,5 +1,5 @@
 import { PINCH_WHEEL_RATE, SPRITE, TILE_H, TILE_W, WHEEL_LINE, WHEEL_RATE, ZOOMS } from '@/components/iso-viewport/constants';
-import type { Camera, Drawable, Overlay, PanDirection, Piece, PixelArt, SceneBox, View, ViewPoint } from '@/components/iso-viewport/types';
+import type { Camera, Drawable, Outline, Overlay, PanDirection, Piece, PixelArt, SceneBox, View, ViewPoint } from '@/components/iso-viewport/types';
 
 /**
  * Where tile (col, row)'s middle falls, in device pixels from the view's top left. The camera's offset is rounded once,
@@ -18,6 +18,34 @@ export function tileOrigin(col: number, row: number, cam: Camera, view: View): V
 /** Whether a piece is an overlay (a frame made in code) rather than a sprite. */
 export function isOverlay(p: Piece): p is Overlay {
   return 'art' in p;
+}
+
+/** Whether a piece is half a tile's outline. */
+export function isOutline(p: Piece): p is Outline {
+  return 'half' in p;
+}
+
+/** A tile's outline as its two halves, the back one to go before what stands on the tile and the front one after. */
+export function outlineHalves(o: Omit<Outline, 'half'>): [Outline, Outline] {
+  return [
+    { ...o, key: `${o.key}b`, half: 'back' },
+    { ...o, key: `${o.key}f`, half: 'front' },
+  ];
+}
+
+/**
+ * The corners an outline's half runs through, in device pixels: the back half from the tile's left corner over its top
+ * to its right, the front half from its right corner under its bottom to its left.
+ */
+export function outlinePoints(o: Outline, cam: Camera, view: View): ViewPoint[] {
+  const p = tileOrigin(o.col, o.row, cam, view);
+  const k = cam.zoom * view.dpr;
+  const [w, h] = [(TILE_W / 2) * k, (TILE_H / 2) * k];
+  const [left, right] = [
+    { x: p.x - w, y: p.y },
+    { x: p.x + w, y: p.y },
+  ];
+  return o.half === 'back' ? [left, { x: p.x, y: p.y - h }, right] : [right, { x: p.x, y: p.y + h }, left];
 }
 
 /** Where an overlay is drawn, in device pixels: its tile's middle, moved by its offset in art pixels. */

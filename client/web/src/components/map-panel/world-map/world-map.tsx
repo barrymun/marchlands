@@ -8,8 +8,8 @@ import { useAnimations } from '@/components/iso-anim/hooks';
 import { TILE_H, TILE_W } from '@/components/iso-viewport/constants';
 import type { Viewport } from '@/components/iso-viewport/hooks';
 import { IsoViewport } from '@/components/iso-viewport/iso-viewport';
-import type { Piece } from '@/components/iso-viewport/types';
-import { spriteBox } from '@/components/iso-viewport/utils';
+import type { Outline, Piece } from '@/components/iso-viewport/types';
+import { outlineHalves, spriteBox } from '@/components/iso-viewport/utils';
 import { GRASS, RELATION_STYLE } from '@/components/map-panel/constants';
 import type { FarmMark } from '@/components/map-panel/types';
 import { relationGroup } from '@/components/map-panel/utils';
@@ -19,7 +19,6 @@ import { FARM_OUTLINE } from '@/components/map-panel/world-map/constants';
 import type { WorldMapData } from '@/components/map-panel/world-map/hooks';
 import { useStateRulers } from '@/hooks/use-state-rulers';
 import { FACTION_STYLE } from '@/lib/factions';
-import { cn } from '@/lib/utils';
 
 /**
  * The world map, isometric like the original: continuous grass with every valley, castle and barbarian camp standing
@@ -57,6 +56,33 @@ export function WorldMap({
   const anchor = -spriteBox().top;
   const shown = sprites.map((s) => (s.id === hoverId ? { ...s, tone: 'lit' as const } : s));
 
+  // outlines: other players' valleys by relation, your valleys, your farm targets (dashed), your city, then the selection
+  // and the tile under the pointer on top
+  const outlines: Omit<Outline, 'half'>[] = tiles.flatMap((d) => {
+    const held = owned.get(d.id);
+    const foreign = !held ? area.valleys.get(d.id) : undefined;
+    const farmed = farms.get(d.id);
+    const lines: { key: string; className: string; width: number; dash?: readonly number[] }[] = [];
+    if (foreign && foreign.relation !== Relation.SELF) lines.push({ key: 'f', className: RELATION_STYLE[relationGroup(foreign.relation)].stroke, width: 2 });
+    if (held) lines.push({ key: 'h', className: held.here ? 'stroke-fuchsia-500' : 'stroke-violet-300', width: held.here ? 3 : 2 });
+    if (farmed) lines.push({ key: 'r', ...(farmed.here ? FARM_OUTLINE.here : FARM_OUTLINE.other) });
+    if (wrap(d.x, mapSize) === home.x && wrap(d.y, mapSize) === home.y) lines.push({ key: 'c', className: 'stroke-amber-400', width: 2.5 });
+    if (d.id === selected) lines.push({ key: 's', className: 'stroke-primary', width: 2.5 });
+    return lines.map((l) => ({ ...l, key: `o${d.x},${d.y}${l.key}`, col: d.x, row: d.y }));
+  });
+  if (hover) outlines.push({ key: `o${hover.x},${hover.y}p`, col: hover.x, row: hover.y, className: 'stroke-amber-200', width: 1.5 });
+  // each outline's back half goes before what stands on its tile and its front half after it (and after a walker or an
+  // army there), so a big city hides the edges behind it and not the ones in front
+  const outlineLayers = outlines.flatMap((o) => {
+    const [back, front] = outlineHalves(o);
+    return [
+      { depth: o.col + o.row - 0.5, pieces: [back] },
+      { depth: o.col + o.row + 0.03, pieces: [front] },
+    ];
+  });
+  const backToFront = (layers: { depth: number; pieces: Piece[] }[]) => layers.sort((a, b) => a.depth - b.depth).flatMap((l) => l.pieces);
+  const still = backToFront([...shown.map((s) => ({ depth: s.col + s.row, pieces: [s] })), ...outlineLayers]);
+
   // the map at a moment, once the animation code has loaded: campfires and glints on the tiles, a worker on each of the
   // player's valleys, and the armies the player can see on the march, back to front; and the sky over the camera's state
   const anim = useAnimations();
@@ -77,7 +103,7 @@ export function WorldMap({
         const valleys = tiles.filter((d) => owned.has(d.id) && d.info).map((d) => ({ key: `v${d.id}`, col: d.x, row: d.y }));
         for (const w of anim.workerOverlays(valleys, t)) layers.push({ depth: w.col + w.row + 0.01, pieces: [w] });
         for (const a of anim.armyOverlays(marching, mapSize, { col: near.x, row: near.y }, t)) layers.push({ depth: a.col + a.row + 0.02, pieces: [a] });
-        return layers.sort((a, b) => a.depth - b.depth).flatMap((l) => l.pieces);
+        return backToFront([...layers, ...outlineLayers]);
       }
     : undefined;
   const sky = anim ? (t: number) => anim.skyAt(anim.zoneOf({ col: near.x, row: near.y }, mapSize), t, vp.view.w, vp.view.h) : undefined;
@@ -117,27 +143,13 @@ export function WorldMap({
       .join(' · ');
   };
 
-  // outlines: other players' valleys by relation, your valleys, your farm targets (dashed), your city, then the selection on top
-  const outlines = tiles.flatMap((d) => {
-    const held = owned.get(d.id);
-    const foreign = !held ? area.valleys.get(d.id) : undefined;
-    const farmed = farms.get(d.id);
-    const lines: { key: string; className: string; width: number; dash?: string }[] = [];
-    if (foreign && foreign.relation !== Relation.SELF) lines.push({ key: 'f', className: RELATION_STYLE[relationGroup(foreign.relation)].stroke, width: 2 });
-    if (held) lines.push({ key: 'h', className: held.here ? 'stroke-fuchsia-500' : 'stroke-violet-300', width: held.here ? 3 : 2 });
-    if (farmed) lines.push({ key: 'r', ...(farmed.here ? FARM_OUTLINE.here : FARM_OUTLINE.other) });
-    if (wrap(d.x, mapSize) === home.x && wrap(d.y, mapSize) === home.y) lines.push({ key: 'c', className: 'stroke-amber-400', width: 2.5 });
-    if (d.id === selected) lines.push({ key: 's', className: 'stroke-primary', width: 2.5 });
-    return lines.map((l) => ({ ...l, key: `${d.x},${d.y}${l.key}`, x: d.x, y: d.y }));
-  });
-
   return (
     <IsoViewport
       vp={vp}
       label={t('aria')}
       className="bg-[#7c9c4c]"
       ground={tiles.map((d) => ({ key: `g${d.x},${d.y}`, col: d.x, row: d.y, src: GRASS }))}
-      sprites={shown}
+      sprites={still}
       animate={animate}
       sky={sky}
     >
@@ -149,10 +161,6 @@ export function WorldMap({
             const f = rulers.has(zone) ? null : factionOfZone(zone);
             return f && <polygon key={`z${d.x},${d.y}`} points={diamond(d.x, d.y)} className={FACTION_STYLE[f.id].tint} />;
           })}
-        {outlines.map((o) => (
-          <polygon key={o.key} points={diamond(o.x, o.y)} className={cn('fill-none', o.className)} strokeWidth={o.width} strokeDasharray={o.dash} />
-        ))}
-        {hover && <polygon points={diamond(hover.x, hover.y)} className="fill-white/10 stroke-amber-200" strokeWidth={1.5} />}
       </svg>
       {tiles.map((d) => {
         const castle = d.info && area.castles.get(d.id);

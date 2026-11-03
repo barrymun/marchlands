@@ -15,6 +15,6 @@ export const HISTORIC_SPRITE = 128;
 
 /** Farm targets' outlines: dashed, this city's bright, the player's other cities' pale (the key matches them). */
 export const FARM_OUTLINE = {
-  here: { className: 'stroke-sky-400', width: 2.5, dash: '5 3' },
-  other: { className: 'stroke-sky-200/80', width: 2, dash: '5 3' },
+  here: { className: 'stroke-sky-400', width: 2.5, dash: [5, 3] },
+  other: { className: 'stroke-sky-200/80', width: 2, dash: [5, 3] },
 } as const;

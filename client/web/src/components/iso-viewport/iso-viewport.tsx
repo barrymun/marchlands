@@ -5,7 +5,19 @@ import { useTranslation } from 'react-i18next';
 import { ANIMATION_FPS, DRAG_SLOP, KEY_STEP } from '@/components/iso-viewport/constants';
 import type { Viewport } from '@/components/iso-viewport/hooks';
 import type { Camera, Drawable, PanDirection, Piece, Sky, ViewPoint } from '@/components/iso-viewport/types';
-import { artCanvas, clampZoom, dragged, isOverlay, overlayRect, panStep, spriteBox, tileOrigin, zoomAround } from '@/components/iso-viewport/utils';
+import {
+  artCanvas,
+  clampZoom,
+  dragged,
+  isOutline,
+  isOverlay,
+  outlinePoints,
+  overlayRect,
+  panStep,
+  spriteBox,
+  tileOrigin,
+  zoomAround,
+} from '@/components/iso-viewport/utils';
 import { Button } from '@/components/ui/button';
 import { useImages } from '@/hooks/use-images';
 import { useMotion } from '@/hooks/use-motion';
@@ -15,8 +27,9 @@ const KEYS: Record<string, PanDirection> = { ArrowUp: 'up', ArrowDown: 'down', A
 
 /**
  * An isometric view filling its parent (the world map, the town, the fields): the `ground` and then the `sprites`, back
- * to front, drawn on a canvas in device pixels at the camera's zoom, so the pixel art stays sharp; `children` lay
- * labels and outlines over it (place them with `vp.at`), and zoom buttons sit in the corner. The camera and the input
+ * to front, drawn on a canvas in device pixels at the camera's zoom, so the pixel art stays sharp; tiles' outlines are
+ * pieces too (`Outline`), hidden by what stands in front of them; `children` lay labels over it (place them with
+ * `vp.at`), and zoom buttons sit in the corner. The camera and the input
  * is `vp` (useIsoViewport). Input: drag with the mouse or a finger (a press that hardly moves is a tap), pinch with
  * two fingers to zoom smoothly towards their middle, the mouse wheel and trackpad (`vp`), the arrow keys to move a
  * tile, + and - (and the buttons) to step between the sharp zooms.
@@ -38,7 +51,8 @@ export function IsoViewport({
 }: {
   vp: Viewport;
   ground: readonly Drawable[];
-  sprites: readonly Drawable[];
+  /** what stands on the ground, back to front, still; the outlines `animate` draws must be here too (for their colours) */
+  sprites: readonly Piece[];
   /** the scene at time `t` (ms, the page's clock), when it moves */
   animate?: (t: number) => readonly Piece[];
   /** the sky over it at time `t`: night, weather, lightning (only while it moves) */
@@ -52,7 +66,15 @@ export function IsoViewport({
 }) {
   const { t } = useTranslation('iso-viewport');
   const canvas = useRef<HTMLCanvasElement>(null);
-  const images = useImages([...ground.map((g) => g.src), ...sprites.map((s) => s.src), ...preload]);
+  const outlineLayer = useRef<HTMLCanvasElement | null>(null);
+  const images = useImages([...ground.map((g) => g.src), ...sprites.flatMap((s) => (isOutline(s) || isOverlay(s) ? [] : [s.src])), ...preload]);
+  // the outlines' colours come from CSS classes (dark mode included): a hidden swatch for each, read as it is painted
+  const swatches = useRef<SVGSVGElement>(null);
+  const strokeClasses = [...new Set(sprites.flatMap((s) => (isOutline(s) ? [s.className] : [])))];
+  const strokeOf = (className: string) => {
+    const swatch = swatches.current?.querySelector(`[data-stroke="${CSS.escape(className)}"]`);
+    return swatch ? getComputedStyle(swatch).stroke : 'transparent';
+  };
   const motion = useMotion() && !!animate;
   const { camera, view, options, setElement } = vp;
   // the pointers on the view, and the drag or pinch they are making
@@ -77,7 +99,8 @@ export function IsoViewport({
     const k = camera.zoom * view.dpr;
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    const draw = (d: Piece) => {
+    const draw = (ctx: CanvasRenderingContext2D, d: Piece) => {
+      if (isOutline(d)) return;
       if (isOverlay(d)) {
         const img = artCanvas(d.art);
         if (!img) return;
@@ -95,23 +118,58 @@ export function IsoViewport({
       ctx.globalAlpha = d.tone === 'dim' ? 0.55 : 1;
       ctx.drawImage(img, p.x + box.left * k, p.y + box.top * k, box.width * k, box.height * k);
     };
-    for (const g of ground) draw(g);
+    for (const g of ground) draw(ctx, g);
     // lights (lit windows, fires) go over the night's darkness, everything else under it
-    for (const s of pieces) if (!(skyNow?.darkness && isOverlay(s) && s.light)) draw(s);
+    for (const s of pieces) if (!(skyNow?.darkness && isOverlay(s) && s.light)) draw(ctx, s);
     ctx.filter = 'none';
     ctx.globalAlpha = 1;
-    if (!skyNow) return;
     const { width, height } = ctx.canvas;
-    if (skyNow.darkness > 0) {
+    if (skyNow?.darkness) {
       // a deep blue over what is drawn (source-atop leaves the empty background alone): colours sink towards night
       // without blurring a pixel
       ctx.globalCompositeOperation = 'source-atop';
       ctx.fillStyle = `rgba(14, 18, 52, ${Math.min(1, skyNow.darkness) * 0.5})`;
       ctx.fillRect(0, 0, width, height);
       ctx.globalCompositeOperation = 'source-over';
-      for (const s of pieces) if (isOverlay(s) && s.light) draw(s);
+      for (const s of pieces) if (isOverlay(s) && s.light) draw(ctx, s);
       ctx.globalAlpha = 1;
     }
+    // the outlines, on a layer of their own laid over the night: each in the scene's order, and every piece after it
+    // erasing what of it the piece covers, so a building hides the edges behind it and not the ones in front
+    if (pieces.some(isOutline)) {
+      const layer = (outlineLayer.current ??= document.createElement('canvas'));
+      [layer.width, layer.height] = [width, height];
+      const lay = layer.getContext('2d');
+      if (lay) {
+        lay.imageSmoothingEnabled = false;
+        const strokes = new Map<string, string>();
+        let started = false;
+        for (const s of pieces) {
+          if (isOutline(s)) {
+            if (!strokes.has(s.className)) strokes.set(s.className, strokeOf(s.className));
+            const [first, ...rest] = outlinePoints(s, camera, view);
+            if (!first) continue;
+            lay.globalCompositeOperation = 'source-over';
+            lay.filter = 'none';
+            lay.globalAlpha = 1;
+            lay.strokeStyle = strokes.get(s.className) ?? 'transparent';
+            lay.lineWidth = s.width * view.dpr;
+            lay.lineCap = s.dash ? 'butt' : 'round';
+            lay.setLineDash((s.dash ?? []).map((n) => n * view.dpr));
+            lay.beginPath();
+            lay.moveTo(first.x, first.y);
+            for (const p of rest) lay.lineTo(p.x, p.y);
+            lay.stroke();
+            started = true;
+          } else if (started) {
+            lay.globalCompositeOperation = 'destination-out';
+            draw(lay, s);
+          }
+        }
+        ctx.drawImage(layer, 0, 0);
+      }
+    }
+    if (!skyNow) return;
     const px = Math.max(1, Math.round(view.dpr));
     if (skyNow.weather === 'snow') {
       ctx.fillStyle = 'rgba(250, 250, 255, 0.85)';
@@ -229,6 +287,11 @@ export function IsoViewport({
       }}
     >
       <canvas ref={canvas} width={Math.round(view.w * view.dpr)} height={Math.round(view.h * view.dpr)} className="absolute inset-0 size-full" />
+      <svg ref={swatches} className="hidden" aria-hidden>
+        {strokeClasses.map((c) => (
+          <path key={c} data-stroke={c} className={c} />
+        ))}
+      </svg>
       {camera && children}
       <div className="absolute end-2 bottom-2 flex flex-col gap-1" onPointerDown={(e) => e.stopPropagation()}>
         <Button size="icon-xs" variant="secondary" onClick={() => vp.zoomBy(1)} aria-label={t('zoom.in')}>

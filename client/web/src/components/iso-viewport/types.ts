@@ -77,8 +77,24 @@ export interface Particle {
   len: number;
 }
 
-/** Anything the viewport draws over the ground, back to front: a sprite or an overlay. */
-export type Piece = Drawable | Overlay;
+/**
+ * Half of a tile's outline on the ground (a valley held, the selection), placed among the pieces in the scene's order:
+ * the `back` half (its two far edges, from the left corner over the top to the right) goes before what stands on the
+ * tile and the `front` half (the two near edges) after it, so whatever stands in front of an edge hides it. Its colour
+ * is the stroke of a CSS class (`className`, `stroke-sky-400`), its width and dashes in CSS pixels.
+ */
+export interface Outline {
+  key: string;
+  col: number;
+  row: number;
+  half: 'back' | 'front';
+  className: string;
+  width: number;
+  dash?: readonly number[];
+}
+
+/** Anything the viewport draws over the ground, back to front: a sprite, an overlay or half a tile's outline. */
+export type Piece = Drawable | Overlay | Outline;
 
 /** The box a scene's sprites fill, at the art's own size: its size, and where the middle of tile (0, 0) falls in it. */
 export interface SceneBox {
