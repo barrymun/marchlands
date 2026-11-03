@@ -1,6 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CirclePlay, Eye, Square } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -21,30 +19,18 @@ import {
   postPlayerFlowsStop,
 } from '@marchlands/api-client';
 
-import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
-import { LastPreview } from '@/components/flows-panel/run-flow/last-preview/last-preview';
-import { LastRun } from '@/components/flows-panel/run-flow/last-run/last-run';
-import { withPreview } from '@/components/flows-panel/run-flow/utils';
+import { withPreview } from '@/components/flows-panel/flow-detail/utils';
 import type { Targets } from '@/components/flows-panel/types';
-import { hasHero, hiresHeroes } from '@/components/flows-panel/utils';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { usePlayer } from '@/hooks/use-game';
 import { errorMessage } from '@/lib/api';
 import { allOf } from '@/lib/query-keys';
 
-/** Pick cities, then preview (up to the first wait, rolled back) or run the flow; repeat; stop; the latest preview or run. */
-export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: number }) {
+/**
+ * Running a flow: preview (up to the first wait, rolled back) or run it on `targets` (`picked`, the cities that
+ * resolves to), switch repeat, stop it; `busy` while any of them is on its way.
+ */
+export function useFlowControls(flow: Flow, targets: Targets, picked: number[]) {
   const { t } = useTranslation('flows-panel');
   const qc = useQueryClient();
-  const cities = usePlayer().data?.castles ?? [];
-  // starts from the flow's saved cities; changing them here applies to this run only
-  const [targets, setTargets] = useState<Targets>(flow.cities);
-  const own = new Set(cities.map((c) => c.id));
-  // all cities: those with a hero (the server skips the others), or every city when the flow hires heroes
-  const hires = hiresHeroes(flow.actions);
-  const picked = targets === 'all' ? cities.filter((c) => hires || hasHero(c)).map((c) => c.id) : targets.filter((id) => own.has(id));
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: getPlayerFlowsQueryKey() });
     // heroes, resources, population and queues changed in the cities that ran
@@ -108,40 +94,5 @@ export function RunFlow({ flow, currentCityId }: { flow: Flow; currentCityId: nu
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
-  const busy = run.isPending || repeat.isPending || stop.isPending;
-  const idle = flow.status === 'idle';
-
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm">{t('runFlow.title')}</CardTitle>
-        <CardDescription>{t('runFlow.description')}</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-3">
-        <CityPicker value={targets} onChange={setTargets} currentCityId={currentCityId} hires={hires} />
-        <label className="flex items-start gap-2 text-sm">
-          <Switch className="mt-0.5" checked={flow.repeat} disabled={busy} onCheckedChange={(on) => repeat.mutate(on)} />
-          <span className="grid gap-0.5">
-            <span>{t('runFlow.repeat')}</span>
-            <span className="text-xs text-muted-foreground">{t('runFlow.repeatHint')}</span>
-          </span>
-        </label>
-        <div className="flex flex-wrap justify-end gap-2">
-          <Button variant="outline" disabled={!picked.length || busy} onClick={() => run.mutate(true)}>
-            <Eye /> {t('runFlow.preview')}
-          </Button>
-          {idle ? (
-            <Button disabled={!picked.length || busy} onClick={() => run.mutate(false)}>
-              <CirclePlay /> {t('runFlow.run', { count: picked.length })}
-            </Button>
-          ) : (
-            <Button variant="destructive" disabled={busy} onClick={() => stop.mutate()}>
-              <Square /> {t('runFlow.stop')}
-            </Button>
-          )}
-        </div>
-        {flow.lastPreview ? <LastPreview preview={flow.lastPreview} /> : flow.lastRun && <LastRun run={flow.lastRun} />}
-      </CardContent>
-    </Card>
-  );
+  return { run, repeat, stop, busy: run.isPending || repeat.isPending || stop.isPending };
 }

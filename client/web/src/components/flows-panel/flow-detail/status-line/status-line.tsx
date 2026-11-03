@@ -19,7 +19,7 @@ export function StatusLine({ flow }: { flow: Flow }) {
     else text = t('statusLine.starting');
   }
   return (
-    <div className="mt-2 grid gap-0.5 text-xs">
+    <div className="grid gap-0.5 text-xs">
       {text && <p className="font-medium text-primary">{text}</p>}
       {flow.status === 'idle' && flow.stopReason && (
         <p className="text-destructive">{t('statusLine.stopped', { reason: translateMessage(flow.stopReason) })}</p>

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
 import { FLOW_MAX_HIRES, FLOW_MAX_WAIT_MINUTES, FLOW_TROOP_IDS, HERO_BASE_STAT_MAX } from '@marchlands/core';
 
-import { actionValid, currentAction, hasHero, hiresHeroes, keyed, strip } from '@/components/flows-panel/utils';
+import { actionValid, ago, currentAction, hasHero, hiresHeroes, keyed, nextDue, strip } from '@/components/flows-panel/utils';
 
 const ACTIONS: FlowAction[] = [
   { type: 'setMayor', stat: 'management' },
@@ -150,5 +150,47 @@ describe(actionValid.name, () => {
     expect(actionValid({ type: 'trainTroops', troopId: FLOW_TROOP_IDS[0]!, amount: Number.NaN })).toBe(false);
     expect(actionValid({ type: 'trainTroops', troopId: FLOW_TROOP_IDS[0]!, amount: 'max' })).toBe(true);
     expect(actionValid({ type: 'attackTargets', presetId: '', targets: {} })).toBe(false);
+  });
+});
+
+const NOW = 1_800_000_000_000;
+
+describe(ago.name, () => {
+  it('is just now under a minute', () => {
+    expect(ago(NOW, NOW)).toBe('just now');
+    expect(ago(NOW, NOW - 59_999)).toBe('just now');
+  });
+
+  it('is the largest unit from a minute on', () => {
+    expect(ago(NOW, NOW - 60_000)).toBe('1m ago');
+    expect(ago(NOW, NOW - 5 * 60_000 - 9_000)).toBe('5m ago');
+    expect(ago(NOW, NOW - 2 * 3_600_000 - 60_000)).toBe('2h ago');
+    expect(ago(NOW, NOW - 3 * 86_400_000)).toBe('3d ago');
+  });
+
+  it('is just now for a time in the future (clock skew)', () => {
+    expect(ago(NOW, NOW + 5_000)).toBe('just now');
+  });
+});
+
+describe(nextDue.name, () => {
+  const flow = (status: Flow['status'], times: Partial<Pick<Flow, 'waitUntil' | 'notBefore'>> = {}) =>
+    ({ status, waitUntil: 0, notBefore: 0, ...times }) as Flow;
+
+  it('counts the flows not idle and finds the soonest wait or repeat ahead', () => {
+    expect(nextDue([flow('waiting', { waitUntil: NOW + 600_000 }), flow('queued', { notBefore: NOW + 60_000 }), flow('idle'), flow('running')], NOW)).toEqual({
+      active: 3,
+      next: NOW + 60_000,
+    });
+  });
+
+  it('has nothing ahead when none waits or repeats later', () => {
+    expect(nextDue([flow('running'), flow('queued')], NOW)).toEqual({ active: 2, next: null });
+    expect(nextDue([flow('idle')], NOW)).toEqual({ active: 0, next: null });
+    expect(nextDue([], NOW)).toEqual({ active: 0, next: null });
+  });
+
+  it('leaves out times already past', () => {
+    expect(nextDue([flow('waiting', { waitUntil: NOW - 1 })], NOW)).toEqual({ active: 1, next: null });
   });
 });

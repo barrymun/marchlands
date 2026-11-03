@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 
 import type { Flow } from '@marchlands/api-client';
 
-import { RunReport } from '@/components/flows-panel/run-flow/run-report/run-report';
-import { ago } from '@/components/flows-panel/run-flow/utils';
+import { RunReport } from '@/components/flows-panel/flow-detail/run-report/run-report';
+import { ago } from '@/components/flows-panel/utils';
 import { useNow } from '@/hooks/use-now';
 
 export function LastRun({ run: r }: { run: NonNullable<Flow['lastRun']> }) {

@@ -2,19 +2,24 @@
   "list": {
     "title": "Flows",
     "description": "A series of actions you run on any of your cities at once.",
-    "new": "New",
+    "new": "New flow",
     "empty": "No flows yet.",
     "actions_one": "{{count}} action",
-    "actions_other": "{{count}} actions"
+    "actions_other": "{{count}} actions",
+    "lastRun": "Run {{run}} · {{ago}}",
+    "lastRunFailed": "Run {{run}} failed · {{ago}}",
+    "neverRun": "Never run"
   },
   "detail": {
     "deleteLabel": "Delete {{name}}",
     "deleteTitle": "Delete the flow \"{{name}}\"?",
     "deleteDescription": "Its actions and settings are removed, and a run in progress stops. This cannot be undone.",
     "deleteConfirm": "Delete flow",
-    "runsOn": "Runs on:",
+    "runsOn": "Runs on",
     "noArmy": "Choose a saved army for the attack (Edit): until then its targets are skipped.",
-    "pickFlow": "Pick a flow, or create a new one."
+    "changeCities": "Change the cities for this run",
+    "changeCitiesHint": "For this run only: the flow keeps its own cities (Edit to change them).",
+    "howRuns": "How runs work"
   },
   "toasts": {
     "deleted": "Flow deleted"
@@ -79,7 +84,6 @@
     }
   },
   "runFlow": {
-    "title": "Run",
     "description": "Each city runs the flow all-or-nothing between waits: if an action fails there, what the flow did in that city since the last wait is undone, and the flow stops. Flows take turns between waits, so other flows run while one waits. Preview shows what would happen up to the first wait, without changing anything.",
     "repeat": "Repeat",
     "repeatHint": "Runs again after every run (at most once a minute) on the flow's cities, until a run fails or you switch it off.",
@@ -109,7 +113,11 @@
       "undone": "What the flow did in this city since the last wait was undone.",
       "wouldSkip": "Would skip",
       "skipped": "Skipped",
-      "allItems": "All {{n}} {{detail}}"
+      "allItems": "All {{n}} {{detail}}",
+      "city": "City",
+      "result": "Result",
+      "what": "What it did",
+      "details": "Show every step"
     }
   },
   "statusBadge": {
@@ -130,5 +138,10 @@
     "nextRun": "Next run in {{time}}.",
     "starting": "Starting…",
     "stopped": "Stopped. {{reason}} Repeat was switched off."
+  },
+  "header": {
+    "active_one": "{{count}} flow running or waiting",
+    "active_other": "{{count}} flows running or waiting",
+    "next": "next step in {{time}}"
   }
 }

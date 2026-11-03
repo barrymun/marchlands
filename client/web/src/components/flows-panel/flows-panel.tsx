@@ -3,40 +3,46 @@
 // everything back. Repeat runs the flow again after every run; one flow runs at a time, others queue.
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { type CityBean, deletePlayerFlowsByFlowId, type Flow, getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows } from '@marchlands/api-client';
-import { flowActionMessage } from '@marchlands/core';
 
-import { ConfirmButton } from '@/components/confirm-button/confirm-button';
-import { CitiesSummary } from '@/components/flows-panel/cities-summary/cities-summary';
-import { FLOWS_SEARCH } from '@/components/flows-panel/constants';
+import { FLOWS_SEARCH, SIDE_BY_SIDE } from '@/components/flows-panel/constants';
+import { FlowDetail } from '@/components/flows-panel/flow-detail/flow-detail';
 import { FlowEditor } from '@/components/flows-panel/flow-editor/flow-editor';
-import { RunFlow } from '@/components/flows-panel/run-flow/run-flow';
-import { StatusBadge } from '@/components/flows-panel/status-badge/status-badge';
-import { StatusLine } from '@/components/flows-panel/status-line/status-line';
+import { FlowList } from '@/components/flows-panel/flow-list/flow-list';
 import type { EditDraft } from '@/components/flows-panel/types';
-import { currentAction, keyed, strip } from '@/components/flows-panel/utils';
+import { keyed, nextDue, strip } from '@/components/flows-panel/utils';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useNow } from '@/hooks/use-now';
 import { useSearchState } from '@/hooks/use-search-state';
 import { errorMessage } from '@/lib/api';
-import { translateMessage } from '@/lib/messages';
-import { cn } from '@/lib/utils';
+import { duration } from '@/lib/format';
 
 export function FlowsPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation(['flows-panel', 'common']);
   const qc = useQueryClient();
+  const now = useNow();
   const flows = useQuery(getPlayerFlowsOptions());
   const list = flows.data ?? [];
   // the flow being edited: a saved one (id) or a new one (id null)
   const [editing, setEditing] = useState<EditDraft | null>(null);
   const [{ flow: selectedId }, set] = useSearchState(FLOWS_SEARCH);
   const setSelectedId = (flow: string | null) => set({ flow });
-  const selected = list.find((f) => f.id === selectedId) ?? null;
+  // the flow chosen, or the first: the detail never opens empty
+  const selected = list.find((f) => f.id === selectedId) ?? list[0] ?? null;
+  const due = nextDue(list, now);
+  // on a narrow screen the detail sits under the list: choosing a flow brings it into view
+  const detail = useRef<HTMLDivElement>(null);
+  const choose = (id: string) => {
+    setSelectedId(id);
+    setEditing(null);
+    if (!window.matchMedia(SIDE_BY_SIDE).matches) requestAnimationFrame(() => detail.current?.scrollIntoView({ block: 'start' }));
+  };
 
   const save = useMutation({
     mutationFn: async (e: NonNullable<typeof editing>) => {
@@ -69,106 +75,55 @@ export function FlowsPanel({ city }: { city: CityBean }) {
   const startEdit = (f: Flow) => setEditing({ id: f.id, name: f.name, actions: f.actions.map(keyed), cities: f.cities });
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-      <Card className="content-start self-start">
-        <CardHeader className="flex flex-row items-start justify-between gap-2 pb-2">
-          <div className="grid gap-1">
-            <CardTitle className="text-sm">{t('list.title')}</CardTitle>
-            <CardDescription>{t('list.description')}</CardDescription>
+    <div className="grid gap-4">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="grid gap-0.5">
+          <h1 className="text-lg font-semibold">{t('list.title')}</h1>
+          <p className="text-xs text-muted-foreground">
+            {t('list.description')}
+            {due.active > 0 && (
+              <>
+                {' '}
+                {t('header.active', { count: due.active })}
+                {due.next != null && <span className="tabular-nums"> · {t('header.next', { time: duration(due.next - now) })}</span>}
+              </>
+            )}
+          </p>
+        </div>
+        <Button size="sm" onClick={startNew}>
+          <Plus /> {t('list.new')}
+        </Button>
+      </header>
+      {flows.isPending ? (
+        <Skeleton className="h-64" />
+      ) : (
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+          <FlowList flows={list} selectedId={editing ? null : (selected?.id ?? null)} onSelect={choose} />
+          <div ref={detail} className="min-w-0 scroll-mt-4">
+            {editing ? (
+              <FlowEditor
+                draft={editing}
+                locked={list.some((f) => f.id === editing.id && (f.status === 'running' || f.status === 'waiting'))}
+                onChange={setEditing}
+                saving={save.isPending}
+                onSave={() => save.mutate(editing)}
+                onCancel={() => setEditing(null)}
+              />
+            ) : (
+              selected && (
+                <FlowDetail
+                  key={`${selected.id}:${JSON.stringify(selected.cities)}`}
+                  flow={selected}
+                  currentCityId={city.id}
+                  onEdit={() => startEdit(selected)}
+                  onDelete={() => remove.mutateAsync(selected.id)}
+                  deleting={remove.isPending}
+                />
+              )
+            )}
           </div>
-          <Button size="sm" onClick={startNew}>
-            <Plus /> {t('list.new')}
-          </Button>
-        </CardHeader>
-        <CardContent className="grid gap-1.5">
-          {list.length === 0 && <p className="text-sm text-muted-foreground">{t('list.empty')}</p>}
-          {list.map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => (setSelectedId(f.id), setEditing(null))}
-              className={cn(
-                'grid gap-0.5 rounded-md border px-3 py-2 text-start text-sm hover:bg-muted/50',
-                f.id === selectedId && !editing && 'border-primary bg-muted/50',
-              )}
-            >
-              <span className="flex items-center justify-between gap-2">
-                <span className="truncate font-medium">{f.name}</span>
-                <StatusBadge flow={f} />
-              </span>
-              <span className="truncate text-xs text-muted-foreground">
-                {t('list.actions', { count: f.actions.length })} · {f.actions.map((a) => translateMessage(flowActionMessage(a))).join(' → ')}
-              </span>
-            </button>
-          ))}
-        </CardContent>
-      </Card>
-      <div className="grid content-start gap-4">
-        {editing ? (
-          <FlowEditor
-            draft={editing}
-            locked={list.some((f) => f.id === editing.id && (f.status === 'running' || f.status === 'waiting'))}
-            onChange={setEditing}
-            saving={save.isPending}
-            onSave={() => save.mutate(editing)}
-            onCancel={() => setEditing(null)}
-          />
-        ) : selected ? (
-          <>
-            <Card>
-              <CardHeader className="flex flex-row items-start justify-between gap-2 pb-2">
-                <CardTitle className="text-sm">{selected.name}</CardTitle>
-                <div className="flex gap-1">
-                  <Button size="sm" variant="outline" onClick={() => startEdit(selected)}>
-                    {t('common:actions.edit')}
-                  </Button>
-                  <ConfirmButton
-                    size="sm"
-                    variant="ghost"
-                    aria-label={t('detail.deleteLabel', { name: selected.name })}
-                    disabled={remove.isPending}
-                    title={t('detail.deleteTitle', { name: selected.name })}
-                    description={t('detail.deleteDescription')}
-                    confirmLabel={t('detail.deleteConfirm')}
-                    onConfirm={() => remove.mutateAsync(selected.id)}
-                  >
-                    <Trash2 />
-                  </ConfirmButton>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ol className="grid gap-1 text-sm">
-                  {selected.actions.map((a, i) => (
-                    <li key={i} className={cn('flex items-center gap-2', currentAction(selected) === i && 'font-medium text-primary')}>
-                      <span
-                        className={cn(
-                          'flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] tabular-nums',
-                          currentAction(selected) === i && 'bg-primary text-primary-foreground',
-                        )}
-                      >
-                        {i + 1}
-                      </span>
-                      {translateMessage(flowActionMessage(a))}
-                    </li>
-                  ))}
-                </ol>
-                <StatusLine flow={selected} />
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {t('detail.runsOn')} <CitiesSummary targets={selected.cities} />
-                </p>
-                {selected.actions.some((a) => a.type === 'attackTargets' && !a.presetId) && (
-                  <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">{t('detail.noArmy')}</p>
-                )}
-              </CardContent>
-            </Card>
-            <RunFlow key={`${selected.id}:${JSON.stringify(selected.cities)}`} flow={selected} currentCityId={city.id} />
-          </>
-        ) : (
-          <Card>
-            <CardContent className="py-8 text-center text-sm text-muted-foreground">{t('detail.pickFlow')}</CardContent>
-          </Card>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

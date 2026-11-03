@@ -2,6 +2,8 @@ import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
 
 import { ACTION_RANGES } from '@/components/flows-panel/constants';
 import type { Draft } from '@/components/flows-panel/types';
+import { duration } from '@/lib/format';
+import { i18n } from '@/lib/i18n';
 import { inRange } from '@/lib/ranges';
 
 let nextKey = 0;
@@ -32,4 +34,14 @@ export function actionValid(a: FlowAction): boolean {
     default:
       return true;
   }
+}
+
+/** How long ago `t` was, for a report title: "just now" under a minute, else the largest unit ("5m ago", "2h ago"). */
+export const ago = (now: number, t: number) =>
+  now - t < 60_000 ? i18n.t('common:time.justNow') : i18n.t('common:time.ago', { time: duration(now - t).split(' ')[0] });
+
+/** How many flows are not idle, and the soonest moment one carries on (a wait ending, a repeat starting), if any is ahead. */
+export function nextDue(flows: readonly Pick<Flow, 'status' | 'waitUntil' | 'notBefore'>[], now: number) {
+  const ahead = flows.map((f) => (f.status === 'waiting' ? f.waitUntil : f.status === 'queued' ? f.notBefore : 0)).filter((at) => at > now);
+  return { active: flows.filter((f) => f.status !== 'idle').length, next: ahead.length ? Math.min(...ahead) : null };
 }

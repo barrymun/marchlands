@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import type { StepItem } from '@/components/flows-panel/run-flow/run-report/step-items/types';
+import type { StepItem } from '@/components/flows-panel/flow-detail/run-report/city-steps/step-items/types';
 import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
 

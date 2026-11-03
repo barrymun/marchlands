@@ -7,6 +7,9 @@ export const FLOWS_SEARCH = {
   flow: param.key(),
 } satisfies SearchSchema;
 
+/** The width from which the list and the flow chosen stand side by side (Tailwind's `lg`, as the page's grid). */
+export const SIDE_BY_SIDE = '(min-width: 64rem)';
+
 /** The numbers each action takes (the server checks the same): its inputs show what is out of range, and Save waits for them. */
 export const ACTION_RANGES = {
   waitMinutes: { min: 1, max: FLOW_MAX_WAIT_MINUTES },
