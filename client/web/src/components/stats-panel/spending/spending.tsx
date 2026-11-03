@@ -1,58 +1,48 @@
 import { useTranslation } from 'react-i18next';
 
-import { Num } from '@/components/stats-panel/num/num';
-import { SPENDING } from '@/components/stats-panel/spending/constants';
+import { ResourceIcon } from '@/components/resource-icon/resource-icon';
+import { SectionId } from '@/components/stats-panel/section/constants';
+import { Section } from '@/components/stats-panel/section/section';
+import { SpendingTable } from '@/components/stats-panel/spending/spending-table/spending-table';
+import { honorSpent, spendingRows } from '@/components/stats-panel/spending/utils';
 import type { Counters } from '@/components/stats-panel/types';
-import { sumPrefix } from '@/components/stats-panel/utils';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { fmt, resourceLabel, RESOURCES } from '@/lib/format';
+import { fmt, fmtExact, resourceLabel } from '@/lib/format';
 
-export function Spending({ c }: { c: Counters }) {
+/** What the resources were spent on: a line a thing, with what it took of each resource. */
+export function Spending({ c, className }: { c: Counters; className?: string }) {
   const { t } = useTranslation(['stats-panel', 'common']);
-  const rows = SPENDING.filter(({ group }) => sumPrefix(c, `spent.${group}.`) !== 0);
+  const rows = spendingRows(c);
+  const honor = honorSpent(c);
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm">{t('spending.title')}</CardTitle>
-        <CardDescription>
-          {c['spent.healing.honor'] ? t('spending.descriptionHonor', { honor: fmt(c['spent.healing.honor']) }) : t('spending.description')}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t('common:nothingYet')}</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('spending.on')}</TableHead>
-                {RESOURCES.map((r) => (
-                  <TableHead key={r} className="text-end">
-                    {resourceLabel(r)}
-                  </TableHead>
+    <Section
+      className={className}
+      title={t('spending.title')}
+      description={honor ? t('spending.descriptionHonor', { honor: fmt(honor) }) : t('spending.description')}
+      table={{ id: SectionId.SPENDING, view: <SpendingTable c={c} /> }}
+    >
+      {rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t('common:nothingYet')}</p>
+      ) : (
+        <ul className="grid divide-y text-sm">
+          {rows.map(({ group, label, amounts }) => (
+            <li key={group} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2">
+              <span>{label}</span>
+              <span className="flex flex-wrap gap-x-3 gap-y-1">
+                {amounts.map(({ resource, amount }) => (
+                  <span
+                    key={resource}
+                    className="flex items-center gap-1 tabular-nums"
+                    title={t('spending.amount', { resource: resourceLabel(resource), amount: fmtExact(amount) })}
+                  >
+                    <ResourceIcon resource={resource} />
+                    {fmt(amount)}
+                  </span>
                 ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map(({ group, label }) => (
-                <TableRow key={group}>
-                  <TableCell>{label}</TableCell>
-                  {RESOURCES.map((r) => (
-                    <Num key={r} v={c[`spent.${group}.${r}`]} />
-                  ))}
-                </TableRow>
-              ))}
-              <TableRow className="font-medium">
-                <TableCell>{t('common:table.total')}</TableCell>
-                {RESOURCES.map((r) => (
-                  <Num key={r} v={SPENDING.reduce((s, { group }) => s + (c[`spent.${group}.${r}`] ?? 0), 0)} />
-                ))}
-              </TableRow>
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
-    </Card>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
   );
 }

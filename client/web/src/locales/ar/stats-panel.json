@@ -7,21 +7,74 @@
   "formerCity": "مدينة سابقة",
   "allTime": "كل الأوقات",
   "last7Days": "آخر 7 أيام",
-  "summary": {
-    "title": "نظرة عامة",
+  "section": {
+    "showTable": "عرض الجدول",
+    "showChart": "عرض الرسم"
+  },
+  "headline": {
     "attacksWon": "هجمات ناجحة",
-    "attacksLost": "هجمات خاسرة",
+    "attacksOf_zero": "{{share}} من {{n}} هجوم",
+    "attacksOf_one": "{{share}} من هجوم واحد ({{n}})",
+    "attacksOf_two": "{{share}} من هجومين ({{n}})",
+    "attacksOf_few": "{{share}} من {{n}} هجمات",
+    "attacksOf_many": "{{share}} من {{n}} هجومًا",
+    "attacksOf_other": "{{share}} من {{n}} هجوم",
     "defensesWon": "دفاعات ناجحة",
-    "defensesLost": "دفاعات خاسرة",
-    "barbarianCitiesBeaten": "مدن بربرية مهزومة",
-    "citiesCaptured": "مدن مستولى عليها",
-    "valleysOccupied": "وديان محتلة",
+    "defensesOf_zero": "{{share}} من {{n}} دفاع",
+    "defensesOf_one": "{{share}} من دفاع واحد ({{n}})",
+    "defensesOf_two": "{{share}} من دفاعين ({{n}})",
+    "defensesOf_few": "{{share}} من {{n}} دفاعات",
+    "defensesOf_many": "{{share}} من {{n}} دفاعًا",
+    "defensesOf_other": "{{share}} من {{n}} دفاع",
     "honorGained": "الشرف المكتسب",
-    "buildingLevels": "مستويات المباني",
-    "researchLevels": "مستويات البحث",
-    "heroLevels": "مستويات الأبطال",
-    "heroesHired": "أبطال مستأجرون",
-    "itemsUsed": "عناصر مستخدمة"
+    "enemies": "أعداء مهزومون",
+    "enemiesMost": "أغلبهم {{unit}}",
+    "trained": "قوات مدرّبة",
+    "fell_zero": "لم يسقط أحد ({{n}})",
+    "fell_one": "سقط واحد إلى الأبد ({{n}})",
+    "fell_two": "سقط اثنان إلى الأبد ({{n}})",
+    "fell_few": "سقط {{n}} إلى الأبد",
+    "fell_many": "سقط {{n}} إلى الأبد",
+    "fell_other": "سقط {{n}} إلى الأبد",
+    "citiesCaptured": "مدن مستولى عليها",
+    "valleys_zero": "{{n}} وادٍ محتل",
+    "valleys_one": "وادٍ واحد محتل ({{n}})",
+    "valleys_two": "واديان محتلان ({{n}})",
+    "valleys_few": "{{n}} وديان محتلة",
+    "valleys_many": "{{n}} واديًا محتلًا",
+    "valleys_other": "{{n}} وادٍ محتل"
+  },
+  "winsByLevel": {
+    "title": "الانتصارات حسب المستوى",
+    "description": "المدن البربرية، ثم المدن التاريخية.",
+    "barbarian_zero": "مدن بربرية من المستوى {{level}}: {{n}} انتصار",
+    "barbarian_one": "مدن بربرية من المستوى {{level}}: انتصار واحد ({{n}})",
+    "barbarian_two": "مدن بربرية من المستوى {{level}}: انتصاران ({{n}})",
+    "barbarian_few": "مدن بربرية من المستوى {{level}}: {{n}} انتصارات",
+    "barbarian_many": "مدن بربرية من المستوى {{level}}: {{n}} انتصارًا",
+    "barbarian_other": "مدن بربرية من المستوى {{level}}: {{n}} انتصار",
+    "historic_zero": "مدن تاريخية من المستوى {{level}}: {{n}} انتصار",
+    "historic_one": "مدن تاريخية من المستوى {{level}}: انتصار واحد ({{n}})",
+    "historic_two": "مدن تاريخية من المستوى {{level}}: انتصاران ({{n}})",
+    "historic_few": "مدن تاريخية من المستوى {{level}}: {{n}} انتصارات",
+    "historic_many": "مدن تاريخية من المستوى {{level}}: {{n}} انتصارًا",
+    "historic_other": "مدن تاريخية من المستوى {{level}}: {{n}} انتصار"
+  },
+  "enemies": {
+    "title": "أعداء مهزومون",
+    "description": "قوات العدو وتحصيناته التي دمرتها جيوشك ودفاعاتك.",
+    "more_zero": "{{n}} نوع آخر",
+    "more_one": "نوع آخر ({{n}})",
+    "more_two": "نوعان آخران ({{n}})",
+    "more_few": "{{n}} أنواع أخرى",
+    "more_many": "{{n}} نوعًا آخر",
+    "more_other": "{{n}} نوع آخر"
+  },
+  "troops": {
+    "title": "قواتك",
+    "description": "كم دربت من كل نوع، وكم سقط منه إلى الأبد.",
+    "trained": "مُدرَّب",
+    "fell": "سقط إلى الأبد"
   },
   "units": {
     "title": "القوات والتحصينات",
@@ -34,6 +87,24 @@
       "healed": "عولج",
       "deserted": "فرّ",
       "disbanded": "سُرّح"
+    }
+  },
+  "resourceFlows": {
+    "title": "من أين جاءت الموارد وإلى أين ذهبت",
+    "description": "المكاسب بالأخضر على جانب من الخط، والخسائر بالأحمر على الجانب الآخر، وكل الموارد بمقياس واحد.",
+    "gained": "مكتسب",
+    "lost": "مفقود",
+    "kinds": {
+      "produced": "المُنتَج",
+      "plundered": "المنهوب",
+      "marketIn": "من السوق",
+      "gift": "الهدية اليومية",
+      "upkeep": "الصيانة (طعام القوات، أجور الأبطال)",
+      "spent": "المُنفَق",
+      "wasted": "المُهدَر (المخزن ممتلئ)",
+      "taxed": "المحوَّل إلى ضرائب",
+      "marketOut": "إلى السوق",
+      "stolen": "المفقود بالنهب"
     }
   },
   "resources": {
@@ -67,11 +138,16 @@
       "valleys": "تطوير الوديان",
       "comfort": "المواساة",
       "other": "أخرى (هدنة، عطلة، تحالف)"
-    }
+    },
+    "amount": "{{resource}}: {{amount}}"
   },
-  "npcWins": {
-    "title": "المدن البربرية المهزومة حسب المستوى",
-    "level": "المستوى {{level}}"
+  "growth": {
+    "title": "النمو",
+    "buildingLevels": "مستويات المباني",
+    "researchLevels": "مستويات البحث",
+    "heroLevels": "مستويات الأبطال",
+    "heroesHired": "أبطال مستأجرون",
+    "itemsUsed": "عناصر مستخدمة"
   },
   "itemsUsed": {
     "title": "العناصر المستخدمة"

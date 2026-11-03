@@ -1,4 +1,4 @@
-// (marchlands) Lord statistics: what the lord trained, fought, produced and spent, for all of their
+// (marchlands) Player statistics: what the player trained, fought, produced and spent, for all of their
 // cities or one, all time or the last 7 days. The server writes the counters in batches, so the
 // newest actions can take a few minutes to appear.
 
@@ -8,14 +8,15 @@ import { useTranslation } from 'react-i18next';
 import { getPlayerStatisticsOptions, type LordStatistics } from '@marchlands/api-client';
 
 import { ALL_CITIES, STATS_SEARCH, StatsPeriod } from '@/components/stats-panel/constants';
+import { Enemies } from '@/components/stats-panel/enemies/enemies';
+import { Growth } from '@/components/stats-panel/growth/growth';
+import { Headline } from '@/components/stats-panel/headline/headline';
 import { ItemsUsed } from '@/components/stats-panel/items-used/items-used';
-import { NpcWins } from '@/components/stats-panel/npc-wins/npc-wins';
-import { Resources } from '@/components/stats-panel/resources/resources';
+import { ResourceFlows } from '@/components/stats-panel/resource-flows/resource-flows';
 import { Spending } from '@/components/stats-panel/spending/spending';
-import { Summary } from '@/components/stats-panel/summary/summary';
+import { Troops } from '@/components/stats-panel/troops/troops';
 import type { Counters } from '@/components/stats-panel/types';
-import { Units } from '@/components/stats-panel/units/units';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { WinsByLevel } from '@/components/stats-panel/wins-by-level/wins-by-level';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -39,12 +40,12 @@ export function StatsPanel() {
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">{t('title')}</CardTitle>
-          <CardDescription>{data.since ? t('descriptionSince', { date: dateTime(data.since) }) : t('description')}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-center gap-3">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="grid gap-0.5">
+          <h1 className="text-lg font-semibold">{t('title')}</h1>
+          <p className="text-xs text-muted-foreground">{data.since ? t('descriptionSince', { date: dateTime(data.since) }) : t('description')}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <Select value={city ? String(city.cityId) : ALL_CITIES} onValueChange={(v) => set({ city: v === ALL_CITIES ? null : Number(v) })}>
             <SelectTrigger className="w-56">
               <SelectValue />
@@ -65,16 +66,22 @@ export function StatsPanel() {
               <TabsTrigger value={StatsPeriod.LAST_7_DAYS}>{t('last7Days')}</TabsTrigger>
             </TabsList>
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </header>
 
-      <Summary c={c} lordWide={!city} />
-      <Units c={c} />
-      <Resources c={c} />
-      <Spending c={c} />
+      <Headline c={c} />
       <div className="grid items-start gap-4 lg:grid-cols-2">
-        <NpcWins c={c} />
-        {!city && <ItemsUsed c={c} />}
+        <WinsByLevel c={c} />
+        <Enemies c={c} />
+      </div>
+      <div className="grid items-start gap-4 xl:grid-cols-2">
+        <Troops c={c} />
+        <ResourceFlows c={c} />
+      </div>
+      <div className="grid items-start gap-4 lg:grid-cols-3">
+        <Spending c={c} className="lg:col-span-2" />
+        <Growth c={c} playerWide={!city} />
+        {!city && <ItemsUsed c={c} className="lg:col-span-3" />}
       </div>
     </div>
   );

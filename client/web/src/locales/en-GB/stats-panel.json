@@ -7,21 +7,46 @@
   "formerCity": "Former city",
   "allTime": "All time",
   "last7Days": "Last 7 days",
-  "summary": {
-    "title": "Overview",
+  "section": {
+    "showTable": "Show table",
+    "showChart": "Show chart"
+  },
+  "headline": {
     "attacksWon": "Attacks won",
-    "attacksLost": "Attacks lost",
+    "attacksOf_one": "{{share}} of {{n}} attack",
+    "attacksOf_other": "{{share}} of {{n}} attacks",
     "defensesWon": "Defences won",
-    "defensesLost": "Defences lost",
-    "barbarianCitiesBeaten": "Barbarian cities beaten",
-    "citiesCaptured": "Cities captured",
-    "valleysOccupied": "Valleys occupied",
+    "defensesOf_one": "{{share}} of {{n}} defence",
+    "defensesOf_other": "{{share}} of {{n}} defences",
     "honorGained": "Honour gained",
-    "buildingLevels": "Building levels",
-    "researchLevels": "Research levels",
-    "heroLevels": "Hero levels",
-    "heroesHired": "Heroes hired",
-    "itemsUsed": "Items used"
+    "enemies": "Enemies defeated",
+    "enemiesMost": "Mostly {{unit}}",
+    "trained": "Troops trained",
+    "fell_one": "{{n}} fell for good",
+    "fell_other": "{{n}} fell for good",
+    "citiesCaptured": "Cities captured",
+    "valleys_one": "{{n}} valley occupied",
+    "valleys_other": "{{n}} valleys occupied"
+  },
+  "winsByLevel": {
+    "title": "Wins by level",
+    "description": "Barbarian cities, then historic cities.",
+    "barbarian_one": "Level {{level}} barbarian city: {{n}} win",
+    "barbarian_other": "Level {{level}} barbarian cities: {{n}} wins",
+    "historic_one": "Level {{level}} historic city: {{n}} win",
+    "historic_other": "Level {{level}} historic cities: {{n}} wins"
+  },
+  "enemies": {
+    "title": "Enemies defeated",
+    "description": "Enemy troops and fortifications your armies and defences destroyed.",
+    "more_one": "{{n}} more type",
+    "more_other": "{{n}} more types"
+  },
+  "troops": {
+    "title": "Your troops",
+    "description": "How many of each you trained, and how many fell for good.",
+    "trained": "Trained",
+    "fell": "Fell for good"
   },
   "units": {
     "title": "Troops and fortifications",
@@ -34,6 +59,24 @@
       "healed": "Healed",
       "deserted": "Deserted",
       "disbanded": "Disbanded"
+    }
+  },
+  "resourceFlows": {
+    "title": "Where resources came from and went",
+    "description": "Gains in green on one side of the line, losses in red on the other, every resource on one scale.",
+    "gained": "Gained",
+    "lost": "Lost",
+    "kinds": {
+      "produced": "Produced",
+      "plundered": "Plundered",
+      "marketIn": "From the market",
+      "gift": "Daily gift",
+      "upkeep": "Upkeep (troops' food, heroes' pay)",
+      "spent": "Spent",
+      "wasted": "Wasted (storage full)",
+      "taxed": "Turned into tax",
+      "marketOut": "To the market",
+      "stolen": "Lost to plunder"
     }
   },
   "resources": {
@@ -67,11 +110,16 @@
       "valleys": "Valley upgrades",
       "comfort": "Comforting",
       "other": "Other (truce, holiday, alliance)"
-    }
+    },
+    "amount": "{{resource}}: {{amount}}"
   },
-  "npcWins": {
-    "title": "Barbarian cities beaten, by level",
-    "level": "Level {{level}}"
+  "growth": {
+    "title": "Growth",
+    "buildingLevels": "Building levels",
+    "researchLevels": "Research levels",
+    "heroLevels": "Hero levels",
+    "heroesHired": "Heroes hired",
+    "itemsUsed": "Items used"
   },
   "itemsUsed": {
     "title": "Items used"

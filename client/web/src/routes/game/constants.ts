@@ -55,8 +55,8 @@ export const PAGES = [
 /** The width a page keeps: lines and tables stay readable on a big screen. Views use the whole viewport. */
 export const PAGE_WIDTH = 'max-w-7xl';
 
-/** Pages that use the viewport's whole width instead: the Heroes page, its heroes' rows and gear in columns; the Reports page, its places in columns. */
-export const FULL_WIDTH_PAGES: readonly PageId[] = [PageId.HEROES, PageId.REPORTS];
+/** Pages that use the viewport's whole width instead: the Heroes page, its heroes' rows and gear in columns; the Reports page, its places in columns; the Statistics page, its charts side by side. */
+export const FULL_WIDTH_PAGES: readonly PageId[] = [PageId.HEROES, PageId.REPORTS, PageId.STATS];
 
 // Every screen but the town and the fields (the one a visit starts on) loads its code on first use, as does the mayor
 // chip's quick swap; usePreloadPanels fetches them all once the page is up, so opening one normally finds it loaded.

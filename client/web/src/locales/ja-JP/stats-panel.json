@@ -7,21 +7,39 @@
   "formerCity": "以前の都市",
   "allTime": "全期間",
   "last7Days": "過去7日間",
-  "summary": {
-    "title": "概要",
+  "section": {
+    "showTable": "表で表示",
+    "showChart": "グラフで表示"
+  },
+  "headline": {
     "attacksWon": "攻撃勝利",
-    "attacksLost": "攻撃敗北",
+    "attacksOf_other": "{{n}} 回の攻撃のうち {{share}}",
     "defensesWon": "防衛勝利",
-    "defensesLost": "防衛敗北",
-    "barbarianCitiesBeaten": "撃破した蛮族の都市",
-    "citiesCaptured": "占領した都市",
-    "valleysOccupied": "占領した領地",
+    "defensesOf_other": "{{n}} 回の防衛のうち {{share}}",
     "honorGained": "獲得した名誉",
-    "buildingLevels": "建物レベル",
-    "researchLevels": "研究レベル",
-    "heroLevels": "英雄レベル",
-    "heroesHired": "雇用した英雄",
-    "itemsUsed": "使用したアイテム"
+    "enemies": "撃破した敵",
+    "enemiesMost": "主に{{unit}}",
+    "trained": "訓練した部隊",
+    "fell_other": "{{n}} が戦死",
+    "citiesCaptured": "占領した都市",
+    "valleys_other": "占領した領地 {{n}}"
+  },
+  "winsByLevel": {
+    "title": "レベル別の勝利",
+    "description": "蛮族の都市、続いて歴史都市。",
+    "barbarian_other": "レベル {{level}} の蛮族の都市: {{n}} 勝",
+    "historic_other": "レベル {{level}} の歴史都市: {{n}} 勝"
+  },
+  "enemies": {
+    "title": "撃破した敵",
+    "description": "自軍の部隊と防御が倒した敵の部隊と防御施設。",
+    "more_other": "ほか {{n}} 種"
+  },
+  "troops": {
+    "title": "自軍の部隊",
+    "description": "兵種ごとに訓練した数と、戦死して戻らなかった数。",
+    "trained": "訓練",
+    "fell": "戦死"
   },
   "units": {
     "title": "部隊と防御施設",
@@ -34,6 +52,24 @@
       "healed": "治療",
       "deserted": "脱走",
       "disbanded": "解散"
+    }
+  },
+  "resourceFlows": {
+    "title": "資源の入手先と使い道",
+    "description": "線の片側に緑で入手、反対側に赤で損失。すべての資源を同じ尺度で表示します。",
+    "gained": "入手",
+    "lost": "損失",
+    "kinds": {
+      "produced": "生産",
+      "plundered": "略奪",
+      "marketIn": "市場から",
+      "gift": "デイリーギフト",
+      "upkeep": "維持費（部隊の食料、英雄の給与）",
+      "spent": "支出",
+      "wasted": "廃棄（倉庫が満杯）",
+      "taxed": "税に変換",
+      "marketOut": "市場へ",
+      "stolen": "略奪された量"
     }
   },
   "resources": {
@@ -67,11 +103,16 @@
       "valleys": "領地の強化",
       "comfort": "慰撫",
       "other": "その他（休戦、休暇、同盟）"
-    }
+    },
+    "amount": "{{resource}}: {{amount}}"
   },
-  "npcWins": {
-    "title": "撃破した蛮族の都市（レベル別）",
-    "level": "レベル {{level}}"
+  "growth": {
+    "title": "成長",
+    "buildingLevels": "建物レベル",
+    "researchLevels": "研究レベル",
+    "heroLevels": "英雄レベル",
+    "heroesHired": "雇用した英雄",
+    "itemsUsed": "使用したアイテム"
   },
   "itemsUsed": {
     "title": "使用したアイテム"

@@ -1,12 +1,16 @@
 {
+  "headline": {
+    "defensesWon": "Defenses won",
+    "defensesOf_one": "{{share}} of {{n}} defense",
+    "defensesOf_other": "{{share}} of {{n}} defenses",
+    "honorGained": "Honor gained"
+  },
+  "enemies": {
+    "description": "Enemy troops and fortifications your armies and defenses destroyed."
+  },
   "spending": {
     "description": "After refunds for canceled orders.",
     "descriptionHonor": "After refunds for canceled orders. Healing also cost {{honor}} honor."
-  },
-  "summary": {
-    "defensesWon": "Defenses won",
-    "defensesLost": "Defenses lost",
-    "honorGained": "Honor gained"
   },
   "units": {
     "description": "Killed counts the enemy units of that type your armies and defenses destroyed. Of your own fallen, Died never came back and Injured came home to be healed."

@@ -1,44 +1,35 @@
 import { useTranslation } from 'react-i18next';
 
 import { ItemIcon } from '@/components/item-icon/item-icon';
-import { Num } from '@/components/stats-panel/num/num';
+import { Section } from '@/components/stats-panel/section/section';
 import type { Counters } from '@/components/stats-panel/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { fmt, fmtExact } from '@/lib/format';
 import { itemName } from '@/lib/game-data';
 
-export function ItemsUsed({ c }: { c: Counters }) {
+/** The items the player used, most first, each with its icon. */
+export function ItemsUsed({ c, className }: { c: Counters; className?: string }) {
   const { t } = useTranslation(['stats-panel', 'common']);
   const used = Object.entries(c)
     .filter(([k, v]) => k.startsWith('items.used.') && v > 0)
     .map(([k, v]) => [k.slice('items.used.'.length), v] as const)
     .sort((a, b) => b[1] - a[1]);
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm">{t('itemsUsed.title')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {used.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t('common:noneYet')}</p>
-        ) : (
-          <Table>
-            <TableBody>
-              {used.map(([id, n]) => (
-                <TableRow key={id}>
-                  <TableCell>
-                    <span className="flex items-center gap-2">
-                      <ItemIcon id={id} />
-                      {itemName(id)}
-                    </span>
-                  </TableCell>
-                  <Num v={n} />
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
-    </Card>
+    <Section className={className} title={t('itemsUsed.title')}>
+      {used.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t('common:noneYet')}</p>
+      ) : (
+        <ul className="grid gap-x-6 sm:grid-cols-2 xl:grid-cols-3">
+          {used.map(([id, n]) => (
+            <li key={id} className="flex items-center gap-2 border-b py-1.5 text-sm">
+              <ItemIcon id={id} />
+              <span className="min-w-0 flex-1 truncate">{itemName(id)}</span>
+              <span className="tabular-nums" title={fmtExact(n)}>
+                {fmt(n)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
   );
 }
