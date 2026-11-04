@@ -329,7 +329,7 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
                   </span>
                   <div className="flex items-center gap-1">
                     <Input
-                      className="h-8 w-32"
+                      className="h-8 w-28"
                       inputMode="numeric"
                       placeholder="0"
                       value={resources[r] ?? ''}
@@ -337,6 +337,15 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
                     />
                     <Button size="xs" variant="ghost" disabled={capacity <= 0} title={t('form.maxTitle')} onClick={() => maxOf(r)}>
                       {t('common:actions.max')}
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      disabled={!resources[r]}
+                      title={t('form.noneResourceTitle')}
+                      onClick={() => setResources({ ...resources, [r]: '' })}
+                    >
+                      {t('common:actions.none')}
                     </Button>
                   </div>
                 </div>

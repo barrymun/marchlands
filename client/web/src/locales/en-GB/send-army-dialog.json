@@ -18,6 +18,7 @@
     "carried": "{{loaded}} / {{capacity}} carried",
     "chooseTroops": "Choose troops to carry resources",
     "maxTitle": "As much as the troops can still carry",
+    "noneResourceTitle": "None of this resource",
     "estimate": "March {{time}} · Carries {{load}}",
     "estimateButton": "Estimate",
     "planTitle": "Add a wave",

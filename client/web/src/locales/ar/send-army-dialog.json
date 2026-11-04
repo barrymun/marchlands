@@ -18,6 +18,7 @@
     "carried": "محمول {{loaded}} / {{capacity}}",
     "chooseTroops": "اختر قوات لحمل الموارد",
     "maxTitle": "أقصى ما تستطيع القوات حمله بعد",
+    "noneResourceTitle": "لا شيء من هذا المورد",
     "estimate": "المسير {{time}} · يحمل {{load}}",
     "estimateButton": "تقدير",
     "planTitle": "أضف موجة",
