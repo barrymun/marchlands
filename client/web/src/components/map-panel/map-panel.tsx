@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Castle, Crosshair, Info, MapPin, Swords } from 'lucide-react';
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -84,11 +84,19 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   if (atId !== lastAt) {
     setLastAt(atId);
     if (atId == null && selected === lastAt) setSelected(null);
+    else if (atId != null) setSelected(atId);
   }
   const centreOnCity = useEffectEvent(() => vp.centreOn(city.x, city.y));
   useEffect(() => {
     if (home) centreOnCity();
   }, [home]);
+  // a place in the address this map didn't put there (Send army's Show on map, the map already open): it goes there too
+  const placed = useRef(atId);
+  const followAddress = useEffectEvent(() => {
+    if (at && atId !== placed.current) vp.centreOn(at.x, at.y);
+    placed.current = atId;
+  });
+  useEffect(() => followAddress(), [atId]);
   /** The tile under a point: the front-most sprite with a pixel there, else the tile whose diamond holds it. */
   const pick = (p: ViewPoint) => {
     if (!vp.camera) return undefined;
@@ -135,6 +143,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const pickedOwn = (tileId: number) => {
     const own = player.data?.castles.find((c) => c.fieldId === tileId);
     if (!own || !search.at) return;
+    placed.current = own.id === city.id ? null : own.fieldId;
     setSearch({ at: own.id === city.id ? null : { x: own.x, y: own.y } });
   };
   // going to a place (the go-to box, a valley, a farming target, a tile card's Centre here) keeps it in the address; going
@@ -142,6 +151,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const goTo = (x: number, y: number) => {
     vp.centreOn(x, y);
     select(y * mapSize + x);
+    placed.current = y * mapSize + x;
     setSearch({ at: { x, y } });
   };
   const goHome = () => {

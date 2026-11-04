@@ -1,4 +1,16 @@
 {
+  "to": {
+    "label": "派遣先",
+    "placeholder": "x, y または自分の都市",
+    "suggestions": "自分の都市と略奪目標",
+    "invalid": "300, 120 のように2つの数字を入力するか、一覧から場所を選んでください。",
+    "yours": "自分の領地",
+    "heldBy": "所有者: {{player}}",
+    "showOnMap": "マップで表示",
+    "self": "軍はこの都市から出発します。別の場所を選んでください。",
+    "none": "そこへは軍を派遣できません。",
+    "missionChanged": "そこでは{{wanted}}ができないため、{{mission}}に変更しました。"
+  },
   "form": {
     "title": "部隊を派遣",
     "description": "{{from}}から{{to}}へ",

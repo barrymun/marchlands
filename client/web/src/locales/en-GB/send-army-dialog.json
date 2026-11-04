@@ -1,4 +1,16 @@
 {
+  "to": {
+    "label": "To",
+    "placeholder": "x, y or one of your cities",
+    "suggestions": "Your cities and farm targets",
+    "invalid": "Type two numbers, such as 300, 120, or pick a place from the list.",
+    "yours": "Yours",
+    "heldBy": "Held by {{player}}",
+    "showOnMap": "Show on map",
+    "self": "The army would leave from this city: choose somewhere else.",
+    "none": "You cannot send an army there.",
+    "missionChanged": "{{wanted}} is not possible there, so this is now {{mission}}."
+  },
   "form": {
     "title": "Send army",
     "description": "From {{from}} to {{to}}",

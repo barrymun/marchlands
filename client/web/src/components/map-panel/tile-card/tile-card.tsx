@@ -11,7 +11,6 @@ import {
   factionOfZone,
   isFactionLevel,
   Mission,
-  Relation,
   tileDistance,
   TileType,
   valleyBonus,
@@ -27,6 +26,7 @@ import { placeName } from '@/components/map-panel/utils';
 import { ValleyUpgrade } from '@/components/map-panel/valley-upgrade/valley-upgrade';
 import { ResourceIcon } from '@/components/resource-icon/resource-icon';
 import type { SendTarget } from '@/components/send-army-dialog/types';
+import { tileKind, tileMissions, tileTarget } from '@/components/send-army-dialog/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -89,20 +89,7 @@ export function TileCard({
   // (marchlands) or, in a state a player rules, cut off from it
   const ruler = tile?.type === TileType.NPC && isFactionLevel(tile.level) ? rulers.get(tile.zoneId) : undefined;
   const side = tile?.type === TileType.NPC && !ruler ? (isFactionLevel(tile.level) ? factionOfZone(tile.zoneId) : null) : undefined;
-  /** what can be scouted on a tile (empty land has nothing to see) */
-  const kindOf = (t: NonNullable<typeof tile>): SendTarget['kind'] =>
-    t.type === TileType.CASTLE ? 'city' : t.type === TileType.NPC || t.type === TileType.HISTORIC ? 'npc' : t.type === TileType.FLAT ? undefined : 'valley';
-  const missionsFor = (t: NonNullable<typeof tile>): number[] => {
-    // the city in view can't send an army to itself
-    if (t.id === city.fieldId) return [];
-    const m: number[] = [];
-    if (t.canLoot || t.canOccupy) m.push(Mission.ATTACK);
-    if (t.canScout && kindOf(t)) m.push(Mission.SCOUT);
-    if (t.canSend) m.push(Mission.REINFORCE);
-    if (t.canTrans) m.push(Mission.TRANSPORT);
-    if (t.type === TileType.FLAT && !('owner' in t && t.owner)) m.push(Mission.BUILD_CITY);
-    return m;
-  };
+  const missions = tile ? tileMissions(tile, city.fieldId) : [];
 
   // the coordinates in the game's own notation, ready to paste into a chat, a mail or another tool
   const copyCoords = (x: number, y: number) => {
@@ -216,35 +203,21 @@ export function TileCard({
             </Button>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            {missionsFor(tile).length > 0 && (
+            {missions.length > 0 && (
               <>
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    onSend({ tileId: tile.id, name: placeName(tile), missions: missionsFor(tile), kind: kindOf(tile), own: tile.relation === Relation.SELF })
-                  }
-                >
+                <Button size="sm" onClick={() => onSend(tileTarget(tile, city.fieldId))}>
                   {t('info.sendArmy')}
                 </Button>
-                {missionsFor(tile).includes(Mission.ATTACK) && <AddToFarmButton city={city} tileId={tile.id} tileName={placeName(tile)} />}
-                {missionsFor(tile).includes(Mission.SCOUT) && (
+                {missions.includes(Mission.ATTACK) && <AddToFarmButton city={city} tileId={tile.id} tileName={placeName(tile)} />}
+                {missions.includes(Mission.SCOUT) && (
                   <Button
                     size="sm"
                     variant="outline"
                     disabled={scouts <= 0}
                     onClick={() => {
-                      const kind = kindOf(tile);
                       // lords' city scouts fight: send them all; elsewhere one always gets through
-                      const n = kind === 'city' ? scouts : 1;
-                      onSend({
-                        tileId: tile.id,
-                        name: placeName(tile),
-                        missions: missionsFor(tile),
-                        mission: Mission.SCOUT,
-                        troops: { scouter: String(n) },
-                        kind,
-                        own: tile.relation === Relation.SELF,
-                      });
+                      const n = tileKind(tile) === 'city' ? scouts : 1;
+                      onSend({ ...tileTarget(tile, city.fieldId), mission: Mission.SCOUT, troops: { scouter: String(n) } });
                     }}
                   >
                     <Eye /> {t('info.scout')}
@@ -256,7 +229,7 @@ export function TileCard({
               <LocateFixed /> {t('centre.button')}
             </Button>
           </div>
-          {missionsFor(tile).includes(Mission.SCOUT) && scouts <= 0 && <p className="text-xs text-muted-foreground">{t('info.noScouts')}</p>}
+          {missions.includes(Mission.SCOUT) && scouts <= 0 && <p className="text-xs text-muted-foreground">{t('info.noScouts')}</p>}
         </>
       )}
     </section>

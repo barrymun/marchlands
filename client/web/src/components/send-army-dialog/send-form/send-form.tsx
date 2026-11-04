@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -6,6 +6,7 @@ import {
   type CityBean,
   getArmiesQueryKey,
   getCitiesByCityIdQueryKey,
+  getMapTilesByTileIdOptions,
   getPlansQueryKey,
   postCitiesArmies,
   postCitiesArmiesEstimate,
@@ -13,6 +14,7 @@ import {
 } from '@marchlands/api-client';
 import {
   armyLoad,
+  BALANCE,
   BuffId,
   buildingLevel,
   BuildingType,
@@ -22,6 +24,7 @@ import {
   maxArmyTroops,
   Mission,
   reliefMarchMs,
+  tileXY,
   TROOP_KEYS,
   type TroopKey,
 } from '@marchlands/core';
@@ -32,10 +35,13 @@ import { NumberField } from '@/components/number-field/number-field';
 import { ResourceIcon } from '@/components/resource-icon/resource-icon';
 import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
 import { RES } from '@/components/send-army-dialog/send-form/constants';
+import { Destination } from '@/components/send-army-dialog/send-form/destination/destination';
+import { TileSummary } from '@/components/send-army-dialog/send-form/destination/tile-summary/tile-summary';
 import { LandAt } from '@/components/send-army-dialog/send-form/land-at/land-at';
 import { ScoutNote } from '@/components/send-army-dialog/send-form/scout-note/scout-note';
 import { capTroops, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
 import type { PlanSlot, SendTarget } from '@/components/send-army-dialog/types';
+import { tileTarget } from '@/components/send-army-dialog/utils';
 import { TroopBadge } from '@/components/troop-badge/troop-badge';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -43,31 +49,51 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCommand, usePlayer } from '@/hooks/use-game';
+import { useGameNav } from '@/hooks/use-game-nav';
 import { useNow } from '@/hooks/use-now';
 import { useServerNow } from '@/hooks/use-server-now';
+import { useSticky } from '@/hooks/use-sticky';
 import { duration, fmt, fmtExact, resourceLabel, utcClock } from '@/lib/format';
 import { typedAmounts } from '@/lib/forms';
 import { itemName, troopName } from '@/lib/game-data';
 import { landingTime } from '@/lib/landing-time';
 import { translateMessage } from '@/lib/messages';
+import { ViewId } from '@/lib/nav';
 import { textInRange } from '@/lib/ranges';
 import { clockOffset } from '@/lib/server-clock';
-import { ITEM_BONUS_TEXT, LOSS_TEXT } from '@/lib/tones';
+import { ITEM_BONUS_TEXT, LOSS_TEXT, WARN_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 /**
  * Send an army to the target. The dialog stays open after sending, so more waves can follow. With a `slot` (the Plans
- * panel) it adds a wave to that plan instead, from troops and heroes not already in the player's unsent waves.
+ * panel) it adds a wave to that plan instead, from troops and heroes not already in the player's unsent waves. The
+ * destination starts as the target and can be changed in the To field, but for a plan's wave, whose target is the plan's.
  */
-export function SendForm({ city, target, slot }: { city: CityBean; target: SendTarget; slot?: PlanSlot }) {
+export function SendForm({ city, target, slot, onClose }: { city: CityBean; target: SendTarget; slot?: PlanSlot; onClose: () => void }) {
   const { t } = useTranslation(['send-army-dialog', 'common']);
+  const nav = useGameNav();
+  const [toTile, setToTile] = useState(target.tileId);
+  // what's typed in the To field, until it becomes the destination
+  const [toText, setToText] = useState<string | null>(null);
+  const toInfo = useQuery({ ...getMapTilesByTileIdOptions({ path: { tileId: toTile } }), enabled: !slot });
+  // the place the army would go to, known once looked up; the form keeps showing the last while the next is on its way
+  const looked = toTile === target.tileId ? target : toInfo.data ? tileTarget(toInfo.data, city.fieldId) : null;
+  const dest = useSticky(looked) ?? target;
+  const toReady = looked != null && toText == null && dest.missions.length > 0;
   // a wave plan's other waves keep their heroes and troops until they're sent
   const heroes = slot ? city.heros.filter((h) => !slot.planned.heroIds.includes(h.id)) : city.heros;
   const free = slot ? freeTroops(city.troop, slot.planned.troops) : city.troop;
-  const [mission, setMission] = useState(String(target.mission ?? target.missions[0]));
+  const [wanted, setWanted] = useState(String(target.mission ?? target.missions[0]));
+  // the mission picked while the destination allows it, else its first; picked again when the destination allows it again
+  const mission = dest.missions.includes(Number(wanted)) ? wanted : String(dest.missions[0] ?? wanted);
   // an attack is led by the strongest idle hero (by Attack) unless the player picks one; other missions go without
   const [heroId, setHeroId] = useState(() => defaultHero(Number(mission), heroes));
   const [heroPicked, setHeroPicked] = useState(false);
+  const [seenMission, setSeenMission] = useState(mission);
+  if (mission !== seenMission) {
+    setSeenMission(mission);
+    if (!heroPicked) setHeroId(defaultHero(Number(mission), heroes));
+  }
   const [troops, setTroops] = useState<Partial<Record<TroopKey, string>>>(target.troops ?? {});
   // typing is never capped (more than are home shows as invalid), but after a wave, when the city has fewer, amounts
   // come down to what is left; by content, as the city refetches every tick with the same troops
@@ -102,8 +128,9 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
     Number(mission) === Mission.ATTACK ? (player.data?.buffs ?? []).filter((b) => (b.id === BuffId.ATTACK || b.id === BuffId.DEFENSE) && b.endTime > now) : [];
   const resourceBody = typedAmounts(resources);
   // the march as the server works it out (armyMarchMs): to the player's own city or valley a Relief Station shortens it
-  const rawMarchMs = chosen > 0 ? marchTimeMs(city.fieldId, target.tileId, troopBody, player.data?.research ?? {}, city.buildings) : null;
-  const marchMs = rawMarchMs != null && target.own ? reliefMarchMs(rawMarchMs, city.buildings) : rawMarchMs;
+  const rawMarchMs = chosen > 0 ? marchTimeMs(city.fieldId, dest.tileId, troopBody, player.data?.research ?? {}, city.buildings) : null;
+  const marchMs = rawMarchMs != null && dest.own ? reliefMarchMs(rawMarchMs, city.buildings) : rawMarchMs;
+  const destAt = tileXY(dest.tileId, player.data?.mapSizeX ?? BALANCE.mapSize);
   const path = { cityId: city.id };
   // carrying capacity of the chosen troops (troop load x Logistics), shared by every resource
   const capacity = armyLoad(troopBody, player.data?.research ?? {});
@@ -118,7 +145,7 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
 
   const estimate = useMutation({
     mutationFn: async () => {
-      const { data } = await postCitiesArmiesEstimate({ path, body: { targetTileId: target.tileId, troops: troopBody }, throwOnError: true });
+      const { data } = await postCitiesArmiesEstimate({ path, body: { targetTileId: toTile, troops: troopBody }, throwOnError: true });
       return data;
     },
   });
@@ -127,7 +154,7 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
       const { data } = await postCitiesArmies({
         path,
         body: {
-          targetTileId: target.tileId,
+          targetTileId: toTile,
           mission: Number(mission),
           troops: troopBody,
           resources: Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY ? resourceBody : undefined,
@@ -172,10 +199,33 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
         <DialogDescription>
           {slot
             ? t('form.planDescription', { from: city.name, to: target.name, time: utcClock(slot.landAt) })
-            : t('form.description', { from: city.name, to: target.name })}
+            : t('form.description', { from: city.name, to: `${dest.name} (${destAt.x},${destAt.y})` })}
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4">
+        {!slot && (
+          <Destination
+            city={city}
+            tileId={toTile}
+            text={toText}
+            onText={setToText}
+            onPick={(tileId) => {
+              setToTile(tileId);
+              setToText(null);
+              estimate.reset();
+            }}
+          >
+            <TileSummary
+              city={city}
+              tile={toInfo.data}
+              error={toInfo.error}
+              onShowOnMap={(x, y) => {
+                nav.go(ViewId.MAP, { at: { x, y } });
+                onClose();
+              }}
+            />
+          </Destination>
+        )}
         {slot && (
           <div className="grid gap-2">
             <Label>{t('form.from')}</Label>
@@ -197,24 +247,23 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
         <div className="grid grid-cols-2 gap-3">
           <div className="grid gap-2">
             <Label>{t('form.mission')}</Label>
-            <Select
-              value={mission}
-              onValueChange={(m) => {
-                setMission(m);
-                if (!heroPicked) setHeroId(defaultHero(Number(m), heroes));
-              }}
-            >
+            <Select value={mission} disabled={dest.missions.length === 0} onValueChange={setWanted}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {target.missions.map((m) => (
+                {dest.missions.map((m) => (
                   <SelectItem key={m} value={String(m)}>
                     {MISSION_NAMES[m]}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {mission !== wanted && (
+              <p className={cn('text-xs', WARN_TEXT)}>
+                {t('to.missionChanged', { wanted: MISSION_NAMES[Number(wanted)], mission: MISSION_NAMES[Number(mission)] })}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label>{t('form.hero')}</Label>
@@ -263,7 +312,7 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
             </p>
           ))}
           {!hasAny && <p className="text-sm text-muted-foreground">{scouting ? t('form.noScouts') : t('form.noTroops')}</p>}
-          {scouting && <ScoutNote kind={target.kind} />}
+          {scouting && <ScoutNote kind={dest.kind} />}
           {/* two to a row from lg (workers and warriors, then scouts and pikemen …), so the dialog needn't scroll */}
           <div className="grid gap-x-8 gap-y-2 lg:grid-cols-2">
             {listed.map(([id, key]) => {
@@ -376,7 +425,7 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
         )}
       </div>
       <DialogFooter>
-        <Button variant="outline" disabled={!Object.keys(troopBody).length} onClick={() => estimate.mutate()}>
+        <Button variant="outline" disabled={!Object.keys(troopBody).length || !toReady} onClick={() => estimate.mutate()}>
           {t('form.estimateButton')}
         </Button>
         {slot ? (
@@ -390,6 +439,7 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
           <Button
             disabled={
               !Object.keys(troopBody).length ||
+              !toReady ||
               over ||
               !troopsValid ||
               (carriesResources && overloaded) ||

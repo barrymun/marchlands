@@ -10,9 +10,16 @@ export function SendArmyDialog({ city, target, slot, onClose }: { city: CityBean
   const shown = useSticky(target);
   return (
     <Dialog open={target != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg lg:max-w-4xl">
+      <DialogContent
+        className="max-h-[85svh] overflow-y-auto sm:max-w-lg lg:max-w-4xl"
+        // the dialog itself takes the focus, not its first box: the To field would open its list and, on a phone, the keyboard
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          if (e.currentTarget instanceof HTMLElement) e.currentTarget.focus();
+        }}
+      >
         {/* a new city or target starts the form afresh (its hero and troops are that city's) */}
-        {shown && <SendForm key={`${shown.tileId}-${city.id}`} city={city} target={shown} slot={slot} />}
+        {shown && <SendForm key={`${shown.tileId}-${city.id}`} city={city} target={shown} slot={slot} onClose={onClose} />}
       </DialogContent>
     </Dialog>
   );
