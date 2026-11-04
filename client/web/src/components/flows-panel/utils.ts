@@ -18,6 +18,9 @@ export const hasHero = (c: Pick<CityBean, 'heros'>) => c.heros.some((h) => !h.se
 /** Whether a flow hires heroes: then "all cities" runs on every city, those without a hero too, like the server. */
 export const hiresHeroes = (actions: readonly Pick<FlowAction, 'type'>[]) => actions.some((a) => a.type === 'hireHeroes');
 
+/** Whether a flow is active: running, waiting between steps, or queued to go (again); anything but idle. */
+export const isActive = (f: Pick<Flow, 'status'>) => f.status !== 'idle';
+
 export const currentAction = (f: Flow) => (f.status === 'waiting' ? f.nextAction - 1 : f.status === 'running' ? f.nextAction : -1);
 
 /** Whether an action is ready to save: its numbers in range (ACTION_RANGES), an attack's army chosen. */
@@ -43,5 +46,5 @@ export const ago = (now: number, t: number) =>
 /** How many flows are not idle, and the soonest moment one carries on (a wait ending, a repeat starting), if any is ahead. */
 export function nextDue(flows: readonly Pick<Flow, 'status' | 'waitUntil' | 'notBefore'>[], now: number) {
   const ahead = flows.map((f) => (f.status === 'waiting' ? f.waitUntil : f.status === 'queued' ? f.notBefore : 0)).filter((at) => at > now);
-  return { active: flows.filter((f) => f.status !== 'idle').length, next: ahead.length ? Math.min(...ahead) : null };
+  return { active: flows.filter(isActive).length, next: ahead.length ? Math.min(...ahead) : null };
 }

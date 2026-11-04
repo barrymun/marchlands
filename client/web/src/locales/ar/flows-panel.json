@@ -12,7 +12,8 @@
     "actions_other": "{{count}} إجراء",
     "lastRun": "التشغيل {{run}} · {{ago}}",
     "lastRunFailed": "فشل التشغيل {{run}} · {{ago}}",
-    "neverRun": "لم يُشغَّل بعد"
+    "neverRun": "لم يُشغَّل بعد",
+    "active": "نشط"
   },
   "detail": {
     "deleteLabel": "حذف {{name}}",
@@ -28,9 +29,10 @@
   "toasts": {
     "deleted": "تم حذف التدفق"
   },
-  "citiesSummary": {
-    "all": "جميع المدن",
-    "none": "لا شيء من مدنك الحالية"
+  "cityChips": {
+    "all": "كل المدن",
+    "none": "لا شيء من مدنك الحالية",
+    "more": "+{{n}} أخرى"
   },
   "cityPicker": {
     "label": "المدن",

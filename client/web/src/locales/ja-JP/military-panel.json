@@ -105,7 +105,9 @@
     "timed": "訓練コスト −{{percent}}(補給係、残り{{time}}): 以下のコストに反映済みです。"
   },
   "trainEstimate": {
-    "instant": "即時(市長と軍事科学が十分に速いため)",
+    "instant": "即時",
+    "instantWhy": "市長と軍事科学が十分に速いため",
+    "instantQueued": "先行するバッチの完了を待ち、{{n}}ユニットが{{time}}後に完成",
     "perUnit": "1ユニットあたり{{time}}",
     "readyIn": "{{perUnit}} · {{n}}ユニットが{{time}}後に完成",
     "split": "{{perUnit}} · {{n}}ユニットが{{lanes}}つの兵舎({{shares}})で<b>{{time}}</b>後に完成(1つの兵舎なら{{single}})",

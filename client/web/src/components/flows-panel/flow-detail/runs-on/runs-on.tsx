@@ -1,7 +1,7 @@
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { CitiesSummary } from '@/components/flows-panel/cities-summary/cities-summary';
+import { CityChips } from '@/components/flows-panel/city-chips/city-chips';
 import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
 import type { Targets } from '@/components/flows-panel/types';
 import { Button } from '@/components/ui/button';
@@ -29,9 +29,9 @@ export function RunsOn({
   const { t } = useTranslation('flows-panel');
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-      <span className="flex min-w-0 items-center gap-1.5">
+      <span className="flex min-w-0 flex-wrap items-center gap-1.5">
         <span className="text-muted-foreground">{t('detail.runsOn')}</span>
-        <CitiesSummary targets={targets} />
+        <CityChips targets={targets} currentCityId={currentCityId} />
         <Popover>
           <PopoverTrigger asChild>
             <Button size="icon-xs" variant="ghost" aria-label={t('detail.changeCities')} title={t('detail.changeCities')}>

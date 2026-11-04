@@ -29,6 +29,7 @@ import {
 import { MISSION_NAMES } from '@/components/armies-panel/constants';
 import { Countdown } from '@/components/countdown/countdown';
 import { NumberField } from '@/components/number-field/number-field';
+import { ResourceIcon } from '@/components/resource-icon/resource-icon';
 import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
 import { RES } from '@/components/send-army-dialog/send-form/constants';
 import { LandAt } from '@/components/send-army-dialog/send-form/land-at/land-at';
@@ -319,8 +320,12 @@ export function SendForm({ city, target, slot }: { city: CityBean; target: SendT
             <div className="grid gap-x-8 gap-y-2 lg:grid-cols-2">
               {RES.map((r) => (
                 <div key={r} className="flex items-center justify-between gap-2 text-sm">
-                  <span className="capitalize">
-                    {resourceLabel(r)} <span className="text-muted-foreground">({fmtExact(inCity(r))})</span>
+                  <span className="flex items-center gap-2">
+                    {/* the margin makes up the width of a troop's badge, so the names line up with the troops' above */}
+                    <ResourceIcon resource={r} className="mx-1" />
+                    <span className="capitalize">
+                      {resourceLabel(r)} <span className="text-muted-foreground">({fmtExact(inCity(r))})</span>
+                    </span>
                   </span>
                   <div className="flex items-center gap-1">
                     <Input

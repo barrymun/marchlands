@@ -2,9 +2,10 @@
 //
 //   hero attributes        politics green, attack red, intelligence blue (ATTRIBUTE_TONE, hero-attributes.ts)
 //   running item bonuses   purple (ITEM_BONUS_*)
-//   gains, success         green text, never a badge (GAIN_TEXT): +production, market buys, ✓ steps
+//   gains, success         green text, never a badge (GAIN_TEXT): +production, market buys, ✓ steps, instant training
 //   losses, errors         red (LOSS_TEXT): negative rates, failed or rolled-back steps
 //   needs attention        amber (WARN_TEXT): no mayor, storage full, skipped steps
+//   live right now         a green dot (LIVE_DOT, with LIVE_EDGE on its row): a flow that is active, as the top bar's connection dot
 //   status, finished, info neutral with an icon (STATUS_DONE): max level reached, all research complete
 //   a hero at max level    gold with a trophy (MAX_LEVEL_TEXT, HeroLevel): the milestone of the hero's level itself
 //   a held historic city   its flags' colour by level, a solid HC badge with a castle, never plain text (HISTORIC_TONE, HistoricBadge)
@@ -26,6 +27,12 @@ export const LOSS_TEXT = 'text-destructive';
 
 /** Something that needs the player's attention, as text. */
 export const WARN_TEXT = 'text-amber-700 dark:text-amber-400';
+
+/** Something live right now, as a dot. */
+export const LIVE_DOT = 'bg-emerald-500';
+
+/** The edge of a row that is live right now. */
+export const LIVE_EDGE = 'border-s-emerald-500';
 
 /** A hero's level at the maximum (BALANCE.heroMaxLevel), shown with a trophy by HeroLevel. */
 export const MAX_LEVEL_TEXT = 'text-yellow-700 dark:text-yellow-300';

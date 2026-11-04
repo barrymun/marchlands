@@ -366,6 +366,7 @@ The server never sends or stores English for players. Everything it tells a play
   | Gains | green text, `GAIN_TEXT` |
   | Losses and errors | red, `LOSS_TEXT` |
   | Needs attention | amber, `WARN_TEXT` |
+  | Live right now (an active flow) | a green dot, `LIVE_DOT`, and `LIVE_EDGE` on its row |
   | Status | neutral, `STATUS_DONE` |
   | A hero at the maximum level | gold with a trophy, `MAX_LEVEL_TEXT` (`HeroLevel`, `components/hero-level/`) |
   | A held historic city, by level | its flags' colour (red, dark green, blue, gold), a solid HC badge with a castle, `HISTORIC_TONE` (`HistoricBadge`, `routes/game/historic-badge/`) |

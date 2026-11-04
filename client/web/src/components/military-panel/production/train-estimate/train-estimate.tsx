@@ -2,6 +2,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { BALANCE, getGameSpeed, splitTraining } from '@marchlands/core';
 
+import { InstantNote } from '@/components/military-panel/production/train-estimate/instant-note/instant-note';
 import type { Queue } from '@/components/military-panel/production/train-estimate/types';
 import { useNow } from '@/hooks/use-now';
 import { duration, fmtDecimal, fmtExact } from '@/lib/format';
@@ -33,16 +34,14 @@ export function TrainEstimate({
     const head = Math.max(now, first.endTime || now + first.costTime * 1000);
     return head + rest.reduce((t, b) => t + b.costTime * 1000, 0);
   };
-  const perUnit =
-    unitMs <= 0
-      ? t('trainEstimate.instant')
-      : t('trainEstimate.perUnit', {
-          time: unitMs < 10_000 ? t('common:units.seconds', { value: fmtDecimal(unitMs / 1000, 2) }) : duration(unitMs),
-        });
-  const each = <span className="text-xs text-muted-foreground">{perUnit}</span>;
-  if (count <= 0 || fort) return each;
+  const instant = unitMs <= 0;
+  const perUnit = t('trainEstimate.perUnit', {
+    time: unitMs < 10_000 ? t('common:units.seconds', { value: fmtDecimal(unitMs / 1000, 2) }) : duration(unitMs),
+  });
+  if (count <= 0 || fort) return instant ? <InstantNote count={count} waitMs={0} /> : <span className="text-xs text-muted-foreground">{perUnit}</span>;
   const single = freeAt(queues.find((q) => q.positionId === pos)) + count * unitMs - now;
   if (!splitting) {
+    if (instant) return <InstantNote count={count} waitMs={single} />;
     return <span className="text-xs text-muted-foreground">{t('trainEstimate.readyIn', { perUnit, n: fmtExact(count), time: duration(single) })}</span>;
   }
   const lanes = barracks
@@ -51,6 +50,7 @@ export function TrainEstimate({
   const plan = splitTraining(lanes, count, unitMs);
   if (!plan.length) return <span className="text-xs text-destructive">{t('trainEstimate.queuesFull')}</span>;
   const finish = Math.max(...plan.map((p) => p.finishAt)) - now;
+  if (instant) return <InstantNote count={count} waitMs={finish} />;
   return (
     <span className="text-xs text-muted-foreground">
       <Trans

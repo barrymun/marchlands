@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { Flow } from '@marchlands/api-client';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
+import { ActiveDot } from '@/components/flows-panel/active-dot/active-dot';
 import { useFlowControls } from '@/components/flows-panel/flow-detail/hooks';
 import { LastPreview } from '@/components/flows-panel/flow-detail/last-preview/last-preview';
 import { LastRun } from '@/components/flows-panel/flow-detail/last-run/last-run';
@@ -51,7 +52,10 @@ export function FlowDetail({
       <Card>
         <CardHeader className="flex flex-wrap items-start justify-between gap-3">
           <div className="grid min-w-0 gap-1">
-            <CardTitle className="truncate text-base">{flow.name}</CardTitle>
+            <CardTitle className="flex min-w-0 items-center gap-2 text-base">
+              {!idle && <ActiveDot />}
+              <span className="truncate">{flow.name}</span>
+            </CardTitle>
             <StatusLine flow={flow} />
           </div>
           <div className="flex flex-wrap items-center gap-1.5">

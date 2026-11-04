@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
 import { FLOW_MAX_HIRES, FLOW_MAX_WAIT_MINUTES, FLOW_TROOP_IDS, HERO_BASE_STAT_MAX } from '@marchlands/core';
 
-import { actionValid, ago, currentAction, hasHero, hiresHeroes, keyed, nextDue, strip } from '@/components/flows-panel/utils';
+import { actionValid, ago, currentAction, hasHero, hiresHeroes, isActive, keyed, nextDue, strip } from '@/components/flows-panel/utils';
 
 const ACTIONS: FlowAction[] = [
   { type: 'setMayor', stat: 'management' },
@@ -192,5 +192,17 @@ describe(nextDue.name, () => {
 
   it('leaves out times already past', () => {
     expect(nextDue([flow('waiting', { waitUntil: NOW - 1 })], NOW)).toEqual({ active: 1, next: null });
+  });
+});
+
+describe(isActive.name, () => {
+  it('is true for a flow running, waiting or queued', () => {
+    expect(isActive({ status: 'running' })).toBe(true);
+    expect(isActive({ status: 'waiting' })).toBe(true);
+    expect(isActive({ status: 'queued' })).toBe(true);
+  });
+
+  it('is false for an idle flow', () => {
+    expect(isActive({ status: 'idle' })).toBe(false);
   });
 });

@@ -8,7 +8,8 @@
     "actions_other": "{{count}} actions",
     "lastRun": "Run {{run}} · {{ago}}",
     "lastRunFailed": "Run {{run}} failed · {{ago}}",
-    "neverRun": "Never run"
+    "neverRun": "Never run",
+    "active": "Active"
   },
   "detail": {
     "deleteLabel": "Delete {{name}}",
@@ -24,9 +25,10 @@
   "toasts": {
     "deleted": "Flow deleted"
   },
-  "citiesSummary": {
-    "all": "all cities",
-    "none": "none of your current cities"
+  "cityChips": {
+    "all": "All cities",
+    "none": "none of your current cities",
+    "more": "+{{n}} more"
   },
   "cityPicker": {
     "label": "Cities",

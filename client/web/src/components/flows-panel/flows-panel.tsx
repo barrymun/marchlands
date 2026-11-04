@@ -98,7 +98,7 @@ export function FlowsPanel({ city }: { city: CityBean }) {
         <Skeleton className="h-64" />
       ) : (
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-          <FlowList flows={list} selectedId={editing ? null : (selected?.id ?? null)} onSelect={choose} />
+          <FlowList flows={list} selectedId={editing ? null : (selected?.id ?? null)} currentCityId={city.id} onSelect={choose} />
           <div ref={detail} className="min-w-0 scroll-mt-4">
             {editing ? (
               <FlowEditor

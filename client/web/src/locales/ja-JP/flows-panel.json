@@ -7,7 +7,8 @@
     "actions_other": "{{count}}アクション",
     "lastRun": "実行 {{run}} · {{ago}}",
     "lastRunFailed": "実行 {{run}} 失敗 · {{ago}}",
-    "neverRun": "未実行"
+    "neverRun": "未実行",
+    "active": "稼働中"
   },
   "detail": {
     "deleteLabel": "{{name}}を削除",
@@ -23,9 +24,10 @@
   "toasts": {
     "deleted": "フローを削除しました"
   },
-  "citiesSummary": {
-    "all": "全都市",
-    "none": "現在の都市はありません"
+  "cityChips": {
+    "all": "すべての都市",
+    "none": "現在の都市はありません",
+    "more": "他 {{n}}"
   },
   "cityPicker": {
     "label": "都市",

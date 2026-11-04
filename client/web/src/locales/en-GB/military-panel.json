@@ -113,7 +113,9 @@
     "timed": "Training cost −{{percent}} (Quartermaster) for {{time}}: the costs below include it."
   },
   "trainEstimate": {
-    "instant": "instant (mayor and Military Science fast enough)",
+    "instant": "Instant",
+    "instantWhy": "Mayor and Military Science are fast enough",
+    "instantQueued": "{{n}} ready in {{time}}, after the batches ahead of them",
     "perUnit": "{{time}} per unit",
     "readyIn": "{{perUnit}} · {{n}} ready in {{time}}",
     "split": "{{perUnit}} · {{n}} ready in <b>{{time}}</b> across {{lanes}} barracks ({{shares}}) instead of {{single}} in one",
