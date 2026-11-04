@@ -14,7 +14,7 @@ import { PlayerSummary } from '@/routes/game/player-summary/player-summary';
 import { TroopsHome } from '@/routes/game/troops-home/troops-home';
 
 /** The phone menu, from the bottom: every panel and page, then what the desktop sidebar shows (cities, troops at home). */
-export function MenuSheet({ city, open, onClose }: { city?: CityBean; open: boolean; onClose: () => void }) {
+export function MenuSheet({ city, open, onClose, onSend }: { city?: CityBean; open: boolean; onClose: () => void; onSend: (cityId: number) => void }) {
   const { t } = useTranslation('game');
   const nav = useGameNav();
   const unread = useUnreadReports().data?.count ?? 0;
@@ -55,7 +55,14 @@ export function MenuSheet({ city, open, onClose }: { city?: CityBean; open: bool
             ))}
           </div>
           <Separator />
-          <CityList city={city} onPick={onClose} />
+          <CityList
+            city={city}
+            onPick={onClose}
+            onSend={(cityId) => {
+              onClose();
+              onSend(cityId);
+            }}
+          />
           {city && (
             <>
               <Separator />

@@ -8,16 +8,28 @@ import { LordDialog } from '@/components/lord-dialog/lord-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
 import { useGameNav } from '@/hooks/use-game-nav';
+import { useSticky } from '@/hooks/use-sticky';
 import { errorMessage } from '@/lib/api';
 import { legacyTarget, PageId, screenHref, VIEW_IDS, ViewId } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 import { BottomBar } from '@/routes/game/bottom-bar/bottom-bar';
-import { FlowsPanel, FULL_WIDTH_PAGES, HeroesPanel, MapPanel, MarketPanel, PAGE_WIDTH, ReportsPanel, StatsPanel } from '@/routes/game/constants';
+import {
+  FlowsPanel,
+  FULL_WIDTH_PAGES,
+  HeroesPanel,
+  MapPanel,
+  MarketPanel,
+  PAGE_WIDTH,
+  ReportsPanel,
+  SendArmyDialog,
+  StatsPanel,
+} from '@/routes/game/constants';
 import { usePreloadPanels } from '@/routes/game/hooks';
 import { PanelSheet } from '@/routes/game/panel-sheet/panel-sheet';
 import { SideBar } from '@/routes/game/side-bar/side-bar';
 import { TabBar } from '@/routes/game/tab-bar/tab-bar';
 import { TopBar } from '@/routes/game/top-bar/top-bar';
+import { ownCityTarget } from '@/routes/game/utils';
 
 /**
  * The game, laid out like the original but for any screen: a top bar (the city, the Town · Fields · Map switch, the
@@ -32,6 +44,11 @@ export function GamePage() {
   const city = useCity(nav.cityId);
   const status = usePushSync(true);
   const [dialog, setDialog] = useState<'lord' | 'city' | null>(null);
+  // the city the city list's button is sending an army to, from any screen; the dialog stays mounted once opened, for its
+  // close animation
+  const [sendTo, setSendTo] = useState<number | null>(null);
+  const sendCity = player.data?.castles.find((c) => c.id === sendTo);
+  const sendOpened = useSticky(sendCity) != null;
   usePreloadPanels();
 
   // an address naming no view or page (the city's own, or one from before the views) goes where it now lives
@@ -79,10 +96,10 @@ export function GamePage() {
             )}
           </div>
         </main>
-        {city.data && <SideBar city={city.data} />}
+        {city.data && <SideBar city={city.data} onSend={setSendTo} />}
       </div>
       <BottomBar />
-      <TabBar city={city.data} />
+      <TabBar city={city.data} onSend={setSendTo} />
       {city.data && (
         <>
           <PanelSheet city={city.data} />
@@ -90,6 +107,11 @@ export function GamePage() {
             <ActivityDock city={city.data} variant="floating" />
           </div>
           <CityDialog city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />
+          {sendOpened && (
+            <Suspense fallback={null}>
+              <SendArmyDialog city={city.data} target={sendCity ? ownCityTarget(sendCity) : null} onClose={() => setSendTo(null)} />
+            </Suspense>
+          )}
         </>
       )}
       <LordDialog open={dialog === 'lord'} onClose={() => setDialog(null)} city={city.data} />

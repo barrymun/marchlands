@@ -83,6 +83,9 @@
     "row": "{{type}} Lv {{level}}",
     "bonus": "{{resource}} +{{bonus}}"
   },
+  "cities": {
+    "title": "自分の他の都市"
+  },
   "farms": {
     "title": "略奪リスト",
     "cityHere": "{{city}}（この都市）",

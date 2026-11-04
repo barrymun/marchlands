@@ -27,6 +27,7 @@
   },
   "cityFallback": "مدينة",
   "yourCities": "مدنك",
+  "sendTo": "إرسال جيش إلى {{city}}",
   "citySettings": "إعدادات المدينة",
   "playerStats": "الهيبة {{prestige}} · الترتيب {{rank}} · الشرف {{honor}}",
   "beginnerProtection": "حماية المبتدئين",

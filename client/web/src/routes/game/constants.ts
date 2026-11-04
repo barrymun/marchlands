@@ -72,6 +72,7 @@ export const ReportsPanel = lazyComponent(() => import('@/components/reports-pan
 export const FlowsPanel = lazyComponent(() => import('@/components/flows-panel/flows-panel').then((m) => m.FlowsPanel));
 export const StatsPanel = lazyComponent(() => import('@/components/stats-panel/stats-panel').then((m) => m.StatsPanel));
 export const MapPanel = lazyComponent(() => import('@/components/map-panel/map-panel').then((m) => m.MapPanel));
+export const SendArmyDialog = lazyComponent(() => import('@/components/send-army-dialog/send-army-dialog').then((m) => m.SendArmyDialog));
 
 export const LAZY_PANELS = [
   MilitaryPanel,
@@ -86,5 +87,6 @@ export const LAZY_PANELS = [
   FlowsPanel,
   StatsPanel,
   MapPanel,
+  SendArmyDialog,
   MayorPicker,
 ];

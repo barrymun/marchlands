@@ -27,6 +27,7 @@
   },
   "cityFallback": "City",
   "yourCities": "Your cities",
+  "sendTo": "Send army to {{city}}",
   "citySettings": "City settings",
   "playerStats": "Prestige {{prestige}} · Rank {{rank}} · Honour {{honor}}",
   "beginnerProtection": "Beginner protection",

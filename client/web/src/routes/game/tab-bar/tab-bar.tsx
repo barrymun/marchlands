@@ -11,7 +11,7 @@ import { NavButton } from '@/routes/game/nav-button/nav-button';
 import { MenuSheet } from '@/routes/game/tab-bar/menu-sheet/menu-sheet';
 
 /** The phone and tablet tab bar: the three views, and Menu for everything else (the sidebar's contents too). */
-export function TabBar({ city }: { city?: CityBean }) {
+export function TabBar({ city, onSend }: { city?: CityBean; onSend: (cityId: number) => void }) {
   const { t } = useTranslation('game');
   const nav = useGameNav();
   const [menu, setMenu] = useState(false);
@@ -27,7 +27,7 @@ export function TabBar({ city }: { city?: CityBean }) {
         ))}
         <NavButton icon={Menu} label={t('menu')} active={menu} count={unread} onClick={() => setMenu(true)} className="flex-1" />
       </nav>
-      <MenuSheet city={city} open={menu} onClose={() => setMenu(false)} />
+      <MenuSheet city={city} open={menu} onClose={() => setMenu(false)} onSend={onSend} />
     </>
   );
 }

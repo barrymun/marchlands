@@ -83,6 +83,9 @@
     "row": "{{type}} Lv {{level}}",
     "bonus": "+{{bonus}} {{resource}}"
   },
+  "cities": {
+    "title": "Your other cities"
+  },
   "farms": {
     "title": "Farming lists",
     "cityHere": "{{city}} (this city)",

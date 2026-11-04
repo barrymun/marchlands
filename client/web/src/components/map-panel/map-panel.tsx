@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Crosshair, Info, MapPin, Swords } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Castle, Crosshair, Info, MapPin, Swords } from 'lucide-react';
 import { useEffect, useEffectEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -23,6 +23,7 @@ import { FarmTargets } from '@/components/map-panel/farm-targets/farm-targets';
 import { GoToCoords } from '@/components/map-panel/go-to-coords/go-to-coords';
 import { HeldValleys } from '@/components/map-panel/held-valleys/held-valleys';
 import { MapLegend } from '@/components/map-panel/map-legend/map-legend';
+import { OtherCities } from '@/components/map-panel/other-cities/other-cities';
 import { TileCard } from '@/components/map-panel/tile-card/tile-card';
 import { farmedTiles, farmLists, readFactionTint, saveFactionTint, wrap } from '@/components/map-panel/utils';
 import { PAN_STEP } from '@/components/map-panel/world-map/constants';
@@ -42,9 +43,9 @@ import { cn } from '@/lib/utils';
 
 /**
  * The world map filling the viewport, everything else floating over it: a toolbar (where the map is, which opens a box
- * to go to any coordinates, the arrows, back to the city, this city's valleys, the farming lists, the key), the selected
- * tile's card, and the valleys, the farming lists or the key when asked for. On a phone the tile's card and the lists share the top of the map, one at a
- * time.
+ * to go to any coordinates, the arrows, back to the city, the player's other cities, this city's valleys, the farming
+ * lists, the key), the selected tile's card, and the other cities, the valleys, the farming lists or the key when asked
+ * for. On a phone the tile's card and the lists share the top of the map, one at a time.
  */
 export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number }) {
   const { t } = useTranslation(['map-panel', 'common']);
@@ -53,7 +54,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const at = search.at && { x: wrap(search.at.x, mapSize), y: wrap(search.at.y, mapSize) };
   const [selected, setSelected] = useState<number | null>(() => (at ? at.y * mapSize + at.x : null));
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
-  const [list, setList] = useState<'valleys' | 'farms' | 'legend' | null>(null);
+  const [list, setList] = useState<'cities' | 'valleys' | 'farms' | 'legend' | null>(null);
   const [factions, setFactions] = useState(readFactionTint);
   const [target, setTarget] = useState<SendTarget | null>(null);
   const [moveTo, setMoveTo] = useState<{ x: number; y: number } | null>(null);
@@ -107,6 +108,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const farms = farmLists(flows.data ?? [], player.data?.castles ?? [], city.id);
   const farmed = farmedTiles(farms);
   const farmedHere = farms.find((l) => l.here)?.targets.length ?? 0;
+  const otherCities = (player.data?.castles ?? []).filter((c) => c.id !== city.id);
   const release = useCommand(
     deleteValleysByTileIdMutation(),
     () => [
@@ -150,7 +152,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     const { dx, dy } = panStep(dir, PAN_STEP);
     vp.panBy(dx, dy);
   };
-  const toggle = (which: 'valleys' | 'farms' | 'legend') => setList((l) => (l === which ? null : which));
+  const toggle = (which: 'cities' | 'valleys' | 'farms' | 'legend') => setList((l) => (l === which ? null : which));
   const tintFactions = (on: boolean) => {
     setFactions(on);
     saveFactionTint(on);
@@ -192,6 +194,19 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           <Crosshair />
         </Button>
         <span className="mx-0.5 h-5 w-px bg-border" />
+        {otherCities.length > 0 && (
+          <Button
+            size="xs"
+            variant={list === 'cities' ? 'secondary' : 'ghost'}
+            aria-pressed={list === 'cities'}
+            onClick={() => toggle('cities')}
+            className="gap-1"
+          >
+            <Castle />
+            <span className="tabular-nums">{otherCities.length}</span>
+            <span className="sr-only">{t('cities.title')}</span>
+          </Button>
+        )}
         <Button
           size="xs"
           variant={list === 'valleys' ? 'secondary' : 'ghost'}
@@ -218,6 +233,15 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           <Info />
         </Button>
       </div>
+      {list === 'cities' && (
+        <OtherCities
+          cities={otherCities}
+          fromTileId={city.fieldId}
+          mapSize={mapSize}
+          onGoTo={goTo}
+          className={cn(floating, 'top-14 start-2 w-[min(24rem,calc(100%-1rem))]')}
+        />
+      )}
       {list === 'valleys' && (
         <HeldValleys
           city={city}

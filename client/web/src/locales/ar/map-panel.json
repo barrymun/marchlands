@@ -83,6 +83,9 @@
     "row": "{{type}} مستوى {{level}}",
     "bonus": "+{{bonus}} {{resource}}"
   },
+  "cities": {
+    "title": "مدنك الأخرى"
+  },
   "farms": {
     "title": "قوائم الإغارة",
     "cityHere": "{{city}} (هذه المدينة)",
