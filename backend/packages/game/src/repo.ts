@@ -4,7 +4,7 @@
 
 import { and, asc, eq, sql } from 'drizzle-orm';
 
-import { GameError, HeroStatus, type LordGear, lordGear, msg, syncHeroBuffs, syncHeroGear } from '@marchlands/core';
+import { GameError, type LordGear, lordGear, msg, syncHeroBuffs, syncHeroGear } from '@marchlands/core';
 import { armies, cities, heroes, players, tiles } from '@marchlands/db';
 
 import type { Ctx } from '#/context.ts';
@@ -98,9 +98,9 @@ export async function getHero(ctx: Ctx, id: number, opts: Opts = {}): Promise<He
   if (!row) throw new GameError(msg('common.heroNotFound'), -99, 404);
   return row;
 }
-/** The gear a hero wears: its lord's (gear.ts); none in a tavern or while held captive. */
-export async function gearOfHero(ctx: Ctx, h: Pick<HeroRow, 'playerId' | 'inTavern' | 'status'>): Promise<LordGear | null> {
-  if (h.playerId == null || h.inTavern || h.status === HeroStatus.SEIZED) return null;
+/** The gear a hero wears: its lord's (gear.ts); none in a tavern. */
+export async function gearOfHero(ctx: Ctx, h: Pick<HeroRow, 'playerId' | 'inTavern'>): Promise<LordGear | null> {
+  if (h.playerId == null || h.inTavern) return null;
   const [p] = await ctx.tx.select({ research: players.research, misc: players.misc }).from(players).where(eq(players.id, h.playerId));
   return p ? lordGear(p) : null;
 }

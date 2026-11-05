@@ -9,7 +9,7 @@ The guides' strategies, run through the battle simulator, are in [battle-sims/ol
 ## Fixed
 
 - **Percentage speed-ups were scaled by the game speed twice.** Ultimate Guidelines (30%) and the 50% speed-up cut a share of a construction's or research's whole time, which is stored in real time, and the cut was then scaled by `GAME_SPEED` again: at speed 60 they took 0.5% off, not 30%. Now `speedupCut` (`shared/core/src/construction.ts`) scales only the fixed cuts (15 minutes, 1 hour …), which are game time. The tests ran at speed 1, where the two agree; a core test now runs at 60.
-- **A captured hero kept its loyalty,** so its captor could persuade it only if it had been captured at loyalty 0. The original sets a captive's loyalty to 0 (`spec/battle.md`, hero capture); so does `armyWiped` now (`engine/combat.ts`).
+- **A captured hero kept its loyalty,** so its captor could persuade it only if it had been captured at loyalty 0. The original sets a captive's loyalty to 0 (`spec/battle.md`, hero capture); so did `armyWiped` (`engine/combat.ts`), until heroes stopped being taken prisoner at all (2026-11-05, deviations.md).
 - **Heroes stationed in a city didn't defend it against scouts,** though they do against attacks; the original takes the strongest of the city's heroes and the stationed ones for both (`spec/battle.md`). The scout battle now does too.
 - A misplaced comment on `BALANCE.maxRestTimeMs`, which described the Relief Station.
 

@@ -41,16 +41,6 @@ import { addHero, createTestPlayer, giveItems, reloadCity, reloadPlayer, setRese
 import { game, type TestGame } from '#test/support/game.ts';
 import { heroBuildings, lastHeroPush, patchHero, patchPlayer, pushedHeroes } from '#test/support/heroes.ts';
 
-/** Hero `heroId` of `owner` is held captive in `captor`'s city, as combat leaves it. */
-const capture = (g: TestGame, heroId: number, owner: TestPlayer, captor: TestPlayer, loyalty = 70) =>
-  patchHero(g, heroId, {
-    cityId: captor.cityId,
-    status: HeroStatus.SEIZED,
-    capturedByPlayerId: captor.id,
-    loyalty,
-    buffs: [{ id: HeroBuffId.HOME_CITY, desc: msg('buff.homeCity'), endTime: Number.MAX_SAFE_INTEGER, param: owner.cityId }],
-  });
-
 const gold = async (g: TestGame, p: TestPlayer) => (await reloadCity(g, p.cityId)).gold;
 
 describe(heroes.listHeroes.name, () => {
@@ -693,80 +683,5 @@ describe(heroes.renameHero.name, () => {
       await expectRefused(heroes.renameHero(g, a.id, id, 'Bob<b>'), msg('common.nameInvalid', { what }));
       await expectRefused(heroes.renameHero(g, a.id, id, 'Shithead'), msg('common.nameNotAllowed'));
       await expectRefused(heroes.renameHero(g, b.id, id, 'Robin'), msg('common.heroNotFound'));
-    }));
-});
-
-describe(heroes.releaseCaptive.name, () => {
-  it('sends the hero home idle with loyalty 70', () =>
-    game(async (g) => {
-      const owner = await createTestPlayer(g);
-      const captor = await createTestPlayer(g);
-      const id = await addHero(g, owner);
-      await capture(g, id, owner, captor, 10);
-      await heroes.releaseCaptive(g, captor.id, id);
-      expect(await getHero(g, id)).toMatchObject({
-        cityId: owner.cityId,
-        playerId: owner.id,
-        status: HeroStatus.IDLE,
-        capturedByPlayerId: null,
-        loyalty: 70,
-        buffs: [],
-      });
-      const [toCaptor, toOwner] = g.pushes(PushCmd.HERO_UPDATE).slice(-2);
-      expect(toCaptor).toMatchObject({ playerIds: [captor.id], data: { castleId: captor.cityId, hero: { id }, updateType: 1 } });
-      expect(toOwner).toMatchObject({ playerIds: [owner.id], data: { castleId: owner.cityId, hero: { id }, updateType: 0 } });
-    }));
-
-  it('a hero with no home city of its lord left is dismissed', () =>
-    game(async (g) => {
-      const owner = await createTestPlayer(g);
-      const captor = await createTestPlayer(g);
-      const id = await addHero(g, owner);
-      await capture(g, id, owner, captor);
-      await patchHero(g, id, { buffs: [{ id: HeroBuffId.HOME_CITY, desc: msg('buff.homeCity'), endTime: Number.MAX_SAFE_INTEGER, param: captor.cityId }] });
-      await heroes.releaseCaptive(g, captor.id, id);
-      await expectRefused(getHero(g, id), msg('common.heroNotFound'));
-      expect(lastHeroPush(g)).toMatchObject({ playerIds: [captor.id], data: { hero: { id }, updateType: 1 } });
-    }));
-
-  it('refuses a hero that is not your prisoner', () =>
-    game(async (g) => {
-      const owner = await createTestPlayer(g);
-      const captor = await createTestPlayer(g);
-      const id = await addHero(g, owner);
-      await expectRefused(heroes.releaseCaptive(g, captor.id, id), msg('hero.notPrisoner'));
-      await capture(g, id, owner, captor);
-      await expectRefused(heroes.releaseCaptive(g, owner.id, id), msg('hero.notPrisoner'));
-    }));
-});
-
-describe(heroes.persuadeCaptive.name, () => {
-  it('a captive with no loyalty left joins the captor', () =>
-    game(async (g) => {
-      const owner = await createTestPlayer(g);
-      const captor = await createTestPlayer(g);
-      await heroBuildings(g, captor, 1, 1);
-      const id = await addHero(g, owner);
-      await capture(g, id, owner, captor, 0);
-      const bean = await heroes.persuadeCaptive(g, captor.id, id);
-      expect(bean).toMatchObject({ id, status: HeroStatus.IDLE, loyalty: 50, seized: false, buffs: [] });
-      expect(await getHero(g, id)).toMatchObject({ playerId: captor.id, cityId: captor.cityId, capturedByPlayerId: null });
-      const [toOwner, toCaptor] = g.pushes(PushCmd.HERO_UPDATE).slice(-2);
-      expect(toOwner).toMatchObject({ playerIds: [owner.id], data: { hero: { id }, updateType: 1 } });
-      expect(toCaptor).toMatchObject({ playerIds: [captor.id], data: { hero: { id }, updateType: 0 } });
-    }));
-
-  it('refuses a loyal captive, a full Feasting Hall and a hero that is not your prisoner', () =>
-    game(async (g) => {
-      const owner = await createTestPlayer(g);
-      const captor = await createTestPlayer(g);
-      await heroBuildings(g, captor, 1, 1);
-      const id = await addHero(g, owner);
-      await expectRefused(heroes.persuadeCaptive(g, captor.id, id), msg('hero.notPrisoner'));
-      await capture(g, id, owner, captor, 1);
-      await expectRefused(heroes.persuadeCaptive(g, captor.id, id), msg('hero.stillLoyal'));
-      await patchHero(g, id, { loyalty: 0 });
-      await addHero(g, captor);
-      await expectRefused(heroes.persuadeCaptive(g, captor.id, id), msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }));
     }));
 });

@@ -10,7 +10,6 @@ import {
   BuffId,
   BuildingType,
   FortType,
-  HeroBuffId,
   HeroStatus,
   injuredOf,
   ItemId,
@@ -146,10 +145,10 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       expect((await reloadCity(g, p.cityId)).troops.lightCavalry ?? 0).toBe(0);
       expect((await reloadCity(g, q.cityId)).troops).toEqual(b.defender.troops.after);
       expect((await reloadPlayer(g, q)).honor).toBe(b.defender.honor);
-      await expectWipedHero(g, heroId, loyalty, p, q);
+      await expectWipedHero(g, heroId, loyalty, p);
     }));
 
-  it('heroes of wiped armies may be captured by a city with a free Feasting Hall slot', () =>
+  it('the hero of a wiped army always goes home, even with a free Feasting Hall slot there', () =>
     game(async (g) => {
       const { p } = await warrior(g, { lightCavalry: 100 });
       const { p: q } = await warrior(g, { archer: 50_000 });
@@ -161,33 +160,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
         sent.push({ heroId, loyalty: (await getHero(g, heroId)).loyalty, armyId });
       }
       await arrive(g, sent[0]!.armyId);
-      const heroes = [];
-      for (const s of sent) heroes.push(await expectWipedHero(g, s.heroId, s.loyalty, p, q));
-      const captured = heroes.filter((h) => h.status === HeroStatus.SEIZED);
-      expect(captured.length).toBeGreaterThan(0);
-      // q had one hero and 5 slots
-      expect(captured.length).toBeLessThanOrEqual(4);
-      for (const h of captured) {
-        expect(h).toMatchObject({ powerBuffAdded: 0, managementBuffAdded: 0, stratagemBuffAdded: 0 });
-        expect(h.buffs).toEqual([expect.objectContaining({ id: HeroBuffId.HOME_CITY, param: p.cityId })]);
-        expect(g.pushes(PushCmd.HERO_UPDATE).some((x) => x.playerIds.includes(p.id) && (x.data as { updateType: number }).updateType === 1)).toBe(true);
-      }
-    }));
-
-  it('no hero is captured without a free Feasting Hall slot', () =>
-    game(async (g) => {
-      const { p } = await warrior(g, { lightCavalry: 100 });
-      const { p: q } = await warrior(g, { archer: 50_000 }, { feastingHall: 0 });
-      await setBuildings(g, q, [[1, BuildingType.FEASTING_HALL, 0]]);
-      const target = await cityTile(g, q.cityId);
-      const sent: { heroId: number; loyalty: number; armyId: number }[] = [];
-      for (let i = 0; i < 10; i++) {
-        const heroId = await addHero(g, p);
-        const { armyId } = await send(g, p, { targetTileId: target, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId });
-        sent.push({ heroId, loyalty: (await getHero(g, heroId)).loyalty, armyId });
-      }
-      await arrive(g, sent[0]!.armyId);
-      for (const s of sent) expect((await expectWipedHero(g, s.heroId, s.loyalty, p, null)).status).toBe(HeroStatus.IDLE);
+      for (const s of sent) await expectWipedHero(g, s.heroId, s.loyalty, p);
     }));
 
   it('a city keeping its troops in fights with nothing but its walls', () =>

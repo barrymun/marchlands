@@ -7,8 +7,7 @@ import { bestIdleHero, capTroops, defaultHero, freeTroops } from '@/components/s
 
 type Hero = CityBean['heros'][number];
 
-const hero = (id: number, power: number, status: HeroStatus = HeroStatus.IDLE, seized = false) =>
-  ({ id, status, seized, power, powerAdded: 0, powerBuffAdded: 0 }) as Hero;
+const hero = (id: number, power: number, status: HeroStatus = HeroStatus.IDLE) => ({ id, status, power, powerAdded: 0, powerBuffAdded: 0 }) as Hero;
 
 describe(bestIdleHero.name, () => {
   it('is the idle hero with the highest Attack, counting added and item points', () => {
@@ -16,8 +15,8 @@ describe(bestIdleHero.name, () => {
     expect(bestIdleHero([hero(1, 50), hero(2, 60), boosted])).toBe('3');
   });
 
-  it('leaves out busy and captive heroes', () => {
-    expect(bestIdleHero([hero(1, 90, HeroStatus.MAYOR), hero(2, 80, HeroStatus.ATTACK), hero(3, 99, HeroStatus.IDLE, true), hero(4, 10)])).toBe('4');
+  it('leaves out busy heroes', () => {
+    expect(bestIdleHero([hero(1, 90, HeroStatus.MAYOR), hero(2, 80, HeroStatus.ATTACK), hero(4, 10)])).toBe('4');
   });
 
   it('leaves out the excluded hero (one just sent)', () => {

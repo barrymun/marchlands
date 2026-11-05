@@ -91,7 +91,7 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
       expect(b.loyaltyLeft).toBe(npcTemplate(1).loyalty);
       expect(await armyRow(g, armyId)).toBeUndefined();
       expect((await getTile(g, npc.id)).troops).toEqual(b.defender.troops.after);
-      await expectWipedHero(g, heroId, loyalty, p, null);
+      await expectWipedHero(g, heroId, loyalty, p);
     }));
 
   it('its garrison and fortifications regenerate over time', () =>

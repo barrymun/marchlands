@@ -72,7 +72,7 @@ export function HeroList({ city }: { city: CityBean }) {
                 note={<MayorNote city={city} hero={h} />}
                 showExp
                 gear={<HeroGearLine hero={h} cityId={city.id} />}
-                onRename={h.seized ? undefined : (name) => rename.mutateAsync({ path: { heroId: h.id }, body: { name } }).then(() => undefined)}
+                onRename={(name) => rename.mutateAsync({ path: { heroId: h.id }, body: { name } }).then(() => undefined)}
               >
                 <HeroActions hero={h} city={city} />
               </HeroRow>

@@ -15,7 +15,7 @@ describe(mayorOf.name, () => {
   });
 
   it('returns undefined when no hero is mayor', () => {
-    const heros = [HeroStatus.IDLE, HeroStatus.ATTACK, HeroStatus.SEIZED, HeroStatus.RETURN].map((s, i) => hero(i, s));
+    const heros = [HeroStatus.IDLE, HeroStatus.ATTACK, HeroStatus.RETURN].map((s, i) => hero(i, s));
     expect(mayorOf({ heros })).toBeUndefined();
   });
 

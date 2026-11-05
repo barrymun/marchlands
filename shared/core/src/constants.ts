@@ -165,7 +165,7 @@ export const HeroStatus = {
   IDLE: 0,
   MAYOR: 1,
   ATTACK: 3,
-  SEIZED: 4,
+  /** (marchlands) no prisoners: heroes are never captured (orig 4, seized) */
   RETURN: 5,
 } as const;
 export type HeroStatus = (typeof HeroStatus)[keyof typeof HeroStatus];
@@ -280,13 +280,11 @@ export const BuffId = {
 export type BuffId = (typeof BuffId)[keyof typeof BuffId];
 export const BUFF_IDS = Object.values(BuffId) as [BuffId, ...BuffId[]];
 
-/** Timed effects on a hero (heroes.buffs[].id): attribute boosts, and where a captured hero goes home to. */
+/** Timed effects on a hero (heroes.buffs[].id): attribute boosts. */
 export const HeroBuffId = {
   POWER: 'power',
   MANAGEMENT: 'management',
   STRATAGEM: 'stratagem',
-  /** param: the city a captured hero returns to when released */
-  HOME_CITY: 'homeCity',
 } as const;
 export type HeroBuffId = (typeof HeroBuffId)[keyof typeof HeroBuffId];
 export const HERO_BUFF_IDS = Object.values(HeroBuffId) as [HeroBuffId, ...HeroBuffId[]];

@@ -125,9 +125,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/heroes/{heroId}/level-up` | Level up as many times as the experience pays for (hero.levelUp) |
 | PUT | `/api/v1/heroes/{heroId}/lock` | Lock or unlock a hero (a locked hero cannot be dismissed) |
 | POST | `/api/v1/heroes/{heroId}/mayor` | Appoint mayor (hero.promoteToChief) |
-| POST | `/api/v1/heroes/{heroId}/persuade` | Recruit a captive whose loyalty is 0 |
 | POST | `/api/v1/heroes/{heroId}/points` | Assign points: new totals (hero.addPoint) |
-| POST | `/api/v1/heroes/{heroId}/release` | Free a captured enemy hero (hero.releaseHero) |
 | POST | `/api/v1/heroes/{heroId}/reset` | Reset attribute points with Holy Water (hero.resetPoint) |
 | POST | `/api/v1/heroes/{heroId}/reward` | +5 loyalty for gold (hero.awardGold) |
 

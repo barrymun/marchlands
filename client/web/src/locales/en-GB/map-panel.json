@@ -120,11 +120,9 @@
   },
   "seat": {
     "loyalty": "Loyalty {{loyalty}} / {{max}}",
-    "truce": "Under its truce: no unrest yet",
-    "garrison": "Fewer than {{troops}} troops at home: losing loyalty",
-    "unpaid": "Out of gold or food for its upkeep: losing loyalty",
-    "upkeep": "Upkeep {{gold}} gold and {{food}} food an hour",
-    "shared": "Your alliance gets {{gold}} gold an hour of its tribute"
+    "truce": "Under its truce: it can't be attacked yet",
+    "shared": "Your alliance gets {{gold}} gold an hour of its tribute",
+    "risk": "If a rival takes it, your heroes, armies, market orders and shipments here are lost"
   },
   "valley": {
     "boost": "+{{bonus}} {{resource}}",

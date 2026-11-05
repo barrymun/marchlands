@@ -20,7 +20,6 @@ export function Breakdown({ line, mayor }: { line: ResourceLine; mayor?: HeroBea
   if (b.valleyBonus) rows.push([t('breakdown.valleys', { percent: percent(b.valleyBonus) }), b.valley]);
   if (b.buffBonus) rows.push([t('itemBonus', { percent: percent(b.buffBonus) }), b.buff, ITEM_BONUS_TEXT_INVERTED]);
   if (b.upkeep) rows.push([t('breakdown.upkeep'), b.upkeep]);
-  if (b.seatUpkeep) rows.push([t('breakdown.seatUpkeep'), b.seatUpkeep]);
   if (b.tax) rows.push([t('breakdown.tax'), b.tax]);
   return <Rows rows={rows} total={line.increaseRate} />;
 }

@@ -18,7 +18,7 @@ export const REPORT_MESSAGES = {
   'title.attackRepelled': [],
   /** a player's historic city taken by the attacker who brought its loyalty to 0 */
   'title.seatLost': [],
-  /** a player's historic city rose up (its loyalty at 0 from unrest) and stands again as one nobody holds */
+  /** a player's historic city rose up (no longer happens: kept for the reports from before 2026-11-05) */
   'title.seatRebelled': [],
   /** a held historic city drafted troops from a barbarian city */
   'title.draft': [],
@@ -31,7 +31,7 @@ export const REPORT_MESSAGES = {
   notFound: [],
   /** a stored report that no longer matches the report format */
   oldFormat: [],
-  /** body of a "Historic city rebelled" report: the city's name and level */
+  /** body of a "Historic city rebelled" report, as above: the city's name and level */
   seatRebelled: ['name', 'level'],
   /** body of a "New city founded" report */
   cityFounded: ['name'],

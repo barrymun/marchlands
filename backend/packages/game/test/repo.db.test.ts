@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { ArmyDirection, BuildingType, heroGearBonus, heroGearStat, HeroStatus, msg, TechType, TileType } from '@marchlands/core';
+import { ArmyDirection, BuildingType, heroGearBonus, heroGearStat, msg, TechType, TileType } from '@marchlands/core';
 import { players } from '@marchlands/db';
 
 import { heroes } from '#/index.ts';
@@ -170,14 +170,13 @@ describe('heroes', () => {
       expect(await gearOfHero(g, h)).toEqual({ level: 3, stars: { weapon: 2 } });
     }));
 
-  it('gearOfHero is null for an Inn offer, a captive, a hero without a lord and a lord that is gone', () =>
+  it('gearOfHero is null for an Inn offer, a hero without a lord and a lord that is gone', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      expect(await gearOfHero(g, { playerId: p.id, inTavern: true, status: HeroStatus.IDLE })).toBeNull();
-      expect(await gearOfHero(g, { playerId: p.id, inTavern: false, status: HeroStatus.SEIZED })).toBeNull();
-      expect(await gearOfHero(g, { playerId: null, inTavern: false, status: HeroStatus.IDLE })).toBeNull();
-      expect(await gearOfHero(g, { playerId: MISSING, inTavern: false, status: HeroStatus.IDLE })).toBeNull();
-      expect(await gearOfHero(g, { playerId: p.id, inTavern: false, status: HeroStatus.MAYOR })).toEqual({ level: 0, stars: {} });
+      expect(await gearOfHero(g, { playerId: p.id, inTavern: true })).toBeNull();
+      expect(await gearOfHero(g, { playerId: null, inTavern: false })).toBeNull();
+      expect(await gearOfHero(g, { playerId: MISSING, inTavern: false })).toBeNull();
+      expect(await gearOfHero(g, { playerId: p.id, inTavern: false })).toEqual({ level: 0, stars: {} });
     }));
 
   it('saveHero puts the gear points on the gear attribute, and stores the row (not its creation time)', () =>
@@ -195,14 +194,13 @@ describe('heroes', () => {
       expect(await getHero(g, id)).toMatchObject({ ...added, name: 'Geared', level: 30, createdAt });
     }));
 
-  it('saveHero moves the gear to the chosen attribute, and takes it off a captive', () =>
+  it('saveHero moves the gear to the chosen attribute', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       await enhance(g, p, 3);
       const id = await addHero(g, p);
       const bonus = heroGearBonus(30, { level: 3, stars: {} });
       expect(await updateHero(g, id, { level: 30, gearStat: 'stratagem' })).toMatchObject({ powerAdded: 0, managementAdded: 0, stratagemAdded: bonus });
-      expect(await updateHero(g, id, { status: HeroStatus.SEIZED })).toMatchObject({ powerAdded: 0, managementAdded: 0, stratagemAdded: 0 });
     }));
 });
 

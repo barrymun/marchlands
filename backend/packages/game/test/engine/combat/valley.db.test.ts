@@ -120,7 +120,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const guard = createGuardHero(20, seededRng(`guard:${tile.state!.heroSeed}`), stateOf(tile.id));
       expect(b.defender.hero).toMatchObject({ name: guard.name, level: guard.level });
       expect(await armyRow(g, armyId)).toBeUndefined();
-      await expectWipedHero(g, heroId, loyalty, p, null);
+      await expectWipedHero(g, heroId, loyalty, p);
     }));
 
   it('a city holds one valley per Town Hall level', () =>

@@ -111,7 +111,7 @@ export const BuffStateSchema = z.object({
 });
 export type BuffState = z.infer<typeof BuffStateSchema>;
 
-/** A timed effect on a hero (attribute boosts, a captured hero's home city). */
+/** A timed effect on a hero (attribute boosts). */
 export const HeroBuffStateSchema = BuffStateSchema.extend({ id: z.enum(HERO_BUFF_IDS) });
 export type HeroBuffState = z.infer<typeof HeroBuffStateSchema>;
 

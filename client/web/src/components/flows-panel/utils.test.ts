@@ -97,19 +97,14 @@ describe(currentAction.name, () => {
 });
 
 describe(hasHero.name, () => {
-  const city = (...seized: boolean[]) => ({ heros: seized.map((s) => ({ seized: s })) }) as Pick<CityBean, 'heros'>;
+  const city = (heroes: number) => ({ heros: Array.from({ length: heroes }, () => ({})) }) as Pick<CityBean, 'heros'>;
 
   it('is false for a city without heroes (e.g. one just captured)', () => {
-    expect(hasHero(city())).toBe(false);
+    expect(hasHero(city(0))).toBe(false);
   });
 
-  it('is true with at least one hero not held captive', () => {
-    expect(hasHero(city(false))).toBe(true);
-    expect(hasHero(city(true, false))).toBe(true);
-  });
-
-  it('is false when every hero there is held captive', () => {
-    expect(hasHero(city(true, true))).toBe(false);
+  it('is true with at least one hero', () => {
+    expect(hasHero(city(1))).toBe(true);
   });
 });
 

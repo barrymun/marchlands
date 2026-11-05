@@ -12,9 +12,6 @@ export const STATUS: Record<number, string> = {
   get [HeroStatus.ATTACK]() {
     return i18n.t('hero-summary:status.marching');
   },
-  get [HeroStatus.SEIZED]() {
-    return i18n.t('hero-summary:status.captive');
-  },
   get [HeroStatus.RETURN]() {
     return i18n.t('hero-summary:status.returning');
   },

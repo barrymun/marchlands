@@ -4,7 +4,7 @@ import { heroPower, HeroStatus, Mission, type TroopKey } from '@marchlands/core'
 /** The strongest idle hero (by Attack) to lead the army, leaving out `exclude` (e.g. one just sent): its id, or 'none'. */
 export function bestIdleHero(heros: CityBean['heros'], exclude?: number): string {
   const best = heros
-    .filter((h) => h.status === HeroStatus.IDLE && !h.seized && h.id !== exclude)
+    .filter((h) => h.status === HeroStatus.IDLE && h.id !== exclude)
     .reduce<CityBean['heros'][number] | null>((top, h) => (!top || heroPower(h) > heroPower(top) ? h : top), null);
   return best ? String(best.id) : 'none';
 }

@@ -29,7 +29,7 @@ export function CharacterSheet({ hero, city, onGear }: { hero: HeroBean; city: C
           key={hero.id}
           hero={hero}
           className="text-base"
-          onRename={hero.seized ? undefined : (name) => rename.mutateAsync({ path: { heroId: hero.id }, body: { name } }).then(() => undefined)}
+          onRename={(name) => rename.mutateAsync({ path: { heroId: hero.id }, body: { name } }).then(() => undefined)}
         />
         <ExpBar hero={hero} />
       </CardHeader>

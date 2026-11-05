@@ -24,7 +24,7 @@ Whatever way they're won, a famous hero would be:
 
 **A. Guards of the seats** (recommended to start). Each state's capital (level 16) and Atlantis is guarded by a famous hero of its land: 17 heroes.
 - They fight in the seat's defence as `historicGuard` does today (their attributes in place of the level's).
-- **The win that captures the seat captures its guard:** the hero joins the captor, in the seat city, as a captured hero joins a city today (like a seized hero, but theirs at once, or released or kept as the maintainer prefers).
+- **The win that captures the seat captures its guard:** the hero joins the captor, theirs at once, in the seat city. (There are no prisoners to persuade: they were removed on 2026-11-05, deviations.md.)
 - **Losing the seat:** the hero stays with their player (a seat's next holder meets a new guard, below), or goes with the seat (the hero is the seat's, not the player's). The second keeps each hero in one place in the world and makes them part of what's fought for.
 - **A seat without its famous guard** (taken earlier, held by a player) is guarded by a generated guard, as now.
 - Ties into what's built: the seats, their capture, and their per-state names. Small: a table of 17 heroes, a column marking a hero famous, and the capture.
@@ -72,7 +72,7 @@ One per state, a ruler or figure of that land in the period (9th to 13th century
 
 - **Which way first:** A (seat guards), B (Inn rumours), or both in turn?
 - **Their numbers:** base 55–95 as proposed, or nearer Age 2's spread (20–99)? Do they grow faster per level, or only start higher?
-- **Capture:** does the win that takes the seat win its guard at once, or only by a chance? Is a captured famous hero theirs at once or a prisoner to persuade?
+- **Capture:** does the win that takes the seat win its guard at once, or only by a chance?
 - **Losing the seat:** does the hero stay with their player or go with the seat?
 - **Release and leaving:** back to their seat (or rumour pool), whole, at level 1 or at the level they reached?
 - **The roster:** these 17 as they are, or other people? Level 14 guards later?

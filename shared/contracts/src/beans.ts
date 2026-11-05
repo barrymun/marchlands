@@ -37,7 +37,6 @@ export const HeroBean = HeroRow.pick({
 })
   .extend({
     experience: z.number().int(),
-    seized: z.boolean().describe('held captive by another lord'),
     gearStat: z.enum(['power', 'management', 'stratagem']).describe("(marchlands) attribute the lord's gear boosts on this hero"),
     sex: z.literal([Sex.MALE, Sex.FEMALE]).describe('(marchlands) 0 a man, 1 a woman: the figure the Heroes page draws (never shown as text)'),
     buffs: z
@@ -72,7 +71,6 @@ export const ResourceLine = z
         valley: z.number().int().describe('from occupied valleys'),
         buff: z.number().int().describe('from production items'),
         upkeep: z.number().describe('troop food upkeep per game hour (negative; 0 for other resources), 2 decimals'),
-        seatUpkeep: z.number().describe("(marchlands) a held historic city's food upkeep per game hour (negative; 0 for other resources), 2 decimals"),
         tax: z.number().describe('(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals'),
         techBonus: z.number().describe('bonus share from research'),
         mayorBonus: z.number().describe("bonus share from the mayor's politics"),
@@ -100,8 +98,6 @@ export const ResourceBean = z
     tribute: z.number().int().describe("(marchlands) gold per game hour a held historic city's tribute brings (part of goldRate)"),
     stateTribute: z.number().int().describe("(marchlands) gold per game hour a state's capital gets from its state's barbarian cities (part of goldRate)"),
     tributeShared: z.number().int().describe("(marchlands) gold per game hour of those tributes the holder's alliance gets instead (not in goldRate)"),
-    seatUpkeepGold: z.number().int().describe("(marchlands) gold per game hour a held historic city's upkeep costs (part of goldRate)"),
-    seatUpkeepFood: z.number().int().describe("(marchlands) food per game hour a held historic city's upkeep costs (part of foodRate)"),
     herosSalary: z.number(),
     troopCostFood: z.number().describe('troop food upkeep per game hour, 2 decimals'),
     curPopulation: z.number().int(),
@@ -145,10 +141,7 @@ export const CityBean = z
     draftsUsed: z.number().int().describe('drafts a historic city has made today (UTC)'),
     draftedToday: z.array(z.number().int()).describe('the tiles a historic city has drafted from today (UTC): each at most once a day'),
     draftNextAt: Ms.describe('when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)'),
-    seatLoyalty: z.number().int().describe("a held historic city's loyalty now: rivals' wins and unrest take it down, and at 0 it's lost"),
-    seatNeglect: z
-      .array(z.enum(['garrison', 'upkeep']))
-      .describe('what a held historic city lacks, losing it loyalty: troops at home, gold or food for its upkeep'),
+    seatLoyalty: z.number().int().describe("a held historic city's loyalty now: rivals' wins take it down, and at 0 it's lost"),
     createdAt: Ms,
   })
   .meta({ id: 'CityBean' });

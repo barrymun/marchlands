@@ -1,6 +1,6 @@
 // Loading a city together with everything its economy depends on, and settling it to "now".
 
-import { and, count, eq, isNotNull, ne } from 'drizzle-orm';
+import { and, count, eq, ne } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import {
@@ -20,7 +20,7 @@ import {
   tileXY,
   type TroopCounts,
 } from '@marchlands/core';
-import { cities, one, players } from '@marchlands/db';
+import { one, players } from '@marchlands/db';
 
 import type { Ctx } from '#/context.ts';
 import { troopBean } from '#/dto.ts';
@@ -49,8 +49,8 @@ export interface CityBundle {
   awayTroops: TroopCounts;
   /** set by viewCity: troops the in-memory settle found deserting (not yet saved or reported) */
   deserted?: TroopCounts;
-  /** (marchlands) a held historic city: how many seats its holder holds, and whether their alliance shares its tribute */
-  seats?: { held: number; shared: boolean };
+  /** (marchlands) a held historic city: whether the holder's alliance shares its tribute */
+  seats?: { shared: boolean };
 }
 
 export function mayorOf(heroes: HeroRow[]): HeroRow | undefined {
@@ -67,8 +67,7 @@ export function economyContext(b: CityBundle): EconomyContext {
   return {
     research: b.player.research,
     mayor: mayorStats(b.heroes),
-    // seized heroes held prisoner here are not paid
-    heroLevels: b.heroes.filter((h) => h.playerId === b.city.playerId).map((h) => h.level),
+    heroLevels: b.heroes.map((h) => h.level),
     valleys: b.valleys.map((v) => ({ type: v.type, level: v.level })),
     buffs: b.player.buffs,
     awayTroops: b.awayTroops,
@@ -91,14 +90,8 @@ export async function loadBundle(ctx: Ctx, city: CityRow, player: PlayerRow): Pr
   return { player, city, heroes, valleys, awayTroops: away, ...(seats ? { seats } : {}) };
 }
 
-/** (marchlands) How many historic cities a player holds, and whether they're in an alliance with anyone else (who then share their tribute). */
-async function seatsOf(ctx: Ctx, player: PlayerRow): Promise<{ held: number; shared: boolean }> {
-  const held = one(
-    await ctx.tx
-      .select({ n: count() })
-      .from(cities)
-      .where(and(eq(cities.playerId, player.id), isNotNull(cities.historicLevel))),
-  ).n;
+/** (marchlands) Whether a historic city's holder is in an alliance with anyone else (who then share their tribute). */
+async function seatsOf(ctx: Ctx, player: PlayerRow): Promise<{ shared: boolean }> {
   const others =
     player.allianceId == null
       ? 0
@@ -108,7 +101,7 @@ async function seatsOf(ctx: Ctx, player: PlayerRow): Promise<{ held: number; sha
             .from(players)
             .where(and(eq(players.allianceId, player.allianceId), ne(players.id, player.id))),
         ).n;
-  return { held: Number(held), shared: Number(others) > 0 };
+  return { shared: Number(others) > 0 };
 }
 
 /**

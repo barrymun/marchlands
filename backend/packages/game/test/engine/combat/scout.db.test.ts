@@ -208,7 +208,7 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
       expect(scoutOf(await lastReport(g, q.id, 'report.title.scoutsRepelled'), 'cityDefender')).toMatchObject({ from: p.name, success: false });
       expect(await armyRow(g, armyId)).toBeUndefined();
       expect(g.events('army')).toEqual([]);
-      await expectWipedHero(g, heroId, loyalty, p, q);
+      await expectWipedHero(g, heroId, loyalty, p);
       expect((await reloadCity(g, p.cityId)).troops.scouter ?? 0).toBe(0);
     }));
 

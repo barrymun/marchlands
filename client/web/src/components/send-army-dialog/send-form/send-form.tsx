@@ -111,7 +111,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
   // every troop type, those the city has none of greyed out; only scouts go on a scouting mission
   const listed = Object.entries(TROOP_KEYS).filter(([, key]) => !scouting || key === 'scouter');
   const hasAny = listed.some(([, key]) => (free[key] ?? 0) > 0);
-  const idleHeroes = heroes.filter((h) => h.status === HeroStatus.IDLE && !h.seized);
+  const idleHeroes = heroes.filter((h) => h.status === HeroStatus.IDLE);
   const troopBody = typedAmounts(scouting ? { scouter: troops.scouter } : troops);
   // troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)
   const player = usePlayer();

@@ -1,10 +1,10 @@
-// Hero routes (src/routes/military.ts): the city's heroes, the tavern, the mayor, hero commands, the lord's gear
-// and captives. The rules are covered by the heroes service tests.
+// Hero routes (src/routes/military.ts): the city's heroes, the tavern, the mayor, hero commands, the lord's gear.
+// The rules are covered by the heroes service tests.
 
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { BuildingType, gearStarCost, HeroBuffId, HeroStatus, ItemId, medalId, msg, TechType } from '@marchlands/core';
+import { BuildingType, gearStarCost, HeroStatus, ItemId, medalId, TechType } from '@marchlands/core';
 import { cities, heroes, players } from '@marchlands/db';
 
 import { apiTest, type TestApi } from '#test/support/api.ts';
@@ -45,16 +45,6 @@ async function heroHall(api: TestApi, p: Lord, inn = 5, hall = 5) {
   await setResources(api, p, RICH);
 }
 
-/** Hero `id` of `owner` is held captive in `captor`'s city, as combat leaves it. */
-const capture = (api: TestApi, id: number, owner: Lord, captor: Lord, loyalty: number) =>
-  patchHero(api, id, {
-    cityId: captor.cityId,
-    status: HeroStatus.SEIZED,
-    capturedByPlayerId: captor.playerId,
-    loyalty,
-    buffs: [{ id: HeroBuffId.HOME_CITY, desc: msg('buff.homeCity'), endTime: Number.MAX_SAFE_INTEGER, param: owner.cityId }],
-  });
-
 describe('GET /cities/{cityId}/heroes', () => {
   itGuards('GET', (c) => `cities/${c}/heroes`);
 
@@ -64,7 +54,7 @@ describe('GET /cities/{cityId}/heroes', () => {
       await heroHall(api, a, 1, 4);
       const id = await addHero(api, a);
       const list = await api.ok('GET', `cities/${a.cityId}/heroes`, { token: a.token });
-      expect(list).toEqual({ heroes: [expect.objectContaining({ id, cityId: a.cityId, status: HeroStatus.IDLE, seized: false })], slots: 4 });
+      expect(list).toEqual({ heroes: [expect.objectContaining({ id, cityId: a.cityId, status: HeroStatus.IDLE })], slots: 4 });
     }));
 });
 
@@ -475,49 +465,5 @@ describe('PATCH /heroes/{heroId}', () => {
       await expectInvalid(api, a.token, [['PATCH', `heroes/${id}`, { body: { name: 5 } }]]);
       const r = await api.refused('PATCH', `heroes/${id}`, 'common.nameLength', { token: a.token, body: { name: '   ' }, status: 400 });
       expect(r.body).toMatchObject({ ok: -87, error: { params: { min: 1, max: 20 } } });
-    }));
-});
-
-describe('POST /heroes/{heroId}/release', () => {
-  itGuardsHero('POST', (h) => `heroes/${h}/release`, { refusedForOther: { code: 'hero.notPrisoner', status: 400 } });
-
-  it('frees a captive, who goes home', () =>
-    apiTest(async (api) => {
-      const [owner, captor] = await lords(api, 2);
-      const id = await addHero(api, owner);
-      await capture(api, id, owner, captor, 10);
-      expect(await api.ok('POST', `heroes/${id}/release`, { token: captor.token })).toBeNull();
-      expect(await heroRow(api, id)).toMatchObject({ playerId: owner.playerId, cityId: owner.cityId, status: HeroStatus.IDLE, capturedByPlayerId: null });
-    }));
-
-  it("refuses the captive's own lord", () =>
-    apiTest(async (api) => {
-      const [owner, captor] = await lords(api, 2);
-      const id = await addHero(api, owner);
-      await capture(api, id, owner, captor, 10);
-      await api.refused('POST', `heroes/${id}/release`, 'hero.notPrisoner', { token: owner.token, status: 400 });
-    }));
-});
-
-describe('POST /heroes/{heroId}/persuade', () => {
-  itGuardsHero('POST', (h) => `heroes/${h}/persuade`, { refusedForOther: { code: 'hero.notPrisoner', status: 400 } });
-
-  it('a captive with no loyalty left joins the captor', () =>
-    apiTest(async (api) => {
-      const [owner, captor] = await lords(api, 2);
-      await heroHall(api, captor, 1, 1);
-      const id = await addHero(api, owner);
-      await capture(api, id, owner, captor, 0);
-      expect(await api.ok('POST', `heroes/${id}/persuade`, { token: captor.token })).toMatchObject({ id, cityId: captor.cityId, status: HeroStatus.IDLE });
-      expect(await heroRow(api, id)).toMatchObject({ playerId: captor.playerId, capturedByPlayerId: null });
-    }));
-
-  it('refuses a loyal captive', () =>
-    apiTest(async (api) => {
-      const [owner, captor] = await lords(api, 2);
-      await heroHall(api, captor, 1, 1);
-      const id = await addHero(api, owner);
-      await capture(api, id, owner, captor, 1);
-      await api.refused('POST', `heroes/${id}/persuade`, 'hero.stillLoyal', { token: captor.token, status: 400 });
     }));
 });

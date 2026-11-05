@@ -108,7 +108,7 @@ Whenever something changes a city's rates, the city is settled first. Examples a
 | `players` | the lord: profile, prestige/honor, title, alliance rank; `research`, `items`, `buffs`, `misc` as jsonb |
 | `cities` | resources and their timestamp, population, loyalty, tax, work rates; `buildings`, `troops`, `forts`, `troop_queues`, `fort_queue`, `injured_troops` as jsonb |
 | `tiles` | 640,000 rows: type, level, city on it, valley owner; NPC/valley garrison and state as jsonb (lazy regeneration) |
-| `heroes` | hired heroes, tavern offers (`in_tavern`), captives (`captured_by_player_id`) |
+| `heroes` | hired heroes, tavern offers (`in_tavern`) |
 | `armies` | marching (forward/backward) and stationed armies |
 | `timed_events` | the game clock |
 | `mails`, `reports`, `chat_messages`, `push_messages` | messaging and outbox |

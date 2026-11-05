@@ -9,7 +9,7 @@
     "barracks": "Trains troops. Each barracks has its own queue of one batch per level, and several barracks train in parallel.",
     "academy": "Researches technologies, up to {{queues}} at a time. A technology only counts up to the {{building}} level in this city.",
     "inn": "Offers heroes for hire. Higher levels offer more and stronger heroes; new offers cost {{gold}} gold per level.",
-    "feastingHall": "Houses heroes: one hero (hired or captured) per level.",
+    "feastingHall": "Houses heroes: one hero per level.",
     "rallySpot_one": "Sends armies out. Needed to march at all; each level allows {{count, number}} more army away at a time and {{troops}} more troops in each army (a {{item}} adds {{percent}}).",
     "rallySpot_other": "Sends armies out. Needed to march at all; each level allows {{count, number}} more armies away at a time and {{troops}} more troops in each army (a {{item}} adds {{percent}}).",
     "marketplace_one": "Trades food, lumber, stone and iron for gold with other players and the merchant. Each level allows {{count, number}} more waiting order.",

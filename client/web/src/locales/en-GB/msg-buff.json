@@ -11,6 +11,5 @@
   "truceCooldown": "Truce cooldown",
   "teleportCooldown": "Teleport cooldown",
   "holiday": "Holiday",
-  "heroStat": "+{{percent}} {{stat}}",
-  "homeCity": "Home city"
+  "heroStat": "+{{percent}} {{stat}}"
 }

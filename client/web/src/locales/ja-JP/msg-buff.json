@@ -11,6 +11,5 @@
   "truceCooldown": "休戦クールダウン",
   "teleportCooldown": "移転クールダウン",
   "holiday": "休暇",
-  "heroStat": "{{stat}} +{{percent}}",
-  "homeCity": "帰還先の都市"
+  "heroStat": "{{stat}} +{{percent}}"
 }

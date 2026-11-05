@@ -6,7 +6,6 @@
     "idle": "Idle",
     "mayor": "Mayor",
     "marching": "Marching",
-    "captive": "Captive",
     "returning": "Returning"
   },
   "unspent_one": "{{count}} attribute point to spend",

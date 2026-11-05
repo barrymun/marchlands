@@ -33,7 +33,7 @@ const ARCHER_UPKEEP = 9;
  */
 function producingCity(over: { city?: Parameters<typeof cityRow>[0]; buffs?: CityBundle['player']['buffs'] } = {}): CityBundle {
   return bundle({
-    player: playerRow({ research: { 1: { level: 1 } }, buffs: over.buffs ?? [{ id: BuffId.FOOD_PRODUCTION, desc: msg('buff.homeCity'), endTime: T0 + 1 }] }),
+    player: playerRow({ research: { 1: { level: 1 } }, buffs: over.buffs ?? [{ id: BuffId.FOOD_PRODUCTION, desc: msg('buff.truce'), endTime: T0 + 1 }] }),
     city: cityRow({
       food: 1234.9,
       taxRate: 10,
@@ -70,13 +70,13 @@ describe(buildingBean.name, () => {
 });
 
 describe(heroBean.name, () => {
-  it('whole experience, the gear attribute, the boosts, and whether it is held captive; matches the contract', () => {
-    const boost = { id: HeroBuffId.POWER, desc: msg('buff.homeCity'), endTime: T0 + 1000, param: 12 };
+  it('whole experience, the gear attribute and the boosts; matches the contract', () => {
+    const boost = { id: HeroBuffId.POWER, desc: msg('buff.truce'), endTime: T0 + 1000, param: 12 };
     const h = heroRow({ experience: 99.8, power: 30, management: 50, stratagem: 20, buffs: [boost] });
     const bean = heroBean(h);
-    expect(bean).toMatchObject({ id: h.id, experience: 99, gearStat: 'management', seized: false, buffs: [boost] });
+    expect(bean).toMatchObject({ id: h.id, experience: 99, gearStat: 'management', buffs: [boost] });
     expect(HeroBean.parse(bean)).toEqual(bean);
-    expect(heroBean(heroRow({ gearStat: 'stratagem', capturedByPlayerId: 2 }))).toMatchObject({ gearStat: 'stratagem', seized: true });
+    expect(heroBean(heroRow({ gearStat: 'stratagem' }))).toMatchObject({ gearStat: 'stratagem' });
   });
 
   it("carries the hero's sex for its figure", () => {
@@ -86,7 +86,7 @@ describe(heroBean.name, () => {
 
   it("leaves out the hero's lord, Inn and order", () => {
     const bean = heroBean(heroRow());
-    for (const k of ['playerId', 'inTavern', 'sortOrder', 'capturedByPlayerId', 'createdAt']) expect(bean).not.toHaveProperty(k);
+    for (const k of ['playerId', 'inTavern', 'sortOrder', 'createdAt']) expect(bean).not.toHaveProperty(k);
   });
 });
 
@@ -121,7 +121,6 @@ describe(resourceBean.name, () => {
       valley: Math.round(FARM_2 * valley),
       buff: Math.round(FARM_2 * buff),
       upkeep: -10 * ARCHER_UPKEEP,
-      seatUpkeep: 0,
       tax: -Math.round(gross * 10) / 100,
       techBonus: share,
       mayorBonus: mayor,
@@ -175,7 +174,7 @@ describe(resourceBean.name, () => {
   });
 
   it('the gold production item adds its share of the base tax', () => {
-    const b = producingCity({ buffs: [{ id: BuffId.GOLD_PRODUCTION, desc: msg('buff.homeCity'), endTime: T0 + 1 }] });
+    const b = producingCity({ buffs: [{ id: BuffId.GOLD_PRODUCTION, desc: msg('buff.truce'), endTime: T0 + 1 }] });
     const bean = resourceBean(b, cityStats(b, T0));
     expect(bean.taxItemShare).toBe(BALANCE.resourceBuffBonus);
     expect(bean.taxItemBonus).toBe(Math.round(BALANCE.startPopulation * BALANCE.baseTaxShare * BALANCE.resourceBuffBonus));
@@ -266,7 +265,7 @@ describe(itemsArray.name, () => {
 
 describe(buffsArray.name, () => {
   it('lists the buffs still running, matching the contract', () => {
-    const desc = msg('buff.homeCity');
+    const desc = msg('buff.truce');
     const running = { id: BuffId.ATTACK, desc, endTime: T0 + 1, param: 5, cityId: 2, itemId: 'player.attack.1' };
     const list = buffsArray([running, { id: BuffId.DEFENSE, desc, endTime: T0 }], T0);
     expect(list).toEqual([running]);

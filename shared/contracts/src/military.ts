@@ -64,7 +64,7 @@ export const MapSearchQuery = z.object({
 // ---- heroes ----
 
 export const CityHeroList = z
-  .object({ heroes: z.array(HeroBean).describe('hired heroes and captives held'), slots: z.number().int().describe('Feasting Hall capacity') })
+  .object({ heroes: z.array(HeroBean).describe('hired heroes'), slots: z.number().int().describe('Feasting Hall capacity') })
   .meta({ id: 'CityHeroList' });
 export type CityHeroList = z.infer<typeof CityHeroList>;
 

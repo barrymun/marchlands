@@ -24,7 +24,6 @@ import {
   dur,
   type FortCounts,
   freshNpcState,
-  HeroBuffId,
   heroPower,
   HeroStatus,
   HISTORIC_LEVELS,
@@ -75,12 +74,12 @@ import {
   valleyGarrison,
   WAR_ENSIGN_DESC,
 } from '@marchlands/core';
-import { armies, cities, heroes, marketOrders, marketShipments, one, tiles } from '@marchlands/db';
+import { armies, cities, heroes, marketOrders, marketShipments, one, tiles, warPlanWaves } from '@marchlands/db';
 
 import { type CityBundle, openCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
-import { fortBean, heroBean, troopBean } from '#/dto.ts';
-import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner } from '#/engine/armies.ts';
+import { fortBean, troopBean } from '#/dto.ts';
+import { armyRef, cityPosition, departRef, homeMarchMs, notifyArmyParties, sendBack, tileOwner } from '#/engine/armies.ts';
 import { dropCapturedTarget } from '#/engine/flows.ts';
 import { heroSlots, pushHero } from '#/engine/heroes.ts';
 import { plunderNpc } from '#/engine/npc-economy.ts';
@@ -261,7 +260,7 @@ async function returnHome(ctx: Ctx, a: ArmyRow) {
   if (!b) throw new Error(`army ${a.id}'s home city ${homeId} is gone`);
   b.city.troops = addTroops(b.city.troops, a.troops);
   gainResources(b.city, a.resources);
-  if (hero && hero.capturedByPlayerId == null) {
+  if (hero) {
     hero.status = HeroStatus.IDLE;
     hero.cityId = homeId;
     await saveHero(ctx, hero);
@@ -684,7 +683,7 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     // only the scouts fought: anything else sent along comes home with the hero
     const { scouter: _lost, ...others } = a.troops;
     if (totalTroops(others) > 0) return finishScout(ctx, a, others);
-    return armyWiped(ctx, a, hero, def);
+    return armyWiped(ctx, a, hero);
   }
   return finishScout(ctx, a, { ...a.troops, scouter: survivors });
 }
@@ -708,40 +707,16 @@ async function disbandEmptyArmy(ctx: Ctx, s: ArmyRow) {
   await notifyArmyParties(ctx, s);
 }
 
-/**
- * The whole army died. Its hero loses 5 loyalty and may be captured by a defending city with a
- * free Feasting Hall slot (chance: d100 > loyalty), its loyalty then 0; otherwise it limps home at once.
- */
-async function armyWiped(ctx: Ctx, a: ArmyRow, hero: HeroRow | null, captor: CityBundle | null): Promise<{ captured: boolean }> {
-  let captured = false;
+/** The whole army died. Its hero loses 5 loyalty and limps home at once. */
+async function armyWiped(ctx: Ctx, a: ArmyRow, hero: HeroRow | null) {
   if (hero) {
     hero.loyalty = Math.max(0, hero.loyalty - 5);
-    const free = captor ? captor.heroes.length < heroSlots(captor) : false;
-    if (captor && free && randInt(ctx.rng, 0, 99) > hero.loyalty) {
-      const home = hero.cityId;
-      Object.assign(hero, {
-        cityId: captor.city.id,
-        status: HeroStatus.SEIZED,
-        capturedByPlayerId: captor.player.id,
-        // as the original's battle handler: a captive's loyalty to its owner is gone, so it can be persuaded
-        loyalty: 0,
-        powerBuffAdded: 0,
-        managementBuffAdded: 0,
-        stratagemBuffAdded: 0,
-        buffs: [{ id: HeroBuffId.HOME_CITY, desc: msg('buff.homeCity'), endTime: Number.MAX_SAFE_INTEGER, param: home }],
-      });
-      captured = true;
-      pushHero(ctx, captor.player.id, hero, 0);
-      ctx.push(a.playerId, PushCmd.HERO_UPDATE, { castleId: home, hero: heroBean(hero), updateType: 1 });
-    } else {
-      hero.status = HeroStatus.IDLE;
-      pushHero(ctx, a.playerId, hero, 2);
-    }
+    hero.status = HeroStatus.IDLE;
+    pushHero(ctx, a.playerId, hero, 2);
     await saveHero(ctx, hero);
   }
   await deleteArmy(ctx, a);
   await notifyArmyParties(ctx, a);
-  return { captured };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1014,71 +989,55 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
   pushResources(ctx, def);
   if (seat?.captured) await takeSeat(ctx, def, attacker, seat.level);
   if (totalTroops(r.attacker.after) <= 0) {
-    await armyWiped(ctx, a, hero, def);
+    await armyWiped(ctx, a, hero);
     return;
   }
   await returnWithLoot(ctx, a, r.attacker.after, loot);
 }
 
 /**
- * A held historic city taken (docs/features/historical-cities.md): it becomes the winner's, whole but for its troops
- * (lost in the battle; any kept home go too), under a new truce and at full loyalty, drafting by itself. What its old holder had there moves
- * to their oldest other city: heroes, armies out, market orders and shipments; with no other city, they're gone.
- * Valleys it held go free (their troops head home), allies' troops stationed in it go home, and armies already marching
- * on it now march on the winner.
+ * What goes with a held historic city when a rival takes it: all its old holder had in it is lost, as nothing is moved
+ * to another city (docs/features/historical-cities.md): heroes, armies wherever they are, plan waves, market orders and
+ * shipments. Its valleys go free (other cities' troops there head home), and troops other cities have stationed in it go home.
  */
-/**
- * A held historic city's holder leaves it (taken by a rival, or risen up): their heroes, armies, market orders and
- * shipments go to their oldest other city (or are gone, with none), its valleys go free, and allies' troops stationed in
- * it go home.
- */
-export async function evacuateSeat(ctx: Ctx, city: CityRow, loserId: number) {
-  const fallback = (await citiesOf(ctx, loserId)).filter((c) => c.id !== city.id).sort((p, q) => p.id - q.id)[0];
-  // the old holder's heroes and armies out, orders and shipments, to their other city
-  const theirs = await ctx.tx
-    .select()
-    .from(armies)
-    .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loserId)));
-  if (fallback) {
-    await ctx.tx
-      .update(heroes)
-      .set({ cityId: fallback.id })
-      .where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loserId)));
-    await ctx.tx
-      .update(heroes)
-      .set({ status: HeroStatus.IDLE })
-      .where(and(eq(heroes.cityId, fallback.id), eq(heroes.status, HeroStatus.MAYOR), eq(heroes.playerId, loserId)));
-    await ctx.tx
-      .update(armies)
-      .set({ cityId: fallback.id })
-      .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loserId)));
-    await ctx.tx
-      .update(marketOrders)
-      .set({ cityId: fallback.id })
-      .where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loserId)));
-    await ctx.tx
-      .update(marketShipments)
-      .set({ cityId: fallback.id })
-      .where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loserId)));
-  } else {
-    for (const a of theirs) ctx.unschedule(armyRef(a.id));
-    await ctx.tx.delete(armies).where(and(eq(armies.cityId, city.id), eq(armies.playerId, loserId)));
-    await ctx.tx.delete(heroes).where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loserId)));
-    await ctx.tx.delete(marketOrders).where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loserId)));
-    await ctx.tx.delete(marketShipments).where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loserId)));
+async function clearSeat(ctx: Ctx, city: CityRow, loserId: number) {
+  const lostArmies = await ctx.tx
+    .delete(armies)
+    .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loserId)))
+    .returning();
+  for (const a of lostArmies) {
+    ctx.unschedule(armyRef(a.id));
+    ctx.unschedule(departRef(a.id));
   }
-  // valleys it held go free; allies' troops stationed in it go home; armies marching on it now march on the winner
+  await ctx.tx.delete(heroes).where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loserId)));
+  await ctx.tx.delete(warPlanWaves).where(and(eq(warPlanWaves.cityId, city.id), eq(warPlanWaves.playerId, loserId)));
+  const orders = await ctx.tx
+    .delete(marketOrders)
+    .where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loserId)))
+    .returning();
+  if (orders.length) ctx.broadcast(PushCmd.MARKET_UPDATE, { resTypes: [...new Set(orders.map((o) => o.resType))] });
+  const shipments = await ctx.tx
+    .delete(marketShipments)
+    .where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loserId)))
+    .returning();
+  for (const s of shipments) ctx.unschedule(`shipment:${s.id}`);
   for (const v of await ctx.tx.select().from(tiles).where(eq(tiles.ownerCityId, city.id))) {
     for (const s of await armiesStationedAt(ctx, v.id, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, v.id));
     await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, troops: null, state: null, updatedAt: ctx.now }).where(eq(tiles.id, v.id));
   }
   for (const s of await armiesStationedAt(ctx, city.tileId, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, city.tileId));
+  return lostArmies;
 }
 
+/**
+ * A held historic city taken (docs/features/historical-cities.md): it becomes the winner's, whole but for its troops
+ * (lost in the battle; any kept home go too), under a new truce and at full loyalty, drafting by itself. All its old
+ * holder had in it is lost (clearSeat), and armies already marching on it now march on the winner.
+ */
 async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: number) {
   const city = def.city;
   const loser = def.player;
-  await evacuateSeat(ctx, city, loser.id);
+  const lostArmies = await clearSeat(ctx, city, loser.id);
   await ctx.tx
     .update(armies)
     .set({ targetPlayerId: winner.id })
@@ -1103,6 +1062,8 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
   pushCity(ctx, await viewCity(ctx, city.id));
   await pushPlayerInfo(ctx, loser);
   await notifyArmyParties(ctx, { playerId: loser.id, targetPlayerId: winner.id });
+  // whoever those armies were marching on, or stationed with, no longer sees them
+  for (const id of new Set(lostArmies.flatMap((a) => a.targetPlayerId ?? []))) await notifyArmyParties(ctx, { playerId: id, targetPlayerId: null });
 }
 
 async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
@@ -1193,7 +1154,7 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     body,
   });
   if (totalTroops(r.attacker.after) <= 0) {
-    await armyWiped(ctx, a, hero, null);
+    await armyWiped(ctx, a, hero);
     return;
   }
   await returnWithLoot(ctx, a, r.attacker.after, loot);
@@ -1293,7 +1254,7 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     body,
   });
   if (totalTroops(r.attacker.after) <= 0) {
-    await armyWiped(ctx, a, hero, null);
+    await armyWiped(ctx, a, hero);
     return;
   }
   await returnWithLoot(ctx, a, r.attacker.after, loot);
@@ -1511,7 +1472,7 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   if (defenderId)
     await createReport(ctx, { ...common, playerId: defenderId, title: msg(occupied ? 'report.title.valleyLost' : 'report.title.valleyDefended') });
   if (totalTroops(r.attacker.after) <= 0) {
-    await armyWiped(ctx, a, hero, null);
+    await armyWiped(ctx, a, hero);
     return;
   }
   await returnWithLoot(ctx, a, r.attacker.after, { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 });

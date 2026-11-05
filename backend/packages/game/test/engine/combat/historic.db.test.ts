@@ -1,14 +1,17 @@
 // processArmy against historic cities (docs/features/historical-cities.md): scouting one, and attacks on its garrison
 // and loyalty. Capturing one comes with the next phase.
 
+import { and, eq, inArray } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
+import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BuildingType,
   DAY,
   dur,
   factionRivals,
+  HeroStatus,
   historicCities,
   historicCityBuildings,
   historicDay,
@@ -16,21 +19,26 @@ import {
   historicNameAt,
   type HistoricState,
   homeFaction,
+  MarketSide,
   Mission,
   msg,
   nextAutoDraftAt,
+  TechType,
   tileDistance,
   TileType,
   tileXY,
 } from '@marchlands/core';
+import { armies as armyRows, heroes as heroRows } from '@marchlands/db';
 
 import { processArmy } from '#/engine/combat.ts';
-import { admin, armies, buildings, interior, player, world } from '#/index.ts';
-import { getCity, getHero, getTile, saveCity, saveTile } from '#/repo.ts';
+import { ship } from '#/engine/market.ts';
+import { admin, armies, buildings, heroes, interior, market, plans, player, research, world } from '#/index.ts';
+import { getCity, getHero, getPlayer, getTile, saveCity, saveTile } from '#/repo.ts';
 import { arrive, battleOf, reportsOf, scoutOf, send, tileNear, warrior } from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
-import { addHero, reloadCity, type TestPlayer } from '#test/support/factories.ts';
+import { addHero, createTestPlayer, reloadCity, setResources, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
+import { Res } from '#test/support/market.ts';
 
 /** The nearest historic city with a name of its own to a player's city (a level 14, 16 or Atlantis), and its name. */
 async function namedSeatNear(g: TestGame, p: TestPlayer) {
@@ -270,10 +278,9 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       expect((await getCity(g, cityId)).loyalty).toBe(BALANCE.historic.loyalty - 3);
     }));
 
-  it('the win that leaves it at 0 hands it to the winner, its old holder’s heroes going to their other city', () =>
+  it('the win that leaves it at 0 hands it to the winner', () =>
     game(async (g) => {
       const { p, q, seat, cityId, attack } = await heldSeat(g);
-      const pHero = await addHero(g, p, 1, cityId);
       // as the waves before it left it: 3 loyalty as it lands; its holder had turned drafting by itself off
       const r = await attack(async (at) => saveCity(g, { ...(await getCity(g, cityId)), loyalty: 3, loyaltyAt: at, draftAuto: false }));
       expect(r.seat).toMatchObject({ loyaltyLeft: 0, captured: true });
@@ -288,7 +295,97 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
         draftNextAt: nextAutoDraftAt(g.now),
       });
       expect((await getTile(g, seat.id)).ownerPlayerId).toBe(q.id);
-      expect((await getHero(g, pHero)).cityId).toBe(p.cityId);
       expect((await reportsOf(g, p.id)).at(-1)!.title).toEqual(msg('report.title.seatLost'));
+    }));
+
+  /** q's win that takes the seat: 3 loyalty left as it lands. */
+  const takeIt = (g: TestGame, cityId: number, attack: (beforeLanding?: (at: number) => Promise<void>) => Promise<unknown>) =>
+    attack(async (at) => saveCity(g, { ...(await getCity(g, cityId)), loyalty: 3, loyaltyAt: at }));
+
+  it('loses all its old holder had in it, nothing moving to their other city', () =>
+    game(async (g) => {
+      const { p, cityId, attack } = await heldSeat(g);
+      const seatHero = await addHero(g, p, 1, cityId);
+      const seatMayor = await addHero(g, p, 1, cityId);
+      await heroes.appointMayor(g, p.id, seatMayor);
+      const leader = await addHero(g, p, 1, cityId);
+      const home = await addHero(g, p, 1, p.cityId);
+      await setResources(g, p, { gold: 1_000_000, food: 1_000_000 }, cityId);
+      await saveCity(g, { ...(await getCity(g, cityId)), troops: { archer: 100 } });
+
+      const target = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
+      const out = await armies.sendArmy(g, p.id, cityId, { targetTileId: target.id, mission: Mission.ATTACK, troops: { archer: 100 }, heroId: leader });
+      await market.placeOrder(g, p.id, cityId, { resType: Res.STONE, side: MarketSide.BUY, amount: 10, price: 0.5 });
+      await ship(g, { playerId: p.id, cityId, orderId: null, resType: Res.STONE, amount: 10, price: 1, ms: 60_000 });
+      const plan = await plans.create(g, p.id, { name: 'Plan', targetTileId: target.id, landAt: g.now + DAY, shared: false });
+      await plans.addWave(g, p.id, plan.id, { cityId, mission: Mission.ATTACK, troops: { archer: 1 } });
+      const offers = () =>
+        g.tx
+          .select({ id: heroRows.id })
+          .from(heroRows)
+          .where(and(eq(heroRows.cityId, cityId), eq(heroRows.inTavern, true)));
+      const innOffers = await offers();
+
+      await takeIt(g, cityId, attack);
+
+      expect(
+        await g.tx
+          .select()
+          .from(heroRows)
+          .where(inArray(heroRows.id, [seatHero, seatMayor, leader])),
+      ).toEqual([]);
+      expect(await g.tx.select().from(armyRows).where(eq(armyRows.id, out.armyId))).toEqual([]);
+      expect(await market.myOrders(g, p.id)).toEqual([]);
+      expect(await market.myShipments(g, p.id)).toEqual([]);
+      // the plan stays, without the wave: left on a city no longer theirs, the wave would refuse the whole list
+      expect(await plans.list(g, p.id)).toMatchObject([{ id: plan.id, waves: [] }]);
+      // the Inn's offers stay with the city, and nothing of their other city goes
+      expect(await offers()).toEqual(innOffers);
+      expect((await getHero(g, home)).cityId).toBe(p.cityId);
+      // none of the lost things' timed events is left to run
+      expect(
+        g
+          .events('army.depart')
+          .concat(g.events('shipment'))
+          .filter((e) => e.playerId === p.id),
+      ).toEqual([]);
+      await g.runDue(g.now + DAY);
+    }));
+
+  it('leaves their other city as it was, its mayor included', () =>
+    game(async (g) => {
+      const { p, cityId, attack } = await heldSeat(g);
+      const mayor = await addHero(g, p, 1, p.cityId);
+      await heroes.appointMayor(g, p.id, mayor);
+      await takeIt(g, cityId, attack);
+      expect((await getHero(g, mayor)).status).toBe(HeroStatus.MAYOR);
+    }));
+
+  it('leaves research started there running, as it is the player’s', () =>
+    game(async (g) => {
+      const { p, cityId, attack } = await heldSeat(g);
+      await setResources(g, p, { gold: 1_000_000, food: 1_000_000, wood: 1_000_000, stone: 1_000_000, iron: 1_000_000 }, cityId);
+      const { endTime } = await research.startResearch(g, p.id, cityId, TechType.AGRICULTURE);
+      await takeIt(g, cityId, attack);
+      await g.runDue(endTime + 1);
+      expect((await getPlayer(g, p.id)).research[TechType.AGRICULTURE]).toEqual({ level: 1 });
+    }));
+
+  it('tells whoever a lost army was marching on that it is gone', () =>
+    game(async (g) => {
+      const { p, cityId, attack } = await heldSeat(g);
+      const other = await createTestPlayer(g);
+      const leader = await addHero(g, p, 1, cityId);
+      await saveCity(g, { ...(await getCity(g, cityId)), troops: { archer: 100 } });
+      const target = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
+      const out = await armies.sendArmy(g, p.id, cityId, { targetTileId: target.id, mission: Mission.ATTACK, troops: { archer: 100 }, heroId: leader });
+      await g.tx.update(armyRows).set({ targetPlayerId: other.id }).where(eq(armyRows.id, out.armyId));
+      await takeIt(g, cityId, attack);
+      expect(
+        g
+          .pushes(PushCmd.ENEMY_ARMIES_UPDATE)
+          .filter((x) => x.playerIds.includes(other.id))
+          .at(-1)?.data,
+      ).toEqual({ armys: [] });
     }));
 });

@@ -82,7 +82,6 @@ export function ResourceBar({ resource, mayor, stacked }: { resource: ResourceBe
                     ...(r.tribute ? [[t('gold.tribute'), r.tribute] as Row] : []),
                     ...(r.stateTribute ? [[t('gold.stateTribute'), r.stateTribute] as Row] : []),
                     ...(r.herosSalary ? [[t('gold.heroSalaries'), -r.herosSalary] as Row] : []),
-                    ...(r.seatUpkeepGold ? [[t('gold.seatUpkeep'), -r.seatUpkeepGold] as Row] : []),
                   ]}
                   total={r.goldRate}
                 />

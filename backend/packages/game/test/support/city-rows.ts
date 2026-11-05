@@ -115,7 +115,6 @@ export function heroRow(over: Partial<HeroRow> = {}): HeroRow {
     stratagemBuffAdded: 0,
     remainPoint: 0,
     buffs: [],
-    capturedByPlayerId: null,
     locked: false,
     gearStat: null,
     sortOrder: 0,

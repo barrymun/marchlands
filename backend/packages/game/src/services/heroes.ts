@@ -1,8 +1,7 @@
-// hero.* — tavern, hiring, mayor, attribute points, levels, loyalty, items, captives.
+// hero.* — tavern, hiring, mayor, attribute points, levels, loyalty, items.
 
 import { eq } from 'drizzle-orm';
 
-import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   buildingLevel,
@@ -43,7 +42,7 @@ import { type Ctx } from '#/context.ts';
 import { heroBean } from '#/dto.ts';
 import { closeMayorCity, fillTavern, heroSlots, hireOffer, openMayorCity, pushHero, rerollTavern, resyncHeroGear } from '#/engine/heroes.ts';
 import { addItem, assertClean, cleanName, consumeItem, itemCount, pushResources, spendGold, spendResources } from '#/helpers.ts';
-import { findCity, getHero, getPlayer, heroesOfCity, type HeroRow, saveCity, saveHero, savePlayer } from '#/repo.ts';
+import { getHero, getPlayer, heroesOfCity, type HeroRow, saveCity, saveHero, savePlayer } from '#/repo.ts';
 
 async function own(ctx: Ctx, playerId: number, cityId: number) {
   const b = await viewCity(ctx, cityId);
@@ -51,7 +50,7 @@ async function own(ctx: Ctx, playerId: number, cityId: number) {
   return b;
 }
 
-/** Heroes living in a city (hired and held captives). */
+/** Heroes living in a city. */
 export async function listHeroes(ctx: Ctx, playerId: number, cityId: number) {
   const b = await own(ctx, playerId, cityId);
   return { heroes: b.heroes.map(heroBean), slots: heroSlots(b) };
@@ -337,49 +336,5 @@ export async function renameHero(ctx: Ctx, playerId: number, heroId: number, nam
   h.name = n;
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
-  return heroBean(h);
-}
-
-/** hero.releaseHero: the captor frees a seized hero; it walks home idle with loyalty 70. */
-export async function releaseCaptive(ctx: Ctx, captorId: number, heroId: number) {
-  const h = await getHero(ctx, heroId, { lock: true });
-  if (h.capturedByPlayerId !== captorId || h.status !== HeroStatus.SEIZED) throw new GameError(msg('hero.notPrisoner'), -99);
-  const home = h.buffs.find((x) => x.id === HeroBuffId.HOME_CITY)?.param ?? 0;
-  const homeCity = home ? await findCity(ctx, home) : undefined;
-  if (!homeCity || homeCity.playerId !== h.playerId) {
-    await ctx.tx.delete(heroes).where(eq(heroes.id, heroId));
-    ctx.push(captorId, PushCmd.HERO_UPDATE, { castleId: h.cityId, hero: heroBean(h), updateType: 1 });
-    return;
-  }
-  const prevCity = h.cityId;
-  Object.assign(h, {
-    cityId: homeCity.id,
-    status: HeroStatus.IDLE,
-    capturedByPlayerId: null,
-    loyalty: 70,
-    buffs: h.buffs.filter((x) => x.id !== HeroBuffId.HOME_CITY),
-  });
-  await saveHero(ctx, h);
-  ctx.push(captorId, PushCmd.HERO_UPDATE, { castleId: prevCity, hero: heroBean(h), updateType: 1 });
-  if (h.playerId) pushHero(ctx, h.playerId, h, 0);
-}
-
-/**
- * Persuade a captive to switch sides (Evony "recruit seized hero"): succeeds when the hero's
- * loyalty is 0 and the captor's city has a free Feasting Hall slot.
- */
-export async function persuadeCaptive(ctx: Ctx, captorId: number, heroId: number) {
-  const h = await getHero(ctx, heroId, { lock: true });
-  if (h.capturedByPlayerId !== captorId || h.status !== HeroStatus.SEIZED) throw new GameError(msg('hero.notPrisoner'), -99);
-  if (h.loyalty > 0) throw new GameError(msg('hero.stillLoyal'), -99);
-  const b = await openOwnCity(ctx, captorId, h.cityId);
-  const hired = b.heroes.filter((x) => x.playerId === captorId).length;
-  if (hired >= heroSlots(b)) throw new GameError(msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }), -99);
-  const formerOwner = h.playerId;
-  Object.assign(h, { playerId: captorId, status: HeroStatus.IDLE, capturedByPlayerId: null, loyalty: 50, buffs: [] });
-  await saveHero(ctx, h);
-  if (formerOwner) ctx.push(formerOwner, PushCmd.HERO_UPDATE, { castleId: h.cityId, hero: heroBean(h), updateType: 1 });
-  pushHero(ctx, captorId, h, 0);
-  await saveCity(ctx, b.city);
   return heroBean(h);
 }

@@ -191,16 +191,13 @@ describe(rankings.heroRanking.name, () => {
       }
     }));
 
-  it('leaves out tavern offers and captured heroes', () =>
+  it('leaves out tavern offers', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      const b = await createTestPlayer(g);
       await setBuildings(g, a, [[0, BuildingType.INN, 1]]);
       const offers = await heroes.tavern(g, a.id, a.cityId);
       expect(offers.heros.length).toBeGreaterThan(0);
       const kept = await addHero(g, a);
-      const captured = await addHero(g, a);
-      await g.tx.update(heroTable).set({ capturedByPlayerId: b.id }).where(eq(heroTable.id, captured));
       const [hero] = await g.tx.select().from(heroTable).where(eq(heroTable.id, kept));
       expect((await rankings.heroRanking(g, 1, 1, 10)).beans.map((x) => x.name)).toEqual([hero!.name]);
     }));

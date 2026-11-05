@@ -15,7 +15,5 @@
   "notEnoughMedals": "{{item}}が足りません。{{amount}}個必要です。",
   "fullyLoyal": "この英雄の忠誠はすでに最大です。",
   "itemNotForGold": "このアイテムはゴールドで購入できません。",
-  "invalidItem": "このアイテムは英雄に使用できません。",
-  "notPrisoner": "この英雄はあなたの捕虜ではありません。",
-  "stillLoyal": "この英雄はまだ主君に忠誠を誓っています。"
+  "invalidItem": "このアイテムは英雄に使用できません。"
 }

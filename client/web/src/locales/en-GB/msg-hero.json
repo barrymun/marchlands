@@ -15,7 +15,5 @@
   "notEnoughMedals": "Not enough {{item}}: {{amount}} needed.",
   "fullyLoyal": "This hero is already completely loyal.",
   "itemNotForGold": "This item cannot be bought with gold.",
-  "invalidItem": "This item cannot be used on a hero.",
-  "notPrisoner": "This hero is not your prisoner.",
-  "stillLoyal": "This hero is still loyal to their owner."
+  "invalidItem": "This item cannot be used on a hero."
 }

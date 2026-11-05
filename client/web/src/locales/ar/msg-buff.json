@@ -11,6 +11,5 @@
   "truceCooldown": "فترة انتظار الهدنة",
   "teleportCooldown": "فترة انتظار الانتقال",
   "holiday": "عطلة",
-  "heroStat": "+{{percent}} {{stat}}",
-  "homeCity": "المدينة الأم"
+  "heroStat": "+{{percent}} {{stat}}"
 }

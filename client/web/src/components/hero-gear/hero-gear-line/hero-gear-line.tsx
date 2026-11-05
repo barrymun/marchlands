@@ -17,7 +17,7 @@ export function HeroGearLine({ hero, cityId }: { hero: HeroBean; cityId: number 
   const { t } = useTranslation('hero-gear');
   const gear: LordGear | undefined = usePlayer().data?.gear;
   const setStat = useCommand(putHeroesGearStatMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId } })]);
-  if (!gear || hero.seized) return null;
+  if (!gear) return null;
   const { tier, setStars, setBonus, total } = heroGearBreakdown(hero.level, gear);
   const current = attributeOfStat(hero.gearStat);
   return (

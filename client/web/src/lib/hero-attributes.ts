@@ -64,7 +64,7 @@ const HERO_ATTRIBUTES = [
 /** The attribute entry for a field name ('power' | 'management' | 'stratagem'). */
 export const attributeOfStat = (stat: GearStat) => HERO_ATTRIBUTES.find((a) => a.stat === stat) ?? HERO_ATTRIBUTES[0]; // there is one for each stat
 
-/** The attribute a hero boost raises (its id is the attribute's field name); none for a captive's home city. */
+/** The attribute a hero boost raises (its id is the attribute's field name). */
 export const attributeOfBuff = (id: HeroBuffId) => HERO_ATTRIBUTES.find((a) => a.stat === id);
 
 export type HeroAttributeValue = (typeof HERO_ATTRIBUTES)[number] & { v: number };

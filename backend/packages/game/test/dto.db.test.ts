@@ -28,7 +28,7 @@ async function producingCity(g: TestGame, p: TestPlayer) {
   await heroes.appointMayor(g, p.id, mayorId);
   const lake = await holdValley(g, p, TileType.LAKE);
   const row = await reloadPlayer(g, p);
-  setBuff(g, row, BuffId.FOOD_PRODUCTION, msg('buff.homeCity'), g.now + 24 * HOUR);
+  setBuff(g, row, BuffId.FOOD_PRODUCTION, msg('buff.truce'), g.now + 24 * HOUR);
   await savePlayer(g, row);
   await setCityStats(g, p, { troops: { archer: 10 } });
   return { mayorId, lake };

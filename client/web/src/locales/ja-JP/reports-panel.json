@@ -117,6 +117,7 @@
     "medalsAttackerFound": "攻撃側が発見したメダル:",
     "loyalty": "民忠 −{{damage}}（現在 {{left}}）",
     "captured": " · 都市を占領",
+    "seatLost": "元の保有者がここに持っていた英雄、軍隊、市場の注文、輸送中の物資は失われました",
     "standing": "{{faction}}との評判 {{change}}（現在 {{standing}}）"
   },
   "desertion": {

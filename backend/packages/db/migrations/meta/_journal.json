@@ -309,6 +309,13 @@
       "when": 1793654040856,
       "tag": "0043_level_12_names",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1793899963979,
+      "tag": "0044_no_prisoners",
+      "breakpoints": true
     }
   ]
 }

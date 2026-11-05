@@ -264,8 +264,6 @@ export const heroes = pgTable(
     stratagemBuffAdded: integer('stratagem_buff_added').notNull().default(0),
     remainPoint: integer('remain_point').notNull().default(0),
     buffs: jsonb('buffs').$type<HeroBuffState[]>().notNull().default([]),
-    /** player who captured this hero (status SEIZED) */
-    capturedByPlayerId: integer('captured_by_player_id'),
     /** (marchlands) a locked hero cannot be dismissed */
     locked: boolean('locked').notNull().default(false),
     /** (marchlands) attribute the lord's gear boosts ('power' | 'management' | 'stratagem'); null: the hero's highest */

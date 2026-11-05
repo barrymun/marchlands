@@ -9,11 +9,10 @@ import { GAIN_TEXT, LOSS_TEXT } from '@/lib/tones';
 
 /**
  * What a hero adds to the city's production as mayor: the mayor's bonus, or for an idle hero what it would add and how
- * that compares with the mayor now. Nothing for a captive or a hero away.
+ * that compares with the mayor now. Nothing for a hero away.
  */
 export function MayorNote({ city, hero }: { city: CityBean; hero: HeroBean }) {
   const { t } = useTranslation('mayor-note');
-  if (hero.seized) return null;
   const pct = percent(mayorShare(hero));
   const rate = signedRate(mayorGain(city, hero));
   if (hero.status === HeroStatus.MAYOR) return <span className={GAIN_TEXT}>{t('bonus', { pct, rate })}</span>;

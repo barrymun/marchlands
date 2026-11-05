@@ -119,6 +119,7 @@
     "medalsAttackerFound": "Medals the attacker found:",
     "loyalty": "Loyalty −{{damage}} (now {{left}})",
     "captured": " · City captured",
+    "seatLost": "Its old holder's heroes, armies, market orders and shipments there are lost",
     "standing": "Standing with the {{faction}} {{change}} (now {{standing}})"
   },
   "desertion": {

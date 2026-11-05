@@ -12,7 +12,7 @@
 // flows held earlier go first. A preview runs up to the first wait and rolls everything back; only its
 // report is kept on the flow (until it runs, is edited or repeat is switched).
 
-import { and, asc, eq, gt, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, isNotNull, lt, ne, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import {
@@ -110,9 +110,7 @@ async function attackTargets(
   const preset = ((await getPlayer(ctx, playerId)).misc.armyPresets ?? []).find((x) => x.id === a.presetId);
   if (!preset) return msg(a.presetId ? 'flow.step.armyGone' : 'flow.step.noArmy');
   const start = await openOwnCity(ctx, playerId, cityId);
-  const heroes = start.heroes
-    .filter((h) => h.playerId === playerId && h.capturedByPlayerId == null && h.status === HeroStatus.IDLE)
-    .sort((x, y) => heroPower(y) - heroPower(x));
+  const heroes = start.heroes.filter((h) => h.status === HeroStatus.IDLE).sort((x, y) => heroPower(y) - heroPower(x));
   const items: NonNullable<FlowStepResult['items']> = [];
   let next = 0;
   for (const tileId of targets) {
@@ -256,7 +254,7 @@ async function hireHeroes(ctx: Ctx, playerId: number, cityId: number, a: Extract
   const inn = buildingLevel(b.city.buildings, BuildingType.INN);
   if (inn < 1) return { detail: msg('hero.needInn', { building: ref.building(BuildingType.INN) }), skipped: true };
   const base = BASE_VALUE[a.stat];
-  const have = b.heroes.filter((h) => h.playerId === playerId && h.capturedByPlayerId == null && base(h) >= a.min).length;
+  const have = b.heroes.filter((h) => base(h) >= a.min).length;
   if (have >= a.count) return { detail: msg('flow.step.hireTargetMet', { count: have, stat: ref.stat(a.stat), min: a.min }), skipped: true };
   const want = Math.min(a.count - have, heroSlots(b) - b.heroes.length);
   if (want < 1) return { detail: msg('flow.step.hallFull', { building: ref.building(BuildingType.FEASTING_HALL) }), skipped: true };
@@ -305,9 +303,7 @@ async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<
     const value = STAT_VALUE[a.stat];
     const stat = ref.stat(a.stat);
     // heroes at home and free: idle ones and the current mayor
-    const candidates = b.heroes.filter(
-      (h) => h.playerId === playerId && h.capturedByPlayerId == null && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR),
-    );
+    const candidates = b.heroes.filter((h) => h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR);
     if (!candidates.length) throw new GameError(msg('flow.noMayorHero'), -99);
     const best = candidates.reduce((top, h) => (value(h) > value(top) ? h : top));
     if (best.status === HeroStatus.MAYOR) return msg('flow.step.alreadyMayor', { hero: best.name, stat, value: value(best) });
@@ -367,10 +363,7 @@ export async function planCities(
   const wanted = citiesWanted(f);
   if (wanted === 'all' && f.actions.some((a) => a.type === 'hireHeroes')) return { cities: own.map((c) => c.id), skipped: [] };
   if (wanted === 'all') {
-    const rows = await ctx.tx
-      .selectDistinct({ cityId: heroesTable.cityId })
-      .from(heroesTable)
-      .where(and(eq(heroesTable.playerId, playerId), isNull(heroesTable.capturedByPlayerId)));
+    const rows = await ctx.tx.selectDistinct({ cityId: heroesTable.cityId }).from(heroesTable).where(eq(heroesTable.playerId, playerId));
     const withHero = new Set(rows.map((r) => r.cityId));
     return {
       cities: own.filter((c) => withHero.has(c.id)).map((c) => c.id),

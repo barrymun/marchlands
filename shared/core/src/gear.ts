@@ -135,7 +135,7 @@ export function heroGearStat(h: Pick<GearedHero, 'power' | 'management' | 'strat
   return h.management >= h.stratagem ? 'management' : 'stratagem';
 }
 
-/** Put the hero's gear points on its gear attribute (`gear` null: no gear, e.g. a captive). Returns whether anything changed. */
+/** Put the hero's gear points on its gear attribute (`gear` null: no gear, e.g. in a tavern). Returns whether anything changed. */
 export function syncHeroGear(h: GearedHero, gear: LordGear | null): boolean {
   const bonus = gear ? heroGearBonus(h.level, gear) : 0;
   const stat = heroGearStat(h);

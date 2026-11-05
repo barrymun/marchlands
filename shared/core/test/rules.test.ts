@@ -124,31 +124,24 @@ describe('economy', () => {
   it('(marchlands) a held historic city brings its tribute in gold, by its level', () => {
     const s = computeCityStats(city({ historicLevel: 16 }), ctx(), 0);
     expect(s.tribute).toBe(BALANCE.historic.tribute[16]);
-    expect(s.rates.gold).toBe(5 + BALANCE.historic.tribute[16] - BALANCE.historic.upkeep.gold[16]);
+    expect(s.rates.gold).toBe(5 + BALANCE.historic.tribute[16]);
     expect(computeCityStats(city(), ctx(), 0).tribute).toBe(0);
   });
 
   it("(marchlands) a state's capital brings its state's tribute too, per real hour", () => {
     const s = computeCityStats(city({ historicLevel: 16, stateTribute: 42_000 }), ctx(), 0);
     expect(s.stateTribute).toBe(42_000);
-    expect(s.rates.gold).toBe(5 + BALANCE.historic.tribute[16] + 42_000 - BALANCE.historic.upkeep.gold[16]);
+    expect(s.rates.gold).toBe(5 + BALANCE.historic.tribute[16] + 42_000);
     expect(computeCityStats(city(), ctx(), 0).stateTribute).toBe(0);
   });
 
-  it('(marchlands) holding a historic city costs gold and food, more with every other seat held', () => {
-    const U = BALANCE.historic.upkeep;
-    const one = computeCityStats(city({ historicLevel: 12 }), ctx({ seats: { held: 1, shared: false } }), 0);
-    expect(one.seatUpkeep).toEqual({ gold: U.gold[12], food: U.food[12] });
-    expect(one.rates.gold).toBe(5 + BALANCE.historic.tribute[12] - U.gold[12]);
-    const three = computeCityStats(city({ historicLevel: 12 }), ctx({ seats: { held: 3, shared: false } }), 0);
-    expect(three.seatUpkeep.gold).toBeCloseTo(U.gold[12] * (1 + 2 * U.risePerSeat));
-    expect(one.rates.food - three.rates.food).toBeCloseTo(U.food[12] * 2 * U.risePerSeat);
-    expect(computeCityStats(city(), ctx(), 0).seatUpkeep).toEqual({ gold: 0, food: 0 });
+  it('(marchlands) holding a historic city costs no food: only the tribute sets it apart', () => {
+    expect(computeCityStats(city({ historicLevel: 12 }), ctx(), 0).rates.food).toBe(computeCityStats(city(), ctx(), 0).rates.food);
   });
 
   it("(marchlands) the holder's alliance takes its share of both tributes", () => {
     const share = BALANCE.historic.allianceShare;
-    const s = computeCityStats(city({ historicLevel: 16, stateTribute: 40_000 }), ctx({ seats: { held: 1, shared: true } }), 0);
+    const s = computeCityStats(city({ historicLevel: 16, stateTribute: 40_000 }), ctx({ seats: { shared: true } }), 0);
     expect(s.tribute).toBeCloseTo(BALANCE.historic.tribute[16] * (1 - share));
     expect(s.stateTribute).toBeCloseTo(40_000 * (1 - share));
     expect(s.tributeShared).toBeCloseTo((BALANCE.historic.tribute[16] + 40_000) * share);

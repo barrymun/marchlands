@@ -12,7 +12,7 @@ import { merchantSweep } from '#/engine/market.ts';
 import { npcTradeTick } from '#/engine/npc-economy.ts';
 import { checkBeginner } from '#/engine/player.ts';
 import { refreshRankings } from '#/engine/rankings.ts';
-import { tendSeat } from '#/engine/unrest.ts';
+import { tendSeat } from '#/engine/seat-share.ts';
 import { refreshZoneStats } from '#/engine/world.ts';
 import { getCity, getPlayer, getTile, saveCity, savePlayer } from '#/repo.ts';
 import { compactStats } from '#/stats.ts';
@@ -69,7 +69,7 @@ export async function draftJob(db: Db) {
   }
 }
 
-/** (marchlands) Every held historic city's minute: unrest, rising up, and its alliance's share of the tribute (engine/unrest.ts). */
+/** (marchlands) Every held historic city's minute: its alliance's share of the tribute (engine/seat-share.ts). */
 export async function seatsJob(db: Db) {
   const seats = await db.select({ id: cities.id }).from(cities).where(isNotNull(cities.historicLevel));
   for (const { id } of seats) await runGame(db, (ctx) => tendSeat(ctx, id));

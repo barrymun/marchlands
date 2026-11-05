@@ -25,6 +25,4 @@ export const HERO_MESSAGES = {
   itemNotForGold: [],
   /** an item that does nothing for a hero */
   invalidItem: [],
-  notPrisoner: [],
-  stillLoyal: [],
 } as const;

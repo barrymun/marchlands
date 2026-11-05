@@ -139,7 +139,7 @@ export async function heroRanking(ctx: Ctx, sortType: number, pageNo: number, pa
       select h.id, h.name, h.level, h.power, h.management, h.stratagem, p.name as kind,
              row_number() over (order by ${order}, h.id) as rank
       from heroes h join players p on p.id = h.player_id
-      where not h.in_tavern and h.captured_by_player_id is null)
+      where not h.in_tavern)
     select *, count(*) over () as total from numbered
     where ${key ? sql`name ilike ${like(key)}` : sql`true`}
     order by rank limit ${size} offset ${offset}`);

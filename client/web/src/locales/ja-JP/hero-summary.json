@@ -6,7 +6,6 @@
     "idle": "待機中",
     "mayor": "市長",
     "marching": "行軍中",
-    "captive": "捕虜",
     "returning": "帰還中"
   },
   "unspent_other": "未使用の能力ポイント {{count}}"

@@ -72,6 +72,7 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
         <div className="text-xs text-muted-foreground">
           {t('loot.loyalty', { damage: fmtExact(b.seat.loyaltyDamage), left: fmtExact(b.seat.loyaltyLeft) })}
           {b.seat.captured && t('loot.captured')}
+          {b.seat.captured && <p>{t('loot.seatLost')}</p>}
         </div>
       )}
       {'standing' in b && b.standing && mine && (

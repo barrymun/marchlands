@@ -52,30 +52,26 @@ export function HeroActions({ hero: h, city }: { hero: HeroBean; city: CityBean 
   return (
     <>
       <Badge variant={h.status === HeroStatus.MAYOR ? 'default' : 'secondary'}>{statusLabel(h)}</Badge>
-      {!h.seized && (h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR) && (
+      {(h.status === HeroStatus.IDLE || h.status === HeroStatus.MAYOR) && (
         <Button size="xs" variant={h.remainPoint > 0 ? 'default' : 'outline'} onClick={() => setPoints(true)}>
           {h.remainPoint > 0 ? t('heroes.pointsCount', { points: h.remainPoint }) : t('heroes.points')}
         </Button>
       )}
-      {!h.seized && (
-        <Button size="xs" variant="outline" onClick={() => setItems(true)}>
-          {t('heroes.items')}
-        </Button>
-      )}
-      {!h.seized && (
-        <div className="flex items-center gap-1.5 px-1">
-          <Switch
-            id={`lock-${h.id}`}
-            checked={h.locked}
-            disabled={lock.isPending}
-            onCheckedChange={(locked) => lock.mutate({ path: { heroId: h.id }, body: { locked } })}
-          />
-          <Label htmlFor={`lock-${h.id}`} className="gap-1 text-xs font-normal">
-            {h.locked ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
-            {h.locked ? t('heroes.locked') : t('heroes.lock')}
-          </Label>
-        </div>
-      )}
+      <Button size="xs" variant="outline" onClick={() => setItems(true)}>
+        {t('heroes.items')}
+      </Button>
+      <div className="flex items-center gap-1.5 px-1">
+        <Switch
+          id={`lock-${h.id}`}
+          checked={h.locked}
+          disabled={lock.isPending}
+          onCheckedChange={(locked) => lock.mutate({ path: { heroId: h.id }, body: { locked } })}
+        />
+        <Label htmlFor={`lock-${h.id}`} className="gap-1 text-xs font-normal">
+          {h.locked ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
+          {h.locked ? t('heroes.locked') : t('heroes.lock')}
+        </Label>
+      </div>
       {h.experience >= h.upgradeExp && !heroAtMaxLevel(h) && (
         <Button size="xs" onClick={() => levelUp.mutate(h.id)} disabled={levelUp.isPending}>
           {levelsReady(h) > 1 ? t('heroes.levelUpMulti', { times: levelsReady(h), level: h.level + levelsReady(h) }) : t('heroes.levelUp')}

@@ -248,27 +248,3 @@ export function historicGuard(level: HistoricLevel, tileId: number) {
  */
 export const stateTribute = (groups: readonly { level: number; members: number }[]) =>
   groups.reduce((sum, g) => sum + g.level * g.members, 0) * BALANCE.historic.stateTribute.perMemberLevel;
-
-/** Why a held historic city is restless: too few troops at home, or out of gold or food for its upkeep. */
-export const SeatNeglect = { GARRISON: 'garrison', UPKEEP: 'upkeep' } as const;
-export type SeatNeglect = (typeof SeatNeglect)[keyof typeof SeatNeglect];
-
-/** What a held historic city lacks now (BALANCE.historic.unrest): troops at home below its garrison, and gold or food at 0. */
-export function seatNeglect(level: HistoricLevel, city: { troops: TroopCounts; gold: number; food: number }): SeatNeglect[] {
-  const home = Object.values(city.troops).reduce((sum, n) => sum + n, 0);
-  const out: SeatNeglect[] = [];
-  if (home < BALANCE.historic.unrest.garrison[level]) out.push(SeatNeglect.GARRISON);
-  if (city.gold <= 0 || city.food <= 0) out.push(SeatNeglect.UPKEEP);
-  return out;
-}
-
-/**
- * A held historic city's loyalty as of `at`, given what it lacked since `from`: neglected, it loses a point every
- * BALANCE.historic.unrest.msPerPoint for each thing it lacks and doesn't recover; otherwise it recovers (seatLoyalty).
- */
-export function seatUnrest(loyalty: number, from: number, at: number, neglect: number): { loyalty: number; loyaltyAt: number } {
-  if (neglect <= 0) return seatLoyalty(loyalty, from, at);
-  const step = BALANCE.historic.unrest.msPerPoint / neglect;
-  const lost = Math.min(loyalty, Math.max(0, Math.floor((at - from) / step)));
-  return { loyalty: loyalty - lost, loyaltyAt: lost >= loyalty ? at : from + lost * step };
-}

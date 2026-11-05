@@ -28,5 +28,4 @@ export const BUFF_MESSAGES = {
   /** hero attribute item (`stat`), `percent`: BALANCE.items.heroAttributeBuff.bonus */
   heroStat: ['stat', 'percent'],
   /** a captured hero's home city (param: the city) */
-  homeCity: [],
 } as const;

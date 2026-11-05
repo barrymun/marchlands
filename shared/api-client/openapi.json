@@ -317,7 +317,6 @@
               "buff.teleportCooldown",
               "buff.holiday",
               "buff.heroStat",
-              "buff.homeCity",
               "flow.nameLength",
               "flow.actionCount",
               "flow.invalidAction",
@@ -530,8 +529,6 @@
               "hero.fullyLoyal",
               "hero.itemNotForGold",
               "hero.invalidItem",
-              "hero.notPrisoner",
-              "hero.stillLoyal",
               "report.title.missionAborted",
               "report.title.scoutReturned",
               "report.title.attackReturned",
@@ -947,10 +944,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "seized": {
-            "type": "boolean",
-            "description": "held captive by another lord"
-          },
           "gearStat": {
             "type": "string",
             "enum": [
@@ -978,8 +971,7 @@
                   "enum": [
                     "power",
                     "management",
-                    "stratagem",
-                    "homeCity"
+                    "stratagem"
                   ]
                 },
                 "desc": {
@@ -1028,7 +1020,6 @@
           "cityId",
           "locked",
           "experience",
-          "seized",
           "gearStat",
           "sex",
           "buffs"
@@ -1077,10 +1068,6 @@
             "type": "number",
             "description": "troop food upkeep per game hour (negative; 0 for other resources), 2 decimals"
           },
-          "seatUpkeep": {
-            "type": "number",
-            "description": "(marchlands) a held historic city's food upkeep per game hour (negative; 0 for other resources), 2 decimals"
-          },
           "tax": {
             "type": "number",
             "description": "(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals"
@@ -1110,7 +1097,6 @@
           "valley",
           "buff",
           "upkeep",
-          "seatUpkeep",
           "tax",
           "techBonus",
           "mayorBonus",
@@ -1232,18 +1218,6 @@
             "maximum": 9007199254740991,
             "description": "(marchlands) gold per game hour of those tributes the holder's alliance gets instead (not in goldRate)"
           },
-          "seatUpkeepGold": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "(marchlands) gold per game hour a held historic city's upkeep costs (part of goldRate)"
-          },
-          "seatUpkeepFood": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "(marchlands) food per game hour a held historic city's upkeep costs (part of foodRate)"
-          },
           "herosSalary": {
             "type": "number"
           },
@@ -1294,8 +1268,6 @@
           "tribute",
           "stateTribute",
           "tributeShared",
-          "seatUpkeepGold",
-          "seatUpkeepFood",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -1478,18 +1450,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "a held historic city's loyalty now: rivals' wins and unrest take it down, and at 0 it's lost"
-          },
-          "seatNeglect": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "garrison",
-                "upkeep"
-              ]
-            },
-            "description": "what a held historic city lacks, losing it loyalty: troops at home, gold or food for its upkeep"
+            "description": "a held historic city's loyalty now: rivals' wins take it down, and at 0 it's lost"
           },
           "createdAt": {
             "type": "number",
@@ -1521,7 +1482,6 @@
           "draftedToday",
           "draftNextAt",
           "seatLoyalty",
-          "seatNeglect",
           "createdAt"
         ]
       },
@@ -1903,7 +1863,7 @@
             "items": {
               "$ref": "#/components/schemas/HeroBeanInput"
             },
-            "description": "hired heroes and captives held"
+            "description": "hired heroes"
           },
           "slots": {
             "type": "integer",
@@ -12677,7 +12637,6 @@
               "buff.teleportCooldown",
               "buff.holiday",
               "buff.heroStat",
-              "buff.homeCity",
               "flow.nameLength",
               "flow.actionCount",
               "flow.invalidAction",
@@ -12890,8 +12849,6 @@
               "hero.fullyLoyal",
               "hero.itemNotForGold",
               "hero.invalidItem",
-              "hero.notPrisoner",
-              "hero.stillLoyal",
               "report.title.missionAborted",
               "report.title.scoutReturned",
               "report.title.attackReturned",
@@ -13312,10 +13269,6 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "seized": {
-            "type": "boolean",
-            "description": "held captive by another lord"
-          },
           "gearStat": {
             "type": "string",
             "enum": [
@@ -13343,8 +13296,7 @@
                   "enum": [
                     "power",
                     "management",
-                    "stratagem",
-                    "homeCity"
+                    "stratagem"
                   ]
                 },
                 "desc": {
@@ -13394,7 +13346,6 @@
           "cityId",
           "locked",
           "experience",
-          "seized",
           "gearStat",
           "sex",
           "buffs"
@@ -13444,10 +13395,6 @@
             "type": "number",
             "description": "troop food upkeep per game hour (negative; 0 for other resources), 2 decimals"
           },
-          "seatUpkeep": {
-            "type": "number",
-            "description": "(marchlands) a held historic city's food upkeep per game hour (negative; 0 for other resources), 2 decimals"
-          },
           "tax": {
             "type": "number",
             "description": "(marchlands) output the tax rate sells to the merchant per game hour (negative), 2 decimals"
@@ -13477,7 +13424,6 @@
           "valley",
           "buff",
           "upkeep",
-          "seatUpkeep",
           "tax",
           "techBonus",
           "mayorBonus",
@@ -13601,18 +13547,6 @@
             "maximum": 9007199254740991,
             "description": "(marchlands) gold per game hour of those tributes the holder's alliance gets instead (not in goldRate)"
           },
-          "seatUpkeepGold": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "(marchlands) gold per game hour a held historic city's upkeep costs (part of goldRate)"
-          },
-          "seatUpkeepFood": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "(marchlands) food per game hour a held historic city's upkeep costs (part of foodRate)"
-          },
           "herosSalary": {
             "type": "number"
           },
@@ -13663,8 +13597,6 @@
           "tribute",
           "stateTribute",
           "tributeShared",
-          "seatUpkeepGold",
-          "seatUpkeepFood",
           "herosSalary",
           "troopCostFood",
           "curPopulation",
@@ -13849,18 +13781,7 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
-            "description": "a held historic city's loyalty now: rivals' wins and unrest take it down, and at 0 it's lost"
-          },
-          "seatNeglect": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "garrison",
-                "upkeep"
-              ]
-            },
-            "description": "what a held historic city lacks, losing it loyalty: troops at home, gold or food for its upkeep"
+            "description": "a held historic city's loyalty now: rivals' wins take it down, and at 0 it's lost"
           },
           "createdAt": {
             "type": "number",
@@ -13892,7 +13813,6 @@
           "draftedToday",
           "draftNextAt",
           "seatLoyalty",
-          "seatNeglect",
           "createdAt"
         ],
         "additionalProperties": false
@@ -14281,7 +14201,7 @@
             "items": {
               "$ref": "#/components/schemas/HeroBean"
             },
-            "description": "hired heroes and captives held"
+            "description": "hired heroes"
           },
           "slots": {
             "type": "integer",
@@ -32653,150 +32573,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "path",
-            "name": "heroId",
-            "required": true
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ok": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/HeroBean"
-                    }
-                  },
-                  "required": [
-                    "ok",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/heroes/{heroId}/release": {
-      "post": {
-        "operationId": "postHeroesRelease",
-        "summary": "Free a captured enemy hero (hero.releaseHero)",
-        "tags": [
-          "heroes"
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "number"
-            },
-            "in": "path",
-            "name": "heroId",
-            "required": true
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "ok": {
-                      "type": "number",
-                      "enum": [
-                        1
-                      ]
-                    },
-                    "data": {
-                      "type": "null"
-                    }
-                  },
-                  "required": [
-                    "ok",
-                    "data"
-                  ],
-                  "additionalProperties": false
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "Default Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/heroes/{heroId}/persuade": {
-      "post": {
-        "operationId": "postHeroesPersuade",
-        "summary": "Recruit a captive whose loyalty is 0",
-        "tags": [
-          "heroes"
-        ],
         "parameters": [
           {
             "schema": {

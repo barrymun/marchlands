@@ -29,7 +29,7 @@ import { gearOfHero, getHero, heroesOfCity, type HeroRow, saveCity, saveHero } f
 export const pushHero = (ctx: Ctx, playerId: number, h: HeroRow, updateType: 0 | 1 | 2) =>
   ctx.push(playerId, PushCmd.HERO_UPDATE, { castleId: h.cityId, hero: heroBean(h), updateType });
 
-/** Hired heroes (incl. captives held) a city has room for: Feasting Hall level. */
+/** Hired heroes a city has room for: Feasting Hall level. */
 export const heroSlots = (b: CityBundle) => buildingLevel(b.city.buildings, BuildingType.FEASTING_HALL);
 
 export function heroValues(g: GeneratedHero) {

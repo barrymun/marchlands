@@ -117,12 +117,6 @@ export default async function militaryRoutes(app: ZApp) {
   app.patch('/heroes/:heroId', s(tags.heroes, 'Rename (hero.changeName)', HeroBean, { params: HeroParams, body: RenameHeroBody }), (req) =>
     game(req, (ctx, pid) => heroes.renameHero(ctx, pid, req.params.heroId, req.body.name)),
   );
-  app.post('/heroes/:heroId/release', s(tags.heroes, 'Free a captured enemy hero (hero.releaseHero)', Empty, { params: HeroParams }), (req) =>
-    game(req, (ctx, pid) => heroes.releaseCaptive(ctx, pid, req.params.heroId)),
-  );
-  app.post('/heroes/:heroId/persuade', s(tags.heroes, 'Recruit a captive whose loyalty is 0', HeroBean, { params: HeroParams }), (req) =>
-    game(req, (ctx, pid) => heroes.persuadeCaptive(ctx, pid, req.params.heroId)),
-  );
 
   // ---- armies ----
   app.get('/armies', s(tags.armies, 'Own, friendly and hostile armies (Self/Friend/EnemyArmysUpdate)', VisibleArmies), (req) =>

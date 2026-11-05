@@ -17,7 +17,7 @@ export function HeroStats({ hero }: { hero: HeroBean }) {
   const { t } = useTranslation('hero-summary');
   const gear = usePlayer().data?.gear;
   const top = dominantAttribute(hero);
-  const gearBonus = gear && !hero.seized ? heroGearBreakdown(hero.level, gear) : null;
+  const gearBonus = gear ? heroGearBreakdown(hero.level, gear) : null;
   return (
     <span className="flex items-center gap-1.5 text-xs tabular-nums">
       <span className={cn('rounded px-1 font-semibold', top.tone)} title={t('strongest', { label: top.label })}>

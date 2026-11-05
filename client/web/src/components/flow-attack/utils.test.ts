@@ -9,7 +9,7 @@ type Hero = CityBean['heros'][number];
 
 let nextId = 1;
 
-const hero = (status: HeroStatus, seized = false): Hero => ({
+const hero = (status: HeroStatus): Hero => ({
   id: nextId++,
   name: `Hero ${nextId}`,
   logoUrl: '',
@@ -33,7 +33,6 @@ const hero = (status: HeroStatus, seized = false): Hero => ({
   cityId: 1,
   locked: false,
   experience: 0,
-  seized,
   gearStat: 'power',
   sex: Sex.MALE,
   buffs: [],
@@ -53,11 +52,6 @@ describe(idleHeroes.name, () => {
     expect(idleHeroes(c)).toBe(2);
   });
 
-  it('leaves out heroes held captive, even when their status is idle', () => {
-    expect(idleHeroes(city(hero(HeroStatus.IDLE, true), hero(HeroStatus.IDLE)))).toBe(1);
-    expect(idleHeroes(city(hero(HeroStatus.SEIZED, true)))).toBe(0);
-  });
-
   it('is 0 when every hero is busy', () => {
     expect(idleHeroes(city(hero(HeroStatus.MAYOR), hero(HeroStatus.ATTACK)))).toBe(0);
   });
@@ -71,7 +65,7 @@ describe(targetCap.name, () => {
 
   it('is 0 without idle heroes', () => {
     expect(targetCap(city())).toBe(0);
-    expect(targetCap(city(hero(HeroStatus.ATTACK), hero(HeroStatus.IDLE, true)))).toBe(0);
+    expect(targetCap(city(hero(HeroStatus.ATTACK)))).toBe(0);
   });
 
   it('stops at FLOW_MAX_TARGETS_PER_CITY', () => {

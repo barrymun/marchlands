@@ -41,7 +41,7 @@ describe(mayorStats.name, () => {
 
 describe(economyContext.name, () => {
   it("passes the lord's research and buffs, the valleys' types and levels and the troops away", () => {
-    const buffs = [{ id: BuffId.FOOD_PRODUCTION, desc: msg('buff.homeCity'), endTime: T0 + 1000 }];
+    const buffs = [{ id: BuffId.FOOD_PRODUCTION, desc: msg('buff.truce'), endTime: T0 + 1000 }];
     const b = bundle({
       player: playerRow({ research: { 1: { level: 3 } }, buffs }),
       valleys: [tileRow({ id: 7, type: TileType.LAKE, level: 4, ownerCityId: 1 }), tileRow({ id: 9, type: TileType.HILL, level: 2, ownerCityId: 1 })],
@@ -60,10 +60,9 @@ describe(economyContext.name, () => {
     });
   });
 
-  it('pays the heroes of the city owner, not prisoners held there', () => {
+  it("pays the city's heroes, and takes the mayor's stats", () => {
     const own = [heroRow({ level: 3 }), heroRow({ level: 7, status: HeroStatus.MAYOR, management: 30 })];
-    const prisoner = heroRow({ playerId: 2, level: 9, status: HeroStatus.SEIZED, capturedByPlayerId: 1 });
-    const ctx = economyContext(bundle({ heroes: [...own, prisoner] }));
+    const ctx = economyContext(bundle({ heroes: own }));
     expect(ctx.heroLevels).toEqual([3, 7]);
     expect(ctx.mayor).toEqual({ power: 10, management: 30, stratagem: 10 });
   });

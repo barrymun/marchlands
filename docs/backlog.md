@@ -17,6 +17,7 @@ Design notes and known quirks to come back to. Each entry says what happens now,
 
 ## Known quirks
 
+- **Hero loyalty does nothing now.** Heroes still have a loyalty (shown on the Heroes page, 5 less when an army is wiped), and medals and the Reward button raise it, but its only effect was the chance of being captured, gone since 2026-11-05 ([deviations.md](deviations.md)). Left for the maintainer to decide: give it an effect, or remove it, the Reward button and the medals' use on heroes (medals still buy titles).
 - **Report pages are counted by position.** The Reports page keeps its page in the address (`page`, [features/address-state.md](features/address-state.md)), but a page is a position in the list: while reports arrive newest first, page 3 after a reload can start a few rows later than before. The open report is by id, so it reopens whatever moved. Left because fixing it means cursor paging ("older than report X") in `listReports` (`backend/packages/game/src/services/reports.ts`) and its route, a server change not worth it for a few rows.
 - **A report that's gone shows an empty dialog for a moment.** Opening `?report=<id>` for a report deleted or expired since asks the server first; the dialog opens with no content and closes once the refusal comes back (`ReportDialog`, `components/reports-panel/report-dialog/`). Left because it's brief and only follows an old link; holding the dialog until the report loads would make every opening wait.
 - **A value a screen doesn't understand stays in the address.** `useSearchState` reads a nonsensical value as the default (`?items.owned=0` reads as off) but only writes the names it's asked to change, so the stray text stays until something sets that name or the panel closes. Harmless: it reads as the default every time. Rewriting the whole address on every read would add a history-free navigation on each visit.
@@ -50,6 +51,6 @@ Design notes and known quirks to come back to. Each entry says what happens now,
 
 ## A seat's alliance share between payouts
 
-- **What happens:** while a seat's holder is in an alliance with others, their tribute is a quarter lower and the quarter is paid to the other members every whole real hour (`shareTribute`, `backend/packages/game/src/engine/unrest.ts`). If the holder leaves the alliance, or the others leave, before the hour is up, what accrued since the last payout is paid to nobody.
+- **What happens:** while a seat's holder is in an alliance with others, their tribute is a quarter lower and the quarter is paid to the other members every whole real hour (`shareTribute`, `backend/packages/game/src/engine/seat-share.ts`). If the holder leaves the alliance, or the others leave, before the hour is up, what accrued since the last payout is paid to nobody.
 - **Why left:** at most an hour's share (500 gold at level 12, 15,000 at Atlantis), and paying it on leaving would mean hooking every way out of an alliance. Paying every minute instead would cost a city write per member per seat each minute.
 
