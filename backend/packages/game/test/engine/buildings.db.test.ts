@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { BALANCE, buildingHeroExp, buildingMaxLevel, BuildingStatus, BuildingType, PrestigeAction, prestigeOf } from '@marchlands/core';
+import { BALANCE, buildingHeroExp, buildingMaxLevel, BuildingStatus, BuildingType, PrestigeAction, prestigeOf, TimedEventType } from '@marchlands/core';
 
 import { completeBuilding } from '#/engine/buildings.ts';
 import { buildings, heroes } from '#/index.ts';
@@ -71,7 +71,7 @@ describe(completeBuilding.name, () => {
       g.unschedule(`building:${p.cityId}:0`);
       await completeBuilding(g, p.cityId, 0);
       expect(await buildingAt(g, p, 0)).toMatchObject({ level: 0, status: BuildingStatus.BUILDING });
-      expect(g.events('building')).toMatchObject([{ dueAt: built.endTime, payload: { positionId: 0 } }]);
+      expect(g.events(TimedEventType.BUILDING)).toMatchObject([{ dueAt: built.endTime, payload: { positionId: 0 } }]);
     }));
 
   it('does nothing for an idle building or a missing city', () =>

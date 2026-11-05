@@ -17,6 +17,7 @@ import {
   Mission,
   msg,
   TechType,
+  TimedEventType,
   totalResources,
   WAR_ENSIGN_DESC,
 } from '@marchlands/core';
@@ -141,7 +142,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       expect(b.medals).toBeUndefined();
       expect(await reportTitles(g, q.id)).toEqual(['report.title.attackRepelled']);
       expect(await armyRow(g, armyId)).toBeUndefined();
-      expect(g.events('army')).toEqual([]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([]);
       expect((await reloadCity(g, p.cityId)).troops.lightCavalry ?? 0).toBe(0);
       expect((await reloadCity(g, q.cityId)).troops).toEqual(b.defender.troops.after);
       expect((await reloadPlayer(g, q)).honor).toBe(b.defender.honor);
@@ -265,7 +266,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       const { p, q, go } = await battle(g, { lightCavalry: 5000 }, { militia: 10 });
       await setBuildings(g, q, [[-2, BuildingType.WALLS, 4]]);
       await training.train(g, q.id, q.cityId, FortType.TRAP, 100, training.WALLS_QUEUE);
-      await g.runDue(g.events('train')[0]!.dueAt);
+      await g.runDue(g.events(TimedEventType.TRAIN)[0]!.dueAt);
       expect((await reloadCity(g, q.cityId)).forts).toEqual({ trap: 100 });
       const armyId = await go();
       await arrive(g, armyId);

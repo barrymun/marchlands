@@ -5,7 +5,7 @@ import { Swords } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { totalTroops, TROOP_KEYS } from '@marchlands/core';
+import { FlowCities, type FlowCityChoice, totalTroops, TROOP_KEYS } from '@marchlands/core';
 
 import { CityTargets } from '@/components/flow-attack/attack-targets-fields/city-targets/city-targets';
 import { usePresets } from '@/components/flow-attack/attack-targets-fields/hooks';
@@ -25,13 +25,13 @@ export function AttackTargetsFields({
 }: {
   action: AttackAction;
   onChange: (a: AttackAction) => void;
-  cities: 'all' | number[];
+  cities: FlowCityChoice;
 }) {
   const { t } = useTranslation(['flow-attack', 'common']);
   const player = usePlayer();
   const presets = usePresets();
   const [creating, setCreating] = useState(false);
-  const castles = (player.data?.castles ?? []).filter((c) => targets === 'all' || targets.includes(c.id));
+  const castles = (player.data?.castles ?? []).filter((c) => targets === FlowCities.ALL || targets.includes(c.id));
   const preset = presets.data?.find((p) => p.id === action.presetId);
   const setList = (cityId: number, list: number[]) => onChange({ ...action, targets: { ...action.targets, [String(cityId)]: list } });
 

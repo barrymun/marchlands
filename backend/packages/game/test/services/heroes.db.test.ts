@@ -30,6 +30,7 @@ import {
   ref,
   tavernRefreshCost,
   TechType,
+  TimedEventType,
   upgradeExpFor,
 } from '@marchlands/core';
 
@@ -619,13 +620,15 @@ describe(heroes.useHeroItem.name, () => {
       const end = heroAttributeBuffEnd(start);
       expect(bean.powerBuffAdded).toBe(amount);
       expect(bean.buffs).toEqual([{ id: HeroBuffId.POWER, desc: heroBuffDesc('power'), endTime: end, param: amount }]);
-      expect(g.events('hero.buff')).toMatchObject([{ dueAt: end, playerId: p.id, refKey: `herobuff:${id}:power`, payload: { heroId: id, attr: 'power' } }]);
+      expect(g.events(TimedEventType.HERO_BUFF)).toMatchObject([
+        { dueAt: end, playerId: p.id, refKey: `herobuff:${id}:power`, payload: { heroId: id, attr: 'power' } },
+      ]);
 
       g.advance(60_000);
       await heroes.useHeroItem(g, p.id, id, ItemId.EXCALIBUR);
       const stacked = heroAttributeBuffEnd(g.now, end);
       expect((await getHero(g, id)).buffs).toMatchObject([{ id: HeroBuffId.POWER, endTime: stacked }]);
-      expect(g.events('hero.buff')).toMatchObject([{ dueAt: stacked }]);
+      expect(g.events(TimedEventType.HERO_BUFF)).toMatchObject([{ dueAt: stacked }]);
 
       await g.runDue(end);
       expect((await getHero(g, id)).powerBuffAdded).toBe(amount);
@@ -646,7 +649,7 @@ describe(heroes.useHeroItem.name, () => {
       expect(bean.managementBuffAdded).toBeGreaterThan(0);
       expect(await gold(g, p)).toBe(0);
       expect(g.pushes(PushCmd.RESOURCE_UPDATE)).toHaveLength(pushes + 1);
-      await g.runDue(g.events('hero.buff')[0]!.dueAt);
+      await g.runDue(g.events(TimedEventType.HERO_BUFF)[0]!.dueAt);
       expect((await getHero(g, id)).managementBuffAdded).toBe(0);
       expect(g.pushes(PushCmd.RESOURCE_UPDATE)).toHaveLength(pushes + 2);
     }));

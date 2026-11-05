@@ -31,6 +31,7 @@ import type {
   CastleSign,
   CityMisc,
   FlowAction,
+  FlowCityChoice,
   FlowPreviewLog,
   FlowRunLog,
   FlowStatus,
@@ -43,6 +44,7 @@ import type {
   ReportBody,
   ResearchState,
   ResourceSet,
+  TimedEventType,
   TroopCounts,
   TroopQueueState,
 } from '#/types.ts';
@@ -337,7 +339,7 @@ export const flows = pgTable(
     actions: jsonb('actions').$type<FlowAction[]>().notNull(),
     /** 'all' (every city, including ones gained later) or chosen city ids */
     cities: jsonb('cities')
-      .$type<'all' | number[]>()
+      .$type<FlowCityChoice>()
       .notNull()
       .default(sql`'"all"'::jsonb`),
     /** run again after each run, until a run fails or the lord switches it off */
@@ -350,7 +352,7 @@ export const flows = pgTable(
     /** cities of the current run */
     runCities: jsonb('run_cities').$type<number[]>().notNull().default([]),
     /** cities chosen for this run only (Run on chosen cities, or 'all'); null = the flow's own cities */
-    cityOverride: jsonb('city_override').$type<'all' | number[] | null>(),
+    cityOverride: jsonb('city_override').$type<FlowCityChoice | null>(),
     /** armies the current run sent, per city id (for "wait until armies home" and heals) */
     armyIds: jsonb('army_ids').$type<Record<string, number[]>>().notNull().default({}),
     /** when it joined the queue (the queue is first come, first served) */
@@ -381,7 +383,7 @@ export const timedEvents = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     /** e.g. building.complete, research.complete, troop.train, fort.train, army.arrive, buff.expire */
-    type: text('type').notNull(),
+    type: text('type').$type<TimedEventType>().notNull(),
     dueAt: ms('due_at').notNull(),
     playerId: integer('player_id'),
     cityId: integer('city_id'),

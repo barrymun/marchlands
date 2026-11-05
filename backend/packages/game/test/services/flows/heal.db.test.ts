@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { FlowActionType, FlowHealWhen, HealPayment, TimedEventType } from '@marchlands/core';
+
 import { runScheduledHeal } from '#/engine/flows.ts';
 import { armies, flows } from '#/index.ts';
 import { createTestPlayer, setInjured } from '#test/support/factories.ts';
@@ -16,10 +18,13 @@ describe(`${flows.runFlow.name}: a heal still waiting from an earlier run`, () =
       await runScheduledHeal(g, p.id, p.cityId, 'resources', [armyId]);
       await persistEvents(g);
       await armies.recallArmy(g, p.id, armyId);
-      await g.runDue(g.events('army')[0]!.dueAt);
+      await g.runDue(g.events(TimedEventType.ARMY)[0]!.dueAt);
       expect(await storedEvent(g, `flowheal:${p.cityId}`)).toBeDefined();
 
-      const f = await newFlow(g, p, { name: 'Heal', actions: [{ type: 'healTroops', payWith: 'resources', when: 'armiesHome' }] });
+      const f = await newFlow(g, p, {
+        name: 'Heal',
+        actions: [{ type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.RESOURCES, when: FlowHealWhen.ARMIES_HOME }],
+      });
       const r = await runFlowIn(g, p, f.id);
       expect(r.cities[0]!.steps[0]!.detail).toEqual(healed());
       expect(await storedEvent(g, `flowheal:${p.cityId}`)).toBeUndefined();

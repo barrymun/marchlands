@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { BALANCE, HOUR, PrestigeAction, prestigeOf, researchHeroExp, TechType } from '@marchlands/core';
+import { BALANCE, HOUR, PrestigeAction, prestigeOf, researchHeroExp, TechType, TimedEventType } from '@marchlands/core';
 
 import { completeResearch, settleAllCities } from '#/engine/research.ts';
 import { heroes, research } from '#/index.ts';
@@ -104,7 +104,7 @@ describe(completeResearch.name, () => {
       g.unschedule(`research:${p.id}:${AGRICULTURE}`);
       await completeResearch(g, p.id, AGRICULTURE);
       expect(await researchOf(g, p, AGRICULTURE)).toMatchObject({ level: 0, endTime: out.endTime });
-      expect(g.events('research')).toMatchObject([{ dueAt: out.endTime, cityId: p.cityId, payload: { techId: AGRICULTURE } }]);
+      expect(g.events(TimedEventType.RESEARCH)).toMatchObject([{ dueAt: out.endTime, cityId: p.cityId, payload: { techId: AGRICULTURE } }]);
     }));
 
   it('does nothing for a tech not being researched', () =>

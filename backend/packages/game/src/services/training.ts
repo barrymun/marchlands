@@ -18,6 +18,7 @@ import {
   getGameSpeed,
   healCost,
   healHonorCost,
+  HealPayment,
   itemGoldPrice,
   ItemId,
   msg,
@@ -328,13 +329,13 @@ function payRefund(ctx: Ctx, b: CityBundle, key: string, unitId: number, count: 
 }
 
 /** army.cureInjuredTroop: heal injured troops for BALANCE.healCostShare of their training cost, or for honor. */
-export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, troops: Record<string, number>, payWith: 'resources' | 'honor' = 'resources') {
+export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, troops: Record<string, number>, payWith: HealPayment = HealPayment.RESOURCES) {
   const b = await openOwnCity(ctx, playerId, cityId);
   for (const [key, n] of Object.entries(troops)) {
     if (!Number.isInteger(n) || n < 0) throw new GameError(msg('common.invalidTroopCount'), -99);
     if ((b.city.injuredTroops[key as keyof typeof b.city.injuredTroops] ?? 0) < n) throw new GameError(msg('training.notEnoughInjured'), -99);
   }
-  if (payWith === 'honor') {
+  if (payWith === HealPayment.HONOR) {
     // honor earned by killing pays to heal: each unit costs its food upkeep x BALANCE.healHonorPerUpkeep
     const honor = healHonorCost(troops);
     if (b.player.honor < honor) throw new GameError(msg('training.notEnoughHonor', { amount: honor }), -99);

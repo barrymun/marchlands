@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { goldForSpeedup, HOUR, msg, scaled } from '@marchlands/core';
+import { goldForSpeedup, HOUR, msg, scaled, TimedEventType } from '@marchlands/core';
 
 import { market } from '#/index.ts';
 import { expectRefused } from '#test/support/expect.ts';
@@ -16,7 +16,7 @@ describe(market.speedupShipment.name, () => {
           const [a, b] = [await createTrader(g), await createTrader(g, {}, 2)];
           const s = (await shipWoodTo(g, a, b))!;
           expect(s.endTime).toBe(g.now + scaled(Math.floor(HOUR / 2)));
-          expect(g.events('shipment')).toMatchObject([{ dueAt: s.endTime, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } }]);
+          expect(g.events(TimedEventType.SHIPMENT)).toMatchObject([{ dueAt: s.endTime, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } }]);
           const gold0 = (await reloadCity(g, b.cityId)).gold;
 
           await market.speedupShipment(g, b.id, s.id);
@@ -25,7 +25,7 @@ describe(market.speedupShipment.name, () => {
           expect((await reloadCity(g, b.cityId)).gold).toBe(gold0 - cost);
           expect(g._stats.get(`${b.id}|${b.cityId}`)).toMatchObject({ 'spent.speedups.gold': cost });
           expect(await market.myShipments(g, b.id)).toMatchObject([{ id: s.id, endTime: g.now }]);
-          expect(g.events('shipment')).toMatchObject([{ dueAt: g.now, refKey: `shipment:${s.id}` }]);
+          expect(g.events(TimedEventType.SHIPMENT)).toMatchObject([{ dueAt: g.now, refKey: `shipment:${s.id}` }]);
 
           expect(await g.runDue()).toBe(1);
           expect(await reloadCity(g, b.cityId)).toMatchObject({ wood: 1_001_000 });

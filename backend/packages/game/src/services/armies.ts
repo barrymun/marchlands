@@ -31,6 +31,7 @@ import {
   sanitizeTroops,
   TechType,
   TileType,
+  TimedEventType,
   totalResources,
   totalTroops,
   type TroopCounts,
@@ -198,10 +199,10 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
     await saveHero(ctx, hero);
     pushHero(ctx, playerId, hero, 2);
   }
-  ctx.schedule({ type: 'army', dueAt: army.reachTime, playerId, cityId, refKey: armyRef(army.id), payload: { armyId: army.id } });
+  ctx.schedule({ type: TimedEventType.ARMY, dueAt: army.reachTime, playerId, cityId, refKey: armyRef(army.id), payload: { armyId: army.id } });
   // a waiting army's target hears of it when it sets off
   if (isWaiting(army, ctx.now))
-    ctx.schedule({ type: 'army.depart', dueAt: leaves, playerId, cityId, refKey: departRef(army.id), payload: { armyId: army.id } });
+    ctx.schedule({ type: TimedEventType.ARMY_DEPART, dueAt: leaves, playerId, cityId, refKey: departRef(army.id), payload: { armyId: army.id } });
   await saveCity(ctx, b.city);
   ctx.push(playerId, PushCmd.TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.troops) });
   pushResources(ctx, b);

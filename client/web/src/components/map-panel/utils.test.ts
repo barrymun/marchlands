@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { Relation, TileType } from '@marchlands/core';
+import { FlowActionType, Relation, TileType } from '@marchlands/core';
 
 import { FACTION_TINT_KEY } from '@/components/map-panel/constants';
 import { farmedTiles, farmLists, placeName, readFactionTint, relationGroup, saveFactionTint, wrap } from '@/components/map-panel/utils';
@@ -102,9 +102,9 @@ const cities = [
   { id: 2, name: 'North' },
   { id: 3, name: 'Idle' },
 ];
-const attack = (targets: Record<string, number[]>) => ({ type: 'attackTargets' as const, presetId: 'p', targets });
+const attack = (targets: Record<string, number[]>) => ({ type: FlowActionType.ATTACK_TARGETS, presetId: 'p', targets });
 const flows = [
-  { name: 'Farm A', actions: [{ type: 'setMayor' as const, stat: 'power' as const }, attack({ '1': [100, 101], '2': [200] })] },
+  { name: 'Farm A', actions: [{ type: FlowActionType.SET_MAYOR, stat: 'power' as const }, attack({ '1': [100, 101], '2': [200] })] },
   { name: 'Farm B', actions: [attack({ '2': [200, 201], '9': [900] })] },
 ];
 
@@ -133,7 +133,7 @@ describe(farmLists.name, () => {
   });
 
   it('leaves out cities with no targets, cities the player no longer has, and flows that do not attack', () => {
-    expect(farmLists([{ name: 'Mayor', actions: [{ type: 'setMayor', stat: 'power' }] }], cities, 1)).toEqual([]);
+    expect(farmLists([{ name: 'Mayor', actions: [{ type: FlowActionType.SET_MAYOR, stat: 'power' }] }], cities, 1)).toEqual([]);
     expect(farmLists(flows, cities, 3).map((l) => l.cityId)).toEqual([1, 2]);
   });
 });

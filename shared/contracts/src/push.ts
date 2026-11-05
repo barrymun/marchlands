@@ -4,7 +4,7 @@
 
 import { z } from 'zod';
 
-import { MessageSchema } from '@marchlands/core';
+import { FLOW_STATUSES, MessageSchema } from '@marchlands/core';
 
 import { ArmyBean, BuffBean, BuildingBean, CityBean, HeroBean, ItemCount, PlayerInfo, ResourceBean } from '#/beans.ts';
 import { FortBean, Ms, TroopBean } from '#/common.ts';
@@ -63,9 +63,7 @@ export const PushSchemas = {
     buffBean: z.object({ typeId: z.string(), desc: MessageSchema.describe('what the buff does (`buff.*`), worded by the client'), endTime: Ms }),
     updateType: z.literal([0, 1]).describe('0 = added or extended, 1 = expired or removed'),
   }),
-  [PushCmd.FLOW_UPDATE]: z
-    .object({ flowId: z.string(), status: z.enum(['idle', 'queued', 'running', 'waiting']) })
-    .describe('(marchlands) a flow started, paused or finished'),
+  [PushCmd.FLOW_UPDATE]: z.object({ flowId: z.string(), status: z.enum(FLOW_STATUSES) }).describe('(marchlands) a flow started, paused or finished'),
   [PushCmd.PLAYER_BUFFS_UPDATE]: z.object({ buffs: z.array(BuffBean) }),
 
   // armies

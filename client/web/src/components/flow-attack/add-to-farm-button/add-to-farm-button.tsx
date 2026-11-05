@@ -8,6 +8,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { type CityBean, type Flow, getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows } from '@marchlands/api-client';
+import { FlowActionType, FlowCities } from '@marchlands/core';
 
 import type { AttackAction } from '@/components/flow-attack/types';
 import { targetCap } from '@/components/flow-attack/utils';
@@ -21,12 +22,12 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
   const { t } = useTranslation(['flow-attack', 'common']);
   const qc = useQueryClient();
   const flows = useQuery(getPlayerFlowsOptions());
-  const farms = (flows.data ?? []).filter((f) => f.actions.some((a) => a.type === 'attackTargets'));
+  const farms = (flows.data ?? []).filter((f) => f.actions.some((a) => a.type === FlowActionType.ATTACK_TARGETS));
   const [busy, setBusy] = useState(false);
 
   /** true once saved; toasts what happened either way */
   const addTo = async (flow: Flow): Promise<boolean> => {
-    const i = flow.actions.findIndex((a) => a.type === 'attackTargets');
+    const i = flow.actions.findIndex((a) => a.type === FlowActionType.ATTACK_TARGETS);
     const action = flow.actions[i] as AttackAction;
     const list = action.targets[String(city.id)] ?? [];
     if (list.includes(tileId)) {
@@ -39,7 +40,7 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
     }
     const actions = flow.actions.map((a, j) => (j === i ? { ...action, targets: { ...action.targets, [String(city.id)]: [...list, tileId] } } : a));
     // the flow must also run on this city
-    const cities = flow.cities === 'all' || flow.cities.includes(city.id) ? flow.cities : [...flow.cities, city.id];
+    const cities = flow.cities === FlowCities.ALL || flow.cities.includes(city.id) ? flow.cities : [...flow.cities, city.id];
     setBusy(true);
     try {
       const { data: saved } = await postPlayerFlows({ body: { id: flow.id, name: flow.name, actions, cities }, throwOnError: true });
@@ -60,7 +61,7 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
     setBusy(true);
     try {
       const { data: saved } = await postPlayerFlows({
-        body: { name, actions: [{ type: 'attackTargets', presetId: '', targets: { [String(city.id)]: [tileId] } }], cities: 'all' },
+        body: { name, actions: [{ type: FlowActionType.ATTACK_TARGETS, presetId: '', targets: { [String(city.id)]: [tileId] } }], cities: FlowCities.ALL },
         throwOnError: true,
       });
       qc.setQueryData(getPlayerFlowsQueryKey(), saved);
@@ -78,7 +79,7 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
   const [chosen, setChosen] = useState('');
   const flow = farms.find((f) => f.id === chosen) ?? farms[0];
   const cap = targetCap(city);
-  const targets = flow ? (flow.actions.find((a): a is AttackAction => a.type === 'attackTargets')?.targets[String(city.id)] ?? []) : [];
+  const targets = flow ? (flow.actions.find((a): a is AttackAction => a.type === FlowActionType.ATTACK_TARGETS)?.targets[String(city.id)] ?? []) : [];
   const confirm = async () => {
     if (await (flow ? addTo(flow) : createList())) setOpen(false);
   };

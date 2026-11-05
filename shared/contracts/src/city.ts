@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 
-import { FortKeySchema, MessageSchema, RequirementCheckSchema, ResourceKeySchema, TroopKeySchema } from '@marchlands/core';
+import { FortKeySchema, HEAL_PAYMENTS, HealPayment, MessageSchema, RequirementCheckSchema, ResourceKeySchema, TroopKeySchema } from '@marchlands/core';
 
 import { BuildingBean } from '#/beans.ts';
 import { Ms, ResourceAmounts, zCityParams, zId, zTroops } from '#/common.ts';
@@ -67,7 +67,7 @@ export const TrainManyResult = z.object({ orders: z.number().int(), units: z.num
 export const TroopCountBody = z.object({ troopId: z.number().int(), count: z.number().int() });
 export const InjuredTroopsBody = z.object({ troops: zTroops });
 export const CureInjuredBody = InjuredTroopsBody.extend({
-  payWith: z.enum(['resources', 'honor']).default('resources').describe('resources: a share of the training cost; honor: each unit costs its food upkeep'),
+  payWith: z.enum(HEAL_PAYMENTS).default(HealPayment.RESOURCES).describe('resources: a share of the training cost; honor: each unit costs its food upkeep'),
 });
 
 // ---- shared pieces ----

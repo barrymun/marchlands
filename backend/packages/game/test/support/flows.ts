@@ -4,7 +4,21 @@ import { and, desc, eq, gt, inArray, isNull } from 'drizzle-orm';
 import { vi } from 'vitest';
 
 import type { PushCmd, PushData } from '@marchlands/contracts';
-import { BuildingType, healCost, HOLDABLE_VALLEY_TYPES, Mission, msg, ref, tileId, tileXY, type TroopCounts } from '@marchlands/core';
+import {
+  BuildingType,
+  FlowActionType,
+  type FlowCityChoice,
+  FlowWaitUntil,
+  healCost,
+  HOLDABLE_VALLEY_TYPES,
+  Mission,
+  msg,
+  ref,
+  tileId,
+  tileXY,
+  TimedEventType,
+  type TroopCounts,
+} from '@marchlands/core';
 import { pushMessages, tiles, timedEvents } from '@marchlands/db';
 
 import { armies, flows, player as players } from '#/index.ts';
@@ -13,7 +27,7 @@ import { addHero, setBuildings, setCityStats, type TestPlayer } from '#test/supp
 import type { TestGame } from '#test/support/game.ts';
 import type { Tuple } from '#test/support/tuple.ts';
 
-export type FlowInput = { id?: string | null; name: string; actions: unknown[]; cities?: 'all' | number[] };
+export type FlowInput = { id?: string | null; name: string; actions: unknown[]; cities?: FlowCityChoice };
 
 /** Save a new flow and return it as listed. */
 export async function newFlow(g: TestGame, p: TestPlayer, input: FlowInput) {
@@ -36,7 +50,7 @@ export async function flowOf(g: TestGame, p: TestPlayer, flowId: string) {
  * savepoints, its clock is the test's, and the pushes and timed events it commits are moved back into the test
  * (g.pushes(), g.events(), g.runDue()).
  */
-export async function runFlowIn(g: TestGame, p: TestPlayer, flowId: string, cityIds?: 'all' | number[], preview = false) {
+export async function runFlowIn(g: TestGame, p: TestPlayer, flowId: string, cityIds?: FlowCityChoice, preview = false) {
   const [lastPush] = await g.tx.select({ id: pushMessages.id }).from(pushMessages).orderBy(desc(pushMessages.id)).limit(1);
   const [lastEvent] = await g.tx.select({ id: timedEvents.id }).from(timedEvents).orderBy(desc(timedEvents.id)).limit(1);
   vi.useFakeTimers({ toFake: ['Date'] });
@@ -133,14 +147,14 @@ export async function storedEvent(g: TestGame, refKey: string) {
   return row;
 }
 
-export const mayor = { type: 'setMayor', stat: 'power' };
+export const mayor = { type: FlowActionType.SET_MAYOR, stat: 'power' };
 
-export const waitTime = { type: 'wait', until: 'time', minutes: 5 };
+export const waitTime = { type: FlowActionType.WAIT, until: FlowWaitUntil.TIME, minutes: 5 };
 
 export async function heroAway(g: TestGame, p: TestPlayer, heroId: number, cityId = p.cityId) {
   const [valley] = await valleysNear(g, cityId);
   const { armyId } = await armies.sendArmy(g, p.id, cityId, { targetTileId: valley, mission: Mission.ATTACK, troops: { militia: 10 }, heroId });
-  return { armyId, reach: g.events('army').find((e) => e.payload?.armyId === armyId)!.dueAt };
+  return { armyId, reach: g.events(TimedEventType.ARMY).find((e) => e.payload?.armyId === armyId)!.dueAt };
 }
 
 export const injured = { militia: 10 };

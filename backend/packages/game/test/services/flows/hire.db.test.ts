@@ -2,7 +2,20 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { BALANCE, BuildingType, defaultRng, heroHireCost, hiredHeroName, msg, ref, seededRng, tavernRefreshCost } from '@marchlands/core';
+import {
+  BALANCE,
+  BuildingType,
+  defaultRng,
+  FlowActionType,
+  FlowCities,
+  type FlowCityChoice,
+  heroHireCost,
+  hiredHeroName,
+  msg,
+  ref,
+  seededRng,
+  tavernRefreshCost,
+} from '@marchlands/core';
 
 import { flows, heroes } from '#/index.ts';
 import { heroesOfCity } from '#/repo.ts';
@@ -32,8 +45,8 @@ async function innWith(g: TestGame, powers: number[], opts: { hall?: number; gol
   return p;
 }
 
-async function hire(g: TestGame, p: TestPlayer, action: { min: number; count: number; maxGold: number }, cities: 'all' | number[] = [p.cityId]) {
-  const f = await newFlow(g, p, { name: `Hire ${g.now}`, actions: [{ type: 'hireHeroes', stat: 'power', ...action }] });
+async function hire(g: TestGame, p: TestPlayer, action: { min: number; count: number; maxGold: number }, cities: FlowCityChoice = [p.cityId]) {
+  const f = await newFlow(g, p, { name: `Hire ${g.now}`, actions: [{ type: FlowActionType.HIRE_HEROES, stat: 'power', ...action }] });
   return runFlowIn(g, p, f.id, cities);
 }
 
@@ -140,7 +153,7 @@ describe(`${flows.runFlow.name}: hireHeroes`, () => {
     game(async (g) => {
       const p = await innWith(g, []);
       const second = await addCity(g, p);
-      const r = await hire(g, p, { min: 1, count: 1, maxGold: 1 }, 'all');
+      const r = await hire(g, p, { min: 1, count: 1, maxGold: 1 }, FlowCities.ALL);
       expect(r.cities.map((c) => c.cityId).sort()).toEqual([p.cityId, second].sort());
       expect(r.skippedCities).toEqual([]);
     }));

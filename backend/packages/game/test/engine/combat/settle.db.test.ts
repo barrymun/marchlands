@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, BALANCE, BASIC_RESOURCES, HeroStatus, Mission, msg, ReportType, TileType } from '@marchlands/core';
+import { ArmyDirection, BALANCE, BASIC_RESOURCES, HeroStatus, Mission, msg, ReportType, TileType, TimedEventType } from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
 import { admin } from '#/index.ts';
@@ -30,7 +30,7 @@ describe(`${processArmy.name}: settlers`, () => {
       await arrive(g, bean.armyId);
 
       expect(await armyRow(g, bean.armyId)).toBeUndefined();
-      expect(g.events('army')).toEqual([]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([]);
       const [, city] = await citiesOf(g, p.id);
       const name = `${p.name.slice(0, 12)} 2`;
       expect(city).toMatchObject({ name, playerId: p.id, tileId: flat.id, troops: { carriage: 10, lightCavalry: 5 }, ...goods });

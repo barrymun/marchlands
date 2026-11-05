@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, BuildingType, HeroStatus, marchTimeMs, Mission, msg, ref, TechType, TileType, tileXY } from '@marchlands/core';
+import { ArmyDirection, BuildingType, HeroStatus, marchTimeMs, Mission, msg, ref, TechType, TileType, tileXY, TimedEventType } from '@marchlands/core';
 
 import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner, tilePosition, visibleArmies } from '#/engine/armies.ts';
 import { type ArmyRow, getHero, getTile } from '#/repo.ts';
@@ -97,7 +97,7 @@ describe(sendBack.name, () => {
       await sendBack(g, a, 7000);
       expect(await armyRow(g, bean.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, startTime: g.now, reachTime: g.now + 7000, restTime: 0 });
       expect((await getHero(g, heroId)).status).toBe(HeroStatus.RETURN);
-      expect(g.events('army')).toEqual([expect.objectContaining({ dueAt: g.now + 7000, refKey: armyRef(bean.armyId) })]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([expect.objectContaining({ dueAt: g.now + 7000, refKey: armyRef(bean.armyId) })]);
       // never under a second
       await sendBack(g, a, 0);
       expect((await armyRow(g, bean.armyId))!.reachTime).toBe(g.now + 1000);

@@ -6,14 +6,15 @@ import {
   BuildingType,
   civilCodePopulation,
   heroBoxQuality,
-  type ItemEffect,
   itemEffect,
+  type ItemEffect,
   itemGoldPrice,
   ItemId,
   ITEMS,
   medalId,
   msg,
   ref,
+  TimedEventType,
   upgradeExpFor,
 } from '@marchlands/core';
 
@@ -124,8 +125,14 @@ describe(shop.useItem.name, () => {
         const player = await reloadPlayer(g, p);
         expect(player.items[itemId] ?? 0, itemId).toBe(0);
         expect(player.buffs, itemId).toEqual([{ id: effect.buff, desc: effect.desc, endTime: g.now + effect.durationMs, itemId }]);
-        expect(g.events('buff.expire').filter((e) => e.playerId === p.id)).toEqual([
-          { type: 'buff.expire', dueAt: g.now + effect.durationMs, playerId: p.id, refKey: `buff:${p.id}:${effect.buff}`, payload: { buffId: effect.buff } },
+        expect(g.events(TimedEventType.BUFF_EXPIRE).filter((e) => e.playerId === p.id)).toEqual([
+          {
+            type: TimedEventType.BUFF_EXPIRE,
+            dueAt: g.now + effect.durationMs,
+            playerId: p.id,
+            refKey: `buff:${p.id}:${effect.buff}`,
+            payload: { buffId: effect.buff },
+          },
         ]);
         expect(g.pushes(PushCmd.PLAYER_BUFF_UPDATE).at(-1)).toMatchObject({
           playerIds: [p.id],
@@ -144,7 +151,7 @@ describe(shop.useItem.name, () => {
       await shop.useItem(g, p.id, ItemId.IRON_RAKE, null);
       const end = g.now - 1000 + short + long;
       expect((await reloadPlayer(g, p)).buffs).toEqual([expect.objectContaining({ endTime: end, itemId: ItemId.IRON_RAKE })]);
-      expect(g.events('buff.expire').map((e) => e.dueAt)).toEqual([end]);
+      expect(g.events(TimedEventType.BUFF_EXPIRE).map((e) => e.dueAt)).toEqual([end]);
     }));
 
   it('a production boost settles every city first, at the old rates', () =>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { msg } from '@marchlands/core';
+import { FlowActionType, FlowStatus, msg, TimedEventType } from '@marchlands/core';
 
 import { flows } from '#/index.ts';
 import { expectRefused } from '#test/support/expect.ts';
@@ -17,8 +17,17 @@ describe(flows.setRepeat.name, () => {
       const f = await newFlow(g, p, { name: 'Mayor', actions: [mayor] });
       const list = await flows.setRepeat(g, p.id, f.id, true);
       expect(list).toEqual(await flows.listFlows(g, p.id));
-      expect(list[0]).toMatchObject({ repeat: true, status: 'queued', runs: 1, queuedAt: T0, notBefore: T0 + 60_000, lastRun: { run: 1, finishedAt: T0 } });
-      expect(g.events('flow.queue')).toEqual([{ type: 'flow.queue', dueAt: T0 + 60_000, playerId: p.id, refKey: `flowqueue:${p.id}` }]);
+      expect(list[0]).toMatchObject({
+        repeat: true,
+        status: FlowStatus.QUEUED,
+        runs: 1,
+        queuedAt: T0,
+        notBefore: T0 + 60_000,
+        lastRun: { run: 1, finishedAt: T0 },
+      });
+      expect(g.events(TimedEventType.FLOW_QUEUE)).toEqual([
+        { type: TimedEventType.FLOW_QUEUE, dueAt: T0 + 60_000, playerId: p.id, refKey: `flowqueue:${p.id}` },
+      ]);
     }));
 
   it('runs the flow again every minute until switched off', () =>
@@ -28,11 +37,16 @@ describe(flows.setRepeat.name, () => {
       const f = await newFlow(g, p, { name: 'Mayor', actions: [mayor] });
       await flows.setRepeat(g, p.id, f.id, true);
       await g.runDue(T0 + 120_000);
-      expect(await flowOf(g, p, f.id)).toMatchObject({ runs: 3, status: 'queued', notBefore: T0 + 180_000, lastRun: { run: 3, startedAt: T0 + 120_000 } });
+      expect(await flowOf(g, p, f.id)).toMatchObject({
+        runs: 3,
+        status: FlowStatus.QUEUED,
+        notBefore: T0 + 180_000,
+        lastRun: { run: 3, startedAt: T0 + 120_000 },
+      });
 
       g.advance(1000);
       const [off] = await flows.setRepeat(g, p.id, f.id, false);
-      expect(off).toMatchObject({ repeat: false, status: 'idle' });
+      expect(off).toMatchObject({ repeat: false, status: FlowStatus.IDLE });
       await g.runDue(T0 + 600_000);
       expect((await flowOf(g, p, f.id)).runs).toBe(3);
     }));
@@ -43,11 +57,11 @@ describe(flows.setRepeat.name, () => {
       await withHero(g, p);
       const f = await newFlow(g, p, { name: 'Waits', actions: [mayor, waitTime, mayor] });
       await flows.setRepeat(g, p.id, f.id, true);
-      expect((await flowOf(g, p, f.id)).status).toBe('waiting');
+      expect((await flowOf(g, p, f.id)).status).toBe(FlowStatus.WAITING);
       await flows.setRepeat(g, p.id, f.id, false);
-      expect(await flowOf(g, p, f.id)).toMatchObject({ status: 'waiting', repeat: false });
+      expect(await flowOf(g, p, f.id)).toMatchObject({ status: FlowStatus.WAITING, repeat: false });
       await g.runDue(T0 + 600_000);
-      expect(await flowOf(g, p, f.id)).toMatchObject({ status: 'idle', runs: 1, lastRun: { finishedAt: T0 + 300_000 } });
+      expect(await flowOf(g, p, f.id)).toMatchObject({ status: FlowStatus.IDLE, runs: 1, lastRun: { finishedAt: T0 + 300_000 } });
     }));
 
   it('switched on during a run, queues the flow again when the run ends', () =>
@@ -57,10 +71,10 @@ describe(flows.setRepeat.name, () => {
       const f = await newFlow(g, p, { name: 'Waits', actions: [mayor, waitTime, mayor] });
       await runFlowIn(g, p, f.id);
       const [on] = await flows.setRepeat(g, p.id, f.id, true);
-      expect(on).toMatchObject({ status: 'waiting', repeat: true, runs: 1 });
+      expect(on).toMatchObject({ status: FlowStatus.WAITING, repeat: true, runs: 1 });
       await g.runDue(T0 + 300_000);
       // the run began more than a minute ago, so the next one starts at once (and waits in turn)
-      expect(await flowOf(g, p, f.id)).toMatchObject({ status: 'waiting', repeat: true, runs: 2, lastRun: { run: 2, startedAt: T0 + 300_000 } });
+      expect(await flowOf(g, p, f.id)).toMatchObject({ status: FlowStatus.WAITING, repeat: true, runs: 2, lastRun: { run: 2, startedAt: T0 + 300_000 } });
     }));
 
   it('clears the last preview', () =>
@@ -80,10 +94,10 @@ describe(flows.setRepeat.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withHero(g, p);
-      const f = await newFlow(g, p, { name: 'Bad', actions: [mayor, { type: 'trainTroops', troopId: 3, amount: 1 }] });
+      const f = await newFlow(g, p, { name: 'Bad', actions: [mayor, { type: FlowActionType.TRAIN_TROOPS, troopId: 3, amount: 1 }] });
       const [after] = await flows.setRepeat(g, p.id, f.id, true);
-      expect(after).toMatchObject({ repeat: false, status: 'idle', runs: 1, stopReason: { code: 'flow.runFailed' } });
-      expect(g.events('flow.queue')).toEqual([]);
+      expect(after).toMatchObject({ repeat: false, status: FlowStatus.IDLE, runs: 1, stopReason: { code: 'flow.runFailed' } });
+      expect(g.events(TimedEventType.FLOW_QUEUE)).toEqual([]);
     }));
 
   it('refuses an unknown flow, and an idle one with no city to run on', () =>
@@ -97,13 +111,13 @@ describe(flows.setRepeat.name, () => {
 
       const all = await newFlow(g, p, { name: 'All', actions: [mayor] });
       await expectRefused(flows.setRepeat(g, p.id, all.id, true), msg('flow.noHeroCities'));
-      expect(await flowOf(g, p, all.id)).toMatchObject({ repeat: false, status: 'idle', queuedAt: 0 });
+      expect(await flowOf(g, p, all.id)).toMatchObject({ repeat: false, status: FlowStatus.IDLE, queuedAt: 0 });
 
       const second = await addCity(g, p);
       const chosen = await newFlow(g, p, { name: 'Chosen', actions: [mayor], cities: [second] });
       await loseCity(g, second, other);
       await expectRefused(flows.setRepeat(g, p.id, chosen.id, true), msg('flow.noOwnCities'));
-      expect(await flowOf(g, p, chosen.id)).toMatchObject({ repeat: false, status: 'idle' });
+      expect(await flowOf(g, p, chosen.id)).toMatchObject({ repeat: false, status: FlowStatus.IDLE });
     }));
 });
 
@@ -117,7 +131,7 @@ describe(flows.stopFlow.name, () => {
       g.advance(1000);
       const list = await flows.stopFlow(g, p.id, f.id);
       expect(list[0]).toMatchObject({
-        status: 'idle',
+        status: FlowStatus.IDLE,
         repeat: false,
         nextAction: 0,
         waitUntil: 0,
@@ -125,9 +139,9 @@ describe(flows.stopFlow.name, () => {
         stopReason: null,
         lastRun: { finishedAt: T0 + 1000 },
       });
-      expect(g.events('flow.resume')).toEqual([]);
+      expect(g.events(TimedEventType.FLOW_RESUME)).toEqual([]);
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE)).toEqual([]);
-      expect(g.pushes(PushCmd.FLOW_UPDATE).at(-1)?.data).toEqual({ flowId: f.id, status: 'idle' });
+      expect(g.pushes(PushCmd.FLOW_UPDATE).at(-1)?.data).toEqual({ flowId: f.id, status: FlowStatus.IDLE });
       // the mayor it appointed stays
       expect((await flowOf(g, p, f.id)).lastRun?.cities[0]!.steps[0]!.detail.code).toBe('flow.step.mayor');
     }));
@@ -139,7 +153,7 @@ describe(flows.stopFlow.name, () => {
       const f = await newFlow(g, p, { name: 'Mayor', actions: [mayor] });
       await flows.setRepeat(g, p.id, f.id, true);
       const [stopped] = await flows.stopFlow(g, p.id, f.id);
-      expect(stopped).toMatchObject({ status: 'idle', repeat: false, lastRun: { finishedAt: T0 } });
+      expect(stopped).toMatchObject({ status: FlowStatus.IDLE, repeat: false, lastRun: { finishedAt: T0 } });
       await g.runDue(T0 + 600_000);
       expect((await flowOf(g, p, f.id)).runs).toBe(1);
     }));
@@ -153,15 +167,15 @@ describe(flows.stopFlow.name, () => {
       await runFlowIn(g, p, f.id);
       expect((await flowOf(g, p, f.id)).heldSince).toBe(T0);
       const [stopped] = await flows.stopFlow(g, p.id, f.id);
-      expect(stopped).toMatchObject({ status: 'idle', heldSince: 0, waitUntil: 0 });
-      expect(g.events('flow.resume')).toEqual([]);
+      expect(stopped).toMatchObject({ status: FlowStatus.IDLE, heldSince: 0, waitUntil: 0 });
+      expect(g.events(TimedEventType.FLOW_RESUME)).toEqual([]);
     }));
 
   it('leaves an idle flow idle', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       const f = await newFlow(g, p, { name: 'Mayor', actions: [mayor] });
-      expect((await flows.stopFlow(g, p.id, f.id))[0]).toMatchObject({ status: 'idle', repeat: false, lastRun: null, stopReason: null });
+      expect((await flows.stopFlow(g, p.id, f.id))[0]).toMatchObject({ status: FlowStatus.IDLE, repeat: false, lastRun: null, stopReason: null });
     }));
 
   it("refuses an unknown flow or another player's", () =>

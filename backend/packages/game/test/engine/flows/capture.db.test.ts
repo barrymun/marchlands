@@ -2,7 +2,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { freshNpcState, tileId, TileType, tileXY } from '@marchlands/core';
+import { FlowActionType, FlowStatus, freshNpcState, tileId, TileType, tileXY, TimedEventType } from '@marchlands/core';
 import { tiles } from '@marchlands/db';
 
 import { dropCapturedTarget } from '#/engine/flows.ts';
@@ -12,8 +12,8 @@ import { createTestPlayer, reloadCity } from '#test/support/factories.ts';
 import { armyPreset, farmingCity, flowOf, newFlow, runFlowIn } from '#test/support/flows.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 
-const mayor = { type: 'setMayor', stat: 'power' };
-const attack = (targets: Record<string, number[]>) => ({ type: 'attackTargets', presetId: '', targets });
+const mayor = { type: FlowActionType.SET_MAYOR, stat: 'power' };
+const attack = (targets: Record<string, number[]>) => ({ type: FlowActionType.ATTACK_TARGETS, presetId: '', targets });
 
 /** The nearest barbarian city to this city. */
 async function npcNear(g: TestGame, cityId: number) {
@@ -44,8 +44,8 @@ describe(dropCapturedTarget.name, () => {
       expect((await flowOf(g, b, fb.id)).actions).toEqual([attack({ [b.cityId]: [] })]);
       expect(g.pushes(PushCmd.FLOW_UPDATE).map((p) => [p.playerIds, p.data])).toEqual(
         expect.arrayContaining([
-          [[a.id], { flowId: fa.id, status: 'idle' }],
-          [[b.id], { flowId: fb.id, status: 'idle' }],
+          [[a.id], { flowId: fa.id, status: FlowStatus.IDLE }],
+          [[b.id], { flowId: fb.id, status: FlowStatus.IDLE }],
         ]),
       );
     }));
@@ -74,14 +74,14 @@ describe(`${dropCapturedTarget.name} (through combat)`, () => {
       await saveTile(g, { ...tile, state: { ...state, loyalty: 1 }, troops: {}, forts: {} });
 
       const preset = await armyPreset(g, a, 'Siege', { militia: 5000 });
-      const fa = await newFlow(g, a, { name: 'Take', actions: [{ type: 'attackTargets', presetId: preset, targets: { [a.cityId]: [npc] } }] });
+      const fa = await newFlow(g, a, { name: 'Take', actions: [{ type: FlowActionType.ATTACK_TARGETS, presetId: preset, targets: { [a.cityId]: [npc] } }] });
       const fb = await newFlow(g, b, { name: 'Farm', actions: [attack({ [b.cityId]: [npc, 5] })] });
       await runFlowIn(g, a, fa.id);
-      await g.runDue(g.events('army')[0]!.dueAt);
+      await g.runDue(g.events(TimedEventType.ARMY)[0]!.dueAt);
 
       expect((await getTile(g, npc)).ownerPlayerId).toBe(a.id);
       expect((await flowOf(g, a, fa.id)).actions[0]).toMatchObject({ targets: { [a.cityId]: [] } });
       expect((await flowOf(g, b, fb.id)).actions[0]).toMatchObject({ targets: { [b.cityId]: [5] } });
-      expect(g.pushes(PushCmd.FLOW_UPDATE)).toContainEqual(expect.objectContaining({ playerIds: [b.id], data: { flowId: fb.id, status: 'idle' } }));
+      expect(g.pushes(PushCmd.FLOW_UPDATE)).toContainEqual(expect.objectContaining({ playerIds: [b.id], data: { flowId: fb.id, status: FlowStatus.IDLE } }));
     }));
 });

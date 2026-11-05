@@ -27,6 +27,7 @@ import {
   tileDistance,
   TileType,
   tileXY,
+  TimedEventType,
 } from '@marchlands/core';
 import { armies as armyRows, heroes as heroRows, timedEvents } from '@marchlands/db';
 
@@ -346,8 +347,8 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       // none of the lost things' timed events is left to run
       expect(
         g
-          .events('army.depart')
-          .concat(g.events('shipment'))
+          .events(TimedEventType.ARMY_DEPART)
+          .concat(g.events(TimedEventType.SHIPMENT))
           .filter((e) => e.playerId === p.id),
       ).toEqual([]);
       await g.runDue(g.now + DAY);
@@ -383,7 +384,7 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       // back at the level it had, the level under way lost
       expect(after.research[TechType.AGRICULTURE]).toEqual({ level });
       expect(after.research[TechType.LUMBERING]).toMatchObject({ cityId: p.cityId, endTime: elsewhere });
-      expect(g.events('research').map((e) => e.payload)).toEqual([{ techId: TechType.LUMBERING }]);
+      expect(g.events(TimedEventType.RESEARCH).map((e) => e.payload)).toEqual([{ techId: TechType.LUMBERING }]);
       expect(g.pushes(PushCmd.RESEARCH_UPDATE).at(-1)?.data).toEqual({ castleId: cityId, typeId: TechType.AGRICULTURE, endTime: 0 });
       // they can start it again in their other city
       await research.startResearch(g, p.id, p.cityId, TechType.AGRICULTURE);
@@ -399,7 +400,7 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
         await saveCity(g, { ...(await getCity(g, cityId)), loyalty: 3, loyaltyAt: at });
       });
       expect((await getCity(g, cityId)).abandonAt).toBe(0);
-      expect(g.events('city.abandon')).toEqual([]);
+      expect(g.events(TimedEventType.CITY_ABANDON)).toEqual([]);
       expect(
         g
           .pushes(PushCmd.CASTLE_UPDATE)
@@ -411,7 +412,7 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
   it('passes its queues’ events to the winner, so the old holder restarting leaves them', () =>
     game(async (g) => {
       const { p, q, cityId, attack } = await heldSeat(g);
-      const row = (refKey: string, type: string) => ({
+      const row = (refKey: string, type: TimedEventType) => ({
         type,
         dueAt: g.now + DAY,
         playerId: p.id,
@@ -420,7 +421,7 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
         payload: { positionId: 0 },
         createdAt: g.now,
       });
-      await g.tx.insert(timedEvents).values([row('queued-building', 'building'), row('queued-train', 'train')]);
+      await g.tx.insert(timedEvents).values([row('queued-building', TimedEventType.BUILDING), row('queued-train', TimedEventType.TRAIN)]);
       await takeIt(g, cityId, attack);
       await player.restartPlayer(g, p.id);
       const left = await g.tx

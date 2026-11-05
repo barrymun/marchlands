@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { BuffId, ItemId, msg } from '@marchlands/core';
+import { BuffId, ItemId, msg, TimedEventType } from '@marchlands/core';
 
 import { cityBean } from '#/dto.ts';
 import { addItem, consumeItem, playerInfoOf, pushCity, pushPlayerInfo, pushResources, removeBuff, setBuff, useItemOrGold } from '#/helpers.ts';
@@ -102,8 +102,8 @@ describe(setBuff.name, () => {
       const desc = msg('buff.truce');
       setBuff(g, p, BuffId.TRUCE, desc, g.now + HOUR, { param: 3, itemId: ITEM });
       expect(p.buffs).toEqual([{ id: BuffId.TRUCE, desc, endTime: g.now + HOUR, param: 3, itemId: ITEM }]);
-      expect(g.events('buff.expire')).toEqual([
-        { type: 'buff.expire', dueAt: g.now + HOUR, playerId: p.id, refKey: `buff:${p.id}:${BuffId.TRUCE}`, payload: { buffId: BuffId.TRUCE } },
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toEqual([
+        { type: TimedEventType.BUFF_EXPIRE, dueAt: g.now + HOUR, playerId: p.id, refKey: `buff:${p.id}:${BuffId.TRUCE}`, payload: { buffId: BuffId.TRUCE } },
       ]);
       expect(g.pushes(PushCmd.PLAYER_BUFF_UPDATE)).toEqual([
         { playerIds: [p.id], cmd: PushCmd.PLAYER_BUFF_UPDATE, data: { buffBean: { typeId: BuffId.TRUCE, desc, endTime: g.now + HOUR }, updateType: 0 } },
@@ -120,7 +120,7 @@ describe(setBuff.name, () => {
       expect(p.buffs).toMatchObject([{ id: BuffId.ATTACK, endTime: g.now + 2 * HOUR }]);
       setBuff(g, p, BuffId.ATTACK, desc, g.now + HOUR, { extend: true });
       expect(p.buffs).toMatchObject([{ id: BuffId.ATTACK, endTime: g.now + 3 * HOUR }]);
-      expect(g.events('buff.expire')).toMatchObject([{ dueAt: g.now + 3 * HOUR }]);
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toMatchObject([{ dueAt: g.now + 3 * HOUR }]);
     }));
 
   it('`extend` starts afresh when the buff has ended, and drops ended buffs', () =>
@@ -146,7 +146,7 @@ describe(removeBuff.name, () => {
       setBuff(g, p, BuffId.ATTACK, desc, g.now + HOUR);
       removeBuff(g, p, BuffId.TRUCE);
       expect(p.buffs.map((b) => b.id)).toEqual([BuffId.ATTACK]);
-      expect(g.events('buff.expire').map((e) => e.refKey)).toEqual([`buff:${p.id}:${BuffId.ATTACK}`]);
+      expect(g.events(TimedEventType.BUFF_EXPIRE).map((e) => e.refKey)).toEqual([`buff:${p.id}:${BuffId.ATTACK}`]);
       expect(g._unscheduled).toEqual(new Set([`buff:${p.id}:${BuffId.TRUCE}`]));
       expect(g.pushes(PushCmd.PLAYER_BUFF_UPDATE).at(-1)?.data).toEqual({ buffBean: { typeId: BuffId.TRUCE, desc, endTime: g.now + HOUR }, updateType: 1 });
     }));

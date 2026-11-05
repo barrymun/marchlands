@@ -9,6 +9,7 @@ export type {
   FlowAction,
   FlowPreviewLog,
   FlowRunLog,
+  FlowCityChoice,
   FlowStatus,
   Message,
   ItemCounts,
@@ -18,4 +19,5 @@ export type {
   ResourceSet,
   TroopCounts,
   TroopQueueState,
+  TimedEventType,
 } from '@marchlands/core';

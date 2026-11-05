@@ -6,7 +6,9 @@ import { z } from 'zod';
 import {
   ArmyPresetSchema,
   CastleSignSchema,
+  FLOW_STATUSES,
   FlowActionSchema,
+  FlowCities,
   FlowSchema,
   GrantContentsSchema,
   ItemId,
@@ -174,7 +176,7 @@ export const FlowPreviewLog = z
 export const Flow = FlowSchema.extend({
   actions: z.array(FlowAction),
   status: z
-    .enum(['idle', 'queued', 'running', 'waiting'])
+    .enum(FLOW_STATUSES)
     .describe("'queued': waits for the lord's active flow to finish its run (one flow runs at a time); 'waiting': paused on a wait action"),
   nextAction: z.number().int().describe('index of the action the run continues with'),
   runs: z.number().int(),
@@ -192,14 +194,14 @@ export const FlowBody = z.object({
   name: z.string(),
   actions: z.array(FlowAction).min(1).max(20),
   cities: z
-    .union([z.literal('all'), z.array(zId).min(1)])
-    .default('all')
+    .union([z.literal(FlowCities.ALL), z.array(zId).min(1)])
+    .default(FlowCities.ALL)
     .describe("'all' (every city, including ones gained later) or chosen city ids"),
 });
 export const FlowParams = z.object({ flowId: z.string() });
 export const FlowRunBody = z.object({
   cityIds: z
-    .union([z.literal('all'), z.array(zId).min(1)])
+    .union([z.literal(FlowCities.ALL), z.array(zId).min(1)])
     .optional()
     .describe("cities to run the flow on, or 'all' (every city with a hero); default: the flow's saved cities"),
   preview: z.boolean().default(false).describe('run up to the first wait and roll everything back: shows what would happen'),

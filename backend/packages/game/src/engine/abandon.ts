@@ -3,7 +3,7 @@
 import { and, eq, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { abandonPrestigeBack, ArmyDirection, Mission, msg } from '@marchlands/core';
+import { abandonPrestigeBack, ArmyDirection, Mission, msg, TimedEventType } from '@marchlands/core';
 import { armies, cities } from '@marchlands/db';
 
 import { openCity } from '#/city.ts';
@@ -34,7 +34,7 @@ export async function completeAbandon(ctx: Ctx, cityId: number) {
   if (!b || !b.city.abandonAt) return; // cancelled, or the city changed hands
   const { city, player } = b;
   if (city.abandonAt > ctx.now) {
-    ctx.schedule({ type: 'city.abandon', dueAt: city.abandonAt, playerId: player.id, cityId, refKey: abandonRef(cityId), payload: {} });
+    ctx.schedule({ type: TimedEventType.CITY_ABANDON, dueAt: city.abandonAt, playerId: player.id, cityId, refKey: abandonRef(cityId), payload: {} });
     return;
   }
   const position = cityPosition(city.name, city.tileId);

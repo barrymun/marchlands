@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { TroopType } from '@marchlands/core';
+import { TimedEventType, TroopType } from '@marchlands/core';
 
 import { completeTraining, hasTrainingRoom } from '#/engine/training.ts';
 import { training } from '#/index.ts';
@@ -30,11 +30,11 @@ describe(completeTraining.name, () => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [1]);
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
-      const ev = g.events('train')[0];
+      const ev = g.events(TimedEventType.TRAIN)[0];
       const pushes = g.pushes().length;
       await completeTraining(g, p.cityId, 0);
       expect(await queueOf(g, p, 0)).toHaveLength(1);
-      expect(g.events('train')).toEqual([ev]);
+      expect(g.events(TimedEventType.TRAIN)).toEqual([ev]);
       expect(g.pushes()).toHaveLength(pushes);
     }));
 
@@ -48,7 +48,7 @@ describe(completeTraining.name, () => {
       await completeTraining(g, p.cityId, 0);
       expect((await reloadCity(g, p.cityId)).troops).toMatchObject({ peasants: 10, militia: 10 });
       expect(await queueOf(g, p, 0)).toEqual([]);
-      expect(g.events('train')).toEqual([]);
+      expect(g.events(TimedEventType.TRAIN)).toEqual([]);
     }));
 
   it('ignores a city that no longer exists', () =>

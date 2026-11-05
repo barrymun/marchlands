@@ -21,6 +21,7 @@ import {
   SpeedupId,
   speedupItemGold,
   TechType,
+  TimedEventType,
   TroopType,
   unlockedOuterSlots,
 } from '@marchlands/core';
@@ -69,8 +70,8 @@ describe(buildings.construct.name, () => {
       expect(bean).toEqual(expected);
       expect(await buildingAt(g, p, 0)).toEqual(expected);
       expect(await stored(g, p)).toEqual(minus(before, buildCost(COTTAGE, 1)));
-      expect(g.events('building')).toEqual([
-        { type: 'building', dueAt: end, playerId: p.id, cityId: p.cityId, refKey: `building:${p.cityId}:0`, payload: { positionId: 0 } },
+      expect(g.events(TimedEventType.BUILDING)).toEqual([
+        { type: TimedEventType.BUILDING, dueAt: end, playerId: p.id, cityId: p.cityId, refKey: `building:${p.cityId}:0`, payload: { positionId: 0 } },
       ]);
       expect(g.pushes(PushCmd.BUILD_COMPLETE).at(-1)).toMatchObject({ playerIds: [p.id], data: { castleId: p.cityId, buildingBean: expected } });
       expect(g.pushes(PushCmd.RESOURCE_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { castleId: p.cityId } });
@@ -105,7 +106,7 @@ describe(buildings.construct.name, () => {
       await expectRefused(buildings.construct(g, p.id, p.cityId, FARM, 0), msg('building.cannotBuildHere', { building: ref.building(FARM) }));
       await expectRefused(buildings.construct(g, p.id, p.cityId, COTTAGE, 1001), msg('building.cannotBuildHere', { building: ref.building(COTTAGE) }));
       await expectRefused(buildings.construct(g, p.id, p.cityId, TOWN_HALL, -1), msg('building.positionTaken'));
-      expect(g.events('building')).toEqual([]);
+      expect(g.events(TimedEventType.BUILDING)).toEqual([]);
     }));
 
   it('refuses a second building of a limited type', () =>
@@ -164,7 +165,7 @@ describe(buildings.upgrade.name, () => {
       expect(bean).toEqual(expected);
       expect(await buildingAt(g, p, 0)).toEqual(expected);
       expect(await stored(g, p)).toEqual(minus(before, buildCost(COTTAGE, 2)));
-      expect(g.events('building')).toMatchObject([{ dueAt: end, cityId: p.cityId, payload: { positionId: 0 } }]);
+      expect(g.events(TimedEventType.BUILDING)).toMatchObject([{ dueAt: end, cityId: p.cityId, payload: { positionId: 0 } }]);
       expect(g.pushes(PushCmd.BUILD_COMPLETE).at(-1)?.data).toEqual({ castleId: p.cityId, buildingBean: expected });
     }));
 
@@ -263,7 +264,7 @@ describe(buildings.cancel.name, () => {
       expect(await buildingAt(g, p, 0)).toBeUndefined();
       expect(await stored(g, p)).toEqual(plus(settled, buildCost(COTTAGE, 1), BALANCE.cancelBuildRefund));
       expect(settled.wood).toBeLessThan(before.wood);
-      expect(g.events('building')).toEqual([]);
+      expect(g.events(TimedEventType.BUILDING)).toEqual([]);
       expect(g.pushes(PushCmd.BUILD_COMPLETE).at(-1)?.data).toEqual({ castleId: p.cityId, buildingBean: { positionId: 0, ...GONE } });
     }));
 
@@ -277,7 +278,7 @@ describe(buildings.cancel.name, () => {
       const idle = { positionId: 0, typeId: COTTAGE, level: 1, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 };
       expect(await buildingAt(g, p, 0)).toEqual(idle);
       expect(await stored(g, p)).toEqual(plus(before, buildCost(COTTAGE, 2), BALANCE.cancelBuildRefund));
-      expect(g.events('building')).toEqual([]);
+      expect(g.events(TimedEventType.BUILDING)).toEqual([]);
       expect(g.pushes(PushCmd.BUILD_COMPLETE).at(-1)?.data).toEqual({ castleId: p.cityId, buildingBean: idle });
     }));
 
@@ -298,7 +299,7 @@ describe(buildings.speedup.name, () => {
       g.advance(5_000);
       const bean = await buildings.speedup(g, p.id, p.cityId, 0, SpeedupId.FREE);
       expect(bean).toMatchObject({ endTime: g.now, startTime: built.startTime - (built.endTime - g.now), status: BuildingStatus.BUILDING });
-      expect(g.events('building')).toMatchObject([{ dueAt: g.now }]);
+      expect(g.events(TimedEventType.BUILDING)).toMatchObject([{ dueAt: g.now }]);
       await g.runDue();
       expect(await buildingAt(g, p, 0)).toMatchObject({ level: 1, status: BuildingStatus.IDLE });
     }));
@@ -353,7 +354,7 @@ describe(buildings.speedup.name, () => {
       expect(bean).toMatchObject({ startTime: built.startTime - cut, endTime: built.endTime - cut });
       expect((await reloadPlayer(g, p)).items[ItemId.BEGINNER_GUIDELINES] ?? 0).toBe(before - 1);
       expect((await stored(g, p)).gold).toBe(gold);
-      expect(g.events('building')).toMatchObject([{ dueAt: built.endTime - cut }]);
+      expect(g.events(TimedEventType.BUILDING)).toMatchObject([{ dueAt: built.endTime - cut }]);
       expect(g.pushes(PushCmd.ITEM_UPDATE).at(-1)?.data).toEqual({ items: [{ id: ItemId.BEGINNER_GUIDELINES, count: before - 1 }] });
     }));
 

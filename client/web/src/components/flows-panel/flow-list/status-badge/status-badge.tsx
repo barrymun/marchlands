@@ -2,6 +2,7 @@ import { Repeat } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import type { Flow } from '@marchlands/api-client';
+import { FlowStatus } from '@marchlands/core';
 
 import { Badge } from '@/components/ui/badge';
 import { useNow } from '@/hooks/use-now';
@@ -14,13 +15,13 @@ export function StatusBadge({ flow }: { flow: Flow }) {
   const left = (at: number) => (at > now ? duration(at - now) : t('statusBadge.due'));
   const repeat = flow.repeat && <Repeat className="size-3.5 text-muted-foreground" aria-label={t('statusBadge.repeats')} />;
   const badge =
-    flow.status === 'running' ? (
+    flow.status === FlowStatus.RUNNING ? (
       <Badge>{t('statusBadge.running')}</Badge>
-    ) : flow.status === 'waiting' ? (
+    ) : flow.status === FlowStatus.WAITING ? (
       <Badge className="tabular-nums" title={flow.heldSince > 0 ? t('statusBadge.held') : undefined}>
         {flow.heldSince > 0 ? t('statusBadge.heroesOut') : t('statusBadge.waiting')} · {left(flow.waitUntil)}
       </Badge>
-    ) : flow.status === 'queued' ? (
+    ) : flow.status === FlowStatus.QUEUED ? (
       <Badge variant="secondary" className="tabular-nums">
         {flow.notBefore > now
           ? t('statusBadge.repeatsIn', { time: left(flow.notBefore) })

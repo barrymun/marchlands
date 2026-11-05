@@ -1,7 +1,7 @@
 // Research completion (timed event) and settling a lord's cities before their rates change.
 
 import { PushCmd } from '@marchlands/contracts';
-import { addHeroExp, buildingLevel, BuildingType, PrestigeAction, prestigeOf, researchHeroExp, TechType } from '@marchlands/core';
+import { addHeroExp, buildingLevel, BuildingType, PrestigeAction, prestigeOf, researchHeroExp, TechType, TimedEventType } from '@marchlands/core';
 
 import { type CityBundle, loadBundle, mayorOf, settleAndReport } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -46,7 +46,7 @@ export async function completeResearch(ctx: Ctx, playerId: number, techId: numbe
   const r = p.research[techId];
   if (!r?.endTime) return;
   if (r.endTime > ctx.now) {
-    ctx.schedule({ type: 'research', dueAt: r.endTime, playerId, cityId: r.cityId, refKey: refKey(playerId, techId), payload: { techId } });
+    ctx.schedule({ type: TimedEventType.RESEARCH, dueAt: r.endTime, playerId, cityId: r.cityId, refKey: refKey(playerId, techId), payload: { techId } });
     return;
   }
   const bundles = await settleAllCities(ctx, p);

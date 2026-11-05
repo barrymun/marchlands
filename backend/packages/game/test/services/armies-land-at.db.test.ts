@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, BALANCE, dur, marchTimeMs, Mission, msg, TileType } from '@marchlands/core';
+import { ArmyDirection, BALANCE, dur, marchTimeMs, Mission, msg, TileType, TimedEventType } from '@marchlands/core';
 
 import { armies } from '#/index.ts';
 import { armyRow, arrive, reportsOf, send, tileNear, warrior } from '#test/support/armies.ts';
@@ -29,8 +29,8 @@ describe(armies.sendArmy.name, () => {
       expect(bean).toMatchObject({ direction: ArmyDirection.FORWARD, startTime: land - ms, reachTime: land });
       // the troops are committed at once
       expect((await reloadCity(g, p.cityId)).troops.lightCavalry).toBe(4000);
-      expect(g.events('army.depart')).toEqual([expect.objectContaining({ dueAt: land - ms })]);
-      expect(g.events('army')).toEqual([expect.objectContaining({ dueAt: land })]);
+      expect(g.events(TimedEventType.ARMY_DEPART)).toEqual([expect.objectContaining({ dueAt: land - ms })]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([expect.objectContaining({ dueAt: land })]);
 
       await arrive(g, bean.armyId);
       expect(g.now).toBe(land);
@@ -68,7 +68,7 @@ describe(armies.sendArmy.name, () => {
       const second = await send(g, p, { targetTileId: npc.id, mission: Mission.SCOUT, troops: { scouter: 10 }, heroId, arriveAt: land });
 
       // both due at the same moment, in the order they were sent (the worker takes ties by when they were scheduled)
-      expect(g.events('army').map((e) => [e.dueAt, e.payload?.armyId])).toEqual([
+      expect(g.events(TimedEventType.ARMY).map((e) => [e.dueAt, e.payload?.armyId])).toEqual([
         [land, first.armyId],
         [land, second.armyId],
       ]);
@@ -108,7 +108,7 @@ describe(armies.recallArmy.name, () => {
 
       await armies.recallArmy(g, p.id, bean.armyId);
       expect(await armyRow(g, bean.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, reachTime: g.now + 1000 });
-      expect(g.events('army.depart')).toEqual([]);
+      expect(g.events(TimedEventType.ARMY_DEPART)).toEqual([]);
 
       await arrive(g, bean.armyId);
       expect(await armyRow(g, bean.armyId)).toBeUndefined();

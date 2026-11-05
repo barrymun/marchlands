@@ -4,7 +4,20 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, BALANCE, BuildingType, DAY, HeroStatus, MarketSide, Mission, msg, TechType, TileType } from '@marchlands/core';
+import {
+  ArmyDirection,
+  BALANCE,
+  BuildingType,
+  DAY,
+  FlowActionType,
+  HeroStatus,
+  MarketSide,
+  Mission,
+  msg,
+  TechType,
+  TileType,
+  TimedEventType,
+} from '@marchlands/core';
 import { armies as armyRows, cities, heroes as heroRows, timedEvents, warPlanWaves } from '@marchlands/db';
 
 import { completeAbandon } from '#/engine/abandon.ts';
@@ -47,7 +60,7 @@ describe(abandon.abandonCity.name, () => {
       const at = g.now + BALANCE.abandon.delayMs;
       expect(out).toEqual({ abandonAt: at });
       expect((await getCity(g, p.cityId)).abandonAt).toBe(at);
-      expect(g.events('city.abandon')).toMatchObject([{ dueAt: at, playerId: p.id, cityId: p.cityId, refKey: `abandon:${p.cityId}` }]);
+      expect(g.events(TimedEventType.CITY_ABANDON)).toMatchObject([{ dueAt: at, playerId: p.id, cityId: p.cityId, refKey: `abandon:${p.cityId}` }]);
       const pushed = lastPush(g, PushCmd.CASTLE_UPDATE, p.id);
       expect(pushed?.data).toMatchObject({ updateType: 2, castleBean: { id: p.cityId, abandonAt: at } });
     }));
@@ -103,7 +116,7 @@ describe(abandon.cancelAbandon.name, () => {
       await abandon.abandonCity(g, p.id, p.cityId);
       await abandon.cancelAbandon(g, p.id, p.cityId);
       expect((await getCity(g, p.cityId)).abandonAt).toBe(0);
-      expect(g.events('city.abandon')).toEqual([]);
+      expect(g.events(TimedEventType.CITY_ABANDON)).toEqual([]);
       g.advance(BALANCE.abandon.delayMs);
       await completeAbandon(g, p.cityId);
       expect((await getCity(g, p.cityId)).id).toBe(p.cityId);
@@ -135,7 +148,7 @@ describe(completeAbandon.name, () => {
       g.advance(1000);
       await completeAbandon(g, p.cityId);
       expect((await getCity(g, p.cityId)).abandonAt).toBe(abandonAt);
-      expect(g.events('city.abandon')).toMatchObject([{ dueAt: abandonAt }]);
+      expect(g.events(TimedEventType.CITY_ABANDON)).toMatchObject([{ dueAt: abandonAt }]);
     }));
 
   it('leaves flat land of the level it had, reports it and tells the client', () =>
@@ -196,8 +209,8 @@ describe(completeAbandon.name, () => {
       await abandonNow(g, p);
 
       expect(await g.tx.select().from(armyRows).where(eq(armyRows.playerId, p.id))).toEqual([]);
-      expect(g.events('army').filter((e) => e.playerId === p.id)).toEqual([]);
-      expect(g.events('army.depart').filter((e) => e.playerId === p.id)).toEqual([]);
+      expect(g.events(TimedEventType.ARMY).filter((e) => e.playerId === p.id)).toEqual([]);
+      expect(g.events(TimedEventType.ARMY_DEPART).filter((e) => e.playerId === p.id)).toEqual([]);
       expect(await g.tx.select().from(heroRows).where(eq(heroRows.id, leader))).toEqual([]);
       await g.runDue(g.now + DAY);
     }));
@@ -219,10 +232,10 @@ describe(completeAbandon.name, () => {
 
       expect(await market.myOrders(g, p.id)).toEqual([]);
       expect(await market.myShipments(g, p.id)).toEqual([]);
-      expect(g.events('shipment').filter((e) => e.playerId === p.id)).toEqual([]);
+      expect(g.events(TimedEventType.SHIPMENT).filter((e) => e.playerId === p.id)).toEqual([]);
       expect(await g.tx.select().from(warPlanWaves).where(eq(warPlanWaves.playerId, p.id))).toEqual([]);
       expect((await getPlayer(g, p.id)).research[TechType.AGRICULTURE]).toEqual({ level });
-      expect(g.events('research').filter((e) => e.playerId === p.id)).toEqual([]);
+      expect(g.events(TimedEventType.RESEARCH).filter((e) => e.playerId === p.id)).toEqual([]);
       expect(await getTile(g, valley.id)).toMatchObject({ ownerCityId: null, ownerPlayerId: null, troops: null, state: null });
       // it can start the research again elsewhere
       await withAcademy(g, p, other);
@@ -234,7 +247,7 @@ describe(completeAbandon.name, () => {
     game(async (g) => {
       const { p, other } = await withSecondCity(g);
       const row = (cityId: number, refKey: string) => ({
-        type: 'building',
+        type: TimedEventType.BUILDING,
         dueAt: g.now + DAY,
         playerId: p.id,
         cityId,
@@ -285,7 +298,10 @@ describe(completeAbandon.name, () => {
     game(async (g) => {
       const { p, other } = await withSecondCity(g);
       const preset = await armyPreset(g, p, 'Farm', { militia: 10 });
-      const f = await newFlow(g, p, { name: 'Farm', actions: [{ type: 'attackTargets', presetId: preset, targets: { [p.cityId]: [5], [other]: [6] } }] });
+      const f = await newFlow(g, p, {
+        name: 'Farm',
+        actions: [{ type: FlowActionType.ATTACK_TARGETS, presetId: preset, targets: { [p.cityId]: [5], [other]: [6] } }],
+      });
       await abandonNow(g, p);
       const saved = await flowOf(g, p, f.id);
       expect(saved.actions).toEqual([expect.objectContaining({ targets: { [other]: [6] } })]);

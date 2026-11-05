@@ -22,15 +22,22 @@ import {
   BuildingType,
   checkRequirements,
   dur,
+  FLOW_TRAIN_MAX,
   type FlowAction,
   flowActionMessage,
+  FlowActionType,
+  FlowCities,
   type FlowCityResult,
+  FlowHealWhen,
   type FlowSkippedCity,
+  FlowStatus,
   type FlowStepResult,
+  FlowWaitUntil,
   GameError,
   hasTroops,
   healCost,
   healHonorCost,
+  HealPayment,
   heroHireCost,
   heroManagement,
   heroPower,
@@ -45,6 +52,7 @@ import {
   requirementsMet,
   tavernRefreshCost,
   tileXY,
+  TimedEventType,
   troopConfig,
   troopCostShare,
 } from '@marchlands/core';
@@ -102,7 +110,7 @@ async function attackTargets(
   ctx: Ctx,
   playerId: number,
   cityId: number,
-  a: Extract<FlowAction, { type: 'attackTargets' }>,
+  a: Extract<FlowAction, { type: typeof FlowActionType.ATTACK_TARGETS }>,
   run: CityRun,
 ): Promise<ActionOutcome> {
   const targets = a.targets[String(cityId)] ?? [];
@@ -141,13 +149,13 @@ async function attackTargets(
 }
 
 /** Heal every injured troop in the city (resources or honor); fails, rolling the city back, if it cannot pay for all of them. */
-async function healAll(ctx: Ctx, playerId: number, cityId: number, payWith: 'resources' | 'honor'): Promise<Message> {
+async function healAll(ctx: Ctx, playerId: number, cityId: number, payWith: HealPayment): Promise<Message> {
   const b = await openOwnCity(ctx, playerId, cityId);
   const injured = Object.fromEntries(Object.entries(b.city.injuredTroops).filter(([, n]) => n > 0)) as Record<string, number>;
   const total = Object.values(injured).reduce((s, n) => s + n, 0);
   if (!total) return msg('flow.step.noInjured');
   await cureInjured(ctx, playerId, cityId, injured, payWith);
-  if (payWith === 'honor') return msg('flow.step.healedHonour', { count: total, honour: healHonorCost(injured) });
+  if (payWith === HealPayment.HONOR) return msg('flow.step.healedHonour', { count: total, honour: healHonorCost(injured) });
   const cost = (Object.entries(healCost(injured)) as [Parameters<typeof ref.resource>[0], number][])
     .filter(([, v]) => v > 0)
     .map(([k, v]) => msg('flow.resourceAmount', { amount: Math.ceil(v), resource: ref.resource(k) }));
@@ -194,14 +202,14 @@ async function holdUntil(ctx: Ctx, playerId: number, f: FlowRow): Promise<number
 }
 
 const healRef = (cityId: number) => `flowheal:${cityId}`;
-const scheduleHeal = (ctx: Ctx, playerId: number, cityId: number, payWith: 'resources' | 'honor', armyIds: number[], dueAt: number) =>
-  ctx.schedule({ type: 'flow.heal', dueAt, playerId, cityId, refKey: healRef(cityId), payload: { payWith, armyIds } });
+const scheduleHeal = (ctx: Ctx, playerId: number, cityId: number, payWith: HealPayment, armyIds: number[], dueAt: number) =>
+  ctx.schedule({ type: TimedEventType.FLOW_HEAL, dueAt, playerId, cityId, refKey: healRef(cityId), payload: { payWith, armyIds } });
 
 /**
  * Heal once the armies this flow sent from the city are home (event 'flow.heal'), or now if it sent
  * none. A heal still waiting from an earlier run keeps waiting for that run's armies as well.
  */
-async function healWhenHome(ctx: Ctx, playerId: number, cityId: number, payWith: 'resources' | 'honor', run: CityRun): Promise<Message> {
+async function healWhenHome(ctx: Ctx, playerId: number, cityId: number, payWith: HealPayment, run: CityRun): Promise<Message> {
   const [pending] = await ctx.tx
     .select({ payload: timedEvents.payload })
     .from(timedEvents)
@@ -218,7 +226,7 @@ async function healWhenHome(ctx: Ctx, playerId: number, cityId: number, payWith:
 }
 
 /** Timed event 'flow.heal': heal once the flow's armies are all home (waiting longer if some are still out). */
-export async function runScheduledHeal(ctx: Ctx, playerId: number, cityId: number, payWith: 'resources' | 'honor', armyIds: number[]) {
+export async function runScheduledHeal(ctx: Ctx, playerId: number, cityId: number, payWith: HealPayment, armyIds: number[]) {
   let name: string;
   try {
     name = (await openOwnCity(ctx, playerId, cityId)).city.name;
@@ -249,7 +257,12 @@ const BASE_VALUE = { power: (h: HeroRow) => h.basePower, management: (h: HeroRow
  * has re-rolled BALANCE.flowHireMaxRerolls times. Each is named after what it was hired for (ATK - 76). Stopping short
  * isn't a failure: the step says why and the flow carries on, so a repeating flow goes on until every city has its count.
  */
-async function hireHeroes(ctx: Ctx, playerId: number, cityId: number, a: Extract<FlowAction, { type: 'hireHeroes' }>): Promise<ActionOutcome> {
+async function hireHeroes(
+  ctx: Ctx,
+  playerId: number,
+  cityId: number,
+  a: Extract<FlowAction, { type: typeof FlowActionType.HIRE_HEROES }>,
+): Promise<ActionOutcome> {
   const b = await openOwnCity(ctx, playerId, cityId);
   const inn = buildingLevel(b.city.buildings, BuildingType.INN);
   if (inn < 1) return { detail: msg('hero.needInn', { building: ref.building(BuildingType.INN) }), skipped: true };
@@ -294,11 +307,18 @@ async function hireHeroes(ctx: Ctx, playerId: number, cityId: number, a: Extract
   return hired ? detail : { detail, skipped: true };
 }
 
-async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<FlowAction, { type: 'wait' }>, run: CityRun): Promise<ActionOutcome> {
-  if (a.type === 'attackTargets') return attackTargets(ctx, playerId, cityId, a, run);
-  if (a.type === 'hireHeroes') return hireHeroes(ctx, playerId, cityId, a);
-  if (a.type === 'healTroops') return a.when === 'armiesHome' ? healWhenHome(ctx, playerId, cityId, a.payWith, run) : healAll(ctx, playerId, cityId, a.payWith);
-  if (a.type === 'setMayor') {
+async function runAction(
+  ctx: Ctx,
+  playerId: number,
+  cityId: number,
+  a: Exclude<FlowAction, { type: typeof FlowActionType.WAIT }>,
+  run: CityRun,
+): Promise<ActionOutcome> {
+  if (a.type === FlowActionType.ATTACK_TARGETS) return attackTargets(ctx, playerId, cityId, a, run);
+  if (a.type === FlowActionType.HIRE_HEROES) return hireHeroes(ctx, playerId, cityId, a);
+  if (a.type === FlowActionType.HEAL_TROOPS)
+    return a.when === FlowHealWhen.ARMIES_HOME ? healWhenHome(ctx, playerId, cityId, a.payWith, run) : healAll(ctx, playerId, cityId, a.payWith);
+  if (a.type === FlowActionType.SET_MAYOR) {
     const b = await openOwnCity(ctx, playerId, cityId);
     const value = STAT_VALUE[a.stat];
     const stat = ref.stat(a.stat);
@@ -329,13 +349,13 @@ async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<
   const max = maxTrainableCount(a.troopId, have, cityStats(b, ctx.now).idlePopulation, troopCostShare(b.player.buffs, ctx.now));
   // what the city cannot do right now is skipped, not failed: as many as it can afford, up to the amount
   if (!hasTrainingRoom(b)) return { detail: msg('flow.step.noBarracksRoom'), skipped: true };
-  const count = a.amount === 'max' ? max : Math.min(a.amount, max);
+  const count = a.amount === FLOW_TRAIN_MAX ? max : Math.min(a.amount, max);
   if (count < 1) return { detail: msg('flow.step.cannotAfford', { troop }), skipped: true };
   const r = await trainSplit(ctx, playerId, cityId, a.troopId, count);
   const left = Math.max(0, r.finishAt - ctx.now);
   const barracks = r.batches.length;
   const time = dur(Math.ceil(left / 1000) * 1000);
-  if (a.amount !== 'max' && count < a.amount) {
+  if (a.amount !== FLOW_TRAIN_MAX && count < a.amount) {
     const requested = a.amount;
     return left > 0
       ? msg('flow.step.trainingPartial', { amount: count, requested, troop, count: barracks, time })
@@ -347,7 +367,7 @@ async function runAction(ctx: Ctx, playerId: number, cityId: number, a: Exclude<
 }
 
 const citiesWanted = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => f.cityOverride ?? f.cities;
-export const usesAllCities = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => citiesWanted(f) === 'all';
+export const usesAllCities = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => citiesWanted(f) === FlowCities.ALL;
 
 /**
  * Cities a run starts on: the ones chosen for it, or the flow's own. 'all' is every city the lord has
@@ -364,10 +384,10 @@ export async function planCities(
   const own = cityRows.filter((c) => !c.abandonAt);
   const wanted = citiesWanted(f);
   const leaving = cityRows
-    .filter((c) => c.abandonAt && (wanted === 'all' || wanted.includes(c.id)))
+    .filter((c) => c.abandonAt && (wanted === FlowCities.ALL || wanted.includes(c.id)))
     .map((c) => ({ cityId: c.id, cityName: c.name, reason: msg('flow.skipAbandoning') }));
-  if (wanted === 'all' && f.actions.some((a) => a.type === 'hireHeroes')) return { cities: own.map((c) => c.id), skipped: leaving };
-  if (wanted === 'all') {
+  if (wanted === FlowCities.ALL && f.actions.some((a) => a.type === FlowActionType.HIRE_HEROES)) return { cities: own.map((c) => c.id), skipped: leaving };
+  if (wanted === FlowCities.ALL) {
     const rows = await ctx.tx.selectDistinct({ cityId: heroesTable.cityId }).from(heroesTable).where(eq(heroesTable.playerId, playerId));
     const withHero = new Set(rows.map((r) => r.cityId));
     return {
@@ -385,9 +405,9 @@ const noCitiesReason = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => msg(uses
 export async function dropCityTargets(ctx: Ctx, playerId: number, cityId: number) {
   const key = String(cityId);
   for (const f of await ctx.tx.select().from(flowsTable).where(eq(flowsTable.playerId, playerId)).for('update')) {
-    if (!f.actions.some((a) => a.type === 'attackTargets' && key in a.targets)) continue;
+    if (!f.actions.some((a) => a.type === FlowActionType.ATTACK_TARGETS && key in a.targets)) continue;
     const actions = f.actions.map((a) =>
-      a.type === 'attackTargets' ? { ...a, targets: Object.fromEntries(Object.entries(a.targets).filter(([city]) => city !== key)) } : a,
+      a.type === FlowActionType.ATTACK_TARGETS ? { ...a, targets: Object.fromEntries(Object.entries(a.targets).filter(([city]) => city !== key)) } : a,
     );
     await ctx.tx.update(flowsTable).set({ actions }).where(eq(flowsTable.id, f.id));
     ctx.push(playerId, PushCmd.FLOW_UPDATE, { flowId: f.id, status: f.status });
@@ -408,7 +428,7 @@ export async function dropCapturedTarget(ctx: Ctx, tileId: number) {
     .for('update');
   for (const f of listed) {
     const actions = f.actions.map((a) =>
-      a.type === 'attackTargets'
+      a.type === FlowActionType.ATTACK_TARGETS
         ? { ...a, targets: Object.fromEntries(Object.entries(a.targets).map(([city, list]) => [city, list.filter((t) => t !== tileId)])) }
         : a,
     );
@@ -434,7 +454,7 @@ export async function runPart(ctx: Ctx, playerId: number, f: FlowRow, from: numb
         steps = [];
         const run: CityRun = { armyIds: [...(f.armyIds[key] ?? [])] };
         for (const a of f.actions.slice(from, to)) {
-          if (a.type === 'wait') continue;
+          if (a.type === FlowActionType.WAIT) continue;
           const action = flowActionMessage(a);
           try {
             const res = await runAction(sp, playerId, cityId, a, run);
@@ -482,8 +502,8 @@ export const waitStep = (a: FlowAction, detail: Message): FlowStepResult => ({ a
  * When a wait action ends: after its minutes, or once every army the run sent is home (null: none
  * are out, so there is nothing to wait for).
  */
-async function waitEnd(ctx: Ctx, f: FlowRow, a: Extract<FlowAction, { type: 'wait' }>): Promise<number | null> {
-  if (a.until === 'time') return ctx.now + a.minutes * 60_000;
+async function waitEnd(ctx: Ctx, f: FlowRow, a: Extract<FlowAction, { type: typeof FlowActionType.WAIT }>): Promise<number | null> {
+  if (a.until === FlowWaitUntil.TIME) return ctx.now + a.minutes * 60_000;
   const away = await armiesAway(ctx, Object.values(f.armyIds).flat());
   return away.count ? Math.max(away.homeBy, ctx.now + 5_000) : null;
 }
@@ -503,15 +523,15 @@ async function advance(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCity
     if (f.lastRun) f.lastRun = { ...f.lastRun, cities: mergeResults(f.lastRun.cities, part) };
   };
   for (;;) {
-    const waitAt = f.actions.findIndex((a, i) => i >= f.nextAction && a.type === 'wait');
+    const waitAt = f.actions.findIndex((a, i) => i >= f.nextAction && a.type === FlowActionType.WAIT);
     const end = waitAt < 0 ? f.actions.length : waitAt;
     if (end > f.nextAction) {
       const hold = await holdUntil(ctx, playerId, f);
       if (hold != null) {
-        f.status = 'waiting';
+        f.status = FlowStatus.WAITING;
         f.waitUntil = hold;
         f.heldSince ||= ctx.now;
-        ctx.schedule({ type: 'flow.resume', dueAt: hold, playerId, refKey: resumeRef(f.id), payload: { flowId: f.id } });
+        ctx.schedule({ type: TimedEventType.FLOW_RESUME, dueAt: hold, playerId, refKey: resumeRef(f.id), payload: { flowId: f.id } });
         await saveRow(ctx, f);
         return ran;
       }
@@ -529,7 +549,7 @@ async function advance(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCity
       await finishRun(ctx, playerId, f);
       return ran;
     }
-    const w = f.actions[waitAt] as Extract<FlowAction, { type: 'wait' }>;
+    const w = f.actions[waitAt] as Extract<FlowAction, { type: typeof FlowActionType.WAIT }>;
     const until = await waitEnd(ctx, f, w);
     f.nextAction = waitAt + 1;
     const step = waitStep(w, until == null ? msg('flow.step.noArmiesOut') : msg('flow.step.waiting', { time: aboutFrom(ctx, until) }));
@@ -543,9 +563,9 @@ async function advance(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCity
       })),
     );
     if (until != null) {
-      f.status = 'waiting';
+      f.status = FlowStatus.WAITING;
       f.waitUntil = until;
-      ctx.schedule({ type: 'flow.resume', dueAt: until, playerId, refKey: resumeRef(f.id), payload: { flowId: f.id } });
+      ctx.schedule({ type: TimedEventType.FLOW_RESUME, dueAt: until, playerId, refKey: resumeRef(f.id), payload: { flowId: f.id } });
       await saveRow(ctx, f);
       return ran;
     }
@@ -557,7 +577,7 @@ async function startRun(ctx: Ctx, playerId: number, f: FlowRow): Promise<FlowCit
   const { cities, skipped } = await planCities(ctx, playerId, f);
   const names = new Map((await citiesOf(ctx, playerId)).map((c) => [c.id, c.name]));
   f.runs += 1;
-  f.status = 'running';
+  f.status = FlowStatus.RUNNING;
   f.runStartedAt = ctx.now;
   f.heldSince = 0;
   f.nextAction = 0;
@@ -587,11 +607,11 @@ async function finishRun(ctx: Ctx, playerId: number, f: FlowRow) {
   f.waitUntil = 0;
   f.heldSince = 0;
   if (f.repeat) {
-    f.status = 'queued';
+    f.status = FlowStatus.QUEUED;
     f.queuedAt = ctx.now;
     f.notBefore = f.runStartedAt + REPEAT_MIN_GAP_MS;
   } else {
-    f.status = 'idle';
+    f.status = FlowStatus.IDLE;
     f.cityOverride = null;
   }
   await saveRow(ctx, f);
@@ -601,7 +621,7 @@ async function finishRun(ctx: Ctx, playerId: number, f: FlowRow) {
 /** End the run now. With a reason, the flow stopped on its own: repeat goes off and the lord is told why. */
 export async function stopRun(ctx: Ctx, playerId: number, f: FlowRow, reason: Message | null) {
   if (f.lastRun && f.lastRun.finishedAt == null) f.lastRun = { ...f.lastRun, finishedAt: ctx.now };
-  f.status = 'idle';
+  f.status = FlowStatus.IDLE;
   f.repeat = false;
   f.nextAction = 0;
   f.waitUntil = 0;
@@ -620,7 +640,7 @@ export async function stopRun(ctx: Ctx, playerId: number, f: FlowRow, reason: Me
 }
 
 /** Look at the queue now (timed event 'flow.queue'), in its own transaction. */
-const nextInQueue = (ctx: Ctx, playerId: number) => ctx.schedule({ type: 'flow.queue', dueAt: ctx.now, playerId, refKey: queueRef(playerId) });
+const nextInQueue = (ctx: Ctx, playerId: number) => ctx.schedule({ type: TimedEventType.FLOW_QUEUE, dueAt: ctx.now, playerId, refKey: queueRef(playerId) });
 
 /**
  * Start every queued flow that may start now, oldest in the queue first (another flow waiting does not
@@ -628,11 +648,11 @@ const nextInQueue = (ctx: Ctx, playerId: number) => ctx.schedule({ type: 'flow.q
  * each flow started ran, by flow id.
  */
 export async function startNext(ctx: Ctx, playerId: number, list: FlowRow[]): Promise<Map<string, FlowCityResult[]>> {
-  const queued = list.filter((f) => f.status === 'queued').sort((a, b) => a.queuedAt - b.queuedAt || a.createdAt - b.createdAt);
+  const queued = list.filter((f) => f.status === FlowStatus.QUEUED).sort((a, b) => a.queuedAt - b.queuedAt || a.createdAt - b.createdAt);
   const started = new Map<string, FlowCityResult[]>();
   for (const f of queued) if (f.notBefore <= ctx.now) started.set(f.id, await startRun(ctx, playerId, f));
-  const later = queued.filter((f) => f.status === 'queued' && f.notBefore > ctx.now);
-  if (later.length) ctx.schedule({ type: 'flow.queue', dueAt: Math.min(...later.map((f) => f.notBefore)), playerId, refKey: queueRef(playerId) });
+  const later = queued.filter((f) => f.status === FlowStatus.QUEUED && f.notBefore > ctx.now);
+  if (later.length) ctx.schedule({ type: TimedEventType.FLOW_QUEUE, dueAt: Math.min(...later.map((f) => f.notBefore)), playerId, refKey: queueRef(playerId) });
   return started;
 }
 
@@ -645,8 +665,8 @@ export async function runQueue(ctx: Ctx, playerId: number) {
 
 /** Carry on flows held for their heroes, the longest held first; one still held keeps the later ones behind it. */
 async function runHeld(ctx: Ctx, playerId: number, list: FlowRow[]) {
-  for (const f of list.filter((x) => x.heldSince > 0 && x.status === 'waiting').sort((a, b) => a.heldSince - b.heldSince)) {
-    f.status = 'running';
+  for (const f of list.filter((x) => x.heldSince > 0 && x.status === FlowStatus.WAITING).sort((a, b) => a.heldSince - b.heldSince)) {
+    f.status = FlowStatus.RUNNING;
     f.waitUntil = 0;
     await advance(ctx, playerId, f);
     if (f.heldSince > 0) break;
@@ -657,19 +677,19 @@ async function runHeld(ctx: Ctx, playerId: number, list: FlowRow[]) {
 export async function resumeFlow(ctx: Ctx, playerId: number, flowId: string) {
   const list = await flowsOf(ctx, playerId, true);
   const f = list.find((x) => x.id === flowId);
-  if (!f || f.status !== 'waiting') return;
+  if (!f || f.status !== FlowStatus.WAITING) return;
   if (f.heldSince > 0) return runHeld(ctx, playerId, list);
   const w = f.actions[f.nextAction - 1];
-  if (w?.type === 'wait' && w.until === 'armiesHome') {
+  if (w?.type === FlowActionType.WAIT && w.until === FlowWaitUntil.ARMIES_HOME) {
     const until = await waitEnd(ctx, f, w);
     if (until != null) {
       f.waitUntil = until;
-      ctx.schedule({ type: 'flow.resume', dueAt: until, playerId, refKey: resumeRef(f.id), payload: { flowId: f.id } });
+      ctx.schedule({ type: TimedEventType.FLOW_RESUME, dueAt: until, playerId, refKey: resumeRef(f.id), payload: { flowId: f.id } });
       await saveRow(ctx, f);
       return;
     }
   }
-  f.status = 'running';
+  f.status = FlowStatus.RUNNING;
   f.waitUntil = 0;
   await advance(ctx, playerId, f);
 }

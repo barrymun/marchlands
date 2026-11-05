@@ -34,6 +34,7 @@ import {
   ref,
   tavernRefreshCost,
   TechType,
+  TimedEventType,
 } from '@marchlands/core';
 import { heroes } from '@marchlands/db';
 
@@ -319,7 +320,7 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     if (attr === HeroBuffId.POWER) h.powerBuffAdded = amount;
     if (attr === HeroBuffId.MANAGEMENT) h.managementBuffAdded = amount;
     if (attr === HeroBuffId.STRATAGEM) h.stratagemBuffAdded = amount;
-    ctx.schedule({ type: 'hero.buff', dueAt: endTime, playerId, refKey: `herobuff:${h.id}:${attr}`, payload: { heroId: h.id, attr } });
+    ctx.schedule({ type: TimedEventType.HERO_BUFF, dueAt: endTime, playerId, refKey: `herobuff:${h.id}:${attr}`, payload: { heroId: h.id, attr } });
   } else throw new GameError(msg('hero.invalidItem'), -99);
   await saveHero(ctx, h);
   await savePlayer(ctx, p);

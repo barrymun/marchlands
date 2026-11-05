@@ -1,5 +1,6 @@
 // (marchlands) Flows: a lord's saved series of actions, run on any of their cities (backend services/flows.ts).
 
+import { FLOW_TRAIN_MAX, FlowActionType, FlowHealWhen, FlowWaitUntil, HealPayment } from '#/constants.ts';
 import { TROOPS } from '#/data/index.ts';
 import { dur, type Message, msg, ref } from '#/messages/index.ts';
 import type { FlowAction } from '#/types.ts';
@@ -13,9 +14,6 @@ const HIRE_NAME_TAGS = { power: 'ATK', management: 'POL', stratagem: 'INT' } as 
 
 /** Troops a flow can train (everything trained in barracks; fortifications are not troops). */
 export const FLOW_TROOP_IDS: readonly number[] = TROOPS.filter((t) => t.inside === 1).map((t) => t.troopId);
-
-/** A flow between runs ('idle'), waiting its turn ('queued'), running its actions, or paused on a wait action. */
-export type FlowStatus = 'idle' | 'queued' | 'running' | 'waiting';
 
 export interface FlowStepResult {
   action: Message;
@@ -60,22 +58,23 @@ export interface FlowPreviewLog {
 
 /** One line for an action, e.g. "Set mayor: highest Attack" or "Train max Archer". */
 export function flowActionMessage(a: FlowAction): Message {
-  if (a.type === 'setMayor') return msg('flow.action.setMayor', { stat: ref.stat(a.stat) });
-  if (a.type === 'healTroops') {
-    const home = a.when === 'armiesHome';
-    if (a.payWith === 'honor') return msg(home ? 'flow.action.healHonourHome' : 'flow.action.healHonour');
+  if (a.type === FlowActionType.SET_MAYOR) return msg('flow.action.setMayor', { stat: ref.stat(a.stat) });
+  if (a.type === FlowActionType.HEAL_TROOPS) {
+    const home = a.when === FlowHealWhen.ARMIES_HOME;
+    if (a.payWith === HealPayment.HONOR) return msg(home ? 'flow.action.healHonourHome' : 'flow.action.healHonour');
     return msg(home ? 'flow.action.healResourcesHome' : 'flow.action.healResources');
   }
-  if (a.type === 'hireHeroes') return msg('flow.action.hireHeroes', { count: a.count, stat: ref.stat(a.stat), min: a.min, gold: a.maxGold });
-  if (a.type === 'wait') return a.until === 'armiesHome' ? msg('flow.action.waitArmiesHome') : msg('flow.action.wait', { time: dur(a.minutes * 60_000) });
-  if (a.type === 'attackTargets') {
+  if (a.type === FlowActionType.HIRE_HEROES) return msg('flow.action.hireHeroes', { count: a.count, stat: ref.stat(a.stat), min: a.min, gold: a.maxGold });
+  if (a.type === FlowActionType.WAIT)
+    return a.until === FlowWaitUntil.ARMIES_HOME ? msg('flow.action.waitArmiesHome') : msg('flow.action.wait', { time: dur(a.minutes * 60_000) });
+  if (a.type === FlowActionType.ATTACK_TARGETS) {
     const lists = Object.values(a.targets).filter((t) => t.length);
     const count = lists.reduce((s, t) => s + t.length, 0);
     return lists.length > 1
       ? msg('flow.action.attackFrom', { count, cities: msg('flow.cityCount', { count: lists.length }) })
       : msg('flow.action.attack', { count });
   }
-  return a.amount === 'max'
+  return a.amount === FLOW_TRAIN_MAX
     ? msg('flow.action.trainMax', { troop: ref.troop(a.troopId) })
     : msg('flow.action.train', { amount: a.amount, troop: ref.troop(a.troopId) });
 }

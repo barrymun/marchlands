@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, HeroStatus, Mission, msg, TileType } from '@marchlands/core';
+import { ArmyDirection, HeroStatus, Mission, msg, TileType, TimedEventType } from '@marchlands/core';
 import { armies as armiesTable } from '@marchlands/db';
 
 import { armyRef, homeMarchMs } from '#/engine/armies.ts';
@@ -30,7 +30,9 @@ describe(processArmy.name, () => {
       const bean = await send(g, p, { targetTileId: npc.id, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId });
       g._events.clear();
       await processArmy(g, bean.armyId);
-      expect(g.events('army')).toEqual([expect.objectContaining({ dueAt: bean.reachTime, refKey: armyRef(bean.armyId), payload: { armyId: bean.armyId } })]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([
+        expect.objectContaining({ dueAt: bean.reachTime, refKey: armyRef(bean.armyId), payload: { armyId: bean.armyId } }),
+      ]);
       expect(await armyRow(g, bean.armyId)).toMatchObject({ direction: ArmyDirection.FORWARD, troops: { lightCavalry: 10 } });
       expect(await reportTitles(g, p.id)).toEqual([]);
     }));
@@ -48,7 +50,7 @@ describe(processArmy.name, () => {
 
       await arrive(g, bean.armyId);
       expect(await armyRow(g, bean.armyId)).toBeUndefined();
-      expect(g.events('army')).toEqual([]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([]);
       const city = await reloadCity(g, p.cityId);
       expect(city.troops.lightCavalry).toBe(before.troops.lightCavalry! + back.troops.lightCavalry!);
       // the loot arrives (production meanwhile is small next to it)
@@ -84,7 +86,7 @@ describe(processArmy.name, () => {
       await arrive(g, bean.armyId);
       const camp = (await armyRow(g, bean.armyId))!;
       expect(camp).toMatchObject({ direction: ArmyDirection.STAY, reachTime: g.now, restTime: 600_000 });
-      expect(g.events('army')).toEqual([expect.objectContaining({ dueAt: g.now + 600_000, refKey: armyRef(bean.armyId) })]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([expect.objectContaining({ dueAt: g.now + 600_000, refKey: armyRef(bean.armyId) })]);
 
       // an early wake-up changes nothing
       await processArmy(g, bean.armyId);
@@ -103,7 +105,7 @@ describe(processArmy.name, () => {
       const valley = await occupyValley(g, p, heroId);
       const bean = await send(g, p, { targetTileId: valley.id, mission: Mission.REINFORCE, troops: { lightCavalry: 100 } });
       await arrive(g, bean.armyId);
-      expect(g.events('army')).toEqual([]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([]);
       g.advance(30 * 86_400_000);
       await processArmy(g, bean.armyId);
       expect((await armyRow(g, bean.armyId))!.direction).toBe(ArmyDirection.STAY);

@@ -17,6 +17,7 @@ import {
   reliefMarchMs,
   TileType,
   tileXY,
+  TimedEventType,
 } from '@marchlands/core';
 import { armies, cities, heroes, players } from '@marchlands/db';
 
@@ -92,7 +93,7 @@ export async function sendBack(ctx: Ctx, a: ArmyRow, marchMs: number) {
   a.restTime = 0;
   await saveArmy(ctx, a);
   if (a.heroId) await ctx.tx.update(heroes).set({ status: HeroStatus.RETURN }).where(eq(heroes.id, a.heroId));
-  ctx.schedule({ type: 'army', dueAt: a.reachTime, playerId: a.playerId, cityId: a.cityId, refKey: armyRef(a.id), payload: { armyId: a.id } });
+  ctx.schedule({ type: TimedEventType.ARMY, dueAt: a.reachTime, playerId: a.playerId, cityId: a.cityId, refKey: armyRef(a.id), payload: { armyId: a.id } });
 }
 
 /**

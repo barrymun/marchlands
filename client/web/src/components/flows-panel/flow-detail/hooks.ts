@@ -18,6 +18,7 @@ import {
   postPlayerFlowsRun,
   postPlayerFlowsStop,
 } from '@marchlands/api-client';
+import { FlowCities, FlowStatus } from '@marchlands/core';
 
 import { withPreview } from '@/components/flows-panel/flow-detail/utils';
 import type { Targets } from '@/components/flows-panel/types';
@@ -51,7 +52,7 @@ export function useFlowControls(flow: Flow, targets: Targets, picked: number[]) 
     mutationFn: async (asPreview: boolean) => {
       const { data } = await postPlayerFlowsRun({
         path: { flowId: flow.id },
-        body: { cityIds: targets === 'all' ? 'all' : picked, preview: asPreview },
+        body: { cityIds: targets === FlowCities.ALL ? FlowCities.ALL : picked, preview: asPreview },
         throwOnError: true,
       });
       return data;
@@ -66,7 +67,7 @@ export function useFlowControls(flow: Flow, targets: Targets, picked: number[]) 
       refresh();
       const failed = r.cities.filter((c) => !c.ok).length;
       if (failed) toast.warning(t('runFlow.toasts.failed', { name: flow.name, count: failed }));
-      else if (r.flow?.status === 'waiting') toast.success(t('runFlow.toasts.waiting', { name: flow.name }));
+      else if (r.flow?.status === FlowStatus.WAITING) toast.success(t('runFlow.toasts.waiting', { name: flow.name }));
       else toast.success(t('runFlow.toasts.done', { name: flow.name, count: r.cities.length }));
     },
     onError: (err) => toast.error(errorMessage(err)),

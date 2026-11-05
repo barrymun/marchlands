@@ -11,11 +11,15 @@ import {
   type Flow,
   FLOW_TROOP_IDS,
   FlowActionSchema,
+  FlowActionType,
+  FlowCities,
+  type FlowCityChoice,
   type FlowCityResult,
   type FlowPreviewLog,
   type FlowRunLog,
   FlowSchema,
   type FlowSkippedCity,
+  FlowStatus,
   GameError,
   msg,
 } from '@marchlands/core';
@@ -35,7 +39,7 @@ export type FlowView = Flow &
     lastPreview: FlowPreviewLog | null;
   };
 
-const isActive = (f: FlowRow) => f.status === 'running' || f.status === 'waiting';
+const isActive = (f: FlowRow) => f.status === FlowStatus.RUNNING || f.status === FlowStatus.WAITING;
 
 /**
  * A flow as the API shows it, every default filled in (FlowSchema): actions saved before a field
@@ -68,7 +72,7 @@ export async function listFlows(ctx: Ctx, playerId: number): Promise<FlowView[]>
 export async function saveFlow(
   ctx: Ctx,
   playerId: number,
-  input: { id?: string | null; name: string; actions: unknown[]; cities?: 'all' | number[] },
+  input: { id?: string | null; name: string; actions: unknown[]; cities?: FlowCityChoice },
 ): Promise<FlowView[]> {
   const name = input.name.trim();
   if (!name || name.length > MAX_NAME) throw new GameError(msg('flow.nameLength', { max: MAX_NAME }), -99);
@@ -77,11 +81,12 @@ export async function saveFlow(
   const actions = input.actions.map((a) => {
     const parsed = FlowActionSchema.safeParse(a);
     if (!parsed.success) throw new GameError(msg('flow.invalidAction'), -99);
-    if (parsed.data.type === 'trainTroops' && !FLOW_TROOP_IDS.includes(parsed.data.troopId)) throw new GameError(msg('common.invalidTroopType'), -99);
+    if (parsed.data.type === FlowActionType.TRAIN_TROOPS && !FLOW_TROOP_IDS.includes(parsed.data.troopId))
+      throw new GameError(msg('common.invalidTroopType'), -99);
     return parsed.data;
   });
   // attack actions: a saved army, and targets on the map listed under the lord's own cities
-  const attacks = actions.filter((a) => a.type === 'attackTargets');
+  const attacks = actions.filter((a) => a.type === FlowActionType.ATTACK_TARGETS);
   if (attacks.length) {
     const p = await getPlayer(ctx, playerId);
     const own = new Set((await citiesOf(ctx, playerId)).map((c) => String(c.id)));
@@ -104,7 +109,7 @@ export async function saveFlow(
     }
   }
   // chosen cities must be the lord's own (cities lost later are skipped when the flow runs)
-  let cities: Flow['cities'] = 'all';
+  let cities: Flow['cities'] = FlowCities.ALL;
   if (Array.isArray(input.cities)) {
     const own = new Set((await citiesOf(ctx, playerId)).map((c) => c.id));
     cities = [...new Set(input.cities)].filter((id) => own.has(id));
@@ -151,7 +156,7 @@ export async function runFlow(
   db: Db,
   playerId: number,
   flowId: string,
-  cityIds: 'all' | number[] | undefined,
+  cityIds: FlowCityChoice | undefined,
   preview: boolean,
 ): Promise<{ preview: boolean; flow: FlowView | null; cities: FlowCityResult[]; skippedCities: FlowSkippedCity[] }> {
   if (preview) {
@@ -166,7 +171,7 @@ export async function runFlow(
         f.runCities = plan.cities;
         skippedCities = plan.skipped;
         if (!f.runCities.length) throw new GameError(msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.chooseCity'), -99);
-        const waitAt = f.actions.findIndex((a) => a.type === 'wait');
+        const waitAt = f.actions.findIndex((a) => a.type === FlowActionType.WAIT);
         const waitAction = f.actions[waitAt];
         cities = await runPart(ctx, playerId, f, 0, waitAt < 0 ? f.actions.length : waitAt);
         if (waitAction) {
@@ -195,7 +200,7 @@ export async function runFlow(
     const list = await flowsOf(ctx, playerId, true);
     const f = list.find((x) => x.id === flowId);
     if (!f) throw new GameError(msg('flow.notFound'), -99, 404);
-    if (f.status !== 'idle') throw new GameError(msg(f.status === 'queued' ? 'flow.alreadyQueued' : 'flow.alreadyRunning'), -99);
+    if (f.status !== FlowStatus.IDLE) throw new GameError(msg(f.status === FlowStatus.QUEUED ? 'flow.alreadyQueued' : 'flow.alreadyRunning'), -99);
     queue(ctx, f, cityIds ?? null);
     if (!(await runCitiesOf(ctx, playerId, f)).length) throw new GameError(msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.chooseCity'), -99);
     await saveRow(ctx, f);
@@ -206,8 +211,8 @@ export async function runFlow(
 }
 
 /** Put an idle flow at the back of the queue. */
-function queue(ctx: Ctx, f: FlowRow, cityOverride: 'all' | number[] | null) {
-  f.status = 'queued';
+function queue(ctx: Ctx, f: FlowRow, cityOverride: FlowCityChoice | null) {
+  f.status = FlowStatus.QUEUED;
   f.queuedAt = ctx.now;
   f.notBefore = 0;
   f.cityOverride = cityOverride;
@@ -224,13 +229,13 @@ export async function setRepeat(ctx: Ctx, playerId: number, flowId: string, repe
   if (!f) throw new GameError(msg('flow.notFound'), -99, 404);
   f.repeat = repeat;
   f.lastPreview = null;
-  if (repeat && f.status === 'idle') {
+  if (repeat && f.status === FlowStatus.IDLE) {
     queue(ctx, f, null);
     if (!(await runCitiesOf(ctx, playerId, f)).length) throw new GameError(msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.noOwnCities'), -99);
   }
   // a repeat waiting in the queue for its next run (notBefore set) does not run again
-  if (!repeat && f.status === 'queued' && f.notBefore > 0) {
-    f.status = 'idle';
+  if (!repeat && f.status === FlowStatus.QUEUED && f.notBefore > 0) {
+    f.status = FlowStatus.IDLE;
     f.cityOverride = null;
   }
   await saveRow(ctx, f);

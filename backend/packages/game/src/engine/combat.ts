@@ -32,8 +32,8 @@ import {
   type HistoricLevel,
   historicNameAt,
   historicResearch,
-  historicState,
   type HistoricState,
+  historicState,
   injuredOf,
   ItemId,
   maxArmyTroops,
@@ -68,6 +68,7 @@ import {
   TechType,
   TileType,
   tileXY,
+  TimedEventType,
   totalResources,
   totalTroops,
   type TroopCounts,
@@ -130,7 +131,7 @@ export async function processArmy(ctx: Ctx, armyId: number) {
     return;
   }
   if (peek.reachTime > ctx.now) {
-    ctx.schedule({ type: 'army', dueAt: peek.reachTime, playerId: peek.playerId, refKey: armyRef(armyId), payload: { armyId } });
+    ctx.schedule({ type: TimedEventType.ARMY, dueAt: peek.reachTime, playerId: peek.playerId, refKey: armyRef(armyId), payload: { armyId } });
     return;
   }
   const target = await getTile(ctx, peek.targetTileId);
@@ -396,7 +397,8 @@ async function station(ctx: Ctx, a: ArmyRow) {
   a.direction = ArmyDirection.STAY;
   a.reachTime = ctx.now;
   await saveArmy(ctx, a);
-  if (a.restTime > 0) ctx.schedule({ type: 'army', dueAt: ctx.now + a.restTime, playerId: a.playerId, refKey: armyRef(a.id), payload: { armyId: a.id } });
+  if (a.restTime > 0)
+    ctx.schedule({ type: TimedEventType.ARMY, dueAt: ctx.now + a.restTime, playerId: a.playerId, refKey: armyRef(a.id), payload: { armyId: a.id } });
   else ctx.unschedule(armyRef(a.id));
   await notifyArmyParties(ctx, a);
 }
@@ -1030,7 +1032,9 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
   await saveCity(ctx, city);
   await ctx.tx.update(tiles).set({ ownerPlayerId: winner.id, updatedAt: ctx.now }).where(eq(tiles.id, city.tileId));
   // its queues pass to the winner, and their events with them: the old holder restarting deletes all that are theirs
-  await ctx.tx.execute(sql`update timed_events set player_id = ${winner.id} where city_id = ${city.id} and type in ('building', 'train')`);
+  await ctx.tx.execute(
+    sql`update timed_events set player_id = ${winner.id} where city_id = ${city.id} and type in (${TimedEventType.BUILDING}, ${TimedEventType.TRAIN})`,
+  );
   addPrestige(winner, 1000 * level);
   await savePlayer(ctx, winner);
   pushCity(ctx, await viewCity(ctx, city.id));

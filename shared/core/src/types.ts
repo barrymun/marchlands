@@ -7,11 +7,18 @@ import {
   BUFF_IDS,
   BuildingStatus,
   FACTION_IDS,
+  FLOW_HEAL_WHENS,
   FLOW_MAX_HIRES,
   FLOW_MAX_TARGETS_PER_CITY,
   FLOW_MAX_WAIT_MINUTES,
+  FLOW_TRAIN_MAX,
+  FLOW_WAIT_UNTILS,
+  FlowActionType,
+  FlowCities,
+  FlowHealWhen,
   FORT_KEY_LIST,
   type FortKey,
+  HEAL_PAYMENTS,
   HERO_BASE_STAT_MAX,
   HERO_BUFF_IDS,
   RESOURCE_KEYS,
@@ -145,25 +152,25 @@ export type ArmyPreset = z.infer<typeof ArmyPresetSchema>;
  * train troops, attack a target list, heal, hire heroes from the Inn, or wait (the whole flow pauses, every city together).
  */
 export const FlowActionSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('setMayor'), stat: z.enum(['power', 'management', 'stratagem']).describe('attribute the new mayor is best at') }),
+  z.object({ type: z.literal(FlowActionType.SET_MAYOR), stat: z.enum(['power', 'management', 'stratagem']).describe('attribute the new mayor is best at') }),
   z.object({
-    type: z.literal('trainTroops'),
+    type: z.literal(FlowActionType.TRAIN_TROOPS),
     troopId: z.number().int().describe('troop type id'),
-    amount: z.union([z.literal('max'), z.number().int().min(1)]).describe("a number, or 'max' for as many as the city can afford"),
+    amount: z.union([z.literal(FLOW_TRAIN_MAX), z.number().int().min(1)]).describe("a number, or 'max' for as many as the city can afford"),
   }),
   z.object({
-    type: z.literal('healTroops'),
-    payWith: z.enum(['resources', 'honor']).describe('heal every injured troop, paid with resources or honor'),
-    when: z.enum(['now', 'armiesHome']).default('now').describe("'armiesHome': once every army of the city is back (e.g. after farming)"),
+    type: z.literal(FlowActionType.HEAL_TROOPS),
+    payWith: z.enum(HEAL_PAYMENTS).describe('heal every injured troop, paid with resources or honor'),
+    when: z.enum(FLOW_HEAL_WHENS).default(FlowHealWhen.NOW).describe("'armiesHome': once every army of the city is back (e.g. after farming)"),
   }),
   z.object({
-    type: z.literal('attackTargets'),
+    type: z.literal(FlowActionType.ATTACK_TARGETS),
     presetId: z.string().describe('saved army sent at each target'),
     /** each city's own targets (city id -> tile ids), attacked in order with its idle heroes, strongest Attack first */
     targets: z.record(z.string(), z.array(z.number().int()).max(FLOW_MAX_TARGETS_PER_CITY)),
   }),
   z.object({
-    type: z.literal('hireHeroes'),
+    type: z.literal(FlowActionType.HIRE_HEROES),
     stat: z.enum(['power', 'management', 'stratagem']).describe('the attribute the heroes must have'),
     min: z.number().int().min(1).max(HERO_BASE_STAT_MAX).describe('the least base value of that attribute (what the hero was born with)'),
     count: z
@@ -177,8 +184,8 @@ export const FlowActionSchema = z.discriminatedUnion('type', [
     maxGold: z.number().int().min(1).describe('the most gold a run may spend in each city on re-rolling the Inn and hiring'),
   }),
   z.object({
-    type: z.literal('wait'),
-    until: z.enum(['time', 'armiesHome']).describe("'time': a number of real minutes; 'armiesHome': until every army this run sent is back"),
+    type: z.literal(FlowActionType.WAIT),
+    until: z.enum(FLOW_WAIT_UNTILS).describe("'time': a number of real minutes; 'armiesHome': until every army this run sent is back"),
     minutes: z.number().int().min(1).max(FLOW_MAX_WAIT_MINUTES).default(10).describe("real minutes (for until 'time'); not sped up by GAME_SPEED"),
   }),
 ]);
@@ -190,7 +197,7 @@ export const FlowSchema = z.object({
   name: z.string().min(1).max(40),
   actions: z.array(FlowActionSchema).min(1).max(20),
   /** cities the flow runs on: 'all' (every city with a hero, including ones gained later) or chosen city ids */
-  cities: z.union([z.literal('all'), z.array(z.number().int())]).default('all'),
+  cities: z.union([z.literal(FlowCities.ALL), z.array(z.number().int())]).default(FlowCities.ALL),
   /** start the flow again after each run, until it fails or is switched off */
   repeat: z.boolean().default(false),
 });

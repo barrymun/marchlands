@@ -11,6 +11,7 @@ import {
   fortKeyOf,
   PrestigeAction,
   prestigeOf,
+  TimedEventType,
   type TrainBatch,
   troopKey,
   type TroopQueueState,
@@ -54,7 +55,7 @@ export function scheduleHead(ctx: Ctx, b: CityBundle, positionId: number, queue:
     return;
   }
   ctx.schedule({
-    type: 'train',
+    type: TimedEventType.TRAIN,
     dueAt: head.endTime,
     playerId: b.player.id,
     cityId: b.city.id,

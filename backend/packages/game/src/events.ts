@@ -1,7 +1,7 @@
 // Timed-event dispatch (used by the worker). Each handler is idempotent: it re-reads state
 // and does nothing if the event is stale (e.g. a speed-up already completed the work).
 
-import { BALANCE, BUFF_IDS, BuffId, msg } from '@marchlands/core';
+import { BALANCE, BUFF_IDS, BuffId, HealPayment, msg, TimedEventType } from '@marchlands/core';
 
 import type { Ctx } from '#/context.ts';
 import { completeAbandon } from '#/engine/abandon.ts';
@@ -42,7 +42,7 @@ async function expireBuff(ctx: Ctx, playerId: number, buffId: BuffId) {
   const b = p.buffs.find((x) => x.id === buffId);
   if (!b) return;
   if (b.endTime > ctx.now) {
-    ctx.schedule({ type: 'buff.expire', dueAt: b.endTime, playerId, refKey: `buff:${playerId}:${buffId}`, payload: { buffId } });
+    ctx.schedule({ type: TimedEventType.BUFF_EXPIRE, dueAt: b.endTime, playerId, refKey: `buff:${playerId}:${buffId}`, payload: { buffId } });
     return;
   }
   // production buffs: bank production at the boosted rate first
@@ -68,36 +68,36 @@ export async function dispatchEvent(ctx: Ctx, ev: EventRow): Promise<void> {
   const playerId = () => scheduledWith(ev, ev.playerId, 'playerId');
   const cityId = () => scheduledWith(ev, ev.cityId, 'cityId');
   switch (ev.type) {
-    case 'building':
+    case TimedEventType.BUILDING:
       return completeBuilding(ctx, cityId(), num(p.positionId));
-    case 'research':
+    case TimedEventType.RESEARCH:
       return completeResearch(ctx, playerId(), num(p.techId));
-    case 'train':
+    case TimedEventType.TRAIN:
       return completeTraining(ctx, cityId(), num(p.positionId));
-    case 'army':
+    case TimedEventType.ARMY:
       await processArmy(ctx, num(p.armyId));
       return;
-    case 'army.depart':
+    case TimedEventType.ARMY_DEPART:
       return departArmy(ctx, num(p.armyId));
-    case 'buff.expire':
+    case TimedEventType.BUFF_EXPIRE:
       return BUFF_IDS.includes(p.buffId as BuffId) ? expireBuff(ctx, playerId(), p.buffId as BuffId) : undefined;
-    case 'hero.buff':
+    case TimedEventType.HERO_BUFF:
       return expireHeroBuff(ctx, num(p.heroId), String(p.attr));
-    case 'shipment':
+    case TimedEventType.SHIPMENT:
       return deliverShipment(ctx, num(p.shipmentId));
-    case 'city.abandon':
+    case TimedEventType.CITY_ABANDON:
       return completeAbandon(ctx, cityId());
-    case 'flow.heal':
+    case TimedEventType.FLOW_HEAL:
       return runScheduledHeal(
         ctx,
         playerId(),
         cityId(),
-        p.payWith === 'honor' ? 'honor' : 'resources',
+        p.payWith === HealPayment.HONOR ? HealPayment.HONOR : HealPayment.RESOURCES,
         Array.isArray(p.armyIds) ? p.armyIds.map(Number).filter(Number.isInteger) : [],
       );
-    case 'flow.resume':
+    case TimedEventType.FLOW_RESUME:
       return resumeFlow(ctx, playerId(), String(p.flowId));
-    case 'flow.queue':
+    case TimedEventType.FLOW_QUEUE:
       return runQueue(ctx, playerId());
     default:
       throw new Error(`unknown timed event type ${ev.type}`);

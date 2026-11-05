@@ -1,6 +1,6 @@
 // (marchlands) Abandoning a city (docs/features/abandoning-a-city.md): a real hour's notice that can be cancelled.
 
-import { BALANCE, GameError, msg } from '@marchlands/core';
+import { BALANCE, GameError, msg, TimedEventType } from '@marchlands/core';
 
 import { openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -14,7 +14,7 @@ export async function abandonCity(ctx: Ctx, playerId: number, cityId: number) {
   if (b.city.abandonAt) throw new GameError(msg('city.abandonAlready'), -99);
   if (!(await keepsRegularCity(ctx, playerId, cityId))) throw new GameError(msg('city.abandonKeepRegular'), -99);
   b.city.abandonAt = ctx.now + BALANCE.abandon.delayMs;
-  ctx.schedule({ type: 'city.abandon', dueAt: b.city.abandonAt, playerId, cityId, refKey: abandonRef(cityId), payload: {} });
+  ctx.schedule({ type: TimedEventType.CITY_ABANDON, dueAt: b.city.abandonAt, playerId, cityId, refKey: abandonRef(cityId), payload: {} });
   await saveCity(ctx, b.city);
   pushCity(ctx, b);
   return { abandonAt: b.city.abandonAt };

@@ -21,6 +21,7 @@ import {
   speedupItemGold,
   TECH_IDS,
   TechType,
+  TimedEventType,
 } from '@marchlands/core';
 
 import { mayorStats } from '#/city.ts';
@@ -118,8 +119,15 @@ describe(research.startResearch.name, () => {
       expect(out).toEqual({ typeId: AGRICULTURE, level: 0, startTime: T0, endTime: end, castleId: p.cityId });
       expect(await researchOf(g, p, AGRICULTURE)).toEqual({ level: 0, cityId: p.cityId, startTime: T0, endTime: end });
       expect(await stored(g, p.cityId)).toEqual(minus(before, researchCost(AGRICULTURE, 1)));
-      expect(g.events('research')).toEqual([
-        { type: 'research', dueAt: end, playerId: p.id, cityId: p.cityId, refKey: `research:${p.id}:${AGRICULTURE}`, payload: { techId: AGRICULTURE } },
+      expect(g.events(TimedEventType.RESEARCH)).toEqual([
+        {
+          type: TimedEventType.RESEARCH,
+          dueAt: end,
+          playerId: p.id,
+          cityId: p.cityId,
+          refKey: `research:${p.id}:${AGRICULTURE}`,
+          payload: { techId: AGRICULTURE },
+        },
       ]);
       expect(g.pushes(PushCmd.RESEARCH_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { castleId: p.cityId, typeId: AGRICULTURE, endTime: end } });
       expect(g.pushes(PushCmd.RESOURCE_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { castleId: p.cityId } });
@@ -160,7 +168,7 @@ describe(research.startResearch.name, () => {
       await setResearch(g, p, HERO_ENHANCEMENT, researchMaxLevel(HERO_ENHANCEMENT));
       await expectRefused(research.startResearch(g, p.id, p.cityId, HERO_ENHANCEMENT), msg('building.invalidTech'));
       await expectRefused(research.startResearch(g, p.id, p.cityId, 999), msg('building.invalidTech'));
-      expect(g.events('research')).toEqual([]);
+      expect(g.events(TimedEventType.RESEARCH)).toEqual([]);
     }));
 
   it('refuses when the city cannot pay', () =>
@@ -223,7 +231,7 @@ describe(research.cancelResearch.name, () => {
       await research.cancelResearch(g, p.id, p.cityId);
       expect(await researchOf(g, p, AGRICULTURE)).toEqual({ level: 1 });
       expect(await stored(g, p.cityId)).toEqual(plus(before, researchCost(AGRICULTURE, 2), BALANCE.cancelResearchRefund));
-      expect(g.events('research')).toEqual([]);
+      expect(g.events(TimedEventType.RESEARCH)).toEqual([]);
       expect(g.pushes(PushCmd.RESEARCH_UPDATE).at(-1)?.data).toEqual({ castleId: p.cityId, typeId: AGRICULTURE, endTime: 0 });
     }));
 
@@ -237,7 +245,7 @@ describe(research.cancelResearch.name, () => {
       await expectRefused(research.cancelResearch(g, p.id, p.cityId, HERO_ENHANCEMENT), msg('research.notResearching', { tech: ref.tech(HERO_ENHANCEMENT) }));
       await research.cancelResearch(g, p.id, p.cityId, LUMBERING);
       expect(await researchOf(g, p, LUMBERING)).toEqual({ level: 0 });
-      expect(g.events('research')).toMatchObject([{ payload: { techId: AGRICULTURE } }]);
+      expect(g.events(TimedEventType.RESEARCH)).toMatchObject([{ payload: { techId: AGRICULTURE } }]);
     }));
 
   it('refuses when nothing is being researched in that city', () =>
@@ -296,7 +304,7 @@ describe(research.speedupResearch.name, () => {
       g.advance(out.endTime - freeMs - T0);
       expect(await research.speedupResearch(g, p.id, p.cityId, SpeedupId.FREE)).toEqual({ endTime: g.now });
       expect(await researchOf(g, p, AGRICULTURE)).toMatchObject({ startTime: out.startTime - freeMs, endTime: g.now });
-      expect(g.events('research')).toMatchObject([{ dueAt: g.now, payload: { techId: AGRICULTURE } }]);
+      expect(g.events(TimedEventType.RESEARCH)).toMatchObject([{ dueAt: g.now, payload: { techId: AGRICULTURE } }]);
       expect(g.pushes(PushCmd.RESEARCH_UPDATE).at(-1)?.data).toEqual({ castleId: p.cityId, typeId: AGRICULTURE, endTime: g.now });
       await g.runDue();
       expect(await researchOf(g, p, AGRICULTURE)).toEqual({ level: 1 });
@@ -340,7 +348,7 @@ describe(research.speedupResearch.name, () => {
       expect(await researchOf(g, p, HERO_ENHANCEMENT)).toMatchObject({ startTime: out.startTime - cut, endTime: out.endTime - cut });
       expect((await reloadPlayer(g, p)).items[ItemId.BEGINNER_GUIDELINES] ?? 0).toBe(owned - 1);
       expect((await stored(g, p.cityId)).gold).toBe(gold);
-      expect(g.events('research')).toMatchObject([{ dueAt: out.endTime - cut }]);
+      expect(g.events(TimedEventType.RESEARCH)).toMatchObject([{ dueAt: out.endTime - cut }]);
     }));
 
   it('an item the player lacks is bought with city gold', () =>

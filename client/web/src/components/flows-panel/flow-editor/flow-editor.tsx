@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUp, Check, GripVertical, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { FLOW_TROOP_IDS } from '@marchlands/core';
+import { FLOW_TRAIN_MAX, FLOW_TROOP_IDS, FlowActionType, FlowCities, FlowHealWhen, FlowWaitUntil, HealPayment } from '@marchlands/core';
 
 import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
 import { ActionFields } from '@/components/flows-panel/flow-editor/action-fields/action-fields';
@@ -41,7 +41,10 @@ export function FlowEditor({
   };
   const update = (i: number, a: Draft) => setActions(draft.actions.map((x, j) => (j === i ? a : x)));
   const valid =
-    draft.name.trim().length > 0 && draft.actions.length > 0 && (draft.cities === 'all' || draft.cities.length > 0) && draft.actions.every(actionValid);
+    draft.name.trim().length > 0 &&
+    draft.actions.length > 0 &&
+    (draft.cities === FlowCities.ALL || draft.cities.length > 0) &&
+    draft.actions.every(actionValid);
 
   return (
     <Card>
@@ -124,7 +127,7 @@ export function FlowEditor({
             size="sm"
             variant="outline"
             disabled={locked || draft.actions.length >= 20}
-            onClick={() => setActions([...draft.actions, keyed({ type: 'setMayor', stat: 'management' })])}
+            onClick={() => setActions([...draft.actions, keyed({ type: FlowActionType.SET_MAYOR, stat: 'management' })])}
           >
             <Plus /> {t('flowEditor.add.setMayor')}
           </Button>
@@ -133,7 +136,10 @@ export function FlowEditor({
             variant="outline"
             disabled={locked || draft.actions.length >= 20}
             onClick={() =>
-              setActions([...draft.actions, keyed({ type: 'trainTroops', troopId: FLOW_TROOP_IDS.includes(7) ? 7 : (FLOW_TROOP_IDS[0] ?? 7), amount: 'max' })])
+              setActions([
+                ...draft.actions,
+                keyed({ type: FlowActionType.TRAIN_TROOPS, troopId: FLOW_TROOP_IDS.includes(7) ? 7 : (FLOW_TROOP_IDS[0] ?? 7), amount: FLOW_TRAIN_MAX }),
+              ])
             }
           >
             <Plus /> {t('flowEditor.add.trainTroops')}
@@ -142,7 +148,7 @@ export function FlowEditor({
             size="sm"
             variant="outline"
             disabled={locked || draft.actions.length >= 20}
-            onClick={() => setActions([...draft.actions, keyed({ type: 'attackTargets', presetId: '', targets: {} })])}
+            onClick={() => setActions([...draft.actions, keyed({ type: FlowActionType.ATTACK_TARGETS, presetId: '', targets: {} })])}
           >
             <Plus /> {t('flowEditor.add.attackTargets')}
           </Button>
@@ -150,7 +156,9 @@ export function FlowEditor({
             size="sm"
             variant="outline"
             disabled={locked || draft.actions.length >= 20}
-            onClick={() => setActions([...draft.actions, keyed({ type: 'healTroops', payWith: 'resources', when: 'armiesHome' })])}
+            onClick={() =>
+              setActions([...draft.actions, keyed({ type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.RESOURCES, when: FlowHealWhen.ARMIES_HOME })])
+            }
           >
             <Plus /> {t('flowEditor.add.healTroops')}
           </Button>
@@ -158,7 +166,7 @@ export function FlowEditor({
             size="sm"
             variant="outline"
             disabled={locked || draft.actions.length >= 20}
-            onClick={() => setActions([...draft.actions, keyed({ type: 'hireHeroes', stat: 'power', min: 70, count: 1, maxGold: 1_000_000 })])}
+            onClick={() => setActions([...draft.actions, keyed({ type: FlowActionType.HIRE_HEROES, stat: 'power', min: 70, count: 1, maxGold: 1_000_000 })])}
           >
             <Plus /> {t('flowEditor.add.hireHeroes')}
           </Button>
@@ -166,7 +174,7 @@ export function FlowEditor({
             size="sm"
             variant="outline"
             disabled={locked || draft.actions.length >= 20}
-            onClick={() => setActions([...draft.actions, keyed({ type: 'wait', until: 'armiesHome', minutes: 10 })])}
+            onClick={() => setActions([...draft.actions, keyed({ type: FlowActionType.WAIT, until: FlowWaitUntil.ARMIES_HOME, minutes: 10 })])}
           >
             <Plus /> {t('flowEditor.add.wait')}
           </Button>

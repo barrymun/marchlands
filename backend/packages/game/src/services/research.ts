@@ -28,6 +28,7 @@ import {
   TECH_IDS,
   techEffect,
   techInfo,
+  TimedEventType,
 } from '@marchlands/core';
 
 import { mayorStats, openOwnCity, viewCity } from '#/city.ts';
@@ -109,7 +110,7 @@ export async function startResearch(ctx: Ctx, playerId: number, cityId: number, 
   ctx.stat(playerId, cityId, prefixed('spent.research', cost));
   const ms = researchTimeMs(techId, level, mayorStats(b.heroes));
   b.player.research = { ...research, [techId]: { level: level - 1, cityId, startTime: ctx.now, endTime: ctx.now + ms } };
-  ctx.schedule({ type: 'research', dueAt: ctx.now + ms, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
+  ctx.schedule({ type: TimedEventType.RESEARCH, dueAt: ctx.now + ms, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
   // other open clients (e.g. the activity dock on another device) refresh their research list
   ctx.push(playerId, PushCmd.RESEARCH_UPDATE, { castleId: cityId, typeId: techId, endTime: ctx.now + ms });
   pushResources(ctx, b);
@@ -167,7 +168,7 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
   const newEnd = Math.max(ctx.now, end - reduce);
   // (marchlands) the start moves back by the time saved, like construction (buildings.ts speedup)
   p.research = { ...p.research, [techId]: { ...r, startTime: (r.startTime ?? ctx.now) - (end - newEnd), endTime: newEnd } };
-  ctx.schedule({ type: 'research', dueAt: newEnd, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
+  ctx.schedule({ type: TimedEventType.RESEARCH, dueAt: newEnd, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
   ctx.push(playerId, PushCmd.RESEARCH_UPDATE, { castleId: cityId, typeId: techId, endTime: newEnd });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);

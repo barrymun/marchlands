@@ -1,4 +1,5 @@
 import type { CityBean, Flow, FlowAction } from '@marchlands/api-client';
+import { FLOW_TRAIN_MAX, FlowActionType, FlowStatus, FlowWaitUntil } from '@marchlands/core';
 
 import { ACTION_RANGES } from '@/components/flows-panel/constants';
 import type { Draft } from '@/components/flows-panel/types';
@@ -16,23 +17,23 @@ export const strip = ({ key: _k, ...a }: Draft): FlowAction => a;
 export const hasHero = (c: Pick<CityBean, 'heros'>) => c.heros.length > 0;
 
 /** Whether a flow hires heroes: then "all cities" runs on every city, those without a hero too, like the server. */
-export const hiresHeroes = (actions: readonly Pick<FlowAction, 'type'>[]) => actions.some((a) => a.type === 'hireHeroes');
+export const hiresHeroes = (actions: readonly Pick<FlowAction, 'type'>[]) => actions.some((a) => a.type === FlowActionType.HIRE_HEROES);
 
 /** Whether a flow is active: running, waiting between steps, or queued to go (again); anything but idle. */
-export const isActive = (f: Pick<Flow, 'status'>) => f.status !== 'idle';
+export const isActive = (f: Pick<Flow, 'status'>) => f.status !== FlowStatus.IDLE;
 
-export const currentAction = (f: Flow) => (f.status === 'waiting' ? f.nextAction - 1 : f.status === 'running' ? f.nextAction : -1);
+export const currentAction = (f: Flow) => (f.status === FlowStatus.WAITING ? f.nextAction - 1 : f.status === FlowStatus.RUNNING ? f.nextAction : -1);
 
 /** Whether an action is ready to save: its numbers in range (ACTION_RANGES), an attack's army chosen. */
 export function actionValid(a: FlowAction): boolean {
   switch (a.type) {
-    case 'wait':
-      return a.until !== 'time' || inRange(a.minutes, ACTION_RANGES.waitMinutes);
-    case 'hireHeroes':
+    case FlowActionType.WAIT:
+      return a.until !== FlowWaitUntil.TIME || inRange(a.minutes, ACTION_RANGES.waitMinutes);
+    case FlowActionType.HIRE_HEROES:
       return inRange(a.count, ACTION_RANGES.hireCount) && inRange(a.min, ACTION_RANGES.hireMin) && inRange(a.maxGold, ACTION_RANGES.hireGold);
-    case 'trainTroops':
-      return a.amount === 'max' || inRange(a.amount, ACTION_RANGES.trainAmount);
-    case 'attackTargets':
+    case FlowActionType.TRAIN_TROOPS:
+      return a.amount === FLOW_TRAIN_MAX || inRange(a.amount, ACTION_RANGES.trainAmount);
+    case FlowActionType.ATTACK_TARGETS:
       return !!a.presetId;
     default:
       return true;
@@ -45,6 +46,6 @@ export const ago = (now: number, t: number) =>
 
 /** How many flows are not idle, and the soonest moment one carries on (a wait ending, a repeat starting), if any is ahead. */
 export function nextDue(flows: readonly Pick<Flow, 'status' | 'waitUntil' | 'notBefore'>[], now: number) {
-  const ahead = flows.map((f) => (f.status === 'waiting' ? f.waitUntil : f.status === 'queued' ? f.notBefore : 0)).filter((at) => at > now);
+  const ahead = flows.map((f) => (f.status === FlowStatus.WAITING ? f.waitUntil : f.status === FlowStatus.QUEUED ? f.notBefore : 0)).filter((at) => at > now);
   return { active: flows.filter(isActive).length, next: ahead.length ? Math.min(...ahead) : null };
 }

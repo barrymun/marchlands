@@ -2,7 +2,7 @@ import { eq, like } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { GameError, msg, seededRng } from '@marchlands/core';
+import { GameError, msg, seededRng, type TimedEventType } from '@marchlands/core';
 import { type Db, playerStats, pushMessages, timedEvents, type Tx, worldState } from '@marchlands/db';
 
 import { type RunOptions, savepoint } from '#/context.ts';
@@ -11,6 +11,12 @@ import { flushStats, statDay } from '#/stats.ts';
 import { createTestPlayer } from '#test/support/factories.ts';
 import { game, T0 } from '#test/support/game.ts';
 import { arrange, inTestTx } from '#test/support/tx.ts';
+
+/** Events of this test's own, never dispatched: what's tested is how they're stored. */
+const TEST_EVENT = { A: 'test.a', B: 'test.b', C: 'test.c', KEYED: 'test.keyed', ANON: 'test.anon' } as unknown as Record<
+  'A' | 'B' | 'C' | 'KEYED' | 'ANON',
+  TimedEventType
+>;
 
 const NOW = T0 + 12 * 3_600_000;
 
@@ -68,9 +74,9 @@ describe(runGame.name, () => {
   it('stores scheduled events: whole milliseconds, defaults for what was left out, keyed and anonymous', () =>
     inTestTx(async (db) => {
       await run(db, async (ctx) => {
-        ctx.schedule({ type: 'test.keyed', dueAt: NOW + 1000.9, playerId: 7, cityId: 8, refKey: 'test:1', payload: { a: 1 } });
-        ctx.schedule({ type: 'test.anon', dueAt: NOW + 5 });
-        ctx.schedule({ type: 'test.anon', dueAt: NOW + 6 });
+        ctx.schedule({ type: TEST_EVENT.KEYED, dueAt: NOW + 1000.9, playerId: 7, cityId: 8, refKey: 'test:1', payload: { a: 1 } });
+        ctx.schedule({ type: TEST_EVENT.ANON, dueAt: NOW + 5 });
+        ctx.schedule({ type: TEST_EVENT.ANON, dueAt: NOW + 6 });
       });
       const base = { id: expect.any(Number), attempts: 0, lastError: null, createdAt: NOW };
       expect(await testEvents(db)).toEqual([
@@ -82,10 +88,10 @@ describe(runGame.name, () => {
 
   it('scheduling a pending key again moves that event and resets its failed attempts', () =>
     inTestTx(async (db) => {
-      await run(db, async (ctx) => ctx.schedule({ type: 'test.a', dueAt: NOW + 1000, playerId: 7, refKey: 'test:1', payload: { a: 1 } }));
+      await run(db, async (ctx) => ctx.schedule({ type: TEST_EVENT.A, dueAt: NOW + 1000, playerId: 7, refKey: 'test:1', payload: { a: 1 } }));
       await db.update(timedEvents).set({ attempts: 3, lastError: 'boom' }).where(eq(timedEvents.refKey, 'test:1'));
 
-      await run(db, async (ctx) => ctx.schedule({ type: 'test.b', dueAt: NOW + 2000, refKey: 'test:1', payload: { b: 2 } }));
+      await run(db, async (ctx) => ctx.schedule({ type: TEST_EVENT.B, dueAt: NOW + 2000, refKey: 'test:1', payload: { b: 2 } }));
       expect(await testEvents(db)).toEqual([
         expect.objectContaining({ type: 'test.b', dueAt: NOW + 2000, refKey: 'test:1', payload: { b: 2 }, attempts: 0, lastError: null }),
       ]);
@@ -94,8 +100,8 @@ describe(runGame.name, () => {
   it('a key scheduled twice in one operation is stored once, as last scheduled', () =>
     inTestTx(async (db) => {
       await run(db, async (ctx) => {
-        ctx.schedule({ type: 'test.a', dueAt: NOW + 1000, refKey: 'test:1' });
-        ctx.schedule({ type: 'test.a', dueAt: NOW + 3000, refKey: 'test:1', payload: { last: true } });
+        ctx.schedule({ type: TEST_EVENT.A, dueAt: NOW + 1000, refKey: 'test:1' });
+        ctx.schedule({ type: TEST_EVENT.A, dueAt: NOW + 3000, refKey: 'test:1', payload: { last: true } });
       });
       expect(await testEvents(db)).toEqual([expect.objectContaining({ dueAt: NOW + 3000, payload: { last: true } })]);
     }));
@@ -103,12 +109,12 @@ describe(runGame.name, () => {
   it('unschedule deletes the pending event with that key, and cancels one queued earlier in the operation', () =>
     inTestTx(async (db) => {
       await run(db, async (ctx) => {
-        ctx.schedule({ type: 'test.a', dueAt: NOW + 1000, refKey: 'test:1' });
-        ctx.schedule({ type: 'test.a', dueAt: NOW + 1000, refKey: 'test:2' });
+        ctx.schedule({ type: TEST_EVENT.A, dueAt: NOW + 1000, refKey: 'test:1' });
+        ctx.schedule({ type: TEST_EVENT.A, dueAt: NOW + 1000, refKey: 'test:2' });
       });
       await run(db, async (ctx) => {
         ctx.unschedule('test:1');
-        ctx.schedule({ type: 'test.a', dueAt: NOW + 1000, refKey: 'test:3' });
+        ctx.schedule({ type: TEST_EVENT.A, dueAt: NOW + 1000, refKey: 'test:3' });
         ctx.unschedule('test:3');
         ctx.unschedule('test:missing');
       });
@@ -117,10 +123,10 @@ describe(runGame.name, () => {
 
   it('scheduling a key after unscheduling it in the same operation keeps the new event', () =>
     inTestTx(async (db) => {
-      await run(db, async (ctx) => ctx.schedule({ type: 'test.a', dueAt: NOW + 1000, refKey: 'test:1' }));
+      await run(db, async (ctx) => ctx.schedule({ type: TEST_EVENT.A, dueAt: NOW + 1000, refKey: 'test:1' }));
       await run(db, async (ctx) => {
         ctx.unschedule('test:1');
-        ctx.schedule({ type: 'test.b', dueAt: NOW + 2000, refKey: 'test:1' });
+        ctx.schedule({ type: TEST_EVENT.B, dueAt: NOW + 2000, refKey: 'test:1' });
       });
       expect(await testEvents(db)).toEqual([expect.objectContaining({ type: 'test.b', dueAt: NOW + 2000, refKey: 'test:1' })]);
     }));
@@ -132,7 +138,7 @@ describe(runGame.name, () => {
         run(db, async (ctx) => {
           await mark(ctx, 'ctx:failed');
           ctx.push(1, PushCmd.ITEM_UPDATE, items(1));
-          ctx.schedule({ type: 'test.a', dueAt: NOW, refKey: 'test:1' });
+          ctx.schedule({ type: TEST_EVENT.A, dueAt: NOW, refKey: 'test:1' });
           throw err;
         }),
       ).rejects.toBe(err);
@@ -149,7 +155,7 @@ describe(runGame.name, () => {
           attempt++;
           await mark(ctx, `ctx:attempt${attempt}`);
           ctx.push(1, PushCmd.ITEM_UPDATE, items(attempt));
-          ctx.schedule({ type: 'test.anon', dueAt: NOW + attempt });
+          ctx.schedule({ type: TEST_EVENT.ANON, dueAt: NOW + attempt });
           if (attempt === 1) throw pgError(code);
           return 'done';
         });
@@ -298,7 +304,7 @@ describe(runGame.name, () => {
 describe(savepoint.name, () => {
   it('returns the result and hands what it queued to the outer operation, keeping its writes', () =>
     game(async (g) => {
-      g.schedule({ type: 'test.a', dueAt: g.now + 1, refKey: 'test:outer' });
+      g.schedule({ type: TEST_EVENT.A, dueAt: g.now + 1, refKey: 'test:outer' });
       g.stat(1, 0, { 'wins.npc': 1 });
       const after = () => undefined;
       const r = await savepoint(g, async (ctx) => {
@@ -306,8 +312,8 @@ describe(savepoint.name, () => {
         expect(ctx.rng).toBe(g.rng);
         await mark(ctx, 'ctx:inner');
         ctx.push(1, PushCmd.ITEM_UPDATE, items(1));
-        ctx.schedule({ type: 'test.b', dueAt: g.now + 2, refKey: 'test:inner' });
-        ctx.schedule({ type: 'test.c', dueAt: g.now + 3 });
+        ctx.schedule({ type: TEST_EVENT.B, dueAt: g.now + 2, refKey: 'test:inner' });
+        ctx.schedule({ type: TEST_EVENT.C, dueAt: g.now + 3 });
         ctx.unschedule('test:outer');
         ctx.afterCommit(after);
         ctx.stat(1, 0, { 'wins.npc': 2 });
@@ -325,13 +331,13 @@ describe(savepoint.name, () => {
 
   it('when it throws, its writes and everything it queued are discarded and the outer operation carries on', () =>
     game(async (g) => {
-      g.schedule({ type: 'test.a', dueAt: g.now + 1, refKey: 'test:outer' });
+      g.schedule({ type: TEST_EVENT.A, dueAt: g.now + 1, refKey: 'test:outer' });
       const err = new Error('boom');
       await expect(
         savepoint(g, async (ctx) => {
           await mark(ctx, 'ctx:inner');
           ctx.push(1, PushCmd.ITEM_UPDATE, items(1));
-          ctx.schedule({ type: 'test.b', dueAt: g.now + 2 });
+          ctx.schedule({ type: TEST_EVENT.B, dueAt: g.now + 2 });
           ctx.unschedule('test:outer');
           ctx.afterCommit(() => undefined);
           ctx.stat(1, 0, { 'wins.npc': 1 });

@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, HeroStatus, Mission, msg, ReportType } from '@marchlands/core';
+import { ArmyDirection, HeroStatus, Mission, msg, ReportType, TimedEventType } from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
 import { alliance, combat, interior } from '#/index.ts';
@@ -118,7 +118,7 @@ describe(`${processArmy.name}: reinforce`, () => {
         resources: NO_RESOURCES,
         troops: { lightCavalry: 300 },
       });
-      expect(g.events('army')).toEqual([]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([]);
       expect((await getHero(g, heroId)).status).toBe(HeroStatus.ATTACK);
       const report = await lastReport(g, q.id, 'report.title.reinforcementsFrom');
       expect(report).toMatchObject({
@@ -159,7 +159,7 @@ describe(`${processArmy.name}: reinforce`, () => {
       await arrive(g, bean.armyId);
 
       expect(await armyRow(g, bean.armyId)).toBeUndefined();
-      expect(g.events('army')).toEqual([]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([]);
       const city = await reloadCity(g, other);
       expect(city.troops.lightCavalry).toBe((before.troops.lightCavalry ?? 0) + 700);
       expect(city.gold - before.gold).toBeCloseTo(2000, 0);

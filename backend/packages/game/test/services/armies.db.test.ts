@@ -19,6 +19,7 @@ import {
   reliefMultiplier,
   TechType,
   TileType,
+  TimedEventType,
   TroopType,
 } from '@marchlands/core';
 
@@ -101,7 +102,7 @@ describe(armies.sendArmy.name, () => {
       expect(city.troops.lightCavalry).toBe(before.city.troops.lightCavalry! - 1000);
       expect(city.troops.scouter).toBe(before.city.troops.scouter! - 10);
       expect(hero.status).toBe(HeroStatus.ATTACK);
-      expect(g.events('army')).toEqual([
+      expect(g.events(TimedEventType.ARMY)).toEqual([
         expect.objectContaining({ dueAt: g.now + ms, playerId: p.id, cityId: p.cityId, refKey: armyRef(bean.armyId), payload: { armyId: bean.armyId } }),
       ]);
       expect(lastPush(g, PushCmd.TROOP_UPDATE, p.id)?.data).toMatchObject({ castleId: p.cityId });
@@ -217,7 +218,7 @@ describe(armies.sendArmy.name, () => {
           send(g, p, { ...base, mission: Mission.ATTACK, troops: { lightCavalry: 1 }, resources: { gold: NaN } }),
           msg('common.invalidAmount'),
         );
-        expect(g.events('army')).toHaveLength(0);
+        expect(g.events(TimedEventType.ARMY)).toHaveLength(0);
       }));
 
     it('more resources than the troops can carry', () =>

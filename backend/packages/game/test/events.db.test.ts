@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { BALANCE, BuffId, type BuffId as BuffIdType, BuildingType, ItemId, msg, PlayerStatus, setGameSpeed } from '@marchlands/core';
+import { BALANCE, BuffId, type BuffId as BuffIdType, BuildingType, ItemId, msg, PlayerStatus, setGameSpeed, TimedEventType } from '@marchlands/core';
 
 import { setBuff } from '#/helpers.ts';
 import { buildings, dispatchEvent, type EventRow, player as players, shop } from '#/index.ts';
@@ -13,7 +13,14 @@ const HOUR = 3_600_000;
 
 afterEach(() => setGameSpeed(1));
 
-const expiry = (p: TestPlayer, buffId: string): EventRow => ({ id: 0, type: 'buff.expire', dueAt: 0, playerId: p.id, cityId: null, payload: { buffId } });
+const expiry = (p: TestPlayer, buffId: string): EventRow => ({
+  id: 0,
+  type: TimedEventType.BUFF_EXPIRE,
+  dueAt: 0,
+  playerId: p.id,
+  cityId: null,
+  payload: { buffId },
+});
 
 /** Give the player a buff ending at `endTime` (as an item would), dropping what that queued. */
 async function withBuff(g: TestGame, p: TestPlayer, id: BuffIdType, endTime: number) {
@@ -39,7 +46,7 @@ describe(`${dispatchEvent.name}: buff.expire`, () => {
       await dispatchEvent(g, expiry(p, BuffId.ATTACK));
 
       expect((await reloadPlayer(g, p)).buffs).toEqual([]);
-      expect(g.events('buff.expire')).toEqual([]);
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toEqual([]);
       expect(g._unscheduled).toContain(`buff:${p.id}:${BuffId.ATTACK}`);
       expect(g.pushes(PushCmd.PLAYER_BUFF_UPDATE)).toEqual([
         {
@@ -58,7 +65,7 @@ describe(`${dispatchEvent.name}: buff.expire`, () => {
       await withBuff(g, p, BuffId.DEFENSE, g.now + 2 * HOUR);
       await g.runDue(g.now + HOUR);
       expect((await reloadPlayer(g, p)).buffs.map((b) => b.id)).toEqual([BuffId.DEFENSE]);
-      expect(g.events('buff.expire')).toMatchObject([{ refKey: `buff:${p.id}:${BuffId.DEFENSE}` }]);
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toMatchObject([{ refKey: `buff:${p.id}:${BuffId.DEFENSE}` }]);
     }));
 
   it('a buff that now ends later (extended since) is scheduled again for its new end', () =>
@@ -70,8 +77,14 @@ describe(`${dispatchEvent.name}: buff.expire`, () => {
       await dispatchEvent(g, expiry(p, BuffId.ATTACK));
 
       expect((await reloadPlayer(g, p)).buffs).toMatchObject([{ id: BuffId.ATTACK, endTime: g.now + 2 * HOUR }]);
-      expect(g.events('buff.expire')).toEqual([
-        { type: 'buff.expire', dueAt: g.now + 2 * HOUR, playerId: p.id, refKey: `buff:${p.id}:${BuffId.ATTACK}`, payload: { buffId: BuffId.ATTACK } },
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toEqual([
+        {
+          type: TimedEventType.BUFF_EXPIRE,
+          dueAt: g.now + 2 * HOUR,
+          playerId: p.id,
+          refKey: `buff:${p.id}:${BuffId.ATTACK}`,
+          payload: { buffId: BuffId.ATTACK },
+        },
       ]);
       expect(g.pushes()).toEqual([]);
     }));
@@ -99,7 +112,7 @@ describe(`${dispatchEvent.name}: buff.expire`, () => {
       expect(row.status).toBe(PlayerStatus.NORMAL);
       const cooldown = { id: BuffId.TRUCE_COOLDOWN, desc: msg('buff.truceCooldown'), endTime: end + BALANCE.truceCooldownMs };
       expect(row.buffs).toEqual([cooldown]);
-      expect(g.events('buff.expire')).toMatchObject([{ dueAt: cooldown.endTime, payload: { buffId: BuffId.TRUCE_COOLDOWN } }]);
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toMatchObject([{ dueAt: cooldown.endTime, payload: { buffId: BuffId.TRUCE_COOLDOWN } }]);
       expect(g.pushes(PushCmd.PLAYER_INFO_UPDATE).at(-1)).toMatchObject({ data: { playerInfo: { status: PlayerStatus.NORMAL } } });
 
       await g.runDue(cooldown.endTime); // the cooldown expires in turn, with no new cooldown
@@ -173,7 +186,7 @@ describe(`${dispatchEvent.name}: work in progress`, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       const bean = await buildings.construct(g, p.id, p.cityId, BuildingType.COTTAGE, 0);
-      const [ev] = g.events('building');
+      const [ev] = g.events(TimedEventType.BUILDING);
       g._events.clear();
       g.advance(bean.endTime - g.now);
       await dispatchEvent(g, {
@@ -191,11 +204,11 @@ describe(`${dispatchEvent.name}: work in progress`, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await buildings.construct(g, p.id, p.cityId, BuildingType.COTTAGE, 0);
-      const [ev] = g.events('building');
+      const [ev] = g.events(TimedEventType.BUILDING);
       await g.runDue(ev!.dueAt);
       const before = (await reloadCity(g, p.cityId)).buildings;
       g._pushes.length = 0;
-      await dispatchEvent(g, { id: 1, type: 'building', dueAt: ev!.dueAt, playerId: p.id, cityId: p.cityId, payload: ev!.payload ?? {} });
+      await dispatchEvent(g, { id: 1, type: TimedEventType.BUILDING, dueAt: ev!.dueAt, playerId: p.id, cityId: p.cityId, payload: ev!.payload ?? {} });
       expect((await reloadCity(g, p.cityId)).buildings).toEqual(before);
       expect(g.pushes()).toEqual([]);
     }));

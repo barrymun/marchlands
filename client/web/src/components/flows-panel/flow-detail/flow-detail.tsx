@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { Flow } from '@marchlands/api-client';
+import { FlowActionType, FlowCities, FlowStatus } from '@marchlands/core';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { ActiveDot } from '@/components/flows-panel/active-dot/active-dot';
@@ -44,9 +45,9 @@ export function FlowDetail({
   const own = new Set(cities.map((c) => c.id));
   // all cities: those with a hero (the server skips the others), or every city when the flow hires heroes
   const hires = hiresHeroes(flow.actions);
-  const picked = targets === 'all' ? cities.filter((c) => hires || hasHero(c)).map((c) => c.id) : targets.filter((id) => own.has(id));
+  const picked = targets === FlowCities.ALL ? cities.filter((c) => hires || hasHero(c)).map((c) => c.id) : targets.filter((id) => own.has(id));
   const { run, repeat, stop, busy } = useFlowControls(flow, targets, picked);
-  const idle = flow.status === 'idle';
+  const idle = flow.status === FlowStatus.IDLE;
   return (
     <div className="grid content-start gap-4">
       <Card>
@@ -101,7 +102,7 @@ export function FlowDetail({
         </CardHeader>
         <CardContent className="grid gap-4">
           <StepTimeline flow={flow} />
-          {flow.actions.some((a) => a.type === 'attackTargets' && !a.presetId) && <p className={`text-xs ${WARN_TEXT}`}>{t('detail.noArmy')}</p>}
+          {flow.actions.some((a) => a.type === FlowActionType.ATTACK_TARGETS && !a.presetId) && <p className={`text-xs ${WARN_TEXT}`}>{t('detail.noArmy')}</p>}
           <RunsOn
             targets={targets}
             onTargets={setTargets}

@@ -5,7 +5,7 @@
 import { sql } from 'drizzle-orm';
 
 import type { PushCmd, PushData } from '@marchlands/contracts';
-import { defaultRng, GameError, type Rng } from '@marchlands/core';
+import { defaultRng, GameError, type Rng, type TimedEventType } from '@marchlands/core';
 import { type Db, pgArray, pushMessages, timedEvents, type Tx } from '@marchlands/db';
 
 import { addCounters, bufferStats, type StatCounters, statDay } from '#/stats.ts';
@@ -25,7 +25,7 @@ export interface QueuedPush {
 
 /** @internal exported for the test harness */
 export interface ScheduledEvent {
-  type: string;
+  type: TimedEventType;
   dueAt: number;
   playerId?: number | null;
   cityId?: number | null;

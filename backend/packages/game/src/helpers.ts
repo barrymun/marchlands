@@ -3,7 +3,7 @@
 import { count, eq } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { type BuffId, type BuffState, GameError, hasResources, type Message, msg, RESOURCE_KEYS, type Resources } from '@marchlands/core';
+import { type BuffId, type BuffState, GameError, hasResources, type Message, msg, RESOURCE_KEYS, type Resources, TimedEventType } from '@marchlands/core';
 import { alliances, cities, one } from '@marchlands/db';
 
 import { type CityBundle, cityStats } from '#/city.ts';
@@ -81,7 +81,7 @@ export function setBuff(ctx: Ctx, p: PlayerRow, id: BuffId, desc: Message, endTi
   const end = opts.extend && cur ? cur.endTime + (endTime - ctx.now) : endTime;
   const buff: BuffState = { id, desc, endTime: end, ...(opts.param != null ? { param: opts.param } : {}), ...(opts.itemId ? { itemId: opts.itemId } : {}) };
   p.buffs = [...p.buffs.filter((b) => b.id !== id && b.endTime > ctx.now), buff];
-  ctx.schedule({ type: 'buff.expire', dueAt: end, playerId: p.id, refKey: `buff:${p.id}:${id}`, payload: { buffId: id } });
+  ctx.schedule({ type: TimedEventType.BUFF_EXPIRE, dueAt: end, playerId: p.id, refKey: `buff:${p.id}:${id}`, payload: { buffId: id } });
   ctx.push(p.id, PushCmd.PLAYER_BUFF_UPDATE, { buffBean: { typeId: id, desc, endTime: end }, updateType: 0 });
 }
 

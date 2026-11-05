@@ -15,6 +15,7 @@ import {
   stateOf,
   TechType,
   TileType,
+  TimedEventType,
 } from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
@@ -207,7 +208,7 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
       expect((await reloadCity(g, q.cityId)).troops.scouter).toBe(s.battle.defenderScouts.after);
       expect(scoutOf(await lastReport(g, q.id, 'report.title.scoutsRepelled'), 'cityDefender')).toMatchObject({ from: p.name, success: false });
       expect(await armyRow(g, armyId)).toBeUndefined();
-      expect(g.events('army')).toEqual([]);
+      expect(g.events(TimedEventType.ARMY)).toEqual([]);
       await expectWipedHero(g, heroId, loyalty, p);
       expect((await reloadCity(g, p.cityId)).troops.scouter ?? 0).toBe(0);
     }));

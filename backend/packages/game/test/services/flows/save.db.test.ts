@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { BALANCE, FortType, msg, TroopType } from '@marchlands/core';
+import {
+  BALANCE,
+  FLOW_TRAIN_MAX,
+  FlowActionType,
+  FlowCities,
+  FlowHealWhen,
+  FlowStatus,
+  FlowWaitUntil,
+  FortType,
+  HealPayment,
+  msg,
+  TimedEventType,
+  TroopType,
+} from '@marchlands/core';
 
 import { flows } from '#/index.ts';
 import { expectRefused } from '#test/support/expect.ts';
@@ -9,8 +22,8 @@ import { addCity, createTestPlayer } from '#test/support/factories.ts';
 import { armyPreset, flowOf, newFlow, runFlowIn, withHero } from '#test/support/flows.ts';
 import { game } from '#test/support/game.ts';
 
-const mayor = { type: 'setMayor', stat: 'power' };
-const waitTime = { type: 'wait', until: 'time', minutes: 5 };
+const mayor = { type: FlowActionType.SET_MAYOR, stat: 'power' };
+const waitTime = { type: FlowActionType.WAIT, until: FlowWaitUntil.TIME, minutes: 5 };
 
 describe(flows.listFlows.name, () => {
   it('is empty for a new player', () =>
@@ -27,8 +40,8 @@ describe(flows.listFlows.name, () => {
       await newFlow(g, p, {
         name: 'First',
         actions: [
-          { type: 'healTroops', payWith: 'honor' },
-          { type: 'wait', until: 'armiesHome' },
+          { type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.HONOR },
+          { type: FlowActionType.WAIT, until: FlowWaitUntil.ARMIES_HOME },
         ],
       });
       g.advance(1000);
@@ -38,12 +51,12 @@ describe(flows.listFlows.name, () => {
       expect(list.map((f) => f.name)).toEqual(['First', 'Second']);
       expect(list[0]).toMatchObject({
         actions: [
-          { type: 'healTroops', payWith: 'honor', when: 'now' },
-          { type: 'wait', until: 'armiesHome', minutes: 10 },
+          { type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.HONOR, when: FlowHealWhen.NOW },
+          { type: FlowActionType.WAIT, until: FlowWaitUntil.ARMIES_HOME, minutes: 10 },
         ],
-        cities: 'all',
+        cities: FlowCities.ALL,
         repeat: false,
-        status: 'idle',
+        status: FlowStatus.IDLE,
         nextAction: 0,
         runs: 0,
         queuedAt: 0,
@@ -61,11 +74,14 @@ describe(flows.saveFlow.name, () => {
   it('creates a flow on all cities, the name trimmed, and returns the list', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      const list = await flows.saveFlow(g, p.id, { name: '  Morning  ', actions: [mayor, { type: 'trainTroops', troopId: TroopType.WARRIOR, amount: 'max' }] });
+      const list = await flows.saveFlow(g, p.id, {
+        name: '  Morning  ',
+        actions: [mayor, { type: FlowActionType.TRAIN_TROOPS, troopId: TroopType.WARRIOR, amount: FLOW_TRAIN_MAX }],
+      });
       expect(list).toHaveLength(1);
-      expect(list[0]).toMatchObject({ name: 'Morning', cities: 'all', repeat: false, status: 'idle' });
+      expect(list[0]).toMatchObject({ name: 'Morning', cities: FlowCities.ALL, repeat: false, status: FlowStatus.IDLE });
       expect(list[0]!.id).toMatch(/^[0-9a-z]+$/);
-      expect(list[0]!.actions).toEqual([mayor, { type: 'trainTroops', troopId: TroopType.WARRIOR, amount: 'max' }]);
+      expect(list[0]!.actions).toEqual([mayor, { type: FlowActionType.TRAIN_TROOPS, troopId: TroopType.WARRIOR, amount: FLOW_TRAIN_MAX }]);
     }));
 
   it('keeps only chosen cities that are the player’s own, once each', () =>
@@ -93,7 +109,7 @@ describe(flows.saveFlow.name, () => {
       const list = await flows.saveFlow(g, p.id, { id: f.id, name: 'New', actions: [waitTime, mayor], cities: [p.cityId] });
       expect(list).toHaveLength(1);
       expect(list[0]).toMatchObject({ id: f.id, name: 'New', actions: [waitTime, mayor], cities: [p.cityId] });
-      expect(g.pushes(PushCmd.FLOW_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { flowId: f.id, status: 'idle' } });
+      expect(g.pushes(PushCmd.FLOW_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { flowId: f.id, status: FlowStatus.IDLE } });
     }));
 
   it('keeps the last preview when only the name changes, and drops it when the actions or cities change', () =>
@@ -111,7 +127,7 @@ describe(flows.saveFlow.name, () => {
       expect((await flowOf(g, p, f.id)).lastPreview).toBeNull();
 
       await runFlowIn(g, p, f.id, undefined, true);
-      await flows.saveFlow(g, p.id, { id: f.id, name: 'Renamed', actions: [{ type: 'setMayor', stat: 'management' }], cities: [p.cityId] });
+      await flows.saveFlow(g, p.id, { id: f.id, name: 'Renamed', actions: [{ type: FlowActionType.SET_MAYOR, stat: 'management' }], cities: [p.cityId] });
       expect((await flowOf(g, p, f.id)).lastPreview).toBeNull();
     }));
 
@@ -121,12 +137,12 @@ describe(flows.saveFlow.name, () => {
       await withHero(g, p);
       const f = await newFlow(g, p, { name: 'Waits', actions: [mayor, waitTime, mayor] });
       await runFlowIn(g, p, f.id);
-      expect((await flowOf(g, p, f.id)).status).toBe('waiting');
+      expect((await flowOf(g, p, f.id)).status).toBe(FlowStatus.WAITING);
 
       await expectRefused(flows.saveFlow(g, p.id, { id: f.id, name: 'Waits', actions: [mayor, waitTime] }), msg('flow.runningLocked'));
       await expectRefused(flows.saveFlow(g, p.id, { id: f.id, name: 'Waits', actions: [waitTime, mayor, mayor] }), msg('flow.runningLocked'));
-      const longer = { type: 'wait', until: 'time', minutes: 30 };
-      await flows.saveFlow(g, p.id, { id: f.id, name: 'Waits', actions: [{ type: 'setMayor', stat: 'stratagem' }, longer, mayor] });
+      const longer = { type: FlowActionType.WAIT, until: FlowWaitUntil.TIME, minutes: 30 };
+      await flows.saveFlow(g, p.id, { id: f.id, name: 'Waits', actions: [{ type: FlowActionType.SET_MAYOR, stat: 'stratagem' }, longer, mayor] });
       expect((await flowOf(g, p, f.id)).actions[1]).toEqual(longer);
     }));
 
@@ -152,10 +168,10 @@ describe(flows.saveFlow.name, () => {
       const p = await createTestPlayer(g);
       for (const bad of [
         { type: 'fly' },
-        { type: 'setMayor', stat: 'luck' },
-        { type: 'trainTroops', troopId: TroopType.WARRIOR, amount: 0 },
-        { type: 'wait', until: 'time', minutes: 0 },
-        { type: 'healTroops', payWith: 'gems' },
+        { type: FlowActionType.SET_MAYOR, stat: 'luck' },
+        { type: FlowActionType.TRAIN_TROOPS, troopId: TroopType.WARRIOR, amount: 0 },
+        { type: FlowActionType.WAIT, until: FlowWaitUntil.TIME, minutes: 0 },
+        { type: FlowActionType.HEAL_TROOPS, payWith: 'gems' },
         'setMayor',
       ])
         await expectRefused(flows.saveFlow(g, p.id, { name: 'X', actions: [bad] }), msg('flow.invalidAction'));
@@ -165,16 +181,19 @@ describe(flows.saveFlow.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       for (const troopId of [FortType.TRAP, 99])
-        await expectRefused(flows.saveFlow(g, p.id, { name: 'X', actions: [{ type: 'trainTroops', troopId, amount: 1 }] }), msg('common.invalidTroopType'));
+        await expectRefused(
+          flows.saveFlow(g, p.id, { name: 'X', actions: [{ type: FlowActionType.TRAIN_TROOPS, troopId, amount: 1 }] }),
+          msg('common.invalidTroopType'),
+        );
     }));
 
   it('saves attack targets once each, and allows a list with no army chosen yet', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       const preset = await armyPreset(g, p, 'Farm', { militia: 10 });
-      const f = await newFlow(g, p, { name: 'Farm', actions: [{ type: 'attackTargets', presetId: preset, targets: { [p.cityId]: [5, 7, 5] } }] });
-      expect(f.actions[0]).toEqual({ type: 'attackTargets', presetId: preset, targets: { [p.cityId]: [5, 7] } });
-      const later = await newFlow(g, p, { name: 'Later', actions: [{ type: 'attackTargets', presetId: '', targets: { [p.cityId]: [5] } }] });
+      const f = await newFlow(g, p, { name: 'Farm', actions: [{ type: FlowActionType.ATTACK_TARGETS, presetId: preset, targets: { [p.cityId]: [5, 7, 5] } }] });
+      expect(f.actions[0]).toEqual({ type: FlowActionType.ATTACK_TARGETS, presetId: preset, targets: { [p.cityId]: [5, 7] } });
+      const later = await newFlow(g, p, { name: 'Later', actions: [{ type: FlowActionType.ATTACK_TARGETS, presetId: '', targets: { [p.cityId]: [5] } }] });
       expect(later.actions[0]).toMatchObject({ presetId: '' });
     }));
 
@@ -183,7 +202,10 @@ describe(flows.saveFlow.name, () => {
       const p = await createTestPlayer(g);
       const other = await createTestPlayer(g);
       const preset = await armyPreset(g, p, 'Farm', { militia: 10 });
-      const attack = (presetId: string, targets: Record<string, number[]>) => ({ name: 'X', actions: [{ type: 'attackTargets', presetId, targets }] });
+      const attack = (presetId: string, targets: Record<string, number[]>) => ({
+        name: 'X',
+        actions: [{ type: FlowActionType.ATTACK_TARGETS, presetId, targets }],
+      });
       await expectRefused(flows.saveFlow(g, p.id, attack('nope', { [p.cityId]: [5] })), msg('flow.chooseArmy'));
       await expectRefused(flows.saveFlow(g, p.id, attack(preset, { [other.cityId]: [5] })), msg('flow.targetsOwnCities'));
       await expectRefused(flows.saveFlow(g, p.id, attack(preset, { [p.cityId]: [-1] })), msg('common.invalidCoordinates'));
@@ -195,7 +217,10 @@ describe(flows.saveFlow.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       const preset = await armyPreset(g, p, 'Farm', { militia: 10 });
-      const f = await newFlow(g, p, { name: 'X', actions: [{ type: 'attackTargets', presetId: preset, targets: { [p.cityId]: [5], 999999999: [6] } }] });
+      const f = await newFlow(g, p, {
+        name: 'X',
+        actions: [{ type: FlowActionType.ATTACK_TARGETS, presetId: preset, targets: { [p.cityId]: [5], 999999999: [6] } }],
+      });
       expect(f.actions).toEqual([expect.objectContaining({ targets: { [p.cityId]: [5] } })]);
     }));
 
@@ -236,9 +261,9 @@ describe(flows.deleteFlow.name, () => {
       await withHero(g, p);
       const f = await newFlow(g, p, { name: 'Waits', actions: [mayor, waitTime, mayor] });
       await runFlowIn(g, p, f.id);
-      expect(g.events('flow.resume')).toHaveLength(1);
+      expect(g.events(TimedEventType.FLOW_RESUME)).toHaveLength(1);
       await flows.deleteFlow(g, p.id, f.id);
-      expect(g.events('flow.resume')).toEqual([]);
+      expect(g.events(TimedEventType.FLOW_RESUME)).toEqual([]);
       expect(await flows.listFlows(g, p.id)).toEqual([]);
     }));
 

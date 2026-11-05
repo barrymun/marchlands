@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { healHonorCost, msg } from '@marchlands/core';
+import { FlowActionType, FlowHealWhen, healHonorCost, HealPayment, msg, TimedEventType } from '@marchlands/core';
 
 import { runScheduledHeal } from '#/engine/flows.ts';
 import { armies } from '#/index.ts';
@@ -53,9 +53,9 @@ describe(runScheduledHeal.name, () => {
       const heroId = await farmingCity(g, p);
       await setInjured(g, p.cityId, injured);
       const armyId = await sendOut(g, p, heroId);
-      const reach = g.events('army')[0]!.dueAt;
+      const reach = g.events(TimedEventType.ARMY)[0]!.dueAt;
       await runScheduledHeal(g, p.id, p.cityId, 'resources', [armyId]);
-      expect(g.events('flow.heal')).toEqual([
+      expect(g.events(TimedEventType.FLOW_HEAL)).toEqual([
         // still marching out: about as long again to come back
         {
           type: 'flow.heal',
@@ -63,7 +63,7 @@ describe(runScheduledHeal.name, () => {
           playerId: p.id,
           cityId: p.cityId,
           refKey: `flowheal:${p.cityId}`,
-          payload: { payWith: 'resources', armyIds: [armyId] },
+          payload: { payWith: HealPayment.RESOURCES, armyIds: [armyId] },
         },
       ]);
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE)).toEqual([]);
@@ -77,7 +77,7 @@ describe(runScheduledHeal.name, () => {
       const armyId = await sendOut(g, p, heroId);
       await armies.recallArmy(g, p.id, armyId); // home in a second
       await runScheduledHeal(g, p.id, p.cityId, 'honor', [armyId]);
-      expect(g.events('flow.heal')).toMatchObject([{ dueAt: T0 + 5_000, payload: { payWith: 'honor', armyIds: [armyId] } }]);
+      expect(g.events(TimedEventType.FLOW_HEAL)).toMatchObject([{ dueAt: T0 + 5_000, payload: { payWith: HealPayment.HONOR, armyIds: [armyId] } }]);
     }));
 
   it('does nothing in a city that changed hands', () =>
@@ -89,7 +89,7 @@ describe(runScheduledHeal.name, () => {
       const pushed = g.pushes().length;
       await runScheduledHeal(g, p.id, p.cityId, 'resources', []);
       expect(g.pushes()).toHaveLength(pushed);
-      expect(g.events('flow.heal')).toEqual([]);
+      expect(g.events(TimedEventType.FLOW_HEAL)).toEqual([]);
       expect((await reloadCity(g, p.cityId)).injuredTroops).toEqual(injured);
     }));
 
@@ -103,12 +103,12 @@ describe(runScheduledHeal.name, () => {
       const f = await newFlow(g, p, {
         name: 'Farm',
         actions: [
-          { type: 'attackTargets', presetId: preset, targets: { [p.cityId]: [valley] } },
-          { type: 'healTroops', payWith: 'resources', when: 'armiesHome' },
+          { type: FlowActionType.ATTACK_TARGETS, presetId: preset, targets: { [p.cityId]: [valley] } },
+          { type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.RESOURCES, when: FlowHealWhen.ARMIES_HOME },
         ],
       });
       await runFlowIn(g, p, f.id);
-      const [heal] = g.events('flow.heal');
+      const [heal] = g.events(TimedEventType.FLOW_HEAL);
       await armies.recallArmy(g, p.id, (heal!.payload as { armyIds: number[] }).armyIds[0]!);
       await g.runDue(heal!.dueAt);
       expect(g.events()).toEqual([]);

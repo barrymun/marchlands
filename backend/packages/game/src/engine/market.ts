@@ -20,6 +20,7 @@ import {
   msg,
   ReportType,
   stateOf,
+  TimedEventType,
 } from '@marchlands/core';
 import { cities, marketCandles, marketOrders, marketShipments, marketTrades, one, worldState } from '@marchlands/db';
 
@@ -126,7 +127,14 @@ export async function ship(
       })
       .returning(),
   );
-  ctx.schedule({ type: 'shipment', dueAt: row.endTime, playerId: s.playerId, cityId: s.cityId, refKey: `shipment:${row.id}`, payload: { shipmentId: row.id } });
+  ctx.schedule({
+    type: TimedEventType.SHIPMENT,
+    dueAt: row.endTime,
+    playerId: s.playerId,
+    cityId: s.cityId,
+    refKey: `shipment:${row.id}`,
+    payload: { shipmentId: row.id },
+  });
   return row;
 }
 
@@ -261,7 +269,14 @@ export async function deliverShipment(ctx: Ctx, shipmentId: number) {
   const [s] = await ctx.tx.select().from(marketShipments).where(eq(marketShipments.id, shipmentId)).for('update');
   if (!b || !s) return;
   if (s.endTime > ctx.now) {
-    ctx.schedule({ type: 'shipment', dueAt: s.endTime, playerId: s.playerId, cityId: s.cityId, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } });
+    ctx.schedule({
+      type: TimedEventType.SHIPMENT,
+      dueAt: s.endTime,
+      playerId: s.playerId,
+      cityId: s.cityId,
+      refKey: `shipment:${s.id}`,
+      payload: { shipmentId: s.id },
+    });
     return;
   }
   gainResources(b.city, { [resKey(s.resType)]: s.amount });

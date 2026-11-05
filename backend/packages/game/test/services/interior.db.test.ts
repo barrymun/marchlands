@@ -17,6 +17,7 @@ import {
   setGameSpeed,
   TileType,
   tileXY,
+  TimedEventType,
 } from '@marchlands/core';
 import { tiles } from '@marchlands/db';
 
@@ -342,7 +343,7 @@ describe(interior.moveCity.name, () => {
       expect(player.items[ItemId.CITY_TELEPORTER] ?? 0).toBe(0);
       const end = g.now + BALANCE.teleportCooldownMs;
       expect(player.buffs).toContainEqual(expect.objectContaining({ id: BuffId.TELEPORT_COOLDOWN, endTime: end }));
-      expect(g.events('buff.expire')).toContainEqual(expect.objectContaining({ dueAt: end, refKey: `buff:${p.id}:${BuffId.TELEPORT_COOLDOWN}` }));
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toContainEqual(expect.objectContaining({ dueAt: end, refKey: `buff:${p.id}:${BuffId.TELEPORT_COOLDOWN}` }));
       expect(g.pushes(PushCmd.CASTLE_UPDATE).at(-1)?.data).toMatchObject({ castleBean: { fieldId: to } });
 
       await giveItems(g, p, { [ItemId.CITY_TELEPORTER]: 1 });

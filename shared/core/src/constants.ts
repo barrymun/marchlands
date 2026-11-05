@@ -296,6 +296,61 @@ export const BuildingStatus = {
 } as const;
 export type BuildingStatus = (typeof BuildingStatus)[keyof typeof BuildingStatus];
 
+/** (marchlands) What a flow's action does (stored in flows.actions). */
+export const FlowActionType = {
+  SET_MAYOR: 'setMayor',
+  TRAIN_TROOPS: 'trainTroops',
+  HEAL_TROOPS: 'healTroops',
+  ATTACK_TARGETS: 'attackTargets',
+  HIRE_HEROES: 'hireHeroes',
+  WAIT: 'wait',
+} as const;
+export type FlowActionType = (typeof FlowActionType)[keyof typeof FlowActionType];
+
+/** (marchlands) A flow between runs, waiting its turn, running its actions, or paused on a wait action (stored in flows.status). */
+export const FlowStatus = { IDLE: 'idle', QUEUED: 'queued', RUNNING: 'running', WAITING: 'waiting' } as const;
+export type FlowStatus = (typeof FlowStatus)[keyof typeof FlowStatus];
+export const FLOW_STATUSES = Object.values(FlowStatus) as [FlowStatus, ...FlowStatus[]];
+
+/** (marchlands) The cities a flow runs on: every city with a hero, including ones gained later, or the ids chosen (stored in flows.cities). */
+export const FlowCities = { ALL: 'all' } as const;
+export type FlowCityChoice = typeof FlowCities.ALL | number[];
+
+/** (marchlands) What a flow's wait action waits for: a number of real minutes, or every army the run sent to be back. */
+export const FlowWaitUntil = { TIME: 'time', ARMIES_HOME: 'armiesHome' } as const;
+export type FlowWaitUntil = (typeof FlowWaitUntil)[keyof typeof FlowWaitUntil];
+export const FLOW_WAIT_UNTILS = Object.values(FlowWaitUntil) as [FlowWaitUntil, ...FlowWaitUntil[]];
+
+/** (marchlands) When a flow's heal action heals: at once, or once every army of the city is back. */
+export const FlowHealWhen = { NOW: 'now', ARMIES_HOME: 'armiesHome' } as const;
+export type FlowHealWhen = (typeof FlowHealWhen)[keyof typeof FlowHealWhen];
+export const FLOW_HEAL_WHENS = Object.values(FlowHealWhen) as [FlowHealWhen, ...FlowHealWhen[]];
+
+/** (marchlands) A flow's train action: as many as the city can afford, in place of a number. */
+export const FLOW_TRAIN_MAX = 'max';
+
+/** What healing injured troops is paid with. */
+export const HealPayment = { RESOURCES: 'resources', HONOR: 'honor' } as const;
+export type HealPayment = (typeof HealPayment)[keyof typeof HealPayment];
+export const HEAL_PAYMENTS = Object.values(HealPayment) as [HealPayment, ...HealPayment[]];
+
+/** The game clock's kinds of timed event (stored in timed_events.type), each with its handler in the game package's events.ts. */
+export const TimedEventType = {
+  BUILDING: 'building',
+  RESEARCH: 'research',
+  TRAIN: 'train',
+  ARMY: 'army',
+  ARMY_DEPART: 'army.depart',
+  BUFF_EXPIRE: 'buff.expire',
+  HERO_BUFF: 'hero.buff',
+  SHIPMENT: 'shipment',
+  CITY_ABANDON: 'city.abandon',
+  FLOW_HEAL: 'flow.heal',
+  FLOW_RESUME: 'flow.resume',
+  FLOW_QUEUE: 'flow.queue',
+} as const;
+export type TimedEventType = (typeof TimedEventType)[keyof typeof TimedEventType];
+
 /** Targets one city may attack in a flow action (a level 10 Rally Spot sends 10 armies). */
 export const FLOW_MAX_TARGETS_PER_CITY = 10;
 

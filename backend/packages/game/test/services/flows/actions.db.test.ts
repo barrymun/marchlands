@@ -4,16 +4,20 @@ import { describe, expect, it } from 'vitest';
 
 import {
   BuildingType,
+  FlowActionType,
   type FlowCityResult,
+  FlowHealWhen,
   type FlowStepResult,
   healCost,
   healHonorCost,
+  HealPayment,
   heroManagement,
   heroPower,
   HeroStatus,
   Mission,
   msg,
   ref,
+  TimedEventType,
   TroopType,
 } from '@marchlands/core';
 
@@ -51,7 +55,7 @@ describe(`${flows.runFlow.name}: setMayor`, () => {
       const p = await createTestPlayer(g);
       for (let i = 0; i < 3; i++) await withHero(g, p);
       const top = best(await heroesOfCity(g, p.cityId), heroManagement);
-      const city = await tryActions(g, p, [{ type: 'setMayor', stat: 'management' }], false);
+      const city = await tryActions(g, p, [{ type: FlowActionType.SET_MAYOR, stat: 'management' }], false);
       expect(city.steps[0]).toEqual({
         action: msg('flow.action.setMayor', { stat: ref.stat('management') }),
         ok: true,
@@ -66,8 +70,8 @@ describe(`${flows.runFlow.name}: setMayor`, () => {
       await withHero(g, p);
       await withHero(g, p);
       const top = best(await heroesOfCity(g, p.cityId), heroPower);
-      await tryActions(g, p, [{ type: 'setMayor', stat: 'power' }], false);
-      const again = await tryActions(g, p, [{ type: 'setMayor', stat: 'power' }]);
+      await tryActions(g, p, [{ type: FlowActionType.SET_MAYOR, stat: 'power' }], false);
+      const again = await tryActions(g, p, [{ type: FlowActionType.SET_MAYOR, stat: 'power' }]);
       expect(again.steps[0]!.detail).toEqual(msg('flow.step.alreadyMayor', { hero: top.name, stat: ref.stat('power'), value: heroPower(top) }));
     }));
 
@@ -78,7 +82,7 @@ describe(`${flows.runFlow.name}: setMayor`, () => {
       const home = await withHero(g, p);
       const [valley] = await valleysNear(g, p.cityId);
       await armies.sendArmy(g, p.id, p.cityId, { targetTileId: valley, mission: Mission.ATTACK, troops: { militia: 10 }, heroId: away });
-      const city = await tryActions(g, p, [{ type: 'setMayor', stat: 'power' }]);
+      const city = await tryActions(g, p, [{ type: FlowActionType.SET_MAYOR, stat: 'power' }]);
       expect(city.steps[0]!.detail).toMatchObject({
         code: 'flow.step.mayor',
         params: { hero: (await heroesOfCity(g, p.cityId)).find((h) => h.id === home)!.name },
@@ -88,13 +92,13 @@ describe(`${flows.runFlow.name}: setMayor`, () => {
   it('fails the city when no hero is home', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      const city = await tryActions(g, p, [{ type: 'setMayor', stat: 'stratagem' }]);
+      const city = await tryActions(g, p, [{ type: FlowActionType.SET_MAYOR, stat: 'stratagem' }]);
       expect(city).toMatchObject({ ok: false, error: msg('flow.noMayorHero'), steps: [{ ok: false, detail: msg('flow.noMayorHero') }] });
     }));
 });
 
 describe(`${flows.runFlow.name}: trainTroops`, () => {
-  const train = (amount: number | 'max') => ({ type: 'trainTroops', troopId: TroopType.WARRIOR, amount });
+  const train = (amount: number | 'max') => ({ type: FlowActionType.TRAIN_TROOPS, troopId: TroopType.WARRIOR, amount });
 
   /** Resources for exactly `n` warriors (80 food, 100 wood, 50 iron each). */
   const fundsFor = (g: TestGame, p: TestPlayer, n: number) => setResources(g, p, { gold: 0, food: 80 * n, wood: 100 * n, stone: 0, iron: 50 * n });
@@ -150,7 +154,7 @@ describe(`${flows.runFlow.name}: trainTroops`, () => {
       await withBarracks(g, p);
       await withHero(g, p);
       await fundsFor(g, p, 0);
-      const city = await tryActions(g, p, [train(5), { type: 'setMayor', stat: 'power' }]);
+      const city = await tryActions(g, p, [train(5), { type: FlowActionType.SET_MAYOR, stat: 'power' }]);
       expect(city.ok).toBe(true);
       expect(city.steps[0]).toMatchObject({ ok: true, skipped: true, detail: msg('flow.step.cannotAfford', { troop: warrior }) });
       expect(city.steps[1]!.detail.code).toBe('flow.step.mayor');
@@ -169,7 +173,7 @@ describe(`${flows.runFlow.name}: trainTroops`, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p);
-      const city = await tryActions(g, p, [{ type: 'trainTroops', troopId: TroopType.CATAPULT, amount: 1 }]);
+      const city = await tryActions(g, p, [{ type: FlowActionType.TRAIN_TROOPS, troopId: TroopType.CATAPULT, amount: 1 }]);
       expect(city.ok).toBe(false);
       expect(city.error).toMatchObject({ code: 'flow.cannotTrain', params: { troop: ref.troop(TroopType.CATAPULT) } });
       const missing = city.error?.params?.missing as { code: string; params: { name: unknown; level: number } }[];
@@ -184,7 +188,7 @@ describe(`${flows.runFlow.name}: healTroops`, () => {
   it('passes when nothing is injured', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      const city = await tryActions(g, p, [{ type: 'healTroops', payWith: 'resources' }]);
+      const city = await tryActions(g, p, [{ type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.RESOURCES }]);
       expect(city.steps[0]).toEqual({ action: msg('flow.action.healResources'), ok: true, detail: msg('flow.step.noInjured') });
     }));
 
@@ -193,7 +197,7 @@ describe(`${flows.runFlow.name}: healTroops`, () => {
       const p = await createTestPlayer(g);
       await setInjured(g, p.cityId, injured);
       const before = await reloadCity(g, p.cityId);
-      const city = await tryActions(g, p, [{ type: 'healTroops', payWith: 'resources' }], false);
+      const city = await tryActions(g, p, [{ type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.RESOURCES }], false);
       const cost = healCost(injured);
       const amounts = (['food', 'wood', 'iron'] as const).map((k) => msg('flow.resourceAmount', { amount: Math.ceil(cost[k]), resource: ref.resource(k) }));
       expect(cost.gold + cost.stone).toBe(0);
@@ -209,7 +213,7 @@ describe(`${flows.runFlow.name}: healTroops`, () => {
       const p = await createTestPlayer(g);
       await setInjured(g, p.cityId, injured);
       await setHonor(g, p, 1000);
-      const city = await tryActions(g, p, [{ type: 'healTroops', payWith: 'honor' }], false);
+      const city = await tryActions(g, p, [{ type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.HONOR }], false);
       expect(city.steps[0]).toEqual({
         action: msg('flow.action.healHonour'),
         ok: true,
@@ -222,7 +226,7 @@ describe(`${flows.runFlow.name}: healTroops`, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await setInjured(g, p.cityId, injured);
-      const city = await tryActions(g, p, [{ type: 'healTroops', payWith: 'honor' }], false);
+      const city = await tryActions(g, p, [{ type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.HONOR }], false);
       const error = msg('training.notEnoughHonor', { amount: healHonorCost(injured) });
       expect(city).toMatchObject({ ok: false, error });
       expect((await reloadCity(g, p.cityId)).injuredTroops).toEqual(injured);
@@ -232,9 +236,9 @@ describe(`${flows.runFlow.name}: healTroops`, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await setInjured(g, p.cityId, injured);
-      const city = await tryActions(g, p, [{ type: 'healTroops', payWith: 'resources', when: 'armiesHome' }]);
+      const city = await tryActions(g, p, [{ type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.RESOURCES, when: FlowHealWhen.ARMIES_HOME }]);
       expect(city.steps[0]).toMatchObject({ action: msg('flow.action.healResourcesHome'), detail: { code: 'flow.step.healed', params: { count: 14 } } });
-      expect(g.events('flow.heal')).toEqual([]);
+      expect(g.events(TimedEventType.FLOW_HEAL)).toEqual([]);
     }));
 
   it('once the armies are home: waits for the armies the run sent', () =>
@@ -248,26 +252,26 @@ describe(`${flows.runFlow.name}: healTroops`, () => {
         g,
         p,
         [
-          { type: 'attackTargets', presetId: preset, targets: { [p.cityId]: [valley] } },
-          { type: 'healTroops', payWith: 'honor', when: 'armiesHome' },
+          { type: FlowActionType.ATTACK_TARGETS, presetId: preset, targets: { [p.cityId]: [valley] } },
+          { type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.HONOR, when: FlowHealWhen.ARMIES_HOME },
         ],
         false,
       );
-      const [army] = g.events('army');
+      const [army] = g.events(TimedEventType.ARMY);
       const homeBy = army!.dueAt + (army!.dueAt - T0);
       expect(city.steps[1]).toEqual({
         action: msg('flow.action.healHonourHome'),
         ok: true,
         detail: msg('flow.step.healScheduled', { count: 1, time: { duration: Math.ceil((homeBy - T0) / 60_000) * 60_000 } }),
       });
-      expect(g.events('flow.heal')).toEqual([
+      expect(g.events(TimedEventType.FLOW_HEAL)).toEqual([
         {
           type: 'flow.heal',
           dueAt: homeBy,
           playerId: p.id,
           cityId: p.cityId,
           refKey: `flowheal:${p.cityId}`,
-          payload: { payWith: 'honor', armyIds: [army!.payload!.armyId] },
+          payload: { payWith: HealPayment.HONOR, armyIds: [army!.payload!.armyId] },
         },
       ]);
       expect((await reloadCity(g, p.cityId)).injuredTroops).toEqual(injured);
@@ -275,7 +279,7 @@ describe(`${flows.runFlow.name}: healTroops`, () => {
 });
 
 describe(`${flows.runFlow.name}: attackTargets`, () => {
-  const attack = (presetId: string, targets: Record<string, number[]>) => ({ type: 'attackTargets', presetId, targets });
+  const attack = (presetId: string, targets: Record<string, number[]>) => ({ type: FlowActionType.ATTACK_TARGETS, presetId, targets });
   const items = (step: FlowStepResult) => step.items!.map((i) => [i.label, i.ok, i.detail]);
   const at = (tile: number) => `(${tile % 800},${Math.floor(tile / 800)})`;
 
@@ -294,7 +298,7 @@ describe(`${flows.runFlow.name}: attackTargets`, () => {
         [at(valleys[0]), true, msg('flow.target.sent', { hero: h1!.name })],
         [at(valleys[1]), true, msg('flow.target.sent', { hero: h2!.name })],
       ]);
-      expect(g.events('army')).toHaveLength(2);
+      expect(g.events(TimedEventType.ARMY)).toHaveLength(2);
       expect((await reloadCity(g, p.cityId)).troops.militia).toBe(800);
     }));
 

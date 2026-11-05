@@ -13,6 +13,7 @@ import {
   msg,
   ref,
   ReportType,
+  TimedEventType,
 } from '@marchlands/core';
 
 import { market, reports } from '#/index.ts';
@@ -86,7 +87,7 @@ describe(market.placeOrder.name, () => {
           },
         ]);
         expect(await market.myOrders(g, a.id)).toEqual([]);
-        expect(g.events('shipment')).toEqual([]);
+        expect(g.events(TimedEventType.SHIPMENT)).toEqual([]);
       }));
 
     it('a market sell is paid at once, with no fee', () =>
@@ -240,7 +241,7 @@ describe(market.placeOrder.name, () => {
           expect(await market.myShipments(g, b.id)).toEqual([
             { id: expect.any(Number), cityId: b.cityId, resType: GOLD, resourceName: 'gold', amount: paid, price: base, startTime: g.now, endTime: g.now },
           ]);
-          expect(g.events('shipment')).toMatchObject([{ dueAt: g.now, playerId: b.id, cityId: b.cityId }]);
+          expect(g.events(TimedEventType.SHIPMENT)).toMatchObject([{ dueAt: g.now, playerId: b.id, cityId: b.cityId }]);
           expect(g.pushes(PushCmd.TRADES_UPDATE)).toEqual([
             { playerIds: [b.id], cmd: PushCmd.TRADES_UPDATE, data: { resType: Res.WOOD, amount: 5000, price: base } },
           ]);

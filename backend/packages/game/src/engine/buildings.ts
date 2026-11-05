@@ -11,6 +11,7 @@ import {
   findBuilding,
   PrestigeAction,
   prestigeOf,
+  TimedEventType,
 } from '@marchlands/core';
 
 import { type CityBundle, mayorOf, openCity } from '#/city.ts';
@@ -25,7 +26,7 @@ export const refKey = (cityId: number, pos: number) => `building:${cityId}:${pos
 
 export function scheduleBuilding(ctx: Ctx, b: CityBundle, bld: BuildingState) {
   ctx.schedule({
-    type: 'building',
+    type: TimedEventType.BUILDING,
     dueAt: bld.endTime,
     playerId: b.player.id,
     cityId: b.city.id,

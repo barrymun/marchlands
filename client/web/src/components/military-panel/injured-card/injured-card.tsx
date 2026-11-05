@@ -8,7 +8,7 @@ import {
   postCitiesTroopsInjuredCureMutation,
   postCitiesTroopsInjuredDisbandMutation,
 } from '@marchlands/api-client';
-import { BALANCE, healCost, healHonorCost, researchLevel, TechType, TROOP_KEYS, type TroopKey } from '@marchlands/core';
+import { BALANCE, healCost, healHonorCost, HealPayment, researchLevel, TechType, TROOP_KEYS, type TroopKey } from '@marchlands/core';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { CostList } from '@/components/cost-list/cost-list';
@@ -98,7 +98,7 @@ export function InjuredCard({ city }: { city: CityBean }) {
             <Button
               size="sm"
               disabled={!valid || total <= 0 || !affordable || heal.isPending}
-              onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: 'resources' } }, { onSuccess: done })}
+              onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: HealPayment.RESOURCES } }, { onSuccess: done })}
             >
               {t('injured.healResources', { n: fmtExact(total) })}
             </Button>
@@ -107,7 +107,7 @@ export function InjuredCard({ city }: { city: CityBean }) {
               variant="secondary"
               disabled={!valid || total <= 0 || honor < honorCost || heal.isPending}
               title={honor < honorCost ? t('injured.notEnoughHonor', { n: fmtExact(honorCost) }) : undefined}
-              onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: 'honor' } }, { onSuccess: done })}
+              onClick={() => heal.mutate({ path, body: { troops: chosen, payWith: HealPayment.HONOR } }, { onSuccess: done })}
             >
               {t('injured.healHonor', { n: fmt(honorCost) })}
             </Button>

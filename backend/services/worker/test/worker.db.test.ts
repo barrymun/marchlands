@@ -11,7 +11,7 @@
 import { eq, sql } from 'drizzle-orm';
 import { describe, expect, it, type Mock, vi } from 'vitest';
 
-import { BuffId, msg } from '@marchlands/core';
+import { BuffId, msg, TimedEventType } from '@marchlands/core';
 import { type Db, pushMessages, timedEvents } from '@marchlands/db';
 import { testDb } from '@marchlands/db/test/support/db.ts';
 import { type Ctx, runGame } from '@marchlands/game';
@@ -43,7 +43,7 @@ async function workerTest(fn: (db: Db, log: Mock<Log>) => Promise<void>) {
 async function addEvent(db: Db, ev: { type: string; dueAt: number; playerId?: number; refKey?: string; payload?: Record<string, unknown>; attempts?: number }) {
   const [row] = await db
     .insert(timedEvents)
-    .values({ payload: {}, ...ev, createdAt: Date.now() })
+    .values({ payload: {}, ...ev, type: ev.type as TimedEventType, createdAt: Date.now() }) // a test may name a type the game has none of
     .returning();
   return row;
 }
@@ -72,8 +72,8 @@ describe(processOne.name, () => {
     workerTest(async (db, log) => {
       // army.depart for an army that no longer exists does nothing, so only the order of the claims shows
       const due = Date.now() - 1000;
-      const first = await addEvent(db, { type: 'army.depart', dueAt: due, payload: { armyId: 2_000_000_001 } });
-      const second = await addEvent(db, { type: 'army.depart', dueAt: due, payload: { armyId: 2_000_000_000 } });
+      const first = await addEvent(db, { type: TimedEventType.ARMY_DEPART, dueAt: due, payload: { armyId: 2_000_000_001 } });
+      const second = await addEvent(db, { type: TimedEventType.ARMY_DEPART, dueAt: due, payload: { armyId: 2_000_000_000 } });
 
       expect(await processOne(db, { log })).toBe(true);
       expect(await eventRow(db, first!.id)).toBeUndefined();
@@ -97,7 +97,7 @@ describe(processOne.name, () => {
         .select()
         .from(timedEvents)
         .where(eq(timedEvents.refKey, buffKey(p)));
-      expect(ev).toMatchObject({ type: 'buff.expire', playerId: p.id, payload: { buffId: BuffId.ATTACK } });
+      expect(ev).toMatchObject({ type: TimedEventType.BUFF_EXPIRE, playerId: p.id, payload: { buffId: BuffId.ATTACK } });
       const pushesBefore = (await db.select().from(pushMessages)).length;
 
       expect(await processOne(db, { log })).toBe(true);
@@ -116,8 +116,8 @@ describe(processOne.name, () => {
     workerTest(async (db, log) => {
       const now = Date.now();
       // buff.expire with an unknown buff id is a no-op: the event is consumed and nothing else changes
-      const second = (await addEvent(db, { type: 'buff.expire', dueAt: now - 1000, payload: { buffId: 'none' } }))!;
-      const first = (await addEvent(db, { type: 'buff.expire', dueAt: now - 2000, payload: { buffId: 'none' } }))!;
+      const second = (await addEvent(db, { type: TimedEventType.BUFF_EXPIRE, dueAt: now - 1000, payload: { buffId: 'none' } }))!;
+      const first = (await addEvent(db, { type: TimedEventType.BUFF_EXPIRE, dueAt: now - 2000, payload: { buffId: 'none' } }))!;
 
       expect(await processOne(db, { log })).toBe(true);
       expect(await eventRow(db, first.id)).toBeUndefined();
@@ -142,7 +142,7 @@ describe(processOne.name, () => {
         .from(timedEvents)
         .where(eq(timedEvents.refKey, buffKey(p)));
       expect(rows).toHaveLength(1);
-      expect(rows[0]).toMatchObject({ type: 'buff.expire', dueAt: endTime, attempts: 0, lastError: null });
+      expect(rows[0]).toMatchObject({ type: TimedEventType.BUFF_EXPIRE, dueAt: endTime, attempts: 0, lastError: null });
       expect(log).not.toHaveBeenCalled();
     }));
 
@@ -191,8 +191,8 @@ describe(processOne.name, () => {
   it('skips an exhausted event and takes the next one that is due', () =>
     workerTest(async (db, log) => {
       const now = Date.now();
-      const exhausted = (await addEvent(db, { type: 'buff.expire', dueAt: now - 2000, attempts: MAX_ATTEMPTS, payload: { buffId: 'none' } }))!;
-      const next = (await addEvent(db, { type: 'buff.expire', dueAt: now - 1000, attempts: MAX_ATTEMPTS - 1, payload: { buffId: 'none' } }))!;
+      const exhausted = (await addEvent(db, { type: TimedEventType.BUFF_EXPIRE, dueAt: now - 2000, attempts: MAX_ATTEMPTS, payload: { buffId: 'none' } }))!;
+      const next = (await addEvent(db, { type: TimedEventType.BUFF_EXPIRE, dueAt: now - 1000, attempts: MAX_ATTEMPTS - 1, payload: { buffId: 'none' } }))!;
 
       expect(await processOne(db, { log })).toBe(true);
       expect(await eventRow(db, next.id)).toBeUndefined();

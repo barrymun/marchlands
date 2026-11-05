@@ -1,5 +1,5 @@
 import type { CityBean, Flow } from '@marchlands/api-client';
-import { historicNameAt, Relation, TileType } from '@marchlands/core';
+import { FlowActionType, historicNameAt, Relation, TileType } from '@marchlands/core';
 
 import { FACTION_TINT_KEY } from '@/components/map-panel/constants';
 import type { FarmList, FarmMark, RelationGroup } from '@/components/map-panel/types';
@@ -48,7 +48,7 @@ export function farmLists(flows: readonly Pick<Flow, 'name' | 'actions'>[], citi
   const byCity = new Map<number, Map<number, string[]>>();
   for (const f of flows)
     for (const a of f.actions) {
-      if (a.type !== 'attackTargets') continue;
+      if (a.type !== FlowActionType.ATTACK_TARGETS) continue;
       for (const [id, tiles] of Object.entries(a.targets)) {
         const targets = byCity.get(Number(id)) ?? new Map<number, string[]>();
         for (const tile of tiles) targets.set(tile, [...new Set([...(targets.get(tile) ?? []), f.name])]);

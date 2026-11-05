@@ -22,6 +22,7 @@ import {
   stateOf,
   TileType,
   tileXY,
+  TimedEventType,
   TITLES,
 } from '@marchlands/core';
 import { accounts, alliances, armies as armyRows, cities, heroes, mails, reports as reportRows, tiles, timedEvents } from '@marchlands/db';
@@ -437,7 +438,9 @@ describe(player.startFurlough.name, () => {
       expect(p.status).toBe(PlayerStatus.HOLIDAY);
       expect(p.buffs).toEqual([expect.objectContaining({ id: BuffId.HOLIDAY, desc: msg('buff.holiday'), endTime: g.now + DAY })]);
       expect((await reloadCity(g, a.cityId)).gold).toBe(BALANCE.startingResources - FURLOUGH_DAY_GOLD);
-      expect(g.events('buff.expire')).toEqual([expect.objectContaining({ dueAt: g.now + DAY, playerId: a.id, payload: { buffId: BuffId.HOLIDAY } })]);
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toEqual([
+        expect.objectContaining({ dueAt: g.now + DAY, playerId: a.id, payload: { buffId: BuffId.HOLIDAY } }),
+      ]);
       expect(g.pushes(PushCmd.RESOURCE_UPDATE).at(-1)).toMatchObject({ data: { castleId: a.cityId } });
       expect(g.pushes(PushCmd.PLAYER_BUFF_UPDATE).at(-1)).toMatchObject({ data: { buffBean: { typeId: BuffId.HOLIDAY }, updateType: 0 } });
       expect(g.pushes(PushCmd.PLAYER_INFO_UPDATE).at(-1)).toMatchObject({ data: { playerInfo: { status: PlayerStatus.HOLIDAY } } });
@@ -497,7 +500,7 @@ describe(player.cancelFurlough.name, () => {
       const p = await reloadPlayer(g, a);
       expect(p.status).toBe(PlayerStatus.NORMAL);
       expect(p.buffs).toEqual([]);
-      expect(g.events('buff.expire')).toEqual([]);
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toEqual([]);
       expect(g.pushes(PushCmd.PLAYER_BUFF_UPDATE).at(-1)).toMatchObject({ data: { buffBean: { typeId: BuffId.HOLIDAY }, updateType: 1 } });
       expect(g.pushes(PushCmd.PLAYER_INFO_UPDATE).at(-1)).toMatchObject({ data: { playerInfo: { status: PlayerStatus.NORMAL } } });
     }));
@@ -525,7 +528,9 @@ describe(player.startTruce.name, () => {
       expect(p.items[ItemId.TRUCE_AGREEMENT]).toBe(1);
       expect(p.buffs).toEqual([{ id: BuffId.TRUCE, desc: msg('buff.truce'), endTime: g.now + BALANCE.truceDurationMs, itemId: ItemId.TRUCE_AGREEMENT }]);
       expect((await reloadCity(g, a.cityId)).gold).toBe(BALANCE.startingResources);
-      expect(g.events('buff.expire')).toEqual([expect.objectContaining({ dueAt: g.now + BALANCE.truceDurationMs, payload: { buffId: BuffId.TRUCE } })]);
+      expect(g.events(TimedEventType.BUFF_EXPIRE)).toEqual([
+        expect.objectContaining({ dueAt: g.now + BALANCE.truceDurationMs, payload: { buffId: BuffId.TRUCE } }),
+      ]);
       expect(g.pushes(PushCmd.PLAYER_INFO_UPDATE).at(-1)).toMatchObject({ data: { playerInfo: { status: PlayerStatus.TRUCE } } });
     }));
 
@@ -613,7 +618,7 @@ describe(player.restartPlayer.name, () => {
       await player.addCastleSign(g, a.id, npc!.id);
       await sendSystemMail(g, a.id, 'Hello', 'x');
       await createReport(g, { playerId: a.id, title: msg('report.title.scoutReport'), body: { kind: 'text', text: msg('report.oldFormat') } });
-      await g.tx.insert(timedEvents).values({ type: 'research', dueAt: g.now + HOUR, playerId: a.id, payload: {}, createdAt: g.now });
+      await g.tx.insert(timedEvents).values({ type: TimedEventType.RESEARCH, dueAt: g.now + HOUR, playerId: a.id, payload: {}, createdAt: g.now });
       // a valley held by the city
       const [valley] = await freeTiles(g, TileType.FOREST);
       await g.tx.update(tiles).set({ ownerCityId: a.cityId, ownerPlayerId: a.id }).where(eq(tiles.id, valley!.id));
@@ -654,7 +659,7 @@ describe(player.restartPlayer.name, () => {
       return { a, b, heroId, armyId: bean.armyId, sent: bean };
     }
     const row = async (g: TestGame, id: number) => (await g.tx.select().from(armyRows).where(eq(armyRows.id, id)))[0];
-    const eventOf = (g: TestGame, id: number) => g.events('army').find((e) => e.refKey === `army:${id}`);
+    const eventOf = (g: TestGame, id: number) => g.events(TimedEventType.ARMY).find((e) => e.refKey === `army:${id}`);
 
     it('one marching there turns back the way it came, as a recall does', () =>
       game(async (g) => {
@@ -669,10 +674,10 @@ describe(player.restartPlayer.name, () => {
     it('one waiting at home to land at a time is back at once, its departure cancelled', () =>
       game(async (g) => {
         const { b, armyId } = await headedFor(g, { arriveAt: g.now + DAY / 2 });
-        expect(g.events('army.depart').some((e) => e.refKey === departRef(armyId))).toBe(true);
+        expect(g.events(TimedEventType.ARMY_DEPART).some((e) => e.refKey === departRef(armyId))).toBe(true);
         await player.restartPlayer(g, b.id);
         expect(await row(g, armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, startTime: g.now, reachTime: g.now + 1000 });
-        expect(g.events('army.depart').some((e) => e.refKey === departRef(armyId))).toBe(false);
+        expect(g.events(TimedEventType.ARMY_DEPART).some((e) => e.refKey === departRef(armyId))).toBe(false);
       }));
 
     it('one already heading home carries on as it was', () =>

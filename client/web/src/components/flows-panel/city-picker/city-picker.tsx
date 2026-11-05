@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
+import { FlowCities } from '@marchlands/core';
+
 import type { Targets } from '@/components/flows-panel/types';
 import { hasHero } from '@/components/flows-panel/utils';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,7 +25,7 @@ export function CityPicker({
 }) {
   const { t } = useTranslation('flows-panel');
   const cities = usePlayer().data?.castles ?? [];
-  const all = value === 'all';
+  const all = value === FlowCities.ALL;
   const chosen = new Set(all ? [] : value);
   const set = (id: number, on: boolean) => onChange(on ? [...chosen, id] : [...chosen].filter((x) => x !== id));
   const noHero = hires ? 0 : cities.filter((c) => !hasHero(c)).length;
@@ -33,7 +35,7 @@ export function CityPicker({
       <label className="flex items-center gap-2 text-sm">
         <Checkbox
           checked={all}
-          onCheckedChange={(on) => onChange(on === true ? 'all' : currentCityId != null ? [currentCityId] : cities.slice(0, 1).map((c) => c.id))}
+          onCheckedChange={(on) => onChange(on === true ? FlowCities.ALL : currentCityId != null ? [currentCityId] : cities.slice(0, 1).map((c) => c.id))}
         />
         {t('cityPicker.all')}{' '}
         <span className="text-xs text-muted-foreground">

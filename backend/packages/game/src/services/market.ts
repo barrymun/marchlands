@@ -43,6 +43,7 @@ import {
   ReportType,
   scaled,
   takeFromGroups,
+  TimedEventType,
   worldGold,
   worldPrice,
   worldTotals,
@@ -642,7 +643,7 @@ export async function speedupShipment(ctx: Ctx, playerId: number, shipmentId: nu
   spendGold(b.city, gold);
   ctx.stat(playerId, s.cityId, { 'spent.speedups.gold': gold });
   await ctx.tx.update(marketShipments).set({ endTime: ctx.now }).where(eq(marketShipments.id, shipmentId));
-  ctx.schedule({ type: 'shipment', dueAt: ctx.now, playerId, cityId: s.cityId, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } });
+  ctx.schedule({ type: TimedEventType.SHIPMENT, dueAt: ctx.now, playerId, cityId: s.cityId, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
 }

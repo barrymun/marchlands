@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { HOUR, MarketSide, merchantAsk, merchantBase, merchantBid, merchantBuys, merchantSells, ReportType } from '@marchlands/core';
+import { HOUR, MarketSide, merchantAsk, merchantBase, merchantBid, merchantBuys, merchantSells, ReportType, TimedEventType } from '@marchlands/core';
 import { cities, marketShipments } from '@marchlands/db';
 
 import { deliverShipment, merchantSweep } from '#/engine/market.ts';
@@ -52,7 +52,7 @@ describe(deliverShipment.name, () => {
           g.advance(s.endTime - g.now - 1);
           await deliverShipment(g, s.id);
           expect(await market.myShipments(g, b.id)).toHaveLength(1);
-          expect(g.events('shipment')).toMatchObject([{ dueAt: s.endTime, refKey: `shipment:${s.id}` }]);
+          expect(g.events(TimedEventType.SHIPMENT)).toMatchObject([{ dueAt: s.endTime, refKey: `shipment:${s.id}` }]);
           expect(await g.runDue(s.endTime)).toBe(1);
           expect(await market.myShipments(g, b.id)).toEqual([]);
         }),
@@ -189,7 +189,7 @@ describe(merchantSweep.name, () => {
         await merchantSweep(g);
         expect(await market.myOrders(g, b.id)).toMatchObject([{ dealedTotal: 0 }, { dealedTotal: 0 }]);
         expect(await market.myShipments(g, b.id)).toEqual([]);
-        expect(g.events('shipment')).toEqual([]);
+        expect(g.events(TimedEventType.SHIPMENT)).toEqual([]);
       }),
     ));
 

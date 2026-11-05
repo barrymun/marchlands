@@ -3,7 +3,7 @@
 // what it queued (pushes, timed events), move time forward and run the timed events that fall due.
 
 import type { PushCmd, PushData } from '@marchlands/contracts';
-import { seededRng } from '@marchlands/core';
+import { seededRng, type TimedEventType } from '@marchlands/core';
 import { testDb } from '@marchlands/db/test/support/db.ts';
 
 import { type CtxInternals, type QueuedPush, type ScheduledEvent } from '#/context.ts';
@@ -20,7 +20,7 @@ export interface TestGame extends CtxInternals {
   pushes(): QueuedPush[];
   pushes<K extends PushCmd>(cmd: K): (QueuedPush & { cmd: K; data: PushData<K> })[];
   /** timed events pending, soonest first */
-  events(type?: string): ScheduledEvent[];
+  events(type?: TimedEventType): ScheduledEvent[];
   /** move time forward by `ms` (does not run events: see runDue) */
   advance(ms: number): void;
   /** move time forward to each pending event that falls due by `until` (default now) and run it, in order */
