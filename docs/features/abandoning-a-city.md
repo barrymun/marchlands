@@ -12,7 +12,7 @@
   |---|---|---|---|
   | Teleport | `moveCity`, `services/interior.ts` | flat land | moves the whole city; refused with armies out or other players' troops there; valleys go free |
   | Restart or deleted player | `restartPlayer`, `services/player.ts` | flat land, a seat a whole historic city | deletes everything; other players' armies go home |
-  | A seat taken by a rival | `takeSeat` and `clearSeat`, `engine/combat.ts` | stays a city, the winner's | heroes, armies, plan waves, orders and shipments lost; valleys go free; other cities' troops go home; troops gone |
+  | A seat taken by a rival | `takeSeat` and `clearSeat`, `engine/combat.ts` | stays a city, the winner's | heroes, armies, research running there, plan waves, orders and shipments lost; valleys go free; other cities' troops go home; troops gone |
 
 - **Tiles keep their level** when a city leaves them: a captured level 10 barbarian city teleported away leaves a level 10 flat. Nothing brings a barbarian city back once it's captured, so their number only falls.
 - **Player cities can't be captured** (deviations.md), only plundered. Only a seat can change hands.
@@ -31,7 +31,8 @@
 **By the maintainer, 2026-11-05:**
 
 - **Abandoning a city loses what's in it, on purpose.** Its heroes, its troops, its resources, its armies on the march, its market orders and its shipments are all gone, with nothing moved to another city or refunded, "so the player really needs to consider what they are doing". The warning has to make that very clear.
-- **A seat taken by a rival loses everything in it too:** its old holder's heroes, armies, plan waves, market orders and shipments, with nothing moved to another city (built 2026-11-05, `clearSeat`). The two rules are the same, so a player can't keep more by being taken than by leaving.
+- **A seat taken by a rival loses everything in it too:** its old holder's heroes, armies, plan waves, market orders and shipments and the research running there, with nothing moved to another city (built 2026-11-05, `clearSeat`). The two rules are the same, so a player can't keep more by being taken than by leaving.
+- **Research running in the city is cancelled, with no refund** (the maintainer, 2026-11-05): the player starts it again in another city. Its level stays. Left running, it couldn't be cancelled or sped up, both needing the city, and its tech stayed blocked until it finished.
 - **Its valleys are released.**
 - **The tile becomes flat land,** of the level it had, as teleporting and restarting leave it. Not a barbarian city as in the original: that needs a job to remove it overnight, and lets a player build a level 10 target beside them, with medals for each win and 10,000 prestige for each capture. It can be added later without undoing anything.
 - **It takes 1 real hour, and can be cancelled until then** (`BALANCE.abandon.delayMs`, not scaled by `GAME_SPEED`). Meanwhile the city plays on as normal and can be attacked, and it still counts against the city limit.
@@ -43,6 +44,7 @@
 | The player's heroes in the city, its mayor and locked heroes included | deleted |
 | The city's troops at home, injured, in queues; fortifications; resources; buildings | gone with the city, no refund |
 | Its armies in any state (waiting to leave, marching out, stationed elsewhere, coming home) | deleted, with their troops, goods and heroes, whatever they were on their way to do |
+| Research running in it | cancelled, no refund; the level stays |
 | Unsent plan waves from it | deleted (`war_plan_waves` cascades) |
 | Market orders and shipments | deleted, the escrow and the goods on the road with them |
 | Valleys | go free, a fresh garrison (`troops` and `state` cleared), any of the player's troops stationed there lost with the armies |
@@ -51,12 +53,11 @@
 **Not lost with the city:**
 
 - **Other players' troops,** stationed or on their way, go home (`turnHome`, as `restartPlayer`).
-- **Running research** carries on: research is the player's, not the city's, so its timed event must survive.
 
 **The rest of the rules:**
 
-- **Refused for the player's last city:** there must be another city not itself being abandoned. Checked again when the hour is up; with none left, it's cancelled and the player told.
-- **Any other city may go,** the first included, and a held seat too. A seat stands again whole, with full loyalty and nobody holding it, as when its holder restarts.
+- **A player always keeps at least one regular city** (the maintainer, 2026-11-05): their last city can't be abandoned, and their last city can't be a historic city, as a rival can capture one and a regular city can't be captured. So abandoning a regular city is refused unless another regular city remains that isn't itself being abandoned. Checked again when the hour is up; with none left, it's cancelled and the player told. This is what stops a seat being taken from ever leaving a player with no city. A barbarian city the player captured counts as regular: it has no loyalty once it's theirs.
+- **Any other city may go,** the first included, and a held seat whenever a regular city remains. A seat stands again whole, with full loyalty and nobody holding it, as when its holder restarts.
 - **No cooldown:** with flat land, dropping a city gains nothing to repeat.
 - **No item or gold to skip the hour.**
 - **Attackers on their way** turn back on arrival (`army.nothingToAttack`); on a seat they carry on against the unheld city.
@@ -87,7 +88,7 @@ Five went on 2026-11-05 with what caused them:
 ## How it would be built
 
 - **Data:** `cities.abandon_at` (ms, 0 none), a generated migration.
-- **Time:** a timed event `city.abandon`, ref `abandon:<cityId>`, handled in `events.ts`; the handler checks `abandon_at` is due, so a stale event does nothing. Clearing a city's timed events leaves research alone, or it would be stuck for good.
+- **Time:** a timed event `city.abandon`, ref `abandon:<cityId>`, handled in `events.ts`; the handler checks `abandon_at` is due, so a stale event does nothing. Clearing a city's timed events takes research's too, so it's cancelled first (`cancelCityResearch`, `engine/research.ts`), or it would be stuck for good.
 - **Code:** `engine/abandon.ts`, sharing with `clearSeat` what both do (what's lost, valleys, other players' troops).
 - **API:** `POST /cities/{cityId}/abandon`, `DELETE /cities/{cityId}/abandon`, `abandonAt` on `CityBean`, then `npm run gen:api`.
 - **Docs:** a `deviations.md` entry *(design change)*, `BALANCE.abandon`, text in every locale.

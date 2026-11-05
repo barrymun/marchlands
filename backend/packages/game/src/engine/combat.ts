@@ -87,6 +87,7 @@ import { initialCity, isProtected } from '#/engine/player.ts';
 import { isFriendly, relationBetween } from '#/engine/relations.ts';
 import { createReport } from '#/engine/reports.ts';
 import { addStanding } from '#/engine/reputation.ts';
+import { cancelCityResearch } from '#/engine/research.ts';
 import { ruledZones } from '#/engine/seats.ts';
 import { activeBuff, addItem, addPrestige, gainResources, pushCity, pushPlayerInfo, pushResources } from '#/helpers.ts';
 import {
@@ -997,10 +998,13 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
 
 /**
  * What goes with a held historic city when a rival takes it: all its old holder had in it is lost, as nothing is moved
- * to another city (docs/features/historical-cities.md): heroes, armies wherever they are, plan waves, market orders and
- * shipments. Its valleys go free (other cities' troops there head home), and troops other cities have stationed in it go home.
+ * to another city (docs/features/historical-cities.md): heroes, armies wherever they are, research running there, plan
+ * waves, market orders and shipments. Its valleys go free (other cities' troops there head home), and troops other cities have stationed in it go home.
  */
-async function clearSeat(ctx: Ctx, city: CityRow, loserId: number) {
+async function clearSeat(ctx: Ctx, city: CityRow, loser: PlayerRow) {
+  const loserId = loser.id;
+  cancelCityResearch(ctx, loser, city.id);
+  await savePlayer(ctx, loser);
   const lostArmies = await ctx.tx
     .delete(armies)
     .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loserId)))
@@ -1037,7 +1041,7 @@ async function clearSeat(ctx: Ctx, city: CityRow, loserId: number) {
 async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: number) {
   const city = def.city;
   const loser = def.player;
-  const lostArmies = await clearSeat(ctx, city, loser.id);
+  const lostArmies = await clearSeat(ctx, city, loser);
   await ctx.tx
     .update(armies)
     .set({ targetPlayerId: winner.id })

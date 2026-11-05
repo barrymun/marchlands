@@ -12,6 +12,22 @@ import { citiesOf, getPlayer, type PlayerRow, saveCity, saveHero, savePlayer } f
 
 export const refKey = (playerId: number, techId: number) => `research:${playerId}:${techId}`;
 
+/**
+ * Cancel the research running in a city its player has lost, with no refund: their level stays, and they can start it
+ * again in another city. The caller saves the player.
+ */
+export function cancelCityResearch(ctx: Ctx, p: PlayerRow, cityId: number) {
+  const research = { ...p.research };
+  for (const [id, r] of Object.entries(p.research)) {
+    if (r.cityId !== cityId) continue;
+    const techId = Number(id);
+    research[techId] = { level: r.level };
+    ctx.unschedule(refKey(p.id, techId));
+    ctx.push(p.id, PushCmd.RESEARCH_UPDATE, { castleId: cityId, typeId: techId, endTime: 0 });
+  }
+  p.research = research;
+}
+
 /** Settle every city of a lord before something that changes all their rates (tech, buffs). */
 export async function settleAllCities(ctx: Ctx, p: PlayerRow): Promise<CityBundle[]> {
   const out: CityBundle[] = [];

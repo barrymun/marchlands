@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * Active attribute boosts with a live countdown (real time: boosts are not sped up by GAME_SPEED); what each
- * does on hover. A captured hero's home city is kept as a buff too, but is no boost.
+ * does on hover.
  */
 export function HeroBuffs({ hero }: { hero: HeroBean }) {
   const { t } = useTranslation('heroes-panel');

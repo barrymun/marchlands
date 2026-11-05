@@ -39,6 +39,7 @@ import { expectRefused } from '#test/support/expect.ts';
 import { addHero, createTestPlayer, reloadCity, setResources, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 import { Res } from '#test/support/market.ts';
+import { withAcademy } from '#test/support/research.ts';
 
 /** The nearest historic city with a name of its own to a player's city (a level 14, 16 or Atlantis), and its name. */
 async function namedSeatNear(g: TestGame, p: TestPlayer) {
@@ -361,14 +362,31 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       expect((await getHero(g, mayor)).status).toBe(HeroStatus.MAYOR);
     }));
 
-  it('leaves research started there running, as it is the player’s', () =>
+  it('cancels research running there, leaving research elsewhere running', () =>
     game(async (g) => {
       const { p, cityId, attack } = await heldSeat(g);
-      await setResources(g, p, { gold: 1_000_000, food: 1_000_000, wood: 1_000_000, stone: 1_000_000, iron: 1_000_000 }, cityId);
-      const { endTime } = await research.startResearch(g, p.id, cityId, TechType.AGRICULTURE);
-      await takeIt(g, cityId, attack);
-      await g.runDue(endTime + 1);
-      expect((await getPlayer(g, p.id)).research[TechType.AGRICULTURE]).toEqual({ level: 1 });
+      const plenty = { gold: 1_000_000, food: 1_000_000, wood: 1_000_000, stone: 1_000_000, iron: 1_000_000 };
+      await withAcademy(g, p);
+      let level = -1;
+      let elsewhere = 0;
+      // started a moment before it lands, so neither is done by then
+      await attack(async (at) => {
+        g.advance(at - g.now - 1_000);
+        await setResources(g, p, plenty, cityId);
+        await setResources(g, p, plenty);
+        ({ level } = await research.startResearch(g, p.id, cityId, TechType.AGRICULTURE));
+        elsewhere = (await research.startResearch(g, p.id, p.cityId, TechType.LUMBERING)).endTime;
+        await saveCity(g, { ...(await getCity(g, cityId)), loyalty: 3, loyaltyAt: at });
+      });
+
+      const after = await getPlayer(g, p.id);
+      // back at the level it had, the level under way lost
+      expect(after.research[TechType.AGRICULTURE]).toEqual({ level });
+      expect(after.research[TechType.LUMBERING]).toMatchObject({ cityId: p.cityId, endTime: elsewhere });
+      expect(g.events('research').map((e) => e.payload)).toEqual([{ techId: TechType.LUMBERING }]);
+      expect(g.pushes(PushCmd.RESEARCH_UPDATE).at(-1)?.data).toEqual({ castleId: cityId, typeId: TechType.AGRICULTURE, endTime: 0 });
+      // they can start it again in their other city
+      await research.startResearch(g, p.id, p.cityId, TechType.AGRICULTURE);
     }));
 
   it('tells whoever a lost army was marching on that it is gone', () =>
