@@ -28,7 +28,7 @@ import {
   TileType,
   tileXY,
 } from '@marchlands/core';
-import { armies as armyRows, heroes as heroRows } from '@marchlands/db';
+import { armies as armyRows, heroes as heroRows, timedEvents } from '@marchlands/db';
 
 import { processArmy } from '#/engine/combat.ts';
 import { ship } from '#/engine/market.ts';
@@ -406,6 +406,35 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
           .filter((x) => x.playerIds.includes(p.id))
           .at(-1)?.data,
       ).toEqual({ updateType: 1, castleBean: { id: cityId } });
+    }));
+
+  it('passes its queues’ events to the winner, so the old holder restarting leaves them', () =>
+    game(async (g) => {
+      const { p, q, cityId, attack } = await heldSeat(g);
+      const row = (refKey: string, type: string) => ({
+        type,
+        dueAt: g.now + DAY,
+        playerId: p.id,
+        cityId,
+        refKey,
+        payload: { positionId: 0 },
+        createdAt: g.now,
+      });
+      await g.tx.insert(timedEvents).values([row('queued-building', 'building'), row('queued-train', 'train')]);
+      await takeIt(g, cityId, attack);
+      await player.restartPlayer(g, p.id);
+      const left = await g.tx
+        .select()
+        .from(timedEvents)
+        .where(inArray(timedEvents.refKey, ['queued-building', 'queued-train']));
+      expect(left.map((e) => e.playerId)).toEqual([q.id, q.id]);
+    }));
+
+  it('records what it gave the winner, for abandoning it soon after', () =>
+    game(async (g) => {
+      const { cityId, attack } = await heldSeat(g);
+      await takeIt(g, cityId, attack);
+      expect(await getCity(g, cityId)).toMatchObject({ capturePrestige: 12_000, capturedAt: g.now });
     }));
 
   it('tells whoever a lost army was marching on that it is gone', () =>

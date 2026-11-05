@@ -29,6 +29,7 @@ export * from '#/trends.ts';
 export * from '#/troops.ts';
 export * from '#/types.ts';
 export * from '#/historic.ts';
+export * from '#/abandon.ts';
 export * from '#/historic-names.ts';
 export * from '#/world.ts';
 export * from '#/battle/simulator.ts';

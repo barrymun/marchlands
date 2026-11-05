@@ -388,6 +388,7 @@
               "flow.target.notEnoughTroops",
               "flow.target.refused",
               "flow.skipNoHero",
+              "flow.skipAbandoning",
               "quest.notFound",
               "quest.alreadyClaimed",
               "quest.notFinished",
@@ -562,6 +563,7 @@
               "report.notFound",
               "report.oldFormat",
               "report.cityAbandoned",
+              "report.cityAbandonedPrestige",
               "report.abandonCancelled",
               "report.seatRebelled",
               "report.cityFounded",
@@ -1457,6 +1459,16 @@
             "type": "number",
             "description": "a city being abandoned: when its hour is up and it goes (0: not being abandoned)"
           },
+          "capturePrestige": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the prestige capturing this city gave its player (0: never captured); abandoning it soon after takes it back"
+          },
+          "capturedAt": {
+            "type": "number",
+            "description": "when its player captured it (0: never captured)"
+          },
           "seatLoyalty": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -1493,6 +1505,8 @@
           "draftedToday",
           "draftNextAt",
           "abandonAt",
+          "capturePrestige",
+          "capturedAt",
           "seatLoyalty",
           "createdAt"
         ]
@@ -12732,6 +12746,7 @@
               "flow.target.notEnoughTroops",
               "flow.target.refused",
               "flow.skipNoHero",
+              "flow.skipAbandoning",
               "quest.notFound",
               "quest.alreadyClaimed",
               "quest.notFinished",
@@ -12906,6 +12921,7 @@
               "report.notFound",
               "report.oldFormat",
               "report.cityAbandoned",
+              "report.cityAbandonedPrestige",
               "report.abandonCancelled",
               "report.seatRebelled",
               "report.cityFounded",
@@ -13812,6 +13828,16 @@
             "type": "number",
             "description": "a city being abandoned: when its hour is up and it goes (0: not being abandoned)"
           },
+          "capturePrestige": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "the prestige capturing this city gave its player (0: never captured); abandoning it soon after takes it back"
+          },
+          "capturedAt": {
+            "type": "number",
+            "description": "when its player captured it (0: never captured)"
+          },
           "seatLoyalty": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -13848,6 +13874,8 @@
           "draftedToday",
           "draftNextAt",
           "abandonAt",
+          "capturePrestige",
+          "capturedAt",
           "seatLoyalty",
           "createdAt"
         ],

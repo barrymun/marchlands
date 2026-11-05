@@ -222,6 +222,9 @@ export const cities = pgTable(
     sharedAt: ms('shared_at').notNull().default(0),
     /** (marchlands) a city being abandoned: when its hour is up (real ms; 0: not being abandoned) */
     abandonAt: ms('abandon_at').notNull().default(0),
+    /** (marchlands) a city captured: the prestige that gave, and when; abandoning it soon after takes it back (core abandonPrestigeBack) */
+    capturePrestige: integer('capture_prestige').notNull().default(0),
+    capturedAt: ms('captured_at').notNull().default(0),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [uniqueIndex('cities_tile_idx').on(t.tileId), index('cities_player_idx').on(t.playerId)],

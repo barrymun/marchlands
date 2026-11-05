@@ -33,5 +33,6 @@
   "cityFounded": "{{name}} has been founded.",
   "seatRebelled": "{{name}}, your level {{level}} historic city, rose up: its loyalty fell to 0 while it lacked troops at home or gold and food for its upkeep. It stands again as a historic city nobody holds. Your heroes and armies there went to your other city.",
   "cityAbandoned": "{{name}} has been abandoned. Everything you had in it is lost, and its valleys are released.",
-  "abandonCancelled": "{{name}} was not abandoned: you must keep at least one regular city."
+  "abandonCancelled": "{{name}} was not abandoned: you must keep at least one regular city.",
+  "cityAbandonedPrestige": "{{name}} has been abandoned. Everything you had in it is lost, its valleys are released, and the {{prestige}} prestige its capture gave you is taken back."
 }

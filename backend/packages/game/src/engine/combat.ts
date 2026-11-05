@@ -3,7 +3,7 @@
 // valley/NPC scouting and a scout-vs-scout fight; everything else follows Evony Age 1 and the
 // recommendations in docs/spec/battle.md §7.3.
 
-import { and, count, eq } from 'drizzle-orm';
+import { and, count, eq, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import {
@@ -80,7 +80,7 @@ import { type CityBundle, openCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { fortBean, troopBean } from '#/dto.ts';
 import { abandonRef } from '#/engine/abandon.ts';
-import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner } from '#/engine/armies.ts';
+import { armiesNowAimAtCity, armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner } from '#/engine/armies.ts';
 import { loseCityContents } from '#/engine/city-loss.ts';
 import { dropCapturedTarget } from '#/engine/flows.ts';
 import { heroSlots, pushHero } from '#/engine/heroes.ts';
@@ -426,6 +426,7 @@ async function arriveBuildCity(ctx: Ctx, a: ArmyRow, settler: PlayerRow) {
     .update(tiles)
     .set({ cityId: city.id, type: TileType.CASTLE, ownerPlayerId: a.playerId, ownerCityId: null, updatedAt: ctx.now })
     .where(eq(tiles.id, tile.id));
+  await armiesNowAimAtCity(ctx, tile.id, a.playerId);
   const hero = await heroOf(ctx, a);
   if (hero) {
     Object.assign(hero, { cityId: city.id, status: HeroStatus.MAYOR });
@@ -1019,6 +1020,8 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
     loyalty: BALANCE.historic.loyalty,
     loyaltyAt: ctx.now,
     abandonAt: 0,
+    capturePrestige: 1000 * level,
+    capturedAt: ctx.now,
     // its new holder starts drafting by itself, the default, from the next part of the day; the drafts made today
     // still count against the seat
     draftAuto: true,
@@ -1026,6 +1029,8 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
   });
   await saveCity(ctx, city);
   await ctx.tx.update(tiles).set({ ownerPlayerId: winner.id, updatedAt: ctx.now }).where(eq(tiles.id, city.tileId));
+  // its queues pass to the winner, and their events with them: the old holder restarting deletes all that are theirs
+  await ctx.tx.execute(sql`update timed_events set player_id = ${winner.id} where city_id = ${city.id} and type in ('building', 'train')`);
   addPrestige(winner, 1000 * level);
   await savePlayer(ctx, winner);
   pushCity(ctx, await viewCity(ctx, city.id));
@@ -1277,6 +1282,8 @@ async function captureHistoric(ctx: Ctx, attacker: PlayerRow, tile: TileRow, lev
         loyaltyAt: ctx.now,
         // drafting by itself (the default) from the next part of the day
         draftNextAt: nextAutoDraftAt(ctx.now),
+        capturePrestige: 1000 * level,
+        capturedAt: ctx.now,
       })
       .returning(),
   );
@@ -1292,6 +1299,7 @@ async function captureHistoric(ctx: Ctx, attacker: PlayerRow, tile: TileRow, lev
   });
   await saveTile(ctx, tile);
   await dropCapturedTarget(ctx, tile.id);
+  await armiesNowAimAtCity(ctx, tile.id, attacker.id);
   pushCity(ctx, await viewCity(ctx, city.id));
   addPrestige(attacker, 1000 * level);
 }
@@ -1311,6 +1319,8 @@ async function captureNpc(ctx: Ctx, attacker: PlayerRow, tile: TileRow, state: N
         stone: state.stone,
         iron: state.iron,
         population: state.population,
+        capturePrestige: 1000 * tile.level,
+        capturedAt: ctx.now,
       })
       .returning(),
   );
@@ -1326,6 +1336,7 @@ async function captureNpc(ctx: Ctx, attacker: PlayerRow, tile: TileRow, state: N
   });
   await saveTile(ctx, tile);
   await dropCapturedTarget(ctx, tile.id);
+  await armiesNowAimAtCity(ctx, tile.id, attacker.id);
   pushCity(ctx, await viewCity(ctx, city.id));
   addPrestige(attacker, 1000 * tile.level);
 }

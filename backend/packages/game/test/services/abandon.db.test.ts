@@ -8,12 +8,14 @@ import { ArmyDirection, BALANCE, BuildingType, DAY, HeroStatus, MarketSide, Miss
 import { armies as armyRows, cities, heroes as heroRows, timedEvents, warPlanWaves } from '@marchlands/db';
 
 import { completeAbandon } from '#/engine/abandon.ts';
+import { armiesNowAimAtCity } from '#/engine/armies.ts';
 import { ship } from '#/engine/market.ts';
-import { abandon, armies, heroes, interior, market, plans, research } from '#/index.ts';
-import { citiesOf, getCity, getHero, getPlayer, getTile, saveCity } from '#/repo.ts';
+import { abandon, armies, flows, heroes, interior, market, plans, research } from '#/index.ts';
+import { citiesOf, getCity, getHero, getPlayer, getTile, saveCity, savePlayer } from '#/repo.ts';
 import { allies, arrive, battleOf, cityTile, lastPush, occupyValley, reportsOf, reportTitles, send, tileNear, warCity, warrior } from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { addCity, addHero, createTestPlayer, setBuildings, setResources, type TestPlayer } from '#test/support/factories.ts';
+import { armyPreset, flowOf, mayor, newFlow, runFlowIn, withHero } from '#test/support/flows.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 import { makeSeat } from '#test/support/historic.ts';
 import { Res } from '#test/support/market.ts';
@@ -249,7 +251,89 @@ describe(completeAbandon.name, () => {
       expect(left.map((e) => e.refKey)).toEqual(['still-there']);
     }));
 
-  it('leaves the player’s prestige, honour and title as they were', () =>
+  it('takes back the prestige capturing it gave, within the window, and says so', () =>
+    game(async (g) => {
+      const { p } = await withSecondCity(g);
+      const city = await getCity(g, p.cityId);
+      await saveCity(g, { ...city, capturePrestige: 10_000, capturedAt: g.now });
+      await savePlayer(g, { ...(await getPlayer(g, p.id)), prestige: 15_000 });
+      await abandonNow(g, p);
+      expect((await getPlayer(g, p.id)).prestige).toBe(5_000);
+      expect((await reportsOf(g, p.id)).at(-1)?.body).toMatchObject({ text: msg('report.cityAbandonedPrestige', { name: city.name, prestige: 10_000 }) });
+    }));
+
+  it('never leaves prestige below 0', () =>
+    game(async (g) => {
+      const { p } = await withSecondCity(g);
+      await saveCity(g, { ...(await getCity(g, p.cityId)), capturePrestige: 10_000, capturedAt: g.now });
+      await savePlayer(g, { ...(await getPlayer(g, p.id)), prestige: 3_000 });
+      await abandonNow(g, p);
+      expect((await getPlayer(g, p.id)).prestige).toBe(0);
+    }));
+
+  it('takes nothing back once the window is over', () =>
+    game(async (g) => {
+      const { p } = await withSecondCity(g);
+      await saveCity(g, { ...(await getCity(g, p.cityId)), capturePrestige: 10_000, capturedAt: g.now });
+      await savePlayer(g, { ...(await getPlayer(g, p.id)), prestige: 3_000 });
+      g.advance(BALANCE.abandon.prestigeBackMs);
+      await abandonNow(g, p);
+      expect((await getPlayer(g, p.id)).prestige).toBe(3_000);
+    }));
+
+  it('takes its targets off the player’s flows, which can be saved again', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      const preset = await armyPreset(g, p, 'Farm', { militia: 10 });
+      const f = await newFlow(g, p, { name: 'Farm', actions: [{ type: 'attackTargets', presetId: preset, targets: { [p.cityId]: [5], [other]: [6] } }] });
+      await abandonNow(g, p);
+      const saved = await flowOf(g, p, f.id);
+      expect(saved.actions).toEqual([expect.objectContaining({ targets: { [other]: [6] } })]);
+      expect(g.pushes(PushCmd.FLOW_UPDATE).at(-1)?.data).toMatchObject({ flowId: f.id });
+      await flows.saveFlow(g, p.id, { id: f.id, name: 'Farm', actions: saved.actions });
+    }));
+
+  it('tells friends sent home, and stops showing attackers bound for its valleys as coming for the player', () =>
+    game(async (g) => {
+      const { p, heroId } = await withSecondCity(g);
+      const valley = await occupyValley(g, p, heroId);
+
+      const { p: friend, heroId: friendHero } = await warrior(g);
+      await allies(g, p, friend);
+      await interior.setCityFlags(g, p.id, p.cityId, { allowAlliance: true });
+      const stationed = await send(g, friend, {
+        targetTileId: await cityTile(g, p.cityId),
+        mission: Mission.REINFORCE,
+        troops: { lightCavalry: 100 },
+        heroId: friendHero,
+      });
+      await arrive(g, stationed.armyId);
+      const { p: rival, heroId: rivalHero } = await warrior(g);
+      const attack = await send(g, rival, { targetTileId: valley.id, mission: Mission.ATTACK, troops: { lightCavalry: 100 }, heroId: rivalHero });
+      expect((await armyRow(g, attack.armyId))?.targetPlayerId).toBe(p.id);
+      const pushesToFriend = () => g.pushes(PushCmd.SELF_ARMIES_UPDATE).filter((x) => x.playerIds.includes(friend.id)).length;
+      const before = pushesToFriend();
+
+      await abandonNow(g, p);
+
+      expect((await armyRow(g, attack.armyId))?.targetPlayerId).toBeNull();
+      expect(pushesToFriend()).toBeGreaterThan(before);
+    }));
+
+  it('shows a new city’s owner an attacker still on its way to the tile', () =>
+    game(async (g) => {
+      const { p } = await withSecondCity(g);
+      const tile = await cityTile(g, p.cityId);
+      const { p: rival, heroId } = await warrior(g);
+      const attack = await send(g, rival, { targetTileId: tile, mission: Mission.ATTACK, troops: { lightCavalry: 100 }, heroId });
+      await abandonNow(g, p);
+      const newcomer = await createTestPlayer(g);
+      await armiesNowAimAtCity(g, tile, newcomer.id);
+      expect((await armyRow(g, attack.armyId))?.targetPlayerId).toBe(newcomer.id);
+      expect(lastPush(g, PushCmd.ENEMY_ARMIES_UPDATE, newcomer.id)?.data).toMatchObject({ armys: [expect.anything()] });
+    }));
+
+  it('leaves prestige (for a city never captured), honour and title as they were', () =>
     game(async (g) => {
       const { p } = await withSecondCity(g);
       const { prestige, honor, title, beginner } = await getPlayer(g, p.id);
@@ -335,5 +419,17 @@ describe(completeAbandon.name, () => {
           .from(cities)
           .where(and(eq(cities.id, p.cityId))),
       ).toEqual([]);
+    }));
+
+  it('stops flows acting in a city being abandoned, saying why, and leaves its other cities running', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      await withHero(g, p, other);
+      const f = await newFlow(g, p, { name: 'Mayors', actions: [mayor] });
+      await abandon.abandonCity(g, p.id, p.cityId);
+      await runFlowIn(g, p, f.id);
+      const done = await flowOf(g, p, f.id);
+      expect(done.lastRun?.cities.map((c) => c.cityId)).toEqual([other]);
+      expect(done.lastRun?.skippedCities).toMatchObject([{ cityId: p.cityId, reason: msg('flow.skipAbandoning') }]);
     }));
 });

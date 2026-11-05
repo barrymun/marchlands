@@ -37,6 +37,8 @@ export const REPORT_MESSAGES = {
   oldFormat: [],
   /** body of a "City abandoned" report */
   cityAbandoned: ['name'],
+  /** the same, abandoned soon after capturing it: the prestige taken back (abandonPrestigeBack) */
+  cityAbandonedPrestige: ['name', 'prestige'],
   /** body of an "Abandoning cancelled" report */
   abandonCancelled: ['name'],
   /** body of a "Historic city rebelled" report, as above: the city's name and level */

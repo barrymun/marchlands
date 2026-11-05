@@ -65,11 +65,12 @@ export function usePushSync(enabled: boolean): PushStatus {
   useEffect(() => {
     if (!enabled) return;
     const offs = subscribePushHandlers(push, qc);
-    // pushes sent while the socket was down are lost: on reconnecting, refresh what only pushes keep fresh (the market)
+    // pushes sent while the socket was down are lost: on reconnecting, refresh what only pushes keep fresh (the market, and the
+    // player's cities, so a screen on a city gone meanwhile moves on)
     let wasOpen = false;
     offs.push(
       push.onStatus((s) => {
-        if (s === 'open' && wasOpen) for (const queryKey of allMarketQueries()) void qc.invalidateQueries({ queryKey });
+        if (s === 'open' && wasOpen) for (const queryKey of [...allMarketQueries(), getPlayerQueryKey()]) void qc.invalidateQueries({ queryKey });
         if (s === 'open') wasOpen = true;
         setStatus(s);
       }),

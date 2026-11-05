@@ -191,6 +191,14 @@ describe(flows.saveFlow.name, () => {
       await expectRefused(flows.saveFlow(g, p.id, attack(preset, { [p.cityId]: Array.from({ length: 11 }, (_, i) => i) })), msg('flow.invalidAction'));
     }));
 
+  it('forgets targets under a city that no longer exists', () =>
+    game(async (g) => {
+      const p = await createTestPlayer(g);
+      const preset = await armyPreset(g, p, 'Farm', { militia: 10 });
+      const f = await newFlow(g, p, { name: 'X', actions: [{ type: 'attackTargets', presetId: preset, targets: { [p.cityId]: [5], 999999999: [6] } }] });
+      expect(f.actions).toEqual([expect.objectContaining({ targets: { [p.cityId]: [5] } })]);
+    }));
+
   it("refuses an unknown id, or another player's flow", () =>
     game(async (g) => {
       const p = await createTestPlayer(g);

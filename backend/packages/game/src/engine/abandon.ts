@@ -3,7 +3,7 @@
 import { and, eq, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, Mission, msg } from '@marchlands/core';
+import { abandonPrestigeBack, ArmyDirection, Mission, msg } from '@marchlands/core';
 import { armies, cities } from '@marchlands/db';
 
 import { openCity } from '#/city.ts';
@@ -11,7 +11,7 @@ import { type Ctx } from '#/context.ts';
 import { cityPosition, notifyArmyParties, turnHome } from '#/engine/armies.ts';
 import { loseCityContents, releaseCityTile } from '#/engine/city-loss.ts';
 import { createReport } from '#/engine/reports.ts';
-import { pushCity, pushPlayerInfo } from '#/helpers.ts';
+import { addPrestige, pushCity, pushPlayerInfo } from '#/helpers.ts';
 import { citiesOf, saveCity } from '#/repo.ts';
 
 export const abandonRef = (cityId: number) => `abandon:${cityId}`;
@@ -52,6 +52,8 @@ export async function completeAbandon(ctx: Ctx, cityId: number) {
     return;
   }
 
+  const prestigeBack = abandonPrestigeBack(city, ctx.now);
+  addPrestige(player, -prestigeBack);
   await loseCityContents(ctx, city, player);
   const onTheWay = await ctx.tx
     .select()
@@ -72,7 +74,10 @@ export async function completeAbandon(ctx: Ctx, cityId: number) {
     title: msg('report.title.cityAbandoned'),
     startPos: position,
     targetPos: position,
-    body: { kind: 'text', text: msg('report.cityAbandoned', { name: city.name }) },
+    body: {
+      kind: 'text',
+      text: prestigeBack ? msg('report.cityAbandonedPrestige', { name: city.name, prestige: prestigeBack }) : msg('report.cityAbandoned', { name: city.name }),
+    },
   });
   ctx.push(player.id, PushCmd.CASTLE_UPDATE, { updateType: 1, castleBean: { id: cityId } });
   await pushPlayerInfo(ctx, player);

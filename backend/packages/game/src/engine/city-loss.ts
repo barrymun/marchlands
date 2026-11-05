@@ -4,18 +4,19 @@
 import { and, eq } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { TileType } from '@marchlands/core';
+import { ArmyDirection, TileType } from '@marchlands/core';
 import { armies, heroes, marketOrders, marketShipments, tiles, warPlanWaves } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
 import { armyRef, departRef, homeMarchMs, notifyArmyParties, sendBack } from '#/engine/armies.ts';
+import { dropCityTargets } from '#/engine/flows.ts';
 import { cancelCityResearch } from '#/engine/research.ts';
 import { armiesStationedAt, type CityRow, type PlayerRow, savePlayer } from '#/repo.ts';
 
 /**
  * All a player had in a city they're losing is lost, as nothing is moved to another city: heroes, armies wherever they
  * are, research running there, plan waves, market orders and shipments. Its valleys go free (other cities' troops there
- * head home), and troops other cities have stationed in it go home.
+ * head home), troops other cities have stationed in it go home, and it leaves the player's farming lists.
  */
 export async function loseCityContents(ctx: Ctx, city: CityRow, loser: PlayerRow) {
   const loserId = loser.id;
@@ -41,13 +42,27 @@ export async function loseCityContents(ctx: Ctx, city: CityRow, loser: PlayerRow
     .where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loserId)))
     .returning();
   for (const s of shipments) ctx.unschedule(`shipment:${s.id}`);
+  await dropCityTargets(ctx, loserId, city.id);
+  const sentHome = new Set<number>();
   for (const v of await ctx.tx.select().from(tiles).where(eq(tiles.ownerCityId, city.id))) {
-    for (const s of await armiesStationedAt(ctx, v.id, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, v.id));
+    for (const s of await armiesStationedAt(ctx, v.id, { lock: true })) {
+      await sendBack(ctx, s, await homeMarchMs(ctx, s, v.id));
+      sentHome.add(s.playerId);
+    }
+    // attackers on their way land on a free valley: it's no longer this player they're coming for
+    await ctx.tx
+      .update(armies)
+      .set({ targetPlayerId: null })
+      .where(and(eq(armies.targetTileId, v.id), eq(armies.direction, ArmyDirection.FORWARD)));
     await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, troops: null, state: null, updatedAt: ctx.now }).where(eq(tiles.id, v.id));
   }
-  for (const s of await armiesStationedAt(ctx, city.tileId, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, city.tileId));
-  // whoever those armies were marching on, or stationed with, no longer sees them
-  for (const id of new Set(lostArmies.flatMap((a) => a.targetPlayerId ?? []))) await notifyArmyParties(ctx, { playerId: id, targetPlayerId: null });
+  for (const s of await armiesStationedAt(ctx, city.tileId, { lock: true })) {
+    await sendBack(ctx, s, await homeMarchMs(ctx, s, city.tileId));
+    sentHome.add(s.playerId);
+  }
+  // whoever the lost armies were marching on or stationed with no longer sees them, and those sent home see them heading back
+  for (const id of new Set([...sentHome, ...lostArmies.flatMap((a) => a.targetPlayerId ?? [])]))
+    await notifyArmyParties(ctx, { playerId: id, targetPlayerId: null });
 }
 
 /** A city gone from the map: a historic city stands again as one, whole, for the next to take; any other leaves flat land. */

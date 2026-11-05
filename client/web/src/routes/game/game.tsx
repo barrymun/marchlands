@@ -111,10 +111,11 @@ export function GamePage() {
           <div className="lg:hidden">
             <ActivityDock city={city.data} variant="floating" />
           </div>
-          <CityDialog city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />
+          {/* keyed by city: what's typed never carries over to another city, as when this one is gone */}
+          <CityDialog key={city.data.id} city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />
           {sendOpened && (
             <Suspense fallback={null}>
-              <SendArmyDialog city={city.data} target={sendCity ? ownCityTarget(sendCity) : null} onClose={() => setSendTo(null)} />
+              <SendArmyDialog key={city.data.id} city={city.data} target={sendCity ? ownCityTarget(sendCity) : null} onClose={() => setSendTo(null)} />
             </Suspense>
           )}
         </>

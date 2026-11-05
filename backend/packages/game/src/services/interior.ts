@@ -23,6 +23,7 @@ import { armies, one, tiles } from '@marchlands/db';
 import { cityStats, openOwnCity, viewCity, viewOwnCity } from '#/city.ts';
 import type { Ctx } from '#/context.ts';
 import { cityBean } from '#/dto.ts';
+import { armiesNowAimAtCity } from '#/engine/armies.ts';
 import { activeBuff, assertClean, cleanName, pushCity, pushResources, setBuff, useItemOrGold } from '#/helpers.ts';
 import { saveCity, savePlayer } from '#/repo.ts';
 
@@ -197,6 +198,7 @@ export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targe
   useItemOrGold(ctx, b.player, b.city, TELEPORTER, itemGoldPrice(TELEPORTER) ?? 0);
   await ctx.tx.update(tiles).set({ cityId: null, type: TileType.FLAT, ownerPlayerId: null, updatedAt: ctx.now }).where(eq(tiles.id, b.city.tileId));
   await ctx.tx.update(tiles).set({ cityId, type: TileType.CASTLE, ownerPlayerId: playerId, ownerCityId: null, updatedAt: ctx.now }).where(eq(tiles.id, target));
+  await armiesNowAimAtCity(ctx, target, playerId);
   // occupied valleys are lost when the city moves away
   const valleyIds = b.valleys.map((v) => v.id);
   if (valleyIds.length) await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, updatedAt: ctx.now }).where(inArray(tiles.id, valleyIds));

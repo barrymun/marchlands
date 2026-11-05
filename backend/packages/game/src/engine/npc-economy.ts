@@ -39,7 +39,7 @@ import { type Ctx } from '#/context.ts';
 import { addToCandles, crossedOrders, settleResting } from '#/engine/market.ts';
 import { cityTerms, tradedWithFactions } from '#/engine/reputation.ts';
 import { type StateRuler, stateRulers } from '#/engine/seats.ts';
-import { getCity, saveCity } from '#/repo.ts';
+import { findCity, saveCity } from '#/repo.ts';
 
 const NPC_ECONOMY_KEY = 'npc-economy';
 
@@ -129,8 +129,8 @@ export async function npcTradeTick(ctx: Ctx) {
 async function payStateTributes(ctx: Ctx, rulers: ReadonlyMap<number, StateRuler>, groups: readonly NpcGroup[]) {
   for (const r of rulers.values()) {
     const tribute = Math.round(stateTribute(groups.filter((g) => g.zone === r.zoneId)));
-    const peek = await getCity(ctx, r.cityId);
-    if (peek.stateTribute === tribute) continue;
+    const peek = await findCity(ctx, r.cityId);
+    if (!peek || peek.stateTribute === tribute) continue;
     const b = await openCity(ctx, r.cityId);
     if (!b) continue;
     b.city.stateTribute = tribute;

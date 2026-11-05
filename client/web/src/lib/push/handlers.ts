@@ -24,6 +24,7 @@ import {
   getMarketQuoteQueryKey,
   getMarketShipmentsQueryKey,
   getMarketSummaryQueryKey,
+  getPlansQueryKey,
   getPlayerFlowsQueryKey,
   getPlayerQueryKey,
   type GetPlayerResponse,
@@ -70,6 +71,8 @@ export const PUSH_HANDLERS: { [K in PushCmd]?: Handler<K> } = {
   [PushCmd.CASTLE_UPDATE]: (d, qc) => {
     if (d.updateType === 2) qc.setQueryData(cityKey(d.castleBean.id), d.castleBean);
     invalidate(qc, getPlayerQueryKey());
+    // a city lost takes its orders, shipments and plan waves with it, and leaves the flows; nothing else tells these screens
+    if (d.updateType === 1) invalidate(qc, ...allMarketQueries(), getPlansQueryKey(), getPlayerFlowsQueryKey());
   },
 
   // patch the hero in place (experience, stats, status) so hero cards update instantly

@@ -23,7 +23,7 @@ import { type Db, flows as flowsTable } from '@marchlands/db';
 
 import { type Ctx, runGame } from '#/context.ts';
 import { type FlowRow, flowsOf, planCities, resumeRef, runPart, saveRow, startNext, stopRun, usesAllCities, waitStep } from '#/engine/flows.ts';
-import { citiesOf, getPlayer } from '#/repo.ts';
+import { citiesOf, findCity, getPlayer } from '#/repo.ts';
 
 const MAX_FLOWS = 30;
 const MAX_NAME = 40;
@@ -90,7 +90,14 @@ export async function saveFlow(
       // no army yet is allowed (a farming list started from the map); it is skipped until one is chosen
       if (a.presetId && !(p.misc.armyPresets ?? []).some((x) => x.id === a.presetId)) throw new GameError(msg('flow.chooseArmy'), -99);
       for (const [city, list] of Object.entries(a.targets)) {
-        if (!own.has(city)) throw new GameError(msg('flow.targetsOwnCities'), -99);
+        if (!own.has(city)) {
+          // a city that's gone is forgotten (a restart leaves the flows); one of another player's is refused
+          if (/^[1-9]\d{0,8}$/.test(city) && !(await findCity(ctx, Number(city)))) {
+            delete a.targets[city];
+            continue;
+          }
+          throw new GameError(msg('flow.targetsOwnCities'), -99);
+        }
         if (list.some((t) => !Number.isInteger(t) || t < 0 || t >= tiles)) throw new GameError(msg('common.invalidCoordinates'), -99);
         a.targets[city] = [...new Set(list)];
       }

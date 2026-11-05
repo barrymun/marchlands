@@ -14,7 +14,7 @@ import { checkBeginner } from '#/engine/player.ts';
 import { refreshRankings } from '#/engine/rankings.ts';
 import { tendSeat } from '#/engine/seat-share.ts';
 import { refreshZoneStats } from '#/engine/world.ts';
-import { getCity, getPlayer, getTile, saveCity, savePlayer } from '#/repo.ts';
+import { findCity, getPlayer, getTile, saveCity, savePlayer } from '#/repo.ts';
 import { compactStats } from '#/stats.ts';
 
 export async function rankingsJob(db: Db) {
@@ -55,9 +55,9 @@ export async function draftJob(db: Db) {
     .where(and(isNotNull(cities.historicLevel), eq(cities.draftAuto, true)));
   for (const { id } of seats) {
     await runGame(db, async (ctx) => {
-      const city = await getCity(ctx, id, { lock: true });
-      const level = seatLevelOf(city);
-      if (!level || !city.draftAuto || ctx.now < city.draftNextAt) return;
+      const city = await findCity(ctx, id, { lock: true });
+      const level = city && seatLevelOf(city);
+      if (!city || !level || !city.draftAuto || ctx.now < city.draftNextAt) return;
       if (draftsUsed(city, ctx.now) < BALANCE.historic.draftsPerDay) {
         const target = await pickDraftTarget(ctx, city, level);
         if (!target) return;

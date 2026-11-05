@@ -13,7 +13,7 @@ import {
   getPlayerQueryKey,
   postCitiesAbandonMutation,
 } from '@marchlands/api-client';
-import { BALANCE, BuildingType } from '@marchlands/core';
+import { abandonPrestigeBack, BALANCE, BuildingType } from '@marchlands/core';
 
 import type { LossRow } from '@/components/city-dialog/city-form/abandon-city/types';
 import { countOf, ofCity } from '@/components/city-dialog/city-form/abandon-city/utils';
@@ -21,6 +21,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCommand } from '@/hooks/use-game';
+import { useNow } from '@/hooks/use-now';
 import { duration, fmtExact } from '@/lib/format';
 import { techName } from '@/lib/game-data';
 import { LOSS_TEXT } from '@/lib/tones';
@@ -29,6 +30,7 @@ import { LOSS_TEXT } from '@/lib/tones';
 export function AbandonConfirm({ city, onClose }: { city: CityBean; onClose: () => void }) {
   const { t } = useTranslation(['city-dialog', 'common']);
   const nameId = useId();
+  const now = useNow();
   const [typed, setTyped] = useState('');
   const hasAcademy = city.buildings.some((b) => b.typeId === BuildingType.ACADEMY);
   const armies = useQuery(getArmiesOptions());
@@ -65,6 +67,7 @@ export function AbandonConfirm({ city, onClose }: { city: CityBean; onClose: () 
     ['orders', t('abandon.row.orders'), ofCity(orders.data, city.id).length],
     ['shipments', t('abandon.row.shipments'), ofCity(shipments.data, city.id).length],
     ['waves', t('abandon.row.waves'), waves.length],
+    ['prestige', t('abandon.row.prestige'), abandonPrestigeBack(city, now + BALANCE.abandon.delayMs)],
   ];
   const named = (key: string, label: string, names: string[]): LossRow[] =>
     names.length ? [{ key, label, value: names.join(t('common:list.separator')) }] : [];

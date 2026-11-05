@@ -97,5 +97,6 @@
     "gold": "the city is out of gold",
     "rerolls_one": "stopped after {{count, number}} re-roll",
     "rerolls_other": "stopped after {{count, number}} re-rolls"
-  }
+  },
+  "skipAbandoning": "Being abandoned"
 }

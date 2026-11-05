@@ -288,8 +288,8 @@ export const BALANCE = {
   furloughCentsPerDay: 10,
   truceCooldownMs: 12 * HOUR, // (orig)
   teleportCooldownMs: 12 * HOUR, // (orig)
-  /** (marchlands) abandoning a city: the notice it takes, cancellable until then (real time) */
-  abandon: { delayMs: HOUR },
+  /** (marchlands) abandoning a city: the notice it takes, cancellable until then, and how long after capturing it abandoning takes the capture's prestige back (real time) */
+  abandon: { delayMs: HOUR, prestigeBackMs: 7 * 24 * HOUR },
   /** (marchlands) renaming the lord is free, once per this much real time (orig: a New ID item each time) */
   renameCooldownMs: 24 * HOUR,
   /** (marchlands) changing gender in Player settings: free, once per this much real time */

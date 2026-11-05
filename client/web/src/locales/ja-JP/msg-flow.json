@@ -79,5 +79,6 @@
     "cap": "上限の{{gold}}金に達しました",
     "gold": "都市の金が足りません",
     "rerolls_other": "{{count, number}}回入れ替えたので停止しました"
-  }
+  },
+  "skipAbandoning": "放棄の手続き中です"
 }

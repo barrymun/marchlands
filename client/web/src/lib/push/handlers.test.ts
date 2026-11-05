@@ -10,6 +10,8 @@ import {
   getMarketHistoryQueryKey,
   getMarketOrdersMineQueryKey,
   getMarketSummaryQueryKey,
+  getPlansQueryKey,
+  getPlayerFlowsQueryKey,
   getPlayerQueryKey,
   type GetPlayerResponse,
   getReportsUnreadQueryKey,
@@ -20,6 +22,7 @@ import {
 
 import { builtAt } from '@/lib/build-events';
 import { PUSH_HANDLERS, subscribePushHandlers } from '@/lib/push/handlers';
+import { allMarketQueries } from '@/lib/query-keys';
 import { clockOffset, noteServerTime } from '@/lib/server-clock';
 
 const toast = vi.hoisted(() => Object.assign(vi.fn(), { success: vi.fn(), warning: vi.fn(), info: vi.fn() }));
@@ -102,6 +105,16 @@ describe('invalidation', () => {
     expect(toast.warning).not.toHaveBeenCalled();
     handle(PushCmd.ENEMY_ARMIES_UPDATE, { armys: [{}, {}] }, qc);
     expect(toast.warning).toHaveBeenCalledWith('2 hostile armies approaching');
+  });
+});
+
+describe(PushCmd.CASTLE_UPDATE, () => {
+  it('a city lost refreshes the player, their market, plans and flows', () => {
+    const qc = new QueryClient();
+    const spy = vi.spyOn(qc, 'invalidateQueries');
+    PUSH_HANDLERS[PushCmd.CASTLE_UPDATE]?.({ updateType: 1, castleBean: { id: 7 } }, qc);
+    const keys = spy.mock.calls.map(([f]) => f?.queryKey);
+    expect(keys).toEqual(expect.arrayContaining([getPlayerQueryKey(), getPlansQueryKey(), getPlayerFlowsQueryKey(), ...allMarketQueries()]));
   });
 });
 

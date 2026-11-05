@@ -359,22 +359,40 @@ export async function planCities(
   playerId: number,
   f: Pick<FlowRow, 'cities' | 'cityOverride' | 'actions'>,
 ): Promise<{ cities: number[]; skipped: FlowSkippedCity[] }> {
-  const own = await citiesOf(ctx, playerId);
+  const cityRows = await citiesOf(ctx, playerId);
+  // a city being abandoned sends nothing more out: an army still away when its hour ends is lost
+  const own = cityRows.filter((c) => !c.abandonAt);
   const wanted = citiesWanted(f);
-  if (wanted === 'all' && f.actions.some((a) => a.type === 'hireHeroes')) return { cities: own.map((c) => c.id), skipped: [] };
+  const leaving = cityRows
+    .filter((c) => c.abandonAt && (wanted === 'all' || wanted.includes(c.id)))
+    .map((c) => ({ cityId: c.id, cityName: c.name, reason: msg('flow.skipAbandoning') }));
+  if (wanted === 'all' && f.actions.some((a) => a.type === 'hireHeroes')) return { cities: own.map((c) => c.id), skipped: leaving };
   if (wanted === 'all') {
     const rows = await ctx.tx.selectDistinct({ cityId: heroesTable.cityId }).from(heroesTable).where(eq(heroesTable.playerId, playerId));
     const withHero = new Set(rows.map((r) => r.cityId));
     return {
       cities: own.filter((c) => withHero.has(c.id)).map((c) => c.id),
-      skipped: own.filter((c) => !withHero.has(c.id)).map((c) => ({ cityId: c.id, cityName: c.name, reason: msg('flow.skipNoHero') })),
+      skipped: [...own.filter((c) => !withHero.has(c.id)).map((c) => ({ cityId: c.id, cityName: c.name, reason: msg('flow.skipNoHero') })), ...leaving],
     };
   }
-  return { cities: [...new Set(wanted)].filter((id) => own.some((c) => c.id === id)), skipped: [] };
+  return { cities: [...new Set(wanted)].filter((id) => own.some((c) => c.id === id)), skipped: leaving };
 }
 
 /** Why a run has no cities. */
 const noCitiesReason = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.noOwnCities');
+
+/** A player lost a city: its list of targets goes from their flows, or saving them would be refused for naming a city not theirs. */
+export async function dropCityTargets(ctx: Ctx, playerId: number, cityId: number) {
+  const key = String(cityId);
+  for (const f of await ctx.tx.select().from(flowsTable).where(eq(flowsTable.playerId, playerId)).for('update')) {
+    if (!f.actions.some((a) => a.type === 'attackTargets' && key in a.targets)) continue;
+    const actions = f.actions.map((a) =>
+      a.type === 'attackTargets' ? { ...a, targets: Object.fromEntries(Object.entries(a.targets).filter(([city]) => city !== key)) } : a,
+    );
+    await ctx.tx.update(flowsTable).set({ actions }).where(eq(flowsTable.id, f.id));
+    ctx.push(playerId, PushCmd.FLOW_UPDATE, { flowId: f.id, status: f.status });
+  }
+}
 
 /**
  * A barbarian city was captured: take its tile off every flow's attack targets (any lord's), so no
@@ -401,10 +419,10 @@ export async function dropCapturedTarget(ctx: Ctx, tileId: number) {
 
 /**
  * Run actions [from, to) (no waits among them) in each of the run's cities, each city in a savepoint:
- * a failure rolls back that city's part. Cities the lord no longer holds are left out.
+ * a failure rolls back that city's part. Cities the lord no longer holds, or is abandoning, are left out.
  */
 export async function runPart(ctx: Ctx, playerId: number, f: FlowRow, from: number, to: number): Promise<FlowCityResult[]> {
-  const names = new Map((await citiesOf(ctx, playerId)).map((c) => [c.id, c.name]));
+  const names = new Map((await citiesOf(ctx, playerId)).filter((c) => !c.abandonAt).map((c) => [c.id, c.name]));
   const out: FlowCityResult[] = [];
   for (const cityId of f.runCities) {
     if (!names.has(cityId)) continue;

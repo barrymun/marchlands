@@ -158,7 +158,8 @@ export async function openCity(ctx: Ctx, cityId: number): Promise<CityBundle | n
     const peek = await findCity(ctx, cityId);
     if (!peek) return null;
     const player = await getPlayer(ctx, peek.playerId, { lock: true });
-    const city = await getCity(ctx, cityId, { lock: true });
+    const city = await findCity(ctx, cityId, { lock: true });
+    if (!city) return null; // gone while we waited
     if (city.playerId !== player.id) continue; // ownership changed while we waited
     const b = await loadBundle(ctx, city, player);
     await settleAndReport(ctx, b);

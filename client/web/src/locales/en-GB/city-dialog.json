@@ -49,7 +49,9 @@
       "valleys": "Valleys released",
       "orders": "Market orders",
       "shipments": "Shipments on the road",
-      "waves": "Unsent plan waves"
-    }
+      "waves": "Unsent plan waves",
+      "prestige": "Prestige taken back"
+    },
+    "prestigeNote": "You captured this city recently: abandoning it before {{date}} takes back the {{prestige}} prestige that gave you."
   }
 }

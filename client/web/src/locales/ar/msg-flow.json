@@ -169,5 +169,6 @@
     "rerolls_few": "توقف بعد {{count, number}} إعادات سحب",
     "rerolls_many": "توقف بعد {{count, number}} إعادةَ سحب",
     "rerolls_other": "توقف بعد {{count, number}} إعادة سحب"
-  }
+  },
+  "skipAbandoning": "يجري التخلي عنها"
 }

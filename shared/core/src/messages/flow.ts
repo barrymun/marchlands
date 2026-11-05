@@ -102,4 +102,6 @@ export const FLOW_MESSAGES = {
 
   /** a city "all cities" leaves out (FlowSkippedCity.reason) */
   skipNoHero: [],
+  /** a run leaves out a city being abandoned */
+  skipAbandoning: [],
 } as const;

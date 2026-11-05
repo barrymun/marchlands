@@ -143,7 +143,9 @@ export async function payFeeShares(ctx: Ctx, buyerCityId: number, gold: number) 
   const seats = await ctx.tx
     .select({ id: cities.id, playerId: cities.playerId, tileId: cities.tileId, historicLevel: cities.historicLevel })
     .from(cities)
-    .where(inArray(cities.historicLevel, [16, 18]));
+    .where(inArray(cities.historicLevel, [16, 18]))
+    // held until the shipments are in: a seat going meanwhile mustn't fail this trade
+    .for('key share');
   for (const s of seats) {
     const share =
       s.historicLevel === 18 ? BALANCE.historic.feeShare.atlantis : stateOf(s.tileId) === stateOf(buyer.tileId) ? BALANCE.historic.feeShare.capital : 0;

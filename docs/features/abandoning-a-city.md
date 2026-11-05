@@ -58,10 +58,10 @@
 
 - **A player always keeps at least one regular city** (the maintainer, 2026-11-05): their last city can't be abandoned, and their last city can't be a historic city, as a rival can capture one and a regular city can't be captured. So abandoning a regular city is refused unless another regular city remains that isn't itself being abandoned. Checked again when the hour is up; with none left, it's cancelled and the player told. This is what stops a seat being taken from ever leaving a player with no city. A barbarian city the player captured counts as regular: it has no loyalty once it's theirs.
 - **Any other city may go,** the first included, and a held seat whenever a regular city remains. A seat stands again whole, with full loyalty and nobody holding it, as when its holder restarts.
-- **No cooldown:** with flat land, dropping a city gains nothing to repeat.
+- **No cooldown, but a quick abandon takes back the capture's prestige** (the maintainer, 2026-11-05). Capturing gives 1000 × the city's level in prestige, so capturing, abandoning to free the slot and capturing again would farm it, on a barbarian city after barbarian city and on a historic city over and over. Abandoning a city within 7 real days of capturing it (`BALANCE.abandon.prestigeBackMs`, `abandonPrestigeBack`) takes that back, never below 0; the settings and the confirmation say so, and the report. A cooldown on capturing was rejected: it would stop the very thing this is for, freeing a slot to capture Atlantis. The medals and the stock a capture gives aren't taken back, and each barbarian city captured and abandoned is still gone from the map.
 - **No item or gold to skip the hour.**
 - **Attackers on their way** turn back on arrival (`army.nothingToAttack`); on a seat they carry on against the unheld city.
-- **Prestige, honour and title stay.** Population and rankings follow from the next rankings job. A seat's tribute, state tribute and titles go with the city row. Reports and mail keep the city's name, as for a lost seat. **Beginner protection isn't reset:** starting again is what restarting is for.
+- **Prestige (but for the above), honour and title stay.** Population and rankings follow from the next rankings job. Flows act no more in a city being abandoned (`planCities`, `runPart`): a repeating farming list would otherwise lose armies with no warning. A city lost leaves the player's farming lists (`dropCityTargets`). A seat's tribute, state tribute and titles go with the city row. Reports and mail keep the city's name, as for a lost seat. **Beginner protection isn't reset:** starting again is what restarting is for.
 - **Capture of a seat being abandoned** (`takeSeat`) cancels it: it's the winner's now, and nothing of it is deleted beyond what capture does. A restart deletes the city and its timed events, leaving nothing to do.
 
 ### The warning
@@ -94,6 +94,10 @@ Five went on 2026-11-05 with what caused them:
 - **Docs:** a `deviations.md` entry *(design change)*, `BALANCE.abandon`, text in every locale.
 - **Teleporting during the hour** is allowed: the city still goes when it's up, from where it then stands.
 - **Tests:** `services/abandon.db.test.ts` for each row of the table, each refusal and each early end, with an army in every state; the routes in the API's `cities/interior.db.test.ts`; `abandon-city/utils.test.ts`.
+
+## What a review found, 2026-11-05
+
+An independent read of the code, all fixed then: the capture farm above; flows that couldn't be saved naming a city lost (`dropCityTargets`, and `saveFlow` forgets a city that's gone); a taken seat's queues stopping when its old holder restarted (their events pass to the winner in `takeSeat`); an attacker landing unseen on a city that appeared on the tile (`armiesNowAimAtCity`); a seat deleted mid-job failing that job; and screens left stale (friends' armies, market, plans, attackers bound for a released valley, a push missed while offline, dialogs carrying what was typed to another city).
 
 ## To watch
 

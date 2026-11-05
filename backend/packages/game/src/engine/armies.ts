@@ -1,7 +1,7 @@
 // Army helpers shared with combat and flows: event references, positions, notifying both sides,
 // marching home and the armies a lord can see.
 
-import { asc, eq, or } from 'drizzle-orm';
+import { and, asc, eq, ne, or } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
 import {
@@ -69,6 +69,19 @@ export async function notifyArmyParties(ctx: Ctx, a: Pick<ArmyRow, 'playerId' | 
     ctx.push(id, PushCmd.FRIEND_ARMIES_UPDATE, { armys: v.friend });
     ctx.push(id, PushCmd.ENEMY_ARMIES_UPDATE, { armys: v.enemy });
   }
+}
+
+/**
+ * A city has just appeared on a tile: armies of others on their way there now march on its owner, who sees them coming. An
+ * attacker sent at a city that has since gone lands on whatever stands there by then.
+ */
+export async function armiesNowAimAtCity(ctx: Ctx, tileId: number, ownerId: number) {
+  const aimed = await ctx.tx
+    .update(armies)
+    .set({ targetPlayerId: ownerId })
+    .where(and(eq(armies.targetTileId, tileId), eq(armies.direction, ArmyDirection.FORWARD), ne(armies.playerId, ownerId)))
+    .returning({ id: armies.id });
+  if (aimed.length) await notifyArmyParties(ctx, { playerId: ownerId, targetPlayerId: null });
 }
 
 /** Turn an army around towards its home city. */
