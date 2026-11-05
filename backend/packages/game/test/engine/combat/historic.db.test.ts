@@ -32,7 +32,7 @@ import { armies as armyRows, heroes as heroRows } from '@marchlands/db';
 
 import { processArmy } from '#/engine/combat.ts';
 import { ship } from '#/engine/market.ts';
-import { admin, armies, buildings, heroes, interior, market, plans, player, research, world } from '#/index.ts';
+import { abandon, admin, armies, buildings, heroes, interior, market, plans, player, research, world } from '#/index.ts';
 import { getCity, getHero, getPlayer, getTile, saveCity, saveTile } from '#/repo.ts';
 import { arrive, battleOf, reportsOf, scoutOf, send, tileNear, warrior } from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
@@ -387,6 +387,25 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       expect(g.pushes(PushCmd.RESEARCH_UPDATE).at(-1)?.data).toEqual({ castleId: cityId, typeId: TechType.AGRICULTURE, endTime: 0 });
       // they can start it again in their other city
       await research.startResearch(g, p.id, p.cityId, TechType.AGRICULTURE);
+    }));
+
+  it('tells its old holder the city is lost, and calls off abandoning it', () =>
+    game(async (g) => {
+      const { p, cityId, attack } = await heldSeat(g);
+      // started a moment before it lands, so its hour is still running
+      await attack(async (at) => {
+        g.advance(at - g.now - 1_000);
+        await abandon.abandonCity(g, p.id, cityId);
+        await saveCity(g, { ...(await getCity(g, cityId)), loyalty: 3, loyaltyAt: at });
+      });
+      expect((await getCity(g, cityId)).abandonAt).toBe(0);
+      expect(g.events('city.abandon')).toEqual([]);
+      expect(
+        g
+          .pushes(PushCmd.CASTLE_UPDATE)
+          .filter((x) => x.playerIds.includes(p.id))
+          .at(-1)?.data,
+      ).toEqual({ updateType: 1, castleBean: { id: cityId } });
     }));
 
   it('tells whoever a lost army was marching on that it is gone', () =>

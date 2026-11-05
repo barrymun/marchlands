@@ -3,6 +3,7 @@
 
 import 'i18next';
 
+import type abandonNotice from '@/locales/en-GB/abandon-notice.json';
 import type activeEffects from '@/locales/en-GB/active-effects.json';
 import type activityDock from '@/locales/en-GB/activity-dock.json';
 import type armiesPanel from '@/locales/en-GB/armies-panel.json';
@@ -123,6 +124,7 @@ declare module 'i18next' {
       'msg-report': typeof msgReport;
       'msg-army': typeof msgArmy;
       'msg-alliance': typeof msgAlliance;
+      'abandon-notice': typeof abandonNotice;
       'active-effects': typeof activeEffects;
       'activity-dock': typeof activityDock;
       'armies-panel': typeof armiesPanel;

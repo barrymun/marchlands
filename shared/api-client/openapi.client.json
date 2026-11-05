@@ -489,6 +489,9 @@
               "city.draftNotTarget",
               "city.draftedToday",
               "city.nothingToDraft",
+              "city.abandonKeepRegular",
+              "city.abandonAlready",
+              "city.abandonNotRunning",
               "city.recallTroopsFirst",
               "city.foreignTroops",
               "city.notFreeFlat",
@@ -546,6 +549,8 @@
               "report.title.cityAttacked",
               "report.title.attackRepelled",
               "report.title.seatLost",
+              "report.title.cityAbandoned",
+              "report.title.abandonCancelled",
               "report.title.seatRebelled",
               "report.title.draft",
               "report.title.reinforcementsFought",
@@ -556,6 +561,8 @@
               "report.title.troopsDeserted",
               "report.notFound",
               "report.oldFormat",
+              "report.cityAbandoned",
+              "report.abandonCancelled",
               "report.seatRebelled",
               "report.cityFounded",
               "army.planNotFound",
@@ -1446,6 +1453,10 @@
             "type": "number",
             "description": "when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)"
           },
+          "abandonAt": {
+            "type": "number",
+            "description": "a city being abandoned: when its hour is up and it goes (0: not being abandoned)"
+          },
           "seatLoyalty": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -1481,6 +1492,7 @@
           "draftsUsed",
           "draftedToday",
           "draftNextAt",
+          "abandonAt",
           "seatLoyalty",
           "createdAt"
         ]
@@ -4936,6 +4948,18 @@
           "fieldId",
           "x",
           "y"
+        ]
+      },
+      "CityAbandonResultInput": {
+        "type": "object",
+        "properties": {
+          "abandonAt": {
+            "type": "number",
+            "description": "when its hour is up and it goes"
+          }
+        },
+        "required": [
+          "abandonAt"
         ]
       },
       "DraftResultInput": {
@@ -12809,6 +12833,9 @@
               "city.draftNotTarget",
               "city.draftedToday",
               "city.nothingToDraft",
+              "city.abandonKeepRegular",
+              "city.abandonAlready",
+              "city.abandonNotRunning",
               "city.recallTroopsFirst",
               "city.foreignTroops",
               "city.notFreeFlat",
@@ -12866,6 +12893,8 @@
               "report.title.cityAttacked",
               "report.title.attackRepelled",
               "report.title.seatLost",
+              "report.title.cityAbandoned",
+              "report.title.abandonCancelled",
               "report.title.seatRebelled",
               "report.title.draft",
               "report.title.reinforcementsFought",
@@ -12876,6 +12905,8 @@
               "report.title.troopsDeserted",
               "report.notFound",
               "report.oldFormat",
+              "report.cityAbandoned",
+              "report.abandonCancelled",
               "report.seatRebelled",
               "report.cityFounded",
               "army.planNotFound",
@@ -13777,6 +13808,10 @@
             "type": "number",
             "description": "when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)"
           },
+          "abandonAt": {
+            "type": "number",
+            "description": "a city being abandoned: when its hour is up and it goes (0: not being abandoned)"
+          },
           "seatLoyalty": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -13812,6 +13847,7 @@
           "draftsUsed",
           "draftedToday",
           "draftNextAt",
+          "abandonAt",
           "seatLoyalty",
           "createdAt"
         ],
@@ -17357,6 +17393,19 @@
           "fieldId",
           "x",
           "y"
+        ],
+        "additionalProperties": false
+      },
+      "CityAbandonResult": {
+        "type": "object",
+        "properties": {
+          "abandonAt": {
+            "type": "number",
+            "description": "when its hour is up and it goes"
+          }
+        },
+        "required": [
+          "abandonAt"
         ],
         "additionalProperties": false
       },
@@ -27611,6 +27660,116 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CityMoveResult"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cities/{cityId}/abandon": {
+      "post": {
+        "operationId": "postCitiesAbandon",
+        "summary": "(marchlands) Start abandoning a city: after a real hour it and all the player has in it are gone. Refused unless a regular city would remain",
+        "tags": [
+          "city"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "path",
+            "name": "cityId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CityAbandonResult"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteCitiesAbandon",
+        "summary": "(marchlands) Keep a city being abandoned",
+        "tags": [
+          "city"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "path",
+            "name": "cityId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null"
                 }
               }
             }

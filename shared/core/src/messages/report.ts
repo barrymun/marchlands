@@ -18,6 +18,10 @@ export const REPORT_MESSAGES = {
   'title.attackRepelled': [],
   /** a player's historic city taken by the attacker who brought its loyalty to 0 */
   'title.seatLost': [],
+  /** a player's city, abandoned once its hour was up */
+  'title.cityAbandoned': [],
+  /** abandoning a city was called off when its hour was up: it was the last regular city left */
+  'title.abandonCancelled': [],
   /** a player's historic city rose up (no longer happens: kept for the reports from before 2026-11-05) */
   'title.seatRebelled': [],
   /** a held historic city drafted troops from a barbarian city */
@@ -31,6 +35,10 @@ export const REPORT_MESSAGES = {
   notFound: [],
   /** a stored report that no longer matches the report format */
   oldFormat: [],
+  /** body of a "City abandoned" report */
+  cityAbandoned: ['name'],
+  /** body of an "Abandoning cancelled" report */
+  abandonCancelled: ['name'],
   /** body of a "Historic city rebelled" report, as above: the city's name and level */
   seatRebelled: ['name', 'level'],
   /** body of a "New city founded" report */

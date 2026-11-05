@@ -141,6 +141,7 @@ export const CityBean = z
     draftsUsed: z.number().int().describe('drafts a historic city has made today (UTC)'),
     draftedToday: z.array(z.number().int()).describe('the tiles a historic city has drafted from today (UTC): each at most once a day'),
     draftNextAt: Ms.describe('when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)'),
+    abandonAt: Ms.describe('a city being abandoned: when its hour is up and it goes (0: not being abandoned)'),
     seatLoyalty: z.number().int().describe("a held historic city's loyalty now: rivals' wins take it down, and at 0 it's lost"),
     createdAt: Ms,
   })

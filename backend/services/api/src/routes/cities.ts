@@ -5,6 +5,7 @@ import {
   AvailableBuildingsQuery,
   BuildingBean,
   BuildingUpgradeInfo,
+  CityAbandonResult,
   CityBean,
   CityMoveResult,
   CityPositionParams,
@@ -41,7 +42,7 @@ import {
   TroopCountBody,
   UpdateCityBody,
 } from '@marchlands/contracts';
-import { buildings, historic, interior, research, training } from '@marchlands/game';
+import { abandon, buildings, historic, interior, research, training } from '@marchlands/game';
 import { authenticate, doc, game, tags, type ZApp, zCityParams } from '#/http.ts';
 
 /**
@@ -102,6 +103,21 @@ export default async function cityRoutes(app: ZApp) {
       body: MoveCityBody,
     }),
     (req) => game(req, (ctx, pid) => interior.moveCity(ctx, pid, req.params.cityId, req.body.targetTileId)),
+  );
+  app.post(
+    '/cities/:cityId/abandon',
+    s(
+      tags.city,
+      '(marchlands) Start abandoning a city: after a real hour it and all the player has in it are gone. Refused unless a regular city would remain',
+      CityAbandonResult,
+      {
+        params: zCityParams,
+      },
+    ),
+    (req) => game(req, (ctx, pid) => abandon.abandonCity(ctx, pid, req.params.cityId)),
+  );
+  app.delete('/cities/:cityId/abandon', s(tags.city, '(marchlands) Keep a city being abandoned', Empty, { params: zCityParams }), (req) =>
+    game(req, (ctx, pid) => abandon.cancelAbandon(ctx, pid, req.params.cityId)),
   );
   app.post(
     '/cities/:cityId/draft',

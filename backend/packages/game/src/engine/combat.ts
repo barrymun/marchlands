@@ -74,12 +74,14 @@ import {
   valleyGarrison,
   WAR_ENSIGN_DESC,
 } from '@marchlands/core';
-import { armies, cities, heroes, marketOrders, marketShipments, one, tiles, warPlanWaves } from '@marchlands/db';
+import { armies, cities, heroes, one, tiles } from '@marchlands/db';
 
 import { type CityBundle, openCity, viewCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
 import { fortBean, troopBean } from '#/dto.ts';
-import { armyRef, cityPosition, departRef, homeMarchMs, notifyArmyParties, sendBack, tileOwner } from '#/engine/armies.ts';
+import { abandonRef } from '#/engine/abandon.ts';
+import { armyRef, cityPosition, homeMarchMs, notifyArmyParties, sendBack, tileOwner } from '#/engine/armies.ts';
+import { loseCityContents } from '#/engine/city-loss.ts';
 import { dropCapturedTarget } from '#/engine/flows.ts';
 import { heroSlots, pushHero } from '#/engine/heroes.ts';
 import { plunderNpc } from '#/engine/npc-economy.ts';
@@ -87,14 +89,12 @@ import { initialCity, isProtected } from '#/engine/player.ts';
 import { isFriendly, relationBetween } from '#/engine/relations.ts';
 import { createReport } from '#/engine/reports.ts';
 import { addStanding } from '#/engine/reputation.ts';
-import { cancelCityResearch } from '#/engine/research.ts';
 import { ruledZones } from '#/engine/seats.ts';
 import { activeBuff, addItem, addPrestige, gainResources, pushCity, pushPlayerInfo, pushResources } from '#/helpers.ts';
 import {
   armiesStationedAt,
   type ArmyRow,
   citiesOf,
-  type CityRow,
   findCity,
   getArmy,
   getHero,
@@ -997,51 +997,15 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
 }
 
 /**
- * What goes with a held historic city when a rival takes it: all its old holder had in it is lost, as nothing is moved
- * to another city (docs/features/historical-cities.md): heroes, armies wherever they are, research running there, plan
- * waves, market orders and shipments. Its valleys go free (other cities' troops there head home), and troops other cities have stationed in it go home.
- */
-async function clearSeat(ctx: Ctx, city: CityRow, loser: PlayerRow) {
-  const loserId = loser.id;
-  cancelCityResearch(ctx, loser, city.id);
-  await savePlayer(ctx, loser);
-  const lostArmies = await ctx.tx
-    .delete(armies)
-    .where(and(eq(armies.cityId, city.id), eq(armies.playerId, loserId)))
-    .returning();
-  for (const a of lostArmies) {
-    ctx.unschedule(armyRef(a.id));
-    ctx.unschedule(departRef(a.id));
-  }
-  await ctx.tx.delete(heroes).where(and(eq(heroes.cityId, city.id), eq(heroes.playerId, loserId)));
-  await ctx.tx.delete(warPlanWaves).where(and(eq(warPlanWaves.cityId, city.id), eq(warPlanWaves.playerId, loserId)));
-  const orders = await ctx.tx
-    .delete(marketOrders)
-    .where(and(eq(marketOrders.cityId, city.id), eq(marketOrders.playerId, loserId)))
-    .returning();
-  if (orders.length) ctx.broadcast(PushCmd.MARKET_UPDATE, { resTypes: [...new Set(orders.map((o) => o.resType))] });
-  const shipments = await ctx.tx
-    .delete(marketShipments)
-    .where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loserId)))
-    .returning();
-  for (const s of shipments) ctx.unschedule(`shipment:${s.id}`);
-  for (const v of await ctx.tx.select().from(tiles).where(eq(tiles.ownerCityId, city.id))) {
-    for (const s of await armiesStationedAt(ctx, v.id, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, v.id));
-    await ctx.tx.update(tiles).set({ ownerCityId: null, ownerPlayerId: null, troops: null, state: null, updatedAt: ctx.now }).where(eq(tiles.id, v.id));
-  }
-  for (const s of await armiesStationedAt(ctx, city.tileId, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, city.tileId));
-  return lostArmies;
-}
-
-/**
  * A held historic city taken (docs/features/historical-cities.md): it becomes the winner's, whole but for its troops
  * (lost in the battle; any kept home go too), under a new truce and at full loyalty, drafting by itself. All its old
- * holder had in it is lost (clearSeat), and armies already marching on it now march on the winner.
+ * holder had in it is lost (loseCityContents), and armies already marching on it now march on the winner.
  */
 async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: number) {
   const city = def.city;
   const loser = def.player;
-  const lostArmies = await clearSeat(ctx, city, loser);
+  await loseCityContents(ctx, city, loser);
+  ctx.unschedule(abandonRef(city.id));
   await ctx.tx
     .update(armies)
     .set({ targetPlayerId: winner.id })
@@ -1054,6 +1018,7 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
     truceUntil: ctx.now + BALANCE.historic.truceMs,
     loyalty: BALANCE.historic.loyalty,
     loyaltyAt: ctx.now,
+    abandonAt: 0,
     // its new holder starts drafting by itself, the default, from the next part of the day; the drafts made today
     // still count against the seat
     draftAuto: true,
@@ -1064,10 +1029,9 @@ async function takeSeat(ctx: Ctx, def: CityBundle, winner: PlayerRow, level: num
   addPrestige(winner, 1000 * level);
   await savePlayer(ctx, winner);
   pushCity(ctx, await viewCity(ctx, city.id));
+  ctx.push(loser.id, PushCmd.CASTLE_UPDATE, { updateType: 1, castleBean: { id: city.id } });
   await pushPlayerInfo(ctx, loser);
   await notifyArmyParties(ctx, { playerId: loser.id, targetPlayerId: winner.id });
-  // whoever those armies were marching on, or stationed with, no longer sees them
-  for (const id of new Set(lostArmies.flatMap((a) => a.targetPlayerId ?? []))) await notifyArmyParties(ctx, { playerId: id, targetPlayerId: null });
 }
 
 async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {

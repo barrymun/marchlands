@@ -172,6 +172,7 @@ export function cityBean(b: CityBundle, now: number): CityBean {
     draftsUsed: draftsUsed(c, now),
     draftedToday: draftedToday(c, now),
     draftNextAt: c.draftNextAt,
+    abandonAt: c.abandonAt,
     seatLoyalty: c.historicLevel ? seatLoyalty(c.loyalty, c.loyaltyAt, now).loyalty : c.loyalty,
     createdAt: c.createdAt,
   };

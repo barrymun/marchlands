@@ -9,7 +9,7 @@ Design documents for large planned features, kept while they are worked out and 
 
 | Document | Feature | Status |
 |---|---|---|
-| [abandoning-a-city.md](abandoning-a-city.md) | Giving up a city, above all to free a city slot: an hour's notice that can be cancelled, everything in it lost behind a very clear warning, its valleys released and the tile flat land again | Designed; not built |
+| [abandoning-a-city.md](abandoning-a-city.md) | Giving up a city, above all to free a city slot: an hour's notice that can be cancelled, everything in it lost behind a very clear warning, its valleys released and the tile flat land again | Built |
 | [gear-animations.md](gear-animations.md) | Hero gear icons that move by level (glinting stones, pulsing glows, level 10's twinkling backdrop), five pieces that move by themselves (a cape, wings, a nodding mount, a plume, swinging pendants), and bursts when a star or a level is added | Built |
 | [item-art.md](item-art.md) | Item icons: one pixel-art icon per item, its steps showing as more or finer, shown wherever items are listed | Built |
 | [heroes-page.md](heroes-page.md) | Heroes as a page of their own: a roster beside a character sheet with a pixel-art figure wearing its gear, the Inn beside the heroes, the gear a tab | Phases 1–2 built (the page, the roster and character sheet); famous heroes next |

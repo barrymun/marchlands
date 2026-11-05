@@ -26,6 +26,10 @@ export const CITY_MESSAGES = {
   /** a seat drafts from each city at most once a day */
   draftedToday: [],
   nothingToDraft: [],
+  /** abandoning: a player always keeps a regular city, as a historic one can be taken from them */
+  abandonKeepRegular: [],
+  abandonAlready: [],
+  abandonNotRunning: [],
   recallTroopsFirst: [],
   foreignTroops: [],
   notFreeFlat: [],

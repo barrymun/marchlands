@@ -1,18 +1,18 @@
 # Abandoning a city
 
-**Status:** designed 2026-11-05, the maintainer's choices made. Nothing built. TODO.md item: *Abandoning a city.*
+**Status:** built 2026-11-05 (the server, the client and the decisions below).
 
 **The aim:** a player can give up a city they no longer want, above all to free a city slot. Prince, the last title, allows 10 cities (`maxCitiesFor`, `shared/core/src/titles.ts`), so a player holding 10 can break Atlantis and leave it at 0 loyalty but never capture it (`canHoldHistoric`, `engine/combat.ts`). Found simulating that attack, 2026-11-03 ([battle-sims/historic-cities.md](../battle-sims/historic-cities.md)).
 
 ## Where things stand
 
-- **A player can't give up a city.** The only ways a city leaves a player today:
+- **Before this, a player couldn't give up a city.** The other ways a city leaves a player:
 
   | Path | Where | The tile afterwards | What it does with the rest |
   |---|---|---|---|
   | Teleport | `moveCity`, `services/interior.ts` | flat land | moves the whole city; refused with armies out or other players' troops there; valleys go free |
   | Restart or deleted player | `restartPlayer`, `services/player.ts` | flat land, a seat a whole historic city | deletes everything; other players' armies go home |
-  | A seat taken by a rival | `takeSeat` and `clearSeat`, `engine/combat.ts` | stays a city, the winner's | heroes, armies, research running there, plan waves, orders and shipments lost; valleys go free; other cities' troops go home; troops gone |
+  | A seat taken by a rival | `takeSeat`, `engine/combat.ts`, and `loseCityContents`, `engine/city-loss.ts` | stays a city, the winner's | heroes, armies, research running there, plan waves, orders and shipments lost; valleys go free; other cities' troops go home; troops gone |
 
 - **Tiles keep their level** when a city leaves them: a captured level 10 barbarian city teleported away leaves a level 10 flat. Nothing brings a barbarian city back once it's captured, so their number only falls.
 - **Player cities can't be captured** (deviations.md), only plundered. Only a seat can change hands.
@@ -31,7 +31,7 @@
 **By the maintainer, 2026-11-05:**
 
 - **Abandoning a city loses what's in it, on purpose.** Its heroes, its troops, its resources, its armies on the march, its market orders and its shipments are all gone, with nothing moved to another city or refunded, "so the player really needs to consider what they are doing". The warning has to make that very clear.
-- **A seat taken by a rival loses everything in it too:** its old holder's heroes, armies, plan waves, market orders and shipments and the research running there, with nothing moved to another city (built 2026-11-05, `clearSeat`). The two rules are the same, so a player can't keep more by being taken than by leaving.
+- **A seat taken by a rival loses everything in it too:** its old holder's heroes, armies, plan waves, market orders and shipments and the research running there, with nothing moved to another city (built 2026-11-05, `loseCityContents`). The two rules are the same, so a player can't keep more by being taken than by leaving.
 - **Research running in the city is cancelled, with no refund** (the maintainer, 2026-11-05): the player starts it again in another city. Its level stays. Left running, it couldn't be cancelled or sped up, both needing the city, and its tech stayed blocked until it finished.
 - **Its valleys are released.**
 - **The tile becomes flat land,** of the level it had, as teleporting and restarting leave it. Not a barbarian city as in the original: that needs a job to remove it overnight, and lets a player build a level 10 target beside them, with medals for each win and 10,000 prestige for each capture. It can be added later without undoing anything.
@@ -48,11 +48,11 @@
 | Unsent plan waves from it | deleted (`war_plan_waves` cascades) |
 | Market orders and shipments | deleted, the escrow and the goods on the road with them |
 | Valleys | go free, a fresh garrison (`troops` and `state` cleared), any of the player's troops stationed there lost with the armies |
-| Flows | a flow's chosen cities already skip one the player no longer owns (`engine/flows.ts`); a run under way there to be tested |
+| Flows | a flow's chosen cities already skip one the player no longer owns and a run under way leaves it out (`planCities`, `runPart`, `engine/flows.ts`) |
 
 **Not lost with the city:**
 
-- **Other players' troops,** stationed or on their way, go home (`turnHome`, as `restartPlayer`).
+- **Other cities' troops,** the player's own included, stationed there or reinforcing or transporting on their way there, go home (`sendBack`, `turnHome`).
 
 **The rest of the rules:**
 
@@ -66,10 +66,10 @@
 
 ### The warning
 
-- **In the city settings** (`city-dialog/city-form/abandon-city/`), under the teleport, in `LOSS_TEXT`, saying what abandoning does before the button.
+- **In the city settings** (`city-dialog/city-form/abandon-city/`), under the teleport, in `LOSS_TEXT`, saying what abandoning does before the button, which is disabled with the reason when no other regular city would remain (`keepsRegularCity`).
 - **The confirmation** (`ConfirmDialog`, whose `disabled` and `children` allow this) lists what this city would lose, with its real numbers: the heroes by name (locked ones too), troops at home and injured, resources, armies out with what's in them, valleys, market orders, shipments and unsent plan waves. **Its button stays disabled until the city's name is typed in,** as this can't be got back. It says plainly that an army sent away during the hour and still on the road when it ends is lost too.
-- **While the hour runs:** a countdown with Cancel on the city's card in the list and in the settings, in `LOSS_TEXT`, repeated in a banner on the city's screens.
-- **When it's done:** a report (`report.title.cityAbandoned`) naming the city. The client has no redirect for a city that's gone (`game.tsx`; `app.tsx` only sends unknown addresses to the first city), so a screen on it needs one: once `castles` no longer holds `nav.cityId`, go to the player's first city, keeping the screen.
+- **While the hour runs:** `AbandonNotice` (`components/abandon-notice/`), a countdown with Keep this city, in `LOSS_TEXT`: on the city's card in the list, in the settings and in a banner under the top bar.
+- **When it's done:** a report (`report.title.cityAbandoned`) naming the city. The city-lost push (`CASTLE_UPDATE`, `updateType: 1`, sent for a seat taken too) refreshes the player's cities, and once `castles` no longer holds `nav.cityId` the game goes to their first city, keeping the screen (`game.tsx`).
 
 ### Known consequences
 
@@ -85,14 +85,15 @@ Five went on 2026-11-05 with what caused them:
 - **Rising up being removed** ended armies, shipments and research being left stuck for good, as only a rising deleted their timed events.
 - **A seat taken losing everything** ended the other city's mayor being sacked: it came from moving the seat's mayor there, and nothing moves now.
 
-## How it would be built
+## How it's built
 
 - **Data:** `cities.abandon_at` (ms, 0 none), a generated migration.
 - **Time:** a timed event `city.abandon`, ref `abandon:<cityId>`, handled in `events.ts`; the handler checks `abandon_at` is due, so a stale event does nothing. Clearing a city's timed events takes research's too, so it's cancelled first (`cancelCityResearch`, `engine/research.ts`), or it would be stuck for good.
-- **Code:** `engine/abandon.ts`, sharing with `clearSeat` what both do (what's lost, valleys, other players' troops).
+- **Code:** `engine/abandon.ts` (`completeAbandon`, `keepsRegularCity`) and `services/abandon.ts`, sharing with `takeSeat` what's lost (`loseCityContents`) and with `restartPlayer` what a tile becomes (`releaseCityTile`), both in `engine/city-loss.ts`.
 - **API:** `POST /cities/{cityId}/abandon`, `DELETE /cities/{cityId}/abandon`, `abandonAt` on `CityBean`, then `npm run gen:api`.
 - **Docs:** a `deviations.md` entry *(design change)*, `BALANCE.abandon`, text in every locale.
-- **Tests:** `services/abandon.db.test.ts` for each row of the table, each refusal and each early end, with an army in every state.
+- **Teleporting during the hour** is allowed: the city still goes when it's up, from where it then stands.
+- **Tests:** `services/abandon.db.test.ts` for each row of the table, each refusal and each early end, with an army in every state; the routes in the API's `cities/interior.db.test.ts`; `abandon-city/utils.test.ts`.
 
 ## To watch
 
@@ -100,6 +101,6 @@ Once it's played: whether an hour proves too short as a safety net or against do
 
 ## Phases
 
-0. **A seat taken loses everything in it** (`clearSeat`). Done 2026-11-05.
-1. **The server:** the rules, data, API, messages, `deviations.md` and tests.
-2. **The client:** the settings section, the confirmation with its real numbers, the countdown and banner, the redirect, the locales.
+0. **A seat taken loses everything in it** (`loseCityContents`). Done 2026-11-05.
+1. **The server:** the rules, data, API, messages, `deviations.md` and tests. Done 2026-11-05.
+2. **The client:** the settings section, the confirmation with its real numbers, the countdown and banner, the redirect, the locales. Done 2026-11-05.

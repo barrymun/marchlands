@@ -4,6 +4,7 @@
 import { BALANCE, BUFF_IDS, BuffId, msg } from '@marchlands/core';
 
 import type { Ctx } from '#/context.ts';
+import { completeAbandon } from '#/engine/abandon.ts';
 import { departArmy } from '#/engine/armies.ts';
 import { completeBuilding } from '#/engine/buildings.ts';
 import { processArmy } from '#/engine/combat.ts';
@@ -84,6 +85,8 @@ export async function dispatchEvent(ctx: Ctx, ev: EventRow): Promise<void> {
       return expireHeroBuff(ctx, num(p.heroId), String(p.attr));
     case 'shipment':
       return deliverShipment(ctx, num(p.shipmentId));
+    case 'city.abandon':
+      return completeAbandon(ctx, cityId());
     case 'flow.heal':
       return runScheduledHeal(
         ctx,

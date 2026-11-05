@@ -1,0 +1,1 @@
+ALTER TABLE "cities" ADD COLUMN "abandon_at" bigint DEFAULT 0 NOT NULL;

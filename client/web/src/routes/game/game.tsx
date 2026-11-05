@@ -1,6 +1,7 @@
 import { Suspense, useState } from 'react';
 import { Navigate } from 'react-router';
 
+import { AbandonNotice } from '@/components/abandon-notice/abandon-notice';
 import { ActivityDock } from '@/components/activity-dock/activity-dock';
 import { BuildingsPanel } from '@/components/buildings-panel/buildings-panel';
 import { CityDialog } from '@/components/city-dialog/city-dialog';
@@ -58,6 +59,9 @@ export function GamePage() {
   }
   // a screen that was a panel before it became a page (heroes) goes to the page
   if (nav.pageAsPanel) return <Navigate to={screenHref(nav.cityId, nav.pageAsPanel)} replace />;
+  // a city that's gone (abandoned, or a historic city taken from the player): the same screen in their first city
+  const first = player.data?.castles[0];
+  if (first && !player.data?.castles.some((c) => c.id === nav.cityId)) return <Navigate to={screenHref(first.id, nav.screen)} replace />;
   // a view fills the viewport edge to edge (the town and fields scroll themselves when shown as cards); a page scrolls inside it;
   // the market is a trading terminal: on a wide screen it fills the viewport like a view, its panes scrolling themselves;
   // most pages keep a readable width, a few (FULL_WIDTH_PAGES) use the whole viewport
@@ -68,6 +72,7 @@ export function GamePage() {
   return (
     <div className="flex h-svh flex-col bg-muted/30">
       <TopBar city={city.data} status={status} onDialog={setDialog} />
+      {city.data && <AbandonNotice city={city.data} className="justify-center border-b bg-destructive/10 px-3 py-1.5" />}
       <div className="flex min-h-0 flex-1">
         <main className={cn('min-w-0 flex-1', isView ? 'overflow-hidden' : isTerminal ? 'overflow-y-auto xl:overflow-hidden' : 'overflow-y-auto')}>
           <div

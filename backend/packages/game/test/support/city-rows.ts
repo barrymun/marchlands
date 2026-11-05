@@ -48,6 +48,7 @@ export function cityRow(over: Partial<CityRow> = {}): CityRow {
     playerId: 1,
     tileId: 401,
     name: 'Home',
+    abandonAt: 0,
     logoUrl: 'images/icon/cityLogo/citylogo_01.png',
     status: 0,
     allowAlliance: false,

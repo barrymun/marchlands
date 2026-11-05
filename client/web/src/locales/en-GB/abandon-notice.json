@@ -1,0 +1,5 @@
+{
+  "leaving": "{{city}} will be abandoned in <countdown />, and everything in it lost",
+  "keep": "Keep this city",
+  "kept": "You're keeping {{city}}"
+}

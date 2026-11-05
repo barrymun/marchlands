@@ -27,5 +27,29 @@
     "allIdle": "All 0% (everyone idle)",
     "allFull": "All 100%",
     "saved": "Work rates saved"
+  },
+  "abandon": {
+    "warning": "Abandoning a city can't be undone. After {{time}} all of it is lost for good: its heroes, troops, resources and buildings, its armies wherever they are, research running there, its market orders and shipments. Nothing moves to another city and nothing is refunded. Its valleys are released.",
+    "keepRegular": "You must keep at least one regular city, as a historic city can be captured, so this one can't be abandoned.",
+    "button": "Abandon this city",
+    "started": "{{city}} will be abandoned in {{time}}",
+    "confirmTitle": "Abandon {{city}}?",
+    "confirmDescription": "In {{time}} this city is gone for good, with everything listed here. Nothing moves to another city and nothing is refunded.",
+    "confirm": "Abandon city",
+    "road": "Move out anything you want to keep before you start: an army sent away during that time and still on the road when it ends is lost too.",
+    "typeName": "Type the city's name, {{city}}, to confirm",
+    "row": {
+      "heroes": "Heroes",
+      "research": "Research running here",
+      "troops": "Troops at home",
+      "injured": "Injured troops",
+      "fortifications": "Fortifications",
+      "armies": "Armies out",
+      "armyTroops": "Troops in those armies",
+      "valleys": "Valleys released",
+      "orders": "Market orders",
+      "shipments": "Shipments on the road",
+      "waves": "Unsent plan waves"
+    }
   }
 }

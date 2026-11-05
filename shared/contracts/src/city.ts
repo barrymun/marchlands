@@ -110,6 +110,7 @@ export type ProductionBreakdown = z.infer<typeof ProductionBreakdown>;
 
 export const CityMoveResult = z.object({ fieldId: int().describe('new tile id'), x: int(), y: int() }).meta({ id: 'CityMoveResult' });
 export type CityMoveResult = z.infer<typeof CityMoveResult>;
+export const CityAbandonResult = z.object({ abandonAt: Ms.describe('when its hour is up and it goes') }).meta({ id: 'CityAbandonResult' });
 export const DraftResult = z.object({ troops: zTroops.describe('the troops drafted into the seat') }).meta({ id: 'DraftResult' });
 export type DraftResult = z.infer<typeof DraftResult>;
 

@@ -20,5 +20,8 @@
   "notFreeFlat": "That tile is not a free flat.",
   "noDraftTarget": "There's no city left in its area to draft from today.",
   "draftNotTarget": "A historic city drafts only from barbarian cities and lower-level historic cities nobody holds.",
-  "draftedToday": "It has already drafted from this city today: each city once a day."
+  "draftedToday": "It has already drafted from this city today: each city once a day.",
+  "abandonKeepRegular": "You must keep at least one regular city: a historic city can be captured.",
+  "abandonAlready": "This city is already being abandoned.",
+  "abandonNotRunning": "This city isn't being abandoned."
 }

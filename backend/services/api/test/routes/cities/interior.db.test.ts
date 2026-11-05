@@ -1,5 +1,5 @@
 // City interior routes (src/routes/cities.ts): city detail, settings, tax, work rates, store percent, comfort,
-// production and teleporting. The rules are covered by the interior service tests.
+// production, teleporting and abandoning. The rules are covered by the interior service tests.
 
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
@@ -232,5 +232,37 @@ describe('POST /cities/{cityId}/move', () => {
       const [a] = await lords(api, 1);
       await setResources(api, a, RICH);
       await expectClientError(api, a.token, 'POST', `cities/${a.cityId}/move`, { targetTileId: HUGE_ID });
+    }));
+});
+
+describe('POST /cities/{cityId}/abandon', () => {
+  itGuards('POST', (c) => `cities/${c}/abandon`);
+
+  it("refuses a player's last city, with the game's message", () =>
+    apiTest(async (api) => {
+      const [a] = await lords(api, 1);
+      await api.refused('POST', `cities/${a.cityId}/abandon`, 'city.abandonKeepRegular', { token: a.token });
+    }));
+
+  it('starts the hour with a second city to keep, and DELETE keeps the city', () =>
+    apiTest(async (api) => {
+      const [a] = await lords(api, 1);
+      const { id: _id, ...row } = (await cityRow(api, a.cityId))!;
+      const flat = await api.game((ctx) => pickOpenFlat(ctx, -1));
+      await api.db.insert(cities).values({ ...row, tileId: flat, name: 'Eastwold' });
+      const { abandonAt } = await api.ok<{ abandonAt: number }>('POST', `cities/${a.cityId}/abandon`, { token: a.token });
+      expect((await cityRow(api, a.cityId))!.abandonAt).toBe(abandonAt);
+      await api.ok('DELETE', `cities/${a.cityId}/abandon`, { token: a.token });
+      expect((await cityRow(api, a.cityId))!.abandonAt).toBe(0);
+    }));
+});
+
+describe('DELETE /cities/{cityId}/abandon', () => {
+  itGuards('DELETE', (c) => `cities/${c}/abandon`);
+
+  it('refuses a city not being abandoned', () =>
+    apiTest(async (api) => {
+      const [a] = await lords(api, 1);
+      await api.refused('DELETE', `cities/${a.cityId}/abandon`, 'city.abandonNotRunning', { token: a.token });
     }));
 });

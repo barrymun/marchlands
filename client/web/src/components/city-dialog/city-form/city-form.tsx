@@ -12,6 +12,7 @@ import {
 } from '@marchlands/api-client';
 import { BALANCE, BuffId, itemGoldPrice } from '@marchlands/core';
 
+import { AbandonCity } from '@/components/city-dialog/city-form/abandon-city/abandon-city';
 import { TELEPORT } from '@/components/city-dialog/city-form/constants';
 import { TaxRate } from '@/components/city-dialog/city-form/tax-rate/tax-rate';
 import { WorkRates } from '@/components/city-dialog/city-form/work-rates/work-rates';
@@ -116,6 +117,8 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
             </div>
           </>
         )}
+        <Separator />
+        <AbandonCity city={city} />
       </div>
     </>
   );

@@ -12,6 +12,7 @@ export * as training from '#/services/training.ts';
 export * as interior from '#/services/interior.ts';
 export * as historic from '#/services/historic.ts';
 export * as heroes from '#/services/heroes.ts';
+export * as abandon from '#/services/abandon.ts';
 export * as armies from '#/services/armies.ts';
 export * as combat from '#/services/combat.ts';
 export * as reports from '#/services/reports.ts';
