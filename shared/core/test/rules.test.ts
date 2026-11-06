@@ -70,6 +70,8 @@ import {
   syncHeroBuffs,
   syncHeroGear,
   TechType,
+  tileDistance,
+  tileId,
   trainCost,
   troopConfig,
   unlockedOuterSlots,
@@ -327,6 +329,29 @@ describe('armies', () => {
   });
   it('slowest unit decides speed', () => {
     expect(marchTimeMs(0, 10, { lightCavalry: 1, catapult: 1 }, {}, [])).toBe(Math.floor((10 * 60_000) / 80) * 1000);
+  });
+  it('measures distance straight across the map when the tiles are close', () => {
+    expect(tileDistance(tileId(10, 20), tileId(13, 24))).toBe(5);
+    expect(tileDistance(tileId(13, 24), tileId(10, 20))).toBe(5);
+  });
+  it('measures distance the shorter way round the map, across either edge or both', () => {
+    const last = BALANCE.mapSize - 1;
+    expect(tileDistance(tileId(0, 100), tileId(last, 100))).toBe(1);
+    expect(tileDistance(tileId(100, 0), tileId(100, last))).toBe(1);
+    expect(tileDistance(tileId(0, 0), tileId(last - 2, last - 3))).toBe(5);
+    expect(tileDistance(tileId(last - 2, last - 3), tileId(0, 0))).toBe(5);
+  });
+  it('is never more than half the map each way, and that far exactly in the middle', () => {
+    const half = BALANCE.mapSize / 2;
+    expect(tileDistance(tileId(0, 0), tileId(half, 0))).toBe(half);
+    expect(tileDistance(tileId(0, 0), tileId(half + 1, 0))).toBe(half - 1);
+  });
+  it('takes as long to march across the edge of the map as anywhere else', () => {
+    const last = BALANCE.mapSize - 1;
+    expect(marchTimeMs(tileId(0, 100), tileId(last, 100), { lightCavalry: 1 }, {}, [])).toBe(60_000);
+  });
+  it('goes by the map size it is given', () => {
+    expect(tileDistance(tileId(0, 0, 10), tileId(9, 0, 10), 10)).toBe(1);
   });
   it("a Relief Station speeds marches between a player's own places by its multiplier, never under a second", () => {
     const relief = (level: number) => [{ positionId: 0, typeId: BuildingType.RELIEF_STATION, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 }];

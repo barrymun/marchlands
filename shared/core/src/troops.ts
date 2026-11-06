@@ -110,10 +110,12 @@ export function tileId(x: number, y: number, mapSize: number = BALANCE.mapSize):
   const m = (v: number) => ((v % mapSize) + mapSize) % mapSize;
   return m(y) * mapSize + m(x);
 }
+/** (marchlands) The straight-line distance between two tiles, in tiles: the shorter way round, as the map wraps at its edges. */
 export function tileDistance(a: number, b: number, mapSize: number = BALANCE.mapSize): number {
   const p = tileXY(a, mapSize);
   const q = tileXY(b, mapSize);
-  return Math.hypot(p.x - q.x, p.y - q.y);
+  const across = (from: number, to: number) => Math.min(Math.abs(from - to), mapSize - Math.abs(from - to));
+  return Math.hypot(across(p.x, q.x), across(p.y, q.y));
 }
 
 /** Slowest speed of an army in tiles/minute*1000 after Compass / Horseback Riding (capped by Academy). */

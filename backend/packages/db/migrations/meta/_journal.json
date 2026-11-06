@@ -337,6 +337,13 @@
       "when": 1793995800000,
       "tag": "0047_flows_forget_lost_cities",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1794007029879,
+      "tag": "0048_armies_shorter_way_round",
+      "breakpoints": true
     }
   ]
 }
