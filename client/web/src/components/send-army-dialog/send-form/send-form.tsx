@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -9,7 +9,6 @@ import {
   getMapTilesByTileIdOptions,
   getPlansQueryKey,
   postCitiesArmies,
-  postCitiesArmiesEstimate,
   postPlansWaves,
 } from '@marchlands/api-client';
 import {
@@ -146,12 +145,6 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
     setResources({ ...resources, [r]: String(Math.max(0, Math.min(inCity(r), capacity - others))) });
   };
 
-  const estimate = useMutation({
-    mutationFn: async () => {
-      const { data } = await postCitiesArmiesEstimate({ path, body: { targetTileId: toTile, troops: troopBody }, throwOnError: true });
-      return data;
-    },
-  });
   const send = useCommand(
     async () => {
       const { data } = await postCitiesArmies({
@@ -215,7 +208,6 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
             onPick={(tileId) => {
               setToTile(tileId);
               setToText(null);
-              estimate.reset();
             }}
           >
             <TileSummary
@@ -360,6 +352,11 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
               );
             })}
           </div>
+          {hasAny && toReady && (
+            <p className="text-sm text-muted-foreground tabular-nums">
+              {marchMs != null ? t('form.estimate', { time: duration(marchMs), load: fmt(capacity) }) : t('form.chooseTroopsMarch')}
+            </p>
+          )}
         </div>
         {carriesResources && (
           <div className="grid gap-2">
@@ -423,14 +420,8 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
         ) : (
           <LandAt marchMs={marchMs} value={landAt} onChange={setLandAt} />
         )}
-        {estimate.data && (
-          <p className="text-sm text-muted-foreground">{t('form.estimate', { time: duration(estimate.data.marchTime), load: fmt(estimate.data.load) })}</p>
-        )}
       </div>
       <DialogFooter>
-        <Button variant="outline" disabled={!Object.keys(troopBody).length || !toReady} onClick={() => estimate.mutate()}>
-          {t('form.estimateButton')}
-        </Button>
         {slot ? (
           <Button
             disabled={!Object.keys(troopBody).length || over || !troopsValid || late || add.isPending}

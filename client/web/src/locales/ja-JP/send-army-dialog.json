@@ -32,7 +32,7 @@
     "maxTitle": "兵がまだ運べるだけ",
     "noneResourceTitle": "この資源を運ばない",
     "estimate": "行軍 {{time}} · 積載 {{load}}",
-    "estimateButton": "見積もり",
+    "chooseTroopsMarch": "兵を選ぶと行軍にかかる時間が表示されます",
     "planTitle": "波を追加",
     "planDescription": "{{from}}から{{to}}へ、{{time}} UTC着弾",
     "from": "出発都市",

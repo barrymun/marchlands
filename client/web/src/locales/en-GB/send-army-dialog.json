@@ -32,7 +32,7 @@
     "maxTitle": "As much as the troops can still carry",
     "noneResourceTitle": "None of this resource",
     "estimate": "March {{time}} · Carries {{load}}",
-    "estimateButton": "Estimate",
+    "chooseTroopsMarch": "Choose troops to see how long the march takes",
     "planTitle": "Add a wave",
     "planDescription": "From {{from}} to {{to}}, landing {{time}} UTC",
     "from": "From",

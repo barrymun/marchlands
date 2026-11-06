@@ -32,7 +32,7 @@
     "maxTitle": "أقصى ما تستطيع القوات حمله بعد",
     "noneResourceTitle": "لا شيء من هذا المورد",
     "estimate": "المسير {{time}} · يحمل {{load}}",
-    "estimateButton": "تقدير",
+    "chooseTroopsMarch": "اختر قوات لمعرفة مدة المسير",
     "planTitle": "أضف موجة",
     "planDescription": "من {{from}} إلى {{to}}، تصل {{time}} بالتوقيت العالمي",
     "from": "من",
