@@ -5,17 +5,14 @@ import { FLOW_TRAIN_MAX, FLOW_TROOP_IDS, FlowActionType, FlowHealWhen, FlowWaitU
 
 import { AttackTargetsFields } from '@/components/flow-attack/attack-targets-fields/attack-targets-fields';
 import { ACTION_RANGES } from '@/components/flows-panel/constants';
-import { FLOW_STATS } from '@/components/flows-panel/flow-editor/action-fields/constants';
-import type { Stat } from '@/components/flows-panel/flow-editor/action-fields/types';
+import { StatSelect } from '@/components/flows-panel/flow-editor/action-fields/stat-select/stat-select';
 import type { Draft, Targets } from '@/components/flows-panel/types';
 import { NumberField } from '@/components/number-field/number-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { shortDuration } from '@/lib/format';
 import { troopName } from '@/lib/game-data';
-import { attributeOfStat } from '@/lib/hero-attributes';
 import { numberText, textNumber } from '@/lib/ranges';
-import { cn } from '@/lib/utils';
 
 /** The inputs of one action: which attribute for "set mayor"; troop type and amount (or max) for "train"; how many, how good and how much gold for "hire heroes". */
 export function ActionFields({ action, cities, onChange }: { action: Draft; cities: Targets; onChange: (a: Draft) => void }) {
@@ -96,20 +93,7 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
                 onChange={(text) => onChange({ ...action, count: textNumber(text) })}
               />
             ),
-            stat: (
-              <Select value={action.stat} onValueChange={(v) => onChange({ ...action, stat: v as Stat })}>
-                <SelectTrigger size="sm" className={cn('w-36 font-medium', attributeOfStat(action.stat).tone)}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {FLOW_STATS.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {attributeOfStat(s).label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ),
+            stat: <StatSelect value={action.stat} onChange={(stat) => onChange({ ...action, stat })} />,
             min: (
               <NumberField
                 className="h-8 w-16"
@@ -138,18 +122,7 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
     return (
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span>{t('actionFields.setMayor')}</span>
-        <Select value={action.stat} onValueChange={(v) => onChange({ ...action, stat: v as Stat })}>
-          <SelectTrigger size="sm" className={cn('w-36 font-medium', attributeOfStat(action.stat).tone)}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FLOW_STATS.map((s) => (
-              <SelectItem key={s} value={s}>
-                {attributeOfStat(s).label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <StatSelect value={action.stat} onChange={(stat) => onChange({ ...action, stat })} />
       </div>
     );
   }
