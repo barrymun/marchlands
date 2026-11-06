@@ -6,8 +6,11 @@ import { HeroTab } from '@/lib/screen-search';
  */
 export const HERO_TABS = [HeroTab.HEROES, HeroTab.GEAR] as const;
 
-/** How the Heroes tab can show the heroes, in the order of their buttons: a roster beside a character sheet, or cards. */
-export const HERO_VIEWS = ['sheet', 'list'] as const;
+/** How the Heroes tab can show the heroes: a roster beside a character sheet, or cards. Remembered in localStorage (HERO_VIEW_KEY), so a value never changes. */
+export const HeroView = { SHEET: 'sheet', LIST: 'list' } as const;
+export type HeroView = (typeof HeroView)[keyof typeof HeroView];
+/** The views in the order of their buttons. */
+export const HERO_VIEWS = Object.values(HeroView);
 
 /** Where this browser remembers the chosen view (localStorage). */
 export const HERO_VIEW_KEY = 'marchlands-heroes-view';

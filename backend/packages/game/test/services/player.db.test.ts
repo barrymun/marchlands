@@ -18,6 +18,7 @@ import {
   msg,
   PlayerStatus,
   Relation,
+  ReportBodyKind,
   ReportType,
   stateOf,
   TileType,
@@ -211,7 +212,7 @@ describe(player.playerState.name, () => {
       await sendSystemMail(g, a.id, 'Welcome', 'Body');
       await sendSystemMail(g, a.id, 'Again', 'Body');
       const title = msg('report.title.scoutReport');
-      const body = { kind: 'text' as const, text: msg('report.oldFormat') };
+      const body = { kind: ReportBodyKind.TEXT, text: msg('report.oldFormat') };
       await createReport(g, { playerId: a.id, typeId: ReportType.TRADE, title, body });
       await createReport(g, { playerId: a.id, typeId: ReportType.ARMY, title, body });
       const read = await createReport(g, { playerId: a.id, typeId: ReportType.OTHER, title, body });
@@ -617,7 +618,7 @@ describe(player.restartPlayer.name, () => {
       await admin.setPlayerFlags(g, a.name, { beginner: false, title: 2 });
       await player.addCastleSign(g, a.id, npc!.id);
       await sendSystemMail(g, a.id, 'Hello', 'x');
-      await createReport(g, { playerId: a.id, title: msg('report.title.scoutReport'), body: { kind: 'text', text: msg('report.oldFormat') } });
+      await createReport(g, { playerId: a.id, title: msg('report.title.scoutReport'), body: { kind: ReportBodyKind.TEXT, text: msg('report.oldFormat') } });
       await g.tx.insert(timedEvents).values({ type: TimedEventType.RESEARCH, dueAt: g.now + HOUR, playerId: a.id, payload: {}, createdAt: g.now });
       // a valley held by the city
       const [valley] = await freeTiles(g, TileType.FOREST);

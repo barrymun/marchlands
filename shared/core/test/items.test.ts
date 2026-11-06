@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { ItemEffectKind } from '#/constants.ts';
 import {
   BALANCE,
   civilCodePopulation,
@@ -112,22 +113,22 @@ describe(heroBuffAmount.name, () => {
 
 describe(itemEffect.name, () => {
   it('lasts buffDurationMs.short for 1-day items and .long for 7-day ones', () => {
-    expect(itemEffect(ItemId.PLOWSHARES)).toMatchObject({ kind: 'buff', durationMs: items.buffDurationMs.short });
-    expect(itemEffect(ItemId.IRON_RAKE)).toMatchObject({ kind: 'buff', durationMs: items.buffDurationMs.long });
+    expect(itemEffect(ItemId.PLOWSHARES)).toMatchObject({ kind: ItemEffectKind.BUFF, durationMs: items.buffDurationMs.short });
+    expect(itemEffect(ItemId.IRON_RAKE)).toMatchObject({ kind: ItemEffectKind.BUFF, durationMs: items.buffDurationMs.long });
     expect(items.buffDurationMs).toEqual({ short: DAY, long: 7 * DAY });
   });
 
   it('grants the Welcome Package from BALANCE, as a copy', () => {
     const e = itemEffect(ItemId.WELCOME_PACKAGE);
-    expect(e).toEqual({ kind: 'grant', items: items.welcomePackage.items, resources: items.welcomePackage.resources });
-    if (e?.kind === 'grant') expect(e.items).not.toBe(items.welcomePackage.items);
+    expect(e).toEqual({ kind: ItemEffectKind.GRANT, items: items.welcomePackage.items, resources: items.welcomePackage.resources });
+    if (e?.kind === ItemEffectKind.GRANT) expect(e.items).not.toBe(items.welcomePackage.items);
   });
 
   it('fills a medal box with medalBoxCount of each of its medal levels', () => {
     const rng = seededRng('medal-box');
     for (const [id, levels] of Object.entries(items.medalBoxes)) {
       const e = itemEffect(id);
-      if (e?.kind !== 'box') throw new Error(`${id} is not a box`);
+      if (e?.kind !== ItemEffectKind.BOX) throw new Error(`${id} is not a box`);
       for (let i = 0; i < 50; i++) {
         const got = e.contents(rng).items!;
         expect(Object.keys(got).sort()).toEqual(levels.map(medalId).sort());

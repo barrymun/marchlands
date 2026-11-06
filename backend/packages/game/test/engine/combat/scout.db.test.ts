@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
+  BattleTarget,
   BuildingType,
   createGuardHero,
   freshNpcState,
@@ -31,6 +32,7 @@ import {
   lastReport,
   occupyValley,
   reportTitles,
+  ScoutOf,
   scoutOf,
   send,
   tileNear,
@@ -68,8 +70,8 @@ describe(`${processArmy.name}: scouting a barbarian city`, () => {
 
       const report = await lastReport(g, p.id, 'report.title.scoutReport');
       expect(report).toMatchObject({ isAttack: true, armyType: Mission.SCOUT });
-      expect(scoutOf(report, 'npc')).toEqual({
-        target: 'npc',
+      expect(scoutOf(report, ScoutOf.NPC)).toEqual({
+        target: BattleTarget.NPC,
         level: npc.level,
         success: true,
         loyalty: fresh.state.loyalty,
@@ -90,10 +92,10 @@ describe(`${processArmy.name}: scouting a barbarian city`, () => {
       const npc = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
       const scout = await send(g, p, { targetTileId: npc.id, mission: Mission.SCOUT, troops: { scouter: 20 } });
       await arrive(g, scout.armyId);
-      const seen = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'npc').hero;
+      const seen = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.NPC).hero;
       const attack = await send(g, p, { targetTileId: npc.id, mission: Mission.ATTACK, troops: { lightCavalry: 2000 }, heroId });
       await arrive(g, attack.armyId);
-      const battle = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), 'npc');
+      const battle = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), BattleTarget.NPC);
       expect(battle.defender.hero).toMatchObject(seen);
     }));
 });
@@ -108,8 +110,8 @@ describe(`${processArmy.name}: scouting a valley`, () => {
       const tile = await getTile(g, valley.id);
       expect(tile.state).toMatchObject({ regenAt: g.now, heroSeed: expect.any(Number) });
       const guard = guardOf(tile.id, tile.state!.heroSeed!, 20);
-      expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'valley')).toEqual({
-        target: 'valley',
+      expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.VALLEY)).toEqual({
+        target: BattleTarget.VALLEY,
         type: valley.type,
         level: valley.level,
         owner: null,
@@ -130,8 +132,8 @@ describe(`${processArmy.name}: scouting a valley`, () => {
       const { p } = await warrior(g);
       const bean = await send(g, p, { targetTileId: valley.id, mission: Mission.SCOUT, troops: { scouter: 20 } });
       await arrive(g, bean.armyId);
-      expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'valley')).toEqual({
-        target: 'valley',
+      expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.VALLEY)).toEqual({
+        target: BattleTarget.VALLEY,
         type: valley.type,
         level: valley.level,
         owner: owner.name,
@@ -149,8 +151,8 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
       await arrive(g, armyId);
 
       const report = await lastReport(g, p.id, 'report.title.scoutReport');
-      const s = scoutOf(report, 'city');
-      expect(s).toMatchObject({ target: 'city', owner: q.name, success: true });
+      const s = scoutOf(report, ScoutOf.CITY);
+      expect(s).toMatchObject({ target: BattleTarget.CITY, owner: q.name, success: true });
       expect(s.battle.attackerScouts.before).toBe(500);
       expect(s.battle.defenderScouts).toMatchObject({ before: 10, after: 0 });
       const city = await reloadCity(g, q.cityId);
@@ -170,7 +172,7 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
         stationed: [],
       });
       const theirs = await lastReport(g, q.id, 'report.title.enemyScouts');
-      expect(scoutOf(theirs, 'cityDefender')).toEqual({ target: 'city', from: p.name, success: true, battle: s.battle });
+      expect(scoutOf(theirs, ScoutOf.CITY_DEFENDER)).toEqual({ target: BattleTarget.CITY, from: p.name, success: true, battle: s.battle });
       expect(g.pushes(PushCmd.TROOP_UPDATE).some((x) => x.playerIds.includes(q.id))).toBe(true);
       expect(await armyRow(g, armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, troops: { scouter: s.battle.attackerScouts.after } });
     }));
@@ -183,7 +185,7 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
       const qHeroes = (await cityBundle(g, q)).heroes;
       expect(qHeroes).toHaveLength(2);
       await arrive(g, armyId);
-      const intel = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'city').intel!;
+      const intel = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.CITY).intel!;
       expect(intel.heroes).toEqual(qHeroes.map((h) => ({ name: h.name, level: h.level })));
       expect(intel.buildings).toBeUndefined();
 
@@ -192,7 +194,7 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
       const again = await send(g, p, { targetTileId: await cityTile(g, q.cityId), mission: Mission.SCOUT, troops: { scouter: 100 } });
       await arrive(g, again.armyId);
       const city = await reloadCity(g, q.cityId);
-      expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'city').intel!.buildings).toEqual(
+      expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.CITY).intel!.buildings).toEqual(
         city.buildings.map((b) => ({ typeId: b.typeId, level: b.level })),
       );
     }));
@@ -203,10 +205,10 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
       const loyalty = (await getHero(g, heroId)).loyalty;
       await arrive(g, armyId);
 
-      const s = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'city');
+      const s = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.CITY);
       expect(s).toMatchObject({ success: false, intel: null, battle: { attackerScouts: { before: 20, after: 0 }, defenderScouts: { before: 2000 } } });
       expect((await reloadCity(g, q.cityId)).troops.scouter).toBe(s.battle.defenderScouts.after);
-      expect(scoutOf(await lastReport(g, q.id, 'report.title.scoutsRepelled'), 'cityDefender')).toMatchObject({ from: p.name, success: false });
+      expect(scoutOf(await lastReport(g, q.id, 'report.title.scoutsRepelled'), ScoutOf.CITY_DEFENDER)).toMatchObject({ from: p.name, success: false });
       expect(await armyRow(g, armyId)).toBeUndefined();
       expect(g.events(TimedEventType.ARMY)).toEqual([]);
       await expectWipedHero(g, heroId, loyalty, p);
@@ -217,7 +219,7 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
     game(async (g) => {
       const { p, armyId } = await scoutCity(g, 20, 2000, { extra: { lightCavalry: 50 } });
       await arrive(g, armyId);
-      expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'city').success).toBe(false);
+      expect(scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.CITY).success).toBe(false);
       expect(await armyRow(g, armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, troops: { lightCavalry: 50 } });
     }));
 
@@ -226,7 +228,7 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
       const { p, q, armyId } = await scoutCity(g, 20, 2000);
       await interior.setCityFlags(g, q.id, q.cityId, { goOutForBattle: false });
       await arrive(g, armyId);
-      const s = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'city');
+      const s = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.CITY);
       expect(s).toMatchObject({ success: true, battle: { attackerScouts: { before: 20, after: 20 }, defenderScouts: { before: 0, after: 0 } } });
       expect((await reloadCity(g, q.cityId)).troops.scouter).toBe(2000);
     }));
@@ -249,7 +251,7 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
         });
         await arrive(g, guard.armyId);
         await arrive(g, armyId);
-        return scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'city').battle.defenderScouts.after;
+        return scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.CITY).battle.defenderScouts.after;
       });
     return (async () => {
       const weak = await defendersLeft(1);
@@ -271,7 +273,7 @@ describe(`${processArmy.name}: scouting a lord's city`, () => {
       expect((await armyRow(g, armyId))!.direction).toBe(ArmyDirection.FORWARD);
       await arrive(g, armyId);
 
-      const s = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), 'city');
+      const s = scoutOf(await lastReport(g, p.id, 'report.title.scoutReport'), ScoutOf.CITY);
       expect(s.battle.defenderScouts.before).toBe(300);
       const left = s.battle.defenderScouts.after;
       const city = await reloadCity(g, q.cityId);

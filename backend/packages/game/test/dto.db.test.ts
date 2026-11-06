@@ -1,7 +1,19 @@
 import { describe, expect, it } from 'vitest';
 
 import { CityBean } from '@marchlands/contracts';
-import { BALANCE, BuffId, BuildingType, heroManagement, HOUR, mayorProductionBonus, msg, TechType, TileType, valleyBonus } from '@marchlands/core';
+import {
+  BALANCE,
+  BASIC_RESOURCES,
+  BuffId,
+  BuildingType,
+  heroManagement,
+  HOUR,
+  mayorProductionBonus,
+  msg,
+  TechType,
+  TileType,
+  valleyBonus,
+} from '@marchlands/core';
 
 import { viewOwnCity } from '#/city.ts';
 import { cityBean } from '#/dto.ts';
@@ -75,7 +87,7 @@ describe(cityBean.name, () => {
       const before = cityBean(await cityBundle(g, p), g.now).resource;
       g.advance(HOUR);
       const after = cityBean(await viewOwnCity(g, p.id, p.cityId), g.now).resource;
-      for (const r of ['food', 'wood', 'stone', 'iron'] as const) within(after[r].amount, before[r].amount, before[r].increaseRate);
+      for (const r of BASIC_RESOURCES) within(after[r].amount, before[r].amount, before[r].increaseRate);
       within(after.gold, before.gold, before.goldRate);
       expect(after.updatedAt).toBe(g.now);
     }));

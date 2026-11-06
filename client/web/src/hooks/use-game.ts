@@ -4,7 +4,7 @@ import { type MutationFunction, type QueryClient, type QueryKey, useMutation, us
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { getCitiesByCityIdOptions, getPlayer, getPlayerQueryKey, type PushStatus } from '@marchlands/api-client';
+import { getCitiesByCityIdOptions, getPlayer, getPlayerQueryKey, PushStatus } from '@marchlands/api-client';
 import { BALANCE, scaled, setGameSpeed } from '@marchlands/core';
 
 import { errorMessage, push } from '@/lib/api';
@@ -61,7 +61,7 @@ export function useCommand<A, R>(
 /** Connect the push socket while a lord is logged in and route pushes into the query cache. */
 export function usePushSync(enabled: boolean): PushStatus {
   const qc = useQueryClient();
-  const [status, setStatus] = useState<PushStatus>('closed');
+  const [status, setStatus] = useState<PushStatus>(PushStatus.CLOSED);
   useEffect(() => {
     if (!enabled) return;
     const offs = subscribePushHandlers(push, qc);
@@ -70,8 +70,8 @@ export function usePushSync(enabled: boolean): PushStatus {
     let wasOpen = false;
     offs.push(
       push.onStatus((s) => {
-        if (s === 'open' && wasOpen) for (const queryKey of [...allMarketQueries(), getPlayerQueryKey()]) void qc.invalidateQueries({ queryKey });
-        if (s === 'open') wasOpen = true;
+        if (s === PushStatus.OPEN && wasOpen) for (const queryKey of [...allMarketQueries(), getPlayerQueryKey()]) void qc.invalidateQueries({ queryKey });
+        if (s === PushStatus.OPEN) wasOpen = true;
         setStatus(s);
       }),
     );

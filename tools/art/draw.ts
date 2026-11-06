@@ -19,7 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { BuildingType, Sex } from '@marchlands/core';
+import { BuildingType, Sex, SpotKind } from '@marchlands/core';
 
 import { BADGE_DRAWINGS } from './badges.ts';
 import { academy } from './buildings/academy.ts';
@@ -122,7 +122,7 @@ const wanted = new Set(positionals);
 const SPOTS_FILE = path.join(ASSETS, 'spots.json');
 const spots: Record<string, Spot[]> = fs.existsSync(SPOTS_FILE) ? JSON.parse(fs.readFileSync(SPOTS_FILE, 'utf8')) : {};
 /** Parts the animated town draws moving over a bare sprite. */
-const MOVING = new Set(['sails', 'wheel', 'sheep']);
+const MOVING: ReadonlySet<SpotKind> = new Set([SpotKind.SAILS, SpotKind.WHEEL, SpotKind.SHEEP]);
 
 /** Save a sprite and its spots; one with moving parts also gets a bare sprite drawn without them. */
 function save(dir: string, file: string, drawing: () => PixelCanvas) {
@@ -209,7 +209,7 @@ if (!wanted.size || wanted.has('gear')) {
   // a piece whose part sways alone also gets its twins: without the part, and the part alone (no spots of their own)
   for (const [piece, twin] of Object.entries(GEAR_TWINS))
     for (const level of GEAR_ART_LEVELS)
-      if ((spots[`gear/${gearArtFile(piece, level)}`] ?? []).some((s) => s.k === 'sway'))
+      if ((spots[`gear/${gearArtFile(piece, level)}`] ?? []).some((s) => s.k === SpotKind.SWAY))
         for (const part of GEAR_TWIN_PARTS) fs.writeFileSync(path.join(ASSETS, 'gear', gearTwinFile(piece, level, part)), twin(level, part).png());
   for (const level of GEAR_ART_LEVELS) save('gear', gearBackdropFile(level), () => GEAR_BACKDROP(level));
   for (const kind of GEAR_STAR_KINDS) save('gear', gearStarFile(kind), () => GEAR_STAR(kind));

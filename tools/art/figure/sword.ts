@@ -3,6 +3,8 @@
 // a stone in the pommel from 3, runes from 5, a glowing fuller from 6, a horned guard from 8, gilded at 9, and a
 // crimson blade with silver edges at 10.
 
+import { SpotKind } from '@marchlands/core';
+
 import { fill, horn, IRON, lit, look, type Shades, STEEL, sweep, WOOD } from '../gear/common.ts';
 import type { PixelCanvas, Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
@@ -71,7 +73,7 @@ export function sword(level: number): PixelCanvas {
   }
   if (level >= 3) {
     c.set(hx + 0.5, hy + 4, L.accent[1]);
-    c.spot('stone', [hx + 0.5, hy + 4], 0.5);
+    c.spot(SpotKind.STONE, [hx + 0.5, hy + 4], 0.5);
   }
   return c;
 }

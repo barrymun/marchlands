@@ -22,6 +22,7 @@ import {
   TileType,
   tileXY,
   valleyUpgradeCost,
+  WorldMapSource,
 } from '@marchlands/core';
 import { cities, type Db, pgArray, players, tiles, worldState } from '@marchlands/db';
 
@@ -32,7 +33,7 @@ import { refreshZoneStats, type ZoneStats } from '#/engine/world.ts';
 
 export interface WorldInfo {
   mapSize: number;
-  source: 'generated' | 'legacy';
+  source: WorldMapSource;
   seed: string;
   createdAt: number;
 }
@@ -56,7 +57,7 @@ function legacyMapPath(): string {
  * Create the 800x800 tile table once. Safe to call from several processes: guarded by an
  * advisory lock and the `world` row in world_state.
  */
-export async function ensureWorld(db: Db, opts: { source: 'generated' | 'legacy'; seed: string; log?: (m: string) => void }): Promise<WorldInfo> {
+export async function ensureWorld(db: Db, opts: { source: WorldMapSource; seed: string; log?: (m: string) => void }): Promise<WorldInfo> {
   const log = opts.log ?? (() => {});
   return db.transaction(async (tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(${SEED_LOCK})`);
@@ -64,7 +65,7 @@ export async function ensureWorld(db: Db, opts: { source: 'generated' | 'legacy'
     if (existing) return existing;
     const size = BALANCE.mapSize;
     let data: Uint8Array;
-    if (opts.source === 'legacy') {
+    if (opts.source === WorldMapSource.LEGACY) {
       data = zlib.gunzipSync(fs.readFileSync(legacyMapPath()));
       log('seeding world from legacy s2 tile dump');
     } else {

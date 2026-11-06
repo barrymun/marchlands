@@ -2,7 +2,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { FlowActionType, FlowStatus, freshNpcState, tileId, TileType, tileXY, TimedEventType } from '@marchlands/core';
+import { FlowActionType, FlowStatus, freshNpcState, HeroBuffId, tileId, TileType, tileXY, TimedEventType } from '@marchlands/core';
 import { tiles } from '@marchlands/db';
 
 import { dropCapturedTarget } from '#/engine/flows.ts';
@@ -12,7 +12,7 @@ import { createTestPlayer, reloadCity } from '#test/support/factories.ts';
 import { armyPreset, farmingCity, flowOf, newFlow, runFlowIn } from '#test/support/flows.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 
-const mayor = { type: FlowActionType.SET_MAYOR, stat: 'power' };
+const mayor = { type: FlowActionType.SET_MAYOR, stat: HeroBuffId.POWER };
 const attack = (targets: Record<string, number[]>) => ({ type: FlowActionType.ATTACK_TARGETS, presetId: '', targets });
 
 /** The nearest barbarian city to this city. */

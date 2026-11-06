@@ -1,45 +1,46 @@
+import { UnitGroup } from '@/components/stats-panel/constants';
 import { i18n } from '@/lib/i18n';
 
 /** Columns of the units table: the counter group and its header. */
 export const UNIT_COLUMNS = [
   {
-    group: 'trained',
+    group: UnitGroup.TRAINED,
     get label() {
       return i18n.t('stats-panel:units.columns.trained');
     },
   },
   {
-    group: 'killed',
+    group: UnitGroup.KILLED,
     get label() {
       return i18n.t('stats-panel:units.columns.killed');
     },
   },
   {
-    group: 'died',
+    group: UnitGroup.DIED,
     get label() {
       return i18n.t('stats-panel:units.columns.died');
     },
   },
   {
-    group: 'injured',
+    group: UnitGroup.INJURED,
     get label() {
       return i18n.t('stats-panel:units.columns.injured');
     },
   },
   {
-    group: 'healed',
+    group: UnitGroup.HEALED,
     get label() {
       return i18n.t('stats-panel:units.columns.healed');
     },
   },
   {
-    group: 'deserted',
+    group: UnitGroup.DESERTED,
     get label() {
       return i18n.t('stats-panel:units.columns.deserted');
     },
   },
   {
-    group: 'disbanded',
+    group: UnitGroup.DISBANDED,
     get label() {
       return i18n.t('stats-panel:units.columns.disbanded');
     },

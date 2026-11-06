@@ -1,4 +1,5 @@
 import type { MarketFactions, MarketMerchant, MarketPriceLevel } from '@marchlands/api-client';
+import { TradeCounterparty } from '@marchlands/core';
 
 /** A row of the book: a player's price level, the factions' price or the merchant's. */
 export interface BookRow {
@@ -6,7 +7,7 @@ export interface BookRow {
   price: number;
   /** null: the merchant, who trades any amount */
   amount: number | null;
-  source: 'player' | 'factions' | 'merchant';
+  source: TradeCounterparty;
   /** the player's level, to prepare the opposite order at its price */
   level?: MarketPriceLevel;
   /** how much is on offer up to this row from the middle of the book, as a share of the side's most (0 to 1) */
@@ -19,10 +20,17 @@ export interface BookRow {
  * lowest, for buyers the highest); the merchant, trading any amount, adds nothing.
  */
 export function bookSide(sells: boolean, levels: MarketPriceLevel[], factions?: MarketFactions | null, merchant?: MarketMerchant | null): BookRow[] {
-  const rows: Omit<BookRow, 'depth'>[] = levels.map((l) => ({ key: `p${l.price}`, price: l.price, amount: l.amount, source: 'player' as const, level: l }));
+  const rows: Omit<BookRow, 'depth'>[] = levels.map((l) => ({
+    key: `p${l.price}`,
+    price: l.price,
+    amount: l.amount,
+    source: TradeCounterparty.PLAYER,
+    level: l,
+  }));
   const theirs = sells ? factions?.ask : factions?.bid;
-  if (factions && theirs != null) rows.push({ key: 'factions', price: theirs, amount: sells ? factions.sells : factions.buys, source: 'factions' });
-  if (merchant) rows.push({ key: 'merchant', price: sells ? merchant.ask : merchant.bid, amount: null, source: 'merchant' });
+  if (factions && theirs != null)
+    rows.push({ key: TradeCounterparty.FACTIONS, price: theirs, amount: sells ? factions.sells : factions.buys, source: TradeCounterparty.FACTIONS });
+  if (merchant) rows.push({ key: TradeCounterparty.MERCHANT, price: sells ? merchant.ask : merchant.bid, amount: null, source: TradeCounterparty.MERCHANT });
   // from the best price outwards
   const outward = [...rows].sort((a, b) => (sells ? a.price - b.price : b.price - a.price));
   let total = 0;

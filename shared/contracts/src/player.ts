@@ -15,6 +15,7 @@ import {
   MessageSchema,
   ResearchStateSchema,
   TREND_KEYS,
+  WORLD_MAP_SOURCES,
 } from '@marchlands/core';
 import { accounts } from '@marchlands/db/schema';
 
@@ -99,7 +100,7 @@ export type ZoneStats = z.infer<typeof ZoneStats>;
 export const WorldInfo = z
   .object({
     mapSize: z.number().int(),
-    source: z.enum(['generated', 'legacy']),
+    source: z.enum(WORLD_MAP_SOURCES),
     seed: z.string(),
     createdAt: Ms,
   })

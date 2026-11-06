@@ -4,7 +4,7 @@
 // by name, durations by their two largest units ("1h 30m"), shares as percents ("12.5%"), nested messages recursively, lists joined; `count` stays a number so the plural form can be chosen
 // (write it as `{{count, number}}`).
 
-import type { GameRef } from '@marchlands/core';
+import { type GameRef, GameRefKind, HeroBuffId, type ResourceKey } from '@marchlands/core';
 
 import { fmtDecimal, fmtExact, percent, shortDuration } from '@/lib/format';
 import { buildingName, gearName, itemCategoryName, itemName, rankName, techName, tileName, titleName, troopName, zoneName } from '@/lib/game-data';
@@ -30,31 +30,31 @@ const isShare = (v: unknown): v is { share: number } => isObject(v) && typeof v.
 export function gameRefName(r: AnyRef): string {
   const id = r.id;
   switch (r.ref) {
-    case 'troop':
+    case GameRefKind.TROOP:
       return troopName(Number(id));
-    case 'building':
+    case GameRefKind.BUILDING:
       return buildingName(Number(id));
-    case 'tech':
+    case GameRefKind.TECH:
       return techName(Number(id));
-    case 'item':
+    case GameRefKind.ITEM:
       return itemName(String(id));
-    case 'title':
+    case GameRefKind.TITLE:
       return titleName(Number(id));
-    case 'tile':
+    case GameRefKind.TILE:
       return tileName(Number(id));
-    case 'zone':
+    case GameRefKind.ZONE:
       return zoneName(Number(id));
-    case 'rank':
+    case GameRefKind.RANK:
       return rankName(Number(id));
-    case 'gear':
+    case GameRefKind.GEAR:
       return gearName(String(id));
-    case 'itemCategory':
+    case GameRefKind.ITEM_CATEGORY:
       return itemCategoryName(Number(id));
-    case 'resource':
-      return i18n.t(`common:resourcesInline.${id as 'gold' | 'food' | 'wood' | 'stone' | 'iron'}`);
-    case 'stat':
+    case GameRefKind.RESOURCE:
+      return i18n.t(`common:resourcesInline.${id as ResourceKey}`);
+    case GameRefKind.STAT:
       return i18n.t(
-        `common:heroAttributes.${({ power: 'attack', management: 'politics', stratagem: 'intelligence' } as const)[id as 'power' | 'management' | 'stratagem']}`,
+        `common:heroAttributes.${({ [HeroBuffId.POWER]: 'attack', [HeroBuffId.MANAGEMENT]: 'politics', [HeroBuffId.STRATAGEM]: 'intelligence' } as const)[id as HeroBuffId]}`,
       );
   }
 }
@@ -72,10 +72,13 @@ export function paramText(v: unknown): string {
   return '';
 }
 
+/** The param i18next picks a plural form by: left a number, for it to read. */
+const PLURAL_PARAM = 'count';
+
 /** A server message in the current locale. */
 export function translateMessage(m: AnyMessage): string {
   const dot = m.code.indexOf('.');
   const params: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(m.params ?? {})) params[k] = k === 'count' && typeof v === 'number' ? v : paramText(v);
+  for (const [k, v] of Object.entries(m.params ?? {})) params[k] = k === PLURAL_PARAM && typeof v === 'number' ? v : paramText(v);
   return i18n.t(`msg-${m.code.slice(0, dot)}:${m.code.slice(dot + 1)}` as never, params as never) as unknown as string;
 }

@@ -6,7 +6,7 @@ import { sql } from 'drizzle-orm';
 import Fastify, { type FastifyServerOptions } from 'fastify';
 import { jsonSchemaTransform, jsonSchemaTransformObject, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 
-import { PushCmd } from '@marchlands/contracts';
+import { ClientCmd, PushCmd } from '@marchlands/contracts';
 import { msg } from '@marchlands/core';
 import type { Db } from '@marchlands/db';
 
@@ -110,7 +110,7 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     socket.on('message', (raw: Buffer) => {
       try {
         const msg = JSON.parse(raw.toString()) as { cmd?: string };
-        if (msg.cmd === 'ping') sendPush(socket, { cmd: PushCmd.PONG, data: { serverTime: Date.now() } });
+        if (msg.cmd === ClientCmd.PING) sendPush(socket, { cmd: PushCmd.PONG, data: { serverTime: Date.now() } });
       } catch {
         /* ignore malformed frames */
       }

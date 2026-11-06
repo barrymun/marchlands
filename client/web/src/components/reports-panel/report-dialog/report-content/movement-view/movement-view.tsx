@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
 
-import type { ReportBody } from '@marchlands/core';
+import { type ReportBody, type ReportBodyKind } from '@marchlands/core';
 
 import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
 import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
 import { TroopList } from '@/components/reports-panel/report-dialog/report-content/troop-list/troop-list';
 
-export function MovementView({ movement: m }: { movement: Extract<ReportBody, { kind: 'movement' }>['movement'] }) {
+export function MovementView({ movement: m }: { movement: Extract<ReportBody, { kind: typeof ReportBodyKind.MOVEMENT }>['movement'] }) {
   const { t } = useTranslation(['reports-panel', 'common']);
   return (
     <div className="grid gap-1.5 text-sm">

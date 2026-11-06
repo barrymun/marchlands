@@ -1,4 +1,4 @@
-import { BuildingType, stateOf } from '@marchlands/core';
+import { BuildingType, SpotKind, stateOf } from '@marchlands/core';
 
 import {
   AFTERMATH_FIRES,
@@ -21,8 +21,9 @@ import {
   WALK_SPEED,
   WHEEL_FRAMES,
 } from '@/components/iso-anim/constants';
-import type { Animated, Frame, GridSpot, Marching, Rgb, Side, Spot, Streets, TownState } from '@/components/iso-anim/types';
-import type { Overlay, Particle, PixelArt, Sky, Weather } from '@/components/iso-viewport/types';
+import type { Animated, Frame, GridSpot, Marching, Rgb, Side, Spot, SpotPoint, Streets, TownState } from '@/components/iso-anim/types';
+import { Weather } from '@/components/iso-viewport/constants';
+import type { Overlay, Particle, PixelArt, Sky } from '@/components/iso-viewport/types';
 import { spriteBox } from '@/components/iso-viewport/utils';
 import { pairs } from '@/lib/arrays';
 
@@ -492,8 +493,8 @@ export function weatherAt(date: Date, zoneId: number): Weather | null {
   const block = Math.floor(date.getUTCHours() / 4);
   const r = (hash(`${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDate()}-${block}-${zoneId}`) % 1000) / 1000;
   const winter = [11, 0, 1].includes(date.getUTCMonth());
-  if (r < 0.05) return 'storm';
-  if (r < 0.22) return winter ? 'snow' : 'rain';
+  if (r < 0.05) return Weather.STORM;
+  if (r < 0.22) return winter ? Weather.SNOW : Weather.RAIN;
   return null;
 }
 
@@ -503,18 +504,18 @@ export function weatherAt(date: Date, zoneId: number): Weather | null {
  */
 export function particlesAt(weather: Weather | null, t: number, w: number, h: number): Particle[] {
   if (!weather || w <= 0 || h <= 0) return [];
-  const per = weather === 'storm' ? 2500 : weather === 'rain' ? 5000 : 6000;
+  const per = weather === Weather.STORM ? 2500 : weather === Weather.RAIN ? 5000 : 6000;
   const n = Math.min(600, Math.round((w * h) / per));
   const s = t / 1000;
   return Array.from({ length: n }, (_, i) => {
     const rand = seeded(i + 1);
     const [x0, y0, v] = [rand() * w, rand() * h, 0.8 + rand() * 0.4];
-    if (weather === 'snow') {
+    if (weather === Weather.SNOW) {
       const y = (((y0 + s * 40 * v) % h) + h) % h;
       return { x: (((x0 + Math.sin(s * 1.5 + i) * 6) % w) + w) % w, y, len: 0 };
     }
-    const speed = (weather === 'storm' ? 700 : 520) * v;
-    return { x: (((x0 - (s * speed) / 2) % w) + w) % w, y: (((y0 + s * speed) % h) + h) % h, len: weather === 'storm' ? 8 : 6 };
+    const speed = (weather === Weather.STORM ? 700 : 520) * v;
+    return { x: (((x0 - (s * speed) / 2) % w) + w) % w, y: (((y0 + s * speed) % h) + h) % h, len: weather === Weather.STORM ? 8 : 6 };
   });
 }
 
@@ -533,12 +534,12 @@ export function flashAt(t: number, seed: number): number {
  */
 export function skyAt(zoneId: number, t: number, w: number, h: number, date = new Date()): Sky {
   const weather = weatherAt(date, zoneId);
-  const overcast = weather === 'storm' ? 0.35 : weather ? 0.15 : 0;
+  const overcast = weather === Weather.STORM ? 0.35 : weather ? 0.15 : 0;
   return {
     darkness: Math.min(1, darknessAt(date.getHours() + date.getMinutes() / 60) * 0.85 + overcast),
     weather,
     particles: particlesAt(weather, t, w, h),
-    flash: weather === 'storm' ? flashAt(t, zoneId) : 0,
+    flash: weather === Weather.STORM ? flashAt(t, zoneId) : 0,
   };
 }
 
@@ -590,25 +591,25 @@ export function blastAt(t: number, phase: number): number {
 /** The ambient animation a spot shows, if any, at time `t`: a frame (or two, a quarry's dust and blast) and its alpha. */
 function ambient(spot: Spot, t: number, seed: number): Frame[] {
   switch (spot.k) {
-    case 'smoke':
+    case SpotKind.SMOKE:
       return [smokeFrame(frameAt(t, 6, SMOKE_FRAMES, seed), seed)];
-    case 'fire':
+    case SpotKind.FIRE:
       return [fireFrame(frameAt(t, 8, 6, seed), spot.n ?? 4)];
-    case 'sails':
+    case SpotKind.SAILS:
       return [sailsFrame(frameAt(t, 5, SAIL_FRAMES, 0), spot.n ?? 6)];
-    case 'wheel':
+    case SpotKind.WHEEL:
       return [wheelFrame(frameAt(t, 6, WHEEL_FRAMES, 0), spot.n ?? 3)];
-    case 'banner':
+    case SpotKind.BANNER:
       return [bannerFrame(frameAt(t, 3, 4, seed))];
-    case 'glow':
+    case SpotKind.GLOW:
       return [glowFrame(frameAt(t, 3, 6, seed), spot.n ?? 3)];
-    case 'horse':
+    case SpotKind.HORSE:
       return [horseTailFrame(frameAt(t, 4, 6, seed))];
-    case 'sheep':
+    case SpotKind.SHEEP:
       return [sheepFrame(frameAt(t, 2, 8, seed), Math.cos((t / 1000) * 0.15 + seed) >= 0)];
-    case 'water':
+    case SpotKind.WATER:
       return [glintFrame(frameAt(t, 3, 6, seed), spot.n ?? 6)];
-    case 'rock': {
+    case SpotKind.ROCK: {
       const blast = blastAt(t, seed);
       return blast >= 0 ? [dustFrame(frameAt(t, 6, DUST_FRAMES, seed), seed), blastFrame(blast)] : [dustFrame(frameAt(t, 6, DUST_FRAMES, seed), seed)];
     }
@@ -737,9 +738,9 @@ export function walkerOverlays(streets: Streets, count: number, t: number, key: 
 }
 
 /** Where a sprite stands on its tile when it has no spot for something: the middle of its ground. */
-function middleOf(owner: Pick<Animated, 'size'>): Spot {
+function middleOf(owner: Pick<Animated, 'size'>): SpotPoint {
   const size = owner.size ?? 64;
-  return { k: 'middle', x: size / 2, y: (size * 3) / 4 - 2 };
+  return { x: size / 2, y: (size * 3) / 4 - 2 };
 }
 
 /**
@@ -762,50 +763,51 @@ export function pacing(t: number, reach: number, seed: number): { dx: number; dy
 export function buildingOverlays(owner: Animated, typeId: number, pos: number | undefined, state: TownState, t: number, night = false): Overlay[] {
   const spots = SPOTS[owner.file] ?? [];
   const alarm = typeId === BuildingType.BEACON_TOWER && state.enemy;
-  const out = ambientOverlays(owner, t, alarm ? spots.filter((s) => s.k !== 'fire') : spots);
+  const out = ambientOverlays(owner, t, alarm ? spots.filter((s) => s.k !== SpotKind.FIRE) : spots);
   const seed = hash(owner.key);
-  const of = (k: string) => spots.filter((s) => s.k === k);
-  const first = (k: string) => of(k)[0] ?? middleOf(owner);
-  const put = (s: Spot, f: Frame, name: string, dx = 0, dy = 0) => out.push(placeFrame(owner, { ...s, x: s.x + dx, y: s.y + dy }, f, `${owner.key}:${name}`));
+  const of = (k: SpotKind) => spots.filter((s) => s.k === k);
+  const first = (k: SpotKind) => of(k)[0] ?? middleOf(owner);
+  const put = (s: SpotPoint, f: Frame, name: string, dx = 0, dy = 0) =>
+    out.push(placeFrame(owner, { ...s, x: s.x + dx, y: s.y + dy }, f, `${owner.key}:${name}`));
   // at night the windows are lit
-  if (night) of('window').forEach((s, i) => put(s, windowLightFrame(frameAt(t, 2, 4, seed + i), s.n ?? 2), `lamp${i}`));
+  if (night) of(SpotKind.WINDOW).forEach((s, i) => put(s, windowLightFrame(frameAt(t, 2, 4, seed + i), s.n ?? 2), `lamp${i}`));
   switch (typeId) {
     case BuildingType.BEACON_TOWER:
       if (alarm)
-        of('fire').forEach((s, i) => {
+        of(SpotKind.FIRE).forEach((s, i) => {
           put(s, fireFrame(frameAt(t, 10, 6, seed + i), (s.n ?? 4) * 2.4), `blaze${i}`);
           put(s, smokeFrame(frameAt(t, 8, SMOKE_FRAMES, seed + i), seed), `blazeSmoke${i}`, 0, -(s.n ?? 4) * 2);
         });
       break;
     case BuildingType.BARRACKS:
-      if (pos != null && state.training.includes(pos)) put(first('dummy'), drillFrame(frameAt(t, 4, 4, seed)), 'drill', -8, 5);
+      if (pos != null && state.training.includes(pos)) put(first(SpotKind.DUMMY), drillFrame(frameAt(t, 4, 4, seed)), 'drill', -8, 5);
       break;
     case BuildingType.FORGE:
-      if (state.forts) of('anvil').forEach((s, i) => put(s, sparksFrame(frameAt(t, 8, 8, seed + i * 3)), `sparks${i}`));
+      if (state.forts) of(SpotKind.ANVIL).forEach((s, i) => put(s, sparksFrame(frameAt(t, 8, 8, seed + i * 3)), `sparks${i}`));
       break;
     case BuildingType.ACADEMY:
       if (state.research) {
-        of('window').forEach((s, i) => put(s, glowFrame(frameAt(t, 3, 6, seed + i), s.n ?? 2), `study${i}`));
-        of('dome').forEach((s, i) => put(s, twinkleFrame(frameAt(t, 4, 4, seed + i)), `twinkle${i}`));
+        of(SpotKind.WINDOW).forEach((s, i) => put(s, glowFrame(frameAt(t, 3, 6, seed + i), s.n ?? 2), `study${i}`));
+        of(SpotKind.DOME).forEach((s, i) => put(s, twinkleFrame(frameAt(t, 4, 4, seed + i)), `twinkle${i}`));
       }
       break;
     case BuildingType.STABLE:
       if (state.cavalry) {
         const p = pacing(t, 9, seed);
-        put(first('horse'), riderFrame(frameAt(t, 6, 2, seed), p.left), 'rider', p.dx - 4, p.dy + 6);
+        put(first(SpotKind.HORSE), riderFrame(frameAt(t, 6, 2, seed), p.left), 'rider', p.dx - 4, p.dy + 6);
       }
       break;
     case BuildingType.RELIEF_STATION:
       if (state.injured) {
         const p = pacing(t, 8, seed);
-        put(first('tent'), stretcherFrame(frameAt(t, 5, 2, seed), p.left), 'stretcher', p.dx, p.dy + 6);
+        put(first(SpotKind.TENT), stretcherFrame(frameAt(t, 5, 2, seed), p.left), 'stretcher', p.dx, p.dy + 6);
       }
       break;
     case BuildingType.RALLY_SPOT:
-      if (state.armyOut) put(first('tent'), drillFrame(frameAt(t, 4, 4, seed)), 'muster', -10, 6);
+      if (state.armyOut) put(first(SpotKind.TENT), drillFrame(frameAt(t, 4, 4, seed)), 'muster', -10, 6);
       break;
     case BuildingType.WORKSHOP:
-      if (state.siege) put(first('logs'), sawdustFrame(frameAt(t, 8, 6, seed)), 'sawdust');
+      if (state.siege) put(first(SpotKind.LOGS), sawdustFrame(frameAt(t, 8, 6, seed)), 'sawdust');
       break;
   }
   return out;
@@ -889,7 +891,7 @@ export function hasMovingParts(file: string): boolean {
 }
 
 /** A frame laid on a sprite: the overlay that puts frame `f`'s anchor on spot `s` of a sprite standing on its tile. */
-export function placeFrame(owner: Animated, s: Spot, f: Frame, key: string, alpha?: number): Overlay {
+export function placeFrame(owner: Animated, s: SpotPoint, f: Frame, key: string, alpha?: number): Overlay {
   const box = spriteBox(owner.size);
   const o: Overlay = { key, col: owner.col, row: owner.row, art: f.art, x: box.left + s.x - f.ax, y: box.top + s.y - f.ay };
   if (alpha != null) o.alpha = alpha;
@@ -906,7 +908,7 @@ export function ambientOverlays(owner: Animated, t: number, spots: readonly Spot
   return spots.flatMap((s, i) => {
     const seed = hash(`${owner.key}:${i}`);
     // a sheep wanders a pixel or two about where it was drawn
-    const at = s.k === 'sheep' ? { ...s, x: s.x + Math.round(Math.sin((t / 1000) * 0.15 + seed) * 2) } : s;
+    const at = s.k === SpotKind.SHEEP ? { ...s, x: s.x + Math.round(Math.sin((t / 1000) * 0.15 + seed) * 2) } : s;
     return ambient(s, t, seed).map((f, j) => placeFrame(owner, at, f, `${owner.key}:a${i}:${j}`));
   });
 }

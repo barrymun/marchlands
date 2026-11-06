@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ResourceKey, UnlockKind } from '#/constants.ts';
 import { BALANCE, BuildingType, FortType, MSG_CODES, msgParamNames, ref, TECH_IDS, techEffect, techInfo, TechType, TroopType } from '#/index.ts';
 
 describe(techInfo.name, () => {
@@ -14,7 +15,7 @@ describe(techInfo.name, () => {
   it('takes its numbers from BALANCE and names game data by reference', () => {
     expect(techInfo(TechType.LUMBERING).summary).toEqual({
       code: 'techInfo.summary.resource',
-      params: { resource: ref.resource('wood'), pct: { share: BALANCE.resourceTechBonusPerLevel } },
+      params: { resource: ref.resource(ResourceKey.WOOD), pct: { share: BALANCE.resourceTechBonusPerLevel } },
     });
     expect(techInfo(TechType.METAL_CASTING).summary.params?.troops).toEqual(
       [TroopType.TRANSPORTER, TroopType.BALLISTA, TroopType.RAM, TroopType.CATAPULT].map(ref.troop),
@@ -23,12 +24,12 @@ describe(techInfo.name, () => {
 
   it('lists what a tech unlocks by id, at the lowest level needed, in level order', () => {
     const unlocks = techInfo(TechType.ARCHERY).unlocks;
-    expect(unlocks[0]).toEqual({ kind: 'troop', id: TroopType.ARCHER, level: 1 });
+    expect(unlocks[0]).toEqual({ kind: UnlockKind.TROOP, id: TroopType.ARCHER, level: 1 });
     expect(unlocks.map((u) => u.level)).toEqual([...unlocks.map((u) => u.level)].sort((a, b) => a - b));
-    expect(unlocks).toContainEqual(expect.objectContaining({ kind: 'troop', id: FortType.ARCHER_TOWER }));
+    expect(unlocks).toContainEqual(expect.objectContaining({ kind: UnlockKind.TROOP, id: FortType.ARCHER_TOWER }));
     // a fortification is listed as the troop it is, never as a building
     expect(unlocks.some((u) => u.kind === 'building' && u.id === BuildingType.ARCHER_TOWER)).toBe(false);
-    expect(techInfo(TechType.LUMBERING).unlocks).toContainEqual({ kind: 'tech', id: TechType.MASONRY, level: 1 });
+    expect(techInfo(TechType.LUMBERING).unlocks).toContainEqual({ kind: UnlockKind.TECH, id: TechType.MASONRY, level: 1 });
   });
 });
 

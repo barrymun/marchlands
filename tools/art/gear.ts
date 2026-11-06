@@ -4,6 +4,8 @@
 // client stacks under the piece; and the stars shown beside it: red in use, orange waiting, grey not yet bought.
 // Pieces lie diagonally, hilt or base at the bottom left, lit from the top left like the troops.
 
+import { SpotKind } from '@marchlands/core';
+
 import { back } from './gear/back.ts';
 import { belt } from './gear/belt.ts';
 import { charm } from './gear/charm.ts';
@@ -19,12 +21,15 @@ import { ring } from './gear/ring.ts';
 import { shield } from './gear/shield.ts';
 import { shoulder } from './gear/shoulder.ts';
 import { weapon } from './gear/weapon.ts';
-import { type Colour, PixelCanvas, type Spot } from './pixel.ts';
+import { CLEAR, type Colour, PixelCanvas, type Spot } from './pixel.ts';
 import { disc } from './shapes.ts';
-import type { GearStarKind } from '../../client/web/src/lib/game-art.ts';
+import type { GearStarKind, GearTwinPart } from '../../client/web/src/lib/game-art.ts';
 
 const SIZE = 32;
 const STAR = 9;
+
+/** The names of GEAR_STAR_KINDS (lib/game-art.ts lists them without any). */
+const GearStar = { USED: 'used', WAITING: 'waiting', EMPTY: 'empty' } as const satisfies Record<string, GearStarKind>;
 
 /** The backdrop at a gear level: its colour glowing from the middle to dark edges; level 10 sparkles. */
 function backdrop(level: number): PixelCanvas {
@@ -54,7 +59,7 @@ function backdrop(level: number): PixelCanvas {
       [8, 25, 1],
       [17, 3, 1],
     ] as const) {
-      c.spot('star', [x, y], r);
+      c.spot(SpotKind.STAR, [x, y], r);
       c.set(x, y, 'sparkle');
       for (let i = 1; i <= r; i++)
         for (const [dx, dy] of [
@@ -71,7 +76,7 @@ function backdrop(level: number): PixelCanvas {
 /** A gear star, 9×9: a red five-pointed star in use, an orange disc waiting, a grey star not yet bought. */
 function star(kind: GearStarKind): PixelCanvas {
   const c = new PixelCanvas(STAR, `star-${kind}`);
-  if (kind === 'waiting') {
+  if (kind === GearStar.WAITING) {
     disc(c, 4, 4, 3.6, 'wait', 'waitDark');
     for (const [x, y] of [
       [3, 2],
@@ -80,11 +85,11 @@ function star(kind: GearStarKind): PixelCanvas {
       [4, 2],
     ] as const)
       c.set(x, y, 'waitHi');
-    for (let y = 0; y < STAR; y++) for (let x = 0; x < STAR; x++) if (c.get(x, y) !== 'clear' && Math.hypot(x - 4, y - 4) > 3.2) c.set(x, y, 'waitDark');
+    for (let y = 0; y < STAR; y++) for (let x = 0; x < STAR; x++) if (c.get(x, y) !== CLEAR && Math.hypot(x - 4, y - 4) > 3.2) c.set(x, y, 'waitDark');
     return c;
   }
   const rows = ['....#....', '....#....', '...###...', '#########', '.#######.', '..#####..', '..##.##..', '.##...##.', '.#.....#.'];
-  const [hi, mid, dark]: Colour[] = kind === 'used' ? ['starHi', 'star', 'starDark'] : ['gear1Dark', 'gear1Dark', 'gear0Hi'];
+  const [hi, mid, dark]: Colour[] = kind === GearStar.USED ? ['starHi', 'star', 'starDark'] : ['gear1Dark', 'gear1Dark', 'gear0Hi'];
   const on = (x: number, y: number) => rows[y]?.[x] === '#';
   for (let y = 0; y < STAR; y++)
     for (let x = 0; x < STAR; x++) {
@@ -104,7 +109,7 @@ const showing =
   (draw: (level: number) => PixelCanvas) =>
   (level: number): PixelCanvas => {
     const c = draw(level);
-    const hidden = (s: Spot) => (s.k === 'gem' || s.k === 'shine') && ['clear', 'outline'].includes(c.get(s.x, s.y));
+    const hidden = (s: Spot) => (s.k === SpotKind.GEM || s.k === SpotKind.SHINE) && [CLEAR, 'outline'].includes(c.get(s.x, s.y));
     for (let i = c.spots.length - 1; i >= 0; i--) if (hidden(c.spots[i])) c.spots.splice(i, 1);
     return c;
   };
@@ -118,7 +123,7 @@ export const GEAR_DRAWINGS: Record<string, (level: number) => PixelCanvas> = Obj
 );
 
 /** The pieces with a part that moves alone, drawn whole, `bare` or as the part: their twins (lib/game-art.ts, gearTwinFile). */
-export const GEAR_TWINS: Record<string, (level: number, part: 'bare' | 'plume') => PixelCanvas> = { head };
+export const GEAR_TWINS: Record<string, (level: number, part: GearTwinPart) => PixelCanvas> = { head };
 
 export const GEAR_BACKDROP = backdrop;
 export const GEAR_STAR = star;

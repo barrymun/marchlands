@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { ArmyDirection, BuildingType, heroGearBonus, heroGearStat, msg, TechType, TileType } from '@marchlands/core';
+import { ArmyDirection, BuildingType, HeroBuffId, heroGearBonus, heroGearStat, msg, TechType, TileType } from '@marchlands/core';
 import { players } from '@marchlands/db';
 
 import { heroes } from '#/index.ts';
@@ -200,7 +200,11 @@ describe('heroes', () => {
       await enhance(g, p, 3);
       const id = await addHero(g, p);
       const bonus = heroGearBonus(30, { level: 3, stars: {} });
-      expect(await updateHero(g, id, { level: 30, gearStat: 'stratagem' })).toMatchObject({ powerAdded: 0, managementAdded: 0, stratagemAdded: bonus });
+      expect(await updateHero(g, id, { level: 30, gearStat: HeroBuffId.STRATAGEM })).toMatchObject({
+        powerAdded: 0,
+        managementAdded: 0,
+        stratagemAdded: bonus,
+      });
     }));
 });
 

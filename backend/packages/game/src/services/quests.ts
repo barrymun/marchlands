@@ -10,6 +10,7 @@ import {
   GameError,
   HeroStatus,
   msg,
+  PlayerRelationKind,
   QUEST_CATALOGUE,
   questById,
   questGroupsWithQuests,
@@ -57,7 +58,7 @@ async function snapshot(ctx: Ctx, playerId: number): Promise<QuestSnapshot> {
     await ctx.tx
       .select({ n: count() })
       .from(playerRelations)
-      .where(and(eq(playerRelations.playerId, playerId), eq(playerRelations.kind, 'friend'))),
+      .where(and(eq(playerRelations.playerId, playerId), eq(playerRelations.kind, PlayerRelationKind.FRIEND))),
   );
   return {
     buildings,

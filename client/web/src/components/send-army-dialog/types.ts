@@ -1,4 +1,4 @@
-import type { TroopKey } from '@marchlands/core';
+import type { BattleTarget, TroopKey } from '@marchlands/core';
 
 export interface SendTarget {
   tileId: number;
@@ -9,7 +9,7 @@ export interface SendTarget {
   /** troop amounts filled in when the dialog opens */
   troops?: Partial<Record<TroopKey, string>>;
   /** what is at the target, for the scouting note */
-  kind?: 'city' | 'npc' | 'valley';
+  kind?: BattleTarget;
   /** the player's own city or valley: the sending city's Relief Station speeds the march there, as the server works it out */
   own?: boolean;
 }

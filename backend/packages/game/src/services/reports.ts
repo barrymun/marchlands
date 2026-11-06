@@ -3,7 +3,7 @@
 
 import { and, asc, count, desc, eq, inArray, or, type SQL, sql } from 'drizzle-orm';
 
-import { GameError, msg, type ReportBody, ReportBodySchema, ReportKind, ReportOrder } from '@marchlands/core';
+import { ALL_REPORTS, GameError, msg, type ReportBody, ReportBodyKind, ReportBodySchema, ReportKind, ReportOrder } from '@marchlands/core';
 import { one, players, reports } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
@@ -55,15 +55,15 @@ const aborted = sql`${reports.title}->>'code' = 'report.title.missionAborted'`;
 function kindWhere(kind: ReportKind): SQL {
   switch (kind) {
     case ReportKind.BATTLES:
-      return sql`${bodyKind} = 'battle'`;
+      return sql`${bodyKind} = ${ReportBodyKind.BATTLE}`;
     case ReportKind.SCOUTING:
-      return sql`${bodyKind} = 'scout'`;
+      return sql`${bodyKind} = ${ReportBodyKind.SCOUT}`;
     case ReportKind.RETURNS:
       return eq(reports.isBack, true);
     case ReportKind.MOVEMENTS:
-      return sql`((${bodyKind} = 'movement' and not ${reports.isBack}) or ${aborted})`;
+      return sql`((${bodyKind} = ${ReportBodyKind.MOVEMENT} and not ${reports.isBack}) or ${aborted})`;
     case ReportKind.OTHER:
-      return sql`(${bodyKind} not in ('battle', 'scout', 'movement') and not ${aborted})`;
+      return sql`(${bodyKind} not in (${ReportBodyKind.BATTLE}, ${ReportBodyKind.SCOUT}, ${ReportBodyKind.MOVEMENT}) and not ${aborted})`;
   }
 }
 
@@ -126,13 +126,13 @@ export async function readReport(ctx: Ctx, playerId: number, id: number) {
   }
   // rows written before the report format was typed may not match it: show a notice instead of failing
   const parsed = ReportBodySchema.safeParse(r.body);
-  const content: ReportBody = parsed.success ? parsed.data : { kind: 'text', text: msg('report.oldFormat') };
+  const content: ReportBody = parsed.success ? parsed.data : { kind: ReportBodyKind.TEXT, text: msg('report.oldFormat') };
   return { ...listBean(r), isRead: r.isRead, content };
 }
 
 /** report.readOverReport */
-export async function markReportsRead(ctx: Ctx, playerId: number, ids: number[] | 'all') {
-  const where = ids === 'all' ? eq(reports.playerId, playerId) : and(eq(reports.playerId, playerId), inArray(reports.id, ids.length ? ids : [-1]));
+export async function markReportsRead(ctx: Ctx, playerId: number, ids: number[] | typeof ALL_REPORTS) {
+  const where = ids === ALL_REPORTS ? eq(reports.playerId, playerId) : and(eq(reports.playerId, playerId), inArray(reports.id, ids.length ? ids : [-1]));
   await ctx.tx.update(reports).set({ isRead: true }).where(where);
   await pushReportCounts(ctx, playerId);
 }

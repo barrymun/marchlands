@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FORT_KEY_LIST, FORT_KEYS, TROOP_KEY_LIST, TROOP_KEYS } from '@marchlands/core';
 
+import { UnitGroup } from '@/components/stats-panel/constants';
 import { shareOf, sumPrefix, unitCount, unitName } from '@/components/stats-panel/utils';
 import { troopName } from '@/lib/game-data';
 
@@ -32,33 +33,33 @@ describe(sumPrefix.name, () => {
 describe(unitCount.name, () => {
   it('reads the `group.unit` counter', () => {
     const c = { 'trained.archer': 120, 'killed.archer': 7, 'trained.pikemen': 3 };
-    expect(unitCount(c, 'trained', 'archer')).toBe(120);
-    expect(unitCount(c, 'killed', 'archer')).toBe(7);
-    expect(unitCount(c, 'trained', 'pikemen')).toBe(3);
+    expect(unitCount(c, UnitGroup.TRAINED, 'archer')).toBe(120);
+    expect(unitCount(c, UnitGroup.KILLED, 'archer')).toBe(7);
+    expect(unitCount(c, UnitGroup.TRAINED, 'pikemen')).toBe(3);
   });
 
   it('is 0 when the counter is missing', () => {
-    expect(unitCount({}, 'trained', 'archer')).toBe(0);
-    expect(unitCount({ 'trained.archer': 5 }, 'healed', 'archer')).toBe(0);
+    expect(unitCount({}, UnitGroup.TRAINED, 'archer')).toBe(0);
+    expect(unitCount({ 'trained.archer': 5 }, UnitGroup.HEALED, 'archer')).toBe(0);
   });
 
   it('computes died as lost less injured', () => {
-    expect(unitCount({ 'lost.archer': 50, 'injured.archer': 20 }, 'died', 'archer')).toBe(30);
-    expect(unitCount({ 'lost.archer': 50 }, 'died', 'archer')).toBe(50);
+    expect(unitCount({ 'lost.archer': 50, 'injured.archer': 20 }, UnitGroup.DIED, 'archer')).toBe(30);
+    expect(unitCount({ 'lost.archer': 50 }, UnitGroup.DIED, 'archer')).toBe(50);
   });
 
   it('never reports a negative died count', () => {
-    expect(unitCount({ 'lost.archer': 10, 'injured.archer': 25 }, 'died', 'archer')).toBe(0);
-    expect(unitCount({ 'injured.archer': 4 }, 'died', 'archer')).toBe(0);
+    expect(unitCount({ 'lost.archer': 10, 'injured.archer': 25 }, UnitGroup.DIED, 'archer')).toBe(0);
+    expect(unitCount({ 'injured.archer': 4 }, UnitGroup.DIED, 'archer')).toBe(0);
   });
 
   it('ignores a stored `died.` counter (died is always derived)', () => {
-    expect(unitCount({ 'died.archer': 99 }, 'died', 'archer')).toBe(0);
+    expect(unitCount({ 'died.archer': 99 }, UnitGroup.DIED, 'archer')).toBe(0);
   });
 
   it('works for fortifications', () => {
-    expect(unitCount({ 'trained.trap': 400, 'lost.trap': 30 }, 'trained', 'trap')).toBe(400);
-    expect(unitCount({ 'trained.trap': 400, 'lost.trap': 30 }, 'died', 'trap')).toBe(30);
+    expect(unitCount({ 'trained.trap': 400, 'lost.trap': 30 }, UnitGroup.TRAINED, 'trap')).toBe(400);
+    expect(unitCount({ 'trained.trap': 400, 'lost.trap': 30 }, UnitGroup.DIED, 'trap')).toBe(30);
   });
 });
 

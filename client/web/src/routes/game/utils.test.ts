@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { HeroBean } from '@marchlands/api-client';
-import { HeroStatus, Mission, Relation, relationPermissions } from '@marchlands/core';
+import { BattleTarget, HeroStatus, Mission, Relation, relationPermissions } from '@marchlands/core';
 
 import { mayorOf, ownCityTarget } from '@/routes/game/utils';
 
@@ -33,7 +33,7 @@ describe(ownCityTarget.name, () => {
   const target = ownCityTarget({ fieldId: 4242, name: 'Oakmere' });
 
   it('aims at the city and marks it as owned, for the Relief Station', () => {
-    expect(target).toMatchObject({ tileId: 4242, name: 'Oakmere', kind: 'city', own: true });
+    expect(target).toMatchObject({ tileId: 4242, name: 'Oakmere', kind: BattleTarget.CITY, own: true });
   });
 
   it('opens on Transport, one of its missions', () => {

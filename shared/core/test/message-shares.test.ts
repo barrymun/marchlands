@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { HeroBuffId, ItemEffectKind } from '#/constants.ts';
 import {
   buildingEffect,
   buildingInfo,
@@ -35,7 +36,7 @@ const described: Message[] = [
   ...ITEMS.flatMap((i) => {
     const info = itemInfo(i.id)!;
     const e = itemEffect(i.id);
-    return [info.description, ...(e?.kind === 'buff' ? [e.desc] : [])];
+    return [info.description, ...(e?.kind === ItemEffectKind.BUFF ? [e.desc] : [])];
   }),
   ...TECH_IDS.flatMap((id) => [techInfo(id).summary, ...Array.from({ length: 10 }, (_, l) => techEffect(id, l + 1)).filter((m): m is Message => !!m)]),
   ...BUILDINGS.filter((b) => b.level === 1).flatMap((b) => {
@@ -43,7 +44,7 @@ const described: Message[] = [
     return [info.summary, ...Array.from({ length: 10 }, (_, l) => buildingEffect(b.typeId, l + 1))].filter((m): m is Message => !!m);
   }),
   ...TROOPS.map((t) => troopDescription(t.troopId)).filter((m): m is Message => !!m),
-  heroBuffDesc('power'),
+  heroBuffDesc(HeroBuffId.POWER),
 ];
 
 describe('message percentages', () => {

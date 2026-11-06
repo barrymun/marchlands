@@ -2,7 +2,7 @@
 // the entrance, a cart on rails and an ore pile; each band after it is bigger and stronger: a wooden headframe over a
 // shaft and a hut, then a smoking stone furnace, then a second entrance, a forge and a walled yard.
 
-import { IsoCanvas } from '../iso.ts';
+import { Axis, IsoCanvas, Rock, Roofing } from '../iso.ts';
 
 const SIZE = 64;
 const ORE = { top: 'oreHi', left: 'oreL', right: 'oreR' } as const;
@@ -25,7 +25,7 @@ function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20, 'ironmine-1');
   c.grass(0, 0, 20, 20);
   c.path(8, 12, 2, 8);
-  c.outcrop(2, 1, 12, 9, 9, 'ore');
+  c.outcrop(2, 1, 12, 9, 9, Rock.ORE);
   // the face the entrance is cut into
   c.box(5, 8, 0, 6, 3, 5, ORE);
   c.mineEntrance(7, 11, 2, 3);
@@ -40,12 +40,12 @@ function band2(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 24, 'ironmine-2');
   c.grass(0, 0, 24, 24);
   c.path(8, 13, 2, 11);
-  c.outcrop(2, 1, 14, 10, 11, 'ore');
+  c.outcrop(2, 1, 14, 10, 11, Rock.ORE);
   c.box(5, 9, 0, 7, 3, 6, ORE);
   c.mineEntrance(7, 12, 3, 4);
   headframe(c, 17, 4, 12);
   c.timber(18, 10, 0, 4, 4, 3);
-  c.hipRoof(18, 10, 4, 4, 3, 2, 'x', 'shingle');
+  c.hipRoof(18, 10, 4, 4, 3, 2, Axis.X, Roofing.SHINGLE);
   c.cart(8, 15, 4);
   orePile(c, 13, 17);
   orePile(c, 3, 17);
@@ -58,7 +58,7 @@ function band3(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 27, 'ironmine-3');
   c.grass(0, 0, 27, 27);
   c.path(9, 14, 2, 13);
-  c.outcrop(1, 1, 16, 11, 13, 'ore');
+  c.outcrop(1, 1, 16, 11, 13, Rock.ORE);
   c.box(5, 10, 0, 8, 3, 7, ORE);
   c.mineEntrance(8, 13, 3, 4);
   headframe(c, 19, 2, 14);
@@ -80,7 +80,7 @@ function band4(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 30, 'ironmine-4');
   c.grass(0, 0, 30, 30);
   c.path(9, 15, 2, 15);
-  c.outcrop(1, 1, 19, 12, 15, 'ore');
+  c.outcrop(1, 1, 19, 12, 15, Rock.ORE);
   c.box(3, 11, 0, 13, 3, 8, ORE);
   c.mineEntrance(5, 14, 3, 4);
   c.mineEntrance(11, 14, 3, 4);
@@ -92,7 +92,7 @@ function band4(): IsoCanvas {
   // the forge
   c.stone(21, 17, 0, 7, 6, 5);
   c.windows([23, 26], 23, 1, 2, 'rust');
-  c.roof(21, 17, 7, 6, 5, 3, 'x', { roofing: 'shingle', gable: 'stoneR' });
+  c.roof(21, 17, 7, 6, 5, 3, Axis.X, { roofing: Roofing.SHINGLE, gable: 'stoneR' });
   c.cart(6, 17, 4);
   c.cart(12, 17, 4);
   orePile(c, 3, 21);

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ResourceKey, UnlockKind } from '#/constants.ts';
 import {
   BALANCE,
   buildingEffect,
@@ -46,7 +47,7 @@ describe('buildingInfo', () => {
         building: ref.building(BuildingType.TOWN_HALL),
       },
     });
-    expect(buildingInfo(BuildingType.SAWMILL).summary).toEqual({ code: 'buildingInfo.summary.field', params: { resource: ref.resource('wood') } });
+    expect(buildingInfo(BuildingType.SAWMILL).summary).toEqual({ code: 'buildingInfo.summary.field', params: { resource: ref.resource(ResourceKey.WOOD) } });
     expect(buildingInfo(BuildingType.WALLS).summary?.params?.forts).toEqual(Object.values(FortType).map((id) => ref.troop(id)));
   });
 
@@ -62,7 +63,7 @@ describe('buildingInfo', () => {
     expect(unlocks.length).toBeGreaterThan(0);
     for (const u of unlocks) expect(Object.keys(u).sort()).toEqual(['id', 'kind', 'level']);
     for (let i = 1; i < unlocks.length; i++) expect(unlocks[i]!.level).toBeGreaterThanOrEqual(unlocks[i - 1]!.level);
-    expect(unlocks).toContainEqual(expect.objectContaining({ kind: 'troop', id: TroopType.WARRIOR }));
+    expect(unlocks).toContainEqual(expect.objectContaining({ kind: UnlockKind.TROOP, id: TroopType.WARRIOR }));
   });
 
   it('has no summary or placement for an unknown type or a fortification', () => {
@@ -94,7 +95,7 @@ describe('buildingEffect', () => {
       troops: 2 * BALANCE.rallySpotTroopsPerLevel,
     });
     expect(buildingEffect(BuildingType.FARM, 1)?.params).toMatchObject({
-      resource: ref.resource('food'),
+      resource: ref.resource(ResourceKey.FOOD),
       count: BALANCE.fieldWorkersPerF * BALANCE.fieldFactor[1],
     });
     expect(buildingEffect(BuildingType.BEACON_TOWER, 1)?.code).toBe('buildingInfo.effect.beaconTroops');

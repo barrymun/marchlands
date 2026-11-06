@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { SignUpChallenge, SignUpProof } from '@marchlands/contracts';
 
-import { type SignUpProofConfig, SignUpProofs } from '#/auth/signup-proof.ts';
+import { ProofCheck, type SignUpProofConfig, SignUpProofs } from '#/auth/signup-proof.ts';
 
 const CONFIG: SignUpProofConfig = { cost: 10, counterMin: 20, counterMax: 40, expiresAfterMs: 10 * 60_000 };
 
@@ -28,36 +28,36 @@ describe(SignUpProofs.name, () => {
   it('accepts a solved puzzle once', async () => {
     const proofs = new SignUpProofs(CONFIG, 'test-jwt-secret');
     const proof = await solve(await proofs.challenge());
-    expect(await proofs.check(proof)).toBe('ok');
-    expect(await proofs.check(proof)).toBe('used');
+    expect(await proofs.check(proof)).toBe(ProofCheck.OK);
+    expect(await proofs.check(proof)).toBe(ProofCheck.USED);
   });
 
   it('accepts it again once released (the sign-up failed for another reason)', async () => {
     const proofs = new SignUpProofs(CONFIG, 'test-jwt-secret');
     const proof = await solve(await proofs.challenge());
-    expect(await proofs.check(proof)).toBe('ok');
+    expect(await proofs.check(proof)).toBe(ProofCheck.OK);
     proofs.release(proof);
-    expect(await proofs.check(proof)).toBe('ok');
+    expect(await proofs.check(proof)).toBe(ProofCheck.OK);
   });
 
   it('refuses a wrong answer, and a malformed one', async () => {
     const proofs = new SignUpProofs(CONFIG, 'test-jwt-secret');
     const proof = await solve(await proofs.challenge());
-    expect(await proofs.check({ ...proof, solution: { ...proof.solution, counter: proof.solution.counter - 1 } })).toBe('invalid');
-    expect(await proofs.check({ ...proof, solution: { ...proof.solution, derivedKey: 'not hex' } })).toBe('invalid');
+    expect(await proofs.check({ ...proof, solution: { ...proof.solution, counter: proof.solution.counter - 1 } })).toBe(ProofCheck.INVALID);
+    expect(await proofs.check({ ...proof, solution: { ...proof.solution, derivedKey: 'not hex' } })).toBe(ProofCheck.INVALID);
   });
 
   it('refuses a puzzle made easier, or signed with another secret', async () => {
     const proofs = new SignUpProofs(CONFIG, 'test-jwt-secret');
     const { challenge, solution } = await solve(await proofs.challenge());
-    expect(await proofs.check({ challenge: { ...challenge, parameters: { ...challenge.parameters, cost: 1 } }, solution })).toBe('invalid');
+    expect(await proofs.check({ challenge: { ...challenge, parameters: { ...challenge.parameters, cost: 1 } }, solution })).toBe(ProofCheck.INVALID);
     const elsewhere = new SignUpProofs(CONFIG, 'another-jwt-secret');
-    expect(await proofs.check(await solve(await elsewhere.challenge()))).toBe('invalid');
+    expect(await proofs.check(await solve(await elsewhere.challenge()))).toBe(ProofCheck.INVALID);
   });
 
   it('refuses a puzzle past its expiry', async () => {
     const twentyMinutesAgo = Date.now() - 20 * 60_000;
     const proofs = new SignUpProofs(CONFIG, 'test-jwt-secret', () => twentyMinutesAgo);
-    expect(await proofs.check(await solve(await proofs.challenge()))).toBe('expired');
+    expect(await proofs.check(await solve(await proofs.challenge()))).toBe(ProofCheck.EXPIRED);
   });
 });

@@ -24,9 +24,12 @@ import {
   maxArmyTroops,
   Mission,
   reliefMarchMs,
+  RESOURCE_KEYS,
+  ResourceKey,
   tileXY,
   TROOP_KEYS,
   type TroopKey,
+  TroopType,
 } from '@marchlands/core';
 
 import { MISSION_NAMES } from '@/components/armies-panel/constants';
@@ -34,7 +37,7 @@ import { Countdown } from '@/components/countdown/countdown';
 import { NumberField } from '@/components/number-field/number-field';
 import { ResourceIcon } from '@/components/resource-icon/resource-icon';
 import { ArmyPresets } from '@/components/send-army-dialog/send-form/army-presets/army-presets';
-import { RES } from '@/components/send-army-dialog/send-form/constants';
+import { NO_HERO } from '@/components/send-army-dialog/send-form/constants';
 import { Destination } from '@/components/send-army-dialog/send-form/destination/destination';
 import { TileSummary } from '@/components/send-army-dialog/send-form/destination/tile-summary/tile-summary';
 import { LandAt } from '@/components/send-army-dialog/send-form/land-at/land-at';
@@ -104,12 +107,12 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
     setTroops(capTroops(troops, free));
   }
   const scouting = Number(mission) === Mission.SCOUT;
-  const [resources, setResources] = useState<Partial<Record<(typeof RES)[number], string>>>({});
+  const [resources, setResources] = useState<Partial<Record<ResourceKey, string>>>({});
   // camp times: a landing time in UTC, kept for the next wave so waves land together
   const [landAt, setLandAt] = useState<{ date: string; time: string } | null>(null);
   const arriveAt = landAt ? landingTime(landAt.date, landAt.time) : null;
   // every troop type, those the city has none of greyed out; only scouts go on a scouting mission
-  const listed = Object.entries(TROOP_KEYS).filter(([, key]) => !scouting || key === 'scouter');
+  const listed = Object.entries(TROOP_KEYS).filter(([, key]) => !scouting || key === TROOP_KEYS[TroopType.SCOUT]);
   const hasAny = listed.some(([, key]) => (free[key] ?? 0) > 0);
   const idleHeroes = heroes.filter((h) => h.status === HeroStatus.IDLE);
   const troopBody = typedAmounts(scouting ? { scouter: troops.scouter } : troops);
@@ -136,9 +139,9 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
   const capacity = armyLoad(troopBody, player.data?.research ?? {});
   const loaded = Object.values(resourceBody).reduce<number>((t, n) => t + Number(n), 0);
   const overloaded = loaded > capacity;
-  const inCity = (r: (typeof RES)[number]) => Math.floor(r === 'gold' ? city.resource.gold : city.resource[r].amount);
+  const inCity = (r: ResourceKey) => Math.floor(r === ResourceKey.GOLD ? city.resource.gold : city.resource[r].amount);
   /** Fill one resource with whatever the troops can still carry (and the city has). */
-  const maxOf = (r: (typeof RES)[number]) => {
+  const maxOf = (r: ResourceKey) => {
     const others = loaded - Number(resourceBody[r] ?? 0);
     setResources({ ...resources, [r]: String(Math.max(0, Math.min(inCity(r), capacity - others))) });
   };
@@ -158,7 +161,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
           mission: Number(mission),
           troops: troopBody,
           resources: Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY ? resourceBody : undefined,
-          heroId: heroId === 'none' ? null : Number(heroId),
+          heroId: heroId === NO_HERO ? null : Number(heroId),
           arriveAt: arriveAt ?? undefined,
         },
         throwOnError: true,
@@ -177,7 +180,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
     async (plan: PlanSlot) => {
       await postPlansWaves({
         path: { planId: plan.planId },
-        body: { cityId: city.id, mission: Number(mission), troops: troopBody, heroId: heroId === 'none' ? null : Number(heroId) },
+        body: { cityId: city.id, mission: Number(mission), troops: troopBody, heroId: heroId === NO_HERO ? null : Number(heroId) },
         throwOnError: true,
       });
     },
@@ -187,7 +190,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
   // after a wave goes (sent, or added to the plan) the dialog stays open for the next: the hero just used is busy (an
   // attack picks the next strongest), and the resources it carried are gone; troop amounts are capped to what is left
   const nextWave = () => {
-    setHeroId(defaultHero(Number(mission), heroes, heroId === 'none' ? undefined : Number(heroId)));
+    setHeroId(defaultHero(Number(mission), heroes, heroId === NO_HERO ? undefined : Number(heroId)));
     setHeroPicked(false);
     setResources({});
   };
@@ -278,7 +281,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">{t('common:noHero')}</SelectItem>
+                <SelectItem value={NO_HERO}>{t('common:noHero')}</SelectItem>
                 {idleHeroes.map((h) => (
                   <SelectItem key={h.id} value={String(h.id)}>
                     {t('form.heroOption', { name: h.name, level: h.level, attack: heroPower(h) })}
@@ -367,7 +370,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
               </span>
             </div>
             <div className="grid gap-x-8 gap-y-2 lg:grid-cols-2">
-              {RES.map((r) => (
+              {RESOURCE_KEYS.map((r) => (
                 <div key={r} className="flex items-center justify-between gap-2 text-sm">
                   <span className="flex items-center gap-2">
                     {/* the margin makes up the width of a troop's badge, so the names line up with the troops' above */}

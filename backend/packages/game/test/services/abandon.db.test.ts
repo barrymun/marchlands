@@ -7,6 +7,7 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
   BALANCE,
+  BattleTarget,
   BuildingType,
   DAY,
   FlowActionType,
@@ -409,7 +410,7 @@ describe(completeAbandon.name, () => {
       const attack = await send(g, rival, { targetTileId: await cityTile(g, p.cityId), mission: Mission.ATTACK, troops: { lightCavalry: 100 }, heroId });
       await abandonNow(g, p);
       await arrive(g, attack.armyId);
-      expect(battleOf((await reportsOf(g, rival.id)).at(-1)!, 'npc')).toBeTruthy();
+      expect(battleOf((await reportsOf(g, rival.id)).at(-1)!, BattleTarget.NPC)).toBeTruthy();
     }));
 
   it('is called off and reported if no regular city would remain when the hour is up', () =>

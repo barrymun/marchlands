@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildingInfo, BUILDINGS, BuildingType, isFortType, TechType, TroopType } from '@marchlands/core';
+import { buildingInfo, BUILDINGS, BuildingType, isFortType, TechType, TroopType, UnlockKind } from '@marchlands/core';
 
 import { unlockName } from '@/components/buildings-panel/building-dialog/unlocks/utils';
 import dataBuildings from '@/locales/en-GB/data-buildings.json';
 
 describe(unlockName.name, () => {
   it('names buildings, troops and technologies from their data namespaces', () => {
-    expect(unlockName({ kind: 'building', id: BuildingType.TOWN_HALL })).toBe('Town Hall');
-    expect(unlockName({ kind: 'troop', id: TroopType.PIKE })).toBe('Pikeman');
-    expect(unlockName({ kind: 'tech', id: TechType.AGRICULTURE })).toBe('Agriculture');
+    expect(unlockName({ kind: UnlockKind.BUILDING, id: BuildingType.TOWN_HALL })).toBe('Town Hall');
+    expect(unlockName({ kind: UnlockKind.TROOP, id: TroopType.PIKE })).toBe('Pikeman');
+    expect(unlockName({ kind: UnlockKind.TECH, id: TechType.AGRICULTURE })).toBe('Agriculture');
   });
 
   it('falls back to a numbered name for an unknown id', () => {
-    expect(unlockName({ kind: 'building', id: 999 })).toBe('Building 999');
+    expect(unlockName({ kind: UnlockKind.BUILDING, id: 999 })).toBe('Building 999');
   });
 
   it('names everything a building unlocks', () => {

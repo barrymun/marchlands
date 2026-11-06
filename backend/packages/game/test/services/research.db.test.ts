@@ -11,6 +11,7 @@ import {
   MINUTE,
   msg,
   ref,
+  RequirementKind,
   researchCost,
   researchMaxLevel,
   researchTimeMs,
@@ -66,7 +67,7 @@ describe(research.researchList.name, () => {
       expect(agri.next).toMatchObject({ ...researchCost(AGRICULTURE, 1), time: Math.ceil(researchTimeMs(AGRICULTURE, 1, null) / 1000) });
       const lumber = list.techs.find((t) => t.typeId === LUMBERING)!;
       expect(lumber.permission).toBe(false);
-      expect(lumber.next!.requirements).toContainEqual({ kind: 'building', id: BuildingType.SAWMILL, required: 1, current: 0, ok: false });
+      expect(lumber.next!.requirements).toContainEqual({ kind: RequirementKind.BUILDING, id: BuildingType.SAWMILL, required: 1, current: 0, ok: false });
     }));
 
   it('shows what is being researched, and nothing may start once the queues are full', () =>

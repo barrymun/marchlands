@@ -4,7 +4,7 @@
 // tile, so its outline never runs into the tile's edge.
 
 import { TroopType } from '@marchlands/core';
-import { type Colour, PixelCanvas, type Pt } from './pixel.ts';
+import { CLEAR, type Colour, PixelCanvas, type Pt } from './pixel.ts';
 import { oval, rect, wheel } from './shapes.ts';
 
 const SIZE = 24;
@@ -45,7 +45,7 @@ function tile(): PixelCanvas {
     [0, SIZE - 1],
     [SIZE - 1, SIZE - 1],
   ])
-    c.set(x, y, 'clear');
+    c.set(x, y, CLEAR);
   return c;
 }
 

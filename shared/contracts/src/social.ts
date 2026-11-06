@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 
-import { MessageSchema, REPORT_KINDS, REPORT_ORDERS, REPORT_SEARCH_MAX } from '@marchlands/core';
+import { CHAT_CHANNELS, MessageSchema, REPORT_KINDS, REPORT_ORDERS, REPORT_SEARCH_MAX } from '@marchlands/core';
 
 import { Ms, zId, zPaging } from '#/common.ts';
 import { AllianceEventRow, AllianceRequestRow, AllianceRow, ArmyRow, ChatMessageRow, MailRow, PlayerRow, ReportRow } from '#/rows.ts';
@@ -56,6 +56,7 @@ export const ReportListQuery = zPaging.extend({
   kind: z.enum(REPORT_KINDS).optional().describe('(marchlands) battles, scouting, returns (armies coming home), movements (other marches) or other'),
   unread: z
     .enum(['true', 'false'])
+    // eslint-disable-next-line marchlands/no-string-compare -- how a query string writes a boolean
     .transform((v) => v === 'true')
     .optional()
     .describe('(marchlands) true: only unread reports'),
@@ -103,7 +104,7 @@ export type ReportSettings = z.infer<typeof ReportSettings>;
 
 export const ChatBody = z.object({ msg: z.string() });
 export const PrivateChatBody = ChatBody.extend({ to: z.string() });
-export const ChatChannelParams = z.object({ channel: z.enum(['world', 'beginner', 'alliance', 'private']) });
+export const ChatChannelParams = z.object({ channel: z.enum(CHAT_CHANNELS) });
 export const ChatHistoryQuery = z.object({ since: z.coerce.number().default(0) });
 
 export const ChatMessage = ChatMessageRow.pick({ id: true })

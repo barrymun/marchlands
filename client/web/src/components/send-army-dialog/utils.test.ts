@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { MapFieldInfo } from '@marchlands/api-client';
-import { Mission, Relation, relationPermissions, TileType } from '@marchlands/core';
+import { BattleTarget, Mission, Relation, relationPermissions, TileType } from '@marchlands/core';
 
 import { tileKind, tileMissions, tileTarget } from '@/components/send-army-dialog/utils';
 
@@ -11,10 +11,10 @@ const tile = (type: number, relation: number, extra: object = {}) =>
 
 describe(tileKind.name, () => {
   it('tells cities, barbarian and historic cities, and valleys apart', () => {
-    expect(tileKind({ type: TileType.CASTLE })).toBe('city');
-    expect(tileKind({ type: TileType.NPC })).toBe('npc');
-    expect(tileKind({ type: TileType.HISTORIC })).toBe('npc');
-    expect(tileKind({ type: TileType.FOREST })).toBe('valley');
+    expect(tileKind({ type: TileType.CASTLE })).toBe(BattleTarget.CITY);
+    expect(tileKind({ type: TileType.NPC })).toBe(BattleTarget.NPC);
+    expect(tileKind({ type: TileType.HISTORIC })).toBe(BattleTarget.NPC);
+    expect(tileKind({ type: TileType.FOREST })).toBe(BattleTarget.VALLEY);
   });
 
   it('has nothing to scout on empty land', () => {
@@ -44,7 +44,7 @@ describe(tileMissions.name, () => {
 describe(tileTarget.name, () => {
   it('names the tile and lists its missions', () => {
     const target = tileTarget(tile(TileType.CASTLE, Relation.NEUTRAL, { name: 'Fenwick' }), 1);
-    expect(target).toEqual({ tileId: 500, name: 'Fenwick', missions: [Mission.ATTACK, Mission.SCOUT], kind: 'city', own: false });
+    expect(target).toEqual({ tileId: 500, name: 'Fenwick', missions: [Mission.ATTACK, Mission.SCOUT], kind: BattleTarget.CITY, own: false });
   });
 
   it('marks the player own places, for the Relief Station', () => {

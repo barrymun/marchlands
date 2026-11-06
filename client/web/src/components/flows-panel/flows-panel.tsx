@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { type CityBean, deletePlayerFlowsByFlowId, type Flow, getPlayerFlowsOptions, getPlayerFlowsQueryKey, postPlayerFlows } from '@marchlands/api-client';
-import { FlowActionType, FlowCities, FlowStatus } from '@marchlands/core';
+import { FlowActionType, FlowCities, FlowStatus, HeroBuffId } from '@marchlands/core';
 
 import { FLOWS_SEARCH, SIDE_BY_SIDE } from '@/components/flows-panel/constants';
 import { FlowDetail } from '@/components/flows-panel/flow-detail/flow-detail';
@@ -72,7 +72,8 @@ export function FlowsPanel({ city }: { city: CityBean }) {
     onError: (err) => toast.error(errorMessage(err)),
   });
 
-  const startNew = () => setEditing({ id: null, name: '', actions: [keyed({ type: FlowActionType.SET_MAYOR, stat: 'power' })], cities: FlowCities.ALL });
+  const startNew = () =>
+    setEditing({ id: null, name: '', actions: [keyed({ type: FlowActionType.SET_MAYOR, stat: HeroBuffId.POWER })], cities: FlowCities.ALL });
   const startEdit = (f: Flow) => setEditing({ id: f.id, name: f.name, actions: f.actions.map(keyed), cities: f.cities });
 
   return (

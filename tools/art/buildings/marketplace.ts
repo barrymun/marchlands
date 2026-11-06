@@ -2,7 +2,7 @@
 // after it is bigger and stronger: more stalls and a pavilion, then a ring of stalls round a statue, then a forum with
 // a colonnaded hall, a fountain and banners.
 
-import { IsoCanvas } from '../iso.ts';
+import { Axis, IsoCanvas, PAVING, Roofing, StallColour } from '../iso.ts';
 
 const SIZE = 64;
 
@@ -10,8 +10,8 @@ function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20, 'marketplace-1');
   c.ground(0, 0, 20, 20, 'sand');
   c.plaza(10, 10, 7);
-  c.stall(5, 6, 'red');
-  c.stall(11, 5, 'blue');
+  c.stall(5, 6, StallColour.RED);
+  c.stall(11, 5, StallColour.BLUE);
   c.crates(12, 13, 3);
   c.anchor();
   c.outline();
@@ -25,11 +25,11 @@ function band2(): IsoCanvas {
   // a pavilion
   c.stone(14, 3, 0, 6, 5, 4);
   c.colonnade(14, 8, 0, 6, 4);
-  c.hipRoof(14, 3, 6, 5, 4, 3, 'x', 'tile');
-  c.stall(4, 5, 'red');
-  c.stall(5, 11, 'blue');
-  c.stall(14, 13, 'red');
-  c.stall(9, 17, 'blue');
+  c.hipRoof(14, 3, 6, 5, 4, 3, Axis.X, Roofing.TILE);
+  c.stall(4, 5, StallColour.RED);
+  c.stall(5, 11, StallColour.BLUE);
+  c.stall(14, 13, StallColour.RED);
+  c.stall(9, 17, StallColour.BLUE);
   c.crates(3, 17, 3);
   c.anchor();
   c.outline();
@@ -42,14 +42,14 @@ function band3(): IsoCanvas {
   c.plaza(13, 13, 11);
   c.stone(16, 2, 0, 7, 6, 5);
   c.colonnade(16, 8, 0, 7, 5);
-  c.hipRoof(16, 2, 7, 6, 5, 3, 'x', 'tile');
-  c.stall(4, 4, 'red');
-  c.stall(9, 4, 'blue');
-  c.stall(3, 11, 'blue');
+  c.hipRoof(16, 2, 7, 6, 5, 3, Axis.X, Roofing.TILE);
+  c.stall(4, 4, StallColour.RED);
+  c.stall(9, 4, StallColour.BLUE);
+  c.stall(3, 11, StallColour.BLUE);
   c.statue(12, 12);
-  c.stall(19, 12, 'red');
-  c.stall(5, 18, 'red');
-  c.stall(15, 19, 'blue');
+  c.stall(19, 12, StallColour.RED);
+  c.stall(5, 18, StallColour.RED);
+  c.stall(15, 19, StallColour.BLUE);
   c.crates(21, 19, 3);
   c.anchor();
   c.outline();
@@ -58,22 +58,22 @@ function band3(): IsoCanvas {
 
 function band4(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 30, 'marketplace-4');
-  c.ground(0, 0, 30, 30, 'paving');
+  c.ground(0, 0, 30, 30, PAVING);
   // a colonnaded hall along the back
   c.wall(2, 1, 0, 26, 5, 6);
   c.colonnade(2, 6, 0, 26, 6);
-  c.roof(2, 1, 26, 5, 6, 3, 'x', { roofing: 'tile', trim: 'gold' });
+  c.roof(2, 1, 26, 5, 6, 3, Axis.X, { roofing: Roofing.TILE, trim: 'gold' });
   c.plaza(15, 17, 11);
-  c.stall(3, 9, 'red');
-  c.stall(8, 9, 'blue');
-  c.stall(19, 9, 'red');
-  c.stall(24, 9, 'blue');
+  c.stall(3, 9, StallColour.RED);
+  c.stall(8, 9, StallColour.BLUE);
+  c.stall(19, 9, StallColour.RED);
+  c.stall(24, 9, StallColour.BLUE);
   c.stone(13, 15, 0, 5, 5, 1);
   c.ground(14, 16, 3, 3, 'water');
-  c.stall(4, 16, 'blue');
-  c.stall(23, 17, 'red');
-  c.stall(7, 23, 'red');
-  c.stall(18, 24, 'blue');
+  c.stall(4, 16, StallColour.BLUE);
+  c.stall(23, 17, StallColour.RED);
+  c.stall(7, 23, StallColour.RED);
+  c.stall(18, 24, StallColour.BLUE);
   c.crates(25, 24, 3);
   c.banner(c.p(2, 27, 0), 9);
   c.banner(c.p(28, 27, 0), 9);

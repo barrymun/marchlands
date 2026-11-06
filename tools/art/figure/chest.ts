@@ -6,7 +6,7 @@
 import { Sex } from '@marchlands/core';
 
 import { BLUE, CLOTH, fill, GOLD, lit, look, type Shades, STEEL, trimmed } from '../gear/common.ts';
-import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
+import { CLEAR, type Colour, type PixelCanvas, type Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { part, stone, torso } from './skeleton.ts';
 
@@ -54,7 +54,7 @@ export function breastplate(sex: Sex, level: number): PixelCanvas {
     if (trim) trimmed(c, pts, metal, trim, 1.4);
     else fill(c, pts, metal);
     // the neck cut out
-    oval(c, 50, 22, 4, 2.4, 'clear');
+    oval(c, 50, 22, 4, 2.4, CLEAR);
     if (female) {
       // the plate shaped over the bust, each side a dome lit from the top left
       oval(c, 46, 30.5, 3.8, 3.2, lit(45.5, 30, 3.6, metal));

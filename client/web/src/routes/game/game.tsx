@@ -3,7 +3,9 @@ import { Navigate } from 'react-router';
 
 import { AbandonNotice } from '@/components/abandon-notice/abandon-notice';
 import { ActivityDock } from '@/components/activity-dock/activity-dock';
+import { DockVariant } from '@/components/activity-dock/constants';
 import { BuildingsPanel } from '@/components/buildings-panel/buildings-panel';
+import { CityArea } from '@/components/buildings-panel/constants';
 import { CityDialog } from '@/components/city-dialog/city-dialog';
 import { LordDialog } from '@/components/lord-dialog/lord-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,6 +19,7 @@ import { BottomBar } from '@/routes/game/bottom-bar/bottom-bar';
 import {
   FlowsPanel,
   FULL_WIDTH_PAGES,
+  GameDialog,
   HeroesPanel,
   MapPanel,
   MarketPanel,
@@ -44,7 +47,7 @@ export function GamePage() {
   const player = usePlayer();
   const city = useCity(nav.cityId);
   const status = usePushSync(true);
-  const [dialog, setDialog] = useState<'lord' | 'city' | null>(null);
+  const [dialog, setDialog] = useState<GameDialog | null>(null);
   // the city the city list's button is sending an army to, from any screen; the dialog stays mounted once opened, for its
   // close animation
   const [sendTo, setSendTo] = useState<number | null>(null);
@@ -89,8 +92,8 @@ export function GamePage() {
             {city.data && (
               // a screen whose code hasn't arrived yet shows the same placeholder as a city still loading
               <Suspense fallback={<Skeleton className="h-96" />}>
-                {nav.screen === ViewId.TOWN && <BuildingsPanel city={city.data} area="inside" />}
-                {nav.screen === ViewId.FIELDS && <BuildingsPanel city={city.data} area="fields" />}
+                {nav.screen === ViewId.TOWN && <BuildingsPanel city={city.data} area={CityArea.INSIDE} />}
+                {nav.screen === ViewId.FIELDS && <BuildingsPanel city={city.data} area={CityArea.FIELDS} />}
                 {nav.screen === ViewId.MAP && <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />}
                 {nav.screen === PageId.HEROES && <HeroesPanel city={city.data} />}
                 {nav.screen === PageId.REPORTS && <ReportsPanel />}
@@ -109,10 +112,10 @@ export function GamePage() {
         <>
           <PanelSheet city={city.data} />
           <div className="lg:hidden">
-            <ActivityDock city={city.data} variant="floating" />
+            <ActivityDock city={city.data} variant={DockVariant.FLOATING} />
           </div>
           {/* keyed by city: what's typed never carries over to another city, as when this one is gone */}
-          <CityDialog key={city.data.id} city={city.data} open={dialog === 'city'} onClose={() => setDialog(null)} />
+          <CityDialog key={city.data.id} city={city.data} open={dialog === GameDialog.CITY} onClose={() => setDialog(null)} />
           {sendOpened && (
             <Suspense fallback={null}>
               <SendArmyDialog key={city.data.id} city={city.data} target={sendCity ? ownCityTarget(sendCity) : null} onClose={() => setSendTo(null)} />
@@ -120,7 +123,7 @@ export function GamePage() {
           )}
         </>
       )}
-      <LordDialog open={dialog === 'lord'} onClose={() => setDialog(null)} city={city.data} />
+      <LordDialog open={dialog === GameDialog.LORD} onClose={() => setDialog(null)} city={city.data} />
     </div>
   );
 }

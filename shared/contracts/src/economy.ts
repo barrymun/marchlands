@@ -3,7 +3,16 @@
 
 import { z } from 'zod';
 
-import { CANDLE_PERIODS, FACTION_IDS, MessageSchema } from '@marchlands/core';
+import {
+  BASIC_RESOURCES,
+  CANDLE_PERIODS,
+  FACTION_IDS,
+  ITEM_USES,
+  MARKET_ORDER_TYPES,
+  MarketOrderType,
+  MessageSchema,
+  TRADE_COUNTERPARTIES,
+} from '@marchlands/core';
 
 import { Ms, zId, zPaging, zResources } from '#/common.ts';
 import { AllianceRow, CityRow, HeroRow, MarketOrderRow, MarketShipmentRow, PlayerRow, QuestProgressRow } from '#/rows.ts';
@@ -76,9 +85,7 @@ const itemConfig = z.object({
   dayLimit: int(),
   rarity: int(),
   description: MessageSchema.describe('what the item does (`itemInfo.*`), worded by the client'),
-  use: z
-    .enum(['direct', 'elsewhere', 'none'])
-    .describe('direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect'),
+  use: z.enum(ITEM_USES).describe('direct: POST /player/items/{id}/use; elsewhere: consumed by another action (see howTo); none: no effect'),
   howTo: MessageSchema.optional().describe('where to use an item consumed by another action (`itemInfo.howTo.*`)'),
 });
 
@@ -213,7 +220,10 @@ export const PlaceOrderBody = z.object({
   side: z.number().int().describe('0 buy, 1 sell'),
   amount: z.number().int(),
   price: z.number().optional().describe('gold per unit; required for limit orders'),
-  type: z.enum(['limit', 'market']).default('limit').describe('limit: unfilled part rests on the book; market: fill now at the best prices, nothing rests'),
+  type: z
+    .enum(MARKET_ORDER_TYPES)
+    .default(MarketOrderType.LIMIT)
+    .describe('limit: unfilled part rests on the book; market: fill now at the best prices, nothing rests'),
 });
 /** The player's city whose terms with the factions a book, quote or affordable amount uses (the base spread without one). */
 const cityQuery = {
@@ -225,7 +235,7 @@ export const MarketQuoteQuery = z.object({
   side: z.coerce.number().int(),
   amount: z.coerce.number().int(),
   price: z.coerce.number().optional(),
-  type: z.enum(['limit', 'market']).default('limit'),
+  type: z.enum(MARKET_ORDER_TYPES).default(MarketOrderType.LIMIT),
 });
 export const MarketHistoryQuery = z.object({
   period: z.enum(CANDLE_PERIODS).default('hour').describe('candle length in real time'),
@@ -235,7 +245,7 @@ export const MarketAffordableQuery = z.object({ ...cityQuery, gold: z.coerce.num
 export const OrderIdParams = z.object({ orderId: zId });
 export const ShipmentIdParams = z.object({ shipmentId: zId });
 
-const resourceName = z.enum(['food', 'wood', 'stone', 'iron']);
+const resourceName = z.enum(BASIC_RESOURCES);
 
 export const MarketPriceLevel = z.object({ price: z.number(), amount: int().describe('open amount at this price') }).meta({ id: 'MarketPriceLevel' });
 export type MarketPriceLevel = z.infer<typeof MarketPriceLevel>;
@@ -397,7 +407,7 @@ export const MarketMyTrade = z
     price: z.number(),
     amount: int(),
     gold: int().describe("gold that changed hands, before the buyer's fee"),
-    with: z.enum(['player', 'factions', 'merchant']).describe('who was on the other side'),
+    with: z.enum(TRADE_COUNTERPARTIES).describe('who was on the other side'),
     createdAt: Ms,
   })
   .meta({ id: 'MarketMyTrade' });

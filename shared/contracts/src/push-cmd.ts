@@ -1,6 +1,9 @@
 // The push message names on their own, without the schemas, so a client that only needs the names (the
 // browser, through @marchlands/api-client) doesn't bundle zod and the contracts.
 
+/** What a client sends on the socket: a keep-alive, answered with `PushCmd.PONG`. */
+export const ClientCmd = { PING: 'ping' } as const;
+
 /**
  * Names of the WebSocket push messages (`server.*`, the original protocol). The keys are readable;
  * the values are what travels on the wire, original spellings included (BuildComplate, Armys, Transing).

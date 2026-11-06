@@ -7,7 +7,7 @@
 
 import { sql } from 'drizzle-orm';
 
-import { BALANCE, setGameSpeed } from '@marchlands/core';
+import { BALANCE, setGameSpeed, WorldMapSource } from '@marchlands/core';
 import { connect, one, timedEvents } from '@marchlands/db';
 import {
   beginnerJob,
@@ -41,7 +41,7 @@ const every = (name: string, ms: number, fn: () => Promise<void>) => everyUntilS
 
 async function main() {
   const info = await world.ensureWorld(db, {
-    source: process.env.WORLD_MAP === 'legacy' ? 'legacy' : 'generated',
+    source: process.env.WORLD_MAP === WorldMapSource.LEGACY ? WorldMapSource.LEGACY : WorldMapSource.GENERATED,
     seed: process.env.WORLD_SEED ?? 'marchlands',
     log: (m) => log('info', m),
   });

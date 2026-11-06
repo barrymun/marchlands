@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { type ReportBody, TileType } from '@marchlands/core';
+import { BattleTarget, type ReportBody, type ReportBodyKind, TileType } from '@marchlands/core';
 
 import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
 import { ResourceList } from '@/components/reports-panel/report-dialog/report-content/resource-list/resource-list';
@@ -8,9 +8,9 @@ import { TroopList } from '@/components/reports-panel/report-dialog/report-conte
 import { fmtExact } from '@/lib/format';
 import { tileName } from '@/lib/game-data';
 
-export function ScoutView({ scout: s }: { scout: Extract<ReportBody, { kind: 'scout' }>['scout'] }) {
+export function ScoutView({ scout: s }: { scout: Extract<ReportBody, { kind: typeof ReportBodyKind.SCOUT }>['scout'] }) {
   const { t } = useTranslation(['reports-panel', 'common']);
-  if (s.target === 'npc') {
+  if (s.target === BattleTarget.NPC) {
     return (
       <div className="grid gap-1.5 text-sm">
         <Line label={t('labels.target')}>{t('common:level.named', { name: tileName(s.historic ? TileType.HISTORIC : TileType.NPC), level: s.level })}</Line>
@@ -29,7 +29,7 @@ export function ScoutView({ scout: s }: { scout: Extract<ReportBody, { kind: 'sc
       </div>
     );
   }
-  if (s.target === 'valley') {
+  if (s.target === BattleTarget.VALLEY) {
     return (
       <div className="grid gap-1.5 text-sm">
         <Line label={t('labels.target')}>{t('common:level.named', { name: tileName(s.type), level: s.level })}</Line>

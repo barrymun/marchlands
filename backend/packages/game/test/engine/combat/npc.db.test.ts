@@ -7,6 +7,7 @@ import {
   ArmyDirection,
   armyLoad,
   BALANCE,
+  BattleTarget,
   freshNpcState,
   homeFaction,
   injuredOf,
@@ -17,6 +18,7 @@ import {
   npcTemplate,
   refillCounts,
   regenerateNpc,
+  RESOURCE_KEYS,
   TechType,
   TileType,
   totalResources,
@@ -31,7 +33,7 @@ import { attack } from '#test/support/combat.ts';
 import { addHero, reloadCity, reloadPlayer, setResearch } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
 
-const KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
+const KEYS = RESOURCE_KEYS;
 
 describe(`${processArmy.name}: attacking a barbarian city`, () => {
   it('a won battle: plunder, loyalty damage, honor, medals and hero experience', () =>
@@ -133,7 +135,7 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
       // the worker takes the arrival an hour late, when the garrison would be whole again
       g.advance(second.reachTime - g.now + 3_600_000);
       await g.runDue();
-      const b = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), 'npc');
+      const b = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), BattleTarget.NPC);
       const atLanding = refillCounts(first.defender.troops.after, npcTemplate(1).troops, second.reachTime - hitAt, 0.1, BALANCE.npcRegenMs);
       expect(b.defender.troops.before).toEqual(atLanding);
     }));

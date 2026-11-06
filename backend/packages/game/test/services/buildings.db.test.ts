@@ -4,6 +4,7 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   buildCost,
+  BuildingArea,
   buildingMaxLevel,
   BuildingStatus,
   BuildingType,
@@ -15,6 +16,7 @@ import {
   MINUTE,
   msg,
   ref,
+  RequirementKind,
   RESOURCE_KEYS,
   type Resources,
   scaled,
@@ -433,7 +435,7 @@ describe(buildings.availableBuildings.name, () => {
   it('lists the buildings that may go inside, with their cost, time and requirements', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      const out = await buildings.availableBuildings(g, p.id, p.cityId, 'inside');
+      const out = await buildings.availableBuildings(g, p.id, p.cityId, BuildingArea.INSIDE);
       const types = out.buildings.map((b) => b!.typeId);
       expect(types).toContain(COTTAGE);
       expect(types).toContain(ACADEMY);
@@ -445,17 +447,17 @@ describe(buildings.availableBuildings.name, () => {
       expect(cottage).toMatchObject(buildCost(COTTAGE, 1));
       const academy = out.buildings.find((b) => b!.typeId === ACADEMY)!;
       expect(academy.ok).toBe(false);
-      expect(academy.requirements).toEqual([{ kind: 'building', id: TOWN_HALL, required: 2, current: 1, ok: false }]);
+      expect(academy.requirements).toEqual([{ kind: RequirementKind.BUILDING, id: TOWN_HALL, required: 2, current: 1, ok: false }]);
     }));
 
   it('lists only fields outside, and only the Walls for the walls', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      const outside = await buildings.availableBuildings(g, p.id, p.cityId, 'outside');
+      const outside = await buildings.availableBuildings(g, p.id, p.cityId, BuildingArea.OUTSIDE);
       expect(outside.buildings.map((b) => b!.typeId).sort((x, y) => x - y)).toEqual(
         [FARM, BuildingType.SAWMILL, BuildingType.QUARRY, BuildingType.IRONMINE].sort((x, y) => x - y),
       );
-      const walls = await buildings.availableBuildings(g, p.id, p.cityId, 'walls');
+      const walls = await buildings.availableBuildings(g, p.id, p.cityId, BuildingArea.WALLS);
       expect(walls.buildings.map((b) => b!.typeId)).toEqual([WALLS]);
     }));
 
@@ -463,7 +465,7 @@ describe(buildings.availableBuildings.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await setBuildings(g, p, [[0, MARKETPLACE, 1]]);
-      const out = await buildings.availableBuildings(g, p.id, p.cityId, 'inside');
+      const out = await buildings.availableBuildings(g, p.id, p.cityId, BuildingArea.INSIDE);
       expect(out.buildings.map((b) => b!.typeId)).not.toContain(MARKETPLACE);
       expect(out.buildings.map((b) => b!.typeId)).toContain(COTTAGE);
     }));
@@ -472,7 +474,7 @@ describe(buildings.availableBuildings.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
-      await expectRefused(buildings.availableBuildings(g, a.id, b.cityId, 'inside'), msg('common.invalidCastle'));
+      await expectRefused(buildings.availableBuildings(g, a.id, b.cityId, BuildingArea.INSIDE), msg('common.invalidCastle'));
     }));
 });
 
@@ -493,7 +495,7 @@ describe(buildings.upgradeInfo.name, () => {
         level: 3,
         time: Math.ceil(buildTimeMs(COTTAGE, 3, null, {}) / 1000),
         ok: false,
-        requirements: [{ kind: 'building', id: TOWN_HALL, required: 2, current: 1, ok: false }],
+        requirements: [{ kind: RequirementKind.BUILDING, id: TOWN_HALL, required: 2, current: 1, ok: false }],
         ...buildCost(COTTAGE, 3),
       });
       await setTownHall(g, p, 2);

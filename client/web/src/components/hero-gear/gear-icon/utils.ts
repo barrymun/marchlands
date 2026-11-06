@@ -1,4 +1,4 @@
-import { GEAR_PIECE_IDS } from '@marchlands/core';
+import { GEAR_PIECE_IDS, SpotKind } from '@marchlands/core';
 
 import {
   BLADE_ALPHA,
@@ -79,7 +79,7 @@ export function haloPixels(cx: number, cy: number, reach: number, c: Rgb, a: num
 
 /** Where a stone's light comes from: the middle of the stone whose glint is at spot `s` (`n` its radius; a point of light is its own middle). */
 export function stoneMiddle(s: Spot): { x: number; y: number; r: number } {
-  if (s.k === 'shine') return { x: s.x + 0.5, y: s.y + 0.5, r: 0.5 };
+  if (s.k === SpotKind.SHINE) return { x: s.x + 0.5, y: s.y + 0.5, r: 0.5 };
   const r = s.n ?? 1;
   // a stone of radius 1 is two by two, its glint the top left; a larger one has its glint half its radius up and left
   const g = r <= 1 ? 0.5 : Math.round(r / 2) + 0.5;
@@ -202,23 +202,23 @@ export function moveOffset(move: Spot, s: number, x: number, y: number): [dx: nu
   const a = MOVE_PX[move.k] ?? 1;
   const rise = Math.sin(Math.PI * s);
   switch (move.k) {
-    case 'stir': {
+    case SpotKind.STIR: {
       if (y <= move.y) return [0, 0];
       const f = reach(y - move.y, move.n);
       // a wave down the cloth, the hem behind the top
       return [px(a * f * rise * Math.sin(2 * Math.PI * 2 * s - f * 2.5)), 0];
     }
-    case 'sway': {
+    case SpotKind.SWAY: {
       if (y >= move.y) return [0, 0];
       const f = reach(move.y - y, move.n);
       return [px(a * f * rise * Math.sin(2 * Math.PI * 2 * s - f * 2)), 0];
     }
-    case 'swing':
+    case SpotKind.SWING:
       // a pendant is rigid: everything below where it hangs moves together, the chain or hook taking up the step
       return y <= move.y ? [0, 0] : [px(a * Math.sin(2 * Math.PI * s)), 0];
-    case 'flap':
+    case SpotKind.FLAP:
       return [0, px(-a * reach(Math.abs(x - move.x), move.n) * rise)];
-    case 'nod':
+    case SpotKind.NOD:
       return x >= move.x ? [0, 0] : [0, px(-a * reach(move.x - x, move.n) * rise)];
     default:
       return [0, 0];
@@ -278,12 +278,12 @@ export function gearFrame(piece: string, level: number, t: number, burst?: numbe
   // each stone's glint a little apart from the last, counted among the glints alone
   let glint = 0;
   spotsOf(gearArtFile(piece, level)).forEach((s) => {
-    if (s.k === 'blade') {
+    if (s.k === SpotKind.BLADE) {
       const a = Math.round(BLADE_ALPHA * pulseAt(t, phase));
       if (a > 0) frame.piece.push(...bladePixels(s, light, a));
       return;
     }
-    if (s.k !== 'gem' && s.k !== 'shine') return;
+    if (s.k !== SpotKind.GEM && s.k !== SpotKind.SHINE) return;
     if (level >= HALO_FROM) {
       const m = stoneMiddle(s);
       frame.over.push(...haloPixels(m.x, m.y, m.r + 1.5, top ? GLOW_RGB : light, glow));
@@ -296,7 +296,7 @@ export function gearFrame(piece: string, level: number, t: number, burst?: numbe
     if (s < SWEEP_MS) frame.piece.push(...sweepPixels(-GEAR_SIZE - 2 + ((GEAR_SIZE + 2) * 2 * s) / SWEEP_MS));
   }
   spotsOf(gearBackdropFile(level)).forEach((s, i) => {
-    if (s.k === 'star') frame.behind.push(...starPixels(s, Math.floor(cycleAt(t, STAR_EVERY_MS, phase + i * 0.29) / FRAME_MS)));
+    if (s.k === SpotKind.STAR) frame.behind.push(...starPixels(s, Math.floor(cycleAt(t, STAR_EVERY_MS, phase + i * 0.29) / FRAME_MS)));
   });
   return withBurst(frame);
 }

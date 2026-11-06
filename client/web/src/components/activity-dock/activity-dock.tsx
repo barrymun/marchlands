@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { CityBean } from '@marchlands/api-client';
 
-import { GROUPS, PER_GROUP, STORE_KEY } from '@/components/activity-dock/constants';
+import { DockVariant, GROUPS, PER_GROUP, STORE_KEY } from '@/components/activity-dock/constants';
 import { useJobs } from '@/components/activity-dock/hooks';
 import { JobRow } from '@/components/activity-dock/job-row/job-row';
 import { readCollapsed } from '@/components/activity-dock/utils';
@@ -17,7 +17,7 @@ import { useSticky } from '@/hooks/use-sticky';
 import { duration } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-export function ActivityDock({ city, variant }: { city: CityBean; variant: 'floating' | 'inline' }) {
+export function ActivityDock({ city, variant }: { city: CityBean; variant: DockVariant }) {
   const { t } = useTranslation('activity-dock');
   const jobs = useJobs(city);
   const now = useNow();
@@ -55,7 +55,7 @@ export function ActivityDock({ city, variant }: { city: CityBean; variant: 'floa
     );
   });
 
-  if (variant === 'inline')
+  if (variant === DockVariant.INLINE)
     return (
       <section aria-label={t('title')} className="grid gap-2">
         <h2 className="text-xs font-medium text-muted-foreground">{t('title')}</h2>

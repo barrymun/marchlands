@@ -1,20 +1,21 @@
 import { describe, expect, it } from 'vitest';
+import { ResourceKey } from '@marchlands/core';
 import { honorSpent, spendingRows } from '@/components/stats-panel/spending/utils';
 
 describe(spendingRows.name, () => {
   it('lists each thing spent on, in the resources it took, in the order of the spending groups', () => {
     const c = { 'spent.training.food': 28, 'spent.training.wood': 39, 'spent.training.iron': 29, 'spent.building.stone': 54, 'spent.items.gold': 463 };
     expect(spendingRows(c).map(({ group, amounts }) => ({ group, amounts }))).toEqual([
-      { group: 'building', amounts: [{ resource: 'stone', amount: 54 }] },
+      { group: 'building', amounts: [{ resource: ResourceKey.STONE, amount: 54 }] },
       {
         group: 'training',
         amounts: [
-          { resource: 'food', amount: 28 },
-          { resource: 'wood', amount: 39 },
-          { resource: 'iron', amount: 29 },
+          { resource: ResourceKey.FOOD, amount: 28 },
+          { resource: ResourceKey.WOOD, amount: 39 },
+          { resource: ResourceKey.IRON, amount: 29 },
         ],
       },
-      { group: 'items', amounts: [{ resource: 'gold', amount: 463 }] },
+      { group: 'items', amounts: [{ resource: ResourceKey.GOLD, amount: 463 }] },
     ]);
   });
 

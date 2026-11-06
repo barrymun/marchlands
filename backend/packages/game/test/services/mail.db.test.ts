@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { MailType, msg } from '@marchlands/core';
+import { MailType, msg, PlayerRelationKind } from '@marchlands/core';
 
 import { mail, social } from '#/index.ts';
 import { expectRefused } from '#test/support/expect.ts';
@@ -49,7 +49,7 @@ describe(mail.sendMail.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
-      await social.addRelation(g, b.id, a.name, 'block');
+      await social.addRelation(g, b.id, a.name, PlayerRelationKind.BLOCK);
       await mail.sendMail(g, a.id, b.name, 'Hi', 'there');
       expect((await mail.listMail(g, b.id, MailType.INBOX, 1, 10)).mails).toHaveLength(0);
       expect((await mail.listMail(g, a.id, MailType.SENT, 1, 10)).mails).toHaveLength(1);

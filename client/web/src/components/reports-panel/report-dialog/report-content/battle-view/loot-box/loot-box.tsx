@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type BattleReport } from '@marchlands/core';
+import { type BattleReport, BattleResult, RESOURCE_KEYS } from '@marchlands/core';
 
 import { ItemIcon } from '@/components/item-icon/item-icon';
 import { Badge } from '@/components/ui/badge';
@@ -24,13 +24,13 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
       </div>
     );
   }
-  const entries = (['gold', 'food', 'wood', 'stone', 'iron'] as const).map((k) => [k, Math.floor(b.plunder[k])] as const);
+  const entries = RESOURCE_KEYS.map((k) => [k, Math.floor(b.plunder[k])] as const);
   const total = entries.reduce((s, [, n]) => s + n, 0);
   return (
     <div className="grid gap-1.5 rounded-md bg-muted/50 p-3">
       <div className="font-medium">{mine ? t('loot.taken') : t('loot.lost')}</div>
       {total === 0 ? (
-        <span className="text-muted-foreground">{b.result === 'attackerWon' ? t('loot.nothingWon') : t('loot.nothingFailed')}</span>
+        <span className="text-muted-foreground">{b.result === BattleResult.ATTACKER_WON ? t('loot.nothingWon') : t('loot.nothingFailed')}</span>
       ) : (
         <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-0.5 tabular-nums sm:grid-cols-[repeat(3,auto_1fr)]">
           {entries

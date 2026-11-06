@@ -74,9 +74,9 @@ describe(heroBean.name, () => {
     const boost = { id: HeroBuffId.POWER, desc: msg('buff.truce'), endTime: T0 + 1000, param: 12 };
     const h = heroRow({ experience: 99.8, power: 30, management: 50, stratagem: 20, buffs: [boost] });
     const bean = heroBean(h);
-    expect(bean).toMatchObject({ id: h.id, experience: 99, gearStat: 'management', buffs: [boost] });
+    expect(bean).toMatchObject({ id: h.id, experience: 99, gearStat: HeroBuffId.MANAGEMENT, buffs: [boost] });
     expect(HeroBean.parse(bean)).toEqual(bean);
-    expect(heroBean(heroRow({ gearStat: 'stratagem' }))).toMatchObject({ gearStat: 'stratagem' });
+    expect(heroBean(heroRow({ gearStat: HeroBuffId.STRATAGEM }))).toMatchObject({ gearStat: HeroBuffId.STRATAGEM });
   });
 
   it("carries the hero's sex for its figure", () => {

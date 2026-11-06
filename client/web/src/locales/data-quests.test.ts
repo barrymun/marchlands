@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { GEAR_PIECE_IDS, QUEST_CATALOGUE, questGroups, questTargetMessage, TITLES } from '@marchlands/core';
 
 import { gearName, questGroupName, questName, titleName } from '@/lib/game-data';
-import { i18n } from '@/lib/i18n';
+import { i18n, Locale } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
 import gear from '@/locales/en-GB/data-gear.json';
 import quests from '@/locales/en-GB/data-quests.json';
@@ -15,7 +15,7 @@ import titles from '@/locales/en-GB/data-titles.json';
 const sorted = (ids: (string | number)[]) => ids.map(String).sort();
 
 afterEach(async () => {
-  await i18n.changeLanguage('en-GB');
+  await i18n.changeLanguage(Locale.EN_GB);
 });
 
 describe('data-quests', () => {
@@ -28,14 +28,14 @@ describe('data-quests', () => {
     expect(questName(1000)).toBe('Town Hall');
     expect(questGroupName(11)).toBe('Hero Recruitment');
     expect(questName(1)).toBe('1');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(questName(1030)).toBe('期待の新星');
   });
 });
 
 describe('quest descriptions and targets', () => {
   it('words every quest in every full locale', async () => {
-    for (const lng of ['en-GB', 'ja-JP']) {
+    for (const lng of [Locale.EN_GB, Locale.JA_JP]) {
       await i18n.changeLanguage(lng);
       for (const q of QUEST_CATALOGUE)
         for (const m of [q.description, ...q.targets.map(questTargetMessage)])
@@ -63,7 +63,7 @@ describe('data-titles', () => {
 
   it('is looked up by id', async () => {
     expect(titleName(1)).toBe('Knight');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(titleName(1)).toBe('騎士');
   });
 });
@@ -75,7 +75,7 @@ describe('data-gear', () => {
 
   it('is looked up by id', async () => {
     expect(gearName('head')).toBe('Head Gear');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(gearName('head')).toBe('頭部装備');
   });
 });

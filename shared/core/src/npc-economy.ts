@@ -10,8 +10,7 @@
 // Pure: the worker keeps the state in world_state (backend engine/npc-economy.ts).
 
 import { BALANCE, getGameSpeed } from '#/balance.ts';
-import { BASIC_RESOURCES, type BasicResource } from '#/constants.ts';
-import { FACTION_IDS, type FactionId } from '#/constants.ts';
+import { BASIC_RESOURCES, type BasicResource, FACTION_IDS, type FactionId, ResourceKey, TradeSide } from '#/constants.ts';
 import { VALLEY_RESOURCE } from '#/economy.ts';
 import { factionOfZone } from '#/factions.ts';
 import type { Rng } from '#/rng.ts';
@@ -67,7 +66,12 @@ export interface NpcAuction {
   sellers: number;
 }
 
-const each = (f: (r: BasicResource) => number): Stock => ({ food: f('food'), wood: f('wood'), stone: f('stone'), iron: f('iron') });
+const each = (f: (r: BasicResource) => number): Stock => ({
+  food: f(ResourceKey.FOOD),
+  wood: f(ResourceKey.WOOD),
+  stone: f(ResourceKey.STONE),
+  iron: f(ResourceKey.IRON),
+});
 const ONES: Stock = each(() => 1);
 const cfg = () => BALANCE.npcTrade;
 
@@ -134,7 +138,7 @@ export function groupRates(groups: readonly NpcGroup[], land: readonly Stock[]):
       use: each((r) => base[r] * turnover * (f?.short.includes(r) ? 1 + strength : 1)),
       base: each((r) => base[r] * turnover),
       // gold: made faster where the faction is strong in it, used at the same rate everywhere
-      goldMake: treasury * (f?.strong.includes('gold') ? 1 + strength : 1),
+      goldMake: treasury * (f?.strong.includes(ResourceKey.GOLD) ? 1 + strength : 1),
       goldUse: treasury,
     };
   });
@@ -305,10 +309,10 @@ function madeUpTrades(groups: readonly NpcGroup[], fill: number[], resource: Bas
 // ---------------------------------------------------------------------------------------------
 
 /** What the factions charge or pay at a world stock: the curve's price (unclamped) ± half the player's spread. */
-export function factionMarginal(target: number, stock: number, side: 'buy' | 'sell', spread: number = cfg().playerSpread): number {
+export function factionMarginal(target: number, stock: number, side: TradeSide, spread: number = cfg().playerSpread): number {
   const p = stock > 0 ? (target / stock) ** priceExponent() : Infinity;
   const half = spread / 2;
-  return side === 'buy' ? p * (1 + half) : p * (1 - half);
+  return side === TradeSide.BUY ? p * (1 + half) : p * (1 - half);
 }
 
 /** ∫ (target / s)^e ds from `low` to `high` (both > 0): the gold for the units between two stocks at the curve's price. */

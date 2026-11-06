@@ -3,7 +3,7 @@
 // Effects are declarative; the game service applies them.
 
 import { BALANCE, goldForCents } from '#/balance.ts';
-import { BuffId } from '#/constants.ts';
+import { type BasicResource, BuffId, HeroBuffId, ItemCommand, ItemEffectKind, ItemSpecialHandler, ResourceKey } from '#/constants.ts';
 import { itemConfig } from '#/data/index.ts';
 import { createRandomHero, experienceItemGain, type GeneratedHero, upgradeExpFor } from '#/heroes.ts';
 import { ItemId } from '#/item-ids.ts';
@@ -13,29 +13,28 @@ import type { GrantContents, ResourceSet, TroopCounts } from '#/types.ts';
 
 export type ItemEffect =
   /** timed player buff (stacks by extending). `desc`: what it does, stored in the buff and worded by the client */
-  | { kind: 'buff'; buff: BuffId; desc: Message; durationMs: number }
+  | { kind: typeof ItemEffectKind.BUFF; buff: BuffId; desc: Message; durationMs: number }
   /** immediate grant of items / resources (to the target city) / troops */
-  | { kind: 'grant'; items?: Record<string, number>; resources?: Partial<ResourceSet>; troops?: TroopCounts }
+  | { kind: typeof ItemEffectKind.GRANT; items?: Record<string, number>; resources?: Partial<ResourceSet>; troops?: TroopCounts }
   /** box opened with a key item */
-  | { kind: 'chest'; key: string; contents: () => GrantContents }
+  | { kind: typeof ItemEffectKind.CHEST; key: string; contents: () => GrantContents }
   /** random contents */
-  | { kind: 'box'; contents: (rng: Rng) => GrantContents }
+  | { kind: typeof ItemEffectKind.BOX; contents: (rng: Rng) => GrantContents }
   /** handled by a specific command (speed-ups, teleporters, hero items ...) */
-  | { kind: 'command'; command: string }
-  | { kind: 'special'; handler: 'civilCode' | 'cureInjured' | 'heroBox' };
+  | { kind: typeof ItemEffectKind.COMMAND; command: ItemCommand }
+  | { kind: typeof ItemEffectKind.SPECIAL; handler: ItemSpecialHandler };
 
 const pct = share;
 const BATTLE_BUFF_PERCENT = pct(BALANCE.battleBuffBonus);
 const UPKEEP_BUFF_PERCENT = pct(BALANCE.upkeepBuffReduction);
 
 /** What each kind of buff item does (stored in the buff, and the item description's effect). */
-const production = (resource: 'food' | 'wood' | 'stone' | 'iron') =>
-  msg('buff.production', { resource: ref.resource(resource), percent: pct(BALANCE.resourceBuffBonus) });
+const production = (resource: BasicResource) => msg('buff.production', { resource: ref.resource(resource), percent: pct(BALANCE.resourceBuffBonus) });
 const BUFF_TEXT = {
-  food: production('food'),
-  wood: production('wood'),
-  stone: production('stone'),
-  iron: production('iron'),
+  food: production(ResourceKey.FOOD),
+  wood: production(ResourceKey.WOOD),
+  stone: production(ResourceKey.STONE),
+  iron: production(ResourceKey.IRON),
   gold: msg('buff.goldIncome', { percent: pct(BALANCE.resourceBuffBonus) }),
   attack: msg('buff.troopAttack', { percent: BATTLE_BUFF_PERCENT }),
   defense: msg('buff.troopDefense', { percent: BATTLE_BUFF_PERCENT }),
@@ -45,7 +44,7 @@ const BUFF_TEXT = {
   trainCost: msg('buff.trainingCost', { percent: pct(BALANCE.trainCostReduction) }),
 } satisfies Record<string, Message>;
 
-const buff = (buffId: BuffId, desc: Message, durationMs: number): ItemEffect => ({ kind: 'buff', buff: buffId, desc, durationMs });
+const buff = (buffId: BuffId, desc: Message, durationMs: number): ItemEffect => ({ kind: ItemEffectKind.BUFF, buff: buffId, desc, durationMs });
 
 const { buffDurationMs: BUFF_MS, medalBoxes: MEDAL_BOXES } = BALANCE.items;
 
@@ -77,42 +76,42 @@ const EFFECTS: Record<string, ItemEffect> = {
   [ItemId.QUARTERMASTERS_CHARTER]: buff(BuffId.TRAIN_COST_REDUCE, BUFF_TEXT.trainCost, BUFF_MS.long),
 
   // ---- protection ----
-  [ItemId.TRUCE_AGREEMENT]: { kind: 'command', command: 'city.truce' },
+  [ItemId.TRUCE_AGREEMENT]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.CITY_TRUCE },
 
   // ---- city items ----
-  [ItemId.CIVIL_CODE]: { kind: 'special', handler: 'civilCode' },
-  [ItemId.PENICILLIN]: { kind: 'special', handler: 'cureInjured' },
+  [ItemId.CIVIL_CODE]: { kind: ItemEffectKind.SPECIAL, handler: ItemSpecialHandler.CIVIL_CODE },
+  [ItemId.PENICILLIN]: { kind: ItemEffectKind.SPECIAL, handler: ItemSpecialHandler.CURE_INJURED },
 
   // ---- boxes ----
-  [ItemId.JUNIOR_MEDAL_BOX]: { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.JUNIOR_MEDAL_BOX]) },
-  [ItemId.MEDIUM_MEDAL_BOX]: { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.MEDIUM_MEDAL_BOX]) },
-  [ItemId.SENIOR_MEDAL_BOX]: { kind: 'box', contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.SENIOR_MEDAL_BOX]) },
-  [ItemId.HERO_PACKAGE]: { kind: 'special', handler: 'heroBox' },
+  [ItemId.JUNIOR_MEDAL_BOX]: { kind: ItemEffectKind.BOX, contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.JUNIOR_MEDAL_BOX]) },
+  [ItemId.MEDIUM_MEDAL_BOX]: { kind: ItemEffectKind.BOX, contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.MEDIUM_MEDAL_BOX]) },
+  [ItemId.SENIOR_MEDAL_BOX]: { kind: ItemEffectKind.BOX, contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.SENIOR_MEDAL_BOX]) },
+  [ItemId.HERO_PACKAGE]: { kind: ItemEffectKind.SPECIAL, handler: ItemSpecialHandler.HERO_BOX },
   [ItemId.WELCOME_PACKAGE]: {
-    kind: 'grant',
+    kind: ItemEffectKind.GRANT,
     items: { ...BALANCE.items.welcomePackage.items },
     resources: { ...BALANCE.items.welcomePackage.resources },
   },
 
   // ---- used through dedicated commands ----
-  [ItemId.BEGINNER_GUIDELINES]: { kind: 'command', command: 'speedup' },
-  [ItemId.PRIMARY_GUIDELINES]: { kind: 'command', command: 'speedup' },
-  [ItemId.INTERMEDIATE_GUIDELINES]: { kind: 'command', command: 'speedup' },
-  [ItemId.SENIOR_GUIDELINES]: { kind: 'command', command: 'speedup' },
-  [ItemId.MASTER_GUIDELINES]: { kind: 'command', command: 'speedup' },
-  [ItemId.ULTIMATE_GUIDELINES]: { kind: 'command', command: 'speedup' },
-  [ItemId.NAPOLEONS_DIARY]: { kind: 'command', command: 'troops.speedup' },
-  [ItemId.ARCHIMEDES_NOTE]: { kind: 'command', command: 'fortifications.speedup' },
-  [ItemId.CITY_TELEPORTER]: { kind: 'command', command: 'city.move' },
-  [ItemId.HOLY_WATER]: { kind: 'command', command: 'heroes.reset' },
-  [ItemId.EXCALIBUR]: { kind: 'command', command: 'heroes.useItem' },
-  [ItemId.WEALTH_OF_NATIONS]: { kind: 'command', command: 'heroes.useItem' },
-  [ItemId.ART_OF_WAR]: { kind: 'command', command: 'heroes.useItem' },
-  [ItemId.ANABASIS]: { kind: 'command', command: 'heroes.useItem' },
-  [ItemId.EPITOME_OF_MILITARY_SCIENCE]: { kind: 'command', command: 'heroes.useItem' },
-  [ItemId.ON_WAR]: { kind: 'command', command: 'heroes.useItem' },
+  [ItemId.BEGINNER_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.PRIMARY_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.INTERMEDIATE_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.SENIOR_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.MASTER_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.ULTIMATE_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.NAPOLEONS_DIARY]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.TROOPS_SPEEDUP },
+  [ItemId.ARCHIMEDES_NOTE]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.FORTIFICATIONS_SPEEDUP },
+  [ItemId.CITY_TELEPORTER]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.CITY_MOVE },
+  [ItemId.HOLY_WATER]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_RESET },
+  [ItemId.EXCALIBUR]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.WEALTH_OF_NATIONS]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.ART_OF_WAR]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.ANABASIS]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.EPITOME_OF_MILITARY_SCIENCE]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.ON_WAR]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
 };
-for (const l of [1, 2, 3, 4, 5, 6, 7, 8, 9]) EFFECTS[medalId(l)] = { kind: 'command', command: 'heroes.useItem' };
+for (const l of [1, 2, 3, 4, 5, 6, 7, 8, 9]) EFFECTS[medalId(l)] = { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM };
 
 /** The medals in a medal box: each of its levels (BALANCE.items.medalBoxes, set for every box). */
 function medals(rng: Rng, levels: readonly number[] = []): GrantContents {
@@ -127,14 +126,13 @@ export function itemEffect(itemId: string): ItemEffect | undefined {
 }
 
 /** Hero-attribute items (Excalibur etc.): +BALANCE.items.heroAttributeBuff.bonus of the attribute as a buff bonus. */
-export const HERO_ATTRIBUTE_ITEMS: Record<string, 'power' | 'management' | 'stratagem'> = {
-  [ItemId.EXCALIBUR]: 'power',
-  [ItemId.WEALTH_OF_NATIONS]: 'management',
-  [ItemId.ART_OF_WAR]: 'stratagem',
+export const HERO_ATTRIBUTE_ITEMS: Record<string, HeroBuffId> = {
+  [ItemId.EXCALIBUR]: HeroBuffId.POWER,
+  [ItemId.WEALTH_OF_NATIONS]: HeroBuffId.MANAGEMENT,
+  [ItemId.ART_OF_WAR]: HeroBuffId.STRATAGEM,
 };
 /** What a hero attribute boost does (heroes.buffs[].desc). */
-export const heroBuffDesc = (attr: 'power' | 'management' | 'stratagem') =>
-  msg('buff.heroStat', { stat: ref.stat(attr), percent: pct(BALANCE.items.heroAttributeBuff.bonus) });
+export const heroBuffDesc = (attr: HeroBuffId) => msg('buff.heroStat', { stat: ref.stat(attr), percent: pct(BALANCE.items.heroAttributeBuff.bonus) });
 /** The army-size boost of the War Ensign (for battle reports). */
 export const WAR_ENSIGN_DESC = BUFF_TEXT.ensign;
 
@@ -203,7 +201,7 @@ type BuffedHero = {
 export const heroBuffAmount = (attributePoints: number) => Math.ceil(attributePoints * BALANCE.items.heroAttributeBuff.bonus);
 
 /** The points an attribute boost works on: assigned points plus gear (marchlands: orig only the hero's own points). */
-export const heroBuffBase = (h: Omit<BuffedHero, 'buffs'>, attr: 'power' | 'management' | 'stratagem') => h[attr] + h[`${attr}Added`];
+export const heroBuffBase = (h: Omit<BuffedHero, 'buffs'>, attr: HeroBuffId) => h[attr] + h[`${attr}Added`];
 
 /**
  * Keep active attribute boosts in step with the hero's current attributes (they grow as the hero
@@ -213,7 +211,7 @@ export function syncHeroBuffs(h: BuffedHero): boolean {
   let changed = false;
   h.buffs = h.buffs.map((b) => {
     const attr = b.id;
-    if (attr !== 'power' && attr !== 'management' && attr !== 'stratagem') return b;
+    if (attr !== HeroBuffId.POWER && attr !== HeroBuffId.MANAGEMENT && attr !== HeroBuffId.STRATAGEM) return b;
     const amount = heroBuffAmount(heroBuffBase(h, attr));
     if (h[`${attr}BuffAdded`] !== amount) {
       h[`${attr}BuffAdded`] = amount;

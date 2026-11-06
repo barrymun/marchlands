@@ -31,3 +31,7 @@ export const GROUPS: { id: Group; icon: typeof Hammer; label: string }[] = [
 export const PER_GROUP = 3;
 
 export const STORE_KEY = 'marchlands-activity-collapsed';
+
+/** Where the dock stands: floating over the page, or in line in the sidebar. */
+export const DockVariant = { FLOATING: 'floating', INLINE: 'inline' } as const;
+export type DockVariant = (typeof DockVariant)[keyof typeof DockVariant];

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { GameRefKind } from '#/constants.ts';
 import { BALANCE, troopConfig, troopDescription, TROOPS } from '#/index.ts';
 
 describe(troopDescription.name, () => {
@@ -22,7 +23,7 @@ describe(troopDescription.name, () => {
   });
 
   it('refers to other troops by id', () => {
-    expect(troopDescription(9)?.params).toMatchObject({ target: { ref: 'troop', id: 7 }, abatis: { ref: 'troop', id: 15 } });
+    expect(troopDescription(9)?.params).toMatchObject({ target: { ref: GameRefKind.TROOP, id: 7 }, abatis: { ref: GameRefKind.TROOP, id: 15 } });
   });
 
   it('quotes the damage multipliers and the tower damage taken from BALANCE.battle', () => {

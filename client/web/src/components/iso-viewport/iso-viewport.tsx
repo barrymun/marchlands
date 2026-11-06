@@ -2,7 +2,7 @@ import { Minus, Plus } from 'lucide-react';
 import { type KeyboardEvent, type PointerEvent, type ReactNode, useEffect, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ANIMATION_FPS, DRAG_SLOP, KEY_STEP } from '@/components/iso-viewport/constants';
+import { ANIMATION_FPS, DRAG_SLOP, DrawableTone, KEY_STEP, Weather } from '@/components/iso-viewport/constants';
 import type { Viewport } from '@/components/iso-viewport/hooks';
 import type { Camera, Drawable, PanDirection, Piece, Sky, ViewPoint } from '@/components/iso-viewport/types';
 import {
@@ -114,8 +114,8 @@ export function IsoViewport({
       if (!img) return;
       const p = tileOrigin(d.col, d.row, camera, view);
       const box = spriteBox(d.size);
-      ctx.filter = d.tone === 'lit' ? 'brightness(1.15)' : d.tone === 'dim' ? 'grayscale(0.7) brightness(0.7)' : 'none';
-      ctx.globalAlpha = d.tone === 'dim' ? 0.55 : 1;
+      ctx.filter = d.tone === DrawableTone.LIT ? 'brightness(1.15)' : d.tone === DrawableTone.DIM ? 'grayscale(0.7) brightness(0.7)' : 'none';
+      ctx.globalAlpha = d.tone === DrawableTone.DIM ? 0.55 : 1;
       ctx.drawImage(img, p.x + box.left * k, p.y + box.top * k, box.width * k, box.height * k);
     };
     for (const g of ground) draw(ctx, g);
@@ -141,7 +141,7 @@ export function IsoViewport({
     }
     if (!skyNow) return;
     const px = Math.max(1, Math.round(view.dpr));
-    if (skyNow.weather === 'snow') {
+    if (skyNow.weather === Weather.SNOW) {
       ctx.fillStyle = 'rgba(250, 250, 255, 0.85)';
       for (const p of skyNow.particles) ctx.fillRect(Math.round(p.x * view.dpr), Math.round(p.y * view.dpr), px * 2, px * 2);
     } else if (skyNow.weather) {

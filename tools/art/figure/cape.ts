@@ -3,8 +3,10 @@
 // collar from 3, edged in gold from 5, torn at the hem from 8, and at 10 a pair of crimson bat wings spread behind the
 // shoulders. The rows below the shoulders stir (a `sway` spot: from its row, `n` rows down).
 
+import { SpotKind } from '@marchlands/core';
+
 import { BLUE, lit, look, type Shades, spike, STEEL } from '../gear/common.ts';
-import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
+import { CLEAR, type Colour, type PixelCanvas, type Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { layer, part } from './skeleton.ts';
 
@@ -56,7 +58,7 @@ function wings(): PixelCanvas {
     const [tx, ty] = tips[dir][0];
     spike(membrane, [tx + dir * -1, ty + 1], [tx + dir * 2, ty - 3], STEEL);
   }
-  membrane.spot('sway', [50, 30], 22);
+  membrane.spot(SpotKind.SWAY, [50, 30], 22);
   return membrane;
 }
 
@@ -68,7 +70,7 @@ export function figureCape(level: number): PixelCanvas {
     c.poly(CAPE, folds(cloth, level === 0 ? 'wool' : undefined));
     if (level >= 8)
       // a torn hem
-      for (let x = 32; x <= 61; x++) for (let y = HEM - ((x * 7) % 5); y <= HEM; y++) c.set(x, y, 'clear');
+      for (let x = 32; x <= 61; x++) for (let y = HEM - ((x * 7) % 5); y <= HEM; y++) c.set(x, y, CLEAR);
     if (level >= 5)
       // edged in gold
       for (let y = TOP + 2; y < HEM - 1; y++) {
@@ -80,6 +82,6 @@ export function figureCape(level: number): PixelCanvas {
     if (level === 0) for (let x = 38; x <= 62; x++) for (const y of [TOP - 1, TOP]) c.set(x, y, y === TOP - 1 ? 'plankTop' : 'trunk');
     else oval(c, 50, TOP, 8, 2.2, lit(50, TOP, 8, level <= 2 ? STEEL : L.trim));
   });
-  cape.spot('sway', [50, 34], HEM - 34);
+  cape.spot(SpotKind.SWAY, [50, 34], HEM - 34);
   return layer(`cape-${level}`, [cape]);
 }

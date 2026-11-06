@@ -2,7 +2,7 @@
 // and our own. Troop keys: militia are warriors, peasants workers, scouter scouts, carriage transporters.
 
 import type { TroopCounts } from '@marchlands/core';
-import type { Plan } from './siege.ts';
+import { type Plan, SiegeUntil } from './siege.ts';
 
 /** One of each type as a thin layer, so traps and towers spread their hits (`n` of each). */
 const layers = (n: number, ...keys: (keyof TroopCounts)[]): TroopCounts => Object.fromEntries(keys.map((k) => [k, n]));
@@ -20,8 +20,13 @@ export const PLANS: Record<string, Plan> = {
       { name: 'cavalry', troops: { pikemen: 90_000, militia: 10_000 }, waves: 2 },
       { name: 'pikemen', troops: { archer: 80_000, pikemen: 10_000, ...layers(1_000, 'peasants', 'militia', 'swordsmen') }, waves: 1 },
       { name: 'archers', troops: { archer: 95_000 }, waves: 3 },
-      { name: 'break', troops: { archer: 95_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') }, until: 'broken', max: 40 },
-      { name: 'loyalty', troops: loyaltyWave, until: 'captured', max: 100 },
+      {
+        name: 'break',
+        troops: { archer: 95_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') },
+        until: SiegeUntil.BROKEN,
+        max: 40,
+      },
+      { name: 'loyalty', troops: loyaltyWave, until: SiegeUntil.CAPTURED, max: 100 },
     ],
   },
   /** Source 13 for heroes of 300-350 attack: warriors and pikemen against the cavalry, then layered archers. */
@@ -34,10 +39,10 @@ export const PLANS: Record<string, Plan> = {
       {
         name: 'break',
         troops: { archer: 95_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen'), ...layers(500, 'lightCavalry', 'heavyCavalry') },
-        until: 'broken',
+        until: SiegeUntil.BROKEN,
         max: 40,
       },
-      { name: 'loyalty', troops: loyaltyWave, until: 'captured', max: 100 },
+      { name: 'loyalty', troops: loyaltyWave, until: SiegeUntil.CAPTURED, max: 100 },
     ],
   },
   /** Source 13 for heroes of 500+ attack: one ballista wave, archers to clean up, then loyalty waves. */
@@ -46,8 +51,8 @@ export const PLANS: Record<string, Plan> = {
     gap: 1,
     stages: [
       { name: 'ballistae', troops: { ballista: 117_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'pikemen', 'swordsmen', 'archer') }, waves: 1 },
-      { name: 'break', troops: { archer: 95_000 }, until: 'broken', max: 40 },
-      { name: 'loyalty', troops: loyaltyWave, until: 'captured', max: 100 },
+      { name: 'break', troops: { archer: 95_000 }, until: SiegeUntil.BROKEN, max: 40 },
+      { name: 'loyalty', troops: loyaltyWave, until: SiegeUntil.CAPTURED, max: 100 },
     ],
   },
   /** Source 9: many small warrior waves for the traps, then big archer waves, then small loyalty waves. */
@@ -56,8 +61,13 @@ export const PLANS: Record<string, Plan> = {
     gap: 1,
     stages: [
       { name: 'traps', troops: { militia: 7_500 }, waves: 40 },
-      { name: 'break', troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'swordsmen', 'pikemen', 'scouter') }, until: 'broken', max: 40 },
-      { name: 'loyalty', troops: { archer: 5_000, militia: 10_000 }, until: 'captured', max: 100 },
+      {
+        name: 'break',
+        troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'swordsmen', 'pikemen', 'scouter') },
+        until: SiegeUntil.BROKEN,
+        max: 40,
+      },
+      { name: 'loyalty', troops: { archer: 5_000, militia: 10_000 }, until: SiegeUntil.CAPTURED, max: 100 },
     ],
   },
   /** Our best army against level 10 barbarian cities (docs/battle-sims/npc-level-10.md), without its transporters. */
@@ -65,8 +75,8 @@ export const PLANS: Record<string, Plan> = {
     name: 'The level 10 farming army, wave after wave',
     gap: 1,
     stages: [
-      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: 'broken', max: 150 },
-      { name: 'loyalty', troops: loyaltyWave, until: 'captured', max: 100 },
+      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: SiegeUntil.BROKEN, max: 150 },
+      { name: 'loyalty', troops: loyaltyWave, until: SiegeUntil.CAPTURED, max: 100 },
     ],
   },
   /**
@@ -77,8 +87,8 @@ export const PLANS: Record<string, Plan> = {
     name: 'The farming army, then small archer waves, all in one landing second',
     gap: 0.001,
     stages: [
-      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: 'broken', max: 150 },
-      { name: 'loyalty', troops: { archer: 5_000 }, until: 'captured', max: 100 },
+      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: SiegeUntil.BROKEN, max: 150 },
+      { name: 'loyalty', troops: { archer: 5_000 }, until: SiegeUntil.CAPTURED, max: 100 },
     ],
   },
   /**
@@ -89,8 +99,13 @@ export const PLANS: Record<string, Plan> = {
     name: 'Archers in five thin layers, then small archer waves, all in one landing second',
     gap: 0.001,
     stages: [
-      { name: 'break', troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') }, until: 'broken', max: 150 },
-      { name: 'loyalty', troops: { archer: 1_000 }, until: 'captured', max: 100 },
+      {
+        name: 'break',
+        troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') },
+        until: SiegeUntil.BROKEN,
+        max: 150,
+      },
+      { name: 'loyalty', troops: { archer: 1_000 }, until: SiegeUntil.CAPTURED, max: 100 },
     ],
   },
   /**
@@ -102,8 +117,13 @@ export const PLANS: Record<string, Plan> = {
     name: 'Catapults until the garrison breaks, then layered archers, all in one landing second',
     gap: 0.001,
     stages: [
-      { name: 'catapults', troops: { catapult: 125_000 }, until: 'broken', max: 150 },
-      { name: 'loyalty', troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') }, until: 'captured', max: 100 },
+      { name: 'catapults', troops: { catapult: 125_000 }, until: SiegeUntil.BROKEN, max: 150 },
+      {
+        name: 'loyalty',
+        troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') },
+        until: SiegeUntil.CAPTURED,
+        max: 100,
+      },
     ],
   },
   /** For a day with cataphracts, which ride down archers: pikemen first until they're gone (AeroAgg's table), then archers. */
@@ -111,9 +131,9 @@ export const PLANS: Record<string, Plan> = {
     name: 'Pikemen until the cataphracts are gone, then the farming army',
     gap: 1,
     stages: [
-      { name: 'pikemen', troops: { pikemen: 125_000 }, until: 'cleared', target: 'heavyCavalry', max: 30 },
-      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: 'broken', max: 150 },
-      { name: 'loyalty', troops: loyaltyWave, until: 'captured', max: 100 },
+      { name: 'pikemen', troops: { pikemen: 125_000 }, until: SiegeUntil.CLEARED, target: 'heavyCavalry', max: 30 },
+      { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: SiegeUntil.BROKEN, max: 150 },
+      { name: 'loyalty', troops: loyaltyWave, until: SiegeUntil.CAPTURED, max: 100 },
     ],
   },
 };

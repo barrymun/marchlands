@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { msg, ref, type ReportBody, ReportKind, ReportOrder, ReportType, TileType } from '@marchlands/core';
+import { ALL_REPORTS, msg, ref, type ReportBody, ReportBodyKind, ReportKind, ReportOrder, ReportType, TileType } from '@marchlands/core';
 import { reports as reportRows } from '@marchlands/db';
 
 import { createReport } from '#/engine/reports.ts';
@@ -109,12 +109,12 @@ describe(`${reports.listReports.name}: search and filters`, () => {
     const battle = await createReport(g, { ...base, title: msg('report.title.attackSucceeded'), targetPos: valley(12, 34), body: textBody() });
     await g.tx
       .update(reportRows)
-      .set({ body: { kind: 'battle' } as unknown as ReportBody })
+      .set({ body: { kind: ReportBodyKind.BATTLE } as unknown as ReportBody })
       .where(eq(reportRows.id, battle));
     const scout = await createReport(g, { ...base, title: msg('report.title.scoutReport'), targetPos: at('Oakridge_%', 120, 7), body: textBody() });
     await g.tx
       .update(reportRows)
-      .set({ body: { kind: 'scout', scout: { owner: 'Eadric' } } as unknown as ReportBody })
+      .set({ body: { kind: ReportBodyKind.SCOUT, scout: { owner: 'Eadric' } } as unknown as ReportBody })
       .where(eq(reportRows.id, scout));
     const home = await createReport(g, {
       playerId: a.id,
@@ -122,7 +122,7 @@ describe(`${reports.listReports.name}: search and filters`, () => {
       isBack: true,
       startPos: valley(12, 34),
       targetPos: at('Home', 1, 2),
-      body: { kind: 'movement', movement: { hero: null, troops: {}, resources: { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 } } },
+      body: { kind: ReportBodyKind.MOVEMENT, movement: { hero: null, troops: {}, resources: { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 } } },
     });
     const aborted = await createReport(g, { ...base, title: msg('report.title.missionAborted'), body: textBody() });
     const trade = await addReport(g, a, ReportType.TRADE, msg('report.title.tradeCompleted'));
@@ -196,7 +196,7 @@ describe(reports.readReport.name, () => {
         .insert(reportRows)
         .values({ playerId: a.id, title: msg('report.title.scoutReport'), body: { kind: 'xml', xml: '<report/>' } as unknown as ReportBody, eventTime: g.now })
         .returning();
-      expect((await reports.readReport(g, a.id, row!.id)).content).toEqual({ kind: 'text', text: msg('report.oldFormat') });
+      expect((await reports.readReport(g, a.id, row!.id)).content).toEqual({ kind: ReportBodyKind.TEXT, text: msg('report.oldFormat') });
     }));
 
   it("cannot read another player's report or one that does not exist", () =>
@@ -233,7 +233,7 @@ describe(reports.markReportsRead.name, () => {
       await addReport(g, b);
       await reports.markReportsRead(g, a.id, []);
       expect(await reports.reportCounts(g, a.id)).toMatchObject({ count: 2 });
-      await reports.markReportsRead(g, a.id, 'all');
+      await reports.markReportsRead(g, a.id, ALL_REPORTS);
       expect(await reports.reportCounts(g, a.id)).toMatchObject({ count: 0 });
       expect(await reports.reportCounts(g, b.id)).toMatchObject({ count: 1 });
     }));

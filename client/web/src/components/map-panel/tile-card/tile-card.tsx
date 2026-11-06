@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { type CityBean, getMapTilesByTileIdOptions } from '@marchlands/api-client';
 import {
   BALANCE,
+  BattleTarget,
   canUpgradeTile,
   FACTION_IDS,
   factionOfZone,
@@ -216,7 +217,7 @@ export function TileCard({
                     disabled={scouts <= 0}
                     onClick={() => {
                       // lords' city scouts fight: send them all; elsewhere one always gets through
-                      const n = tileKind(tile) === 'city' ? scouts : 1;
+                      const n = tileKind(tile) === BattleTarget.CITY ? scouts : 1;
                       onSend({ ...tileTarget(tile, city.fieldId), mission: Mission.SCOUT, troops: { scouter: String(n) } });
                     }}
                   >

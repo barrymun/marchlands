@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { BarRow } from '@/components/stats-panel/bar-row/bar-row';
+import { UnitGroup } from '@/components/stats-panel/constants';
 import { SectionId } from '@/components/stats-panel/section/constants';
 import { Section } from '@/components/stats-panel/section/section';
 import { UNIT_COLUMNS } from '@/components/stats-panel/troops/units-table/constants';
@@ -35,7 +36,7 @@ export function Troops({ c }: { c: Counters }) {
                   ]}
                   tip={
                     <dl className="grid grid-cols-[auto_auto] gap-x-3">
-                      {UNIT_COLUMNS.flatMap((col) => (col.group === 'killed' ? [] : [col])).map(({ group, label }) => (
+                      {UNIT_COLUMNS.flatMap((col) => (col.group === UnitGroup.KILLED ? [] : [col])).map(({ group, label }) => (
                         <div key={group} className="contents">
                           <dt>{label}</dt>
                           <dd className="text-end tabular-nums">{fmtExact(r[group])}</dd>

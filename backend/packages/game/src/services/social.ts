@@ -3,7 +3,7 @@
 import { and, desc, eq, gt, or, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { GameError, msg } from '@marchlands/core';
+import { ChatChannel, GameError, msg, PlayerRelationKind } from '@marchlands/core';
 import { chatMessages, playerRelations, players } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
@@ -22,10 +22,10 @@ export async function listRelations(ctx: Ctx, playerId: number) {
     .innerJoin(players, eq(players.id, playerRelations.otherPlayerId))
     .where(eq(playerRelations.playerId, playerId));
   const view = (k: string) => rows.filter((r) => r.kind === k).map(({ kind: _k, ...r }) => ({ ...r, prestige: Math.floor(r.prestige) }));
-  return { friends: view('friend'), blocked: view('block') };
+  return { friends: view(PlayerRelationKind.FRIEND), blocked: view(PlayerRelationKind.BLOCK) };
 }
 
-export async function addRelation(ctx: Ctx, playerId: number, name: string, kind: 'friend' | 'block') {
+export async function addRelation(ctx: Ctx, playerId: number, name: string, kind: PlayerRelationKind) {
   const other = await findPlayerByName(ctx, name);
   if (!other) throw new GameError(msg('common.playerNamedNotFound', { name }), -41, 404);
   if (other.id === playerId) throw new GameError(msg('social.selfTarget'), -99);
@@ -33,7 +33,7 @@ export async function addRelation(ctx: Ctx, playerId: number, name: string, kind
   return { id: other.id, name: other.name };
 }
 
-export async function removeRelation(ctx: Ctx, playerId: number, otherId: number, kind: 'friend' | 'block') {
+export async function removeRelation(ctx: Ctx, playerId: number, otherId: number, kind: PlayerRelationKind) {
   await ctx.tx
     .delete(playerRelations)
     .where(and(eq(playerRelations.playerId, playerId), eq(playerRelations.otherPlayerId, otherId), eq(playerRelations.kind, kind)));
@@ -67,7 +67,12 @@ async function decorate(ctx: Ctx, p: { prestigeRank: number; allianceId: number 
 }
 
 /** common.worldChat / common.channelChat (beginner channel); (marchlands) both are free: there are no Speakers. */
-export async function worldChat(ctx: Ctx, playerId: number, rawMsg: string, channel: 'world' | 'beginner' = 'world') {
+export async function worldChat(
+  ctx: Ctx,
+  playerId: number,
+  rawMsg: string,
+  channel: typeof ChatChannel.WORLD | typeof ChatChannel.BEGINNER = ChatChannel.WORLD,
+) {
   const p = await getPlayer(ctx, playerId);
   assertNotMuted(p, ctx.now);
   const text = cleanMessage(rawMsg);
@@ -90,12 +95,12 @@ export async function allianceChat(ctx: Ctx, playerId: number, rawMsg: string) {
   const text = cleanMessage(rawMsg);
   await ctx.tx
     .insert(chatMessages)
-    .values({ channel: 'alliance', allianceId: p.allianceId, fromPlayerId: p.id, fromName: p.name, message: text, sentAt: ctx.now });
+    .values({ channel: ChatChannel.ALLIANCE, allianceId: p.allianceId, fromPlayerId: p.id, fromName: p.name, message: text, sentAt: ctx.now });
   const memberRows = await ctx.tx.select({ id: players.id }).from(players).where(eq(players.allianceId, p.allianceId));
   ctx.push(
     memberRows.map((r) => r.id),
     PushCmd.ALLIANCE_CHAT_MESSAGE,
-    { msg: text, languageType: 0, fromUser: p.name, fromId: p.id, channel: 'alliance', time: ctx.now },
+    { msg: text, languageType: 0, fromUser: p.name, fromId: p.id, channel: ChatChannel.ALLIANCE, time: ctx.now },
   );
 }
 
@@ -108,20 +113,22 @@ export async function privateChat(ctx: Ctx, playerId: number, targetName: string
   if (target.id === p.id) throw new GameError(msg('social.selfTarget'), -99);
   const text = cleanMessage(rawMsg);
   if (await isBlocked(ctx, target.id, p.id)) return; // silently dropped, as if delivered
-  await ctx.tx.insert(chatMessages).values({ channel: 'private', fromPlayerId: p.id, fromName: p.name, toPlayerId: target.id, message: text, sentAt: ctx.now });
+  await ctx.tx
+    .insert(chatMessages)
+    .values({ channel: ChatChannel.PRIVATE, fromPlayerId: p.id, fromName: p.name, toPlayerId: target.id, message: text, sentAt: ctx.now });
   ctx.push(target.id, PushCmd.PRIVATE_CHAT_MESSAGE, { msg: text, chatType: 0, fromUser: p.name, fromId: p.id, time: ctx.now });
 }
 
 /** Recent history of a channel (world / beginner / alliance / private). */
-export async function chatHistory(ctx: Ctx, playerId: number, channel: string, since = 0) {
+export async function chatHistory(ctx: Ctx, playerId: number, channel: ChatChannel, since = 0) {
   const p = await getPlayer(ctx, playerId);
   let where;
-  if (channel === 'alliance') {
+  if (channel === ChatChannel.ALLIANCE) {
     if (!p.allianceId) return [];
-    where = and(eq(chatMessages.channel, 'alliance'), eq(chatMessages.allianceId, p.allianceId), gt(chatMessages.sentAt, since));
-  } else if (channel === 'private') {
+    where = and(eq(chatMessages.channel, ChatChannel.ALLIANCE), eq(chatMessages.allianceId, p.allianceId), gt(chatMessages.sentAt, since));
+  } else if (channel === ChatChannel.PRIVATE) {
     where = and(
-      eq(chatMessages.channel, 'private'),
+      eq(chatMessages.channel, ChatChannel.PRIVATE),
       or(eq(chatMessages.toPlayerId, playerId), eq(chatMessages.fromPlayerId, playerId)),
       gt(chatMessages.sentAt, since),
     );

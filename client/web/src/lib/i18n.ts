@@ -8,11 +8,13 @@ import i18n, { type BackendModule } from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
-export const LOCALES = ['en-GB', 'en-US', 'ja-JP', 'ar'] as const;
-export type Locale = (typeof LOCALES)[number];
-export const DEFAULT_LOCALE: Locale = 'en-GB';
+/** The locales, by the names their files have and the player's choice is remembered under, so a value never changes. */
+export const Locale = { EN_GB: 'en-GB', EN_US: 'en-US', JA_JP: 'ja-JP', AR: 'ar' } as const;
+export type Locale = (typeof Locale)[keyof typeof Locale];
+export const LOCALES = Object.values(Locale);
+export const DEFAULT_LOCALE: Locale = Locale.EN_GB;
 /** Locales that hold only the keys whose text differs from en-GB (spelling); every other locale is a full translation. */
-export const OVERRIDE_LOCALES: readonly Locale[] = ['en-US'];
+export const OVERRIDE_LOCALES: readonly Locale[] = [Locale.EN_US];
 /** localStorage key of the chosen locale */
 const STORAGE_KEY = 'marchlands-locale';
 
@@ -77,7 +79,7 @@ const lazyLocalesBackend: BackendModule = {
   init() {},
   read(lng, ns, callback) {
     // a lazy screen's English text (none: an en-US file it doesn't spell differently)
-    if (lng === 'en-GB' || lng === 'en-US') {
+    if (lng === Locale.EN_GB || lng === Locale.EN_US) {
       const file = lazyEnglish[`../locales/${lng}/${ns}.json`];
       if (!file) return callback(null, {});
       file().then(

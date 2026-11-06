@@ -6,8 +6,9 @@ import {
   BuildingType,
   civilCodePopulation,
   heroBoxQuality,
-  itemEffect,
   type ItemEffect,
+  itemEffect,
+  ItemEffectKind,
   itemGoldPrice,
   ItemId,
   ITEMS,
@@ -36,7 +37,7 @@ import {
 import { game, type TestGame } from '#test/support/game.ts';
 
 const BUFF_ITEMS = ITEMS.map((i) => [i.id, itemEffect(i.id)] as const).filter(
-  (e): e is [string, Extract<ItemEffect, { kind: 'buff' }>] => e[1]?.kind === 'buff',
+  (e): e is [string, Extract<ItemEffect, { kind: typeof ItemEffectKind.BUFF }>] => e[1]?.kind === ItemEffectKind.BUFF,
 );
 
 async function setInjured(g: TestGame, p: TestPlayer, injured: Record<string, number>, troops: Record<string, number> = {}) {

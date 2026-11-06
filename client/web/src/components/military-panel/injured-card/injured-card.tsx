@@ -8,7 +8,7 @@ import {
   postCitiesTroopsInjuredCureMutation,
   postCitiesTroopsInjuredDisbandMutation,
 } from '@marchlands/api-client';
-import { BALANCE, healCost, healHonorCost, HealPayment, researchLevel, TechType, TROOP_KEYS, type TroopKey } from '@marchlands/core';
+import { BALANCE, healCost, healHonorCost, HealPayment, researchLevel, RESOURCE_KEYS, TechType, TROOP_KEYS, type TroopKey } from '@marchlands/core';
 
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { CostList } from '@/components/cost-list/cost-list';
@@ -50,7 +50,7 @@ export function InjuredCard({ city }: { city: CityBean }) {
     stone: city.resource.stone.amount,
     iron: city.resource.iron.amount,
   };
-  const affordable = (['gold', 'food', 'wood', 'stone', 'iron'] as const).every((k) => have[k] >= cost[k]);
+  const affordable = RESOURCE_KEYS.every((k) => have[k] >= cost[k]);
   const total = Object.values(chosen).reduce((s, n) => s + n, 0);
   const path = { cityId: city.id };
   const done = () => setAmounts({});

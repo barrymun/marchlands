@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { DAY, HOUR, setGameSpeed } from '@marchlands/core';
+import { DAY, HOUR, ResourceKey, setGameSpeed } from '@marchlands/core';
 
 import {
   clockTime,
@@ -19,12 +19,12 @@ import {
   utcClock,
 } from '@/lib/format';
 import { buildingName, troopName } from '@/lib/game-data';
-import { i18n } from '@/lib/i18n';
+import { i18n, Locale } from '@/lib/i18n';
 
 beforeEach(() => setGameSpeed(1));
 afterEach(async () => {
   setGameSpeed(1);
-  await i18n.changeLanguage('en-GB');
+  await i18n.changeLanguage(Locale.EN_GB);
 });
 
 describe(period.name, () => {
@@ -59,9 +59,9 @@ describe(percent.name, () => {
   });
 
   it('follows the locale', async () => {
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(percent(0.25)).toBe('25%');
-    await i18n.changeLanguage('en-US');
+    await i18n.changeLanguage(Locale.EN_US);
     expect(percent(0.005, 1)).toBe('0.5%');
   });
 });
@@ -77,13 +77,13 @@ describe(fmt.name, () => {
   });
 
   it('follows the locale (Japanese counts in 万)', async () => {
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(fmt(1_234_567)).toBe('123.5万');
     expect(fmt(1234.9)).toBe('1,234');
   });
 
   it('writes Arabic with Western digits, as the coordinates in code are', async () => {
-    await i18n.changeLanguage('ar');
+    await i18n.changeLanguage(Locale.AR);
     expect(fmt(1234.9)).toMatch(/^1.234$/);
     expect(fmt(1234.9)).not.toMatch(/[\u0660-\u0669]/);
   });
@@ -111,7 +111,7 @@ describe(signedRate.name, () => {
   });
 
   it('uses the locale unit', async () => {
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(signedRate(100)).toBe('+100/時');
   });
 });
@@ -130,7 +130,7 @@ describe(duration.name, () => {
   });
 
   it('uses the locale units', async () => {
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(duration(3_723_000)).toBe('1時間 02分 03秒');
     expect(duration(90_061_000)).toBe('1日 1時間 01分');
   });
@@ -145,10 +145,10 @@ describe(shortDuration.name, () => {
 
 describe(resourceLabel.name, () => {
   it('names a resource in the locale (wood is lumber)', async () => {
-    expect(resourceLabel('wood')).toBe('Lumber');
-    expect(resourceLabel('gold')).toBe('Gold');
-    await i18n.changeLanguage('ja-JP');
-    expect(resourceLabel('wood')).toBe('木材');
+    expect(resourceLabel(ResourceKey.WOOD)).toBe('Lumber');
+    expect(resourceLabel(ResourceKey.GOLD)).toBe('Gold');
+    await i18n.changeLanguage(Locale.JA_JP);
+    expect(resourceLabel(ResourceKey.WOOD)).toBe('木材');
   });
 });
 
@@ -179,9 +179,9 @@ const AT = new Date(2026, 9, 11, 13, 4, 5).getTime();
 describe(dateTime.name, () => {
   it('writes the date and time the way the locale does', async () => {
     expect(dateTime(AT)).toBe('11/10/2026, 13:04:05');
-    await i18n.changeLanguage('en-US');
+    await i18n.changeLanguage(Locale.EN_US);
     expect(dateTime(AT)).toBe('10/11/2026, 1:04:05 PM');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(dateTime(AT)).toBe('2026/10/11 13:04:05');
   });
 });
@@ -189,9 +189,9 @@ describe(dateTime.name, () => {
 describe(shortDate.name, () => {
   it('writes the day and month the way the locale does', async () => {
     expect(shortDate(AT)).toBe('11 Oct');
-    await i18n.changeLanguage('en-US');
+    await i18n.changeLanguage(Locale.EN_US);
     expect(shortDate(AT)).toBe('Oct 11');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(shortDate(AT)).toBe('10月11日');
   });
 });
@@ -200,7 +200,7 @@ describe(clockTime.name, () => {
   it('writes the time of day, without seconds when short', async () => {
     expect(clockTime(AT)).toBe('13:04:05');
     expect(clockTime(AT, true)).toBe('13:04');
-    await i18n.changeLanguage('en-US');
+    await i18n.changeLanguage(Locale.EN_US);
     expect(clockTime(AT)).toBe('1:04:05 PM');
     expect(clockTime(AT, true)).toBe('01:04 PM');
   });
@@ -210,7 +210,7 @@ describe(utcClock.name, () => {
   it('writes the time of day in UTC, to the second, on the 24-hour clock', async () => {
     const at = Date.UTC(2026, 10, 1, 20, 0, 5);
     expect(utcClock(at)).toBe('20:00:05');
-    await i18n.changeLanguage('en-US');
+    await i18n.changeLanguage(Locale.EN_US);
     expect(utcClock(at)).toBe('20:00:05');
   });
 });

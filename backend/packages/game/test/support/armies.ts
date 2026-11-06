@@ -10,10 +10,12 @@ import {
   BALANCE,
   BASIC_RESOURCES,
   type BattleReport,
+  BattleTarget,
   BuildingType,
   HeroStatus,
   Mission,
   type ReportBody,
+  ReportBodyKind,
   type ScoutReport,
   tileDistance,
   TileType,
@@ -169,21 +171,32 @@ export async function allies(g: TestGame, a: TestPlayer, b: TestPlayer, name = `
   return id;
 }
 
-type BattleKinds = { city: { city: string }; npc: { loyaltyDamage: number }; valley: { occupied: boolean } };
-type ScoutKinds = { npc: { target: 'npc' }; valley: { target: 'valley' }; city: { intel: unknown }; cityDefender: { from: string } };
+type BattleKinds = {
+  [BattleTarget.CITY]: { city: string };
+  [BattleTarget.NPC]: { loyaltyDamage: number };
+  [BattleTarget.VALLEY]: { occupied: boolean };
+};
+/** Which scout report to expect: `CITY` is the scout's copy, `CITY_DEFENDER` the scouted player's. */
+export const ScoutOf = { ...BattleTarget, CITY_DEFENDER: 'cityDefender' } as const;
+type ScoutKinds = {
+  [ScoutOf.NPC]: { target: typeof BattleTarget.NPC };
+  [ScoutOf.VALLEY]: { target: typeof BattleTarget.VALLEY };
+  [ScoutOf.CITY]: { intel: unknown };
+  [ScoutOf.CITY_DEFENDER]: { from: string };
+};
 
 /** The battle of a report, of the given target kind (fails when the report is something else). */
 export function battleOf<K extends keyof BattleKinds>(r: { body: ReportBody }, kind: K): Extract<BattleReport, BattleKinds[K]> {
-  const key = { city: 'city', npc: 'loyaltyDamage', valley: 'occupied' }[kind];
-  if (r.body.kind !== 'battle' || !(key in r.body.battle)) throw new Error(`not a ${kind} battle report: ${JSON.stringify(r.body)}`);
+  const key = { [BattleTarget.CITY]: 'city', [BattleTarget.NPC]: 'loyaltyDamage', [BattleTarget.VALLEY]: 'occupied' }[kind];
+  if (r.body.kind !== ReportBodyKind.BATTLE || !(key in r.body.battle)) throw new Error(`not a ${kind} battle report: ${JSON.stringify(r.body)}`);
   return r.body.battle as Extract<BattleReport, BattleKinds[K]>;
 }
 
-/** The scouting of a report, of the given kind (`city`: the scout's copy, `cityDefender`: the scouted lord's). */
+/** The scouting of a report, of the given kind (`ScoutOf`). */
 export function scoutOf<K extends keyof ScoutKinds>(r: { body: ReportBody }, kind: K): Extract<ScoutReport, ScoutKinds[K]> {
-  if (r.body.kind !== 'scout') throw new Error(`not a scout report: ${JSON.stringify(r.body)}`);
+  if (r.body.kind !== ReportBodyKind.SCOUT) throw new Error(`not a scout report: ${JSON.stringify(r.body)}`);
   const s = r.body.scout;
-  const ok = kind === 'city' ? 'intel' in s : kind === 'cityDefender' ? 'from' in s : s.target === kind;
+  const ok = kind === ScoutOf.CITY ? 'intel' in s : kind === ScoutOf.CITY_DEFENDER ? 'from' in s : s.target === kind;
   if (!ok) throw new Error(`not a ${kind} scout report: ${JSON.stringify(s)}`);
   return s as Extract<ScoutReport, ScoutKinds[K]>;
 }

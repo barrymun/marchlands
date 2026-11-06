@@ -1,10 +1,10 @@
-import { ItemId } from '@marchlands/core';
+import { HeroBuffId, ItemId } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /** The attributes points go to; `label` and `hint` are in the current locale. */
 export const STATS = [
   {
-    key: 'management',
+    key: HeroBuffId.MANAGEMENT,
     get label() {
       return i18n.t('common:heroAttributes.politics');
     },
@@ -15,7 +15,7 @@ export const STATS = [
     buff: 'managementBuffAdded',
   },
   {
-    key: 'power',
+    key: HeroBuffId.POWER,
     get label() {
       return i18n.t('common:heroAttributes.attack');
     },
@@ -26,7 +26,7 @@ export const STATS = [
     buff: 'powerBuffAdded',
   },
   {
-    key: 'stratagem',
+    key: HeroBuffId.STRATAGEM,
     get label() {
       return i18n.t('common:heroAttributes.intelligence');
     },

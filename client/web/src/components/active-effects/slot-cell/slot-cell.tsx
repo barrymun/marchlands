@@ -1,7 +1,7 @@
 import { Plus, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { WARN_MS } from '@/components/active-effects/constants';
+import { ExtensionKind, WARN_MS } from '@/components/active-effects/constants';
 import { IconButton } from '@/components/active-effects/slot-cell/icon-button/icon-button';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
 import { adds } from '@/components/active-effects/utils';
@@ -64,7 +64,7 @@ export function SlotCell({
         <IconButton
           label={t('slotCell.extend')}
           detail={
-            extension.kind === 'use'
+            extension.kind === ExtensionKind.USE
               ? t('slotCell.useDetail', { item: itemName(extension.itemId), owned: fmtExact(extension.owned), adds: adds(extension.itemId) })
               : t('slotCell.buyDetail', { item: itemName(extension.itemId), price: fmt(extension.price), adds: adds(extension.itemId) })
           }

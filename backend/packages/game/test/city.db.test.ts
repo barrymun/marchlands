@@ -2,7 +2,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { BALANCE, BuildingType, HOUR, msg, type ReportBody, TileType, tileXY } from '@marchlands/core';
+import { BALANCE, BuildingType, HOUR, msg, type ReportBody, ReportBodyKind, TileType, tileXY } from '@marchlands/core';
 import { reports as reportRows } from '@marchlands/db';
 
 import { cityStats, loadBundle, openCity, openOwnCity, settle, settleAndReport, viewCity, viewOwnCity } from '#/city.ts';
@@ -28,8 +28,8 @@ async function desertions(g: TestGame, p: TestPlayer) {
   const rows = await g.tx
     .select()
     .from(reportRows)
-    .where(and(eq(reportRows.playerId, p.id), sql`${reportRows.body}->>'kind' = 'desertion'`));
-  return rows.map((r) => (r.body as Extract<ReportBody, { kind: 'desertion' }>).desertion);
+    .where(and(eq(reportRows.playerId, p.id), sql`${reportRows.body}->>'kind' = ${ReportBodyKind.DESERTION}`));
+  return rows.map((r) => (r.body as Extract<ReportBody, { kind: typeof ReportBodyKind.DESERTION }>).desertion);
 }
 
 /** A city with 100 archers and no food. */

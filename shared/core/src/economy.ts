@@ -10,6 +10,7 @@ import {
   BuffId,
   BuildingType,
   RESOURCE_KEYS,
+  ResourceKey,
   TechType,
   TileType,
   TROOP_ID_BY_KEY,
@@ -28,7 +29,7 @@ export const FIELD_FOR_RESOURCE: Record<BasicResource, number> = {
   stone: BuildingType.QUARRY,
   iron: BuildingType.IRONMINE,
 };
-export const RESOURCE_FOR_FIELD: Record<number, BasicResource> = { 7: 'food', 4: 'wood', 5: 'stone', 6: 'iron' };
+export const RESOURCE_FOR_FIELD: Record<number, BasicResource> = { 7: ResourceKey.FOOD, 4: ResourceKey.WOOD, 5: ResourceKey.STONE, 6: ResourceKey.IRON };
 
 /** Research that boosts each basic resource. */
 export const TECH_FOR_RESOURCE: Record<BasicResource, number> = {
@@ -40,12 +41,12 @@ export const TECH_FOR_RESOURCE: Record<BasicResource, number> = {
 
 /** Valley types that boost each resource (Evony Age 1). */
 export const VALLEY_RESOURCE: Record<number, BasicResource[]> = {
-  [TileType.FOREST]: ['wood'],
-  [TileType.DESERT]: ['stone'],
-  [TileType.HILL]: ['iron'],
-  [TileType.SWAMP]: ['food'],
-  [TileType.GRASS]: ['food'],
-  [TileType.LAKE]: ['food'],
+  [TileType.FOREST]: [ResourceKey.WOOD],
+  [TileType.DESERT]: [ResourceKey.STONE],
+  [TileType.HILL]: [ResourceKey.IRON],
+  [TileType.SWAMP]: [ResourceKey.FOOD],
+  [TileType.GRASS]: [ResourceKey.FOOD],
+  [TileType.LAKE]: [ResourceKey.FOOD],
   [TileType.FLAT]: [],
 };
 
@@ -400,7 +401,7 @@ function integrate(city: EconomyCity, stats: CityStats, dtMs: number, result: Se
   const f = result.flows;
   for (const r of BASIC_RESOURCES) {
     const delta = stats.rates[r] * hours;
-    const eat = r === 'food' ? stats.upkeep * hours : 0;
+    const eat = r === ResourceKey.FOOD ? stats.upkeep * hours : 0;
     const cur = city[r];
     f.produced[r] += delta + eat + stats.taxed[r] * hours;
     f.taxed[r] += stats.taxed[r] * hours;
@@ -411,7 +412,7 @@ function integrate(city: EconomyCity, stats: CityStats, dtMs: number, result: Se
       f.upkeep += eat;
     } else {
       const next = cur + delta;
-      if (next < 0 && r === 'food') {
+      if (next < 0 && r === ResourceKey.FOOD) {
         if (BALANCE.starvationDesertion) starve(city, -next / Math.max(1, stats.upkeep), result);
         city[r] = 0;
         f.upkeep += cur + delta + eat; // they ate what there was
@@ -474,7 +475,7 @@ export function protectedResources(buildings: BuildingState[], storePercent: Par
   const level = buildingLevel(buildings, BuildingType.WAREHOUSE);
   const cap = BALANCE.warehouseProtectPerLevel[level] ?? 0;
   const out = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
-  for (const r of RESOURCE_KEYS) out[r] = r === 'gold' ? 0 : (cap * (storePercent[r] ?? 0)) / 100;
+  for (const r of RESOURCE_KEYS) out[r] = r === ResourceKey.GOLD ? 0 : (cap * (storePercent[r] ?? 0)) / 100;
   return out;
 }
 

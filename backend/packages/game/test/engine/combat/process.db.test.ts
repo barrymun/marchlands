@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, HeroStatus, Mission, msg, TileType, TimedEventType } from '@marchlands/core';
+import { ArmyDirection, HeroStatus, Mission, msg, ReportBodyKind, TileType, TimedEventType } from '@marchlands/core';
 import { armies as armiesTable } from '@marchlands/db';
 
 import { armyRef, homeMarchMs } from '#/engine/armies.ts';
@@ -62,7 +62,7 @@ describe(processArmy.name, () => {
       expect(report).toMatchObject({ isBack: true, armyType: Mission.ATTACK, startPos: back.targetPosName, targetPos: back.startPosName });
       const hero = await getHero(g, heroId);
       expect(report.body).toEqual({
-        kind: 'movement',
+        kind: ReportBodyKind.MOVEMENT,
         movement: { hero: { id: hero.id, name: hero.name, level: hero.level, logoUrl: hero.logoUrl }, troops: back.troops, resources: back.resources },
       });
       expect(g.pushes(PushCmd.TROOP_UPDATE).at(-1)).toMatchObject({ playerIds: [p.id], data: { castleId: p.cityId } });
@@ -121,7 +121,7 @@ describe(processArmy.name, () => {
       await arrive(g, bean.armyId);
       expect(await armyRow(g, bean.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, troops: { scouter: 10 }, resources: NO_RESOURCES });
       const report = await lastReport(g, p.id, 'report.title.missionAborted');
-      expect(report.body).toEqual({ kind: 'text', text: msg('army.unknownMission') });
+      expect(report.body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.unknownMission') });
     }));
 
   it('an attack finding nothing on the tile turns back', () =>
@@ -134,7 +134,7 @@ describe(processArmy.name, () => {
       await g.tx.update(armiesTable).set({ targetTileId: flat.id }).where(eq(armiesTable.id, bean.armyId));
       await arrive(g, bean.armyId);
       expect((await armyRow(g, bean.armyId))!.direction).toBe(ArmyDirection.BACKWARD);
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('army.nothingToAttack') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.nothingToAttack') });
       expect((await getHero(g, heroId)).status).toBe(HeroStatus.RETURN);
     }));
 });

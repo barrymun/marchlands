@@ -1,10 +1,11 @@
-import { gearTier, Sex } from '@marchlands/core';
+import { gearTier, Sex, SpotKind } from '@marchlands/core';
 
 import {
   BREATH_MS,
   BREATH_UP,
   FIGURE_SIZE,
   FIGURE_SPOTS,
+  FigureMotion,
   GLOW_MS,
   GLOW_RGB,
   SWAY_MS,
@@ -52,12 +53,12 @@ export function wornLevel(heroLevel: number, researched: number): number {
 /** The figure's layers, back to front: the cape, the legs, then the skin, upper body, hair and helm, which breathe. */
 export function figureLayers(body: FigureBody, level: number): FigureLayer[] {
   return [
-    { file: figureCapeFile(level), motion: 'sway', glows: false },
-    { file: figureLegsFile(body.sex, level), motion: 'still', glows: false },
-    { file: figureSkinFile(body.sex, body.tone), motion: 'breath', glows: false },
-    { file: figureUpperFile(body.sex, level), motion: 'breath', glows: true },
-    { file: figureHairFile(body.style, body.hair), motion: 'breath', glows: false },
-    { file: figureHelmFile(level), motion: 'breath', glows: false },
+    { file: figureCapeFile(level), motion: FigureMotion.SWAY, glows: false },
+    { file: figureLegsFile(body.sex, level), motion: FigureMotion.STILL, glows: false },
+    { file: figureSkinFile(body.sex, body.tone), motion: FigureMotion.BREATH, glows: false },
+    { file: figureUpperFile(body.sex, level), motion: FigureMotion.BREATH, glows: true },
+    { file: figureHairFile(body.style, body.hair), motion: FigureMotion.BREATH, glows: false },
+    { file: figureHelmFile(level), motion: FigureMotion.BREATH, glows: false },
   ];
 }
 
@@ -87,24 +88,24 @@ export function drawFigure(ctx: FigureContext, layers: readonly { layer: FigureL
   const lift = ms == null ? 0 : breathLift(ms);
   for (const { layer, img } of layers) {
     const spots = FIGURE_SPOTS[`figure/${layer.file}`] ?? [];
-    const sway = spots.find((s) => s.k === 'sway');
-    if (ms != null && layer.motion === 'sway' && sway) {
+    const sway = spots.find((s) => s.k === SpotKind.SWAY);
+    if (ms != null && layer.motion === FigureMotion.SWAY && sway) {
       ctx.drawImage(img, 0, 0, FIGURE_SIZE, sway.y, 0, 0, FIGURE_SIZE, sway.y);
       for (let row = sway.y; row < FIGURE_SIZE; row++) ctx.drawImage(img, 0, row, FIGURE_SIZE, 1, swayShift(row, sway, ms), row, FIGURE_SIZE, 1);
-    } else ctx.drawImage(img, 0, layer.motion === 'breath' ? lift : 0);
+    } else ctx.drawImage(img, 0, layer.motion === FigureMotion.BREATH ? lift : 0);
     if (ms == null || !layer.glows) continue;
     const a = glowAlpha(ms);
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     for (const s of spots) {
-      if (s.k !== 'stone') continue;
+      if (s.k !== SpotKind.STONE) continue;
       const r = Math.ceil(s.n ?? 1) + 1;
       for (let dy = -r; dy <= r; dy++)
         for (let dx = -r; dx <= r; dx++) {
           const d = Math.abs(dx) + Math.abs(dy);
           if (d > r) continue;
           ctx.fillStyle = `rgba(${GLOW_RGB.join(', ')}, ${(a * (1 - d / (r + 1))).toFixed(3)})`;
-          ctx.fillRect(s.x + dx, s.y + dy + (layer.motion === 'breath' ? lift : 0), 1, 1);
+          ctx.fillRect(s.x + dx, s.y + dy + (layer.motion === FigureMotion.BREATH ? lift : 0), 1, 1);
         }
     }
     ctx.restore();

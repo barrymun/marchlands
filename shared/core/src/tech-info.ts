@@ -4,7 +4,7 @@
 // requirement data and names nothing: the client names each entry by its id.
 
 import { BALANCE } from '#/balance.ts';
-import { FortType, TechType, TroopType } from '#/constants.ts';
+import { FortType, ResourceKey, TechType, TroopType, UnlockKind } from '#/constants.ts';
 import { isFortType, SIEGE } from '#/construction.ts';
 import { BUILDINGS, RESEARCH, TROOPS } from '#/data/index.ts';
 import { GEAR_PIECES, gearLevelPoints } from '#/gear.ts';
@@ -27,10 +27,10 @@ interface TechText {
 }
 
 const RES_TECH = {
-  [TechType.AGRICULTURE]: 'food',
-  [TechType.LUMBERING]: 'wood',
-  [TechType.MASONRY]: 'stone',
-  [TechType.MINING]: 'iron',
+  [TechType.AGRICULTURE]: ResourceKey.FOOD,
+  [TechType.LUMBERING]: ResourceKey.WOOD,
+  [TechType.MASONRY]: ResourceKey.STONE,
+  [TechType.MINING]: ResourceKey.IRON,
 } as const;
 
 const TEXT: Record<number, TechText> = {
@@ -116,19 +116,17 @@ const TEXT: Record<number, TechText> = {
   [TechType.PRIVATEERING]: { summary: msg('techInfo.summary.none') },
 };
 
-export type TechUnlockKind = 'building' | 'troop' | 'tech';
-
 export interface TechInfo {
   id: number;
   summary: Message;
   /** buildings, troops and technologies (by id) that require this tech, with the level they need */
-  unlocks: { kind: TechUnlockKind; id: number; level: number }[];
+  unlocks: { kind: UnlockKind; id: number; level: number }[];
 }
 
 /** Lowest required level of `techId` for each building, troop and technology that needs it. */
 function unlocksOf(techId: number): TechInfo['unlocks'] {
   const out = new Map<string, TechInfo['unlocks'][number]>();
-  const add = (kind: TechUnlockKind, id: number, level: number) => {
+  const add = (kind: UnlockKind, id: number, level: number) => {
     const key = `${kind}:${id}`;
     const prev = out.get(key);
     if (!prev || level < prev.level) out.set(key, { kind, id, level });
@@ -136,11 +134,12 @@ function unlocksOf(techId: number): TechInfo['unlocks'] {
   // fortifications have building configs too, but are listed as the troops they are
   for (const b of BUILDINGS) {
     if (b.level !== 1 || isFortType(b.typeId)) continue;
-    for (const t of b.requires.techs) if (t.id === techId) add('building', b.typeId, t.level);
+    for (const t of b.requires.techs) if (t.id === techId) add(UnlockKind.BUILDING, b.typeId, t.level);
   }
-  for (const tr of TROOPS) for (const t of tr.requires.techs) if (t.id === techId) add('troop', tr.troopId, t.level);
-  for (const r of RESEARCH) for (const t of r.requires.techs) if (t.id === techId && r.techId !== techId && r.level === 1) add('tech', r.techId, t.level);
-  const order: TechUnlockKind[] = ['building', 'troop', 'tech'];
+  for (const tr of TROOPS) for (const t of tr.requires.techs) if (t.id === techId) add(UnlockKind.TROOP, tr.troopId, t.level);
+  for (const r of RESEARCH)
+    for (const t of r.requires.techs) if (t.id === techId && r.techId !== techId && r.level === 1) add(UnlockKind.TECH, r.techId, t.level);
+  const order: UnlockKind[] = [UnlockKind.BUILDING, UnlockKind.TROOP, UnlockKind.TECH];
   return [...out.values()].sort((a, b) => a.level - b.level || order.indexOf(a.kind) - order.indexOf(b.kind) || a.id - b.id);
 }
 

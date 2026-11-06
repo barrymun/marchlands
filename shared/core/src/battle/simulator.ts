@@ -6,6 +6,7 @@
 // Troop indices are troop type id - 2 (0 worker ... 11 catapult); fort indices are id - 14.
 
 import { BALANCE } from '#/balance.ts';
+import { TraceKind } from '#/constants.ts';
 import type { Rng } from '#/rng.ts';
 
 const f = Math.fround;
@@ -64,9 +65,9 @@ export interface BattleOptions {
 export type KillSource = number | 'trap' | 'abatis' | 'log' | 'trebuchet' | 'tower';
 
 export type TraceEvent =
-  | { kind: 'kill'; round: number; source: KillSource; target: number; killed: number; location: number }
+  | { kind: typeof TraceKind.KILL; round: number; source: KillSource; target: number; killed: number; location: number }
   | {
-      kind: 'round';
+      kind: typeof TraceKind.ROUND;
       round: number;
       attacker: { location: number; count: number }[];
       defender: { location: number; count: number }[];
@@ -236,7 +237,7 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
   const trace = opts.trace;
   /** report a kill on an attacking group (before it is applied) */
   const killed = (round: number, source: KillSource, target: Group, n: number) =>
-    trace?.({ kind: 'kill', round, source, target: target.typeId, killed: Math.min(n, target.eff), location: target.location });
+    trace?.({ kind: TraceKind.KILL, round, source, target: target.typeId, killed: Math.min(n, target.eff), location: target.location });
   const atkStats = perTroop((i) => ({ ...BASE_STATS[i] }));
   const defStats = perTroop((i) => ({ ...BASE_STATS[i] }));
   const atkModA = f(atk.attackModifier ?? 1);
@@ -536,7 +537,7 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
     }
     if (wallHp > 0) defenderAlive = true;
     trace?.({
-      kind: 'round',
+      kind: TraceKind.ROUND,
       round,
       attacker: A.map((g) => ({ location: g.location, count: g.count })),
       defender: D.map((g) => ({ location: g.location, count: g.count })),

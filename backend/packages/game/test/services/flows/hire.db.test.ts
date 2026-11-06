@@ -9,6 +9,7 @@ import {
   FlowActionType,
   FlowCities,
   type FlowCityChoice,
+  HeroBuffId,
   heroHireCost,
   hiredHeroName,
   msg,
@@ -46,7 +47,7 @@ async function innWith(g: TestGame, powers: number[], opts: { hall?: number; gol
 }
 
 async function hire(g: TestGame, p: TestPlayer, action: { min: number; count: number; maxGold: number }, cities: FlowCityChoice = [p.cityId]) {
-  const f = await newFlow(g, p, { name: `Hire ${g.now}`, actions: [{ type: FlowActionType.HIRE_HEROES, stat: 'power', ...action }] });
+  const f = await newFlow(g, p, { name: `Hire ${g.now}`, actions: [{ type: FlowActionType.HIRE_HEROES, stat: HeroBuffId.POWER, ...action }] });
   return runFlowIn(g, p, f.id, cities);
 }
 
@@ -64,14 +65,14 @@ describe(`${flows.runFlow.name}: hireHeroes`, () => {
 
       const spent = heroHireCost(top!.level) + heroHireCost(second!.level);
       expect(r.cities[0]!.steps[0]).toEqual({
-        action: msg('flow.action.hireHeroes', { count: 2, stat: ref.stat('power'), min: 60, gold: 1_000_000 }),
+        action: msg('flow.action.hireHeroes', { count: 2, stat: ref.stat(HeroBuffId.POWER), min: 60, gold: 1_000_000 }),
         ok: true,
-        detail: msg('flow.step.hired', { count: 2, stat: ref.stat('power'), min: 60, gold: spent, rerolls: msg('flow.rerolls', { count: 0 }) }),
+        detail: msg('flow.step.hired', { count: 2, stat: ref.stat(HeroBuffId.POWER), min: 60, gold: spent, rerolls: msg('flow.rerolls', { count: 0 }) }),
       });
       expect(new Map((await hiredOf(g, p)).map((h) => [h.id, h.name]))).toEqual(
         new Map([
-          [top!.id, hiredHeroName('power', 75)],
-          [second!.id, hiredHeroName('power', 72)],
+          [top!.id, hiredHeroName(HeroBuffId.POWER, 75)],
+          [second!.id, hiredHeroName(HeroBuffId.POWER, 72)],
         ]),
       );
       expect((await reloadCity(g, p.cityId)).gold).toBe(gold - spent);
@@ -89,7 +90,7 @@ describe(`${flows.runFlow.name}: hireHeroes`, () => {
         detail: msg('flow.step.hiredSome', {
           count: 0,
           requested: 1,
-          stat: ref.stat('power'),
+          stat: ref.stat(HeroBuffId.POWER),
           min: 75,
           gold: 2 * REROLL,
           rerolls: msg('flow.rerolls', { count: 2 }),
@@ -123,10 +124,12 @@ describe(`${flows.runFlow.name}: hireHeroes`, () => {
       const r = await hire(g, p, { min: 75, count: 3, maxGold: 1_000_000 });
       // the hero already there with 75 counts: two more, the best two
       expect(r.cities[0]!.steps[0]!.detail).toMatchObject({ code: 'flow.step.hired', params: { count: 2 } });
-      expect((await hiredOf(g, p)).map((h) => h.name).sort()).toEqual([own!.name, hiredHeroName('power', 77), hiredHeroName('power', 78)].sort());
+      expect((await hiredOf(g, p)).map((h) => h.name).sort()).toEqual(
+        [own!.name, hiredHeroName(HeroBuffId.POWER, 77), hiredHeroName(HeroBuffId.POWER, 78)].sort(),
+      );
 
       const again = (await hire(g, p, { min: 75, count: 3, maxGold: 1_000_000 })).cities[0]!.steps[0]!;
-      expect(again).toMatchObject({ skipped: true, detail: msg('flow.step.hireTargetMet', { count: 3, stat: ref.stat('power'), min: 75 }) });
+      expect(again).toMatchObject({ skipped: true, detail: msg('flow.step.hireTargetMet', { count: 3, stat: ref.stat(HeroBuffId.POWER), min: 75 }) });
       // only the hero with 78 counts towards a bar of 78: one more is needed
       noGreatHeroes();
       const higher = (await hire(g, p, { min: 78, count: 2, maxGold: 1_000_000 })).cities[0]!.steps[0]!;
@@ -139,7 +142,7 @@ describe(`${flows.runFlow.name}: hireHeroes`, () => {
       const r = await hire(g, p, { min: 1, count: 5, maxGold: 1_000_000 });
       expect(r.cities[0]!.steps[0]!.detail).toMatchObject({ code: 'flow.step.hired', params: { count: 2 } });
       // the best two
-      expect((await hiredOf(g, p)).map((h) => h.name).sort()).toEqual([hiredHeroName('power', 73), hiredHeroName('power', 74)]);
+      expect((await hiredOf(g, p)).map((h) => h.name).sort()).toEqual([hiredHeroName(HeroBuffId.POWER, 73), hiredHeroName(HeroBuffId.POWER, 74)]);
 
       const full = (await hire(g, p, { min: 1, count: 3, maxGold: 1_000_000 })).cities[0]!.steps[0]!;
       expect(full).toMatchObject({ skipped: true, detail: msg('flow.step.hallFull', { building: ref.building(BuildingType.FEASTING_HALL) }) });

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { HeroBean } from '@marchlands/api-client';
 import { HeroStatus } from '@marchlands/core';
 
-import { HERO_VIEW_KEY } from '@/components/heroes-panel/constants';
+import { HERO_VIEW_KEY, HeroView } from '@/components/heroes-panel/constants';
 import { readHeroView, saveHeroView, sheetHero } from '@/components/heroes-panel/utils';
 
 describe(readHeroView.name, () => {
@@ -11,11 +11,11 @@ describe(readHeroView.name, () => {
 
   it('reads the list when it was chosen, and the sheet otherwise', () => {
     vi.stubGlobal('localStorage', { getItem: (key: string) => (key === HERO_VIEW_KEY ? 'list' : null) });
-    expect(readHeroView()).toBe('list');
+    expect(readHeroView()).toBe(HeroView.LIST);
     vi.stubGlobal('localStorage', { getItem: () => 'something else' });
-    expect(readHeroView()).toBe('sheet');
+    expect(readHeroView()).toBe(HeroView.SHEET);
     vi.stubGlobal('localStorage', { getItem: () => null });
-    expect(readHeroView()).toBe('sheet');
+    expect(readHeroView()).toBe(HeroView.SHEET);
   });
 
   it('falls back to the sheet when storage throws', () => {
@@ -24,7 +24,7 @@ describe(readHeroView.name, () => {
         throw new Error('blocked');
       },
     });
-    expect(readHeroView()).toBe('sheet');
+    expect(readHeroView()).toBe(HeroView.SHEET);
   });
 });
 
@@ -34,7 +34,7 @@ describe(saveHeroView.name, () => {
   it('stores the view under its key', () => {
     const setItem = vi.fn();
     vi.stubGlobal('localStorage', { setItem });
-    saveHeroView('list');
+    saveHeroView(HeroView.LIST);
     expect(setItem).toHaveBeenCalledWith(HERO_VIEW_KEY, 'list');
   });
 
@@ -44,7 +44,7 @@ describe(saveHeroView.name, () => {
         throw new Error('blocked');
       },
     });
-    expect(() => saveHeroView('sheet')).not.toThrow();
+    expect(() => saveHeroView(HeroView.SHEET)).not.toThrow();
   });
 });
 

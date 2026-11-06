@@ -1,3 +1,5 @@
+import { ResourceKey } from '@marchlands/core';
+
 import { FlowKind, GAIN_KINDS, LOSS_KINDS } from '@/components/stats-panel/resource-flows/constants';
 import { SPENDING } from '@/components/stats-panel/spending/constants';
 import type { Counters } from '@/components/stats-panel/types';
@@ -6,7 +8,7 @@ import type { Resource } from '@/lib/format';
 /** How much of a resource each kind of gain or loss moved (never below 0: refunds can leave a spending group negative). */
 function flowAmount(c: Counters, r: Resource, kind: FlowKind): number {
   const n = (key: string) => c[key] ?? 0;
-  const gold = r === 'gold';
+  const gold = r === ResourceKey.GOLD;
   const amount = (() => {
     switch (kind) {
       case FlowKind.PRODUCED:
@@ -20,7 +22,7 @@ function flowAmount(c: Counters, r: Resource, kind: FlowKind): number {
         return n(`gained.dailyGift.${r}`);
       // troops eat food, heroes are paid gold
       case FlowKind.UPKEEP:
-        return r === 'food' ? n('upkeep.food') : gold ? n('salaries.gold') : 0;
+        return r === ResourceKey.FOOD ? n('upkeep.food') : gold ? n('salaries.gold') : 0;
       case FlowKind.SPENT:
         return SPENDING.reduce((s, { group }) => s + n(`spent.${group}.${r}`), 0);
       case FlowKind.WASTED:

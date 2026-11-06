@@ -1,7 +1,22 @@
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { BALANCE, CandlePeriod, heroGearBonus, heroGearStat, MarketSide, merchantBase, msg, nextAutoDraftAt, setGameSpeed, TechType } from '@marchlands/core';
+import {
+  BALANCE,
+  CandlePeriod,
+  ChatChannel,
+  heroGearBonus,
+  heroGearStat,
+  MarketOrderType,
+  MarketSide,
+  merchantBase,
+  msg,
+  nextAutoDraftAt,
+  ReportBodyKind,
+  ResourceKey,
+  setGameSpeed,
+  TechType,
+} from '@marchlands/core';
 import {
   allianceEvents,
   alliances,
@@ -114,12 +129,12 @@ describe(merchantJob.name, () => {
   it('lets the merchant fill a resting order its price has crossed', () =>
     withMerchantCurve(() =>
       inTestTx(async (db) => {
-        const bid = Math.round(merchantBase('wood') * 1.03 * 1000) / 1000;
+        const bid = Math.round(merchantBase(ResourceKey.WOOD) * 1.03 * 1000) / 1000;
         const b = await arrange(db, async (g) => {
           const b = await createTrader(g);
           await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, price: bid });
           // b's own sale pushes the merchant's price below the bid
-          await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, type: 'market' });
+          await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, type: MarketOrderType.MARKET });
           return b;
         });
         const orders = () => arrange(db, (g) => market.myOrders(g, b.id));
@@ -159,12 +174,12 @@ describe(cleanupJob.name, () => {
       const MIN = 60_000;
       const push = (createdAt: number) => ({ playerIds: [p.id], cmd: 'test.cleanup', data: { createdAt }, createdAt });
       await db.insert(pushMessages).values([push(now - 11 * MIN), push(now - 9 * MIN)]);
-      const chat = (sentAt: number) => ({ channel: 'world', fromPlayerId: p.id, fromName: p.name, message: 'cleanup test', sentAt });
+      const chat = (sentAt: number) => ({ channel: ChatChannel.WORLD, fromPlayerId: p.id, fromName: p.name, message: 'cleanup test', sentAt });
       await db.insert(chatMessages).values([chat(now - 8 * DAY), chat(now - 6 * DAY)]);
       const report = (eventTime: number) => ({
         playerId: p.id,
         title: msg('common.invalidData'),
-        body: { kind: 'text' as const, text: msg('common.invalidData') },
+        body: { kind: ReportBodyKind.TEXT, text: msg('common.invalidData') },
         eventTime,
       });
       await db.insert(reports).values([report(now - 31 * DAY), report(now - 29 * DAY)]);

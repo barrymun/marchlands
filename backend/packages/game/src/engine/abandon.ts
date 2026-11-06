@@ -3,7 +3,7 @@
 import { and, eq, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { abandonPrestigeBack, ArmyDirection, Mission, msg, TimedEventType } from '@marchlands/core';
+import { abandonPrestigeBack, ArmyDirection, Mission, msg, ReportBodyKind, TimedEventType } from '@marchlands/core';
 import { armies, cities } from '@marchlands/db';
 
 import { openCity } from '#/city.ts';
@@ -47,7 +47,7 @@ export async function completeAbandon(ctx: Ctx, cityId: number) {
       title: msg('report.title.abandonCancelled'),
       startPos: position,
       targetPos: position,
-      body: { kind: 'text', text: msg('report.abandonCancelled', { name: city.name }) },
+      body: { kind: ReportBodyKind.TEXT, text: msg('report.abandonCancelled', { name: city.name }) },
     });
     return;
   }
@@ -75,7 +75,7 @@ export async function completeAbandon(ctx: Ctx, cityId: number) {
     startPos: position,
     targetPos: position,
     body: {
-      kind: 'text',
+      kind: ReportBodyKind.TEXT,
       text: prestigeBack ? msg('report.cityAbandonedPrestige', { name: city.name, prestige: prestigeBack }) : msg('report.cityAbandoned', { name: city.name }),
     },
   });

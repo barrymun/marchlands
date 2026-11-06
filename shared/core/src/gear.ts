@@ -7,7 +7,7 @@
 // 179 + 140 (levels) + 770 (stars) + 140 (set bonus) = 1,229 in its gear attribute.
 
 import { BALANCE } from '#/balance.ts';
-import { TechType } from '#/constants.ts';
+import { HERO_BUFF_IDS, HeroBuffId, TechType } from '#/constants.ts';
 import { medalId } from '#/items.ts';
 
 export const GEAR_PIECES = [
@@ -32,8 +32,8 @@ export const GEAR_PIECE_IDS: readonly GearPieceId[] = GEAR_PIECES.map((p) => p.i
 export const isGearPiece = (id: string): id is GearPieceId => (GEAR_PIECE_IDS as readonly string[]).includes(id);
 
 /** The attribute a hero's gear boosts. */
-export type GearStat = 'power' | 'management' | 'stratagem';
-export const GEAR_STATS: readonly GearStat[] = ['power', 'management', 'stratagem'];
+export type GearStat = HeroBuffId;
+export const GEAR_STATS: readonly GearStat[] = HERO_BUFF_IDS;
 
 /** A lord's gear: piece level (= Hero Enhancement research level) and stars per piece. */
 export interface LordGear {
@@ -131,8 +131,8 @@ interface GearedHero {
 /** The attribute a hero's gear boosts: the chosen one, else the hero's highest assigned attribute. */
 export function heroGearStat(h: Pick<GearedHero, 'power' | 'management' | 'stratagem' | 'gearStat'>): GearStat {
   if (h.gearStat && (GEAR_STATS as readonly string[]).includes(h.gearStat)) return h.gearStat as GearStat;
-  if (h.power >= h.management && h.power >= h.stratagem) return 'power';
-  return h.management >= h.stratagem ? 'management' : 'stratagem';
+  if (h.power >= h.management && h.power >= h.stratagem) return HeroBuffId.POWER;
+  return h.management >= h.stratagem ? HeroBuffId.MANAGEMENT : HeroBuffId.STRATAGEM;
 }
 
 /** Put the hero's gear points on its gear attribute (`gear` null: no gear, e.g. in a tavern). Returns whether anything changed. */

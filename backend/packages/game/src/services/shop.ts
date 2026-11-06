@@ -9,10 +9,13 @@ import {
   createBoxHero,
   GameError,
   type GrantContents,
+  ItemCommand,
   itemConfig,
   itemEffect,
+  ItemEffectKind,
   itemGoldPrice,
   ITEMS,
+  ItemSpecialHandler,
   type Message,
   msg,
   ref,
@@ -42,10 +45,19 @@ export function catalogue() {
 }
 
 /** Where an item used through another action is used, for a player (by the action's command). */
-function useFromMessage(command: string): Message {
-  if (command === 'speedup' || command.endsWith('.speedup')) return msg('item.useFrom.speedup');
-  if (command.startsWith('heroes.')) return msg('item.useFrom.hero');
-  return msg('item.useFrom.elsewhere');
+function useFromMessage(command: ItemCommand): Message {
+  switch (command) {
+    case ItemCommand.SPEEDUP:
+    case ItemCommand.TROOPS_SPEEDUP:
+    case ItemCommand.FORTIFICATIONS_SPEEDUP:
+      return msg('item.useFrom.speedup');
+    case ItemCommand.HEROES_RESET:
+    case ItemCommand.HEROES_USE_ITEM:
+      return msg('item.useFrom.hero');
+    case ItemCommand.CITY_MOVE:
+    case ItemCommand.CITY_TRUCE:
+      return msg('item.useFrom.elsewhere');
+  }
 }
 
 const today = (now: number) => new Date(now).toISOString().slice(0, 10);
@@ -106,7 +118,7 @@ export interface UseItemResult {
 export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId: number | null): Promise<UseItemResult> {
   const effect = itemEffect(itemId);
   if (!effect) throw new GameError(msg('item.cannotUse'), -99);
-  if (effect.kind === 'command') throw new GameError(useFromMessage(effect.command), -99);
+  if (effect.kind === ItemEffectKind.COMMAND) throw new GameError(useFromMessage(effect.command), -99);
   const b = cityId != null ? await openOwnCity(ctx, playerId, cityId) : null;
   const p = b ? b.player : await getPlayer(ctx, playerId, { lock: true });
   if (itemCount(p, itemId) < 1) throw new GameError(msg('common.insufficientItems'), -24);
@@ -117,21 +129,21 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
   const result: UseItemResult = { itemId };
 
   switch (effect.kind) {
-    case 'buff': {
+    case ItemEffectKind.BUFF: {
       // production buffs change every city's rates: settle them first
       await settleAllCities(ctx, p);
       consumeItem(ctx, p, itemId);
       setBuff(ctx, p, effect.buff, effect.desc, ctx.now + effect.durationMs, { extend: true, itemId });
       break;
     }
-    case 'grant': {
+    case ItemEffectKind.GRANT: {
       const city = effect.resources || effect.troops ? needCity() : b;
       consumeItem(ctx, p, itemId);
       await grant(ctx, p, city, effect);
       result.granted = effect;
       break;
     }
-    case 'box': {
+    case ItemEffectKind.BOX: {
       const contents = effect.contents(ctx.rng);
       const city = contents.resources || contents.troops ? needCity() : b;
       consumeItem(ctx, p, itemId);
@@ -139,7 +151,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
       result.granted = contents;
       break;
     }
-    case 'chest': {
+    case ItemEffectKind.CHEST: {
       if (itemCount(p, effect.key) < 1) throw new GameError(msg('item.needKey', { key: ref.item(effect.key) }), -99);
       const contents = effect.contents();
       consumeItem(ctx, p, itemId);
@@ -148,9 +160,9 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
       result.granted = contents;
       break;
     }
-    case 'special': {
+    case ItemEffectKind.SPECIAL: {
       switch (effect.handler) {
-        case 'civilCode': {
+        case ItemSpecialHandler.CIVIL_CODE: {
           const city = needCity();
           consumeItem(ctx, p, itemId);
           const max = cityStats(city, ctx.now).maxPopulation;
@@ -158,7 +170,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
           pushCity(ctx, city);
           break;
         }
-        case 'cureInjured': {
+        case ItemSpecialHandler.CURE_INJURED: {
           const city = needCity();
           consumeItem(ctx, p, itemId);
           city.city.troops = addTroops(city.city.troops, city.city.injuredTroops);
@@ -166,7 +178,7 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
           pushCity(ctx, city);
           break;
         }
-        case 'heroBox': {
+        case ItemSpecialHandler.HERO_BOX: {
           const city = needCity();
           if (city.heroes.length >= heroSlots(city)) throw new GameError(msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }), -99);
           consumeItem(ctx, p, itemId);

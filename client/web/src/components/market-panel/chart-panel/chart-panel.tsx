@@ -5,7 +5,7 @@ import type { MarketHistory, MarketOrderBook } from '@marchlands/api-client';
 import { CANDLE_PERIOD_MS } from '@marchlands/core';
 
 import { CandleChart } from '@/components/market-panel/chart-panel/candle-chart/candle-chart';
-import { RANGE_IDS, type RangeId, RANGES } from '@/components/market-panel/chart-panel/constants';
+import { ChartView, RANGE_IDS, type RangeId, RANGES } from '@/components/market-panel/chart-panel/constants';
 import { DepthChart } from '@/components/market-panel/chart-panel/depth-chart/depth-chart';
 import { chartData } from '@/components/market-panel/chart-panel/utils';
 import { NO_LEVELS } from '@/components/market-panel/constants';
@@ -34,7 +34,7 @@ export function ChartPanel({
   className?: string;
 }) {
   const { t } = useTranslation('market-panel');
-  const [view, setView] = useState<'price' | 'depth'>('price');
+  const [view, setView] = useState<ChartView>(ChartView.PRICE);
   const range = RANGES[rangeId];
   const now = useNow(10_000);
   const h = history;
@@ -53,11 +53,11 @@ export function ChartPanel({
             value={view}
             onChange={setView}
             tabs={[
-              { id: 'price', label: t('chart.price') },
-              { id: 'depth', label: t('chart.depth') },
+              { id: ChartView.PRICE, label: t('chart.price') },
+              { id: ChartView.DEPTH, label: t('chart.depth') },
             ]}
           />
-          {view === 'price' && (
+          {view === ChartView.PRICE && (
             <PanelTabs
               label={t('chart.ranges')}
               value={rangeId}
@@ -68,7 +68,7 @@ export function ChartPanel({
         </>
       }
     >
-      {view === 'price' ? (
+      {view === ChartView.PRICE ? (
         <CandleChart
           className="min-h-0 flex-1"
           prices={data.prices}

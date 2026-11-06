@@ -3,6 +3,8 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { HeroBuffId } from '@marchlands/core';
+
 import type { Ctx } from '#/context.ts';
 import { completeBuilding } from '#/engine/buildings.ts';
 import { processArmy } from '#/engine/combat.ts';
@@ -61,8 +63,8 @@ describe(dispatchEvent.name, () => {
   });
 
   it('expires a hero boost', async () => {
-    await dispatchEvent(ctx, event('hero.buff', { heroId: 4, attr: 'power' }));
-    expect(expireHeroBuff).toHaveBeenCalledWith(ctx, 4, 'power');
+    await dispatchEvent(ctx, event('hero.buff', { heroId: 4, attr: HeroBuffId.POWER }));
+    expect(expireHeroBuff).toHaveBeenCalledWith(ctx, 4, HeroBuffId.POWER);
   });
 
   it('delivers a shipment', async () => {

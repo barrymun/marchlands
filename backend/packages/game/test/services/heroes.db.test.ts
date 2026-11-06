@@ -7,6 +7,7 @@ import {
   experienceItemGain,
   gearStarCost,
   gearStarPoints,
+  HERO_BUFF_IDS,
   heroAttributeBuffEnd,
   heroAwardCost,
   heroBuffAmount,
@@ -16,6 +17,7 @@ import {
   heroGearStat,
   heroHireCost,
   heroItemGoldPrice,
+  HeroItemPayment,
   heroPointCap,
   HeroStatus,
   innHeroMaxLevel,
@@ -436,7 +438,7 @@ describe(heroes.setHeroGearStat.name, () => {
       await setResearch(g, p, TechType.HERO_ENHANCEMENT, 2);
       const bonus = heroGearBonus(20, lordGear(await reloadPlayer(g, p)));
       expect(bonus).toBeGreaterThan(0);
-      for (const stat of ['power', 'management', 'stratagem'] as const) {
+      for (const stat of HERO_BUFF_IDS) {
         const bean = await heroes.setHeroGearStat(g, p.id, id, stat);
         expect(bean.gearStat).toBe(stat);
         const h = await getHero(g, id);
@@ -455,8 +457,8 @@ describe(heroes.setHeroGearStat.name, () => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
       const id = await addHero(g, a);
-      await expectRefused(heroes.setHeroGearStat(g, a.id, id, 'luck' as 'power'), msg('hero.invalidAttribute'));
-      await expectRefused(heroes.setHeroGearStat(g, b.id, id, 'power'), msg('common.heroNotFound'));
+      await expectRefused(heroes.setHeroGearStat(g, a.id, id, 'luck' as HeroBuffId), msg('hero.invalidAttribute'));
+      await expectRefused(heroes.setHeroGearStat(g, b.id, id, HeroBuffId.POWER), msg('common.heroNotFound'));
     }));
 });
 
@@ -578,11 +580,14 @@ describe(heroes.useHeroItem.name, () => {
       await heroes.useHeroItem(g, p.id, id, ItemId.EPITOME_OF_MILITARY_SCIENCE);
       expect(await gold(g, p)).toBe(price);
       await giveItems(g, p, { [ItemId.EPITOME_OF_MILITARY_SCIENCE]: 1 });
-      await heroes.useHeroItem(g, p.id, id, ItemId.EPITOME_OF_MILITARY_SCIENCE, 'gold');
+      await heroes.useHeroItem(g, p.id, id, ItemId.EPITOME_OF_MILITARY_SCIENCE, HeroItemPayment.GOLD);
       expect(await gold(g, p)).toBe(0);
       expect((await reloadPlayer(g, p)).items[ItemId.EPITOME_OF_MILITARY_SCIENCE]).toBe(1);
       expect((await getHero(g, id)).experience).toBe(2 * gain);
-      await expectRefused(heroes.useHeroItem(g, p.id, id, ItemId.EPITOME_OF_MILITARY_SCIENCE, 'gold'), msg('common.notEnoughGoldFor', { amount: price }));
+      await expectRefused(
+        heroes.useHeroItem(g, p.id, id, ItemId.EPITOME_OF_MILITARY_SCIENCE, HeroItemPayment.GOLD),
+        msg('common.notEnoughGoldFor', { amount: price }),
+      );
     }));
 
   it('refuses a book for a hero at the maximum level', () =>
@@ -601,7 +606,7 @@ describe(heroes.useHeroItem.name, () => {
       await patchHero(g, id, { loyalty: 60 });
       const medal = medalId(3);
       await expectRefused(heroes.useHeroItem(g, p.id, id, medal), msg('common.insufficientItems'));
-      await expectRefused(heroes.useHeroItem(g, p.id, id, medal, 'gold'), msg('hero.itemNotForGold'));
+      await expectRefused(heroes.useHeroItem(g, p.id, id, medal, HeroItemPayment.GOLD), msg('hero.itemNotForGold'));
       await giveItems(g, p, { [medal]: 2, [medalId(9)]: 1 });
       expect((await heroes.useHeroItem(g, p.id, id, medal)).loyalty).toBe(loyaltyAfterMedal(60, medal));
       expect((await heroes.useHeroItem(g, p.id, id, medalId(9))).loyalty).toBe(BALANCE.heroMaxLoyalty);
@@ -619,9 +624,9 @@ describe(heroes.useHeroItem.name, () => {
       const bean = await heroes.useHeroItem(g, p.id, id, ItemId.EXCALIBUR);
       const end = heroAttributeBuffEnd(start);
       expect(bean.powerBuffAdded).toBe(amount);
-      expect(bean.buffs).toEqual([{ id: HeroBuffId.POWER, desc: heroBuffDesc('power'), endTime: end, param: amount }]);
+      expect(bean.buffs).toEqual([{ id: HeroBuffId.POWER, desc: heroBuffDesc(HeroBuffId.POWER), endTime: end, param: amount }]);
       expect(g.events(TimedEventType.HERO_BUFF)).toMatchObject([
-        { dueAt: end, playerId: p.id, refKey: `herobuff:${id}:power`, payload: { heroId: id, attr: 'power' } },
+        { dueAt: end, playerId: p.id, refKey: `herobuff:${id}:power`, payload: { heroId: id, attr: HeroBuffId.POWER } },
       ]);
 
       g.advance(60_000);

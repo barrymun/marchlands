@@ -8,8 +8,15 @@ export const DOLL_RIGHT: readonly GearPieceId[] = ['necklace', 'back', 'charm', 
 /** localStorage key of the 2D · 3D switch (docs/features/hero-3d.md): the way this browser last chose to draw the figure. */
 export const FIGURE_KEY = 'marchlands-hero-figure';
 
+/** How the figure is drawn: the 2D pixel-art layers or the 3D model (docs/features/hero-3d.md). Remembered in localStorage (FIGURE_KEY), so a value never changes. */
+export const FigureMode = { TWO_D: '2d', THREE_D: '3d' } as const;
+export type FigureMode = (typeof FigureMode)[keyof typeof FigureMode];
 /** The ways to draw the figure, in the switch's order. */
-export const FIGURE_MODES = ['2d', '3d'] as const;
+export const FIGURE_MODES = Object.values(FigureMode);
+
+/** The sides of the figure a column of gear stands on. */
+export const DollSide = { LEFT: 'left', RIGHT: 'right' } as const;
+export type DollSide = (typeof DollSide)[keyof typeof DollSide];
 
 /** The 3D figure, its code (three.js) a file of its own, loaded only when the figure is shown in 3D. */
 export const HeroFigure3d = lazyComponent(() =>

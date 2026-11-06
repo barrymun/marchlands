@@ -2,7 +2,7 @@
 // marked with silver crosses (2), then from 3 cloth in the level's colour with knee plates trimmed in gold, plates on
 // the thighs from 6, knee spikes from 7, gilded plates at 9, and crimson armour trimmed in silver at 10.
 
-import type { PixelCanvas, Pt } from '../pixel.ts';
+import { CLEAR, type PixelCanvas, type Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { canvas, CLOTH, fill, lit, look, type Shades, spike } from './common.ts';
 
@@ -27,7 +27,7 @@ export function legs(level: number): PixelCanvas {
   fill(c, LEFT, cloth);
   fill(c, RIGHT, cloth);
   // the gap between the legs
-  for (let y = 14; y < 30; y++) c.set(16, y, 'clear');
+  for (let y = 14; y < 30; y++) c.set(16, y, CLEAR);
   // the waist
   const waist: Shades = level === 1 ? ['leather', 'leather', 'leatherDark'] : level >= 3 ? L.trim : cloth;
   fill(

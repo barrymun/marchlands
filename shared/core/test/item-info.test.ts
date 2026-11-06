@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { GameRefKind, ResourceKey } from '#/constants.ts';
 import { BALANCE, HOUR, ITEM_CATEGORY_IDS, ITEM_INFO, ItemId, itemInfo, ITEMS, medalSources } from '#/index.ts';
 
 describe(itemInfo.name, () => {
@@ -20,7 +21,10 @@ describe(itemInfo.name, () => {
     expect(itemInfo(ItemId.IRON_RAKE)!.description).toEqual({
       code: 'itemInfo.buff',
       params: {
-        effect: { code: 'buff.production', params: { resource: { ref: 'resource', id: 'food' }, percent: { share: BALANCE.resourceBuffBonus } } },
+        effect: {
+          code: 'buff.production',
+          params: { resource: { ref: GameRefKind.RESOURCE, id: ResourceKey.FOOD }, percent: { share: BALANCE.resourceBuffBonus } },
+        },
         period: { code: 'itemInfo.period.days', params: { count: 7 } },
       },
     });
@@ -42,7 +46,7 @@ describe(itemInfo.name, () => {
       params: { count: BALANCE.teleportCooldownMs / HOUR },
     });
     expect(itemInfo(ItemId.MEDIUM_MEDAL_BOX)!.description.params?.medals).toEqual(
-      [ItemId.HONOUR_MEDAL, ItemId.COURAGE_MEDAL, ItemId.WISDOM_MEDAL].map((id) => ({ ref: 'item', id })),
+      [ItemId.HONOUR_MEDAL, ItemId.COURAGE_MEDAL, ItemId.WISDOM_MEDAL].map((id) => ({ ref: GameRefKind.ITEM, id })),
     );
   });
 });

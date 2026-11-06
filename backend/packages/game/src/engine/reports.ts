@@ -3,7 +3,7 @@
 import { and, count, desc, eq, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { addTroops, type DesertionReport, type Message, msg, type ReportBody, ReportType, type TroopCounts } from '@marchlands/core';
+import { addTroops, type DesertionReport, type Message, msg, type ReportBody, ReportBodyKind, ReportType, type TroopCounts } from '@marchlands/core';
 import { one, players, reports } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
@@ -66,11 +66,15 @@ export async function reportDesertion(
     .select()
     .from(reports)
     .where(
-      and(eq(reports.playerId, r.playerId), sql`${reports.body}->>'kind' = 'desertion'`, sql`(${reports.body}->'desertion'->>'cityId')::int = ${r.cityId}`),
+      and(
+        eq(reports.playerId, r.playerId),
+        sql`${reports.body}->>'kind' = ${ReportBodyKind.DESERTION}`,
+        sql`(${reports.body}->'desertion'->>'cityId')::int = ${r.cityId}`,
+      ),
     )
     .orderBy(desc(reports.id))
     .limit(1);
-  const old = prev && prev.body.kind === 'desertion' ? prev.body.desertion : null;
+  const old = prev && prev.body.kind === ReportBodyKind.DESERTION ? prev.body.desertion : null;
   const replaces = old != null && old.last.from === r.from;
   if (prev && old && (replaces || !prev.isRead)) {
     const base = replaces ? addTroops(old.troops, old.last.troops, -1) : old.troops;
@@ -84,7 +88,7 @@ export async function reportDesertion(
     };
     await ctx.tx
       .update(reports)
-      .set({ body: { kind: 'desertion', desertion }, eventTime: ctx.now, isRead: false })
+      .set({ body: { kind: ReportBodyKind.DESERTION, desertion }, eventTime: ctx.now, isRead: false })
       .where(eq(reports.id, prev.id));
     await pushReportCounts(ctx, r.playerId);
     return prev.id;
@@ -96,7 +100,7 @@ export async function reportDesertion(
     startPos: r.position,
     targetPos: r.position,
     body: {
-      kind: 'desertion',
+      kind: ReportBodyKind.DESERTION,
       desertion: { cityId: r.cityId, city: r.city, troops: r.troops, from: r.from, to: ctx.now, food: r.food, last: { from: r.from, troops: r.troops } },
     },
   });

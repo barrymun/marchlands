@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { msg, ref, share } from '@marchlands/core';
+import { HeroBuffId, msg, ref, ResourceKey, share } from '@marchlands/core';
 
-import { i18n } from '@/lib/i18n';
+import { i18n, Locale } from '@/lib/i18n';
 import { gameRefName, paramText, translateMessage } from '@/lib/messages';
 
 afterEach(async () => {
-  await i18n.changeLanguage('en-GB');
+  await i18n.changeLanguage(Locale.EN_GB);
 });
 
 describe(translateMessage.name, () => {
   it('words a message from its area namespace', async () => {
     expect(translateMessage(msg('auth.notLoggedIn'))).toBe('You are not logged in.');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(translateMessage(msg('auth.notLoggedIn'))).toBe('ログインしていません。');
   });
 
@@ -30,13 +30,13 @@ describe(paramText.name, () => {
   it('formats numbers in the locale, keeping up to 2 decimals', async () => {
     expect(paramText(1234567)).toBe('1,234,567');
     expect(paramText(1.256)).toBe('1.26');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(paramText(1234567)).toBe('1,234,567');
   });
 
   it('joins lists with the locale separator', async () => {
-    expect(paramText(['a', 2, ref.resource('wood')])).toBe('a, 2, lumber');
-    await i18n.changeLanguage('ja-JP');
+    expect(paramText(['a', 2, ref.resource(ResourceKey.WOOD)])).toBe('a, 2, lumber');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(paramText(['a', 'b'])).toBe('a、b');
   });
 
@@ -44,7 +44,7 @@ describe(paramText.name, () => {
     expect(paramText(share(0.25))).toBe('25%');
     expect(paramText(share(0.125))).toBe('12.5%');
     expect(paramText(share(0.18999999999999995))).toBe('19%');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(paramText(share(0.25))).toBe('25%');
   });
 
@@ -56,7 +56,7 @@ describe(paramText.name, () => {
   it('shows a duration by its two largest units, in the locale', async () => {
     expect(paramText({ duration: 90_000 })).toBe('1m 30s');
     expect(paramText({ duration: 5_400_000 })).toBe('1h 30m');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(paramText({ duration: 90_000 })).toBe('1分 30秒');
   });
 
@@ -71,10 +71,10 @@ describe(gameRefName.name, () => {
     expect(gameRefName(ref.troop(7))).toBe('Archer');
     expect(gameRefName(ref.title(0))).toBe('Civilian');
     expect(gameRefName(ref.tile(3))).toBe('Hill');
-    expect(gameRefName(ref.stat('power'))).toBe('Attack');
-    await i18n.changeLanguage('ja-JP');
-    expect(gameRefName(ref.resource('food'))).toBe('食料');
-    expect(gameRefName(ref.stat('management'))).toBe('政治');
+    expect(gameRefName(ref.stat(HeroBuffId.POWER))).toBe('Attack');
+    await i18n.changeLanguage(Locale.JA_JP);
+    expect(gameRefName(ref.resource(ResourceKey.FOOD))).toBe('食料');
+    expect(gameRefName(ref.stat(HeroBuffId.MANAGEMENT))).toBe('政治');
   });
 
   it('falls back to the id for unknown data', () => {

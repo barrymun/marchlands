@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { FIGURE_KEY } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/constants';
+import { FIGURE_KEY, FigureMode } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/constants';
 import { figureMode, saveFigureMode, webglWorks } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/utils';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -7,13 +7,13 @@ afterEach(() => vi.unstubAllGlobals());
 describe(figureMode.name, () => {
   it('is 3D unless 2D was picked', () => {
     vi.stubGlobal('localStorage', { getItem: (key: string) => (key === FIGURE_KEY ? '2d' : null) });
-    expect(figureMode()).toBe('2d');
+    expect(figureMode()).toBe(FigureMode.TWO_D);
     vi.stubGlobal('localStorage', { getItem: () => '3d' });
-    expect(figureMode()).toBe('3d');
+    expect(figureMode()).toBe(FigureMode.THREE_D);
     vi.stubGlobal('localStorage', { getItem: () => null });
-    expect(figureMode()).toBe('3d');
+    expect(figureMode()).toBe(FigureMode.THREE_D);
     vi.stubGlobal('localStorage', { getItem: () => 'something else' });
-    expect(figureMode()).toBe('3d');
+    expect(figureMode()).toBe(FigureMode.THREE_D);
   });
 
   it('is 3D without storage', () => {
@@ -22,7 +22,7 @@ describe(figureMode.name, () => {
         throw new Error('blocked');
       },
     });
-    expect(figureMode()).toBe('3d');
+    expect(figureMode()).toBe(FigureMode.THREE_D);
   });
 });
 
@@ -30,7 +30,7 @@ describe(saveFigureMode.name, () => {
   it('stores the choice under its key', () => {
     const setItem = vi.fn();
     vi.stubGlobal('localStorage', { setItem });
-    saveFigureMode('2d');
+    saveFigureMode(FigureMode.TWO_D);
     expect(setItem).toHaveBeenCalledWith(FIGURE_KEY, '2d');
   });
 
@@ -40,7 +40,7 @@ describe(saveFigureMode.name, () => {
         throw new Error('blocked');
       },
     });
-    expect(() => saveFigureMode('3d')).not.toThrow();
+    expect(() => saveFigureMode(FigureMode.THREE_D)).not.toThrow();
   });
 });
 

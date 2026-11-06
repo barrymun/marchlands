@@ -3,7 +3,7 @@
 // helm), so a body's skin tone and hair are files of their own and every level's gear fits every body. The stones
 // glow at level 10 only, so only level 10's are kept as spots.
 
-import type { Sex } from '@marchlands/core';
+import { type Sex, SpotKind } from '@marchlands/core';
 
 import { figureCape } from './figure/cape.ts';
 import { figureHelm } from './figure/helm.ts';
@@ -13,7 +13,7 @@ import type { PixelCanvas } from './pixel.ts';
 
 /** Drop the stones' spots below level 10, where nothing glows, and the gear icons' glints (`gem`), which the figure doesn't use. */
 function glowing(c: PixelCanvas, level: number): PixelCanvas {
-  c.spots.splice(0, c.spots.length, ...c.spots.filter((s) => s.k !== 'gem' && (level >= 10 || s.k !== 'stone')));
+  c.spots.splice(0, c.spots.length, ...c.spots.filter((s) => s.k !== SpotKind.GEM && (level >= 10 || s.k !== SpotKind.STONE)));
   return c;
 }
 

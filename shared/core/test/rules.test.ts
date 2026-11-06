@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { BASIC_RESOURCES, HeroBuffId, RESOURCE_KEYS, ResourceKey } from '#/constants.ts';
 import {
   addHeroExp,
   BALANCE,
@@ -154,7 +155,7 @@ describe('economy', () => {
     expect(free.taxIncome).toBe(1000 * BALANCE.baseTaxShare);
     expect(taxed.taxed.food).toBeCloseTo(free.rates.food * 0.2);
     expect(taxed.rates.food).toBeCloseTo(free.rates.food * 0.8);
-    const sold = (['food', 'wood', 'stone', 'iron'] as const).reduce((g, r) => g + free.rates[r] * 0.2 * merchantBase(r), 0);
+    const sold = BASIC_RESOURCES.reduce((g, r) => g + free.rates[r] * 0.2 * merchantBase(r), 0);
     expect(taxed.taxConverted).toBeCloseTo(sold);
     expect(taxed.taxIncome).toBeCloseTo(free.taxIncome + taxed.taxConverted);
   });
@@ -501,7 +502,7 @@ describe('storage multiplier', () => {
       const one = computeCityStats(city({}), ctx(), 0).storage;
       cfg.storageMultiplier = 20;
       const twenty = computeCityStats(city({}), ctx(), 0).storage;
-      for (const r of ['food', 'wood', 'stone', 'iron'] as const) expect(twenty[r]).toBe(one[r] * 20);
+      for (const r of BASIC_RESOURCES) expect(twenty[r]).toBe(one[r] * 20);
     } finally {
       cfg.storageMultiplier = was;
     }
@@ -529,7 +530,7 @@ describe('hero attribute boosts', () => {
       powerBuffAdded: 32,
       managementBuffAdded: 0,
       stratagemBuffAdded: 0,
-      buffs: [{ id: 'power', desc: heroBuffDesc('power'), endTime: 1, param: 32 }],
+      buffs: [{ id: HeroBuffId.POWER, desc: heroBuffDesc(HeroBuffId.POWER), endTime: 1, param: 32 }],
     };
     expect(syncHeroBuffs(h)).toBe(false);
     h.power = 161;
@@ -712,7 +713,7 @@ describe('hero gear', () => {
     const h = hero(30, 100);
     syncHeroGear(h, gear);
     expect([h.powerAdded, h.managementAdded, h.stratagemAdded]).toEqual([28, 0, 0]);
-    h.gearStat = 'stratagem';
+    h.gearStat = HeroBuffId.STRATAGEM;
     expect(syncHeroGear(h, gear)).toBe(true);
     expect([h.powerAdded, h.managementAdded, h.stratagemAdded]).toEqual([0, 0, 28]);
     expect(syncHeroGear(h, gear)).toBe(false);
@@ -754,7 +755,7 @@ describe('hero gear', () => {
       powerBuffAdded: 0,
       managementBuffAdded: 0,
       stratagemBuffAdded: 0,
-      buffs: [{ id: 'power', desc: heroBuffDesc('power'), endTime: 1, param: 0 }],
+      buffs: [{ id: HeroBuffId.POWER, desc: heroBuffDesc(HeroBuffId.POWER), endTime: 1, param: 0 }],
     };
     syncHeroBuffs(h);
     expect(h.power + h.powerAdded + h.powerBuffAdded).toBe(1_219);
@@ -821,10 +822,10 @@ describe('barbarian city gold', () => {
 
 describe('full demolition', () => {
   it('refunds a third of every level up to the current one', () => {
-    const sum = (l: number, k: 'food' | 'wood') => [...Array(l)].reduce((t, _, i) => t + (buildingConfig(BuildingType.COTTAGE, i + 1)?.cost[k] ?? 0), 0);
+    const sum = (l: number, k: ResourceKey) => [...Array(l)].reduce((t, _, i) => t + (buildingConfig(BuildingType.COTTAGE, i + 1)?.cost[k] ?? 0), 0);
     const r = fullDemolishRefund(BuildingType.COTTAGE, 3);
-    expect(r.wood).toBeCloseTo(sum(3, 'wood') / 3);
-    expect(r.food).toBeCloseTo(sum(3, 'food') / 3);
+    expect(r.wood).toBeCloseTo(sum(3, ResourceKey.WOOD) / 3);
+    expect(r.food).toBeCloseTo(sum(3, ResourceKey.FOOD) / 3);
   });
 });
 
@@ -832,7 +833,7 @@ describe('(marchlands) troop training discount', () => {
   it('charges the paid share of the cost, rounded up, and counts it in the max', () => {
     const full = trainCost(3, 3);
     const paid = trainCost(3, 3, 0.75);
-    for (const k of ['gold', 'food', 'wood', 'stone', 'iron'] as const) expect(paid[k]).toBe(Math.ceil(full[k] * 0.75));
+    for (const k of RESOURCE_KEYS) expect(paid[k]).toBe(Math.ceil(full[k] * 0.75));
     const have = { gold: 1e9, food: full.food, wood: 1e9, stone: 1e9, iron: 1e9 };
     expect(maxTrainableCount(3, have, 1e9)).toBe(3);
     expect(maxTrainableCount(3, have, 1e9, 0.75)).toBe(4);
@@ -846,7 +847,7 @@ describe(disbandRefund.name, () => {
     const full = trainCost(3, 10);
     const r = disbandRefund(3, 10, 25);
     expect(r.creditUsed).toBe(10);
-    for (const k of ['gold', 'food', 'wood', 'stone', 'iron'] as const) expect(r.refund[k]).toBe(share(full[k] / 10, 10));
+    for (const k of RESOURCE_KEYS) expect(r.refund[k]).toBe(share(full[k] / 10, 10));
   });
 
   it('refunds only as many units as the credit covers', () => {
@@ -867,7 +868,7 @@ describe(disbandRefund.name, () => {
     // trained at 0.75 of the cost: 100 units add 75 units of credit
     const paid = trainCost(3, 100, 0.75);
     const r = disbandRefund(3, 100, 100 * 0.75);
-    for (const k of ['gold', 'food', 'wood', 'stone', 'iron'] as const) expect(r.refund[k]).toBeLessThanOrEqual(paid[k] * BALANCE.disbandRefund);
+    for (const k of RESOURCE_KEYS) expect(r.refund[k]).toBeLessThanOrEqual(paid[k] * BALANCE.disbandRefund);
   });
 
   it('works for fortifications', () => {

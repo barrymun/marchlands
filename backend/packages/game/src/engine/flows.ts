@@ -49,6 +49,7 @@ import {
   Mission,
   msg,
   ref,
+  RequirementKind,
   requirementsMet,
   tavernRefreshCost,
   tileXY,
@@ -339,9 +340,9 @@ async function runAction(
     const missing = checks
       .filter((c) => !c.ok)
       .map((c) =>
-        c.kind === 'item'
+        c.kind === RequirementKind.ITEM
           ? msg('flow.req.item', { name: ref.item(String(c.id)), amount: c.required })
-          : msg('flow.req.level', { name: c.kind === 'building' ? ref.building(Number(c.id)) : ref.tech(Number(c.id)), level: c.required }),
+          : msg('flow.req.level', { name: c.kind === RequirementKind.BUILDING ? ref.building(Number(c.id)) : ref.tech(Number(c.id)), level: c.required }),
       );
     throw new GameError(msg('flow.cannotTrain', { troop, missing }), -99);
   }

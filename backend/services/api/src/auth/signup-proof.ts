@@ -22,7 +22,8 @@ export interface SignUpProofConfig {
 }
 
 /** What checking a proof found: `ok` spends it. */
-export type ProofCheck = 'ok' | 'expired' | 'invalid' | 'used';
+export const ProofCheck = { OK: 'ok', EXPIRED: 'expired', INVALID: 'invalid', USED: 'used' } as const;
+export type ProofCheck = (typeof ProofCheck)[keyof typeof ProofCheck];
 
 const ALGORITHM = 'PBKDF2/SHA-256';
 /** Spent puzzles remembered at most: past it the oldest is forgotten (it has long expired at any real rate). */
@@ -62,12 +63,12 @@ export class SignUpProofs {
     try {
       result = await verifySolution({ challenge: proof.challenge, solution: proof.solution, deriveKey, hmacSignatureSecret: this.secret });
     } catch {
-      return 'invalid';
+      return ProofCheck.INVALID;
     }
-    if (result.expired) return 'expired';
-    if (!result.verified) return 'invalid';
+    if (result.expired) return ProofCheck.EXPIRED;
+    if (!result.verified) return ProofCheck.INVALID;
     // synchronous, so two sign-ups with the same proof can't both get past it
-    return this.spent.setIfAbsent(proof.challenge.signature, true) ? 'ok' : 'used';
+    return this.spent.setIfAbsent(proof.challenge.signature, true) ? ProofCheck.OK : ProofCheck.USED;
   }
 
   /** The sign-up failed for another reason (the username was taken): the player may send the same proof again. */

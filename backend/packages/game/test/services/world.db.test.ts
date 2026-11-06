@@ -14,6 +14,8 @@ import {
   TileType,
   tileXY,
   valleyUpgradeCost,
+  WORLD_MAP_SOURCES,
+  WorldMapSource,
 } from '@marchlands/core';
 import { tiles, worldState } from '@marchlands/db';
 import { testDb } from '@marchlands/db/test/support/db.ts';
@@ -82,7 +84,7 @@ describe(world.getWorldInfo.name, () => {
     game(async (g) => {
       const info = await world.getWorldInfo(g.tx);
       expect(info).toMatchObject({ mapSize: SIZE });
-      expect(['generated', 'legacy']).toContain(info!.source);
+      expect(WORLD_MAP_SOURCES).toContain(info!.source);
     }));
 });
 
@@ -90,7 +92,7 @@ describe(world.ensureWorld.name, () => {
   it('leaves a seeded world as it is', async () => {
     const before = await game((g) => world.getWorldInfo(g.tx));
     const log = vi.fn();
-    expect(await world.ensureWorld(testDb(), { source: 'generated', seed: 'another seed', log })).toEqual(before);
+    expect(await world.ensureWorld(testDb(), { source: WorldMapSource.GENERATED, seed: 'another seed', log })).toEqual(before);
     expect(log).not.toHaveBeenCalled();
   });
 });

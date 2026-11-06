@@ -1,3 +1,4 @@
+import { SpotKind } from '@marchlands/core';
 import spotsJson from '@/assets/spots.json';
 import type { Rgb, Side, Spot, TownState } from '@/components/iso-anim/types';
 
@@ -54,7 +55,7 @@ export const CLOTHES = [
 ] as const satisfies readonly Rgb[];
 
 /** Spots whose part is drawn moving over a bare sprite (tools/art/draw.ts, MOVING). */
-export const MOVING_SPOTS: ReadonlySet<string> = new Set(['sails', 'wheel', 'sheep']);
+export const MOVING_SPOTS: ReadonlySet<SpotKind> = new Set([SpotKind.SAILS, SpotKind.WHEEL, SpotKind.SHEEP]);
 
 /** A smoke plume's frames, and how many puffs rise in it at once. */
 export const SMOKE_FRAMES = 10;

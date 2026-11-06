@@ -28,6 +28,7 @@ import {
   ref as gameRef,
   giveToGroups,
   goldForSpeedup,
+  MarketOrderType,
   MarketSide,
   merchantAsk,
   merchantBase,
@@ -40,10 +41,13 @@ import {
   msg,
   type NpcEconomy,
   priceBand,
+  ReportBodyKind,
   ReportType,
   scaled,
   takeFromGroups,
   TimedEventType,
+  TradeCounterparty,
+  TradeSide,
   worldGold,
   worldPrice,
   worldTotals,
@@ -108,14 +112,11 @@ function merchantQuoteBean(res: BasicResource, state: Partial<MerchantState>, no
 // Matching plan (shared by orders and quotes)
 // ---------------------------------------------------------------------------------------------
 
-/** Who is on the other side of a fill. */
-type Source = 'player' | 'factions' | 'merchant';
-
 interface Fill {
   qty: number;
   /** gold for the fill before the buyer's fee (fractional for merchant and faction fills) */
   gold: number;
-  source: Source;
+  source: TradeCounterparty;
   /** the resting order hit, for a player's fill */
   other: OrderRow | null;
 }
@@ -141,7 +142,7 @@ function planFills(side: number, qty: number, limit: number, offers: OrderRow[],
   let i = 0;
   const playerFill = (o: OrderRow) => {
     const q = Math.min(remaining, o.amount - o.filled - used(fills, o));
-    fills.push({ qty: q, gold: q * o.price, source: 'player', other: o });
+    fills.push({ qty: q, gold: q * o.price, source: TradeCounterparty.PLAYER, other: o });
     remaining -= q;
   };
   for (let guard = 0; remaining > 0 && guard < 10_000; guard++) {
@@ -152,8 +153,8 @@ function planFills(side: number, qty: number, limit: number, offers: OrderRow[],
     }
     const o = offers[i];
     const playerOk = !!o && better(o.price, limit);
-    const merchant = merchantMarginal(r, buy ? 'buy' : 'sell');
-    const factions = npc ? factionMarginal(npc.target, npcStock, buy ? 'buy' : 'sell', npc.spread) : null;
+    const merchant = merchantMarginal(r, buy ? TradeSide.BUY : TradeSide.SELL);
+    const factions = npc ? factionMarginal(npc.target, npcStock, buy ? TradeSide.BUY : TradeSide.SELL, npc.spread) : null;
     if (playerOk && better(o.price, merchant) && (factions == null || better(o.price, factions))) {
       playerFill(o);
       continue;
@@ -165,7 +166,7 @@ function planFills(side: number, qty: number, limit: number, offers: OrderRow[],
         ? factionSells(npc.target, npcStock, remaining, bound, npc.spread)
         : factionBuys(npc.target, npcStock, remaining, bound, npcGold, npc.spread);
       if (f.qty > 0) {
-        fills.push({ qty: f.qty, gold: f.gold, source: 'factions', other: null });
+        fills.push({ qty: f.qty, gold: f.gold, source: TradeCounterparty.FACTIONS, other: null });
         remaining -= f.qty;
         npcStock += buy ? -f.qty : f.qty;
         npcGold += buy ? f.gold : -f.gold;
@@ -176,7 +177,7 @@ function planFills(side: number, qty: number, limit: number, offers: OrderRow[],
     const bound = buy ? Math.min(limit, playerOk ? o.price : Infinity) : Math.max(limit, playerOk ? o.price : 0);
     const f = buy ? merchantSells(r, remaining, bound) : merchantBuys(r, remaining, bound);
     if (f.qty > 0) {
-      fills.push({ qty: f.qty, gold: f.gold, source: 'merchant', other: null });
+      fills.push({ qty: f.qty, gold: f.gold, source: TradeCounterparty.MERCHANT, other: null });
       remaining -= f.qty;
       r = f.ref;
     } else if (playerOk) playerFill(o);
@@ -223,14 +224,14 @@ export interface OrderInput {
   amount: number;
   price?: number;
   /** limit (default): rest on the book if not filled; market: fill now at any price */
-  type?: 'limit' | 'market';
+  type?: MarketOrderType;
 }
 
 function normalise(o: OrderInput) {
   const res = assertResType(o.resType);
   if (o.side !== MarketSide.BUY && o.side !== MarketSide.SELL) throw new GameError(msg('market.invalidSide'), -99);
   if (!Number.isInteger(o.amount) || o.amount < 1 || o.amount > MAX_ORDER) throw new GameError(msg('common.invalidAmount'), -99);
-  const market = o.type === 'market';
+  const market = o.type === MarketOrderType.MARKET;
   let price = 0;
   if (!market) {
     price = roundPrice(Number(o.price));
@@ -242,9 +243,9 @@ function normalise(o: OrderInput) {
 
 function summarise(side: number, plan: ReturnType<typeof planFills>, rest: number, price: number) {
   const fillGold = plan.fills.reduce((s, f) => s + f.gold, 0);
-  const filledBy = (source: Source) => plan.fills.filter((f) => f.source === source).reduce((s, f) => s + f.qty, 0);
-  const merchantFilled = filledBy('merchant');
-  const factionsFilled = filledBy('factions');
+  const filledBy = (source: TradeCounterparty) => plan.fills.filter((f) => f.source === source).reduce((s, f) => s + f.qty, 0);
+  const merchantFilled = filledBy(TradeCounterparty.MERCHANT);
+  const factionsFilled = filledBy(TradeCounterparty.FACTIONS);
   const gold = side === MarketSide.BUY ? withFee(fillGold) : Math.floor(fillGold);
   return {
     filled: plan.filled,
@@ -297,8 +298,8 @@ function factionsBean(econ: NpcEconomy | null, res: BasicResource, terms: CityTe
   }
   const { target, stock, spread } = npc;
   const { low, high } = priceBand();
-  const ask = factionMarginal(target, stock, 'buy', spread);
-  const bid = factionMarginal(target, stock, 'sell', spread);
+  const ask = factionMarginal(target, stock, TradeSide.BUY, spread);
+  const bid = factionMarginal(target, stock, TradeSide.SELL, spread);
   const steps = (from: number, to: number, depth: (limit: number) => number) => {
     const levels: { price: number; amount: number }[] = [];
     let before = 0;
@@ -373,8 +374,8 @@ export async function affordable(ctx: Ctx, playerId: number, resType: number, go
   // no unit costs less than the cheapest price on offer now, which bounds the search
   const cheapest = Math.min(
     offers[0]?.price ?? Infinity,
-    npc ? factionMarginal(npc.target, npc.stock, 'buy', npc.spread) : Infinity,
-    merchantMarginal(ref, 'buy'),
+    npc ? factionMarginal(npc.target, npc.stock, TradeSide.BUY, npc.spread) : Infinity,
+    merchantMarginal(ref, TradeSide.BUY),
   );
   let [lo, hi] = [0, Math.min(MAX_ORDER, Math.floor(gold / cheapest))];
   while (lo < hi) {
@@ -428,7 +429,7 @@ export async function myTrades(ctx: Ctx, playerId: number, limit = 50) {
       price: t.price,
       amount: t.amount,
       gold: t.gold,
-      with: t.npc ? ('factions' as const) : other == null ? ('merchant' as const) : ('player' as const),
+      with: t.npc ? TradeCounterparty.FACTIONS : other == null ? TradeCounterparty.MERCHANT : TradeCounterparty.PLAYER,
       createdAt: t.createdAt,
     };
   });
@@ -548,7 +549,7 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
       takerSide: o.side,
       buyerPlayerId: buy ? playerId : (f.other?.playerId ?? null),
       sellerPlayerId: buy ? (f.other?.playerId ?? null) : playerId,
-      npc: f.source === 'factions',
+      npc: f.source === TradeCounterparty.FACTIONS,
     });
     // (marchlands) a player buyer's fee: shares for the holders of their state's capital and of Atlantis
     const buyerCity = buy ? cityId : f.other?.cityId;
@@ -579,7 +580,7 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
       playerId: other.playerId,
       typeId: ReportType.TRADE,
       title: msg('report.title.tradeCompleted'),
-      body: { kind: 'trade', trade: { side: buy ? 'sell' : 'buy', resource: res, amount: f.qty, price: other.price, gold } },
+      body: { kind: ReportBodyKind.TRADE, trade: { side: buy ? TradeSide.SELL : TradeSide.BUY, resource: res, amount: f.qty, price: other.price, gold } },
     });
   }
   const hit = plan.fills.flatMap((f) => (f.other ? [f.other.id] : []));
@@ -588,7 +589,7 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
   // the factions' stock: what they sold leaves it, what they bought joins it
   if (econ && sum.factionsFilled > 0) {
     const move = buy ? takeFromGroups : giveToGroups;
-    const paid = plan.fills.filter((f) => f.source === 'factions').reduce((s, f) => s + f.gold, 0);
+    const paid = plan.fills.filter((f) => f.source === TradeCounterparty.FACTIONS).reduce((s, f) => s + f.gold, 0);
     await saveNpcEconomy(ctx, move(econ, econ.groups, res, sum.factionsFilled, paid));
     await tradedWithFactions(ctx, playerId, b.city.tileId, paid);
   }

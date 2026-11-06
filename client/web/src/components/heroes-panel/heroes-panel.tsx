@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 import type { CityBean } from '@marchlands/api-client';
 
 import { GearCard } from '@/components/hero-gear/gear-card/gear-card';
-import { HERO_TABS, HERO_VIEW_QUERY, HERO_VIEWS } from '@/components/heroes-panel/constants';
+import { HERO_TABS, HERO_VIEW_QUERY, HERO_VIEWS, HeroView } from '@/components/heroes-panel/constants';
 import { HeroList } from '@/components/heroes-panel/hero-list/hero-list';
 import { HeroSheet } from '@/components/heroes-panel/hero-sheet/hero-sheet';
 import { Inn } from '@/components/heroes-panel/inn/inn';
-import type { HeroView } from '@/components/heroes-panel/types';
 import { readHeroView, saveHeroView } from '@/components/heroes-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -33,7 +32,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
   const setTab = (v: string) => set({ tab: HEROES_SEARCH.tab.read(v) });
   const [chosen, setChosen] = useState<HeroView>(readHeroView);
   const wide = useMediaQuery(HERO_VIEW_QUERY);
-  const view: HeroView = wide ? chosen : 'list';
+  const view: HeroView = wide ? chosen : HeroView.LIST;
   const choose = (v: HeroView) => {
     setChosen(v);
     saveHeroView(v);
@@ -62,7 +61,7 @@ export function HeroesPanel({ city }: { city: CityBean }) {
         )}
       </div>
       {tab === HeroTab.HEROES &&
-        (view === 'sheet' ? (
+        (view === HeroView.SHEET ? (
           <div className="grid items-start gap-4 2xl:grid-cols-[1fr_minmax(20rem,28rem)]">
             <HeroSheet city={city} onGear={() => setTab(HeroTab.GEAR)} />
             {inn}

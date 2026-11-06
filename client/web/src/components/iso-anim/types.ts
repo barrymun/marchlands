@@ -1,3 +1,4 @@
+import type { SpotKind } from '@marchlands/core';
 import type { PixelArt } from '@/components/iso-viewport/types';
 
 /** A colour as red, green and blue. */
@@ -9,12 +10,15 @@ export type Rgb = readonly [number, number, number];
  * and depth in world units).
  */
 export interface Spot {
-  k: string;
+  k: SpotKind;
   x: number;
   y: number;
   n?: number;
   m?: number;
 }
+
+/** Where on a sprite something is placed: a spot's pixel, or the middle of the ground for a sprite with no spot for it. */
+export type SpotPoint = Pick<Spot, 'x' | 'y'>;
 
 /** An animation frame and its anchor: the frame's pixel that sits on the spot (it may lie outside the frame). */
 export interface Frame {

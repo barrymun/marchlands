@@ -47,6 +47,7 @@ import {
   SetAllianceRankBody,
   SetAllianceRelationBody,
 } from '@marchlands/contracts';
+import { ALL_REPORTS, ChatChannel, PlayerRelationKind } from '@marchlands/core';
 import { alliance, mail, reports, social } from '@marchlands/game';
 
 import { anon, authenticate, doc, game, tags, type ZApp, zIds } from '#/http.ts';
@@ -102,7 +103,7 @@ export default async function socialRoutes(app: ZApp) {
     game(req, (ctx, pid) => reports.readReport(ctx, pid, req.params.reportId)),
   );
   app.post('/reports/read', s(tags.reports, 'Mark read (report.readOverReport); omit ids for all', Empty, { body: MarkReportsReadBody }), (req) =>
-    game(req, (ctx, pid) => reports.markReportsRead(ctx, pid, req.body.ids ?? 'all')),
+    game(req, (ctx, pid) => reports.markReportsRead(ctx, pid, req.body.ids ?? ALL_REPORTS)),
   );
   app.post('/reports/delete', s(tags.reports, 'Delete (report.deleteReport)', Empty, { body: zIds }), (req) =>
     game(req, (ctx, pid) => reports.deleteReports(ctx, pid, req.body.ids)),
@@ -110,10 +111,10 @@ export default async function socialRoutes(app: ZApp) {
 
   // ---- chat ----
   app.post('/chat/world', s(tags.chat, 'World channel (common.worldChat)', Empty, { body: ChatBody }), (req) =>
-    game(req, (ctx, pid) => social.worldChat(ctx, pid, req.body.msg, 'world')),
+    game(req, (ctx, pid) => social.worldChat(ctx, pid, req.body.msg, ChatChannel.WORLD)),
   );
   app.post('/chat/beginner', s(tags.chat, 'Beginner channel (common.channelChat)', Empty, { body: ChatBody }), (req) =>
-    game(req, (ctx, pid) => social.worldChat(ctx, pid, req.body.msg, 'beginner')),
+    game(req, (ctx, pid) => social.worldChat(ctx, pid, req.body.msg, ChatChannel.BEGINNER)),
   );
   app.post('/chat/alliance', s(tags.chat, 'Alliance channel (common.allianceChat)', Empty, { body: ChatBody }), (req) =>
     game(req, (ctx, pid) => social.allianceChat(ctx, pid, req.body.msg)),
@@ -127,14 +128,16 @@ export default async function socialRoutes(app: ZApp) {
 
   // ---- friends & blocks ----
   app.get('/friends', s(tags.social, 'Friends and blocked lords', PlayerRelationLists), (req) => game(req, (ctx, pid) => social.listRelations(ctx, pid)));
-  for (const kind of ['friend', 'block'] as const) {
-    const path = kind === 'friend' ? '/friends' : '/blocks';
-    app.post(path, s(tags.social, `Add (friend.add${kind === 'friend' ? 'Friend' : 'Block'})`, PlayerRelationTarget, { body: AddPlayerRelationBody }), (req) =>
-      game(req, (ctx, pid) => social.addRelation(ctx, pid, req.body.name, kind)),
+  for (const kind of Object.values(PlayerRelationKind)) {
+    const path = kind === PlayerRelationKind.FRIEND ? '/friends' : '/blocks';
+    app.post(
+      path,
+      s(tags.social, `Add (friend.add${kind === PlayerRelationKind.FRIEND ? 'Friend' : 'Block'})`, PlayerRelationTarget, { body: AddPlayerRelationBody }),
+      (req) => game(req, (ctx, pid) => social.addRelation(ctx, pid, req.body.name, kind)),
     );
     app.delete(
       `${path}/:playerId`,
-      s(tags.social, `Remove (friend.delete${kind === 'friend' ? 'Friend' : 'Block'})`, Empty, { params: PlayerRelationParams }),
+      s(tags.social, `Remove (friend.delete${kind === PlayerRelationKind.FRIEND ? 'Friend' : 'Block'})`, Empty, { params: PlayerRelationParams }),
       (req) => game(req, (ctx, pid) => social.removeRelation(ctx, pid, req.params.playerId, kind)),
     );
   }

@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, HeroStatus, Mission, msg, ReportType, TimedEventType } from '@marchlands/core';
+import { ArmyDirection, HeroStatus, Mission, msg, ReportBodyKind, ReportType, TimedEventType } from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
 import { alliance, combat, interior } from '#/index.ts';
@@ -53,7 +53,7 @@ describe(`${processArmy.name}: transport`, () => {
       expect(after.iron - before.iron).toBeCloseTo(20_000, 0);
       expect(g.pushes(PushCmd.RESOURCE_UPDATE).at(-1)?.playerIds).toEqual([q.id]);
 
-      const body = { kind: 'trade', trade: { from: p.name, to: q.name, resources: goods } };
+      const body = { kind: ReportBodyKind.TRADE, trade: { from: p.name, to: q.name, resources: goods } };
       expect(await lastReport(g, p.id, 'report.title.transportReport')).toMatchObject({ typeId: ReportType.TRADE, armyType: Mission.TRANSPORT, body });
       expect(await lastReport(g, q.id, 'report.title.transportReceived')).toMatchObject({ typeId: ReportType.TRADE, body });
 
@@ -89,7 +89,7 @@ describe(`${processArmy.name}: transport`, () => {
       await alliance.leaveAlliance(g, q.id);
       await arrive(g, bean.armyId);
       expect(await armyRow(g, bean.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, resources: { ...NO_RESOURCES, food: 1000 } });
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('army.destinationNotFriendly') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.destinationNotFriendly') });
       expect(await reportTitles(g, q.id)).toEqual([]);
     }));
 });
@@ -124,7 +124,7 @@ describe(`${processArmy.name}: reinforce`, () => {
       expect(report).toMatchObject({
         title: msg('report.title.reinforcementsFrom', { name: p.name }),
         typeId: ReportType.OTHER,
-        body: { kind: 'movement', movement: { from: p.name, hero: await heroSummaryOf(g, heroId), troops: { lightCavalry: 300 } } },
+        body: { kind: ReportBodyKind.MOVEMENT, movement: { from: p.name, hero: await heroSummaryOf(g, heroId), troops: { lightCavalry: 300 } } },
       });
       expect(await reportTitles(g, p.id)).toEqual([]);
     }));
@@ -139,7 +139,7 @@ describe(`${processArmy.name}: reinforce`, () => {
       await alliance.leaveAlliance(g, q.id);
       await arrive(g, bean.armyId);
       expect((await armyRow(g, bean.armyId))!.direction).toBe(ArmyDirection.BACKWARD);
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('army.destinationNotFriendly') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.destinationNotFriendly') });
     }));
 
   it('moves troops, goods and the hero into an own city for good', () =>
@@ -168,7 +168,7 @@ describe(`${processArmy.name}: reinforce`, () => {
       expect(report).toMatchObject({
         typeId: ReportType.OTHER,
         body: {
-          kind: 'movement',
+          kind: ReportBodyKind.MOVEMENT,
           movement: { hero: await heroSummaryOf(g, hero2), troops: { lightCavalry: 700 }, resources: { ...NO_RESOURCES, gold: 2000 }, heroReturned: false },
         },
       });
@@ -212,6 +212,6 @@ describe(`${processArmy.name}: reinforce`, () => {
       await combat.abandonValley(g, p.id, valley.id);
       await arrive(g, bean.armyId);
       expect((await armyRow(g, bean.armyId))!.direction).toBe(ArmyDirection.BACKWARD);
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('army.valleyNoLongerHeld') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.valleyNoLongerHeld') });
     }));
 });

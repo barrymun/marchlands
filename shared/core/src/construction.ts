@@ -2,7 +2,7 @@
 // pfortifications logic with the original's validation gaps closed.
 
 import { BALANCE, goldForCents, scaled } from '#/balance.ts';
-import { BuildingType, FORT_KEYS, FortType, TechType, TROOP_ID_BY_KEY, TROOP_KEYS, TroopType } from '#/constants.ts';
+import { BuildingType, FORT_KEYS, FortType, RequirementKind, TechType, TROOP_ID_BY_KEY, TROOP_KEYS, TroopType } from '#/constants.ts';
 import {
   buildingConfig,
   type BuildingLevelConfig,
@@ -78,16 +78,16 @@ export function checkRequirements(req: Requirements, buildings: BuildingState[],
   const out: RequirementCheck[] = [];
   for (const b of req.buildings) {
     const cur = buildingLevel(buildings, b.id);
-    out.push({ kind: 'building', id: b.id, required: b.level, current: cur, ok: cur >= b.level });
+    out.push({ kind: RequirementKind.BUILDING, id: b.id, required: b.level, current: cur, ok: cur >= b.level });
   }
   for (const t of req.techs) {
     const cur = researchLevel(research, t.id);
-    out.push({ kind: 'tech', id: t.id, required: t.level, current: cur, ok: cur >= t.level });
+    out.push({ kind: RequirementKind.TECH, id: t.id, required: t.level, current: cur, ok: cur >= t.level });
   }
   for (const i of req.items) {
     const id = itemIdFromLegacy(i.id) ?? String(i.id);
     const cur = items[id] ?? 0;
-    out.push({ kind: 'item', id, required: i.level, current: cur, ok: cur >= i.level });
+    out.push({ kind: RequirementKind.ITEM, id, required: i.level, current: cur, ok: cur >= i.level });
   }
   return out;
 }

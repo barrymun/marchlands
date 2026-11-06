@@ -10,10 +10,12 @@ import {
   type FlowCityChoice,
   FlowWaitUntil,
   healCost,
+  HeroBuffId,
   HOLDABLE_VALLEY_TYPES,
   Mission,
   msg,
   ref,
+  ResourceKey,
   tileId,
   tileXY,
   TimedEventType,
@@ -147,7 +149,7 @@ export async function storedEvent(g: TestGame, refKey: string) {
   return row;
 }
 
-export const mayor = { type: FlowActionType.SET_MAYOR, stat: 'power' };
+export const mayor = { type: FlowActionType.SET_MAYOR, stat: HeroBuffId.POWER };
 
 export const waitTime = { type: FlowActionType.WAIT, until: FlowWaitUntil.TIME, minutes: 5 };
 
@@ -161,7 +163,9 @@ export const injured = { militia: 10 };
 
 export const healed = () => {
   const cost = healCost(injured);
-  const amounts = (['food', 'wood', 'iron'] as const).map((k) => msg('flow.resourceAmount', { amount: Math.ceil(cost[k]), resource: ref.resource(k) }));
+  const amounts = ([ResourceKey.FOOD, ResourceKey.WOOD, ResourceKey.IRON] as const).map((k) =>
+    msg('flow.resourceAmount', { amount: Math.ceil(cost[k]), resource: ref.resource(k) }),
+  );
   return msg('flow.step.healed', { count: 10, cost: amounts });
 };
 

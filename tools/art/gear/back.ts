@@ -2,7 +2,9 @@
 // cape under a silver collar (1), a dark grey cape under a studded collar (2), then from 3 a cape in the level's colour
 // under a gold collar, edged in gold from 5, torn at the hem from 8, and at 10 a pair of bat wings in crimson.
 
-import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
+import { SpotKind } from '@marchlands/core';
+
+import { CLEAR, type Colour, type PixelCanvas, type Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { BLUE, canvas, lit, look, type Shades, spike, STEEL } from './common.ts';
 
@@ -52,14 +54,14 @@ export function back(level: number): PixelCanvas {
     spike(c, [16 - 13, 4], [16 - 15, 0], STEEL);
     spike(c, [16 + 13, 4], [16 + 15, 0], STEEL);
     // the wings flap from their root, the tips lifting most
-    c.spot('flap', root, 14);
+    c.spot(SpotKind.FLAP, root, 14);
     return c;
   }
   const cloth: Shades = level === 0 ? BLUE : level === 1 ? ['bannerHi', 'banner', 'bannerDark'] : level === 2 ? ['hood', 'hoodDark', 'gear0'] : L.accent;
   c.poly(CAPE, folds(cloth, level === 0 ? 'wool' : undefined));
   if (level >= 8)
     // a torn hem
-    for (let x = 5; x < 28; x++) for (let y = 29 - ((x * 7) % 4); y < 30; y++) c.set(x, y, 'clear');
+    for (let x = 5; x < 28; x++) for (let y = 29 - ((x * 7) % 4); y < 30; y++) c.set(x, y, CLEAR);
   if (level >= 5) for (let y = 7; y < 29; y++) for (const x of [Math.round(11 - (y - 6) * 0.26), Math.round(21 + (y - 6) * 0.26)]) c.set(x, y, L.trim[1]);
   // the rod or collar
   if (level === 0) for (let x = 6; x < 27; x++) for (const y of [4, 5]) c.set(x, y, y === 4 ? 'plankTop' : 'trunk');
@@ -80,6 +82,6 @@ export function back(level: number): PixelCanvas {
   }
   // the cape stirs below the rod or collar, the hem most
   const hung = level === 0 ? 6 : 9;
-  c.spot('stir', [16, hung], 29 - hung);
+  c.spot(SpotKind.STIR, [16, hung], 29 - hung);
   return c;
 }

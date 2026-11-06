@@ -1,4 +1,4 @@
-import { BALANCE, BuffId, ItemId } from '@marchlands/core';
+import { BALANCE, BuffId, ItemId, ResourceKey } from '@marchlands/core';
 
 import type { Slot } from '@/components/active-effects/types';
 import { percent, resourceLabel } from '@/lib/format';
@@ -16,35 +16,35 @@ export const GROUPS: { label: string; slots: Slot[] }[] = [
       {
         buff: BuffId.FOOD_PRODUCTION,
         get label() {
-          return resourceLabel('food');
+          return resourceLabel(ResourceKey.FOOD);
         },
         boost: production,
       },
       {
         buff: BuffId.WOOD_PRODUCTION,
         get label() {
-          return resourceLabel('wood');
+          return resourceLabel(ResourceKey.WOOD);
         },
         boost: production,
       },
       {
         buff: BuffId.STONE_PRODUCTION,
         get label() {
-          return resourceLabel('stone');
+          return resourceLabel(ResourceKey.STONE);
         },
         boost: production,
       },
       {
         buff: BuffId.IRON_PRODUCTION,
         get label() {
-          return resourceLabel('iron');
+          return resourceLabel(ResourceKey.IRON);
         },
         boost: production,
       },
       {
         buff: BuffId.GOLD_PRODUCTION,
         get label() {
-          return resourceLabel('gold');
+          return resourceLabel(ResourceKey.GOLD);
         },
         boost: production,
       },
@@ -125,3 +125,7 @@ export const SLOT_BUFFS = new Set<BuffId>(GROUPS.flatMap((g) => g.slots.map((s) 
 export const WARN_MS = 24 * 3_600_000;
 
 export const STORE_KEY = 'marchlands-effects-collapsed';
+
+/** How the + button extends a bonus: use an owned item, or buy one with the city's gold. */
+export const ExtensionKind = { USE: 'use', BUY: 'buy' } as const;
+export type ExtensionKind = (typeof ExtensionKind)[keyof typeof ExtensionKind];

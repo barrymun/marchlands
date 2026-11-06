@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ITEM_CATEGORY_IDS, ITEM_INFO, ItemId, itemInfo, ITEMS, medalId } from '@marchlands/core';
 
 import { itemCategoryName, itemName, itemShortName } from '@/lib/game-data';
-import { i18n } from '@/lib/i18n';
+import { i18n, Locale } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
 import categories from '@/locales/en-GB/data-item-categories.json';
 import enGB from '@/locales/en-GB/data-items.json';
@@ -16,7 +16,7 @@ const ids = ITEMS.map((i) => i.id);
 const medals = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(medalId);
 
 afterEach(async () => {
-  await i18n.changeLanguage('en-GB');
+  await i18n.changeLanguage(Locale.EN_GB);
 });
 
 describe('data-items', () => {
@@ -27,7 +27,7 @@ describe('data-items', () => {
   it('is looked up by id', async () => {
     expect(itemName(ItemId.TRUCE_AGREEMENT)).toBe('Truce Agreement');
     expect(itemName('unknown.item')).toBe('unknown.item');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(itemName(ItemId.TRUCE_AGREEMENT)).toBe('休戦協定');
   });
 
@@ -35,9 +35,9 @@ describe('data-items', () => {
     expect(itemShortName(ItemId.CROSS_MEDAL)).toBe('Cross');
     expect(itemShortName(ItemId.HONOUR_MEDAL)).toBe('Honour');
     expect(itemShortName(ItemId.TRUCE_AGREEMENT)).toBe('Truce Agreement');
-    await i18n.changeLanguage('en-US');
+    await i18n.changeLanguage(Locale.EN_US);
     expect(itemShortName(ItemId.HONOUR_MEDAL)).toBe('Honor');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(itemShortName(ItemId.CROSS_MEDAL)).toBe('十字');
   });
 });
@@ -49,14 +49,14 @@ describe('data-item-categories', () => {
 
   it('is looked up by id', async () => {
     expect(itemCategoryName(1)).toBe('Speed-ups');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(itemCategoryName(1)).toBe('スピードアップ');
   });
 });
 
 describe('item descriptions', () => {
   it('describes every item in every full locale', async () => {
-    for (const lng of ['en-GB', 'ja-JP']) {
+    for (const lng of [Locale.EN_GB, Locale.JA_JP]) {
       await i18n.changeLanguage(lng);
       for (const info of ITEM_INFO) {
         for (const m of [info.description, ...(info.howTo ? [info.howTo] : [])]) {

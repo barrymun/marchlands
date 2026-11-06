@@ -28,7 +28,7 @@ describe(runScheduledHeal.name, () => {
   it('says so when nothing is injured', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      await runScheduledHeal(g, p.id, p.cityId, 'honor', []);
+      await runScheduledHeal(g, p.id, p.cityId, HealPayment.HONOR, []);
       const { name } = await reloadCity(g, p.cityId);
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE).at(-1)?.data).toMatchObject({
         msg: msg('flow.healDone', { city: name, result: msg('flow.step.noInjured') }),
@@ -40,7 +40,7 @@ describe(runScheduledHeal.name, () => {
       const p = await createTestPlayer(g);
       await setInjured(g, p.cityId, injured);
       await setHonor(g, p, 0);
-      await runScheduledHeal(g, p.id, p.cityId, 'honor', []);
+      await runScheduledHeal(g, p.id, p.cityId, HealPayment.HONOR, []);
       const { name, injuredTroops } = await reloadCity(g, p.cityId);
       const error = msg('training.notEnoughHonor', { amount: healHonorCost(injured) });
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE).at(-1)?.data).toMatchObject({ msg: msg('flow.healFailed', { city: name, error }) });
@@ -58,7 +58,7 @@ describe(runScheduledHeal.name, () => {
       expect(g.events(TimedEventType.FLOW_HEAL)).toEqual([
         // still marching out: about as long again to come back
         {
-          type: 'flow.heal',
+          type: TimedEventType.FLOW_HEAL,
           dueAt: reach + (reach - T0),
           playerId: p.id,
           cityId: p.cityId,
@@ -76,7 +76,7 @@ describe(runScheduledHeal.name, () => {
       const heroId = await farmingCity(g, p);
       const armyId = await sendOut(g, p, heroId);
       await armies.recallArmy(g, p.id, armyId); // home in a second
-      await runScheduledHeal(g, p.id, p.cityId, 'honor', [armyId]);
+      await runScheduledHeal(g, p.id, p.cityId, HealPayment.HONOR, [armyId]);
       expect(g.events(TimedEventType.FLOW_HEAL)).toMatchObject([{ dueAt: T0 + 5_000, payload: { payWith: HealPayment.HONOR, armyIds: [armyId] } }]);
     }));
 

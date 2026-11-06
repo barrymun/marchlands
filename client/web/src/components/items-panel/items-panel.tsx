@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { type CityBean, getCitiesByCityIdQueryKey, getPlayerQueryKey, postCitiesShopGoldMutation, postPlayerItemsUseMutation } from '@marchlands/api-client';
-import { ITEM_CATEGORY_IDS, ITEM_INFO } from '@marchlands/core';
+import { ITEM_CATEGORY_IDS, ITEM_INFO, ItemUse } from '@marchlands/core';
 
 import { ActiveEffects } from '@/components/active-effects/active-effects';
 import { slotItems, slotOf } from '@/components/active-effects/utils';
@@ -169,7 +169,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
                       {t('buyFor', { price: fmt(e.gold.price) })}
                     </Button>
                   )}
-                  {e.info.use === 'direct' && (
+                  {e.info.use === ItemUse.DIRECT && (
                     <Button size="xs" disabled={e.owned === 0 || use.isPending} onClick={() => applyEntry(e)}>
                       {t('common:actions.use')}
                     </Button>

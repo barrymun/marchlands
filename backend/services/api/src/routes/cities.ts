@@ -209,6 +209,7 @@ export default async function cityRoutes(app: ZApp) {
 
   // ---- troops & fortifications ----
   for (const kind of ['troops', 'fortifications'] as const) {
+    // eslint-disable-next-line marchlands/no-string-compare -- a segment of these routes' addresses, private to this loop
     const fort = kind === 'fortifications';
     const tag = tags.troops;
     app.get(

@@ -1,5 +1,5 @@
 import type { ReportDetail } from '@marchlands/api-client';
-import type { ReportBody } from '@marchlands/core';
+import { type ReportBody, ReportBodyKind } from '@marchlands/core';
 
 import { BattleView } from '@/components/reports-panel/report-dialog/report-content/battle-view/battle-view';
 import { DesertionView } from '@/components/reports-panel/report-dialog/report-content/desertion-view/desertion-view';
@@ -16,19 +16,19 @@ import { translateMessage } from '@/lib/messages';
 export function ReportContent({ report }: { report: ReportDetail }) {
   const body = report.content as ReportBody;
   switch (body.kind) {
-    case 'battle':
+    case ReportBodyKind.BATTLE:
       return <BattleView battle={body.battle} />;
-    case 'scout':
+    case ReportBodyKind.SCOUT:
       return <ScoutView scout={body.scout} />;
-    case 'movement':
+    case ReportBodyKind.MOVEMENT:
       return <MovementView movement={body.movement} />;
-    case 'trade':
+    case ReportBodyKind.TRADE:
       return <TradeView trade={body.trade} />;
-    case 'text':
+    case ReportBodyKind.TEXT:
       return <p className="text-sm">{translateMessage(body.text)}</p>;
-    case 'desertion':
+    case ReportBodyKind.DESERTION:
       return <DesertionView desertion={body.desertion} />;
-    case 'draft':
+    case ReportBodyKind.DRAFT:
       return <DraftView draft={body.draft} />;
   }
 }

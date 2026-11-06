@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { HOUR, msg, ReportType } from '@marchlands/core';
+import { ALL_REPORTS, HOUR, msg, ReportBodyKind, ReportType } from '@marchlands/core';
 import { reports as reportRows } from '@marchlands/db';
 
 import { createReport, pushReportCounts, reportDesertion } from '#/engine/reports.ts';
@@ -101,7 +101,7 @@ describe(reportDesertion.name, () => {
   /** the stored desertion (read from the row: opening the report would mark it read) */
   const desertion = async (g: TestGame, id: number) => {
     const [row] = await g.tx.select().from(reportRows).where(eq(reportRows.id, id));
-    if (row!.body.kind !== 'desertion') throw new Error('not a desertion report');
+    if (row!.body.kind !== ReportBodyKind.DESERTION) throw new Error('not a desertion report');
     return row!.body.desertion;
   };
 
@@ -197,7 +197,7 @@ describe(reportDesertion.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const id = await reportDesertion(g, { playerId: a.id, cityId: a.cityId, city: 'Home', from: g.now, troops: { archer: 10 }, food, position });
-      await reports.markReportsRead(g, a.id, 'all');
+      await reports.markReportsRead(g, a.id, ALL_REPORTS);
       g.advance(HOUR);
       const id2 = await reportDesertion(g, { playerId: a.id, cityId: a.cityId, city: 'Home', from: g.now, troops: { archer: 3 }, food, position });
       expect(id2).not.toBe(id);

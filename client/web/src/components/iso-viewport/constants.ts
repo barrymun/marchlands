@@ -32,3 +32,15 @@ export const PINCH_WHEEL_RATE = 0.01;
 
 /** Pixels in a line of scrolling, for a wheel that counts in lines (Firefox with a mouse). */
 export const WHEEL_LINE = 16;
+
+/** How a sprite stands out: brightened (under the pointer, a filter match) or faded (filtered out). */
+export const DrawableTone = { LIT: 'lit', DIM: 'dim' } as const;
+export type DrawableTone = (typeof DrawableTone)[keyof typeof DrawableTone];
+
+/** The halves of a tile's outline: the back one goes before what stands on the tile, the front one after. */
+export const OutlineHalf = { BACK: 'back', FRONT: 'front' } as const;
+export type OutlineHalf = (typeof OutlineHalf)[keyof typeof OutlineHalf];
+
+/** Weather over a scene. */
+export const Weather = { RAIN: 'rain', SNOW: 'snow', STORM: 'storm' } as const;
+export type Weather = (typeof Weather)[keyof typeof Weather];

@@ -2,7 +2,16 @@ import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { getCitiesByCityIdQueryKey, getPlayerQueryKey, type HeroBean, postHeroesItemsMutation } from '@marchlands/api-client';
-import { BALANCE, experienceItemGain, HERO_ATTRIBUTE_ITEMS, heroAtMaxLevel, heroBuffAmount, heroBuffBase, heroItemGoldPrice } from '@marchlands/core';
+import {
+  BALANCE,
+  experienceItemGain,
+  HERO_ATTRIBUTE_ITEMS,
+  heroAtMaxLevel,
+  heroBuffAmount,
+  heroBuffBase,
+  heroItemGoldPrice,
+  HeroItemPayment,
+} from '@marchlands/core';
 
 import { Countdown } from '@/components/countdown/countdown';
 import { ATTR_LABEL } from '@/components/hero-items-dialog/hero-items/constants';
@@ -54,7 +63,7 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
               variant={owned > 0 ? 'outline' : 'default'}
               disabled={gold < price || !!disabledReason || buy.isPending}
               title={gold < price ? t('notEnoughGold', { gold: fmtExact(price) }) : undefined}
-              onClick={() => buy.mutate({ path: { heroId: hero.id }, body: { itemId, payWith: 'gold' } })}
+              onClick={() => buy.mutate({ path: { heroId: hero.id }, body: { itemId, payWith: HeroItemPayment.GOLD } })}
             >
               {t('common:gold', { gold: fmt(price) })}
             </Button>

@@ -28,11 +28,11 @@ import {
   toonMaterial,
   turnBy,
 } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure-3d/utils';
-import { FIGURE_HAIR_COLOURS, FIGURE_HAIR_STYLES, FIGURE_SKIN_TONES } from '@/lib/game-art';
+import { FIGURE_HAIR_COLOURS, FIGURE_HAIR_STYLES, FIGURE_SKIN_TONES, FigureHairStyle } from '@/lib/game-art';
 
 const LEVELS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const MAN: FigureBody = { sex: Sex.MALE, tone: 'fair', style: 'beard', hair: 'brown' };
-const WOMAN: FigureBody = { sex: Sex.FEMALE, tone: 'olive', style: 'braid', hair: 'auburn' };
+const MAN: FigureBody = { sex: Sex.MALE, tone: 'fair', style: FigureHairStyle.BEARD, hair: 'brown' };
+const WOMAN: FigureBody = { sex: Sex.FEMALE, tone: 'olive', style: FigureHairStyle.BRAID, hair: 'auburn' };
 /** Every body the heroes can have: each sex with each of its hairstyles, the tones and colours taken in turn. */
 const BODIES: FigureBody[] = [Sex.MALE, Sex.FEMALE].flatMap((sex) =>
   FIGURE_HAIR_STYLES[sex].map((style, i) => ({
@@ -266,14 +266,14 @@ describe(buildFigure.name, () => {
   it('shows the face, hair and a beard under level 0’s open cap only', () => {
     expect(levelsWith(MAN, 'eye')).toEqual([0]);
     expect(levelsWith(MAN, 'beard')).toEqual([0]);
-    expect(has({ ...MAN, style: 'short' }, 0, 'beard')).toBe(false);
+    expect(has({ ...MAN, style: FigureHairStyle.SHORT }, 0, 'beard')).toBe(false);
     expect(has(MAN, 0, 'brow')).toBe(true);
     expect(has(WOMAN, 0, 'lips')).toBe(true);
   });
 
   it('shows a woman’s braid or loose hair below the helm at every level', () => {
     expect(levelsWith(WOMAN, 'braid')).toEqual(LEVELS);
-    expect(levelsWith({ ...WOMAN, style: 'loose' }, 'hair')).toEqual(LEVELS);
+    expect(levelsWith({ ...WOMAN, style: FigureHairStyle.LOOSE }, 'hair')).toEqual(LEVELS);
     expect(levelsWith(MAN, 'braid')).toEqual([]);
   });
 

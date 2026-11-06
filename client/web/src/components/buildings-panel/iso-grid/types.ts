@@ -1,5 +1,4 @@
-/** What a tile of the isometric grid holds: a building slot, a locked field, or the gate in the walls. */
-type IsoTileKind = 'slot' | 'locked' | 'gate';
+import type { IsoTileKind } from '@/components/buildings-panel/iso-grid/constants';
 
 /**
  * One building tile of the grid, at a column and row of the diamond (column runs down-right on screen, row down-left).

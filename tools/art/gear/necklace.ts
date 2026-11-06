@@ -3,6 +3,8 @@
 // stone in the level's colour that grows, side stones from 6, a spiked setting from 8, and at 10 a crimson heart in
 // silver.
 
+import { SpotKind } from '@marchlands/core';
+
 import type { Colour, PixelCanvas } from '../pixel.ts';
 import { disc } from '../shapes.ts';
 import { canvas, gem, heart, lit, look, setStone, type Shades, shine, spike } from './common.ts';
@@ -18,7 +20,7 @@ export function necklace(level: number): PixelCanvas {
   const py = 21 + r * 0.6;
   // the pendant swings as one below its top (the heart's, or the stone's setting), the chain taking up the step
   const pendantTop = level >= 10 ? py - 5.6 * 1.2 : py - r - (level >= 3 ? 1.8 : 0);
-  c.spot('swing', [16, Math.floor(pendantTop) - 1]);
+  c.spot(SpotKind.SWING, [16, Math.floor(pendantTop) - 1]);
   // the pendant, before the outline
   if (level === 0) disc(c, 16, py, r, 'fire', 'roofD');
   else if (level === 2) disc(c, 16, py, r, 'steel', 'steelDark');

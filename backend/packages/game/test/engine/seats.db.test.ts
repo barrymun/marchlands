@@ -4,7 +4,7 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { BALANCE, npcFaction, stateOf, stateTribute } from '@marchlands/core';
+import { BALANCE, npcFaction, ReportBodyKind, stateOf, stateTribute } from '@marchlands/core';
 import { marketShipments } from '@marchlands/db';
 
 import { GOLD, payFeeShares } from '#/engine/market.ts';
@@ -77,7 +77,7 @@ describe(stateRulers.name, () => {
       const target = (await barbariansNear(g, drafter, true)).find((t) => npcFaction(t.id, t.level))!;
       await historic.draftNow(g, drafter.id, drafter.cityId, target.id);
       const r = (await reportsOf(g, drafter.id)).at(-1)!;
-      expect(r.body).toMatchObject({ kind: 'draft' });
-      expect(r.body.kind === 'draft' && r.body.draft.standing).toBeFalsy();
+      expect(r.body).toMatchObject({ kind: ReportBodyKind.DRAFT });
+      expect(r.body.kind === ReportBodyKind.DRAFT && r.body.draft.standing).toBeFalsy();
     }));
 });

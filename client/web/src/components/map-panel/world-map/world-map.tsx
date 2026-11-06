@@ -5,7 +5,7 @@ import { getArmiesOptions } from '@marchlands/api-client';
 import { factionOfZone, Relation, stateOf } from '@marchlands/core';
 
 import { useAnimations } from '@/components/iso-anim/hooks';
-import { TILE_H, TILE_W } from '@/components/iso-viewport/constants';
+import { DrawableTone, TILE_H, TILE_W } from '@/components/iso-viewport/constants';
 import type { Viewport } from '@/components/iso-viewport/hooks';
 import { IsoViewport } from '@/components/iso-viewport/iso-viewport';
 import type { Outline, Piece } from '@/components/iso-viewport/types';
@@ -54,7 +54,7 @@ export function WorldMap({
   const zoom = vp.camera?.zoom ?? 1;
   const hoverId = hover ? idOf(hover.x, hover.y) : null;
   const anchor = -spriteBox().top;
-  const shown = sprites.map((s) => (s.id === hoverId ? { ...s, tone: 'lit' as const } : s));
+  const shown = sprites.map((s) => (s.id === hoverId ? { ...s, tone: DrawableTone.LIT } : s));
 
   // outlines: other players' valleys by relation, your valleys, your farm targets (dashed), your city, then the selection
   // and the tile under the pointer on top

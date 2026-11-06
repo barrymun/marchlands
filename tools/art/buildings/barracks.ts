@@ -2,7 +2,7 @@
 // block with dummies and a weapon rack; each band after it is bigger and stronger: a second block and a fenced yard,
 // then an L of quarters behind a stone wall, then two-storey stone barracks with towers.
 
-import { IsoCanvas } from '../iso.ts';
+import { Axis, IsoCanvas, Roofing } from '../iso.ts';
 
 const SIZE = 64;
 
@@ -13,7 +13,7 @@ function band1(): IsoCanvas {
   c.wall(4, 3, 0, 12, 6, 5);
   c.windows([6, 9, 13], 9, 2, 1);
   c.windows([11], 9, 0, 3, 'logDark');
-  c.roof(4, 3, 12, 6, 5, 3, 'x', { roofing: 'shingle' });
+  c.roof(4, 3, 12, 6, 5, 3, Axis.X, { roofing: Roofing.SHINGLE });
   c.dummy(6, 14);
   c.dummy(9, 16);
   c.rack(14, 14);
@@ -29,10 +29,10 @@ function band2(): IsoCanvas {
   c.wall(3, 2, 0, 13, 6, 6);
   c.windows([5, 8, 13], 8, 2, 2);
   c.windows([11], 8, 0, 3, 'logDark');
-  c.roof(3, 2, 13, 6, 6, 3, 'x', { roofing: 'shingle' });
+  c.roof(3, 2, 13, 6, 6, 3, Axis.X, { roofing: Roofing.SHINGLE });
   c.wall(17, 3, 0, 5, 8, 5);
   c.windowsSe(22, [5, 8], 2, 1);
-  c.roof(17, 3, 5, 8, 5, 3, 'y', { roofing: 'shingle' });
+  c.roof(17, 3, 5, 8, 5, 3, Axis.Y, { roofing: Roofing.SHINGLE });
   c.dummy(6, 15);
   c.dummy(9, 17);
   c.dummy(12, 15);
@@ -53,10 +53,10 @@ function band3(): IsoCanvas {
   c.wall(2, 2, 0, 22, 6, 6);
   c.windows([4, 7, 10, 16, 19, 22], 8, 2, 2);
   c.windows([13], 8, 0, 3, 'logDark');
-  c.roof(2, 2, 22, 6, 6, 3, 'x', { roofing: 'shingle' });
+  c.roof(2, 2, 22, 6, 6, 3, Axis.X, { roofing: Roofing.SHINGLE });
   c.wall(2, 8, 0, 5, 16, 6);
   c.windowsSe(7, [11, 14, 17, 20], 2, 2);
-  c.roof(2, 8, 5, 16, 6, 3, 'y', { roofing: 'shingle' });
+  c.roof(2, 8, 5, 16, 6, 3, Axis.Y, { roofing: Roofing.SHINGLE });
   c.dummy(11, 14);
   c.dummy(14, 16);
   c.dummy(17, 14);
@@ -82,10 +82,10 @@ function band4(): IsoCanvas {
   c.windows([5, 8, 11, 18, 21, 24], 9, 2, 2);
   c.windows([5, 8, 11, 14, 18, 21, 24], 9, 5, 1);
   c.windows([14, 15], 9, 0, 3, 'logDark');
-  c.roof(3, 2, 24, 7, 8, 4, 'x', { roofing: 'shingle', gable: 'stoneR' });
+  c.roof(3, 2, 24, 7, 8, 4, Axis.X, { roofing: Roofing.SHINGLE, gable: 'stoneR' });
   c.stone(2, 9, 0, 5, 17, 8);
   c.windowsSe(7, [12, 15, 18, 21], 2, 2);
-  c.roof(2, 9, 5, 17, 8, 3, 'y', { roofing: 'shingle', gable: 'stoneL' });
+  c.roof(2, 9, 5, 17, 8, 3, Axis.Y, { roofing: Roofing.SHINGLE, gable: 'stoneL' });
   c.dummy(12, 15);
   c.dummy(15, 17);
   c.dummy(18, 15);

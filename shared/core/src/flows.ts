@@ -1,6 +1,6 @@
 // (marchlands) Flows: a lord's saved series of actions, run on any of their cities (backend services/flows.ts).
 
-import { FLOW_TRAIN_MAX, FlowActionType, FlowHealWhen, FlowWaitUntil, HealPayment } from '#/constants.ts';
+import { FLOW_TRAIN_MAX, FlowActionType, FlowHealWhen, FlowWaitUntil, HealPayment, type HeroBuffId } from '#/constants.ts';
 import { TROOPS } from '#/data/index.ts';
 import { dur, type Message, msg, ref } from '#/messages/index.ts';
 import type { FlowAction } from '#/types.ts';
@@ -9,7 +9,7 @@ import type { FlowAction } from '#/types.ts';
  * The name a flow's "hire heroes" action gives a hero it hires: the attribute's short form and the hero's base value
  * (ATK - 76), as players name their heroes. A name, so not translated.
  */
-export const hiredHeroName = (stat: 'power' | 'management' | 'stratagem', base: number) => `${HIRE_NAME_TAGS[stat]} - ${base}`;
+export const hiredHeroName = (stat: HeroBuffId, base: number) => `${HIRE_NAME_TAGS[stat]} - ${base}`;
 const HIRE_NAME_TAGS = { power: 'ATK', management: 'POL', stratagem: 'INT' } as const;
 
 /** Troops a flow can train (everything trained in barracks; fortifications are not troops). */

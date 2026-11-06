@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import { type BuffId, itemEffect } from '@marchlands/core';
+import { type BuffId, itemEffect, ItemEffectKind } from '@marchlands/core';
 
 import { Countdown } from '@/components/countdown/countdown';
 import { Badge } from '@/components/ui/badge';
@@ -17,8 +17,8 @@ import { cn } from '@/lib/utils';
 export function ActiveBonus({ ids, buffs }: { ids: string[]; buffs: { id: BuffId; endTime: number; itemId?: string }[] }) {
   const { t } = useTranslation(['items-panel', 'common']);
   const now = useNow(30_000);
-  const effect = ids.map(itemEffect).find((e) => e?.kind === 'buff');
-  if (effect?.kind !== 'buff') return null;
+  const effect = ids.map(itemEffect).find((e) => e?.kind === ItemEffectKind.BUFF);
+  if (effect?.kind !== ItemEffectKind.BUFF) return null;
   const active = buffs.find((b) => b.id === effect.buff && b.endTime > now);
   if (!active) return null;
   if (active.itemId && ids.includes(active.itemId)) {

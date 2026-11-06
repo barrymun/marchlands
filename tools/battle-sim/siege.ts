@@ -26,6 +26,10 @@ import { armySize, DEFAULT_LORD, ITEM_BONUS, type Lord, lordHero, researchAt, un
 export { HISTORIC_LEVELS, type HistoricLevel } from '@marchlands/core';
 export type Rotation = HistoricDay;
 
+/** When a stage of a plan stops, short of its most waves: the garrison broken, one troop type cleared or the city captured. */
+export const SiegeUntil = { BROKEN: 'broken', CLEARED: 'cleared', CAPTURED: 'captured' } as const;
+export type SiegeUntil = (typeof SiegeUntil)[keyof typeof SiegeUntil];
+
 /** The weakest day, the one Age 2 players waited for (sources 3, 11 and 13). */
 export const WEAK_DAY: Rotation = { foot: 'pikemen', horse: 'lightCavalry', siege: 'batteringRam' };
 
@@ -47,7 +51,7 @@ export interface Stage {
   name: string;
   troops: TroopCounts;
   waves?: number;
-  until?: 'broken' | 'cleared' | 'captured';
+  until?: SiegeUntil;
   target?: TroopKey;
   max?: number;
   gap?: number;
@@ -156,8 +160,8 @@ export function runSiege(plan: Plan, o: SiegeOptions): SiegeResult {
     const waveHero = stage.power != null ? lordHero({ ...lord, power: stage.power }) : lordHero(lord);
     largestWave = Math.max(largestWave, armySize(stage.troops));
     for (let i = 0; i < max; i++) {
-      if (stage.until === 'broken' && troopsLeft() === 0) break;
-      if (stage.until === 'cleared' && stage.target && (troops[stage.target] ?? 0) < 1) break;
+      if (stage.until === SiegeUntil.BROKEN && troopsLeft() === 0) break;
+      if (stage.until === SiegeUntil.CLEARED && stage.target && (troops[stage.target] ?? 0) < 1) break;
       if (loyalty <= 0) break;
       if (!first) {
         const gap = stage.gap ?? plan.gap;
@@ -185,7 +189,7 @@ export function runSiege(plan: Plan, o: SiegeOptions): SiegeResult {
       const injured = BALANCE.attackersGetInjured ? injuredOf(r.attacker.lost, research) : {};
       result.lostValue += value(r.attacker.lost);
       result.deadValue += value(r.attacker.lost) - value(injured);
-      if (stage.until === 'captured' && loyalty <= 0) break;
+      if (stage.until === SiegeUntil.CAPTURED && loyalty <= 0) break;
     }
     result.troopsLeft = troopsLeft();
     result.left = whole(troops);

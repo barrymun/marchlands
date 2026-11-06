@@ -1,12 +1,11 @@
-import { FIGURE_KEY } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/constants';
-import type { FigureMode } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/types';
+import { FIGURE_KEY, FigureMode } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/constants';
 
 /** How this browser last chose to draw the figure: 3D unless 2D was picked. */
 export function figureMode(): FigureMode {
   try {
-    return localStorage.getItem(FIGURE_KEY) === '2d' ? '2d' : '3d';
+    return localStorage.getItem(FIGURE_KEY) === FigureMode.TWO_D ? FigureMode.TWO_D : FigureMode.THREE_D;
   } catch {
-    return '3d';
+    return FigureMode.THREE_D;
   }
 }
 

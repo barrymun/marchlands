@@ -33,3 +33,10 @@ export const RELATION_STYLE: Record<RelationGroup, { label: string; inline: stri
 
 /** Where this browser remembers whether the map is tinted by faction (localStorage). */
 export const FACTION_TINT_KEY = 'marchlands-map-factions';
+
+/** The list open under the map's toolbar: the player's other cities, this city's valleys, the farming lists or the key. */
+export const MapList = { CITIES: 'cities', VALLEYS: 'valleys', FARMS: 'farms', LEGEND: 'legend' } as const;
+export type MapList = (typeof MapList)[keyof typeof MapList];
+
+/** Whether the map is tinted by faction. Remembered in localStorage (FACTION_TINT_KEY), so a value never changes. */
+export const FactionTint = { ON: 'on', OFF: 'off' } as const;

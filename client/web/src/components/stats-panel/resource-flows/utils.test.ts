@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+
+import { ResourceKey } from '@marchlands/core';
+
 import { FlowKind } from '@/components/stats-panel/resource-flows/constants';
 import { flowScale, resourceFlow } from '@/components/stats-panel/resource-flows/utils';
 
@@ -24,8 +27,8 @@ describe(resourceFlow.name, () => {
   };
 
   it('splits a resource into where it came from and where it went, in drawing order', () => {
-    expect(resourceFlow(c, 'food')).toEqual({
-      resource: 'food',
+    expect(resourceFlow(c, ResourceKey.FOOD)).toEqual({
+      resource: ResourceKey.FOOD,
       gains: [
         { kind: FlowKind.PRODUCED, amount: 197 },
         { kind: FlowKind.PLUNDERED, amount: 196 },
@@ -46,7 +49,7 @@ describe(resourceFlow.name, () => {
   });
 
   it('counts gold from and to the market, and heroes pay as its upkeep', () => {
-    const gold = resourceFlow(c, 'gold');
+    const gold = resourceFlow(c, ResourceKey.GOLD);
     expect(gold.gains).toEqual([
       { kind: FlowKind.PRODUCED, amount: 3 },
       { kind: FlowKind.MARKET_IN, amount: 53 },
@@ -59,11 +62,17 @@ describe(resourceFlow.name, () => {
   });
 
   it('has no upkeep for lumber, stone or iron', () => {
-    expect(resourceFlow({ 'upkeep.food': 5, 'salaries.gold': 5 }, 'wood')).toEqual({ resource: 'wood', gains: [], losses: [], gained: 0, lost: 0 });
+    expect(resourceFlow({ 'upkeep.food': 5, 'salaries.gold': 5 }, ResourceKey.WOOD)).toEqual({
+      resource: ResourceKey.WOOD,
+      gains: [],
+      losses: [],
+      gained: 0,
+      lost: 0,
+    });
   });
 
   it('never counts spending refunded past nothing', () => {
-    expect(resourceFlow({ 'spent.building.iron': -40, 'spent.training.iron': 10 }, 'iron').losses).toEqual([]);
+    expect(resourceFlow({ 'spent.building.iron': -40, 'spent.training.iron': 10 }, ResourceKey.IRON).losses).toEqual([]);
   });
 });
 

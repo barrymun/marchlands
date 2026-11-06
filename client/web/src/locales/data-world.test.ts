@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { AllianceRank, BALANCE, FACTION_IDS, FactionId, HISTORIC_NAMES, historicCities, msg, ref, TileType } from '@marchlands/core';
 
 import { factionName, historicName, rankName, seatTitleName, stateName, tileName, zoneName } from '@/lib/game-data';
-import { i18n } from '@/lib/i18n';
+import { i18n, Locale } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
 import factionsGB from '@/locales/en-GB/data-factions.json';
 import historicGB from '@/locales/en-GB/data-historic.json';
@@ -18,7 +18,7 @@ const sorted = (ids: number[]) => [...ids].sort((a, b) => a - b);
 const keys = (o: object) => sorted(Object.keys(o).map(Number));
 
 afterEach(async () => {
-  await i18n.changeLanguage('en-GB');
+  await i18n.changeLanguage(Locale.EN_GB);
 });
 
 describe('data-tiles', () => {
@@ -28,7 +28,7 @@ describe('data-tiles', () => {
 
   it('is looked up by tile type', async () => {
     expect(tileName(TileType.NPC)).toBe('Barbarian city');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(tileName(TileType.LAKE)).toBe('湖');
   });
 });
@@ -40,7 +40,7 @@ describe('data-zones', () => {
 
   it('is looked up by zone id', async () => {
     expect(zoneName(1)).toBe('SAXONY');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(zoneName(1)).toBe('ザクセン');
   });
 });
@@ -52,7 +52,7 @@ describe('data-factions', () => {
 
   it('is looked up by faction id', async () => {
     expect(factionName(FactionId.SAXON_LEAGUE)).toBe('Saxon League');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(factionName(FactionId.BOHEMIAN_CROWN)).toBe('ボヘミア王冠領');
   });
 });
@@ -64,7 +64,7 @@ describe('data-ranks', () => {
 
   it('is looked up by rank', async () => {
     expect(rankName(AllianceRank.VICE_HOST)).toBe('Vice Host');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(rankName(AllianceRank.HOST)).toBe('盟主');
   });
 });
@@ -74,7 +74,7 @@ describe('positions', () => {
     expect(translateMessage(msg('world.position.city', { name: 'Aachen', x: 12, y: 340 }))).toBe('Aachen (12,340)');
     expect(translateMessage(msg('world.position.tile', { tile: ref.tile(TileType.HILL), level: 3, x: 1, y: 2 }))).toBe('Hill Lv.3 (1,2)');
     expect(translateMessage(msg('world.position.place', { tile: ref.tile(TileType.FLAT), x: 1, y: 2 }))).toBe('Flat (1,2)');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(translateMessage(msg('world.position.tile', { tile: ref.tile(TileType.NPC), level: 5, x: 1, y: 2 }))).toBe('蛮族の都市 Lv.5 (1,2)');
   });
 });
@@ -95,7 +95,7 @@ describe('data-historic', () => {
     expect(historicName(0, 0)).toBe('Atlantis');
     expect(historicName(300, 100)).toBe('Beijing');
     expect(historicName(9, 9)).toBeNull();
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(historicName(300, 100)).toBe('北京');
   });
 });
@@ -110,7 +110,7 @@ describe('seat titles', () => {
   it('names a state’s ruler with the state in title case, and Atlantis’s sovereign', async () => {
     expect(seatTitleName({ level: 16, zoneId: 2 })).toBe('Ruler of North March');
     expect(seatTitleName({ level: 18, zoneId: 0 })).toBe('Sovereign of Atlantis');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(seatTitleName({ level: 16, zoneId: 1 })).toBe('ザクセンの統治者');
   });
 });

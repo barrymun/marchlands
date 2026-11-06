@@ -2,7 +2,21 @@ import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { HOUR, MarketSide, merchantAsk, merchantBase, merchantBid, merchantBuys, merchantSells, ReportType, TimedEventType } from '@marchlands/core';
+import {
+  HOUR,
+  MarketOrderType,
+  MarketSide,
+  merchantAsk,
+  merchantBase,
+  merchantBid,
+  merchantBuys,
+  merchantSells,
+  ReportBodyKind,
+  ReportType,
+  ResourceKey,
+  TimedEventType,
+  TradeSide,
+} from '@marchlands/core';
 import { cities, marketShipments } from '@marchlands/db';
 
 import { deliverShipment, merchantSweep } from '#/engine/market.ts';
@@ -11,7 +25,7 @@ import { reloadCity } from '#test/support/factories.ts';
 import { game } from '#test/support/game.ts';
 import { bidPrice, createTrader, escrowGold, GOLD, Res, shipWoodTo, withFee, withMerchantCurve, withShipmentTime } from '#test/support/market.ts';
 
-const offerPrice = () => Math.round(merchantBase('wood') * 0.97 * 1000) / 1000;
+const offerPrice = () => Math.round(merchantBase(ResourceKey.WOOD) * 0.97 * 1000) / 1000;
 
 describe(deliverShipment.name, () => {
   it('delivers the goods to the city and tells the player', () =>
@@ -35,7 +49,7 @@ describe(deliverShipment.name, () => {
       game(async (g) => {
         const [a, b] = [await createTrader(g), await createTrader(g)];
         await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 1000, price: offerPrice() });
-        await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, type: 'market' });
+        await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, type: MarketOrderType.MARKET });
         const [s] = await market.myShipments(g, b.id);
         expect(s).toMatchObject({ resType: GOLD, amount: Math.floor(1000 * offerPrice()) });
         await deliverShipment(g, s!.id);
@@ -97,11 +111,11 @@ describe(merchantSweep.name, () => {
     withMerchantCurve(() =>
       game(async (g) => {
         const b = await createTrader(g);
-        const base = merchantBase('wood');
+        const base = merchantBase(ResourceKey.WOOD);
         const { order } = await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, price: bidPrice() });
         expect(order).not.toBeNull();
         // b's own sale (its bid is not matched) pushes the merchant's price down
-        await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, type: 'market' });
+        await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, type: MarketOrderType.MARKET });
         const r1 = merchantBuys(base, 50_000).ref;
         expect(merchantAsk(r1)).toBeLessThan(bidPrice());
         const gold0 = (await reloadCity(g, b.cityId)).gold;
@@ -131,8 +145,8 @@ describe(merchantSweep.name, () => {
         ]);
         const [report] = (await reports.listReports(g, b.id, ReportType.TRADE, 1, 10)).reports;
         expect((await reports.readReport(g, b.id, report!.id)).content).toEqual({
-          kind: 'trade',
-          trade: { side: 'buy', resource: 'wood', amount: 1000, price: f.gold / 1000, gold: Math.floor(f.gold) },
+          kind: ReportBodyKind.TRADE,
+          trade: { side: TradeSide.BUY, resource: ResourceKey.WOOD, amount: 1000, price: f.gold / 1000, gold: Math.floor(f.gold) },
         });
         expect(g._stats.get(`${b.id}|${b.cityId}`)).toMatchObject({ 'market.bought.wood': 1000 });
         expect((await market.orderBook(g, Res.WOOD)).merchant.reference).toBeCloseTo(f.ref, 12);
@@ -146,9 +160,9 @@ describe(merchantSweep.name, () => {
     withMerchantCurve(() =>
       game(async (g) => {
         const b = await createTrader(g);
-        const base = merchantBase('wood');
+        const base = merchantBase(ResourceKey.WOOD);
         await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 1000, price: offerPrice() });
-        await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 50_000, type: 'market' });
+        await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 50_000, type: MarketOrderType.MARKET });
         const r1 = merchantSells(base, 50_000).ref;
         expect(merchantBid(r1)).toBeGreaterThan(offerPrice());
 
@@ -168,9 +182,9 @@ describe(merchantSweep.name, () => {
     withMerchantCurve(() =>
       game(async (g) => {
         const b = await createTrader(g);
-        const base = merchantBase('wood');
+        const base = merchantBase(ResourceKey.WOOD);
         await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 100_000, price: bidPrice() });
-        await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, type: 'market' });
+        await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, type: MarketOrderType.MARKET });
         const f = merchantSells(merchantBuys(base, 50_000).ref, 100_000, bidPrice());
         expect(f.qty).toBeGreaterThan(0);
         expect(f.qty).toBeLessThan(100_000);
@@ -196,7 +210,7 @@ describe(merchantSweep.name, () => {
   it('at its fixed price, never crosses a resting order', () =>
     game(async (g) => {
       const b = await createTrader(g);
-      const P = merchantBase('wood');
+      const P = merchantBase(ResourceKey.WOOD);
       await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, price: P / 2 });
       await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 1000, price: P * 2 });
       const before = g.pushes(PushCmd.MARKET_UPDATE).length;

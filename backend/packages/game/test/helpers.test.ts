@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { BuffId, type BuffState, GameError, HERO_NAME_MAX, heroNameParts, type Message, msg } from '@marchlands/core';
+import { BuffId, type BuffState, GameError, HERO_NAME_MAX, heroNameParts, type Message, msg, type ResourceKey } from '@marchlands/core';
 
 import { activeBuff, addPrestige, assertClean, cleanName, escapeHtml, gainResources, itemCount, spendGold, spendResources, textOf } from '#/helpers.ts';
 import { type CityRow, type PlayerRow } from '#/repo.ts';
 
-const city = (res: Partial<Record<'gold' | 'food' | 'wood' | 'stone' | 'iron', number>> = {}) =>
-  ({ gold: 0, food: 0, wood: 0, stone: 0, iron: 0, ...res }) as CityRow;
+const city = (res: Partial<Record<ResourceKey, number>> = {}) => ({ gold: 0, food: 0, wood: 0, stone: 0, iron: 0, ...res }) as CityRow;
 
 const player = (fields: Partial<PlayerRow>) => ({ prestige: 0, items: {}, buffs: [], ...fields }) as PlayerRow;
 

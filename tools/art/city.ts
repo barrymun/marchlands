@@ -8,8 +8,8 @@
 //   corner `tower`; and the `gate`, a gatehouse at the front corner opening into the town. Band 1 is a wooden
 //   palisade, band 2 a low stone wall, band 3 a high one with merlons, band 4 a fortress with banners.
 
-import { IsoCanvas } from './iso.ts';
-import type { CityWallPiece, WallBand } from '../../client/web/src/lib/game-art.ts';
+import { Axis, IsoCanvas, Roofing } from './iso.ts';
+import { CityGround, type CityWallPiece, type WallBand } from '../../client/web/src/lib/game-art.ts';
 
 const SIZE = 64;
 const PLOT = 32;
@@ -54,7 +54,11 @@ function locked(): IsoCanvas {
 }
 
 /** The ground tiles drawn in code, by name. */
-export const CITY_GROUND_DRAWINGS: Record<string, () => IsoCanvas> = { grass: () => grass(), plot, locked };
+export const CITY_GROUND_DRAWINGS: Record<CityGround, () => IsoCanvas> = {
+  [CityGround.GRASS]: () => grass(),
+  [CityGround.PLOT]: plot,
+  [CityGround.LOCKED]: locked,
+};
 
 /** Each band's wall: its height and thickness in world units. */
 const WALL = { 1: { h: 9, t: 3 }, 2: { h: 10, t: 4 }, 3: { h: 14, t: 4 }, 4: { h: 17, t: 5 } } as const;
@@ -62,33 +66,33 @@ const WALL = { 1: { h: 9, t: 3 }, 2: { h: 10, t: 4 }, 3: { h: 14, t: 4 }, 4: { h
 const STONE = { top: 'stoneTop', left: 'stoneL', right: 'stoneR' } as const;
 
 /** Merlons along the top of a stretch from (x0, y0), `len` long along `along`, `t` thick, at height `z`. */
-function merlons(c: IsoCanvas, along: 'x' | 'y', x0: number, y0: number, len: number, t: number, z: number) {
+function merlons(c: IsoCanvas, along: Axis, x0: number, y0: number, len: number, t: number, z: number) {
   for (let i = 0; i < len - 1; i += 4) {
-    if (along === 'x') c.box(x0 + i, y0, z, 2, t, 2, STONE);
+    if (along === Axis.X) c.box(x0 + i, y0, z, 2, t, 2, STONE);
     else c.box(x0, y0 + i, z, t, 2, 2, STONE);
   }
 }
 
 /** A stretch of wall along `along` through the middle of the tile, in the band's style. */
-function wallStretch(along: 'x' | 'y', band: WallBand): IsoCanvas {
+function wallStretch(along: Axis, band: WallBand): IsoCanvas {
   const c = new IsoCanvas(SIZE, PLOT, `city-wall-${along}-${band}`);
   const { h, t } = WALL[band];
   const len = PLOT + 2;
-  const [x0, y0, w, d] = along === 'x' ? [-1, PLOT / 2 - t / 2, len, t] : [PLOT / 2 - t / 2, -1, t, len];
+  const [x0, y0, w, d] = along === Axis.X ? [-1, PLOT / 2 - t / 2, len, t] : [PLOT / 2 - t / 2, -1, t, len];
   if (band === 1) {
     c.timber(x0, y0, 0, w, d, h);
     // the palisade's pointed log tops
-    for (let i = 0; i <= len; i += 2) c.set(...(along === 'x' ? c.p(x0 + i, y0 + d, h + 1) : c.p(x0 + w, y0 + i, h + 1)), 'plankL');
+    for (let i = 0; i <= len; i += 2) c.set(...(along === Axis.X ? c.p(x0 + i, y0 + d, h + 1) : c.p(x0 + w, y0 + i, h + 1)), 'plankL');
   } else {
     c.stone(x0, y0, 0, w, d, h);
     // courses of stone on the face towards the viewer
     for (let z = 3; z < h; z += 3)
-      if (along === 'x') c.line(c.p(x0, y0 + d, z), c.p(x0 + w, y0 + d, z), 'stoneR');
+      if (along === Axis.X) c.line(c.p(x0, y0 + d, z), c.p(x0 + w, y0 + d, z), 'stoneR');
       else c.line(c.p(x0 + w, y0, z), c.p(x0 + w, y0 + d, z), 'shingleL');
     if (band >= 3) merlons(c, along, x0, y0, len, t, h);
   }
   // a dark foot where the wall meets the ground
-  if (along === 'x') c.line(c.p(x0, y0 + d), c.p(x0 + w, y0 + d), 'outline');
+  if (along === Axis.X) c.line(c.p(x0, y0 + d), c.p(x0 + w, y0 + d), 'outline');
   else c.line(c.p(x0 + w, y0), c.p(x0 + w, y0 + d), 'outline');
   return c;
 }
@@ -101,7 +105,7 @@ function tower(band: WallBand): IsoCanvas {
   const o = PLOT / 2 - size / 2;
   if (band === 1) {
     c.timber(o, o, 0, size, size, h);
-    c.hipRoof(o, o, size, size, h, 5, 'x', 'thatch');
+    c.hipRoof(o, o, size, size, h, 5, Axis.X, Roofing.THATCH);
   } else {
     c.stone(o, o, 0, size, size, h);
     for (let z = 3; z < h; z += 3) {
@@ -110,9 +114,9 @@ function tower(band: WallBand): IsoCanvas {
     }
     c.windows([o + size / 2], o + size, h - 6, 3);
     if (band >= 3) {
-      merlons(c, 'x', o, o, size + 1, 2, h);
-      merlons(c, 'y', o + size - 2, o, size + 1, 2, h);
-    } else c.hipRoof(o, o, size, size, h, 5, 'x', 'slate');
+      merlons(c, Axis.X, o, o, size + 1, 2, h);
+      merlons(c, Axis.Y, o + size - 2, o, size + 1, 2, h);
+    } else c.hipRoof(o, o, size, size, h, 5, Axis.X, Roofing.SLATE);
     if (band === 4) c.banner(c.p(o + size / 2, o + size / 2, h + 2), 7);
   }
   c.outline();
@@ -136,10 +140,10 @@ function gate(band: WallBand): IsoCanvas {
       c.set(...c.p(o + i, o + size, h + 1), 'plankL');
       c.set(...c.p(o + size, o + i, h + 1), 'plankR');
     }
-  } else if (band === 2) c.hipRoof(o, o, size, size, h, 5, 'x', 'slate');
+  } else if (band === 2) c.hipRoof(o, o, size, size, h, 5, Axis.X, Roofing.SLATE);
   else {
-    merlons(c, 'x', o, o + size - 2, size + 1, 2, h);
-    merlons(c, 'y', o + size - 2, o, size + 1, 2, h);
+    merlons(c, Axis.X, o, o + size - 2, size + 1, 2, h);
+    merlons(c, Axis.Y, o + size - 2, o, size + 1, 2, h);
     if (band === 4) {
       c.banner(c.p(o + 2, o + 2, h + 2), 8);
       c.banner(c.p(o + size - 3, o + size - 3, h), 7);
@@ -151,8 +155,8 @@ function gate(band: WallBand): IsoCanvas {
 
 /** The wall pieces drawn in code, by piece: each takes the band. */
 export const CITY_WALL_DRAWINGS: Record<CityWallPiece, (band: WallBand) => IsoCanvas> = {
-  'wall-x': (band) => wallStretch('x', band),
-  'wall-y': (band) => wallStretch('y', band),
+  'wall-x': (band) => wallStretch(Axis.X, band),
+  'wall-y': (band) => wallStretch(Axis.Y, band),
   tower,
   gate,
 };

@@ -29,6 +29,7 @@ import {
   type Stock,
   takeFromGroups,
   TileType,
+  TradeSide,
   worldGold,
   worldTotals,
 } from '@marchlands/core';
@@ -152,7 +153,12 @@ async function npcSweep(ctx: Ctx, econ: NpcEconomy): Promise<NpcEconomy> {
       let { stock } = worldTotals(next, next.groups, r);
       let { gold } = worldGold(next, next.groups);
       // every order the best spread would fill; each is then filled at its own city's
-      const orders = await crossedOrders(ctx, resType, side, factionMarginal(target, stock, buy ? 'buy' : 'sell', BALANCE.reputation.spread.best));
+      const orders = await crossedOrders(
+        ctx,
+        resType,
+        side,
+        factionMarginal(target, stock, buy ? TradeSide.BUY : TradeSide.SELL, BALANCE.reputation.spread.best),
+      );
       const terms = await cityTerms(
         ctx,
         orders.map((o) => o.cityId),

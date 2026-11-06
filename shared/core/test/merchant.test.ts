@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { BASIC_RESOURCES, ResourceKey, TradeSide } from '#/constants.ts';
 import { BALANCE, merchantAffordable, merchantAsk, merchantBid, merchantBuys, merchantMarginal, merchantReference, merchantSells, scaled } from '#/index.ts';
 
 const merchantCfg = BALANCE.merchant as { fixedPrice: number | null };
@@ -13,7 +14,7 @@ describe('merchant (fixed price)', () => {
   });
 
   it('sells every resource at its ask and buys at its bid, around the fixed price, in any amount', () => {
-    for (const r of ['food', 'wood', 'stone', 'iron'] as const) {
+    for (const r of BASIC_RESOURCES) {
       const ref = merchantReference(r, { price: 0.01, at: 0 }, 0);
       expect(ref).toBe(1);
       expect(merchantAsk(ref)).toBe(1.15);
@@ -21,8 +22,8 @@ describe('merchant (fixed price)', () => {
     }
     expect(merchantSells(1, 5_000_000)).toEqual({ qty: 5_000_000, gold: 5_750_000, ref: 1 });
     expect(merchantBuys(1, 5_000_000)).toEqual({ qty: 5_000_000, gold: 4_250_000, ref: 1 });
-    expect(merchantMarginal(1, 'buy', 1e9)).toBe(1.15);
-    expect(merchantMarginal(1, 'sell', 1e9)).toBe(0.85);
+    expect(merchantMarginal(1, TradeSide.BUY, 1e9)).toBe(1.15);
+    expect(merchantMarginal(1, TradeSide.SELL, 1e9)).toBe(0.85);
   });
 
   it('respects limits: never sells above or buys below the limit', () => {
@@ -86,9 +87,9 @@ describe('merchant (curve)', () => {
 
   it('the reference drifts back to the base price', () => {
     const halfLife = scaled(BALANCE.merchant.recoveryHalfLifeMs);
-    const p = merchantReference('food', { price: base * 2, at: 0 }, halfLife);
+    const p = merchantReference(ResourceKey.FOOD, { price: base * 2, at: 0 }, halfLife);
     expect(p).toBeCloseTo(base * Math.SQRT2, 6);
-    expect(merchantReference('food', { price: base * 2, at: 0 }, 100 * halfLife)).toBeCloseTo(base, 6);
-    expect(merchantReference('food', { price: base * 1000, at: 0 }, 0)).toBeCloseTo(base * BALANCE.merchant.band);
+    expect(merchantReference(ResourceKey.FOOD, { price: base * 2, at: 0 }, 100 * halfLife)).toBeCloseTo(base, 6);
+    expect(merchantReference(ResourceKey.FOOD, { price: base * 1000, at: 0 }, 0)).toBeCloseTo(base * BALANCE.merchant.band);
   });
 });

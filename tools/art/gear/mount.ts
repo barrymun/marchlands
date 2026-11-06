@@ -3,6 +3,7 @@
 // (chanfron) and barding in the level's colour, a plume from 5, a horn from 7, gilded at 9 and at 10 a black horse in
 // crimson armour with glowing eyes and two horns.
 
+import { SpotKind } from '@marchlands/core';
 import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
 import { canvas, fill, horn, look, plume, type Shades, shine, sweep, trimmed } from './common.ts';
 
@@ -93,6 +94,6 @@ export function mount(level: number): PixelCanvas {
   }
   if (level >= 3) for (let i = 0; i < 4; i++) c.set(14 - i * 2, 9 + i * 4, L.trim[0]);
   // the head nods from the top of the neck, the muzzle lifting most
-  c.spot('nod', [20, 13], 16);
+  c.spot(SpotKind.NOD, [20, 13], 16);
   return c;
 }

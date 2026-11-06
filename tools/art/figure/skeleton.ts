@@ -3,7 +3,7 @@
 // Turned three-quarter towards the right of the picture and lit from the top left: the near arm (the hero's right, on
 // the left of the picture) rests a sword point down, the far arm holds the shield before the body.
 
-import { Sex } from '@marchlands/core';
+import { Sex, SpotKind } from '@marchlands/core';
 import { setStone, shaded, type Shades, sweep } from '../gear/common.ts';
 import { PixelCanvas, type Pt } from '../pixel.ts';
 
@@ -101,7 +101,7 @@ export function over(base: PixelCanvas, top: PixelCanvas) {
 /** A stone in its setting (setStone), recorded as a `stone` spot so the client can make it glow. */
 export function stone(c: PixelCanvas, x: number, y: number, r: number, trim: Shades, accent: Shades) {
   setStone(c, x, y, r, trim, accent);
-  c.spot('stone', [x, y], r);
+  c.spot(SpotKind.STONE, [x, y], r);
 }
 
 /** A part drawn on a canvas of its own and outlined, so it keeps its outline where it overlaps the parts behind it. */

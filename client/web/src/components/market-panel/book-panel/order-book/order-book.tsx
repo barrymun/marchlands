@@ -2,6 +2,7 @@ import { Bot, Landmark } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import type { MarketFactions, MarketMerchant, MarketPriceLevel } from '@marchlands/api-client';
+import { TradeCounterparty } from '@marchlands/core';
 
 import { FactionTerms } from '@/components/market-panel/book-panel/order-book/faction-terms/faction-terms';
 import { type BookRow, bookSide, spreadOf } from '@/components/market-panel/book-panel/order-book/utils';
@@ -46,13 +47,13 @@ export function OrderBook({
       className="relative grid w-full grid-cols-[1fr_1fr_auto] items-center gap-2 px-2 py-0.5 text-start tabular-nums hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
     >
       <span aria-hidden className={cn('absolute inset-y-0 end-0', sells ? 'bg-red-500/10' : 'bg-emerald-500/10')} style={{ width: `${r.depth * 100}%` }} />
-      <span className={cn('relative', sells ? LOSS_TEXT : GAIN_TEXT, r.source !== 'player' && 'font-semibold')}>{fmtPrice(r.price)}</span>
-      <span className="relative text-end" title={r.source === 'factions' ? t('orderBook.factionsDepth') : undefined}>
+      <span className={cn('relative', sells ? LOSS_TEXT : GAIN_TEXT, r.source !== TradeCounterparty.PLAYER && 'font-semibold')}>{fmtPrice(r.price)}</span>
+      <span className="relative text-end" title={r.source === TradeCounterparty.FACTIONS ? t('orderBook.factionsDepth') : undefined}>
         {r.amount == null ? <span className="text-muted-foreground">{t('orderBook.unlimited')}</span> : fmt(r.amount)}
       </span>
       <span className="relative flex w-20 items-center justify-end gap-1 text-[11px] text-muted-foreground">
-        {r.source === 'factions' && <Landmark className="size-3" />}
-        {r.source === 'merchant' && <Bot className="size-3" />}
+        {r.source === TradeCounterparty.FACTIONS && <Landmark className="size-3" />}
+        {r.source === TradeCounterparty.MERCHANT && <Bot className="size-3" />}
         {t(`orderBook.${r.source}`)}
       </span>
     </button>

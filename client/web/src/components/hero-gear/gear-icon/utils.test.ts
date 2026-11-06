@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { GEAR_PIECE_IDS } from '@marchlands/core';
+import { GEAR_PIECE_IDS, SpotKind } from '@marchlands/core';
 
 import {
   BLADE_ALPHA,
@@ -46,7 +46,7 @@ import { GLOW_RGB } from '@/components/heroes-panel/hero-sheet/character-sheet/p
 import { glowAlpha } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure/utils';
 
 const at = (px: readonly GearPixel[], x: number, y: number) => px.find((p) => p.x === x && p.y === y);
-const spot = (file: string, k: string) => GEAR_SPOTS[`gear/${file}`]?.find((s) => s.k === k);
+const spot = (file: string, k: SpotKind) => GEAR_SPOTS[`gear/${file}`]?.find((s) => s.k === k);
 
 describe(piecePhase.name, () => {
   it('spreads the 14 pieces evenly over a cycle, the first at its start', () => {
@@ -124,17 +124,17 @@ describe(haloPixels.name, () => {
 
 describe(stoneMiddle.name, () => {
   it('finds the middle of a stone from its glint', () => {
-    expect(stoneMiddle({ k: 'gem', x: 6, y: 25, n: 1 })).toEqual({ x: 6.5, y: 25.5, r: 1 });
-    expect(stoneMiddle({ k: 'gem', x: 14, y: 21, n: 3.5 })).toEqual({ x: 16.5, y: 23.5, r: 3.5 });
+    expect(stoneMiddle({ k: SpotKind.GEM, x: 6, y: 25, n: 1 })).toEqual({ x: 6.5, y: 25.5, r: 1 });
+    expect(stoneMiddle({ k: SpotKind.GEM, x: 14, y: 21, n: 3.5 })).toEqual({ x: 16.5, y: 23.5, r: 3.5 });
   });
 
   it('takes a point of light as its own middle', () => {
-    expect(stoneMiddle({ k: 'shine', x: 15, y: 11 })).toEqual({ x: 15.5, y: 11.5, r: 0.5 });
+    expect(stoneMiddle({ k: SpotKind.SHINE, x: 15, y: 11 })).toEqual({ x: 15.5, y: 11.5, r: 0.5 });
   });
 });
 
 describe(bladePixels.name, () => {
-  const blade = { k: 'blade', x: 10, y: 22, n: 10, m: 1 };
+  const blade = { k: SpotKind.BLADE, x: 10, y: 22, n: 10, m: 1 };
 
   it('lights the blade from the guard up the diagonal, as long and as wide as it is', () => {
     const px = bladePixels(blade, WHITE, 90);
@@ -164,7 +164,7 @@ describe(sweepPixels.name, () => {
 });
 
 describe(starPixels.name, () => {
-  const star = { k: 'star', x: 6, y: 7, n: 2 };
+  const star = { k: SpotKind.STAR, x: 6, y: 7, n: 2 };
 
   it('makes a star’s arms a pixel longer, tipped in level 10’s light', () => {
     const px = starPixels(star, 0);
@@ -204,7 +204,7 @@ describe(gearFrame.name, () => {
   });
 
   it('flares a stone at its own moment, and not between', () => {
-    const gem = spot('weapon-3.png', 'gem');
+    const gem = spot('weapon-3.png', SpotKind.GEM);
     expect(gem).toBeDefined();
     expect(at(gearFrame('weapon', 3, 0).over, gem?.x ?? -1, gem?.y ?? -1)).toBeDefined();
     expect(gearFrame('weapon', 3, GLINT_ARMS.length * FRAME_MS + 1).over).toEqual([]);
@@ -302,11 +302,11 @@ describe(burstPixels.name, () => {
 describe(pieceMove.name, () => {
   it('gives the five moving pieces their movement at every level they have one', () => {
     for (let level = 0; level <= 10; level++) {
-      expect(pieceMove('back', level)?.k).toBe(level === 10 ? 'flap' : 'stir');
-      expect(pieceMove('mount', level)?.k).toBe('nod');
-      expect(pieceMove('necklace', level)?.k).toBe('swing');
-      expect(pieceMove('charm', level)?.k).toBe('swing');
-      expect(pieceMove('head', level)?.k).toBe(level >= 4 ? 'sway' : undefined);
+      expect(pieceMove('back', level)?.k).toBe(level === 10 ? SpotKind.FLAP : SpotKind.STIR);
+      expect(pieceMove('mount', level)?.k).toBe(SpotKind.NOD);
+      expect(pieceMove('necklace', level)?.k).toBe(SpotKind.SWING);
+      expect(pieceMove('charm', level)?.k).toBe(SpotKind.SWING);
+      expect(pieceMove('head', level)?.k).toBe(level >= 4 ? SpotKind.SWAY : undefined);
     }
   });
 
@@ -327,42 +327,42 @@ describe(moveShare.name, () => {
 });
 
 describe(moveOffset.name, () => {
-  const peak = (k: string, s: number, x: number, y: number, spot = { k, x: 16, y: 8, n: 20 }) => moveOffset(spot, s, x, y);
+  const peak = (k: SpotKind, s: number, x: number, y: number, spot = { k, x: 16, y: 8, n: 20 }) => moveOffset(spot, s, x, y);
 
   it('stirs a cape across below its collar, the hem furthest, the collar not at all', () => {
-    expect(peak('stir', 0.3, 16, 8)).toEqual([0, 0]);
-    expect(peak('stir', 0.3, 16, 2)).toEqual([0, 0]);
-    const most = (y: number) => Math.max(...Array.from({ length: 50 }, (_, i) => Math.abs(peak('stir', i / 50, 16, y)[0])));
+    expect(peak(SpotKind.STIR, 0.3, 16, 8)).toEqual([0, 0]);
+    expect(peak(SpotKind.STIR, 0.3, 16, 2)).toEqual([0, 0]);
+    const most = (y: number) => Math.max(...Array.from({ length: 50 }, (_, i) => Math.abs(peak(SpotKind.STIR, i / 50, 16, y)[0])));
     expect(most(28)).toBe(2);
     expect(most(10)).toBeLessThan(most(28));
   });
 
   it('sways a plume across above its base', () => {
-    expect(peak('sway', 0.3, 16, 9)).toEqual([0, 0]);
-    expect([0.1, 0.2, 0.3, 0.6, 0.7, 0.8].some((s) => peak('sway', s, 16, 0)[0] !== 0)).toBe(true);
+    expect(peak(SpotKind.SWAY, 0.3, 16, 9)).toEqual([0, 0]);
+    expect([0.1, 0.2, 0.3, 0.6, 0.7, 0.8].some((s) => peak(SpotKind.SWAY, s, 16, 0)[0] !== 0)).toBe(true);
   });
 
   it('swings a pendant one way then the other, the chain held at the top', () => {
-    expect(peak('swing', 0.25, 16, 28)).toEqual([1, 0]);
-    expect(peak('swing', 0.75, 16, 28)).toEqual([-1, 0]);
-    expect(peak('swing', 0.25, 16, 4)).toEqual([0, 0]);
+    expect(peak(SpotKind.SWING, 0.25, 16, 28)).toEqual([1, 0]);
+    expect(peak(SpotKind.SWING, 0.75, 16, 28)).toEqual([-1, 0]);
+    expect(peak(SpotKind.SWING, 0.25, 16, 4)).toEqual([0, 0]);
   });
 
   it('lifts wings from their root, the tips most', () => {
-    expect(peak('flap', 0.5, 16, 5)).toEqual([0, 0]);
-    const wings = { k: 'flap', x: 16, y: 10, n: 14 };
-    expect(peak('flap', 0.5, 30, 5, wings)).toEqual([0, -2]);
-    expect(peak('flap', 0.5, 2, 5, wings)).toEqual([0, -2]);
-    expect(peak('flap', 0.5, 23, 5, wings)).toEqual([0, -1]);
+    expect(peak(SpotKind.FLAP, 0.5, 16, 5)).toEqual([0, 0]);
+    const wings = { k: SpotKind.FLAP, x: 16, y: 10, n: 14 };
+    expect(peak(SpotKind.FLAP, 0.5, 30, 5, wings)).toEqual([0, -2]);
+    expect(peak(SpotKind.FLAP, 0.5, 2, 5, wings)).toEqual([0, -2]);
+    expect(peak(SpotKind.FLAP, 0.5, 23, 5, wings)).toEqual([0, -1]);
   });
 
   it('nods a head at the muzzle, the neck still', () => {
-    expect(peak('nod', 0.5, 4, 20)).toEqual([0, -1]);
-    expect(peak('nod', 0.5, 20, 20)).toEqual([0, 0]);
+    expect(peak(SpotKind.NOD, 0.5, 4, 20)).toEqual([0, -1]);
+    expect(peak(SpotKind.NOD, 0.5, 20, 20)).toEqual([0, 0]);
   });
 
   it('holds still at the start and end of a movement', () => {
-    for (const k of ['stir', 'sway', 'swing', 'flap', 'nod']) {
+    for (const k of [SpotKind.STIR, SpotKind.SWAY, SpotKind.SWING, SpotKind.FLAP, SpotKind.NOD]) {
       expect(peak(k, 0, 4, 28)).toEqual([0, 0]);
       expect(peak(k, 1, 4, 28)).toEqual([0, 0]);
     }
@@ -382,13 +382,13 @@ describe(movePixels.name, () => {
   };
 
   it('moves a pixel as its offset says', () => {
-    const swing = { k: 'swing', x: 16, y: 4, n: 24 };
+    const swing = { k: SpotKind.SWING, x: 16, y: 4, n: 24 };
     expect(where(movePixels(one(16, 28), swing, 0.25))).toEqual([17, 28]);
     expect(where(movePixels(one(16, 28), swing, 0))).toEqual([16, 28]);
   });
 
   it('drops a pixel moved off the sprite', () => {
-    expect(where(movePixels(one(31, 28), { k: 'swing', x: 16, y: 4, n: 24 }, 0.25))).toBeNull();
+    expect(where(movePixels(one(31, 28), { k: SpotKind.SWING, x: 16, y: 4, n: 24 }, 0.25))).toBeNull();
   });
 });
 
@@ -397,14 +397,14 @@ describe(movedPiece.name, () => {
     const bare = new Uint8ClampedArray(32 * 32 * 4).fill(10);
     const part = new Uint8ClampedArray(32 * 32 * 4);
     part.set([1, 2, 3, 255], (2 * 32 + 16) * 4);
-    const out = movedPiece(bare, part, { k: 'sway', x: 16, y: 9, n: 8 }, 0);
+    const out = movedPiece(bare, part, { k: SpotKind.SWAY, x: 16, y: 9, n: 8 }, 0);
     expect([...out.slice((2 * 32 + 16) * 4, (2 * 32 + 16) * 4 + 4)]).toEqual([1, 2, 3, 255]);
     expect([...out.slice(0, 4)]).toEqual([10, 10, 10, 10]);
   });
 
   it('moves the whole piece when it has no twin', () => {
     const part = new Uint8ClampedArray(32 * 32 * 4).fill(7);
-    expect(movedPiece(null, part, { k: 'nod', x: 20, y: 13, n: 16 }, 0)).toEqual(movePixels(part, { k: 'nod', x: 20, y: 13, n: 16 }, 0));
+    expect(movedPiece(null, part, { k: SpotKind.NOD, x: 20, y: 13, n: 16 }, 0)).toEqual(movePixels(part, { k: SpotKind.NOD, x: 20, y: 13, n: 16 }, 0));
   });
 });
 

@@ -1,6 +1,6 @@
-import { type BuffId, itemEffect, itemGoldPrice, ITEMS } from '@marchlands/core';
+import { type BuffId, itemEffect, ItemEffectKind, itemGoldPrice, ITEMS } from '@marchlands/core';
 
-import { GROUPS, STORE_KEY } from '@/components/active-effects/constants';
+import { ExtensionKind, GROUPS, STORE_KEY } from '@/components/active-effects/constants';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
 import { period } from '@/lib/format';
 
@@ -25,11 +25,11 @@ export function slotItems(slot: Slot): string[] {
   if (slot.items) return slot.items;
   const durationOf = (id: string) => {
     const e = itemEffect(id);
-    return e?.kind === 'buff' ? e.durationMs : 0;
+    return e?.kind === ItemEffectKind.BUFF ? e.durationMs : 0;
   };
   return ITEMS.filter((i) => {
     const e = itemEffect(i.id);
-    return e?.kind === 'buff' && e.buff === slot.buff;
+    return e?.kind === ItemEffectKind.BUFF && e.buff === slot.buff;
   })
     .map((i) => i.id)
     .sort((a, b) => durationOf(b) - durationOf(a));
@@ -38,7 +38,7 @@ export function slotItems(slot: Slot): string[] {
 /** How long using an item extends its bonus ("7 days", "6 hours"), or '' for an item that gives no timed bonus. */
 export function adds(id: string) {
   const e = itemEffect(id);
-  if (e?.kind !== 'buff') return '';
+  if (e?.kind !== ItemEffectKind.BUFF) return '';
   return period(e.durationMs);
 }
 
@@ -49,11 +49,11 @@ export function extensionFor(slot: Slot, active: Buff | undefined, counts: Map<s
   // the first one held, else the first one for sale
   for (const itemId of order) {
     const owned = counts.get(itemId) ?? 0;
-    if (owned > 0) return { kind: 'use', itemId, owned };
+    if (owned > 0) return { kind: ExtensionKind.USE, itemId, owned };
   }
   for (const itemId of order) {
     const price = itemGoldPrice(itemId);
-    if (price != null) return { kind: 'buy', itemId, price };
+    if (price != null) return { kind: ExtensionKind.BUY, itemId, price };
   }
   return null;
 }

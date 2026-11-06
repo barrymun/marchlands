@@ -21,6 +21,7 @@ import {
   inSeatArea,
   msg,
   randInt,
+  ReportBodyKind,
   stateBounds,
   stateOf,
   TileType,
@@ -58,6 +59,7 @@ export async function pickDraftTarget(ctx: Ctx, city: CityRow, level: HistoricLe
   // the area as a rough box (wrapped distance), then exactly by inSeatArea
   const reach = level === 12 ? 9 : level === 14 ? 33 : null;
   const near = (axis: 'x' | 'y', at: number, r: number) => {
+    // eslint-disable-next-line marchlands/no-string-compare -- private to this helper, which the two lines below call
     const v = axis === 'x' ? sql`${tiles.id} % ${size}` : sql`${tiles.id} / ${size}`;
     return sql`least(abs(${v} - ${at}), ${size} - abs(${v} - ${at})) <= ${r}`;
   };
@@ -118,7 +120,7 @@ export async function draft(ctx: Ctx, city: CityRow, tile: TileRow, opts: { auto
     startPos: target,
     targetPos: cityPosition(city.name, city.tileId),
     body: {
-      kind: 'draft',
+      kind: ReportBodyKind.DRAFT,
       draft: { cityId: city.id, city: city.name, target, level: tile.level, troops, auto: opts.auto, scouted: opts.scouted, ...(standing ? { standing } : {}) },
     },
   });

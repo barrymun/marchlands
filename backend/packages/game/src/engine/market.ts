@@ -18,9 +18,12 @@ import {
   merchantSells,
   type MerchantState,
   msg,
+  ReportBodyKind,
   ReportType,
+  ResourceKey,
   stateOf,
   TimedEventType,
+  TradeSide,
 } from '@marchlands/core';
 import { cities, marketCandles, marketOrders, marketShipments, marketTrades, one, worldState } from '@marchlands/db';
 
@@ -37,7 +40,7 @@ export function basicResource(resType: number): BasicResource {
   if (res === undefined) throw new Error(`unknown market resource type ${resType}`);
   return res;
 }
-export const resKey = (t: number) => (t === GOLD ? 'gold' : basicResource(t));
+export const resKey = (t: number) => (t === GOLD ? ResourceKey.GOLD : basicResource(t));
 
 export const escrowGold = (amount: number, price: number) => Math.ceil(amount * price * (1 + BALANCE.marketFee));
 export const withFee = (gold: number) => Math.ceil(gold * (1 + BALANCE.marketFee));
@@ -219,7 +222,7 @@ export async function settleResting(ctx: Ctx, o: OrderRow, qty: number, goldExac
     playerId: o.playerId,
     typeId: ReportType.TRADE,
     title: msg('report.title.tradeCompleted'),
-    body: { kind: 'trade', trade: { side: buy ? 'buy' : 'sell', resource: res, amount: qty, price, gold } },
+    body: { kind: ReportBodyKind.TRADE, trade: { side: buy ? TradeSide.BUY : TradeSide.SELL, resource: res, amount: qty, price, gold } },
   });
 }
 

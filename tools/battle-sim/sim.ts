@@ -24,8 +24,10 @@ import {
   type FortKey,
   GEAR_STATS,
   type GearStat,
+  HeroBuffId,
   historicResearch,
   TechType,
+  TraceKind,
   TROOP_KEY_LIST,
   type TroopCounts,
   type TroopKey,
@@ -35,6 +37,12 @@ import { armySize, attackNpc, DEFAULT_LORD, type Defence, type Lord, lordGearPoi
 import { PLANS } from './plans.ts';
 import { PRESETS } from './presets.ts';
 import { CITY_RESEARCH, HISTORIC_LEVELS, type HistoricLevel, type Rotation, runSiege, type SiegeResult } from './siege.ts';
+
+/** The commands, the first argument. */
+const SimCommand = { COMPARE: 'compare', GRID: 'grid', TRACE: 'trace', SIEGE: 'siege', PRESETS: 'presets' } as const;
+
+/** What --defenders and --forts take for nothing at all. */
+const NO_DEFENCE = 'none';
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -130,7 +138,7 @@ function parseTroops(spec: string): TroopCounts {
 /** --forts trap=1000,arrowTower=500, or none. */
 function parseForts(spec: string): FortCounts {
   const f: FortCounts = {};
-  if (spec === 'none') return f;
+  if (spec === NO_DEFENCE) return f;
   for (const part of spec.split(',')) {
     const [k, n] = part.split('=');
     if (!FORT_KEY_LIST.includes(k as FortKey) || !Number.isFinite(Number(n)))
@@ -143,7 +151,7 @@ function parseForts(spec: string): FortCounts {
 /** What defends, from --garrison, --defenders, --forts and --defender-research. */
 const defence: Defence = {
   ...(values.garrison != null ? { garrison: Number(values.garrison) } : {}),
-  ...(values.defenders != null ? { troops: values.defenders === 'none' ? {} : parseTroops(values.defenders) } : {}),
+  ...(values.defenders != null ? { troops: values.defenders === NO_DEFENCE ? {} : parseTroops(values.defenders) } : {}),
   ...(values.forts != null ? { forts: parseForts(values.forts) } : {}),
   ...(values['defender-research'] != null ? { research: Number(values['defender-research']) } : {}),
 };
@@ -178,7 +186,7 @@ function describeLord() {
   const gear = lordGearPoints(lord);
   const attr = (stat: GearStat, own: number) => (lord.gearStat === stat && gear > 0 ? `${own} + ${count(gear)} gear = ${count(own + gear)}` : String(own));
   return (
-    `lord: research ${lord.researchLevel}, hero Lv ${lord.heroLevel} Attack ${attr('power', lord.power)} / Intelligence ${attr('stratagem', lord.stratagem)} ` +
+    `lord: research ${lord.researchLevel}, hero Lv ${lord.heroLevel} Attack ${attr(HeroBuffId.POWER, lord.power)} / Intelligence ${attr(HeroBuffId.STRATAGEM, lord.stratagem)} ` +
     `(gear Lv ${lord.gearLevel}, ${lord.gearStars} stars), ` +
     `attack item ${lord.attackItem ? 'on' : 'off'}, defense item ${lord.defenseItem ? 'on' : 'off'} · barbarian city level ${level}` +
     (Object.keys(lord.tech ?? {}).length ? ` · research ${JSON.stringify(lord.tech)}` : '') +
@@ -186,15 +194,15 @@ function describeLord() {
   );
 }
 
-const command = positionals[0] ?? 'compare';
+const command = positionals[0] ?? SimCommand.COMPARE;
 
-if (command === 'presets') {
+if (command === SimCommand.PRESETS) {
   for (const [name, t] of Object.entries(PRESETS)) console.log(`${name.padEnd(14)} ${units(t)}`);
-} else if (command === 'compare') {
+} else if (command === SimCommand.COMPARE) {
   const seeds = Number(values.seeds ?? 500);
   console.log(`${describeLord()} · ${seeds} battles each\n`);
   for (const [name, t] of armies()) printSummary(name, attackNpc(t, { level, seeds, lord, defence }));
-} else if (command === 'grid') {
+} else if (command === SimCommand.GRID) {
   // every combination of the fodder counts; the main troop fills the rest of the cap (after transporters)
   const seeds = Number(values.seeds ?? 40);
   const fodder = values.fodder.split(',') as TroopKey[];
@@ -213,14 +221,14 @@ if (command === 'presets') {
     .filter((r) => r.s.winPct === 100)
     .sort((a, b) => a.s.lostValue - b.s.lostValue);
   for (const { t, s } of results.slice(0, Number(values.top))) printSummary(units(t), s);
-} else if (command === 'trace') {
+} else if (command === SimCommand.TRACE) {
   const [first] = armies();
   if (!first) throw new Error('trace: no army to run');
   const [name, t] = first;
   console.log(`${describeLord()} · ${name} · seed ${values.seed}\n`);
   const kills: string[] = [];
   for (const e of traceNpc(t, { level, seed: Number(values.seed), lord, defence })) {
-    if (e.kind === 'kill') {
+    if (e.kind === TraceKind.KILL) {
       if (e.killed > 0)
         kills.push(
           `${typeof e.source === 'number' ? `defending ${TROOP_KEY_LIST[e.source]}` : e.source} killed ${count(e.killed)} ${TROOP_KEY_LIST[e.target]}`,
@@ -238,7 +246,7 @@ if (command === 'presets') {
     if (kills.length) console.log(`  ${kills.join('; ')}`);
     kills.length = 0;
   }
-} else if (command === 'siege') {
+} else if (command === SimCommand.SIEGE) {
   const siegeLevel = (values.level === '10' ? 12 : level) as HistoricLevel;
   if (!HISTORIC_LEVELS.includes(siegeLevel)) throw new Error(`bad --level ${siegeLevel}: historic cities are ${HISTORIC_LEVELS.join(', ')}`);
   const [foot, horse, siege] = values.day.split(',');

@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 
-import { TileType } from '@marchlands/core';
+import { HERO_BUFF_IDS, HeroItemPayment, TileType } from '@marchlands/core';
 
 import { ArmyBean, HeroBean } from '#/beans.ts';
 import { zCityParams, zId, zIdValue, zResources, zTroops } from '#/common.ts';
@@ -16,14 +16,14 @@ export const HeroPointsBody = z.object({ power: z.number().int(), management: z.
 export const UseHeroItemBody = z.object({
   itemId: z.string(),
   payWith: z
-    .enum(['gold'])
+    .enum([HeroItemPayment.GOLD])
     .optional()
     .describe("'gold': buy the item with the hero's city gold even if one is owned (one not owned is always bought with gold)"),
 });
 export const RenameHeroBody = z.object({ name: z.string() });
 export const HeroOrderBody = z.object({ heroIds: z.array(zId).max(100).describe("the city's heroes in the new order (first = top)") });
 export const LockHeroBody = z.object({ locked: z.boolean().describe('a locked hero cannot be dismissed') });
-export const HeroGearStatBody = z.object({ stat: z.enum(['power', 'management', 'stratagem']).describe("attribute the lord's gear boosts on this hero") });
+export const HeroGearStatBody = z.object({ stat: z.enum(HERO_BUFF_IDS).describe("attribute the lord's gear boosts on this hero") });
 export const GearPieceParams = z.object({ pieceId: z.string().describe('gear piece id (weapon, shield, …)') });
 /** (marchlands) A lord's hero gear: piece level (Hero Enhancement research) and stars per piece. */
 export const LordGear = z

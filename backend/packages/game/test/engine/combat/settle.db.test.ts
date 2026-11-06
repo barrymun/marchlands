@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, BALANCE, BASIC_RESOURCES, HeroStatus, Mission, msg, ReportType, TileType, TimedEventType } from '@marchlands/core';
+import { ArmyDirection, BALANCE, BASIC_RESOURCES, HeroStatus, Mission, msg, ReportBodyKind, ReportType, TileType, TimedEventType } from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
 import { admin } from '#/index.ts';
@@ -43,7 +43,7 @@ describe(`${processArmy.name}: settlers`, () => {
         typeId: ReportType.OTHER,
         armyType: Mission.BUILD_CITY,
         targetPos: msg('world.position.city', { name, x: flat.id % BALANCE.mapSize, y: Math.floor(flat.id / BALANCE.mapSize) }),
-        body: { kind: 'text', text: msg('report.cityFounded', { name }) },
+        body: { kind: ReportBodyKind.TEXT, text: msg('report.cityFounded', { name }) },
       });
     }));
 
@@ -61,7 +61,7 @@ describe(`${processArmy.name}: settlers`, () => {
       expect(await citiesOf(g, p.id)).toHaveLength(2);
       expect(await armyRow(g, second.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, resources: goods, troops: { carriage: 10 } });
       expect((await getHero(g, hero2)).status).toBe(HeroStatus.RETURN);
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('army.landNotFree') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.landNotFree') });
 
       await arrive(g, second.armyId);
       expect(await getHero(g, hero2)).toMatchObject({ status: HeroStatus.IDLE, cityId: p.cityId });
@@ -80,6 +80,6 @@ describe(`${processArmy.name}: settlers`, () => {
       expect(await citiesOf(g, p.id)).toHaveLength(1);
       expect((await getTile(g, flat.id)).type).toBe(TileType.FLAT);
       expect((await armyRow(g, bean.armyId))!.direction).toBe(ArmyDirection.BACKWARD);
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('army.cityLimit') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.cityLimit') });
     }));
 });

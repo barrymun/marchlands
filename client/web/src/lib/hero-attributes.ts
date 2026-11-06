@@ -2,7 +2,7 @@
 // (Running item bonuses are purple: tones.ts.)
 
 import type { HeroBean } from '@marchlands/api-client';
-import { type GearStat, type HeroBuffId, heroManagement, heroPower, heroStratagem } from '@marchlands/core';
+import { type GearStat, HeroBuffId, heroManagement, heroPower, heroStratagem } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /** Badge colours (background + text, light and dark) per attribute. */
@@ -25,7 +25,7 @@ export const ATTRIBUTE_BORDER = {
 const HERO_ATTRIBUTES = [
   {
     key: 'pol',
-    stat: 'management',
+    stat: HeroBuffId.MANAGEMENT,
     get label() {
       return i18n.t('common:heroAttributes.politics');
     },
@@ -37,7 +37,7 @@ const HERO_ATTRIBUTES = [
   },
   {
     key: 'att',
-    stat: 'power',
+    stat: HeroBuffId.POWER,
     get label() {
       return i18n.t('common:heroAttributes.attack');
     },
@@ -49,7 +49,7 @@ const HERO_ATTRIBUTES = [
   },
   {
     key: 'int',
-    stat: 'stratagem',
+    stat: HeroBuffId.STRATAGEM,
     get label() {
       return i18n.t('common:heroAttributes.intelligence');
     },
@@ -61,7 +61,7 @@ const HERO_ATTRIBUTES = [
   },
 ] as const satisfies readonly { key: AttributeKey; stat: GearStat; label: string; short: string; value: (h: HeroBean) => number; tone: string }[];
 
-/** The attribute entry for a field name ('power' | 'management' | 'stratagem'). */
+/** The attribute entry for a field name (a `HeroBuffId`). */
 export const attributeOfStat = (stat: GearStat) => HERO_ATTRIBUTES.find((a) => a.stat === stat) ?? HERO_ATTRIBUTES[0]; // there is one for each stat
 
 /** The attribute a hero boost raises (its id is the attribute's field name). */

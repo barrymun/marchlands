@@ -12,7 +12,9 @@ import {
   ITEM_IDS,
   ItemId,
   medalId,
+  ResourceKey,
   Sex,
+  SpotKind,
   TileType,
   TroopType,
 } from '@marchlands/core';
@@ -25,6 +27,7 @@ import {
   buildingArtFile,
   CITY_GROUNDS,
   CITY_WALL_PIECES,
+  CityGround,
   cityGroundFile,
   cityWallFile,
   FIGURE_HAIR_COLOURS,
@@ -32,6 +35,7 @@ import {
   FIGURE_SKIN_TONES,
   figureCapeFile,
   figureHairFile,
+  FigureHairStyle,
   figureHelmFile,
   figureLegsFile,
   figureSkinFile,
@@ -43,6 +47,7 @@ import {
   gearBackdropFile,
   gearStarFile,
   gearTwinFile,
+  GearTwinPart,
   grandTownHallFile,
   HISTORIC_ART_LEVELS,
   historicArtFile,
@@ -71,7 +76,7 @@ const FIGURE_DIR = path.resolve(import.meta.dirname, '../assets/figure');
 const ITEM_DIR = path.resolve(import.meta.dirname, '../assets/items');
 const SPOTS: Record<string, { k: string }[]> = JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, '../assets/spots.json'), 'utf8'));
 /** Whether a sprite has parts the animated town draws turning (and so a bare twin). */
-const moving = (file: string) => (SPOTS[`buildings/${file}`] ?? []).some((s) => s.k === 'sails' || s.k === 'wheel' || s.k === 'sheep');
+const moving = (file: string) => (SPOTS[`buildings/${file}`] ?? []).some((s) => s.k === SpotKind.SAILS || s.k === SpotKind.WHEEL || s.k === SpotKind.SHEEP);
 
 describe(artBand.name, () => {
   it('changes the art at levels 4, 7 and 10', () => {
@@ -179,13 +184,13 @@ describe('unit sprites', () => {
 
 describe(resourceArtFile.name, () => {
   it('names the file after the resource key', () => {
-    expect(resourceArtFile('wood')).toBe('wood.png');
+    expect(resourceArtFile(ResourceKey.WOOD)).toBe('wood.png');
   });
 });
 
 describe('resource icons', () => {
   it('has an icon for gold and every basic resource, and nothing else', () => {
-    expect([...RESOURCE_ART_KEYS].sort()).toEqual(['gold', ...BASIC_RESOURCES].sort());
+    expect([...RESOURCE_ART_KEYS].sort()).toEqual([ResourceKey.GOLD, ...BASIC_RESOURCES].sort());
     expect(fs.readdirSync(RESOURCE_DIR).sort()).toEqual(RESOURCE_ART_KEYS.map(resourceArtFile).sort());
   });
 });
@@ -222,7 +227,7 @@ describe('troop badges', () => {
 
 describe(cityGroundFile.name, () => {
   it('names the file after the ground', () => {
-    expect(cityGroundFile('plot')).toBe('plot.png');
+    expect(cityGroundFile(CityGround.PLOT)).toBe('plot.png');
   });
 });
 
@@ -269,8 +274,8 @@ describe(gearBackdropFile.name, () => {
 
 describe(gearTwinFile.name, () => {
   it('names a twin after its sprite and its part, within 0 to 10', () => {
-    expect(gearTwinFile('head', 4, 'bare')).toBe('head-4-bare.png');
-    expect(gearTwinFile('head', 12, 'plume')).toBe('head-10-plume.png');
+    expect(gearTwinFile('head', 4, GearTwinPart.BARE)).toBe('head-4-bare.png');
+    expect(gearTwinFile('head', 12, GearTwinPart.PLUME)).toBe('head-10-plume.png');
   });
 });
 
@@ -286,7 +291,7 @@ describe('gear art', () => {
       ...GEAR_PIECE_IDS.flatMap((piece) => GEAR_ART_LEVELS.map((level) => gearArtFile(piece, level))),
       // a sprite with a part that moves alone has its twins
       ...GEAR_PIECE_IDS.flatMap((piece) =>
-        GEAR_ART_LEVELS.filter((level) => (SPOTS[`gear/${gearArtFile(piece, level)}`] ?? []).some((s) => s.k === 'sway')).flatMap((level) =>
+        GEAR_ART_LEVELS.filter((level) => (SPOTS[`gear/${gearArtFile(piece, level)}`] ?? []).some((s) => s.k === SpotKind.SWAY)).flatMap((level) =>
           GEAR_TWIN_PARTS.map((part) => gearTwinFile(piece, level, part)),
         ),
       ),
@@ -334,7 +339,7 @@ describe(figureSkinFile.name, () => {
 
 describe(figureHairFile.name, () => {
   it('names the hair after the style and the colour', () => {
-    expect(figureHairFile('braid', 'auburn')).toBe('hair-braid-auburn.png');
+    expect(figureHairFile(FigureHairStyle.BRAID, 'auburn')).toBe('hair-braid-auburn.png');
   });
 });
 
@@ -356,10 +361,17 @@ describe('figure art', () => {
   });
 
   it('marks where every cape stirs, and the stones that glow at level 10 only', () => {
-    for (const level of GEAR_ART_LEVELS) expect(SPOTS[`figure/${figureCapeFile(level)}`]?.map((s) => s.k)).toEqual(['sway']);
+    for (const level of GEAR_ART_LEVELS) expect(SPOTS[`figure/${figureCapeFile(level)}`]?.map((s) => s.k)).toEqual([SpotKind.SWAY]);
     for (const sex of [Sex.MALE, Sex.FEMALE]) {
-      expect(SPOTS[`figure/${figureUpperFile(sex, 10)}`]?.every((s) => s.k === 'stone')).toBe(true);
+      expect(SPOTS[`figure/${figureUpperFile(sex, 10)}`]?.every((s) => s.k === SpotKind.STONE)).toBe(true);
       expect(SPOTS[`figure/${figureUpperFile(sex, 9)}`]).toBeUndefined();
     }
+  });
+});
+
+describe('spots.json', () => {
+  it('holds exactly the kinds SpotKind names', () => {
+    const written = new Set(Object.values(SPOTS).flatMap((spots) => spots.map((s) => s.k)));
+    expect([...written].sort()).toEqual(Object.values(SpotKind).sort());
   });
 });

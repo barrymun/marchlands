@@ -6,6 +6,7 @@ import {
   BALANCE,
   BuffId,
   buildCost,
+  BuildingArea,
   buildingConfig,
   buildingEffect,
   buildingInfo,
@@ -66,14 +67,14 @@ function requirementsView(b: CityBundle, typeId: number, level: number) {
 }
 
 /** castle.getAvailableBuildingListInside / Outside / getAvailableBuildingBean (walls). */
-export async function availableBuildings(ctx: Ctx, playerId: number, cityId: number, area: 'inside' | 'outside' | 'walls') {
+export async function availableBuildings(ctx: Ctx, playerId: number, cityId: number, area: BuildingArea) {
   const b = await ownView(ctx, playerId, cityId);
   // each type's first level, in the order BUILDINGS lists them
   const firstLevels = [...new Map(BUILDINGS.filter((x) => x.level === 1).map((x) => [x.typeId, x])).values()].filter((cfg) => {
     const t = cfg.typeId;
     if (cfg.inside === 3) return false;
-    if (area === 'outside') return canPlace(t, 1001);
-    if (area === 'walls') return t === BuildingType.WALLS || t === BuildingType.TOWN_HALL;
+    if (area === BuildingArea.OUTSIDE) return canPlace(t, 1001);
+    if (area === BuildingArea.WALLS) return t === BuildingType.WALLS || t === BuildingType.TOWN_HALL;
     return canPlace(t, 0);
   });
   const list = [];

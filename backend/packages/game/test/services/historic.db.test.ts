@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { BALANCE, DAY, historicDay, historicGarrison, msg, nextAutoDraftAt, npcFaction, npcTemplate, TileType, tileXY } from '@marchlands/core';
+import { BALANCE, DAY, historicDay, historicGarrison, msg, nextAutoDraftAt, npcFaction, npcTemplate, ReportBodyKind, TileType, tileXY } from '@marchlands/core';
 
 import { historic, world } from '#/index.ts';
 import { getCity, getTile, saveTile } from '#/repo.ts';
@@ -32,7 +32,7 @@ describe(historic.draftNow.name, () => {
       expect(seat.draftsUsed).toBe(1);
       const r = (await reportsOf(g, p.id)).at(-1)!;
       expect(r.title).toEqual(msg('report.title.draft'));
-      expect(r.body).toMatchObject({ kind: 'draft', draft: { cityId: p.cityId, level: target!.level, troops: taken, auto: false } });
+      expect(r.body).toMatchObject({ kind: ReportBodyKind.DRAFT, draft: { cityId: p.cityId, level: target!.level, troops: taken, auto: false } });
     }));
 
   it('without a barbarian city given, drafts from the one it would pick by itself: the highest level in its area', () =>
@@ -45,7 +45,7 @@ describe(historic.draftNow.name, () => {
       expect(Object.values(troops).every((n) => n > 0)).toBe(true);
       expect((await getCity(g, p.cityId)).draftsUsed).toBe(1);
       const r = (await reportsOf(g, p.id)).at(-1)!;
-      expect(r.body).toMatchObject({ kind: 'draft', draft: { cityId: p.cityId, level: top, troops, auto: false } });
+      expect(r.body).toMatchObject({ kind: ReportBodyKind.DRAFT, draft: { cityId: p.cityId, level: top, troops, auto: false } });
     }));
 
   it('refuses to pick one when no barbarian city nobody holds is left in its area', () =>

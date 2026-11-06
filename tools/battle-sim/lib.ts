@@ -9,6 +9,7 @@ import {
   type FortCounts,
   GEAR_PIECES,
   type GearStat,
+  HeroBuffId,
   heroGearBonus,
   type HeroStats,
   injuredOf,
@@ -20,6 +21,7 @@ import {
   syncHeroGear,
   TechType,
   type TraceEvent,
+  TraceKind,
   TROOP_ID_BY_KEY,
   TROOP_KEY_LIST,
   troopConfig,
@@ -63,7 +65,7 @@ export const DEFAULT_LORD: Lord = {
   stratagem: 18,
   gearLevel: 10,
   gearStars: 10,
-  gearStat: 'power',
+  gearStat: HeroBuffId.POWER,
   attackItem: true,
   defenseItem: false,
 };
@@ -165,7 +167,7 @@ export function attackNpc(troops: TroopCounts, opts: { level?: number; seeds?: n
   const lost: Partial<Record<TroopKey, number>> = {};
   const bySource: Partial<Record<TroopKey, Record<string, number>>> = {};
   const trace = (e: TraceEvent) => {
-    if (e.kind !== 'kill' || e.killed <= 0) return;
+    if (e.kind !== TraceKind.KILL || e.killed <= 0) return;
     const k = TROOP_KEY_LIST[e.target];
     if (k === undefined) return; // the simulator only reports troop types it has
     const row = (bySource[k] ??= {});

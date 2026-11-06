@@ -2,7 +2,7 @@
 // after it is bigger and stronger: a stone tower with a brazier, then a taller crenellated tower and a guardhouse, then
 // a fortified beacon with a great fire, a banner and a walled base.
 
-import { IsoCanvas } from '../iso.ts';
+import { Axis, IsoCanvas, Roofing } from '../iso.ts';
 
 const SIZE = 64;
 
@@ -55,7 +55,7 @@ function band3(): IsoCanvas {
   // the guardhouse
   c.wall(17, 13, 0, 6, 5, 4);
   c.windows([19, 20], 18, 0, 3, 'logDark');
-  c.hipRoof(17, 13, 6, 5, 4, 2, 'x', 'slate');
+  c.hipRoof(17, 13, 6, 5, 4, 2, Axis.X, Roofing.SLATE);
   c.logs(4, 17, 6, 2);
   c.anchor();
   c.outline();
@@ -79,7 +79,7 @@ function band4(): IsoCanvas {
   c.fire(c.p(15, 13, 23), 11);
   c.banner(c.p(11, 17, 22), 6);
   c.wall(20, 19, 0, 5, 5, 4);
-  c.hipRoof(20, 19, 5, 5, 4, 2, 'x', 'slate');
+  c.hipRoof(20, 19, 5, 5, 4, 2, Axis.X, Roofing.SLATE);
   c.logs(6, 20, 6, 3);
   c.stone(4, 25, 0, 8, 1, 3);
   c.stone(17, 25, 0, 9, 1, 3);

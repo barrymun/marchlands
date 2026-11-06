@@ -90,3 +90,7 @@ export const LAZY_PANELS = [
   SendArmyDialog,
   MayorPicker,
 ];
+
+/** The dialogs the game page opens over every screen: the player's settings, the city's. */
+export const GameDialog = { LORD: 'lord', CITY: 'city' } as const;
+export type GameDialog = (typeof GameDialog)[keyof typeof GameDialog];

@@ -12,12 +12,12 @@ import {
   type MarketMerchant,
   postCitiesMarketOrdersMutation,
 } from '@marchlands/api-client';
-import { BALANCE, merchantAffordable } from '@marchlands/core';
+import { BALANCE, MarketOrderType, merchantAffordable } from '@marchlands/core';
 
 import { RESOURCES } from '@/components/market-panel/constants';
 import { Panel } from '@/components/market-panel/panel/panel';
 import { AMOUNT_SHARES } from '@/components/market-panel/trade-form/constants';
-import type { Mode, Side } from '@/components/market-panel/types';
+import type { Side } from '@/components/market-panel/types';
 import { fmtPrice, resInline, resLabel } from '@/components/market-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,8 +48,8 @@ export function TradeForm({
   merchant?: MarketMerchant;
   side: Side;
   setSide: (s: Side) => void;
-  mode: Mode;
-  setMode: (m: Mode) => void;
+  mode: MarketOrderType;
+  setMode: (m: MarketOrderType) => void;
   price: string;
   setPrice: (p: string) => void;
   /** after an order is placed (a phone's trade sheet closes) */
@@ -61,7 +61,7 @@ export function TradeForm({
   const res = RESOURCES[resType] ?? RESOURCES[0]; // the market page only offers its four types
   const qty = Number(amount) || 0;
   const unit = Number(price) || 0;
-  const ready = qty >= 1 && (mode === 'market' || unit >= 0.001);
+  const ready = qty >= 1 && (mode === MarketOrderType.MARKET || unit >= 0.001);
   const deferred = useDeferredValue({ qty, unit, side, mode });
   const quote = useQuery({
     ...getMarketQuoteOptions({
@@ -71,7 +71,7 @@ export function TradeForm({
         side: deferred.side,
         amount: deferred.qty,
         type: deferred.mode,
-        price: deferred.mode === 'limit' ? deferred.unit : undefined,
+        price: deferred.mode === MarketOrderType.LIMIT ? deferred.unit : undefined,
       },
     }),
     enabled: ready,
@@ -87,13 +87,13 @@ export function TradeForm({
   const gold = useDeferredValue(Math.floor(city.resource.gold));
   const buyable = useQuery({
     ...getMarketAffordableOptions({ path: { resType }, query: { cityId: city.id, gold } }),
-    enabled: side === 0 && mode === 'market',
+    enabled: side === 0 && mode === MarketOrderType.MARKET,
     placeholderData: keepPreviousData,
   });
   const maxQty =
     side === 1
       ? Math.floor(have)
-      : mode === 'limit'
+      : mode === MarketOrderType.LIMIT
         ? unit > 0
           ? Math.floor(have / (unit * fee))
           : 0
@@ -104,7 +104,7 @@ export function TradeForm({
   const cost = q ? (side === 0 ? q.gold + q.escrow : q.filled + q.escrow) : 0;
   const affordable = cost <= have;
   const wouldRest = !!q && q.rest > 0;
-  const valid = ready && !!q && affordable && (!wouldRest || openHere < cap) && (mode === 'limit' || q.filled > 0);
+  const valid = ready && !!q && affordable && (!wouldRest || openHere < cap) && (mode === MarketOrderType.LIMIT || q.filled > 0);
   const word = resInline(resType);
 
   return (
@@ -122,13 +122,13 @@ export function TradeForm({
           {t('side.sell')}
         </Button>
       </div>
-      <Tabs value={mode} onValueChange={(v) => setMode(v as Mode)}>
+      <Tabs value={mode} onValueChange={(v) => setMode(v as MarketOrderType)}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="market">{t('tradeForm.instant')}</TabsTrigger>
-          <TabsTrigger value="limit">{t('tradeForm.limit')}</TabsTrigger>
+          <TabsTrigger value={MarketOrderType.MARKET}>{t('tradeForm.instant')}</TabsTrigger>
+          <TabsTrigger value={MarketOrderType.LIMIT}>{t('tradeForm.limit')}</TabsTrigger>
         </TabsList>
       </Tabs>
-      <div className={cn('grid gap-3', mode === 'limit' && 'grid-cols-2')}>
+      <div className={cn('grid gap-3', mode === MarketOrderType.LIMIT && 'grid-cols-2')}>
         <div className="grid gap-1.5">
           <Label htmlFor="mk-amount">{t('tradeForm.amount')}</Label>
           <Input id="mk-amount" inputMode="numeric" value={amount} placeholder="0" onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} />
@@ -141,7 +141,7 @@ export function TradeForm({
             ))}
           </div>
         </div>
-        {mode === 'limit' && (
+        {mode === MarketOrderType.LIMIT && (
           <div className="grid gap-1.5">
             <Label htmlFor="mk-price">{side === 0 ? t('tradeForm.highestPrice') : t('tradeForm.lowestPrice')}</Label>
             <Input id="mk-price" inputMode="decimal" value={price} placeholder="0.000" onChange={(e) => setPrice(e.target.value.replace(/[^\d.]/g, ''))} />
@@ -150,7 +150,7 @@ export function TradeForm({
       </div>
       <div className="grid gap-1 rounded-md bg-muted/50 p-3 text-sm tabular-nums">
         {!q ? (
-          <span className="text-muted-foreground">{mode === 'limit' ? t('tradeForm.enterAmountAndPrice') : t('tradeForm.enterAmount')}</span>
+          <span className="text-muted-foreground">{mode === MarketOrderType.LIMIT ? t('tradeForm.enterAmountAndPrice') : t('tradeForm.enterAmount')}</span>
         ) : (
           <>
             {q.filled > 0 ? (
@@ -195,7 +195,7 @@ export function TradeForm({
         disabled={!valid || place.isPending}
         onClick={() =>
           place.mutate(
-            { path: { cityId: city.id }, body: { resType, side, amount: qty, type: mode, price: mode === 'limit' ? unit : undefined } },
+            { path: { cityId: city.id }, body: { resType, side, amount: qty, type: mode, price: mode === MarketOrderType.LIMIT ? unit : undefined } },
             {
               onSuccess: (r) => {
                 setAmount('');
@@ -217,7 +217,9 @@ export function TradeForm({
           )
         }
       >
-        {mode === 'market' ? t(side === 0 ? 'tradeForm.buyNow' : 'tradeForm.sellNow') : t(side === 0 ? 'tradeForm.placeBuy' : 'tradeForm.placeSell')}
+        {mode === MarketOrderType.MARKET
+          ? t(side === 0 ? 'tradeForm.buyNow' : 'tradeForm.sellNow')
+          : t(side === 0 ? 'tradeForm.placeBuy' : 'tradeForm.placeSell')}
       </Button>
     </Panel>
   );

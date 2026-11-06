@@ -3,7 +3,18 @@
 
 import { z } from 'zod';
 
-import { FortKeySchema, HEAL_PAYMENTS, HealPayment, MessageSchema, RequirementCheckSchema, ResourceKeySchema, TroopKeySchema } from '@marchlands/core';
+import {
+  BUILDING_AREAS,
+  BuildingArea,
+  FortKeySchema,
+  HEAL_PAYMENTS,
+  HealPayment,
+  MessageSchema,
+  RequirementCheckSchema,
+  ResourceKey,
+  ResourceKeySchema,
+  TroopKeySchema,
+} from '@marchlands/core';
 
 import { BuildingBean } from '#/beans.ts';
 import { Ms, ResourceAmounts, zCityParams, zId, zTroops } from '#/common.ts';
@@ -33,7 +44,7 @@ export const DraftBody = z.object({
 });
 export const DraftModeBody = z.object({ auto: z.boolean().describe('draft by itself (true) or only when its holder chooses') });
 
-export const AvailableBuildingsQuery = z.object({ area: z.enum(['inside', 'outside', 'walls']).default('inside') });
+export const AvailableBuildingsQuery = z.object({ area: z.enum(BUILDING_AREAS).default(BuildingArea.INSIDE) });
 export const ConstructBody = z.object({ typeId: z.number().int(), positionId: z.number().int() });
 
 export const ResearchBody = z.object({ techId: z.number().int() });
@@ -92,7 +103,7 @@ export type ComfortResult = z.infer<typeof ComfortResult>;
 export const ResourceProductionLine = z
   .object({
     typeid: int().describe('1 food, 2 wood, 3 stone, 4 iron'),
-    resource: ResourceKeySchema.exclude(['gold']),
+    resource: ResourceKeySchema.exclude([ResourceKey.GOLD]),
     basicOutput: int().describe('per hour, regardless of fields'),
     fieldOutput: int().describe('per hour, after work rate and efficiency'),
     bonus: z.number().describe('production bonus as a share (0.25 = +25%)'),

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ResourceKey } from '#/constants.ts';
 import { canUpgradeTile, HOLDABLE_VALLEY_TYPES, researchesInCity, TileType, VALLEY_RESOURCE, VALLEY_TYPES, valleyBonus, valleyResource } from '#/index.ts';
 
 describe(researchesInCity.name, () => {
@@ -22,12 +23,12 @@ describe(researchesInCity.name, () => {
 
 describe(valleyResource.name, () => {
   it('names the resource each valley type boosts', () => {
-    expect(valleyResource(TileType.FOREST)).toBe('wood');
-    expect(valleyResource(TileType.DESERT)).toBe('stone');
-    expect(valleyResource(TileType.HILL)).toBe('iron');
-    expect(valleyResource(TileType.SWAMP)).toBe('food');
-    expect(valleyResource(TileType.GRASS)).toBe('food');
-    expect(valleyResource(TileType.LAKE)).toBe('food');
+    expect(valleyResource(TileType.FOREST)).toBe(ResourceKey.WOOD);
+    expect(valleyResource(TileType.DESERT)).toBe(ResourceKey.STONE);
+    expect(valleyResource(TileType.HILL)).toBe(ResourceKey.IRON);
+    expect(valleyResource(TileType.SWAMP)).toBe(ResourceKey.FOOD);
+    expect(valleyResource(TileType.GRASS)).toBe(ResourceKey.FOOD);
+    expect(valleyResource(TileType.LAKE)).toBe(ResourceKey.FOOD);
   });
 
   it('agrees with the table for every valley type', () => {

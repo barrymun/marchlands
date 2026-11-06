@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { FlowActionType, FlowStatus, FlowWaitUntil, HealPayment, msg, TimedEventType } from '@marchlands/core';
+import { FlowActionType, FlowStatus, FlowWaitUntil, HealPayment, HeroBuffId, msg, TimedEventType } from '@marchlands/core';
 
 import { resumeFlow, runQueue } from '#/engine/flows.ts';
 import { armies, flows, heroes } from '#/index.ts';
@@ -21,7 +21,7 @@ describe(runQueue.name, () => {
       const p = await createTestPlayer(g);
       await withHero(g, p);
       const a = await newFlow(g, p, { name: 'A', actions: [mayor] });
-      const b = await newFlow(g, p, { name: 'B', actions: [{ type: FlowActionType.SET_MAYOR, stat: 'management' }] });
+      const b = await newFlow(g, p, { name: 'B', actions: [{ type: FlowActionType.SET_MAYOR, stat: HeroBuffId.MANAGEMENT }] });
       await flows.setRepeat(g, p.id, a.id, true);
       g.advance(1000);
       await flows.setRepeat(g, p.id, b.id, true);

@@ -293,6 +293,7 @@ function homeState(rng: Rng, state: number): number {
 
 /** "von Meissen", "de Verdun", "d'Arlon", "z Vysehradu", "da Lucca", "d'Asti". */
 function fromPlace(culture: Culture, place: string): string {
+  // eslint-disable-next-line marchlands/no-string-compare -- words of the names themselves: the particles that elide before a vowel
   return (culture.from === 'de' || culture.from === 'da') && /^[AEIOU]/.test(place) ? `d'${place}` : `${culture.from} ${place}`;
 }
 

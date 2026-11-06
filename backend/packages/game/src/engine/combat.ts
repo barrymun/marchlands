@@ -14,6 +14,8 @@ import {
   attackStanding,
   BALANCE,
   type BattleExtra,
+  BattleResult,
+  BattleTarget,
   BuffId,
   buildingLevel,
   BuildingType,
@@ -54,6 +56,7 @@ import {
   refillCounts,
   regenerateNpc,
   type ReportBody,
+  ReportBodyKind,
   ReportType,
   researchLevel,
   resolveCombat,
@@ -175,7 +178,7 @@ async function turnBack(ctx: Ctx, a: ArmyRow, reason: Message) {
     armyType: a.mission,
     startPos: a.startPosName,
     targetPos: a.targetPosName,
-    body: { kind: 'text', text: reason },
+    body: { kind: ReportBodyKind.TEXT, text: reason },
   });
   await notifyArmyParties(ctx, a);
 }
@@ -281,7 +284,7 @@ async function returnHome(ctx: Ctx, a: ArmyRow) {
     isBack: true,
     startPos: a.targetPosName,
     targetPos: a.startPosName,
-    body: { kind: 'movement', movement: { hero: heroSummary(hero), troops: a.troops, resources: a.resources } },
+    body: { kind: ReportBodyKind.MOVEMENT, movement: { hero: heroSummary(hero), troops: a.troops, resources: a.resources } },
   });
   await notifyArmyParties(ctx, a);
 }
@@ -306,7 +309,7 @@ async function arriveTransport(ctx: Ctx, a: ArmyRow, sender: PlayerRow) {
   gainResources(t.b.city, a.resources);
   await saveCity(ctx, t.b.city);
   pushResources(ctx, t.b);
-  const body = { kind: 'trade' as const, trade: { from: sender.name, to: t.b.player.name, resources: a.resources } };
+  const body = { kind: ReportBodyKind.TRADE, trade: { from: sender.name, to: t.b.player.name, resources: a.resources } };
   await createReport(ctx, {
     playerId: a.playerId,
     typeId: ReportType.TRADE,
@@ -364,7 +367,7 @@ async function arriveReinforce(ctx: Ctx, a: ArmyRow, sender: PlayerRow) {
       armyType: a.mission,
       startPos: a.startPosName,
       targetPos: a.targetPosName,
-      body: { kind: 'movement', movement: { hero: heroSummary(hero), troops: a.troops, resources: a.resources, heroReturned: heroLeft } },
+      body: { kind: ReportBodyKind.MOVEMENT, movement: { hero: heroSummary(hero), troops: a.troops, resources: a.resources, heroReturned: heroLeft } },
     });
     if (heroLeft) {
       a.troops = {};
@@ -388,7 +391,7 @@ async function arriveReinforce(ctx: Ctx, a: ArmyRow, sender: PlayerRow) {
     armyType: a.mission,
     startPos: a.startPosName,
     targetPos: a.targetPosName,
-    body: { kind: 'movement', movement: { from: sender.name, hero: heroSummary(hero), troops: a.troops } },
+    body: { kind: ReportBodyKind.MOVEMENT, movement: { from: sender.name, hero: heroSummary(hero), troops: a.troops } },
   });
   return station(ctx, a);
 }
@@ -445,7 +448,7 @@ async function arriveBuildCity(ctx: Ctx, a: ArmyRow, settler: PlayerRow) {
     armyType: a.mission,
     startPos: a.startPosName,
     targetPos: cityPosition(name, tile.id),
-    body: { kind: 'text', text: msg('report.cityFounded', { name }) },
+    body: { kind: ReportBodyKind.TEXT, text: msg('report.cityFounded', { name }) },
   });
   await notifyArmyParties(ctx, a);
 }
@@ -522,9 +525,9 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     await createReport(ctx, {
       ...reportBase,
       body: {
-        kind: 'scout',
+        kind: ReportBodyKind.SCOUT,
         scout: {
-          target: 'npc',
+          target: BattleTarget.NPC,
           level: tile.level,
           success: true,
           loyalty: Math.floor(npc.state.loyalty),
@@ -556,9 +559,9 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     await createReport(ctx, {
       ...reportBase,
       body: {
-        kind: 'scout',
+        kind: ReportBodyKind.SCOUT,
         scout: {
-          target: 'npc',
+          target: BattleTarget.NPC,
           level,
           historic: true,
           success: true,
@@ -599,9 +602,9 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     await createReport(ctx, {
       ...reportBase,
       body: {
-        kind: 'scout',
+        kind: ReportBodyKind.SCOUT,
         scout: {
-          target: 'valley',
+          target: BattleTarget.VALLEY,
           type: tile.type,
           level: tile.level,
           owner: ownerName,
@@ -673,14 +676,17 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
     attackerScouts: { before: a.troops.scouter ?? 0, after: survivors },
     defenderScouts: { before: defScouts, after: result.defender.after.scouter ?? 0 },
   };
-  await createReport(ctx, { ...reportBase, body: { kind: 'scout', scout: { target: 'city', owner: def.player.name, success, battle, intel } } });
+  await createReport(ctx, {
+    ...reportBase,
+    body: { kind: ReportBodyKind.SCOUT, scout: { target: BattleTarget.CITY, owner: def.player.name, success, battle, intel } },
+  });
   await createReport(ctx, {
     playerId: def.player.id,
     title: msg(success ? 'report.title.enemyScouts' : 'report.title.scoutsRepelled'),
     armyType: Mission.SCOUT,
     startPos: a.startPosName,
     targetPos: a.targetPosName,
-    body: { kind: 'scout', scout: { target: 'city', from: scoutOwner.name, success, battle } },
+    body: { kind: ReportBodyKind.SCOUT, scout: { target: BattleTarget.CITY, from: scoutOwner.name, success, battle } },
   });
   if (cityScouts > 0) ctx.push(def.player.id, PushCmd.TROOP_UPDATE, { castleId: def.city.id, troop: troopBean(def.city.troops) });
   if (!success) {
@@ -744,7 +750,7 @@ function battleStats(
   ctx: Ctx,
   a: ArmyRow,
   r: CombatResult,
-  target: 'city' | 'npc' | 'valley',
+  target: BattleTarget,
   o: {
     injured?: TroopCounts;
     loot?: ResourceSet;
@@ -762,7 +768,7 @@ function battleStats(
     ...prefixed('injured', o.injured),
     ...prefixed('plundered', o.loot),
     [`attacks.${won ? 'won' : 'lost'}.${target}`]: 1,
-    ...(target === 'npc' && won && o.level ? { [`npcWins.${o.level}`]: 1 } : {}),
+    ...(target === BattleTarget.NPC && won && o.level ? { [`npcWins.${o.level}`]: 1 } : {}),
     ...(o.captured ? { [`captured.${target}`]: 1 } : {}),
     honor: r.attackerHonor,
   });
@@ -810,9 +816,9 @@ function battleBody(
   extra: BattleExtra,
 ): ReportBody {
   return {
-    kind: 'battle' as const,
+    kind: ReportBodyKind.BATTLE,
     battle: {
-      result: r.attackerWon ? 'attackerWon' : r.defenderWon ? 'defenderWon' : 'draw',
+      result: r.attackerWon ? BattleResult.ATTACKER_WON : r.defenderWon ? BattleResult.DEFENDER_WON : BattleResult.DRAW,
       rounds: r.rounds,
       attacker: { ...attacker, honor: r.attackerHonor, heroExp: r.attackerHeroExp },
       defender: { ...defender, honor: r.defenderHonor, heroExp: r.defenderHeroExp },
@@ -962,7 +968,7 @@ async function attackCity(ctx: Ctx, a: ArmyRow, attacker: PlayerRow, cityId: num
     wallLevel,
     ...battleBonuses(def.player, ctx.now),
   };
-  battleStats(ctx, a, r, 'city', {
+  battleStats(ctx, a, r, BattleTarget.CITY, {
     injured: attackerSide.injured,
     loot,
     defender: { playerId: def.player.id, cityId: def.city.id, injured: defenderInjured },
@@ -1094,7 +1100,7 @@ async function attackNpc(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   await savePlayer(ctx, attacker);
   await grantHeroExp(ctx, hero, r.attackerHeroExp);
   const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
-  battleStats(ctx, a, r, 'npc', { injured, loot, captured, level: tile.level });
+  battleStats(ctx, a, r, BattleTarget.NPC, { injured, loot, captured, level: tile.level });
   const body = battleBody(
     r,
     {
@@ -1193,7 +1199,7 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   await savePlayer(ctx, attacker);
   await grantHeroExp(ctx, hero, r.attackerHeroExp);
   const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
-  battleStats(ctx, a, r, 'npc', { injured, loot, captured, level });
+  battleStats(ctx, a, r, BattleTarget.NPC, { injured, loot, captured, level });
   const body = battleBody(
     r,
     {
@@ -1427,7 +1433,7 @@ async function attackValley(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   await grantHeroExp(ctx, guard, r.defenderHeroExp);
   const g = guard ?? npcGuard;
   const injured = await woundAttackers(ctx, a, attacker, r.attacker.lost);
-  battleStats(ctx, a, r, 'valley', { injured, captured: occupied, defender: owner ? { playerId: owner.id, cityId: ownerCityId } : null });
+  battleStats(ctx, a, r, BattleTarget.VALLEY, { injured, captured: occupied, defender: owner ? { playerId: owner.id, cityId: ownerCityId } : null });
   const body = battleBody(
     r,
     {

@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { ArmyDirection, BALANCE, dur, marchTimeMs, Mission, msg, TileType, TimedEventType } from '@marchlands/core';
+import { ArmyDirection, BALANCE, dur, marchTimeMs, Mission, msg, ReportBodyKind, TileType, TimedEventType } from '@marchlands/core';
 
 import { armies } from '#/index.ts';
 import { armyRow, arrive, reportsOf, send, tileNear, warrior } from '#test/support/armies.ts';
@@ -114,6 +114,6 @@ describe(armies.recallArmy.name, () => {
       expect(await armyRow(g, bean.armyId)).toBeUndefined();
       expect((await reloadCity(g, p.cityId)).troops.lightCavalry).toBe(5000);
       // home again, as any recalled army reports, and no battle
-      expect((await reportsOf(g, p.id)).map((r) => r.body.kind)).toEqual(['movement']);
+      expect((await reportsOf(g, p.id)).map((r) => r.body.kind)).toEqual([ReportBodyKind.MOVEMENT]);
     }));
 });

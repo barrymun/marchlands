@@ -12,6 +12,10 @@ const SIZE = 32;
 /** Body colours: the garment's lit, mid and shaded tones. */
 type Cloth = { hi: Colour; mid: Colour; dark: Colour };
 
+/** A rider's helm: open, the face showing, or closed. */
+const HelmKind = { OPEN: 'open', CLOSED: 'closed' } as const;
+type HelmKind = (typeof HelmKind)[keyof typeof HelmKind];
+
 const LINEN: Cloth = { hi: 'linen', mid: 'linen', dark: 'linenDark' };
 const LEATHER: Cloth = { hi: 'leather', mid: 'leather', dark: 'leatherDark' };
 const PLATE: Cloth = { hi: 'steelHi', mid: 'steel', dark: 'steelDark' };
@@ -319,7 +323,7 @@ function horse(c: PixelCanvas, armoured: boolean) {
 }
 
 /** A rider seated on the horse, the near leg down its side; `helm` is open (the face shows) or closed. */
-function rider(c: PixelCanvas, cloth: Cloth, leg: Colour, helm: 'open' | 'closed') {
+function rider(c: PixelCanvas, cloth: Cloth, leg: Colour, helm: HelmKind) {
   rect(c, 14, 13, 18, 16, leg);
   rect(c, 16, 16, 18, 20, leg);
   rect(c, 16, 19, 19, 21, 'leatherDark');
@@ -328,7 +332,7 @@ function rider(c: PixelCanvas, cloth: Cloth, leg: Colour, helm: 'open' | 'closed
   rect(c, 16, 8, 17, 15, cloth.dark);
   rect(c, 12, 14, 17, 14, 'leatherDark');
   rect(c, 13, 1, 17, 7, 'skin');
-  if (helm === 'open') {
+  if (helm === HelmKind.OPEN) {
     rect(c, 13, 1, 17, 3, 'steel');
     rect(c, 13, 1, 14, 6, 'steel');
     rect(c, 13, 1, 15, 2, 'steelHi');
@@ -355,7 +359,7 @@ function cavalry(): PixelCanvas {
     ],
     'banner',
   );
-  rider(c, { hi: 'steel', mid: 'steel', dark: 'steelDark' }, 'hoodDark', 'open');
+  rider(c, { hi: 'steel', mid: 'steel', dark: 'steelDark' }, 'hoodDark', HelmKind.OPEN);
   for (let y = 9; y <= 13; y += 2) for (const x of [14, 16]) c.set(x + ((y - 9) % 4 ? 1 : 0), y, 'steelDark');
   rect(c, 11, 7, 12, 11, 'bannerHi');
   rect(c, 17, 8, 20, 10, 'steel');
@@ -371,7 +375,7 @@ function cavalry(): PixelCanvas {
 function cataphract(): PixelCanvas {
   const c = new PixelCanvas(SIZE, 'cataphract');
   horse(c, true);
-  rider(c, PLATE, 'steelDark', 'closed');
+  rider(c, PLATE, 'steelDark', HelmKind.CLOSED);
   rect(c, 17, 9, 20, 11, 'steel');
   c.outline();
   c.line([21, 0], [21, 20], 'wood');

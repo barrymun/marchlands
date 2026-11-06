@@ -1,7 +1,8 @@
 // Zod schemas for messages (index.ts), for core types that store them and for the API contracts.
 
 import { z } from 'zod';
-import { GAME_REF_KINDS, type Message, MSG_CODES, type MsgParam } from '#/messages/index.ts';
+import { GAME_REF_KINDS } from '#/constants.ts';
+import { type Message, MSG_CODES, type MsgParam } from '#/messages/index.ts';
 
 /** A reference to game data the client names in the player's language. */
 export const GameRefSchema = z.object({ ref: z.enum(GAME_REF_KINDS), id: z.union([z.number(), z.string()]) }).meta({ id: 'GameRef' });

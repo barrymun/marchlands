@@ -13,6 +13,7 @@ const pascal = (s: string) =>
     .join('');
 
 export function operationIdOf(method: string, url: string): string {
+  // eslint-disable-next-line marchlands/no-string-compare -- the address's own prefix, /api/v1, is no part of the name
   const segments = url.split('/').filter((s) => s && s !== 'api' && s !== 'v1');
   const parts = segments.map((s, i) => {
     const param = /^[{:](\w+)\}?$/.exec(s);

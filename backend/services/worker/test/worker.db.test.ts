@@ -202,7 +202,7 @@ describe(processOne.name, () => {
   it('backs off an event whose handler hit a database error, and the connection carries on', () =>
     workerTest(async (db, log) => {
       // a shipment id that is not a number: the handler's query fails in Postgres and aborts the game transaction
-      const ev = (await addEvent(db, { type: 'shipment', dueAt: Date.now() - 1000, payload: { shipmentId: 'x' } }))!;
+      const ev = (await addEvent(db, { type: TimedEventType.SHIPMENT, dueAt: Date.now() - 1000, payload: { shipmentId: 'x' } }))!;
 
       expect(await processOne(db, { log })).toBe(true);
 

@@ -2,6 +2,8 @@
 // (tools/art/gear/necklace.ts): an amber pendant on a red cord (0), a plain silver chain (1), a small silver pendant
 // (2), then a gold chain and a stone in the level's colour that grows from 3, and a crimson heart in silver at 10.
 
+import { SpotKind } from '@marchlands/core';
+
 import { heart, lit, look, type Shades } from '../gear/common.ts';
 import type { Colour, PixelCanvas } from '../pixel.ts';
 import { disc } from '../shapes.ts';
@@ -31,7 +33,7 @@ export function necklace(level: number): PixelCanvas {
   }
   if (level >= 10) {
     c.set(px - 1, py - 0.5, 'sparkle');
-    c.spot('stone', [px, py + 0.5], 1.6);
+    c.spot(SpotKind.STONE, [px, py + 0.5], 1.6);
   }
   return c;
 }

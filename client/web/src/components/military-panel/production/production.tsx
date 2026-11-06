@@ -20,15 +20,25 @@ import {
   postCitiesTroopsQueuesSpeedupMutation,
   postCitiesTroopsTrainManyMutation,
 } from '@marchlands/api-client';
-import { BALANCE, BuildingType, itemGoldPrice, ItemId, researchLevel, TechType, usedWallSpace, wallCapacity } from '@marchlands/core';
+import {
+  BALANCE,
+  BuildingType,
+  itemGoldPrice,
+  ItemId,
+  researchLevel,
+  RESOURCE_KEYS,
+  ResourceKey,
+  TechType,
+  usedWallSpace,
+  wallCapacity,
+} from '@marchlands/core';
 
 import { CostList } from '@/components/cost-list/cost-list';
-import { MILITARY_SEARCH, ProductionTab, RES_KEYS } from '@/components/military-panel/production/constants';
+import { MILITARY_SEARCH, ProductionTab, TrainLimit } from '@/components/military-panel/production/constants';
 import { MayorExpHint } from '@/components/military-panel/production/mayor-exp-hint/mayor-exp-hint';
 import { MayorTrainingHint } from '@/components/military-panel/production/mayor-training-hint/mayor-training-hint';
 import { TrainDiscountHint } from '@/components/military-panel/production/train-discount-hint/train-discount-hint';
 import { TrainEstimate } from '@/components/military-panel/production/train-estimate/train-estimate';
-import type { TrainLimit } from '@/components/military-panel/production/types';
 import { limitLabel, maxTrainable } from '@/components/military-panel/production/utils';
 import { UnitIcon } from '@/components/military-panel/unit-icon/unit-icon';
 import { Requirements } from '@/components/requirements/requirements';
@@ -124,17 +134,17 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   // the amounts entered, and what they cost together
   const countOf = (typeId: number) => Number(counts[typeId] ?? 0);
   // costs per unit as paid now (costShare: a Quartermaster item's discount on troops)
-  const units = (trainable.data ?? []).map((u) => ({ ...u, ...Object.fromEntries(RES_KEYS.map((k) => [k, u[k] * u.costShare])) }));
+  const units = (trainable.data ?? []).map((u) => ({ ...u, ...Object.fromEntries(RESOURCE_KEYS.map((k) => [k, u[k] * u.costShare])) }));
   const orders = units.filter((u) => u.permission && countOf(u.typeId) > 0).map((u) => ({ u, count: countOf(u.typeId) }));
   const ordered = orders.reduce((n, o) => n + o.count, 0);
   // each order's cost is rounded up, as the server charges it
-  const costOf = (list: typeof orders, k: (typeof RES_KEYS)[number]) => list.reduce((n, o) => n + Math.ceil(o.u[k] * o.count), 0);
+  const costOf = (list: typeof orders, k: ResourceKey) => list.reduce((n, o) => n + Math.ceil(o.u[k] * o.count), 0);
   const sumOf = (list: typeof orders) => ({
-    gold: costOf(list, 'gold'),
-    food: costOf(list, 'food'),
-    wood: costOf(list, 'wood'),
-    stone: costOf(list, 'stone'),
-    iron: costOf(list, 'iron'),
+    gold: costOf(list, ResourceKey.GOLD),
+    food: costOf(list, ResourceKey.FOOD),
+    wood: costOf(list, ResourceKey.WOOD),
+    stone: costOf(list, ResourceKey.STONE),
+    iron: costOf(list, ResourceKey.IRON),
     population: list.reduce((n, o) => n + o.u.population * o.count, 0),
     space: list.reduce((n, o) => n + (BALANCE.fortSpace[o.u.typeId] ?? 1) * o.count, 0),
   });
@@ -148,7 +158,7 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const idleFor = (typeId: number) => city.resource.idlePopulation - others(typeId).population;
   const wallFor = (typeId: number) => wallRoom - others(typeId).space;
   const overBudget: TrainLimit | null =
-    RES_KEYS.find((k) => total[k] > have[k]) ??
+    RESOURCE_KEYS.find((k) => total[k] > have[k]) ??
     (total.population > city.resource.idlePopulation ? 'idlePopulation' : fort && total.space > wallRoom ? 'wallSpace' : null);
 
   return (
@@ -291,7 +301,7 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                         size="xs"
                         variant="outline"
                         disabled={!u.permission || m.count <= 0}
-                        title={`${m.count > 0 ? t('production.maxLimited', { n: fmtExact(m.count), limit: limitLabel(m.limit) }) : t('production.maxNone', { limit: limitLabel(m.limit) })}${orders.some((o) => o.u.typeId !== u.typeId) ? t('production.maxAfterOthers') : ''}${m.limit === 'idlePopulation' ? t('production.maxFreeWorkers') : ''}`}
+                        title={`${m.count > 0 ? t('production.maxLimited', { n: fmtExact(m.count), limit: limitLabel(m.limit) }) : t('production.maxNone', { limit: limitLabel(m.limit) })}${orders.some((o) => o.u.typeId !== u.typeId) ? t('production.maxAfterOthers') : ''}${m.limit === TrainLimit.IDLE_POPULATION ? t('production.maxFreeWorkers') : ''}`}
                         onClick={() => setCounts({ ...counts, [u.typeId]: String(m.count) })}
                       >
                         {t('common:actions.max')}

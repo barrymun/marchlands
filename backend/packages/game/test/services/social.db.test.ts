@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { msg } from '@marchlands/core';
+import { ChatChannel, msg, PlayerRelationKind } from '@marchlands/core';
 
 import { refreshRankings } from '#/engine/rankings.ts';
 import { addPrestige } from '#/helpers.ts';
@@ -36,8 +36,8 @@ describe(social.listRelations.name, () => {
       const b = await createTestPlayer(g);
       const c = await createTestPlayer(g);
       await givePrestige(g, b, 123.9);
-      await social.addRelation(g, a.id, b.name, 'friend');
-      await social.addRelation(g, a.id, c.name, 'block');
+      await social.addRelation(g, a.id, b.name, PlayerRelationKind.FRIEND);
+      await social.addRelation(g, a.id, c.name, PlayerRelationKind.BLOCK);
       const seen = (await reloadPlayer(g, b)).lastSeenAt;
       expect(await social.listRelations(g, a.id)).toEqual({
         friends: [{ id: b.id, name: b.name, prestige: 123, lastSeen: seen }],
@@ -53,7 +53,7 @@ describe(social.addRelation.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g, { name: 'Gareth' });
-      expect(await social.addRelation(g, a.id, 'gARETH', 'friend')).toEqual({ id: b.id, name: 'Gareth' });
+      expect(await social.addRelation(g, a.id, 'gARETH', PlayerRelationKind.FRIEND)).toEqual({ id: b.id, name: 'Gareth' });
       expect((await social.listRelations(g, a.id)).friends.map((f) => f.id)).toEqual([b.id]);
     }));
 
@@ -61,9 +61,9 @@ describe(social.addRelation.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
-      await social.addRelation(g, a.id, b.name, 'friend');
-      await social.addRelation(g, a.id, b.name, 'friend');
-      await social.addRelation(g, a.id, b.name, 'block');
+      await social.addRelation(g, a.id, b.name, PlayerRelationKind.FRIEND);
+      await social.addRelation(g, a.id, b.name, PlayerRelationKind.FRIEND);
+      await social.addRelation(g, a.id, b.name, PlayerRelationKind.BLOCK);
       const list = await social.listRelations(g, a.id);
       expect(list.friends).toHaveLength(1);
       expect(list.blocked).toHaveLength(1);
@@ -72,8 +72,8 @@ describe(social.addRelation.name, () => {
   it('rejects an unknown player and yourself', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      await expectRefused(social.addRelation(g, a.id, 'Nobody Here', 'friend'), msg('common.playerNamedNotFound', { name: 'Nobody Here' }));
-      await expectRefused(social.addRelation(g, a.id, a.name.toUpperCase(), 'block'), msg('social.selfTarget'));
+      await expectRefused(social.addRelation(g, a.id, 'Nobody Here', PlayerRelationKind.FRIEND), msg('common.playerNamedNotFound', { name: 'Nobody Here' }));
+      await expectRefused(social.addRelation(g, a.id, a.name.toUpperCase(), PlayerRelationKind.BLOCK), msg('social.selfTarget'));
       expect(await social.listRelations(g, a.id)).toEqual({ friends: [], blocked: [] });
     }));
 });
@@ -83,11 +83,11 @@ describe(social.removeRelation.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
-      await social.addRelation(g, a.id, b.name, 'friend');
-      await social.addRelation(g, a.id, b.name, 'block');
-      await social.removeRelation(g, a.id, b.id, 'block');
+      await social.addRelation(g, a.id, b.name, PlayerRelationKind.FRIEND);
+      await social.addRelation(g, a.id, b.name, PlayerRelationKind.BLOCK);
+      await social.removeRelation(g, a.id, b.id, PlayerRelationKind.BLOCK);
       expect(await social.listRelations(g, a.id)).toMatchObject({ friends: [{ id: b.id }], blocked: [] });
-      await social.removeRelation(g, a.id, b.id, 'friend');
+      await social.removeRelation(g, a.id, b.id, PlayerRelationKind.FRIEND);
       expect(await social.listRelations(g, a.id)).toEqual({ friends: [], blocked: [] });
     }));
 
@@ -95,9 +95,9 @@ describe(social.removeRelation.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
-      await social.addRelation(g, a.id, b.name, 'friend');
-      await social.removeRelation(g, b.id, a.id, 'friend');
-      await social.removeRelation(g, a.id, 2_000_000_000, 'friend');
+      await social.addRelation(g, a.id, b.name, PlayerRelationKind.FRIEND);
+      await social.removeRelation(g, b.id, a.id, PlayerRelationKind.FRIEND);
+      await social.removeRelation(g, a.id, 2_000_000_000, PlayerRelationKind.FRIEND);
       expect((await social.listRelations(g, a.id)).friends).toHaveLength(1);
     }));
 });
@@ -111,21 +111,21 @@ describe(social.worldChat.name, () => {
         {
           playerIds: [],
           cmd: PushCmd.CHANNEL_CHAT_MESSAGE,
-          data: { msg: 'Hello world', languageType: 0, fromUser: a.name, fromId: a.id, channel: 'world', time: T0 },
+          data: { msg: 'Hello world', languageType: 0, fromUser: a.name, fromId: a.id, channel: ChatChannel.WORLD, time: T0 },
         },
       ]);
-      expect(await social.chatHistory(g, a.id, 'world')).toEqual([
-        { id: expect.any(Number), channel: 'world', fromUser: a.name, fromId: a.id, toId: null, msg: 'Hello world', time: T0 },
+      expect(await social.chatHistory(g, a.id, ChatChannel.WORLD)).toEqual([
+        { id: expect.any(Number), channel: ChatChannel.WORLD, fromUser: a.name, fromId: a.id, toId: null, msg: 'Hello world', time: T0 },
       ]);
     }));
 
   it('posts to the beginner channel', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      await social.worldChat(g, a.id, 'Hi', 'beginner');
-      expect(g.pushes(PushCmd.CHANNEL_CHAT_MESSAGE)[0]!.data).toMatchObject({ channel: 'beginner' });
-      expect(await social.chatHistory(g, a.id, 'world')).toEqual([]);
-      expect((await social.chatHistory(g, a.id, 'beginner')).map((m) => m.msg)).toEqual(['Hi']);
+      await social.worldChat(g, a.id, 'Hi', ChatChannel.BEGINNER);
+      expect(g.pushes(PushCmd.CHANNEL_CHAT_MESSAGE)[0]!.data).toMatchObject({ channel: ChatChannel.BEGINNER });
+      expect(await social.chatHistory(g, a.id, ChatChannel.WORLD)).toEqual([]);
+      expect((await social.chatHistory(g, a.id, ChatChannel.BEGINNER)).map((m) => m.msg)).toEqual(['Hi']);
     }));
 
   it('escapes HTML', () =>
@@ -134,7 +134,7 @@ describe(social.worldChat.name, () => {
       await social.worldChat(g, a.id, `<b>"Tom" & 'Jerry'</b>`);
       const escaped = '&lt;b&gt;&quot;Tom&quot; &amp; &#39;Jerry&#39;&lt;/b&gt;';
       expect(g.pushes(PushCmd.CHANNEL_CHAT_MESSAGE)[0]!.data).toMatchObject({ msg: escaped });
-      expect((await social.chatHistory(g, a.id, 'world'))[0]!.msg).toBe(escaped);
+      expect((await social.chatHistory(g, a.id, ChatChannel.WORLD))[0]!.msg).toBe(escaped);
     }));
 
   it('accepts 300 characters and rejects more, and rejects an empty message', () =>
@@ -143,7 +143,7 @@ describe(social.worldChat.name, () => {
       await social.worldChat(g, a.id, 'x'.repeat(300));
       await expectRefused(social.worldChat(g, a.id, 'x'.repeat(301)), msg('social.messageTooLong', { count: 300 }));
       await expectRefused(social.worldChat(g, a.id, '   '), msg('social.emptyMessage'));
-      expect(await social.chatHistory(g, a.id, 'world')).toHaveLength(1);
+      expect(await social.chatHistory(g, a.id, ChatChannel.WORLD)).toHaveLength(1);
       expect(g.pushes(PushCmd.CHANNEL_CHAT_MESSAGE)).toHaveLength(1);
     }));
 
@@ -167,7 +167,7 @@ describe(social.worldChat.name, () => {
       await social.worldChat(g, a.id, 'First');
       await social.worldChat(g, b.id, 'Second');
       expect(chatPushes(g)).toEqual(['<font color="#FF0000">First</font>', 'Second']);
-      expect((await social.chatHistory(g, a.id, 'world')).map((m) => m.msg)).toEqual(['First', 'Second']);
+      expect((await social.chatHistory(g, a.id, ChatChannel.WORLD)).map((m) => m.msg)).toEqual(['First', 'Second']);
     }));
 
   it('colours members of the top alliance blue', () =>
@@ -202,12 +202,12 @@ describe(social.allianceChat.name, () => {
         {
           playerIds: expect.arrayContaining([a.id, b.id]),
           cmd: PushCmd.ALLIANCE_CHAT_MESSAGE,
-          data: { msg: 'For the &lt;Order&gt;', languageType: 0, fromUser: b.name, fromId: b.id, channel: 'alliance', time: T0 },
+          data: { msg: 'For the &lt;Order&gt;', languageType: 0, fromUser: b.name, fromId: b.id, channel: ChatChannel.ALLIANCE, time: T0 },
         },
       ]);
       expect(g.pushes(PushCmd.ALLIANCE_CHAT_MESSAGE)[0]!.playerIds).toHaveLength(2);
-      expect((await social.chatHistory(g, a.id, 'alliance')).map((m) => m.msg)).toEqual(['For the &lt;Order&gt;']);
-      expect(await social.chatHistory(g, outsider.id, 'alliance')).toEqual([]);
+      expect((await social.chatHistory(g, a.id, ChatChannel.ALLIANCE)).map((m) => m.msg)).toEqual(['For the &lt;Order&gt;']);
+      expect(await social.chatHistory(g, outsider.id, ChatChannel.ALLIANCE)).toEqual([]);
     }));
 
   it('rejects a player without an alliance, a muted player and an empty message', () =>
@@ -234,8 +234,8 @@ describe(social.privateChat.name, () => {
       expect(g.pushes(PushCmd.PRIVATE_CHAT_MESSAGE)).toEqual([
         { playerIds: [b.id], cmd: PushCmd.PRIVATE_CHAT_MESSAGE, data: { msg: 'psst &amp; hi', chatType: 0, fromUser: a.name, fromId: a.id, time: T0 } },
       ]);
-      expect(await social.chatHistory(g, b.id, 'private')).toEqual([
-        { id: expect.any(Number), channel: 'private', fromUser: a.name, fromId: a.id, toId: b.id, msg: 'psst &amp; hi', time: T0 },
+      expect(await social.chatHistory(g, b.id, ChatChannel.PRIVATE)).toEqual([
+        { id: expect.any(Number), channel: ChatChannel.PRIVATE, fromUser: a.name, fromId: a.id, toId: b.id, msg: 'psst &amp; hi', time: T0 },
       ]);
     }));
 
@@ -243,10 +243,10 @@ describe(social.privateChat.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
-      await social.addRelation(g, b.id, a.name, 'block');
+      await social.addRelation(g, b.id, a.name, PlayerRelationKind.BLOCK);
       await social.privateChat(g, a.id, b.name, 'Hi');
       expect(g.pushes(PushCmd.PRIVATE_CHAT_MESSAGE)).toEqual([]);
-      expect(await social.chatHistory(g, a.id, 'private')).toEqual([]);
+      expect(await social.chatHistory(g, a.id, ChatChannel.PRIVATE)).toEqual([]);
       // the other way round still works
       await social.privateChat(g, b.id, a.name, 'Hi back');
       expect(g.pushes(PushCmd.PRIVATE_CHAT_MESSAGE)).toHaveLength(1);
@@ -271,7 +271,7 @@ describe(social.chatHistory.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       for (const text of ['One', 'Two', 'Three', 'Four']) await social.worldChat(g, a.id, text);
-      expect((await social.chatHistory(g, a.id, 'world')).map((m) => m.msg)).toEqual(['One', 'Two', 'Three', 'Four']);
+      expect((await social.chatHistory(g, a.id, ChatChannel.WORLD)).map((m) => m.msg)).toEqual(['One', 'Two', 'Three', 'Four']);
     }));
 
   it('lists a channel oldest first, only messages after `since`', () =>
@@ -281,9 +281,9 @@ describe(social.chatHistory.name, () => {
         await social.worldChat(g, a.id, `Message ${i}`);
         g.advance(1000);
       }
-      expect((await social.chatHistory(g, a.id, 'world')).map((m) => m.msg)).toEqual(['Message 1', 'Message 2', 'Message 3']);
-      expect((await social.chatHistory(g, a.id, 'world', T0 + 1000)).map((m) => m.msg)).toEqual(['Message 3']);
-      expect(await social.chatHistory(g, a.id, 'world', T0 + 2000)).toEqual([]);
+      expect((await social.chatHistory(g, a.id, ChatChannel.WORLD)).map((m) => m.msg)).toEqual(['Message 1', 'Message 2', 'Message 3']);
+      expect((await social.chatHistory(g, a.id, ChatChannel.WORLD, T0 + 1000)).map((m) => m.msg)).toEqual(['Message 3']);
+      expect(await social.chatHistory(g, a.id, ChatChannel.WORLD, T0 + 2000)).toEqual([]);
     }));
 
   it('keeps the latest 100 messages', () =>
@@ -293,7 +293,7 @@ describe(social.chatHistory.name, () => {
         await social.worldChat(g, a.id, `M${i}`);
         g.advance(1);
       }
-      const list = await social.chatHistory(g, a.id, 'world');
+      const list = await social.chatHistory(g, a.id, ChatChannel.WORLD);
       expect(list).toHaveLength(100);
       expect(list[0]!.msg).toBe('M3');
       expect(list.at(-1)!.msg).toBe('M102');
@@ -309,8 +309,8 @@ describe(social.chatHistory.name, () => {
       await social.privateChat(g, b.id, c.name, 'b to c');
       g.advance(1);
       await social.privateChat(g, c.id, a.name, 'c to a');
-      expect((await social.chatHistory(g, a.id, 'private')).map((m) => m.msg)).toEqual(['a to b', 'c to a']);
-      expect((await social.chatHistory(g, b.id, 'private')).map((m) => m.msg)).toEqual(['a to b', 'b to c']);
+      expect((await social.chatHistory(g, a.id, ChatChannel.PRIVATE)).map((m) => m.msg)).toEqual(['a to b', 'c to a']);
+      expect((await social.chatHistory(g, b.id, ChatChannel.PRIVATE)).map((m) => m.msg)).toEqual(['a to b', 'b to c']);
     }));
 
   it("shows only the player's own alliance's messages, and nothing without an alliance", () =>
@@ -322,16 +322,16 @@ describe(social.chatHistory.name, () => {
       await foundAlliance(g, b, 'Chaos');
       await social.allianceChat(g, a.id, 'Order only');
       await social.allianceChat(g, b.id, 'Chaos only');
-      expect((await social.chatHistory(g, a.id, 'alliance')).map((m) => m.msg)).toEqual(['Order only']);
-      expect((await social.chatHistory(g, b.id, 'alliance')).map((m) => m.msg)).toEqual(['Chaos only']);
-      expect(await social.chatHistory(g, c.id, 'alliance')).toEqual([]);
+      expect((await social.chatHistory(g, a.id, ChatChannel.ALLIANCE)).map((m) => m.msg)).toEqual(['Order only']);
+      expect((await social.chatHistory(g, b.id, ChatChannel.ALLIANCE)).map((m) => m.msg)).toEqual(['Chaos only']);
+      expect(await social.chatHistory(g, c.id, ChatChannel.ALLIANCE)).toEqual([]);
     }));
 
   it('an unknown channel is simply empty; an unknown player is refused', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
       await social.worldChat(g, a.id, 'Hi');
-      expect(await social.chatHistory(g, a.id, 'nowhere')).toEqual([]);
-      await expectRefused(social.chatHistory(g, 2_000_000_000, 'world'), msg('common.playerNotFound'));
+      expect(await social.chatHistory(g, a.id, 'nowhere' as ChatChannel)).toEqual([]);
+      await expectRefused(social.chatHistory(g, 2_000_000_000, ChatChannel.WORLD), msg('common.playerNotFound'));
     }));
 });

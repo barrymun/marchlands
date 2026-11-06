@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { BuildingType } from '@marchlands/core';
+import { BuildingType, SpotKind } from '@marchlands/core';
 
 import {
   AFTERMATH_MS,
@@ -71,6 +71,7 @@ import {
   workerOverlays,
   zoneOf,
 } from '@/components/iso-anim/utils';
+import { Weather } from '@/components/iso-viewport/constants';
 import type { PixelArt } from '@/components/iso-viewport/types';
 
 /** How many pixels of a frame are drawn. */
@@ -270,8 +271,8 @@ describe(placeFrame.name, () => {
     const owner = { key: 'b1', col: 2, row: 3, file: 'x' };
     const f = { art: pixelArt('test:place', 1, 1, () => {}), ax: 1, ay: 2 };
     // a 64-pixel sprite's top left is (-32, -46) from its tile's middle
-    expect(placeFrame(owner, { k: 'smoke', x: 40, y: 10 }, f, 'k')).toMatchObject({ col: 2, row: 3, x: -32 + 40 - 1, y: -46 + 10 - 2, key: 'k' });
-    expect(placeFrame({ ...owner, size: 128 }, { k: 'smoke', x: 40, y: 10 }, f, 'k')).toMatchObject({ x: -64 + 40 - 1, y: -94 + 10 - 2 });
+    expect(placeFrame(owner, { x: 40, y: 10 }, f, 'k')).toMatchObject({ col: 2, row: 3, x: -32 + 40 - 1, y: -46 + 10 - 2, key: 'k' });
+    expect(placeFrame({ ...owner, size: 128 }, { x: 40, y: 10 }, f, 'k')).toMatchObject({ x: -64 + 40 - 1, y: -94 + 10 - 2 });
   });
 });
 
@@ -280,7 +281,7 @@ describe(ambientOverlays.name, () => {
     const owner = { key: 'b7', col: 1, row: 1, file: 'buildings/forge-2.png' };
     const kinds = (SPOTS[owner.file] ?? []).map((s) => s.k);
     const o = ambientOverlays(owner, 0);
-    expect(o.length).toBe(kinds.filter((k) => k === 'smoke' || k === 'glow').length);
+    expect(o.length).toBe(kinds.filter((k) => k === SpotKind.SMOKE || k === SpotKind.GLOW).length);
     expect(o.some((x) => x.art.id.startsWith('smoke'))).toBe(true);
     expect(o.some((x) => x.art.id.startsWith('glow'))).toBe(true);
     expect(new Set(o.map((x) => x.key)).size).toBe(o.length);
@@ -530,7 +531,7 @@ describe(buildingOverlays.name, () => {
 
   it('lights the windows at night', () => {
     const lit = buildingOverlays(owner('buildings/cottage-1.png'), BuildingType.COTTAGE, 1, QUIET_TOWN, 0, true);
-    const windows = (SPOTS['buildings/cottage-1.png'] ?? []).filter((s) => s.k === 'window').length;
+    const windows = (SPOTS['buildings/cottage-1.png'] ?? []).filter((s) => s.k === SpotKind.WINDOW).length;
     expect(windows).toBeGreaterThan(0);
     expect(lit.filter((o) => o.art.id.startsWith('lamp') && o.light)).toHaveLength(windows);
     expect(buildingOverlays(owner('buildings/cottage-1.png'), BuildingType.COTTAGE, 1, QUIET_TOWN, 0).some((o) => o.art.id.startsWith('lamp'))).toBe(false);
@@ -586,25 +587,25 @@ describe(weatherAt.name, () => {
     );
     const share = (w: string | null) => summer.filter((x) => x === w).length / summer.length;
     expect(share(null)).toBeGreaterThan(0.65);
-    expect(share('rain')).toBeGreaterThan(0.08);
-    expect(share('storm')).toBeGreaterThan(0.01);
-    expect(share('snow')).toBe(0);
+    expect(share(Weather.RAIN)).toBeGreaterThan(0.08);
+    expect(share(Weather.STORM)).toBeGreaterThan(0.01);
+    expect(share(Weather.SNOW)).toBe(0);
     const winter = Array.from({ length: 16 * 6 * 30 }, (_, i) =>
       weatherAt(new Date(Date.UTC(2026, 0, 1 + (i % 30), (Math.floor(i / 30) % 6) * 4)), Math.floor(i / 180)),
     );
-    expect(winter).toContain('snow');
-    expect(winter).not.toContain('rain');
+    expect(winter).toContain(Weather.SNOW);
+    expect(winter).not.toContain(Weather.RAIN);
   });
 });
 
 describe(particlesAt.name, () => {
   it('fills the view with drops or flakes, more in a storm, none when dry', () => {
-    const rain = particlesAt('rain', 0, 800, 600);
+    const rain = particlesAt(Weather.RAIN, 0, 800, 600);
     expect(rain.length).toBe(96);
-    expect(particlesAt('storm', 0, 800, 600).length).toBeGreaterThan(rain.length);
+    expect(particlesAt(Weather.STORM, 0, 800, 600).length).toBeGreaterThan(rain.length);
     expect(particlesAt(null, 0, 800, 600)).toEqual([]);
-    expect(particlesAt('rain', 0, 0, 0)).toEqual([]);
-    for (const p of [...rain, ...particlesAt('snow', 5000, 800, 600)]) {
+    expect(particlesAt(Weather.RAIN, 0, 0, 0)).toEqual([]);
+    for (const p of [...rain, ...particlesAt(Weather.SNOW, 5000, 800, 600)]) {
       expect(p.x).toBeGreaterThanOrEqual(0);
       expect(p.x).toBeLessThan(800);
       expect(p.y).toBeGreaterThanOrEqual(0);
@@ -613,8 +614,8 @@ describe(particlesAt.name, () => {
   });
 
   it('lets rain fall fast and snow drift, as time goes by', () => {
-    const [r0, r1] = [particlesAt('rain', 0, 800, 600)[0], particlesAt('rain', 100, 800, 600)[0]];
-    const [s0, s1] = [particlesAt('snow', 0, 800, 600)[0], particlesAt('snow', 100, 800, 600)[0]];
+    const [r0, r1] = [particlesAt(Weather.RAIN, 0, 800, 600)[0], particlesAt(Weather.RAIN, 100, 800, 600)[0]];
+    const [s0, s1] = [particlesAt(Weather.SNOW, 0, 800, 600)[0], particlesAt(Weather.SNOW, 100, 800, 600)[0]];
     const dy = (a: { y: number }, b: { y: number }) => (b.y - a.y + 600) % 600;
     expect(dy(r0!, r1!)).toBeGreaterThan(30);
     expect(dy(s0!, s1!)).toBeLessThan(10);
@@ -641,7 +642,7 @@ describe(skyAt.name, () => {
       const night = skyAt(z, 0, 800, 600, midnight);
       expect(night.darkness).toBeGreaterThan(day.darkness);
       if (!day.weather) expect(day.darkness).toBe(0);
-      if (day.weather !== 'storm') expect(day.flash).toBe(0);
+      if (day.weather !== Weather.STORM) expect(day.flash).toBe(0);
       expect(day.particles.length > 0).toBe(!!day.weather);
     }
   });
@@ -790,7 +791,7 @@ describe(sheepFrame.name, () => {
 
   it("makes the farm's sheep move", () => {
     expect(ambientOverlays({ key: 'f', col: 0, row: 0, file: 'buildings/farm-1.png' }, 0).filter((o) => o.art.id.startsWith('sheep')).length).toBe(
-      (SPOTS['buildings/farm-1.png'] ?? []).filter((s) => s.k === 'sheep').length,
+      (SPOTS['buildings/farm-1.png'] ?? []).filter((s) => s.k === SpotKind.SHEEP).length,
     );
   });
 });

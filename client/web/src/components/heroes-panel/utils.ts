@@ -1,15 +1,13 @@
 import type { HeroBean } from '@marchlands/api-client';
 import { HeroStatus } from '@marchlands/core';
-
-import { HERO_VIEW_KEY } from '@/components/heroes-panel/constants';
-import type { HeroView } from '@/components/heroes-panel/types';
+import { HERO_VIEW_KEY, HeroView } from '@/components/heroes-panel/constants';
 
 /** How this browser last chose to show the heroes: the sheet unless the cards were picked. */
 export function readHeroView(): HeroView {
   try {
-    return localStorage.getItem(HERO_VIEW_KEY) === 'list' ? 'list' : 'sheet';
+    return localStorage.getItem(HERO_VIEW_KEY) === HeroView.LIST ? HeroView.LIST : HeroView.SHEET;
   } catch {
-    return 'sheet';
+    return HeroView.SHEET;
   }
 }
 

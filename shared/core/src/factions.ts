@@ -5,7 +5,7 @@
 // data-factions namespace, keyed by FactionId.
 
 import { BALANCE } from '#/balance.ts';
-import { FactionId, type ResourceKey } from '#/constants.ts';
+import { FactionId, ResourceKey } from '#/constants.ts';
 import { stateOf } from '#/world.ts';
 
 /** How a faction behaves towards others: trade, war, or neither. */
@@ -29,15 +29,27 @@ export interface Faction {
 
 export const FACTIONS: readonly Faction[] = [
   // the north: Friesland, Saxony, North March
-  { id: FactionId.SAXON_LEAGUE, zones: [0, 1, 2], strong: ['wood'], short: ['stone'], temperament: FactionTemperament.TRADING },
+  { id: FactionId.SAXON_LEAGUE, zones: [0, 1, 2], strong: [ResourceKey.WOOD], short: [ResourceKey.STONE], temperament: FactionTemperament.TRADING },
   // the west: Lower Lorraine, Upper Lorraine, Burgundy
-  { id: FactionId.LOTHARINGIAN_CROWN, zones: [4, 8, 12], strong: ['stone'], short: ['food'], temperament: FactionTemperament.INSULAR },
+  { id: FactionId.LOTHARINGIAN_CROWN, zones: [4, 8, 12], strong: [ResourceKey.STONE], short: [ResourceKey.FOOD], temperament: FactionTemperament.INSULAR },
   // the centre, bordering every other faction: Franconia, Thuringia, Swabia, Bavaria
-  { id: FactionId.FRANCONIAN_HEARTLAND, zones: [5, 6, 9, 10], strong: ['food'], short: ['wood'], temperament: FactionTemperament.TRADING },
+  { id: FactionId.FRANCONIAN_HEARTLAND, zones: [5, 6, 9, 10], strong: [ResourceKey.FOOD], short: [ResourceKey.WOOD], temperament: FactionTemperament.TRADING },
   // the east: Bohemia, Moravia, Carinthia
-  { id: FactionId.BOHEMIAN_CROWN, zones: [3, 7, 11], strong: ['iron', 'stone'], short: ['food'], temperament: FactionTemperament.WARLIKE },
+  {
+    id: FactionId.BOHEMIAN_CROWN,
+    zones: [3, 7, 11],
+    strong: [ResourceKey.IRON, ResourceKey.STONE],
+    short: [ResourceKey.FOOD],
+    temperament: FactionTemperament.WARLIKE,
+  },
   // the south: Lombardy, Tuscany, Romagna
-  { id: FactionId.ITALIAN_LEAGUE, zones: [13, 14, 15], strong: ['food', 'gold'], short: ['iron'], temperament: FactionTemperament.TRADING },
+  {
+    id: FactionId.ITALIAN_LEAGUE,
+    zones: [13, 14, 15],
+    strong: [ResourceKey.FOOD, ResourceKey.GOLD],
+    short: [ResourceKey.IRON],
+    temperament: FactionTemperament.TRADING,
+  },
 ];
 
 const BY_ZONE = new Map(FACTIONS.flatMap((f) => f.zones.map((z) => [z, f] as const)));

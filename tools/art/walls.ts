@@ -4,7 +4,7 @@
 // low stone walls, band 3 high stone walls with towers, band 4 a crenellated fortress with banners.
 
 import { IsoCanvas } from './iso.ts';
-import type { Colour } from './pixel.ts';
+import { CLEAR, type Colour } from './pixel.ts';
 import type { WallPiece } from '../../client/web/src/lib/game-art.ts';
 
 type Fill = Colour | ((x: number, y: number) => Colour);
@@ -39,7 +39,7 @@ function wall(band: number): IsoCanvas {
   if (band === 1) palisade(c, 0, 16, 3, 16);
   else {
     const top = band === 2 ? 7 : band === 3 ? 2 : 3;
-    if (band === 4) rect(c, 0, 0, 16, 3, (x) => (x % 4 < 2 ? 'stoneTop' : 'clear'));
+    if (band === 4) rect(c, 0, 0, 16, 3, (x) => (x % 4 < 2 ? 'stoneTop' : CLEAR));
     rect(c, 0, top, 16, 2, 'stoneTop');
     rect(c, 0, top + 2, 16, 16 - top - 2, masonry(top + 2));
     if (band === 4) rect(c, 7, 8, 1, 4, 'outline');
@@ -62,7 +62,7 @@ function side(band: number): IsoCanvas {
     rect(c, x0, 0, x1 - x0, 16, (_x, y) => (y % 8 === 0 ? 'stoneL' : 'stoneTop'));
     rect(c, x0 - 1, 0, 1, 16, 'stoneL');
     rect(c, x1, 0, 1, 16, 'stoneR');
-    if (band === 4) rect(c, 1, 0, 2, 16, (_x, y) => (y % 4 < 2 ? 'stoneTop' : 'clear'));
+    if (band === 4) rect(c, 1, 0, 2, 16, (_x, y) => (y % 4 < 2 ? 'stoneTop' : CLEAR));
   }
   c.outline({ edges: false });
   return c;
@@ -81,7 +81,7 @@ function corner(band: number): IsoCanvas {
     palisade(c, 4, 16, 2, 5);
   } else {
     const [x0, x1, top] = band === 2 ? [5, 19, 7] : [3, 21, 5];
-    if (band >= 3) rect(c, x0, top - 3, x1 - x0, 3, (x) => ((x - x0) % 4 < 2 ? 'stoneTop' : 'clear'));
+    if (band >= 3) rect(c, x0, top - 3, x1 - x0, 3, (x) => ((x - x0) % 4 < 2 ? 'stoneTop' : CLEAR));
     rect(c, x0, top, x1 - x0, 5, 'stoneTop');
     rect(c, x0, top + 5, Math.round((x1 - x0) * 0.7), 24 - top - 5, masonry(top + 5));
     rect(c, x0 + Math.round((x1 - x0) * 0.7), top + 5, x1 - x0 - Math.round((x1 - x0) * 0.7), 24 - top - 5, masonry(top + 5, 'stoneR'));
@@ -125,7 +125,7 @@ function gate(band: number): IsoCanvas {
       rect(c, 11, 22, 10, 1, 'metal');
     } else doors(12, 17, 8, 15);
     for (const x0 of [1, 23]) {
-      rect(c, x0, 3, 8, 3, (x) => (band === 4 && (x - x0) % 4 >= 2 ? 'clear' : 'stoneTop'));
+      rect(c, x0, 3, 8, 3, (x) => (band === 4 && (x - x0) % 4 >= 2 ? CLEAR : 'stoneTop'));
       rect(c, x0, 6, 8, 3, 'stoneTop');
       rect(c, x0, 9, 6, 23, masonry(9));
       rect(c, x0 + 6, 9, 2, 23, masonry(9, 'stoneR'));

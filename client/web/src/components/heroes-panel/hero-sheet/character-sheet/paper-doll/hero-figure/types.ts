@@ -1,4 +1,5 @@
 import type { Sex } from '@marchlands/core';
+import type { FigureMotion } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure/constants';
 import type { FigureHairColour, FigureHairStyle, FigureSkinTone } from '@/lib/game-art';
 
 /** A hero's body: its sex, skin tone and hair. */
@@ -8,9 +9,6 @@ export interface FigureBody {
   style: FigureHairStyle;
   hair: FigureHairColour;
 }
-
-/** How a layer moves: the cape stirs, the body breathes, the legs stand still. */
-type FigureMotion = 'sway' | 'breath' | 'still';
 
 /** A layer of the figure: its file, how it moves, and whether its stones glow. */
 export interface FigureLayer {

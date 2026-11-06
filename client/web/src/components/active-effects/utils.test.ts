@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { BUFF_IDS, BuffId, itemEffect, itemGoldPrice, ItemId, ITEMS, msg, ref } from '@marchlands/core';
+import { BUFF_IDS, BuffId, itemEffect, ItemEffectKind, itemGoldPrice, ItemId, ITEMS, msg, ref, ResourceKey } from '@marchlands/core';
 
-import { GROUPS, STORE_KEY } from '@/components/active-effects/constants';
+import { ExtensionKind, GROUPS, STORE_KEY } from '@/components/active-effects/constants';
 import type { Buff, Slot } from '@/components/active-effects/types';
 import { adds, extensionFor, readCollapsed, slotItems, slotOf } from '@/components/active-effects/utils';
 
@@ -13,9 +13,9 @@ vi.mock('@marchlands/core', async (importOriginal) => {
     ...core,
     itemEffect: (id: string) =>
       id === 'test.hourly'
-        ? { kind: 'buff', buff: core.BuffId.ATTACK, desc: core.msg('buff.troopAttack', { percent: 20 }), durationMs: 5.6 * 3_600_000 }
+        ? { kind: core.ItemEffectKind.BUFF, buff: core.BuffId.ATTACK, desc: core.msg('buff.troopAttack', { percent: 20 }), durationMs: 5.6 * 3_600_000 }
         : id === 'test.hour'
-          ? { kind: 'buff', buff: core.BuffId.ATTACK, desc: core.msg('buff.troopAttack', { percent: 20 }), durationMs: 3_600_000 }
+          ? { kind: core.ItemEffectKind.BUFF, buff: core.BuffId.ATTACK, desc: core.msg('buff.troopAttack', { percent: 20 }), durationMs: 3_600_000 }
           : core.itemEffect(id),
   };
 });
@@ -24,7 +24,7 @@ const food: Slot = { buff: BuffId.FOOD_PRODUCTION, label: 'Food', boost: '+25%' 
 const truce = GROUPS.flatMap((g) => g.slots).find((s) => s.buff === BuffId.TRUCE)!;
 const buff = (itemId?: string): Buff => ({
   id: BuffId.FOOD_PRODUCTION,
-  desc: msg('buff.production', { resource: ref.resource('food'), percent: 25 }),
+  desc: msg('buff.production', { resource: ref.resource(ResourceKey.FOOD), percent: 25 }),
   endTime: 0,
   itemId,
 });
@@ -106,12 +106,12 @@ describe(slotItems.name, () => {
       expect(ids.length).toBeGreaterThan(0);
       const expected = ITEMS.filter((i) => {
         const e = itemEffect(i.id);
-        return e?.kind === 'buff' && e.buff === slot.buff;
+        return e?.kind === ItemEffectKind.BUFF && e.buff === slot.buff;
       }).map((i) => i.id);
       expect([...ids].sort()).toEqual([...expected].sort());
       const durations = ids.map((id) => {
         const e = itemEffect(id);
-        return e?.kind === 'buff' ? e.durationMs : 0;
+        return e?.kind === ItemEffectKind.BUFF ? e.durationMs : 0;
       });
       expect(durations).toEqual([...durations].sort((a, b) => b - a));
     }
@@ -154,7 +154,7 @@ describe(extensionFor.name, () => {
       [ItemId.PLOWSHARES, 2],
       [ItemId.IRON_RAKE, 1],
     ]);
-    expect(extensionFor(food, undefined, counts)).toEqual({ kind: 'use', itemId: ItemId.IRON_RAKE, owned: 1 });
+    expect(extensionFor(food, undefined, counts)).toEqual({ kind: ExtensionKind.USE, itemId: ItemId.IRON_RAKE, owned: 1 });
   });
 
   it('prefers the item that set the running bonus', () => {
@@ -162,7 +162,7 @@ describe(extensionFor.name, () => {
       [ItemId.PLOWSHARES, 2],
       [ItemId.IRON_RAKE, 1],
     ]);
-    expect(extensionFor(food, buff(ItemId.PLOWSHARES), counts)).toEqual({ kind: 'use', itemId: ItemId.PLOWSHARES, owned: 2 });
+    expect(extensionFor(food, buff(ItemId.PLOWSHARES), counts)).toEqual({ kind: ExtensionKind.USE, itemId: ItemId.PLOWSHARES, owned: 2 });
   });
 
   it('ignores a running item that does not belong to the slot, and items owned zero times', () => {
@@ -171,17 +171,21 @@ describe(extensionFor.name, () => {
       [ItemId.IRON_RAKE, 0],
       [ItemId.ARCH_SAW, 9],
     ]);
-    expect(extensionFor(food, buff(ItemId.ARCH_SAW), counts)).toEqual({ kind: 'use', itemId: ItemId.PLOWSHARES, owned: 4 });
+    expect(extensionFor(food, buff(ItemId.ARCH_SAW), counts)).toEqual({ kind: ExtensionKind.USE, itemId: ItemId.PLOWSHARES, owned: 4 });
   });
 
   it('buys one with gold when none is owned, in the same order', () => {
-    expect(extensionFor(food, undefined, new Map())).toEqual({ kind: 'buy', itemId: ItemId.IRON_RAKE, price: itemGoldPrice(ItemId.IRON_RAKE) });
-    expect(extensionFor(food, buff(ItemId.PLOWSHARES), new Map())).toEqual({ kind: 'buy', itemId: ItemId.PLOWSHARES, price: itemGoldPrice(ItemId.PLOWSHARES) });
+    expect(extensionFor(food, undefined, new Map())).toEqual({ kind: ExtensionKind.BUY, itemId: ItemId.IRON_RAKE, price: itemGoldPrice(ItemId.IRON_RAKE) });
+    expect(extensionFor(food, buff(ItemId.PLOWSHARES), new Map())).toEqual({
+      kind: ExtensionKind.BUY,
+      itemId: ItemId.PLOWSHARES,
+      price: itemGoldPrice(ItemId.PLOWSHARES),
+    });
   });
 
   it('skips items that are not for sale', () => {
     const slot: Slot = { ...food, items: ['unknown.item', ItemId.PLOWSHARES] };
-    expect(extensionFor(slot, undefined, new Map())).toEqual({ kind: 'buy', itemId: ItemId.PLOWSHARES, price: itemGoldPrice(ItemId.PLOWSHARES) });
+    expect(extensionFor(slot, undefined, new Map())).toEqual({ kind: ExtensionKind.BUY, itemId: ItemId.PLOWSHARES, price: itemGoldPrice(ItemId.PLOWSHARES) });
   });
 
   it('cannot extend when nothing is owned or for sale', () => {

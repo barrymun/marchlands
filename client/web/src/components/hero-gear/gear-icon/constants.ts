@@ -1,3 +1,5 @@
+import { SpotKind } from '@marchlands/core';
+
 import spotsJson from '@/assets/spots.json';
 import type { Rgb, Spot } from '@/components/iso-anim/types';
 import { ANIMATION_FPS } from '@/components/iso-viewport/constants';
@@ -44,12 +46,18 @@ export const BURST_FLASH: readonly number[] = [170, 110, 60, 25];
 export const BURST_SPARKS = 12;
 
 /** The pieces' own movement (spots the art scripts record at its pivot): which kinds there are. */
-export const MOVE_KINDS: ReadonlySet<string> = new Set(['stir', 'flap', 'nod', 'swing', 'sway']);
+export const MOVE_KINDS: ReadonlySet<SpotKind> = new Set([SpotKind.STIR, SpotKind.FLAP, SpotKind.NOD, SpotKind.SWING, SpotKind.SWAY]);
 /** A piece moves by itself once in this long (ms), for MOVE_MS. */
 export const MOVE_EVERY_MS = 5500;
 export const MOVE_MS = 1500;
 /** How far each movement goes at its furthest point (pixels, before rounding): a cape's hem, a plume's tip, a wing's tip, the muzzle, a pendant. */
-export const MOVE_PX: Readonly<Record<string, number>> = { stir: 1.6, sway: 1.6, flap: 2, nod: 1.4, swing: 1.4 };
+export const MOVE_PX: Readonly<Partial<Record<SpotKind, number>>> = {
+  [SpotKind.STIR]: 1.6,
+  [SpotKind.SWAY]: 1.6,
+  [SpotKind.FLAP]: 2,
+  [SpotKind.NOD]: 1.4,
+  [SpotKind.SWING]: 1.4,
+};
 
 /** The sprites' palette colours the icons move in (tools/art/pixel.ts, PALETTE): white light, gold (a burst's sparks below level 3), and each level's bright colour (gearNHi). */
 export const WHITE: Rgb = [255, 255, 255];

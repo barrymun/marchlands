@@ -16,7 +16,7 @@ import {
 } from '@marchlands/api-client';
 import type { BuffId } from '@marchlands/core';
 
-import { GROUPS, SLOT_BUFFS, STORE_KEY, WARN_MS } from '@/components/active-effects/constants';
+import { ExtensionKind, GROUPS, SLOT_BUFFS, STORE_KEY, WARN_MS } from '@/components/active-effects/constants';
 import { SlotCell } from '@/components/active-effects/slot-cell/slot-cell';
 import type { Buff, Extension, Slot } from '@/components/active-effects/types';
 import { adds, extensionFor, readCollapsed } from '@/components/active-effects/utils';
@@ -71,7 +71,7 @@ export function ActiveEffects({
   }, refresh);
 
   function extend(slot: Slot, ext: NonNullable<Extension>) {
-    if (ext.kind === 'buy') return setBuying({ slot, itemId: ext.itemId, price: ext.price });
+    if (ext.kind === ExtensionKind.BUY) return setBuying({ slot, itemId: ext.itemId, price: ext.price });
     use.mutate(
       { path: { itemId: ext.itemId }, body: { cityId: city.id } },
       { onSuccess: () => toast.success(t('extended', { slot: slot.label, adds: adds(ext.itemId) })) },

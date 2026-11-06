@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { BuildingBean } from '@marchlands/api-client';
 import { BALANCE, BuildingType, TOWN_HALL_POSITION, TroopType } from '@marchlands/core';
 
-import { CITY_ART, OUTSIDE, VIEW_KEY } from '@/components/buildings-panel/constants';
+import { CITY_ART, CityView, OUTSIDE, VIEW_KEY } from '@/components/buildings-panel/constants';
 import { cityArt, fieldSlots, fieldWorkers, readView, saveView, townState, townWalkers } from '@/components/buildings-panel/utils';
 
 const building = (positionId: number, typeId: number, level: number): BuildingBean => ({ positionId, typeId, level, status: 0, startTime: 0, endTime: 0 });
@@ -43,11 +43,11 @@ describe(readView.name, () => {
 
   it('reads the grid when it was chosen, and the scene otherwise', () => {
     vi.stubGlobal('localStorage', { getItem: (key: string) => (key === VIEW_KEY ? 'grid' : null) });
-    expect(readView()).toBe('grid');
+    expect(readView()).toBe(CityView.GRID);
     vi.stubGlobal('localStorage', { getItem: () => 'something else' });
-    expect(readView()).toBe('scene');
+    expect(readView()).toBe(CityView.SCENE);
     vi.stubGlobal('localStorage', { getItem: () => null });
-    expect(readView()).toBe('scene');
+    expect(readView()).toBe(CityView.SCENE);
   });
 
   it('falls back to the scene when storage throws', () => {
@@ -56,7 +56,7 @@ describe(readView.name, () => {
         throw new Error('blocked');
       },
     });
-    expect(readView()).toBe('scene');
+    expect(readView()).toBe(CityView.SCENE);
   });
 });
 
@@ -66,7 +66,7 @@ describe(saveView.name, () => {
   it('stores the view under its key', () => {
     const setItem = vi.fn();
     vi.stubGlobal('localStorage', { setItem });
-    saveView('grid');
+    saveView(CityView.GRID);
     expect(setItem).toHaveBeenCalledWith(VIEW_KEY, 'grid');
   });
 
@@ -76,7 +76,7 @@ describe(saveView.name, () => {
         throw new Error('blocked');
       },
     });
-    expect(() => saveView('scene')).not.toThrow();
+    expect(() => saveView(CityView.SCENE)).not.toThrow();
   });
 });
 

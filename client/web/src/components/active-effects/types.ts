@@ -1,4 +1,5 @@
 import type { BuffId } from '@marchlands/core';
+import type { ExtensionKind } from '@/components/active-effects/constants';
 import type { AnyMessage } from '@/lib/messages';
 
 export interface Buff {
@@ -20,4 +21,5 @@ export interface Slot {
 }
 
 /** How the + button extends a bonus: use an owned item (the running one first), else buy one with the city's gold. */
-export type Extension = { kind: 'use'; itemId: string; owned: number } | { kind: 'buy'; itemId: string; price: number } | null;
+export type Extension =
+  { kind: typeof ExtensionKind.USE; itemId: string; owned: number } | { kind: typeof ExtensionKind.BUY; itemId: string; price: number } | null;

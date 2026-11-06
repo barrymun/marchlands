@@ -10,6 +10,7 @@ import {
   type QuestDef,
   questGroupsWithQuests,
   type QuestTarget,
+  QuestTargetKind,
   questTargetMessage,
   RESOURCE_KEYS,
 } from '@marchlands/core';
@@ -42,11 +43,11 @@ function questWith(pred: (t: QuestTarget) => boolean): QuestDef {
   return q;
 }
 const buildingQuest = (typeId: number, level: number, count?: number) =>
-  questWith((t) => t.kind === 'building' && t.typeId === typeId && t.level === level && t.count === count);
+  questWith((t) => t.kind === QuestTargetKind.BUILDING && t.typeId === typeId && t.level === level && t.count === count);
 const kindQuest = (kind: QuestTarget['kind']) => questWith((t) => t.kind === kind);
 
 const TOWN_HALL_2 = buildingQuest(BuildingType.TOWN_HALL, 2);
-const FAIR_TAXES = kindQuest('taxRate');
+const FAIR_TAXES = kindQuest(QuestTargetKind.TAX_RATE);
 
 /** Is the quest finished (targets met or claimed) for the player now? */
 async function finished(g: TestGame, p: TestPlayer, q: QuestDef) {
@@ -127,14 +128,14 @@ describe(quests.questList.name, () => {
   it('evaluates research, troops, fortifications, population and prestige', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      const research = kindQuest('research');
-      const militia = questWith((t) => t.kind === 'troops' && t.key === 'militia');
-      const traps = questWith((t) => t.kind === 'troops' && t.key === 'trap');
-      const population = kindQuest('population');
-      const prestige = kindQuest('prestige');
+      const research = kindQuest(QuestTargetKind.RESEARCH);
+      const militia = questWith((t) => t.kind === QuestTargetKind.TROOPS && t.key === 'militia');
+      const traps = questWith((t) => t.kind === QuestTargetKind.TROOPS && t.key === 'trap');
+      const population = kindQuest(QuestTargetKind.POPULATION);
+      const prestige = kindQuest(QuestTargetKind.PRESTIGE);
       for (const q of [research, militia, traps, population, prestige]) expect(await finished(g, a, q)).toBe(false);
 
-      const r = research.targets[0] as Extract<QuestTarget, { kind: 'research' }>;
+      const r = research.targets[0] as Extract<QuestTarget, { kind: typeof QuestTargetKind.RESEARCH }>;
       await setResearch(g, a, r.techId, r.level);
       await setCityStats(g, a, { troops: { militia: 100 }, population: 1000 });
       const b = await cityBundle(g, a);
@@ -150,10 +151,10 @@ describe(quests.questList.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
-      const recruit = kindQuest('heroes');
-      const mayor = kindQuest('mayor');
-      const join = kindQuest('alliance');
-      const correspondence = kindQuest('mailSent');
+      const recruit = kindQuest(QuestTargetKind.HEROES);
+      const mayor = kindQuest(QuestTargetKind.MAYOR);
+      const join = kindQuest(QuestTargetKind.ALLIANCE);
+      const correspondence = kindQuest(QuestTargetKind.MAIL_SENT);
 
       await setBuildings(g, a, [[0, BuildingType.INN, 1]]);
       await heroes.tavern(g, a.id, a.cityId); // offers in the inn are not the player's heroes
@@ -201,7 +202,7 @@ describe(quests.claimQuest.name, () => {
   it('gives an item award to the player', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      const mayor = kindQuest('mayor');
+      const mayor = kindQuest(QuestTargetKind.MAYOR);
       expect(mayor.award.items).toEqual({ [ItemId.CROSS_MEDAL]: 1 });
       await heroes.appointMayor(g, a.id, await addHero(g, a));
       const had = (await reloadPlayer(g, a)).items[ItemId.CROSS_MEDAL] ?? 0;

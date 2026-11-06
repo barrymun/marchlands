@@ -9,12 +9,15 @@ import {
   groupKey,
   groupTarget,
   homeFaction,
+  MarketOrderType,
   MarketSide,
   MINUTE,
   msg,
   priceBand,
+  ResourceKey,
   stateOf,
   TileType,
+  TradeSide,
   worldGold,
   worldTotals,
 } from '@marchlands/core';
@@ -77,7 +80,7 @@ describe(npcTradeTick.name, () => {
         { playerIds: [], cmd: PushCmd.MARKET_UPDATE, data: { resTypes: [0, 1, 2, 3] } },
         { playerIds: [], cmd: PushCmd.MARKET_UPDATE, data: { resTypes: [0, 1, 2, 3] } },
       ]);
-      expect(h.ticker.every((x) => x.resource === 'food')).toBe(true);
+      expect(h.ticker.every((x) => x.resource === ResourceKey.FOOD)).toBe(true);
     }));
 
   it("fills players' resting orders the factions' price has crossed, at the order's price at most", () =>
@@ -93,7 +96,7 @@ describe(npcTradeTick.name, () => {
       expect(trade).toMatchObject({ amount: 1000, factions: true, merchant: false });
       expect(trade?.price).toBeLessThanOrEqual(price);
       // the goods and the escrow it didn't need come as zero-time shipments
-      expect((await market.myShipments(g, a.id)).map((s) => s.resourceName).sort()).toEqual(['gold', 'wood']);
+      expect((await market.myShipments(g, a.id)).map((s) => s.resourceName).sort()).toEqual([ResourceKey.GOLD, ResourceKey.WOOD]);
     }));
 });
 
@@ -105,7 +108,7 @@ describe("the factions' gold", () => {
       const keys = Object.keys(econ.gold);
       await saveNpcEconomy(g, { ...econ, gold: Object.fromEntries(keys.map((k) => [k, 1000 / keys.length])) });
       const a = await createTrader(g);
-      const sold = await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, type: 'market' });
+      const sold = await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 50_000, type: MarketOrderType.MARKET });
       expect(sold.filled).toBe(50_000);
       expect(sold.factionsFilled).toBeGreaterThan(0);
       expect(sold.factionsFilled).toBeLessThan(1100);
@@ -119,7 +122,7 @@ describe("the factions' gold", () => {
     game(async (g) => {
       const econ = await trading(g);
       const a = await createTrader(g);
-      const bought = await market.placeOrder(g, a.id, a.cityId, { resType: Res.FOOD, side: MarketSide.BUY, amount: 10_000, type: 'market' });
+      const bought = await market.placeOrder(g, a.id, a.cityId, { resType: Res.FOOD, side: MarketSide.BUY, amount: 10_000, type: MarketOrderType.MARKET });
       const after = await loadNpcEconomy(g, false);
       expect(after && worldGold(after, after.groups).gold - worldGold(econ, econ.groups).gold).toBeCloseTo(bought.gold - bought.fee, -1);
     }));
@@ -142,15 +145,15 @@ describe('trading with the factions', () => {
     game(async (g) => {
       const before = await trading(g);
       const a = await createTrader(g);
-      const { target, stock } = worldTotals(before, before.groups, 'wood');
-      const order = { resType: Res.WOOD, side: MarketSide.BUY, amount: 50_000, type: 'market' } as const;
+      const { target, stock } = worldTotals(before, before.groups, ResourceKey.WOOD);
+      const order = { resType: Res.WOOD, side: MarketSide.BUY, amount: 50_000, type: MarketOrderType.MARKET } as const;
       const q = await market.quote(g, a.id, order);
       const { order: _o, ...placed } = await market.placeOrder(g, a.id, a.cityId, order);
       expect(placed).toEqual(q);
       expect(placed).toMatchObject({ filled: 50_000, factionsFilled: 50_000, merchantFilled: 0, playerFilled: 0 });
-      expect(placed.avgPrice).toBeCloseTo(factionMarginal(target, stock, 'buy'), 3);
+      expect(placed.avgPrice).toBeCloseTo(factionMarginal(target, stock, TradeSide.BUY), 3);
       const after = await loadNpcEconomy(g, false);
-      expect(after && worldTotals(after, after.groups, 'wood').stock).toBeCloseTo(stock - 50_000, 0);
+      expect(after && worldTotals(after, after.groups, ResourceKey.WOOD).stock).toBeCloseTo(stock - 50_000, 0);
       expect((await market.history(g, Res.WOOD)).trades[0]).toMatchObject({ factions: true, merchant: false });
     }));
 
@@ -193,7 +196,7 @@ describe(plunderNpc.name, () => {
 
 describe("standing and the factions' prices", () => {
   const R = BALANCE.reputation;
-  const order = { resType: Res.WOOD, side: MarketSide.BUY, amount: 50_000, type: 'market' } as const;
+  const order = { resType: Res.WOOD, side: MarketSide.BUY, amount: 50_000, type: MarketOrderType.MARKET } as const;
 
   /** A trader and its home faction, the player's standing with it moved by `standing`. */
   async function trader(g: TestGame, standing = 0, res = {}) {
@@ -207,14 +210,14 @@ describe("standing and the factions' prices", () => {
   it("prices a city's trade with the factions by its player's standing with its home faction", () =>
     game(async (g) => {
       const econ = await trading(g);
-      const { target, stock } = worldTotals(econ, econ.groups, 'wood');
+      const { target, stock } = worldTotals(econ, econ.groups, ResourceKey.WOOD);
       const { p: neutral } = await trader(g);
       const { p: honoured } = await trader(g, R.max);
       const base = await market.quote(g, neutral.id, { ...order, cityId: neutral.cityId });
       const best = await market.quote(g, honoured.id, { ...order, cityId: honoured.cityId });
       expect(best.factionsFilled).toBe(50_000);
       expect(best.avgPrice).toBeLessThan(base.avgPrice!);
-      expect(best.avgPrice).toBeCloseTo(factionMarginal(target, stock, 'buy', R.spread.best), 3);
+      expect(best.avgPrice).toBeCloseTo(factionMarginal(target, stock, TradeSide.BUY, R.spread.best), 3);
       // without a city the quote is at the base spread
       expect(await market.quote(g, honoured.id, order)).toEqual(base);
       const { order: _o, ...placed } = await market.placeOrder(g, honoured.id, honoured.cityId, order);

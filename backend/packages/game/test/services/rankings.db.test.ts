@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { AllianceRank, BALANCE, BuildingType, msg } from '@marchlands/core';
+import { AllianceRank, BALANCE, BuildingType, HeroBuffId, msg } from '@marchlands/core';
 import { heroes as heroTable } from '@marchlands/db';
 
 import { refreshRankings } from '#/engine/rankings.ts';
@@ -182,9 +182,9 @@ describe(rankings.heroRanking.name, () => {
       for (let i = 0; i < 4; i++) await addHero(g, a, 10);
       const rows = await g.tx.select().from(heroTable);
       for (const [sort, key] of [
-        [2, 'management'],
-        [3, 'power'],
-        [4, 'stratagem'],
+        [2, HeroBuffId.MANAGEMENT],
+        [3, HeroBuffId.POWER],
+        [4, HeroBuffId.STRATAGEM],
       ] as const) {
         const expected = [...rows].sort((x, y) => y[key] - x[key] || x.id - y.id).map((h) => h.name);
         expect((await rankings.heroRanking(g, sort, 1, 10)).beans.map((x) => x.name)).toEqual(expected);

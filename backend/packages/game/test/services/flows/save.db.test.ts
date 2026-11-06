@@ -11,6 +11,7 @@ import {
   FlowWaitUntil,
   FortType,
   HealPayment,
+  HeroBuffId,
   msg,
   TimedEventType,
   TroopType,
@@ -22,7 +23,7 @@ import { addCity, createTestPlayer } from '#test/support/factories.ts';
 import { armyPreset, flowOf, newFlow, runFlowIn, withHero } from '#test/support/flows.ts';
 import { game } from '#test/support/game.ts';
 
-const mayor = { type: FlowActionType.SET_MAYOR, stat: 'power' };
+const mayor = { type: FlowActionType.SET_MAYOR, stat: HeroBuffId.POWER };
 const waitTime = { type: FlowActionType.WAIT, until: FlowWaitUntil.TIME, minutes: 5 };
 
 describe(flows.listFlows.name, () => {
@@ -127,7 +128,12 @@ describe(flows.saveFlow.name, () => {
       expect((await flowOf(g, p, f.id)).lastPreview).toBeNull();
 
       await runFlowIn(g, p, f.id, undefined, true);
-      await flows.saveFlow(g, p.id, { id: f.id, name: 'Renamed', actions: [{ type: FlowActionType.SET_MAYOR, stat: 'management' }], cities: [p.cityId] });
+      await flows.saveFlow(g, p.id, {
+        id: f.id,
+        name: 'Renamed',
+        actions: [{ type: FlowActionType.SET_MAYOR, stat: HeroBuffId.MANAGEMENT }],
+        cities: [p.cityId],
+      });
       expect((await flowOf(g, p, f.id)).lastPreview).toBeNull();
     }));
 
@@ -142,7 +148,7 @@ describe(flows.saveFlow.name, () => {
       await expectRefused(flows.saveFlow(g, p.id, { id: f.id, name: 'Waits', actions: [mayor, waitTime] }), msg('flow.runningLocked'));
       await expectRefused(flows.saveFlow(g, p.id, { id: f.id, name: 'Waits', actions: [waitTime, mayor, mayor] }), msg('flow.runningLocked'));
       const longer = { type: FlowActionType.WAIT, until: FlowWaitUntil.TIME, minutes: 30 };
-      await flows.saveFlow(g, p.id, { id: f.id, name: 'Waits', actions: [{ type: FlowActionType.SET_MAYOR, stat: 'stratagem' }, longer, mayor] });
+      await flows.saveFlow(g, p.id, { id: f.id, name: 'Waits', actions: [{ type: FlowActionType.SET_MAYOR, stat: HeroBuffId.STRATAGEM }, longer, mayor] });
       expect((await flowOf(g, p, f.id)).actions[1]).toEqual(longer);
     }));
 

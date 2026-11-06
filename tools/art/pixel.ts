@@ -2,6 +2,7 @@
 // filled polygons and lines, centring, the outline that finishes a sprite, and the indexed PNG it is saved as.
 // IsoCanvas (iso.ts) builds the isometric buildings and tiles on it, and the troops are drawn on it directly.
 
+import type { SpotKind } from '@marchlands/core';
 import { indexedPng, type Rgb } from './png.ts';
 
 export const PALETTE = {
@@ -199,6 +200,8 @@ export const PALETTE = {
 } as const satisfies Record<string, Rgb>;
 
 export type Colour = keyof typeof PALETTE;
+/** The palette's first colour, index 0: no pixel, drawn transparent. */
+export const CLEAR = 'clear' satisfies Colour;
 const NAMES = Object.keys(PALETTE) as Colour[];
 const INDEX = new Map(NAMES.map((n, i) => [n, i]));
 /** A colour's palette index; every Colour is in the palette, so a miss is a typo in a drawing. */
@@ -216,7 +219,7 @@ export type Pt = readonly [number, number];
  * wheel's radius, a window's height, a field's width and depth in world units).
  */
 export interface Spot {
-  k: string;
+  k: SpotKind;
   x: number;
   y: number;
   n?: number;
@@ -306,7 +309,7 @@ export class PixelCanvas {
   }
 
   /** Record where something that moves stands, at a screen point (rounded to a pixel), with its size if it has one. */
-  spot(k: string, [x, y]: Pt, n?: number, m?: number) {
+  spot(k: SpotKind, [x, y]: Pt, n?: number, m?: number) {
     const s: Spot = { k, x: Math.round(x), y: Math.round(y) };
     if (n != null) s.n = Math.round(n * 10) / 10;
     if (m != null) s.m = Math.round(m * 10) / 10;

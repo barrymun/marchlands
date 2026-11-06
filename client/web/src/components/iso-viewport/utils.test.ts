@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+
+import { OutlineHalf } from '@/components/iso-viewport/constants';
 import type { Camera, Outline, Piece, View } from '@/components/iso-viewport/types';
 import {
   clampToScene,
@@ -282,7 +284,7 @@ describe(spriteAt.name, () => {
   });
 });
 
-const outline: Outline = { key: 'o', col: 100, row: 200, half: 'back', className: 'stroke-primary', width: 2 };
+const outline: Outline = { key: 'o', col: 100, row: 200, half: OutlineHalf.BACK, className: 'stroke-primary', width: 2 };
 
 describe(isOutline.name, () => {
   it('tells half an outline from a sprite and an overlay', () => {
@@ -303,8 +305,8 @@ describe(isOverlay.name, () => {
 describe(outlineHalves.name, () => {
   it('splits an outline into its back and front halves, keyed apart, the rest kept', () => {
     const [back, front] = outlineHalves({ key: 'o', col: 3, row: 4, className: 'stroke-sky-400', width: 2.5, dash: [5, 3] });
-    expect(back).toEqual({ key: 'ob', col: 3, row: 4, className: 'stroke-sky-400', width: 2.5, dash: [5, 3], half: 'back' });
-    expect(front).toEqual({ key: 'of', col: 3, row: 4, className: 'stroke-sky-400', width: 2.5, dash: [5, 3], half: 'front' });
+    expect(back).toEqual({ key: 'ob', col: 3, row: 4, className: 'stroke-sky-400', width: 2.5, dash: [5, 3], half: OutlineHalf.BACK });
+    expect(front).toEqual({ key: 'of', col: 3, row: 4, className: 'stroke-sky-400', width: 2.5, dash: [5, 3], half: OutlineHalf.FRONT });
   });
 });
 
@@ -318,7 +320,7 @@ describe(outlinePoints.name, () => {
   });
 
   it('runs the front half from the right corner under the bottom to the left corner', () => {
-    expect(outlinePoints({ ...outline, half: 'front' }, cam, view)).toEqual([
+    expect(outlinePoints({ ...outline, half: OutlineHalf.FRONT }, cam, view)).toEqual([
       { x: 352, y: 160 },
       { x: 320, y: 176 },
       { x: 288, y: 160 },
@@ -376,7 +378,7 @@ function fakeCanvases(width: number, height: number) {
 
 const sprite: Piece = { key: 's', col: 100, row: 200, src: 'castle.png' };
 const back = outline;
-const front: Outline = { ...outline, key: 'of', half: 'front' };
+const front: Outline = { ...outline, key: 'of', half: OutlineHalf.FRONT };
 
 describe(layOutlines.name, () => {
   it.each([

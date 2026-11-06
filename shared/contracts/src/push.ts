@@ -4,13 +4,13 @@
 
 import { z } from 'zod';
 
-import { FLOW_STATUSES, MessageSchema } from '@marchlands/core';
+import { ChatChannel, FLOW_STATUSES, MessageSchema } from '@marchlands/core';
 
 import { ArmyBean, BuffBean, BuildingBean, CityBean, HeroBean, ItemCount, PlayerInfo, ResourceBean } from '#/beans.ts';
 import { FortBean, Ms, TroopBean } from '#/common.ts';
-import { PushCmd } from '#/push-cmd.ts';
+import { ClientCmd, PushCmd } from '#/push-cmd.ts';
 
-export { PushCmd };
+export { ClientCmd, PushCmd };
 
 const int = z.number().int();
 const castleId = int.describe('city id');
@@ -83,8 +83,8 @@ export const PushSchemas = {
     .describe('(marchlands) sent to everyone connected, so open market screens refresh instead of asking every few seconds'),
 
   // chat / social
-  [PushCmd.CHANNEL_CHAT_MESSAGE]: ChatMsg(z.enum(['world', 'beginner'])),
-  [PushCmd.ALLIANCE_CHAT_MESSAGE]: ChatMsg(z.literal('alliance')),
+  [PushCmd.CHANNEL_CHAT_MESSAGE]: ChatMsg(z.enum([ChatChannel.WORLD, ChatChannel.BEGINNER])),
+  [PushCmd.ALLIANCE_CHAT_MESSAGE]: ChatMsg(z.literal(ChatChannel.ALLIANCE)),
   [PushCmd.PRIVATE_CHAT_MESSAGE]: z.object({ msg: z.string(), chatType: z.literal(0), fromUser: z.string(), fromId: int, time: Ms }),
   [PushCmd.SYSTEM_INFO_MESSAGE]: z.object({
     msg: MessageSchema.describe('what to tell the player, worded by the client'),

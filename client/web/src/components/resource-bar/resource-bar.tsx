@@ -2,7 +2,7 @@ import { Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import type { HeroBean, ResourceBean } from '@marchlands/api-client';
-import { BASIC_RESOURCES } from '@marchlands/core';
+import { BASIC_RESOURCES, ResourceKey } from '@marchlands/core';
 
 import { Breakdown } from '@/components/resource-bar/breakdown/breakdown';
 import { Rows } from '@/components/resource-bar/rows/rows';
@@ -25,8 +25,8 @@ export function ResourceBar({ resource, mayor, stacked }: { resource: ResourceBe
   const r = resource;
   const items = [
     {
-      key: 'gold' as const,
-      label: resourceLabel('gold'),
+      key: ResourceKey.GOLD,
+      label: resourceLabel(ResourceKey.GOLD),
       amount: live(r.gold, r.goldRate, Infinity, r.updatedAt, now),
       rate: r.goldRate,
       max: null,

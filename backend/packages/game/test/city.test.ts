@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { BALANCE, BuffId, computeCityStats, HeroStatus, mayorProductionBonus, msg, TileType } from '@marchlands/core';
+import { BALANCE, BASIC_RESOURCES, BuffId, computeCityStats, HeroStatus, mayorProductionBonus, msg, TileType } from '@marchlands/core';
 
 import { cityStats, economyContext, mayorOf, mayorStats } from '#/city.ts';
 import { bundle, cityRow, heroRow, playerRow, T0, tileRow } from '#test/support/city-rows.ts';
@@ -92,7 +92,7 @@ describe(cityStats.name, () => {
 
   it("adds the mayor's production bonus to every resource", () => {
     const s = cityStats(bundle({ heroes: [heroRow({ status: HeroStatus.MAYOR, management: 80 })] }), T0);
-    for (const r of ['food', 'wood', 'stone', 'iron'] as const) expect(s.bonusParts[r].mayor).toBe(mayorProductionBonus(80));
+    for (const r of BASIC_RESOURCES) expect(s.bonusParts[r].mayor).toBe(mayorProductionBonus(80));
   });
 
   it('feeds the troops at home and away', () => {

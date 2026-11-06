@@ -4,7 +4,7 @@
 
 import { Sex } from '@marchlands/core';
 
-import type { FigureHairColour, FigureHairStyle, FigureSkinTone } from '../../../client/web/src/lib/game-art.ts';
+import { type FigureHairColour, FigureHairStyle, type FigureSkinTone } from '../../../client/web/src/lib/game-art.ts';
 import { lit, type Shades, sweep } from '../gear/common.ts';
 import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
@@ -84,9 +84,9 @@ function crown(c: PixelCanvas, h: Shades, grow: number, nape: number) {
 /** A hairstyle in a colour. */
 export function hair(style: FigureHairStyle, colour: FigureHairColour): PixelCanvas {
   const h = hairShades(colour);
-  const sex = style === 'loose' || style === 'braid' ? Sex.FEMALE : Sex.MALE;
+  const sex = style === FigureHairStyle.LOOSE || style === FigureHairStyle.BRAID ? Sex.FEMALE : Sex.MALE;
   const parts: PixelCanvas[] = [];
-  if (style === 'loose')
+  if (style === FigureHairStyle.LOOSE)
     parts.push(
       part('hair-fall', (c) => {
         // a fall of hair down the back and over the near shoulder
@@ -98,7 +98,7 @@ export function hair(style: FigureHairStyle, colour: FigureHairColour): PixelCan
         );
       }),
     );
-  if (style === 'braid')
+  if (style === FigureHairStyle.BRAID)
     parts.push(
       part('hair-braid', (c) => {
         // a braid from behind the ear over the near shoulder and down the chest, plaited
@@ -114,7 +114,7 @@ export function hair(style: FigureHairStyle, colour: FigureHairColour): PixelCan
   parts.push(
     part('hair-crown', (c) => {
       crown(c, h, sex === Sex.FEMALE ? 0.9 : 0.6, sex === Sex.FEMALE ? 18 : 16);
-      if (style === 'beard') {
+      if (style === FigureHairStyle.BEARD) {
         // a beard along the jaw and round the mouth, a moustache above it
         for (let y = 15; y <= 22; y++)
           for (let x = 48; x <= 56; x++) {

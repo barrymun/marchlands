@@ -2,6 +2,8 @@
 // drops (2), and from 3 stones in the level's colour in settings that grow, a second stone from 6, wings from 8, and
 // at 10 crimson crystals in silver.
 
+import { SpotKind } from '@marchlands/core';
+
 import type { PixelCanvas } from '../pixel.ts';
 import { disc } from '../shapes.ts';
 import { canvas, fill, gem, look, setStone, shine, spike } from './common.ts';
@@ -9,7 +11,7 @@ import { canvas, fill, gem, look, setStone, shine, spike } from './common.ts';
 export function charm(level: number): PixelCanvas {
   const c = canvas('charm', level);
   // the tag or the drops swing as one below where they hang from the cord or the hooks
-  c.spot('swing', [16, level === 0 ? 11 : 13]);
+  c.spot(SpotKind.SWING, [16, level === 0 ? 11 : 13]);
   if (level === 0) {
     // a gold tag, engraved, hung from a loop of cord
     fill(

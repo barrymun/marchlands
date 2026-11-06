@@ -6,14 +6,14 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { troopDescription, TROOPS } from '@marchlands/core';
 
 import { troopName } from '@/lib/game-data';
-import { i18n } from '@/lib/i18n';
+import { i18n, Locale } from '@/lib/i18n';
 import { translateMessage } from '@/lib/messages';
 import enGB from '@/locales/en-GB/data-troops.json';
 
 const ids = TROOPS.map((t) => t.troopId);
 
 afterEach(async () => {
-  await i18n.changeLanguage('en-GB');
+  await i18n.changeLanguage(Locale.EN_GB);
 });
 
 describe('data-troops', () => {
@@ -29,14 +29,14 @@ describe('data-troops', () => {
     expect(troopName(7)).toBe('Archer');
     expect(troopName(16)).toBe("Archer's Tower");
     expect(troopName(99)).not.toBe('');
-    await i18n.changeLanguage('ja-JP');
+    await i18n.changeLanguage(Locale.JA_JP);
     expect(troopName(7)).toBe('弓兵');
   });
 });
 
 describe('troop descriptions', () => {
   it('describes every troop and fortification in every full locale', async () => {
-    for (const lng of ['en-GB', 'ja-JP']) {
+    for (const lng of [Locale.EN_GB, Locale.JA_JP]) {
       await i18n.changeLanguage(lng);
       for (const id of ids) {
         const text = translateMessage(troopDescription(id)!);

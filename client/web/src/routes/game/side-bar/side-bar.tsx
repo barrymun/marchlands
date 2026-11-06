@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { CityBean } from '@marchlands/api-client';
 
 import { ActivityDock } from '@/components/activity-dock/activity-dock';
+import { DockVariant } from '@/components/activity-dock/constants';
 import { ResourceBar } from '@/components/resource-bar/resource-bar';
 import { Separator } from '@/components/ui/separator';
 import { CityList } from '@/routes/game/city-list/city-list';
@@ -20,7 +21,7 @@ export function SideBar({ city, onSend }: { city: CityBean; onSend: (cityId: num
       <Separator />
       <TroopsHome city={city} />
       <Separator />
-      <ActivityDock city={city} variant="inline" />
+      <ActivityDock city={city} variant={DockVariant.INLINE} />
     </aside>
   );
 }

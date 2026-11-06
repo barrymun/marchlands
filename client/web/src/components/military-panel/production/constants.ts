@@ -1,6 +1,9 @@
+import type { ResourceKey } from '@marchlands/core';
 import { param, type SearchSchema } from '@/lib/search-state';
 
-export const RES_KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
+/** What caps an order: a resource, idle population, wall space (fortifications), or `RESOURCES` when the unit costs nothing. */
+export const TrainLimit = { IDLE_POPULATION: 'idlePopulation', WALL_SPACE: 'wallSpace', RESOURCES: 'resources' } as const;
+export type TrainLimit = ResourceKey | (typeof TrainLimit)[keyof typeof TrainLimit];
 
 /** A production card's tabs: what can be ordered, and the queue. */
 export const ProductionTab = { TRAIN: 'train', QUEUE: 'queue' } as const;

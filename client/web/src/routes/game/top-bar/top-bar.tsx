@@ -3,7 +3,7 @@ import { ChevronDown, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import type { CityBean } from '@marchlands/api-client';
+import { type CityBean, PushStatus } from '@marchlands/api-client';
 
 import { ResourceBar } from '@/components/resource-bar/resource-bar';
 import { ThemeToggle } from '@/components/theme-toggle/theme-toggle';
@@ -22,7 +22,7 @@ import { usePlayer } from '@/hooks/use-game';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { tokenStore } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { VIEWS } from '@/routes/game/constants';
+import { GameDialog, VIEWS } from '@/routes/game/constants';
 import { HistoricBadge } from '@/routes/game/historic-badge/historic-badge';
 import { MayorChip } from '@/routes/game/mayor-chip/mayor-chip';
 import { MayorSummary } from '@/routes/game/mayor-summary/mayor-summary';
@@ -33,7 +33,7 @@ import { mayorOf } from '@/routes/game/utils';
  * The top bar: the city (a switcher of all the player's cities), its mayor, the Town · Fields · Map switch, the live
  * updates light, the theme and the account menu. Phones get the resources under it (the sidebar is desktop only).
  */
-export function TopBar({ city, status, onDialog }: { city?: CityBean; status: 'open' | 'connecting' | 'closed'; onDialog: (d: 'lord' | 'city') => void }) {
+export function TopBar({ city, status, onDialog }: { city?: CityBean; status: PushStatus; onDialog: (d: GameDialog) => void }) {
   const { t } = useTranslation(['game', 'common']);
   const nav = useGameNav();
   const navigate = useNavigate();
@@ -75,7 +75,7 @@ export function TopBar({ city, status, onDialog }: { city?: CityBean; status: 'o
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => onDialog('city')}>{t('citySettings')}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onDialog(GameDialog.CITY)}>{t('citySettings')}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         {city && (
@@ -102,7 +102,10 @@ export function TopBar({ city, status, onDialog }: { city?: CityBean; status: 'o
           <Tooltip>
             <TooltipTrigger asChild>
               <span
-                className={cn('size-2 rounded-full', status === 'open' ? 'bg-emerald-500' : status === 'connecting' ? 'bg-amber-500' : 'bg-red-500')}
+                className={cn(
+                  'size-2 rounded-full',
+                  status === PushStatus.OPEN ? 'bg-emerald-500' : status === PushStatus.CONNECTING ? 'bg-amber-500' : 'bg-red-500',
+                )}
                 aria-label={t('liveUpdates.aria', { status: t(`liveUpdates.status.${status}`) })}
               />
             </TooltipTrigger>
@@ -120,7 +123,7 @@ export function TopBar({ city, status, onDialog }: { city?: CityBean; status: 'o
                 <PlayerSummary />
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => onDialog('lord')}>{t('account.playerSettings')}</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onDialog(GameDialog.LORD)}>{t('account.playerSettings')}</DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a href="/docs" target="_blank" rel="noreferrer">
                   {t('account.apiDocs')}

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { RESOURCE_KEYS } from '@marchlands/core';
 import { duration, fmt, fmtDecimal } from '@/lib/format';
 
 interface Cost {
@@ -11,7 +12,7 @@ interface Cost {
 
 export function CostList({ cost, seconds, have }: { cost: Cost; seconds?: number; have?: Partial<Cost> }) {
   const { t } = useTranslation(['cost-list', 'common']);
-  const parts = (['gold', 'food', 'wood', 'stone', 'iron'] as const).filter((k) => cost[k] > 0);
+  const parts = RESOURCE_KEYS.filter((k) => cost[k] > 0);
   return (
     <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs tabular-nums">
       {parts.map((k) => (

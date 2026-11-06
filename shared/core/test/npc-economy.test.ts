@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { ResourceKey, TradeSide } from '#/constants.ts';
 import {
   BALANCE,
   BASIC_RESOURCES,
@@ -169,8 +170,8 @@ describe(npcTick.name, () => {
     expect(auctions.iron.close).toBe(priceBand().high);
     expect(auctions.iron.open).toBe(1);
     expect(next.price.iron).toBe(priceBand().high);
-    const before = worldTotals(econ, GROUPS, 'iron').stock;
-    const after = worldTotals(next, GROUPS, 'iron').stock;
+    const before = worldTotals(econ, GROUPS, ResourceKey.IRON).stock;
+    const after = worldTotals(next, GROUPS, ResourceKey.IRON).stock;
     expect(after).toBeGreaterThan(before);
     expect(after - before).toBeLessThan(before * 0.01);
   });
@@ -231,12 +232,12 @@ describe(factionSells.name, () => {
 
   it('gets dearer as it sells, stopping where its price reaches the limit or the band', () => {
     const big = factionSells(T, S, 200_000_000);
-    expect(big.gold / big.qty).toBeGreaterThan(factionMarginal(T, S, 'buy'));
-    expect(big.gold / big.qty).toBeLessThan(factionMarginal(T, S - big.qty, 'buy'));
+    expect(big.gold / big.qty).toBeGreaterThan(factionMarginal(T, S, TradeSide.BUY));
+    expect(big.gold / big.qty).toBeLessThan(factionMarginal(T, S - big.qty, TradeSide.BUY));
     const all = factionSells(T, S, 10 * T);
-    expect(factionMarginal(T, S - all.qty, 'buy')).toBeCloseTo(priceBand().high, 6);
+    expect(factionMarginal(T, S - all.qty, TradeSide.BUY)).toBeCloseTo(priceBand().high, 6);
     const limited = factionSells(T, S, 10 * T, 1.05);
-    expect(factionMarginal(T, S - limited.qty, 'buy')).toBeCloseTo(1.05, 6);
+    expect(factionMarginal(T, S - limited.qty, TradeSide.BUY)).toBeCloseTo(1.05, 6);
     expect(factionSells(T, S, 100, 1).qty).toBe(0);
   });
 
@@ -267,7 +268,7 @@ describe(factionBuys.name, () => {
     const f = factionBuys(T, S, 1000);
     expect(f.gold / f.qty).toBeCloseTo(1 - BALANCE.npcTrade.playerSpread / 2, 6);
     const all = factionBuys(T, S, 10 * T);
-    expect(factionMarginal(T, S + all.qty, 'sell')).toBeCloseTo(priceBand().low, 6);
+    expect(factionMarginal(T, S + all.qty, TradeSide.SELL)).toBeCloseTo(priceBand().low, 6);
     expect(factionBuys(T, S, 100, 1).qty).toBe(0);
   });
 });
@@ -275,9 +276,9 @@ describe(factionBuys.name, () => {
 describe(factionMarginal.name, () => {
   it('is the curve price, plus or minus half the player spread', () => {
     const half = BALANCE.npcTrade.playerSpread / 2;
-    expect(factionMarginal(100, 100, 'buy')).toBeCloseTo(1 + half, 12);
-    expect(factionMarginal(100, 100, 'sell')).toBeCloseTo(1 - half, 12);
-    expect(factionMarginal(100, 0, 'buy')).toBe(Infinity);
+    expect(factionMarginal(100, 100, TradeSide.BUY)).toBeCloseTo(1 + half, 12);
+    expect(factionMarginal(100, 100, TradeSide.SELL)).toBeCloseTo(1 - half, 12);
+    expect(factionMarginal(100, 0, TradeSide.BUY)).toBe(Infinity);
   });
 });
 
@@ -293,10 +294,10 @@ describe(factionAffordable.name, () => {
 describe(takeFromGroups.name, () => {
   it('takes the goods from every group in proportion to what it holds, and pays each its share of the gold', () => {
     const econ = newNpcEconomy(GROUPS, FLAT_LAND, 0);
-    const before = worldTotals(econ, GROUPS, 'stone').stock;
-    const share = (e: typeof econ) => (e.stock[groupKey(3, 9)]?.stone ?? 0) / worldTotals(e, GROUPS, 'stone').stock;
-    const next = takeFromGroups(econ, GROUPS, 'stone', 1_000_000, 1_010_000);
-    expect(worldTotals(next, GROUPS, 'stone').stock).toBeCloseTo(before - 1_000_000, 0);
+    const before = worldTotals(econ, GROUPS, ResourceKey.STONE).stock;
+    const share = (e: typeof econ) => (e.stock[groupKey(3, 9)]?.stone ?? 0) / worldTotals(e, GROUPS, ResourceKey.STONE).stock;
+    const next = takeFromGroups(econ, GROUPS, ResourceKey.STONE, 1_000_000, 1_010_000);
+    expect(worldTotals(next, GROUPS, ResourceKey.STONE).stock).toBeCloseTo(before - 1_000_000, 0);
     expect(share(next)).toBeCloseTo(share(econ), 12);
     expect(worldGold(next, GROUPS).gold - worldGold(econ, GROUPS).gold).toBeCloseTo(1_010_000, 0);
     expect((next.gold[groupKey(3, 9)] ?? 0) - (econ.gold[groupKey(3, 9)] ?? 0)).toBeCloseTo(1_010_000 * share(econ), 0);
@@ -306,8 +307,8 @@ describe(takeFromGroups.name, () => {
 describe(giveToGroups.name, () => {
   it('gives the goods to every group in proportion to its target, each paying in proportion to the gold it holds', () => {
     const econ = newNpcEconomy(GROUPS, FLAT_LAND, 0);
-    const next = giveToGroups(econ, GROUPS, 'food', 2_000_000, 1_980_000);
-    expect(worldTotals(next, GROUPS, 'food').stock - worldTotals(econ, GROUPS, 'food').stock).toBeCloseTo(2_000_000, 0);
+    const next = giveToGroups(econ, GROUPS, ResourceKey.FOOD, 2_000_000, 1_980_000);
+    expect(worldTotals(next, GROUPS, ResourceKey.FOOD).stock - worldTotals(econ, GROUPS, ResourceKey.FOOD).stock).toBeCloseTo(2_000_000, 0);
     expect(worldGold(econ, GROUPS).gold - worldGold(next, GROUPS).gold).toBeCloseTo(1_980_000, 0);
     const key = groupKey(4, 5);
     const paidShare = ((econ.gold[key] ?? 0) - (next.gold[key] ?? 0)) / 1_980_000;
@@ -316,7 +317,7 @@ describe(giveToGroups.name, () => {
 
   it('never leaves a group owing gold', () => {
     const econ = newNpcEconomy(GROUPS, FLAT_LAND, 0);
-    const next = giveToGroups(econ, GROUPS, 'food', 1, 10 * worldGold(econ, GROUPS).gold);
+    const next = giveToGroups(econ, GROUPS, ResourceKey.FOOD, 1, 10 * worldGold(econ, GROUPS).gold);
     expect(Object.values(next.gold).every((g) => g === 0)).toBe(true);
   });
 });
@@ -378,7 +379,7 @@ describe("the factions' gold", () => {
   it('drifts back to its treasury after players drain it', () =>
     quiet(() => {
       let econ = newNpcEconomy(GROUPS, FLAT_LAND, 0);
-      econ = giveToGroups(econ, GROUPS, 'food', 1, worldGold(econ, GROUPS).gold / 2);
+      econ = giveToGroups(econ, GROUPS, ResourceKey.FOOD, 1, worldGold(econ, GROUPS).gold / 2);
       const drained = worldGold(econ, GROUPS).gold;
       econ = tick(econ, BALANCE.npcTrade.restoreHalfLifeMs).econ;
       expect(worldGold(econ, GROUPS).gold).toBeGreaterThan(drained);

@@ -1,6 +1,8 @@
+import { IsoTileKind } from '@/components/buildings-panel/iso-grid/constants';
 import type { BuildingArt, GridPoint, GroundTile, IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
 import { SPRITE, TILE_H, TILE_W } from '@/components/iso-viewport/constants';
 import { spriteBox } from '@/components/iso-viewport/utils';
+import { CityGround } from '@/lib/game-art';
 
 /**
  * The middle of a tile's diamond, in pixels from the middle of tile (0, 0), at the art's own size, rounded to a whole
@@ -59,9 +61,9 @@ export function townLayout(o: {
   if (free.length !== o.positions.length) throw new Error(`${free.length} free cells for ${o.positions.length} slots`);
   return {
     tiles: [
-      { col: c.margin + (hi + 0.5) * o.pitch, row: r.margin + (hj + 0.5) * o.pitch, kind: 'slot' as const, pos: o.townHallPos, span: 2 },
-      ...free.map(([i, j], n) => ({ col: c.margin + i * o.pitch, row: r.margin + j * o.pitch, kind: 'slot' as const, pos: o.positions[n] })),
-      { col: c.ground - 0.5, row: r.ground - 0.5, kind: 'gate' as const, pos: o.wallsPos },
+      { col: c.margin + (hi + 0.5) * o.pitch, row: r.margin + (hj + 0.5) * o.pitch, kind: IsoTileKind.SLOT, pos: o.townHallPos, span: 2 },
+      ...free.map(([i, j], n) => ({ col: c.margin + i * o.pitch, row: r.margin + j * o.pitch, kind: IsoTileKind.SLOT, pos: o.positions[n] })),
+      { col: c.ground - 0.5, row: r.ground - 0.5, kind: IsoTileKind.GATE, pos: o.wallsPos },
     ].sort((a, b) => depthOf(a.col, a.row) - depthOf(b.col, b.row)),
     ground: groundTiles(c.ground, r.ground),
     cols: c.ground,
@@ -82,7 +84,7 @@ export function fieldLayout(o: { cols: number; rows: number; pitch: number; extr
     tiles: cells.map(([i, j], n) => ({
       col: c.margin + i * o.pitch,
       row: r.margin + j * o.pitch,
-      kind: n < o.unlocked ? ('slot' as const) : ('locked' as const),
+      kind: n < o.unlocked ? IsoTileKind.SLOT : IsoTileKind.LOCKED,
       pos: o.positions[n],
     })),
     ground: groundTiles(c.ground, r.ground),
@@ -119,7 +121,7 @@ export function hitTest(
     if (x >= 0 && y >= 0 && x < box.width && y < box.height && opaque(s.src, x, y)) return s.pos;
   }
   for (const t of front(
-    tiles.filter((t) => t.kind === 'slot' || t.kind === 'gate'),
+    tiles.filter((t) => t.kind === IsoTileKind.SLOT || t.kind === IsoTileKind.GATE),
     (t) => depthOf(t.col, t.row),
   )) {
     const at = tilePoint(t.col, t.row);
@@ -129,9 +131,9 @@ export function hitTest(
 }
 
 /** The marker on a tile's ground: an empty plot, a locked field; none under a building or the gate. */
-export function markerOf(tile: IsoTile, built: boolean): 'plot' | 'locked' | null {
-  if (tile.kind === 'locked') return 'locked';
-  return tile.kind === 'slot' && !built ? 'plot' : null;
+export function markerOf(tile: IsoTile, built: boolean): typeof CityGround.PLOT | typeof CityGround.LOCKED | null {
+  if (tile.kind === IsoTileKind.LOCKED) return CityGround.LOCKED;
+  return tile.kind === IsoTileKind.SLOT && !built ? CityGround.PLOT : null;
 }
 
 /**
@@ -145,7 +147,7 @@ export function buildingSprites(
   artOf: (typeId: number, level: number, span: number) => BuildingArt | undefined,
 ): IsoSprite[] {
   return tiles.flatMap((t) => {
-    const b = t.kind === 'slot' && t.pos != null ? byPos.get(t.pos) : undefined;
+    const b = t.kind === IsoTileKind.SLOT && t.pos != null ? byPos.get(t.pos) : undefined;
     const span = t.span ?? 1;
     const art = b && b.typeId !== 0 ? artOf(b.typeId, b.level, span) : undefined;
     if (!art?.src) return [];

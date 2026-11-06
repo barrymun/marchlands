@@ -13,6 +13,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Theme } from '@/lib/theme';
 
 /** Light / dark / follow the system. The choice is remembered in this browser (next-themes). */
 export function ThemeToggle() {
@@ -24,7 +25,7 @@ export function ThemeToggle() {
     () => true,
     () => false,
   );
-  const Icon = !mounted ? Sun : theme === 'system' ? Monitor : resolvedTheme === 'dark' ? Moon : Sun;
+  const Icon = !mounted ? Sun : theme === Theme.SYSTEM ? Monitor : resolvedTheme === Theme.DARK ? Moon : Sun;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,13 +36,13 @@ export function ThemeToggle() {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>{t('label')}</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={mounted ? theme : undefined} onValueChange={setTheme}>
-          <DropdownMenuRadioItem value="light">
+          <DropdownMenuRadioItem value={Theme.LIGHT}>
             <Sun className="size-4" /> {t('light')}
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">
+          <DropdownMenuRadioItem value={Theme.DARK}>
             <Moon className="size-4" /> {t('dark')}
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">
+          <DropdownMenuRadioItem value={Theme.SYSTEM}>
             <Monitor className="size-4" /> {t('system')}
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>

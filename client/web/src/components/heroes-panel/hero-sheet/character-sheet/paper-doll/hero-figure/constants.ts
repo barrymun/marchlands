@@ -25,3 +25,7 @@ export const SWAY_PX = 1.4;
 /** One pulse of the stones' glow, and its colour (the gear's level 10 light, softened). */
 export const GLOW_MS = 2000;
 export const GLOW_RGB: readonly [number, number, number] = [255, 186, 198];
+
+/** How a layer moves: the cape stirs, the body breathes, the legs stand still. */
+export const FigureMotion = { SWAY: 'sway', BREATH: 'breath', STILL: 'still' } as const;
+export type FigureMotion = (typeof FigureMotion)[keyof typeof FigureMotion];

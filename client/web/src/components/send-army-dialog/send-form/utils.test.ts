@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { CityBean } from '@marchlands/api-client';
 import { HeroStatus, Mission } from '@marchlands/core';
 
+import { NO_HERO } from '@/components/send-army-dialog/send-form/constants';
 import { bestIdleHero, capTroops, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
 
 type Hero = CityBean['heros'][number];
@@ -24,8 +25,8 @@ describe(bestIdleHero.name, () => {
   });
 
   it("is 'none' without an idle hero", () => {
-    expect(bestIdleHero([])).toBe('none');
-    expect(bestIdleHero([hero(1, 90)], 1)).toBe('none');
+    expect(bestIdleHero([])).toBe(NO_HERO);
+    expect(bestIdleHero([hero(1, 90)], 1)).toBe(NO_HERO);
   });
 });
 
@@ -38,7 +39,7 @@ describe(defaultHero.name, () => {
   });
 
   it("is 'none' for every other mission", () => {
-    for (const m of [Mission.TRANSPORT, Mission.REINFORCE, Mission.SCOUT, Mission.BUILD_CITY]) expect(defaultHero(m, heros)).toBe('none');
+    for (const m of [Mission.TRANSPORT, Mission.REINFORCE, Mission.SCOUT, Mission.BUILD_CITY]) expect(defaultHero(m, heros)).toBe(NO_HERO);
   });
 });
 

@@ -1,5 +1,7 @@
 import { type RefObject, useEffect } from 'react';
 
+import { SpotKind } from '@marchlands/core';
+
 import { GEAR_ART } from '@/components/hero-gear/constants';
 import { BURST_FRAMES, FRAME_MS, GEAR_SIZE } from '@/components/hero-gear/gear-icon/constants';
 import type { GearFrame, GearPixel } from '@/components/hero-gear/gear-icon/types';
@@ -8,7 +10,7 @@ import { burstAt, onBurst } from '@/components/hero-gear/utils';
 import { ANIMATION_FPS } from '@/components/iso-viewport/constants';
 import { useImages } from '@/hooks/use-images';
 import { useMotion } from '@/hooks/use-motion';
-import { gearTwinFile } from '@/lib/game-art';
+import { gearTwinFile, GearTwinPart } from '@/lib/game-art';
 
 /** The icons moving on the page, each drawing itself at a moment: one clock for them all. */
 const painters = new Set<(t: number) => void>();
@@ -107,7 +109,8 @@ export function useGearMotion(
   const motion = useMotion();
   const move = pieceMove(piece, level);
   // the plume sways alone: the helm without it, and the plume
-  const twins = move?.k === 'sway' ? [GEAR_ART[gearTwinFile(piece, level, 'bare')], GEAR_ART[gearTwinFile(piece, level, 'plume')]] : [];
+  const twins =
+    move?.k === SpotKind.SWAY ? [GEAR_ART[gearTwinFile(piece, level, GearTwinPart.BARE)], GEAR_ART[gearTwinFile(piece, level, GearTwinPart.PLUME)]] : [];
   const srcs = motion && art ? [art, ...twins].flatMap((src) => (src ? [src] : [])) : [];
   const images = useImages(srcs);
   const loaded = srcs.length > 0 && srcs.every((src) => images.has(src));

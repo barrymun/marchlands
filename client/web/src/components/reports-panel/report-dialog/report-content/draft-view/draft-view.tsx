@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import type { ReportBody } from '@marchlands/core';
+import { type ReportBody, type ReportBodyKind } from '@marchlands/core';
 
 import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
 import { TroopList } from '@/components/reports-panel/report-dialog/report-content/troop-list/troop-list';
@@ -9,7 +9,7 @@ import { factionName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 
 /** Troops a held historic city drafted from a barbarian city, by itself or as its holder chose. */
-export function DraftView({ draft: d }: { draft: Extract<ReportBody, { kind: 'draft' }>['draft'] }) {
+export function DraftView({ draft: d }: { draft: Extract<ReportBody, { kind: typeof ReportBodyKind.DRAFT }>['draft'] }) {
   const { t } = useTranslation('reports-panel');
   return (
     <div className="grid gap-1.5 text-sm">

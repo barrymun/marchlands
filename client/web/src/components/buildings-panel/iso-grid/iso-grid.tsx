@@ -6,20 +6,21 @@ import type { BuildingBean } from '@marchlands/api-client';
 import { BuildingType } from '@marchlands/core';
 
 import { BUILDING_ART } from '@/components/buildings-panel/constants';
+import { IsoTileKind } from '@/components/buildings-panel/iso-grid/constants';
 import type { BuildingArt, IsoLayout, IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
 import { buildingSprites, depthOf, hitTest, markerOf } from '@/components/buildings-panel/iso-grid/utils';
 import { cityArt } from '@/components/buildings-panel/utils';
 import { Countdown } from '@/components/countdown/countdown';
 import { useAnimations } from '@/components/iso-anim/hooks';
 import type { TownState } from '@/components/iso-anim/types';
-import { SPRITE, TILE_H, TILE_W } from '@/components/iso-viewport/constants';
+import { DrawableTone, SPRITE, TILE_H, TILE_W } from '@/components/iso-viewport/constants';
 import { useIsoViewport } from '@/components/iso-viewport/hooks';
 import { IsoViewport } from '@/components/iso-viewport/iso-viewport';
 import type { Drawable, Piece, ViewPoint } from '@/components/iso-viewport/types';
 import { clampToScene, fitZoom, sceneBox, sceneCentre, spriteAt, spriteBox, tileAt } from '@/components/iso-viewport/utils';
 import { opaqueAt } from '@/hooks/use-images';
 import { builtAt } from '@/lib/build-events';
-import { artBand, bareArtFile, buildingArtFile, cityGroundFile, grandTownHallFile } from '@/lib/game-art';
+import { artBand, bareArtFile, buildingArtFile, CityGround, cityGroundFile, grandTownHallFile } from '@/lib/game-art';
 import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
@@ -71,7 +72,7 @@ export function IsoGrid({
   const tileLabel = (tile: IsoTile, b?: BuildingBean) =>
     b
       ? t('slot.building', { name: buildingName(b.typeId), level: b.level })
-      : tile.kind === 'gate'
+      : tile.kind === IsoTileKind.GATE
         ? buildingName(BuildingType.WALLS)
         : t('slot.build', { pos: tile.pos });
   const artOf = (type: number, level: number, span: number): BuildingArt => {
@@ -118,10 +119,10 @@ export function IsoGrid({
     return !b || !highlight(b);
   };
   const groundArt: Drawable[] = [
-    ...ground.map((g) => ({ key: `g${g.col},${g.row}`, col: g.col, row: g.row, src: cityArt(cityGroundFile('grass')) })),
+    ...ground.map((g) => ({ key: `g${g.col},${g.row}`, col: g.col, row: g.row, src: cityArt(cityGroundFile(CityGround.GRASS)) })),
     ...tiles.flatMap((tile) => {
       const m = markerOf(tile, !!built(tile.pos));
-      return m ? [{ key: `m${tile.pos}`, col: tile.col, row: tile.row, src: cityArt(cityGroundFile(m)), tone: highlight ? ('dim' as const) : undefined }] : [];
+      return m ? [{ key: `m${tile.pos}`, col: tile.col, row: tile.row, src: cityArt(cityGroundFile(m)), tone: highlight ? DrawableTone.DIM : undefined }] : [];
     }),
   ];
   // each sprite with how it's drawn now (lit under the pointer, dimmed when not picked)
@@ -131,9 +132,9 @@ export function IsoGrid({
       ...s,
       tone:
         s.pos != null && s.pos === hover
-          ? ('lit' as const)
+          ? DrawableTone.LIT
           : s.pos != null && byPos.has(s.pos) && s.key.startsWith('b') && dimmed(s.pos)
-            ? ('dim' as const)
+            ? DrawableTone.DIM
             : undefined,
     } satisfies Drawable,
   }));
@@ -142,13 +143,13 @@ export function IsoGrid({
   // shows (smoke, sails, construction, a finished level's sparkle), and people on the streets, all back to front; a
   // dimmed building stays still
   const anim = useAnimations();
-  const streets = anim?.streetsOf(tiles.filter((tile) => tile.kind === 'slot'));
+  const streets = anim?.streetsOf(tiles.filter((tile) => tile.kind === IsoTileKind.SLOT));
   const animate =
     anim && streets
       ? (t: number): Piece[] => {
           const night = anim.isNight();
           const layers: { depth: number; pieces: Piece[] }[] = toned.map(({ s, d }) => {
-            if (!s.file || d.tone === 'dim') return { depth: s.depth, pieces: [d] };
+            if (!s.file || d.tone === DrawableTone.DIM) return { depth: s.depth, pieces: [d] };
             const owner = { key: s.key, col: s.col, row: s.row, size: s.size, file: s.file };
             const b = s.pos != null ? byPos.get(s.pos) : undefined;
             return {
@@ -170,7 +171,7 @@ export function IsoGrid({
   const preload = sprites.flatMap((s) => (s.bare ? [s.bare] : []));
   // the sky over the city's state: night by the player's clock, and the weather
   const sky = anim ? (t: number) => anim.skyAt(state.zoneId, t, vp.view.w, vp.view.h) : undefined;
-  const hovered = tiles.find((tile) => tile.pos != null && tile.pos === hover && tile.kind !== 'locked');
+  const hovered = tiles.find((tile) => tile.pos != null && tile.pos === hover && tile.kind !== IsoTileKind.LOCKED);
   const corners = (pts: ViewPoint[]) => pts.map((p) => `${p.x},${p.y}`).join(' ');
   const diamond = (tile: IsoTile) => {
     const p = vp.at(tile.col, tile.row);
@@ -202,7 +203,7 @@ export function IsoGrid({
       {tiles.map((tile) => {
         const b = built(tile.pos);
         const p = vp.at(tile.col, tile.row);
-        if (!b && tile.kind === 'gate')
+        if (!b && tile.kind === IsoTileKind.GATE)
           return (
             <span
               key={`c${tile.pos}`}
@@ -250,7 +251,7 @@ export function IsoGrid({
         </span>
       )}
       {tiles
-        .filter((tile): tile is typeof tile & { pos: number } => (tile.kind === 'slot' || tile.kind === 'gate') && tile.pos != null)
+        .filter((tile): tile is typeof tile & { pos: number } => (tile.kind === IsoTileKind.SLOT || tile.kind === IsoTileKind.GATE) && tile.pos != null)
         .sort((a, b) => depthOf(a.col, a.row) - depthOf(b.col, b.row))
         .map((tile) => {
           const p = vp.at(tile.col, tile.row);

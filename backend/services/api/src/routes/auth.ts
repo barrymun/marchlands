@@ -8,7 +8,7 @@ import { accounts, one, players } from '@marchlands/db';
 import { signToken } from '#/auth/jwt.ts';
 import { LoginBackoff } from '#/auth/login-backoff.ts';
 import { hashPassword, verifyPassword } from '#/auth/password.ts';
-import { SignUpProofs } from '#/auth/signup-proof.ts';
+import { ProofCheck, SignUpProofs } from '#/auth/signup-proof.ts';
 import { authenticate, claimsOf, secured, tags, type ZApp } from '#/http.ts';
 
 /** Public routes cannot use doc(): same envelope, no `security`. */
@@ -45,8 +45,8 @@ export default async function authRoutes(app: ZApp) {
     async (req) => {
       const { username, password, email, proof } = req.body;
       const check = await proofs.check(proof);
-      if (check === 'expired') throw new GameError(msg('auth.signUpCheckExpired'), -12, 403);
-      if (check !== 'ok') throw new GameError(msg('auth.signUpCheckFailed'), -12, 403);
+      if (check === ProofCheck.EXPIRED) throw new GameError(msg('auth.signUpCheckExpired'), -12, 403);
+      if (check !== ProofCheck.OK) throw new GameError(msg('auth.signUpCheckFailed'), -12, 403);
       const [dupe] = await db
         .select({ id: accounts.id })
         .from(accounts)

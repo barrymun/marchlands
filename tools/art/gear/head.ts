@@ -3,6 +3,9 @@
 // plume in the level's colour from 4, wings from 6, horns from 7, gilded at 9, and at 10 a crimson helm with silver
 // horns and a glowing slit.
 
+import { SpotKind } from '@marchlands/core';
+
+import { GearTwinPart } from '../../../client/web/src/lib/game-art.ts';
 import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
 import { BLUE, canvas, fill, GOLD, horn, look, plume, type Shades, shine, spike, STEEL, trimmed } from './common.ts';
 
@@ -21,7 +24,7 @@ function shell(left: number, right: number, top: number, bottom: number): Pt[] {
  * The head at a gear level: whole, or, for the helm with a plume (from 4), `bare` without the plume or the `plume`
  * alone, the twins the icon moves the plume with (docs/features/gear-animations.md).
  */
-export function head(level: number, part?: 'bare' | 'plume'): PixelCanvas {
+export function head(level: number, part?: GearTwinPart): PixelCanvas {
   const c = canvas('head', level);
   const L = look(level);
   if (level === 0) {
@@ -62,16 +65,16 @@ export function head(level: number, part?: 'bare' | 'plume'): PixelCanvas {
   if (level >= 3) for (let y = top + 1; y < sy; y++) c.set(16, y, L.trim[1]);
   if (level >= 10) shine(c, 13, sy);
   // a plume in the level's colour from 4, horns from 8, filled so the outline goes round them
-  if (part === 'plume') {
+  if (part === GearTwinPart.PLUME) {
     const alone = canvas('head', level);
     plume(alone, [17, top], [24, 1], -2, 2.4, L.accent);
     alone.outline();
     return alone;
   }
-  if (level >= 4 && part !== 'bare') {
+  if (level >= 4 && part !== GearTwinPart.BARE) {
     plume(c, [17, top], [24, 1], -2, 2.4, L.accent);
     // it sways from its base, the tip most
-    c.spot('sway', [17, top], top - 1);
+    c.spot(SpotKind.SWAY, [17, top], top - 1);
   }
   if (L.horns) {
     horn(c, [10, top + 6], [2, top - 5], 5, L.trim);

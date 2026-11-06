@@ -23,6 +23,7 @@ export function parseTuples(text) {
           const c = text[i];
           if (c === '\\') {
             const e = text[i + 1];
+            // eslint-disable-next-line marchlands/no-string-compare -- MySQL's escape letters, fixed by the dump format
             s += e === 'n' ? '\n' : e === 'r' ? '\r' : e === 't' ? '\t' : e === '0' ? '\0' : e;
             i += 2;
           } else if (c === "'" && text[i + 1] === "'") {
@@ -41,6 +42,7 @@ export function parseTuples(text) {
         let j = i;
         while (text[j] !== ',' && text[j] !== ')') j++;
         const raw = text.slice(i, j).trim();
+        // eslint-disable-next-line marchlands/no-string-compare -- MySQL's NULL, fixed by the dump format
         row.push(raw === 'NULL' ? null : Number(raw));
         i = j;
       }

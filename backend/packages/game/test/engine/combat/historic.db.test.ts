@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
+  BattleTarget,
   BuildingType,
   DAY,
   dur,
@@ -35,7 +36,7 @@ import { processArmy } from '#/engine/combat.ts';
 import { ship } from '#/engine/market.ts';
 import { abandon, admin, armies, buildings, heroes, interior, market, plans, player, research, world } from '#/index.ts';
 import { getCity, getHero, getPlayer, getTile, saveCity, saveTile } from '#/repo.ts';
-import { arrive, battleOf, reportsOf, scoutOf, send, tileNear, warrior } from '#test/support/armies.ts';
+import { arrive, battleOf, reportsOf, ScoutOf, scoutOf, send, tileNear, warrior } from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { addHero, createTestPlayer, reloadCity, setResources, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
@@ -69,7 +70,7 @@ describe(`${processArmy.name}: historic cities`, () => {
       const seat = await seatNear(g, p);
       const scout = await send(g, p, { targetTileId: seat.id, mission: Mission.SCOUT, troops: { scouter: 1 } });
       await arrive(g, scout.armyId);
-      const s = scoutOf((await reportsOf(g, p.id)).at(-1)!, 'npc');
+      const s = scoutOf((await reportsOf(g, p.id)).at(-1)!, ScoutOf.NPC);
       const full = historicGarrison(12, historicDay(seat.id, Math.floor(scout.reachTime / DAY)));
       expect(s).toMatchObject({ level: 12, loyalty: BALANCE.historic.loyalty, troops: full.troops, fortifications: full.forts, wallLevel: 12 });
     }));
@@ -82,7 +83,7 @@ describe(`${processArmy.name}: historic cities`, () => {
       await arrive(g, bean.armyId);
       const r = (await reportsOf(g, p.id)).at(-1)!;
       expect(r.title).toEqual(msg('report.title.attackFailed'));
-      const b = battleOf(r, 'npc');
+      const b = battleOf(r, BattleTarget.NPC);
       expect(b).toMatchObject({ level: 12, loyaltyDamage: 0, loyaltyLeft: BALANCE.historic.loyalty, captured: false });
       // even a lost attack costs standing with the faction whose state it stands in
       const change = -BALANCE.reputation.attackPerLevel * 12;
@@ -115,7 +116,7 @@ describe(`${processArmy.name}: historic cities`, () => {
       };
       await saveTile(g, { ...seat, troops: {}, forts: {}, state });
       await arrive(g, bean.armyId);
-      const b = battleOf((await reportsOf(g, p.id)).at(-1)!, 'npc');
+      const b = battleOf((await reportsOf(g, p.id)).at(-1)!, BattleTarget.NPC);
       expect(b).toMatchObject({
         result: 'attackerWon',
         loyaltyDamage: BALANCE.historic.loyaltyPerWin,
@@ -148,7 +149,7 @@ async function lastWave(g: TestGame, p: TestPlayer, heroId: number, target?: Awa
   };
   await saveTile(g, { ...seat, troops: {}, forts: {}, state });
   await arrive(g, bean.armyId);
-  return { seat, report: battleOf((await reportsOf(g, p.id)).at(-1)!, 'npc') };
+  return { seat, report: battleOf((await reportsOf(g, p.id)).at(-1)!, BattleTarget.NPC) };
 }
 
 describe(`${processArmy.name}: capturing a historic city`, () => {
@@ -266,7 +267,7 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       const bean = await send(g, q, { targetTileId: seat.id, mission: Mission.ATTACK, troops: { archer: 20_000 }, heroId: qHero });
       await beforeLanding?.(bean.reachTime);
       await arrive(g, bean.armyId);
-      return battleOf((await reportsOf(g, q.id)).at(-1)!, 'city');
+      return battleOf((await reportsOf(g, q.id)).at(-1)!, BattleTarget.CITY);
     };
     return { p, q, seat, cityId, attack };
   }

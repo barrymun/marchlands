@@ -12,8 +12,15 @@ export const BUILDING_ART = byFile(import.meta.glob<string>('@/assets/buildings/
 /** The isometric city view's ground and wall pieces by file name (`plot.png`, lib/game-art.ts). */
 export const CITY_ART = byFile(import.meta.glob<string>('@/assets/city/*.png', { eager: true, query: '?url', import: 'default' }));
 
-/** How the panel can show the buildings, in the order of their buttons: the isometric scene, or cards. */
-export const CITY_VIEWS = ['scene', 'grid'] as const;
+/** How the panel can show the buildings: the isometric scene, or cards. Remembered in localStorage (VIEW_KEY), so a value never changes. */
+export const CityView = { SCENE: 'scene', GRID: 'grid' } as const;
+export type CityView = (typeof CityView)[keyof typeof CityView];
+/** The city views in the order of their buttons. */
+export const CITY_VIEWS = Object.values(CityView);
+
+/** The area of the city the panel shows: inside the walls (the Town view), or the fields outside them (the Fields view). */
+export const CityArea = { INSIDE: 'inside', FIELDS: 'fields' } as const;
+export type CityArea = (typeof CityArea)[keyof typeof CityArea];
 
 /** Screens at least this wide may show the isometric scene (Tailwind's md); narrower ones always show the cards. */
 export const TOWN_VIEW_QUERY = '(min-width: 768px)';

@@ -3,7 +3,7 @@
 // colour, a raised collar from 6, spiked shoulders from 7, horns on the collar from 8, gilded at 9 and crimson with a
 // silver collar at 10.
 
-import type { PixelCanvas, Pt } from '../pixel.ts';
+import { CLEAR, type PixelCanvas, type Pt } from '../pixel.ts';
 import { BLUE, canvas, fill, GOLD, heart, horn, lit, look, setStone, type Shades, spike, STEEL, trimmed } from './common.ts';
 
 const BODY: Pt[] = [
@@ -25,8 +25,8 @@ export function chest(level: number): PixelCanvas {
   // the neck and the arms cut out
   for (let y = 0; y < 32; y++)
     for (let x = 0; x < 32; x++) {
-      if (((x + 0.5 - 16) / 5.5) ** 2 + ((y + 0.5 - 3) / 4) ** 2 <= 1) c.set(x, y, 'clear');
-      if (((x + 0.5 - 3) / 3.5) ** 2 + ((y + 0.5 - 7) / 5) ** 2 <= 1 || ((x + 0.5 - 29) / 3.5) ** 2 + ((y + 0.5 - 7) / 5) ** 2 <= 1) c.set(x, y, 'clear');
+      if (((x + 0.5 - 16) / 5.5) ** 2 + ((y + 0.5 - 3) / 4) ** 2 <= 1) c.set(x, y, CLEAR);
+      if (((x + 0.5 - 3) / 3.5) ** 2 + ((y + 0.5 - 7) / 5) ** 2 <= 1 || ((x + 0.5 - 29) / 3.5) ** 2 + ((y + 0.5 - 7) / 5) ** 2 <= 1) c.set(x, y, CLEAR);
     }
   // a ridge down the middle, or padding
   if (level === 0) for (let y = 9; y < 27; y += 3) for (let x = 9; x < 24; x++) c.set(x, y, 'blueDark');

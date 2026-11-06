@@ -5,7 +5,7 @@
 // earrings would be under every closed helm): a gold tag on a red cord (0), a silver drop (1-2), a stone in a setting
 // in the level's colour from 3, and a crimson crystal at 10.
 
-import { Sex } from '@marchlands/core';
+import { Sex, SpotKind } from '@marchlands/core';
 
 import { BLUE, fill, GOLD, LEATHER, look, type Shades, STEEL } from '../gear/common.ts';
 import type { PixelCanvas } from '../pixel.ts';
@@ -57,7 +57,7 @@ export function belt(sex: Sex, level: number): PixelCanvas {
   if (level >= 3) {
     strap.set(52, BELT[0] + 1, L.accent[1]);
     strap.set(51, BELT[0] + 1, L.accent[0]);
-    strap.spot('stone', [51.5, BELT[0] + 1.5], 1);
+    strap.spot(SpotKind.STONE, [51.5, BELT[0] + 1.5], 1);
   }
   const charm = part('charm', (c) => {
     const [x, y] = CHARM;
@@ -92,7 +92,7 @@ export function belt(sex: Sex, level: number): PixelCanvas {
   out.set(CHARM[0], CHARM[1], level === 0 ? 'banner' : level >= 3 ? L.trim[0] : 'steelHi');
   if (level >= 10) {
     out.set(CHARM[0] - 1, CHARM[1] + 3, 'sparkle');
-    out.spot('stone', [CHARM[0], CHARM[1] + 4], 1.5);
+    out.spot(SpotKind.STONE, [CHARM[0], CHARM[1] + 4], 1.5);
   }
   return out;
 }

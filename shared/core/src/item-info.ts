@@ -5,7 +5,7 @@
 // names come from the client's locale files by id.
 
 import { BALANCE } from '#/balance.ts';
-import { BuildingType, TROOP_ID_BY_KEY, type TroopKey } from '#/constants.ts';
+import { BuildingType, ItemCommand, ItemEffectKind, ItemSpecialHandler, ItemUse, type ResourceKey, TROOP_ID_BY_KEY, type TroopKey } from '#/constants.ts';
 import { SPEEDUP_ITEMS } from '#/construction.ts';
 import { itemConfig, ITEMS } from '#/data/index.ts';
 import { experienceItemGain } from '#/heroes.ts';
@@ -26,7 +26,7 @@ export interface ItemInfo {
    * `direct`: used from the inventory (POST /player/items/{id}/use, with the current city);
    * `elsewhere`: consumed by another action, see `howTo`; `none`: no effect on this server.
    */
-  use: 'direct' | 'elsewhere' | 'none';
+  use: ItemUse;
   howTo?: Message;
   /** shop price in city gold (0 = not sold; itemGoldPrice) */
   price: number;
@@ -46,7 +46,7 @@ function contents(c: GrantContents): Message[] {
   const parts: Message[] = [];
   for (const [id, n] of Object.entries(c.items ?? {})) parts.push(msg('itemInfo.contents.item', { amount: n, item: ref.item(id) }));
   for (const [r, n] of Object.entries(c.resources ?? {}))
-    if (n) parts.push(msg('itemInfo.contents.amount', { amount: n, name: ref.resource(r as 'gold' | 'food' | 'wood' | 'stone' | 'iron') }));
+    if (n) parts.push(msg('itemInfo.contents.amount', { amount: n, name: ref.resource(r as ResourceKey) }));
   for (const [k, n] of Object.entries(c.troops ?? {}))
     if (n) parts.push(msg('itemInfo.contents.amount', { amount: n, name: ref.troop(TROOP_ID_BY_KEY[k as TroopKey]) }));
   return parts;
@@ -64,15 +64,14 @@ function speedupDescription(id: string): Message | undefined {
 }
 
 const HOW_TO = {
-  speedup: msg('itemInfo.howTo.speedup'),
-  'troops.speedup': msg('itemInfo.howTo.troopsSpeedup'),
-  'fortifications.speedup': msg('itemInfo.howTo.fortificationsSpeedup'),
-  'city.move': msg('itemInfo.howTo.cityMove'),
-  'heroes.reset': msg('itemInfo.howTo.heroesReset'),
-  'heroes.useItem': msg('itemInfo.howTo.heroesUseItem'),
-  'city.truce': msg('itemInfo.howTo.cityTruce'),
-} satisfies Record<string, Message>;
-const howToFor = (command: string): Message | undefined => HOW_TO[command as keyof typeof HOW_TO];
+  [ItemCommand.SPEEDUP]: msg('itemInfo.howTo.speedup'),
+  [ItemCommand.TROOPS_SPEEDUP]: msg('itemInfo.howTo.troopsSpeedup'),
+  [ItemCommand.FORTIFICATIONS_SPEEDUP]: msg('itemInfo.howTo.fortificationsSpeedup'),
+  [ItemCommand.CITY_MOVE]: msg('itemInfo.howTo.cityMove'),
+  [ItemCommand.HEROES_RESET]: msg('itemInfo.howTo.heroesReset'),
+  [ItemCommand.HEROES_USE_ITEM]: msg('itemInfo.howTo.heroesUseItem'),
+  [ItemCommand.CITY_TRUCE]: msg('itemInfo.howTo.cityTruce'),
+} satisfies Record<ItemCommand, Message>;
 
 /** Experience books: a share of the next level, at least a minimum (experienceItemGain). */
 function experienceDescription(id: string): Message | undefined {
@@ -83,21 +82,21 @@ function experienceDescription(id: string): Message | undefined {
   return fraction >= 1 ? msg('itemInfo.experience.level', { min }) : msg('itemInfo.experience.share', { percent: pct(fraction), min });
 }
 
-const noEffect = (): Pick<ItemInfo, 'description' | 'use' | 'howTo'> => ({ description: msg('itemInfo.noEffect'), use: 'none' });
+const noEffect = (): Pick<ItemInfo, 'description' | 'use' | 'howTo'> => ({ description: msg('itemInfo.noEffect'), use: ItemUse.NONE });
 
 function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
   const e = itemEffect(id);
   const speedup = speedupDescription(id);
-  if (speedup) return { description: speedup, use: 'elsewhere', howTo: HOW_TO.speedup };
-  if (e?.kind === 'command' && (e.command === 'troops.speedup' || e.command === 'fortifications.speedup')) {
-    const code = e.command === 'troops.speedup' ? 'itemInfo.speedup.troopBatch' : 'itemInfo.speedup.fortBatch';
-    return { description: msg(code, { percent: pct(BALANCE.items.batchSpeedupShare) }), use: 'elsewhere', howTo: howToFor(e.command) };
+  if (speedup) return { description: speedup, use: ItemUse.ELSEWHERE, howTo: HOW_TO[ItemCommand.SPEEDUP] };
+  if (e?.kind === ItemEffectKind.COMMAND && (e.command === ItemCommand.TROOPS_SPEEDUP || e.command === ItemCommand.FORTIFICATIONS_SPEEDUP)) {
+    const code = e.command === ItemCommand.TROOPS_SPEEDUP ? 'itemInfo.speedup.troopBatch' : 'itemInfo.speedup.fortBatch';
+    return { description: msg(code, { percent: pct(BALANCE.items.batchSpeedupShare) }), use: ItemUse.ELSEWHERE, howTo: HOW_TO[e.command] };
   }
   if (BALANCE.items.medalLoyalty[id])
     return {
       description: msg('itemInfo.loyalty', { amount: BALANCE.items.medalLoyalty[id], max: BALANCE.heroMaxLoyalty }),
-      use: 'elsewhere',
-      howTo: HOW_TO['heroes.useItem'],
+      use: ItemUse.ELSEWHERE,
+      howTo: HOW_TO[ItemCommand.HEROES_USE_ITEM],
     };
   if (HERO_ATTRIBUTE_ITEMS[id]) {
     const description = msg('itemInfo.heroStat', {
@@ -105,35 +104,35 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
       percent: pct(BALANCE.items.heroAttributeBuff.bonus),
       period: period(BALANCE.items.heroAttributeBuff.durationMs),
     });
-    return { description, use: 'elsewhere', howTo: HOW_TO['heroes.useItem'] };
+    return { description, use: ItemUse.ELSEWHERE, howTo: HOW_TO[ItemCommand.HEROES_USE_ITEM] };
   }
   const experience = experienceDescription(id);
-  if (experience) return { description: experience, use: 'elsewhere', howTo: HOW_TO['heroes.useItem'] };
+  if (experience) return { description: experience, use: ItemUse.ELSEWHERE, howTo: HOW_TO[ItemCommand.HEROES_USE_ITEM] };
   const chestFor = ITEMS.find((i) => {
     const c = itemEffect(i.id);
-    return c?.kind === 'chest' && c.key === id;
+    return c?.kind === ItemEffectKind.CHEST && c.key === id;
   });
   if (chestFor)
     return {
       description: msg('itemInfo.key', { chest: ref.item(chestFor.id) }),
-      use: 'elsewhere',
+      use: ItemUse.ELSEWHERE,
       howTo: msg('itemInfo.howTo.key', { chest: ref.item(chestFor.id) }),
     };
 
   if (!e) return noEffect();
   switch (e.kind) {
-    case 'buff':
-      return { description: msg('itemInfo.buff', { effect: e.desc, period: period(e.durationMs) }), use: 'direct' };
-    case 'grant': {
+    case ItemEffectKind.BUFF:
+      return { description: msg('itemInfo.buff', { effect: e.desc, period: period(e.durationMs) }), use: ItemUse.DIRECT };
+    case ItemEffectKind.GRANT: {
       const toCity = !!(e.resources || e.troops);
       const description = msg(toCity ? 'itemInfo.grantCity' : 'itemInfo.grant', { contents: contents(e) });
       // the Welcome Package is never sold or won: every new player gets one (player.createPlayer)
-      if (id === ItemId.WELCOME_PACKAGE) return { description, use: 'direct', howTo: msg('itemInfo.howTo.welcome') };
-      return { description, use: 'direct' };
+      if (id === ItemId.WELCOME_PACKAGE) return { description, use: ItemUse.DIRECT, howTo: msg('itemInfo.howTo.welcome') };
+      return { description, use: ItemUse.DIRECT };
     }
-    case 'chest':
-      return { description: msg('itemInfo.chest', { key: ref.item(e.key), contents: contents(e.contents()) }), use: 'direct' };
-    case 'box':
+    case ItemEffectKind.CHEST:
+      return { description: msg('itemInfo.chest', { key: ref.item(e.key), contents: contents(e.contents()) }), use: ItemUse.DIRECT };
+    case ItemEffectKind.BOX:
       if (BALANCE.items.medalBoxes[id])
         return {
           description: msg('itemInfo.medalBox', {
@@ -141,32 +140,35 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
             max: BALANCE.items.medalBoxCount.max,
             medals: BALANCE.items.medalBoxes[id].map((l) => ref.item(medalId(l))),
           }),
-          use: 'direct',
+          use: ItemUse.DIRECT,
         };
-      return { description: msg('itemInfo.randomBox'), use: 'direct' };
-    case 'special':
+      return { description: msg('itemInfo.randomBox'), use: ItemUse.DIRECT };
+    case ItemEffectKind.SPECIAL:
       switch (e.handler) {
-        case 'civilCode':
-          return { description: msg('itemInfo.civilCode', { percent: pct(BALANCE.items.civilCode.share), min: BALANCE.items.civilCode.min }), use: 'direct' };
-        case 'cureInjured':
-          return { description: msg('itemInfo.cureInjured'), use: 'direct' };
-        case 'heroBox': {
+        case ItemSpecialHandler.CIVIL_CODE:
+          return {
+            description: msg('itemInfo.civilCode', { percent: pct(BALANCE.items.civilCode.share), min: BALANCE.items.civilCode.min }),
+            use: ItemUse.DIRECT,
+          };
+        case ItemSpecialHandler.CURE_INJURED:
+          return { description: msg('itemInfo.cureInjured'), use: ItemUse.DIRECT };
+        case ItemSpecialHandler.HERO_BOX: {
           const q = heroBoxQuality(id);
           return {
             description: msg('itemInfo.heroBox', { level: q.level, minStat: q.minStat, building: ref.building(BuildingType.FEASTING_HALL) }),
-            use: 'direct',
+            use: ItemUse.DIRECT,
           };
         }
       }
       break;
-    case 'command': {
+    case ItemEffectKind.COMMAND: {
       const text: Record<string, Message> = {
         [ItemId.CITY_TELEPORTER]: msg('itemInfo.teleporter', { period: period(BALANCE.teleportCooldownMs) }),
         [ItemId.HOLY_WATER]: msg('itemInfo.holyWater'),
         [ItemId.TRUCE_AGREEMENT]: msg('itemInfo.truce', { period: period(BALANCE.truceDurationMs) }),
       };
-      if (text[id]) return { description: text[id], use: 'elsewhere', howTo: howToFor(e.command) };
-      return { description: msg('itemInfo.notUsable'), use: 'none' };
+      if (text[id]) return { description: text[id], use: ItemUse.ELSEWHERE, howTo: HOW_TO[e.command] };
+      return { description: msg('itemInfo.notUsable'), use: ItemUse.NONE };
     }
   }
   return noEffect();
@@ -208,12 +210,15 @@ export function medalSources(level: number): MedalSources {
   const containers: MedalSources['containers'] = [];
   for (const item of ITEMS) {
     const e = itemEffect(item.id);
-    if (!e || (e.kind !== 'box' && e.kind !== 'chest')) continue;
+    if (!e || (e.kind !== ItemEffectKind.BOX && e.kind !== ItemEffectKind.CHEST)) continue;
     const price = itemGoldPrice(item.id) ?? 0;
     if (!price) continue;
     // random contents: look at many openings
     const rng = seededRng(`medal-sources:${item.id}`);
-    const counts = Array.from({ length: e.kind === 'box' ? 200 : 1 }, () => (e.kind === 'box' ? e.contents(rng) : e.contents()).items?.[id] ?? 0);
+    const counts = Array.from(
+      { length: e.kind === ItemEffectKind.BOX ? 200 : 1 },
+      () => (e.kind === ItemEffectKind.BOX ? e.contents(rng) : e.contents()).items?.[id] ?? 0,
+    );
     const held = counts.filter((n) => n > 0);
     if (!held.length) continue;
     containers.push({
@@ -222,7 +227,7 @@ export function medalSources(level: number): MedalSources {
       max: Math.max(...held),
       always: held.length === counts.length,
       price,
-      key: e.kind === 'chest' ? e.key : null,
+      key: e.kind === ItemEffectKind.CHEST ? e.key : null,
     });
   }
   const quests = QUEST_CATALOGUE.flatMap((q) => {

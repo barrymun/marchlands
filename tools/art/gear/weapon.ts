@@ -1,6 +1,8 @@
 // The weapon (tools/art/gear.ts): a sword lying on the diagonal, pommel at the bottom left, from a wooden practice sword
 // (0) to a crimson blade with silver edges and a horned guard (10).
 
+import { SpotKind } from '@marchlands/core';
+
 import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
 import { disc } from '../shapes.ts';
 import { along, bent, canvas, shaded, SIZE, STEEL, sweep, tier, WOOD } from './common.ts';
@@ -207,15 +209,15 @@ export function weapon(level: number): PixelCanvas {
   if (s.gem != null) {
     const [hi, mid] = tier(s.gem);
     c.set(px, py, mid);
-    c.spot('gem', [Math.floor(px), Math.floor(py)], 1);
+    c.spot(SpotKind.GEM, [Math.floor(px), Math.floor(py)], 1);
     if (s.gem >= 4) {
       c.set(guardAt[0], guardAt[1], mid);
       c.set(guardAt[0] - 1, guardAt[1], hi);
-      c.spot('gem', [Math.floor(guardAt[0] - 1), Math.floor(guardAt[1])], 1);
+      c.spot(SpotKind.GEM, [Math.floor(guardAt[0] - 1), Math.floor(guardAt[1])], 1);
     }
   }
   // a glowing blade: from the guard up the diagonal, `n` long and `m` its half-width
-  if (s.glows) c.spot('blade', guardAt, s.length - s.grip, s.width);
+  if (s.glows) c.spot(SpotKind.BLADE, guardAt, s.length - s.grip, s.width);
   c.outline();
   // the guard's horns after the outline, so they stay thin: two pixels wide, curling towards the tip
   if (s.guard.horns)

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { TradeCounterparty } from '@marchlands/core';
 import { bookSide, spreadOf } from '@/components/market-panel/book-panel/order-book/utils';
 
 const merchant = { reference: 1, base: 1, bid: 0.85, ask: 1.15 };
@@ -28,10 +29,10 @@ describe(bookSide.name, () => {
       merchant,
     );
     expect(rows.map((r) => [r.source, r.price, r.amount])).toEqual([
-      ['merchant', 1.15, null],
-      ['player', 1.05, 100],
-      ['factions', 1.01, 300],
-      ['player', 1.0, 100],
+      [TradeCounterparty.MERCHANT, 1.15, null],
+      [TradeCounterparty.PLAYER, 1.05, 100],
+      [TradeCounterparty.FACTIONS, 1.01, 300],
+      [TradeCounterparty.PLAYER, 1.0, 100],
     ]);
     // 100 at 1.00, then 300 more at 1.01, then 100 more at 1.05, out of 500
     expect(rows.map((r) => r.depth)).toEqual([0, 1, 0.8, 0.2]);
@@ -40,9 +41,9 @@ describe(bookSide.name, () => {
   it('lists buyers highest price first too, adding up their depth from the highest price', () => {
     const rows = bookSide(false, [{ price: 0.995, amount: 500 }], factions, merchant);
     expect(rows.map((r) => [r.source, r.price, r.depth])).toEqual([
-      ['player', 0.995, 0.5],
-      ['factions', 0.99, 1],
-      ['merchant', 0.85, 0],
+      [TradeCounterparty.PLAYER, 0.995, 0.5],
+      [TradeCounterparty.FACTIONS, 0.99, 1],
+      [TradeCounterparty.MERCHANT, 0.85, 0],
     ]);
   });
 
@@ -52,8 +53,8 @@ describe(bookSide.name, () => {
   });
 
   it('leaves out the factions past the band (no price) and before they trade', () => {
-    expect(bookSide(true, [], { ...factions, ask: null }, merchant).map((r) => r.source)).toEqual(['merchant']);
-    expect(bookSide(false, [], null, merchant).map((r) => r.source)).toEqual(['merchant']);
+    expect(bookSide(true, [], { ...factions, ask: null }, merchant).map((r) => r.source)).toEqual([TradeCounterparty.MERCHANT]);
+    expect(bookSide(false, [], null, merchant).map((r) => r.source)).toEqual([TradeCounterparty.MERCHANT]);
   });
 
   it('is empty with nobody on the side', () => {

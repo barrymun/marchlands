@@ -1,11 +1,13 @@
 import type { Rgba } from 'lightweight-charts';
 
+import { ResourceKey } from '@marchlands/core';
+
 import { RESOURCES } from '@/components/market-panel/constants';
 import { fmtDecimal, resourceLabel } from '@/lib/format';
 import { i18n } from '@/lib/i18n';
 
 /** A market resource type as a label ("Lumber"); type 4 is gold. */
-export const resLabel = (t: number) => (t === 4 ? resourceLabel('gold') : (RESOURCES[t]?.label ?? `#${t}`));
+export const resLabel = (t: number) => (t === 4 ? resourceLabel(ResourceKey.GOLD) : (RESOURCES[t]?.label ?? `#${t}`));
 
 /** A market resource type as it reads inside a sentence ("lumber"); type 4 is gold. */
 export const resInline = (t: number) =>

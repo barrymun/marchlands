@@ -1,3 +1,5 @@
+import type { DrawableTone, OutlineHalf, Weather } from '@/components/iso-viewport/constants';
+
 /** Where a view looks: the tile (fractional) at its middle, and screen pixels per art pixel. */
 export interface Camera {
   x: number;
@@ -29,7 +31,7 @@ export interface Drawable {
   row: number;
   src: string;
   size?: number;
-  tone?: 'lit' | 'dim';
+  tone?: DrawableTone;
 }
 
 /** A small pixel-art image made in code (an animation frame): RGBA pixels at the art's own size, named by `id` for caching. */
@@ -55,9 +57,6 @@ export interface Overlay {
   /** it gives light (a lit window, a fire): drawn over the night's darkness rather than under it */
   light?: boolean;
 }
-
-/** Weather over a scene. */
-export type Weather = 'rain' | 'snow' | 'storm';
 
 /**
  * The sky over a scene at a moment: how dark it is (0 day, 1 deep night), the weather and its drops or flakes (in CSS
@@ -87,7 +86,7 @@ export interface Outline {
   key: string;
   col: number;
   row: number;
-  half: 'back' | 'front';
+  half: OutlineHalf;
   className: string;
   width: number;
   dash?: readonly number[];

@@ -52,6 +52,7 @@ import type {
   Shades,
   Vec,
 } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure-3d/types';
+import { FigureHairStyle } from '@/lib/game-art';
 
 /** A gear level's colours, the level kept to 0–10. */
 function tier(level: number): Shades {
@@ -288,14 +289,14 @@ export function buildFigure(body: FigureBody, level: number): FigureModel {
     box('nose', [0, head - 1.5, front - 0.4], [1.6, 2.4, 1.6], skin);
     if (female) box('lips', [0, head - 4.6, front - 1.6], [3, 1.2, 1], flat(COLOURS.lips));
     ball('hair', [0, head + 0.8, -2], headR + 0.3, hair, [build.head[0] * 1.02, build.head[1], 1]);
-    if (body.style === 'beard') ball('beard', [0, head - 5.5, 1.8], 5.6, hair, [build.head[0], 0.7, 1]);
+    if (body.style === FigureHairStyle.BEARD) ball('beard', [0, head - 5.5, 1.8], 5.6, hair, [build.head[0], 0.7, 1]);
   }
   // a woman's hair shows below the helm at every level: loose down the back and over the near shoulder, or a braid
-  if (body.style === 'loose') {
+  if (body.style === FigureHairStyle.LOOSE) {
     bar('hair', [0, head - 2, -5.5], [0, shoulder - 14, -9.5], 9, 2.5, hair);
     limb('hair', [-6, head - 3, 1], [-9, shoulder - 10, 7.5], 2.4, 1.6, hair);
   }
-  if (body.style === 'braid') {
+  if (body.style === FigureHairStyle.BRAID) {
     const from: Vec = [-6, head - 4, -1];
     const to: Vec = [-8.5, shoulder - 15, 8.5];
     for (let i = 0; i < 5; i++) {

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { MarketOrderBook, MarketPriceLevel, MarketTrade } from '@marchlands/api-client';
 
+import { BookView } from '@/components/market-panel/book-panel/constants';
 import { OrderBook } from '@/components/market-panel/book-panel/order-book/order-book';
 import { RecentTrades } from '@/components/market-panel/book-panel/recent-trades/recent-trades';
 import { NO_LEVELS } from '@/components/market-panel/constants';
@@ -25,7 +26,7 @@ export function BookPanel({
   className?: string;
 }) {
   const { t } = useTranslation('market-panel');
-  const [view, setView] = useState<'book' | 'trades'>('book');
+  const [view, setView] = useState<BookView>(BookView.BOOK);
   return (
     <Panel
       className={className}
@@ -35,13 +36,13 @@ export function BookPanel({
           value={view}
           onChange={setView}
           tabs={[
-            { id: 'book', label: t('book.book') },
-            { id: 'trades', label: t('book.trades') },
+            { id: BookView.BOOK, label: t('book.book') },
+            { id: BookView.TRADES, label: t('book.trades') },
           ]}
         />
       }
     >
-      {view === 'book' ? (
+      {view === BookView.BOOK ? (
         <OrderBook
           buyers={book?.buyers ?? NO_LEVELS}
           sellers={book?.sellers ?? NO_LEVELS}

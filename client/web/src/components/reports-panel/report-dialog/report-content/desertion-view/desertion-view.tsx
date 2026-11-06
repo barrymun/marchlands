@@ -1,13 +1,13 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import { getGameSpeed, type ReportBody } from '@marchlands/core';
+import { getGameSpeed, type ReportBody, type ReportBodyKind } from '@marchlands/core';
 
 import { Line } from '@/components/reports-panel/report-dialog/report-content/line/line';
 import { TroopList } from '@/components/reports-panel/report-dialog/report-content/troop-list/troop-list';
 import { dateTime, signedRate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
-export function DesertionView({ desertion: d }: { desertion: Extract<ReportBody, { kind: 'desertion' }>['desertion'] }) {
+export function DesertionView({ desertion: d }: { desertion: Extract<ReportBody, { kind: typeof ReportBodyKind.DESERTION }>['desertion'] }) {
   const { t } = useTranslation('reports-panel');
   const perHour = (n: number) => signedRate(n);
   return (

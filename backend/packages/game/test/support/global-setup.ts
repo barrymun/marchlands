@@ -5,6 +5,7 @@
 import pg from 'pg';
 import type { TestProject } from 'vitest/node';
 
+import { WorldMapSource } from '@marchlands/core';
 import { connect, runMigrations } from '@marchlands/db';
 
 import { world } from '#/index.ts';
@@ -40,7 +41,7 @@ export default async function setup(project: TestProject) {
   await runMigrations(url.toString());
   const { db, close } = connect(url.toString(), 2);
   try {
-    await world.ensureWorld(db, { source: 'generated', seed: 'test' });
+    await world.ensureWorld(db, { source: WorldMapSource.GENERATED, seed: 'test' });
   } finally {
     await close();
   }

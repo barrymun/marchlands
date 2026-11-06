@@ -12,6 +12,8 @@ import { i18nReady } from '@/lib/i18n';
 
 import '@/index.css';
 
+import { Theme } from '@/lib/theme';
+
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
 });
@@ -24,7 +26,7 @@ if (!root) throw new Error('index.html has no #root');
 
 createRoot(root).render(
   <StrictMode>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange storageKey="marchlands-theme">
+    <ThemeProvider attribute="class" defaultTheme={Theme.SYSTEM} enableSystem disableTransitionOnChange storageKey="marchlands-theme">
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <TooltipProvider delayDuration={200}>

@@ -7,10 +7,16 @@ import { type GearPieceId, gearStarLimit, gearTier } from '@marchlands/core';
 
 import { GearIcon } from '@/components/hero-gear/gear-icon/gear-icon';
 import { Stars } from '@/components/hero-gear/stars/stars';
-import { DOLL_LEFT, DOLL_RIGHT, FIGURE_MODES, HeroFigure3d } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/constants';
+import {
+  DOLL_LEFT,
+  DOLL_RIGHT,
+  DollSide,
+  FIGURE_MODES,
+  FigureMode,
+  HeroFigure3d,
+} from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/constants';
 import { HeroFigure } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure/hero-figure';
 import { figureBody, wornLevel } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure/utils';
-import type { FigureMode } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/types';
 import { figureMode, saveFigureMode, webglWorks } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -36,7 +42,7 @@ export function PaperDoll({ hero, gear, onPiece }: { hero: HeroBean; gear: LordG
     saveFigureMode(m);
   };
   const flat = <HeroFigure body={body} level={level} label={t('sheet.figure', { name: hero.name, level })} className="size-48 @3xl:size-72" />;
-  const column = (pieces: readonly GearPieceId[], side: 'left' | 'right') => (
+  const column = (pieces: readonly GearPieceId[], side: DollSide) => (
     <ul className="grid gap-1.5">
       {pieces.map((piece) => (
         <li key={piece}>
@@ -46,7 +52,7 @@ export function PaperDoll({ hero, gear, onPiece }: { hero: HeroBean; gear: LordG
                 type="button"
                 onClick={onPiece}
                 aria-label={t('sheet.piece', { piece: gearName(piece), level })}
-                className={cn('flex items-center gap-1.5 rounded-md p-0.5 hover:bg-muted', side === 'left' && 'flex-row-reverse')}
+                className={cn('flex items-center gap-1.5 rounded-md p-0.5 hover:bg-muted', side === DollSide.LEFT && 'flex-row-reverse')}
               >
                 <GearIcon piece={piece} level={level} size={32} />
                 <Stars count={gear.stars[piece] ?? 0} used={used} size={9} />
@@ -60,11 +66,11 @@ export function PaperDoll({ hero, gear, onPiece }: { hero: HeroBean; gear: LordG
   );
   return (
     <div className="flex items-center justify-center gap-2">
-      {column(DOLL_LEFT, 'left')}
+      {column(DOLL_LEFT, DollSide.LEFT)}
       <div className="flex flex-col items-center gap-1">
         {/* one size for both, so switching doesn't move the sheet */}
         <div className="grid size-64 place-items-center @3xl:size-72">
-          {webgl && mode === '3d' ? (
+          {webgl && mode === FigureMode.THREE_D ? (
             <Suspense
               fallback={
                 <div role="status" className="grid place-items-center">
@@ -96,7 +102,7 @@ export function PaperDoll({ hero, gear, onPiece }: { hero: HeroBean; gear: LordG
           </div>
         )}
       </div>
-      {column(DOLL_RIGHT, 'right')}
+      {column(DOLL_RIGHT, DollSide.RIGHT)}
     </div>
   );
 }

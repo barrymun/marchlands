@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUp, Check, GripVertical, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { FLOW_TRAIN_MAX, FLOW_TROOP_IDS, FlowActionType, FlowCities, FlowHealWhen, FlowWaitUntil, HealPayment } from '@marchlands/core';
+import { FLOW_TRAIN_MAX, FLOW_TROOP_IDS, FlowActionType, FlowCities, FlowHealWhen, FlowWaitUntil, HealPayment, HeroBuffId } from '@marchlands/core';
 
 import { CityPicker } from '@/components/flows-panel/city-picker/city-picker';
 import { ActionFields } from '@/components/flows-panel/flow-editor/action-fields/action-fields';
@@ -127,7 +127,7 @@ export function FlowEditor({
             size="sm"
             variant="outline"
             disabled={locked || draft.actions.length >= 20}
-            onClick={() => setActions([...draft.actions, keyed({ type: FlowActionType.SET_MAYOR, stat: 'management' })])}
+            onClick={() => setActions([...draft.actions, keyed({ type: FlowActionType.SET_MAYOR, stat: HeroBuffId.MANAGEMENT })])}
           >
             <Plus /> {t('flowEditor.add.setMayor')}
           </Button>
@@ -166,7 +166,9 @@ export function FlowEditor({
             size="sm"
             variant="outline"
             disabled={locked || draft.actions.length >= 20}
-            onClick={() => setActions([...draft.actions, keyed({ type: FlowActionType.HIRE_HEROES, stat: 'power', min: 70, count: 1, maxGold: 1_000_000 })])}
+            onClick={() =>
+              setActions([...draft.actions, keyed({ type: FlowActionType.HIRE_HEROES, stat: HeroBuffId.POWER, min: 70, count: 1, maxGold: 1_000_000 })])
+            }
           >
             <Plus /> {t('flowEditor.add.hireHeroes')}
           </Button>

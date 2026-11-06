@@ -10,6 +10,7 @@
 // data the client names itself (troops, buildings, items …), a length of time (`dur(ms)`, real milliseconds, which
 // the client shows as a duration), a share (`share(0.25)`, which the client shows as a percent: 25%), or a list of these.
 
+import { GameRefKind, type HeroBuffId, type ResourceKey } from '#/constants.ts';
 import { ADMIN_MESSAGES } from '#/messages/admin.ts';
 import { ALLIANCE_MESSAGES } from '#/messages/alliance.ts';
 import { ARMY_MESSAGES } from '#/messages/army.ts';
@@ -77,19 +78,18 @@ type ParamNames<C extends MsgCode> = C extends `${infer A extends MsgArea}.${inf
 
 /** Game data the client names in the player's language (by id). */
 export type GameRef =
-  | { ref: 'troop'; id: number }
-  | { ref: 'building'; id: number }
-  | { ref: 'tech'; id: number }
-  | { ref: 'item'; id: string }
-  | { ref: 'title'; id: number }
-  | { ref: 'tile'; id: number }
-  | { ref: 'resource'; id: 'gold' | 'food' | 'wood' | 'stone' | 'iron' }
-  | { ref: 'stat'; id: 'power' | 'management' | 'stratagem' }
-  | { ref: 'zone'; id: number }
-  | { ref: 'rank'; id: number }
-  | { ref: 'gear'; id: string }
-  | { ref: 'itemCategory'; id: number };
-export const GAME_REF_KINDS = ['troop', 'building', 'tech', 'item', 'title', 'tile', 'resource', 'stat', 'zone', 'rank', 'gear', 'itemCategory'] as const;
+  | { ref: typeof GameRefKind.TROOP; id: number }
+  | { ref: typeof GameRefKind.BUILDING; id: number }
+  | { ref: typeof GameRefKind.TECH; id: number }
+  | { ref: typeof GameRefKind.ITEM; id: string }
+  | { ref: typeof GameRefKind.TITLE; id: number }
+  | { ref: typeof GameRefKind.TILE; id: number }
+  | { ref: typeof GameRefKind.RESOURCE; id: ResourceKey }
+  | { ref: typeof GameRefKind.STAT; id: HeroBuffId }
+  | { ref: typeof GameRefKind.ZONE; id: number }
+  | { ref: typeof GameRefKind.RANK; id: number }
+  | { ref: typeof GameRefKind.GEAR; id: string }
+  | { ref: typeof GameRefKind.ITEM_CATEGORY; id: number };
 
 /** A length of time in real milliseconds; the client shows it as a duration ("1m 30s"). */
 export interface MsgDuration {
@@ -133,16 +133,16 @@ export const share = (x: number): MsgShare => ({ share: x });
 
 /** Game data references. */
 export const ref = {
-  troop: (id: number): GameRef => ({ ref: 'troop', id }),
-  building: (id: number): GameRef => ({ ref: 'building', id }),
-  tech: (id: number): GameRef => ({ ref: 'tech', id }),
-  item: (id: string): GameRef => ({ ref: 'item', id }),
-  title: (id: number): GameRef => ({ ref: 'title', id }),
-  tile: (id: number): GameRef => ({ ref: 'tile', id }),
-  resource: (id: 'gold' | 'food' | 'wood' | 'stone' | 'iron'): GameRef => ({ ref: 'resource', id }),
-  stat: (id: 'power' | 'management' | 'stratagem'): GameRef => ({ ref: 'stat', id }),
-  zone: (id: number): GameRef => ({ ref: 'zone', id }),
-  rank: (id: number): GameRef => ({ ref: 'rank', id }),
-  gear: (id: string): GameRef => ({ ref: 'gear', id }),
-  itemCategory: (id: number): GameRef => ({ ref: 'itemCategory', id }),
+  troop: (id: number): GameRef => ({ ref: GameRefKind.TROOP, id }),
+  building: (id: number): GameRef => ({ ref: GameRefKind.BUILDING, id }),
+  tech: (id: number): GameRef => ({ ref: GameRefKind.TECH, id }),
+  item: (id: string): GameRef => ({ ref: GameRefKind.ITEM, id }),
+  title: (id: number): GameRef => ({ ref: GameRefKind.TITLE, id }),
+  tile: (id: number): GameRef => ({ ref: GameRefKind.TILE, id }),
+  resource: (id: ResourceKey): GameRef => ({ ref: GameRefKind.RESOURCE, id }),
+  stat: (id: HeroBuffId): GameRef => ({ ref: GameRefKind.STAT, id }),
+  zone: (id: number): GameRef => ({ ref: GameRefKind.ZONE, id }),
+  rank: (id: number): GameRef => ({ ref: GameRefKind.RANK, id }),
+  gear: (id: string): GameRef => ({ ref: GameRefKind.GEAR, id }),
+  itemCategory: (id: number): GameRef => ({ ref: GameRefKind.ITEM_CATEGORY, id }),
 };

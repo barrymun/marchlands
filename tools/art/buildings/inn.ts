@@ -2,7 +2,7 @@
 // after it is bigger and stronger: a wing round a courtyard with a well, then three wings and guests' horses, then a
 // closed courtyard with a fountain and a banner over the gate.
 
-import { IsoCanvas } from '../iso.ts';
+import { Axis, IsoCanvas, PAVING, Roofing } from '../iso.ts';
 
 const SIZE = 64;
 
@@ -12,7 +12,7 @@ function wingX(c: IsoCanvas, x: number, y: number, w: number, d: number, h: numb
   const xs = Array.from({ length: Math.floor((w - 1) / 3) }, (_, i) => x + 2 + i * 3);
   c.windows(xs, y + d, 1, 2);
   c.windows(xs, y + d, 4, 1);
-  c.roof(x, y, w, d, h, 3, 'x', { roofing: 'slate' });
+  c.roof(x, y, w, d, h, 3, Axis.X, { roofing: Roofing.SLATE });
 }
 
 /** An inn wing along y. */
@@ -21,7 +21,7 @@ function wingY(c: IsoCanvas, x: number, y: number, w: number, d: number, h: numb
   const ys = Array.from({ length: Math.floor((d - 1) / 3) }, (_, i) => y + 2 + i * 3);
   c.windowsSe(x + w, ys, 1, 2);
   c.windowsSe(x + w, ys, 4, 1);
-  c.roof(x, y, w, d, h, 3, 'y', { roofing: 'slate' });
+  c.roof(x, y, w, d, h, 3, Axis.Y, { roofing: Roofing.SLATE });
 }
 
 /** A table with a bench. */
@@ -32,7 +32,7 @@ function table(c: IsoCanvas, x: number, y: number) {
 function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20, 'inn-1');
   c.grass(0, 0, 20, 20);
-  c.ground(3, 11, 14, 7, 'paving');
+  c.ground(3, 11, 14, 7, PAVING);
   wingX(c, 4, 4, 11, 6, 6);
   c.windows([9], 10, 0, 3, 'logDark');
   c.banner(c.p(15, 10, 4), 3);
@@ -46,7 +46,7 @@ function band1(): IsoCanvas {
 function band2(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 24, 'inn-2');
   c.grass(0, 0, 24, 24);
-  c.ground(8, 9, 14, 13, 'paving');
+  c.ground(8, 9, 14, 13, PAVING);
   wingX(c, 3, 2, 17, 6, 7);
   wingY(c, 3, 8, 5, 12, 6);
   c.well(15, 14);
@@ -59,7 +59,7 @@ function band2(): IsoCanvas {
 function band3(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 27, 'inn-3');
   c.grass(0, 0, 27, 27);
-  c.ground(8, 9, 11, 16, 'paving');
+  c.ground(8, 9, 11, 16, PAVING);
   wingX(c, 2, 2, 22, 6, 7);
   wingY(c, 2, 8, 5, 15, 6);
   c.well(12, 13);
@@ -74,7 +74,7 @@ function band3(): IsoCanvas {
 function band4(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 30, 'inn-4');
   c.grass(0, 0, 30, 30);
-  c.ground(8, 9, 14, 13, 'paving');
+  c.ground(8, 9, 14, 13, PAVING);
   wingX(c, 2, 2, 26, 6, 8);
   wingY(c, 2, 8, 5, 20, 7);
   c.stone(13, 13, 0, 5, 5, 1);

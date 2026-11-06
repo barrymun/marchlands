@@ -13,3 +13,7 @@ export const RANGES: Record<RangeId, { period: CandlePeriod; span: number; limit
   week: { period: CandlePeriod.HOUR, span: 7 * DAY, limit: 720 },
   month: { period: CandlePeriod.DAY, span: 30 * DAY, limit: 365 },
 };
+
+/** What the chart pane shows: the price history, or the book's depth. */
+export const ChartView = { PRICE: 'price', DEPTH: 'depth' } as const;
+export type ChartView = (typeof ChartView)[keyof typeof ChartView];

@@ -7,6 +7,7 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
   BALANCE,
+  BattleTarget,
   BuildingType,
   createGuardHero,
   HeroStatus,
@@ -15,6 +16,7 @@ import {
   msg,
   ref,
   refillCounts,
+  ReportBodyKind,
   seededRng,
   stateOf,
 } from '@marchlands/core';
@@ -66,7 +68,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const valley = await valleyNear(g, p.cityId, { level: 3 });
       // too few to win: the valley keeps what survives
       const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 10 });
-      const b = battleOf(report, 'valley');
+      const b = battleOf(report, BattleTarget.VALLEY);
       expect(b.result).toBe('defenderWon');
       const hitAt = g.now;
       const full = b.defender.troops.before;
@@ -92,7 +94,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const { armyId, report } = await attack(g, p, heroId, valley.id);
 
       expect(report).toMatchObject({ title: msg('report.title.valleyOccupied'), isAttack: true });
-      const b = battleOf(report, 'valley');
+      const b = battleOf(report, BattleTarget.VALLEY);
       expect(b).toMatchObject({ result: 'attackerWon', occupied: true, reason: null, valley: { type: valley.type, level: 1 }, defender: { player: '' } });
       const tile = await getTile(g, valley.id);
       expect(tile).toMatchObject({ ownerCityId: p.cityId, ownerPlayerId: p.id, troops: null, state: null, updatedAt: g.now });
@@ -112,7 +114,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const valley = await valleyNear(g, p.cityId, { level: 1 });
       const { armyId, report } = await attack(g, p, heroId, valley.id, { militia: 10 });
       expect(report.title).toEqual(msg('report.title.attackFailed'));
-      const b = battleOf(report, 'valley');
+      const b = battleOf(report, BattleTarget.VALLEY);
       expect(b).toMatchObject({ result: 'defenderWon', occupied: false, reason: null });
       const tile = await getTile(g, valley.id);
       expect(tile.ownerPlayerId).toBeNull();
@@ -133,7 +135,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       expect(second.id).not.toBe(first.id);
       const { armyId, report } = await attack(g, p, heroId, second.id);
       expect(report.title).toEqual(msg('report.title.attackSucceeded'));
-      expect(battleOf(report, 'valley')).toMatchObject({
+      expect(battleOf(report, BattleTarget.VALLEY)).toMatchObject({
         result: 'attackerWon',
         occupied: false,
         reason: msg('army.valleyLimit', { building: ref.building(BuildingType.TOWN_HALL) }),
@@ -166,7 +168,11 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       await setCityStats(g, p, { troops: { lightCavalry: 40_000 } });
       const thirteenth = await valleyNear(g, p.cityId, { level: 1 });
       const { report } = await attack(g, p, heroId, thirteenth.id);
-      expect(battleOf(report, 'valley')).toMatchObject({ result: 'attackerWon', occupied: false, reason: msg('army.seatValleyLimit', { level: 12 }) });
+      expect(battleOf(report, BattleTarget.VALLEY)).toMatchObject({
+        result: 'attackerWon',
+        occupied: false,
+        reason: msg('army.seatValleyLimit', { level: 12 }),
+      });
       expect((await getTile(g, thirteenth.id)).ownerPlayerId).toBeNull();
     }));
 
@@ -181,7 +187,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       await arrive(g, first.armyId); // both arrive, the first one takes the valley
       expect((await getTile(g, valley.id)).ownerPlayerId).toBe(p.id);
       expect(await armyRow(g, second.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, troops: { lightCavalry: 10_000 } });
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('army.valleyAlreadyHeld') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.valleyAlreadyHeld') });
     }));
 
   it('another lord’s garrison defends the valley; the owner keeps the honor and gets the report', () =>
@@ -191,7 +197,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const exp = (await getHero(g, qHero)).experience;
       const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 500 });
       expect(report.title).toEqual(msg('report.title.attackFailed'));
-      const b = battleOf(report, 'valley');
+      const b = battleOf(report, BattleTarget.VALLEY);
       const guard = await getHero(g, qHero);
       expect(b).toMatchObject({ result: 'defenderWon', occupied: false, defender: { player: q.name, hero: { name: guard.name, level: guard.level } } });
       expect(await lastReport(g, q.id, 'report.title.valleyDefended')).toMatchObject({ body: report.body });
@@ -205,7 +211,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
     game(async (g) => {
       const { p, heroId, q, valley, campId } = await heldValley(g, { lightCavalry: 30_000 });
       const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 40_000 });
-      const b = battleOf(report, 'valley');
+      const b = battleOf(report, BattleTarget.VALLEY);
       expect(b).toMatchObject({ result: 'attackerWon', occupied: true, defender: { player: q.name } });
       expect(await getTile(g, valley.id)).toMatchObject({ ownerPlayerId: p.id, ownerCityId: p.cityId });
       expect(await reportTitles(g, q.id)).toContain('report.title.valleyLost');
@@ -220,8 +226,8 @@ describe(`${processArmy.name}: attacking a valley`, () => {
     game(async (g) => {
       const { p, heroId, qHero, valley, campId } = await heldValley(g, { lightCavalry: 100 });
       const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 40_000 });
-      expect(battleOf(report, 'valley')).toMatchObject({ result: 'attackerWon', defender: { troops: { after: {} } } });
-      expect(battleOf(report, 'valley').defender.heroExp).toBeGreaterThan(0);
+      expect(battleOf(report, BattleTarget.VALLEY)).toMatchObject({ result: 'attackerWon', defender: { troops: { after: {} } } });
+      expect(battleOf(report, BattleTarget.VALLEY).defender.heroExp).toBeGreaterThan(0);
       expect(await armyRow(g, campId)).toBeUndefined();
       expect((await getHero(g, qHero)).status).toBe(HeroStatus.IDLE);
     }));
@@ -232,7 +238,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const { p: q, heroId: qHero } = await warrior(g);
       const valley = await occupyValley(g, q, qHero);
       const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 100 });
-      const b = battleOf(report, 'valley');
+      const b = battleOf(report, BattleTarget.VALLEY);
       expect(b).toMatchObject({ result: 'attackerWon', occupied: true, defender: { player: q.name, hero: null, troops: { before: {} } } });
       expect((await getTile(g, valley.id)).ownerPlayerId).toBe(p.id);
     }));
@@ -245,7 +251,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const bean = await send(g, p, { targetTileId: valley.id, mission: Mission.ATTACK, troops: { lightCavalry: 100 }, heroId });
       await allies(g, p, q);
       await arrive(g, bean.armyId);
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('army.valleyNowFriendly') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.valleyNowFriendly') });
       expect((await getTile(g, valley.id)).ownerPlayerId).toBe(q.id);
     }));
 });

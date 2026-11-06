@@ -9,7 +9,7 @@
 // merchant sells everything at its ask and buys at its bid, in any amount.
 
 import { BALANCE, scaled } from '#/balance.ts';
-import type { BasicResource } from '#/constants.ts';
+import { type BasicResource, TradeSide } from '#/constants.ts';
 
 export interface MerchantPrice {
   /** reference price (gold per unit) at `at` */
@@ -79,11 +79,11 @@ export function merchantBuys(ref: number, qty: number, limit = 0): MerchantFill 
 }
 
 /** Marginal merchant price after `q` more units on `side` (buy = the merchant sells). */
-export function merchantMarginal(ref: number, side: 'buy' | 'sell', q = 0): number {
+export function merchantMarginal(ref: number, side: TradeSide, q = 0): number {
   const fixed = merchantFixed();
-  if (fixed != null) return side === 'buy' ? merchantAsk(fixed) : merchantBid(fixed);
+  if (fixed != null) return side === TradeSide.BUY ? merchantAsk(fixed) : merchantBid(fixed);
   const d = cfg().depth;
-  return side === 'buy' ? merchantAsk(ref) * Math.exp(q / d) : merchantBid(ref) * Math.exp(-q / d);
+  return side === TradeSide.BUY ? merchantAsk(ref) * Math.exp(q / d) : merchantBid(ref) * Math.exp(-q / d);
 }
 
 /** Units the merchant sells for `gold`, where each unit costs its price x `feeFactor`. */

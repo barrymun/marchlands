@@ -22,6 +22,7 @@ export function PanelSheet({ city }: { city: CityBean }) {
   return (
     <Sheet open={!!place} onOpenChange={(o) => !o && nav.close()}>
       <SheetContent
+        // eslint-disable-next-line marchlands/no-string-compare -- i18next's value for a right-to-left language, read only here
         side={i18n.dir() === 'rtl' ? 'left' : 'right'}
         className="w-full gap-0 sm:max-w-3xl xl:max-w-5xl"
         // focus the panel itself rather than its first control, which would pop that control's tooltip open

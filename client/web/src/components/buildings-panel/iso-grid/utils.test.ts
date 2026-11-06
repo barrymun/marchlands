@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+
+import { IsoTileKind } from '@/components/buildings-panel/iso-grid/constants';
 import type { IsoSprite, IsoTile } from '@/components/buildings-panel/iso-grid/types';
 import {
   buildingSprites,
@@ -12,6 +14,7 @@ import {
   tilePoint,
   townLayout,
 } from '@/components/buildings-panel/iso-grid/utils';
+import { CityGround } from '@/lib/game-art';
 
 describe(tilePoint.name, () => {
   it('puts tile (0, 0) at the origin', () => {
@@ -85,18 +88,18 @@ describe(townLayout.name, () => {
   });
 
   it('puts the Town Hall in the middle of its 2×2 block, two tiles across', () => {
-    expect(town.tiles.find((t) => t.pos === -1)).toEqual({ col: 0.75 + 2.5 * 1.3, row: 0.75 + 2.5 * 1.3, kind: 'slot', pos: -1, span: 2 });
+    expect(town.tiles.find((t) => t.pos === -1)).toEqual({ col: 0.75 + 2.5 * 1.3, row: 0.75 + 2.5 * 1.3, kind: IsoTileKind.SLOT, pos: -1, span: 2 });
   });
 
   it('fills every other cell with a slot, each once', () => {
-    const slots = town.tiles.filter((t) => t.kind === 'slot' && t.pos !== -1);
+    const slots = town.tiles.filter((t) => t.kind === IsoTileKind.SLOT && t.pos !== -1);
     expect(slots.map((t) => t.pos!).sort((a, b) => a - b)).toEqual(positions);
     const hall = town.tiles.find((t) => t.pos === -1)!;
     expect(slots.every((t) => Math.abs(t.col - hall.col) > 1 || Math.abs(t.row - hall.row) > 1)).toBe(true);
   });
 
   it('keeps the slots apart and clear of the walls round the ground', () => {
-    const slots = town.tiles.filter((t) => t.kind === 'slot');
+    const slots = town.tiles.filter((t) => t.kind === IsoTileKind.SLOT);
     expect(Math.min(...slots.map((t) => t.col))).toBeCloseTo(0.75);
     expect(Math.max(...slots.map((t) => t.col))).toBeCloseTo(8 - 0.75);
     expect(town.tiles.find((t) => t.pos === 0)).toMatchObject({ col: 0.75, row: 0.75 });
@@ -104,7 +107,7 @@ describe(townLayout.name, () => {
   });
 
   it('puts the gate on the front corner of the ground', () => {
-    expect(town.tiles.find((t) => t.kind === 'gate')).toEqual({ col: 8.5, row: 8.5, kind: 'gate', pos: -2 });
+    expect(town.tiles.find((t) => t.kind === IsoTileKind.GATE)).toEqual({ col: 8.5, row: 8.5, kind: IsoTileKind.GATE, pos: -2 });
   });
 
   it('is in drawing order, back to front', () => {
@@ -126,14 +129,14 @@ describe(fieldLayout.name, () => {
   it('opens the first `unlocked` fields, back to front, and locks the rest', () => {
     const { tiles } = fields(3);
     expect(tiles).toHaveLength(40);
-    expect(tiles.slice(0, 3).every((t) => t.kind === 'slot')).toBe(true);
-    expect(tiles.slice(3).every((t) => t.kind === 'locked')).toBe(true);
+    expect(tiles.slice(0, 3).every((t) => t.kind === IsoTileKind.SLOT)).toBe(true);
+    expect(tiles.slice(3).every((t) => t.kind === IsoTileKind.LOCKED)).toBe(true);
     expect(tiles[0]!.pos).toBe(1001);
   });
 
   it('locks every field with nothing unlocked, and none with all of them', () => {
-    expect(fields(0).tiles.every((t) => t.kind === 'locked')).toBe(true);
-    expect(fields(40).tiles.every((t) => t.kind === 'slot')).toBe(true);
+    expect(fields(0).tiles.every((t) => t.kind === IsoTileKind.LOCKED)).toBe(true);
+    expect(fields(40).tiles.every((t) => t.kind === IsoTileKind.SLOT)).toBe(true);
   });
 
   it('lays grass under them, with some to spare round the edge', () => {
@@ -167,9 +170,9 @@ describe(inDiamond.name, () => {
 
 describe(hitTest.name, () => {
   const tiles: IsoTile[] = [
-    { col: 0, row: 0, kind: 'slot', pos: 1 },
-    { col: 1, row: 0, kind: 'slot', pos: 2 },
-    { col: 1, row: 1, kind: 'locked', pos: 3 },
+    { col: 0, row: 0, kind: IsoTileKind.SLOT, pos: 1 },
+    { col: 1, row: 0, kind: IsoTileKind.SLOT, pos: 2 },
+    { col: 1, row: 1, kind: IsoTileKind.LOCKED, pos: 3 },
   ];
   const sprite = (col: number, row: number, pos?: number): IsoSprite => ({ key: `s${col}${row}`, col, row, src: `b${col}${row}`, depth: col + row, pos });
   const solid = () => true;
@@ -197,7 +200,7 @@ describe(hitTest.name, () => {
   });
 
   it('finds the gate by its diamond, at a fractional position', () => {
-    const gate: IsoTile = { col: 2.5, row: 2.5, kind: 'gate', pos: -2 };
+    const gate: IsoTile = { col: 2.5, row: 2.5, kind: IsoTileKind.GATE, pos: -2 };
     expect(hitTest({ x: 0, y: 80 }, [], [gate], clear)).toBe(-2);
   });
 
@@ -209,22 +212,22 @@ describe(hitTest.name, () => {
 
 describe(markerOf.name, () => {
   it('marks an empty slot as a plot, and nothing under a building', () => {
-    expect(markerOf({ col: 0, row: 0, kind: 'slot', pos: 1 }, false)).toBe('plot');
-    expect(markerOf({ col: 0, row: 0, kind: 'slot', pos: 1 }, true)).toBeNull();
+    expect(markerOf({ col: 0, row: 0, kind: IsoTileKind.SLOT, pos: 1 }, false)).toBe(CityGround.PLOT);
+    expect(markerOf({ col: 0, row: 0, kind: IsoTileKind.SLOT, pos: 1 }, true)).toBeNull();
   });
 
   it('roughens a locked field, and leaves the gate bare', () => {
-    expect(markerOf({ col: 0, row: 0, kind: 'locked', pos: 1040 }, false)).toBe('locked');
-    expect(markerOf({ col: 0, row: 0, kind: 'gate', pos: -2 }, false)).toBeNull();
+    expect(markerOf({ col: 0, row: 0, kind: IsoTileKind.LOCKED, pos: 1040 }, false)).toBe(CityGround.LOCKED);
+    expect(markerOf({ col: 0, row: 0, kind: IsoTileKind.GATE, pos: -2 }, false)).toBeNull();
   });
 });
 
 describe(buildingSprites.name, () => {
   const tiles: IsoTile[] = [
-    { col: 0, row: 0, kind: 'slot', pos: 1 },
-    { col: 1, row: 0, kind: 'slot', pos: 2 },
-    { col: 1, row: 1, kind: 'slot', pos: 3 },
-    { col: 2, row: 2, kind: 'gate', pos: -2 },
+    { col: 0, row: 0, kind: IsoTileKind.SLOT, pos: 1 },
+    { col: 1, row: 0, kind: IsoTileKind.SLOT, pos: 2 },
+    { col: 1, row: 1, kind: IsoTileKind.SLOT, pos: 3 },
+    { col: 2, row: 2, kind: IsoTileKind.GATE, pos: -2 },
   ];
   const byPos = new Map([
     [1, { typeId: 1, level: 4 }],
@@ -243,7 +246,7 @@ describe(buildingSprites.name, () => {
   });
 
   it('draws a building on a 2×2 tile at twice the size, asking for its big art', () => {
-    const hall: IsoTile[] = [{ col: 1, row: 1, kind: 'slot', pos: 1, span: 2 }];
+    const hall: IsoTile[] = [{ col: 1, row: 1, kind: IsoTileKind.SLOT, pos: 1, span: 2 }];
     expect(buildingSprites(hall, byPos, (_type, _level, span) => ({ src: `art-${span}`, file: 'hall' }))).toEqual([
       { key: 'b1', col: 1, row: 1, src: 'art-2', depth: 2, pos: 1, size: 128, file: 'hall' },
     ]);

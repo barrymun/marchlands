@@ -1,9 +1,10 @@
 // WebSocket push client: authenticates with the access token, keeps the socket alive,
 // reconnects with backoff and dispatches typed `{ cmd, data }` frames.
 
-import type { PushCmd, PushData, PushMessage } from '@marchlands/contracts';
+import { ClientCmd, type PushCmd, type PushData, type PushMessage } from '@marchlands/contracts';
 
-export type PushStatus = 'connecting' | 'open' | 'closed';
+export const PushStatus = { CONNECTING: 'connecting', OPEN: 'open', CLOSED: 'closed' } as const;
+export type PushStatus = (typeof PushStatus)[keyof typeof PushStatus];
 
 export interface PushClientOptions {
   /** WebSocket endpoint, e.g. `ws://localhost:3000/ws` or `/ws` (resolved against location) */
@@ -25,7 +26,7 @@ export class PushClient {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private ping: ReturnType<typeof setInterval> | null = null;
   private stopped = true;
-  private current: PushStatus = 'closed';
+  private current: PushStatus = PushStatus.CLOSED;
   private statusListeners = new Set<(status: PushStatus) => void>();
   private readonly opts: PushClientOptions;
 
@@ -76,7 +77,7 @@ export class PushClient {
     this.timer = this.ping = null;
     this.socket?.close(1000, 'bye');
     this.socket = null;
-    this.setStatus('closed');
+    this.setStatus(PushStatus.CLOSED);
   }
 
   private open() {
@@ -88,13 +89,13 @@ export class PushClient {
     if (url.protocol === 'http:') url.protocol = 'ws:';
     if (url.protocol === 'https:') url.protocol = 'wss:';
     url.searchParams.set('token', token);
-    this.setStatus('connecting');
+    this.setStatus(PushStatus.CONNECTING);
     const ws = new WS(url);
     this.socket = ws;
     ws.onopen = () => {
       this.retry = 0;
-      this.setStatus('open');
-      this.ping = setInterval(() => ws.readyState === ws.OPEN && ws.send(JSON.stringify({ cmd: 'ping' })), 25_000);
+      this.setStatus(PushStatus.OPEN);
+      this.ping = setInterval(() => ws.readyState === ws.OPEN && ws.send(JSON.stringify({ cmd: ClientCmd.PING })), 25_000);
     };
     ws.onmessage = (ev) => {
       let msg: PushMessage;
@@ -111,7 +112,7 @@ export class PushClient {
       this.ping = null;
       if (this.socket !== ws) return;
       this.socket = null;
-      this.setStatus('closed');
+      this.setStatus(PushStatus.CLOSED);
       if (ev.code === 4001 || ev.code === 4004) {
         this.opts.onRejected?.(ev.code, ev.reason);
         return;

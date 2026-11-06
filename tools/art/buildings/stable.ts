@@ -2,7 +2,7 @@
 // and a haystack; each band after it is bigger and stronger: a longer stable, a trough and more horses, then a second
 // stable and a training ring, then stone stables round large paddocks with banners.
 
-import { IsoCanvas } from '../iso.ts';
+import { Axis, IsoCanvas, Roofing } from '../iso.ts';
 
 const SIZE = 64;
 
@@ -23,7 +23,7 @@ function band1(): IsoCanvas {
   c.grass(0, 0, 20, 20);
   c.timber(3, 3, 0, 10, 5, 4);
   c.windows([5, 7, 9, 11], 8, 0, 3, 'logDark');
-  c.roof(3, 3, 10, 5, 4, 3, 'x', { roofing: 'barn' });
+  c.roof(3, 3, 10, 5, 4, 3, Axis.X, { roofing: Roofing.BARN });
   c.ground(9, 11, 9, 7, 'sand');
   c.horse(12, 14);
   c.horse(15, 16);
@@ -39,7 +39,7 @@ function band2(): IsoCanvas {
   c.grass(0, 0, 24, 24);
   c.timber(2, 2, 0, 14, 6, 5);
   c.windows([4, 6, 8, 10, 12, 14], 8, 0, 3, 'logDark');
-  c.roof(2, 2, 14, 6, 5, 3, 'x', { roofing: 'barn' });
+  c.roof(2, 2, 14, 6, 5, 3, Axis.X, { roofing: Roofing.BARN });
   c.ground(9, 11, 13, 11, 'sand');
   trough(c, 11, 12);
   c.horse(12, 16);
@@ -59,10 +59,10 @@ function band3(): IsoCanvas {
   c.grass(0, 0, 27, 27);
   c.timber(2, 2, 0, 15, 6, 5);
   c.windows([4, 6, 8, 10, 12, 14, 16], 8, 0, 3, 'logDark');
-  c.roof(2, 2, 15, 6, 5, 3, 'x', { roofing: 'barn' });
+  c.roof(2, 2, 15, 6, 5, 3, Axis.X, { roofing: Roofing.BARN });
   c.timber(19, 2, 0, 6, 10, 5);
   c.windowsSe(25, [4, 6, 8, 10], 0, 3, 'logDark');
-  c.roof(19, 2, 6, 10, 5, 3, 'y', { roofing: 'barn' });
+  c.roof(19, 2, 6, 10, 5, 3, Axis.Y, { roofing: Roofing.BARN });
   // a training ring
   c.ground(2, 12, 10, 10, 'sand');
   c.horse(6, 16);
@@ -84,10 +84,10 @@ function band4(): IsoCanvas {
   c.stone(2, 2, 0, 18, 7, 6);
   c.windows([4, 6, 8, 10, 12, 14, 16, 18], 9, 0, 3, 'logDark');
   c.windows([5, 9, 13, 17], 9, 4, 1);
-  c.roof(2, 2, 18, 7, 6, 4, 'x', { roofing: 'barn', gable: 'stoneR' });
+  c.roof(2, 2, 18, 7, 6, 4, Axis.X, { roofing: Roofing.BARN, gable: 'stoneR' });
   c.stone(22, 2, 0, 6, 13, 6);
   c.windowsSe(28, [4, 6, 8, 10, 12], 0, 3, 'logDark');
-  c.roof(22, 2, 6, 13, 6, 3, 'y', { roofing: 'barn', gable: 'stoneL' });
+  c.roof(22, 2, 6, 13, 6, 3, Axis.Y, { roofing: Roofing.BARN, gable: 'stoneL' });
   c.banner(c.p(2, 9, 6), 5);
   c.banner(c.p(28, 15, 6), 5);
   c.ground(2, 12, 11, 15, 'sand');

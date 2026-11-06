@@ -8,6 +8,7 @@ import {
   FlowCities,
   FlowStatus,
   FlowWaitUntil,
+  HeroBuffId,
   HeroStatus,
   Mission,
   msg,
@@ -23,7 +24,7 @@ import { addCity, createTestPlayer, reloadCity } from '#test/support/factories.t
 import { armyPreset, farmingCity, flowOf, newFlow, runFlowIn, valleysNear, withBarracks, withHero } from '#test/support/flows.ts';
 import { game, T0 } from '#test/support/game.ts';
 
-const mayor = { type: FlowActionType.SET_MAYOR, stat: 'power' };
+const mayor = { type: FlowActionType.SET_MAYOR, stat: HeroBuffId.POWER };
 const train5 = { type: FlowActionType.TRAIN_TROOPS, troopId: TroopType.WARRIOR, amount: 5 };
 const waitTime = { type: FlowActionType.WAIT, until: FlowWaitUntil.TIME, minutes: 5 };
 const noBarracks = msg('flow.cannotTrain', {
@@ -176,7 +177,7 @@ describe(flows.runFlow.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withHero(g, p);
-      const f = await newFlow(g, p, { name: 'Waits', actions: [mayor, waitTime, { type: FlowActionType.SET_MAYOR, stat: 'management' }] });
+      const f = await newFlow(g, p, { name: 'Waits', actions: [mayor, waitTime, { type: FlowActionType.SET_MAYOR, stat: HeroBuffId.MANAGEMENT }] });
       const r = await runFlowIn(g, p, f.id);
       expect(r.flow).toMatchObject({ status: FlowStatus.WAITING, nextAction: 2, waitUntil: T0 + 300_000 });
       const wait = { action: msg('flow.action.wait', { time: dur(300_000) }), ok: true, detail: msg('flow.step.waiting', { time: dur(300_000) }) };

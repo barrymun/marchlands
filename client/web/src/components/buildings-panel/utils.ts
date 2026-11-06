@@ -1,8 +1,7 @@
 import type { BuildingBean } from '@marchlands/api-client';
 import { TOWN_HALL_POSITION, TroopType, unlockedOuterSlots } from '@marchlands/core';
 
-import { CITY_ART, VIEW_KEY } from '@/components/buildings-panel/constants';
-import type { CityView } from '@/components/buildings-panel/types';
+import { CITY_ART, CityView, VIEW_KEY } from '@/components/buildings-panel/constants';
 import type { TownState } from '@/components/iso-anim/types';
 
 /** The city's Town Hall level and how many field slots outside the walls it unlocks. */
@@ -22,9 +21,9 @@ export function fieldSlots(buildings: BuildingBean[]): { townHall: number; unloc
 /** How this browser last chose to show the buildings: the isometric scene unless the cards were picked. */
 export function readView(): CityView {
   try {
-    return localStorage.getItem(VIEW_KEY) === 'grid' ? 'grid' : 'scene';
+    return localStorage.getItem(VIEW_KEY) === CityView.GRID ? CityView.GRID : CityView.SCENE;
   } catch {
-    return 'scene';
+    return CityView.SCENE;
   }
 }
 

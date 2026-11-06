@@ -6,7 +6,7 @@
 // src/assets/figure/, and one icon per item in src/assets/items/. The art scripts in tools/art import this file, so it uses
 // no `@/` imports.
 
-import { buildingConfig, BuildingType, FortType, ItemId, Sex, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
+import { buildingConfig, BuildingType, FortType, ItemId, RESOURCE_KEYS, Sex, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
 
 /** The level bands the art changes at (a building's or a valley's level): 1-3, 4-6, 7-9 and 10. */
 export const ART_BANDS = [
@@ -96,7 +96,7 @@ export function troopBadgeFile(typeId: number): string {
 }
 
 /** The resources with an icon, as the resource bar lists them. */
-export const RESOURCE_ART_KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
+export const RESOURCE_ART_KEYS = RESOURCE_KEYS;
 export type ResourceKey = (typeof RESOURCE_ART_KEYS)[number];
 
 /** A resource icon's file name: `wood.png`. */
@@ -113,8 +113,9 @@ export function itemArtFile(id: string): string | null {
 }
 
 /** The isometric city view's ground: grass tiles, and the markers laid over it for an empty plot and a locked field. */
-export const CITY_GROUNDS = ['grass', 'plot', 'locked'] as const;
-export type CityGround = (typeof CITY_GROUNDS)[number];
+export const CityGround = { GRASS: 'grass', PLOT: 'plot', LOCKED: 'locked' } as const;
+export type CityGround = (typeof CityGround)[keyof typeof CityGround];
+export const CITY_GROUNDS = Object.values(CityGround);
 
 /** A city ground tile's file name: `plot.png`. */
 export function cityGroundFile(name: CityGround): string {
@@ -151,8 +152,9 @@ export function gearArtFile(piece: string, level: number): string {
  * A gear sprite split where one part moves alone (docs/features/gear-animations.md, the pieces' own movement): the piece
  * without the part (`bare`) and the part by itself (the helm's `plume`), drawn whenever the sprite has a `sway` spot.
  */
-export const GEAR_TWIN_PARTS = ['bare', 'plume'] as const;
-export type GearTwinPart = (typeof GEAR_TWIN_PARTS)[number];
+export const GearTwinPart = { BARE: 'bare', PLUME: 'plume' } as const;
+export type GearTwinPart = (typeof GearTwinPart)[keyof typeof GearTwinPart];
+export const GEAR_TWIN_PARTS = Object.values(GearTwinPart);
 
 /** One of a gear sprite's twins (`head-4-bare.png`, `head-4-plume.png`). */
 export function gearTwinFile(piece: string, level: number, part: GearTwinPart): string {
@@ -187,9 +189,14 @@ export const FIGURE_SKIN_TONES = ['pale', 'fair', 'olive', 'brown'] as const;
 export type FigureSkinTone = (typeof FIGURE_SKIN_TONES)[number];
 export const FIGURE_HAIR_COLOURS = ['black', 'brown', 'auburn', 'blond', 'grey'] as const;
 export type FigureHairColour = (typeof FIGURE_HAIR_COLOURS)[number];
-/** Hairstyles by sex: a man's short hair with or without a beard, a woman's loose or braided. */
-export const FIGURE_HAIR_STYLES = { [Sex.MALE]: ['short', 'beard'], [Sex.FEMALE]: ['loose', 'braid'] } as const;
-export type FigureHairStyle = (typeof FIGURE_HAIR_STYLES)[Sex][number];
+/** Hairstyles: a man's short hair with or without a beard, a woman's loose or braided. */
+export const FigureHairStyle = { SHORT: 'short', BEARD: 'beard', LOOSE: 'loose', BRAID: 'braid' } as const;
+export type FigureHairStyle = (typeof FigureHairStyle)[keyof typeof FigureHairStyle];
+/** The hairstyles of each sex. */
+export const FIGURE_HAIR_STYLES = {
+  [Sex.MALE]: [FigureHairStyle.SHORT, FigureHairStyle.BEARD],
+  [Sex.FEMALE]: [FigureHairStyle.LOOSE, FigureHairStyle.BRAID],
+} as const;
 
 const sexKey = (sex: Sex) => (sex === Sex.FEMALE ? 'f' : 'm');
 

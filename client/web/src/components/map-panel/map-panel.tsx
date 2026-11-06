@@ -19,6 +19,7 @@ import { CityDialog } from '@/components/city-dialog/city-dialog';
 import { useIsoViewport } from '@/components/iso-viewport/hooks';
 import type { PanDirection, ViewPoint } from '@/components/iso-viewport/types';
 import { panStep, spriteAt, tileAt } from '@/components/iso-viewport/utils';
+import { MapList } from '@/components/map-panel/constants';
 import { FarmTargets } from '@/components/map-panel/farm-targets/farm-targets';
 import { GoToCoords } from '@/components/map-panel/go-to-coords/go-to-coords';
 import { HeldValleys } from '@/components/map-panel/held-valleys/held-valleys';
@@ -54,7 +55,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
   const at = search.at && { x: wrap(search.at.x, mapSize), y: wrap(search.at.y, mapSize) };
   const [selected, setSelected] = useState<number | null>(() => (at ? at.y * mapSize + at.x : null));
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null);
-  const [list, setList] = useState<'cities' | 'valleys' | 'farms' | 'legend' | null>(null);
+  const [list, setList] = useState<MapList | null>(null);
   const [factions, setFactions] = useState(readFactionTint);
   const [target, setTarget] = useState<SendTarget | null>(null);
   const [moveTo, setMoveTo] = useState<{ x: number; y: number } | null>(null);
@@ -162,7 +163,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
     const { dx, dy } = panStep(dir, PAN_STEP);
     vp.panBy(dx, dy);
   };
-  const toggle = (which: 'cities' | 'valleys' | 'farms' | 'legend') => setList((l) => (l === which ? null : which));
+  const toggle = (which: MapList) => setList((l) => (l === which ? null : which));
   const tintFactions = (on: boolean) => {
     setFactions(on);
     saveFactionTint(on);
@@ -207,9 +208,9 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
         {otherCities.length > 0 && (
           <Button
             size="xs"
-            variant={list === 'cities' ? 'secondary' : 'ghost'}
-            aria-pressed={list === 'cities'}
-            onClick={() => toggle('cities')}
+            variant={list === MapList.CITIES ? 'secondary' : 'ghost'}
+            aria-pressed={list === MapList.CITIES}
+            onClick={() => toggle(MapList.CITIES)}
             className="gap-1"
           >
             <Castle />
@@ -219,31 +220,37 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
         )}
         <Button
           size="xs"
-          variant={list === 'valleys' ? 'secondary' : 'ghost'}
-          aria-pressed={list === 'valleys'}
-          onClick={() => toggle('valleys')}
+          variant={list === MapList.VALLEYS ? 'secondary' : 'ghost'}
+          aria-pressed={list === MapList.VALLEYS}
+          onClick={() => toggle(MapList.VALLEYS)}
           className="gap-1"
         >
           <MapPin />
           <span className="tabular-nums">{city.fields.length}</span>
           <span className="sr-only">{t('held.title', { city: city.name })}</span>
         </Button>
-        <Button size="xs" variant={list === 'farms' ? 'secondary' : 'ghost'} aria-pressed={list === 'farms'} onClick={() => toggle('farms')} className="gap-1">
+        <Button
+          size="xs"
+          variant={list === MapList.FARMS ? 'secondary' : 'ghost'}
+          aria-pressed={list === MapList.FARMS}
+          onClick={() => toggle(MapList.FARMS)}
+          className="gap-1"
+        >
           <Swords />
           <span className="tabular-nums">{farmedHere}</span>
           <span className="sr-only">{t('farms.title')}</span>
         </Button>
         <Button
           size="icon-xs"
-          variant={list === 'legend' ? 'secondary' : 'ghost'}
-          aria-pressed={list === 'legend'}
-          onClick={() => toggle('legend')}
+          variant={list === MapList.LEGEND ? 'secondary' : 'ghost'}
+          aria-pressed={list === MapList.LEGEND}
+          onClick={() => toggle(MapList.LEGEND)}
           aria-label={t('legend.title')}
         >
           <Info />
         </Button>
       </div>
-      {list === 'cities' && (
+      {list === MapList.CITIES && (
         <OtherCities
           cities={otherCities}
           fromTileId={city.fieldId}
@@ -252,7 +259,7 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           className={cn(floating, 'top-14 start-2 w-[min(24rem,calc(100%-1rem))]')}
         />
       )}
-      {list === 'valleys' && (
+      {list === MapList.VALLEYS && (
         <HeldValleys
           city={city}
           onGoTo={goTo}
@@ -261,10 +268,10 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
           className={cn(floating, 'top-14 start-2 w-[min(24rem,calc(100%-1rem))]')}
         />
       )}
-      {list === 'farms' && (
+      {list === MapList.FARMS && (
         <FarmTargets lists={farms} mapSize={mapSize} onGoTo={goTo} className={cn(floating, 'top-14 start-2 w-[min(26rem,calc(100%-1rem))]')} />
       )}
-      {list === 'legend' && (
+      {list === MapList.LEGEND && (
         <MapLegend factions={factions} onFactions={tintFactions} className={cn(floating, 'top-14 start-2 w-[min(22rem,calc(100%-1rem))]')} />
       )}
       {selected != null && (

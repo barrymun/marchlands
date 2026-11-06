@@ -22,6 +22,7 @@ import {
   heroBuffDesc,
   HeroBuffId,
   heroItemGoldPrice,
+  HeroItemPayment,
   heroPointCap,
   HeroStatus,
   isGearPiece,
@@ -284,15 +285,15 @@ export async function reward(ctx: Ctx, playerId: number, heroId: number) {
 }
 
 /** hero.useItem: experience books, loyalty medals, attribute items. */
-export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, itemId: string, payWith?: 'gold') {
+export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, itemId: string, payWith?: HeroItemPayment) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   const h = await ownHero(ctx, playerId, heroId);
-  let city = HERO_ATTRIBUTE_ITEMS[itemId] === 'management' ? await openMayorCity(ctx, h) : null;
+  let city = HERO_ATTRIBUTE_ITEMS[itemId] === HeroBuffId.MANAGEMENT ? await openMayorCity(ctx, h) : null;
   // buying with gold (asked for, or the item is not owned): the hero's city pays (BALANCE.heroItemGold)
   let paidInGold = false;
   const price = heroItemGoldPrice(itemId, h.upgradeExp);
-  if (payWith === 'gold' && price == null) throw new GameError(msg('hero.itemNotForGold'), -99);
-  if (price != null && (payWith === 'gold' || itemCount(p, itemId) <= 0)) {
+  if (payWith === HeroItemPayment.GOLD && price == null) throw new GameError(msg('hero.itemNotForGold'), -99);
+  if (price != null && (payWith === HeroItemPayment.GOLD || itemCount(p, itemId) <= 0)) {
     city ??= await openOwnCity(ctx, playerId, h.cityId);
     if (city.city.gold < price) throw new GameError(msg('common.notEnoughGoldFor', { amount: price }), -99);
     city.city.gold -= price;

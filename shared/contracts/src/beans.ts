@@ -37,7 +37,7 @@ export const HeroBean = HeroRow.pick({
 })
   .extend({
     experience: z.number().int(),
-    gearStat: z.enum(['power', 'management', 'stratagem']).describe("(marchlands) attribute the lord's gear boosts on this hero"),
+    gearStat: z.enum(HERO_BUFF_IDS).describe("(marchlands) attribute the lord's gear boosts on this hero"),
     sex: z.literal([Sex.MALE, Sex.FEMALE]).describe('(marchlands) 0 a man, 1 a woman: the figure the Heroes page draws (never shown as text)'),
     buffs: z
       .array(

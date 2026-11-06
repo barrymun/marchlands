@@ -1,4 +1,4 @@
-import { PINCH_WHEEL_RATE, SPRITE, TILE_H, TILE_W, WHEEL_LINE, WHEEL_RATE, ZOOMS } from '@/components/iso-viewport/constants';
+import { OutlineHalf, PINCH_WHEEL_RATE, SPRITE, TILE_H, TILE_W, WHEEL_LINE, WHEEL_RATE, ZOOMS } from '@/components/iso-viewport/constants';
 import type { Camera, Drawable, Outline, Overlay, PanDirection, Piece, PixelArt, SceneBox, View, ViewPoint } from '@/components/iso-viewport/types';
 
 /**
@@ -28,8 +28,8 @@ export function isOutline(p: Piece): p is Outline {
 /** A tile's outline as its two halves, the back one to go before what stands on the tile and the front one after. */
 export function outlineHalves(o: Omit<Outline, 'half'>): [Outline, Outline] {
   return [
-    { ...o, key: `${o.key}b`, half: 'back' },
-    { ...o, key: `${o.key}f`, half: 'front' },
+    { ...o, key: `${o.key}b`, half: OutlineHalf.BACK },
+    { ...o, key: `${o.key}f`, half: OutlineHalf.FRONT },
   ];
 }
 
@@ -45,7 +45,7 @@ export function outlinePoints(o: Outline, cam: Camera, view: View): ViewPoint[] 
     { x: p.x - w, y: p.y },
     { x: p.x + w, y: p.y },
   ];
-  return o.half === 'back' ? [left, { x: p.x, y: p.y - h }, right] : [right, { x: p.x, y: p.y + h }, left];
+  return o.half === OutlineHalf.BACK ? [left, { x: p.x, y: p.y - h }, right] : [right, { x: p.x, y: p.y + h }, left];
 }
 
 /** What drawing a layer of outlines needs of a 2D context (a canvas's, or a stand-in in tests). */

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { type CityBean, getCitiesBuildingsAvailableOptions, getCitiesByCityIdQueryKey, postCitiesBuildingsMutation } from '@marchlands/api-client';
-import { BuildingType } from '@marchlands/core';
+import { BuildingArea, BuildingType } from '@marchlands/core';
 
 import { areaOf } from '@/components/buildings-panel/building-dialog/build-list/utils';
 import { MayorBuildExp } from '@/components/buildings-panel/building-dialog/mayor-build-exp/mayor-build-exp';
@@ -34,7 +34,7 @@ export function BuildList({ city, positionId, onDone }: { city: CityBean; positi
     <>
       <DialogHeader>
         <DialogTitle>{t('buildList.title')}</DialogTitle>
-        <DialogDescription>{area === 'outside' ? t('buildList.outside') : t('buildList.inside')}</DialogDescription>
+        <DialogDescription>{area === BuildingArea.OUTSIDE ? t('buildList.outside') : t('buildList.inside')}</DialogDescription>
       </DialogHeader>
       <MayorBuildHint city={city} />
       {list.isPending && <Skeleton className="h-32" />}

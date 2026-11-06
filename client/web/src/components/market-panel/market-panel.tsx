@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type CityBean, getMarketByResTypeOptions, getMarketHistoryOptions, type MarketPriceLevel } from '@marchlands/api-client';
-import { BuildingType } from '@marchlands/core';
+import { BuildingType, MarketOrderType } from '@marchlands/core';
 
 import { ActivityPanel } from '@/components/market-panel/activity-panel/activity-panel';
 import { BookPanel } from '@/components/market-panel/book-panel/book-panel';
@@ -12,7 +12,7 @@ import { type RangeId, RANGES } from '@/components/market-panel/chart-panel/cons
 import { MarketBar } from '@/components/market-panel/market-bar/market-bar';
 import { TradeBar } from '@/components/market-panel/trade-bar/trade-bar';
 import { TradeForm } from '@/components/market-panel/trade-form/trade-form';
-import type { Mode, Side } from '@/components/market-panel/types';
+import type { Side } from '@/components/market-panel/types';
 import { resInline } from '@/components/market-panel/utils';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -31,7 +31,7 @@ export function MarketPanel({ city }: { city: CityBean }) {
   const [resType, setResType] = useState(0);
   const [rangeId, setRangeId] = useState<RangeId>('hour');
   const [side, setSide] = useState<Side>(0);
-  const [mode, setMode] = useState<Mode>('market');
+  const [mode, setMode] = useState<MarketOrderType>(MarketOrderType.MARKET);
   const [price, setPrice] = useState('');
   const wide = useMediaQuery('(min-width: 768px)');
   // a phone's trade sheet
@@ -59,14 +59,14 @@ export function MarketPanel({ city }: { city: CityBean }) {
   // clicking a level of the book prepares the opposite order at that price
   const pickLevel = (level: MarketPriceLevel, levelSide: Side) => {
     setSide(levelSide === 1 ? 0 : 1);
-    setMode('limit');
+    setMode(MarketOrderType.LIMIT);
     setPrice(String(level.price));
     setTrading(!wide);
   };
   // clicking the factions or the merchant prepares an instant order against them
   const pickInstant = (theySell: boolean) => {
     setSide(theySell ? 0 : 1);
-    setMode('market');
+    setMode(MarketOrderType.MARKET);
     setTrading(!wide);
   };
   // the history's trades and ticker are of the resource shown (the previous one while the next loads)

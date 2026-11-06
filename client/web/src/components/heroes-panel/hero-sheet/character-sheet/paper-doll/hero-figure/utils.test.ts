@@ -2,7 +2,14 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { Sex } from '@marchlands/core';
 
-import { BREATH_MS, FIGURE_ART, FIGURE_SIZE, GLOW_MS, SWAY_MS } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure/constants';
+import {
+  BREATH_MS,
+  FIGURE_ART,
+  FIGURE_SIZE,
+  FigureMotion,
+  GLOW_MS,
+  SWAY_MS,
+} from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure/constants';
 import {
   breathLift,
   drawFigure,
@@ -62,12 +69,12 @@ describe(figureLayers.name, () => {
 
   it('stirs the cape, keeps the legs still, breathes the rest, and lights the upper body', () => {
     expect(figureLayers(body, 10).map((l) => [l.motion, l.glows])).toEqual([
-      ['sway', false],
-      ['still', false],
-      ['breath', false],
-      ['breath', true],
-      ['breath', false],
-      ['breath', false],
+      [FigureMotion.SWAY, false],
+      [FigureMotion.STILL, false],
+      [FigureMotion.BREATH, false],
+      [FigureMotion.BREATH, true],
+      [FigureMotion.BREATH, false],
+      [FigureMotion.BREATH, false],
     ]);
   });
 

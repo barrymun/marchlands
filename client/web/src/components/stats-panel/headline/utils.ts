@@ -1,4 +1,6 @@
 import { FORT_KEY_LIST, TROOP_KEY_LIST } from '@marchlands/core';
+
+import { UnitGroup } from '@/components/stats-panel/constants';
 import type { Counters } from '@/components/stats-panel/types';
 import { sumPrefix, unitCount } from '@/components/stats-panel/utils';
 
@@ -8,7 +10,9 @@ export function headline(c: Counters) {
   const attacksWon = sumPrefix(c, 'attacks.won.');
   const defensesWon = sumPrefix(c, 'defenses.won.');
   // the enemy unit type defeated most, if any
-  const [topEnemy] = units.filter((k) => unitCount(c, 'killed', k) > 0).sort((a, b) => unitCount(c, 'killed', b) - unitCount(c, 'killed', a));
+  const [topEnemy] = units
+    .filter((k) => unitCount(c, UnitGroup.KILLED, k) > 0)
+    .sort((a, b) => unitCount(c, UnitGroup.KILLED, b) - unitCount(c, UnitGroup.KILLED, a));
   return {
     attacksWon,
     attacks: attacksWon + sumPrefix(c, 'attacks.lost.'),
@@ -18,7 +22,7 @@ export function headline(c: Counters) {
     enemies: sumPrefix(c, 'killed.'),
     topEnemy: topEnemy ?? null,
     trained: sumPrefix(c, 'trained.'),
-    fell: units.reduce((s, k) => s + unitCount(c, 'died', k), 0),
+    fell: units.reduce((s, k) => s + unitCount(c, UnitGroup.DIED, k), 0),
     citiesCaptured: (c['captured.city'] ?? 0) + (c['captured.npc'] ?? 0),
     valleys: c['captured.valley'] ?? 0,
   };

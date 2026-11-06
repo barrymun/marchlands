@@ -4,6 +4,7 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
   BuildingType,
+  MarketOrderType,
   MarketSide,
   merchantAsk,
   merchantBase,
@@ -12,8 +13,11 @@ import {
   merchantSells,
   msg,
   ref,
+  ReportBodyKind,
   ReportType,
+  ResourceKey,
   TimedEventType,
+  TradeSide,
 } from '@marchlands/core';
 
 import { market, reports } from '#/index.ts';
@@ -23,7 +27,7 @@ import { game } from '#test/support/game.ts';
 import { createTrader, escrowGold, GOLD, Res, withFee, withMerchantCurve } from '#test/support/market.ts';
 
 /** The merchant's fixed price for wood (BALANCE.merchant.fixedPrice), and what it sells and buys at around it. */
-const P = () => merchantBase('wood');
+const P = () => merchantBase(ResourceKey.WOOD);
 const ASK = () => merchantAsk(P());
 const BID = () => merchantBid(P());
 
@@ -31,7 +35,7 @@ describe('market updates', () => {
   it('tells everyone connected when an order changes a market: placed (filled or resting) or cancelled', () =>
     game(async (g) => {
       const a = await createTrader(g);
-      await market.placeOrder(g, a.id, a.cityId, { resType: Res.IRON, side: MarketSide.BUY, amount: 10, type: 'market' });
+      await market.placeOrder(g, a.id, a.cityId, { resType: Res.IRON, side: MarketSide.BUY, amount: 10, type: MarketOrderType.MARKET });
       const { order } = await market.placeOrder(g, a.id, a.cityId, { resType: Res.STONE, side: MarketSide.BUY, amount: 10, price: 0.5 });
       await market.cancelOrder(g, a.id, order?.id ?? 0);
       expect(g.pushes(PushCmd.MARKET_UPDATE)).toEqual([
@@ -45,7 +49,7 @@ describe('market updates', () => {
     game(async (g) => {
       const a = await createTrader(g, { gold: 0 });
       await expectRefused(
-        market.placeOrder(g, a.id, a.cityId, { resType: Res.FOOD, side: MarketSide.BUY, amount: 10, type: 'market' }),
+        market.placeOrder(g, a.id, a.cityId, { resType: Res.FOOD, side: MarketSide.BUY, amount: 10, type: MarketOrderType.MARKET }),
         'common.notEnoughGoldFor',
       );
       expect(g.pushes(PushCmd.MARKET_UPDATE)).toEqual([]);
@@ -57,7 +61,7 @@ describe(market.placeOrder.name, () => {
     it('a market buy is filled by the merchant at once, the buyer paying the fee', () =>
       game(async (g) => {
         const a = await createTrader(g);
-        const res = await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, type: 'market' });
+        const res = await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, type: MarketOrderType.MARKET });
         const gold = withFee(1000 * ASK());
         expect(res).toEqual({
           filled: 1000,
@@ -93,10 +97,10 @@ describe(market.placeOrder.name, () => {
     it('a market sell is paid at once, with no fee', () =>
       game(async (g) => {
         const a = await createTrader(g);
-        const res = await market.placeOrder(g, a.id, a.cityId, { resType: Res.IRON, side: MarketSide.SELL, amount: 1000, type: 'market' });
+        const res = await market.placeOrder(g, a.id, a.cityId, { resType: Res.IRON, side: MarketSide.SELL, amount: 1000, type: MarketOrderType.MARKET });
         expect(res).toMatchObject({
           filled: 1000,
-          gold: Math.floor(1000 * merchantBid(merchantBase('iron'))),
+          gold: Math.floor(1000 * merchantBid(merchantBase(ResourceKey.IRON))),
           fee: 0,
           merchantFilled: 1000,
           rest: 0,
@@ -134,7 +138,7 @@ describe(market.placeOrder.name, () => {
           order: {
             id: expect.any(Number),
             resType: Res.WOOD,
-            resourceName: 'wood',
+            resourceName: ResourceKey.WOOD,
             tradeType: MarketSide.BUY,
             price,
             amount: 1000,
@@ -151,8 +155,13 @@ describe(market.placeOrder.name, () => {
     it("an offer above the merchant's bid rests, its goods held", () =>
       game(async (g) => {
         const a = await createTrader(g);
-        const res = await market.placeOrder(g, a.id, a.cityId, { resType: Res.STONE, side: MarketSide.SELL, amount: 700, price: 3 * merchantBase('stone') });
-        expect(res).toMatchObject({ filled: 0, rest: 700, escrow: 700, order: { tradeType: MarketSide.SELL, resourceName: 'stone', amount: 700 } });
+        const res = await market.placeOrder(g, a.id, a.cityId, {
+          resType: Res.STONE,
+          side: MarketSide.SELL,
+          amount: 700,
+          price: 3 * merchantBase(ResourceKey.STONE),
+        });
+        expect(res).toMatchObject({ filled: 0, rest: 700, escrow: 700, order: { tradeType: MarketSide.SELL, resourceName: ResourceKey.STONE, amount: 700 } });
         expect(await reloadCity(g, a.cityId)).toMatchObject({ gold: 1_000_000, stone: 999_300 });
       }));
 
@@ -170,7 +179,7 @@ describe(market.placeOrder.name, () => {
         const bid = { resType: Res.WOOD, side: MarketSide.BUY, amount: 10, price: P() / 2 };
         for (let i = 0; i < limit; i++) await market.placeOrder(g, a.id, a.cityId, bid);
         await expectRefused(market.placeOrder(g, a.id, a.cityId, bid), msg('market.tooManyOrders', { building: ref.building(BuildingType.MARKETPLACE) }));
-        await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 10, type: 'market' });
+        await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 10, type: MarketOrderType.MARKET });
         expect(await market.myOrders(g, a.id)).toHaveLength(limit);
       }));
 
@@ -178,7 +187,7 @@ describe(market.placeOrder.name, () => {
       game(async (g) => {
         const a = await createTrader(g, { gold: 100, wood: 50 });
         await expectRefused(
-          market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, type: 'market' }),
+          market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, type: MarketOrderType.MARKET }),
           msg('common.notEnoughGoldFor', { amount: withFee(1000 * ASK()) }),
         );
         await expectRefused(
@@ -186,12 +195,12 @@ describe(market.placeOrder.name, () => {
           msg('common.notEnoughGoldFor', { amount: escrowGold(1000, P() / 2) }),
         );
         await expectRefused(
-          market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 51, type: 'market' }),
-          msg('market.notEnoughResource', { resource: ref.resource('wood') }),
+          market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 51, type: MarketOrderType.MARKET }),
+          msg('market.notEnoughResource', { resource: ref.resource(ResourceKey.WOOD) }),
         );
         await expectRefused(
           market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 51, price: 2 * P() }),
-          msg('market.notEnoughResource', { resource: ref.resource('wood') }),
+          msg('market.notEnoughResource', { resource: ref.resource(ResourceKey.WOOD) }),
         );
         expect(await reloadCity(g, a.cityId)).toMatchObject({ gold: 100, wood: 50 });
       }));
@@ -200,7 +209,7 @@ describe(market.placeOrder.name, () => {
       game(async (g) => {
         const a = await createTrader(g);
         const p = await createTestPlayer(g);
-        const order = { resType: Res.WOOD, side: MarketSide.BUY, amount: 10, type: 'market' } as const;
+        const order = { resType: Res.WOOD, side: MarketSide.BUY, amount: 10, type: MarketOrderType.MARKET } as const;
         await expectRefused(market.placeOrder(g, p.id, p.cityId, order), msg('market.needMarketplace', { building: ref.building(BuildingType.MARKETPLACE) }));
         await expectRefused(market.placeOrder(g, p.id, a.cityId, order), msg('common.invalidCastle'));
       }));
@@ -222,13 +231,13 @@ describe(market.placeOrder.name, () => {
       withMerchantCurve(() =>
         game(async (g) => {
           const [a, b] = [await createTrader(g), await createTrader(g)];
-          const base = merchantBase('wood');
+          const base = merchantBase(ResourceKey.WOOD);
           expect((await market.orderBook(g, Res.WOOD)).merchant.reference).toBe(base);
           const offer = await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 5000, price: base });
           expect(offer).toMatchObject({ filled: 0, rest: 5000 });
 
           g._pushes.length = 0;
-          const res = await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 8000, type: 'market' });
+          const res = await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 8000, type: MarketOrderType.MARKET });
           const m = merchantSells(base, 3000);
           const fillGold = 5000 * base + m.gold;
           expect(res).toMatchObject({ filled: 8000, playerFilled: 5000, merchantFilled: 3000, gold: withFee(fillGold), avgPrice: fillGold / 8000 });
@@ -239,7 +248,16 @@ describe(market.placeOrder.name, () => {
           expect(await market.myOrders(g, b.id)).toEqual([]);
           const paid = Math.floor(5000 * base);
           expect(await market.myShipments(g, b.id)).toEqual([
-            { id: expect.any(Number), cityId: b.cityId, resType: GOLD, resourceName: 'gold', amount: paid, price: base, startTime: g.now, endTime: g.now },
+            {
+              id: expect.any(Number),
+              cityId: b.cityId,
+              resType: GOLD,
+              resourceName: ResourceKey.GOLD,
+              amount: paid,
+              price: base,
+              startTime: g.now,
+              endTime: g.now,
+            },
           ]);
           expect(g.events(TimedEventType.SHIPMENT)).toMatchObject([{ dueAt: g.now, playerId: b.id, cityId: b.cityId }]);
           expect(g.pushes(PushCmd.TRADES_UPDATE)).toEqual([
@@ -248,8 +266,8 @@ describe(market.placeOrder.name, () => {
           const [report] = (await reports.listReports(g, b.id, ReportType.TRADE, 1, 10)).reports;
           expect(report!.title).toEqual(msg('report.title.tradeCompleted'));
           expect((await reports.readReport(g, b.id, report!.id)).content).toEqual({
-            kind: 'trade',
-            trade: { side: 'sell', resource: 'wood', amount: 5000, price: base, gold: paid },
+            kind: ReportBodyKind.TRADE,
+            trade: { side: TradeSide.SELL, resource: ResourceKey.WOOD, amount: 5000, price: base, gold: paid },
           });
           expect(g._stats.get(`${b.id}|${b.cityId}`)).toMatchObject({ 'market.sold.wood': 5000, 'market.goldReceived': paid });
 
@@ -271,15 +289,22 @@ describe(market.placeOrder.name, () => {
       withMerchantCurve(() =>
         game(async (g) => {
           const [a, b] = [await createTrader(g), await createTrader(g)];
-          const bidPrice = Math.round(merchantBase('wood') * 1.03 * 1000) / 1000; // inside the spread
+          const bidPrice = Math.round(merchantBase(ResourceKey.WOOD) * 1.03 * 1000) / 1000; // inside the spread
           const bid = await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, price: bidPrice });
           expect(bid).toMatchObject({ filled: 0, rest: 1000, escrow: escrowGold(1000, bidPrice) });
 
-          const res = await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 400, price: merchantBase('wood') });
+          const res = await market.placeOrder(g, a.id, a.cityId, {
+            resType: Res.WOOD,
+            side: MarketSide.SELL,
+            amount: 400,
+            price: merchantBase(ResourceKey.WOOD),
+          });
           expect(res).toMatchObject({ filled: 400, playerFilled: 400, merchantFilled: 0, gold: Math.floor(400 * bidPrice), rest: 0, order: null });
           expect(await reloadCity(g, a.cityId)).toMatchObject({ gold: 1_000_000 + Math.floor(400 * bidPrice), wood: 999_600 });
           expect(await market.myOrders(g, b.id)).toMatchObject([{ id: bid.order!.id, amount: 1000, dealedTotal: 400 }]);
-          expect(await market.myShipments(g, b.id)).toMatchObject([{ resType: Res.WOOD, resourceName: 'wood', amount: 400, price: bidPrice, endTime: g.now }]);
+          expect(await market.myShipments(g, b.id)).toMatchObject([
+            { resType: Res.WOOD, resourceName: ResourceKey.WOOD, amount: 400, price: bidPrice, endTime: g.now },
+          ]);
 
           await g.runDue();
           expect(await reloadCity(g, b.cityId)).toMatchObject({ wood: 1_000_400, gold: 1_000_000 - escrowGold(1000, bidPrice) });
@@ -289,7 +314,7 @@ describe(market.placeOrder.name, () => {
     it('better prices first, then older orders; a bid filled in part rests for the rest', () =>
       withMerchantCurve(() =>
         game(async (g) => {
-          const base = merchantBase('wood');
+          const base = merchantBase(ResourceKey.WOOD);
           const cheap = Math.round(base * 0.97 * 1000) / 1000;
           const offer = (p: TestPlayer, price: number) =>
             market.placeOrder(g, p.id, p.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 1000, price });
@@ -301,7 +326,7 @@ describe(market.placeOrder.name, () => {
           await offer(d, cheap);
 
           // the limit is below the merchant's ask, so only the offers can fill it
-          expect(merchantMarginal(base, 'buy')).toBeGreaterThan(base);
+          expect(merchantMarginal(base, TradeSide.BUY)).toBeGreaterThan(base);
           const res = await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 2500, price: base });
           const fillGold = 1000 * cheap + 1500 * base;
           expect(res).toMatchObject({ filled: 2500, playerFilled: 2500, merchantFilled: 0, rest: 0, gold: withFee(fillGold), order: null });
@@ -324,9 +349,9 @@ describe(market.placeOrder.name, () => {
       withMerchantCurve(() =>
         game(async (g) => {
           const b = await createTrader(g);
-          const base = merchantBase('wood');
+          const base = merchantBase(ResourceKey.WOOD);
           await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 1000, price: base });
-          const res = await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, type: 'market' });
+          const res = await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, type: MarketOrderType.MARKET });
           expect(res).toMatchObject({ playerFilled: 0, merchantFilled: 1000, gold: withFee(merchantSells(base, 1000).gold) });
           expect(await market.myOrders(g, b.id)).toMatchObject([{ dealedTotal: 0 }]);
         }),
@@ -349,7 +374,12 @@ describe(market.cancelOrder.name, () => {
   it('returns the goods of an offer', () =>
     game(async (g) => {
       const a = await createTrader(g);
-      const { order } = await market.placeOrder(g, a.id, a.cityId, { resType: Res.FOOD, side: MarketSide.SELL, amount: 1234, price: 2 * merchantBase('food') });
+      const { order } = await market.placeOrder(g, a.id, a.cityId, {
+        resType: Res.FOOD,
+        side: MarketSide.SELL,
+        amount: 1234,
+        price: 2 * merchantBase(ResourceKey.FOOD),
+      });
       await market.cancelOrder(g, a.id, order!.id);
       expect(await reloadCity(g, a.cityId)).toMatchObject({ food: 1_000_000 });
     }));
@@ -358,7 +388,7 @@ describe(market.cancelOrder.name, () => {
     withMerchantCurve(() =>
       game(async (g) => {
         const [a, b] = [await createTrader(g), await createTrader(g)];
-        const bidPrice = Math.round(merchantBase('wood') * 1.03 * 1000) / 1000;
+        const bidPrice = Math.round(merchantBase(ResourceKey.WOOD) * 1.03 * 1000) / 1000;
         const { order } = await market.placeOrder(g, b.id, b.cityId, { resType: Res.WOOD, side: MarketSide.BUY, amount: 1000, price: bidPrice });
         await market.placeOrder(g, a.id, a.cityId, { resType: Res.WOOD, side: MarketSide.SELL, amount: 400, price: bidPrice });
         await market.cancelOrder(g, b.id, order!.id);

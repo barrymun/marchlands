@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { FORT_KEYS, TROOP_KEYS } from '@marchlands/core';
+import { FORT_KEYS, ResourceKey, TROOP_KEYS } from '@marchlands/core';
 
 import { resourceKeyLabel, troopLabel } from '@/components/reports-panel/report-dialog/report-content/utils';
 import { troopName } from '@/lib/game-data';
@@ -29,11 +29,11 @@ describe(troopLabel.name, () => {
 
 describe(resourceKeyLabel.name, () => {
   it('labels every resource key', () => {
-    expect(resourceKeyLabel('gold')).toBe('Gold');
-    expect(resourceKeyLabel('food')).toBe('Food');
-    expect(resourceKeyLabel('wood')).toBe('Lumber');
-    expect(resourceKeyLabel('stone')).toBe('Stone');
-    expect(resourceKeyLabel('iron')).toBe('Iron');
+    expect(resourceKeyLabel(ResourceKey.GOLD)).toBe('Gold');
+    expect(resourceKeyLabel(ResourceKey.FOOD)).toBe('Food');
+    expect(resourceKeyLabel(ResourceKey.WOOD)).toBe('Lumber');
+    expect(resourceKeyLabel(ResourceKey.STONE)).toBe('Stone');
+    expect(resourceKeyLabel(ResourceKey.IRON)).toBe('Iron');
   });
 
   it('falls back to the raw key when it is not a resource', () => {

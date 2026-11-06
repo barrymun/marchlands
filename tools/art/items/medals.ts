@@ -6,7 +6,8 @@ import type { Colour, PixelCanvas } from '../pixel.ts';
 import { disc, rect } from '../shapes.ts';
 import { BRONZE, canvas, GOLD, sparkle, stamp, STEEL, type Tone } from './common.ts';
 
-type Shape = 'round' | 'scalloped' | 'star';
+const MedalShape = { ROUND: 'round', SCALLOPED: 'scalloped', STAR: 'star' } as const;
+type MedalShape = (typeof MedalShape)[keyof typeof MedalShape];
 
 /** An emblem: a 9×9 pattern, `d` engraved in the metal and other letters enamel colours. */
 interface Emblem {
@@ -42,7 +43,7 @@ const EMBLEMS = {
 } as const satisfies Record<string, Emblem>;
 
 /** A medal: a ribbon of three stripes, `shape` in `metal`, and its emblem. */
-function medal(seed: string, shape: Shape, metal: Metal, stripes: readonly [Colour, Colour], emblem: Emblem): () => PixelCanvas {
+function medal(seed: string, shape: MedalShape, metal: Metal, stripes: readonly [Colour, Colour], emblem: Emblem): () => PixelCanvas {
   return () => {
     const c = canvas(seed);
     const [outer, inner] = stripes;
@@ -59,7 +60,7 @@ function medal(seed: string, shape: Shape, metal: Metal, stripes: readonly [Colo
     );
     rect(c, 10, 0, 21, 0, 'outline');
     const [cx, cy] = [16, 19];
-    if (shape === 'star') {
+    if (shape === MedalShape.STAR) {
       for (let a = 0; a < 8; a++) {
         const ang = (a * Math.PI) / 4;
         const tip: [number, number] = [cx + Math.cos(ang) * 12.5, cy + Math.sin(ang) * 12.5];
@@ -70,16 +71,16 @@ function medal(seed: string, shape: Shape, metal: Metal, stripes: readonly [Colo
           a >= 1 && a <= 4 ? metal.dark : metal.mid,
         );
       }
-    } else if (shape === 'scalloped') {
+    } else if (shape === MedalShape.SCALLOPED) {
       for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) disc(c, cx + Math.cos(a) * 8.6, cy + Math.sin(a) * 8.6, 1.9, metal.mid, metal.dark);
     }
-    const r = shape === 'star' ? 7.5 : 8.5;
+    const r = shape === MedalShape.STAR ? 7.5 : 8.5;
     disc(c, cx, cy, r, metal.dark);
     disc(c, cx - 0.4, cy - 0.4, r - 1.1, metal.mid);
     disc(c, cx - r * 0.35, cy - r * 0.35, r * 0.3, metal.hi);
     stamp(c, cx - 4, cy - 4, emblem.rows, { d: metal.engrave, ...emblem.colours });
     c.outline();
-    if (shape === 'star') sparkle(c, 26, 12);
+    if (shape === MedalShape.STAR) sparkle(c, 26, 12);
     return c;
   };
 }
@@ -92,13 +93,13 @@ const SILVER: Metal = { ...STEEL, engrave: 'slateD' };
 const GOLD_MEDAL: Metal = { ...GOLD, engrave: 'bronzeDark' };
 
 export const MEDAL_DRAWINGS = {
-  cross: medal('cross-medal', 'round', BRONZE_MEDAL, ['greenL', 'wool'], EMBLEMS.cross),
-  rose: medal('rose-medal', 'round', BRONZE_MEDAL, ['flower', 'wool'], EMBLEMS.rose),
-  lion: medal('lion-medal', 'round', BRONZE_MEDAL, ['gold', 'hoodDark'], EMBLEMS.lion),
-  honour: medal('honour-medal', 'scalloped', SILVER, ['blue', 'wool'], EMBLEMS.laurel),
-  courage: medal('courage-medal', 'scalloped', SILVER, ['banner', 'wool'], EMBLEMS.sword),
-  wisdom: medal('wisdom-medal', 'scalloped', SILVER, ['tealL', 'gold'], EMBLEMS.lamp),
-  freedom: medal('freedom-medal', 'star', GOLD_MEDAL, ['greenL', 'gold'], EMBLEMS.torch),
-  justice: medal('justice-medal', 'star', GOLD_MEDAL, ['blue', 'gold'], EMBLEMS.scales),
-  nation: medal('nation-medal', 'star', GOLD_MEDAL, ['banner', 'gold'], EMBLEMS.crown),
+  cross: medal('cross-medal', MedalShape.ROUND, BRONZE_MEDAL, ['greenL', 'wool'], EMBLEMS.cross),
+  rose: medal('rose-medal', MedalShape.ROUND, BRONZE_MEDAL, ['flower', 'wool'], EMBLEMS.rose),
+  lion: medal('lion-medal', MedalShape.ROUND, BRONZE_MEDAL, ['gold', 'hoodDark'], EMBLEMS.lion),
+  honour: medal('honour-medal', MedalShape.SCALLOPED, SILVER, ['blue', 'wool'], EMBLEMS.laurel),
+  courage: medal('courage-medal', MedalShape.SCALLOPED, SILVER, ['banner', 'wool'], EMBLEMS.sword),
+  wisdom: medal('wisdom-medal', MedalShape.SCALLOPED, SILVER, ['tealL', 'gold'], EMBLEMS.lamp),
+  freedom: medal('freedom-medal', MedalShape.STAR, GOLD_MEDAL, ['greenL', 'gold'], EMBLEMS.torch),
+  justice: medal('justice-medal', MedalShape.STAR, GOLD_MEDAL, ['blue', 'gold'], EMBLEMS.scales),
+  nation: medal('nation-medal', MedalShape.STAR, GOLD_MEDAL, ['banner', 'gold'], EMBLEMS.crown),
 };

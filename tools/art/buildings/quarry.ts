@@ -2,7 +2,7 @@
 // blocks and a slate-roofed hut; each band after it is bigger and stronger: a wooden crane and more blocks, then
 // terraces cut into the rock and a stone workshop, then a wide terraced pit with two cranes and a block yard.
 
-import { IsoCanvas } from '../iso.ts';
+import { Axis, IsoCanvas, Rock, Roofing } from '../iso.ts';
 
 const SIZE = 64;
 
@@ -17,11 +17,11 @@ function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20, 'quarry-1');
   c.grass(0, 0, 20, 20);
   c.path(10, 12, 2, 8);
-  c.outcrop(2, 2, 10, 8, 9, 'granite');
+  c.outcrop(2, 2, 10, 8, 9, Rock.GRANITE);
   // the cut floor in front of the face
   c.box(3, 9, 0, 8, 3, 1, { top: 'graniteHi', left: 'graniteL', right: 'graniteR' });
   c.timber(14, 3, 0, 4, 4, 3);
-  c.hipRoof(14, 3, 4, 4, 3, 2, 'x', 'slate');
+  c.hipRoof(14, 3, 4, 4, 3, 2, Axis.X, Roofing.SLATE);
   blocks(c, 12, 13, 2);
   c.anchor();
   c.outline();
@@ -32,12 +32,12 @@ function band2(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 24, 'quarry-2');
   c.grass(0, 0, 24, 24);
   c.path(11, 14, 2, 10);
-  c.outcrop(2, 2, 13, 10, 11, 'granite');
+  c.outcrop(2, 2, 13, 10, 11, Rock.GRANITE);
   c.box(3, 11, 0, 11, 3, 1, { top: 'graniteHi', left: 'graniteL', right: 'graniteR' });
   c.derrick(12, 12, 12);
   c.timber(17, 3, 0, 5, 5, 4);
   c.windows([19], 8, 0, 3, 'logDark');
-  c.hipRoof(17, 3, 5, 5, 4, 3, 'x', 'slate');
+  c.hipRoof(17, 3, 5, 5, 4, 3, Axis.X, Roofing.SLATE);
   blocks(c, 14, 15, 3);
   blocks(c, 4, 17, 2);
   c.anchor();
@@ -51,7 +51,7 @@ function band3(): IsoCanvas {
   c.grass(0, 0, 27, 27);
   c.path(12, 16, 2, 11);
   // terraces cut into the rock, stepping down to the front, under a rough crown
-  c.outcrop(2, 1, 16, 4, 13, 'granite');
+  c.outcrop(2, 1, 16, 4, 13, Rock.GRANITE);
   c.box(2, 5, 0, 16, 4, 8, faces);
   c.box(2, 9, 0, 16, 3, 5, faces);
   c.box(2, 12, 0, 16, 3, 2, faces);
@@ -59,7 +59,7 @@ function band3(): IsoCanvas {
   // a stone workshop
   c.stone(20, 3, 0, 5, 6, 5);
   c.windows([22], 9, 0, 3);
-  c.hipRoof(20, 3, 5, 6, 5, 3, 'y', 'slate');
+  c.hipRoof(20, 3, 5, 6, 5, 3, Axis.Y, Roofing.SLATE);
   blocks(c, 16, 18, 3);
   blocks(c, 3, 19, 3);
   c.fence(2, 25, 24, 25);
@@ -73,7 +73,7 @@ function band4(): IsoCanvas {
   const faces = { top: 'graniteHi', left: 'graniteL', right: 'graniteR' } as const;
   c.grass(0, 0, 30, 30);
   c.path(13, 18, 2, 12);
-  c.outcrop(1, 1, 20, 4, 15, 'granite');
+  c.outcrop(1, 1, 20, 4, 15, Rock.GRANITE);
   c.box(1, 5, 0, 20, 4, 11, faces);
   c.box(1, 9, 0, 20, 3, 8, faces);
   c.box(1, 12, 0, 20, 3, 5, faces);
@@ -84,7 +84,7 @@ function band4(): IsoCanvas {
   c.stone(23, 2, 0, 6, 8, 8);
   c.windows([25], 10, 0, 3);
   c.windows([24, 27], 10, 4, 2);
-  c.roof(23, 2, 6, 8, 8, 4, 'y', { roofing: 'slate', gable: 'stoneL' });
+  c.roof(23, 2, 6, 8, 8, 4, Axis.Y, { roofing: Roofing.SLATE, gable: 'stoneL' });
   // the block yard
   blocks(c, 3, 21, 3);
   blocks(c, 3, 25, 3);

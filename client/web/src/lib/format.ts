@@ -1,11 +1,11 @@
-import { DAY, getGameSpeed, HOUR } from '@marchlands/core';
-import { i18n } from '@/lib/i18n';
+import { DAY, getGameSpeed, HOUR, RESOURCE_KEYS } from '@marchlands/core';
+import { i18n, Locale } from '@/lib/i18n';
 
 /**
  * The locale dates and times are written in: the player's, but Arabic with Western digits (0-9), as the coordinates
  * and times the code writes are.
  */
-const dateLocale = () => (i18n.language === 'ar' ? 'ar-u-nu-latn' : i18n.language);
+const dateLocale = () => (i18n.language === Locale.AR ? 'ar-u-nu-latn' : i18n.language);
 
 /**
  * Number formats for the current locale (made again when the locale changes). English locales share plain
@@ -96,7 +96,7 @@ export function shortDuration(ms: number): string {
   return duration(ms).split(' ').slice(0, 2).join(' ');
 }
 
-export const RESOURCES = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
+export const RESOURCES = RESOURCE_KEYS;
 export type Resource = (typeof RESOURCES)[number];
 /** A resource's name as a label ("Lumber"). */
 export const resourceLabel = (r: Resource) => i18n.t(`common:resources.${r}`);

@@ -4,7 +4,7 @@
 
 import { BALANCE, getGameSpeed } from '#/balance.ts';
 import { wallHitPoints } from '#/battle/simulator.ts';
-import { BuildingType, FortType } from '#/constants.ts';
+import { type BasicResource, BuildingType, FortType, ResourceKey, UnlockKind } from '#/constants.ts';
 import { isFortType, unlockedOuterSlots } from '#/construction.ts';
 import { buildingConfig, BUILDINGS, RESEARCH, TROOPS } from '#/data/index.ts';
 import { fieldFactorAt } from '#/economy.ts';
@@ -23,7 +23,7 @@ interface BuildingText {
   effect?: (level: number) => Message;
 }
 
-const field = (resource: 'food' | 'wood' | 'stone' | 'iron'): BuildingText => ({
+const field = (resource: BasicResource): BuildingText => ({
   summary: () => msg('buildingInfo.summary.field', { resource: ref.resource(resource) }),
   effect: (l) =>
     msg('buildingInfo.effect.field', {
@@ -61,10 +61,10 @@ const TEXT: Record<number, BuildingText> = {
     summary: () => msg('buildingInfo.summary.cottage'),
     effect: (l) => msg('buildingInfo.effect.cottage', { population: BALANCE.cottagePopulation[l] ?? 0 }),
   },
-  [BuildingType.FARM]: field('food'),
-  [BuildingType.SAWMILL]: field('wood'),
-  [BuildingType.QUARRY]: field('stone'),
-  [BuildingType.IRONMINE]: field('iron'),
+  [BuildingType.FARM]: field(ResourceKey.FOOD),
+  [BuildingType.SAWMILL]: field(ResourceKey.WOOD),
+  [BuildingType.QUARRY]: field(ResourceKey.STONE),
+  [BuildingType.IRONMINE]: field(ResourceKey.IRON),
   [BuildingType.WAREHOUSE]: {
     summary: () => msg('buildingInfo.summary.warehouse'),
     effect: (l) => msg('buildingInfo.effect.warehouse', { amount: BALANCE.warehouseProtectPerLevel[l] ?? 0 }),
@@ -116,7 +116,6 @@ const TEXT: Record<number, BuildingText> = {
   [BuildingType.WORKSHOP]: prerequisite,
 };
 
-export type UnlockKind = 'building' | 'troop' | 'tech';
 /** Something that needs a building or technology: a building type, troop or technology id and the level it needs. */
 export interface Unlock {
   kind: UnlockKind;
@@ -134,7 +133,7 @@ export interface BuildingInfo {
   unlocks: Unlock[];
 }
 
-const KIND_ORDER: Record<UnlockKind, number> = { building: 0, troop: 1, tech: 2 };
+const KIND_ORDER: Record<UnlockKind, number> = { [UnlockKind.BUILDING]: 0, [UnlockKind.TROOP]: 1, [UnlockKind.TECH]: 2 };
 
 function unlocksOf(typeId: number): Unlock[] {
   const out = new Map<string, Unlock>();
@@ -146,9 +145,9 @@ function unlocksOf(typeId: number): Unlock[] {
   // fortifications share the building data but are troops: they are listed from TROOPS
   for (const b of BUILDINGS)
     for (const r of b.requires.buildings)
-      if (r.id === typeId && b.typeId !== typeId && b.level === 1 && !isFortType(b.typeId)) add('building', b.typeId, r.level);
-  for (const t of TROOPS) for (const r of t.requires.buildings) if (r.id === typeId) add('troop', t.troopId, r.level);
-  for (const t of RESEARCH) for (const r of t.requires.buildings) if (r.id === typeId && t.level === 1) add('tech', t.techId, r.level);
+      if (r.id === typeId && b.typeId !== typeId && b.level === 1 && !isFortType(b.typeId)) add(UnlockKind.BUILDING, b.typeId, r.level);
+  for (const t of TROOPS) for (const r of t.requires.buildings) if (r.id === typeId) add(UnlockKind.TROOP, t.troopId, r.level);
+  for (const t of RESEARCH) for (const r of t.requires.buildings) if (r.id === typeId && t.level === 1) add(UnlockKind.TECH, t.techId, r.level);
   return [...out.values()].sort((a, b) => a.level - b.level || KIND_ORDER[a.kind] - KIND_ORDER[b.kind] || a.id - b.id);
 }
 

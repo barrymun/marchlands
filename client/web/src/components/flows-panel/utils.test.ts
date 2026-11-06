@@ -13,12 +13,13 @@ import {
   FlowWaitUntil,
   HealPayment,
   HERO_BASE_STAT_MAX,
+  HeroBuffId,
 } from '@marchlands/core';
 
 import { actionValid, ago, currentAction, hasHero, hiresHeroes, isActive, keyed, nextDue, strip } from '@/components/flows-panel/utils';
 
 const ACTIONS: FlowAction[] = [
-  { type: FlowActionType.SET_MAYOR, stat: 'management' },
+  { type: FlowActionType.SET_MAYOR, stat: HeroBuffId.MANAGEMENT },
   { type: FlowActionType.TRAIN_TROOPS, troopId: FLOW_TROOP_IDS[0]!, amount: FLOW_TRAIN_MAX },
   { type: FlowActionType.ATTACK_TARGETS, presetId: 'p1', targets: { '1': [5, 9] } },
   { type: FlowActionType.HEAL_TROOPS, payWith: HealPayment.RESOURCES, when: FlowHealWhen.ARMIES_HOME },
@@ -75,7 +76,7 @@ describe(keyed.name, () => {
 
 describe(strip.name, () => {
   it('removes the editor key, leaving the action', () => {
-    expect(strip({ type: FlowActionType.SET_MAYOR, stat: 'power', key: 'a7' })).toEqual({ type: FlowActionType.SET_MAYOR, stat: 'power' });
+    expect(strip({ type: FlowActionType.SET_MAYOR, stat: HeroBuffId.POWER, key: 'a7' })).toEqual({ type: FlowActionType.SET_MAYOR, stat: HeroBuffId.POWER });
   });
 
   it('undoes keyed for every action type', () => {
@@ -132,7 +133,7 @@ describe(hiresHeroes.name, () => {
 });
 
 describe(actionValid.name, () => {
-  const hire = { type: FlowActionType.HIRE_HEROES, count: 3, stat: 'power', min: 50, maxGold: 100_000 } as const satisfies FlowAction;
+  const hire = { type: FlowActionType.HIRE_HEROES, count: 3, stat: HeroBuffId.POWER, min: 50, maxGold: 100_000 } as const satisfies FlowAction;
 
   it('takes every action with its numbers in range', () => {
     for (const a of [...ACTIONS, hire]) expect(actionValid(a), a.type).toBe(true);

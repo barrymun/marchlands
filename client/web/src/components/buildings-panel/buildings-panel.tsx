@@ -5,12 +5,11 @@ import type { BuildingBean, CityBean } from '@marchlands/api-client';
 import { isOuterPosition } from '@marchlands/core';
 
 import { BuildingDialog } from '@/components/buildings-panel/building-dialog/building-dialog';
-import { CITY_VIEWS, FLOATING, OUTSIDE, TOWN_VIEW_QUERY } from '@/components/buildings-panel/constants';
+import { CITY_VIEWS, CityArea, CityView, FLOATING, OUTSIDE, TOWN_VIEW_QUERY } from '@/components/buildings-panel/constants';
 import { useTownState } from '@/components/buildings-panel/hooks';
 import { IsoCity } from '@/components/buildings-panel/iso-city/iso-city';
 import { IsoFields } from '@/components/buildings-panel/iso-fields/iso-fields';
 import { Slot } from '@/components/buildings-panel/slot/slot';
-import type { CityView } from '@/components/buildings-panel/types';
 import { fieldSlots, fieldWorkers, readView, saveView, townWalkers } from '@/components/buildings-panel/utils';
 import { WalledCity } from '@/components/buildings-panel/walled-city/walled-city';
 import { Button } from '@/components/ui/button';
@@ -29,15 +28,15 @@ import { cn } from '@/lib/utils';
  * with Grid chosen, the buildings show as cards that scroll, and the tags list only the buildings they pick. A building
  * opens in its dialog, also from `?building=<position>` (the activity dock).
  */
-export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' | 'fields' }) {
+export function BuildingsPanel({ city, area }: { city: CityBean; area: CityArea }) {
   const { t } = useTranslation(['buildings-panel', 'common']);
   const [selected, setSelected] = useState<number | null>(null);
   const [chosen, setChosen] = useState<CityView>(readView);
   // the town needs room: narrower screens always get the cards, and no choice
   const wide = useMediaQuery(TOWN_VIEW_QUERY);
-  const view: CityView = wide ? chosen : 'grid';
+  const view: CityView = wide ? chosen : CityView.GRID;
   // what the city is doing, for the animated scene's buildings
-  const state = useTownState(city, useMotion() && view === 'scene');
+  const state = useTownState(city, useMotion() && view === CityView.SCENE);
   const choose = (v: CityView) => {
     setChosen(v);
     saveView(v);
@@ -55,7 +54,7 @@ export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' 
   }, [requested, setSearch]);
   const byPos = new Map(city.buildings.map((b) => [b.positionId, b]));
   const { townHall, unlocked: outerSlots } = fieldSlots(city.buildings);
-  const here = city.buildings.filter((b) => (area === 'fields') === isOuterPosition(b.positionId));
+  const here = city.buildings.filter((b) => (area === CityArea.FIELDS) === isOuterPosition(b.positionId));
   // tag filter: one tag per building type present; with tags selected only those buildings show (or, in the scene, stand out)
   const [tags, setTags] = useState<number[]>([]);
   const typeCounts = new Map<number, number>();
@@ -68,8 +67,8 @@ export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' 
     .sort((a, b) => buildingName(a.typeId).localeCompare(buildingName(b.typeId)) || b.level - a.level || a.positionId - b.positionId);
   const highlight = active.length > 0 ? (b: BuildingBean) => active.includes(b.typeId) : undefined;
 
-  const title = area === 'inside' ? t('inside.title') : t('fields.title');
-  const note = area === 'fields' && (
+  const title = area === CityArea.INSIDE ? t('inside.title') : t('fields.title');
+  const note = area === CityArea.FIELDS && (
     <span className="font-normal text-muted-foreground">{t('fields.unlocked', { unlocked: outerSlots, total: OUTSIDE.length, level: townHall })}</span>
   );
   const summary = active.length > 0 && (
@@ -113,10 +112,10 @@ export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' 
     <BuildingDialog city={city} positionId={selected} building={selected != null ? byPos.get(selected) : undefined} onClose={() => setSelected(null)} />
   );
 
-  if (view === 'scene')
+  if (view === CityView.SCENE)
     return (
       <div className="relative h-full min-h-80 overflow-hidden">
-        {area === 'inside' ? (
+        {area === CityArea.INSIDE ? (
           <IsoCity
             cityId={city.id}
             people={townWalkers(city.resource.curPopulation)}
@@ -174,7 +173,7 @@ export function BuildingsPanel({ city, area }: { city: CityBean; area: 'inside' 
                 {title} {note}
               </CardTitle>
             </CardHeader>
-            {area === 'inside' ? (
+            {area === CityArea.INSIDE ? (
               <CardContent>
                 <WalledCity byPos={byPos} onSelect={setSelected} />
               </CardContent>

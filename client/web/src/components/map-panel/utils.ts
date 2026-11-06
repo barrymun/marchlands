@@ -1,7 +1,7 @@
 import type { CityBean, Flow } from '@marchlands/api-client';
 import { FlowActionType, historicNameAt, Relation, TileType } from '@marchlands/core';
 
-import { FACTION_TINT_KEY } from '@/components/map-panel/constants';
+import { FACTION_TINT_KEY, FactionTint } from '@/components/map-panel/constants';
 import type { FarmList, FarmMark, RelationGroup } from '@/components/map-panel/types';
 import { historicName, tileName } from '@/lib/game-data';
 
@@ -24,7 +24,7 @@ export const placeName = (t: { type: number; name?: string; x?: number; y?: numb
 /** Whether this browser last chose to tint the map by faction; off until it did. */
 export function readFactionTint(): boolean {
   try {
-    return localStorage.getItem(FACTION_TINT_KEY) === 'on';
+    return localStorage.getItem(FACTION_TINT_KEY) === FactionTint.ON;
   } catch {
     return false;
   }
@@ -33,7 +33,7 @@ export function readFactionTint(): boolean {
 /** Remember the faction tint; without storage it lasts until the page reloads. */
 export function saveFactionTint(on: boolean) {
   try {
-    localStorage.setItem(FACTION_TINT_KEY, on ? 'on' : 'off');
+    localStorage.setItem(FACTION_TINT_KEY, on ? FactionTint.ON : FactionTint.OFF);
   } catch {
     /* storage unavailable */
   }

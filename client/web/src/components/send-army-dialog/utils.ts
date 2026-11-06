@@ -1,5 +1,5 @@
 import type { MapFieldInfo } from '@marchlands/api-client';
-import { Mission, Relation, TileType } from '@marchlands/core';
+import { BattleTarget, Mission, Relation, TileType } from '@marchlands/core';
 
 import { placeName } from '@/components/map-panel/utils';
 import type { SendTarget } from '@/components/send-army-dialog/types';
@@ -7,12 +7,12 @@ import type { SendTarget } from '@/components/send-army-dialog/types';
 /** What can be scouted on a tile (empty land has nothing to see). */
 export const tileKind = (tile: Pick<MapFieldInfo, 'type'>): SendTarget['kind'] =>
   tile.type === TileType.CASTLE
-    ? 'city'
+    ? BattleTarget.CITY
     : tile.type === TileType.NPC || tile.type === TileType.HISTORIC
-      ? 'npc'
+      ? BattleTarget.NPC
       : tile.type === TileType.FLAT
         ? undefined
-        : 'valley';
+        : BattleTarget.VALLEY;
 
 /** The missions an army from the city on `fromTileId` can go on to a tile, as the tile's permissions allow. */
 export function tileMissions(tile: MapFieldInfo, fromTileId: number): number[] {

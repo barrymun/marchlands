@@ -2,18 +2,18 @@
 // each band after it is bigger and stronger: a kitchen with a smoking chimney, then a colonnade and a garden, then a
 // great hall between towers with banners round a courtyard fountain.
 
-import { IsoCanvas } from '../iso.ts';
+import { Axis, IsoCanvas, PAVING, Roofing } from '../iso.ts';
 
 const SIZE = 64;
 
 function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20, 'feasting-hall-1');
   c.grass(0, 0, 20, 20);
-  c.ground(3, 11, 14, 6, 'paving');
+  c.ground(3, 11, 14, 6, PAVING);
   c.wall(3, 4, 0, 14, 6, 5);
   c.windows([9, 10], 10, 0, 3, 'logDark');
   c.windows([5, 7, 13, 15], 10, 2, 1);
-  c.roof(3, 4, 14, 6, 5, 4, 'x', { roofing: 'green' });
+  c.roof(3, 4, 14, 6, 5, 4, Axis.X, { roofing: Roofing.GREEN });
   c.box(6, 13, 0, 7, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
   c.anchor();
   c.outline();
@@ -23,14 +23,14 @@ function band1(): IsoCanvas {
 function band2(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 24, 'feasting-hall-2');
   c.grass(0, 0, 24, 24);
-  c.ground(2, 11, 18, 8, 'paving');
+  c.ground(2, 11, 18, 8, PAVING);
   c.wall(2, 3, 0, 16, 7, 6);
   c.windows([9, 10], 10, 0, 4, 'logDark');
   c.windows([4, 6, 13, 15], 10, 2, 2);
-  c.roof(2, 3, 16, 7, 6, 4, 'x', { roofing: 'green' });
+  c.roof(2, 3, 16, 7, 6, 4, Axis.X, { roofing: Roofing.GREEN });
   // the kitchen
   c.stone(19, 4, 0, 4, 5, 4);
-  c.hipRoof(19, 4, 4, 5, 4, 2, 'y', 'slate');
+  c.hipRoof(19, 4, 4, 5, 4, 2, Axis.Y, Roofing.SLATE);
   c.stone(20, 5, 6, 1, 1, 3);
   c.smoke(c.p(20.5, 5.5, 9));
   c.box(4, 14, 0, 8, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
@@ -43,12 +43,12 @@ function band2(): IsoCanvas {
 function band3(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 27, 'feasting-hall-3');
   c.grass(0, 0, 27, 27);
-  c.ground(2, 13, 20, 7, 'paving');
+  c.ground(2, 13, 20, 7, PAVING);
   c.wall(2, 3, 0, 18, 8, 7);
   c.colonnade(2, 11, 0, 18, 7);
-  c.roof(2, 3, 18, 8, 7, 5, 'x', { roofing: 'green' });
+  c.roof(2, 3, 18, 8, 7, 5, Axis.X, { roofing: Roofing.GREEN });
   c.stone(21, 4, 0, 4, 6, 5);
-  c.hipRoof(21, 4, 4, 6, 5, 2, 'y', 'slate');
+  c.hipRoof(21, 4, 4, 6, 5, 2, Axis.Y, Roofing.SLATE);
   c.stone(22, 5, 7, 1, 1, 3);
   c.smoke(c.p(22.5, 5.5, 10));
   c.garden(3, 21, 7, 4);
@@ -62,13 +62,13 @@ function band3(): IsoCanvas {
 function band4(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 30, 'feasting-hall-4');
   c.grass(0, 0, 30, 30);
-  c.ground(3, 14, 23, 13, 'paving');
+  c.ground(3, 14, 23, 13, PAVING);
   // towers at both ends of the great hall
   c.stone(1, 2, 0, 4, 4, 13);
   c.crenels(1, 2, 13, 4, 4);
   c.wall(5, 3, 0, 18, 9, 9);
   c.colonnade(5, 12, 0, 18, 8);
-  c.roof(5, 3, 18, 9, 9, 6, 'x', { roofing: 'green', trim: 'gold' });
+  c.roof(5, 3, 18, 9, 9, 6, Axis.X, { roofing: Roofing.GREEN, trim: 'gold' });
   c.stone(23, 2, 0, 4, 4, 13);
   c.crenels(23, 2, 13, 4, 4);
   c.banner(c.p(3, 4, 14), 5);

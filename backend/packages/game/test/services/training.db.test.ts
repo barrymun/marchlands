@@ -9,12 +9,14 @@ import {
   FortType,
   healCost,
   healHonorCost,
+  HealPayment,
   itemGoldPrice,
   ItemId,
   msg,
   PrestigeAction,
   prestigeOf,
   ref,
+  RequirementKind,
   RESOURCE_KEYS,
   type Resources,
   splitTraining,
@@ -87,10 +89,10 @@ describe(training.trainableList.name, () => {
       const list = await training.trainableList(g, p.id, p.cityId, false);
       const worker = list.find((t) => t.typeId === WORKER)!;
       expect(worker).toMatchObject({ key: 'peasants', permission: true, population: 1, time: troopUnitSeconds(WORKER, null, {}) });
-      expect(worker.requirements).toEqual([{ kind: 'building', id: BuildingType.BARRACKS, required: 1, current: 1, ok: true }]);
+      expect(worker.requirements).toEqual([{ kind: RequirementKind.BUILDING, id: BuildingType.BARRACKS, required: 1, current: 1, ok: true }]);
       const scout = list.find((t) => t.typeId === SCOUT)!;
       expect(scout.permission).toBe(false);
-      expect(scout.requirements.filter((r) => !r.ok).map((r) => r.kind)).toEqual(['building', 'tech']);
+      expect(scout.requirements.filter((r) => !r.ok).map((r) => r.kind)).toEqual([RequirementKind.BUILDING, RequirementKind.TECH]);
     }));
 
   it('troops show the Quartermaster discount; fortifications never do', () =>
@@ -772,7 +774,7 @@ describe(training.cureInjured.name, () => {
       player.honor = honor + 5;
       await savePlayer(g, player);
       const before = await reloadCity(g, p.cityId);
-      await training.cureInjured(g, p.id, p.cityId, INJURED, 'honor');
+      await training.cureInjured(g, p.id, p.cityId, INJURED, HealPayment.HONOR);
       expect((await reloadPlayer(g, p)).honor).toBe(5);
       const city = await reloadCity(g, p.cityId);
       expectResources(resourcesOf(city), resourcesOf(before));
@@ -784,7 +786,10 @@ describe(training.cureInjured.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await editCity(g, p, (c) => (c.injuredTroops = INJURED));
-      await expectRefused(training.cureInjured(g, p.id, p.cityId, INJURED, 'honor'), msg('training.notEnoughHonor', { amount: healHonorCost(INJURED) }));
+      await expectRefused(
+        training.cureInjured(g, p.id, p.cityId, INJURED, HealPayment.HONOR),
+        msg('training.notEnoughHonor', { amount: healHonorCost(INJURED) }),
+      );
       await setResources(g, p, { food: 0 });
       await expectRefused(training.cureInjured(g, p.id, p.cityId, INJURED), msg('common.notEnoughResources'));
       expect((await reloadCity(g, p.cityId)).injuredTroops).toEqual(INJURED);

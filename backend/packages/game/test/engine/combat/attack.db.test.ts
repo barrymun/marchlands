@@ -7,6 +7,7 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
   armyLoad,
+  BattleTarget,
   BuffId,
   BuildingType,
   FortType,
@@ -16,6 +17,8 @@ import {
   maxArmyTroops,
   Mission,
   msg,
+  ReportBodyKind,
+  RESOURCE_KEYS,
   TechType,
   TimedEventType,
   totalResources,
@@ -53,7 +56,7 @@ import {
 } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 
-const KEYS = ['gold', 'food', 'wood', 'stone', 'iron'] as const;
+const KEYS = RESOURCE_KEYS;
 
 /** p attacks q's city: p has `attackers`, q `defenders`; returns the army (not sent yet when `go` is false). */
 async function battle(g: TestGame, attackers: Record<string, number>, defenders: Record<string, number>) {
@@ -83,7 +86,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       const theirs = await lastReport(g, q.id, 'report.title.cityAttacked');
       expect(mine).toMatchObject({ isAttack: true, armyType: Mission.ATTACK });
       expect(theirs).toMatchObject({ isAttack: false, body: mine.body });
-      const b = battleOf(mine, 'city');
+      const b = battleOf(mine, BattleTarget.CITY);
       const [pp, qp] = [await reloadPlayer(g, p), await reloadPlayer(g, q)];
       const [hero, defHero] = [await getHero(g, heroId), await getHero(g, qHero)];
       expect(b).toMatchObject({
@@ -136,7 +139,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       const armyId = await go();
       await arrive(g, armyId);
 
-      const b = battleOf(await lastReport(g, p.id, 'report.title.attackFailed'), 'city');
+      const b = battleOf(await lastReport(g, p.id, 'report.title.attackFailed'), BattleTarget.CITY);
       expect(b).toMatchObject({ result: 'defenderWon', plunder: { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 } });
       expect(b.attacker.troops.after).toEqual({});
       expect(b.medals).toBeUndefined();
@@ -170,7 +173,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       await interior.setCityFlags(g, q.id, q.cityId, { goOutForBattle: false });
       const armyId = await go();
       await arrive(g, armyId);
-      const b = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), 'city');
+      const b = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), BattleTarget.CITY);
       expect(b.defender.troops.before).toEqual({});
       expect(b.defender.injured).toEqual({});
       expect((await reloadCity(g, q.cityId)).troops.archer).toBe(50_000);
@@ -188,7 +191,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       await arrive(g, armyId);
 
       const report = await lastReport(g, ally.id, 'report.title.reinforcementsFought');
-      const b = battleOf(report, 'city');
+      const b = battleOf(report, BattleTarget.CITY);
       expect(b.defender.troops.before).toEqual({ militia: 100, pikemen: 200 });
       const stationed = await armyRow(g, guard.armyId);
       const city = await reloadCity(g, q.cityId);
@@ -212,7 +215,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       await arrive(g, guard.armyId);
       const attack = await send(g, p, { targetTileId: await cityTile(g, q.cityId), mission: Mission.ATTACK, troops: { lightCavalry: 5000 }, heroId });
       await arrive(g, attack.armyId);
-      const b = battleOf(await lastReport(g, ally.id, 'report.title.reinforcementsFought'), 'city');
+      const b = battleOf(await lastReport(g, ally.id, 'report.title.reinforcementsFought'), BattleTarget.CITY);
       expect(b).toMatchObject({ result: 'attackerWon', defender: { hero: { id: allyHero } } });
       expect(b.defender.heroExp).toBeGreaterThan(0);
       expect(await armyRow(g, guard.armyId)).toBeUndefined();
@@ -230,7 +233,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       const horn = (await reloadPlayer(g, p)).buffs.find((x) => x.id === BuffId.ATTACK)!;
       const armyId = await go();
       await arrive(g, armyId);
-      const b = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), 'city');
+      const b = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), BattleTarget.CITY);
       expect(b.attacker.bonuses).toEqual([
         { desc: horn.desc, itemId: ItemId.WAR_HORN },
         { desc: WAR_ENSIGN_DESC, itemId: ItemId.WAR_ENSIGN },
@@ -244,7 +247,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       const armyId = await go();
       await allies(g, p, q);
       await arrive(g, armyId);
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('army.cityNowFriendly') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('army.cityNowFriendly') });
       expect(await armyRow(g, armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, troops: { lightCavalry: 100 } });
       expect((await getHero(g, heroId)).status).toBe(HeroStatus.RETURN);
       expect(await reportTitles(g, q.id)).toEqual([]);
@@ -257,7 +260,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       await giveItems(g, q, { [ItemId.TRUCE_AGREEMENT]: 1 });
       await player.startTruce(g, q.id, ItemId.TRUCE_AGREEMENT, q.cityId);
       await arrive(g, armyId);
-      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: 'text', text: msg('player.protected.truce') });
+      expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('player.protected.truce') });
       expect((await reloadCity(g, q.cityId)).troops.militia).toBe(10);
     }));
 
@@ -270,7 +273,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       expect((await reloadCity(g, q.cityId)).forts).toEqual({ trap: 100 });
       const armyId = await go();
       await arrive(g, armyId);
-      const b = battleOf((await reportsOf(g, p.id))[0]!, 'city');
+      const b = battleOf((await reportsOf(g, p.id))[0]!, BattleTarget.CITY);
       expect(b.defender.wallLevel).toBe(4);
       expect(b.defender.forts).toMatchObject({ before: { trap: 100 } });
       expect((await reloadCity(g, q.cityId)).forts).toEqual(b.defender.forts!.after);

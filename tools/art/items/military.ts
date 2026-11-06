@@ -2,7 +2,7 @@
 // (defence), the War Ensign's banner, Bernini's Hammer on a block of marble (a second building queue), Vesta's flame
 // in a goblet and a grander jewelled one (upkeep), and the quartermaster's signet and his sealed charter (training cost).
 
-import type { PixelCanvas } from '../pixel.ts';
+import { CLEAR, type PixelCanvas } from '../pixel.ts';
 import { disc, oval, rect } from '../shapes.ts';
 import { canvas, flame, GOLD, lathe, LEATHER, RED, rod, scroll, sparkle, stamp, STEEL, STONE, type Tone, writing } from './common.ts';
 
@@ -51,7 +51,7 @@ function corselet(seed: string, tone: Tone, trim?: Tone): () => PixelCanvas {
       [5, 3],
       [6, 2],
     ])
-      for (let x = 16 - hw; x < 16 + hw; x++) c.set(x, y, 'clear');
+      for (let x = 16 - hw; x < 16 + hw; x++) c.set(x, y, CLEAR);
     // the ridge down the middle and the belt
     rect(c, 16, 8, 16, 20, tone.dark);
     rect(c, 15, 8, 15, 19, tone.hi);

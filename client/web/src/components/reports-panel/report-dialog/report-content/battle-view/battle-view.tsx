@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { type BattleReport, TileType } from '@marchlands/core';
+import { type BattleReport, BattleResult, TileType } from '@marchlands/core';
 
 import { LootBox } from '@/components/reports-panel/report-dialog/report-content/battle-view/loot-box/loot-box';
 import { SideView } from '@/components/reports-panel/report-dialog/report-content/battle-view/side-view/side-view';
@@ -14,13 +14,13 @@ export function BattleView({ battle: b }: { battle: BattleReport }) {
   const { t } = useTranslation(['reports-panel', 'common']);
   const player = usePlayer();
   const me = player.data?.playerInfo.userName;
-  const myWin = (b.result === 'attackerWon' && b.attacker.player === me) || (b.result === 'defenderWon' && b.defender.player === me);
-  const myLoss = (b.result === 'attackerWon' && b.defender.player === me) || (b.result === 'defenderWon' && b.attacker.player === me);
+  const myWin = (b.result === BattleResult.ATTACKER_WON && b.attacker.player === me) || (b.result === BattleResult.DEFENDER_WON && b.defender.player === me);
+  const myLoss = (b.result === BattleResult.ATTACKER_WON && b.defender.player === me) || (b.result === BattleResult.DEFENDER_WON && b.attacker.player === me);
   return (
     <div className="grid gap-4 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={myWin ? 'default' : myLoss ? 'destructive' : 'secondary'}>
-          {myWin ? t('battle.victory') : myLoss ? t('battle.defeat') : b.result === 'draw' ? t('battle.result.draw') : resultLabel(b.result)}
+          {myWin ? t('battle.victory') : myLoss ? t('battle.defeat') : b.result === BattleResult.DRAW ? t('battle.result.draw') : resultLabel(b.result)}
         </Badge>
         <span className="text-muted-foreground">{t('battle.rounds', { count: b.rounds })}</span>
         {'valley' in b && (

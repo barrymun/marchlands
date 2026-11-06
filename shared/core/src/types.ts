@@ -4,6 +4,8 @@
 
 import { z } from 'zod';
 import {
+  BATTLE_RESULTS,
+  BattleTarget,
   BUFF_IDS,
   BuildingStatus,
   FACTION_IDS,
@@ -21,7 +23,10 @@ import {
   HEAL_PAYMENTS,
   HERO_BASE_STAT_MAX,
   HERO_BUFF_IDS,
+  ReportBodyKind,
+  REQUIREMENT_KINDS,
   RESOURCE_KEYS,
+  TRADE_SIDES,
   TROOP_KEY_LIST,
   type TroopKey,
 } from '#/constants.ts';
@@ -152,7 +157,7 @@ export type ArmyPreset = z.infer<typeof ArmyPresetSchema>;
  * train troops, attack a target list, heal, hire heroes from the Inn, or wait (the whole flow pauses, every city together).
  */
 export const FlowActionSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal(FlowActionType.SET_MAYOR), stat: z.enum(['power', 'management', 'stratagem']).describe('attribute the new mayor is best at') }),
+  z.object({ type: z.literal(FlowActionType.SET_MAYOR), stat: z.enum(HERO_BUFF_IDS).describe('attribute the new mayor is best at') }),
   z.object({
     type: z.literal(FlowActionType.TRAIN_TROOPS),
     troopId: z.number().int().describe('troop type id'),
@@ -171,7 +176,7 @@ export const FlowActionSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal(FlowActionType.HIRE_HEROES),
-    stat: z.enum(['power', 'management', 'stratagem']).describe('the attribute the heroes must have'),
+    stat: z.enum(HERO_BUFF_IDS).describe('the attribute the heroes must have'),
     min: z.number().int().min(1).max(HERO_BASE_STAT_MAX).describe('the least base value of that attribute (what the hero was born with)'),
     count: z
       .number()
@@ -256,7 +261,7 @@ export const BattleDefenderReportSchema = BattleSideReportSchema.extend({
 });
 
 const BattleBaseSchema = z.object({
-  result: z.enum(['attackerWon', 'defenderWon', 'draw']),
+  result: z.enum(BATTLE_RESULTS),
   rounds: z.number().int(),
   attacker: BattleSideReportSchema,
   defender: BattleDefenderReportSchema,
@@ -312,7 +317,7 @@ const ScoutFightSchema = z.object({
 export const ScoutReportSchema = z.union([
   /** NPC city: full intel, scouting always succeeds */
   z.object({
-    target: z.literal('npc'),
+    target: z.literal(BattleTarget.NPC),
     level: z.number().int(),
     /** (marchlands) a historic city (levels 12 to 18) rather than a barbarian city */
     historic: z.boolean().optional(),
@@ -328,7 +333,7 @@ export const ScoutReportSchema = z.union([
   }),
   /** valley or empty land */
   z.object({
-    target: z.literal('valley'),
+    target: z.literal(BattleTarget.VALLEY),
     type: z.number().int(),
     level: z.number().int(),
     owner: z.string().nullable(),
@@ -339,7 +344,7 @@ export const ScoutReportSchema = z.union([
   }),
   /** player city, the scouting player's copy */
   z.object({
-    target: z.literal('city'),
+    target: z.literal(BattleTarget.CITY),
     owner: z.string(),
     success: z.boolean(),
     battle: ScoutFightSchema,
@@ -360,7 +365,7 @@ export const ScoutReportSchema = z.union([
       .nullable(),
   }),
   /** player city, the scouted player's copy */
-  z.object({ target: z.literal('city'), from: z.string(), success: z.boolean(), battle: ScoutFightSchema }),
+  z.object({ target: z.literal(BattleTarget.CITY), from: z.string(), success: z.boolean(), battle: ScoutFightSchema }),
 ]);
 export type ScoutReport = z.infer<typeof ScoutReportSchema>;
 
@@ -376,7 +381,7 @@ export type MovementReport = z.infer<typeof MovementReportSchema>;
 
 export const TradeReportSchema = z.union([
   /** a market order filled */
-  z.object({ side: z.enum(['buy', 'sell']), resource: ResourceKeySchema, amount: z.number(), price: z.number(), gold: z.number() }),
+  z.object({ side: z.enum(TRADE_SIDES), resource: ResourceKeySchema, amount: z.number(), price: z.number(), gold: z.number() }),
   /** a transport delivered goods */
   z.object({ from: z.string(), to: z.string(), resources: ResourceSetSchema }),
 ]);
@@ -416,13 +421,13 @@ export type DesertionReport = z.infer<typeof DesertionReportSchema>;
 
 /** Report payloads are structured JSON (the original wrote XML files). */
 export const ReportBodySchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('battle'), battle: BattleReportSchema }),
-  z.object({ kind: z.literal('scout'), scout: ScoutReportSchema }),
-  z.object({ kind: z.literal('movement'), movement: MovementReportSchema }),
-  z.object({ kind: z.literal('trade'), trade: TradeReportSchema }),
-  z.object({ kind: z.literal('text'), text: MessageSchema }),
-  z.object({ kind: z.literal('desertion'), desertion: DesertionReportSchema }),
-  z.object({ kind: z.literal('draft'), draft: DraftReportSchema }),
+  z.object({ kind: z.literal(ReportBodyKind.BATTLE), battle: BattleReportSchema }),
+  z.object({ kind: z.literal(ReportBodyKind.SCOUT), scout: ScoutReportSchema }),
+  z.object({ kind: z.literal(ReportBodyKind.MOVEMENT), movement: MovementReportSchema }),
+  z.object({ kind: z.literal(ReportBodyKind.TRADE), trade: TradeReportSchema }),
+  z.object({ kind: z.literal(ReportBodyKind.TEXT), text: MessageSchema }),
+  z.object({ kind: z.literal(ReportBodyKind.DESERTION), desertion: DesertionReportSchema }),
+  z.object({ kind: z.literal(ReportBodyKind.DRAFT), draft: DraftReportSchema }),
 ]);
 export type ReportBody = z.infer<typeof ReportBodySchema>;
 
@@ -436,7 +441,7 @@ export type GrantContents = z.infer<typeof GrantContentsSchema>;
 
 /** One prerequisite of a building, tech or troop and whether it is met (construction.ts checkRequirements). */
 export const RequirementCheckSchema = z.object({
-  kind: z.enum(['building', 'tech', 'item']),
+  kind: z.enum(REQUIREMENT_KINDS),
   id: z.union([z.number().int(), z.string()]).describe('building type / tech id, or item id string'),
   required: z.number().int().describe('level (or item count) required'),
   current: z.number().int(),
