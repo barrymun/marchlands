@@ -178,7 +178,9 @@ Whether siege engines should be this good against historic cities is a balance q
 
 ### Layering catapult waves
 
-*Simulated 2026-11-06 for Atlantis with the maintainer's own armies: research 10, the horn and the defence item running, the War Ensign, and each wave led by one of its city's heroes (about 1,225 Attack, the first of each city about 1,530 with Excalibur). One day's garrison only: swordsmen, light cavalry and rams. A one-off script fought the waves a millisecond apart as `attackHistoric` does, over 20 to 60 seeds, with 8 waves of 218,750 from a held level 16 and 8 from a held level 14, then archers. Not yet checked against a real siege.*
+*Simulated 2026-11-06 for Atlantis with the maintainer's own armies: research 10, the horn and the defence item running, the War Ensign, and each wave led by one of its city's heroes (about 1,225 Attack, the first of each city about 1,530 with Excalibur). One day's garrison only: swordsmen, light cavalry and rams. A one-off script fought the waves a millisecond apart as `attackHistoric` does, over 20 to 60 seeds, with 8 waves of 218,750 from a held level 16 and 8 from a held level 14, then archers.*
+
+**Checked against the real siege:** the maintainer's 56 waves landed on 2026-11-06 with the 15,000-ram mix as below. As simulated, wave 1 left 8,357,143 of the garrison, wave 2 broke it and wave 35 captured it, with the same losses (217,561 catapults, 13,717 archers). The 21 waves after the capture turned back without fighting.
 
 **A few of the right troops in the first waves more than halve the cost.** Only the waves before the first win decide it, and all of those came from the held level 16. The 15,000-ram mix was carried by its first 3 waves only, the most its rams allowed:
 

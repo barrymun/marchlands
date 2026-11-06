@@ -8,7 +8,7 @@ export function HeroItemsDialog({ hero, cityId, onClose }: { hero: HeroBean | nu
   const shown = useSticky(hero);
   return (
     <Dialog open={hero != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-lg">{shown && <HeroItems hero={shown} cityId={cityId} />}</DialogContent>
+      <DialogContent className="max-h-[85svh] overflow-y-auto sm:max-w-2xl">{shown && <HeroItems hero={shown} cityId={cityId} />}</DialogContent>
     </Dialog>
   );
 }
