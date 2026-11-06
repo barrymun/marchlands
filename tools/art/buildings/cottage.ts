@@ -3,13 +3,14 @@
 // then a walled hamlet. The roofs stay golden thatch at every band, so a cottage never looks like the red-roofed
 // Town Hall.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, PAVING } from '../iso.ts';
 
 const SIZE = 64;
 
 function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20);
-  c.ground(0, 0, 20, 20, 'sand');
+  c.ground(0, 0, 20, 20, Colour.SAND);
   c.grass(0, 13, 6, 7);
   c.grass(14, 0, 6, 6);
   c.ground(9, 12, 3, 8, PAVING);
@@ -25,7 +26,7 @@ function band1(): IsoCanvas {
 
 function band2(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 24);
-  c.ground(0, 0, 24, 24, 'sand');
+  c.ground(0, 0, 24, 24, Colour.SAND);
   c.grass(0, 0, 8, 7);
   c.ground(10, 11, 3, 13, PAVING);
   c.garden(15, 15, 7, 6);
@@ -45,7 +46,7 @@ function band2(): IsoCanvas {
 
 function band3(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 27);
-  c.ground(0, 0, 27, 27, 'sand');
+  c.ground(0, 0, 27, 27, Colour.SAND);
   c.grass(0, 0, 9, 3);
   c.grass(0, 20, 6, 7);
   c.ground(13, 10, 3, 17, PAVING);
@@ -71,7 +72,7 @@ function band3(): IsoCanvas {
 
 function band4(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 30);
-  c.ground(0, 0, 30, 30, 'sand');
+  c.ground(0, 0, 30, 30, Colour.SAND);
   c.grass(1, 1, 9, 2);
   c.ground(14, 11, 3, 19, PAVING);
   // the low stone wall's back sides

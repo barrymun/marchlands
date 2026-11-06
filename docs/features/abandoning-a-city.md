@@ -67,15 +67,43 @@
 ### The warning
 
 - **In the city settings** (`city-dialog/city-form/abandon-city/`), under the teleport, in `LOSS_TEXT`, saying what abandoning does before the button, which is disabled with the reason when no other regular city would remain (`keepsRegularCity`).
-- **The confirmation** (`ConfirmDialog`, whose `disabled` and `children` allow this) lists what this city would lose, with its real numbers: the heroes by name (locked ones too), troops at home and injured, resources, armies out with what's in them, valleys, market orders, shipments and unsent plan waves. **Its button stays disabled until the city's name is typed in,** as this can't be got back. It says plainly that an army sent away during the hour and still on the road when it ends is lost too.
+- **The confirmation** (`ConfirmDialog`, whose `disabled` and `children` allow this) lists what this city would lose, with its real numbers: the heroes by name (locked ones too), troops at home, in training and injured, fortifications built and being built, resources, armies out with what's in them, valleys, market orders, shipments and unsent plan waves. **Its button stays disabled until the city's name is typed in,** as this can't be got back. It says plainly that an army sent away during the hour and still on the road when it ends is lost too.
 - **While the hour runs:** `AbandonNotice` (`components/abandon-notice/`), a countdown with Keep this city, in `LOSS_TEXT`: on the city's card in the list, in the settings and in a banner under the top bar.
 - **When it's done:** a report (`report.title.cityAbandoned`) naming the city. The city-lost push (`CASTLE_UPDATE`, `updateType: 1`, sent for a seat taken too) refreshes the player's cities, and once `castles` no longer holds `nav.cityId` the game goes to their first city, keeping the screen (`game.tsx`).
 
 ### Known consequences
 
-- **Move things out before starting, not during the hour.** Marches between far cities can take over an hour (Rome to Atlantis at 60× is 81 minutes), and an army still on the road when the hour ends is lost, so the hour can't be counted on as time to evacuate. The warning says so.
+- **An army still on the road when the hour ends is lost**, so one sent away during it, or a far one called home, can't be counted on. Troops, resources and chosen heroes don't march: they can be moved out at once (below).
 - **An hour doesn't stop every dodge.** A holder who sees a rival's army more than an hour out can drop a seat before it lands, denying the capture: the seat stands again unheld and at full loyalty. With a seat taken losing everything too, this costs the holder nothing a capture wouldn't: a holder about to lose a seat anyway can always deny it to the winner, given an hour's warning. It's left as it is. A longer delay, or refusing it while a rival's army is on its way, would close it if it turns out to be a problem.
+- **A hero can only move to a city with a free Feasting Hall slot.** With none the troops and goods stay there and the hero's army marches back to the city it left (`arriveReinforce`). The settings and the confirmation both say so, as it's found out too late from the report otherwise (the maintainer's own plan ran into this, 2026-11-06).
+- **A city's own armies coming home during its hour** move in as ever, so they go with it unless moved out again. They're going home rather than being sent, so nothing stops them (found in a real hour's run of `tools/smoke/abandon.mjs`, 2026-11-06).
+- **Moving a big city out takes a lot of armies.** A Rally Spot level gives an army 10,000 troops and the city one army out (`rallySpotTroopsPerLevel`, `rallySpotArmiesPerLevel`): at level 10, 10 armies of 100,000, or 125,000 with a War Ensign. A Transporter carried 10,000 at the research checked (`armyLoad`). Marches between near cities take seconds, so it can all be moved, but send by send, which is why a city being abandoned can now be moved out at once (below).
 - **The Atlantis case:** to have a slot free when the last wave lands, abandon a city that isn't in the plan, at least an hour before landing, with its troops and heroes moved out first.
+
+## Moving a city out at once
+
+**Asked for by the maintainer, 2026-11-06,** having tried to plan it: a big city takes hundreds of armies to empty by hand (Known consequences). A city being abandoned can send its troops and resources straight to the player's other cities.
+
+**Decided by the maintainer, 2026-11-06:**
+
+- **It's instant, and free,** and shares everything evenly between the cities chosen.
+- **Only during the hour** (`city.moveOutNotAbandoning`): it belongs to giving a city up, not to everyday logistics.
+- **The screen** (`components/move-out/`, in the settings once the hour has started, loaded on first use): tick the cities, see what each would get, confirm. Keep this city asks first once it has been moved out (`AbandonNotice`, `movedOut` on `CityBean`).
+- **Keeping the city afterwards doesn't bring anything back, and costs 24 real hours** with no moving any city out (`BALANCE.abandon.moveOutCooldownMs`, `misc.moveOutBlockedUntil`). Without a price, starting the hour, moving and calling it off would teleport a whole army to any city. It can be done as often as wanted during the hour, for what's produced meanwhile; only changing your mind costs anything. Calling it off by the game (no regular city would remain) costs nothing.
+- **Refused with an enemy army on its way** (`city.moveOutUnderAttack`): otherwise an attack could be dodged in one click. Only an attack that has set off counts: one still waiting to leave at a landing time is hidden from the player, and a refusal would give it away. Scouts don't count.
+- **Injured troops move too:** they can't march out any other way.
+- **Heroes move too, if chosen, each to its own city** with a free Feasting Hall slot (`hero.noVacancy`), the mayor included, and only heroes can be moved without the rest. Without a slot a hero still can't go, so a full city needs a hero dismissed first. Added at the maintainer's word, 2026-11-06, having first been left out.
+- **No army can be sent to a city being abandoned** (`army.destinationAbandoning`, a Reinforce or a Transport, the player's or a friend's), as it could only be lost; one on its way when the hour starts turns back on arrival, or goes home when the hour ends. An enemy's attack or scout isn't told, and carries on as before. The maintainer, 2026-11-06.
+
+**What follows from those (our reading):**
+
+- **Armies out, queues and fortifications stay,** and so does a hero out with an army. The warning lists them.
+- **Shares** are per kind of troop and resource: whole units each, and what's left over to the first city chosen (`splitEvenly`), so nothing is lost. Rounding can't make a share differ by more than the number of cities.
+- **Any of the player's other cities** may receive it, historic ones included, but not one being abandoned (`city.moveOutTarget`). There's no limit on what a city holds, as with an army moving in.
+- **A later hour starts clean:** `misc.movedOutFor` holds the `abandonAt` of the hour moved in, so nothing needs clearing when an hour ends any other way.
+- **A report** names the cities it went to (`report.title.cityMovedOut`).
+
+**To watch:** this makes an abandoned city's contents safe in one click, so a holder losing a seat an hour ahead keeps its troops as well as denying the capture (Known consequences, *An hour doesn't stop every dodge*), as long as no attack has set off yet. Refusing during an attack limits it; a longer hour would close it.
 
 ## Bugs in the code nearby, all gone
 
@@ -93,7 +121,7 @@ Five went on 2026-11-05 with what caused them:
 - **API:** `POST /cities/{cityId}/abandon`, `DELETE /cities/{cityId}/abandon`, `abandonAt` on `CityBean`, then `npm run gen:api`.
 - **Docs:** a `deviations.md` entry *(design change)*, `BALANCE.abandon`, text in every locale.
 - **Teleporting during the hour** is allowed: the city still goes when it's up, from where it then stands.
-- **Tests:** `services/abandon.db.test.ts` for each row of the table, each refusal and each early end, with an army in every state; the routes in the API's `cities/interior.db.test.ts`; `abandon-city/utils.test.ts`.
+- **Tests:** `services/abandon.db.test.ts` for each row of the table, each refusal and each early end, with an army in every state; the routes in the API's `cities/interior.db.test.ts`; `abandon-city/utils.test.ts`; end to end against the running stack, `tools/smoke/abandon.mjs` (`--real` to wait out the hour).
 
 ## What a review found, 2026-11-05
 

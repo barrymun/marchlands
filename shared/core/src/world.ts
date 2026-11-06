@@ -2,7 +2,7 @@
 // Port of Map.cpp / NpcCity.cpp / Valley.cpp.
 
 import { BALANCE, scaled } from '#/balance.ts';
-import { BASIC_RESOURCES, BuildingStatus, Relation, RESOURCE_KEYS, TileType, TROOP_ID_BY_KEY } from '#/constants.ts';
+import { BASIC_RESOURCES, BuildingStatus, Relation, RESOURCE_KEYS, TileType, TROOP_ID_BY_KEY, TroopKey } from '#/constants.ts';
 import { randInt, type Rng, seededRng } from '#/rng.ts';
 import { unitExp } from '#/troops.ts';
 import { type BuildingState, type FortCounts, type ResourceSet, type TroopCounts } from '#/types.ts';
@@ -253,12 +253,12 @@ export function valleyGarrison(level: number, rng: Rng): TroopCounts {
   const consider = (k: keyof TroopCounts, allowed: boolean) => {
     if (allowed && randInt(rng, 0, 2) > 0) candidates.push(k);
   };
-  consider('militia', true);
-  consider('pikemen', true);
-  consider('swordsmen', level > 2);
-  consider('archer', level > 4);
-  consider('lightCavalry', level > 6);
-  if (candidates.length === 0) candidates.push('militia');
+  consider(TroopKey.MILITIA, true);
+  consider(TroopKey.PIKEMEN, true);
+  consider(TroopKey.SWORDSMEN, level > 2);
+  consider(TroopKey.ARCHER, level > 4);
+  consider(TroopKey.LIGHT_CAVALRY, level > 6);
+  if (candidates.length === 0) candidates.push(TroopKey.MILITIA);
   const x = Math.pow(2, level - 1) * 10_000;
   const total = Math.floor((x + randInt(rng, 0, x - 1)) / candidates.length);
   const troops: TroopCounts = {};

@@ -17,6 +17,9 @@ import {
   ItemId,
   lordGear,
   msg,
+  ResourceKey,
+  StatGroup,
+  statKey,
   TileType,
   tileXY,
   TITLES,
@@ -241,7 +244,7 @@ export async function promoteTitle(ctx: Ctx, playerId: number, cityId: number) {
   if (p.prestige < next.prestige) throw new GameError(msg('player.title.prestigeRequired', { prestige: next.prestige }), -99);
   for (const [id, n] of Object.entries(next.medals)) if (itemCount(p, id) < n) throw new GameError(msg('player.title.notEnoughMedals'), -99);
   spendGold(b.city, next.gold);
-  ctx.stat(playerId, cityId, { 'spent.other.gold': next.gold });
+  ctx.stat(playerId, cityId, { [statKey(StatGroup.SPENT_OTHER, ResourceKey.GOLD)]: next.gold });
   for (const [id, n] of Object.entries(next.medals)) consumeItem(ctx, p, id, n);
   p.title = next.id;
   pushResources(ctx, b);
@@ -271,7 +274,7 @@ export async function startFurlough(ctx: Ctx, playerId: number, days: number, ci
   const { n: outgoing } = one(await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.playerId, playerId)));
   if (Number(outgoing) > 0) throw new GameError(msg('player.holiday.troopsOut'), -77);
   spendGold(b.city, days * goldForCents(BALANCE.furloughCentsPerDay));
-  ctx.stat(playerId, cityId, { 'spent.other.gold': days * goldForCents(BALANCE.furloughCentsPerDay) });
+  ctx.stat(playerId, cityId, { [statKey(StatGroup.SPENT_OTHER, ResourceKey.GOLD)]: days * goldForCents(BALANCE.furloughCentsPerDay) });
   setBuff(ctx, p, BuffId.HOLIDAY, msg('buff.holiday'), ctx.now + days * DAY);
   p.status = 5;
   pushResources(ctx, b);

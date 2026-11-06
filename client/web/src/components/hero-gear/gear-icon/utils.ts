@@ -1,4 +1,4 @@
-import { GEAR_PIECE_IDS, SpotKind } from '@marchlands/core';
+import { GEAR_PIECE_IDS, type GearPieceId, SpotKind } from '@marchlands/core';
 
 import {
   BLADE_ALPHA,
@@ -33,9 +33,8 @@ import type { Rgb, Spot } from '@/components/iso-anim/types';
 import { gearArtFile, gearBackdropFile } from '@/lib/game-art';
 
 /** Where a piece's effects start in their cycles, as a share of one: the 14 pieces spread evenly, so they never flash in step. */
-export function piecePhase(piece: string): number {
-  const i = (GEAR_PIECE_IDS as readonly string[]).indexOf(piece);
-  return i < 0 ? 0 : i / GEAR_PIECE_IDS.length;
+export function piecePhase(piece: GearPieceId): number {
+  return GEAR_PIECE_IDS.indexOf(piece) / GEAR_PIECE_IDS.length;
 }
 
 /** How far into its cycle (ms) an effect repeating every `every` ms is at `t`, started `phase` (a share of one) ahead. */
@@ -176,7 +175,7 @@ function spotsOf(file: string): readonly Spot[] {
 }
 
 /** A piece's own movement at a gear level (docs/features/gear-animations.md): the spot at its pivot, whose kind says how it moves; null for a piece that holds still. */
-export function pieceMove(piece: string, level: number): Spot | null {
+export function pieceMove(piece: GearPieceId, level: number): Spot | null {
   return spotsOf(gearArtFile(piece, level)).find((s) => MOVE_KINDS.has(s.k)) ?? null;
 }
 
@@ -249,7 +248,7 @@ export function movedPiece(bare: Uint8ClampedArray | null, part: Uint8ClampedArr
 }
 
 /** Whether a piece's icon at a gear level moves at all (docs/features/gear-animations.md): a piece with a movement of its own at every level; otherwise nothing below level 3, nor a piece with nothing to light. */
-export function hasMotion(piece: string, level: number): boolean {
+export function hasMotion(piece: GearPieceId, level: number): boolean {
   if (pieceMove(piece, level)) return true;
   if (level < GLINT_FROM) return false;
   return level >= SWEEP_FROM || spotsOf(gearArtFile(piece, level)).length > 0 || spotsOf(gearBackdropFile(level)).length > 0;
@@ -262,7 +261,7 @@ export function hasMotion(piece: string, level: number): boolean {
  * flare. Each piece starts its effects at its own moment (`piecePhase`), each stone and star a little apart. With
  * `burst` (when one started, on the same clock) a burst plays over it all (`burstPixels`), at any level.
  */
-export function gearFrame(piece: string, level: number, t: number, burst?: number): GearFrame {
+export function gearFrame(piece: GearPieceId, level: number, t: number, burst?: number): GearFrame {
   const frame: GearFrame = { behind: [], piece: [], over: [] };
   const phase = piecePhase(piece);
   const light = GEAR_LIGHT[Math.min(level, 10)] ?? GOLD;

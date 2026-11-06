@@ -1,17 +1,7 @@
 // Troop count helpers and march maths (orig spitfire::CalcTroopSpeed).
 
 import { BALANCE, scaled } from '#/balance.ts';
-import {
-  BuildingType,
-  FORT_ID_BY_KEY,
-  FORT_KEY_LIST,
-  type FortKey,
-  TechType,
-  TROOP_ID_BY_KEY,
-  TROOP_KEY_LIST,
-  TROOP_KEYS,
-  type TroopKey,
-} from '#/constants.ts';
+import { BuildingType, FORT_ID_BY_KEY, FORT_KEY_LIST, type FortKey, TechType, TROOP_ID_BY_KEY, TROOP_KEY_LIST, TROOP_KEYS, TroopKey } from '#/constants.ts';
 import { troopConfig } from '#/data/index.ts';
 import { buildingLevel, researchLevel } from '#/economy.ts';
 import { GameError } from '#/errors.ts';
@@ -104,7 +94,14 @@ export const MARCH_SPEED: Record<TroopKey, number> = {
   batteringRam: 120,
   catapult: 80,
 };
-const MECH_OR_MOUNTED: TroopKey[] = ['carriage', 'lightCavalry', 'heavyCavalry', 'ballista', 'batteringRam', 'catapult'];
+const MECH_OR_MOUNTED: TroopKey[] = [
+  TroopKey.CARRIAGE,
+  TroopKey.LIGHT_CAVALRY,
+  TroopKey.HEAVY_CAVALRY,
+  TroopKey.BALLISTA,
+  TroopKey.BATTERING_RAM,
+  TroopKey.CATAPULT,
+];
 
 export function tileXY(tileId: number, mapSize: number = BALANCE.mapSize): { x: number; y: number } {
   return { x: tileId % mapSize, y: Math.floor(tileId / mapSize) };

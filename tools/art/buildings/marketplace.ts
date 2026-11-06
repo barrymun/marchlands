@@ -2,13 +2,14 @@
 // after it is bigger and stronger: more stalls and a pavilion, then a ring of stalls round a statue, then a forum with
 // a colonnaded hall, a fountain and banners.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, PAVING, Roofing, StallColour } from '../iso.ts';
 
 const SIZE = 64;
 
 function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20, 'marketplace-1');
-  c.ground(0, 0, 20, 20, 'sand');
+  c.ground(0, 0, 20, 20, Colour.SAND);
   c.plaza(10, 10, 7);
   c.stall(5, 6, StallColour.RED);
   c.stall(11, 5, StallColour.BLUE);
@@ -20,7 +21,7 @@ function band1(): IsoCanvas {
 
 function band2(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 24, 'marketplace-2');
-  c.ground(0, 0, 24, 24, 'sand');
+  c.ground(0, 0, 24, 24, Colour.SAND);
   c.plaza(12, 12, 9);
   // a pavilion
   c.stone(14, 3, 0, 6, 5, 4);
@@ -38,7 +39,7 @@ function band2(): IsoCanvas {
 
 function band3(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 27, 'marketplace-3');
-  c.ground(0, 0, 27, 27, 'sand');
+  c.ground(0, 0, 27, 27, Colour.SAND);
   c.plaza(13, 13, 11);
   c.stone(16, 2, 0, 7, 6, 5);
   c.colonnade(16, 8, 0, 7, 5);
@@ -62,14 +63,14 @@ function band4(): IsoCanvas {
   // a colonnaded hall along the back
   c.wall(2, 1, 0, 26, 5, 6);
   c.colonnade(2, 6, 0, 26, 6);
-  c.roof(2, 1, 26, 5, 6, 3, Axis.X, { roofing: Roofing.TILE, trim: 'gold' });
+  c.roof(2, 1, 26, 5, 6, 3, Axis.X, { roofing: Roofing.TILE, trim: Colour.GOLD });
   c.plaza(15, 17, 11);
   c.stall(3, 9, StallColour.RED);
   c.stall(8, 9, StallColour.BLUE);
   c.stall(19, 9, StallColour.RED);
   c.stall(24, 9, StallColour.BLUE);
   c.stone(13, 15, 0, 5, 5, 1);
-  c.ground(14, 16, 3, 3, 'water');
+  c.ground(14, 16, 3, 3, Colour.WATER);
   c.stall(4, 16, StallColour.BLUE);
   c.stall(23, 17, StallColour.RED);
   c.stall(7, 23, StallColour.RED);

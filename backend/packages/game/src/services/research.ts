@@ -20,11 +20,14 @@ import {
   researchMaxLevel,
   type ResearchState,
   researchTimeMs,
+  ResourceKey,
   scaled,
   SPEEDUP_ITEMS,
   speedupCut,
   SpeedupId,
   speedupItemGold,
+  StatGroup,
+  statKey,
   TECH_IDS,
   techEffect,
   techInfo,
@@ -107,7 +110,7 @@ export async function startResearch(ctx: Ctx, playerId: number, cityId: number, 
   const level = (research[techId]?.level ?? 0) + 1;
   const cost = researchCost(techId, level);
   spendResources(b.city, cost, msg('common.notEnoughResources'), -99);
-  ctx.stat(playerId, cityId, prefixed('spent.research', cost));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.SPENT_RESEARCH, cost));
   const ms = researchTimeMs(techId, level, mayorStats(b.heroes));
   b.player.research = { ...research, [techId]: { level: level - 1, cityId, startTime: ctx.now, endTime: ctx.now + ms } };
   ctx.schedule({ type: TimedEventType.RESEARCH, dueAt: ctx.now + ms, playerId, cityId, refKey: refKey(playerId, techId), payload: { techId } });
@@ -125,7 +128,7 @@ export async function cancelResearch(ctx: Ctx, playerId: number, cityId: number,
   const { techId, entry: r } = pickResearch(b.player.research, cityId, which);
   const paid = researchCost(techId, r.level + 1);
   gainResources(b.city, paid, BALANCE.cancelResearchRefund);
-  ctx.stat(playerId, cityId, prefixed('spent.research', paid, -BALANCE.cancelResearchRefund));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.SPENT_RESEARCH, paid, -BALANCE.cancelResearchRefund));
   b.player.research = { ...b.player.research, [techId]: { level: r.level } };
   ctx.unschedule(refKey(playerId, techId));
   ctx.push(playerId, PushCmd.RESEARCH_UPDATE, { castleId: cityId, typeId: techId, endTime: 0 });
@@ -157,7 +160,7 @@ export async function speedupResearch(ctx: Ctx, playerId: number, cityId: number
   } else if (itemId === SpeedupId.GOLD) {
     const gold = goldForSpeedup(left);
     spendGold(b.city, gold);
-    ctx.stat(playerId, cityId, { 'spent.speedups.gold': gold });
+    ctx.stat(playerId, cityId, { [statKey(StatGroup.SPENT_SPEEDUPS, ResourceKey.GOLD)]: gold });
     reduce = left;
   } else {
     const eff = SPEEDUP_ITEMS[itemId];

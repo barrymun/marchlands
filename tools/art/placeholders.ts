@@ -48,7 +48,7 @@ const FONT: Record<string, number[]> = {
 
 /** Two-letter codes, unique across the building types: initials, else the first two letters, else first and another. */
 function codes(): Map<number, string> {
-  const keyOf = new Map(Object.entries(BuildingType).map(([k, id]) => [id, k]));
+  const keyOf = new Map<number, string>(Object.entries(BuildingType).map(([k, id]) => [id, k]));
   const used = new Set<string>();
   const out = new Map<number, string>();
   for (const id of BUILDING_ART_TYPES) {

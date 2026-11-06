@@ -77,7 +77,6 @@ export interface Marching {
 }
 
 /** Whose army it is, which sets its banner's colour. */
-export type Side = 'own' | 'ally' | 'enemy';
 
 /** A sprite in the scene that may carry animations: where it stands, how big it is, and its file in spots.json. */
 export interface Animated {

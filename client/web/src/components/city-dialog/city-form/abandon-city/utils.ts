@@ -10,5 +10,9 @@ export const keepsRegularCity = (castles: readonly Pick<CityBean, 'id' | 'histor
 /** How many troops or fortifications a bean holds, none for an army whose troops are hidden. */
 export const countOf = (counts: Record<string, number> | null | undefined) => Object.values(counts ?? {}).reduce((sum, n) => sum + n, 0);
 
+/** How many troops or fortifications a city's queues hold, waiting or being made: paid for, and lost with the city. */
+export const queuedCount = (queues: readonly { allProduceQueue: readonly { num: number }[] }[] | undefined) =>
+  (queues ?? []).reduce((sum, q) => sum + q.allProduceQueue.reduce((n, batch) => n + batch.num, 0), 0);
+
 /** Only the things of this city, from a list of the player's. */
 export const ofCity = <T extends { cityId: number }>(list: readonly T[] | undefined, cityId: number): T[] => (list ?? []).filter((x) => x.cityId === cityId);

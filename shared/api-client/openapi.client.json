@@ -493,6 +493,11 @@
               "city.abandonKeepRegular",
               "city.abandonAlready",
               "city.abandonNotRunning",
+              "city.moveOutNotAbandoning",
+              "city.moveOutUnderAttack",
+              "city.moveOutCooldown",
+              "city.moveOutTarget",
+              "city.moveOutNothing",
               "city.recallTroopsFirst",
               "city.foreignTroops",
               "city.notFreeFlat",
@@ -552,6 +557,7 @@
               "report.title.seatLost",
               "report.title.cityAbandoned",
               "report.title.abandonCancelled",
+              "report.title.cityMovedOut",
               "report.title.seatRebelled",
               "report.title.draft",
               "report.title.reinforcementsFought",
@@ -563,6 +569,9 @@
               "report.notFound",
               "report.oldFormat",
               "report.cityAbandoned",
+              "report.cityMovedOut",
+              "report.heroesMovedOut",
+              "report.heroMovedTo",
               "report.cityAbandonedPrestige",
               "report.abandonCancelled",
               "report.seatRebelled",
@@ -604,6 +613,7 @@
               "army.landTooLate",
               "army.unknownMission",
               "army.destinationNotFriendly",
+              "army.destinationAbandoning",
               "army.valleyNoLongerHeld",
               "army.landNotFree",
               "army.cityGone",
@@ -1465,6 +1475,10 @@
             "maximum": 9007199254740991,
             "description": "the prestige capturing this city gave its player (0: never captured); abandoning it soon after takes it back"
           },
+          "movedOut": {
+            "type": "boolean",
+            "description": "moved out during the hour it is being abandoned: keeping it now stops the player moving any city out for a while"
+          },
           "capturedAt": {
             "type": "number",
             "description": "when its player captured it (0: never captured)"
@@ -1506,6 +1520,7 @@
           "draftNextAt",
           "abandonAt",
           "capturePrestige",
+          "movedOut",
           "capturedAt",
           "seatLoyalty",
           "createdAt"
@@ -1627,6 +1642,10 @@
           "changedFace": {
             "type": "boolean"
           },
+          "moveOutBlockedUntil": {
+            "type": "number",
+            "description": "no moving a city out before this, having kept one moved out (0: free to)"
+          },
           "createrTime": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -1656,6 +1675,7 @@
           "castleCount",
           "population",
           "changedFace",
+          "moveOutBlockedUntil",
           "createrTime",
           "lastLoginTime"
         ]
@@ -4384,6 +4404,10 @@
           "changedFace": {
             "type": "boolean"
           },
+          "moveOutBlockedUntil": {
+            "type": "number",
+            "description": "no moving a city out before this, having kept one moved out (0: free to)"
+          },
           "createrTime": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -4458,6 +4482,7 @@
           "castleCount",
           "population",
           "changedFace",
+          "moveOutBlockedUntil",
           "createrTime",
           "lastLoginTime",
           "relation",
@@ -12851,6 +12876,11 @@
               "city.abandonKeepRegular",
               "city.abandonAlready",
               "city.abandonNotRunning",
+              "city.moveOutNotAbandoning",
+              "city.moveOutUnderAttack",
+              "city.moveOutCooldown",
+              "city.moveOutTarget",
+              "city.moveOutNothing",
               "city.recallTroopsFirst",
               "city.foreignTroops",
               "city.notFreeFlat",
@@ -12910,6 +12940,7 @@
               "report.title.seatLost",
               "report.title.cityAbandoned",
               "report.title.abandonCancelled",
+              "report.title.cityMovedOut",
               "report.title.seatRebelled",
               "report.title.draft",
               "report.title.reinforcementsFought",
@@ -12921,6 +12952,9 @@
               "report.notFound",
               "report.oldFormat",
               "report.cityAbandoned",
+              "report.cityMovedOut",
+              "report.heroesMovedOut",
+              "report.heroMovedTo",
               "report.cityAbandonedPrestige",
               "report.abandonCancelled",
               "report.seatRebelled",
@@ -12962,6 +12996,7 @@
               "army.landTooLate",
               "army.unknownMission",
               "army.destinationNotFriendly",
+              "army.destinationAbandoning",
               "army.valleyNoLongerHeld",
               "army.landNotFree",
               "army.cityGone",
@@ -13834,6 +13869,10 @@
             "maximum": 9007199254740991,
             "description": "the prestige capturing this city gave its player (0: never captured); abandoning it soon after takes it back"
           },
+          "movedOut": {
+            "type": "boolean",
+            "description": "moved out during the hour it is being abandoned: keeping it now stops the player moving any city out for a while"
+          },
           "capturedAt": {
             "type": "number",
             "description": "when its player captured it (0: never captured)"
@@ -13875,6 +13914,7 @@
           "draftNextAt",
           "abandonAt",
           "capturePrestige",
+          "movedOut",
           "capturedAt",
           "seatLoyalty",
           "createdAt"
@@ -13998,6 +14038,10 @@
           "changedFace": {
             "type": "boolean"
           },
+          "moveOutBlockedUntil": {
+            "type": "number",
+            "description": "no moving a city out before this, having kept one moved out (0: free to)"
+          },
           "createrTime": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -14027,6 +14071,7 @@
           "castleCount",
           "population",
           "changedFace",
+          "moveOutBlockedUntil",
           "createrTime",
           "lastLoginTime"
         ],
@@ -16826,6 +16871,10 @@
           "changedFace": {
             "type": "boolean"
           },
+          "moveOutBlockedUntil": {
+            "type": "number",
+            "description": "no moving a city out before this, having kept one moved out (0: free to)"
+          },
           "createrTime": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -16901,6 +16950,7 @@
           "castleCount",
           "population",
           "changedFace",
+          "moveOutBlockedUntil",
           "createrTime",
           "lastLoginTime",
           "relation",
@@ -27776,6 +27826,109 @@
         "tags": [
           "city"
         ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "path",
+            "name": "cityId",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cities/{cityId}/abandon/move-out": {
+      "post": {
+        "operationId": "postCitiesAbandonMoveOut",
+        "summary": "(marchlands) Move a city being abandoned out at once: its troops, injured troops and resources, shared evenly between other cities, and any heroes chosen",
+        "tags": [
+          "city"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "targetCityIds": {
+                    "default": [],
+                    "description": "the cities its troops and resources go to, shared evenly; what is left over goes to the first; none leaves them",
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "heroes": {
+                    "default": [],
+                    "description": "the heroes that go too, each to its own city",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "heroId": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "cityId": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991,
+                          "description": "a city of the player with a free Feasting Hall slot"
+                        }
+                      },
+                      "required": [
+                        "heroId",
+                        "cityId"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
         "parameters": [
           {
             "schema": {

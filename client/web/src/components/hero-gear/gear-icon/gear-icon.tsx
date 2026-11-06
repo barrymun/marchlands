@@ -1,5 +1,7 @@
 import { useRef } from 'react';
 
+import type { GearPieceId } from '@marchlands/core';
+
 import { GEAR_ART } from '@/components/hero-gear/constants';
 import { GEAR_SIZE } from '@/components/hero-gear/gear-icon/constants';
 import { useGearMotion } from '@/components/hero-gear/gear-icon/hooks';
@@ -12,7 +14,7 @@ import { cn } from '@/lib/utils';
  * 3 stones flaring, then glowing, a glint across the metal, level 10's stars; and at every level the cape, the plume,
  * the mount and the pendants now and then. Still with reduced motion.
  */
-export function GearIcon({ piece, level, size = 64, className }: { piece: string; level: number; size?: 32 | 64; className?: string }) {
+export function GearIcon({ piece, level, size = 64, className }: { piece: GearPieceId; level: number; size?: 32 | 64; className?: string }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const still = useRef<HTMLImageElement>(null);
   const backdrop = GEAR_ART[gearBackdropFile(level)];

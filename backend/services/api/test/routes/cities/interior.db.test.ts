@@ -257,6 +257,55 @@ describe('POST /cities/{cityId}/abandon', () => {
     }));
 });
 
+describe('POST /cities/{cityId}/abandon/move-out', () => {
+  itGuards('POST', (c) => `cities/${c}/abandon/move-out`, { body: { targetCityIds: [1] } });
+
+  /** A second city, for the first to move to. */
+  async function eastwold(api: TestApi, cityId: number) {
+    const { id: _id, ...row } = (await cityRow(api, cityId))!;
+    const flat = await api.game((ctx) => pickOpenFlat(ctx, -1));
+    const [made] = await api.db
+      .insert(cities)
+      .values({ ...row, tileId: flat, name: 'Eastwold' })
+      .returning();
+    return made!.id;
+  }
+
+  it("refuses a city not being abandoned, with the game's message", () =>
+    apiTest(async (api) => {
+      const [a] = await lords(api, 1);
+      const to = await eastwold(api, a.cityId);
+      await api.refused('POST', `cities/${a.cityId}/abandon/move-out`, 'city.moveOutNotAbandoning', { token: a.token, body: { targetCityIds: [to] } });
+    }));
+
+  it("refuses a body it can't read", () =>
+    apiTest(async (api) => {
+      const [a] = await lords(api, 1);
+      await expectInvalid(api, a.token, [
+        ['POST', `cities/${a.cityId}/abandon/move-out`, { body: { heroes: [{ heroId: 'x', cityId: 1 }] } }],
+        ['POST', `cities/${a.cityId}/abandon/move-out`, { body: { targetCityIds: ['x'] } }],
+      ]);
+    }));
+
+  it('moves the city, says so on the city, and on the player once it has been kept', () =>
+    apiTest(async (api) => {
+      const [a] = await lords(api, 1);
+      const to = await eastwold(api, a.cityId);
+      const city = () => api.ok<{ movedOut: boolean; resource: { gold: number } }>('GET', `cities/${a.cityId}`, { token: a.token });
+      const blockedUntil = async () =>
+        (await api.ok<{ playerInfo: { moveOutBlockedUntil: number } }>('GET', 'player', { token: a.token })).playerInfo.moveOutBlockedUntil;
+      await api.ok('POST', `cities/${a.cityId}/abandon`, { token: a.token });
+      expect((await city()).movedOut).toBe(false);
+      await api.ok('POST', `cities/${a.cityId}/abandon/move-out`, { token: a.token, body: { targetCityIds: [to] } });
+      expect((await city()).movedOut).toBe(true);
+      expect((await city()).resource.gold).toBeLessThan(1);
+      expect(await blockedUntil()).toBe(0);
+      await api.ok('DELETE', `cities/${a.cityId}/abandon`, { token: a.token });
+      expect((await city()).movedOut).toBe(false);
+      expect(await blockedUntil()).toBeGreaterThan(0);
+    }));
+});
+
 describe('DELETE /cities/{cityId}/abandon', () => {
   itGuards('DELETE', (c) => `cities/${c}/abandon`);
 

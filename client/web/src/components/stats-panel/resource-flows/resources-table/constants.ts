@@ -1,51 +1,52 @@
+import { StatGroup } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /** Columns of the resources table: the counter group and its header. */
 export const RESOURCE_COLUMNS = [
   {
-    group: 'produced',
+    group: StatGroup.PRODUCED,
     get label() {
       return i18n.t('stats-panel:resources.columns.produced');
     },
   },
   {
-    group: 'wasted',
+    group: StatGroup.WASTED,
     get label() {
       return i18n.t('stats-panel:resources.columns.wasted');
     },
   },
   {
-    group: 'taxed',
+    group: StatGroup.TAXED,
     get label() {
       return i18n.t('stats-panel:resources.columns.taxed');
     },
   },
   {
-    group: 'plundered',
+    group: StatGroup.PLUNDERED,
     get label() {
       return i18n.t('stats-panel:resources.columns.plundered');
     },
   },
   {
-    group: 'stolen',
+    group: StatGroup.STOLEN,
     get label() {
       return i18n.t('stats-panel:resources.columns.stolen');
     },
   },
   {
-    group: 'gained.dailyGift',
+    group: StatGroup.GAINED_DAILY_GIFT,
     get label() {
       return i18n.t('stats-panel:resources.columns.dailyGift');
     },
   },
   {
-    group: 'market.bought',
+    group: StatGroup.MARKET_BOUGHT,
     get label() {
       return i18n.t('stats-panel:resources.columns.bought');
     },
   },
   {
-    group: 'market.sold',
+    group: StatGroup.MARKET_SOLD,
     get label() {
       return i18n.t('stats-panel:resources.columns.sold');
     },

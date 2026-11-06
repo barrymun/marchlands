@@ -16,6 +16,7 @@ import {
   valleyUpgradeCost,
   WORLD_MAP_SOURCES,
   WorldMapSource,
+  WorldStateKey,
 } from '@marchlands/core';
 import { tiles, worldState } from '@marchlands/db';
 import { testDb } from '@marchlands/db/test/support/db.ts';
@@ -100,7 +101,7 @@ describe(world.ensureWorld.name, () => {
 describe(world.zoneStats.name, () => {
   it('reads the cached statistics, computing them when there are none', () =>
     game(async (g) => {
-      await g.tx.delete(worldState).where(eq(worldState.key, 'zones'));
+      await g.tx.delete(worldState).where(eq(worldState.key, WorldStateKey.ZONES));
       const fresh = await world.zoneStats(asDb(g));
       expect(fresh).toHaveLength(BALANCE.stateGrid ** 2);
       await createTestPlayer(g, { zone: 2 });

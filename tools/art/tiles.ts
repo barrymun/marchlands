@@ -8,7 +8,7 @@
 
 import { SpotKind, TileType } from '@marchlands/core';
 import { Axis, IsoCanvas, Rock, Roofing } from './iso.ts';
-import type { Colour } from './pixel.ts';
+import { Colour } from '../../client/web/src/lib/palette.ts';
 
 const SIZE = 64;
 const PLOT = 32;
@@ -64,7 +64,7 @@ const forest = bands((band) =>
   layered(
     'forest',
     band,
-    (c) => c.blob(MID, MID, [7, 10, 12, 13.5][band - 1], [7, 10, 12, 13.5][band - 1], 'grassDark'),
+    (c) => c.blob(MID, MID, [7, 10, 12, 13.5][band - 1], [7, 10, 12, 13.5][band - 1], Colour.GRASS_DARK),
     (c) => {
       const spots = band <= 2 ? scatter(c, [3, 7][band - 1], 9 - band * 2) : grid(c, band === 3 ? 4.6 : 3.6, band === 3 ? 10 : 12);
       for (const [x, y] of spots) c.pine(x, y, c.between(8 + band, 11 + band * 1.5));
@@ -78,17 +78,17 @@ const grass = bands((band) =>
     band,
     (c) => {
       const r = [7, 10, 12, 13.5][band - 1];
-      c.blob(MID, MID, r, r, (x, y) => ((x * 3 + y * 5) % 7 === 0 ? 'moss' : 'greenL'));
+      c.blob(MID, MID, r, r, (x, y) => ((x * 3 + y * 5) % 7 === 0 ? Colour.MOSS : Colour.GREEN_L));
     },
     (c) => {
       for (const [x, y] of scatter(c, [5, 10, 16, 24][band - 1], 6)) c.tuft(x, y, c.between(2 + band, 3 + band));
-      for (const [x, y] of scatter(c, band * 2, 7)) c.flower(x, y, c.rand() < 0.5 ? 'flower' : 'flowerB');
+      for (const [x, y] of scatter(c, band * 2, 7)) c.flower(x, y, c.rand() < 0.5 ? Colour.FLOWER : Colour.FLOWER_B);
     },
   ),
 );
 
 const swamp = bands((band) => {
-  const mud = (x: number, y: number) => ((x * 3 + y * 7) % 5 === 0 ? 'moss' : 'mud');
+  const mud = (x: number, y: number) => ((x * 3 + y * 7) % 5 === 0 ? Colour.MOSS : Colour.MUD);
   const pools = [
     [16, 16, 3.5],
     [10, 21, 2.5],
@@ -103,7 +103,7 @@ const swamp = bands((band) => {
       const r = [9, 11, 12.5, 13.5][band - 1];
       c.blob(MID, MID, r, r, mud);
       for (const [x, y, r] of pools) {
-        c.blob(x, y, r + 1.5, r + 1.5, 'moss');
+        c.blob(x, y, r + 1.5, r + 1.5, Colour.MOSS);
         c.blob(x, y, r, r, (sx, sy) => c.water(sx, sy));
         c.spot(SpotKind.WATER, c.p(x, y), r);
       }
@@ -120,10 +120,10 @@ const lake = bands((band) => {
     'lake',
     band,
     (c) => {
-      c.blob(MID, MID, r + 2, r + 2, 'sandLight');
+      c.blob(MID, MID, r + 2, r + 2, Colour.SAND_LIGHT);
       c.blob(MID, MID, r, r, (x, y) => c.water(x, y));
       c.spot(SpotKind.WATER, c.p(MID, MID), r);
-      if (band >= 3) c.blob(MID - 1, MID - 1, r * 0.45, r * 0.45, 'waterDeep');
+      if (band >= 3) c.blob(MID - 1, MID - 1, r * 0.45, r * 0.45, Colour.WATER_DEEP);
     },
     (c) => {
       const palms = [
@@ -148,7 +148,7 @@ const hill = bands((band) => {
   return layered(
     'hill',
     band,
-    (c) => c.blob(MID, MID, size * 0.65, size * 0.65, (x, y) => ((x * 5 + y * 3) % 6 === 0 ? 'stoneL' : 'grassDark')),
+    (c) => c.blob(MID, MID, size * 0.65, size * 0.65, (x, y) => ((x * 5 + y * 3) % 6 === 0 ? Colour.STONE_L : Colour.GRASS_DARK)),
     (c) => {
       // separate rock pillars, tallest towards the middle, more and taller at each band
       const from = (PLOT - size) / 2;
@@ -173,7 +173,7 @@ const desert = bands((band) =>
     (c) => {
       // dunes: wavy darker ridges across the sand, more of them at higher bands
       const r = [9, 11, 12.5, 13.5][band - 1];
-      c.blob(MID, MID, r, r, (x, y) => ((x + 2 * y + Math.round(3 * Math.sin(x / 4))) % [40, 16, 12, 10][band - 1] === 0 ? 'sandDark' : 'sand'));
+      c.blob(MID, MID, r, r, (x, y) => ((x + 2 * y + Math.round(3 * Math.sin(x / 4))) % [40, 16, 12, 10][band - 1] === 0 ? Colour.SAND_DARK : Colour.SAND));
     },
     (c) => {
       if (band >= 3) c.outcrop(9, 9, band === 4 ? 7 : 4, band === 4 ? 6 : 4, band === 4 ? 6 : 3, Rock.SANDSTONE);
@@ -188,8 +188,9 @@ const flat = bands((band) =>
     band,
     () => {},
     (c) => {
-      for (const [x, y] of scatter(c, [1, 3, 5, 7][band - 1], 5)) c.box(x, y, 0, 1, 1, 1, { top: 'graniteHi', left: 'graniteL', right: 'graniteR' });
-      for (const [x, y] of scatter(c, [0, 2, 6, 12][band - 1], 5)) c.flower(x, y, c.rand() < 0.5 ? 'flower' : 'flowerB');
+      for (const [x, y] of scatter(c, [1, 3, 5, 7][band - 1], 5))
+        c.box(x, y, 0, 1, 1, 1, { top: Colour.GRANITE_HI, left: Colour.GRANITE_L, right: Colour.GRANITE_R });
+      for (const [x, y] of scatter(c, [0, 2, 6, 12][band - 1], 5)) c.flower(x, y, c.rand() < 0.5 ? Colour.FLOWER : Colour.FLOWER_B);
       if (band === 4) {
         c.cypress(8, 22, 5);
         c.cypress(22, 8, 5);
@@ -207,7 +208,7 @@ function ring(c: IsoCanvas, part: RingPart, o: number, side: number, h: number, 
     if (kind === WallKind.STONE) c.stone(x, y, 0, w, d, h);
     else {
       c.timber(x, y, 0, w, d, h);
-      for (let i = 0; i <= Math.max(w, d); i += 2) c.set(...(w > d ? c.p(x + i, y + d, h + 1) : c.p(x + w, y + i, h + 1)), 'plankL');
+      for (let i = 0; i <= Math.max(w, d); i += 2) c.set(...(w > d ? c.p(x + i, y + d, h + 1) : c.p(x + w, y + i, h + 1)), Colour.PLANK_L);
     }
   };
   const gate = Math.round(side / 2 - 2);
@@ -240,7 +241,7 @@ const castle = bands((band) => {
   return layered(
     'castle',
     band,
-    (c) => c.blob(MID, MID, side * 0.62, side * 0.62, (x, y) => ((x * 3 + y * 5) % 9 === 0 ? 'paveB' : 'paveA')),
+    (c) => c.blob(MID, MID, side * 0.62, side * 0.62, (x, y) => ((x * 3 + y * 5) % 9 === 0 ? Colour.PAVE_B : Colour.PAVE_A)),
     (c) => {
       ring(c, RingPart.BACK, o, side, h, kind);
       if (band >= 3) tower(c, o - 1, o - 1, 4, h + 5, band === 4);
@@ -279,7 +280,7 @@ const npc = bands((band) => {
   return layered(
     'npc',
     band,
-    (c) => c.blob(MID, MID, side * 0.6, side * 0.6, (x, y) => ((x * 5 + y * 3) % 7 === 0 ? 'mud' : 'dirt')),
+    (c) => c.blob(MID, MID, side * 0.6, side * 0.6, (x, y) => ((x * 5 + y * 3) % 7 === 0 ? Colour.MUD : Colour.DIRT)),
     (c) => {
       if (band >= 2) ring(c, RingPart.BACK, o, side, h, WallKind.TIMBER);
       const watch = (x: number, y: number) => {
@@ -310,7 +311,7 @@ const npc = bands((band) => {
 });
 
 /** What moss turns each of the stone faces into. */
-const MOSS_ON: Partial<Record<Colour, Colour>> = { stoneL: 'grassDark', stoneR: 'greenD' };
+const MOSS_ON: Partial<Record<Colour, Colour>> = { [Colour.STONE_L]: Colour.GRASS_DARK, [Colour.STONE_R]: Colour.GREEN_D };
 
 /** Moss and ivy over a share of a sprite's stone faces, the older the city the more. */
 function moss(c: IsoCanvas, share: number) {
@@ -328,9 +329,9 @@ function moss(c: IsoCanvas, share: number) {
 /** A tower: a stone block, crenellated, or under a pointed roof `roof` high, with a flag on top. */
 function spireTower(c: IsoCanvas, x: number, y: number, w: number, h: number, roof: number, roofing: Roofing | null, flag: Colour) {
   c.stone(x, y, 0, w, w, h);
-  c.windows([x + w / 2], y + w, h - 4, 2, 'outline');
+  c.windows([x + w / 2], y + w, h - 4, 2, Colour.OUTLINE);
   // a tall tower gets a lower window too
-  if (h >= 24) c.windows([x + w / 2], y + w, Math.round(h / 2), 2, 'outline');
+  if (h >= 24) c.windows([x + w / 2], y + w, Math.round(h / 2), 2, Colour.OUTLINE);
   if (roofing) {
     c.hipRoof(x, y, w, w, h, roof, Axis.X, roofing);
     c.banner(c.p(x + w / 2, y + w / 2, h + roof), 4, flag);
@@ -349,10 +350,10 @@ function spireTower(c: IsoCanvas, x: number, y: number, w: number, h: number, ro
  * walls. Each stays on its own tile, growing only upwards, so they're 128×128, their tile's middle at (64, 94).
  */
 const HISTORIC_STYLE = {
-  12: { o: 3, wall: 10, tower: 5, towerH: 26, roof: 0, roofing: null, keep: 9, keepH: 32, keepRoof: 0, flag: 'banner', moss: 0.025 },
-  14: { o: 2, wall: 11, tower: 5, towerH: 32, roof: 7, roofing: Roofing.GREEN, keep: 10, keepH: 42, keepRoof: 8, flag: 'greenL', moss: 0.05 },
-  16: { o: 1, wall: 12, tower: 6, towerH: 38, roof: 9, roofing: Roofing.SLATE, keep: 12, keepH: 52, keepRoof: 11, flag: 'blue', moss: 0.08 },
-  18: { o: 1, wall: 13, tower: 6, towerH: 44, roof: 10, roofing: Roofing.CANVAS, keep: 13, keepH: 62, keepRoof: 0, flag: 'gold', moss: 0.11 },
+  12: { o: 3, wall: 10, tower: 5, towerH: 26, roof: 0, roofing: null, keep: 9, keepH: 32, keepRoof: 0, flag: Colour.BANNER, moss: 0.025 },
+  14: { o: 2, wall: 11, tower: 5, towerH: 32, roof: 7, roofing: Roofing.GREEN, keep: 10, keepH: 42, keepRoof: 8, flag: Colour.GREEN_L, moss: 0.05 },
+  16: { o: 1, wall: 12, tower: 6, towerH: 38, roof: 9, roofing: Roofing.SLATE, keep: 12, keepH: 52, keepRoof: 11, flag: Colour.BLUE, moss: 0.08 },
+  18: { o: 1, wall: 13, tower: 6, towerH: 44, roof: 10, roofing: Roofing.CANVAS, keep: 13, keepH: 62, keepRoof: 0, flag: Colour.GOLD, moss: 0.11 },
 } as const;
 
 /** Historic cities stand taller than every other map sprite, so theirs are 128×128 (drawn with `spriteBox(128)`). */
@@ -372,7 +373,7 @@ function historic(level: (typeof HISTORIC_LEVELS)[number]): IsoCanvas {
   const c = layered(
     'historic',
     level,
-    (g) => g.blob(MID, MID, side * 0.66, side * 0.66, (x, y) => ((x * 3 + y * 5) % 9 === 0 ? 'paveB' : 'paveA')),
+    (g) => g.blob(MID, MID, side * 0.66, side * 0.66, (x, y) => ((x * 3 + y * 5) % 9 === 0 ? Colour.PAVE_B : Colour.PAVE_A)),
     (g) => {
       const tw = st.tower;
       const far = o + side - tw + 1;
@@ -387,8 +388,8 @@ function historic(level: (typeof HISTORIC_LEVELS)[number]): IsoCanvas {
       g.stone(ko, ko, 0, k, k, st.keepH);
       // a row of windows every 12 pixels down the keep, above the walls
       for (let z = st.keepH - 6; z > st.wall + 2; z -= 12) {
-        g.windows([ko + k / 3, ko + (2 * k) / 3], ko + k, z, 3, 'outline');
-        g.windowsSe(ko + k, [ko + k / 3, ko + (2 * k) / 3], z, 3, 'outline');
+        g.windows([ko + k / 3, ko + (2 * k) / 3], ko + k, z, 3, Colour.OUTLINE);
+        g.windowsSe(ko + k, [ko + k / 3, ko + (2 * k) / 3], z, 3, Colour.OUTLINE);
       }
       if (level === 18) {
         // a gold dome over the keep, a pale spire behind it
@@ -411,8 +412,8 @@ function historic(level: (typeof HISTORIC_LEVELS)[number]): IsoCanvas {
       g.crenels(o + side - t, o, front, t, side);
       const gx = o + side / 2 - 3;
       const gy = o + side;
-      g.poly([g.p(gx - 1, gy, 0), g.p(gx + 5, gy, 0), g.p(gx + 5, gy, front - 1), g.p(gx - 1, gy, front - 1)], 'stoneR');
-      g.poly([g.p(gx, gy, 0), g.p(gx + 4, gy, 0), g.p(gx + 4, gy, front - 2), g.p(gx, gy, front - 2)], (x) => (x % 2 === 0 ? 'plankR' : 'plankL'));
+      g.poly([g.p(gx - 1, gy, 0), g.p(gx + 5, gy, 0), g.p(gx + 5, gy, front - 1), g.p(gx - 1, gy, front - 1)], Colour.STONE_R);
+      g.poly([g.p(gx, gy, 0), g.p(gx + 4, gy, 0), g.p(gx + 4, gy, front - 2), g.p(gx, gy, front - 2)], (x) => (x % 2 === 0 ? Colour.PLANK_R : Colour.PLANK_L));
       spireTower(g, far, far, tw, st.towerH, st.roof, roofing, flag);
     },
     HISTORIC_SIZE,

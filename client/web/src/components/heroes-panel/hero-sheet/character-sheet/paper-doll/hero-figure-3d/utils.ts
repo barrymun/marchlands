@@ -30,6 +30,7 @@ import {
   BUILDS,
   COLOURS,
   CRIMSON_STONE,
+  type FigureAction,
   GEAR_TIERS,
   GLOW_STRENGTH,
   HAIR_COLOURS,
@@ -45,7 +46,6 @@ import {
 import type {
   Acting,
   ArmAngles,
-  FigureAction,
   FigureModel,
   GearLook,
   Rgb,

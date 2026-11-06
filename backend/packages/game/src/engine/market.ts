@@ -21,9 +21,13 @@ import {
   ReportBodyKind,
   ReportType,
   ResourceKey,
+  StatCounter,
   stateOf,
+  StatGroup,
+  statKey,
   TimedEventType,
   TradeSide,
+  WorldStateKey,
 } from '@marchlands/core';
 import { cities, marketCandles, marketOrders, marketShipments, marketTrades, one, worldState } from '@marchlands/db';
 
@@ -44,7 +48,6 @@ export const resKey = (t: number) => (t === GOLD ? ResourceKey.GOLD : basicResou
 
 export const escrowGold = (amount: number, price: number) => Math.ceil(amount * price * (1 + BALANCE.marketFee));
 export const withFee = (gold: number) => Math.ceil(gold * (1 + BALANCE.marketFee));
-export const MERCHANT_KEY = 'merchant';
 /** The candles of every trade (market_candles.scope); factions and zones get their own later. */
 export const WORLD_SCOPE = 'world';
 
@@ -55,20 +58,22 @@ export const WORLD_SCOPE = 'world';
 export async function loadMerchant(ctx: Ctx, lock: boolean): Promise<Partial<MerchantState>> {
   if (lock) {
     // create the row once so it can be locked; concurrent trades then queue on it
-    await ctx.tx.insert(worldState).values({ key: MERCHANT_KEY, value: {}, updatedAt: ctx.now }).onConflictDoNothing();
-    const [row] = await ctx.tx.select().from(worldState).where(eq(worldState.key, MERCHANT_KEY)).for('update');
+    await ctx.tx.insert(worldState).values({ key: WorldStateKey.MERCHANT, value: {}, updatedAt: ctx.now }).onConflictDoNothing();
+    const [row] = await ctx.tx.select().from(worldState).where(eq(worldState.key, WorldStateKey.MERCHANT)).for('update');
     return row?.value ?? {};
   }
-  const [row] = await ctx.tx.select().from(worldState).where(eq(worldState.key, MERCHANT_KEY));
+  const [row] = await ctx.tx.select().from(worldState).where(eq(worldState.key, WorldStateKey.MERCHANT));
   return row?.value ?? {};
 }
 
 /** (marchlands) A lord's side of a trade, for their statistics. */
-export function tradeStat(ctx: Ctx, playerId: number, cityId: number, bought: boolean, res: string, qty: number, gold: number) {
+export function tradeStat(ctx: Ctx, playerId: number, cityId: number, bought: boolean, res: BasicResource, qty: number, gold: number) {
   ctx.stat(
     playerId,
     cityId,
-    bought ? { [`market.bought.${res}`]: qty, 'market.goldPaid': gold } : { [`market.sold.${res}`]: qty, 'market.goldReceived': gold },
+    bought
+      ? { [statKey(StatGroup.MARKET_BOUGHT, res)]: qty, [StatCounter.MARKET_GOLD_PAID]: gold }
+      : { [statKey(StatGroup.MARKET_SOLD, res)]: qty, [StatCounter.MARKET_GOLD_RECEIVED]: gold },
   );
 }
 
@@ -253,7 +258,7 @@ export async function merchantSweep(ctx: Ctx) {
       swept.push(resType);
     }
   }
-  if (changed) await ctx.tx.update(worldState).set({ value: state, updatedAt: ctx.now }).where(eq(worldState.key, MERCHANT_KEY));
+  if (changed) await ctx.tx.update(worldState).set({ value: state, updatedAt: ctx.now }).where(eq(worldState.key, WorldStateKey.MERCHANT));
   if (swept.length) ctx.broadcast(PushCmd.MARKET_UPDATE, { resTypes: swept });
 }
 

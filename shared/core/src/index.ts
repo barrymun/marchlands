@@ -25,6 +25,7 @@ export * from '#/resources.ts';
 export * from '#/rng.ts';
 export * from '#/time.ts';
 export * from '#/titles.ts';
+export * from '#/stats.ts';
 export * from '#/trends.ts';
 export * from '#/troops.ts';
 export * from '#/types.ts';

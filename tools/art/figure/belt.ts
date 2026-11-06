@@ -7,6 +7,7 @@
 
 import { Sex, SpotKind } from '@marchlands/core';
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { BLUE, fill, GOLD, LEATHER, look, type Shades, STEEL } from '../gear/common.ts';
 import type { PixelCanvas } from '../pixel.ts';
 import { disc } from '../shapes.ts';
@@ -22,9 +23,9 @@ export function belt(sex: Sex, level: number): PixelCanvas {
     level === 0
       ? BLUE
       : level === 1
-        ? ['steelHi', 'blue', 'blueDark']
+        ? [Colour.STEEL_HI, Colour.BLUE, Colour.BLUE_DARK]
         : level === 2
-          ? ['hood', 'hoodDark', 'gear0']
+          ? [Colour.HOOD, Colour.HOOD_DARK, Colour.GEAR_0]
           : level === 9
             ? GOLD
             : level >= 10
@@ -41,7 +42,7 @@ export function belt(sex: Sex, level: number): PixelCanvas {
       ],
       band,
     );
-    if (level === 2 || (level >= 3 && level < 9)) for (let x = 44 + w; x < 57 - w; x += 3) if (x < 49 || x > 55) c.set(x, BELT[0] + 1, 'steelHi');
+    if (level === 2 || (level >= 3 && level < 9)) for (let x = 44 + w; x < 57 - w; x += 3) if (x < 49 || x > 55) c.set(x, BELT[0] + 1, Colour.STEEL_HI);
     const buckle = level >= 3 ? L.trim : level === 0 ? GOLD : STEEL;
     fill(
       c,
@@ -70,11 +71,11 @@ export function belt(sex: Sex, level: number): PixelCanvas {
           [x + 2, y + 6],
           [x - 1, y + 6],
         ],
-        ['fireHi', 'gold', 'goldDark'],
+        [Colour.FIRE_HI, Colour.GOLD, Colour.GOLD_DARK],
       );
       return;
     }
-    if (level <= 2) disc(c, x, y + 3.5, 1.6, level === 1 ? 'wool' : 'steel', level === 1 ? 'linen' : 'steelDark');
+    if (level <= 2) disc(c, x, y + 3.5, 1.6, level === 1 ? Colour.WOOL : Colour.STEEL, level === 1 ? Colour.LINEN : Colour.STEEL_DARK);
     else if (level >= 10)
       c.poly(
         [
@@ -83,15 +84,15 @@ export function belt(sex: Sex, level: number): PixelCanvas {
           [x, y + 8],
           [x - 2, y + 4],
         ],
-        (px) => (px < x ? 'gear10Hi' : 'gear10'),
+        (px) => (px < x ? Colour.GEAR_10_HI : Colour.GEAR_10),
       );
     else stone(c, x, y + 3.5, 0.9 + level * 0.06, L.trim, L.accent);
   });
   // the cord or hook from the belt, one pixel, after the outline
   const out = layer(`belt-${level}`, [strap, charm]);
-  out.set(CHARM[0], CHARM[1], level === 0 ? 'banner' : level >= 3 ? L.trim[0] : 'steelHi');
+  out.set(CHARM[0], CHARM[1], level === 0 ? Colour.BANNER : level >= 3 ? L.trim[0] : Colour.STEEL_HI);
   if (level >= 10) {
-    out.set(CHARM[0] - 1, CHARM[1] + 3, 'sparkle');
+    out.set(CHARM[0] - 1, CHARM[1] + 3, Colour.SPARKLE);
     out.spot(SpotKind.STONE, [CHARM[0], CHARM[1] + 4], 1.5);
   }
   return out;

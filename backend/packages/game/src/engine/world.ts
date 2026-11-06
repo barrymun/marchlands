@@ -2,7 +2,7 @@
 
 import { and, eq, inArray, sql } from 'drizzle-orm';
 
-import { BALANCE, GameError, msg, randInt, stateBounds, TileType } from '@marchlands/core';
+import { BALANCE, GameError, msg, randInt, stateBounds, TileType, WorldStateKey } from '@marchlands/core';
 import { type Db, tiles, worldState } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
@@ -45,7 +45,7 @@ export async function refreshZoneStats(db: Db): Promise<ZoneStats[]> {
   }
   await db
     .insert(worldState)
-    .values({ key: 'zones', value: stats, updatedAt: Date.now() })
+    .values({ key: WorldStateKey.ZONES, value: stats, updatedAt: Date.now() })
     .onConflictDoUpdate({ target: worldState.key, set: { value: stats, updatedAt: Date.now() } });
   return stats;
 }

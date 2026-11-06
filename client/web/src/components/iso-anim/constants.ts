@@ -1,57 +1,60 @@
 import { SpotKind } from '@marchlands/core';
+
 import spotsJson from '@/assets/spots.json';
-import type { Rgb, Side, Spot, TownState } from '@/components/iso-anim/types';
+import type { Rgb, Spot, TownState } from '@/components/iso-anim/types';
+import type { ArmySide } from '@/lib/game-art';
+import { PALETTE } from '@/lib/palette';
 
 /** Where the moving parts stand on every sprite drawn in code, by `<folder>/<file>` (npm run art:draw). */
 export const SPOTS = spotsJson as Record<string, readonly Spot[]>;
 
-/** The sprites' palette colours the animations use (tools/art/pixel.ts, PALETTE). */
+/** The base colours the animations use (lib/palette.ts), by what they draw. */
 export const C = {
-  outline: [52, 36, 28],
-  wood: [122, 88, 56],
-  canvas: [246, 238, 216],
-  logDark: [104, 72, 42],
-  logEnd: [210, 172, 116],
-  smoke: [176, 176, 180],
-  smokeDark: [142, 142, 148],
-  fire: [240, 132, 40],
-  fireHi: [252, 222, 100],
-  banner: [178, 44, 44],
-  bannerDark: [128, 30, 32],
-  horse: [124, 78, 46],
-  horseDark: [86, 52, 30],
-  wool: [242, 240, 230],
-  woolShade: [214, 210, 198],
-  dust: [222, 200, 156],
-  dustDark: [196, 170, 122],
-  dustDeep: [156, 130, 90],
-  granite: [206, 204, 196],
-  graniteDark: [160, 158, 152],
-  white: [255, 250, 236],
-  lamp: [255, 214, 140],
-  gold: [232, 186, 72],
-  plank: [176, 132, 86],
-  skin: [234, 186, 142],
-  hair: [86, 52, 30],
-  metal: [150, 156, 166],
+  outline: PALETTE.OUTLINE,
+  wood: PALETTE.WOOD,
+  canvas: PALETTE.WALL_TOP,
+  logDark: PALETTE.LOG_DARK,
+  logEnd: PALETTE.LOG_END,
+  smoke: PALETTE.SMOKE,
+  smokeDark: PALETTE.SMOKE_DARK,
+  fire: PALETTE.FIRE,
+  fireHi: PALETTE.FIRE_HI,
+  banner: PALETTE.BANNER,
+  bannerDark: PALETTE.BANNER_DARK,
+  horse: PALETTE.HORSE,
+  horseDark: PALETTE.HORSE_DARK,
+  wool: PALETTE.WOOL,
+  woolShade: PALETTE.WOOL_SHADE,
+  dust: PALETTE.SANDSTONE_HI,
+  dustDark: PALETTE.SANDSTONE_L,
+  dustDeep: PALETTE.SANDSTONE_R,
+  granite: PALETTE.GRANITE_L,
+  graniteDark: PALETTE.GRANITE_R,
+  white: PALETTE.LAMP_WHITE,
+  lamp: PALETTE.LAMP,
+  gold: PALETTE.GOLD,
+  plank: PALETTE.PLANK_TOP,
+  skin: PALETTE.SKIN,
+  hair: PALETTE.HORSE_DARK,
+  metal: PALETTE.METAL,
 } as const satisfies Record<string, Rgb>;
 
 /** Banner colours of armies on the map, by whose they are. */
-export const SIDE_COLOURS: Readonly<Record<Side, Rgb>> = {
-  own: [72, 112, 172],
-  ally: [92, 134, 66],
-  enemy: [178, 44, 44],
+export const SIDE_COLOURS: Readonly<Record<ArmySide, Rgb>> = {
+  own: PALETTE.BLUE,
+  ally: PALETTE.LEAF,
+  enemy: PALETTE.BANNER,
 };
 
 /** Clothes people in the town wear, one picked for each (seeded). */
 export const CLOTHES = [
-  [178, 44, 44],
-  [72, 112, 172],
-  [92, 134, 66],
-  [190, 150, 82],
-  [128, 30, 32],
-  [242, 240, 230],
-  [104, 72, 42],
+  PALETTE.BANNER,
+  PALETTE.BLUE,
+  PALETTE.LEAF,
+  PALETTE.THATCH_L,
+  PALETTE.BANNER_DARK,
+  PALETTE.WOOL,
+  PALETTE.LOG_DARK,
 ] as const satisfies readonly Rgb[];
 
 /** Spots whose part is drawn moving over a bare sprite (tools/art/draw.ts, MOVING). */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { OutlineHalf } from '@/components/iso-viewport/constants';
+import { OutlineHalf, PanDirection } from '@/components/iso-viewport/constants';
 import type { Camera, Outline, Piece, View } from '@/components/iso-viewport/types';
 import {
   clampToScene,
@@ -83,14 +83,14 @@ describe(dragged.name, () => {
 
 describe(panStep.name, () => {
   it('moves straight up the screen by going back along both axes, across by one axis and back along the other', () => {
-    expect(panStep('up', 4)).toEqual({ dx: -4, dy: -4 });
-    expect(panStep('down', 4)).toEqual({ dx: 4, dy: 4 });
-    expect(panStep('left', 4)).toEqual({ dx: -4, dy: 4 });
-    expect(panStep('right', 4)).toEqual({ dx: 4, dy: -4 });
+    expect(panStep(PanDirection.UP, 4)).toEqual({ dx: -4, dy: -4 });
+    expect(panStep(PanDirection.DOWN, 4)).toEqual({ dx: 4, dy: 4 });
+    expect(panStep(PanDirection.LEFT, 4)).toEqual({ dx: -4, dy: 4 });
+    expect(panStep(PanDirection.RIGHT, 4)).toEqual({ dx: 4, dy: -4 });
   });
 
   it('does what it says on screen', () => {
-    const { dx, dy } = panStep('right', 4);
+    const { dx, dy } = panStep(PanDirection.RIGHT, 4);
     const p = tileOrigin(100 + dx, 200 + dy, cam, view);
     expect(p.y).toBe(160);
     expect(p.x).toBeGreaterThan(320);

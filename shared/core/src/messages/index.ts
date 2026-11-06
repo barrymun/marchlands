@@ -10,7 +10,7 @@
 // data the client names itself (troops, buildings, items …), a length of time (`dur(ms)`, real milliseconds, which
 // the client shows as a duration), a share (`share(0.25)`, which the client shows as a percent: 25%), or a list of these.
 
-import { GameRefKind, type HeroBuffId, type ResourceKey } from '#/constants.ts';
+import { GameRefKind, type GearPieceId, type HeroBuffId, type ResourceKey } from '#/constants.ts';
 import { ADMIN_MESSAGES } from '#/messages/admin.ts';
 import { ALLIANCE_MESSAGES } from '#/messages/alliance.ts';
 import { ARMY_MESSAGES } from '#/messages/army.ts';
@@ -143,6 +143,6 @@ export const ref = {
   stat: (id: HeroBuffId): GameRef => ({ ref: GameRefKind.STAT, id }),
   zone: (id: number): GameRef => ({ ref: GameRefKind.ZONE, id }),
   rank: (id: number): GameRef => ({ ref: GameRefKind.RANK, id }),
-  gear: (id: string): GameRef => ({ ref: GameRefKind.GEAR, id }),
+  gear: (id: GearPieceId): GameRef => ({ ref: GameRefKind.GEAR, id }),
   itemCategory: (id: number): GameRef => ({ ref: GameRefKind.ITEM_CATEGORY, id }),
 };

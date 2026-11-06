@@ -1,3 +1,4 @@
+/* eslint-disable marchlands/no-string-value -- a made-up set of tabs, to test how a schema reads raw strings */
 import { describe, expect, it } from 'vitest';
 import { REPORT_KINDS, ReportKind } from '@marchlands/core';
 import { defaultsOf, dropPrefix, followAddress, param, readSearch, searchBox, type SearchSchema, textToWrite, writeSearch } from '@/lib/search-state';

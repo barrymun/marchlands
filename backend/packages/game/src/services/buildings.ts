@@ -27,11 +27,15 @@ import {
   msg,
   ref,
   requirementsMet,
+  ResourceKey,
   scaled,
   SPEEDUP_ITEMS,
   speedupCut,
   SpeedupId,
   speedupItemGold,
+  StatCounter,
+  StatGroup,
+  statKey,
   unlockedOuterSlots,
 } from '@marchlands/core';
 
@@ -136,7 +140,7 @@ export async function construct(ctx: Ctx, playerId: number, cityId: number, type
   });
   const cost = buildCost(typeId, 1);
   spendResources(b.city, cost);
-  ctx.stat(playerId, cityId, prefixed('spent.building', cost));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.SPENT_BUILDING, cost));
   const ms = buildTimeMs(typeId, 1, mayorStats(b.heroes), b.player.research);
   const bld: BuildingState = { positionId, typeId, level: 0, status: BuildingStatus.BUILDING, startTime: ctx.now, endTime: ctx.now + ms };
   b.city.buildings = [...b.city.buildings, bld];
@@ -153,7 +157,7 @@ export async function upgrade(ctx: Ctx, playerId: number, cityId: number, positi
   const bld = findBuilding(b.city.buildings, positionId);
   const { building, next: cfg } = assertCanUpgrade(bld, b.city.buildings, b.player.research, b.player.items, maxConcurrent(b, ctx.now), b.city.historicLevel);
   spendResources(b.city, cfg.cost);
-  ctx.stat(playerId, cityId, prefixed('spent.building', cfg.cost));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.SPENT_BUILDING, cfg.cost));
   const ms = buildTimeMs(building.typeId, building.level + 1, mayorStats(b.heroes), b.player.research);
   const next: BuildingState = { ...building, status: BuildingStatus.BUILDING, startTime: ctx.now, endTime: ctx.now + ms };
   b.city.buildings = b.city.buildings.map((x) => (x.positionId === positionId ? next : x));
@@ -177,7 +181,7 @@ export async function demolish(ctx: Ctx, playerId: number, cityId: number, posit
     throw new GameError(msg('building.cannotDemolish', { building: ref.building(bld.typeId) }), -99);
   }
   gainResources(b.city, fullDemolishRefund(bld.typeId, bld.level));
-  ctx.stat(playerId, cityId, { 'levels.demolished': bld.level });
+  ctx.stat(playerId, cityId, { [StatCounter.LEVELS_DEMOLISHED]: bld.level });
   removeBuilding(b, bld);
   const gone: BuildingState = { positionId, typeId: 0, level: 0, status: 0, startTime: 0, endTime: 0 };
   pushBuilding(ctx, b, gone);
@@ -194,7 +198,7 @@ export async function cancel(ctx: Ctx, playerId: number, cityId: number, positio
   // a building under way is going to its next level, which has a config (it was checked when it started)
   const paid = buildingConfig(bld.typeId, bld.level + 1)?.cost ?? {};
   gainResources(b.city, paid, BALANCE.cancelBuildRefund);
-  ctx.stat(playerId, cityId, prefixed('spent.building', paid, -BALANCE.cancelBuildRefund));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.SPENT_BUILDING, paid, -BALANCE.cancelBuildRefund));
   const after: BuildingState | null = bld.level === 0 ? null : { ...bld, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 };
   b.city.buildings = after
     ? b.city.buildings.map((x) => (x.positionId === positionId ? after : x))
@@ -220,7 +224,7 @@ export async function speedup(ctx: Ctx, playerId: number, cityId: number, positi
   } else if (itemId === SpeedupId.GOLD) {
     const gold = goldForSpeedup(left);
     spendGold(b.city, gold);
-    ctx.stat(playerId, cityId, { 'spent.speedups.gold': gold });
+    ctx.stat(playerId, cityId, { [statKey(StatGroup.SPENT_SPEEDUPS, ResourceKey.GOLD)]: gold });
     reduce = left;
   } else {
     const eff = SPEEDUP_ITEMS[itemId];

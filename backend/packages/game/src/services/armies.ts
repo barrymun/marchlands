@@ -153,6 +153,10 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
     }
   }
 
+  // whoever is told this is already known to be a friend: an attack or a scout learns nothing
+  if ((mission === Mission.TRANSPORT || mission === Mission.REINFORCE) && target.cityId != null && (await getCity(ctx, target.cityId)).abandonAt)
+    throw new GameError(msg('army.destinationAbandoning'), -13);
+
   let hero = null;
   if (input.heroId != null && input.heroId >= 0) {
     hero = b.heroes.find((h) => h.id === input.heroId && h.playerId === playerId);

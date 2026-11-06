@@ -1,7 +1,13 @@
 import { CandlePeriod, DAY, HOUR } from '@marchlands/core';
 
-export const RANGE_IDS = ['hour', 'day', 'week', 'month'] as const;
-export type RangeId = (typeof RANGE_IDS)[number];
+export const RangeId = {
+  HOUR: 'hour',
+  DAY: 'day',
+  WEEK: 'week',
+  MONTH: 'month',
+} as const;
+export type RangeId = (typeof RangeId)[keyof typeof RangeId];
+export const RANGE_IDS = Object.values(RangeId);
 
 /**
  * The chart's ranges: the length of its candles, how much time it opens on, and how many candles it loads (it can

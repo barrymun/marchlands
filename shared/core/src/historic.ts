@@ -2,7 +2,7 @@
 // defending hero, and the troops that change with the day. Numbers live in BALANCE.historic.
 
 import { BALANCE, scaled } from '#/balance.ts';
-import { TechType, TileType } from '#/constants.ts';
+import { TechType, TileType, TroopKey } from '#/constants.ts';
 import { createGuardHero } from '#/heroes.ts';
 import { pick, seededRng } from '#/rng.ts';
 import { DAY } from '#/time.ts';
@@ -13,10 +13,15 @@ export const HISTORIC_LEVELS = [12, 14, 16, 18] as const;
 export type HistoricLevel = (typeof HISTORIC_LEVELS)[number];
 
 /** The troops that change each day: one of each pair, and one of the three siege engines. */
+/** The troops a historic city's garrison picks from each day. */
+const FOOT_ROTATION = [TroopKey.PIKEMEN, TroopKey.SWORDSMEN] as const;
+const HORSE_ROTATION = [TroopKey.LIGHT_CAVALRY, TroopKey.HEAVY_CAVALRY] as const;
+const SIEGE_ROTATION = [TroopKey.BATTERING_RAM, TroopKey.BALLISTA, TroopKey.CATAPULT] as const;
+
 export interface HistoricDay {
-  foot: 'pikemen' | 'swordsmen';
-  horse: 'lightCavalry' | 'heavyCavalry';
-  siege: 'batteringRam' | 'ballista' | 'catapult';
+  foot: (typeof FOOT_ROTATION)[number];
+  horse: (typeof HORSE_ROTATION)[number];
+  siege: (typeof SIEGE_ROTATION)[number];
 }
 
 /**
@@ -76,9 +81,9 @@ export function historicCities(mapSize: number = BALANCE.mapSize): { x: number; 
 export function historicDay(tileId: number, day: number): HistoricDay {
   const rng = seededRng(`historic-day:${tileId}:${day}`);
   return {
-    foot: pick(rng, ['pikemen', 'swordsmen'] as const),
-    horse: pick(rng, ['lightCavalry', 'heavyCavalry'] as const),
-    siege: pick(rng, ['batteringRam', 'ballista', 'catapult'] as const),
+    foot: pick(rng, FOOT_ROTATION),
+    horse: pick(rng, HORSE_ROTATION),
+    siege: pick(rng, SIEGE_ROTATION),
   };
 }
 

@@ -20,4 +20,11 @@ export type {
   TroopCounts,
   TroopQueueState,
   TimedEventType,
+  WorldStateKey,
+  AllianceRequestKind,
+  CandlePeriod,
+  ChatChannel,
+  FactionId,
+  GearStat,
+  PlayerRelationKind,
 } from '@marchlands/core';

@@ -43,33 +43,24 @@ import {
   priceBand,
   ReportBodyKind,
   ReportType,
+  ResourceKey,
   scaled,
+  StatGroup,
+  statKey,
   takeFromGroups,
   TimedEventType,
   TradeCounterparty,
   TradeSide,
   worldGold,
   worldPrice,
+  WorldStateKey,
   worldTotals,
 } from '@marchlands/core';
 import { marketCandles, marketOrders, marketShipments, marketTrades, one, pgArray, worldState } from '@marchlands/db';
 
 import { openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
-import {
-  basicResource,
-  escrowGold,
-  GOLD,
-  loadMerchant,
-  logTrade,
-  MERCHANT_KEY,
-  payFeeShares,
-  resKey,
-  ship,
-  tradeStat,
-  withFee,
-  WORLD_SCOPE,
-} from '#/engine/market.ts';
+import { basicResource, escrowGold, GOLD, loadMerchant, logTrade, payFeeShares, resKey, ship, tradeStat, withFee, WORLD_SCOPE } from '#/engine/market.ts';
 import { loadNpcEconomy, saveNpcEconomy } from '#/engine/npc-economy.ts';
 import { createReport } from '#/engine/reports.ts';
 import { cityTerms, type CityTerms, tradedWithFactions } from '#/engine/reputation.ts';
@@ -595,7 +586,7 @@ export async function placeOrder(ctx: Ctx, playerId: number, cityId: number, o: 
   }
   if (sum.merchantFilled > 0) {
     const value = { ...merchantState, [res]: { price: plan.ref, at: ctx.now } };
-    await ctx.tx.update(worldState).set({ value, updatedAt: ctx.now }).where(eq(worldState.key, MERCHANT_KEY));
+    await ctx.tx.update(worldState).set({ value, updatedAt: ctx.now }).where(eq(worldState.key, WorldStateKey.MERCHANT));
   }
 
   let order: OrderRow | null = null;
@@ -642,7 +633,7 @@ export async function speedupShipment(ctx: Ctx, playerId: number, shipmentId: nu
   const b = await openOwnCity(ctx, playerId, s.cityId);
   const gold = goldForSpeedup(Math.max(0, s.endTime - ctx.now));
   spendGold(b.city, gold);
-  ctx.stat(playerId, s.cityId, { 'spent.speedups.gold': gold });
+  ctx.stat(playerId, s.cityId, { [statKey(StatGroup.SPENT_SPEEDUPS, ResourceKey.GOLD)]: gold });
   await ctx.tx.update(marketShipments).set({ endTime: ctx.now }).where(eq(marketShipments.id, shipmentId));
   ctx.schedule({ type: TimedEventType.SHIPMENT, dueAt: ctx.now, playerId, cityId: s.cityId, refKey: `shipment:${s.id}`, payload: { shipmentId: s.id } });
   pushResources(ctx, b);

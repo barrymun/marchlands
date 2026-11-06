@@ -19,7 +19,7 @@ import {
   seededRng,
   TROOP_KEY_LIST,
   type TroopCounts,
-  type TroopKey,
+  TroopKey,
 } from '@marchlands/core';
 import { armySize, DEFAULT_LORD, ITEM_BONUS, type Lord, lordHero, researchAt, unitValue } from './lib.ts';
 
@@ -31,7 +31,7 @@ export const SiegeUntil = { BROKEN: 'broken', CLEARED: 'cleared', CAPTURED: 'cap
 export type SiegeUntil = (typeof SiegeUntil)[keyof typeof SiegeUntil];
 
 /** The weakest day, the one Age 2 players waited for (sources 3, 11 and 13). */
-export const WEAK_DAY: Rotation = { foot: 'pikemen', horse: 'lightCavalry', siege: 'batteringRam' };
+export const WEAK_DAY: Rotation = { foot: TroopKey.PIKEMEN, horse: TroopKey.LIGHT_CAVALRY, siege: TroopKey.BATTERING_RAM };
 
 /** The city's research level (every research but Archery; core historicResearch). */
 export const CITY_RESEARCH = BALANCE.historic.researchLevel;

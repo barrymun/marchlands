@@ -44,6 +44,7 @@ import type mapPanel from '@/locales/en-GB/map-panel.json';
 import type marketPanel from '@/locales/en-GB/market-panel.json';
 import type mayorNote from '@/locales/en-GB/mayor-note.json';
 import type militaryPanel from '@/locales/en-GB/military-panel.json';
+import type moveOut from '@/locales/en-GB/move-out.json';
 import type msgAdmin from '@/locales/en-GB/msg-admin.json';
 import type msgAlliance from '@/locales/en-GB/msg-alliance.json';
 import type msgArmy from '@/locales/en-GB/msg-army.json';
@@ -134,6 +135,7 @@ declare module 'i18next' {
       'factions-panel': typeof factionsPanel;
       'flow-attack': typeof flowAttack;
       'flows-panel': typeof flowsPanel;
+      'move-out': typeof moveOut;
       'full-page-message': typeof fullPageMessage;
       'hero-gear': typeof heroGear;
       'hero-items-dialog': typeof heroItemsDialog;

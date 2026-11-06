@@ -13,7 +13,11 @@ import {
   heroHireCost,
   HeroStatus,
   msg,
+  ResourceKey,
+  StatCounter,
   stateOf,
+  StatGroup,
+  statKey,
   syncHeroGear,
   tavernRefill,
   tavernRefreshCost,
@@ -96,7 +100,7 @@ export async function fillTavern(ctx: Ctx, b: CityBundle, regenerate: boolean) {
 export async function rerollTavern(ctx: Ctx, b: CityBundle) {
   const cost = tavernRefreshCost(buildingLevel(b.city.buildings, BuildingType.INN));
   spendResources(b.city, { gold: cost }, msg('common.notEnoughGold'), -99);
-  ctx.stat(b.player.id, b.city.id, { 'spent.heroes.gold': cost });
+  ctx.stat(b.player.id, b.city.id, { [statKey(StatGroup.SPENT_HEROES, ResourceKey.GOLD)]: cost });
   return fillTavern(ctx, b, true);
 }
 
@@ -104,7 +108,7 @@ export async function rerollTavern(ctx: Ctx, b: CityBundle) {
 export async function hireOffer(ctx: Ctx, b: CityBundle, h: HeroRow, name?: string) {
   const cost = heroHireCost(h.level);
   spendResources(b.city, { gold: cost }, msg('common.notEnoughGold'), -99);
-  ctx.stat(b.player.id, b.city.id, { 'spent.heroes.gold': cost, 'heroes.hired': 1 });
+  ctx.stat(b.player.id, b.city.id, { [statKey(StatGroup.SPENT_HEROES, ResourceKey.GOLD)]: cost, [StatCounter.HEROES_HIRED]: 1 });
   Object.assign(h, { inTavern: false, playerId: b.player.id, status: HeroStatus.IDLE }, name ? { name } : {});
   await saveHero(ctx, h);
   pushHero(ctx, b.player.id, h, 0);

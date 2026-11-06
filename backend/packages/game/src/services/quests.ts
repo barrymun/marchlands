@@ -16,6 +16,7 @@ import {
   questGroupsWithQuests,
   type QuestSnapshot,
   questTargetMessage,
+  StatGroup,
   TROOP_KEY_LIST,
 } from '@marchlands/core';
 import { heroes, mails, one, playerRelations, questProgress, tiles } from '@marchlands/db';
@@ -146,7 +147,7 @@ export async function claimDailyGift(ctx: Ctx, playerId: number, cityId: number)
   b.player.misc = { ...b.player.misc, dailyGiftDay: day };
   const resources = { ...BALANCE.dailyGift };
   gainResources(b.city, resources);
-  ctx.stat(playerId, cityId, prefixed('gained.dailyGift', resources));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.GAINED_DAILY_GIFT, resources));
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
   await savePlayer(ctx, b.player);

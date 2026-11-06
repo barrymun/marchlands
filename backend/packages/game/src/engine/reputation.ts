@@ -15,7 +15,7 @@ type StandingRow = typeof factionStanding.$inferSelect;
 export async function standingsOf(ctx: Ctx, playerId: number): Promise<Record<FactionId, number>> {
   const rows = await ctx.tx.select().from(factionStanding).where(eq(factionStanding.playerId, playerId));
   const out = Object.fromEntries(FACTION_IDS.map((id) => [id, 0])) as Record<FactionId, number>;
-  for (const r of rows) if (r.factionId in out) out[r.factionId as FactionId] = standingNow(r, ctx.now);
+  for (const r of rows) if (r.factionId in out) out[r.factionId] = standingNow(r, ctx.now);
   return out;
 }
 

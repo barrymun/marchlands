@@ -2,6 +2,7 @@
 // block with dummies and a weapon rack; each band after it is bigger and stronger: a second block and a fenced yard,
 // then an L of quarters behind a stone wall, then two-storey stone barracks with towers.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, Roofing } from '../iso.ts';
 
 const SIZE = 64;
@@ -9,10 +10,10 @@ const SIZE = 64;
 function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20, 'barracks-1');
   c.grass(0, 0, 20, 20);
-  c.ground(3, 11, 14, 7, 'sand');
+  c.ground(3, 11, 14, 7, Colour.SAND);
   c.wall(4, 3, 0, 12, 6, 5);
   c.windows([6, 9, 13], 9, 2, 1);
-  c.windows([11], 9, 0, 3, 'logDark');
+  c.windows([11], 9, 0, 3, Colour.LOG_DARK);
   c.roof(4, 3, 12, 6, 5, 3, Axis.X, { roofing: Roofing.SHINGLE });
   c.dummy(6, 14);
   c.dummy(9, 16);
@@ -25,10 +26,10 @@ function band1(): IsoCanvas {
 function band2(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 24, 'barracks-2');
   c.grass(0, 0, 24, 24);
-  c.ground(3, 11, 18, 11, 'sand');
+  c.ground(3, 11, 18, 11, Colour.SAND);
   c.wall(3, 2, 0, 13, 6, 6);
   c.windows([5, 8, 13], 8, 2, 2);
-  c.windows([11], 8, 0, 3, 'logDark');
+  c.windows([11], 8, 0, 3, Colour.LOG_DARK);
   c.roof(3, 2, 13, 6, 6, 3, Axis.X, { roofing: Roofing.SHINGLE });
   c.wall(17, 3, 0, 5, 8, 5);
   c.windowsSe(22, [5, 8], 2, 1);
@@ -47,12 +48,12 @@ function band2(): IsoCanvas {
 function band3(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 27, 'barracks-3');
   c.grass(0, 0, 27, 27);
-  c.ground(8, 9, 17, 15, 'sand');
+  c.ground(8, 9, 17, 15, Colour.SAND);
   c.stone(0, 0, 0, 27, 1, 2);
   c.stone(0, 0, 0, 1, 27, 2);
   c.wall(2, 2, 0, 22, 6, 6);
   c.windows([4, 7, 10, 16, 19, 22], 8, 2, 2);
-  c.windows([13], 8, 0, 3, 'logDark');
+  c.windows([13], 8, 0, 3, Colour.LOG_DARK);
   c.roof(2, 2, 22, 6, 6, 3, Axis.X, { roofing: Roofing.SHINGLE });
   c.wall(2, 8, 0, 5, 16, 6);
   c.windowsSe(7, [11, 14, 17, 20], 2, 2);
@@ -73,7 +74,7 @@ function band3(): IsoCanvas {
 function band4(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 30, 'barracks-4');
   c.grass(0, 0, 30, 30);
-  c.ground(8, 10, 19, 17, 'sand');
+  c.ground(8, 10, 19, 17, Colour.SAND);
   c.stone(0, 0, 0, 30, 1, 3);
   c.stone(0, 0, 0, 1, 30, 3);
   c.stone(0, 0, 0, 3, 3, 10);
@@ -81,11 +82,11 @@ function band4(): IsoCanvas {
   c.stone(3, 2, 0, 24, 7, 8);
   c.windows([5, 8, 11, 18, 21, 24], 9, 2, 2);
   c.windows([5, 8, 11, 14, 18, 21, 24], 9, 5, 1);
-  c.windows([14, 15], 9, 0, 3, 'logDark');
-  c.roof(3, 2, 24, 7, 8, 4, Axis.X, { roofing: Roofing.SHINGLE, gable: 'stoneR' });
+  c.windows([14, 15], 9, 0, 3, Colour.LOG_DARK);
+  c.roof(3, 2, 24, 7, 8, 4, Axis.X, { roofing: Roofing.SHINGLE, gable: Colour.STONE_R });
   c.stone(2, 9, 0, 5, 17, 8);
   c.windowsSe(7, [12, 15, 18, 21], 2, 2);
-  c.roof(2, 9, 5, 17, 8, 3, Axis.Y, { roofing: Roofing.SHINGLE, gable: 'stoneL' });
+  c.roof(2, 9, 5, 17, 8, 3, Axis.Y, { roofing: Roofing.SHINGLE, gable: Colour.STONE_L });
   c.dummy(12, 15);
   c.dummy(15, 17);
   c.dummy(18, 15);

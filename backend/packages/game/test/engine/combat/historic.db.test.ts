@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { PushCmd } from '@marchlands/contracts';
 import {
   BALANCE,
+  BattleResult,
   BattleTarget,
   BuildingType,
   DAY,
@@ -118,7 +119,7 @@ describe(`${processArmy.name}: historic cities`, () => {
       await arrive(g, bean.armyId);
       const b = battleOf((await reportsOf(g, p.id)).at(-1)!, BattleTarget.NPC);
       expect(b).toMatchObject({
-        result: 'attackerWon',
+        result: BattleResult.ATTACKER_WON,
         loyaltyDamage: BALANCE.historic.loyaltyPerWin,
         loyaltyLeft: BALANCE.historic.loyalty - BALANCE.historic.loyaltyPerWin,
         captured: false,
@@ -276,7 +277,7 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
     game(async (g) => {
       const { cityId, attack } = await heldSeat(g);
       const r = await attack();
-      expect(r.result).toBe('attackerWon');
+      expect(r.result).toBe(BattleResult.ATTACKER_WON);
       expect(r.seat).toEqual({ level: 12, loyaltyDamage: 3, loyaltyLeft: BALANCE.historic.loyalty - 3, captured: false });
       expect((await getCity(g, cityId)).loyalty).toBe(BALANCE.historic.loyalty - 3);
     }));

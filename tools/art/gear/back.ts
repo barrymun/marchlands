@@ -2,9 +2,10 @@
 // cape under a silver collar (1), a dark grey cape under a studded collar (2), then from 3 a cape in the level's colour
 // under a gold collar, edged in gold from 5, torn at the hem from 8, and at 10 a pair of bat wings in crimson.
 
-import { SpotKind } from '@marchlands/core';
+import { GearPieceId, SpotKind } from '@marchlands/core';
 
-import { CLEAR, type Colour, type PixelCanvas, type Pt } from '../pixel.ts';
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import { type PixelCanvas, type Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { BLUE, canvas, lit, look, type Shades, spike, STEEL } from './common.ts';
 
@@ -25,7 +26,7 @@ const folds =
   };
 
 export function back(level: number): PixelCanvas {
-  const c = canvas('back', level);
+  const c = canvas(GearPieceId.BACK, level);
   const L = look(level);
   if (level >= 10) {
     // bat wings: membranes between bones, spread from the middle
@@ -39,7 +40,7 @@ export function back(level: number): PixelCanvas {
       ];
       for (let i = 0; i < tips.length - 1; i++)
         c.poly(dir < 0 ? [root, tips[i], tips[i + 1]] : [root, tips[i + 1], tips[i]], (x, y) =>
-          (x + y) % 7 === 0 ? 'gear10Dark' : i % 2 ? 'gear10' : 'gear10Hi',
+          (x + y) % 7 === 0 ? Colour.GEAR_10_DARK : i % 2 ? Colour.GEAR_10 : Colour.GEAR_10_HI,
         );
     }
     oval(c, 16, 11, 3, 4, lit(16, 11, 3, STEEL));
@@ -50,31 +51,38 @@ export function back(level: number): PixelCanvas {
         [16 + dir * 13, 17],
         [16 + dir * 8, 21],
       ] as Pt[])
-        c.line(root, tip, 'gear0Dark');
+        c.line(root, tip, Colour.GEAR_0_DARK);
     spike(c, [16 - 13, 4], [16 - 15, 0], STEEL);
     spike(c, [16 + 13, 4], [16 + 15, 0], STEEL);
     // the wings flap from their root, the tips lifting most
     c.spot(SpotKind.FLAP, root, 14);
     return c;
   }
-  const cloth: Shades = level === 0 ? BLUE : level === 1 ? ['bannerHi', 'banner', 'bannerDark'] : level === 2 ? ['hood', 'hoodDark', 'gear0'] : L.accent;
-  c.poly(CAPE, folds(cloth, level === 0 ? 'wool' : undefined));
+  const cloth: Shades =
+    level === 0
+      ? BLUE
+      : level === 1
+        ? [Colour.BANNER_HI, Colour.BANNER, Colour.BANNER_DARK]
+        : level === 2
+          ? [Colour.HOOD, Colour.HOOD_DARK, Colour.GEAR_0]
+          : L.accent;
+  c.poly(CAPE, folds(cloth, level === 0 ? Colour.WOOL : undefined));
   if (level >= 8)
     // a torn hem
-    for (let x = 5; x < 28; x++) for (let y = 29 - ((x * 7) % 4); y < 30; y++) c.set(x, y, CLEAR);
+    for (let x = 5; x < 28; x++) for (let y = 29 - ((x * 7) % 4); y < 30; y++) c.set(x, y, Colour.CLEAR);
   if (level >= 5) for (let y = 7; y < 29; y++) for (const x of [Math.round(11 - (y - 6) * 0.26), Math.round(21 + (y - 6) * 0.26)]) c.set(x, y, L.trim[1]);
   // the rod or collar
-  if (level === 0) for (let x = 6; x < 27; x++) for (const y of [4, 5]) c.set(x, y, y === 4 ? 'plankTop' : 'trunk');
+  if (level === 0) for (let x = 6; x < 27; x++) for (const y of [4, 5]) c.set(x, y, y === 4 ? Colour.PLANK_TOP : Colour.TRUNK);
   else {
     const collar: Shades = level <= 2 ? STEEL : L.trim;
     oval(c, 16, 6, 7, 3, lit(16, 6, 7, collar));
-    if (level === 2) for (const x of [11, 14, 18, 21]) c.set(x, 6, 'steelHi');
+    if (level === 2) for (const x of [11, 14, 18, 21]) c.set(x, 6, Colour.STEEL_HI);
     if (level >= 3) c.set(16, 6, L.accent[0]);
   }
   c.outline();
   if (level === 0) {
-    c.set(5, 4, 'trunk');
-    c.set(27, 4, 'trunk');
+    c.set(5, 4, Colour.TRUNK);
+    c.set(27, 4, Colour.TRUNK);
   }
   if (L.horns) {
     spike(c, [10, 5], [7, 1], L.trim);

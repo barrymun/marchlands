@@ -30,6 +30,12 @@ export const CITY_MESSAGES = {
   abandonKeepRegular: [],
   abandonAlready: [],
   abandonNotRunning: [],
+  /** moving a city out at once: only while it's being abandoned, not with an enemy army on its way, and not soon after keeping a city moved out */
+  moveOutNotAbandoning: [],
+  moveOutUnderAttack: [],
+  moveOutCooldown: ['time'],
+  moveOutTarget: [],
+  moveOutNothing: [],
   recallTroopsFirst: [],
   foreignTroops: [],
   notFreeFlat: [],

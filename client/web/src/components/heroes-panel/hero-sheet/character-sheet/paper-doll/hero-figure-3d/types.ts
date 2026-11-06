@@ -1,7 +1,7 @@
 import type { Group, ShaderMaterial } from 'three';
-import type { FIGURE_ACTIONS } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure-3d/constants';
+import type { FigureAction } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure-3d/constants';
 
-/** A colour as red, green and blue, 0–255: one of the sprites' palette colours (tools/art/pixel.ts, PALETTE). */
+/** A colour as red, green and blue, 0–255: one of the base colours (lib/palette.ts). */
 export type Rgb = readonly [number, number, number];
 
 /** Three shades of a material: lit, mid and shaded, as the art scripts' `Shades`. */
@@ -36,7 +36,6 @@ export interface Build {
 }
 
 /** What the figure does on a tap, one in turn. */
-export type FigureAction = (typeof FIGURE_ACTIONS)[number];
 
 /** An action under way: which, and when it started (the animation clock, ms). */
 export interface Acting {

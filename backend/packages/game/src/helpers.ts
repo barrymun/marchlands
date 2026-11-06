@@ -3,7 +3,20 @@
 import { count, eq } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { type BuffId, type BuffState, GameError, hasResources, type Message, msg, RESOURCE_KEYS, type Resources, TimedEventType } from '@marchlands/core';
+import {
+  type BuffId,
+  type BuffState,
+  GameError,
+  hasResources,
+  type Message,
+  msg,
+  RESOURCE_KEYS,
+  ResourceKey,
+  type Resources,
+  StatGroup,
+  statKey,
+  TimedEventType,
+} from '@marchlands/core';
 import { alliances, cities, one } from '@marchlands/db';
 
 import { type CityBundle, cityStats } from '#/city.ts';
@@ -44,7 +57,7 @@ export function addItem(ctx: Ctx, p: PlayerRow, id: string, n: number) {
   else delete items[id];
   p.items = items;
   ctx.push(p.id, PushCmd.ITEM_UPDATE, { items: [{ id, count: next }] });
-  if (n) ctx.stat(p.id, 0, { [`items.${n < 0 ? 'used' : 'gained'}.${id}`]: Math.abs(n) });
+  if (n) ctx.stat(p.id, 0, { [statKey(n < 0 ? StatGroup.ITEMS_USED : StatGroup.ITEMS_GAINED, id)]: Math.abs(n) });
 }
 
 export function consumeItem(ctx: Ctx, p: PlayerRow, id: string, n = 1) {
@@ -67,7 +80,7 @@ export function useItemOrGold(ctx: Ctx, p: PlayerRow, city: CityRow, itemId: str
   if (itemCount(p, itemId) > 0) addItem(ctx, p, itemId, -1);
   else {
     spendGold(city, gold);
-    ctx.stat(p.id, city.id, { 'spent.items.gold': gold, [`items.used.${itemId}`]: 1 });
+    ctx.stat(p.id, city.id, { [statKey(StatGroup.SPENT_ITEMS, ResourceKey.GOLD)]: gold, [statKey(StatGroup.ITEMS_USED, itemId)]: 1 });
   }
 }
 

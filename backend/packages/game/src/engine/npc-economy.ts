@@ -31,6 +31,7 @@ import {
   TileType,
   TradeSide,
   worldGold,
+  WorldStateKey,
   worldTotals,
 } from '@marchlands/core';
 import { worldState } from '@marchlands/db';
@@ -41,8 +42,6 @@ import { addToCandles, crossedOrders, settleResting } from '#/engine/market.ts';
 import { cityTerms, tradedWithFactions } from '#/engine/reputation.ts';
 import { type StateRuler, stateRulers } from '#/engine/seats.ts';
 import { findCity, saveCity } from '#/repo.ts';
-
-const NPC_ECONOMY_KEY = 'npc-economy';
 
 /** A tile's zone, in SQL (stateOf). */
 function zoneSql() {
@@ -74,7 +73,7 @@ async function zoneLand(ctx: Ctx): Promise<Stock[]> {
 
 /** The economy's state, locked for this transaction when `lock` (concurrent ticks and trades then queue on it); null before the first tick. */
 export async function loadNpcEconomy(ctx: Ctx, lock: boolean): Promise<NpcEconomy | null> {
-  const q = ctx.tx.select().from(worldState).where(eq(worldState.key, NPC_ECONOMY_KEY));
+  const q = ctx.tx.select().from(worldState).where(eq(worldState.key, WorldStateKey.NPC_ECONOMY));
   const [row] = lock ? await q.for('update') : await q;
   if (!row) return null;
   // state saved before the factions held gold has none yet: every group starts at its treasury
@@ -85,7 +84,7 @@ export async function loadNpcEconomy(ctx: Ctx, lock: boolean): Promise<NpcEconom
 export async function saveNpcEconomy(ctx: Ctx, econ: NpcEconomy) {
   await ctx.tx
     .insert(worldState)
-    .values({ key: NPC_ECONOMY_KEY, value: econ, updatedAt: ctx.now })
+    .values({ key: WorldStateKey.NPC_ECONOMY, value: econ, updatedAt: ctx.now })
     .onConflictDoUpdate({ target: worldState.key, set: { value: econ, updatedAt: ctx.now } });
 }
 

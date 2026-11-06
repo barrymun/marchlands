@@ -1,6 +1,7 @@
 // Boxes: the three medal boxes are chests of wood bound in bronze, of iron bound in steel and of gold set with stones,
 // each with a medal on its lock; the Hero Package is a red pouch tied with gold cord; the Welcome Package a gift box.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas } from '../pixel.ts';
 import { oval, rect } from '../shapes.ts';
 import { BLUE, BRONZE, canvas, GOLD, lathe, RED, sparkle, stamp, STEEL, type Tone, WOOD } from './common.ts';
@@ -29,12 +30,12 @@ function chest(seed: string, body: Tone, band: Tone, { gems = false } = {}): () 
     // the lock plate, with a medal on it
     rect(c, 13, 14, 18, 21, band.dark);
     rect(c, 14, 15, 17, 20, band.mid);
-    stamp(c, 14, 16, ['.rr.', 'gmmg', 'gmmg', '.gg.'], { r: 'banner', g: GOLD.dark, m: GOLD.hi });
+    stamp(c, 14, 16, ['.rr.', 'gmmg', 'gmmg', '.gg.'], { r: Colour.BANNER, g: GOLD.dark, m: GOLD.hi });
     if (gems)
       for (const x of [11, 20]) {
-        c.set(x, 12, 'banner');
-        c.set(x, 11, 'bannerHi');
-        c.set(x, 24, 'blue');
+        c.set(x, 12, Colour.BANNER);
+        c.set(x, 11, Colour.BANNER_HI);
+        c.set(x, 24, Colour.BLUE);
       }
     c.outline();
     if (gems) sparkle(c, 26, 7);
@@ -120,8 +121,8 @@ function welcomePackage(): PixelCanvas {
 
 export const BOX_DRAWINGS = {
   juniorMedalBox: chest('junior-medal-box', WOOD, BRONZE),
-  mediumMedalBox: chest('medium-medal-box', { hi: 'slateHi', mid: 'slateL', dark: 'slateD' }, STEEL),
-  seniorMedalBox: chest('senior-medal-box', GOLD, { hi: 'sparkle', mid: 'fireHi', dark: 'goldDark' }, { gems: true }),
+  mediumMedalBox: chest('medium-medal-box', { hi: Colour.SLATE_HI, mid: Colour.SLATE_L, dark: Colour.SLATE_D }, STEEL),
+  seniorMedalBox: chest('senior-medal-box', GOLD, { hi: Colour.SPARKLE, mid: Colour.FIRE_HI, dark: Colour.GOLD_DARK }, { gems: true }),
   heroPackage,
   welcomePackage,
 };

@@ -1,5 +1,7 @@
 {
   "leaving": "{{city}}は<countdown />後に放棄され、そこにあるものはすべて失われます",
   "keep": "この都市を残す",
-  "kept": "{{city}}を残しました"
+  "kept": "{{city}}を残しました",
+  "keepMovedTitle": "{{city}}を残しますか？",
+  "keepMovedDescription": "移したものは移した先に残り、{{time}}の間どの都市の中身も移せなくなります。"
 }

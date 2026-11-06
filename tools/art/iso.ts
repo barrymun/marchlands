@@ -4,7 +4,8 @@
 // (y max) mid, the south-east face (x max) darkest. Draw back to front; outline() finishes the sprite.
 
 import { SpotKind } from '@marchlands/core';
-import { CLEAR, type Colour, PixelCanvas, type Pt } from './pixel.ts';
+import { PixelCanvas, type Pt } from './pixel.ts';
+import { Colour } from '../../client/web/src/lib/palette.ts';
 
 /** Which way something runs along the ground: a roof's ridge, a stretch of wall. */
 export const Axis = { X: 'x', Y: 'y' } as const;
@@ -45,31 +46,31 @@ export type DomeRoofing = typeof Roofing.SLATE | typeof Roofing.GOLD;
 export const PAVING = 'paving';
 
 /** The red of the banner the animated town flaps. */
-const RED_BANNER = 'banner' satisfies Colour;
+const RED_BANNER = Colour.BANNER satisfies Colour;
 
 /** The window colours the animated town lights, and the kind of spot each records. */
-const LIT_WINDOWS: Partial<Record<Colour, SpotKind>> = { window: SpotKind.WINDOW, fire: SpotKind.GLOW };
+const LIT_WINDOWS: Partial<Record<Colour, SpotKind>> = { [Colour.WINDOW]: SpotKind.WINDOW, [Colour.FIRE]: SpotKind.GLOW };
 
 /** A roof's colours, lit side to dark side, and the eave line. */
 const ROOFING = {
-  [Roofing.TILE]: { hi: 'roofHi', mid: 'roofL', dark: 'roofD', edge: 'roofEdge' },
-  [Roofing.THATCH]: { hi: 'thatchHi', mid: 'thatchL', dark: 'thatchD', edge: 'thatchEdge' },
-  [Roofing.SHINGLE]: { hi: 'shingleHi', mid: 'shingleL', dark: 'shingleD', edge: 'shingleEdge' },
-  [Roofing.BARN]: { hi: 'barnHi', mid: 'barnL', dark: 'barnD', edge: 'barnEdge' },
-  [Roofing.SLATE]: { hi: 'slateHi', mid: 'slateL', dark: 'slateD', edge: 'slateEdge' },
-  [Roofing.GREEN]: { hi: 'greenHi', mid: 'greenL', dark: 'greenD', edge: 'greenEdge' },
-  [Roofing.TEAL]: { hi: 'tealHi', mid: 'tealL', dark: 'tealD', edge: 'tealEdge' },
-  [Roofing.CANVAS]: { hi: 'wallTop', mid: 'wallL', dark: 'wallR', edge: 'stoneR' },
-  [Roofing.AWNING_RED]: { hi: 'wallTop', mid: 'banner', dark: 'bannerDark', edge: 'bannerDark' },
-  [Roofing.AWNING_BLUE]: { hi: 'wallTop', mid: 'blue', dark: 'blueDark', edge: 'blueDark' },
-  [Roofing.GOLD]: { hi: 'gold', mid: 'gold', dark: 'goldDark', edge: 'goldDark' },
+  [Roofing.TILE]: { hi: Colour.ROOF_HI, mid: Colour.ROOF_L, dark: Colour.ROOF_D, edge: Colour.ROOF_EDGE },
+  [Roofing.THATCH]: { hi: Colour.THATCH_HI, mid: Colour.THATCH_L, dark: Colour.THATCH_D, edge: Colour.THATCH_EDGE },
+  [Roofing.SHINGLE]: { hi: Colour.SHINGLE_HI, mid: Colour.SHINGLE_L, dark: Colour.SHINGLE_D, edge: Colour.SHINGLE_EDGE },
+  [Roofing.BARN]: { hi: Colour.BARN_HI, mid: Colour.BARN_L, dark: Colour.BARN_D, edge: Colour.BARN_EDGE },
+  [Roofing.SLATE]: { hi: Colour.SLATE_HI, mid: Colour.SLATE_L, dark: Colour.SLATE_D, edge: Colour.SLATE_EDGE },
+  [Roofing.GREEN]: { hi: Colour.GREEN_HI, mid: Colour.GREEN_L, dark: Colour.GREEN_D, edge: Colour.GREEN_EDGE },
+  [Roofing.TEAL]: { hi: Colour.TEAL_HI, mid: Colour.TEAL_L, dark: Colour.TEAL_D, edge: Colour.TEAL_EDGE },
+  [Roofing.CANVAS]: { hi: Colour.WALL_TOP, mid: Colour.WALL_L, dark: Colour.WALL_R, edge: Colour.STONE_R },
+  [Roofing.AWNING_RED]: { hi: Colour.WALL_TOP, mid: Colour.BANNER, dark: Colour.BANNER_DARK, edge: Colour.BANNER_DARK },
+  [Roofing.AWNING_BLUE]: { hi: Colour.WALL_TOP, mid: Colour.BLUE, dark: Colour.BLUE_DARK, edge: Colour.BLUE_DARK },
+  [Roofing.GOLD]: { hi: Colour.GOLD, mid: Colour.GOLD, dark: Colour.GOLD_DARK, edge: Colour.GOLD_DARK },
 } as const;
 
 /** Rock faces: top, south-west and south-east. */
 const ROCK = {
-  [Rock.SANDSTONE]: { top: 'sandstoneHi', left: 'sandstoneL', right: 'sandstoneR' },
-  [Rock.GRANITE]: { top: 'graniteHi', left: 'graniteL', right: 'graniteR' },
-  [Rock.ORE]: { top: 'oreHi', left: 'oreL', right: 'oreR' },
+  [Rock.SANDSTONE]: { top: Colour.SANDSTONE_HI, left: Colour.SANDSTONE_L, right: Colour.SANDSTONE_R },
+  [Rock.GRANITE]: { top: Colour.GRANITE_HI, left: Colour.GRANITE_L, right: Colour.GRANITE_R },
+  [Rock.ORE]: { top: Colour.ORE_HI, left: Colour.ORE_L, right: Colour.ORE_R },
 } as const;
 
 export class IsoCanvas extends PixelCanvas {
@@ -115,7 +116,7 @@ export class IsoCanvas extends PixelCanvas {
 
   /** The ground plot: a diamond of `c`, or of a paving pattern. */
   ground(x0: number, y0: number, w: number, d: number, c: Colour | typeof PAVING) {
-    const grid = (x: number, y: number) => ((x + 2 * y) % 8 < 2 || (x - 2 * y + 800) % 8 < 2 ? 'paveB' : 'paveA');
+    const grid = (x: number, y: number) => ((x + 2 * y) % 8 < 2 || (x - 2 * y + 800) % 8 < 2 ? Colour.PAVE_B : Colour.PAVE_A);
     const fill = c === PAVING ? grid : c;
     this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], fill);
   }
@@ -130,18 +131,18 @@ export class IsoCanvas extends PixelCanvas {
   }
 
   wall(x0: number, y0: number, z0: number, w: number, d: number, h: number) {
-    this.box(x0, y0, z0, w, d, h, { top: 'wallTop', left: 'wallL', right: 'wallR', corner: 'wallR' });
+    this.box(x0, y0, z0, w, d, h, { top: Colour.WALL_TOP, left: Colour.WALL_L, right: Colour.WALL_R, corner: Colour.WALL_R });
   }
 
   stone(x0: number, y0: number, z0: number, w: number, d: number, h: number) {
-    this.box(x0, y0, z0, w, d, h, { top: 'stoneTop', left: 'stoneL', right: 'stoneR', corner: 'stoneR' });
+    this.box(x0, y0, z0, w, d, h, { top: Colour.STONE_TOP, left: Colour.STONE_L, right: Colour.STONE_R, corner: Colour.STONE_R });
   }
 
   /** A roof's fill for a slope: thatch streaked like straw, shingles in rows, tile and the rest plain. */
   private slope(roofing: Roofing, base: Colour): Colour | ((x: number, y: number) => Colour) {
     const r = ROOFING[roofing];
     // market awnings are striped white and colour
-    if (roofing === Roofing.AWNING_RED || roofing === Roofing.AWNING_BLUE) return (x) => (x % 4 < 2 ? 'wallTop' : base === r.hi ? r.mid : base);
+    if (roofing === Roofing.AWNING_RED || roofing === Roofing.AWNING_BLUE) return (x) => (x % 4 < 2 ? Colour.WALL_TOP : base === r.hi ? r.mid : base);
     const period = roofing === Roofing.THATCH ? 3 : roofing === Roofing.SHINGLE ? 2 : 0;
     return period ? (_x, y) => (y % period === 0 && base !== r.dark ? r.dark : base) : base;
   }
@@ -161,7 +162,7 @@ export class IsoCanvas extends PixelCanvas {
     if (along === Axis.X) {
       const ym = y0 + d / 2;
       this.poly([this.p(x0 - o, y0 - o, zb), this.p(x0 + w + o, y0 - o, zb), this.p(x0 + w + o, ym, zt), this.p(x0 - o, ym, zt)], this.slope(roofing, r.hi));
-      this.poly([this.p(x0 + w, y0, zb), this.p(x0 + w, y0 + d, zb), this.p(x0 + w, ym, zt)], opts.gable ?? 'wallR');
+      this.poly([this.p(x0 + w, y0, zb), this.p(x0 + w, y0 + d, zb), this.p(x0 + w, ym, zt)], opts.gable ?? Colour.WALL_R);
       this.poly(
         [this.p(x0 - o, y0 + d + o, zb), this.p(x0 + w + o, y0 + d + o, zb), this.p(x0 + w + o, ym, zt), this.p(x0 - o, ym, zt)],
         this.slope(roofing, r.mid),
@@ -172,7 +173,7 @@ export class IsoCanvas extends PixelCanvas {
     } else {
       const xm = x0 + w / 2;
       this.poly([this.p(x0 - o, y0 - o, zb), this.p(x0 - o, y0 + d + o, zb), this.p(xm, y0 + d + o, zt), this.p(xm, y0 - o, zt)], this.slope(roofing, r.hi));
-      this.poly([this.p(x0, y0 + d, zb), this.p(x0 + w, y0 + d, zb), this.p(xm, y0 + d, zt)], opts.gable ?? 'wallL');
+      this.poly([this.p(x0, y0 + d, zb), this.p(x0 + w, y0 + d, zb), this.p(xm, y0 + d, zt)], opts.gable ?? Colour.WALL_L);
       this.poly(
         [this.p(x0 + w + o, y0 - o, zb), this.p(x0 + w + o, y0 + d + o, zb), this.p(xm, y0 + d + o, zt), this.p(xm, y0 - o, zt)],
         this.slope(roofing, r.dark),
@@ -220,35 +221,36 @@ export class IsoCanvas extends PixelCanvas {
 
   /** A timber building: plank walls, the boards drawn as darker stripes. */
   timber(x0: number, y0: number, z0: number, w: number, d: number, h: number) {
-    const boards = (base: Colour) => (x: number) => (x % 3 === 0 ? 'plankR' : base);
-    this.box(x0, y0, z0, w, d, h, { top: 'plankTop', left: 'plankL', right: 'plankR', corner: 'logDark' });
-    this.poly([this.p(x0, y0 + d, z0), this.p(x0 + w, y0 + d, z0), this.p(x0 + w, y0 + d, z0 + h), this.p(x0, y0 + d, z0 + h)], boards('plankL'));
+    const boards = (base: Colour) => (x: number) => (x % 3 === 0 ? Colour.PLANK_R : base);
+    this.box(x0, y0, z0, w, d, h, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R, corner: Colour.LOG_DARK });
+    this.poly([this.p(x0, y0 + d, z0), this.p(x0 + w, y0 + d, z0), this.p(x0 + w, y0 + d, z0 + h), this.p(x0, y0 + d, z0 + h)], boards(Colour.PLANK_L));
   }
 
   /** A pine: a dark-green cone in tiers on a short trunk, shaded on its right. */
   pine(x: number, y: number, h: number) {
     const [sx, sy] = this.p(x, y);
-    this.set(sx, sy, 'trunk');
+    this.set(sx, sy, Colour.TRUNK);
     for (let i = 1; i <= h; i++) {
       const fromTop = h - i;
       // widest at the foot, a notch every third row for the tiers of branches
       const half = Math.max(0, Math.floor(fromTop / 2.2) - (fromTop % 3 === 2 ? 1 : 0));
-      for (let dx = -half; dx <= half; dx++) this.set(sx + dx, sy - i, dx > 0 ? 'pineDark' : 'pine');
+      for (let dx = -half; dx <= half; dx++) this.set(sx + dx, sy - i, dx > 0 ? Colour.PINE_DARK : Colour.PINE);
     }
   }
 
   /** A tree stump. */
   stump(x: number, y: number) {
     const [sx, sy] = this.p(x, y);
-    this.set(sx, sy, 'logDark');
-    this.set(sx, sy - 1, 'logEnd');
+    this.set(sx, sy, Colour.LOG_DARK);
+    this.set(sx, sy - 1, Colour.LOG_END);
   }
 
   /** A pile of logs along x: `rows` layers, each one log shorter at both ends; the cut ends face south-east. */
   logs(x0: number, y0: number, len: number, rows: number) {
     this.spot(SpotKind.LOGS, this.p(x0 + len / 2, y0 + rows / 2, rows), len);
     for (let r = 0; r < rows; r++)
-      for (let i = 0; i < rows - r; i++) this.box(x0 + r, y0 + i * 1 + r * 0.5, r, len - r, 1, 1, { top: 'log', left: 'logDark', right: 'logEnd' });
+      for (let i = 0; i < rows - r; i++)
+        this.box(x0 + r, y0 + i * 1 + r * 0.5, r, len - r, 1, 1, { top: Colour.LOG, left: Colour.LOG_DARK, right: Colour.LOG_END });
   }
 
   /** A water wheel on a south-east face (x = x0), centred on (y, z): a dark rim with light paddles. */
@@ -258,21 +260,21 @@ export class IsoCanvas extends PixelCanvas {
     if (IsoCanvas.bare) return;
     for (let a = 0; a < 360; a += 3) {
       const rad = (a * Math.PI) / 180;
-      for (const r of [radius, radius - 1]) this.set(cx + Math.cos(rad) * r * 0.6, cy + Math.sin(rad) * r, 'logDark');
+      for (const r of [radius, radius - 1]) this.set(cx + Math.cos(rad) * r * 0.6, cy + Math.sin(rad) * r, Colour.LOG_DARK);
     }
     for (let a = 0; a < 360; a += 45) {
       const rad = (a * Math.PI) / 180;
-      this.line([cx, cy], [cx + Math.cos(rad) * (radius - 1) * 0.6, cy + Math.sin(rad) * (radius - 1)], 'wood');
-      this.set(cx + Math.cos(rad) * (radius + 1) * 0.6, cy + Math.sin(rad) * (radius + 1), 'logEnd');
+      this.line([cx, cy], [cx + Math.cos(rad) * (radius - 1) * 0.6, cy + Math.sin(rad) * (radius - 1)], Colour.WOOD);
+      this.set(cx + Math.cos(rad) * (radius + 1) * 0.6, cy + Math.sin(rad) * (radius + 1), Colour.LOG_END);
     }
-    this.set(cx, cy, 'logEnd');
+    this.set(cx, cy, Colour.LOG_END);
   }
 
   /** A field of crops: soil with rows along x, ripe wheat or green shoots. */
   crops(x0: number, y0: number, w: number, d: number, kind: CropKind) {
     this.spot(SpotKind.CROPS, this.p(x0 + w / 2, y0 + d / 2), w, d);
-    const [a, b] = kind === CropKind.WHEAT ? (['wheat', 'wheatDark'] as const) : (['leaf', 'leafDark'] as const);
-    this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], 'soil');
+    const [a, b] = kind === CropKind.WHEAT ? ([Colour.WHEAT, Colour.WHEAT_DARK] as const) : ([Colour.LEAF, Colour.LEAF_DARK] as const);
+    this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], Colour.SOIL);
     for (let y = y0 + 0.5; y < y0 + d; y += 2) this.line(this.p(x0 + 0.5, y), this.p(x0 + w - 0.5, y), a);
     for (let y = y0 + 1.5; y < y0 + d; y += 2) for (let x = x0 + 1; x < x0 + w; x += 3) this.set(...this.p(x, y), b);
   }
@@ -281,7 +283,7 @@ export class IsoCanvas extends PixelCanvas {
   haystack(x: number, y: number) {
     const [sx, sy] = this.p(x, y);
     [1, 3, 5, 5].forEach((width, i) => {
-      for (let dx = -Math.floor(width / 2); dx <= Math.floor(width / 2); dx++) this.set(sx + dx, sy - 3 + i, dx > 0 ? 'wheatDark' : 'wheat');
+      for (let dx = -Math.floor(width / 2); dx <= Math.floor(width / 2); dx++) this.set(sx + dx, sy - 3 + i, dx > 0 ? Colour.WHEAT_DARK : Colour.WHEAT);
     });
   }
 
@@ -290,16 +292,16 @@ export class IsoCanvas extends PixelCanvas {
     const [sx, sy] = this.p(x, y);
     this.spot(SpotKind.SHEEP, [sx, sy]);
     if (IsoCanvas.bare) return;
-    this.set(sx, sy - 1, 'wool');
-    this.set(sx + 1, sy - 1, 'wool');
-    this.set(sx - 1, sy - 1, 'outline');
-    this.set(sx, sy, 'logDark');
-    this.set(sx + 1, sy, 'logDark');
+    this.set(sx, sy - 1, Colour.WOOL);
+    this.set(sx + 1, sy - 1, Colour.WOOL);
+    this.set(sx - 1, sy - 1, Colour.OUTLINE);
+    this.set(sx, sy, Colour.LOG_DARK);
+    this.set(sx + 1, sy, Colour.LOG_DARK);
   }
 
   /** A path of trodden earth on the ground. */
   path(x0: number, y0: number, w: number, d: number) {
-    this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], 'dirt');
+    this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], Colour.DIRT);
   }
 
   /** Windmill sails on a south-west face, centred on a world point: four canvas blades on wooden spars. */
@@ -314,12 +316,12 @@ export class IsoCanvas extends PixelCanvas {
       [-1, -1],
     ]) {
       for (let i = 1; i <= len; i++) {
-        this.set(cx + dx * i, cy + dy * i * 0.8, 'wood');
+        this.set(cx + dx * i, cy + dy * i * 0.8, Colour.WOOD);
         // the canvas: two pixels wide beside the spar, from a third of the way out
-        if (i > len / 3) for (const w of [1, 2]) this.set(cx + dx * i + dx * w, cy + dy * i * 0.8, 'wallTop');
+        if (i > len / 3) for (const w of [1, 2]) this.set(cx + dx * i + dx * w, cy + dy * i * 0.8, Colour.WALL_TOP);
       }
     }
-    this.set(cx, cy, 'logDark');
+    this.set(cx, cy, Colour.LOG_DARK);
   }
 
   /** A rock spire: a column of stone with a narrower cap, `w` across. */
@@ -366,13 +368,13 @@ export class IsoCanvas extends PixelCanvas {
 
   /** Water with a few light ripples. */
   water(x: number, y: number): Colour {
-    return (x * 5 + y * 11) % 23 === 0 ? 'waterLight' : 'water';
+    return (x * 5 + y * 11) % 23 === 0 ? Colour.WATER_LIGHT : Colour.WATER;
   }
 
   /** A palm: a curved trunk and drooping fronds. */
   palm(x: number, y: number, h: number) {
     const [sx, sy] = this.p(x, y);
-    for (let i = 0; i < h; i++) this.set(sx + Math.round(Math.sin((i / h) * 1.4) * 2), sy - i, i % 2 ? 'trunk' : 'logDark');
+    for (let i = 0; i < h; i++) this.set(sx + Math.round(Math.sin((i / h) * 1.4) * 2), sy - i, i % 2 ? Colour.TRUNK : Colour.LOG_DARK);
     const tx = sx + Math.round(Math.sin(1.4) * 2);
     const ty = sy - h;
     for (const [dx, dy] of [
@@ -382,24 +384,24 @@ export class IsoCanvas extends PixelCanvas {
       [3, -1],
       [4, 2],
     ])
-      for (const off of [0, 1]) this.line([tx, ty + off], [tx + dx, ty + dy + off], dx > 0 ? 'leafDark' : 'leaf');
-    this.set(tx, ty, 'leafDark');
+      for (const off of [0, 1]) this.line([tx, ty + off], [tx + dx, ty + dy + off], dx > 0 ? Colour.LEAF_DARK : Colour.LEAF);
+    this.set(tx, ty, Colour.LEAF_DARK);
   }
 
   /** A cactus with two arms. */
   cactus(x: number, y: number, h: number) {
     const [sx, sy] = this.p(x, y);
     for (let i = 0; i < h; i++) {
-      this.set(sx, sy - i, 'cactus');
-      this.set(sx + 1, sy - i, 'cactusDark');
+      this.set(sx, sy - i, Colour.CACTUS);
+      this.set(sx + 1, sy - i, Colour.CACTUS_DARK);
     }
     const arm = Math.max(2, Math.floor(h / 3));
     for (let i = 0; i < arm; i++) {
-      this.set(sx - 2, sy - arm - i, 'cactus');
-      this.set(sx + 3, sy - arm - 1 - i, 'cactusDark');
+      this.set(sx - 2, sy - arm - i, Colour.CACTUS);
+      this.set(sx + 3, sy - arm - 1 - i, Colour.CACTUS_DARK);
     }
-    this.set(sx - 1, sy - arm, 'cactus');
-    this.set(sx + 2, sy - arm - 1, 'cactusDark');
+    this.set(sx - 1, sy - arm, Colour.CACTUS);
+    this.set(sx + 2, sy - arm - 1, Colour.CACTUS_DARK);
   }
 
   /** A clump of reeds. */
@@ -410,51 +412,51 @@ export class IsoCanvas extends PixelCanvas {
       [0, 5],
       [1, 4],
     ]) {
-      this.line([sx + dx, sy], [sx + dx, sy - h + 1], 'reed');
-      this.set(sx + dx, sy - h, 'trunk');
+      this.line([sx + dx, sy], [sx + dx, sy - h + 1], Colour.REED);
+      this.set(sx + dx, sy - h, Colour.TRUNK);
     }
   }
 
   /** A tuft of tall grass. */
   tuft(x: number, y: number, h: number) {
     const [sx, sy] = this.p(x, y);
-    this.line([sx - 1, sy], [sx - 2, sy - h + 1], 'grassDark');
-    this.line([sx, sy], [sx, sy - h], 'grass');
-    this.line([sx + 1, sy], [sx + 2, sy - h + 1], 'leafDark');
+    this.line([sx - 1, sy], [sx - 2, sy - h + 1], Colour.GRASS_DARK);
+    this.line([sx, sy], [sx, sy - h], Colour.GRASS);
+    this.line([sx + 1, sy], [sx + 2, sy - h + 1], Colour.LEAF_DARK);
   }
 
   /** A flower on the ground. */
-  flower(x: number, y: number, c: Colour = 'flower') {
+  flower(x: number, y: number, c: Colour = Colour.FLOWER) {
     const [sx, sy] = this.p(x, y);
-    this.set(sx, sy, 'leafDark');
+    this.set(sx, sy, Colour.LEAF_DARK);
     this.set(sx, sy - 1, c);
   }
 
   /** A mine entrance in a south-west face: a dark opening framed with timber. */
   mineEntrance(x: number, y: number, w: number, h: number) {
     this.spot(SpotKind.MINE, this.p(x + w / 2, y, 0), w, h);
-    this.poly([this.p(x, y, 0), this.p(x + w, y, 0), this.p(x + w, y, h), this.p(x, y, h)], 'outline');
-    this.line(this.p(x, y, 0), this.p(x, y, h), 'wood');
-    this.line(this.p(x + w, y, 0), this.p(x + w, y, h), 'wood');
-    this.line(this.p(x - 0.5, y, h), this.p(x + w + 0.5, y, h), 'plankTop');
+    this.poly([this.p(x, y, 0), this.p(x + w, y, 0), this.p(x + w, y, h), this.p(x, y, h)], Colour.OUTLINE);
+    this.line(this.p(x, y, 0), this.p(x, y, h), Colour.WOOD);
+    this.line(this.p(x + w, y, 0), this.p(x + w, y, h), Colour.WOOD);
+    this.line(this.p(x - 0.5, y, h), this.p(x + w + 0.5, y, h), Colour.PLANK_TOP);
   }
 
   /** A wooden crane (a derrick): a mast, a boom out to the south-east, and a rope with a stone hanging. */
   derrick(x: number, y: number, h: number) {
     const top = this.p(x, y, h);
-    this.line(this.p(x, y, 0), top, 'wood');
-    this.line(this.p(x - 1, y + 1, 0), this.p(x, y, h - 2), 'logDark');
+    this.line(this.p(x, y, 0), top, Colour.WOOD);
+    this.line(this.p(x - 1, y + 1, 0), this.p(x, y, h - 2), Colour.LOG_DARK);
     const tip = this.p(x + 5, y, h - 1);
-    this.line(top, tip, 'wood');
-    this.line(tip, [tip[0], tip[1] + 4], 'outline');
-    this.set(tip[0], tip[1] + 5, 'graniteL');
-    this.set(tip[0] + 1, tip[1] + 5, 'graniteR');
+    this.line(top, tip, Colour.WOOD);
+    this.line(tip, [tip[0], tip[1] + 4], Colour.OUTLINE);
+    this.set(tip[0], tip[1] + 5, Colour.GRANITE_L);
+    this.set(tip[0] + 1, tip[1] + 5, Colour.GRANITE_R);
   }
 
   /** A mine cart on rails, full of ore. */
   cart(x: number, y: number, len: number) {
-    this.line(this.p(x - 2, y + 1), this.p(x + len + 2, y + 1), 'logDark');
-    this.box(x, y, 0, 2, 2, 2, { top: 'rust', left: 'oreL', right: 'oreR' });
+    this.line(this.p(x - 2, y + 1), this.p(x + len + 2, y + 1), Colour.LOG_DARK);
+    this.box(x, y, 0, 2, 2, 2, { top: Colour.RUST, left: Colour.ORE_L, right: Colour.ORE_R });
   }
 
   /** A puff of smoke rising from a screen point. */
@@ -468,7 +470,7 @@ export class IsoCanvas extends PixelCanvas {
       [2, -5],
       [1, -6],
     ])
-      this.set(sx + dx, sy + dy, 'smoke');
+      this.set(sx + dx, sy + dy, Colour.SMOKE);
   }
 
   /** A tent: a canvas hip roof standing on the ground. */
@@ -481,8 +483,8 @@ export class IsoCanvas extends PixelCanvas {
   stall(x: number, y: number, colour: StallColour) {
     this.spot(SpotKind.STALL, this.p(x + 1.5, y + 2.5, 0));
     this.timber(x, y, 0, 3, 2, 1);
-    this.line(this.p(x, y + 2, 1), this.p(x, y + 2, 3), 'wood');
-    this.line(this.p(x + 3, y + 2, 1), this.p(x + 3, y + 2, 3), 'wood');
+    this.line(this.p(x, y + 2, 1), this.p(x, y + 2, 3), Colour.WOOD);
+    this.line(this.p(x + 3, y + 2, 1), this.p(x + 3, y + 2, 3), Colour.WOOD);
     this.hipRoof(x, y, 3, 2, 3, 1, Axis.X, colour === StallColour.RED ? Roofing.AWNING_RED : Roofing.AWNING_BLUE);
   }
 
@@ -492,7 +494,10 @@ export class IsoCanvas extends PixelCanvas {
    * with a finial on top. Slate or gold.
    */
   dome(x: number, y: number, z: number, w: number, roofing: DomeRoofing) {
-    const tones: readonly Colour[] = roofing === Roofing.GOLD ? ['goldDark', 'gold', 'gold', 'fireHi'] : ['slateD', 'slateL', 'slateHi', 'graniteL'];
+    const tones: readonly Colour[] =
+      roofing === Roofing.GOLD
+        ? [Colour.GOLD_DARK, Colour.GOLD, Colour.GOLD, Colour.FIRE_HI]
+        : [Colour.SLATE_D, Colour.SLATE_L, Colour.SLATE_HI, Colour.GRANITE_L];
     const r = w / 2;
     const [cx, cy] = this.p(x + r, y + r, z);
     // the base circle projects to an ellipse rx across and ry deep; the crown rises r above its centre
@@ -513,15 +518,15 @@ export class IsoCanvas extends PixelCanvas {
     // the finial: a short tip (a thin spike would only show as outline)
     const top = Math.floor(cy - up);
     this.spot(SpotKind.DOME, [cx, top], w);
-    this.line([cx, top - 1], [cx, top - 2], 'gold');
+    this.line([cx, top - 1], [cx, top - 2], Colour.GOLD);
   }
 
   /** A few crates and sacks. */
   crates(x: number, y: number, n: number) {
     for (let i = 0; i < n; i++) {
       const [cx, cy] = [x + (i % 3) * 1.6, y + Math.floor(i / 3) * 1.6];
-      if (i % 2) this.box(cx, cy, 0, 1.5, 1.5, 1.5, { top: 'plankTop', left: 'plankL', right: 'plankR' });
-      else this.box(cx, cy, 0, 1.5, 1.5, 1, { top: 'wallTop', left: 'wallL', right: 'wallR' });
+      if (i % 2) this.box(cx, cy, 0, 1.5, 1.5, 1.5, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R });
+      else this.box(cx, cy, 0, 1.5, 1.5, 1, { top: Colour.WALL_TOP, left: Colour.WALL_L, right: Colour.WALL_R });
     }
   }
 
@@ -529,11 +534,11 @@ export class IsoCanvas extends PixelCanvas {
   horse(x: number, y: number) {
     const [sx, sy] = this.p(x, y);
     this.spot(SpotKind.HORSE, [sx, sy]);
-    for (const dx of [0, 1, 2]) this.set(sx + dx, sy - 2, 'horse');
-    this.set(sx - 1, sy - 3, 'horse');
-    this.set(sx - 1, sy - 2, 'horseDark');
-    this.set(sx, sy - 3, 'horseDark');
-    for (const dx of [0, 2]) this.set(sx + dx, sy - 1, 'horseDark');
+    for (const dx of [0, 1, 2]) this.set(sx + dx, sy - 2, Colour.HORSE);
+    this.set(sx - 1, sy - 3, Colour.HORSE);
+    this.set(sx - 1, sy - 2, Colour.HORSE_DARK);
+    this.set(sx, sy - 3, Colour.HORSE_DARK);
+    for (const dx of [0, 2]) this.set(sx + dx, sy - 1, Colour.HORSE_DARK);
   }
 
   /** Flames on a screen point (a beacon, a forge). */
@@ -541,106 +546,108 @@ export class IsoCanvas extends PixelCanvas {
     this.spot(SpotKind.FIRE, [sx, sy], h);
     for (let i = 0; i < h; i++) {
       const half = Math.max(0, Math.floor((h - i) / 2.5));
-      for (let dx = -half; dx <= half; dx++) this.set(sx + dx, sy - i, Math.abs(dx) < half || i > h - 2 ? 'fireHi' : 'fire');
+      for (let dx = -half; dx <= half; dx++) this.set(sx + dx, sy - i, Math.abs(dx) < half || i > h - 2 ? Colour.FIRE_HI : Colour.FIRE);
     }
   }
 
   /** An anvil on a block. */
   anvil(x: number, y: number) {
     this.spot(SpotKind.ANVIL, this.p(x + 0.5, y + 0.5, 1.6));
-    this.box(x, y, 0, 1, 1, 1, { top: 'logDark', left: 'logDark', right: 'outline' });
-    this.box(x - 0.3, y - 0.3, 1, 1.6, 1, 0.6, { top: 'metal', left: 'stoneR', right: 'outline' });
+    this.box(x, y, 0, 1, 1, 1, { top: Colour.LOG_DARK, left: Colour.LOG_DARK, right: Colour.OUTLINE });
+    this.box(x - 0.3, y - 0.3, 1, 1.6, 1, 0.6, { top: Colour.METAL, left: Colour.STONE_R, right: Colour.OUTLINE });
   }
 
   /** A straw training dummy on a post. */
   dummy(x: number, y: number) {
     const [sx, sy] = this.p(x, y);
     this.spot(SpotKind.DUMMY, [sx, sy]);
-    this.line([sx, sy], [sx, sy - 5], 'wood');
-    this.line([sx - 2, sy - 4], [sx + 2, sy - 4], 'wood');
-    this.set(sx, sy - 6, 'wheat');
-    this.set(sx, sy - 5, 'wheatDark');
+    this.line([sx, sy], [sx, sy - 5], Colour.WOOD);
+    this.line([sx - 2, sy - 4], [sx + 2, sy - 4], Colour.WOOD);
+    this.set(sx, sy - 6, Colour.WHEAT);
+    this.set(sx, sy - 5, Colour.WHEAT_DARK);
   }
 
   /** A rack of spears. */
   rack(x: number, y: number) {
     const [sx, sy] = this.p(x, y);
-    this.line([sx - 2, sy - 2], [sx + 2, sy - 2], 'wood');
+    this.line([sx - 2, sy - 2], [sx + 2, sy - 2], Colour.WOOD);
     for (const dx of [-2, -1, 0, 1, 2]) {
-      this.line([sx + dx, sy], [sx + dx, sy - 5], 'wood');
-      this.set(sx + dx, sy - 6, 'metal');
+      this.line([sx + dx, sy], [sx + dx, sy - 5], Colour.WOOD);
+      this.set(sx + dx, sy - 6, Colour.METAL);
     }
   }
 
   /** A catapult: a timber frame and a throwing arm. */
   catapult(x: number, y: number) {
-    this.box(x, y, 0, 4, 2, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
+    this.box(x, y, 0, 4, 2, 1, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R });
     const pivot = this.p(x + 2, y + 1, 3);
     this.spot(SpotKind.CATAPULT, pivot);
-    this.line(this.p(x + 1.5, y + 1, 1), pivot, 'wood');
-    this.line(this.p(x + 2.5, y + 1, 1), pivot, 'wood');
-    this.line([pivot[0] - 4, pivot[1] + 1], [pivot[0] + 4, pivot[1] - 4], 'logDark');
-    this.set(pivot[0] + 4, pivot[1] - 5, 'stoneL');
+    this.line(this.p(x + 1.5, y + 1, 1), pivot, Colour.WOOD);
+    this.line(this.p(x + 2.5, y + 1, 1), pivot, Colour.WOOD);
+    this.line([pivot[0] - 4, pivot[1] + 1], [pivot[0] + 4, pivot[1] - 4], Colour.LOG_DARK);
+    this.set(pivot[0] + 4, pivot[1] - 5, Colour.STONE_L);
   }
 
   /** A statue on a plinth. */
   statue(x: number, y: number) {
     this.stone(x, y, 0, 2, 2, 2);
     const [sx, sy] = this.p(x + 1, y + 1, 2);
-    for (let i = 1; i <= 4; i++) this.set(sx, sy - i, i === 4 ? 'graniteHi' : 'graniteL');
-    this.set(sx - 1, sy - 3, 'graniteL');
-    this.set(sx + 1, sy - 2, 'graniteR');
+    for (let i = 1; i <= 4; i++) this.set(sx, sy - i, i === 4 ? Colour.GRANITE_HI : Colour.GRANITE_L);
+    this.set(sx - 1, sy - 3, Colour.GRANITE_L);
+    this.set(sx + 1, sy - 2, Colour.GRANITE_R);
   }
 
   /** A round paved plaza. */
   plaza(cx: number, cy: number, r: number) {
-    this.blob(cx, cy, r, r, (x, y) => ((x + 2 * y) % 8 < 2 || (x - 2 * y + 800) % 8 < 2 ? 'paveB' : 'paveA'));
+    this.blob(cx, cy, r, r, (x, y) => ((x + 2 * y) % 8 < 2 || (x - 2 * y + 800) % 8 < 2 ? Colour.PAVE_B : Colour.PAVE_A));
   }
 
   /** A patch of grass, flecked darker. */
   grass(x0: number, y0: number, w: number, d: number) {
-    this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], (x, y) => ((x * 7 + y * 13) % 9 === 0 ? 'grassDark' : 'grass'));
+    this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], (x, y) =>
+      (x * 7 + y * 13) % 9 === 0 ? Colour.GRASS_DARK : Colour.GRASS,
+    );
   }
 
   /** A vegetable garden: dark soil with rows of green along x. */
   garden(x0: number, y0: number, w: number, d: number) {
-    this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], 'soil');
-    for (let y = y0 + 1; y < y0 + d; y += 2) for (let x = x0 + 1; x < x0 + w; x += 2) this.set(...this.p(x, y), 'leaf');
+    this.poly([this.p(x0, y0), this.p(x0 + w, y0), this.p(x0 + w, y0 + d), this.p(x0, y0 + d)], Colour.SOIL);
+    for (let y = y0 + 1; y < y0 + d; y += 2) for (let x = x0 + 1; x < x0 + w; x += 2) this.set(...this.p(x, y), Colour.LEAF);
   }
 
   /** A wooden fence from one ground point to another: posts every 2 units and a rail. */
   fence(x0: number, y0: number, x1: number, y1: number) {
     const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
-    this.line(this.p(x0, y0, 2), this.p(x1, y1, 2), 'wood');
+    this.line(this.p(x0, y0, 2), this.p(x1, y1, 2), Colour.WOOD);
     for (let i = 0; i <= steps; i += 2) {
       const [x, y] = [x0 + ((x1 - x0) * i) / steps, y0 + ((y1 - y0) * i) / steps];
-      this.line(this.p(x, y, 0), this.p(x, y, 2), 'wood');
+      this.line(this.p(x, y, 0), this.p(x, y, 2), Colour.WOOD);
     }
   }
 
   /** A stone well with water in it. */
   well(x: number, y: number) {
     this.spot(SpotKind.WELL, this.p(x + 1.5, y + 1.5, 0));
-    this.box(x, y, 0, 3, 3, 2, { top: 'water', left: 'stoneL', right: 'stoneR', corner: 'stoneR' });
-    this.line(this.p(x, y + 3, 2), this.p(x, y + 3, 5), 'wood');
-    this.line(this.p(x + 3, y, 2), this.p(x + 3, y, 5), 'wood');
-    this.line(this.p(x, y + 3, 5), this.p(x + 3, y, 5), 'wood');
+    this.box(x, y, 0, 3, 3, 2, { top: Colour.WATER, left: Colour.STONE_L, right: Colour.STONE_R, corner: Colour.STONE_R });
+    this.line(this.p(x, y + 3, 2), this.p(x, y + 3, 5), Colour.WOOD);
+    this.line(this.p(x + 3, y, 2), this.p(x + 3, y, 5), Colour.WOOD);
+    this.line(this.p(x, y + 3, 5), this.p(x + 3, y, 5), Colour.WOOD);
   }
 
   /** A colonnade on a box's south-west face (y = y0 + d): white columns every 2 units over a shaded porch. */
   colonnade(x0: number, y: number, z0: number, w: number, h: number) {
-    this.poly([this.p(x0, y, z0), this.p(x0 + w, y, z0), this.p(x0 + w, y, z0 + h), this.p(x0, y, z0 + h)], 'portico');
-    for (let x = x0 + 1; x < x0 + w; x += 2) this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), 'column');
+    this.poly([this.p(x0, y, z0), this.p(x0 + w, y, z0), this.p(x0 + w, y, z0 + h), this.p(x0, y, z0 + h)], Colour.PORTICO);
+    for (let x = x0 + 1; x < x0 + w; x += 2) this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), Colour.COLUMN);
   }
 
   /** Columns on a south-east face (x = x0 + w), every 2 units. */
   colonnadeSe(x: number, y0: number, z0: number, d: number, h: number) {
-    this.poly([this.p(x, y0, z0), this.p(x, y0 + d, z0), this.p(x, y0 + d, z0 + h), this.p(x, y0, z0 + h)], 'portico');
-    for (let y = y0 + 1; y < y0 + d; y += 2) this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), 'column');
+    this.poly([this.p(x, y0, z0), this.p(x, y0 + d, z0), this.p(x, y0 + d, z0 + h), this.p(x, y0, z0 + h)], Colour.PORTICO);
+    for (let y = y0 + 1; y < y0 + d; y += 2) this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), Colour.COLUMN);
   }
 
   /** Small windows or doors on a south-west face: dark marks `h` high at each x. */
-  windows(xs: number[], y: number, z0: number, h: number, c: Colour = 'window') {
+  windows(xs: number[], y: number, z0: number, h: number, c: Colour = Colour.WINDOW) {
     const lit = LIT_WINDOWS[c];
     for (const x of xs) {
       this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), c);
@@ -649,7 +656,7 @@ export class IsoCanvas extends PixelCanvas {
   }
 
   /** Windows on a south-east face, at each y. */
-  windowsSe(x: number, ys: number[], z0: number, h: number, c: Colour = 'window') {
+  windowsSe(x: number, ys: number[], z0: number, h: number, c: Colour = Colour.WINDOW) {
     const lit = LIT_WINDOWS[c];
     for (const y of ys) {
       this.line(this.p(x, y, z0), this.p(x, y, z0 + h - 1), c);
@@ -660,17 +667,17 @@ export class IsoCanvas extends PixelCanvas {
   /** A cypress: a tall dark-green flame on a short trunk. */
   cypress(x: number, y: number, h: number) {
     const [sx, sy] = this.p(x, y);
-    this.set(sx, sy, 'trunk');
+    this.set(sx, sy, Colour.TRUNK);
     for (let i = 1; i <= h; i++) {
       const half = i < h - 1 ? 1 : 0;
-      for (let dx = -half; dx <= half; dx++) this.set(sx + dx, sy - i, dx === 1 ? 'leafDark' : 'leaf');
+      for (let dx = -half; dx <= half; dx++) this.set(sx + dx, sy - i, dx === 1 ? Colour.LEAF_DARK : Colour.LEAF);
     }
   }
 
   /** Crenellations along the top of a stone box's front edges. */
   crenels(x0: number, y0: number, z: number, w: number, d: number) {
-    for (let x = x0; x <= x0 + w; x += 2) this.set(...this.p(x, y0 + d, z + 1), 'stoneTop');
-    for (let y = y0; y <= y0 + d; y += 2) this.set(...this.p(x0 + w, y, z + 1), 'stoneTop');
+    for (let x = x0; x <= x0 + w; x += 2) this.set(...this.p(x, y0 + d, z + 1), Colour.STONE_TOP);
+    for (let y = y0; y <= y0 + d; y += 2) this.set(...this.p(x0 + w, y, z + 1), Colour.STONE_TOP);
   }
 
   /**
@@ -679,7 +686,7 @@ export class IsoCanvas extends PixelCanvas {
    */
   banner([sx, sy]: Pt, h: number, colour: Colour = RED_BANNER) {
     if (colour === RED_BANNER) this.spot(SpotKind.BANNER, [sx + 1, sy - h], h);
-    this.line([sx, sy], [sx, sy - h], 'outline');
-    for (let y = 0; y < 3; y++) for (let x = 1; x <= 3; x++) this.set(sx + x, sy - h + y, y === 2 && x === 3 ? CLEAR : colour);
+    this.line([sx, sy], [sx, sy - h], Colour.OUTLINE);
+    for (let y = 0; y < 3; y++) for (let x = 1; x <= 3; x++) this.set(sx + x, sy - h + y, y === 2 && x === 3 ? Colour.CLEAR : colour);
   }
 }

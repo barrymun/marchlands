@@ -10,6 +10,7 @@ import {
   ACTION_MS,
   CAMERA,
   FIGURE_ACTIONS,
+  FigureAction,
   GEAR_TIERS,
   GLOW_STRENGTH,
   RENDER_SIZE,
@@ -28,18 +29,18 @@ import {
   toonMaterial,
   turnBy,
 } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure-3d/utils';
-import { FIGURE_HAIR_COLOURS, FIGURE_HAIR_STYLES, FIGURE_SKIN_TONES, FigureHairStyle } from '@/lib/game-art';
+import { FIGURE_HAIR_COLOURS, FIGURE_HAIR_STYLES, FIGURE_SKIN_TONES, FigureHairColour, FigureHairStyle, FigureSkinTone } from '@/lib/game-art';
 
 const LEVELS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const MAN: FigureBody = { sex: Sex.MALE, tone: 'fair', style: FigureHairStyle.BEARD, hair: 'brown' };
-const WOMAN: FigureBody = { sex: Sex.FEMALE, tone: 'olive', style: FigureHairStyle.BRAID, hair: 'auburn' };
+const MAN: FigureBody = { sex: Sex.MALE, tone: FigureSkinTone.FAIR, style: FigureHairStyle.BEARD, hair: FigureHairColour.BROWN };
+const WOMAN: FigureBody = { sex: Sex.FEMALE, tone: FigureSkinTone.OLIVE, style: FigureHairStyle.BRAID, hair: FigureHairColour.AUBURN };
 /** Every body the heroes can have: each sex with each of its hairstyles, the tones and colours taken in turn. */
 const BODIES: FigureBody[] = [Sex.MALE, Sex.FEMALE].flatMap((sex) =>
   FIGURE_HAIR_STYLES[sex].map((style, i) => ({
     sex,
     style,
-    tone: FIGURE_SKIN_TONES[(sex * 2 + i) % FIGURE_SKIN_TONES.length] ?? 'fair',
-    hair: FIGURE_HAIR_COLOURS[(sex * 2 + i) % FIGURE_HAIR_COLOURS.length] ?? 'brown',
+    tone: FIGURE_SKIN_TONES[(sex * 2 + i) % FIGURE_SKIN_TONES.length] ?? FigureSkinTone.FAIR,
+    hair: FIGURE_HAIR_COLOURS[(sex * 2 + i) % FIGURE_HAIR_COLOURS.length] ?? FigureHairColour.BROWN,
   })),
 );
 
@@ -136,16 +137,16 @@ describe(actionAngles.name, () => {
 
   it('eases between keyframes', () => {
     // the swing: drawn back by 0.3, struck by 0.55
-    const [back] = actionAngles('swing', 0.15);
+    const [back] = actionAngles(FigureAction.SWING, 0.15);
     expect(back).toBeLessThan(0);
     expect(back).toBeGreaterThan(-0.55);
-    const [mid] = actionAngles('swing', 0.425);
+    const [mid] = actionAngles(FigureAction.SWING, 0.425);
     expect(mid).toBeCloseTo((-0.55 + 1.35) / 2);
   });
 
   it('moves only the shield arm for the shield, and only the sword arm otherwise', () => {
-    expect(actionAngles('shield', 0.5)).toEqual([0, 0, -0.85]);
-    expect(actionAngles('salute', 0.5)).toEqual([-0.5, 0.7, 0]);
+    expect(actionAngles(FigureAction.SHIELD, 0.5)).toEqual([0, 0, -0.85]);
+    expect(actionAngles(FigureAction.SALUTE, 0.5)).toEqual([-0.5, 0.7, 0]);
   });
 });
 
@@ -180,16 +181,16 @@ describe(poseFigure.name, () => {
 
   it('turns the arms as the action has them', () => {
     const model = buildFigure(MAN, 5);
-    poseFigure(model, 1000 + ACTION_MS / 2, { kind: 'shield', at: 1000 });
+    poseFigure(model, 1000 + ACTION_MS / 2, { kind: FigureAction.SHIELD, at: 1000 });
     expect(model.shieldArm.rotation.x).toBeCloseTo(-0.85);
     expect(model.swordArm.rotation.x).toBe(0);
-    poseFigure(model, 1000 + ACTION_MS * 2, { kind: 'shield', at: 1000 });
+    poseFigure(model, 1000 + ACTION_MS * 2, { kind: FigureAction.SHIELD, at: 1000 });
     expect(model.shieldArm.rotation.x).toBe(0);
   });
 
   it('stands still in its rest pose with no time', () => {
     const model = buildFigure(MAN, 10);
-    poseFigure(model, null, { kind: 'swing', at: 0 });
+    poseFigure(model, null, { kind: FigureAction.SWING, at: 0 });
     expect(model.upper.position.y).toBe(0);
     expect(model.swordArm.rotation.x).toBe(0);
     expect(model.back.map((b) => b.group.rotation.y)).toEqual([-0.6, 0.6]);

@@ -6,12 +6,13 @@
 // ridge (2), then plates edged in gold with a stone, cloth in the level's colour hanging below from 5, spikes from 6
 // and a horn from 8; gilded at 9 and crimson at 10.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { BLUE, CLOTH, DARK_STEEL, GOLD, horn, IRON, lit, look, type Shades, spike, STEEL } from '../gear/common.ts';
 import type { PixelCanvas, Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { ELBOW_FAR, ELBOW_NEAR, HAND_FAR, HAND_NEAR, layer, limb, part, SHOULDER_FAR, SHOULDER_NEAR, stone } from './skeleton.ts';
 
-const MAIL: Shades = ['mailHi', 'mail', 'steelDark'];
+const MAIL: Shades = [Colour.MAIL_HI, Colour.MAIL, Colour.STEEL_DARK];
 
 const sleeve = (level: number): Shades => (level <= 2 ? CLOTH : MAIL);
 
@@ -48,8 +49,8 @@ export function nearArm(level: number): PixelCanvas {
         c.set(x, wrist[1] - 1, cuff[0]);
         c.set(x, wrist[1], cuff[1]);
       }
-    if (level === 0) for (const x of [wrist[0] - 2, wrist[0], wrist[0] + 2]) c.set(x, wrist[1] - 2, 'fireHi');
-    if (level === 2) for (let y = ELBOW_NEAR[1] + 2; y < wrist[1] - 1; y += 2) c.set(ELBOW_NEAR[0] + 1, y, 'hoodDark');
+    if (level === 0) for (const x of [wrist[0] - 2, wrist[0], wrist[0] + 2]) c.set(x, wrist[1] - 2, Colour.FIRE_HI);
+    if (level === 2) for (let y = ELBOW_NEAR[1] + 2; y < wrist[1] - 1; y += 2) c.set(ELBOW_NEAR[0] + 1, y, Colour.HOOD_DARK);
     if (level >= 3) stone(c, ELBOW_NEAR[0] + 1.5, ELBOW_NEAR[1] + 5, 0.8 + level * 0.04, cuff ?? GOLD, L.accent);
   });
   if (hand) for (const y of [HAND_NEAR[1] - 1, HAND_NEAR[1] + 1]) c.set(HAND_NEAR[0] + 1, y, metal[2]);
@@ -61,7 +62,7 @@ export function nearArm(level: number): PixelCanvas {
 export function shoulders(level: number): PixelCanvas {
   const L = look(level);
   const metal: Shades = level === 0 ? BLUE : level === 1 ? IRON : level === 2 ? STEEL : L.metal;
-  const edge: Shades = level === 0 ? GOLD : level >= 3 ? L.trim : ['steelDark', 'steelDark', 'hoodDark'];
+  const edge: Shades = level === 0 ? GOLD : level >= 3 ? L.trim : [Colour.STEEL_DARK, Colour.STEEL_DARK, Colour.HOOD_DARK];
   const cloth: Shades | null = level === 0 ? CLOTH : level >= 5 ? L.accent : null;
   const pauldron = (name: string, [sx, sy]: Pt, rx: number, ry: number) =>
     part(name, (c) => {
@@ -75,7 +76,7 @@ export function shoulders(level: number): PixelCanvas {
         c.set(x, Math.round(sy + ry * 0.75 + ry * 0.6 * Math.sqrt(Math.max(0, 1 - ((x - sx) / rx) ** 2))) - 1, edge[1]);
       oval(c, sx, sy, rx, ry, lit(sx - 1, sy - 1, rx, metal));
       for (let x = Math.ceil(sx - rx); x < sx + rx; x++) c.set(x, Math.round(sy + ry * Math.sqrt(Math.max(0, 1 - ((x - sx) / rx) ** 2))) - 1, edge[1]);
-      if (level === 2) for (let x = Math.ceil(sx - rx + 2); x < sx + rx - 1; x++) c.set(x, Math.round(sy - 1), 'steelDark');
+      if (level === 2) for (let x = Math.ceil(sx - rx + 2); x < sx + rx - 1; x++) c.set(x, Math.round(sy - 1), Colour.STEEL_DARK);
     });
   const far = pauldron('far-pauldron', [SHOULDER_FAR[0] + 1.5, SHOULDER_FAR[1] - 1], 4, 3.2);
   const hornPart = part('pauldron-horn', (c) => {

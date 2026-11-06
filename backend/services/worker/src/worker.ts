@@ -26,7 +26,7 @@ export async function processOne(db: Db, opts: { log: Log }): Promise<boolean> {
         claimed = null; // a retried attempt starts over: forget what a failed one claimed
         const rows = await ctx.tx.execute<{
           id: number;
-          type: string;
+          type: EventRow['type'];
           due_at: number;
           player_id: number | null;
           city_id: number | null;

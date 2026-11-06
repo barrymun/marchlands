@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { FlowActionType, HeroBuffId, Relation, TileType } from '@marchlands/core';
 
-import { FACTION_TINT_KEY } from '@/components/map-panel/constants';
+import { FACTION_TINT_KEY, RelationGroup } from '@/components/map-panel/constants';
 import { farmedTiles, farmLists, placeName, readFactionTint, relationGroup, saveFactionTint, wrap } from '@/components/map-panel/utils';
 
 describe(wrap.name, () => {
@@ -16,19 +16,19 @@ describe(wrap.name, () => {
 
 describe(relationGroup.name, () => {
   it('groups alliance members and allies as friends', () => {
-    expect(relationGroup(Relation.ALLIANCE)).toBe('friend');
-    expect(relationGroup(Relation.ALLY)).toBe('friend');
+    expect(relationGroup(Relation.ALLIANCE)).toBe(RelationGroup.FRIEND);
+    expect(relationGroup(Relation.ALLY)).toBe(RelationGroup.FRIEND);
   });
 
   it('groups enemies as enemies', () => {
-    expect(relationGroup(Relation.ENEMY)).toBe('enemy');
+    expect(relationGroup(Relation.ENEMY)).toBe(RelationGroup.ENEMY);
   });
 
   it('groups every other relation (and unknown values) as other', () => {
-    expect(relationGroup(Relation.NEUTRAL)).toBe('other');
-    expect(relationGroup(Relation.NO_RELATION)).toBe('other');
-    expect(relationGroup(Relation.SELF)).toBe('other');
-    expect(relationGroup(99)).toBe('other');
+    expect(relationGroup(Relation.NEUTRAL)).toBe(RelationGroup.OTHER);
+    expect(relationGroup(Relation.NO_RELATION)).toBe(RelationGroup.OTHER);
+    expect(relationGroup(Relation.SELF)).toBe(RelationGroup.OTHER);
+    expect(relationGroup(99)).toBe(RelationGroup.OTHER);
   });
 });
 

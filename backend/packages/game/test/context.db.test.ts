@@ -2,7 +2,7 @@ import { eq, like } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
-import { GameError, msg, seededRng, type TimedEventType } from '@marchlands/core';
+import { GameError, msg, seededRng, type TimedEventType, type WorldStateKey } from '@marchlands/core';
 import { type Db, playerStats, pushMessages, timedEvents, type Tx, worldState } from '@marchlands/db';
 
 import { type RunOptions, savepoint } from '#/context.ts';
@@ -31,9 +31,15 @@ const items = (n: number) => ({ items: [{ id: 'x', count: n }] });
 
 const pgError = (code: string) => Object.assign(new Error(`pg ${code}`), { code });
 
-/** A marker row: shows whether an attempt's writes were kept. */
-const mark = (ctx: Ctx, key: string) => ctx.tx.insert(worldState).values({ key, value: { at: ctx.now }, updatedAt: ctx.now });
-const marked = async (db: Db | Tx, key: string) => (await db.select().from(worldState).where(eq(worldState.key, key))).length > 0;
+/** A marker row: shows whether an attempt's writes were kept. Its key is made up, so nothing of the game's is touched. */
+const mark = (ctx: Ctx, key: string) => ctx.tx.insert(worldState).values({ key: key as WorldStateKey, value: { at: ctx.now }, updatedAt: ctx.now });
+const marked = async (db: Db | Tx, key: string) =>
+  (
+    await db
+      .select()
+      .from(worldState)
+      .where(eq(worldState.key, key as WorldStateKey))
+  ).length > 0;
 
 describe(runGame.name, () => {
   it('runs the operation at the given time with the given random numbers, and returns its result', () =>

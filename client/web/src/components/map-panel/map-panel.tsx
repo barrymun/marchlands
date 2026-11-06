@@ -16,8 +16,9 @@ import {
 } from '@marchlands/api-client';
 
 import { CityDialog } from '@/components/city-dialog/city-dialog';
+import { PanDirection } from '@/components/iso-viewport/constants';
 import { useIsoViewport } from '@/components/iso-viewport/hooks';
-import type { PanDirection, ViewPoint } from '@/components/iso-viewport/types';
+import type { ViewPoint } from '@/components/iso-viewport/types';
 import { panStep, spriteAt, tileAt } from '@/components/iso-viewport/utils';
 import { MapList } from '@/components/map-panel/constants';
 import { FarmTargets } from '@/components/map-panel/farm-targets/farm-targets';
@@ -189,16 +190,16 @@ export function MapPanel({ city, mapSize }: { city: CityBean; mapSize: number })
         className="absolute top-2 start-2 flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1 rounded-lg border bg-background/90 p-1 shadow backdrop-blur"
       >
         <GoToCoords x={wrap(Math.round(centre.x), mapSize)} y={wrap(Math.round(centre.y), mapSize)} mapSize={mapSize} onGoTo={goTo} />
-        <Button size="icon-xs" variant="ghost" onClick={() => pan('left')} aria-label={t('pan.left')}>
+        <Button size="icon-xs" variant="ghost" onClick={() => pan(PanDirection.LEFT)} aria-label={t('pan.left')}>
           <ArrowLeft />
         </Button>
-        <Button size="icon-xs" variant="ghost" onClick={() => pan('up')} aria-label={t('pan.up')}>
+        <Button size="icon-xs" variant="ghost" onClick={() => pan(PanDirection.UP)} aria-label={t('pan.up')}>
           <ArrowUp />
         </Button>
-        <Button size="icon-xs" variant="ghost" onClick={() => pan('down')} aria-label={t('pan.down')}>
+        <Button size="icon-xs" variant="ghost" onClick={() => pan(PanDirection.DOWN)} aria-label={t('pan.down')}>
           <ArrowDown />
         </Button>
-        <Button size="icon-xs" variant="ghost" onClick={() => pan('right')} aria-label={t('pan.right')}>
+        <Button size="icon-xs" variant="ghost" onClick={() => pan(PanDirection.RIGHT)} aria-label={t('pan.right')}>
           <ArrowRight />
         </Button>
         <Button size="icon-xs" variant="ghost" onClick={goHome} aria-label={t('pan.home')}>

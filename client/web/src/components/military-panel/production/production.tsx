@@ -159,7 +159,7 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const wallFor = (typeId: number) => wallRoom - others(typeId).space;
   const overBudget: TrainLimit | null =
     RESOURCE_KEYS.find((k) => total[k] > have[k]) ??
-    (total.population > city.resource.idlePopulation ? 'idlePopulation' : fort && total.space > wallRoom ? 'wallSpace' : null);
+    (total.population > city.resource.idlePopulation ? TrainLimit.IDLE_POPULATION : fort && total.space > wallRoom ? TrainLimit.WALL_SPACE : null);
 
   return (
     <Card className="overflow-visible">

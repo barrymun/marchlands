@@ -16,6 +16,8 @@ import {
   ResourceKey,
   type ResourceSet,
   scaled,
+  StatGroup,
+  statKey,
   TileType,
   tileXY,
 } from '@marchlands/core';
@@ -115,9 +117,9 @@ export async function comfort(ctx: Ctx, playerId: number, cityId: number, typeId
   }
   c.misc = { ...c.misc, lastComfortAt: ctx.now };
   ctx.stat(playerId, cityId, {
-    'spent.comfort.gold': Math.max(0, before.gold - c.gold),
-    'spent.comfort.food': Math.max(0, before.food - c.food),
-    'gained.blessing.food': Math.max(0, c.food - before.food),
+    [statKey(StatGroup.SPENT_COMFORT, ResourceKey.GOLD)]: Math.max(0, before.gold - c.gold),
+    [statKey(StatGroup.SPENT_COMFORT, ResourceKey.FOOD)]: Math.max(0, before.food - c.food),
+    [statKey(StatGroup.GAINED_BLESSING, ResourceKey.FOOD)]: Math.max(0, c.food - before.food),
   });
   pushResources(ctx, b);
   await saveCity(ctx, c);

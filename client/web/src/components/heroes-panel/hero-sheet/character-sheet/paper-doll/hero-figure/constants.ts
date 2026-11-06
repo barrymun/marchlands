@@ -1,5 +1,6 @@
 import spotsJson from '@/assets/spots.json';
 import type { Spot } from '@/components/iso-anim/types';
+import { PALETTE } from '@/lib/palette';
 
 /** The figure's layers by file name (`upper-f-3.png`, lib/game-art.ts); Vite gives each file a hashed name. */
 export const FIGURE_ART: Record<string, string> = Object.fromEntries(
@@ -24,7 +25,7 @@ export const SWAY_MS = 2800;
 export const SWAY_PX = 1.4;
 /** One pulse of the stones' glow, and its colour (the gear's level 10 light, softened). */
 export const GLOW_MS = 2000;
-export const GLOW_RGB: readonly [number, number, number] = [255, 186, 198];
+export const GLOW_RGB: readonly [number, number, number] = PALETTE.STONE_GLOW;
 
 /** How a layer moves: the cape stirs, the body breathes, the legs stand still. */
 export const FigureMotion = { SWAY: 'sway', BREATH: 'breath', STILL: 'still' } as const;

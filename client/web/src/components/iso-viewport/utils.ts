@@ -1,5 +1,5 @@
-import { OutlineHalf, PINCH_WHEEL_RATE, SPRITE, TILE_H, TILE_W, WHEEL_LINE, WHEEL_RATE, ZOOMS } from '@/components/iso-viewport/constants';
-import type { Camera, Drawable, Outline, Overlay, PanDirection, Piece, PixelArt, SceneBox, View, ViewPoint } from '@/components/iso-viewport/types';
+import { OutlineHalf, type PanDirection, PINCH_WHEEL_RATE, SPRITE, TILE_H, TILE_W, WHEEL_LINE, WHEEL_RATE, ZOOMS } from '@/components/iso-viewport/constants';
+import type { Camera, Drawable, Outline, Overlay, Piece, PixelArt, SceneBox, View, ViewPoint } from '@/components/iso-viewport/types';
 
 /**
  * Where tile (col, row)'s middle falls, in device pixels from the view's top left. The camera's offset is rounded once,

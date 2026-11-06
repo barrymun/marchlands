@@ -3,10 +3,11 @@
 // plume in the level's colour from 4, wings from 6, horns from 7, gilded at 9, and at 10 a crimson helm with silver
 // horns and a glowing slit.
 
-import { SpotKind } from '@marchlands/core';
+import { GearPieceId, SpotKind } from '@marchlands/core';
 
 import { GearTwinPart } from '../../../client/web/src/lib/game-art.ts';
-import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import type { PixelCanvas, Pt } from '../pixel.ts';
 import { BLUE, canvas, fill, GOLD, horn, look, plume, type Shades, shine, spike, STEEL, trimmed } from './common.ts';
 
 /** A helm's shell: straight sides, a rounded top from `top`, down to `bottom`. */
@@ -25,7 +26,7 @@ function shell(left: number, right: number, top: number, bottom: number): Pt[] {
  * alone, the twins the icon moves the plume with (docs/features/gear-animations.md).
  */
 export function head(level: number, part?: GearTwinPart): PixelCanvas {
-  const c = canvas('head', level);
+  const c = canvas(GearPieceId.HEAD, level);
   const L = look(level);
   if (level === 0) {
     // a round cap over a gold rim
@@ -49,7 +50,7 @@ export function head(level: number, part?: GearTwinPart): PixelCanvas {
   if (level >= 3) trimmed(c, pts, metal, L.trim, 1.8);
   else fill(c, pts, metal);
   // the visor or eye slit, and breaths
-  const slit: Colour = level >= 10 ? 'gear10Hi' : 'gear0Dark';
+  const slit: Colour = level >= 10 ? Colour.GEAR_10_HI : Colour.GEAR_0_DARK;
   const sy = top + 9;
   for (let x = 10; x < 23; x++) c.set(x, sy, slit);
   if (level >= 2) for (let y = sy; y < sy + 7; y++) c.set(16, y, slit);
@@ -61,12 +62,12 @@ export function head(level: number, part?: GearTwinPart): PixelCanvas {
       [19, sy + 6],
       [21, sy + 7],
     ] as const)
-      c.set(x, y, 'steelDark');
+      c.set(x, y, Colour.STEEL_DARK);
   if (level >= 3) for (let y = top + 1; y < sy; y++) c.set(16, y, L.trim[1]);
   if (level >= 10) shine(c, 13, sy);
   // a plume in the level's colour from 4, horns from 8, filled so the outline goes round them
   if (part === GearTwinPart.PLUME) {
-    const alone = canvas('head', level);
+    const alone = canvas(GearPieceId.HEAD, level);
     plume(alone, [17, top], [24, 1], -2, 2.4, L.accent);
     alone.outline();
     return alone;

@@ -19,6 +19,7 @@ import {
   type PushClient,
   PushCmd,
 } from '@marchlands/api-client';
+import { CandlePeriod } from '@marchlands/core';
 
 import { builtAt } from '@/lib/build-events';
 import { PUSH_HANDLERS, subscribePushHandlers } from '@/lib/push/handlers';
@@ -67,7 +68,7 @@ describe('city patches', () => {
 describe('MarketUpdate', () => {
   it("marks the moved resources' books and histories stale, and the summary, but not other resources or the player's orders", () => {
     const book = (resType: number) => getMarketByResTypeQueryKey({ path: { resType } });
-    const history = (resType: number) => getMarketHistoryQueryKey({ path: { resType }, query: { period: 'minute', limit: 1440 } });
+    const history = (resType: number) => getMarketHistoryQueryKey({ path: { resType }, query: { period: CandlePeriod.MINUTE, limit: 1440 } });
     for (const key of [book(0), book(1), history(0), history(1), getMarketSummaryQueryKey(), getMarketOrdersMineQueryKey()]) seed(key, {});
     handle(PushCmd.MARKET_UPDATE, { resTypes: [0] }, qc);
     expect([stale(book(0)), stale(history(0)), stale(getMarketSummaryQueryKey())]).toEqual([true, true, true]);

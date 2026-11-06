@@ -19,6 +19,7 @@ import { FARM_OUTLINE } from '@/components/map-panel/world-map/constants';
 import type { WorldMapData } from '@/components/map-panel/world-map/hooks';
 import { useStateRulers } from '@/hooks/use-state-rulers';
 import { FACTION_STYLE } from '@/lib/factions';
+import { ArmySide } from '@/lib/game-art';
 
 /**
  * The world map, isometric like the original: continuous grass with every valley, castle and barbarian camp standing
@@ -89,9 +90,9 @@ export function WorldMap({
   const rulers = useStateRulers();
   const armies = useQuery({ ...getArmiesOptions(), enabled: !!anim });
   const marching = [
-    ...(armies.data?.self ?? []).map((army) => ({ army, side: 'own' as const })),
-    ...(armies.data?.friend ?? []).map((army) => ({ army, side: 'ally' as const })),
-    ...(armies.data?.enemy ?? []).map((army) => ({ army, side: 'enemy' as const })),
+    ...(armies.data?.self ?? []).map((army) => ({ army, side: ArmySide.OWN })),
+    ...(armies.data?.friend ?? []).map((army) => ({ army, side: ArmySide.ALLY })),
+    ...(armies.data?.enemy ?? []).map((army) => ({ army, side: ArmySide.ENEMY })),
   ];
   const near = vp.camera ?? { x: home.x, y: home.y };
   const animate = anim

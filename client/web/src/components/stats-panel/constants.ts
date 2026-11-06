@@ -1,4 +1,9 @@
+import { FORT_ID_BY_KEY, TROOP_ID_BY_KEY } from '@marchlands/core';
+import type { UnitKey } from '@/components/stats-panel/types';
 import { param, type SearchSchema } from '@/lib/search-state';
+
+/** Every troop's and fortification's id, by its key. */
+export const UNIT_IDS: Record<UnitKey, number> = { ...TROOP_ID_BY_KEY, ...FORT_ID_BY_KEY };
 
 /** The periods the statistics are counted over. */
 export const StatsPeriod = { ALL_TIME: 'allTime', LAST_7_DAYS: 'last7Days' } as const;

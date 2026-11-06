@@ -2,6 +2,7 @@
 // after it is bigger and stronger: a stone tower with a brazier, then a taller crenellated tower and a guardhouse, then
 // a fortified beacon with a great fire, a banner and a walled base.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, Roofing } from '../iso.ts';
 
 const SIZE = 64;
@@ -16,9 +17,9 @@ function band1(): IsoCanvas {
     [8, 12],
     [12, 12],
   ])
-    c.line(c.p(x, y, 0), c.p(x, y, 11), 'wood');
-  c.line(c.p(8, 12, 3), c.p(12, 8, 8), 'logDark');
-  c.box(7.5, 7.5, 11, 5, 5, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
+    c.line(c.p(x, y, 0), c.p(x, y, 11), Colour.WOOD);
+  c.line(c.p(8, 12, 3), c.p(12, 8, 8), Colour.LOG_DARK);
+  c.box(7.5, 7.5, 11, 5, 5, 1, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R });
   c.fire(c.p(10, 10, 12), 5);
   c.logs(13, 14, 4, 2);
   c.anchor();
@@ -31,9 +32,9 @@ function band2(): IsoCanvas {
   c.grass(0, 0, 24, 24);
   c.stone(9, 8, 0, 5, 5, 13);
   c.windows([11], 13, 3, 2);
-  c.windows([11], 13, 0, 2, 'logDark');
-  c.box(8.5, 7.5, 13, 6, 6, 1, { top: 'stoneTop', left: 'stoneL', right: 'stoneR' });
-  c.box(10.5, 9.5, 14, 2, 2, 1, { top: 'outline', left: 'metal', right: 'stoneR' });
+  c.windows([11], 13, 0, 2, Colour.LOG_DARK);
+  c.box(8.5, 7.5, 13, 6, 6, 1, { top: Colour.STONE_TOP, left: Colour.STONE_L, right: Colour.STONE_R });
+  c.box(10.5, 9.5, 14, 2, 2, 1, { top: Colour.OUTLINE, left: Colour.METAL, right: Colour.STONE_R });
   c.fire(c.p(11.5, 10.5, 15), 7);
   c.logs(15, 16, 5, 2);
   c.anchor();
@@ -47,14 +48,14 @@ function band3(): IsoCanvas {
   c.stone(10, 7, 0, 6, 6, 17);
   c.windows([12], 13, 4, 2);
   c.windows([12], 13, 9, 2);
-  c.windows([12, 13], 13, 0, 3, 'logDark');
-  c.box(9.5, 6.5, 17, 7, 7, 1, { top: 'stoneTop', left: 'stoneL', right: 'stoneR' });
+  c.windows([12, 13], 13, 0, 3, Colour.LOG_DARK);
+  c.box(9.5, 6.5, 17, 7, 7, 1, { top: Colour.STONE_TOP, left: Colour.STONE_L, right: Colour.STONE_R });
   c.crenels(9.5, 6.5, 17, 7, 7);
-  c.box(12, 9, 18, 2, 2, 1, { top: 'outline', left: 'metal', right: 'stoneR' });
+  c.box(12, 9, 18, 2, 2, 1, { top: Colour.OUTLINE, left: Colour.METAL, right: Colour.STONE_R });
   c.fire(c.p(13, 10, 19), 8);
   // the guardhouse
   c.wall(17, 13, 0, 6, 5, 4);
-  c.windows([19, 20], 18, 0, 3, 'logDark');
+  c.windows([19, 20], 18, 0, 3, Colour.LOG_DARK);
   c.hipRoof(17, 13, 6, 5, 4, 2, Axis.X, Roofing.SLATE);
   c.logs(4, 17, 6, 2);
   c.anchor();
@@ -72,10 +73,10 @@ function band4(): IsoCanvas {
   c.windows([13, 16], 17, 4, 2);
   c.windows([13, 16], 17, 10, 2);
   c.windows([13, 16], 17, 15, 2);
-  c.windows([14, 15], 17, 0, 3, 'logDark');
-  c.box(10.5, 8.5, 21, 9, 9, 1, { top: 'stoneTop', left: 'stoneL', right: 'stoneR' });
+  c.windows([14, 15], 17, 0, 3, Colour.LOG_DARK);
+  c.box(10.5, 8.5, 21, 9, 9, 1, { top: Colour.STONE_TOP, left: Colour.STONE_L, right: Colour.STONE_R });
   c.crenels(10.5, 8.5, 21, 9, 9);
-  c.box(13.5, 11.5, 22, 3, 3, 1, { top: 'outline', left: 'metal', right: 'stoneR' });
+  c.box(13.5, 11.5, 22, 3, 3, 1, { top: Colour.OUTLINE, left: Colour.METAL, right: Colour.STONE_R });
   c.fire(c.p(15, 13, 23), 11);
   c.banner(c.p(11, 17, 22), 6);
   c.wall(20, 19, 0, 5, 5, 4);

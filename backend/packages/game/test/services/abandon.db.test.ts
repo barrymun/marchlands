@@ -10,11 +10,14 @@ import {
   BattleTarget,
   BuildingType,
   DAY,
+  dur,
   FlowActionType,
   HeroStatus,
+  HOUR,
   MarketSide,
   Mission,
   msg,
+  ref,
   TechType,
   TileType,
   TimedEventType,
@@ -26,7 +29,21 @@ import { armiesNowAimAtCity } from '#/engine/armies.ts';
 import { ship } from '#/engine/market.ts';
 import { abandon, armies, flows, heroes, interior, market, plans, research } from '#/index.ts';
 import { citiesOf, getCity, getHero, getPlayer, getTile, saveCity, savePlayer } from '#/repo.ts';
-import { allies, arrive, battleOf, cityTile, lastPush, occupyValley, reportsOf, reportTitles, send, tileNear, warCity, warrior } from '#test/support/armies.ts';
+import {
+  allies,
+  arrive,
+  battleOf,
+  cityTile,
+  lastPush,
+  lastReport,
+  occupyValley,
+  reportsOf,
+  reportTitles,
+  send,
+  tileNear,
+  warCity,
+  warrior,
+} from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { addCity, addHero, createTestPlayer, setBuildings, setResources, type TestPlayer } from '#test/support/factories.ts';
 import { armyPreset, flowOf, mayor, newFlow, runFlowIn, withHero } from '#test/support/flows.ts';
@@ -449,4 +466,495 @@ describe(completeAbandon.name, () => {
       expect(done.lastRun?.cities.map((c) => c.cityId)).toEqual([other]);
       expect(done.lastRun?.skippedCities).toMatchObject([{ cityId: p.cityId, reason: msg('flow.skipAbandoning') }]);
     }));
+});
+
+/** A player with two more cities than their first, whose first is being abandoned with troops, injured troops and goods in it. */
+async function movingOut(g: TestGame) {
+  const { p, other, heroId } = await withSecondCity(g);
+  const third = await addCity(g, p, 'Southmere');
+  await setResources(g, p, { gold: 1001, food: 2001, wood: 3000, stone: 4000, iron: 5000 });
+  for (const id of [other, third]) await setResources(g, p, { gold: 100, food: 100, wood: 100, stone: 100, iron: 100 }, id);
+  await saveCity(g, { ...(await getCity(g, p.cityId)), troops: { archer: 5001, militia: 4 }, injuredTroops: { archer: 3 } });
+  const { abandonAt } = await abandon.abandonCity(g, p.id, p.cityId);
+  return { p, other, third, heroId, abandonAt };
+}
+
+describe(abandon.moveOutCity.name, () => {
+  it('moves troops, injured troops and resources at once, shared evenly, the first chosen getting what is left over', () =>
+    game(async (g) => {
+      const { p, other, third } = await movingOut(g);
+      await abandon.moveOutCity(g, p.id, p.cityId, [third, other]);
+      expect(await getCity(g, third)).toMatchObject({
+        troops: { archer: 2501, militia: 2 },
+        injuredTroops: { archer: 2 },
+        gold: 601,
+        food: 1101,
+        wood: 1600,
+        stone: 2100,
+        iron: 2600,
+      });
+      expect(await getCity(g, other)).toMatchObject({
+        troops: { archer: 2500, militia: 2 },
+        injuredTroops: { archer: 1 },
+        gold: 600,
+        food: 1100,
+        wood: 1600,
+        stone: 2100,
+        iron: 2600,
+      });
+      expect(await getCity(g, p.cityId)).toMatchObject({ troops: {}, injuredTroops: {}, gold: 0, food: 0, wood: 0, stone: 0, iron: 0 });
+    }));
+
+  it('moves it all to one city, adding to what is there', () =>
+    game(async (g) => {
+      const { p, other } = await movingOut(g);
+      await saveCity(g, { ...(await getCity(g, other)), troops: { archer: 10 } });
+      await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+      expect(await getCity(g, other)).toMatchObject({ troops: { archer: 5011, militia: 4 }, injuredTroops: { archer: 3 }, gold: 1101 });
+    }));
+
+  it('leaves heroes, armies out and the hour as they were', () =>
+    game(async (g) => {
+      const { p, other, heroId, abandonAt } = await movingOut(g);
+      await saveCity(g, { ...(await getCity(g, p.cityId)), troops: { archer: 100, lightCavalry: 100 } });
+      const out = await send(g, p, { targetTileId: await cityTile(g, other), mission: Mission.REINFORCE, troops: { lightCavalry: 10 } });
+      await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+      expect(await getHero(g, heroId)).toMatchObject({ cityId: p.cityId });
+      expect(await armyRow(g, out.armyId)).toMatchObject({ cityId: p.cityId, direction: ArmyDirection.FORWARD, troops: { lightCavalry: 10 } });
+      expect(await getCity(g, p.cityId)).toMatchObject({ abandonAt });
+    }));
+
+  it('tells the client about every city, and reports where it went', () =>
+    game(async (g) => {
+      const { p, other } = await movingOut(g);
+      await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+      expect(lastPush(g, PushCmd.TROOP_UPDATE, p.id)?.data).toMatchObject({ castleId: other, troop: { archer: 5001 } });
+      expect(lastPush(g, PushCmd.INJURED_TROOP_UPDATE, p.id)?.data).toMatchObject({ castleId: other, troop: { archer: 3 } });
+      expect(
+        g
+          .pushes()
+          .filter((m) => m.cmd === PushCmd.TROOP_UPDATE)
+          .map((m) => (m.data as { castleId: number }).castleId),
+      ).toContain(p.cityId);
+      const report = await lastReport(g, p.id, 'report.title.cityMovedOut');
+      expect(report.body).toMatchObject({ text: msg('report.cityMovedOut', { name: (await getCity(g, p.cityId)).name, cities: ['Eastwold'] }) });
+    }));
+
+  it('can go again during the hour, for what was produced meanwhile', () =>
+    game(async (g) => {
+      const { p, other } = await movingOut(g);
+      await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+      await setResources(g, p, { gold: 50, food: 0, wood: 0, stone: 0, iron: 0 });
+      await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+      expect((await getCity(g, other)).gold).toBe(1151);
+    }));
+
+  it('is refused for a city not being abandoned', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [other]), msg('city.moveOutNotAbandoning'));
+    }));
+
+  it('is refused for another player’s city, and to another player’s', () =>
+    game(async (g) => {
+      const { p, other } = await movingOut(g);
+      const { p: rival } = await warrior(g);
+      await expectRefused(abandon.moveOutCity(g, rival.id, p.cityId, [rival.cityId]), msg('common.invalidCastle'));
+      await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [other, rival.cityId]), msg('common.invalidCastle'));
+    }));
+
+  it('is refused to itself, to a city twice and to a city being abandoned, nothing having moved', () =>
+    game(async (g) => {
+      const { p, other, third } = await movingOut(g);
+      await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [other, p.cityId]), msg('city.moveOutTarget'));
+      await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [other, other]), msg('city.moveOutTarget'));
+      await abandon.abandonCity(g, p.id, third);
+      await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [other, third]), msg('city.moveOutTarget'));
+      expect((await getCity(g, p.cityId)).troops).toMatchObject({ archer: 5001 });
+    }));
+
+  it('is refused with nothing to move, a fraction of a resource not counting', () =>
+    game(async (g) => {
+      const { p, other } = await movingOut(g);
+      await saveCity(g, { ...(await getCity(g, p.cityId)), troops: {}, injuredTroops: {}, gold: 0.5, food: 0.5, wood: 0, stone: 0, iron: 0 });
+      await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [other]), msg('city.moveOutNothing'));
+    }));
+
+  it('moves a city with only injured troops left in it', () =>
+    game(async (g) => {
+      const { p, other } = await movingOut(g);
+      await saveCity(g, { ...(await getCity(g, p.cityId)), troops: {}, gold: 0, food: 0, wood: 0, stone: 0, iron: 0 });
+      await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+      expect((await getCity(g, other)).injuredTroops).toMatchObject({ archer: 3 });
+    }));
+
+  describe('heroes', () => {
+    /** The first city being abandoned with its heroes, its second city's Feasting Hall having this many slots and no hero. */
+    async function withHeroes(g: TestGame, slots = 5) {
+      const made = await movingOut(g);
+      await warCity(g, made.p, { cityId: made.other, feastingHall: slots, troops: {} });
+      const second = await addHero(g, made.p);
+      return { ...made, second };
+    }
+
+    it('moves a chosen hero at once, alone if no city is chosen for the rest, as they were', () =>
+      game(async (g) => {
+        const { p, other, heroId } = await withHeroes(g);
+        const { level } = await getHero(g, heroId);
+        await abandon.moveOutCity(g, p.id, p.cityId, [], [{ heroId, cityId: other }]);
+        expect(await getHero(g, heroId)).toMatchObject({ cityId: other, status: HeroStatus.IDLE, level });
+        expect((await getCity(g, p.cityId)).troops).toMatchObject({ archer: 5001 });
+      }));
+
+    it('leaves the heroes not chosen', () =>
+      game(async (g) => {
+        const { p, other, heroId, second } = await withHeroes(g);
+        await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+        expect(await getHero(g, heroId)).toMatchObject({ cityId: p.cityId });
+        expect(await getHero(g, second)).toMatchObject({ cityId: p.cityId });
+      }));
+
+    it('moves heroes along with the troops and resources, each to its own city', () =>
+      game(async (g) => {
+        const { p, other, third, heroId, second } = await withHeroes(g);
+        await warCity(g, p, { cityId: third, feastingHall: 1, troops: {} });
+        await abandon.moveOutCity(
+          g,
+          p.id,
+          p.cityId,
+          [other],
+          [
+            { heroId, cityId: other },
+            { heroId: second, cityId: third },
+          ],
+        );
+        expect(await getHero(g, heroId)).toMatchObject({ cityId: other });
+        expect(await getHero(g, second)).toMatchObject({ cityId: third });
+        expect((await getCity(g, other)).troops).toMatchObject({ archer: 5001 });
+      }));
+
+    it('moves the mayor, the hero no longer being one and the city left with none', () =>
+      game(async (g) => {
+        const { p, other, heroId } = await withHeroes(g);
+        await heroes.appointMayor(g, p.id, heroId);
+        expect(await getHero(g, heroId)).toMatchObject({ status: HeroStatus.MAYOR });
+        await abandon.moveOutCity(g, p.id, p.cityId, [], [{ heroId, cityId: other }]);
+        expect(await getHero(g, heroId)).toMatchObject({ cityId: other, status: HeroStatus.IDLE });
+      }));
+
+    it('is refused for a hero out with an army, nothing having moved', () =>
+      game(async (g) => {
+        const { p, other, heroId } = await withHeroes(g);
+        await saveCity(g, { ...(await getCity(g, p.cityId)), troops: { lightCavalry: 100, archer: 5 } });
+        await send(g, p, { targetTileId: await cityTile(g, other), mission: Mission.REINFORCE, troops: { lightCavalry: 10 }, heroId });
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [other], [{ heroId, cityId: other }]), msg('hero.notIdle'));
+        expect((await getCity(g, p.cityId)).troops).toMatchObject({ archer: 5 });
+      }));
+
+    it('is refused with no free Feasting Hall slot, nothing having moved', () =>
+      game(async (g) => {
+        const { p, other, heroId } = await withHeroes(g, 1);
+        await addHero(g, p, 1, other);
+        const noSlot = msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) });
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [other], [{ heroId, cityId: other }]), noSlot);
+        expect((await getCity(g, p.cityId)).troops).toMatchObject({ archer: 5001 });
+        expect(await getHero(g, heroId)).toMatchObject({ cityId: p.cityId });
+      }));
+
+    it('counts the heroes chosen against the slots left', () =>
+      game(async (g) => {
+        const { p, other, heroId, second } = await withHeroes(g, 1);
+        const moves = [
+          { heroId, cityId: other },
+          { heroId: second, cityId: other },
+        ];
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [], moves), msg('hero.noVacancy', { building: ref.building(BuildingType.FEASTING_HALL) }));
+      }));
+
+    it('is refused for a hero of another city, for a hero twice, and to the city itself or one being abandoned', () =>
+      game(async (g) => {
+        const { p, other, third, heroId } = await withHeroes(g);
+        const elsewhere = await addHero(g, p, 1, third);
+        const twice = [
+          { heroId, cityId: other },
+          { heroId, cityId: other },
+        ];
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [], [{ heroId: elsewhere, cityId: other }]), msg('common.heroNotFound'));
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [], twice), msg('common.heroNotFound'));
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [], [{ heroId, cityId: p.cityId }]), msg('city.moveOutTarget'));
+        await abandon.abandonCity(g, p.id, third);
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [], [{ heroId, cityId: third }]), msg('city.moveOutTarget'));
+      }));
+
+    it('is refused under attack and during the wait, like the rest', () =>
+      game(async (g) => {
+        const { p, other, heroId } = await withHeroes(g);
+        const { p: rival, heroId: rivalHero } = await warrior(g);
+        const attack = await send(g, rival, {
+          targetTileId: await cityTile(g, p.cityId),
+          mission: Mission.ATTACK,
+          troops: { lightCavalry: 100 },
+          heroId: rivalHero,
+        });
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [], [{ heroId, cityId: other }]), msg('city.moveOutUnderAttack'));
+        await armies.recallArmy(g, rival.id, attack.armyId);
+        await abandon.moveOutCity(g, p.id, p.cityId, [], [{ heroId, cityId: other }]);
+        await abandon.cancelAbandon(g, p.id, p.cityId);
+        expect((await getPlayer(g, p.id)).misc.moveOutBlockedUntil).toBe(g.now + BALANCE.abandon.moveOutCooldownMs);
+      }));
+
+    it('is safe when the hour ends, and reports where each went', () =>
+      game(async (g) => {
+        const { p, other, heroId, second } = await withHeroes(g);
+        await abandon.moveOutCity(g, p.id, p.cityId, [], [{ heroId, cityId: other }]);
+        const hero = await getHero(g, heroId);
+        const report = await lastReport(g, p.id, 'report.title.cityMovedOut');
+        const name = (await getCity(g, p.cityId)).name;
+        expect(report.body).toMatchObject({
+          text: msg('report.heroesMovedOut', { name, heroes: [msg('report.heroMovedTo', { hero: hero.name, city: 'Eastwold' })] }),
+        });
+        g.advance(BALANCE.abandon.delayMs);
+        await completeAbandon(g, p.cityId);
+        expect(await getHero(g, heroId)).toMatchObject({ cityId: other });
+        await expect(getHero(g, second)).rejects.toThrow();
+      }));
+
+    it('is refused with neither a city nor a hero', () =>
+      game(async (g) => {
+        const { p } = await movingOut(g);
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, []), msg('city.moveOutTarget'));
+      }));
+  });
+
+  describe('a city’s own army coming home during the hour', () => {
+    /** The first city being abandoned, its hour put off so that a march can end within it, and its own army home again. */
+    async function cameHome(g: TestGame) {
+      const { p, other, third } = await movingOut(g);
+      await saveCity(g, { ...(await getCity(g, p.cityId)), troops: { lightCavalry: 100 }, abandonAt: g.now + 30 * DAY });
+      const army = await send(g, p, { targetTileId: await cityTile(g, other), mission: Mission.REINFORCE, troops: { lightCavalry: 10 } });
+      await armies.recallArmy(g, p.id, army.armyId);
+      await arrive(g, army.armyId);
+      expect((await getCity(g, p.cityId)).troops).toMatchObject({ lightCavalry: 100 });
+      return { p, third };
+    }
+
+    it('is lost with the city', () =>
+      game(async (g) => {
+        const { p, third } = await cameHome(g);
+        await saveCity(g, { ...(await getCity(g, p.cityId)), abandonAt: g.now });
+        await completeAbandon(g, p.cityId);
+        expect((await getCity(g, third)).troops).toEqual({});
+      }));
+
+    it('is safe if moved out again', () =>
+      game(async (g) => {
+        const { p, third } = await cameHome(g);
+        await abandon.moveOutCity(g, p.id, p.cityId, [third]);
+        expect((await getCity(g, third)).troops).toMatchObject({ lightCavalry: 100 });
+      }));
+  });
+
+  describe('with an army on its way', () => {
+    it('is refused for an enemy attack on its way, nothing having moved', () =>
+      game(async (g) => {
+        const { p, other } = await movingOut(g);
+        const { p: rival, heroId } = await warrior(g);
+        await send(g, rival, { targetTileId: await cityTile(g, p.cityId), mission: Mission.ATTACK, troops: { lightCavalry: 100 }, heroId });
+        await expectRefused(abandon.moveOutCity(g, p.id, p.cityId, [other]), msg('city.moveOutUnderAttack'));
+        expect((await getCity(g, p.cityId)).troops).toMatchObject({ archer: 5001 });
+      }));
+
+    it('goes ahead once that attack has turned back', () =>
+      game(async (g) => {
+        const { p, other } = await movingOut(g);
+        const { p: rival, heroId } = await warrior(g);
+        const attack = await send(g, rival, { targetTileId: await cityTile(g, p.cityId), mission: Mission.ATTACK, troops: { lightCavalry: 1 }, heroId });
+        await armies.recallArmy(g, rival.id, attack.armyId);
+        await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+        expect((await getCity(g, other)).gold).toBeGreaterThan(100);
+      }));
+
+    it('goes ahead for an attack still waiting to leave at a landing time, as the player can’t see it and a refusal would give it away', () =>
+      game(async (g) => {
+        const { p, other } = await movingOut(g);
+        const { p: rival, heroId } = await warrior(g);
+        await send(g, rival, {
+          targetTileId: await cityTile(g, p.cityId),
+          mission: Mission.ATTACK,
+          troops: { lightCavalry: 100 },
+          heroId,
+          arriveAt: g.now + DAY / 2,
+        });
+        await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+        expect((await getCity(g, other)).troops).toMatchObject({ archer: 5001 });
+      }));
+
+    it('goes ahead for scouts', () =>
+      game(async (g) => {
+        const { p, other } = await movingOut(g);
+        const { p: rival } = await warrior(g);
+        await send(g, rival, { targetTileId: await cityTile(g, p.cityId), mission: Mission.SCOUT, troops: { scouter: 10 } });
+        await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+        expect((await getCity(g, p.cityId)).troops).toEqual({});
+      }));
+  });
+
+  describe('keeping the city afterwards', () => {
+    it('brings nothing back, and stops every city moving out until the time is up', () =>
+      game(async (g) => {
+        const { p, other, third } = await movingOut(g);
+        await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+        await abandon.cancelAbandon(g, p.id, p.cityId);
+        expect((await getCity(g, p.cityId)).troops).toEqual({});
+        expect((await getCity(g, other)).troops).toMatchObject({ archer: 5001 });
+        const wait = BALANCE.abandon.moveOutCooldownMs;
+        expect((await getPlayer(g, p.id)).misc.moveOutBlockedUntil).toBe(g.now + wait);
+
+        await abandon.abandonCity(g, p.id, third);
+        await expectRefused(abandon.moveOutCity(g, p.id, third, [other]), msg('city.moveOutCooldown', { time: dur(wait) }));
+        g.advance(wait - 1000);
+        await expectRefused(abandon.moveOutCity(g, p.id, third, [other]), msg('city.moveOutCooldown', { time: dur(1000) }));
+        g.advance(1000);
+        await abandon.cancelAbandon(g, p.id, third);
+        await abandon.abandonCity(g, p.id, third);
+        await abandon.moveOutCity(g, p.id, third, [other]);
+      }));
+
+    it('costs nothing if nothing was moved', () =>
+      game(async (g) => {
+        const { p, other } = await movingOut(g);
+        await abandon.cancelAbandon(g, p.id, p.cityId);
+        expect((await getPlayer(g, p.id)).misc.moveOutBlockedUntil).toBeUndefined();
+        await abandon.abandonCity(g, p.id, p.cityId);
+        await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+      }));
+
+    it('counts only the hour moved in: starting again and keeping it adds no more time', () =>
+      game(async (g) => {
+        const { p, other } = await movingOut(g);
+        await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+        await abandon.cancelAbandon(g, p.id, p.cityId);
+        const { moveOutBlockedUntil } = (await getPlayer(g, p.id)).misc;
+        g.advance(HOUR);
+        await abandon.abandonCity(g, p.id, p.cityId);
+        await abandon.cancelAbandon(g, p.id, p.cityId);
+        expect((await getPlayer(g, p.id)).misc.moveOutBlockedUntil).toBe(moveOutBlockedUntil);
+      }));
+  });
+
+  describe('when the hour ends', () => {
+    it('leaves what moved out safe, at no cost, the city gone', () =>
+      game(async (g) => {
+        const { p, other } = await movingOut(g);
+        await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+        g.advance(BALANCE.abandon.delayMs);
+        await completeAbandon(g, p.cityId);
+        expect((await citiesOf(g, p.id)).map((c) => c.id)).not.toContain(p.cityId);
+        expect((await getCity(g, other)).troops).toMatchObject({ archer: 5001 });
+        expect((await getPlayer(g, p.id)).misc.moveOutBlockedUntil).toBeUndefined();
+      }));
+
+    it('costs nothing if it’s the game that calls it off, no regular city remaining', () =>
+      game(async (g) => {
+        const { p, other, third, abandonAt } = await movingOut(g);
+        await abandon.moveOutCity(g, p.id, p.cityId, [other]);
+        // nothing in the game leaves it so: as in the test of that guard above
+        for (const id of [other, third]) await saveCity(g, { ...(await getCity(g, id)), abandonAt });
+        g.advance(BALANCE.abandon.delayMs);
+        await completeAbandon(g, p.cityId);
+        expect(await getCity(g, p.cityId)).toMatchObject({ abandonAt: 0 });
+        expect((await getPlayer(g, p.id)).misc.moveOutBlockedUntil).toBeUndefined();
+      }));
+  });
+});
+
+describe('armies and a city being abandoned', () => {
+  const GOLD = { gold: 1000, food: 0, wood: 0, stone: 0, iron: 0 };
+
+  it('refuses a Reinforce and a Transport from the player’s other city, nothing leaving', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      await warCity(g, p, { cityId: other, troops: { lightCavalry: 100, carriage: 10 } });
+      await abandon.abandonCity(g, p.id, p.cityId);
+      const targetTileId = await cityTile(g, p.cityId);
+      const refused = msg('army.destinationAbandoning');
+      await expectRefused(armies.sendArmy(g, p.id, other, { targetTileId, mission: Mission.REINFORCE, troops: { lightCavalry: 10 } }), refused);
+      await expectRefused(armies.sendArmy(g, p.id, other, { targetTileId, mission: Mission.TRANSPORT, troops: { carriage: 10 }, resources: GOLD }), refused);
+      expect((await getCity(g, other)).troops).toMatchObject({ lightCavalry: 100, carriage: 10 });
+    }));
+
+  it('refuses a friend’s Reinforce and Transport too', () =>
+    game(async (g) => {
+      const { p } = await withSecondCity(g);
+      const { p: friend } = await warrior(g);
+      await allies(g, p, friend);
+      await saveCity(g, { ...(await getCity(g, p.cityId)), allowAlliance: true });
+      await abandon.abandonCity(g, p.id, p.cityId);
+      const targetTileId = await cityTile(g, p.cityId);
+      const refused = msg('army.destinationAbandoning');
+      await expectRefused(send(g, friend, { targetTileId, mission: Mission.REINFORCE, troops: { lightCavalry: 10 } }), refused);
+      await expectRefused(send(g, friend, { targetTileId, mission: Mission.TRANSPORT, troops: { carriage: 10 }, resources: GOLD }), refused);
+    }));
+
+  it('tells an enemy nothing: an attack and a scout may still set off', () =>
+    game(async (g) => {
+      const { p } = await withSecondCity(g);
+      const { p: rival, heroId } = await warrior(g);
+      await abandon.abandonCity(g, p.id, p.cityId);
+      const targetTileId = await cityTile(g, p.cityId);
+      await send(g, rival, { targetTileId, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId });
+      await send(g, rival, { targetTileId, mission: Mission.SCOUT, troops: { scouter: 10 } });
+    }));
+
+  it('lets the leaving city’s own armies go elsewhere', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      await abandon.abandonCity(g, p.id, p.cityId);
+      await send(g, p, { targetTileId: await cityTile(g, other), mission: Mission.REINFORCE, troops: { lightCavalry: 10 } });
+    }));
+
+  it('goes back to normal once the city is kept', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      await warCity(g, p, { cityId: other, troops: { lightCavalry: 100 } });
+      await abandon.abandonCity(g, p.id, p.cityId);
+      await abandon.cancelAbandon(g, p.id, p.cityId);
+      await armies.sendArmy(g, p.id, other, { targetTileId: await cityTile(g, p.cityId), mission: Mission.REINFORCE, troops: { lightCavalry: 10 } });
+    }));
+
+  describe('already on the way when the hour starts', () => {
+    /** Send this from the other city, then start the hour (put off, so that the march ends within it) and land the army. */
+    async function landsDuring(g: TestGame, troops: Record<string, number>, mission: Mission, resources?: typeof GOLD) {
+      const { p, other } = await withSecondCity(g);
+      await warCity(g, p, { cityId: other, troops: { lightCavalry: 100, carriage: 10 } });
+      const army = await armies.sendArmy(g, p.id, other, { targetTileId: await cityTile(g, p.cityId), mission, troops, resources });
+      await abandon.abandonCity(g, p.id, p.cityId);
+      await saveCity(g, { ...(await getCity(g, p.cityId)), abandonAt: g.now + 30 * DAY });
+      const before = await getCity(g, p.cityId);
+      await arrive(g, army.armyId);
+      return { p, other, army, before };
+    }
+
+    it('turns a Reinforce back on arrival, telling the player, its troops safe', () =>
+      game(async (g) => {
+        const { p, army, before } = await landsDuring(g, { lightCavalry: 10 }, Mission.REINFORCE);
+        expect(await armyRow(g, army.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, troops: { lightCavalry: 10 } });
+        expect((await getCity(g, p.cityId)).troops).toEqual(before.troops);
+        expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toMatchObject({ text: msg('army.destinationAbandoning') });
+      }));
+
+    it('turns a Transport back on arrival, its goods safe', () =>
+      game(async (g) => {
+        const { p, army, before } = await landsDuring(g, { carriage: 10 }, Mission.TRANSPORT, GOLD);
+        expect(await armyRow(g, army.armyId)).toMatchObject({ direction: ArmyDirection.BACKWARD, resources: GOLD });
+        expect((await getCity(g, p.cityId)).gold).toBe(before.gold);
+      }));
+
+    it('gets the army home with everything it left with', () =>
+      game(async (g) => {
+        const { other, army } = await landsDuring(g, { lightCavalry: 10 }, Mission.REINFORCE);
+        await arrive(g, army.armyId);
+        expect((await getCity(g, other)).troops).toMatchObject({ lightCavalry: 100 });
+      }));
+  });
 });

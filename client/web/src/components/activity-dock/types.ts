@@ -1,8 +1,8 @@
-export type Group = 'Building' | 'Research' | 'Training';
+import type { DockGroup } from '@/components/activity-dock/constants';
 
 export interface Job {
   key: string;
-  group: Group;
+  group: DockGroup;
   label: string;
   /** extra note, e.g. batches waiting behind this one */
   note?: string;

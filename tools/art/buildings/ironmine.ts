@@ -2,22 +2,23 @@
 // the entrance, a cart on rails and an ore pile; each band after it is bigger and stronger: a wooden headframe over a
 // shaft and a hut, then a smoking stone furnace, then a second entrance, a forge and a walled yard.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, Rock, Roofing } from '../iso.ts';
 
 const SIZE = 64;
-const ORE = { top: 'oreHi', left: 'oreL', right: 'oreR' } as const;
+const ORE = { top: Colour.ORE_HI, left: Colour.ORE_L, right: Colour.ORE_R } as const;
 
 /** A heap of ore: a small rust-topped mound. */
 function orePile(c: IsoCanvas, x: number, y: number) {
-  c.box(x, y, 0, 3, 3, 1, { top: 'rust', left: 'oreL', right: 'oreR' });
-  c.box(x + 0.5, y + 0.5, 1, 2, 2, 1, { top: 'rust', left: 'oreL', right: 'oreR' });
+  c.box(x, y, 0, 3, 3, 1, { top: Colour.RUST, left: Colour.ORE_L, right: Colour.ORE_R });
+  c.box(x + 0.5, y + 0.5, 1, 2, 2, 1, { top: Colour.RUST, left: Colour.ORE_L, right: Colour.ORE_R });
 }
 
 /** A headframe over a shaft: two timber legs, a cross beam and the winding wheel. */
 function headframe(c: IsoCanvas, x: number, y: number, h: number) {
-  c.line(c.p(x, y + 3, 0), c.p(x + 1.5, y + 1.5, h), 'wood');
-  c.line(c.p(x + 3, y, 0), c.p(x + 1.5, y + 1.5, h), 'wood');
-  c.line(c.p(x + 0.75, y + 2.25, h / 2), c.p(x + 2.25, y + 0.75, h / 2), 'logDark');
+  c.line(c.p(x, y + 3, 0), c.p(x + 1.5, y + 1.5, h), Colour.WOOD);
+  c.line(c.p(x + 3, y, 0), c.p(x + 1.5, y + 1.5, h), Colour.WOOD);
+  c.line(c.p(x + 0.75, y + 2.25, h / 2), c.p(x + 2.25, y + 0.75, h / 2), Colour.LOG_DARK);
   c.wheel(x + 1.5, y + 1.5, h, 2);
 }
 
@@ -66,7 +67,7 @@ function band3(): IsoCanvas {
   c.stone(19, 12, 0, 5, 5, 5);
   c.stone(20, 13, 5, 2, 2, 5);
   c.smoke(c.p(21, 14, 10));
-  c.windowsSe(24, [14, 15], 0, 2, 'rust');
+  c.windowsSe(24, [14, 15], 0, 2, Colour.RUST);
   c.cart(9, 16, 4);
   c.cart(4, 19, 3);
   orePile(c, 14, 19);
@@ -88,11 +89,11 @@ function band4(): IsoCanvas {
   c.stone(22, 9, 0, 6, 5, 6);
   c.stone(23, 10, 6, 2, 2, 6);
   c.smoke(c.p(24, 11, 12));
-  c.windowsSe(28, [11, 12], 0, 2, 'rust');
+  c.windowsSe(28, [11, 12], 0, 2, Colour.RUST);
   // the forge
   c.stone(21, 17, 0, 7, 6, 5);
-  c.windows([23, 26], 23, 1, 2, 'rust');
-  c.roof(21, 17, 7, 6, 5, 3, Axis.X, { roofing: Roofing.SHINGLE, gable: 'stoneR' });
+  c.windows([23, 26], 23, 1, 2, Colour.RUST);
+  c.roof(21, 17, 7, 6, 5, 3, Axis.X, { roofing: Roofing.SHINGLE, gable: Colour.STONE_R });
   c.cart(6, 17, 4);
   c.cart(12, 17, 4);
   orePile(c, 3, 21);

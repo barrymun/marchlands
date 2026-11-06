@@ -7,6 +7,7 @@ import {
   BuildingUpgradeInfo,
   CityAbandonResult,
   CityBean,
+  CityMoveOutBody,
   CityMoveResult,
   CityPositionParams,
   CitySpeedupCost,
@@ -115,6 +116,19 @@ export default async function cityRoutes(app: ZApp) {
       },
     ),
     (req) => game(req, (ctx, pid) => abandon.abandonCity(ctx, pid, req.params.cityId)),
+  );
+  app.post(
+    '/cities/:cityId/abandon/move-out',
+    s(
+      tags.city,
+      '(marchlands) Move a city being abandoned out at once: its troops, injured troops and resources, shared evenly between other cities, and any heroes chosen',
+      Empty,
+      {
+        params: zCityParams,
+        body: CityMoveOutBody,
+      },
+    ),
+    (req) => game(req, (ctx, pid) => abandon.moveOutCity(ctx, pid, req.params.cityId, req.body.targetCityIds, req.body.heroes)),
   );
   app.delete('/cities/:cityId/abandon', s(tags.city, '(marchlands) Keep a city being abandoned', Empty, { params: zCityParams }), (req) =>
     game(req, (ctx, pid) => abandon.cancelAbandon(ctx, pid, req.params.cityId)),

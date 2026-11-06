@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { TroopKey } from '@marchlands/core';
 import { headline } from '@/components/stats-panel/headline/utils';
 
 describe(headline.name, () => {
@@ -26,7 +27,7 @@ describe(headline.name, () => {
   });
 
   it('adds up the enemies defeated and names the type defeated most', () => {
-    expect(headline(c)).toMatchObject({ enemies: 4_045_076_363 + 74_878_696 + 4_072_607, topEnemy: 'militia' });
+    expect(headline(c)).toMatchObject({ enemies: 4_045_076_363 + 74_878_696 + 4_072_607, topEnemy: TroopKey.MILITIA });
   });
 
   it('counts the troops trained and those that fell for good, fortifications included', () => {

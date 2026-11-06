@@ -3,7 +3,10 @@
 // colour, a raised collar from 6, spiked shoulders from 7, horns on the collar from 8, gilded at 9 and crimson with a
 // silver collar at 10.
 
-import { CLEAR, type PixelCanvas, type Pt } from '../pixel.ts';
+import { GearPieceId } from '@marchlands/core';
+
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import { type PixelCanvas, type Pt } from '../pixel.ts';
 import { BLUE, canvas, fill, GOLD, heart, horn, lit, look, setStone, type Shades, spike, STEEL, trimmed } from './common.ts';
 
 const BODY: Pt[] = [
@@ -16,7 +19,7 @@ const BODY: Pt[] = [
 ];
 
 export function chest(level: number): PixelCanvas {
-  const c = canvas('chest', level);
+  const c = canvas(GearPieceId.CHEST, level);
   const L = look(level);
   const metal: Shades = level === 0 ? BLUE : level <= 2 ? STEEL : L.metal;
   const trim: Shades | null = level === 0 ? GOLD : level >= 3 ? L.trim : null;
@@ -25,17 +28,17 @@ export function chest(level: number): PixelCanvas {
   // the neck and the arms cut out
   for (let y = 0; y < 32; y++)
     for (let x = 0; x < 32; x++) {
-      if (((x + 0.5 - 16) / 5.5) ** 2 + ((y + 0.5 - 3) / 4) ** 2 <= 1) c.set(x, y, CLEAR);
-      if (((x + 0.5 - 3) / 3.5) ** 2 + ((y + 0.5 - 7) / 5) ** 2 <= 1 || ((x + 0.5 - 29) / 3.5) ** 2 + ((y + 0.5 - 7) / 5) ** 2 <= 1) c.set(x, y, CLEAR);
+      if (((x + 0.5 - 16) / 5.5) ** 2 + ((y + 0.5 - 3) / 4) ** 2 <= 1) c.set(x, y, Colour.CLEAR);
+      if (((x + 0.5 - 3) / 3.5) ** 2 + ((y + 0.5 - 7) / 5) ** 2 <= 1 || ((x + 0.5 - 29) / 3.5) ** 2 + ((y + 0.5 - 7) / 5) ** 2 <= 1) c.set(x, y, Colour.CLEAR);
     }
   // a ridge down the middle, or padding
-  if (level === 0) for (let y = 9; y < 27; y += 3) for (let x = 9; x < 24; x++) c.set(x, y, 'blueDark');
+  if (level === 0) for (let y = 9; y < 27; y += 3) for (let x = 9; x < 24; x++) c.set(x, y, Colour.BLUE_DARK);
   else for (let y = 8; y < 27; y++) c.set(16, y, metal[2]);
-  if (level === 1) heart(c, 16, 15, 4, (x, y) => (x + y < 30 ? 'bannerHi' : 'bannerDark'));
+  if (level === 1) heart(c, 16, 15, 4, (x, y) => (x + y < 30 ? Colour.BANNER_HI : Colour.BANNER_DARK));
   if (level === 2)
     for (const y of [19, 23]) {
-      for (let x = 8; x < 25; x++) c.set(x, y, 'steelDark');
-      for (const x of [9, 23]) c.set(x, y - 1, 'steelHi');
+      for (let x = 8; x < 25; x++) c.set(x, y, Colour.STEEL_DARK);
+      for (const x of [9, 23]) c.set(x, y - 1, Colour.STEEL_HI);
     }
   if (level >= 3) setStone(c, 16, 14, 1.4 + level * 0.15, L.trim, L.accent);
   if (level >= 6) {

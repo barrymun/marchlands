@@ -10,6 +10,7 @@
 
 import { Axis, IsoCanvas, Roofing } from './iso.ts';
 import { CityGround, type CityWallPiece, type WallBand } from '../../client/web/src/lib/game-art.ts';
+import { Colour } from '../../client/web/src/lib/palette.ts';
 
 const SIZE = 64;
 const PLOT = 32;
@@ -19,15 +20,15 @@ function grass(seed = 'city-grass'): IsoCanvas {
   const c = new IsoCanvas(SIZE, PLOT, seed);
   c.grass(0, 0, PLOT, PLOT);
   for (let i = 0; i < 6; i++) c.tuft(c.between(4, 28), c.between(4, 28), 2);
-  for (let i = 0; i < 2; i++) c.flower(c.between(6, 26), c.between(6, 26), i ? 'flowerB' : 'flower');
+  for (let i = 0; i < 2; i++) c.flower(c.between(6, 26), c.between(6, 26), i ? Colour.FLOWER_B : Colour.FLOWER);
   return c;
 }
 
 /** An empty plot, laid over the grass: a patch of pale, trodden grass with a dark edge, staked out at its corners. */
 function plot(): IsoCanvas {
   const c = new IsoCanvas(SIZE, PLOT, 'city-plot');
-  c.ground(5, 5, PLOT - 10, PLOT - 10, 'grassDark');
-  c.poly([c.p(6, 6), c.p(PLOT - 6, 6), c.p(PLOT - 6, PLOT - 6), c.p(6, PLOT - 6)], (x, y) => ((x * 3 + y * 7) % 11 === 0 ? 'dirt' : 'moss'));
+  c.ground(5, 5, PLOT - 10, PLOT - 10, Colour.GRASS_DARK);
+  c.poly([c.p(6, 6), c.p(PLOT - 6, 6), c.p(PLOT - 6, PLOT - 6), c.p(6, PLOT - 6)], (x, y) => ((x * 3 + y * 7) % 11 === 0 ? Colour.DIRT : Colour.MOSS));
   for (const [x, y] of [
     [5, 5],
     [PLOT - 5, 5],
@@ -35,8 +36,8 @@ function plot(): IsoCanvas {
     [PLOT - 5, PLOT - 5],
   ]) {
     const [sx, sy] = c.p(x, y);
-    c.line([sx, sy], [sx, sy - 3], 'wood');
-    c.set(sx, sy - 4, 'logEnd');
+    c.line([sx, sy], [sx, sy - 3], Colour.WOOD);
+    c.set(sx, sy - 4, Colour.LOG_END);
   }
   return c;
 }
@@ -44,11 +45,11 @@ function plot(): IsoCanvas {
 /** A locked field, laid over the grass: a patch of rough, muddy ground with a few stones. */
 function locked(): IsoCanvas {
   const c = new IsoCanvas(SIZE, PLOT, 'city-locked');
-  c.poly([c.p(3, 3), c.p(PLOT - 3, 3), c.p(PLOT - 3, PLOT - 3), c.p(3, PLOT - 3)], (x, y) => ((x * 5 + y * 11) % 7 === 0 ? 'mud' : 'grassDark'));
+  c.poly([c.p(3, 3), c.p(PLOT - 3, 3), c.p(PLOT - 3, PLOT - 3), c.p(3, PLOT - 3)], (x, y) => ((x * 5 + y * 11) % 7 === 0 ? Colour.MUD : Colour.GRASS_DARK));
   for (let i = 0; i < 3; i++) {
     const [sx, sy] = c.p(c.between(8, 24), c.between(8, 24));
-    c.set(sx, sy, 'stoneL');
-    c.set(sx + 1, sy, 'stoneR');
+    c.set(sx, sy, Colour.STONE_L);
+    c.set(sx + 1, sy, Colour.STONE_R);
   }
   return c;
 }
@@ -63,7 +64,7 @@ export const CITY_GROUND_DRAWINGS: Record<CityGround, () => IsoCanvas> = {
 /** Each band's wall: its height and thickness in world units. */
 const WALL = { 1: { h: 9, t: 3 }, 2: { h: 10, t: 4 }, 3: { h: 14, t: 4 }, 4: { h: 17, t: 5 } } as const;
 
-const STONE = { top: 'stoneTop', left: 'stoneL', right: 'stoneR' } as const;
+const STONE = { top: Colour.STONE_TOP, left: Colour.STONE_L, right: Colour.STONE_R } as const;
 
 /** Merlons along the top of a stretch from (x0, y0), `len` long along `along`, `t` thick, at height `z`. */
 function merlons(c: IsoCanvas, along: Axis, x0: number, y0: number, len: number, t: number, z: number) {
@@ -82,18 +83,18 @@ function wallStretch(along: Axis, band: WallBand): IsoCanvas {
   if (band === 1) {
     c.timber(x0, y0, 0, w, d, h);
     // the palisade's pointed log tops
-    for (let i = 0; i <= len; i += 2) c.set(...(along === Axis.X ? c.p(x0 + i, y0 + d, h + 1) : c.p(x0 + w, y0 + i, h + 1)), 'plankL');
+    for (let i = 0; i <= len; i += 2) c.set(...(along === Axis.X ? c.p(x0 + i, y0 + d, h + 1) : c.p(x0 + w, y0 + i, h + 1)), Colour.PLANK_L);
   } else {
     c.stone(x0, y0, 0, w, d, h);
     // courses of stone on the face towards the viewer
     for (let z = 3; z < h; z += 3)
-      if (along === Axis.X) c.line(c.p(x0, y0 + d, z), c.p(x0 + w, y0 + d, z), 'stoneR');
-      else c.line(c.p(x0 + w, y0, z), c.p(x0 + w, y0 + d, z), 'shingleL');
+      if (along === Axis.X) c.line(c.p(x0, y0 + d, z), c.p(x0 + w, y0 + d, z), Colour.STONE_R);
+      else c.line(c.p(x0 + w, y0, z), c.p(x0 + w, y0 + d, z), Colour.SHINGLE_L);
     if (band >= 3) merlons(c, along, x0, y0, len, t, h);
   }
   // a dark foot where the wall meets the ground
-  if (along === Axis.X) c.line(c.p(x0, y0 + d), c.p(x0 + w, y0 + d), 'outline');
-  else c.line(c.p(x0 + w, y0), c.p(x0 + w, y0 + d), 'outline');
+  if (along === Axis.X) c.line(c.p(x0, y0 + d), c.p(x0 + w, y0 + d), Colour.OUTLINE);
+  else c.line(c.p(x0 + w, y0), c.p(x0 + w, y0 + d), Colour.OUTLINE);
   return c;
 }
 
@@ -109,8 +110,8 @@ function tower(band: WallBand): IsoCanvas {
   } else {
     c.stone(o, o, 0, size, size, h);
     for (let z = 3; z < h; z += 3) {
-      c.line(c.p(o, o + size, z), c.p(o + size, o + size, z), 'stoneR');
-      c.line(c.p(o + size, o, z), c.p(o + size, o + size, z), 'shingleL');
+      c.line(c.p(o, o + size, z), c.p(o + size, o + size, z), Colour.STONE_R);
+      c.line(c.p(o + size, o, z), c.p(o + size, o + size, z), Colour.SHINGLE_L);
     }
     c.windows([o + size / 2], o + size, h - 6, 3);
     if (band >= 3) {
@@ -133,12 +134,12 @@ function gate(band: WallBand): IsoCanvas {
   else c.stone(o, o, 0, size, size, h);
   // the arch, on both faces either side of the front corner
   const [aw, ah] = [Math.round(size / 2.5), Math.round(h * 0.55)];
-  c.poly([c.p(o + size - aw, o + size, 0), c.p(o + size, o + size, 0), c.p(o + size, o + size, ah), c.p(o + size - aw, o + size, ah)], 'hoodDark');
-  c.poly([c.p(o + size, o + size - aw, 0), c.p(o + size, o + size, 0), c.p(o + size, o + size, ah), c.p(o + size, o + size - aw, ah)], 'outline');
+  c.poly([c.p(o + size - aw, o + size, 0), c.p(o + size, o + size, 0), c.p(o + size, o + size, ah), c.p(o + size - aw, o + size, ah)], Colour.HOOD_DARK);
+  c.poly([c.p(o + size, o + size - aw, 0), c.p(o + size, o + size, 0), c.p(o + size, o + size, ah), c.p(o + size, o + size - aw, ah)], Colour.OUTLINE);
   if (band === 1) {
     for (let i = 0; i <= size; i += 2) {
-      c.set(...c.p(o + i, o + size, h + 1), 'plankL');
-      c.set(...c.p(o + size, o + i, h + 1), 'plankR');
+      c.set(...c.p(o + i, o + size, h + 1), Colour.PLANK_L);
+      c.set(...c.p(o + size, o + i, h + 1), Colour.PLANK_R);
     }
   } else if (band === 2) c.hipRoof(o, o, size, size, h, 5, Axis.X, Roofing.SLATE);
   else {

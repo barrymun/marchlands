@@ -26,7 +26,8 @@
     "troopsDeserted": "兵が脱走",
     "seatRebelled": "歴史都市の反乱",
     "cityAbandoned": "都市を放棄した",
-    "abandonCancelled": "都市の放棄を中止した"
+    "abandonCancelled": "都市の放棄を中止した",
+    "cityMovedOut": "都市の移転"
   },
   "notFound": "報告書が見つかりません。",
   "oldFormat": "この報告書は古い形式で保存されているため表示できません。",
@@ -34,5 +35,8 @@
   "seatRebelled": "レベル{{level}}の歴史都市{{name}}が反乱を起こしました。駐留部隊、または維持費の金や食料が足りない間に忠誠度が0になりました。誰も保持していない歴史都市に戻りました。そこにいた英雄と軍はあなたの別の都市へ移りました。",
   "cityAbandoned": "{{name}}を放棄しました。そこにあったものはすべて失われ、その領地は解放されました。",
   "abandonCancelled": "{{name}}は放棄されませんでした。通常の都市を少なくとも1つ残す必要があります。",
-  "cityAbandonedPrestige": "{{name}}を放棄しました。そこにあったものはすべて失われ、その領地は解放され、占領で得た{{prestige}}の名声は取り消されました。"
+  "cityAbandonedPrestige": "{{name}}を放棄しました。そこにあったものはすべて失われ、その領地は解放され、占領で得た{{prestige}}の名声は取り消されました。",
+  "cityMovedOut": "{{name}}の部隊と資源を{{cities}}へ移しました。",
+  "heroesMovedOut": "{{name}}の英雄を移しました：{{heroes}}。",
+  "heroMovedTo": "{{hero}}を{{city}}へ"
 }

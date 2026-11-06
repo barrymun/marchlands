@@ -175,6 +175,7 @@ export function cityBean(b: CityBundle, now: number): CityBean {
     draftNextAt: c.draftNextAt,
     abandonAt: c.abandonAt,
     capturePrestige: c.capturePrestige,
+    movedOut: c.abandonAt > 0 && c.misc.movedOutFor === c.abandonAt,
     capturedAt: c.capturedAt,
     seatLoyalty: c.historicLevel ? seatLoyalty(c.loyalty, c.loyaltyAt, now).loyalty : c.loyalty,
     createdAt: c.createdAt,
@@ -211,6 +212,7 @@ export function playerInfo(
     beginner: p.beginner,
     status: p.status,
     changedFace: p.misc.changedFace ?? false,
+    moveOutBlockedUntil: p.misc.moveOutBlockedUntil ?? 0,
     createrTime: p.createdAt,
     lastLoginTime: p.lastLoginAt,
   };

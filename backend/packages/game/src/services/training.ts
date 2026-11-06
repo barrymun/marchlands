@@ -27,6 +27,9 @@ import {
   speedUpTrainBatch,
   type SplitLane,
   splitTraining,
+  StatCounter,
+  StatGroup,
+  statKey,
   type TrainBatch,
   trainBatchMs,
   trainCost,
@@ -132,7 +135,7 @@ export async function train(ctx: Ctx, playerId: number, cityId: number, troopId:
   const share = fort ? 1 : troopCostShare(b.player.buffs, ctx.now);
   const cost = trainCost(troopId, count, share);
   spendResources(b.city, cost);
-  ctx.stat(playerId, cityId, prefixed('spent.training', cost));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.SPENT_TRAINING, cost));
   b.city.population -= pop;
   const ms = trainBatchMs(troopId, count, mayorStats(b.heroes), b.player.research);
   const batch: TrainBatch = {
@@ -205,7 +208,7 @@ export async function trainSplit(ctx: Ctx, playerId: number, cityId: number, tro
   const share = troopCostShare(b.player.buffs, ctx.now);
   const cost = trainCost(troopId, count, share);
   spendResources(b.city, cost);
-  ctx.stat(playerId, cityId, prefixed('spent.training', cost));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.SPENT_TRAINING, cost));
   b.city.population -= pop;
 
   const mayor = mayorStats(b.heroes);
@@ -247,7 +250,7 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
   const share = idx === 0 ? BALANCE.cancelTrainInProgressRefund : BALANCE.cancelTrainQueuedRefund;
   const paid = trainCost(batch.troopId, batch.count, batch.paidShare ?? 1);
   gainResources(b.city, paid, share);
-  ctx.stat(playerId, cityId, prefixed('spent.training', paid, -share));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.SPENT_TRAINING, paid, -share));
   b.city.population += (troopConfig(batch.troopId)?.population ?? 1) * batch.count;
   const next = queue.filter((_, i) => i !== idx);
   if (idx === 0 && next[0]) next[0] = startBatch(next[0], ctx.now);
@@ -296,7 +299,7 @@ export async function disbandTroops(ctx: Ctx, playerId: number, cityId: number, 
   const stats = cityStats(b, ctx.now);
   b.city.population = Math.min(stats.maxPopulation, b.city.population + (troopConfig(troopId)?.population ?? 1) * count);
   payRefund(ctx, b, key, troopId, count);
-  ctx.stat(playerId, cityId, { [`disbanded.${key}`]: count });
+  ctx.stat(playerId, cityId, { [statKey(StatGroup.DISBANDED, key)]: count });
   ctx.push(playerId, PushCmd.TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.troops) });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
@@ -312,7 +315,7 @@ export async function destroyForts(ctx: Ctx, playerId: number, cityId: number, f
   if ((b.city.forts[key] ?? 0) < count) throw new GameError(msg('training.notEnoughUnits', { unit: ref.troop(FORT_ID_BY_KEY[key]) }), -99);
   b.city.forts = addForts(b.city.forts, { [key]: count }, -1);
   payRefund(ctx, b, key, fortId, count);
-  ctx.stat(playerId, cityId, { [`disbanded.${key}`]: count });
+  ctx.stat(playerId, cityId, { [statKey(StatGroup.DISBANDED, key)]: count });
   ctx.push(playerId, PushCmd.FORTIFICATIONS_UPDATE, { castleId: cityId, fortification: fortBean(b.city.forts) });
   pushResources(ctx, b);
   await saveCity(ctx, b.city);
@@ -325,7 +328,7 @@ function payRefund(ctx: Ctx, b: CityBundle, key: string, unitId: number, count: 
   if (creditUsed <= 0) return;
   gainResources(b.city, refund);
   addRefundCredit(b.player, key, -creditUsed);
-  ctx.stat(b.player.id, b.city.id, prefixed('spent.training', refund, -1));
+  ctx.stat(b.player.id, b.city.id, prefixed(StatGroup.SPENT_TRAINING, refund, -1));
 }
 
 /** army.cureInjuredTroop: heal injured troops for BALANCE.healCostShare of their training cost, or for honor. */
@@ -340,15 +343,15 @@ export async function cureInjured(ctx: Ctx, playerId: number, cityId: number, tr
     const honor = healHonorCost(troops);
     if (b.player.honor < honor) throw new GameError(msg('training.notEnoughHonor', { amount: honor }), -99);
     b.player.honor -= honor;
-    ctx.stat(playerId, cityId, { 'spent.healing.honor': honor });
+    ctx.stat(playerId, cityId, { [StatCounter.SPENT_HEALING_HONOR]: honor });
     await savePlayer(ctx, b.player);
     await pushPlayerInfo(ctx, b.player);
   } else {
     const cost = healCost(troops);
     spendResources(b.city, cost);
-    ctx.stat(playerId, cityId, prefixed('spent.healing', cost));
+    ctx.stat(playerId, cityId, prefixed(StatGroup.SPENT_HEALING, cost));
   }
-  ctx.stat(playerId, cityId, prefixed('healed', troops));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.HEALED, troops));
   b.city.injuredTroops = addTroops(b.city.injuredTroops, troops, -1);
   b.city.troops = addTroops(b.city.troops, troops);
   ctx.push(playerId, PushCmd.TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.troops) });
@@ -365,7 +368,7 @@ export async function disbandInjured(ctx: Ctx, playerId: number, cityId: number,
     if ((b.city.injuredTroops[key as keyof typeof b.city.injuredTroops] ?? 0) < n) throw new GameError(msg('training.notEnoughInjured'), -99);
   }
   b.city.injuredTroops = addTroops(b.city.injuredTroops, troops, -1);
-  ctx.stat(playerId, cityId, prefixed('disbanded', troops));
+  ctx.stat(playerId, cityId, prefixed(StatGroup.DISBANDED, troops));
   ctx.push(playerId, PushCmd.INJURED_TROOP_UPDATE, { castleId: cityId, troop: troopBean(b.city.injuredTroops) });
   await saveCity(ctx, b.city);
 }

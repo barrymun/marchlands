@@ -33,6 +33,10 @@ import {
   loyaltyAfterMedal,
   msg,
   ref,
+  ResourceKey,
+  StatCounter,
+  StatGroup,
+  statKey,
   tavernRefreshCost,
   TechType,
   TimedEventType,
@@ -192,7 +196,10 @@ export async function resetPoints(ctx: Ctx, playerId: number, heroId: number) {
   else {
     city ??= await openOwnCity(ctx, playerId, h.cityId);
     spendGold(city.city, itemGoldPrice(ItemId.HOLY_WATER) ?? 0);
-    ctx.stat(playerId, city.city.id, { 'spent.items.gold': itemGoldPrice(ItemId.HOLY_WATER) ?? 0, 'items.used.hero.reset.1': 1 });
+    ctx.stat(playerId, city.city.id, {
+      [statKey(StatGroup.SPENT_ITEMS, ResourceKey.GOLD)]: itemGoldPrice(ItemId.HOLY_WATER) ?? 0,
+      'items.used.hero.reset.1': 1,
+    });
   }
   Object.assign(h, { power: h.basePower, management: h.baseManagement, stratagem: h.baseStratagem, remainPoint: h.level });
   await saveHero(ctx, h);
@@ -226,7 +233,7 @@ export async function levelUp(ctx: Ctx, playerId: number, heroId: number) {
   const city = await openMayorCity(ctx, h);
   const levels = levelUpAll(h);
   if (levels === 0) throw new GameError(msg('hero.notEnoughExperience'), -99);
-  ctx.stat(playerId, h.cityId, { 'levels.hero': levels });
+  ctx.stat(playerId, h.cityId, { [StatCounter.LEVELS_HERO]: levels });
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
   await closeMayorCity(ctx, city, h);
@@ -275,7 +282,7 @@ export async function reward(ctx: Ctx, playerId: number, heroId: number) {
   const h = b.heroes.find((x) => x.id === heroId);
   if (!h) throw new GameError(msg('common.heroNotFound'), -99, 404);
   spendResources(b.city, { gold: heroAwardCost(h.level) }, msg('common.notEnoughGold'), -99);
-  ctx.stat(playerId, b.city.id, { 'spent.heroes.gold': heroAwardCost(h.level) });
+  ctx.stat(playerId, b.city.id, { [statKey(StatGroup.SPENT_HEROES, ResourceKey.GOLD)]: heroAwardCost(h.level) });
   h.loyalty = Math.min(BALANCE.heroMaxLoyalty, h.loyalty + 5);
   await saveHero(ctx, h);
   pushHero(ctx, playerId, h, 2);
@@ -297,7 +304,7 @@ export async function useHeroItem(ctx: Ctx, playerId: number, heroId: number, it
     city ??= await openOwnCity(ctx, playerId, h.cityId);
     if (city.city.gold < price) throw new GameError(msg('common.notEnoughGoldFor', { amount: price }), -99);
     city.city.gold -= price;
-    ctx.stat(playerId, city.city.id, { 'spent.items.gold': price, [`items.used.${itemId}`]: 1 });
+    ctx.stat(playerId, city.city.id, { [statKey(StatGroup.SPENT_ITEMS, ResourceKey.GOLD)]: price, [statKey(StatGroup.ITEMS_USED, itemId)]: 1 });
     paidInGold = true;
   }
   if (BALANCE.items.experienceBooks[itemId]) {

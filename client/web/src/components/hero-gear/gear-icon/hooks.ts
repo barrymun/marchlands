@@ -1,6 +1,6 @@
 import { type RefObject, useEffect } from 'react';
 
-import { SpotKind } from '@marchlands/core';
+import { type GearPieceId, SpotKind } from '@marchlands/core';
 
 import { GEAR_ART } from '@/components/hero-gear/constants';
 import { BURST_FRAMES, FRAME_MS, GEAR_SIZE } from '@/components/hero-gear/gear-icon/constants';
@@ -102,7 +102,7 @@ function paint(ctx: CanvasRenderingContext2D, f: GearFrame, piece: CanvasImageSo
 export function useGearMotion(
   canvas: RefObject<HTMLCanvasElement | null>,
   still: RefObject<HTMLImageElement | null>,
-  piece: string,
+  piece: GearPieceId,
   level: number,
   art: string | undefined,
 ) {

@@ -5,8 +5,9 @@
 
 import { SpotKind } from '@marchlands/core';
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { BLUE, lit, look, type Shades, spike, STEEL } from '../gear/common.ts';
-import { CLEAR, type Colour, type PixelCanvas, type Pt } from '../pixel.ts';
+import { type PixelCanvas, type Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { layer, part } from './skeleton.ts';
 
@@ -50,11 +51,11 @@ function wings(): PixelCanvas {
     for (const dir of [-1, 1])
       for (let i = 0; i < 3; i++) {
         const [a, b] = [tips[dir][i], tips[dir][i + 1]];
-        c.poly(dir < 0 ? [root, a, b] : [root, b, a], (x, y) => ((x + y) % 7 === 0 ? 'gear10Dark' : i % 2 ? 'gear10' : 'gear10Hi'));
+        c.poly(dir < 0 ? [root, a, b] : [root, b, a], (x, y) => ((x + y) % 7 === 0 ? Colour.GEAR_10_DARK : i % 2 ? Colour.GEAR_10 : Colour.GEAR_10_HI));
       }
   });
   for (const dir of [-1, 1]) {
-    for (const tip of tips[dir].slice(0, 3)) membrane.line(root, tip, 'gear0Dark');
+    for (const tip of tips[dir].slice(0, 3)) membrane.line(root, tip, Colour.GEAR_0_DARK);
     const [tx, ty] = tips[dir][0];
     spike(membrane, [tx + dir * -1, ty + 1], [tx + dir * 2, ty - 3], STEEL);
   }
@@ -65,12 +66,19 @@ function wings(): PixelCanvas {
 export function figureCape(level: number): PixelCanvas {
   if (level >= 10) return layer('cape-10', [wings()]);
   const L = look(level);
-  const cloth: Shades = level === 0 ? BLUE : level === 1 ? ['bannerHi', 'banner', 'bannerDark'] : level === 2 ? ['hood', 'hoodDark', 'gear0'] : L.accent;
+  const cloth: Shades =
+    level === 0
+      ? BLUE
+      : level === 1
+        ? [Colour.BANNER_HI, Colour.BANNER, Colour.BANNER_DARK]
+        : level === 2
+          ? [Colour.HOOD, Colour.HOOD_DARK, Colour.GEAR_0]
+          : L.accent;
   const cape = part('cape', (c) => {
-    c.poly(CAPE, folds(cloth, level === 0 ? 'wool' : undefined));
+    c.poly(CAPE, folds(cloth, level === 0 ? Colour.WOOL : undefined));
     if (level >= 8)
       // a torn hem
-      for (let x = 32; x <= 61; x++) for (let y = HEM - ((x * 7) % 5); y <= HEM; y++) c.set(x, y, CLEAR);
+      for (let x = 32; x <= 61; x++) for (let y = HEM - ((x * 7) % 5); y <= HEM; y++) c.set(x, y, Colour.CLEAR);
     if (level >= 5)
       // edged in gold
       for (let y = TOP + 2; y < HEM - 1; y++) {
@@ -79,7 +87,7 @@ export function figureCape(level: number): PixelCanvas {
         c.set(59 + 2 * f - 1, y, L.trim[1]);
       }
     // the rod or collar behind the neck
-    if (level === 0) for (let x = 38; x <= 62; x++) for (const y of [TOP - 1, TOP]) c.set(x, y, y === TOP - 1 ? 'plankTop' : 'trunk');
+    if (level === 0) for (let x = 38; x <= 62; x++) for (const y of [TOP - 1, TOP]) c.set(x, y, y === TOP - 1 ? Colour.PLANK_TOP : Colour.TRUNK);
     else oval(c, 50, TOP, 8, 2.2, lit(50, TOP, 8, level <= 2 ? STEEL : L.trim));
   });
   cape.spot(SpotKind.SWAY, [50, 34], HEM - 34);

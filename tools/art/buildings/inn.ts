@@ -2,6 +2,7 @@
 // after it is bigger and stronger: a wing round a courtyard with a well, then three wings and guests' horses, then a
 // closed courtyard with a fountain and a banner over the gate.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, PAVING, Roofing } from '../iso.ts';
 
 const SIZE = 64;
@@ -26,7 +27,7 @@ function wingY(c: IsoCanvas, x: number, y: number, w: number, d: number, h: numb
 
 /** A table with a bench. */
 function table(c: IsoCanvas, x: number, y: number) {
-  c.box(x, y, 0, 3, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
+  c.box(x, y, 0, 3, 1, 1, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R });
 }
 
 function band1(): IsoCanvas {
@@ -34,7 +35,7 @@ function band1(): IsoCanvas {
   c.grass(0, 0, 20, 20);
   c.ground(3, 11, 14, 7, PAVING);
   wingX(c, 4, 4, 11, 6, 6);
-  c.windows([9], 10, 0, 3, 'logDark');
+  c.windows([9], 10, 0, 3, Colour.LOG_DARK);
   c.banner(c.p(15, 10, 4), 3);
   table(c, 5, 13);
   table(c, 11, 14);
@@ -78,7 +79,7 @@ function band4(): IsoCanvas {
   wingX(c, 2, 2, 26, 6, 8);
   wingY(c, 2, 8, 5, 20, 7);
   c.stone(13, 13, 0, 5, 5, 1);
-  c.ground(14, 14, 3, 3, 'water');
+  c.ground(14, 14, 3, 3, Colour.WATER);
   c.grass(9, 10, 3, 3);
   c.grass(19, 18, 3, 3);
   wingY(c, 23, 8, 5, 20, 7);

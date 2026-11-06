@@ -1,3 +1,4 @@
+import { StatCounter, StatGroup, statKey } from '@marchlands/core';
 import { ResourceKey } from '@marchlands/core';
 
 import { FlowKind, GAIN_KINDS, LOSS_KINDS } from '@/components/stats-panel/resource-flows/constants';
@@ -12,28 +13,28 @@ function flowAmount(c: Counters, r: Resource, kind: FlowKind): number {
   const amount = (() => {
     switch (kind) {
       case FlowKind.PRODUCED:
-        return n(`produced.${r}`);
+        return n(statKey(StatGroup.PRODUCED, r));
       case FlowKind.PLUNDERED:
-        return n(`plundered.${r}`);
+        return n(statKey(StatGroup.PLUNDERED, r));
       // the market: gold received for what was sold, or the resource bought
       case FlowKind.MARKET_IN:
-        return gold ? n('market.goldReceived') : n(`market.bought.${r}`);
+        return gold ? n(StatCounter.MARKET_GOLD_RECEIVED) : n(statKey(StatGroup.MARKET_BOUGHT, r));
       case FlowKind.GIFT:
-        return n(`gained.dailyGift.${r}`);
+        return n(statKey(StatGroup.GAINED_DAILY_GIFT, r));
       // troops eat food, heroes are paid gold
       case FlowKind.UPKEEP:
-        return r === ResourceKey.FOOD ? n('upkeep.food') : gold ? n('salaries.gold') : 0;
+        return r === ResourceKey.FOOD ? n(StatCounter.UPKEEP_FOOD) : gold ? n(StatCounter.SALARIES_GOLD) : 0;
       case FlowKind.SPENT:
-        return SPENDING.reduce((s, { group }) => s + n(`spent.${group}.${r}`), 0);
+        return SPENDING.reduce((s, { group }) => s + n(statKey(group, r)), 0);
       case FlowKind.WASTED:
-        return n(`wasted.${r}`);
+        return n(statKey(StatGroup.WASTED, r));
       case FlowKind.TAXED:
-        return n(`taxed.${r}`);
+        return n(statKey(StatGroup.TAXED, r));
       // the market: gold paid for what was bought, or the resource sold
       case FlowKind.MARKET_OUT:
-        return gold ? n('market.goldPaid') : n(`market.sold.${r}`);
+        return gold ? n(StatCounter.MARKET_GOLD_PAID) : n(statKey(StatGroup.MARKET_SOLD, r));
       case FlowKind.STOLEN:
-        return n(`stolen.${r}`);
+        return n(statKey(StatGroup.STOLEN, r));
     }
   })();
   return Math.max(0, amount);

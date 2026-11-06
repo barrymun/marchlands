@@ -7,6 +7,7 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
   BALANCE,
+  BattleResult,
   BattleTarget,
   BuildingType,
   createGuardHero,
@@ -69,7 +70,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       // too few to win: the valley keeps what survives
       const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 10 });
       const b = battleOf(report, BattleTarget.VALLEY);
-      expect(b.result).toBe('defenderWon');
+      expect(b.result).toBe(BattleResult.DEFENDER_WON);
       const hitAt = g.now;
       const full = b.defender.troops.before;
       expect(b.defender.troops.after).not.toEqual(full);
@@ -95,7 +96,13 @@ describe(`${processArmy.name}: attacking a valley`, () => {
 
       expect(report).toMatchObject({ title: msg('report.title.valleyOccupied'), isAttack: true });
       const b = battleOf(report, BattleTarget.VALLEY);
-      expect(b).toMatchObject({ result: 'attackerWon', occupied: true, reason: null, valley: { type: valley.type, level: 1 }, defender: { player: '' } });
+      expect(b).toMatchObject({
+        result: BattleResult.ATTACKER_WON,
+        occupied: true,
+        reason: null,
+        valley: { type: valley.type, level: 1 },
+        defender: { player: '' },
+      });
       const tile = await getTile(g, valley.id);
       expect(tile).toMatchObject({ ownerCityId: p.cityId, ownerPlayerId: p.id, troops: null, state: null, updatedAt: g.now });
       expect((await cityBundle(g, p)).valleys.map((v) => v.id)).toEqual([valley.id]);
@@ -115,7 +122,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const { armyId, report } = await attack(g, p, heroId, valley.id, { militia: 10 });
       expect(report.title).toEqual(msg('report.title.attackFailed'));
       const b = battleOf(report, BattleTarget.VALLEY);
-      expect(b).toMatchObject({ result: 'defenderWon', occupied: false, reason: null });
+      expect(b).toMatchObject({ result: BattleResult.DEFENDER_WON, occupied: false, reason: null });
       const tile = await getTile(g, valley.id);
       expect(tile.ownerPlayerId).toBeNull();
       expect(tile.troops).toEqual(b.defender.troops.after);
@@ -136,7 +143,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const { armyId, report } = await attack(g, p, heroId, second.id);
       expect(report.title).toEqual(msg('report.title.attackSucceeded'));
       expect(battleOf(report, BattleTarget.VALLEY)).toMatchObject({
-        result: 'attackerWon',
+        result: BattleResult.ATTACKER_WON,
         occupied: false,
         reason: msg('army.valleyLimit', { building: ref.building(BuildingType.TOWN_HALL) }),
       });
@@ -169,7 +176,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const thirteenth = await valleyNear(g, p.cityId, { level: 1 });
       const { report } = await attack(g, p, heroId, thirteenth.id);
       expect(battleOf(report, BattleTarget.VALLEY)).toMatchObject({
-        result: 'attackerWon',
+        result: BattleResult.ATTACKER_WON,
         occupied: false,
         reason: msg('army.seatValleyLimit', { level: 12 }),
       });
@@ -199,7 +206,11 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       expect(report.title).toEqual(msg('report.title.attackFailed'));
       const b = battleOf(report, BattleTarget.VALLEY);
       const guard = await getHero(g, qHero);
-      expect(b).toMatchObject({ result: 'defenderWon', occupied: false, defender: { player: q.name, hero: { name: guard.name, level: guard.level } } });
+      expect(b).toMatchObject({
+        result: BattleResult.DEFENDER_WON,
+        occupied: false,
+        defender: { player: q.name, hero: { name: guard.name, level: guard.level } },
+      });
       expect(await lastReport(g, q.id, 'report.title.valleyDefended')).toMatchObject({ body: report.body });
       expect((await armyRow(g, campId))!.troops).toEqual(b.defender.troops.after);
       expect((await reloadPlayer(g, q)).honor - honor).toBe(b.defender.honor);
@@ -212,7 +223,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const { p, heroId, q, valley, campId } = await heldValley(g, { lightCavalry: 30_000 });
       const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 40_000 });
       const b = battleOf(report, BattleTarget.VALLEY);
-      expect(b).toMatchObject({ result: 'attackerWon', occupied: true, defender: { player: q.name } });
+      expect(b).toMatchObject({ result: BattleResult.ATTACKER_WON, occupied: true, defender: { player: q.name } });
       expect(await getTile(g, valley.id)).toMatchObject({ ownerPlayerId: p.id, ownerCityId: p.cityId });
       expect(await reportTitles(g, q.id)).toContain('report.title.valleyLost');
       const camp = await armyRow(g, campId);
@@ -226,7 +237,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
     game(async (g) => {
       const { p, heroId, qHero, valley, campId } = await heldValley(g, { lightCavalry: 100 });
       const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 40_000 });
-      expect(battleOf(report, BattleTarget.VALLEY)).toMatchObject({ result: 'attackerWon', defender: { troops: { after: {} } } });
+      expect(battleOf(report, BattleTarget.VALLEY)).toMatchObject({ result: BattleResult.ATTACKER_WON, defender: { troops: { after: {} } } });
       expect(battleOf(report, BattleTarget.VALLEY).defender.heroExp).toBeGreaterThan(0);
       expect(await armyRow(g, campId)).toBeUndefined();
       expect((await getHero(g, qHero)).status).toBe(HeroStatus.IDLE);
@@ -239,7 +250,7 @@ describe(`${processArmy.name}: attacking a valley`, () => {
       const valley = await occupyValley(g, q, qHero);
       const { report } = await attack(g, p, heroId, valley.id, { lightCavalry: 100 });
       const b = battleOf(report, BattleTarget.VALLEY);
-      expect(b).toMatchObject({ result: 'attackerWon', occupied: true, defender: { player: q.name, hero: null, troops: { before: {} } } });
+      expect(b).toMatchObject({ result: BattleResult.ATTACKER_WON, occupied: true, defender: { player: q.name, hero: null, troops: { before: {} } } });
       expect((await getTile(g, valley.id)).ownerPlayerId).toBe(p.id);
     }));
 

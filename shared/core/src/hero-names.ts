@@ -34,8 +34,20 @@ const words = (list: string) => list.trim().split(/\s+/);
 
 const German = (name: string) => (/[sxz]$/.test(name) ? null : `${name}s`);
 
+/** The cultures a state's heroes are named in. */
+const CultureId = {
+  FRISIAN: 'frisian',
+  SAXON: 'saxon',
+  FRANCONIAN: 'franconian',
+  LOTHARINGIAN: 'lotharingian',
+  CZECH: 'czech',
+  CARINTHIAN: 'carinthian',
+  ITALIAN: 'italian',
+} as const;
+type CultureId = (typeof CultureId)[keyof typeof CultureId];
+
 const CULTURES = {
-  frisian: {
+  [CultureId.FRISIAN]: {
     men: words(`
       Radbod Popko Sicco Ubbo Haio Tjaard Eppo Wigbold Abbo Poppo Gerolf Ritsert Douwe Sjoerd Tjalling Wybren Hessel Jelle Gerbrand
       Feddo Hidde Lubbert Menno Okko Edzard Enno Imel Folkert Rienk Tako Wiard Wilke Ulbe Sibrand Keno Tamme Snelger Bauke Reinold
@@ -50,7 +62,7 @@ const CULTURES = {
     // Ubbo's son or daughter is an Ubbena, Radbod's a Radboda
     father: (name) => (/[aeiou]$/.test(name) ? `${name.slice(0, -1)}ena` : `${name}a`),
   },
-  saxon: {
+  [CultureId.SAXON]: {
     men: words(`
       Liudolf Gero Wichmann Ekkehard Hermann Bernhard Thietmar Brun Widukind Ludger Meinwerk Bernward Dietrich Siegfried Wigger Egbert
       Amelung Lothar Ordulf Udo Gunzelin Werner Hoyer Wilhelm Albrecht Heinrich Wiprecht Thankmar Volkmar Esiko Dedo Hodo Billung Rikdag
@@ -64,7 +76,7 @@ const CULTURES = {
     from: 'von',
     father: German,
   },
-  franconian: {
+  [CultureId.FRANCONIAN]: {
     men: words(`
       Konrad Welf Arnulf Luitpold Eberhard Gebhard Burchard Ulrich Berthold Rudolf Ernst Wolfger Engelhard Adalbert Hartwig Megingoz
       Babo Rapoto Sighard Aribo Wernher Walther Diepold Friedrich Ludwig Heinrich Kuno Manegold Ruotger Siboto Wolfram Hartmann Reinmar
@@ -78,7 +90,7 @@ const CULTURES = {
     from: 'von',
     father: German,
   },
-  lotharingian: {
+  [CultureId.LOTHARINGIAN]: {
     men: words(`
       Gozelo Godefroy Thierry Rainier Renaud Hugues Baudouin Gerard Albert Arnoul Lambert Gislebert Conon Frederic Thibaut Simon Mathieu
       Ferry Henri Guillaume Othon Raoul Gautier Amaury Guy Humbert Amedee Rodolphe Wigeric Ricwin Adalberon Folmar Sigefroi Wenric
@@ -93,7 +105,7 @@ const CULTURES = {
     // a son is Thierry fiz Gozelo; the period has no such form for a daughter, so she goes by a place
     father: (name, sex) => (sex === Sex.MALE ? `fiz ${name}` : null),
   },
-  czech: {
+  [CultureId.CZECH]: {
     men: words(`
       Borivoj Vratislav Bretislav Sobeslav Jaromir Oldrich Spytihnev Boleslav Vladislav Jaroslav Svatopluk Ctirad Hostivit Neklan
       Kresina Mstis Slavibor Radim Bohus Dobromir Zdislav Hroznata Kojata Bohuslav Drslav Hrabis Vsebor Smil Zbraslav Vitek Hynek Vok
@@ -112,7 +124,7 @@ const CULTURES = {
       return sex === Sex.MALE ? `${stem}uv` : `${stem}ova`;
     },
   },
-  carinthian: {
+  [CultureId.CARINTHIAN]: {
     men: words(`
       Adalbero Markwart Engelbert Hartwig Bernhard Ulrich Heinrich Hermann Gottfried Hotimir Borut Gorazd Valuk Ingo Ratold Wezelin
       Aribo Otakar Liutold Konrad Starchand Pribislav Wilhelm Poppo Chazil Udalrich Gebhard Rapoto Sieghard Swiker Ortolf Pilgrim
@@ -126,7 +138,7 @@ const CULTURES = {
     from: 'von',
     father: German,
   },
-  italian: {
+  [CultureId.ITALIAN]: {
     men: words(`
       Arduino Berengario Bonifacio Guido Ugo Ottone Lanfranco Adalberto Oberto Azzo Alberto Tedaldo Ranieri Guglielmo Corrado Enrico
       Federico Rolando Ubaldo Gerardo Ildebrando Pandolfo Landolfo Manfredi Ruggero Tancredi Uberto Ugolino Sigifredo Anselmo Ariberto
@@ -141,117 +153,116 @@ const CULTURES = {
     father: (name) => `di ${name}`,
   },
 } satisfies Record<string, Culture>;
-type CultureId = keyof typeof CULTURES;
 
 /** Each state's culture and places (real towns, castles and abbeys), by state: 0 Friesland … 15 Romagna. */
 const STATES: readonly { culture: CultureId; places: readonly string[] }[] = [
   {
-    culture: 'frisian',
+    culture: CultureId.FRISIAN,
     places: words(`
       Stavoren Dokkum Bolsward Franeker Harlingen Sneek Emden Norden Aurich Jever Groningen Workum Winsum Esens Leer Egmond Medemblik
       Hallum Wittmund Loppersum
     `),
   },
   {
-    culture: 'saxon',
+    culture: CultureId.SAXON,
     places: words(`
       Magdeburg Goslar Hildesheim Halberstadt Bremen Verden Minden Paderborn Corvey Werla Luneburg Hamburg Stade Bardowick Soest
       Osnabruck Hameln Einbeck Celle Gifhorn Northeim Dassel
     `),
   },
   {
-    culture: 'saxon',
+    culture: CultureId.SAXON,
     places: words(`
       Salzwedel Stendal Havelberg Arneburg Gardelegen Osterburg Werben Spandau Kopenick Lebus Seehausen Calbe Walbeck Plotzkau
       Ballenstedt Aschersleben Bernburg Zerbst Belzig Burg
     `),
   },
   {
-    culture: 'czech',
+    culture: CultureId.CZECH,
     places: words(`
       Vysehradu Prahy Kourimi Libice Melnika Zatce Litomeric Plzne Budce Chrudimi Caslavi Hradce Kladska Biliny Doksan Tetina Kolina
       Chebu Lokte Krivoklatu Teplic Pisku
     `),
   },
   {
-    culture: 'lotharingian',
+    culture: CultureId.LOTHARINGIAN,
     places: words(`
       Bouillon Namur Louvain Liege Huy Dinant Aix Cambrai Brabant Hainaut Mons Limbourg Nivelles Gembloux Stavelot Malmedy Tongres
       Anvers Bruxelles Chiny Durbuy Looz
     `),
   },
   {
-    culture: 'franconian',
+    culture: CultureId.FRANCONIAN,
     places: words(`
       Wurzburg Bamberg Nurnberg Fulda Mainz Worms Speyer Frankfurt Rothenburg Ansbach Hersfeld Henneberg Castell Wertheim Lorsch Hanau
       Coburg Kitzingen Ingelheim Oppenheim Abenberg Rieneck
     `),
   },
   {
-    culture: 'saxon',
+    culture: CultureId.SAXON,
     places: words(`
       Erfurt Eisenach Gotha Arnstadt Jena Weimar Naumburg Merseburg Meissen Zeitz Muhlhausen Nordhausen Wartburg Schwarzburg Orlamunde
       Saalfeld Altenburg Gleichen Querfurt Wettin Kafernburg
     `),
   },
   {
-    culture: 'czech',
+    culture: CultureId.CZECH,
     places: words(`
       Olomouce Brna Znojma Velehradu Mikulcic Hodonina Breclavi Prerova Jihlavy Trebice Kromerize Opavy Litovle Bitova Pernstejna
       Boskovic Holasovic Vranova Lomnice Kunstatu
     `),
   },
   {
-    culture: 'lotharingian',
+    culture: CultureId.LOTHARINGIAN,
     places: words(`
       Verdun Metz Toul Nancy Bar Epinal Remiremont Luneville Commercy Vaudemont Chatel Ligny Sarrebourg Thionville Longwy Briey Arlon
       Luxembourg Vianden Salm Dabo Lixheim
     `),
   },
   {
-    culture: 'franconian',
+    culture: CultureId.FRANCONIAN,
     places: words(`
       Ulm Augsburg Konstanz Reichenau Zurich Basel Staufen Esslingen Rottweil Tubingen Zollern Kempten Lindau Memmingen Ravensburg
       Buchhorn Altdorf Calw Urach Teck Kyburg Lenzburg
     `),
   },
   {
-    culture: 'franconian',
+    culture: CultureId.FRANCONIAN,
     places: words(`
       Regensburg Freising Passau Landshut Ingolstadt Andechs Scheyern Salzburg Straubing Eichstatt Wasserburg Kelheim Ebersberg
       Tegernsee Burghausen Moosburg Chiemsee Vohburg Sulzbach Bogen Neuburg Dachau
     `),
   },
   {
-    culture: 'carinthian',
+    culture: CultureId.CARINTHIAN,
     places: words(`
       Gurk Villach Klagenfurt Friesach Karnburg Spanheim Ossiach Millstatt Lavant Treffen Wolfsberg Bleiburg Griffen Eppenstein
       Ortenburg Sternberg Gmund Hollenburg Liebenfels Stein
     `),
   },
   {
-    culture: 'lotharingian',
+    culture: CultureId.LOTHARINGIAN,
     places: words(`
       Besancon Vienne Lyon Arles Geneve Lausanne Grandson Salins Dole Gray Neuchatel Valence Grenoble Vesoul Joux Romont Gex Savoie
       Aoste Orange Embrun Die
     `),
   },
   {
-    culture: 'italian',
+    culture: CultureId.ITALIAN,
     places: words(`
       Milano Pavia Monza Como Bergamo Brescia Cremona Lodi Lecco Novara Vercelli Asti Torino Ivrea Varese Crema Mantova Verona Vicenza
       Padova Treviso Susa
     `),
   },
   {
-    culture: 'italian',
+    culture: CultureId.ITALIAN,
     places: words(`
       Lucca Pisa Firenze Siena Arezzo Volterra Pistoia Prato Fiesole Cortona Chiusi Massa Livorno Grosseto Populonia Poggibonsi Empoli
       Sovana Pescia Barga Carrara Pontremoli
     `),
   },
   {
-    culture: 'italian',
+    culture: CultureId.ITALIAN,
     places: words(`
       Ravenna Rimini Forli Faenza Imola Cesena Bologna Ferrara Modena Reggio Parma Bertinoro Comacchio Cervia Lugo Pesaro Fano Sarsina
       Meldola Urbino Piacenza Nonantola

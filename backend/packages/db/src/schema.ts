@@ -26,10 +26,14 @@ import {
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import type {
+  AllianceRequestKind,
   BuffState,
   BuildingState,
+  CandlePeriod,
   CastleSign,
+  ChatChannel,
   CityMisc,
+  FactionId,
   FlowAction,
   FlowCityChoice,
   FlowPreviewLog,
@@ -37,16 +41,19 @@ import type {
   FlowStatus,
   FortCounts,
   FortQueueState,
+  GearStat,
   HeroBuffState,
   ItemCounts,
   Message,
   PlayerMisc,
+  PlayerRelationKind,
   ReportBody,
   ResearchState,
   ResourceSet,
   TimedEventType,
   TroopCounts,
   TroopQueueState,
+  WorldStateKey,
 } from '#/types.ts';
 
 const ms = (name: string) => bigint(name, { mode: 'number' });
@@ -274,7 +281,7 @@ export const heroes = pgTable(
     /** (marchlands) a locked hero cannot be dismissed */
     locked: boolean('locked').notNull().default(false),
     /** (marchlands) attribute the lord's gear boosts ('power' | 'management' | 'stratagem'); null: the hero's highest */
-    gearStat: text('gear_stat'),
+    gearStat: text('gear_stat').$type<GearStat>(),
     /** (marchlands) position in the city's hero list, set by the lord (1 = first); 0 = never placed: after the placed ones, oldest first */
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: ms('created_at').notNull(),
@@ -344,6 +351,7 @@ export const flows = pgTable(
       .default(sql`'"all"'::jsonb`),
     /** run again after each run, until a run fails or the lord switches it off */
     repeat: boolean('repeat').notNull().default(false),
+    // eslint-disable-next-line marchlands/no-string-value -- this file imports only types from core, for drizzle-kit
     status: text('status').$type<FlowStatus>().notNull().default('idle'),
     /** index of the action the run continues with */
     nextAction: integer('next_action').notNull().default(0),
@@ -468,7 +476,7 @@ export const chatMessages = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     /** world | alliance | private */
-    channel: text('channel').notNull(),
+    channel: text('channel').$type<ChatChannel>().notNull(),
     allianceId: integer('alliance_id'),
     fromPlayerId: integer('from_player_id'),
     fromName: text('from_name').notNull(),
@@ -538,8 +546,7 @@ export const allianceRequests = pgTable(
     playerId: integer('player_id')
       .notNull()
       .references(() => players.id, { onDelete: 'cascade' }),
-    /** 'apply' (player asked) | 'invite' (alliance officer asked) */
-    kind: text('kind').notNull(),
+    kind: text('kind').$type<AllianceRequestKind>().notNull(),
     invitedByName: text('invited_by_name').notNull().default(''),
     createdAt: ms('created_at').notNull(),
   },
@@ -570,8 +577,7 @@ export const playerRelations = pgTable(
     otherPlayerId: integer('other_player_id')
       .notNull()
       .references(() => players.id, { onDelete: 'cascade' }),
-    /** 'friend' | 'block' */
-    kind: text('kind').notNull(),
+    kind: text('kind').$type<PlayerRelationKind>().notNull(),
     createdAt: ms('created_at').notNull(),
   },
   (t) => [primaryKey({ columns: [t.playerId, t.otherPlayerId, t.kind] })],
@@ -592,7 +598,7 @@ export const factionStanding = pgTable(
       .notNull()
       .references(() => players.id, { onDelete: 'cascade' }),
     /** core FactionId */
-    factionId: text('faction_id').notNull(),
+    factionId: text('faction_id').$type<FactionId>().notNull(),
     value: doublePrecision('value').notNull(),
     at: ms('at').notNull(),
     tradeDay: integer('trade_day').notNull().default(0),
@@ -731,7 +737,7 @@ export const marketCandles = pgTable(
     /** whose trades: 'world' for every trade (later a faction or zone) */
     scope: text('scope').notNull(),
     /** CandlePeriod: minute, hour or day */
-    period: text('period').notNull(),
+    period: text('period').$type<CandlePeriod>().notNull(),
     start: ms('start').notNull(),
     open: doublePrecision('open').notNull(),
     high: doublePrecision('high').notNull(),
@@ -780,7 +786,7 @@ export const playerStats = pgTable(
 
 /** Global key/value state (world config, counters). */
 export const worldState = pgTable('world_state', {
-  key: text('key').primaryKey(),
+  key: text('key').$type<WorldStateKey>().primaryKey(),
   value: jsonb('value').notNull(),
   updatedAt: ms('updated_at').notNull(),
 });

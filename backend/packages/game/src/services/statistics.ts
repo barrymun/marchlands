@@ -4,7 +4,7 @@
 
 import { eq, sql } from 'drizzle-orm';
 
-import { TREND_COUNTERS, TREND_KEYS, trendDays, type TrendKey, trendOf } from '@marchlands/core';
+import { TREND_COUNTERS, TREND_KEYS, trendDays, type TrendKey, trendOf, WorldStateKey } from '@marchlands/core';
 import { pgArray, worldState } from '@marchlands/db';
 
 import type { Ctx } from '#/context.ts';
@@ -82,7 +82,7 @@ export async function lordStatistics(ctx: Ctx, playerId: number) {
   for (const [cityId, c] of perCity)
     if (!cities.some((x) => x.cityId === cityId))
       cities.push({ cityId, name: null, owned: false, ...c, trend: trend.perCity.get(cityId) ?? noTrend(days.length) });
-  const [started] = await ctx.tx.select().from(worldState).where(eq(worldState.key, 'statsStartedAt'));
+  const [started] = await ctx.tx.select().from(worldState).where(eq(worldState.key, WorldStateKey.STATS_STARTED_AT));
   const since = started ? Number((started.value as { at: number }).at) : null;
   return { allTime, last7Days, cities, since, days, trend: trend.lord };
 }

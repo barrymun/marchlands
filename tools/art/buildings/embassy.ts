@@ -2,6 +2,7 @@
 // each band after it is bigger and stronger: broad steps and more flags, then wings and a gilded dome, then a
 // podium, a walled garden and a grand gilded dome.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, type DomeRoofing, IsoCanvas, PAVING, Roofing } from '../iso.ts';
 
 const SIZE = 64;
@@ -11,7 +12,7 @@ function rotunda(c: IsoCanvas, x: number, y: number, z: number, w: number, h: nu
   c.wall(x, y, z, w, w, h);
   c.colonnade(x, y + w, z, w, h);
   c.colonnadeSe(x + w, y, z, w, h);
-  c.box(x - 0.5, y - 0.5, z + h, w + 1, w + 1, 1, { top: 'wallTop', left: 'wallL', right: 'wallR' });
+  c.box(x - 0.5, y - 0.5, z + h, w + 1, w + 1, 1, { top: Colour.WALL_TOP, left: Colour.WALL_L, right: Colour.WALL_R });
   c.dome(x, y, z + h + 1, w, dome);
 }
 
@@ -65,10 +66,10 @@ function band4(): IsoCanvas {
   c.ground(3, 18, 24, 9, PAVING);
   c.wall(2, 5, 0, 7, 8, 6);
   c.windows([4, 7], 13, 2, 2);
-  c.roof(2, 5, 7, 8, 6, 3, Axis.X, { roofing: Roofing.SLATE, trim: 'gold' });
+  c.roof(2, 5, 7, 8, 6, 3, Axis.X, { roofing: Roofing.SLATE, trim: Colour.GOLD });
   c.wall(21, 5, 0, 7, 8, 6);
   c.windows([23, 26], 13, 2, 2);
-  c.roof(21, 5, 7, 8, 6, 3, Axis.X, { roofing: Roofing.SLATE, trim: 'gold' });
+  c.roof(21, 5, 7, 8, 6, 3, Axis.X, { roofing: Roofing.SLATE, trim: Colour.GOLD });
   // the podium and the grand rotunda
   c.stone(8, 2, 0, 14, 14, 2);
   rotunda(c, 9, 3, 2, 12, 8, Roofing.GOLD);

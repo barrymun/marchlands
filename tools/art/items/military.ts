@@ -2,7 +2,8 @@
 // (defence), the War Ensign's banner, Bernini's Hammer on a block of marble (a second building queue), Vesta's flame
 // in a goblet and a grander jewelled one (upkeep), and the quartermaster's signet and his sealed charter (training cost).
 
-import { CLEAR, type PixelCanvas } from '../pixel.ts';
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import { type PixelCanvas } from '../pixel.ts';
 import { disc, oval, rect } from '../shapes.ts';
 import { canvas, flame, GOLD, lathe, LEATHER, RED, rod, scroll, sparkle, stamp, STEEL, STONE, type Tone, writing } from './common.ts';
 
@@ -33,7 +34,7 @@ function horn(seed: string, body: Tone, tip: Tone, band: Tone): () => PixelCanva
     // the mouth, facing right
     const [mx, my] = at(1);
     oval(c, mx + 1, my, 2.2, 5.2, band.mid);
-    oval(c, mx + 1.5, my + 0.5, 1.2, 3.8, 'outline');
+    oval(c, mx + 1.5, my + 0.5, 1.2, 3.8, Colour.OUTLINE);
     c.outline();
     return c;
   };
@@ -51,7 +52,7 @@ function corselet(seed: string, tone: Tone, trim?: Tone): () => PixelCanvas {
       [5, 3],
       [6, 2],
     ])
-      for (let x = 16 - hw; x < 16 + hw; x++) c.set(x, y, CLEAR);
+      for (let x = 16 - hw; x < 16 + hw; x++) c.set(x, y, Colour.CLEAR);
     // the ridge down the middle and the belt
     rect(c, 16, 8, 16, 20, tone.dark);
     rect(c, 15, 8, 15, 19, tone.hi);
@@ -75,7 +76,7 @@ function corselet(seed: string, tone: Tone, trim?: Tone): () => PixelCanvas {
 /** War Ensign: a red war banner with a gold sun, swallow-tailed, on a spear-tipped pole. */
 function warEnsign(): PixelCanvas {
   const c = canvas('war-ensign');
-  rod(c, [8, 4], [8, 30], 2, 'wood');
+  rod(c, [8, 4], [8, 30], 2, Colour.WOOD);
   c.poly(
     [
       [9, 6],
@@ -86,8 +87,8 @@ function warEnsign(): PixelCanvas {
     ],
     (x) => (x % 6 < 2 ? RED.hi : x % 6 > 3 ? RED.dark : RED.mid),
   );
-  stamp(c, 13, 9, ['g.g.g', '.ggg.', 'ggogg', '.ggg.', 'g.g.g'], { g: 'gold', o: 'fireHi' });
-  rect(c, 9, 6, 27, 6, 'gold');
+  stamp(c, 13, 9, ['g.g.g', '.ggg.', 'ggogg', '.ggg.', 'g.g.g'], { g: Colour.GOLD, o: Colour.FIRE_HI });
+  rect(c, 9, 6, 27, 6, Colour.GOLD);
   c.poly(
     [
       [6, 4],
@@ -133,10 +134,10 @@ function berninisHammer(): PixelCanvas {
     STONE.dark,
   );
   // the chisel, its blade on the marble
-  rod(c, [24, 7], [24, 19], 3, 'wood');
+  rod(c, [24, 7], [24, 19], 3, Colour.WOOD);
   rod(c, [24, 18], [24, 24], 2, STEEL.mid);
   // the hammer: its handle across the block, its head raised
-  rod(c, [21, 23], [9, 9], 3, 'wood');
+  rod(c, [21, 23], [9, 9], 3, Colour.WOOD);
   c.poly(
     [
       [2, 9],
@@ -157,7 +158,7 @@ function berninisHammer(): PixelCanvas {
   );
   c.outline();
   c.line([3, 9], [9, 3], STEEL.hi);
-  c.line([23, 8], [23, 17], 'plankTop');
+  c.line([23, 8], [23, 17], Colour.PLANK_TOP);
   return c;
 }
 
@@ -173,8 +174,8 @@ function vesta(seed: string, grand: boolean): () => PixelCanvas {
     flame(c, 16, y0, grand ? 13 : 9);
     if (grand)
       for (const x of [11, 16, 21]) {
-        c.set(x, y0 + 4, 'banner');
-        c.set(x, y0 + 3, 'bannerHi');
+        c.set(x, y0 + 4, Colour.BANNER);
+        c.set(x, y0 + 3, Colour.BANNER_HI);
       }
     c.outline();
     if (grand) {
@@ -208,7 +209,7 @@ function quartermastersSeal(): PixelCanvas {
       [9, 27],
       [6, 29],
     ],
-    'blue',
+    Colour.BLUE,
   );
   c.poly(
     [
@@ -218,7 +219,7 @@ function quartermastersSeal(): PixelCanvas {
       [23, 27],
       [21, 30],
     ],
-    'blueDark',
+    Colour.BLUE_DARK,
   );
   bigSeal(c, 16, 11, 9);
   c.outline();
@@ -230,16 +231,16 @@ function quartermastersCharter(): PixelCanvas {
   const c = canvas('quartermasters-charter');
   scroll(c, 7, 2, 24, 23);
   writing(c, 10, 21, 6, 16);
-  c.line([14, 23], [15, 26], 'blue');
-  c.line([18, 23], [17, 26], 'blueDark');
+  c.line([14, 23], [15, 26], Colour.BLUE);
+  c.line([18, 23], [17, 26], Colour.BLUE_DARK);
   bigSeal(c, 16, 27, 4);
   c.outline();
   return c;
 }
 
 export const MILITARY_DRAWINGS = {
-  warHorn: horn('war-horn', { hi: 'wallTop', mid: 'linen', dark: 'linenDark' }, LEATHER, LEATHER),
-  ivoryHorn: horn('ivory-horn', { hi: 'sparkle', mid: 'wool', dark: 'linen' }, GOLD, GOLD),
+  warHorn: horn('war-horn', { hi: Colour.WALL_TOP, mid: Colour.LINEN, dark: Colour.LINEN_DARK }, LEATHER, LEATHER),
+  ivoryHorn: horn('ivory-horn', { hi: Colour.SPARKLE, mid: Colour.WOOL, dark: Colour.LINEN }, GOLD, GOLD),
   corselet: corselet('corselet', LEATHER),
   ultraCorselet: corselet('ultra-corselet', STEEL, GOLD),
   warEnsign,

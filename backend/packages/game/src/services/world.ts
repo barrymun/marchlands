@@ -23,6 +23,7 @@ import {
   tileXY,
   valleyUpgradeCost,
   WorldMapSource,
+  WorldStateKey,
 } from '@marchlands/core';
 import { cities, type Db, pgArray, players, tiles, worldState } from '@marchlands/db';
 
@@ -38,11 +39,10 @@ export interface WorldInfo {
   createdAt: number;
 }
 
-const WORLD_KEY = 'world';
 const SEED_LOCK = 0x45564f4e; // "EVON"
 
 export async function getWorldInfo(db: Db | Ctx['tx']): Promise<WorldInfo | undefined> {
-  const [row] = await db.select().from(worldState).where(eq(worldState.key, WORLD_KEY));
+  const [row] = await db.select().from(worldState).where(eq(worldState.key, WorldStateKey.WORLD));
   return row?.value as WorldInfo | undefined;
 }
 
@@ -99,14 +99,14 @@ export async function ensureWorld(db: Db, opts: { source: WorldMapSource; seed: 
       from unnest(${pgArray(seats.map((s) => s.y * size + s.x))}::int[], ${pgArray(seats.map((s) => s.level))}::smallint[]) as seat(id, level)
       where tiles.id = seat.id`);
     const info: WorldInfo = { mapSize: size, source: opts.source, seed: opts.seed, createdAt: Date.now() };
-    await tx.insert(worldState).values({ key: WORLD_KEY, value: info, updatedAt: Date.now() });
+    await tx.insert(worldState).values({ key: WorldStateKey.WORLD, value: info, updatedAt: Date.now() });
     log(`world seeded: ${total} tiles in ${Date.now() - started}ms`);
     return info;
   });
 }
 
 export async function zoneStats(db: Db): Promise<ZoneStats[]> {
-  const [row] = await db.select().from(worldState).where(eq(worldState.key, 'zones'));
+  const [row] = await db.select().from(worldState).where(eq(worldState.key, WorldStateKey.ZONES));
   return (row?.value as ZoneStats[] | undefined) ?? refreshZoneStats(db);
 }
 

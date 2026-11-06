@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { type CityBean, getCitiesFortificationsQueuesOptions, getCitiesResearchOptions, getCitiesTroopsQueuesOptions } from '@marchlands/api-client';
 import { buildingLevel, BuildingType } from '@marchlands/core';
 
+import { DockGroup } from '@/components/activity-dock/constants';
 import type { Job } from '@/components/activity-dock/types';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { fmtExact } from '@/lib/format';
@@ -26,7 +27,7 @@ export function useJobs(city: CityBean): Job[] {
     if (b.status === 0) continue;
     jobs.push({
       key: `b${b.positionId}`,
-      group: 'Building',
+      group: DockGroup.BUILDING,
       label: i18n.t('activity-dock:job.level', { name: buildingName(b.typeId), level: b.level + 1 }),
       startTime: b.startTime,
       endTime: b.endTime,
@@ -37,7 +38,7 @@ export function useJobs(city: CityBean): Job[] {
     if (!t.upgrading || t.castleId !== city.id) continue;
     jobs.push({
       key: `r${t.typeId}`,
-      group: 'Research',
+      group: DockGroup.RESEARCH,
       label: i18n.t('activity-dock:job.level', { name: techName(t.typeId), level: t.level + 1 }),
       startTime: t.startTime,
       endTime: t.endTime,
@@ -50,7 +51,7 @@ export function useJobs(city: CityBean): Job[] {
     const waiting = q.allProduceQueue.length - 1;
     jobs.push({
       key: `t${q.positionId}:${running.queueId}`,
-      group: 'Training',
+      group: DockGroup.TRAINING,
       label: i18n.t('activity-dock:job.troops', { troop: troopName(running.type), amount: fmtExact(running.num) }),
       note: waiting > 0 ? i18n.t('activity-dock:job.queued', { n: waiting }) : undefined,
       startTime: running.startTime,

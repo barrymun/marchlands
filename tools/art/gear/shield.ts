@@ -2,22 +2,25 @@
 // light and dark (1), rimmed (2), and from 3 rimmed in gold with a boss stone in the level's colour, a cross from 5,
 // spiked corners from 7, gilded at 9 and crimson rimmed in silver at 10.
 
+import { GearPieceId } from '@marchlands/core';
+
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas, Pt } from '../pixel.ts';
 import { disc } from '../shapes.ts';
 import { canvas, DARK_STEEL, fill, inset, look, setStone, type Shades, spike, STEEL } from './common.ts';
 
 export function shield(level: number): PixelCanvas {
-  const c = canvas('shield', level);
+  const c = canvas(GearPieceId.SHIELD, level);
   if (level === 0) {
     // planks inside an iron rim, round an iron boss
     for (let y = 4; y < 28; y++)
       for (let x = 4; x < 28; x++) {
         const d = Math.hypot(x + 0.5 - 16, y + 0.5 - 16);
         if (d > 11.5) continue;
-        if (d > 10) c.set(x, y, x + y > 34 ? 'steelDark' : 'metal');
-        else c.set(x, y, x + y > 38 ? 'plankR' : Math.floor((x - 4) / 4) % 2 ? 'plankL' : 'plankTop');
+        if (d > 10) c.set(x, y, x + y > 34 ? Colour.STEEL_DARK : Colour.METAL);
+        else c.set(x, y, x + y > 38 ? Colour.PLANK_R : Math.floor((x - 4) / 4) % 2 ? Colour.PLANK_L : Colour.PLANK_TOP);
       }
-    disc(c, 16, 16, 2.6, 'steelHi', 'steelDark');
+    disc(c, 16, 16, 2.6, Colour.STEEL_HI, Colour.STEEL_DARK);
     c.outline();
     return c;
   }
@@ -35,7 +38,7 @@ export function shield(level: number): PixelCanvas {
   if (rim) fill(c, outer, rim);
   // the halves, the lit one on the left
   c.poly(rim ? inset(outer, 2.2) : outer, (x, y) => (x < 16 ? body[0] : y > 22 ? body[2] : body[1]));
-  if (level === 2) for (let y = 6; y < 26; y++) c.set(16, y, 'steelDark');
+  if (level === 2) for (let y = 6; y < 26; y++) c.set(16, y, Colour.STEEL_DARK);
   if (level >= 5) {
     // a cross in the level's colour
     for (let y = 7; y < 24; y++) c.set(16, y, L.accent[1]);

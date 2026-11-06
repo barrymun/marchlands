@@ -18,7 +18,7 @@ import { getPlayer, savePlayer } from '#/repo.ts';
 
 export interface EventRow {
   id: number;
-  type: string;
+  type: TimedEventType;
   dueAt: number;
   playerId: number | null;
   cityId: number | null;
@@ -100,6 +100,7 @@ export async function dispatchEvent(ctx: Ctx, ev: EventRow): Promise<void> {
     case TimedEventType.FLOW_QUEUE:
       return runQueue(ctx, playerId());
     default:
-      throw new Error(`unknown timed event type ${ev.type}`);
+      // the type covers every case, but a row outlives the code: one left by another version of the game
+      throw new Error(`unknown timed event type ${String(ev.type)}`);
   }
 }

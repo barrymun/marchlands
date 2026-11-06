@@ -6,7 +6,7 @@
 // src/assets/figure/, and one icon per item in src/assets/items/. The art scripts in tools/art import this file, so it uses
 // no `@/` imports.
 
-import { buildingConfig, BuildingType, FortType, ItemId, RESOURCE_KEYS, Sex, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
+import { buildingConfig, BuildingType, FortType, type GearPieceId, ItemId, RESOURCE_KEYS, Sex, TileType, TroopType, VALLEY_TYPES } from '@marchlands/core';
 
 /** The level bands the art changes at (a building's or a valley's level): 1-3, 4-6, 7-9 and 10. */
 export const ART_BANDS = [
@@ -67,8 +67,14 @@ export function historicArtFile(level: (typeof HISTORIC_ART_LEVELS)[number]): st
  * The pieces the walls' frame round the city is made of, for each level band: `wall` repeats along the back and front
  * walls, `side` down the side walls (mirrored on the right), `corner` is a tower and `gate` the gatehouse.
  */
-export const WALL_PIECES = ['wall', 'side', 'corner', 'gate'] as const;
-export type WallPiece = (typeof WALL_PIECES)[number];
+export const WallPiece = {
+  WALL: 'wall',
+  SIDE: 'side',
+  CORNER: 'corner',
+  GATE: 'gate',
+} as const;
+export type WallPiece = (typeof WallPiece)[keyof typeof WallPiece];
+export const WALL_PIECES = Object.values(WallPiece);
 
 /** A wall piece's file name: `walls-4-gate.png`. */
 export function wallArtFile(band: number, piece: WallPiece): string {
@@ -126,8 +132,14 @@ export function cityGroundFile(name: CityGround): string {
  * The isometric city view's wall pieces, for each art band: a stretch of wall where the row is fixed (`wall-x`) or the
  * column is (`wall-y`), a corner `tower` and the `gate` at the front corner.
  */
-export const CITY_WALL_PIECES = ['wall-x', 'wall-y', 'tower', 'gate'] as const;
-export type CityWallPiece = (typeof CITY_WALL_PIECES)[number];
+export const CityWallPiece = {
+  WALL_X: 'wall-x',
+  WALL_Y: 'wall-y',
+  TOWER: 'tower',
+  GATE: 'gate',
+} as const;
+export type CityWallPiece = (typeof CityWallPiece)[keyof typeof CityWallPiece];
+export const CITY_WALL_PIECES = Object.values(CityWallPiece);
 export type WallBand = 1 | 2 | 3 | 4;
 
 /** A city wall piece's file name: `walls-4-gate.png` (in src/assets/city/, apart from the grid view's frame pieces). */
@@ -144,7 +156,7 @@ export function grandTownHallFile(band: number): string {
 export const GEAR_ART_LEVELS: readonly number[] = Array.from({ length: 11 }, (_, i) => i);
 
 /** A gear piece's sprite at a gear level (`weapon-3.png`, in assets/gear/); levels above 10 use 10's. */
-export function gearArtFile(piece: string, level: number): string {
+export function gearArtFile(piece: GearPieceId, level: number): string {
   return `${piece}-${gearArtLevel(level)}.png`;
 }
 
@@ -157,7 +169,7 @@ export type GearTwinPart = (typeof GearTwinPart)[keyof typeof GearTwinPart];
 export const GEAR_TWIN_PARTS = Object.values(GearTwinPart);
 
 /** One of a gear sprite's twins (`head-4-bare.png`, `head-4-plume.png`). */
-export function gearTwinFile(piece: string, level: number, part: GearTwinPart): string {
+export function gearTwinFile(piece: GearPieceId, level: number, part: GearTwinPart): string {
   return `${piece}-${gearArtLevel(level)}-${part}.png`;
 }
 
@@ -172,8 +184,13 @@ function gearArtLevel(level: number): number {
 }
 
 /** A gear star: in use, waiting above the research level, or not yet bought. */
-export const GEAR_STAR_KINDS = ['used', 'waiting', 'empty'] as const;
-export type GearStarKind = (typeof GEAR_STAR_KINDS)[number];
+export const GearStarKind = {
+  USED: 'used',
+  WAITING: 'waiting',
+  EMPTY: 'empty',
+} as const;
+export type GearStarKind = (typeof GearStarKind)[keyof typeof GearStarKind];
+export const GEAR_STAR_KINDS = Object.values(GearStarKind);
 
 /** A gear star's sprite (`star-used.png`, in assets/gear/). */
 export function gearStarFile(kind: GearStarKind): string {
@@ -185,10 +202,23 @@ export function gearStarFile(kind: GearStarKind): string {
  * gear layers go by gear level (0 to 10, like the icons), the legs and upper body by sex too (a woman's own cut); the
  * skin by sex and tone, the hair by style (a man's or a woman's) and colour.
  */
-export const FIGURE_SKIN_TONES = ['pale', 'fair', 'olive', 'brown'] as const;
-export type FigureSkinTone = (typeof FIGURE_SKIN_TONES)[number];
-export const FIGURE_HAIR_COLOURS = ['black', 'brown', 'auburn', 'blond', 'grey'] as const;
-export type FigureHairColour = (typeof FIGURE_HAIR_COLOURS)[number];
+export const FigureSkinTone = {
+  PALE: 'pale',
+  FAIR: 'fair',
+  OLIVE: 'olive',
+  BROWN: 'brown',
+} as const;
+export type FigureSkinTone = (typeof FigureSkinTone)[keyof typeof FigureSkinTone];
+export const FIGURE_SKIN_TONES = Object.values(FigureSkinTone);
+export const FigureHairColour = {
+  BLACK: 'black',
+  BROWN: 'brown',
+  AUBURN: 'auburn',
+  BLOND: 'blond',
+  GREY: 'grey',
+} as const;
+export type FigureHairColour = (typeof FigureHairColour)[keyof typeof FigureHairColour];
+export const FIGURE_HAIR_COLOURS = Object.values(FigureHairColour);
 /** Hairstyles: a man's short hair with or without a beard, a woman's loose or braided. */
 export const FigureHairStyle = { SHORT: 'short', BEARD: 'beard', LOOSE: 'loose', BRAID: 'braid' } as const;
 export type FigureHairStyle = (typeof FigureHairStyle)[keyof typeof FigureHairStyle];
@@ -229,3 +259,11 @@ export function figureHairFile(style: FigureHairStyle, colour: FigureHairColour)
 export function figureHelmFile(level: number): string {
   return `helm-${gearArtLevel(level)}.png`;
 }
+
+/** Whose an army marching on the map is: its banner's colour (components/iso-anim). */
+export const ArmySide = {
+  OWN: 'own',
+  ALLY: 'ally',
+  ENEMY: 'enemy',
+} as const;
+export type ArmySide = (typeof ArmySide)[keyof typeof ArmySide];

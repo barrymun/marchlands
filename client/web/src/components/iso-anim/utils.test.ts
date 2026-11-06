@@ -73,6 +73,7 @@ import {
 } from '@/components/iso-anim/utils';
 import { Weather } from '@/components/iso-viewport/constants';
 import type { PixelArt } from '@/components/iso-viewport/types';
+import { ArmySide } from '@/lib/game-art';
 
 /** How many pixels of a frame are drawn. */
 const drawn = (a: PixelArt) => a.data.filter((_, i) => i % 4 === 3 && a.data[i]! > 0).length;
@@ -689,13 +690,13 @@ describe(glintFrame.name, () => {
 
 describe(marchFrame.name, () => {
   it("draws soldiers behind a banner of their side's colour, stepping, facing either way", () => {
-    const own = marchFrame(0, 'own', false).art;
+    const own = marchFrame(0, ArmySide.OWN, false).art;
     const flags = (art: PixelArt, c: readonly number[]) =>
       Array.from({ length: art.w * art.h }, (_, i) => i).filter((i) => at(art, i % art.w, Math.floor(i / art.w))?.join() === c.join()).length;
     expect(flags(own, SIDE_COLOURS.own)).toBe(9);
-    expect(flags(marchFrame(0, 'enemy', false).art, SIDE_COLOURS.enemy)).toBe(9);
-    expect(marchFrame(1, 'own', false).art.id).not.toBe(own.id);
-    expect(marchFrame(0, 'own', true).art.id).not.toBe(own.id);
+    expect(flags(marchFrame(0, ArmySide.ENEMY, false).art, SIDE_COLOURS.enemy)).toBe(9);
+    expect(marchFrame(1, ArmySide.OWN, false).art.id).not.toBe(own.id);
+    expect(marchFrame(0, ArmySide.OWN, true).art.id).not.toBe(own.id);
   });
 });
 
@@ -738,8 +739,8 @@ describe(armyAt.name, () => {
 describe(armyOverlays.name, () => {
   it('draws each army marching under its side, keyed by army', () => {
     const marching = [
-      { army: { armyId: 7, startFieldId: 0, targetFieldId: 10, startTime: 0, reachTime: 1000, direction: 1 }, side: 'own' as const },
-      { army: { armyId: 8, startFieldId: 0, targetFieldId: 10, startTime: 0, reachTime: 1000, direction: 1 }, side: 'enemy' as const },
+      { army: { armyId: 7, startFieldId: 0, targetFieldId: 10, startTime: 0, reachTime: 1000, direction: 1 }, side: ArmySide.OWN },
+      { army: { armyId: 8, startFieldId: 0, targetFieldId: 10, startTime: 0, reachTime: 1000, direction: 1 }, side: ArmySide.ENEMY },
     ];
     const o = armyOverlays(marching, 800, { col: 0, row: 0 }, 0, 500);
     expect(o.map((x) => x.key)).toEqual(['army7', 'army8']);

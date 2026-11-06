@@ -1,6 +1,8 @@
 import { Sex } from '@marchlands/core';
+
 import type { Build, Rgb, Shades } from '@/components/heroes-panel/hero-sheet/character-sheet/paper-doll/hero-figure-3d/types';
 import type { FigureHairColour, FigureSkinTone } from '@/lib/game-art';
+import { PALETTE } from '@/lib/palette';
 
 /** The render's size in pixels, scaled up crisp by whole multiples (docs/features/hero-3d.md). */
 export const RENDER_SIZE = 128;
@@ -24,7 +26,13 @@ export const SETTLE_HALF_LIFE_MS = 90;
 export const SETTLED = 0.002;
 
 /** What a tap does, one in turn: a sword swing, a salute, the shield raised. */
-export const FIGURE_ACTIONS = ['swing', 'salute', 'shield'] as const;
+export const FigureAction = {
+  SWING: 'swing',
+  SALUTE: 'salute',
+  SHIELD: 'shield',
+} as const;
+export type FigureAction = (typeof FigureAction)[keyof typeof FigureAction];
+export const FIGURE_ACTIONS = Object.values(FigureAction) as [FigureAction, ...FigureAction[]];
 
 /** How long an action takes, in milliseconds. */
 export const ACTION_MS = 800;
@@ -33,7 +41,7 @@ export const ACTION_MS = 800;
  * Each action's keyframes: at a share of its time, the sword arm's turn about x (forward: positive tips the sword
  * forward) and z (towards the body), and the shield arm's about x (negative raises it forward); eased between.
  */
-export const ACTION_KEYS: Record<(typeof FIGURE_ACTIONS)[number], readonly (readonly [at: number, swordX: number, swordZ: number, shieldX: number])[]> = {
+export const ACTION_KEYS: Record<FigureAction, readonly (readonly [at: number, swordX: number, swordZ: number, shieldX: number])[]> = {
   // drawn back, then struck down in front
   swing: [
     [0, 0, 0, 0],
@@ -72,79 +80,77 @@ export const BANDS = { lit: 0.5, mid: -0.1 };
 /** An inner edge is outlined where a neighbour is nearer by this many render pixels (an arm over the chest). */
 export const DEPTH_EDGE = 3;
 
-// the sprites' palette colours the figure uses (tools/art/pixel.ts, PALETTE), kept in step with it
-const rgb = (r: number, g: number, b: number): Rgb => [r, g, b];
-
+// the figure's colours are the base colours the sprites use (lib/palette.ts)
 /** The outline round every sprite. */
-export const OUTLINE = rgb(52, 36, 28);
+export const OUTLINE = PALETTE.OUTLINE;
 
 /** The materials, as the art scripts' (tools/art/gear/common.ts and tools/art/figure/). */
 export const SHADES = {
-  blue: [rgb(112, 154, 208), rgb(72, 112, 172), rgb(50, 80, 130)],
-  steel: [rgb(226, 232, 240), rgb(172, 180, 194), rgb(110, 118, 134)],
-  brightSteel: [rgb(226, 232, 240), rgb(226, 232, 240), rgb(172, 180, 194)],
-  iron: [rgb(150, 156, 166), rgb(150, 156, 166), rgb(110, 118, 134)],
-  darkSteel: [rgb(150, 156, 166), rgb(88, 82, 78), rgb(60, 56, 54)],
-  mail: [rgb(150, 156, 168), rgb(104, 110, 122), rgb(110, 118, 134)],
-  gold: [rgb(252, 222, 100), rgb(232, 186, 72), rgb(178, 132, 40)],
-  wood: [rgb(176, 132, 86), rgb(152, 108, 66), rgb(118, 82, 50)],
-  rod: [rgb(176, 132, 86), rgb(176, 132, 86), rgb(94, 66, 42)],
-  leather: [rgb(160, 106, 66), rgb(146, 100, 62), rgb(104, 70, 44)],
-  cloth: [rgb(242, 240, 230), rgb(214, 196, 154), rgb(174, 154, 112)],
-  wool: [rgb(242, 240, 230), rgb(242, 240, 230), rgb(214, 196, 154)],
-  whiteFoot: [rgb(242, 240, 230), rgb(242, 240, 230), rgb(174, 154, 112)],
-  banner: [rgb(214, 76, 64), rgb(178, 44, 44), rgb(128, 30, 32)],
-  cord: [rgb(214, 76, 64), rgb(214, 76, 64), rgb(128, 30, 32)],
-  flower: [rgb(236, 120, 140), rgb(214, 76, 64), rgb(146, 74, 50)],
-  hood: [rgb(88, 82, 78), rgb(60, 56, 54), rgb(42, 36, 42)],
-  blueBelt: [rgb(226, 232, 240), rgb(72, 112, 172), rgb(50, 80, 130)],
-  amber: [rgb(240, 132, 40), rgb(240, 132, 40), rgb(156, 56, 38)],
+  blue: [PALETTE.BLUE_HI, PALETTE.BLUE, PALETTE.BLUE_DARK],
+  steel: [PALETTE.STEEL_HI, PALETTE.STEEL, PALETTE.STEEL_DARK],
+  brightSteel: [PALETTE.STEEL_HI, PALETTE.STEEL_HI, PALETTE.STEEL],
+  iron: [PALETTE.METAL, PALETTE.METAL, PALETTE.STEEL_DARK],
+  darkSteel: [PALETTE.METAL, PALETTE.HOOD, PALETTE.HOOD_DARK],
+  mail: [PALETTE.MAIL_HI, PALETTE.MAIL, PALETTE.STEEL_DARK],
+  gold: [PALETTE.FIRE_HI, PALETTE.GOLD, PALETTE.GOLD_DARK],
+  wood: [PALETTE.PLANK_TOP, PALETTE.PLANK_L, PALETTE.PLANK_R],
+  rod: [PALETTE.PLANK_TOP, PALETTE.PLANK_TOP, PALETTE.TRUNK],
+  leather: [PALETTE.HORSE_HI, PALETTE.LEATHER, PALETTE.LEATHER_DARK],
+  cloth: [PALETTE.WOOL, PALETTE.LINEN, PALETTE.LINEN_DARK],
+  wool: [PALETTE.WOOL, PALETTE.WOOL, PALETTE.LINEN],
+  whiteFoot: [PALETTE.WOOL, PALETTE.WOOL, PALETTE.LINEN_DARK],
+  banner: [PALETTE.BANNER_HI, PALETTE.BANNER, PALETTE.BANNER_DARK],
+  cord: [PALETTE.BANNER_HI, PALETTE.BANNER_HI, PALETTE.BANNER_DARK],
+  flower: [PALETTE.FLOWER, PALETTE.BANNER_HI, PALETTE.BARN_L],
+  hood: [PALETTE.HOOD, PALETTE.HOOD_DARK, PALETTE.GEAR_0],
+  blueBelt: [PALETTE.STEEL_HI, PALETTE.BLUE, PALETTE.BLUE_DARK],
+  amber: [PALETTE.FIRE, PALETTE.FIRE, PALETTE.ROOF_D],
 } satisfies Record<string, Shades>;
 
 /** Single colours: the outline (for eyes and slits), lips, a man's brow, a plank's seam, a braid's tie. */
 export const COLOURS = {
   outline: OUTLINE,
-  lips: rgb(176, 92, 84),
-  brow: rgb(66, 42, 26),
-  seam: rgb(118, 82, 50),
-  tie: rgb(104, 70, 44),
-  sparkle: rgb(255, 255, 255),
+  lips: PALETTE.LIPS,
+  brow: PALETTE.HAIR_BROWN_DARK,
+  seam: PALETTE.PLANK_R,
+  tie: PALETTE.LEATHER_DARK,
+  sparkle: PALETTE.SPARKLE,
 } satisfies Record<string, Rgb>;
 
 /** The skin tones (FIGURE_SKIN_TONES), each light, mid and shaded. */
 export const SKIN_TONES = {
-  pale: [rgb(252, 226, 204), rgb(240, 204, 176), rgb(208, 162, 134)],
-  fair: [rgb(246, 206, 166), rgb(228, 178, 136), rgb(190, 136, 98)],
-  olive: [rgb(220, 170, 122), rgb(196, 144, 98), rgb(154, 104, 68)],
-  brown: [rgb(172, 118, 80), rgb(140, 92, 60), rgb(102, 64, 42)],
+  pale: [PALETTE.SKIN_PALE_HI, PALETTE.SKIN_PALE, PALETTE.SKIN_PALE_SHADE],
+  fair: [PALETTE.SKIN_FAIR_HI, PALETTE.SKIN_FAIR, PALETTE.SKIN_FAIR_SHADE],
+  olive: [PALETTE.SKIN_OLIVE_HI, PALETTE.SKIN_OLIVE, PALETTE.SKIN_OLIVE_SHADE],
+  brown: [PALETTE.SKIN_BROWN_HI, PALETTE.SKIN_BROWN, PALETTE.SKIN_BROWN_SHADE],
 } satisfies Record<FigureSkinTone, Shades>;
 
 /** The hair colours (FIGURE_HAIR_COLOURS), each light, mid and dark. */
 export const HAIR_COLOURS = {
-  black: [rgb(78, 70, 72), rgb(44, 38, 40), rgb(26, 22, 24)],
-  brown: [rgb(132, 90, 58), rgb(98, 64, 40), rgb(66, 42, 26)],
-  auburn: [rgb(190, 98, 50), rgb(148, 66, 32), rgb(100, 40, 20)],
-  blond: [rgb(240, 210, 136), rgb(212, 168, 86), rgb(158, 118, 52)],
-  grey: [rgb(214, 212, 206), rgb(168, 164, 158), rgb(118, 114, 110)],
+  black: [PALETTE.HAIR_BLACK_HI, PALETTE.HAIR_BLACK, PALETTE.HAIR_BLACK_DARK],
+  brown: [PALETTE.HAIR_BROWN_HI, PALETTE.HAIR_BROWN, PALETTE.HAIR_BROWN_DARK],
+  auburn: [PALETTE.HAIR_AUBURN_HI, PALETTE.HAIR_AUBURN, PALETTE.HAIR_AUBURN_DARK],
+  blond: [PALETTE.HAIR_BLOND_HI, PALETTE.HAIR_BLOND, PALETTE.HAIR_BLOND_DARK],
+  grey: [PALETTE.HAIR_GREY_HI, PALETTE.HAIR_GREY, PALETTE.HAIR_GREY_DARK],
 } satisfies Record<FigureHairColour, Shades>;
 
 /** Each gear level's colours, 0 to 10 (the gearN palette entries). */
 export const GEAR_TIERS: readonly [Shades, ...Shades[]] = [
-  [rgb(74, 66, 72), rgb(42, 36, 42), rgb(20, 16, 22)],
-  [rgb(178, 182, 188), rgb(130, 134, 142), rgb(80, 84, 92)],
-  [rgb(152, 198, 76), rgb(100, 156, 42), rgb(56, 102, 26)],
-  [rgb(104, 140, 236), rgb(46, 90, 210), rgb(24, 50, 138)],
-  [rgb(92, 204, 184), rgb(32, 152, 138), rgb(16, 94, 90)],
-  [rgb(132, 112, 226), rgb(84, 60, 190), rgb(46, 30, 122)],
-  [rgb(188, 104, 178), rgb(140, 54, 132), rgb(86, 28, 86)],
-  [rgb(244, 100, 192), rgb(208, 44, 152), rgb(138, 18, 100)],
-  [rgb(252, 162, 74), rgb(228, 112, 26), rgb(154, 64, 12)],
-  [rgb(252, 224, 112), rgb(224, 178, 40), rgb(150, 110, 16)],
-  [rgb(244, 96, 116), rgb(198, 30, 64), rgb(118, 12, 36)],
+  [PALETTE.GEAR_0_HI, PALETTE.GEAR_0, PALETTE.GEAR_0_DARK],
+  [PALETTE.GEAR_1_HI, PALETTE.GEAR_1, PALETTE.GEAR_1_DARK],
+  [PALETTE.GEAR_2_HI, PALETTE.GEAR_2, PALETTE.GEAR_2_DARK],
+  [PALETTE.GEAR_3_HI, PALETTE.GEAR_3, PALETTE.GEAR_3_DARK],
+  [PALETTE.GEAR_4_HI, PALETTE.GEAR_4, PALETTE.GEAR_4_DARK],
+  [PALETTE.GEAR_5_HI, PALETTE.GEAR_5, PALETTE.GEAR_5_DARK],
+  [PALETTE.GEAR_6_HI, PALETTE.GEAR_6, PALETTE.GEAR_6_DARK],
+  [PALETTE.GEAR_7_HI, PALETTE.GEAR_7, PALETTE.GEAR_7_DARK],
+  [PALETTE.GEAR_8_HI, PALETTE.GEAR_8, PALETTE.GEAR_8_DARK],
+  [PALETTE.GEAR_9_HI, PALETTE.GEAR_9, PALETTE.GEAR_9_DARK],
+  [PALETTE.GEAR_10_HI, PALETTE.GEAR_10, PALETTE.GEAR_10_DARK],
 ];
 
 /** Level 10's stones: white at heart, in its crimson. */
-export const CRIMSON_STONE: Shades = [rgb(255, 255, 255), rgb(244, 96, 116), rgb(118, 12, 36)];
+export const CRIMSON_STONE: Shades = [PALETTE.SPARKLE, PALETTE.GEAR_10_HI, PALETTE.GEAR_10_DARK];
 
 /** The builds: a woman's narrower waist, belt, neck and legs, wider hips and smaller head, as the 2D figure's cut. */
 export const BUILDS = {

@@ -5,20 +5,31 @@
 import { Sex } from '@marchlands/core';
 
 import { type FigureHairColour, FigureHairStyle, type FigureSkinTone } from '../../../client/web/src/lib/game-art.ts';
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { lit, type Shades, sweep } from '../gear/common.ts';
-import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
+import type { PixelCanvas, Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { HAND_FAR, HAND_NEAR, HEAD, layer, part } from './skeleton.ts';
 
-const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
-const skinShades = (tone: FigureSkinTone): Shades => [`skin${cap(tone)}Hi` as Colour, `skin${cap(tone)}` as Colour, `skin${cap(tone)}Shade` as Colour];
-const hairShades = (colour: FigureHairColour): Shades => [`hair${cap(colour)}Hi` as Colour, `hair${cap(colour)}` as Colour, `hair${cap(colour)}Dark` as Colour];
+const SKIN_SHADES: Record<FigureSkinTone, Shades> = {
+  pale: [Colour.SKIN_PALE_HI, Colour.SKIN_PALE, Colour.SKIN_PALE_SHADE],
+  fair: [Colour.SKIN_FAIR_HI, Colour.SKIN_FAIR, Colour.SKIN_FAIR_SHADE],
+  olive: [Colour.SKIN_OLIVE_HI, Colour.SKIN_OLIVE, Colour.SKIN_OLIVE_SHADE],
+  brown: [Colour.SKIN_BROWN_HI, Colour.SKIN_BROWN, Colour.SKIN_BROWN_SHADE],
+};
+const HAIR_SHADES: Record<FigureHairColour, Shades> = {
+  black: [Colour.HAIR_BLACK_HI, Colour.HAIR_BLACK, Colour.HAIR_BLACK_DARK],
+  brown: [Colour.HAIR_BROWN_HI, Colour.HAIR_BROWN, Colour.HAIR_BROWN_DARK],
+  auburn: [Colour.HAIR_AUBURN_HI, Colour.HAIR_AUBURN, Colour.HAIR_AUBURN_DARK],
+  blond: [Colour.HAIR_BLOND_HI, Colour.HAIR_BLOND, Colour.HAIR_BLOND_DARK],
+  grey: [Colour.HAIR_GREY_HI, Colour.HAIR_GREY, Colour.HAIR_GREY_DARK],
+};
 
 const inHead = (x: number, y: number, grow = 0) => ((x + 0.5 - HEAD.cx) / (HEAD.rx + grow)) ** 2 + ((y + 0.5 - HEAD.cy) / (HEAD.ry + grow)) ** 2 <= 1;
 
 /** The head, neck and hands in `tone`. */
 export function skin(sex: Sex, tone: FigureSkinTone): PixelCanvas {
-  const s = skinShades(tone);
+  const s = SKIN_SHADES[tone];
   const [, mid, shade] = s;
   const female = sex === Sex.FEMALE;
   const head = part('skin-head', (c) => {
@@ -52,12 +63,12 @@ export function skin(sex: Sex, tone: FigureSkinTone): PixelCanvas {
   head.set(48, 13, s[2]);
   head.set(48, 14, s[2]);
   head.set(49, 14, s[2]);
-  head.set(53, 13, 'outline');
-  head.set(54, 13, 'sparkle');
-  for (const x of [52, 53, 54]) head.set(x, 11, female ? s[2] : 'hairBrownDark');
-  if (female) head.set(54, 12, 'outline');
-  head.set(53, 17, female ? 'lips' : s[2]);
-  head.set(54, 17, female ? 'lips' : s[2]);
+  head.set(53, 13, Colour.OUTLINE);
+  head.set(54, 13, Colour.SPARKLE);
+  for (const x of [52, 53, 54]) head.set(x, 11, female ? s[2] : Colour.HAIR_BROWN_DARK);
+  if (female) head.set(54, 12, Colour.OUTLINE);
+  head.set(53, 17, female ? Colour.LIPS : s[2]);
+  head.set(54, 17, female ? Colour.LIPS : s[2]);
   head.set(55, 15, s[2]);
   const hands = part('skin-hands', (c) => {
     oval(c, HAND_FAR[0], HAND_FAR[1], 2.2, 2.2, lit(HAND_FAR[0], HAND_FAR[1], 2, s));
@@ -83,7 +94,7 @@ function crown(c: PixelCanvas, h: Shades, grow: number, nape: number) {
 
 /** A hairstyle in a colour. */
 export function hair(style: FigureHairStyle, colour: FigureHairColour): PixelCanvas {
-  const h = hairShades(colour);
+  const h = HAIR_SHADES[colour];
   const sex = style === FigureHairStyle.LOOSE || style === FigureHairStyle.BRAID ? Sex.FEMALE : Sex.MALE;
   const parts: PixelCanvas[] = [];
   if (style === FigureHairStyle.LOOSE)
@@ -108,7 +119,7 @@ export function hair(style: FigureHairStyle, colour: FigureHairColour): PixelCan
           (t) => 3.1 - t * 0.7,
           (t, side) => (Math.floor(t * 10 + side * 0.9) % 2 ? h[2] : side > 0.3 ? h[1] : h[0]),
         );
-        oval(c, 45, 37, 1.6, 1.2, 'leatherDark');
+        oval(c, 45, 37, 1.6, 1.2, Colour.LEATHER_DARK);
       }),
     );
   parts.push(

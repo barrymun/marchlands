@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { FORT_KEY_LIST, FORT_KEYS, TROOP_KEY_LIST, TROOP_KEYS } from '@marchlands/core';
+import { FORT_KEY_LIST, FORT_KEYS, FortKey, TROOP_KEY_LIST, TROOP_KEYS, TroopKey } from '@marchlands/core';
 
-import { UnitGroup } from '@/components/stats-panel/constants';
+import { UNIT_IDS, UnitGroup } from '@/components/stats-panel/constants';
 import { shareOf, sumPrefix, unitCount, unitName } from '@/components/stats-panel/utils';
 import { troopName } from '@/lib/game-data';
 
@@ -33,56 +33,54 @@ describe(sumPrefix.name, () => {
 describe(unitCount.name, () => {
   it('reads the `group.unit` counter', () => {
     const c = { 'trained.archer': 120, 'killed.archer': 7, 'trained.pikemen': 3 };
-    expect(unitCount(c, UnitGroup.TRAINED, 'archer')).toBe(120);
-    expect(unitCount(c, UnitGroup.KILLED, 'archer')).toBe(7);
-    expect(unitCount(c, UnitGroup.TRAINED, 'pikemen')).toBe(3);
+    expect(unitCount(c, UnitGroup.TRAINED, TroopKey.ARCHER)).toBe(120);
+    expect(unitCount(c, UnitGroup.KILLED, TroopKey.ARCHER)).toBe(7);
+    expect(unitCount(c, UnitGroup.TRAINED, TroopKey.PIKEMEN)).toBe(3);
   });
 
   it('is 0 when the counter is missing', () => {
-    expect(unitCount({}, UnitGroup.TRAINED, 'archer')).toBe(0);
-    expect(unitCount({ 'trained.archer': 5 }, UnitGroup.HEALED, 'archer')).toBe(0);
+    expect(unitCount({}, UnitGroup.TRAINED, TroopKey.ARCHER)).toBe(0);
+    expect(unitCount({ 'trained.archer': 5 }, UnitGroup.HEALED, TroopKey.ARCHER)).toBe(0);
   });
 
   it('computes died as lost less injured', () => {
-    expect(unitCount({ 'lost.archer': 50, 'injured.archer': 20 }, UnitGroup.DIED, 'archer')).toBe(30);
-    expect(unitCount({ 'lost.archer': 50 }, UnitGroup.DIED, 'archer')).toBe(50);
+    expect(unitCount({ 'lost.archer': 50, 'injured.archer': 20 }, UnitGroup.DIED, TroopKey.ARCHER)).toBe(30);
+    expect(unitCount({ 'lost.archer': 50 }, UnitGroup.DIED, TroopKey.ARCHER)).toBe(50);
   });
 
   it('never reports a negative died count', () => {
-    expect(unitCount({ 'lost.archer': 10, 'injured.archer': 25 }, UnitGroup.DIED, 'archer')).toBe(0);
-    expect(unitCount({ 'injured.archer': 4 }, UnitGroup.DIED, 'archer')).toBe(0);
+    expect(unitCount({ 'lost.archer': 10, 'injured.archer': 25 }, UnitGroup.DIED, TroopKey.ARCHER)).toBe(0);
+    expect(unitCount({ 'injured.archer': 4 }, UnitGroup.DIED, TroopKey.ARCHER)).toBe(0);
   });
 
   it('ignores a stored `died.` counter (died is always derived)', () => {
-    expect(unitCount({ 'died.archer': 99 }, UnitGroup.DIED, 'archer')).toBe(0);
+    expect(unitCount({ 'died.archer': 99 }, UnitGroup.DIED, TroopKey.ARCHER)).toBe(0);
   });
 
   it('works for fortifications', () => {
-    expect(unitCount({ 'trained.trap': 400, 'lost.trap': 30 }, UnitGroup.TRAINED, 'trap')).toBe(400);
-    expect(unitCount({ 'trained.trap': 400, 'lost.trap': 30 }, UnitGroup.DIED, 'trap')).toBe(30);
+    expect(unitCount({ 'trained.trap': 400, 'lost.trap': 30 }, UnitGroup.TRAINED, FortKey.TRAP)).toBe(400);
+    expect(unitCount({ 'trained.trap': 400, 'lost.trap': 30 }, UnitGroup.DIED, FortKey.TRAP)).toBe(30);
   });
 });
 
 describe(unitName.name, () => {
   it('names every troop key by its troop id', () => {
     for (const [id, key] of Object.entries(TROOP_KEYS)) expect(unitName(key)).toBe(troopName(Number(id)));
-    expect(unitName('archer')).toBe('Archer');
-    expect(unitName('lightCavalry')).toBe('Cavalry');
+    expect(unitName(TroopKey.ARCHER)).toBe('Archer');
+    expect(unitName(TroopKey.LIGHT_CAVALRY)).toBe('Cavalry');
   });
 
   it('names every fortification key by its fort id', () => {
     for (const [id, key] of Object.entries(FORT_KEYS)) expect(unitName(key)).toBe(troopName(Number(id)));
-    expect(unitName('rockfall')).toBe('Trebuchet');
+    expect(unitName(FortKey.ROCKFALL)).toBe('Trebuchet');
   });
 
   it('gives a display name for every listed unit', () => {
     for (const k of [...TROOP_KEY_LIST, ...FORT_KEY_LIST]) expect(unitName(k)).not.toBe(k);
   });
 
-  it('falls back to the key when the unit is unknown', () => {
-    expect(unitName('dragon')).toBe('dragon');
-    expect(unitName('')).toBe('');
-    expect(unitName('toString')).toBe('toString');
+  it('knows the troops and the fortifications apart, none sharing a key', () => {
+    expect(Object.keys(UNIT_IDS)).toHaveLength(TROOP_KEY_LIST.length + FORT_KEY_LIST.length);
   });
 });
 

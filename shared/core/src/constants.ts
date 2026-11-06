@@ -78,33 +78,57 @@ export const FortType = {
 } as const;
 export type FortType = (typeof FortType)[keyof typeof FortType];
 
-/** Troop keys as used in client objects, indexed by troop id. */
-export const TROOP_KEYS = {
-  2: 'peasants',
-  3: 'militia',
-  4: 'scouter',
-  5: 'pikemen',
-  6: 'swordsmen',
-  7: 'archer',
-  8: 'carriage',
-  9: 'lightCavalry',
-  10: 'heavyCavalry',
-  11: 'ballista',
-  12: 'batteringRam',
-  13: 'catapult',
+/** Troop keys as used in client objects and stored troop counts. */
+export const TroopKey = {
+  PEASANTS: 'peasants',
+  MILITIA: 'militia',
+  SCOUTER: 'scouter',
+  PIKEMEN: 'pikemen',
+  SWORDSMEN: 'swordsmen',
+  ARCHER: 'archer',
+  CARRIAGE: 'carriage',
+  LIGHT_CAVALRY: 'lightCavalry',
+  HEAVY_CAVALRY: 'heavyCavalry',
+  BALLISTA: 'ballista',
+  BATTERING_RAM: 'batteringRam',
+  CATAPULT: 'catapult',
 } as const;
-export type TroopKey = (typeof TROOP_KEYS)[keyof typeof TROOP_KEYS];
+export type TroopKey = (typeof TroopKey)[keyof typeof TroopKey];
+/** The troop keys, indexed by troop id. */
+export const TROOP_KEYS = {
+  2: TroopKey.PEASANTS,
+  3: TroopKey.MILITIA,
+  4: TroopKey.SCOUTER,
+  5: TroopKey.PIKEMEN,
+  6: TroopKey.SWORDSMEN,
+  7: TroopKey.ARCHER,
+  8: TroopKey.CARRIAGE,
+  9: TroopKey.LIGHT_CAVALRY,
+  10: TroopKey.HEAVY_CAVALRY,
+  11: TroopKey.BALLISTA,
+  12: TroopKey.BATTERING_RAM,
+  13: TroopKey.CATAPULT,
+} as const;
 export const TROOP_KEY_LIST = Object.values(TROOP_KEYS) as TroopKey[];
 export const TROOP_ID_BY_KEY = Object.fromEntries(Object.entries(TROOP_KEYS).map(([id, key]) => [key, Number(id)])) as Record<TroopKey, TroopType>;
 
-export const FORT_KEYS = {
-  14: 'trap',
-  15: 'abatis',
-  16: 'arrowTower',
-  17: 'rollingLogs',
-  18: 'rockfall',
+/** Fortification keys, as troop keys. */
+export const FortKey = {
+  TRAP: 'trap',
+  ABATIS: 'abatis',
+  ARROW_TOWER: 'arrowTower',
+  ROLLING_LOGS: 'rollingLogs',
+  ROCKFALL: 'rockfall',
 } as const;
-export type FortKey = (typeof FORT_KEYS)[keyof typeof FORT_KEYS];
+export type FortKey = (typeof FortKey)[keyof typeof FortKey];
+/** The fortification keys, indexed by fortification id. */
+export const FORT_KEYS = {
+  14: FortKey.TRAP,
+  15: FortKey.ABATIS,
+  16: FortKey.ARROW_TOWER,
+  17: FortKey.ROLLING_LOGS,
+  18: FortKey.ROCKFALL,
+} as const;
 export const FORT_KEY_LIST = Object.values(FORT_KEYS) as FortKey[];
 export const FORT_ID_BY_KEY = Object.fromEntries(Object.entries(FORT_KEYS).map(([id, key]) => [key, Number(id)])) as Record<FortKey, FortType>;
 
@@ -384,6 +408,7 @@ export const REQUIREMENT_KINDS = Object.values(RequirementKind) as [RequirementK
 /** What needs a building or technology: another building, a troop or a technology (building-info.ts, tech-info.ts). */
 export const UnlockKind = { BUILDING: 'building', TROOP: 'troop', TECH: 'tech' } as const;
 export type UnlockKind = (typeof UnlockKind)[keyof typeof UnlockKind];
+export const UNLOCK_KINDS = Object.values(UnlockKind) as [UnlockKind, ...UnlockKind[]];
 
 /** The parts of a city a building can go in (the available buildings' list). */
 export const BuildingArea = { INSIDE: 'inside', OUTSIDE: 'outside', WALLS: 'walls' } as const;
@@ -549,3 +574,36 @@ export const FactionId = {
 } as const;
 export type FactionId = (typeof FactionId)[keyof typeof FactionId];
 export const FACTION_IDS = Object.values(FactionId) as [FactionId, ...FactionId[]];
+
+/** (marchlands) A hero's gear pieces (players.misc.gearStars), in the order they're listed. */
+export const GearPieceId = {
+  WEAPON: 'weapon',
+  SHIELD: 'shield',
+  MOUNT: 'mount',
+  NECKLACE: 'necklace',
+  CHARM: 'charm',
+  RING: 'ring',
+  HEAD: 'head',
+  SHOULDER: 'shoulder',
+  CHEST: 'chest',
+  BACK: 'back',
+  GAUNTLETS: 'gauntlets',
+  BELT: 'belt',
+  LEGS: 'legs',
+  FEET: 'feet',
+} as const;
+export type GearPieceId = (typeof GearPieceId)[keyof typeof GearPieceId];
+
+/** Who asked to join an alliance (alliance_requests.kind): the player, or an officer of the alliance. */
+export const AllianceRequestKind = { APPLY: 'apply', INVITE: 'invite' } as const;
+export type AllianceRequestKind = (typeof AllianceRequestKind)[keyof typeof AllianceRequestKind];
+
+/** The rows of world_state. */
+export const WorldStateKey = {
+  WORLD: 'world',
+  ZONES: 'zones',
+  MERCHANT: 'merchant',
+  NPC_ECONOMY: 'npc-economy',
+  STATS_STARTED_AT: 'statsStartedAt',
+} as const;
+export type WorldStateKey = (typeof WorldStateKey)[keyof typeof WorldStateKey];

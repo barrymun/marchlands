@@ -2,6 +2,7 @@ import type { SQL } from 'drizzle-orm';
 import { PgDialect } from 'drizzle-orm/pg-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { StatGroup } from '@marchlands/core';
 import type { SettleFlows } from '@marchlands/core';
 import type { Db } from '@marchlands/db';
 
@@ -55,14 +56,14 @@ describe(addCounters.name, () => {
 
 describe(prefixed.name, () => {
   it('prefixes each count with its group, skipping zeros and missing counts', () => {
-    expect(prefixed('trained', { archer: 5, scout: 0, worker: undefined })).toEqual({ 'trained.archer': 5 });
-    expect(prefixed('lost', { archer: 5 }, 2)).toEqual({ 'lost.archer': 10 });
+    expect(prefixed(StatGroup.TRAINED, { archer: 5, scout: 0, worker: undefined })).toEqual({ 'trained.archer': 5 });
+    expect(prefixed(StatGroup.LOST, { archer: 5 }, 2)).toEqual({ 'lost.archer': 10 });
   });
 
   it('is empty for no counts', () => {
-    expect(prefixed('trained', null)).toEqual({});
-    expect(prefixed('trained', undefined)).toEqual({});
-    expect(prefixed('trained', {})).toEqual({});
+    expect(prefixed(StatGroup.TRAINED, null)).toEqual({});
+    expect(prefixed(StatGroup.TRAINED, undefined)).toEqual({});
+    expect(prefixed(StatGroup.TRAINED, {})).toEqual({});
   });
 });
 

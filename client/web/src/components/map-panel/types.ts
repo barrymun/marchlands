@@ -1,5 +1,3 @@
-export type RelationGroup = 'friend' | 'enemy' | 'other';
-
 /** One of the player's cities' farming list: the targets its flows' "Attack targets" actions list for it. */
 export interface FarmList {
   cityId: number;

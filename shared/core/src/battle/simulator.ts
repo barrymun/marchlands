@@ -62,7 +62,9 @@ export interface BattleOptions {
 }
 
 /** Who killed attacking troops: a defending troop type (battle index), or a fortification. */
-export type KillSource = number | 'trap' | 'abatis' | 'log' | 'trebuchet' | 'tower';
+export const FortKill = { TRAP: 'trap', ABATIS: 'abatis', LOG: 'log', TREBUCHET: 'trebuchet', TOWER: 'tower' } as const;
+export type FortKill = (typeof FortKill)[keyof typeof FortKill];
+export type KillSource = number | FortKill;
 
 export type TraceEvent =
   | { kind: typeof TraceKind.KILL; round: number; source: KillSource; target: number; killed: number; location: number }
@@ -426,7 +428,7 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
         const kills = Math.trunc(f(f(maxTraps * 0.5 * trapKillPower) / groups));
         for (const lp of A) {
           if (!inZone(lp)) continue;
-          if (trace) killed(round, 'trap', lp, kills);
+          if (trace) killed(round, FortKill.TRAP, lp, kills);
           lp.eff = Math.max(0, lp.eff - kills);
         }
         trapCount -= maxTraps;
@@ -440,7 +442,7 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
       const target = inZone(A[7]) ? A[7] : inZone(A[8]) ? A[8] : null;
       if (target) {
         const fired = Math.min(abatisCount, abatisDieRate);
-        if (trace) killed(round, 'abatis', target, Math.trunc(fired * 0.535));
+        if (trace) killed(round, FortKill.ABATIS, target, Math.trunc(fired * 0.535));
         target.eff = Math.max(target.eff - Math.trunc(fired * 0.535), 0);
         if (fixes) abatisCount -= fired;
       }
@@ -465,7 +467,7 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
         const dmg = fixes
           ? Math.floor(f(f(f(fired * logKillPower) * fortStats[3].attack) / f(target.stat.defense * target.stat.life)))
           : Math.floor(f(f(f(fired * logKillPower) * fortStats[3].attack) * target.stat.defense));
-        if (trace) killed(round, 'log', target, dmg);
+        if (trace) killed(round, FortKill.LOG, target, dmg);
         target.eff = Math.trunc(Math.max(f(target.eff - dmg), 0));
         logCount -= fired;
       }
@@ -488,13 +490,13 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
         if (totalDef > totalAtk) {
           rockCount -= maxRockDieRate;
           const n = Math.floor(f(f(f(maxRockDieRate * fortStats[4].attack) * rockKillPower) / f(target.stat.defense * target.stat.life)));
-          if (trace) killed(round, 'trebuchet', target, n);
+          if (trace) killed(round, FortKill.TREBUCHET, target, n);
           target.eff = Math.trunc(Math.max(f(target.eff - n), 0));
         } else {
           const used = Math.ceil(f(f(f(target.stat.defense * target.stat.life) * target.eff) / f(rockKillPower * fortStats[4].attack)));
           rockCount = Math.max(0, Math.trunc(f(rockCount - used)));
           if (fixes) {
-            if (trace) killed(round, 'trebuchet', target, target.eff);
+            if (trace) killed(round, FortKill.TREBUCHET, target, target.eff);
             target.eff = 0;
           }
         }
@@ -519,7 +521,7 @@ export function simulateBattle(atk: BattleSide, def: DefenderSide, opts: BattleO
         const distance = fieldSize - target.location;
         const mod = distance > f(tower.stat.range / 2) ? f(0.5) : 1;
         const n = Math.trunc(f(f(f(tower.stat.attack * f(tower.count)) * mod) / f(target.stat.defense * target.stat.life)));
-        if (trace) killed(round, 'tower', target, n);
+        if (trace) killed(round, FortKill.TOWER, target, n);
         target.eff = n > target.eff ? 0 : target.eff - n;
       }
     }

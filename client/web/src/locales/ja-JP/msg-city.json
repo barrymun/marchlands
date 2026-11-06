@@ -22,5 +22,10 @@
   "draftedToday": "今日はすでにこの都市から徴兵しています。各都市から徴兵できるのは1日1回です。",
   "abandonKeepRegular": "通常の都市を少なくとも1つ残す必要があります。歴史都市は奪われることがあります。",
   "abandonAlready": "この都市はすでに放棄の手続き中です。",
-  "abandonNotRunning": "この都市は放棄の手続き中ではありません。"
+  "abandonNotRunning": "この都市は放棄の手続き中ではありません。",
+  "moveOutNotAbandoning": "都市の中身を移せるのは、放棄の途中だけです。",
+  "moveOutUnderAttack": "敵の軍隊がこの都市へ向かっているため、移すことはできません。",
+  "moveOutCooldown": "移した都市を残したため、次に都市の中身を移せるのは{{time}}後です。",
+  "moveOutTarget": "移す先には、放棄の途中ではない他の自分の都市を選んでください。",
+  "moveOutNothing": "この都市に移せるものはありません。"
 }

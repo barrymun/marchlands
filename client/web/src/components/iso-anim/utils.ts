@@ -21,11 +21,12 @@ import {
   WALK_SPEED,
   WHEEL_FRAMES,
 } from '@/components/iso-anim/constants';
-import type { Animated, Frame, GridSpot, Marching, Rgb, Side, Spot, SpotPoint, Streets, TownState } from '@/components/iso-anim/types';
+import type { Animated, Frame, GridSpot, Marching, Rgb, Spot, SpotPoint, Streets, TownState } from '@/components/iso-anim/types';
 import { Weather } from '@/components/iso-viewport/constants';
 import type { Overlay, Particle, PixelArt, Sky } from '@/components/iso-viewport/types';
 import { spriteBox } from '@/components/iso-viewport/utils';
 import { pairs } from '@/lib/arrays';
+import type { ArmySide } from '@/lib/game-art';
 
 /** A stable 32-bit hash of a string (FNV-1a), to seed an animation from what it belongs to. */
 export function hash(s: string): number {
@@ -563,7 +564,7 @@ export function glintFrame(i: number, r: number): Frame {
 }
 
 /** An army on the march: three soldiers stepping behind a banner of their side's colour, frame `i`, facing left or right. Anchored at their feet. */
-export function marchFrame(i: number, side: Side, left: boolean): Frame {
+export function marchFrame(i: number, side: ArmySide, left: boolean): Frame {
   const step = i % 2 === 1;
   const flag = SIDE_COLOURS[side];
   // the soldiers in the middle, the banner's pole at the front and its flag flying out beyond it
@@ -876,7 +877,7 @@ export function workerOverlays(places: readonly (GridSpot & { key: string })[], 
 }
 
 /** The armies the player can see, marching on the map at time `t` (`now` the real clock), placed nearest the camera. */
-export function armyOverlays(armies: readonly { army: Marching; side: Side }[], size: number, near: GridSpot, t: number, now = Date.now()): Overlay[] {
+export function armyOverlays(armies: readonly { army: Marching; side: ArmySide }[], size: number, near: GridSpot, t: number, now = Date.now()): Overlay[] {
   return armies.flatMap(({ army, side }) => {
     const p = armyAt(army, size, now, near);
     if (!p) return [];

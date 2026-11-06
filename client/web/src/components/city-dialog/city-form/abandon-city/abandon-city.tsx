@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { CityBean } from '@marchlands/api-client';
@@ -6,6 +6,7 @@ import { abandonPrestigeBack, BALANCE } from '@marchlands/core';
 
 import { AbandonNotice } from '@/components/abandon-notice/abandon-notice';
 import { AbandonConfirm } from '@/components/city-dialog/city-form/abandon-city/abandon-confirm/abandon-confirm';
+import { MoveOut } from '@/components/city-dialog/city-form/abandon-city/constants';
 import { keepsRegularCity } from '@/components/city-dialog/city-form/abandon-city/utils';
 import { Button } from '@/components/ui/button';
 import { usePlayer } from '@/hooks/use-game';
@@ -19,12 +20,23 @@ export function AbandonCity({ city }: { city: CityBean }) {
   const castles = usePlayer().data?.castles ?? [];
   const [confirming, setConfirming] = useState(false);
   const now = useNow();
-  if (city.abandonAt) return <AbandonNotice city={city} />;
+  if (city.abandonAt)
+    return (
+      <div className="grid gap-3">
+        <AbandonNotice city={city} />
+        <p className={`text-xs ${LOSS_TEXT}`}>{t('abandon.arriving')}</p>
+        <Suspense fallback={null}>
+          <MoveOut city={city} />
+        </Suspense>
+      </div>
+    );
   const allowed = keepsRegularCity(castles, city.id);
   const prestigeBack = abandonPrestigeBack(city, now + BALANCE.abandon.delayMs);
   return (
     <div className="grid gap-2">
       <p className={`text-xs ${LOSS_TEXT}`}>{t('abandon.warning', { time: duration(BALANCE.abandon.delayMs) })}</p>
+      <p className={`text-xs ${LOSS_TEXT}`}>{t('abandon.moving')}</p>
+      <p className={`text-xs ${LOSS_TEXT}`}>{t('abandon.arriving')}</p>
       {prestigeBack > 0 && (
         <p className={`text-xs ${LOSS_TEXT}`}>
           {t('abandon.prestigeNote', {

@@ -2,6 +2,7 @@
 // step; Napoleon's Diary is a strapped campaign notebook with a quill; Archimedes' Note a scroll of geometry under a
 // pair of dividers.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas } from '../pixel.ts';
 import { oval, rect } from '../shapes.ts';
 import { BLUE, canvas, corners, GOLD, GREEN, LEATHER, lyingBook, quill, RED, rod, scroll, sparkle, stamp, tome, type Tone } from './common.ts';
@@ -11,9 +12,9 @@ const PILE: readonly Tone[] = [LEATHER, RED, BLUE, GREEN];
 
 /** A ribbon bookmark hanging from a book's fore-edge at (x, y). */
 function bookmark(c: PixelCanvas, x: number, y: number) {
-  rect(c, x, y, x, y + 3, 'banner');
-  c.set(x - 1, y + 4, 'bannerDark');
-  c.set(x + 1, y + 4, 'bannerDark');
+  rect(c, x, y, x, y + 3, Colour.BANNER);
+  c.set(x - 1, y + 4, Colour.BANNER_DARK);
+  c.set(x + 1, y + 4, Colour.BANNER_DARK);
 }
 
 /**
@@ -45,7 +46,7 @@ function guidelines(seed: string, books: number, { fine = false, grand = false }
     }
     if (grand) {
       const gx = top.x + Math.floor(top.w / 2) + 2;
-      stamp(c, gx - 1, top.y - 3, ['oho', 'odo'], { o: 'goldDark', h: 'waterLight', d: 'blue' });
+      stamp(c, gx - 1, top.y - 3, ['oho', 'odo'], { o: Colour.GOLD_DARK, h: Colour.WATER_LIGHT, d: Colour.BLUE });
     }
     if (books > 1) bookmark(c, top.x + top.w - 5, top.y + t);
     c.outline();
@@ -61,19 +62,19 @@ function guidelines(seed: string, books: number, { fine = false, grand = false }
 /** Napoleon's Diary: a dark blue campaign notebook, held shut by a strap, with a quill across it. */
 function napoleonsDiary(): PixelCanvas {
   const c = canvas('napoleons-diary');
-  const n = { hi: 'blueHi', mid: 'blueDark', dark: 'blueEdge' } as const;
+  const n = { hi: Colour.BLUE_HI, mid: Colour.BLUE_DARK, dark: Colour.BLUE_EDGE } as const;
   tome(c, 3, 5, 19, 27, n);
   corners(c, 3, 5, 19, 27);
   // the strap round it and its buckle
-  rect(c, 3, 17, 21, 18, 'leatherDark');
+  rect(c, 3, 17, 21, 18, Colour.LEATHER_DARK);
   rect(c, 15, 16, 17, 19, GOLD.mid);
-  c.set(16, 17, 'leatherDark');
+  c.set(16, 17, Colour.LEATHER_DARK);
   // a laurel wreath on the cover
-  stamp(c, 8, 8, ['g...g', 'g...g', '.g.g.', '..h..'], { g: 'gold', h: 'fireHi' });
-  rect(c, 12, 27, 12, 29, 'banner');
+  stamp(c, 8, 8, ['g...g', 'g...g', '.g.g.', '..h..'], { g: Colour.GOLD, h: Colour.FIRE_HI });
+  rect(c, 12, 27, 12, 29, Colour.BANNER);
   quill(c, [18, 30], [27, 3]);
   c.outline();
-  c.line([19, 28], [26, 6], 'linenDark');
+  c.line([19, 28], [26, 6], Colour.LINEN_DARK);
   return c;
 }
 
@@ -82,18 +83,18 @@ function archimedesNote(): PixelCanvas {
   const c = canvas('archimedes-note');
   scroll(c, 6, 4, 23, 28);
   // a circle with a triangle drawn in it
-  oval(c, 14.5, 15.5, 6, 6, 'blueDark');
-  oval(c, 14.5, 15.5, 5, 5, 'linen');
-  c.line([14, 10], [10, 19], 'blueDark');
-  c.line([14, 10], [19, 19], 'blueDark');
-  c.line([10, 19], [19, 19], 'blueDark');
-  rect(c, 9, 24, 19, 24, 'linenDark');
+  oval(c, 14.5, 15.5, 6, 6, Colour.BLUE_DARK);
+  oval(c, 14.5, 15.5, 5, 5, Colour.LINEN);
+  c.line([14, 10], [10, 19], Colour.BLUE_DARK);
+  c.line([14, 10], [19, 19], Colour.BLUE_DARK);
+  c.line([10, 19], [19, 19], Colour.BLUE_DARK);
+  rect(c, 9, 24, 19, 24, Colour.LINEN_DARK);
   // the dividers: a hinge at the top, two steel legs
-  rod(c, [23, 6], [18, 28], 3.6, 'steelDark');
-  rod(c, [23, 6], [28, 27], 3.6, 'steel');
+  rod(c, [23, 6], [18, 28], 3.6, Colour.STEEL_DARK);
+  rod(c, [23, 6], [28, 27], 3.6, Colour.STEEL);
   c.outline();
-  c.line([24, 9], [27, 24], 'steelHi');
-  stamp(c, 22, 4, ['.o.', 'ogo', '.o.'], { o: 'outline', g: 'gold' });
+  c.line([24, 9], [27, 24], Colour.STEEL_HI);
+  stamp(c, 22, 4, ['.o.', 'ogo', '.o.'], { o: Colour.OUTLINE, g: Colour.GOLD });
   return c;
 }
 

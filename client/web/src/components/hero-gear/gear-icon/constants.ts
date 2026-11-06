@@ -3,6 +3,7 @@ import { SpotKind } from '@marchlands/core';
 import spotsJson from '@/assets/spots.json';
 import type { Rgb, Spot } from '@/components/iso-anim/types';
 import { ANIMATION_FPS } from '@/components/iso-viewport/constants';
+import { PALETTE } from '@/lib/palette';
 
 /** Where the glints, glowing blades and stars stand on each gear sprite, by `gear/<file>` (npm run art:draw -- gear). */
 export const GEAR_SPOTS = spotsJson as Record<string, readonly Spot[] | undefined>;
@@ -59,16 +60,16 @@ export const MOVE_PX: Readonly<Partial<Record<SpotKind, number>>> = {
   [SpotKind.SWING]: 1.4,
 };
 
-/** The sprites' palette colours the icons move in (tools/art/pixel.ts, PALETTE): white light, gold (a burst's sparks below level 3), and each level's bright colour (gearNHi). */
-export const WHITE: Rgb = [255, 255, 255];
-export const GOLD: Rgb = [232, 186, 72];
+/** The base colours the icons move in (lib/palette.ts): white light, gold (a burst's sparks below level 3), and each level's bright colour (gearNHi). */
+export const WHITE: Rgb = PALETTE.SPARKLE;
+export const GOLD: Rgb = PALETTE.GOLD;
 export const GEAR_LIGHT: Readonly<Record<number, Rgb>> = {
-  3: [104, 140, 236],
-  4: [92, 204, 184],
-  5: [132, 112, 226],
-  6: [188, 104, 178],
-  7: [244, 100, 192],
-  8: [252, 162, 74],
-  9: [252, 224, 112],
-  10: [244, 96, 116],
+  3: PALETTE.GEAR_3_HI,
+  4: PALETTE.GEAR_4_HI,
+  5: PALETTE.GEAR_5_HI,
+  6: PALETTE.GEAR_6_HI,
+  7: PALETTE.GEAR_7_HI,
+  8: PALETTE.GEAR_8_HI,
+  9: PALETTE.GEAR_9_HI,
+  10: PALETTE.GEAR_10_HI,
 };

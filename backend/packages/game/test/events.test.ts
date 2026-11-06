@@ -3,7 +3,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { HeroBuffId } from '@marchlands/core';
+import { HealPayment, HeroBuffId, TimedEventType } from '@marchlands/core';
 
 import type { Ctx } from '#/context.ts';
 import { completeBuilding } from '#/engine/buildings.ts';
@@ -27,7 +27,7 @@ vi.mock('#/repo.ts', () => ({ getPlayer: vi.fn(), savePlayer: vi.fn() }));
 
 const ctx = { now: 1000 } as Ctx;
 
-const event = (type: string, payload: Record<string, unknown> = {}, ids: Partial<EventRow> = {}): EventRow => ({
+const event = (type: TimedEventType, payload: Record<string, unknown> = {}, ids: Partial<EventRow> = {}): EventRow => ({
   id: 1,
   type,
   dueAt: 1000,
@@ -43,63 +43,63 @@ beforeEach(() => {
 
 describe(dispatchEvent.name, () => {
   it('completes a building at the event’s city and position', async () => {
-    await dispatchEvent(ctx, event('building', { positionId: '3' }));
+    await dispatchEvent(ctx, event(TimedEventType.BUILDING, { positionId: '3' }));
     expect(completeBuilding).toHaveBeenCalledWith(ctx, 8, 3);
   });
 
   it('completes the player’s research', async () => {
-    await dispatchEvent(ctx, event('research', { techId: 5 }));
+    await dispatchEvent(ctx, event(TimedEventType.RESEARCH, { techId: 5 }));
     expect(completeResearch).toHaveBeenCalledWith(ctx, 7, 5);
   });
 
   it('completes training at the event’s city and barracks', async () => {
-    await dispatchEvent(ctx, event('train', { positionId: 2 }));
+    await dispatchEvent(ctx, event(TimedEventType.TRAIN, { positionId: 2 }));
     expect(completeTraining).toHaveBeenCalledWith(ctx, 8, 2);
   });
 
   it('processes the army, and returns nothing', async () => {
-    expect(await dispatchEvent(ctx, event('army', { armyId: '12' }))).toBeUndefined();
+    expect(await dispatchEvent(ctx, event(TimedEventType.ARMY, { armyId: '12' }))).toBeUndefined();
     expect(processArmy).toHaveBeenCalledWith(ctx, 12);
   });
 
   it('expires a hero boost', async () => {
-    await dispatchEvent(ctx, event('hero.buff', { heroId: 4, attr: HeroBuffId.POWER }));
+    await dispatchEvent(ctx, event(TimedEventType.HERO_BUFF, { heroId: 4, attr: HeroBuffId.POWER }));
     expect(expireHeroBuff).toHaveBeenCalledWith(ctx, 4, HeroBuffId.POWER);
   });
 
   it('delivers a shipment', async () => {
-    await dispatchEvent(ctx, event('shipment', { shipmentId: 9 }));
+    await dispatchEvent(ctx, event(TimedEventType.SHIPMENT, { shipmentId: 9 }));
     expect(deliverShipment).toHaveBeenCalledWith(ctx, 9);
   });
 
   it('runs a scheduled heal, with resources unless honor was chosen, and only whole army ids', async () => {
-    await dispatchEvent(ctx, event('flow.heal', { payWith: 'honor', armyIds: [1, '2', 2.5, 'x'] }));
-    expect(runScheduledHeal).toHaveBeenLastCalledWith(ctx, 7, 8, 'honor', [1, 2]);
-    await dispatchEvent(ctx, event('flow.heal', { payWith: 'gold', armyIds: 'nope' }));
-    expect(runScheduledHeal).toHaveBeenLastCalledWith(ctx, 7, 8, 'resources', []);
-    await dispatchEvent(ctx, event('flow.heal'));
-    expect(runScheduledHeal).toHaveBeenLastCalledWith(ctx, 7, 8, 'resources', []);
+    await dispatchEvent(ctx, event(TimedEventType.FLOW_HEAL, { payWith: HealPayment.HONOR, armyIds: [1, '2', 2.5, 'x'] }));
+    expect(runScheduledHeal).toHaveBeenLastCalledWith(ctx, 7, 8, HealPayment.HONOR, [1, 2]);
+    await dispatchEvent(ctx, event(TimedEventType.FLOW_HEAL, { payWith: 'gold', armyIds: 'nope' }));
+    expect(runScheduledHeal).toHaveBeenLastCalledWith(ctx, 7, 8, HealPayment.RESOURCES, []);
+    await dispatchEvent(ctx, event(TimedEventType.FLOW_HEAL));
+    expect(runScheduledHeal).toHaveBeenLastCalledWith(ctx, 7, 8, HealPayment.RESOURCES, []);
   });
 
   it('resumes a flow, and runs the player’s flow queue', async () => {
-    await dispatchEvent(ctx, event('flow.resume', { flowId: 'f1' }));
+    await dispatchEvent(ctx, event(TimedEventType.FLOW_RESUME, { flowId: 'f1' }));
     expect(resumeFlow).toHaveBeenCalledWith(ctx, 7, 'f1');
-    await dispatchEvent(ctx, event('flow.queue'));
+    await dispatchEvent(ctx, event(TimedEventType.FLOW_QUEUE));
     expect(runQueue).toHaveBeenCalledWith(ctx, 7);
   });
 
   it('ignores the expiry of a buff it does not know', async () => {
-    await expect(dispatchEvent(ctx, event('buff.expire', { buffId: 'NoSuchBuff' }))).resolves.toBeUndefined();
-    await expect(dispatchEvent(ctx, event('buff.expire'))).resolves.toBeUndefined();
+    await expect(dispatchEvent(ctx, event(TimedEventType.BUFF_EXPIRE, { buffId: 'NoSuchBuff' }))).resolves.toBeUndefined();
+    await expect(dispatchEvent(ctx, event(TimedEventType.BUFF_EXPIRE))).resolves.toBeUndefined();
     expect(getPlayer).not.toHaveBeenCalled();
   });
 
   it('reads a missing payload as empty', async () => {
-    await dispatchEvent(ctx, { ...event('flow.queue'), payload: null as unknown as Record<string, unknown> });
+    await dispatchEvent(ctx, { ...event(TimedEventType.FLOW_QUEUE), payload: null as unknown as Record<string, unknown> });
     expect(runQueue).toHaveBeenCalledWith(ctx, 7);
   });
 
   it('refuses an event type it does not know', async () => {
-    await expect(dispatchEvent(ctx, event('nope'))).rejects.toThrow('unknown timed event type nope');
+    await expect(dispatchEvent(ctx, event('nope' as TimedEventType))).rejects.toThrow('unknown timed event type nope');
   });
 });

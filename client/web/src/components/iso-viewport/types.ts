@@ -104,4 +104,3 @@ export interface SceneBox {
 }
 
 /** A direction the arrows move a view, on screen. */
-export type PanDirection = 'up' | 'down' | 'left' | 'right';

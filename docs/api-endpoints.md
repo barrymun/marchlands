@@ -54,6 +54,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | PATCH | `/api/v1/cities/{cityId}` | Rename / logo / defence settings (city.modifyCastleName, army.setArmyGoOut) |
 | POST | `/api/v1/cities/{cityId}/abandon` | (marchlands) Start abandoning a city: after a real hour it and all the player has in it are gone. Refused unless a regular city would remain |
 | DELETE | `/api/v1/cities/{cityId}/abandon` | (marchlands) Keep a city being abandoned |
+| POST | `/api/v1/cities/{cityId}/abandon/move-out` | (marchlands) Move a city being abandoned out at once: its troops, injured troops and resources, shared evenly between other cities, and any heroes chosen |
 | POST | `/api/v1/cities/{cityId}/comfort` | Comfort: 3 blessing (gold for food), 4 population raising (food for people) (interior.pacifyPeople) |
 | POST | `/api/v1/cities/{cityId}/draft` | (marchlands) A held historic city drafts from a barbarian city in its area (the one given, or the one it would pick by itself), as one of its drafts today |
 | POST | `/api/v1/cities/{cityId}/draft/mode` | (marchlands) Let a held historic city draft by itself, or only when its holder chooses |

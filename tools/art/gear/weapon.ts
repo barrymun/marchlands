@@ -1,9 +1,10 @@
 // The weapon (tools/art/gear.ts): a sword lying on the diagonal, pommel at the bottom left, from a wooden practice sword
 // (0) to a crimson blade with silver edges and a horned guard (10).
 
-import { SpotKind } from '@marchlands/core';
+import { GearPieceId, SpotKind } from '@marchlands/core';
 
-import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import type { PixelCanvas, Pt } from '../pixel.ts';
 import { disc } from '../shapes.ts';
 import { along, bent, canvas, shaded, SIZE, STEEL, sweep, tier, WOOD } from './common.ts';
 
@@ -31,8 +32,8 @@ interface Sword {
   glows?: boolean;
 }
 
-const SWORD_GOLD = ['gold', 'gold', 'goldDark'] as const;
-const GRIP = ['leather', 'leatherDark'] as const;
+const SWORD_GOLD = [Colour.GOLD, Colour.GOLD, Colour.GOLD_DARK] as const;
+const GRIP = [Colour.LEATHER, Colour.LEATHER_DARK] as const;
 
 /** The sword at each gear level, plain to fantastic. */
 const SWORDS: Sword[] = [
@@ -42,12 +43,20 @@ const SWORDS: Sword[] = [
     grip: 6,
     width: 2,
     blade: WOOD,
-    guard: { half: 3.5, colours: ['plankTop', 'trunk'] },
-    grips: ['leather', 'leatherDark'],
-    pommel: ['plankTop', 'trunk'],
+    guard: { half: 3.5, colours: [Colour.PLANK_TOP, Colour.TRUNK] },
+    grips: [Colour.LEATHER, Colour.LEATHER_DARK],
+    pommel: [Colour.PLANK_TOP, Colour.TRUNK],
   },
   // 1: a plain steel broadsword
-  { length: 26, grip: 6, width: 2.2, blade: STEEL, guard: { half: 4, colours: ['metal', 'steelDark'] }, grips: GRIP, pommel: ['metal', 'metal', 'steelDark'] },
+  {
+    length: 26,
+    grip: 6,
+    width: 2.2,
+    blade: STEEL,
+    guard: { half: 4, colours: [Colour.METAL, Colour.STEEL_DARK] },
+    grips: GRIP,
+    pommel: [Colour.METAL, Colour.METAL, Colour.STEEL_DARK],
+  },
   // 2: a slender sabre with a brass guard
   {
     length: 27,
@@ -55,8 +64,8 @@ const SWORDS: Sword[] = [
     width: 1.4,
     blade: STEEL,
     bend: 1.6,
-    guard: { half: 3, colours: ['gold', 'goldDark'], up: 1 },
-    grips: ['hair', 'leatherDark'],
+    guard: { half: 3, colours: [Colour.GOLD, Colour.GOLD_DARK], up: 1 },
+    grips: [Colour.HAIR, Colour.LEATHER_DARK],
     pommel: SWORD_GOLD,
   },
   // 3: a longsword with a fuller and a blue stone in its pommel
@@ -65,8 +74,8 @@ const SWORDS: Sword[] = [
     grip: 7,
     width: 2,
     blade: STEEL,
-    fuller: 'steelDark',
-    guard: { half: 4, colours: ['gold', 'goldDark'] },
+    fuller: Colour.STEEL_DARK,
+    guard: { half: 4, colours: [Colour.GOLD, Colour.GOLD_DARK] },
     grips: GRIP,
     pommel: SWORD_GOLD,
     gem: 3,
@@ -77,9 +86,9 @@ const SWORDS: Sword[] = [
     grip: 7,
     width: 2.2,
     blade: STEEL,
-    fuller: 'gear4Dark',
+    fuller: Colour.GEAR_4_DARK,
     guard: { half: 4.5, colours: SWORD_GOLD, up: 1.5 },
-    grips: ['blueDark', 'blueEdge'],
+    grips: [Colour.BLUE_DARK, Colour.BLUE_EDGE],
     pommel: SWORD_GOLD,
     gem: 4,
   },
@@ -91,7 +100,7 @@ const SWORDS: Sword[] = [
     blade: STEEL,
     runes: true,
     guard: { half: 5, colours: SWORD_GOLD, up: 1.5 },
-    grips: ['bannerDark', 'roofEdge'],
+    grips: [Colour.BANNER_DARK, Colour.ROOF_EDGE],
     pommel: SWORD_GOLD,
     gem: 5,
   },
@@ -102,10 +111,10 @@ const SWORDS: Sword[] = [
     width: 2.2,
     blade: STEEL,
     wave: 0.5,
-    edges: 'gear6Hi',
+    edges: Colour.GEAR_6_HI,
     glows: true,
     guard: { half: 5, colours: SWORD_GOLD, up: 2 },
-    grips: ['gear6Dark', 'gear0'],
+    grips: [Colour.GEAR_6_DARK, Colour.GEAR_0],
     pommel: SWORD_GOLD,
     gem: 6,
   },
@@ -115,11 +124,11 @@ const SWORDS: Sword[] = [
     grip: 7,
     width: 2.6,
     blade: STEEL,
-    edges: 'gear7Hi',
+    edges: Colour.GEAR_7_HI,
     runes: true,
     glows: true,
     guard: { half: 5, colours: SWORD_GOLD, up: 2, horns: true },
-    grips: ['gear7Dark', 'gear0'],
+    grips: [Colour.GEAR_7_DARK, Colour.GEAR_0],
     pommel: SWORD_GOLD,
     gem: 7,
   },
@@ -129,11 +138,11 @@ const SWORDS: Sword[] = [
     grip: 8,
     width: 3,
     blade: STEEL,
-    fuller: 'gear8Hi',
-    edges: 'steelHi',
+    fuller: Colour.GEAR_8_HI,
+    edges: Colour.STEEL_HI,
     glows: true,
     guard: { half: 5.5, colours: SWORD_GOLD, up: 2.5, horns: true },
-    grips: ['gear8Dark', 'gear0'],
+    grips: [Colour.GEAR_8_DARK, Colour.GEAR_0],
     pommel: SWORD_GOLD,
     gem: 8,
   },
@@ -142,10 +151,10 @@ const SWORDS: Sword[] = [
     length: 31,
     grip: 8,
     width: 3,
-    blade: ['gold', 'steelHi', 'goldDark'],
-    fuller: 'gear9Hi',
+    blade: [Colour.GOLD, Colour.STEEL_HI, Colour.GOLD_DARK],
+    fuller: Colour.GEAR_9_HI,
     guard: { half: 6, colours: SWORD_GOLD, up: 2.5, horns: true },
-    grips: ['gear9Dark', 'gear0'],
+    grips: [Colour.GEAR_9_DARK, Colour.GEAR_0],
     pommel: SWORD_GOLD,
     gem: 9,
   },
@@ -154,12 +163,12 @@ const SWORDS: Sword[] = [
     length: 31,
     grip: 8,
     width: 3.2,
-    blade: ['gear10Hi', 'gear10', 'gear10Dark'],
-    edges: 'steelHi',
-    fuller: 'gear10Dark',
-    guard: { half: 6, colours: ['steelHi', 'steelDark'], up: 3, horns: true },
-    grips: ['gear10Dark', 'gear0'],
-    pommel: ['steelHi', 'steel', 'steelDark'],
+    blade: [Colour.GEAR_10_HI, Colour.GEAR_10, Colour.GEAR_10_DARK],
+    edges: Colour.STEEL_HI,
+    fuller: Colour.GEAR_10_DARK,
+    guard: { half: 6, colours: [Colour.STEEL_HI, Colour.STEEL_DARK], up: 3, horns: true },
+    grips: [Colour.GEAR_10_DARK, Colour.GEAR_0],
+    pommel: [Colour.STEEL_HI, Colour.STEEL, Colour.STEEL_DARK],
     gem: 10,
   },
 ];
@@ -167,7 +176,7 @@ const SWORDS: Sword[] = [
 /** The weapon at a gear level. */
 export function weapon(level: number): PixelCanvas {
   const s = SWORDS[level];
-  const c = canvas('weapon', level);
+  const c = canvas(GearPieceId.WEAPON, level);
   // the pommel sits at the bottom left, so the sword fills the diagonal
   const start: Pt = [SIZE / 2 - s.length / 2 / Math.SQRT2 + 0.5, SIZE / 2 + s.length / 2 / Math.SQRT2 - 0.5];
   const guardAt = along(start, s.grip);

@@ -5,6 +5,7 @@ import {
   BALANCE,
   BuildingType,
   experienceItemGain,
+  GearPieceId,
   gearStarCost,
   gearStarPoints,
   HERO_BUFF_IDS,
@@ -485,7 +486,7 @@ describe(heroes.buyGearStar.name, () => {
       const cost = gearStarCost(1);
       await giveItems(g, p, { [cost.itemId]: cost.count + 1 });
       const before = await getHero(g, id);
-      expect(await heroes.buyGearStar(g, p.id, 'weapon')).toEqual({ level: 1, stars: { weapon: 1 } });
+      expect(await heroes.buyGearStar(g, p.id, GearPieceId.WEAPON)).toEqual({ level: 1, stars: { weapon: 1 } });
       expect((await reloadPlayer(g, p)).items[cost.itemId]).toBe(1);
       const after = await getHero(g, id);
       const stat = heroGearStat(after);
@@ -503,20 +504,26 @@ describe(heroes.buyGearStar.name, () => {
       const cost = gearStarCost(BALANCE.heroGear.maxStars);
       expect(cost).toEqual({ itemId: medalId(9), count: BALANCE.heroGear.lastStarMedals });
       await giveItems(g, p, { [cost.itemId]: cost.count - 1 });
-      await expectRefused(heroes.buyGearStar(g, p.id, 'ring'), msg('hero.notEnoughMedals', { item: ref.item(cost.itemId), amount: cost.count }));
+      await expectRefused(heroes.buyGearStar(g, p.id, GearPieceId.RING), msg('hero.notEnoughMedals', { item: ref.item(cost.itemId), amount: cost.count }));
       await giveItems(g, p, { [cost.itemId]: 1 });
-      expect((await heroes.buyGearStar(g, p.id, 'ring')).stars.ring).toBe(BALANCE.heroGear.maxStars);
+      expect((await heroes.buyGearStar(g, p.id, GearPieceId.RING)).stars.ring).toBe(BALANCE.heroGear.maxStars);
       expect((await reloadPlayer(g, p)).items[cost.itemId]).toBeUndefined();
-      await expectRefused(heroes.buyGearStar(g, p.id, 'ring'), msg('hero.gearMaxStars'));
+      await expectRefused(heroes.buyGearStar(g, p.id, GearPieceId.RING), msg('hero.gearMaxStars'));
     }));
 
   it('refuses an unknown piece, a star beyond Hero Enhancement and missing medals', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       await expectRefused(heroes.buyGearStar(g, p.id, 'hat'), msg('hero.invalidGearPiece'));
-      await expectRefused(heroes.buyGearStar(g, p.id, 'weapon'), msg('hero.gearStarLimit', { tech: ref.tech(TechType.HERO_ENHANCEMENT), limit: 0, level: 1 }));
+      await expectRefused(
+        heroes.buyGearStar(g, p.id, GearPieceId.WEAPON),
+        msg('hero.gearStarLimit', { tech: ref.tech(TechType.HERO_ENHANCEMENT), limit: 0, level: 1 }),
+      );
       await setResearch(g, p, TechType.HERO_ENHANCEMENT, 1);
-      await expectRefused(heroes.buyGearStar(g, p.id, 'weapon'), msg('hero.notEnoughMedals', { item: ref.item(medalId(1)), amount: gearStarCost(1).count }));
+      await expectRefused(
+        heroes.buyGearStar(g, p.id, GearPieceId.WEAPON),
+        msg('hero.notEnoughMedals', { item: ref.item(medalId(1)), amount: gearStarCost(1).count }),
+      );
     }));
 });
 

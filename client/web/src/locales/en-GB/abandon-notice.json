@@ -1,5 +1,7 @@
 {
   "leaving": "{{city}} will be abandoned in <countdown />, and everything in it lost",
   "keep": "Keep this city",
-  "kept": "You're keeping {{city}}"
+  "kept": "You're keeping {{city}}",
+  "keepMovedTitle": "Keep {{city}}?",
+  "keepMovedDescription": "What you moved out stays where it went, and you won't be able to move any city out for {{time}}."
 }

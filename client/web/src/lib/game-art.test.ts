@@ -9,6 +9,7 @@ import {
   BuildingType,
   FortType,
   GEAR_PIECE_IDS,
+  GearPieceId,
   ITEM_IDS,
   ItemId,
   medalId,
@@ -30,15 +31,18 @@ import {
   CityGround,
   cityGroundFile,
   cityWallFile,
+  CityWallPiece,
   FIGURE_HAIR_COLOURS,
   FIGURE_HAIR_STYLES,
   FIGURE_SKIN_TONES,
   figureCapeFile,
+  FigureHairColour,
   figureHairFile,
   FigureHairStyle,
   figureHelmFile,
   figureLegsFile,
   figureSkinFile,
+  FigureSkinTone,
   figureUpperFile,
   GEAR_ART_LEVELS,
   GEAR_STAR_KINDS,
@@ -46,6 +50,7 @@ import {
   gearArtFile,
   gearBackdropFile,
   gearStarFile,
+  GearStarKind,
   gearTwinFile,
   GearTwinPart,
   grandTownHallFile,
@@ -62,6 +67,7 @@ import {
   unitArtFile,
   WALL_PIECES,
   wallArtFile,
+  WallPiece,
 } from '@/lib/game-art';
 
 const ART_DIR = path.resolve(import.meta.dirname, '../assets/buildings');
@@ -152,7 +158,7 @@ describe(historicArtFile.name, () => {
 
 describe(wallArtFile.name, () => {
   it('names the file after the band and the piece', () => {
-    expect(wallArtFile(4, 'gate')).toBe('walls-4-gate.png');
+    expect(wallArtFile(4, WallPiece.GATE)).toBe('walls-4-gate.png');
   });
 });
 
@@ -233,7 +239,7 @@ describe(cityGroundFile.name, () => {
 
 describe(cityWallFile.name, () => {
   it('names the file after the band and the piece', () => {
-    expect(cityWallFile(4, 'gate')).toBe('walls-4-gate.png');
+    expect(cityWallFile(4, CityWallPiece.GATE)).toBe('walls-4-gate.png');
   });
 });
 
@@ -255,13 +261,13 @@ describe('city view art', () => {
 
 describe(gearArtFile.name, () => {
   it('names the file after the piece and the gear level, 0 to 10', () => {
-    expect(gearArtFile('weapon', 0)).toBe('weapon-0.png');
-    expect(gearArtFile('feet', 10)).toBe('feet-10.png');
+    expect(gearArtFile(GearPieceId.WEAPON, 0)).toBe('weapon-0.png');
+    expect(gearArtFile(GearPieceId.FEET, 10)).toBe('feet-10.png');
   });
 
   it('shows level 10 above it, and level 0 below it', () => {
-    expect(gearArtFile('weapon', 12)).toBe('weapon-10.png');
-    expect(gearArtFile('weapon', -1)).toBe('weapon-0.png');
+    expect(gearArtFile(GearPieceId.WEAPON, 12)).toBe('weapon-10.png');
+    expect(gearArtFile(GearPieceId.WEAPON, -1)).toBe('weapon-0.png');
   });
 });
 
@@ -274,14 +280,14 @@ describe(gearBackdropFile.name, () => {
 
 describe(gearTwinFile.name, () => {
   it('names a twin after its sprite and its part, within 0 to 10', () => {
-    expect(gearTwinFile('head', 4, GearTwinPart.BARE)).toBe('head-4-bare.png');
-    expect(gearTwinFile('head', 12, GearTwinPart.PLUME)).toBe('head-10-plume.png');
+    expect(gearTwinFile(GearPieceId.HEAD, 4, GearTwinPart.BARE)).toBe('head-4-bare.png');
+    expect(gearTwinFile(GearPieceId.HEAD, 12, GearTwinPart.PLUME)).toBe('head-10-plume.png');
   });
 });
 
 describe(gearStarFile.name, () => {
   it('names the star after its kind', () => {
-    expect(gearStarFile('waiting')).toBe('star-waiting.png');
+    expect(gearStarFile(GearStarKind.WAITING)).toBe('star-waiting.png');
   });
 });
 
@@ -332,14 +338,14 @@ describe(figureUpperFile.name, () => {
 
 describe(figureSkinFile.name, () => {
   it('names the skin after the sex and the tone', () => {
-    expect(figureSkinFile(Sex.MALE, 'olive')).toBe('skin-m-olive.png');
-    expect(figureSkinFile(Sex.FEMALE, 'pale')).toBe('skin-f-pale.png');
+    expect(figureSkinFile(Sex.MALE, FigureSkinTone.OLIVE)).toBe('skin-m-olive.png');
+    expect(figureSkinFile(Sex.FEMALE, FigureSkinTone.PALE)).toBe('skin-f-pale.png');
   });
 });
 
 describe(figureHairFile.name, () => {
   it('names the hair after the style and the colour', () => {
-    expect(figureHairFile(FigureHairStyle.BRAID, 'auburn')).toBe('hair-braid-auburn.png');
+    expect(figureHairFile(FigureHairStyle.BRAID, FigureHairColour.AUBURN)).toBe('hair-braid-auburn.png');
   });
 });
 

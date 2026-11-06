@@ -23,6 +23,7 @@ import {
   TechType,
   TimedEventType,
   trainCost,
+  TroopKey,
   TroopType,
   troopUnitSeconds,
   unitExp,
@@ -88,7 +89,7 @@ describe(training.trainableList.name, () => {
       await withBarracks(g, p, [1]);
       const list = await training.trainableList(g, p.id, p.cityId, false);
       const worker = list.find((t) => t.typeId === WORKER)!;
-      expect(worker).toMatchObject({ key: 'peasants', permission: true, population: 1, time: troopUnitSeconds(WORKER, null, {}) });
+      expect(worker).toMatchObject({ key: TroopKey.PEASANTS, permission: true, population: 1, time: troopUnitSeconds(WORKER, null, {}) });
       expect(worker.requirements).toEqual([{ kind: RequirementKind.BUILDING, id: BuildingType.BARRACKS, required: 1, current: 1, ok: true }]);
       const scout = list.find((t) => t.typeId === SCOUT)!;
       expect(scout.permission).toBe(false);

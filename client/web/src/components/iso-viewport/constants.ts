@@ -44,3 +44,12 @@ export type OutlineHalf = (typeof OutlineHalf)[keyof typeof OutlineHalf];
 /** Weather over a scene. */
 export const Weather = { RAIN: 'rain', SNOW: 'snow', STORM: 'storm' } as const;
 export type Weather = (typeof Weather)[keyof typeof Weather];
+
+/** The ways the arrow buttons and keys move a view, on screen. */
+export const PanDirection = {
+  UP: 'up',
+  DOWN: 'down',
+  LEFT: 'left',
+  RIGHT: 'right',
+} as const;
+export type PanDirection = (typeof PanDirection)[keyof typeof PanDirection];

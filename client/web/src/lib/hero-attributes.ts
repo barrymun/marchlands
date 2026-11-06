@@ -5,14 +5,20 @@ import type { HeroBean } from '@marchlands/api-client';
 import { type GearStat, HeroBuffId, heroManagement, heroPower, heroStratagem } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
+/** The three hero attributes, as this file keys them. */
+export const AttributeKey = {
+  POLITICS: 'pol',
+  ATTACK: 'att',
+  INTELLIGENCE: 'int',
+} as const;
+export type AttributeKey = (typeof AttributeKey)[keyof typeof AttributeKey];
+
 /** Badge colours (background + text, light and dark) per attribute. */
 const ATTRIBUTE_TONE = {
   pol: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
   att: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300',
   int: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300',
 } as const;
-
-export type AttributeKey = keyof typeof ATTRIBUTE_TONE;
 
 /** Border colours per attribute, to pick out a card or row (e.g. the boost that suits a hero best). */
 export const ATTRIBUTE_BORDER = {
@@ -24,7 +30,7 @@ export const ATTRIBUTE_BORDER = {
 /** `stat`: the attribute's field name on the hero (and in gear / boost APIs); `label` and `short` are in the current locale. */
 const HERO_ATTRIBUTES = [
   {
-    key: 'pol',
+    key: AttributeKey.POLITICS,
     stat: HeroBuffId.MANAGEMENT,
     get label() {
       return i18n.t('common:heroAttributes.politics');
@@ -36,7 +42,7 @@ const HERO_ATTRIBUTES = [
     tone: ATTRIBUTE_TONE.pol,
   },
   {
-    key: 'att',
+    key: AttributeKey.ATTACK,
     stat: HeroBuffId.POWER,
     get label() {
       return i18n.t('common:heroAttributes.attack');
@@ -48,7 +54,7 @@ const HERO_ATTRIBUTES = [
     tone: ATTRIBUTE_TONE.att,
   },
   {
-    key: 'int',
+    key: AttributeKey.INTELLIGENCE,
     stat: HeroBuffId.STRATAGEM,
     get label() {
       return i18n.t('common:heroAttributes.intelligence');

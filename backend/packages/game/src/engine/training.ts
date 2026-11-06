@@ -11,6 +11,7 @@ import {
   fortKeyOf,
   PrestigeAction,
   prestigeOf,
+  StatGroup,
   TimedEventType,
   type TrainBatch,
   troopKey,
@@ -128,7 +129,7 @@ export async function completeTraining(ctx: Ctx, cityId: number, positionId: num
   }
   setQueue(b, positionId, queue, nextQueueId);
   scheduleHead(ctx, b, positionId, queue);
-  ctx.stat(b.player.id, cityId, prefixed('trained', done));
+  ctx.stat(b.player.id, cityId, prefixed(StatGroup.TRAINED, done));
   addPrestige(b.player, gain);
   const mayor = mayorOf(b.heroes);
   if (mayor && gain + exp > 0) {

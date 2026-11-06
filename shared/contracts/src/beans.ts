@@ -143,6 +143,7 @@ export const CityBean = z
     draftNextAt: Ms.describe('when a historic city drafting by itself next drafts (the start of a part of the UTC day; 0: at once)'),
     abandonAt: Ms.describe('a city being abandoned: when its hour is up and it goes (0: not being abandoned)'),
     capturePrestige: z.number().int().describe('the prestige capturing this city gave its player (0: never captured); abandoning it soon after takes it back'),
+    movedOut: z.boolean().describe('moved out during the hour it is being abandoned: keeping it now stops the player moving any city out for a while'),
     capturedAt: Ms.describe('when its player captured it (0: never captured)'),
     seatLoyalty: z.number().int().describe("a held historic city's loyalty now: rivals' wins take it down, and at 0 it's lost"),
     createdAt: Ms,
@@ -167,6 +168,7 @@ export const PlayerInfo = PlayerRow.pick({ id: true, sex: true, flag: true, face
     castleCount: z.number().int(),
     population: z.number(),
     changedFace: z.boolean(),
+    moveOutBlockedUntil: Ms.describe('no moving a city out before this, having kept one moved out (0: free to)'),
     createrTime: Ms,
     lastLoginTime: Ms,
   })

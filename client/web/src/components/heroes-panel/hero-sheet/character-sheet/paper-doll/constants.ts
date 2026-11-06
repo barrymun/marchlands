@@ -1,9 +1,25 @@
-import type { GearPieceId } from '@marchlands/core';
+import { GearPieceId } from '@marchlands/core';
 import { lazyComponent } from '@/lib/lazy';
 
 /** The gear round the figure, top to bottom: on the sword's side (left of the picture) and on the shield's. */
-export const DOLL_LEFT: readonly GearPieceId[] = ['head', 'shoulder', 'chest', 'gauntlets', 'weapon', 'legs', 'mount'];
-export const DOLL_RIGHT: readonly GearPieceId[] = ['necklace', 'back', 'charm', 'ring', 'shield', 'belt', 'feet'];
+export const DOLL_LEFT: readonly GearPieceId[] = [
+  GearPieceId.HEAD,
+  GearPieceId.SHOULDER,
+  GearPieceId.CHEST,
+  GearPieceId.GAUNTLETS,
+  GearPieceId.WEAPON,
+  GearPieceId.LEGS,
+  GearPieceId.MOUNT,
+];
+export const DOLL_RIGHT: readonly GearPieceId[] = [
+  GearPieceId.NECKLACE,
+  GearPieceId.BACK,
+  GearPieceId.CHARM,
+  GearPieceId.RING,
+  GearPieceId.SHIELD,
+  GearPieceId.BELT,
+  GearPieceId.FEET,
+];
 
 /** localStorage key of the 2D · 3D switch (docs/features/hero-3d.md): the way this browser last chose to draw the figure. */
 export const FIGURE_KEY = 'marchlands-hero-figure';

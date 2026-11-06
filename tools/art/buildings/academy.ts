@@ -2,6 +2,7 @@
 // bigger and stronger: a columned porch and a garden, then a library wing and an observatory dome, then wings round a
 // courtyard with a statue under a gilded observatory dome.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, PAVING, Roofing } from '../iso.ts';
 
 const SIZE = 64;
@@ -13,7 +14,7 @@ function band1(): IsoCanvas {
   c.wall(4, 4, 0, 11, 7, 6);
   c.windows([6, 13], 11, 1, 2);
   c.windows([6, 8, 11, 13], 11, 4, 1);
-  c.windows([9, 10], 11, 0, 3, 'logDark');
+  c.windows([9, 10], 11, 0, 3, Colour.LOG_DARK);
   c.roof(4, 4, 11, 7, 6, 4, Axis.X, { roofing: Roofing.SLATE });
   c.cypress(16, 14, 5);
   c.anchor();
@@ -30,7 +31,7 @@ function band2(): IsoCanvas {
   c.roof(4, 3, 15, 8, 7, 4, Axis.X, { roofing: Roofing.SLATE });
   // the porch
   c.colonnade(9, 12, 0, 5, 5);
-  c.box(9, 11, 5, 5, 1, 1, { top: 'wallTop', left: 'wallL', right: 'wallR' });
+  c.box(9, 11, 5, 5, 1, 1, { top: Colour.WALL_TOP, left: Colour.WALL_L, right: Colour.WALL_R });
   c.garden(2, 18, 6, 4);
   c.cypress(19, 17, 6);
   c.cypress(21, 20, 5);
@@ -47,7 +48,7 @@ function band3(): IsoCanvas {
   c.windows([6, 8, 16, 18], 12, 4, 2);
   c.roof(4, 3, 16, 9, 8, 5, Axis.X, { roofing: Roofing.SLATE });
   c.colonnade(10, 13, 0, 5, 6);
-  c.box(10, 12, 6, 5, 1, 1, { top: 'wallTop', left: 'wallL', right: 'wallR' });
+  c.box(10, 12, 6, 5, 1, 1, { top: Colour.WALL_TOP, left: Colour.WALL_L, right: Colour.WALL_R });
   // the library wing and the observatory
   c.wall(21, 6, 0, 5, 12, 6);
   c.windowsSe(26, [9, 12, 15], 2, 2);
@@ -69,9 +70,9 @@ function band4(): IsoCanvas {
   c.dome(0.5, 2.5, 13, 5, Roofing.GOLD);
   c.wall(5, 2, 0, 18, 10, 9);
   c.windows([7, 9, 19, 21], 12, 5, 2);
-  c.roof(5, 2, 18, 10, 9, 5, Axis.X, { roofing: Roofing.SLATE, trim: 'gold' });
+  c.roof(5, 2, 18, 10, 9, 5, Axis.X, { roofing: Roofing.SLATE, trim: Colour.GOLD });
   c.colonnade(11, 13, 0, 6, 7);
-  c.box(11, 12, 7, 6, 1, 1, { top: 'wallTop', left: 'wallL', right: 'wallR' });
+  c.box(11, 12, 7, 6, 1, 1, { top: Colour.WALL_TOP, left: Colour.WALL_L, right: Colour.WALL_R });
   c.wall(24, 5, 0, 5, 15, 7);
   c.windowsSe(29, [8, 11, 14, 17], 2, 2);
   c.roof(24, 5, 5, 15, 7, 3, Axis.Y, { roofing: Roofing.SLATE });

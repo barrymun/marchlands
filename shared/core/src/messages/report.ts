@@ -22,6 +22,8 @@ export const REPORT_MESSAGES = {
   'title.cityAbandoned': [],
   /** abandoning a city was called off when its hour was up: it was the last regular city left */
   'title.abandonCancelled': [],
+  /** a city being abandoned moved out at once to the player's other cities */
+  'title.cityMovedOut': [],
   /** a player's historic city rose up (no longer happens: kept for the reports from before 2026-11-05) */
   'title.seatRebelled': [],
   /** a held historic city drafted troops from a barbarian city */
@@ -37,6 +39,10 @@ export const REPORT_MESSAGES = {
   oldFormat: [],
   /** body of a "City abandoned" report */
   cityAbandoned: ['name'],
+  cityMovedOut: ['name', 'cities'],
+  heroesMovedOut: ['name', 'heroes'],
+  /** one of heroesMovedOut's heroes */
+  heroMovedTo: ['hero', 'city'],
   /** the same, abandoned soon after capturing it: the prestige taken back (abandonPrestigeBack) */
   cityAbandonedPrestige: ['name', 'prestige'],
   /** body of an "Abandoning cancelled" report */

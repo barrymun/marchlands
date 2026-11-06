@@ -3,8 +3,9 @@
 // and 7, horns from 8, gilded at 9, and at 10 crimson with silver horns and a glowing slit, as the head icon
 // (tools/art/gear/head.ts). The face looks right, so the slit and the breaths are on the right.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { BLUE, fill, GOLD, horn, look, plume, type Shades, spike, STEEL, trimmed } from '../gear/common.ts';
-import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
+import type { PixelCanvas, Pt } from '../pixel.ts';
 import { HEAD, layer, part } from './skeleton.ts';
 
 /** A helm's shell round the skull: a dome over the crown, the face plate forward to the right, down to `bottom`. */
@@ -45,7 +46,7 @@ export function figureHelm(level: number): PixelCanvas {
     if (level >= 3) trimmed(c, shell(bottom), metal, L.trim, 1.4);
     else fill(c, shell(bottom), metal);
     // the eye slit and the breaths, on the face to the right
-    const slit: Colour = level >= 10 ? 'gear10Hi' : 'gear0Dark';
+    const slit: Colour = level >= 10 ? Colour.GEAR_10_HI : Colour.GEAR_0_DARK;
     for (let x = 51; x <= 57; x++) c.set(x, 13, slit);
     if (level === 1) for (let x = 51; x <= 57; x++) c.set(x, 14, slit);
     if (level >= 2) for (let y = 13; y <= 19; y++) c.set(54, y, slit);
@@ -56,10 +57,10 @@ export function figureHelm(level: number): PixelCanvas {
         [52, 20],
         [56, 20],
       ] as const)
-        c.set(x, y, 'steelDark');
+        c.set(x, y, Colour.STEEL_DARK);
     // a crest over the dome from 3
     if (level >= 3) for (let y = 7; y <= 12; y++) c.set(54, y, L.trim[1]);
-    if (level >= 10) c.set(52, 13, 'sparkle');
+    if (level >= 10) c.set(52, 13, Colour.SPARKLE);
     if (L.horns) {
       horn(c, [46, 10], [41, 5], 6, L.trim);
       horn(c, [42, 6], [38, 1], 3.5, L.trim);

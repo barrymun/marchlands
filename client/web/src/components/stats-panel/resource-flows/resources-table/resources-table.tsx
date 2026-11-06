@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
+import { StatCounter, statKey } from '@marchlands/core';
+
 import { Num } from '@/components/stats-panel/num/num';
 import { RESOURCE_COLUMNS } from '@/components/stats-panel/resource-flows/resources-table/constants';
 import type { Counters } from '@/components/stats-panel/types';
@@ -13,10 +15,10 @@ export function ResourcesTable({ c }: { c: Counters }) {
     <div className="grid gap-2">
       <p className="text-xs text-muted-foreground">
         {t('resources.description', {
-          food: fmt(c['upkeep.food'] ?? 0),
-          salaries: fmt(c['salaries.gold'] ?? 0),
-          paid: fmt(c['market.goldPaid'] ?? 0),
-          received: fmt(c['market.goldReceived'] ?? 0),
+          food: fmt(c[StatCounter.UPKEEP_FOOD] ?? 0),
+          salaries: fmt(c[StatCounter.SALARIES_GOLD] ?? 0),
+          paid: fmt(c[StatCounter.MARKET_GOLD_PAID] ?? 0),
+          received: fmt(c[StatCounter.MARKET_GOLD_RECEIVED] ?? 0),
         })}
       </p>
       <Table>
@@ -35,7 +37,7 @@ export function ResourcesTable({ c }: { c: Counters }) {
             <TableRow key={r}>
               <TableCell>{resourceLabel(r)}</TableCell>
               {RESOURCE_COLUMNS.map(({ group }) => (
-                <Num key={group} v={c[`${group}.${r}`]} />
+                <Num key={group} v={c[statKey(group, r)]} />
               ))}
             </TableRow>
           ))}

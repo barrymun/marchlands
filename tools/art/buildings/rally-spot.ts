@@ -2,6 +2,7 @@
 // and a weapon rack; each band after it is bigger and stronger: tents and training dummies, then a muster hall and
 // rows of tents, then a paved parade ground with stands and banners.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, PAVING, Roofing } from '../iso.ts';
 
 const SIZE = 64;
@@ -9,9 +10,9 @@ const SIZE = 64;
 function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20, 'rally-spot-1');
   c.grass(0, 0, 20, 20);
-  c.ground(2, 7, 14, 11, 'sand');
+  c.ground(2, 7, 14, 11, Colour.SAND);
   c.wall(13, 2, 0, 5, 5, 4);
-  c.windows([15, 16], 7, 0, 3, 'logDark');
+  c.windows([15, 16], 7, 0, 3, Colour.LOG_DARK);
   c.hipRoof(13, 2, 5, 5, 4, 3, Axis.X, Roofing.TEAL);
   c.banner(c.p(5, 9, 0), 10);
   c.rack(9, 14);
@@ -23,11 +24,11 @@ function band1(): IsoCanvas {
 function band2(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 24, 'rally-spot-2');
   c.grass(0, 0, 24, 24);
-  c.ground(2, 8, 18, 14, 'sand');
+  c.ground(2, 8, 18, 14, Colour.SAND);
   c.tent(2, 2, 4, 4, 4);
   c.tent(7, 2, 4, 4, 4);
   c.wall(15, 2, 0, 6, 6, 5);
-  c.windows([17, 18], 8, 0, 3, 'logDark');
+  c.windows([17, 18], 8, 0, 3, Colour.LOG_DARK);
   c.hipRoof(15, 2, 6, 6, 5, 3, Axis.X, Roofing.TEAL);
   c.banner(c.p(6, 11, 0), 11);
   c.rack(11, 16);
@@ -42,9 +43,9 @@ function band2(): IsoCanvas {
 function band3(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 27, 'rally-spot-3');
   c.grass(0, 0, 27, 27);
-  c.ground(2, 9, 21, 16, 'sand');
+  c.ground(2, 9, 21, 16, Colour.SAND);
   c.wall(9, 2, 0, 14, 6, 6);
-  c.windows([15, 16], 8, 0, 4, 'logDark');
+  c.windows([15, 16], 8, 0, 4, Colour.LOG_DARK);
   c.windows([11, 13, 18, 20], 8, 3, 1);
   c.roof(9, 2, 14, 6, 6, 4, Axis.X, { roofing: Roofing.TEAL });
   c.tent(2, 2, 4, 4, 4);

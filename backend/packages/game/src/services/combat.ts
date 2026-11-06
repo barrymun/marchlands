@@ -1,6 +1,6 @@
 // valley.* — abandoning and upgrading valleys. Army arrival and battles live in engine/combat.ts.
 
-import { canUpgradeTile, GameError, msg, TileType, valleyUpgradeCost } from '@marchlands/core';
+import { canUpgradeTile, GameError, msg, ResourceKey, StatGroup, statKey, TileType, valleyUpgradeCost } from '@marchlands/core';
 
 import { openOwnCity } from '#/city.ts';
 import { type Ctx } from '#/context.ts';
@@ -36,7 +36,7 @@ export async function upgradeValley(ctx: Ctx, playerId: number, cityId: number, 
   if (cost == null) throw new GameError(msg(npc ? 'army.barbarianCityMaxLevel' : 'army.valleyMaxLevel', { level: tile.level }), -99);
   if (b.city.gold < cost) throw new GameError(msg('common.notEnoughGoldFor', { amount: cost }), -99);
   b.city.gold -= cost;
-  ctx.stat(b.player.id, b.city.id, { 'spent.valleys.gold': cost });
+  ctx.stat(b.player.id, b.city.id, { [statKey(StatGroup.SPENT_VALLEYS, ResourceKey.GOLD)]: cost });
   // the garrison, fortifications, resources and hero start afresh at the new level
   Object.assign(tile, { level: tile.level + 1, troops: null, forts: null, state: null, updatedAt: ctx.now });
   await saveTile(ctx, tile);

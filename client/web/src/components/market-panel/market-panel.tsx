@@ -8,7 +8,7 @@ import { BuildingType, MarketOrderType } from '@marchlands/core';
 import { ActivityPanel } from '@/components/market-panel/activity-panel/activity-panel';
 import { BookPanel } from '@/components/market-panel/book-panel/book-panel';
 import { ChartPanel } from '@/components/market-panel/chart-panel/chart-panel';
-import { type RangeId, RANGES } from '@/components/market-panel/chart-panel/constants';
+import { RangeId, RANGES } from '@/components/market-panel/chart-panel/constants';
 import { MarketBar } from '@/components/market-panel/market-bar/market-bar';
 import { TradeBar } from '@/components/market-panel/trade-bar/trade-bar';
 import { TradeForm } from '@/components/market-panel/trade-form/trade-form';
@@ -29,7 +29,7 @@ export function MarketPanel({ city }: { city: CityBean }) {
   const { t } = useTranslation('market-panel');
   const market = city.buildings.filter((b) => b.typeId === BuildingType.MARKETPLACE).reduce((m, b) => Math.max(m, b.level), 0);
   const [resType, setResType] = useState(0);
-  const [rangeId, setRangeId] = useState<RangeId>('hour');
+  const [rangeId, setRangeId] = useState<RangeId>(RangeId.HOUR);
   const [side, setSide] = useState<Side>(0);
   const [mode, setMode] = useState<MarketOrderType>(MarketOrderType.MARKET);
   const [price, setPrice] = useState('');

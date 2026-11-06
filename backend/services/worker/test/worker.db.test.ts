@@ -210,7 +210,7 @@ describe(processOne.name, () => {
       expect(row.attempts).toBe(1);
       expect(row.lastError).toMatch(/^Failed query: select .* from "market_shipments"/);
       expect(row.lastError!.length).toBeLessThanOrEqual(500);
-      expect(log).toHaveBeenCalledWith('error', 'event failed', expect.objectContaining({ id: ev.id, type: 'shipment' }));
+      expect(log).toHaveBeenCalledWith('error', 'event failed', expect.objectContaining({ id: ev.id, type: TimedEventType.SHIPMENT }));
       expect(await processOne(db, { log })).toBe(false);
     }));
 });

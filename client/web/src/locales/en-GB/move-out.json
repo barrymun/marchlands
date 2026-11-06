@@ -1,0 +1,22 @@
+{
+  "title": "Move it all out now",
+  "description": "This city's troops at home, injured troops and resources can go to your other cities at once, shared evenly, and any heroes you choose. Armies out, queues and fortifications stay.",
+  "noCities": "You have no other city to move to.",
+  "table": {
+    "city": "City",
+    "troops": "Troops",
+    "injured": "Injured",
+    "goods": "Resources"
+  },
+  "nothing": "There is nothing left in this city to move.",
+  "underAttack": "An enemy army is on its way to this city, so it can't be moved out.",
+  "cooldown": "You kept a city you had moved out: you can move a city out again in <countdown />.",
+  "button": "Move out",
+  "confirmTitle": "Move {{city}} out?",
+  "confirmDescription": "This happens at once and can't be undone. If you then keep {{city}}, what moved doesn't come back, and you can't move any city out for {{time}}.",
+  "done": "{{city}} moved out",
+  "heroes": "Heroes",
+  "stays": "Stays here",
+  "cityFree": "{{city}} ({{n}} free)",
+  "noRoom": "None of your other cities has a free Feasting Hall slot."
+}

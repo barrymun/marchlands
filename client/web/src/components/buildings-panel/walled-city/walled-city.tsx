@@ -10,7 +10,7 @@ import { Slot } from '@/components/buildings-panel/slot/slot';
 import { CORNERS, WALL_ART, WALL_SCALE } from '@/components/buildings-panel/walled-city/constants';
 import { Countdown } from '@/components/countdown/countdown';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { artBand, wallArtFile, type WallPiece } from '@/lib/game-art';
+import { artBand, wallArtFile, WallPiece } from '@/lib/game-art';
 import { buildingName } from '@/lib/game-data';
 import { cn } from '@/lib/utils';
 
@@ -41,15 +41,15 @@ export function WalledCity({ byPos, onSelect }: { byPos: Map<number, BuildingBea
     >
       {built && (
         <div aria-hidden className="[image-rendering:pixelated]">
-          <div className="absolute inset-x-0 top-0 h-8 bg-repeat-x" style={art('wall', 16)} />
-          <div className="absolute inset-x-0 bottom-0 h-8 bg-repeat-x" style={art('wall', 16)} />
+          <div className="absolute inset-x-0 top-0 h-8 bg-repeat-x" style={art(WallPiece.WALL, 16)} />
+          <div className="absolute inset-x-0 bottom-0 h-8 bg-repeat-x" style={art(WallPiece.WALL, 16)} />
           {/* the side walls are a picture (the right one the left mirrored), which doesn't mirror right to left */}
           {/* eslint-disable-next-line no-restricted-syntax -- a picture, not a layout */}
-          <div className="absolute inset-y-0 left-0 w-8 bg-repeat-y" style={art('side', 16)} />
+          <div className="absolute inset-y-0 left-0 w-8 bg-repeat-y" style={art(WallPiece.SIDE, 16)} />
           {/* eslint-disable-next-line no-restricted-syntax -- a picture, not a layout */}
-          <div className="absolute inset-y-0 right-0 w-8 -scale-x-100 bg-repeat-y" style={art('side', 16)} />
+          <div className="absolute inset-y-0 right-0 w-8 -scale-x-100 bg-repeat-y" style={art(WallPiece.SIDE, 16)} />
           {CORNERS.map((at) => (
-            <div key={at} className={cn('absolute size-12', at)} style={art('corner', 24)} />
+            <div key={at} className={cn('absolute size-12', at)} style={art(WallPiece.CORNER, 24)} />
           ))}
         </div>
       )}
@@ -75,7 +75,7 @@ export function WalledCity({ byPos, onSelect }: { byPos: Map<number, BuildingBea
                 'absolute bottom-0 left-1/2 size-16 -translate-x-1/2 rounded-sm [image-rendering:pixelated] transition hover:brightness-110',
                 walls.status !== 0 && 'ring-2 ring-amber-500',
               )}
-              style={art('gate', 32)}
+              style={art(WallPiece.GATE, 32)}
             >
               <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-background/85 px-1 text-[11px] leading-4 font-medium whitespace-nowrap tabular-nums">
                 {t('common:level.short', { level: walls.level })}

@@ -15,7 +15,7 @@ describe(runScheduledHeal.name, () => {
       const p = await createTestPlayer(g);
       await setInjured(g, p.cityId, injured);
       const { name } = await reloadCity(g, p.cityId);
-      await runScheduledHeal(g, p.id, p.cityId, 'resources', []);
+      await runScheduledHeal(g, p.id, p.cityId, HealPayment.RESOURCES, []);
       expect(g.pushes(PushCmd.SYSTEM_INFO_MESSAGE).at(-1)).toMatchObject({
         playerIds: [p.id],
         data: { msg: msg('flow.healDone', { city: name, result: healed() }) },
@@ -54,7 +54,7 @@ describe(runScheduledHeal.name, () => {
       await setInjured(g, p.cityId, injured);
       const armyId = await sendOut(g, p, heroId);
       const reach = g.events(TimedEventType.ARMY)[0]!.dueAt;
-      await runScheduledHeal(g, p.id, p.cityId, 'resources', [armyId]);
+      await runScheduledHeal(g, p.id, p.cityId, HealPayment.RESOURCES, [armyId]);
       expect(g.events(TimedEventType.FLOW_HEAL)).toEqual([
         // still marching out: about as long again to come back
         {
@@ -87,7 +87,7 @@ describe(runScheduledHeal.name, () => {
       await setInjured(g, p.cityId, injured);
       await loseCity(g, p.cityId, captor);
       const pushed = g.pushes().length;
-      await runScheduledHeal(g, p.id, p.cityId, 'resources', []);
+      await runScheduledHeal(g, p.id, p.cityId, HealPayment.RESOURCES, []);
       expect(g.pushes()).toHaveLength(pushed);
       expect(g.events(TimedEventType.FLOW_HEAL)).toEqual([]);
       expect((await reloadCity(g, p.cityId)).injuredTroops).toEqual(injured);

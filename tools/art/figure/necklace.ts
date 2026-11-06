@@ -4,8 +4,9 @@
 
 import { SpotKind } from '@marchlands/core';
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { heart, lit, look, type Shades } from '../gear/common.ts';
-import type { Colour, PixelCanvas } from '../pixel.ts';
+import type { PixelCanvas } from '../pixel.ts';
 import { disc } from '../shapes.ts';
 import { part, stone } from './skeleton.ts';
 
@@ -14,15 +15,16 @@ const chain = (t: number): [number, number] => [46.5 + 8.5 * t, 22.5 + 4 * (1 - 
 
 export function necklace(level: number): PixelCanvas {
   const L = look(level);
-  const links: readonly Colour[] = level === 0 ? ['bannerHi', 'bannerDark'] : level <= 2 ? ['steelHi', 'steelDark'] : [L.trim[0], L.trim[2]];
+  const links: readonly Colour[] =
+    level === 0 ? [Colour.BANNER_HI, Colour.BANNER_DARK] : level <= 2 ? [Colour.STEEL_HI, Colour.STEEL_DARK] : [L.trim[0], L.trim[2]];
   const [px, py] = [51, 28.5];
   const c = part('necklace', (c) => {
-    if (level === 0) disc(c, px, py, 1.3, 'fire', 'roofD');
-    else if (level === 2) disc(c, px, py, 1, 'steel', 'steelDark');
+    if (level === 0) disc(c, px, py, 1.3, Colour.FIRE, Colour.ROOF_D);
+    else if (level === 2) disc(c, px, py, 1, Colour.STEEL, Colour.STEEL_DARK);
     else if (level >= 10) {
       const silver: Shades = L.trim;
       heart(c, px, py + 0.5, 2.6, lit(px, py, 2.5, silver));
-      heart(c, px, py + 0.5, 1.6, (x, y) => (x + y < px + py ? 'gear10' : 'gear10Dark'));
+      heart(c, px, py + 0.5, 1.6, (x, y) => (x + y < px + py ? Colour.GEAR_10 : Colour.GEAR_10_DARK));
     } else if (level >= 3) stone(c, px, py + 0.5, 0.7 + level * 0.07, L.trim, L.accent);
   });
   // the chain after the outline, one pixel thick, links in two shades
@@ -32,7 +34,7 @@ export function necklace(level: number): PixelCanvas {
     c.set(x, y, links[i % 2]);
   }
   if (level >= 10) {
-    c.set(px - 1, py - 0.5, 'sparkle');
+    c.set(px - 1, py - 0.5, Colour.SPARKLE);
     c.spot(SpotKind.STONE, [px, py + 0.5], 1.6);
   }
   return c;

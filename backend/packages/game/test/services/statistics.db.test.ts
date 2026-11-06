@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { TREND_DAYS, TREND_KEYS, type TrendKey } from '@marchlands/core';
+import { TREND_DAYS, TREND_KEYS, TrendKey, WorldStateKey } from '@marchlands/core';
 import { playerStats, worldState } from '@marchlands/db';
 
 import { statistics } from '#/index.ts';
@@ -58,7 +58,7 @@ describe(statistics.lordStatistics.name, () => {
           owned: true,
           allTime: { 'trained.archer': 1115, 'produced.food': 507 },
           last7Days: { 'trained.archer': 15, 'produced.food': 500 },
-          trend: trendEnding('trained', 100, 5, 0, 0, 0, 0, 0, 10),
+          trend: trendEnding(TrendKey.TRAINED, 100, 5, 0, 0, 0, 0, 0, 10),
         },
       ]);
     }));
@@ -85,7 +85,14 @@ describe(statistics.lordStatistics.name, () => {
       expect(s.cities).toEqual([
         { cityId: a.cityId, name: `${a.name} City`, owned: true, allTime: {}, last7Days: {}, trend: noTrend() },
         { cityId: b.cityId, name: null, owned: false, allTime: { 'trained.archer': 2 }, last7Days: {}, trend: noTrend() },
-        { cityId: gone, name: null, owned: false, allTime: { 'trained.archer': 3 }, last7Days: { 'trained.archer': 3 }, trend: trendEnding('trained', 3) },
+        {
+          cityId: gone,
+          name: null,
+          owned: false,
+          allTime: { 'trained.archer': 3 },
+          last7Days: { 'trained.archer': 3 },
+          trend: trendEnding(TrendKey.TRAINED, 3),
+        },
       ]);
       expect(s.allTime).toEqual({ 'trained.archer': 5 });
     }));
@@ -109,12 +116,12 @@ describe(statistics.lordStatistics.name, () => {
       expect(s.days).toHaveLength(TREND_DAYS);
       expect(s.days.at(-1)).toBe(statDay(T0));
       const last3 = (k: TrendKey) => s.trend[k].slice(-3);
-      expect(last3('attacksWon')).toEqual([0, 0, 4]);
-      expect(last3('honor')).toEqual([6, 0, 40]);
-      expect(last3('enemies')).toEqual([0, 0, 9]);
-      expect(last3('trained')).toEqual([0, 15, 0]);
-      expect(last3('captured')).toEqual([0, 1, 0]);
-      expect(last3('defensesWon')).toEqual([0, 0, 0]);
+      expect(last3(TrendKey.ATTACKS_WON)).toEqual([0, 0, 4]);
+      expect(last3(TrendKey.HONOR)).toEqual([6, 0, 40]);
+      expect(last3(TrendKey.ENEMIES)).toEqual([0, 0, 9]);
+      expect(last3(TrendKey.TRAINED)).toEqual([0, 15, 0]);
+      expect(last3(TrendKey.CAPTURED)).toEqual([0, 1, 0]);
+      expect(last3(TrendKey.DEFENSES_WON)).toEqual([0, 0, 0]);
       expect(s.trend.attacksWon.reduce((x, y) => x + y, 0)).toBe(4);
       // the city's own: the honour on the lord as a whole (city 0) isn't the city's
       expect(s.cities[0]?.trend.honor.slice(-3)).toEqual([0, 0, 40]);
@@ -125,9 +132,9 @@ describe(statistics.lordStatistics.name, () => {
     game(async (g) => {
       const a = await createTestPlayer(g);
       const at = T0 - 90 * DAY;
-      await g.tx.update(worldState).set({ value: { at } }).where(eq(worldState.key, 'statsStartedAt'));
+      await g.tx.update(worldState).set({ value: { at } }).where(eq(worldState.key, WorldStateKey.STATS_STARTED_AT));
       expect((await statistics.lordStatistics(g, a.id)).since).toBe(at);
-      await g.tx.delete(worldState).where(eq(worldState.key, 'statsStartedAt'));
+      await g.tx.delete(worldState).where(eq(worldState.key, WorldStateKey.STATS_STARTED_AT));
       expect((await statistics.lordStatistics(g, a.id)).since).toBeNull();
     }));
 });

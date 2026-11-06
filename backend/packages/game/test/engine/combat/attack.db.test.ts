@@ -7,6 +7,7 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   ArmyDirection,
   armyLoad,
+  BattleResult,
   BattleTarget,
   BuffId,
   BuildingType,
@@ -90,7 +91,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       const [pp, qp] = [await reloadPlayer(g, p), await reloadPlayer(g, q)];
       const [hero, defHero] = [await getHero(g, heroId), await getHero(g, qHero)];
       expect(b).toMatchObject({
-        result: 'attackerWon',
+        result: BattleResult.ATTACKER_WON,
         city: before.name,
         attacker: { player: p.name, hero: { id: hero.id, name: hero.name }, troops: { before: { lightCavalry: 5000 } } },
         defender: { player: q.name, hero: { id: defHero.id, name: defHero.name }, troops: { before: { militia: 300, archer: 20 } }, wallLevel: 0 },
@@ -140,7 +141,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       await arrive(g, armyId);
 
       const b = battleOf(await lastReport(g, p.id, 'report.title.attackFailed'), BattleTarget.CITY);
-      expect(b).toMatchObject({ result: 'defenderWon', plunder: { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 } });
+      expect(b).toMatchObject({ result: BattleResult.DEFENDER_WON, plunder: { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 } });
       expect(b.attacker.troops.after).toEqual({});
       expect(b.medals).toBeUndefined();
       expect(await reportTitles(g, q.id)).toEqual(['report.title.attackRepelled']);
@@ -200,7 +201,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
         pikemen: b.defender.troops.after.pikemen ?? 0,
       });
       if (!stationed) expect((await getHero(g, allyHero)).status).toBe(HeroStatus.IDLE);
-      expect(await reportTitles(g, q.id)).toContain(b.result === 'attackerWon' ? 'report.title.cityAttacked' : 'report.title.attackRepelled');
+      expect(await reportTitles(g, q.id)).toContain(b.result === BattleResult.ATTACKER_WON ? 'report.title.cityAttacked' : 'report.title.attackRepelled');
     }));
 
   it('the hero of allied troops wiped out defending a city is idle again', () =>
@@ -216,7 +217,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       const attack = await send(g, p, { targetTileId: await cityTile(g, q.cityId), mission: Mission.ATTACK, troops: { lightCavalry: 5000 }, heroId });
       await arrive(g, attack.armyId);
       const b = battleOf(await lastReport(g, ally.id, 'report.title.reinforcementsFought'), BattleTarget.CITY);
-      expect(b).toMatchObject({ result: 'attackerWon', defender: { hero: { id: allyHero } } });
+      expect(b).toMatchObject({ result: BattleResult.ATTACKER_WON, defender: { hero: { id: allyHero } } });
       expect(b.defender.heroExp).toBeGreaterThan(0);
       expect(await armyRow(g, guard.armyId)).toBeUndefined();
       expect((await getHero(g, allyHero)).status).toBe(HeroStatus.IDLE);

@@ -54,8 +54,8 @@ export function CityList({ city, onPick, onSend }: { city?: CityBean; onPick?: (
                 </span>
                 <MayorSummary mayor={mayorOf(here && city ? city : c)} />
               </button>
-              {/* a city can't send an army to itself */}
-              {!here && (
+              {/* a city can't send an army to itself, and none can go to a city being abandoned */}
+              {!here && !c.abandonAt && (
                 <Button
                   size="icon-sm"
                   // the row turns the colour a ghost button would on hover, so the button keeps its own border and fills on its own hover

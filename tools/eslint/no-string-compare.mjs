@@ -1,5 +1,5 @@
 // Fixed values are named, never written as strings (AGENTS.md, Shared code): a value a piece of code compares against is a
-// const object's, so this refuses `x === 'y'` and `case 'y':`. It can only see comparisons, not a string assigned or passed.
+// const object's, so this refuses `x === 'y'` and `case 'y':`. no-string-value (beside it) refuses a string assigned or passed.
 // What something else fixes is left alone: `typeof`, DOM events and keys, HTTP methods, environment variables and message
 // codes (which msg() types). A value private to one function may stay, with an eslint-disable saying so.
 

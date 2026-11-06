@@ -29,26 +29,26 @@ describe(isPanel.name, () => {
 
 describe(legacyTarget.name, () => {
   it('takes the city itself and the old City tab to the town', () => {
-    expect(legacyTarget('')).toEqual({ screen: 'town' });
-    expect(legacyTarget('buildings')).toEqual({ screen: 'town' });
+    expect(legacyTarget('')).toEqual({ screen: ViewId.TOWN });
+    expect(legacyTarget('buildings')).toEqual({ screen: ViewId.TOWN });
   });
 
   it('opens an old tab that is now a panel over the town', () => {
-    expect(legacyTarget('research')).toEqual({ screen: 'town', panel: 'research' });
+    expect(legacyTarget('research')).toEqual({ screen: ViewId.TOWN, panel: PanelId.RESEARCH });
   });
 
   it('falls back to the town for an address it does not know', () => {
-    expect(legacyTarget('nowhere')).toEqual({ screen: 'town' });
+    expect(legacyTarget('nowhere')).toEqual({ screen: ViewId.TOWN });
   });
 });
 
 describe(viewOf.name, () => {
   it('puts fields in the fields view and everything else in the town', () => {
-    expect(viewOf(1001)).toBe('fields');
-    expect(viewOf(1040)).toBe('fields');
-    expect(viewOf(0)).toBe('town');
-    expect(viewOf(-1)).toBe('town');
-    expect(viewOf(-2)).toBe('town');
+    expect(viewOf(1001)).toBe(ViewId.FIELDS);
+    expect(viewOf(1040)).toBe(ViewId.FIELDS);
+    expect(viewOf(0)).toBe(ViewId.TOWN);
+    expect(viewOf(-1)).toBe(ViewId.TOWN);
+    expect(viewOf(-2)).toBe(ViewId.TOWN);
   });
 });
 

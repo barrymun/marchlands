@@ -2,6 +2,7 @@
 // (food), a bow saw and a two-man saw (lumber), a pickaxe and the pickaxe crossed with a sledgehammer (stone), a pair of
 // bellows and a blast furnace (iron), and a tax decree, alone and with a stack of gold (gold).
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas } from '../pixel.ts';
 import { disc, oval, rect } from '../shapes.ts';
 import { canvas, coin, GOLD, LEATHER, rod, scroll, STEEL, STONE, waxSeal, writing } from './common.ts';
@@ -9,11 +10,11 @@ import { canvas, coin, GOLD, LEATHER, rod, scroll, STEEL, STONE, waxSeal, writin
 /** Plowshares: a wooden plough handle driving an iron share into a furrow of soil. */
 function plowshares(): PixelCanvas {
   const c = canvas('plowshares');
-  oval(c, 20, 27, 11, 3, 'soil');
-  oval(c, 18, 26, 6, 1.5, 'dirt');
-  rod(c, [4, 5], [19, 21], 3, 'wood');
-  rod(c, [4, 5], [5, 4], 3, 'logDark');
-  rod(c, [2, 9], [8, 3], 2, 'logDark');
+  oval(c, 20, 27, 11, 3, Colour.SOIL);
+  oval(c, 18, 26, 6, 1.5, Colour.DIRT);
+  rod(c, [4, 5], [19, 21], 3, Colour.WOOD);
+  rod(c, [4, 5], [5, 4], 3, Colour.LOG_DARK);
+  rod(c, [2, 9], [8, 3], 2, Colour.LOG_DARK);
   c.poly(
     [
       [16, 18],
@@ -40,7 +41,7 @@ function plowshares(): PixelCanvas {
 /** Iron Rake: a long-handled rake with an iron head and teeth. */
 function ironRake(): PixelCanvas {
   const c = canvas('iron-rake');
-  rod(c, [28, 2], [9, 21], 2.5, 'wood');
+  rod(c, [28, 2], [9, 21], 2.5, Colour.WOOD);
   rod(c, [3, 17], [14, 28], 3, STEEL.dark);
   rod(c, [3, 16], [14, 27], 1.5, STEEL.mid);
   for (let i = 0; i <= 5; i++) {
@@ -48,7 +49,7 @@ function ironRake(): PixelCanvas {
     rod(c, [x, y], [x - 3, y + 3], 1.5, STEEL.mid);
   }
   c.outline();
-  c.line([27, 3], [20, 10], 'plankTop');
+  c.line([27, 3], [20, 10], Colour.PLANK_TOP);
   return c;
 }
 
@@ -57,16 +58,16 @@ function archSaw(): PixelCanvas {
   const c = canvas('arch-saw');
   for (let x = 5; x <= 27; x += 0.5) {
     const u = (x - 16) / 11;
-    disc(c, x, 22 - 15 * (1 - u * u), 1.5, 'wood');
+    disc(c, x, 22 - 15 * (1 - u * u), 1.5, Colour.WOOD);
   }
   rod(c, [3, 23], [29, 23], 3, STEEL.mid);
-  rod(c, [2, 21], [6, 26], 3, 'logDark');
+  rod(c, [2, 21], [6, 26], 3, Colour.LOG_DARK);
   c.outline();
   for (let x = 6; x <= 28; x += 2) c.set(x, 25, STEEL.dark);
   c.line([5, 22], [28, 22], STEEL.hi);
   for (let x = 8; x <= 24; x += 1) {
     const u = (x - 16) / 11;
-    c.set(x, Math.round(21 - 15 * (1 - u * u)), 'plankTop');
+    c.set(x, Math.round(21 - 15 * (1 - u * u)), Colour.PLANK_TOP);
   }
   return c;
 }
@@ -94,8 +95,8 @@ function doubleSaw(): PixelCanvas {
     ],
     STEEL.dark,
   );
-  rod(c, [3, 18], [7, 27], 3, 'wood');
-  rod(c, [24, 5], [29, 14], 3, 'wood');
+  rod(c, [3, 18], [7, 27], 3, Colour.WOOD);
+  rod(c, [24, 5], [29, 14], 3, Colour.WOOD);
   c.outline();
   c.line([7, 21], [25, 10], STEEL.hi);
   for (const [x, y] of [
@@ -106,13 +107,13 @@ function doubleSaw(): PixelCanvas {
     [21, 18],
     [24, 15],
   ])
-    c.set(x, y, 'outline');
+    c.set(x, y, Colour.OUTLINE);
   return c;
 }
 
 /** A pickaxe: its handle from the butt (x0, y0) to the head at (x1, y1), and the curved iron head across it, `arm` long each way. */
 function pick(c: PixelCanvas, x0: number, y0: number, x1: number, y1: number, arm = 11) {
-  rod(c, [x0, y0], [x1, y1], 3, 'wood');
+  rod(c, [x0, y0], [x1, y1], 3, Colour.WOOD);
   const len = Math.hypot(x1 - x0, y1 - y0);
   const [px, py] = [(y0 - y1) / len, (x1 - x0) / len];
   const [dx, dy] = [(x1 - x0) / len, (y1 - y0) / len];
@@ -134,7 +135,7 @@ function quarryingTools(): PixelCanvas {
 
 /** A sledgehammer: its handle from the butt (x0, y0) to the head at (x1, y1), and the iron head across it. */
 function sledge(c: PixelCanvas, x0: number, y0: number, x1: number, y1: number) {
-  rod(c, [x0, y0], [x1, y1], 3, 'wood');
+  rod(c, [x0, y0], [x1, y1], 3, Colour.WOOD);
   const len = Math.hypot(x1 - x0, y1 - y0);
   const [px, py] = [((y0 - y1) / len) * 5, ((x1 - x0) / len) * 5];
   const [dx, dy] = [((x1 - x0) / len) * 3, ((y1 - y0) / len) * 3];
@@ -170,8 +171,8 @@ function advQuarryingTools(): PixelCanvas {
 /** Blower: a pair of bellows, leather pleated between two wooden boards narrowing to an iron nozzle. */
 function blower(): PixelCanvas {
   const c = canvas('blower');
-  rod(c, [7, 10], [2, 6], 2.5, 'wood');
-  rod(c, [7, 23], [2, 27], 2.5, 'wood');
+  rod(c, [7, 10], [2, 6], 2.5, Colour.WOOD);
+  rod(c, [7, 23], [2, 27], 2.5, Colour.WOOD);
   c.poly(
     [
       [6, 11],
@@ -189,7 +190,7 @@ function blower(): PixelCanvas {
       [26, 15],
       [6, 13],
     ],
-    'plankL',
+    Colour.PLANK_L,
   );
   c.poly(
     [
@@ -198,7 +199,7 @@ function blower(): PixelCanvas {
       [21, 12],
       [7, 11],
     ],
-    'plankTop',
+    Colour.PLANK_TOP,
   );
   c.poly(
     [
@@ -207,7 +208,7 @@ function blower(): PixelCanvas {
       [18, 25],
       [5, 25],
     ],
-    'plankR',
+    Colour.PLANK_R,
   );
   rod(c, [24, 16.5], [31, 16.5], 3, STEEL.mid);
   c.outline();
@@ -225,16 +226,16 @@ function blastFurnace(): PixelCanvas {
       [27, 29],
       [4, 29],
     ],
-    (x, y) => ((Math.floor(y / 3) % 2 ? x + 2 : x) % 6 === 0 || y % 3 === 0 ? STONE.dark : x < 12 ? STONE.hi : x > 20 ? 'stoneR' : STONE.mid),
+    (x, y) => ((Math.floor(y / 3) % 2 ? x + 2 : x) % 6 === 0 || y % 3 === 0 ? STONE.dark : x < 12 ? STONE.hi : x > 20 ? Colour.STONE_R : STONE.mid),
   );
-  rect(c, 8, 7, 23, 9, 'stoneR');
+  rect(c, 8, 7, 23, 9, Colour.STONE_R);
   rect(c, 8, 7, 23, 7, STONE.hi);
   // the glowing mouth
-  oval(c, 15.5, 25, 5, 5, 'outline');
-  oval(c, 15.5, 25.5, 4, 4, 'fire');
-  oval(c, 15.5, 26.5, 2.5, 2.5, 'fireHi');
-  rect(c, 10, 27, 21, 29, 'stoneR');
-  rect(c, 11, 27, 20, 27, 'fire');
+  oval(c, 15.5, 25, 5, 5, Colour.OUTLINE);
+  oval(c, 15.5, 25.5, 4, 4, Colour.FIRE);
+  oval(c, 15.5, 26.5, 2.5, 2.5, Colour.FIRE_HI);
+  rect(c, 10, 27, 21, 29, Colour.STONE_R);
+  rect(c, 11, 27, 20, 27, Colour.FIRE);
   // flames over the top
   c.poly(
     [
@@ -244,7 +245,7 @@ function blastFurnace(): PixelCanvas {
       [19, 0],
       [23, 8],
     ],
-    'fire',
+    Colour.FIRE,
   );
   c.poly(
     [
@@ -254,7 +255,7 @@ function blastFurnace(): PixelCanvas {
       [18, 2],
       [19, 7],
     ],
-    'fireHi',
+    Colour.FIRE_HI,
   );
   c.outline();
   return c;

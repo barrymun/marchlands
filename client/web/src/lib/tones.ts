@@ -42,8 +42,8 @@ export const STATUS_DONE = 'text-muted-foreground';
 
 /**
  * A held historic city's badge by its level: solid, in the colours of its flags on the map (the sprites' palette,
- * tools/art/pixel.ts: `banner` red at 12, the darker `greenD` at 14 so it isn't the hero's pale Politics green, `blue`
- * at 16, `gold` at Atlantis), the same in both themes, always a badge with a castle so it isn't read as a gain, loss or
+ * lib/palette.ts: `BANNER` red at 12, the darker `GREEN_D` at 14 so it isn't the hero's pale Politics green, `BLUE`
+ * at 16, `GOLD` at Atlantis), the same in both themes, always a badge with a castle so it isn't read as a gain, loss or
  * warning.
  */
 export const HISTORIC_TONE = {

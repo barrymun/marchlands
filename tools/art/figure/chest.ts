@@ -5,8 +5,9 @@
 
 import { Sex } from '@marchlands/core';
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { BLUE, CLOTH, fill, GOLD, lit, look, type Shades, STEEL, trimmed } from '../gear/common.ts';
-import { CLEAR, type Colour, type PixelCanvas, type Pt } from '../pixel.ts';
+import { type PixelCanvas, type Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { part, stone, torso } from './skeleton.ts';
 
@@ -22,7 +23,7 @@ export function plate(level: number): { metal: Shades; trim: Shades | null } {
 const mail =
   (cx: number) =>
   (x: number, y: number): Colour =>
-    (x + y) % 2 ? (x < cx ? 'mailHi' : 'mail') : 'steelDark';
+    (x + y) % 2 ? (x < cx ? Colour.MAIL_HI : Colour.MAIL) : Colour.STEEL_DARK;
 
 /** The breastplate, from the collar to the belt; a woman's shaped over the bust and narrower at the waist. */
 export function breastplate(sex: Sex, level: number): PixelCanvas {
@@ -54,7 +55,7 @@ export function breastplate(sex: Sex, level: number): PixelCanvas {
     if (trim) trimmed(c, pts, metal, trim, 1.4);
     else fill(c, pts, metal);
     // the neck cut out
-    oval(c, 50, 22, 4, 2.4, CLEAR);
+    oval(c, 50, 22, 4, 2.4, Colour.CLEAR);
     if (female) {
       // the plate shaped over the bust, each side a dome lit from the top left
       oval(c, 46, 30.5, 3.8, 3.2, lit(45.5, 30, 3.6, metal));
@@ -66,7 +67,7 @@ export function breastplate(sex: Sex, level: number): PixelCanvas {
         for (let x = x0; x <= x1; x++) c.set(x, y, metal[2]);
     }
     // the ridge down the front, turned towards the right with the body
-    if (level === 0) for (let y = 27; y < 42; y += 3) for (let x = 43; x < 58; x++) if (c.get(x, y) === BLUE[1]) c.set(x, y, 'blueDark');
+    if (level === 0) for (let y = 27; y < 42; y += 3) for (let x = 43; x < 58; x++) if (c.get(x, y) === BLUE[1]) c.set(x, y, Colour.BLUE_DARK);
     if (level >= 1) for (let y = female ? 35 : 26; y < 42; y++) c.set(52, y, metal[2]);
     if (level >= 3) stone(c, female ? 51 : 52, female ? 37 : 35, 1.2 + level * 0.1, trim ?? GOLD, L.accent);
     if (level >= 6) {

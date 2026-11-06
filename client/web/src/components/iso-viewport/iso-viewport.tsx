@@ -2,9 +2,9 @@ import { Minus, Plus } from 'lucide-react';
 import { type KeyboardEvent, type PointerEvent, type ReactNode, useEffect, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ANIMATION_FPS, DRAG_SLOP, DrawableTone, KEY_STEP, Weather } from '@/components/iso-viewport/constants';
+import { ANIMATION_FPS, DRAG_SLOP, DrawableTone, KEY_STEP, PanDirection, Weather } from '@/components/iso-viewport/constants';
 import type { Viewport } from '@/components/iso-viewport/hooks';
-import type { Camera, Drawable, PanDirection, Piece, Sky, ViewPoint } from '@/components/iso-viewport/types';
+import type { Camera, Drawable, Piece, Sky, ViewPoint } from '@/components/iso-viewport/types';
 import {
   artCanvas,
   clampZoom,
@@ -23,7 +23,12 @@ import { useImages } from '@/hooks/use-images';
 import { useMotion } from '@/hooks/use-motion';
 import { cn } from '@/lib/utils';
 
-const KEYS: Record<string, PanDirection> = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+const KEYS: Record<string, PanDirection> = {
+  ArrowUp: PanDirection.UP,
+  ArrowDown: PanDirection.DOWN,
+  ArrowLeft: PanDirection.LEFT,
+  ArrowRight: PanDirection.RIGHT,
+};
 
 /**
  * An isometric view filling its parent (the world map, the town, the fields): the `ground` and then the `sprites`, back

@@ -1,63 +1,64 @@
+import { StatGroup } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 
 /** Rows of the spending table: the counter group and its label. */
 export const SPENDING = [
   {
-    group: 'building',
+    group: StatGroup.SPENT_BUILDING,
     get label() {
       return i18n.t('stats-panel:spending.groups.building');
     },
   },
   {
-    group: 'research',
+    group: StatGroup.SPENT_RESEARCH,
     get label() {
       return i18n.t('stats-panel:spending.groups.research');
     },
   },
   {
-    group: 'training',
+    group: StatGroup.SPENT_TRAINING,
     get label() {
       return i18n.t('stats-panel:spending.groups.training');
     },
   },
   {
-    group: 'healing',
+    group: StatGroup.SPENT_HEALING,
     get label() {
       return i18n.t('stats-panel:spending.groups.healing');
     },
   },
   {
-    group: 'speedups',
+    group: StatGroup.SPENT_SPEEDUPS,
     get label() {
       return i18n.t('stats-panel:spending.groups.speedups');
     },
   },
   {
-    group: 'items',
+    group: StatGroup.SPENT_ITEMS,
     get label() {
       return i18n.t('stats-panel:spending.groups.items');
     },
   },
   {
-    group: 'heroes',
+    group: StatGroup.SPENT_HEROES,
     get label() {
       return i18n.t('stats-panel:spending.groups.heroes');
     },
   },
   {
-    group: 'valleys',
+    group: StatGroup.SPENT_VALLEYS,
     get label() {
       return i18n.t('stats-panel:spending.groups.valleys');
     },
   },
   {
-    group: 'comfort',
+    group: StatGroup.SPENT_COMFORT,
     get label() {
       return i18n.t('stats-panel:spending.groups.comfort');
     },
   },
   {
-    group: 'other',
+    group: StatGroup.SPENT_OTHER,
     get label() {
       return i18n.t('stats-panel:spending.groups.other');
     },

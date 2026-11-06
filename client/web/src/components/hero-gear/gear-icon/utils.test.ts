@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { GEAR_PIECE_IDS, SpotKind } from '@marchlands/core';
+import { GEAR_PIECE_IDS, GearPieceId, SpotKind } from '@marchlands/core';
 
 import {
   BLADE_ALPHA,
@@ -54,10 +54,6 @@ describe(piecePhase.name, () => {
     expect(phases[0]).toBe(0);
     expect(new Set(phases).size).toBe(GEAR_PIECE_IDS.length);
     expect(Math.max(...phases)).toBeLessThan(1);
-  });
-
-  it('starts a piece it does not know at the start', () => {
-    expect(piecePhase('cloak')).toBe(0);
   });
 });
 
@@ -186,12 +182,12 @@ describe(starPixels.name, () => {
 describe(hasMotion.name, () => {
   it('keeps every piece still below level 3 but those with a movement of their own', () => {
     const moving = GEAR_PIECE_IDS.filter((p) => [0, 1, 2].some((l) => hasMotion(p, l)));
-    expect(moving.sort()).toEqual(['back', 'charm', 'mount', 'necklace']);
+    expect(moving.sort()).toEqual([GearPieceId.BACK, GearPieceId.CHARM, GearPieceId.MOUNT, GearPieceId.NECKLACE]);
   });
 
   it('moves a piece with stones from level 3, and every piece from 9', () => {
-    expect(hasMotion('weapon', 3)).toBe(true);
-    expect(hasMotion('legs', 3)).toBe(false);
+    expect(hasMotion(GearPieceId.WEAPON, 3)).toBe(true);
+    expect(hasMotion(GearPieceId.LEGS, 3)).toBe(false);
     expect(GEAR_PIECE_IDS.every((p) => hasMotion(p, 9) && hasMotion(p, 10))).toBe(true);
   });
 });
@@ -206,59 +202,59 @@ describe(gearFrame.name, () => {
   it('flares a stone at its own moment, and not between', () => {
     const gem = spot('weapon-3.png', SpotKind.GEM);
     expect(gem).toBeDefined();
-    expect(at(gearFrame('weapon', 3, 0).over, gem?.x ?? -1, gem?.y ?? -1)).toBeDefined();
-    expect(gearFrame('weapon', 3, GLINT_ARMS.length * FRAME_MS + 1).over).toEqual([]);
+    expect(at(gearFrame(GearPieceId.WEAPON, 3, 0).over, gem?.x ?? -1, gem?.y ?? -1)).toBeDefined();
+    expect(gearFrame(GearPieceId.WEAPON, 3, GLINT_ARMS.length * FRAME_MS + 1).over).toEqual([]);
   });
 
   it('flares each piece at a different moment', () => {
     const flaring = GEAR_PIECE_IDS.filter((p) => gearFrame(p, 3, 0).over.length > 0);
-    expect(flaring).toEqual(['weapon']);
+    expect(flaring).toEqual([GearPieceId.WEAPON]);
   });
 
   it('makes the stones glow from level 6, not before', () => {
     const between = GLINT_EVERY_MS / 2;
-    expect(gearFrame('necklace', 5, between).over).toEqual([]);
-    expect(gearFrame('necklace', 6, between).over.length).toBeGreaterThan(0);
+    expect(gearFrame(GearPieceId.NECKLACE, 5, between).over).toEqual([]);
+    expect(gearFrame(GearPieceId.NECKLACE, 6, between).over.length).toBeGreaterThan(0);
   });
 
   it('makes a glowing blade pulse on the piece at levels 6 to 8 only', () => {
     const t = PULSE_MS / 4;
     for (const level of [6, 7, 8]) {
-      const px = gearFrame('weapon', level, t).piece;
+      const px = gearFrame(GearPieceId.WEAPON, level, t).piece;
       expect(px.length).toBeGreaterThan(0);
       expect(px.every((p) => p.a === BLADE_ALPHA && p.c === GEAR_LIGHT[level])).toBe(true);
     }
-    expect(gearFrame('weapon', 5, t).piece).toEqual([]);
+    expect(gearFrame(GearPieceId.WEAPON, 5, t).piece).toEqual([]);
   });
 
   it('crosses gilded and crimson metal with a glint now and then, from level 9', () => {
     const t = SWEEP_MS / 2;
-    expect(gearFrame('weapon', 9, t).piece.some((p) => p.c === WHITE)).toBe(true);
-    expect(gearFrame('weapon', 10, t).piece.some((p) => p.c === WHITE)).toBe(true);
-    expect(gearFrame('weapon', 10, SWEEP_MS + 1).piece).toEqual([]);
-    expect(gearFrame('chest', 8, t).piece).toEqual([]);
+    expect(gearFrame(GearPieceId.WEAPON, 9, t).piece.some((p) => p.c === WHITE)).toBe(true);
+    expect(gearFrame(GearPieceId.WEAPON, 10, t).piece.some((p) => p.c === WHITE)).toBe(true);
+    expect(gearFrame(GearPieceId.WEAPON, 10, SWEEP_MS + 1).piece).toEqual([]);
+    expect(gearFrame(GearPieceId.CHEST, 8, t).piece).toEqual([]);
     expect(SWEEP_EVERY_MS).toBeGreaterThan(SWEEP_MS);
   });
 
   it('glows at level 10 in the figure’s light and time', () => {
     const t = 500;
-    const px = gearFrame('mount', 10, t).over.filter((p) => p.c === GLOW_RGB);
+    const px = gearFrame(GearPieceId.MOUNT, 10, t).over.filter((p) => p.c === GLOW_RGB);
     expect(px.length).toBeGreaterThan(0);
     expect(Math.max(...px.map((p) => p.a))).toBeLessThanOrEqual(Math.round(255 * glowAlpha(t)));
   });
 
   it('flares level 10’s backdrop stars behind the piece', () => {
-    const behind = Array.from({ length: 40 }, (_, i) => gearFrame('weapon', 10, i * 100).behind.length);
+    const behind = Array.from({ length: 40 }, (_, i) => gearFrame(GearPieceId.WEAPON, 10, i * 100).behind.length);
     expect(Math.max(...behind)).toBeGreaterThan(0);
-    for (let t = 0; t < 4000; t += 100) expect(gearFrame('weapon', 9, t).behind).toEqual([]);
+    for (let t = 0; t < 4000; t += 100) expect(gearFrame(GearPieceId.WEAPON, 9, t).behind).toEqual([]);
   });
 
   it('plays a burst at any level, in gold below level 3 and the level’s light above', () => {
-    const low = gearFrame('ring', 0, 1000, 1000);
+    const low = gearFrame(GearPieceId.RING, 0, 1000, 1000);
     expect(low.piece.length).toBeGreaterThan(0);
     expect(low.over.some((p) => p.c === GOLD)).toBe(true);
-    expect(gearFrame('ring', 7, 1000, 1000).over.some((p) => p.c === GEAR_LIGHT[7])).toBe(true);
-    expect(all(gearFrame('ring', 0, 1000 + BURST_FRAMES * FRAME_MS, 1000))).toEqual([]);
+    expect(gearFrame(GearPieceId.RING, 7, 1000, 1000).over.some((p) => p.c === GEAR_LIGHT[7])).toBe(true);
+    expect(all(gearFrame(GearPieceId.RING, 0, 1000 + BURST_FRAMES * FRAME_MS, 1000))).toEqual([]);
   });
 
   it('moves only in the palette’s light, the level’s colours and the figure’s glow', () => {
@@ -302,16 +298,26 @@ describe(burstPixels.name, () => {
 describe(pieceMove.name, () => {
   it('gives the five moving pieces their movement at every level they have one', () => {
     for (let level = 0; level <= 10; level++) {
-      expect(pieceMove('back', level)?.k).toBe(level === 10 ? SpotKind.FLAP : SpotKind.STIR);
-      expect(pieceMove('mount', level)?.k).toBe(SpotKind.NOD);
-      expect(pieceMove('necklace', level)?.k).toBe(SpotKind.SWING);
-      expect(pieceMove('charm', level)?.k).toBe(SpotKind.SWING);
-      expect(pieceMove('head', level)?.k).toBe(level >= 4 ? SpotKind.SWAY : undefined);
+      expect(pieceMove(GearPieceId.BACK, level)?.k).toBe(level === 10 ? SpotKind.FLAP : SpotKind.STIR);
+      expect(pieceMove(GearPieceId.MOUNT, level)?.k).toBe(SpotKind.NOD);
+      expect(pieceMove(GearPieceId.NECKLACE, level)?.k).toBe(SpotKind.SWING);
+      expect(pieceMove(GearPieceId.CHARM, level)?.k).toBe(SpotKind.SWING);
+      expect(pieceMove(GearPieceId.HEAD, level)?.k).toBe(level >= 4 ? SpotKind.SWAY : undefined);
     }
   });
 
   it('keeps the other pieces still', () => {
-    for (const p of ['weapon', 'shield', 'ring', 'shoulder', 'chest', 'gauntlets', 'belt', 'legs', 'feet'])
+    for (const p of [
+      GearPieceId.WEAPON,
+      GearPieceId.SHIELD,
+      GearPieceId.RING,
+      GearPieceId.SHOULDER,
+      GearPieceId.CHEST,
+      GearPieceId.GAUNTLETS,
+      GearPieceId.BELT,
+      GearPieceId.LEGS,
+      GearPieceId.FEET,
+    ])
       for (let level = 0; level <= 10; level++) expect(pieceMove(p, level)).toBeNull();
   });
 });

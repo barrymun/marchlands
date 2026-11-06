@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { getCitiesByCityIdQueryKey, getPlayerQueryKey, postGearStarMutation } from '@marchlands/api-client';
-import { BALANCE, GEAR_PIECES, gearSetBonus, gearSetStars, gearStarCost, gearStarLimit, TechType } from '@marchlands/core';
+import { BALANCE, GEAR_PIECES, type GearPieceId, gearSetBonus, gearSetStars, gearStarCost, gearStarLimit, TechType } from '@marchlands/core';
 
 import { levelPoints, maxLevel, maxStars, setBonus } from '@/components/hero-gear/constants';
 import { LEVEL_BURST_STAGGER_MS } from '@/components/hero-gear/gear-card/constants';
@@ -34,7 +34,7 @@ export function GearCard({ onResearch }: { onResearch?: () => void }) {
   const gear = player.data?.gear;
   const addStar = useCommand(postGearStarMutation(), () => [getPlayerQueryKey(), allOf(getCitiesByCityIdQueryKey)], t('card.starAdded'));
   // the star just added, for its twinkle; `n` replays it for the next
-  const [added, setAdded] = useState<{ piece: string; star: number; n: number } | null>(null);
+  const [added, setAdded] = useState<{ piece: GearPieceId; star: number; n: number } | null>(null);
   const playerId = player.data?.playerInfo.id;
   const level = gear?.level;
   // the level this card last showed, and whose: a rise since then bursts every piece, one after another

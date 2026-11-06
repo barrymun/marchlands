@@ -1,8 +1,10 @@
 // What the hero gear sprites share (tools/art/gear.ts, docs/features/hero-gear-art.md): the canvas size, a level's
 // colours, materials, the look every piece takes above level 2, and the shapes they're drawn with, lit from the top left.
 
-import { SpotKind } from '@marchlands/core';
-import { type Colour, PixelCanvas, type Pt } from '../pixel.ts';
+import { type GearPieceId, SpotKind } from '@marchlands/core';
+
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import { PixelCanvas, type Pt } from '../pixel.ts';
 import { disc } from '../shapes.ts';
 
 export const SIZE = 32;
@@ -11,18 +13,31 @@ export const SIZE = 32;
 export type Shades = readonly [Colour, Colour, Colour];
 
 /** A gear level's colours (the gearN palette entries, reserved for the gear). */
-export const tier = (level: number): Shades => [`gear${level}Hi` as Colour, `gear${level}` as Colour, `gear${level}Dark` as Colour];
+const TIERS: readonly Shades[] = [
+  [Colour.GEAR_0_HI, Colour.GEAR_0, Colour.GEAR_0_DARK],
+  [Colour.GEAR_1_HI, Colour.GEAR_1, Colour.GEAR_1_DARK],
+  [Colour.GEAR_2_HI, Colour.GEAR_2, Colour.GEAR_2_DARK],
+  [Colour.GEAR_3_HI, Colour.GEAR_3, Colour.GEAR_3_DARK],
+  [Colour.GEAR_4_HI, Colour.GEAR_4, Colour.GEAR_4_DARK],
+  [Colour.GEAR_5_HI, Colour.GEAR_5, Colour.GEAR_5_DARK],
+  [Colour.GEAR_6_HI, Colour.GEAR_6, Colour.GEAR_6_DARK],
+  [Colour.GEAR_7_HI, Colour.GEAR_7, Colour.GEAR_7_DARK],
+  [Colour.GEAR_8_HI, Colour.GEAR_8, Colour.GEAR_8_DARK],
+  [Colour.GEAR_9_HI, Colour.GEAR_9, Colour.GEAR_9_DARK],
+  [Colour.GEAR_10_HI, Colour.GEAR_10, Colour.GEAR_10_DARK],
+];
+export const tier = (level: number): Shades => TIERS[level];
 
-export const STEEL: Shades = ['steelHi', 'steel', 'steelDark'];
-export const IRON: Shades = ['metal', 'metal', 'steelDark'];
-export const DARK_STEEL: Shades = ['metal', 'hood', 'hoodDark'];
-export const GOLD: Shades = ['fireHi', 'gold', 'goldDark'];
-export const BRONZE: Shades = ['thatchHi', 'goldDark', 'thatchEdge'];
-export const WOOD: Shades = ['plankTop', 'plankL', 'plankR'];
-export const LEATHER: Shades = ['horseHi', 'leather', 'leatherDark'];
+export const STEEL: Shades = [Colour.STEEL_HI, Colour.STEEL, Colour.STEEL_DARK];
+export const IRON: Shades = [Colour.METAL, Colour.METAL, Colour.STEEL_DARK];
+export const DARK_STEEL: Shades = [Colour.METAL, Colour.HOOD, Colour.HOOD_DARK];
+export const GOLD: Shades = [Colour.FIRE_HI, Colour.GOLD, Colour.GOLD_DARK];
+export const BRONZE: Shades = [Colour.THATCH_HI, Colour.GOLD_DARK, Colour.THATCH_EDGE];
+export const WOOD: Shades = [Colour.PLANK_TOP, Colour.PLANK_L, Colour.PLANK_R];
+export const LEATHER: Shades = [Colour.HORSE_HI, Colour.LEATHER, Colour.LEATHER_DARK];
 /** The armour set with no level: blue steel, trimmed in gold. */
-export const BLUE: Shades = ['blueHi', 'blue', 'blueDark'];
-export const CLOTH: Shades = ['wool', 'linen', 'linenDark'];
+export const BLUE: Shades = [Colour.BLUE_HI, Colour.BLUE, Colour.BLUE_DARK];
+export const CLOTH: Shades = [Colour.WOOL, Colour.LINEN, Colour.LINEN_DARK];
 export const CRIMSON = tier(10);
 
 /** How a piece looks above level 2: its metal, its trim, the colour of its gems and cloth, and its spikes and horns. */
@@ -37,12 +52,12 @@ export interface Look {
 
 /** Steel trimmed in gold with gems in the level's colour; gilded at 9; crimson trimmed in silver at 10. */
 export function look(level: number): Look {
-  if (level >= 10) return { metal: CRIMSON, trim: STEEL, accent: ['sparkle', 'gear10Hi', 'gear10Dark'], spikes: true, horns: true };
+  if (level >= 10) return { metal: CRIMSON, trim: STEEL, accent: [Colour.SPARKLE, Colour.GEAR_10_HI, Colour.GEAR_10_DARK], spikes: true, horns: true };
   if (level === 9) return { metal: GOLD, trim: STEEL, accent: tier(9), spikes: true, horns: true };
   return { metal: STEEL, trim: GOLD, accent: tier(level), spikes: level >= 7, horns: level >= 8 };
 }
 
-export const canvas = (piece: string, level: number) => new PixelCanvas(SIZE, `${piece}-${level}`);
+export const canvas = (piece: GearPieceId, level: number) => new PixelCanvas(SIZE, `${piece}-${level}`);
 
 /** Light from the top left over a shape round (cx, cy) of size r: lit, mid or shaded by where a pixel falls. */
 export const lit =
@@ -96,7 +111,7 @@ export function ring(c: PixelCanvas, cx: number, cy: number, rx: number, ry: num
 export function gem(c: PixelCanvas, x: number, y: number, r: number, [hi, mid, dark]: Shades) {
   if (r <= 1) {
     c.spot(SpotKind.GEM, [Math.floor(x), Math.floor(y)], r);
-    c.set(x, y, 'sparkle');
+    c.set(x, y, Colour.SPARKLE);
     c.set(x + 1, y, mid);
     c.set(x, y + 1, mid);
     c.set(x + 1, y + 1, dark);
@@ -107,14 +122,14 @@ export function gem(c: PixelCanvas, x: number, y: number, r: number, [hi, mid, d
   disc(c, x - r * 0.3, y - r * 0.3, r * 0.55, mid);
   const g = Math.round(r / 2);
   c.spot(SpotKind.GEM, [Math.floor(x - g), Math.floor(y - g)], r);
-  c.set(x - g, y - g, 'sparkle');
+  c.set(x - g, y - g, Colour.SPARKLE);
   c.set(x - g + 1, y - g, hi);
   c.set(x - g, y - g + 1, hi);
 }
 
 /** A point of white light (level 10's glowing eyes and slits), recorded as a `shine` spot so the icon can make it glint. */
 export function shine(c: PixelCanvas, x: number, y: number) {
-  c.set(x, y, 'sparkle');
+  c.set(x, y, Colour.SPARKLE);
   c.spot(SpotKind.SHINE, [Math.floor(x), Math.floor(y)]);
 }
 

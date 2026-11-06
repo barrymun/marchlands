@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { FORT_KEYS, ResourceKey, TROOP_KEYS } from '@marchlands/core';
+import { FORT_KEYS, FortKey, ResourceKey, TROOP_KEYS, TroopKey } from '@marchlands/core';
 
 import { resourceKeyLabel, troopLabel } from '@/components/reports-panel/report-dialog/report-content/utils';
 import { troopName } from '@/lib/game-data';
@@ -15,9 +15,9 @@ describe(troopLabel.name, () => {
   });
 
   it('uses the display names, not the client keys', () => {
-    expect(troopLabel('lightCavalry')).toBe('Cavalry');
-    expect(troopLabel('heavyCavalry')).toBe('Cataphract');
-    expect(troopLabel('arrowTower')).toBe("Archer's Tower");
+    expect(troopLabel(TroopKey.LIGHT_CAVALRY)).toBe('Cavalry');
+    expect(troopLabel(TroopKey.HEAVY_CAVALRY)).toBe('Cataphract');
+    expect(troopLabel(FortKey.ARROW_TOWER)).toBe("Archer's Tower");
   });
 
   it('falls back to the raw key when it is unknown', () => {

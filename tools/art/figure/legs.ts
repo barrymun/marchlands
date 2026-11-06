@@ -6,6 +6,7 @@
 
 import { Sex } from '@marchlands/core';
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { BLUE, CLOTH, fill, GOLD, lit, look, setStone, type Shades, spike, STEEL } from '../gear/common.ts';
 import type { PixelCanvas, Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
@@ -15,8 +16,8 @@ import { ANKLE_FAR, ANKLE_NEAR, HIP_FAR, HIP_NEAR, KNEE_FAR, KNEE_NEAR, layer, l
 function materials(level: number): { cloth: Shades; plate: Shades; trim: Shades | null } {
   const L = look(level);
   if (level === 0) return { cloth: CLOTH, plate: BLUE, trim: GOLD };
-  if (level === 1) return { cloth: ['flower', 'bannerHi', 'barnL'], plate: STEEL, trim: null };
-  if (level === 2) return { cloth: ['hood', 'hoodDark', 'gear0'], plate: STEEL, trim: null };
+  if (level === 1) return { cloth: [Colour.FLOWER, Colour.BANNER_HI, Colour.BARN_L], plate: STEEL, trim: null };
+  if (level === 2) return { cloth: [Colour.HOOD, Colour.HOOD_DARK, Colour.GEAR_0], plate: STEEL, trim: null };
   return { cloth: level >= 10 ? L.metal : L.accent, plate: L.metal, trim: L.trim };
 }
 
@@ -39,7 +40,7 @@ function boot(c: PixelCanvas, [ax]: Pt, top: number, sole: number, level: number
   if (level === 0) {
     // blue and white, a gold cuff
     fill(c, shaft, BLUE);
-    fill(c, foot, ['wool', 'wool', 'linenDark']);
+    fill(c, foot, [Colour.WOOL, Colour.WOOL, Colour.LINEN_DARK]);
   } else {
     fill(c, shaft, plate);
     fill(c, foot, plate);
@@ -80,8 +81,8 @@ export function figureLegs(sex: Sex, level: number): PixelCanvas {
       }
       if (level === 2)
         for (let i = -2; i <= 2; i++) {
-          c.set(knee[0] + i, knee[1] + 6 + i, 'steelHi');
-          c.set(knee[0] + i, knee[1] + 6 - i, 'steelHi');
+          c.set(knee[0] + i, knee[1] + 6 + i, Colour.STEEL_HI);
+          c.set(knee[0] + i, knee[1] + 6 - i, Colour.STEEL_HI);
         }
     }),
     part(`${name}-boot`, (c) => boot(c, ankle, ankle[1] - 5, sole, level)),
@@ -103,8 +104,8 @@ export function figureLegs(sex: Sex, level: number): PixelCanvas {
     );
     if (level === 1)
       for (let x = 43; x <= 57; x++) {
-        c.set(x, 47, 'leatherDark');
-        c.set(x, 48, 'leather');
+        c.set(x, 47, Colour.LEATHER_DARK);
+        c.set(x, 48, Colour.LEATHER);
       }
   });
   const parts = [...leg('far', HIP_FAR, KNEE_FAR, ANKLE_FAR, SOLE_FAR, thigh - 1), hips, ...leg('near', HIP_NEAR, KNEE_NEAR, ANKLE_NEAR, SOLE_NEAR, thigh)];

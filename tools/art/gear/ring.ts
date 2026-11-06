@@ -2,20 +2,23 @@
 // (1), silver engraved with vines (2), then from 3 a stone in the level's colour on top that grows, claws round it
 // from 7, gilded at 9, and at 10 a crimson band with silver claws and a glowing stone.
 
+import { GearPieceId } from '@marchlands/core';
+
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas } from '../pixel.ts';
 import { ring as band, BRONZE, canvas, look, setStone, type Shades, shine, spike, STEEL } from './common.ts';
 
 export function ring(level: number): PixelCanvas {
-  const c = canvas('ring', level);
+  const c = canvas(GearPieceId.RING, level);
   const L = look(level);
   const metal: Shades = level === 0 ? BRONZE : level <= 2 ? STEEL : L.metal;
   band(c, 16, 19, 11, 8, 3.2, metal);
   // engraving on the front of the band
   for (let x = 7; x < 26; x++) {
     const y = 19 + Math.round(Math.sqrt(Math.max(0, 1 - ((x + 0.5 - 16) / 9.5) ** 2)) * 6.2);
-    if (level === 0 && x % 2) c.set(x, y, 'thatchEdge');
-    if (level === 1) c.set(x, y, 'steelDark');
-    if (level === 2 && (x % 3 === 0 || (x % 3 === 1 && y % 2))) c.set(x, y - (x % 2), 'hoodDark');
+    if (level === 0 && x % 2) c.set(x, y, Colour.THATCH_EDGE);
+    if (level === 1) c.set(x, y, Colour.STEEL_DARK);
+    if (level === 2 && (x % 3 === 0 || (x % 3 === 1 && y % 2))) c.set(x, y - (x % 2), Colour.HOOD_DARK);
     if (level >= 3 && x % 4 === 0) c.set(x, y, L.trim[1]);
   }
   if (level >= 3) {

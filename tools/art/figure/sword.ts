@@ -5,6 +5,7 @@
 
 import { SpotKind } from '@marchlands/core';
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { fill, horn, IRON, lit, look, type Shades, STEEL, sweep, WOOD } from '../gear/common.ts';
 import type { PixelCanvas, Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
@@ -14,7 +15,7 @@ import { HAND_NEAR, part } from './skeleton.ts';
 export function sword(level: number): PixelCanvas {
   const L = look(level);
   const [hx, hy] = HAND_NEAR;
-  const blade: Shades = level === 0 ? WOOD : level >= 10 ? L.metal : level === 9 ? ['steelHi', 'steelHi', 'steel'] : STEEL;
+  const blade: Shades = level === 0 ? WOOD : level >= 10 ? L.metal : level === 9 ? [Colour.STEEL_HI, Colour.STEEL_HI, Colour.STEEL] : STEEL;
   const guard: Shades = level === 0 ? WOOD : level <= 2 ? IRON : L.trim;
   const width = level === 0 ? 4.4 : 4.6 + Math.min(level, 8) * 0.15;
   // the blade leans out, clear of the head
@@ -69,7 +70,7 @@ export function sword(level: number): PixelCanvas {
   if (level >= 10) {
     const [x0, y0] = at(0.02);
     const [x1, y1] = at(0.92);
-    c.line([x0 - 1.4, y0], [x1 - 0.8, y1], 'steelHi');
+    c.line([x0 - 1.4, y0], [x1 - 0.8, y1], Colour.STEEL_HI);
   }
   if (level >= 3) {
     c.set(hx + 0.5, hy + 4, L.accent[1]);

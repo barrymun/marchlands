@@ -14,6 +14,7 @@ import {
   ResourceKey,
   ResourceKeySchema,
   TroopKeySchema,
+  UNLOCK_KINDS,
 } from '@marchlands/core';
 
 import { BuildingBean } from '#/beans.ts';
@@ -121,6 +122,16 @@ export type ProductionBreakdown = z.infer<typeof ProductionBreakdown>;
 
 export const CityMoveResult = z.object({ fieldId: int().describe('new tile id'), x: int(), y: int() }).meta({ id: 'CityMoveResult' });
 export type CityMoveResult = z.infer<typeof CityMoveResult>;
+export const CityMoveOutBody = z.object({
+  targetCityIds: z
+    .array(z.number().int())
+    .default([])
+    .describe('the cities its troops and resources go to, shared evenly; what is left over goes to the first; none leaves them'),
+  heroes: z
+    .array(z.object({ heroId: z.number().int(), cityId: z.number().int().describe('a city of the player with a free Feasting Hall slot') }))
+    .default([])
+    .describe('the heroes that go too, each to its own city'),
+});
 export const CityAbandonResult = z.object({ abandonAt: Ms.describe('when its hour is up and it goes') }).meta({ id: 'CityAbandonResult' });
 export const DraftResult = z.object({ troops: zTroops.describe('the troops drafted into the seat') }).meta({ id: 'DraftResult' });
 export type DraftResult = z.infer<typeof DraftResult>;
@@ -147,7 +158,7 @@ export const BuildingDescription = z
     unlocks: z
       .array(
         z.object({
-          kind: z.enum(['building', 'troop', 'tech']),
+          kind: z.enum(UNLOCK_KINDS),
           id: int().describe('building type, troop or technology id'),
           level: int().describe('level of this building required'),
         }),
@@ -198,7 +209,7 @@ export const TechBean = z
     unlocks: z
       .array(
         z.object({
-          kind: z.enum(['building', 'troop', 'tech']),
+          kind: z.enum(UNLOCK_KINDS),
           id: int().describe('building type, troop or technology id'),
           level: int().describe('level of this technology required'),
         }),

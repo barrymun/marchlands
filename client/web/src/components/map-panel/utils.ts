@@ -1,8 +1,8 @@
 import type { CityBean, Flow } from '@marchlands/api-client';
 import { FlowActionType, historicNameAt, Relation, TileType } from '@marchlands/core';
 
-import { FACTION_TINT_KEY, FactionTint } from '@/components/map-panel/constants';
-import type { FarmList, FarmMark, RelationGroup } from '@/components/map-panel/types';
+import { FACTION_TINT_KEY, FactionTint, RelationGroup } from '@/components/map-panel/constants';
+import type { FarmList, FarmMark } from '@/components/map-panel/types';
 import { historicName, tileName } from '@/lib/game-data';
 
 /** `v` brought into 0 … size - 1, the map wrapping round at its edges. */
@@ -11,7 +11,7 @@ export function wrap(v: number, size: number): number {
 }
 
 export const relationGroup = (r: number): RelationGroup =>
-  r === Relation.ALLIANCE || r === Relation.ALLY ? 'friend' : r === Relation.ENEMY ? 'enemy' : 'other';
+  r === Relation.ALLIANCE || r === Relation.ALLY ? RelationGroup.FRIEND : r === Relation.ENEMY ? RelationGroup.ENEMY : RelationGroup.OTHER;
 
 /**
  * What a map tile is called: a city by its name, a historic city by its own, given its place (a level 14, 16 or 18's in

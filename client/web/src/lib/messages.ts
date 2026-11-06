@@ -4,7 +4,7 @@
 // by name, durations by their two largest units ("1h 30m"), shares as percents ("12.5%"), nested messages recursively, lists joined; `count` stays a number so the plural form can be chosen
 // (write it as `{{count, number}}`).
 
-import { type GameRef, GameRefKind, HeroBuffId, type ResourceKey } from '@marchlands/core';
+import { type GameRef, GameRefKind, type GearPieceId, HeroBuffId, type ResourceKey } from '@marchlands/core';
 
 import { fmtDecimal, fmtExact, percent, shortDuration } from '@/lib/format';
 import { buildingName, gearName, itemCategoryName, itemName, rankName, techName, tileName, titleName, troopName, zoneName } from '@/lib/game-data';
@@ -47,7 +47,7 @@ export function gameRefName(r: AnyRef): string {
     case GameRefKind.RANK:
       return rankName(Number(id));
     case GameRefKind.GEAR:
-      return gearName(String(id));
+      return gearName(id as GearPieceId);
     case GameRefKind.ITEM_CATEGORY:
       return itemCategoryName(Number(id));
     case GameRefKind.RESOURCE:

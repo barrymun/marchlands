@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 
 import { BALANCE } from '#/balance.ts';
 import { type BattleSide, type DefenderSide, type ResearchStats, simulateBattle, type TraceEvent } from '#/battle/simulator.ts';
-import { TROOP_KEY_LIST, type TroopKey } from '#/constants.ts';
+import { TROOP_KEY_LIST, TroopKey } from '#/constants.ts';
 import { fortsToArray, troopsToArray } from '#/troops.ts';
 import type { FortCounts, TroopCounts } from '#/types.ts';
 import { npcTemplate } from '#/world.ts';
@@ -66,7 +66,7 @@ describe(simulateBattle.name, () => {
       ['a trap', {}, ONE_TRAP, 5200],
     ] as [string, TroopCounts, FortCounts, number][])('with %s is %i long', (_, troops, forts, size) => {
       const { defenderAt } = fight({ research: {}, troops: { militia: 1 } }, { research: {}, troops: { ...troops, carriage: 1 }, forts });
-      expect(defenderAt(0, 'carriage')).toBe(size);
+      expect(defenderAt(0, TroopKey.CARRIAGE)).toBe(size);
     });
 
     // 1,000 cavalry at Horseback Riding 10 move 1500 in round 0. Against 1,000 archers and 1 ballista
@@ -74,15 +74,15 @@ describe(simulateBattle.name, () => {
     // instead (field 1700) they end 200 short and hit nothing: one catapult denies cavalry their first strike.
     it('decides whether cavalry strike in round 1', () => {
       const ballista = fight({ research: RESEARCH_10, troops: { lightCavalry: 1000 } }, { research: RESEARCH_10, troops: { archer: 1000, ballista: 1 } });
-      expect(ballista.attackerAt(0, 'lightCavalry')).toBe(1500);
-      expect(ballista.defenderAt(0, 'archer')).toBe(1600);
+      expect(ballista.attackerAt(0, TroopKey.LIGHT_CAVALRY)).toBe(1500);
+      expect(ballista.defenderAt(0, TroopKey.ARCHER)).toBe(1600);
       // 1.2 (cavalry vs archers) x 1,000 x 250 attack x 0.925 (Iron Working 10) / 375 life (Medicine 10)
-      expect(ballista.defenderLost(0, 'archer')).toBe(740);
+      expect(ballista.defenderLost(0, TroopKey.ARCHER)).toBe(740);
 
       const catapult = fight({ research: RESEARCH_10, troops: { lightCavalry: 1000 } }, { research: RESEARCH_10, troops: { archer: 1000, catapult: 1 } });
-      expect(catapult.attackerAt(0, 'lightCavalry')).toBe(1500);
-      expect(catapult.defenderAt(0, 'archer')).toBe(1700);
-      expect(catapult.defenderLost(0, 'archer')).toBe(0);
+      expect(catapult.attackerAt(0, TroopKey.LIGHT_CAVALRY)).toBe(1500);
+      expect(catapult.defenderAt(0, TroopKey.ARCHER)).toBe(1700);
+      expect(catapult.defenderLost(0, TroopKey.ARCHER)).toBe(0);
     });
   });
 
@@ -91,9 +91,9 @@ describe(simulateBattle.name, () => {
     // +10% a level of Compass (500 at 10). Read from the first round on an open field of 5200.
     it('moves cavalry 1500 at Horseback Riding 10 and archers 500 at Compass 10', () => {
       const none = fight({ research: {}, troops: { lightCavalry: 1, archer: 1 } }, { research: {}, troops: { carriage: 1 }, forts: ONE_TRAP });
-      expect([none.attackerAt(0, 'lightCavalry'), none.attackerAt(0, 'archer')]).toEqual([1000, 250]);
+      expect([none.attackerAt(0, TroopKey.LIGHT_CAVALRY), none.attackerAt(0, TroopKey.ARCHER)]).toEqual([1000, 250]);
       const full = fight({ research: RESEARCH_10, troops: { lightCavalry: 1, archer: 1 } }, { research: {}, troops: { carriage: 1 }, forts: ONE_TRAP });
-      expect([full.attackerAt(0, 'lightCavalry'), full.attackerAt(0, 'archer')]).toEqual([1500, 500]);
+      expect([full.attackerAt(0, TroopKey.LIGHT_CAVALRY), full.attackerAt(0, TroopKey.ARCHER)]).toEqual([1500, 500]);
     });
 
     // 1 cavalry, 1 pikeman and 1 swordsman a side, all research 10, the defender with one trap (field 5200).
@@ -105,7 +105,7 @@ describe(simulateBattle.name, () => {
         { research: RESEARCH_10, troops: { lightCavalry: 1, pikemen: 1, swordsmen: 1 } },
         { research: RESEARCH_10, troops: { lightCavalry: 1, pikemen: 1, swordsmen: 1 }, forts: ONE_TRAP },
       );
-      const groups: TroopKey[] = ['lightCavalry', 'pikemen', 'swordsmen'];
+      const groups: TroopKey[] = [TroopKey.LIGHT_CAVALRY, TroopKey.PIKEMEN, TroopKey.SWORDSMEN];
       expect(groups.map((k) => attackerAt(0, k))).toEqual([1500, 600, 550]);
       expect(groups.map((k) => defenderAt(0, k))).toEqual([3700, 4600, 4650]);
       expect(groups.map((k) => attackerAt(1, k))).toEqual([2200, 1200, 1100]);
@@ -118,12 +118,12 @@ describe(simulateBattle.name, () => {
     // reach 300 in round 0 and both defending groups are in range there, at the same distance, so the cavalry
     // hit the one with the larger attack x count: warriors 50 each, swordsmen 100 each.
     it.each([
-      ['2,001 warriors (100,050) over 1,000 swordsmen (100,000)', 2001, 1000, 'militia'],
-      ['500 swordsmen (50,000) over 999 warriors (49,950)', 999, 500, 'swordsmen'],
-      ['the warriors on an exact tie (2,000 and 1,000), by order', 2000, 1000, 'militia'],
+      ['2,001 warriors (100,050) over 1,000 swordsmen (100,000)', 2001, 1000, TroopKey.MILITIA],
+      ['500 swordsmen (50,000) over 999 warriors (49,950)', 999, 500, TroopKey.SWORDSMEN],
+      ['the warriors on an exact tie (2,000 and 1,000), by order', 2000, 1000, TroopKey.MILITIA],
     ] as [string, number, number, TroopKey][])('hit %s', (_, militia, swordsmen, hit) => {
       const { defenderAt, defenderLost } = fight({ research: {}, troops: { lightCavalry: 100 } }, { research: {}, troops: { militia, swordsmen } });
-      expect([defenderAt(0, 'militia'), defenderAt(0, 'swordsmen')]).toEqual([300, 300]);
+      expect([defenderAt(0, TroopKey.MILITIA), defenderAt(0, TroopKey.SWORDSMEN)]).toEqual([300, 300]);
       const missed = hit === 'militia' ? 'swordsmen' : 'militia';
       expect(defenderLost(0, hit)).toBeGreaterThan(0);
       expect(defenderLost(0, missed)).toBe(0);
@@ -139,11 +139,11 @@ describe(simulateBattle.name, () => {
         { research: RESEARCH_10, troops: { archer: 1000, ballista: 1000, catapult: 1000 } },
         { research: RESEARCH_10, troops: { archer: 100_000 } },
       );
-      const volleys = kills.filter((k) => k.source === at('archer')).map((k) => [k.round, k.target]);
+      const volleys = kills.filter((k) => k.source === at(TroopKey.ARCHER)).map((k) => [k.round, k.target]);
       expect(volleys).toEqual([
-        [0, at('catapult')],
-        [1, at('ballista')],
-        [2, at('archer')],
+        [0, at(TroopKey.CATAPULT)],
+        [1, at(TroopKey.BALLISTA)],
+        [2, at(TroopKey.ARCHER)],
       ]);
     });
 
@@ -155,8 +155,13 @@ describe(simulateBattle.name, () => {
         { research: RESEARCH_10, troops: { archer: 20_000 } },
         { research: RESEARCH_10, troops: { ballista: 1, heavyCavalry: 300, pikemen: 300, swordsmen: 300 } },
       );
-      const groups: TroopKey[] = ['ballista', 'heavyCavalry', 'pikemen', 'swordsmen'];
-      expect([0, 1, 2, 3].map((r) => groups.filter((k) => defenderLost(r, k) > 0))).toEqual([['ballista'], ['heavyCavalry'], ['pikemen'], ['swordsmen']]);
+      const groups: TroopKey[] = [TroopKey.BALLISTA, TroopKey.HEAVY_CAVALRY, TroopKey.PIKEMEN, TroopKey.SWORDSMEN];
+      expect([0, 1, 2, 3].map((r) => groups.filter((k) => defenderLost(r, k) > 0))).toEqual([
+        [TroopKey.BALLISTA],
+        [TroopKey.HEAVY_CAVALRY],
+        [TroopKey.PIKEMEN],
+        [TroopKey.SWORDSMEN],
+      ]);
     });
 
     // Speed, not distance: the attacker's scouts stay at 0 while the rest of the army lives, the farthest
@@ -167,10 +172,10 @@ describe(simulateBattle.name, () => {
         { research: RESEARCH_10, troops: { scouter: 10, heavyCavalry: 3000, pikemen: 3000 } },
         { research: RESEARCH_10, troops: { archer: 20_000 } },
       );
-      const volleys = kills.filter((k) => k.source === at('archer')).slice(0, 2);
+      const volleys = kills.filter((k) => k.source === at(TroopKey.ARCHER)).slice(0, 2);
       expect(volleys.map((k) => [k.round, k.target, k.location])).toEqual([
-        [0, at('scouter'), 0],
-        [1, at('heavyCavalry'), 1400],
+        [0, at(TroopKey.SCOUTER), 0],
+        [1, at(TroopKey.HEAVY_CAVALRY), 1400],
       ]);
     });
 
@@ -182,11 +187,11 @@ describe(simulateBattle.name, () => {
     it('deal full damage within half range and a quarter at point-blank', () => {
       const archers = { research: {}, troops: { archer: 99_000 }, attackModifier: 3.5 };
       const full = fight(archers, { research: { ironWorking: 10 }, troops: { lightCavalry: 100_000 } });
-      expect(full.defenderAt(0, 'lightCavalry')).toBe(400);
-      expect(full.defenderLost(0, 'lightCavalry')).toBe(60_707);
+      expect(full.defenderAt(0, TroopKey.LIGHT_CAVALRY)).toBe(400);
+      expect(full.defenderLost(0, TroopKey.LIGHT_CAVALRY)).toBe(60_707);
       const pointBlank = fight(archers, { research: { ironWorking: 10, horsebackRiding: 10 }, troops: { lightCavalry: 100_000 } });
-      expect(pointBlank.defenderAt(0, 'lightCavalry')).toBe(0);
-      expect(pointBlank.defenderLost(0, 'lightCavalry')).toBe(15_177);
+      expect(pointBlank.defenderAt(0, TroopKey.LIGHT_CAVALRY)).toBe(0);
+      expect(pointBlank.defenderLost(0, TroopKey.LIGHT_CAVALRY)).toBe(15_177);
     });
   });
 
@@ -205,8 +210,8 @@ describe(simulateBattle.name, () => {
         { research: { ironWorking: 10 }, hero: { intel }, troops: { archer: 200_000 }, defenceModifier },
         { research: { horsebackRiding: 10 }, troops: { lightCavalry: 100_000 } },
       );
-      const strike = kills.find((k) => k.source === at('lightCavalry'));
-      expect(strike).toMatchObject({ round: 0, target: at('archer'), killed });
+      const strike = kills.find((k) => k.source === at(TroopKey.LIGHT_CAVALRY));
+      expect(strike).toMatchObject({ round: 0, target: at(TroopKey.ARCHER), killed });
     });
   });
 
@@ -252,10 +257,10 @@ describe(simulateBattle.name, () => {
         { research: RESEARCH_10, troops: { ballista: 500 } },
         { research: {}, troops: npc.troops, forts: npc.forts, wallLevel: 5 },
       );
-      const stops = rounds.map((r) => r.attacker[at('ballista')]!.location);
+      const stops = rounds.map((r) => r.attacker[at(TroopKey.BALLISTA)]!.location);
       const standOff = Math.max(...stops);
       expect(kills).toEqual([]);
-      expect(outcome.attackerTroops[at('ballista')]).toBe(500);
+      expect(outcome.attackerTroops[at(TroopKey.BALLISTA)]).toBe(500);
       expect(outcome.attackerAlive).toBe(true);
       expect(outcome.wallHitPoints).toBe(0);
       // once at its post it never moves closer

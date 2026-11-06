@@ -7,27 +7,26 @@
 // 179 + 140 (levels) + 770 (stars) + 140 (set bonus) = 1,229 in its gear attribute.
 
 import { BALANCE } from '#/balance.ts';
-import { HERO_BUFF_IDS, HeroBuffId, TechType } from '#/constants.ts';
+import { GearPieceId, HERO_BUFF_IDS, HeroBuffId, TechType } from '#/constants.ts';
 import { medalId } from '#/items.ts';
 
 export const GEAR_PIECES = [
-  { id: 'weapon' },
-  { id: 'shield' },
-  { id: 'mount' },
-  { id: 'necklace' },
-  { id: 'charm' },
-  { id: 'ring' },
-  { id: 'head' },
-  { id: 'shoulder' },
-  { id: 'chest' },
-  { id: 'back' },
-  { id: 'gauntlets' },
-  { id: 'belt' },
-  { id: 'legs' },
-  { id: 'feet' },
+  { id: GearPieceId.WEAPON },
+  { id: GearPieceId.SHIELD },
+  { id: GearPieceId.MOUNT },
+  { id: GearPieceId.NECKLACE },
+  { id: GearPieceId.CHARM },
+  { id: GearPieceId.RING },
+  { id: GearPieceId.HEAD },
+  { id: GearPieceId.SHOULDER },
+  { id: GearPieceId.CHEST },
+  { id: GearPieceId.BACK },
+  { id: GearPieceId.GAUNTLETS },
+  { id: GearPieceId.BELT },
+  { id: GearPieceId.LEGS },
+  { id: GearPieceId.FEET },
 ] as const;
 
-export type GearPieceId = (typeof GEAR_PIECES)[number]['id'];
 export const GEAR_PIECE_IDS: readonly GearPieceId[] = GEAR_PIECES.map((p) => p.id);
 export const isGearPiece = (id: string): id is GearPieceId => (GEAR_PIECE_IDS as readonly string[]).includes(id);
 
@@ -125,12 +124,12 @@ interface GearedHero {
   powerAdded: number;
   managementAdded: number;
   stratagemAdded: number;
-  gearStat: string | null;
+  gearStat: GearStat | null;
 }
 
 /** The attribute a hero's gear boosts: the chosen one, else the hero's highest assigned attribute. */
 export function heroGearStat(h: Pick<GearedHero, 'power' | 'management' | 'stratagem' | 'gearStat'>): GearStat {
-  if (h.gearStat && (GEAR_STATS as readonly string[]).includes(h.gearStat)) return h.gearStat as GearStat;
+  if (h.gearStat) return h.gearStat;
   if (h.power >= h.management && h.power >= h.stratagem) return HeroBuffId.POWER;
   return h.management >= h.stratagem ? HeroBuffId.MANAGEMENT : HeroBuffId.STRATAGEM;
 }

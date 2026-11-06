@@ -145,6 +145,8 @@ export const CityMiscSchema = z.object({
   lastComfortAt: z.number().optional(),
   /** food shortfall carried into troop desertion */
   starvingSince: z.number().optional(),
+  /** (marchlands) the abandonAt of the hour in which the player moved this city out, so that a later hour doesn't count as moved */
+  movedOutFor: z.number().optional(),
 });
 export type CityMisc = z.infer<typeof CityMiscSchema>;
 
@@ -211,6 +213,8 @@ export type Flow = z.infer<typeof FlowSchema>;
 export const PlayerMiscSchema = z.object({
   /** (marchlands) when the lord last renamed (renaming is free, once per BALANCE.renameCooldownMs) */
   renamedAt: z.number().optional(),
+  /** (marchlands) no moving a city out before this: they kept a city after moving it out (BALANCE.abandon.moveOutCooldownMs) */
+  moveOutBlockedUntil: z.number().optional(),
   /** (marchlands) when the player last changed gender (once per BALANCE.genderCooldownMs) */
   genderChangedAt: z.number().optional(),
   changedFace: z.boolean().optional(),

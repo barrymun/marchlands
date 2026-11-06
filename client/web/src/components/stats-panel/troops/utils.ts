@@ -1,12 +1,12 @@
 import { FORT_KEY_LIST, TROOP_KEY_LIST } from '@marchlands/core';
 
 import { UnitGroup } from '@/components/stats-panel/constants';
-import type { Counters } from '@/components/stats-panel/types';
+import type { Counters, UnitKey } from '@/components/stats-panel/types';
 import { unitCount } from '@/components/stats-panel/utils';
 
 /** What became of each of the player's own unit types: trained, fallen for good, injured, healed, deserted, disbanded. */
 export interface TroopRow {
-  key: string;
+  key: UnitKey;
   trained: number;
   died: number;
   injured: number;

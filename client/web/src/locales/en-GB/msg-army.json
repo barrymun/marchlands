@@ -54,5 +54,6 @@
   "planWaveSent": "That wave was sent already.",
   "planLandAt": "A plan lands in the future, at most {{time}} ahead.",
   "planMoveSent": "Waves of this plan were sent already: its target and landing time can no longer change.",
-  "planKeepShared": "Other players have waves in this plan, so it stays shared."
+  "planKeepShared": "Other players have waves in this plan, so it stays shared.",
+  "destinationAbandoning": "That city is being abandoned, so no army can go there."
 }

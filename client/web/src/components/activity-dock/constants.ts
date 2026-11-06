@@ -1,25 +1,32 @@
 import { FlaskConical, Hammer, Swords } from 'lucide-react';
-import type { Group } from '@/components/activity-dock/types';
 import { i18n } from '@/lib/i18n';
 
 /** `label` is in the current locale. */
-export const GROUPS: { id: Group; icon: typeof Hammer; label: string }[] = [
+/** The queues the dock lists. */
+export const DockGroup = {
+  BUILDING: 'Building',
+  RESEARCH: 'Research',
+  TRAINING: 'Training',
+} as const;
+export type DockGroup = (typeof DockGroup)[keyof typeof DockGroup];
+
+export const GROUPS: { id: DockGroup; icon: typeof Hammer; label: string }[] = [
   {
-    id: 'Building',
+    id: DockGroup.BUILDING,
     icon: Hammer,
     get label() {
       return i18n.t('activity-dock:groups.building');
     },
   },
   {
-    id: 'Research',
+    id: DockGroup.RESEARCH,
     icon: FlaskConical,
     get label() {
       return i18n.t('activity-dock:groups.research');
     },
   },
   {
-    id: 'Training',
+    id: DockGroup.TRAINING,
     icon: Swords,
     get label() {
       return i18n.t('activity-dock:groups.training');

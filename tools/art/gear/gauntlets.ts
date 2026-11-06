@@ -3,6 +3,9 @@
 // in the level's colour on the back of the hand, spikes on the knuckles from 7 and along the forearm from 8, gilded at
 // 9 and crimson at 10.
 
+import { GearPieceId } from '@marchlands/core';
+
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas, Pt } from '../pixel.ts';
 import { BLUE, canvas, DARK_STEEL, fill, GOLD, horn, look, setStone, type Shades, spike, STEEL } from './common.ts';
 
@@ -32,7 +35,7 @@ const CUFF: Pt[] = [
 ];
 
 export function gauntlets(level: number): PixelCanvas {
-  const c = canvas('gauntlets', level);
+  const c = canvas(GearPieceId.GAUNTLETS, level);
   const L = look(level);
   const metal: Shades = level === 0 ? BLUE : level === 1 ? STEEL : level === 2 ? DARK_STEEL : L.metal;
   const trim: Shades = level === 0 ? GOLD : level <= 2 ? metal : L.trim;
@@ -45,7 +48,7 @@ export function gauntlets(level: number): PixelCanvas {
     for (let x = 11; x < 21; x++) c.set(x, 9, metal[2]);
   }
   fill(c, BRACER, metal);
-  if (level === 2) for (let y = 17; y < 28; y += 3) for (let x = 13; x < 22; x++) if ((x + y) % 3) c.set(x, y + Math.round((x - 13) * -0.15), 'hoodDark');
+  if (level === 2) for (let y = 17; y < 28; y += 3) for (let x = 13; x < 22; x++) if ((x + y) % 3) c.set(x, y + Math.round((x - 13) * -0.15), Colour.HOOD_DARK);
   if (level !== 1 && level !== 2) fill(c, CUFF, trim);
   if (level === 0)
     // the cuff's crown points
@@ -56,7 +59,7 @@ export function gauntlets(level: number): PixelCanvas {
           [x + 4, 15 - (x - 9) * 0.08],
           [x + 2, 10 - (x - 9) * 0.08],
         ],
-        (px) => (px < x + 2 ? 'fireHi' : 'gold'),
+        (px) => (px < x + 2 ? Colour.FIRE_HI : Colour.GOLD),
       );
   if (level >= 3) setStone(c, 16, 12, 0.9 + level * 0.08, L.trim, L.accent);
   if (L.horns) horn(c, [23, 22], [30, 16], 6, L.trim);

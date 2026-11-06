@@ -3,7 +3,7 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { GEAR_PIECE_IDS, QUEST_CATALOGUE, questGroups, questTargetMessage, TITLES } from '@marchlands/core';
+import { GEAR_PIECE_IDS, GearPieceId, QUEST_CATALOGUE, questGroups, QuestTargetKind, questTargetMessage, TITLES } from '@marchlands/core';
 
 import { gearName, questGroupName, questName, titleName } from '@/lib/game-data';
 import { i18n, Locale } from '@/lib/i18n';
@@ -52,7 +52,7 @@ describe('quest descriptions and targets', () => {
     expect(translateMessage(questTargetMessage(q(1025).targets[0]!))).toBe('100 × Warrior');
     expect(translateMessage(questTargetMessage(q(1026).targets[0]!))).toBe('100 × Trap');
     expect(translateMessage(questTargetMessage(q(1030).targets[0]!))).toBe('10,000 prestige');
-    expect(translateMessage(questTargetMessage({ kind: 'cities', count: 1 }))).toBe('Own 1 city');
+    expect(translateMessage(questTargetMessage({ kind: QuestTargetKind.CITIES, count: 1 }))).toBe('Own 1 city');
   });
 });
 
@@ -74,8 +74,8 @@ describe('data-gear', () => {
   });
 
   it('is looked up by id', async () => {
-    expect(gearName('head')).toBe('Head Gear');
+    expect(gearName(GearPieceId.HEAD)).toBe('Head Gear');
     await i18n.changeLanguage(Locale.JA_JP);
-    expect(gearName('head')).toBe('頭部装備');
+    expect(gearName(GearPieceId.HEAD)).toBe('頭部装備');
   });
 });

@@ -2,7 +2,8 @@
 // 1 to 3 (Cross, Rose, Lion), scalloped silver for 4 to 6 (Honour, Courage, Wisdom) and a gold star for 7 to 9
 // (Freedom, Justice, Nation), so a medal's level shows at a glance. The Lion Medal shows a lion's paw.
 
-import type { Colour, PixelCanvas } from '../pixel.ts';
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import type { PixelCanvas } from '../pixel.ts';
 import { disc, rect } from '../shapes.ts';
 import { BRONZE, canvas, GOLD, sparkle, stamp, STEEL, type Tone } from './common.ts';
 
@@ -19,26 +20,26 @@ const EMBLEMS = {
   cross: { rows: ['...ddd...', '....d....', '....d....', 'd...d...d', 'ddddddddd', 'd...d...d', '....d....', '....d....', '...ddd...'] },
   rose: {
     rows: ['..rrrr...', '.rRrrRr..', '.rrRRrr..', '.rRrrRr..', '..rrrr...', '....g.gg.', '..ggg.gg.', '....g....', '....g....'],
-    colours: { r: 'banner', R: 'bannerHi', g: 'greenL' },
+    colours: { r: Colour.BANNER, R: Colour.BANNER_HI, g: Colour.GREEN_L },
   },
   lion: { rows: ['..d...d..', '.ddd.ddd.', '..d...d..', 'dd.....dd', 'dd.ddd.dd', '..ddddd..', '.ddddddd.', '.ddddddd.', '..dd.dd..'] },
   laurel: {
     rows: ['..g...g..', '.gG...Gg.', 'gG.....Gg', 'g.......g', 'gG.....Gg', '.gG...Gg.', '..gG.Gg..', '....r....', '...r.r...'],
-    colours: { g: 'greenD', G: 'greenL', r: 'banner' },
+    colours: { g: Colour.GREEN_D, G: Colour.GREEN_L, r: Colour.BANNER },
   },
   sword: { rows: ['....d....', '....d....', '....d....', '....d....', '....d....', '.ddddddd.', '....d....', '....d....', '...ddd...'] },
   lamp: {
     rows: ['....f....', '...fFf...', '....f....', '.....d...', '..dddddd.', 'dddddddd.', '.dddddd..', '...dd....', '..dddd...'],
-    colours: { f: 'fire', F: 'fireHi' },
+    colours: { f: Colour.FIRE, F: Colour.FIRE_HI },
   },
   torch: {
     rows: ['...ff....', '..fFFf...', '..fFFf...', '...ff....', '...dd....', '....d....', '....d....', '....d....', '....d....'],
-    colours: { f: 'fire', F: 'fireHi' },
+    colours: { f: Colour.FIRE, F: Colour.FIRE_HI },
   },
   scales: { rows: ['....d....', 'ddddddddd', '.d..d..d.', 'd.d.d.d.d', 'ddd.d.ddd', '....d....', '....d....', '..ddddd..', '.........'] },
   crown: {
     rows: ['.........', 'd...d...d', 'dd.ddd.dd', 'ddddddddd', 'drddbddrd', 'ddddddddd', '.........', '.........', '.........'],
-    colours: { r: 'banner', b: 'blue' },
+    colours: { r: Colour.BANNER, b: Colour.BLUE },
   },
 } as const satisfies Record<string, Emblem>;
 
@@ -58,7 +59,7 @@ function medal(seed: string, shape: MedalShape, metal: Metal, stripes: readonly 
       ],
       (x) => (x >= 14 && x <= 17 ? inner : outer),
     );
-    rect(c, 10, 0, 21, 0, 'outline');
+    rect(c, 10, 0, 21, 0, Colour.OUTLINE);
     const [cx, cy] = [16, 19];
     if (shape === MedalShape.STAR) {
       for (let a = 0; a < 8; a++) {
@@ -88,18 +89,18 @@ function medal(seed: string, shape: MedalShape, metal: Metal, stripes: readonly 
 /** A medal's metal: its tones and the darker shade its emblem is engraved in. */
 type Metal = Tone & { engrave: Colour };
 
-const BRONZE_MEDAL: Metal = { ...BRONZE, engrave: 'barnEdge' };
-const SILVER: Metal = { ...STEEL, engrave: 'slateD' };
-const GOLD_MEDAL: Metal = { ...GOLD, engrave: 'bronzeDark' };
+const BRONZE_MEDAL: Metal = { ...BRONZE, engrave: Colour.BARN_EDGE };
+const SILVER: Metal = { ...STEEL, engrave: Colour.SLATE_D };
+const GOLD_MEDAL: Metal = { ...GOLD, engrave: Colour.BRONZE_DARK };
 
 export const MEDAL_DRAWINGS = {
-  cross: medal('cross-medal', MedalShape.ROUND, BRONZE_MEDAL, ['greenL', 'wool'], EMBLEMS.cross),
-  rose: medal('rose-medal', MedalShape.ROUND, BRONZE_MEDAL, ['flower', 'wool'], EMBLEMS.rose),
-  lion: medal('lion-medal', MedalShape.ROUND, BRONZE_MEDAL, ['gold', 'hoodDark'], EMBLEMS.lion),
-  honour: medal('honour-medal', MedalShape.SCALLOPED, SILVER, ['blue', 'wool'], EMBLEMS.laurel),
-  courage: medal('courage-medal', MedalShape.SCALLOPED, SILVER, ['banner', 'wool'], EMBLEMS.sword),
-  wisdom: medal('wisdom-medal', MedalShape.SCALLOPED, SILVER, ['tealL', 'gold'], EMBLEMS.lamp),
-  freedom: medal('freedom-medal', MedalShape.STAR, GOLD_MEDAL, ['greenL', 'gold'], EMBLEMS.torch),
-  justice: medal('justice-medal', MedalShape.STAR, GOLD_MEDAL, ['blue', 'gold'], EMBLEMS.scales),
-  nation: medal('nation-medal', MedalShape.STAR, GOLD_MEDAL, ['banner', 'gold'], EMBLEMS.crown),
+  cross: medal('cross-medal', MedalShape.ROUND, BRONZE_MEDAL, [Colour.GREEN_L, Colour.WOOL], EMBLEMS.cross),
+  rose: medal('rose-medal', MedalShape.ROUND, BRONZE_MEDAL, [Colour.FLOWER, Colour.WOOL], EMBLEMS.rose),
+  lion: medal('lion-medal', MedalShape.ROUND, BRONZE_MEDAL, [Colour.GOLD, Colour.HOOD_DARK], EMBLEMS.lion),
+  honour: medal('honour-medal', MedalShape.SCALLOPED, SILVER, [Colour.BLUE, Colour.WOOL], EMBLEMS.laurel),
+  courage: medal('courage-medal', MedalShape.SCALLOPED, SILVER, [Colour.BANNER, Colour.WOOL], EMBLEMS.sword),
+  wisdom: medal('wisdom-medal', MedalShape.SCALLOPED, SILVER, [Colour.TEAL_L, Colour.GOLD], EMBLEMS.lamp),
+  freedom: medal('freedom-medal', MedalShape.STAR, GOLD_MEDAL, [Colour.GREEN_L, Colour.GOLD], EMBLEMS.torch),
+  justice: medal('justice-medal', MedalShape.STAR, GOLD_MEDAL, [Colour.BLUE, Colour.GOLD], EMBLEMS.scales),
+  nation: medal('nation-medal', MedalShape.STAR, GOLD_MEDAL, [Colour.BANNER, Colour.GOLD], EMBLEMS.crown),
 };

@@ -2,6 +2,7 @@
 // of Nations with its gold (politics), The Art of War on bamboo slips (intelligence), and three books of experience
 // that grow with it, Anabasis plain, the Epitome of Military Science bound in gold, On War the grandest.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas } from '../pixel.ts';
 import { disc, rect } from '../shapes.ts';
 import { BLUE, canvas, coin, corners, GOLD, GREEN, lathe, LEATHER, RED, rod, sparkle, stamp, STEEL, tome } from './common.ts';
@@ -9,12 +10,12 @@ import { BLUE, canvas, coin, corners, GOLD, GREEN, lathe, LEATHER, RED, rod, spa
 /** Holy Water: a slender corked vial of blue water, glinting. */
 function holyWater(): PixelCanvas {
   const c = canvas('holy-water');
-  lathe(c, 16, 2, [2.5, 2.5, 2.5], { hi: 'plankTop', mid: 'plankL', dark: 'plankR' });
-  lathe(c, 16, 5, [3.5, 2, 2, 2.5, 3.5, 4.5, 5, 5.5, 5.5], { hi: 'sparkle', mid: 'waterLight', dark: 'water' });
-  lathe(c, 16, 14, [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5.5, 5, 4], { hi: 'waterLight', mid: 'water', dark: 'waterDeep' });
-  rect(c, 11, 14, 20, 14, 'waterLight');
+  lathe(c, 16, 2, [2.5, 2.5, 2.5], { hi: Colour.PLANK_TOP, mid: Colour.PLANK_L, dark: Colour.PLANK_R });
+  lathe(c, 16, 5, [3.5, 2, 2, 2.5, 3.5, 4.5, 5, 5.5, 5.5], { hi: Colour.SPARKLE, mid: Colour.WATER_LIGHT, dark: Colour.WATER });
+  lathe(c, 16, 14, [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5.5, 5, 4], { hi: Colour.WATER_LIGHT, mid: Colour.WATER, dark: Colour.WATER_DEEP });
+  rect(c, 11, 14, 20, 14, Colour.WATER_LIGHT);
   c.outline();
-  rect(c, 12, 16, 12, 24, 'sparkle');
+  rect(c, 12, 16, 12, 24, Colour.SPARKLE);
   sparkle(c, 24, 9);
   sparkle(c, 7, 18, 1);
   return c;
@@ -30,8 +31,8 @@ function excalibur(): PixelCanvas {
   c.outline();
   c.line([11, 20], [27, 4], STEEL.hi);
   c.line([13, 22], [28, 6], STEEL.dark);
-  c.set(4, 28, 'blueHi');
-  c.set(10, 22, 'blue');
+  c.set(4, 28, Colour.BLUE_HI);
+  c.set(10, 22, Colour.BLUE);
   sparkle(c, 23, 6);
   return c;
 }
@@ -52,16 +53,16 @@ function wealthOfNations(): PixelCanvas {
 function artOfWar(): PixelCanvas {
   const c = canvas('art-of-war');
   for (let x = 3; x <= 21; x += 2) {
-    rect(c, x, 6, x, 26, x % 4 === 1 ? 'thatchHi' : 'thatchL');
-    rect(c, x + 1, 6, x + 1, 26, 'thatchD');
-    for (let y = 9; y <= 22; y += 3) c.set(x, y, 'outline');
+    rect(c, x, 6, x, 26, x % 4 === 1 ? Colour.THATCH_HI : Colour.THATCH_L);
+    rect(c, x + 1, 6, x + 1, 26, Colour.THATCH_D);
+    for (let y = 9; y <= 22; y += 3) c.set(x, y, Colour.OUTLINE);
   }
   // the rolled part
-  disc(c, 25, 16, 6, 'thatchL', 'thatchD');
-  rect(c, 22, 6, 28, 26, 'thatchL');
-  rect(c, 22, 6, 23, 26, 'thatchHi');
-  rect(c, 27, 6, 28, 26, 'thatchD');
-  for (const y of [9, 23]) rect(c, 3, y, 28, y, 'banner');
+  disc(c, 25, 16, 6, Colour.THATCH_L, Colour.THATCH_D);
+  rect(c, 22, 6, 28, 26, Colour.THATCH_L);
+  rect(c, 22, 6, 23, 26, Colour.THATCH_HI);
+  rect(c, 27, 6, 28, 26, Colour.THATCH_D);
+  for (const y of [9, 23]) rect(c, 3, y, 28, y, Colour.BANNER);
   c.outline();
   return c;
 }

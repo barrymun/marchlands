@@ -4,7 +4,23 @@
 import { and, asc, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
 
 import { PushCmd } from '@marchlands/contracts';
-import { AllianceRank, BALANCE, buildingLevel, BuildingType, GameError, HOUR, type Message, msg, ref, Relation, scaled } from '@marchlands/core';
+import {
+  AllianceRank,
+  AllianceRequestKind,
+  BALANCE,
+  buildingLevel,
+  BuildingType,
+  GameError,
+  HOUR,
+  type Message,
+  msg,
+  ref,
+  Relation,
+  ResourceKey,
+  scaled,
+  StatGroup,
+  statKey,
+} from '@marchlands/core';
 import { allianceEvents, allianceRelations, allianceRequests, alliances, armies, one, players } from '@marchlands/db';
 
 import { openOwnCity } from '#/city.ts';
@@ -261,7 +277,7 @@ export async function createAlliance(ctx: Ctx, playerId: number, cityId: number,
   if (dupe) throw new GameError(msg('alliance.nameTaken', { name }), -12, 409);
   const b = await openOwnCity(ctx, playerId, cityId);
   spendResources(b.city, { gold: BALANCE.allianceCreateGold }, msg('common.notEnoughGold'), -99);
-  ctx.stat(playerId, cityId, { 'spent.other.gold': BALANCE.allianceCreateGold });
+  ctx.stat(playerId, cityId, { [statKey(StatGroup.SPENT_OTHER, ResourceKey.GOLD)]: BALANCE.allianceCreateGold });
   await saveCity(ctx, b.city);
   const a = one(
     await ctx.tx
@@ -345,7 +361,7 @@ export async function invite(ctx: Ctx, playerId: number, userName: string) {
   if (target.allianceId) throw new GameError(msg('alliance.playerInOtherAlliance', { name: userName }), -99);
   await ctx.tx
     .insert(allianceRequests)
-    .values({ allianceId, playerId: target.id, kind: 'invite', invitedByName: p.name, createdAt: ctx.now })
+    .values({ allianceId, playerId: target.id, kind: AllianceRequestKind.INVITE, invitedByName: p.name, createdAt: ctx.now })
     .onConflictDoNothing();
   const a = await getAlliance(ctx, allianceId);
   ctx.push(target.id, PushCmd.SYSTEM_INFO_MESSAGE, {
@@ -365,7 +381,7 @@ export async function cancelInvite(ctx: Ctx, playerId: number, userName: string)
   if (!target) throw new GameError(msg('common.playerNamedNotFound', { name: userName }), -41, 404);
   await ctx.tx
     .delete(allianceRequests)
-    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, 'invite')));
+    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, AllianceRequestKind.INVITE)));
 }
 
 /** alliance.addUsertoAllianceList: invitations my alliance sent. */
@@ -382,7 +398,7 @@ export async function sentInvites(ctx: Ctx, playerId: number) {
     })
     .from(allianceRequests)
     .innerJoin(players, eq(players.id, allianceRequests.playerId))
-    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.kind, 'invite')));
+    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.kind, AllianceRequestKind.INVITE)));
   return rows.map((r) => ({ ...r, prestige: Math.floor(r.prestige) }));
 }
 
@@ -398,7 +414,7 @@ export async function myInvites(ctx: Ctx, playerId: number) {
     })
     .from(allianceRequests)
     .innerJoin(alliances, eq(alliances.id, allianceRequests.allianceId))
-    .where(and(eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, 'invite')));
+    .where(and(eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, AllianceRequestKind.INVITE)));
   return rows.map((r) => ({ ...r, prestige: Math.floor(r.prestige) }));
 }
 
@@ -411,7 +427,7 @@ export async function acceptInvite(ctx: Ctx, playerId: number, allianceName: str
   const [inv] = await ctx.tx
     .select()
     .from(allianceRequests)
-    .where(and(eq(allianceRequests.allianceId, a.id), eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, 'invite')));
+    .where(and(eq(allianceRequests.allianceId, a.id), eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, AllianceRequestKind.INVITE)));
   if (!inv) throw new GameError(msg('alliance.inviteNotFound'), -99);
   assertRejoinCooldown(p, a.id, ctx.now);
   await joinPlayer(ctx, p, a, AllianceRank.MEMBER);
@@ -423,7 +439,7 @@ export async function rejectInvite(ctx: Ctx, playerId: number, allianceName: str
   const a = await allianceByName(ctx, allianceName);
   await ctx.tx
     .delete(allianceRequests)
-    .where(and(eq(allianceRequests.allianceId, a.id), eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, 'invite')));
+    .where(and(eq(allianceRequests.allianceId, a.id), eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, AllianceRequestKind.INVITE)));
 }
 
 async function requireEmbassy(ctx: Ctx, playerId: number) {
@@ -439,8 +455,8 @@ export async function apply(ctx: Ctx, playerId: number, allianceName: string) {
   await requireEmbassy(ctx, playerId);
   const a = await allianceByName(ctx, allianceName);
   assertRejoinCooldown(p, a.id, ctx.now);
-  await ctx.tx.delete(allianceRequests).where(and(eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, 'apply')));
-  await ctx.tx.insert(allianceRequests).values({ allianceId: a.id, playerId, kind: 'apply', createdAt: ctx.now });
+  await ctx.tx.delete(allianceRequests).where(and(eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, AllianceRequestKind.APPLY)));
+  await ctx.tx.insert(allianceRequests).values({ allianceId: a.id, playerId, kind: AllianceRequestKind.APPLY, createdAt: ctx.now });
   p.misc = { ...p.misc, allianceApply: a.name, allianceApplyAt: ctx.now };
   await savePlayer(ctx, p);
   await announce(ctx, a.id, msg('alliance.event.applied', { name: p.name }));
@@ -450,7 +466,7 @@ export async function apply(ctx: Ctx, playerId: number, allianceName: string) {
 export async function cancelApplication(ctx: Ctx, playerId: number) {
   const p = await getPlayer(ctx, playerId, { lock: true });
   if (!p.misc.allianceApply) throw new GameError(msg('alliance.notApplied'), -99);
-  await ctx.tx.delete(allianceRequests).where(and(eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, 'apply')));
+  await ctx.tx.delete(allianceRequests).where(and(eq(allianceRequests.playerId, playerId), eq(allianceRequests.kind, AllianceRequestKind.APPLY)));
   p.misc = { ...p.misc, allianceApply: undefined, allianceApplyAt: undefined };
   await savePlayer(ctx, p);
 }
@@ -475,7 +491,7 @@ export async function applications(ctx: Ctx, playerId: number) {
     })
     .from(allianceRequests)
     .innerJoin(players, eq(players.id, allianceRequests.playerId))
-    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.kind, 'apply')));
+    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.kind, AllianceRequestKind.APPLY)));
   return rows.map((r) => ({ ...r, prestige: Math.floor(r.prestige), castleCount: Number(r.castleCount) }));
 }
 
@@ -490,7 +506,7 @@ export async function acceptApplication(ctx: Ctx, playerId: number, userName: st
   const [req] = await ctx.tx
     .select()
     .from(allianceRequests)
-    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, 'apply')));
+    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, AllianceRequestKind.APPLY)));
   if (!req) throw new GameError(msg('alliance.applicationNotFound'), -99);
   const a = await getAlliance(ctx, allianceId, true);
   await joinPlayer(ctx, target, a, AllianceRank.MEMBER);
@@ -505,7 +521,7 @@ export async function declineApplication(ctx: Ctx, playerId: number, userName: s
   if (!target) throw new GameError(msg('common.playerNamedNotFound', { name: userName }), -41, 404);
   await ctx.tx
     .delete(allianceRequests)
-    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, 'apply')));
+    .where(and(eq(allianceRequests.allianceId, allianceId), eq(allianceRequests.playerId, target.id), eq(allianceRequests.kind, AllianceRequestKind.APPLY)));
   // only this alliance's application: the player may have applied elsewhere since
   const a = await getAlliance(ctx, allianceId);
   if (target.misc.allianceApply !== a.name) return;

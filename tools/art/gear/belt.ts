@@ -3,20 +3,31 @@
 // gold buckle holding a stone in the level's colour, spikes from 7, gilded at 9, and crimson with a jewelled buckle at
 // 10.
 
-import type { Colour, PixelCanvas } from '../pixel.ts';
+import { GearPieceId } from '@marchlands/core';
+
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import type { PixelCanvas } from '../pixel.ts';
 import { canvas, fill, GOLD, LEATHER, look, ring, setStone, type Shades, spike, STEEL } from './common.ts';
 
 export function belt(level: number): PixelCanvas {
-  const c = canvas('belt', level);
+  const c = canvas(GearPieceId.BELT, level);
   const L = look(level);
   const band: Shades =
-    level === 0 ? ['blueHi', 'blueHi', 'blue'] : level === 1 ? STEEL : level === 2 ? ['hood', 'hoodDark', 'gear0'] : level >= 9 ? L.metal : LEATHER;
+    level === 0
+      ? [Colour.BLUE_HI, Colour.BLUE_HI, Colour.BLUE]
+      : level === 1
+        ? STEEL
+        : level === 2
+          ? [Colour.HOOD, Colour.HOOD_DARK, Colour.GEAR_0]
+          : level >= 9
+            ? L.metal
+            : LEATHER;
   ring(c, 16, 15, 14, 9, 3.6, band);
   // a stripe or studs round the front of the band
   for (let x = 4; x < 29; x++) {
     const y = 15 + Math.round(Math.sqrt(Math.max(0, 1 - ((x + 0.5 - 16) / 12.5) ** 2)) * 7.2);
-    if (level === 1) c.set(x, y, 'blue');
-    if (level === 2 && x % 3 === 0) c.set(x, y, 'steelHi');
+    if (level === 1) c.set(x, y, Colour.BLUE);
+    if (level === 2 && x % 3 === 0) c.set(x, y, Colour.STEEL_HI);
     if (level >= 3 && x % 3 === 0) c.set(x, y, L.trim[0]);
   }
   // the buckle
@@ -31,7 +42,7 @@ export function belt(level: number): PixelCanvas {
     ],
     buckle,
   );
-  const hole: Colour = level === 0 ? 'blue' : level === 2 ? 'gear0' : 'steelDark';
+  const hole: Colour = level === 0 ? Colour.BLUE : level === 2 ? Colour.GEAR_0 : Colour.STEEL_DARK;
   if (level <= 2)
     for (let y = 20; y < 25; y++)
       for (let x = 13; x < 19; x++)

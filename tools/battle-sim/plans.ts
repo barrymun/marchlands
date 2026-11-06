@@ -1,7 +1,7 @@
 // Siege plans for historic cities (siege.ts): Age 2 players' plans from docs/reference/historic-cities.md, Taking one,
 // and our own. Troop keys: militia are warriors, peasants workers, scouter scouts, carriage transporters.
 
-import type { TroopCounts } from '@marchlands/core';
+import { type TroopCounts, TroopKey } from '@marchlands/core';
 import { type Plan, SiegeUntil } from './siege.ts';
 
 /** One of each type as a thin layer, so traps and towers spread their hits (`n` of each). */
@@ -18,11 +18,11 @@ export const PLANS: Record<string, Plan> = {
     stages: [
       { name: 'traps', troops: { militia: 3_000 }, waves: 30 },
       { name: 'cavalry', troops: { pikemen: 90_000, militia: 10_000 }, waves: 2 },
-      { name: 'pikemen', troops: { archer: 80_000, pikemen: 10_000, ...layers(1_000, 'peasants', 'militia', 'swordsmen') }, waves: 1 },
+      { name: 'pikemen', troops: { archer: 80_000, pikemen: 10_000, ...layers(1_000, TroopKey.PEASANTS, TroopKey.MILITIA, TroopKey.SWORDSMEN) }, waves: 1 },
       { name: 'archers', troops: { archer: 95_000 }, waves: 3 },
       {
         name: 'break',
-        troops: { archer: 95_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') },
+        troops: { archer: 95_000, ...layers(1_000, TroopKey.PEASANTS, TroopKey.MILITIA, TroopKey.SCOUTER, TroopKey.SWORDSMEN, TroopKey.PIKEMEN) },
         until: SiegeUntil.BROKEN,
         max: 40,
       },
@@ -38,7 +38,11 @@ export const PLANS: Record<string, Plan> = {
       { name: 'archers', troops: { archer: 96_000, pikemen: 2_000, swordsmen: 2_000 }, waves: 2 },
       {
         name: 'break',
-        troops: { archer: 95_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen'), ...layers(500, 'lightCavalry', 'heavyCavalry') },
+        troops: {
+          archer: 95_000,
+          ...layers(1_000, TroopKey.PEASANTS, TroopKey.MILITIA, TroopKey.SCOUTER, TroopKey.SWORDSMEN),
+          ...layers(500, TroopKey.LIGHT_CAVALRY, TroopKey.HEAVY_CAVALRY),
+        },
         until: SiegeUntil.BROKEN,
         max: 40,
       },
@@ -50,7 +54,14 @@ export const PLANS: Record<string, Plan> = {
     name: 'Age 2, ballistae (source 13)',
     gap: 1,
     stages: [
-      { name: 'ballistae', troops: { ballista: 117_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'pikemen', 'swordsmen', 'archer') }, waves: 1 },
+      {
+        name: 'ballistae',
+        troops: {
+          ballista: 117_000,
+          ...layers(1_000, TroopKey.PEASANTS, TroopKey.MILITIA, TroopKey.SCOUTER, TroopKey.PIKEMEN, TroopKey.SWORDSMEN, TroopKey.ARCHER),
+        },
+        waves: 1,
+      },
       { name: 'break', troops: { archer: 95_000 }, until: SiegeUntil.BROKEN, max: 40 },
       { name: 'loyalty', troops: loyaltyWave, until: SiegeUntil.CAPTURED, max: 100 },
     ],
@@ -63,7 +74,7 @@ export const PLANS: Record<string, Plan> = {
       { name: 'traps', troops: { militia: 7_500 }, waves: 40 },
       {
         name: 'break',
-        troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'swordsmen', 'pikemen', 'scouter') },
+        troops: { archer: 120_000, ...layers(1_000, TroopKey.PEASANTS, TroopKey.MILITIA, TroopKey.SWORDSMEN, TroopKey.PIKEMEN, TroopKey.SCOUTER) },
         until: SiegeUntil.BROKEN,
         max: 40,
       },
@@ -101,7 +112,7 @@ export const PLANS: Record<string, Plan> = {
     stages: [
       {
         name: 'break',
-        troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') },
+        troops: { archer: 120_000, ...layers(1_000, TroopKey.PEASANTS, TroopKey.MILITIA, TroopKey.SCOUTER, TroopKey.SWORDSMEN, TroopKey.PIKEMEN) },
         until: SiegeUntil.BROKEN,
         max: 150,
       },
@@ -120,7 +131,7 @@ export const PLANS: Record<string, Plan> = {
       { name: 'catapults', troops: { catapult: 125_000 }, until: SiegeUntil.BROKEN, max: 150 },
       {
         name: 'loyalty',
-        troops: { archer: 120_000, ...layers(1_000, 'peasants', 'militia', 'scouter', 'swordsmen', 'pikemen') },
+        troops: { archer: 120_000, ...layers(1_000, TroopKey.PEASANTS, TroopKey.MILITIA, TroopKey.SCOUTER, TroopKey.SWORDSMEN, TroopKey.PIKEMEN) },
         until: SiegeUntil.CAPTURED,
         max: 100,
       },
@@ -131,7 +142,7 @@ export const PLANS: Record<string, Plan> = {
     name: 'Pikemen until the cataphracts are gone, then the farming army',
     gap: 1,
     stages: [
-      { name: 'pikemen', troops: { pikemen: 125_000 }, until: SiegeUntil.CLEARED, target: 'heavyCavalry', max: 30 },
+      { name: 'pikemen', troops: { pikemen: 125_000 }, until: SiegeUntil.CLEARED, target: TroopKey.HEAVY_CAVALRY, max: 30 },
       { name: 'break', troops: { archer: 121_750, peasants: 1_500, militia: 1_750 }, until: SiegeUntil.BROKEN, max: 150 },
       { name: 'loyalty', troops: loyaltyWave, until: SiegeUntil.CAPTURED, max: 100 },
     ],

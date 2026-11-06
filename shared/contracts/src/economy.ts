@@ -6,6 +6,7 @@ import { z } from 'zod';
 import {
   BASIC_RESOURCES,
   CANDLE_PERIODS,
+  CandlePeriod,
   FACTION_IDS,
   ITEM_USES,
   MARKET_ORDER_TYPES,
@@ -238,7 +239,7 @@ export const MarketQuoteQuery = z.object({
   type: z.enum(MARKET_ORDER_TYPES).default(MarketOrderType.LIMIT),
 });
 export const MarketHistoryQuery = z.object({
-  period: z.enum(CANDLE_PERIODS).default('hour').describe('candle length in real time'),
+  period: z.enum(CANDLE_PERIODS).default(CandlePeriod.HOUR).describe('candle length in real time'),
   limit: z.coerce.number().int().min(1).max(2000).default(500).describe('the most recent candles, at most this many'),
 });
 export const MarketAffordableQuery = z.object({ ...cityQuery, gold: z.coerce.number().int().min(0).max(1e15).describe('the gold to spend, fee included') });

@@ -15,7 +15,7 @@ describe(`${flows.runFlow.name}: a heal still waiting from an earlier run`, () =
       const heroId = await farmingCity(g, p);
       await setInjured(g, p.cityId, injured);
       const armyId = await sendOut(g, p, heroId);
-      await runScheduledHeal(g, p.id, p.cityId, 'resources', [armyId]);
+      await runScheduledHeal(g, p.id, p.cityId, HealPayment.RESOURCES, [armyId]);
       await persistEvents(g);
       await armies.recallArmy(g, p.id, armyId);
       await g.runDue(g.events(TimedEventType.ARMY)[0]!.dueAt);

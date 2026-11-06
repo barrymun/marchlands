@@ -34,8 +34,8 @@ import {
   type HistoricLevel,
   historicNameAt,
   historicResearch,
-  type HistoricState,
   historicState,
+  type HistoricState,
   injuredOf,
   ItemId,
   maxArmyTroops,
@@ -67,7 +67,10 @@ import {
   seatStanding,
   seededRng,
   type StandingChange,
+  StatCounter,
   stateOf,
+  StatGroup,
+  statKey,
   TechType,
   TileType,
   tileXY,
@@ -75,6 +78,7 @@ import {
   totalResources,
   totalTroops,
   type TroopCounts,
+  TroopKey,
   valleyGarrison,
   WAR_ENSIGN_DESC,
 } from '@marchlands/core';
@@ -306,6 +310,7 @@ async function friendlyCityAt(ctx: Ctx, a: ArmyRow): Promise<{ tile: TileRow; b:
 async function arriveTransport(ctx: Ctx, a: ArmyRow, sender: PlayerRow) {
   const t = await friendlyCityAt(ctx, a);
   if (!t) return turnBack(ctx, a, msg('army.destinationNotFriendly'));
+  if (t.b.city.abandonAt) return turnBack(ctx, a, msg('army.destinationAbandoning'));
   gainResources(t.b.city, a.resources);
   await saveCity(ctx, t.b.city);
   pushResources(ctx, t.b);
@@ -344,6 +349,7 @@ async function arriveReinforce(ctx: Ctx, a: ArmyRow, sender: PlayerRow) {
   }
   const t = await friendlyCityAt(ctx, a);
   if (!t) return turnBack(ctx, a, msg('army.destinationNotFriendly'));
+  if (t.b.city.abandonAt) return turnBack(ctx, a, msg('army.destinationAbandoning'));
   const hero = await heroOf(ctx, a);
   if (t.b.player.id === a.playerId) {
     // own city: troops, goods and the hero move in for good
@@ -650,8 +656,16 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
   const success = survivors > 0;
   const scoutsLost = (a.troops.scouter ?? 0) - survivors;
   const defScoutsLost = defScouts - (result.defender.after.scouter ?? 0);
-  ctx.stat(a.playerId, a.cityId, { 'killed.scouter': defScoutsLost, 'lost.scouter': scoutsLost, [`scouting.${success ? 'won' : 'lost'}`]: 1 });
-  ctx.stat(def.player.id, def.city.id, { 'killed.scouter': scoutsLost, 'lost.scouter': defScoutsLost, [`scouting.${success ? 'lost' : 'won'}Defending`]: 1 });
+  ctx.stat(a.playerId, a.cityId, {
+    [statKey(StatGroup.KILLED, TroopKey.SCOUTER)]: defScoutsLost,
+    [statKey(StatGroup.LOST, TroopKey.SCOUTER)]: scoutsLost,
+    [success ? StatCounter.SCOUTING_WON : StatCounter.SCOUTING_LOST]: 1,
+  });
+  ctx.stat(def.player.id, def.city.id, {
+    [statKey(StatGroup.KILLED, TroopKey.SCOUTER)]: scoutsLost,
+    [statKey(StatGroup.LOST, TroopKey.SCOUTER)]: defScoutsLost,
+    [success ? StatCounter.SCOUTING_LOST_DEFENDING : StatCounter.SCOUTING_WON_DEFENDING]: 1,
+  });
   const informatics = researchLevel(scoutOwner.research, TechType.INFORMATICS);
   const intel = success
     ? {
@@ -762,27 +776,27 @@ function battleStats(
   const fortsLost = r.forts.lost;
   const won = r.attackerWon;
   ctx.stat(a.playerId, a.cityId, {
-    ...prefixed('killed', r.defender.lost),
-    ...prefixed('killed', fortsLost),
-    ...prefixed('lost', r.attacker.lost),
-    ...prefixed('injured', o.injured),
-    ...prefixed('plundered', o.loot),
-    [`attacks.${won ? 'won' : 'lost'}.${target}`]: 1,
-    ...(target === BattleTarget.NPC && won && o.level ? { [`npcWins.${o.level}`]: 1 } : {}),
-    ...(o.captured ? { [`captured.${target}`]: 1 } : {}),
-    honor: r.attackerHonor,
+    ...prefixed(StatGroup.KILLED, r.defender.lost),
+    ...prefixed(StatGroup.KILLED, fortsLost),
+    ...prefixed(StatGroup.LOST, r.attacker.lost),
+    ...prefixed(StatGroup.INJURED, o.injured),
+    ...prefixed(StatGroup.PLUNDERED, o.loot),
+    [statKey(won ? StatGroup.ATTACKS_WON : StatGroup.ATTACKS_LOST, target)]: 1,
+    ...(target === BattleTarget.NPC && won && o.level ? { [statKey(StatGroup.NPC_WINS, o.level)]: 1 } : {}),
+    ...(o.captured ? { [statKey(StatGroup.CAPTURED, target)]: 1 } : {}),
+    [StatCounter.HONOR]: r.attackerHonor,
   });
   const d = o.defender;
   if (!d) return;
   ctx.stat(d.playerId, d.cityId, {
-    ...prefixed('killed', r.attacker.lost),
-    ...prefixed('lost', r.defender.lost),
-    ...prefixed('lost', fortsLost),
-    ...prefixed('injured', d.injured),
-    ...prefixed('stolen', o.loot),
-    [`defenses.${won ? 'lost' : 'won'}.${target}`]: 1,
-    ...(o.captured ? { [`taken.${target}`]: 1 } : {}),
-    honor: r.defenderHonor,
+    ...prefixed(StatGroup.KILLED, r.attacker.lost),
+    ...prefixed(StatGroup.LOST, r.defender.lost),
+    ...prefixed(StatGroup.LOST, fortsLost),
+    ...prefixed(StatGroup.INJURED, d.injured),
+    ...prefixed(StatGroup.STOLEN, o.loot),
+    [statKey(won ? StatGroup.DEFENSES_LOST : StatGroup.DEFENSES_WON, target)]: 1,
+    ...(o.captured ? { [statKey(StatGroup.TAKEN, target)]: 1 } : {}),
+    [StatCounter.HONOR]: r.defenderHonor,
   });
 }
 

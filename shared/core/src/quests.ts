@@ -3,7 +3,7 @@
 // No text here: quest and group names are `data-quests` in the client's locale files, descriptions and
 // targets are messages (`questInfo.*`).
 
-import { FORT_ID_BY_KEY, type FortKey, QuestTargetKind, TROOP_ID_BY_KEY, type TroopKey } from '#/constants.ts';
+import { FORT_ID_BY_KEY, FortKey, QuestTargetKind, TROOP_ID_BY_KEY, TroopKey } from '#/constants.ts';
 import { QUESTS } from '#/data/index.ts';
 import { ItemId } from '#/item-ids.ts';
 import { type Message, msg, ref } from '#/messages/index.ts';
@@ -139,14 +139,14 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   // 12 Military Service
   q(
     12,
-    { kind: QuestTargetKind.TROOPS, key: 'militia', count: 100 },
+    { kind: QuestTargetKind.TROOPS, key: TroopKey.MILITIA, count: 100 },
     (t) => t.kind === QuestTargetKind.TROOPS && msg('questInfo.description.train', { troop: ref.troop(troopId(t.key)), count: t.count }),
     { resources: res(5000, 5000, 0, 2500) },
   ), // Militia
   // 14 Fortification
   q(
     14,
-    { kind: QuestTargetKind.TROOPS, key: 'trap', count: 100 },
+    { kind: QuestTargetKind.TROOPS, key: FortKey.TRAP, count: 100 },
     (t) => t.kind === QuestTargetKind.TROOPS && msg('questInfo.description.fortify', { troop: ref.troop(troopId(t.key)), count: t.count }),
     { resources: res(2000, 10000, 2000, 1000) },
   ), // Traps

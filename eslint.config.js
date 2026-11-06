@@ -15,6 +15,7 @@ import tseslint from 'typescript-eslint';
 
 import importSpacing from './tools/eslint/import-spacing.mjs';
 import noStringCompare from './tools/eslint/no-string-compare.mjs';
+import noStringValue from './tools/eslint/no-string-value.mjs';
 
 const RELATIVE_IMPORT = { group: ['./*', '../*'], message: 'Use #/… or #test/… instead of a relative path.' };
 const TESTING_IMPORT = { name: '@marchlands/game/testing', message: 'Test hooks only: use @marchlands/game.' };
@@ -123,7 +124,10 @@ export default tseslint.config(
     // Imports in groups, each alphabetised: stylesheets, node: builtins, packages, workspace packages (@marchlands/…),
     // local (#/…, #test/…, @/…), relative. Side-effect imports (import '@/index.css') stay where they are, since their
     // order can matter. The blank lines between groups are the marchlands/import-spacing rule's (tools/eslint).
-    plugins: { 'import-x': importX, marchlands: { rules: { 'import-spacing': importSpacing, 'no-string-compare': noStringCompare } } },
+    plugins: {
+      'import-x': importX,
+      marchlands: { rules: { 'import-spacing': importSpacing, 'no-string-compare': noStringCompare, 'no-string-value': noStringValue } },
+    },
     rules: {
       'import-x/order': [
         'error',
@@ -151,6 +155,13 @@ export default tseslint.config(
     files: ['backend/**/*.ts', 'shared/**/*.ts', 'client/web/src/**/*.{ts,tsx}', 'tools/**/*.{ts,mjs}'],
     ignores: [...TESTS, 'client/web/src/components/ui/**', 'tools/smoke/**', 'tools/eslint/**', 'shared/api-client/**'],
     rules: { 'marchlands/no-string-compare': 'error' },
+  },
+  {
+    // Named too when assigned or passed; this one asks the type checker, so tools/art gets types for it alone.
+    files: [...TYPED, 'tools/art/**/*.ts'],
+    ignores: ['client/web/src/components/ui/**', 'shared/api-client/**'],
+    languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
+    rules: { 'marchlands/no-string-value': 'error' },
   },
   {
     // backend and shared imports are absolute: #/… (the package's src) and #test/…, from package.json "imports" (AGENTS.md)

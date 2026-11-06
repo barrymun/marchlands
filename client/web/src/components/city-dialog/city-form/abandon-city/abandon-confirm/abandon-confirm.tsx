@@ -6,17 +6,19 @@ import {
   type CityBean,
   getArmiesOptions,
   getCitiesByCityIdQueryKey,
+  getCitiesFortificationsQueuesOptions,
   getCitiesResearchOptions,
+  getCitiesTroopsQueuesOptions,
   getMarketOrdersMineOptions,
   getMarketShipmentsOptions,
   getPlansOptions,
   getPlayerQueryKey,
   postCitiesAbandonMutation,
 } from '@marchlands/api-client';
-import { abandonPrestigeBack, BALANCE, BuildingType } from '@marchlands/core';
+import { abandonPrestigeBack, BALANCE, buildingLevel, BuildingType } from '@marchlands/core';
 
 import type { LossRow } from '@/components/city-dialog/city-form/abandon-city/types';
-import { countOf, ofCity } from '@/components/city-dialog/city-form/abandon-city/utils';
+import { countOf, ofCity, queuedCount } from '@/components/city-dialog/city-form/abandon-city/utils';
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,13 +40,22 @@ export function AbandonConfirm({ city, onClose }: { city: CityBean; onClose: () 
   const shipments = useQuery(getMarketShipmentsOptions());
   const plans = useQuery(getPlansOptions());
   const research = useQuery({ ...getCitiesResearchOptions({ path: { cityId: city.id } }), enabled: hasAcademy });
+  const training = useQuery({
+    ...getCitiesTroopsQueuesOptions({ path: { cityId: city.id } }),
+    enabled: city.buildings.some((b) => b.typeId === BuildingType.BARRACKS && b.level > 0),
+  });
+  const building = useQuery({
+    ...getCitiesFortificationsQueuesOptions({ path: { cityId: city.id } }),
+    enabled: buildingLevel(city.buildings, BuildingType.WALLS) > 0,
+  });
   const time = duration(BALANCE.abandon.delayMs);
   const start = useCommand(
     postCitiesAbandonMutation(),
     () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } }), getPlayerQueryKey()],
     t('abandon.started', { city: city.name, time }),
   );
-  const loading = armies.isLoading || orders.isLoading || shipments.isLoading || plans.isLoading || research.isLoading;
+  const loading =
+    armies.isLoading || orders.isLoading || shipments.isLoading || plans.isLoading || research.isLoading || training.isLoading || building.isLoading;
 
   const armiesOut = ofCity(armies.data?.self, city.id);
   const waves = ofCity(
@@ -54,8 +65,10 @@ export function AbandonConfirm({ city, onClose }: { city: CityBean; onClose: () 
   const r = city.resource;
   const counted: [string, string, number][] = [
     ['troops', t('abandon.row.troops'), countOf(city.troop)],
+    ['training', t('abandon.row.training'), queuedCount(training.data?.queues)],
     ['injured', t('abandon.row.injured'), countOf(city.injuredTroop)],
     ['fortifications', t('abandon.row.fortifications'), countOf(city.fortification)],
+    ['fortsQueued', t('abandon.row.fortsQueued'), queuedCount(building.data?.queues)],
     ['armies', t('abandon.row.armies'), armiesOut.length],
     ['armyTroops', t('abandon.row.armyTroops'), armiesOut.reduce((sum, a) => sum + countOf(a.troop), 0)],
     ['gold', t('common:resources.gold'), r.gold],
@@ -101,6 +114,8 @@ export function AbandonConfirm({ city, onClose }: { city: CityBean; onClose: () 
           ))}
         </dl>
         <p className={`text-xs ${LOSS_TEXT}`}>{t('abandon.road')}</p>
+        <p className={`text-xs ${LOSS_TEXT}`}>{t('abandon.moving')}</p>
+        <p className={`text-xs ${LOSS_TEXT}`}>{t('abandon.arriving')}</p>
         <div className="grid gap-1.5">
           <Label htmlFor={nameId}>{t('abandon.typeName', { city: city.name })}</Label>
           <Input id={nameId} autoComplete="off" value={typed} onChange={(e) => setTyped(e.target.value)} />

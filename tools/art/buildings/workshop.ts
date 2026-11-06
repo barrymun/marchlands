@@ -2,15 +2,16 @@
 // with timber and crates; each band after it is bigger and stronger: a catapult in the yard, then a second shed, a
 // crane and two engines, then a stone-footed workshop with a yard of engines.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, Roofing } from '../iso.ts';
 
 const SIZE = 64;
 
 function band1(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 20, 'workshop-1');
-  c.ground(0, 0, 20, 20, 'sand');
+  c.ground(0, 0, 20, 20, Colour.SAND);
   c.timber(4, 3, 0, 11, 6, 5);
-  c.windows([8, 9, 10], 9, 0, 4, 'logDark');
+  c.windows([8, 9, 10], 9, 0, 4, Colour.LOG_DARK);
   c.roof(4, 3, 11, 6, 5, 3, Axis.X, { roofing: Roofing.SHINGLE });
   c.logs(3, 13, 6, 2);
   c.crates(12, 13, 3);
@@ -21,9 +22,9 @@ function band1(): IsoCanvas {
 
 function band2(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 24, 'workshop-2');
-  c.ground(0, 0, 24, 24, 'sand');
+  c.ground(0, 0, 24, 24, Colour.SAND);
   c.timber(3, 2, 0, 13, 7, 6);
-  c.windows([8, 9, 10, 11], 9, 0, 5, 'logDark');
+  c.windows([8, 9, 10, 11], 9, 0, 5, Colour.LOG_DARK);
   c.roof(3, 2, 13, 7, 6, 4, Axis.X, { roofing: Roofing.SHINGLE });
   c.catapult(12, 14);
   c.logs(3, 13, 7, 3);
@@ -35,12 +36,12 @@ function band2(): IsoCanvas {
 
 function band3(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 27, 'workshop-3');
-  c.ground(0, 0, 27, 27, 'sand');
+  c.ground(0, 0, 27, 27, Colour.SAND);
   c.timber(2, 2, 0, 15, 7, 7);
-  c.windows([7, 8, 9, 10, 11], 9, 0, 6, 'logDark');
+  c.windows([7, 8, 9, 10, 11], 9, 0, 6, Colour.LOG_DARK);
   c.roof(2, 2, 15, 7, 7, 4, Axis.X, { roofing: Roofing.SHINGLE });
   c.timber(19, 3, 0, 6, 9, 5);
-  c.windowsSe(25, [6, 7, 8], 0, 4, 'logDark');
+  c.windowsSe(25, [6, 7, 8], 0, 4, Colour.LOG_DARK);
   c.roof(19, 3, 6, 9, 5, 3, Axis.Y, { roofing: Roofing.SHINGLE });
   c.derrick(6, 15, 12);
   c.catapult(10, 15);
@@ -53,14 +54,14 @@ function band3(): IsoCanvas {
 
 function band4(): IsoCanvas {
   const c = new IsoCanvas(SIZE, 30, 'workshop-4');
-  c.ground(0, 0, 30, 30, 'sand');
+  c.ground(0, 0, 30, 30, Colour.SAND);
   c.stone(2, 2, 0, 18, 8, 2);
   c.timber(2, 2, 2, 18, 8, 8);
-  c.windows([8, 9, 10, 11, 12, 13], 10, 0, 7, 'logDark');
+  c.windows([8, 9, 10, 11, 12, 13], 10, 0, 7, Colour.LOG_DARK);
   c.roof(2, 2, 18, 8, 8, 5, Axis.X, { roofing: Roofing.SHINGLE });
   c.stone(22, 3, 0, 6, 11, 2);
   c.timber(22, 3, 2, 6, 11, 5);
-  c.windowsSe(28, [7, 8, 9], 0, 5, 'logDark');
+  c.windowsSe(28, [7, 8, 9], 0, 5, Colour.LOG_DARK);
   c.roof(22, 3, 6, 11, 7, 3, Axis.Y, { roofing: Roofing.SHINGLE });
   c.derrick(7, 17, 14);
   c.catapult(10, 16);

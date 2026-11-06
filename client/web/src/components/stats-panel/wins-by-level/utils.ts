@@ -1,3 +1,4 @@
+import { StatGroup, statKey } from '@marchlands/core';
 import { HISTORIC_LEVELS, type HistoricLevel } from '@marchlands/core';
 import type { Counters } from '@/components/stats-panel/types';
 
@@ -10,7 +11,7 @@ const BARBARIAN_LEVELS = Array.from({ length: 10 }, (_, i) => i + 1);
  */
 export function winsByLevel(c: Counters): { level: number; wins: number; historic: HistoricLevel | null }[] {
   return [
-    ...BARBARIAN_LEVELS.map((level) => ({ level, wins: c[`npcWins.${level}`] ?? 0, historic: null })),
-    ...HISTORIC_LEVELS.map((level) => ({ level, wins: c[`npcWins.${level}`] ?? 0, historic: level })),
+    ...BARBARIAN_LEVELS.map((level) => ({ level, wins: c[statKey(StatGroup.NPC_WINS, level)] ?? 0, historic: null })),
+    ...HISTORIC_LEVELS.map((level) => ({ level, wins: c[statKey(StatGroup.NPC_WINS, level)] ?? 0, historic: level })),
   ].filter((x) => x.wins > 0);
 }

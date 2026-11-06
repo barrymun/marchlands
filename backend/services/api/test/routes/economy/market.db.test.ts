@@ -13,7 +13,7 @@ import type {
   MarketSummary,
   PlayerState,
 } from '@marchlands/contracts';
-import { BALANCE, BuildingType, HOUR, merchantBase } from '@marchlands/core';
+import { BALANCE, BuildingType, HOUR, merchantBase, ResourceKey } from '@marchlands/core';
 import { admin } from '@marchlands/game';
 import { withMerchantCurve, withShipmentTime } from '@marchlands/game/test/support/market.ts';
 
@@ -217,7 +217,7 @@ describe('POST /cities/:cityId/market/orders', () => {
   it('rests a limit order the merchant does not fill, holding its gold', () =>
     apiTest(async (api) => {
       const p = await trader(api);
-      const price = merchantBase('wood') / 2;
+      const price = merchantBase(ResourceKey.WOOD) / 2;
       const r = await api.ok<MarketPlaceOrderResult>('POST', `cities/${p.cityId}/market/orders`, {
         token: p.token,
         body: { resType: WOOD, side: BUY, amount: 100, price },
@@ -308,7 +308,7 @@ describe('order limit', () => {
 async function shipped(api: TestApi) {
   const buyer = await trader(api, 'Buyer');
   const seller = await trader(api, 'Seller');
-  const price = Math.round(merchantBase('wood') * 1.03 * 1000) / 1000;
+  const price = Math.round(merchantBase(ResourceKey.WOOD) * 1.03 * 1000) / 1000;
   await api.ok('POST', `cities/${buyer.cityId}/market/orders`, { token: buyer.token, body: { resType: WOOD, side: BUY, amount: 1000, price } });
   const r = await api.ok<MarketPlaceOrderResult>('POST', `cities/${seller.cityId}/market/orders`, {
     token: seller.token,

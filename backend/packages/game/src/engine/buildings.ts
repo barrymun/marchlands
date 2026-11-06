@@ -11,6 +11,7 @@ import {
   findBuilding,
   PrestigeAction,
   prestigeOf,
+  StatCounter,
   TimedEventType,
 } from '@marchlands/core';
 
@@ -60,7 +61,7 @@ export async function completeBuilding(ctx: Ctx, cityId: number, positionId: num
   }
   const level = bld.level + 1;
   const after: BuildingState = { ...bld, level, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 };
-  ctx.stat(playerId, cityId, { 'levels.building': 1 });
+  ctx.stat(playerId, cityId, { [StatCounter.LEVELS_BUILDING]: 1 });
   const th = bld.typeId === BuildingType.TOWN_HALL ? level : buildingLevel(b.city.buildings, BuildingType.TOWN_HALL);
   const gain = prestigeOf(PrestigeAction.BUILDING, bld.typeId, level, th);
   addPrestige(b.player, gain);

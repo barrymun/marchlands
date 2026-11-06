@@ -88,6 +88,21 @@ import {
 } from '../../client/web/src/lib/game-art.ts';
 import type { CityGround, CityWallPiece, ResourceKey, WallBand } from '../../client/web/src/lib/game-art.ts';
 
+/** The folders the sprites go to under src/assets, also the names `npm run art:draw` takes for all of a folder. */
+const ArtFolder = {
+  BUILDINGS: 'buildings',
+  TILES: 'tiles',
+  WALLS: 'walls',
+  UNITS: 'units',
+  RESOURCES: 'resources',
+  BADGES: 'badges',
+  CITY: 'city',
+  GEAR: 'gear',
+  FIGURE: 'figure',
+  ITEMS: 'items',
+} as const;
+/** What `npm run art:draw` takes for the historic cities' sprites alone. */
+const HISTORIC = 'historic';
 const ASSETS = path.resolve(import.meta.dirname, '../../client/web/src/assets');
 
 type Drawing = Record<number, () => IsoCanvas>;
@@ -150,99 +165,98 @@ function draw(drawings: Record<number, Drawing>, dir: string, fileOf: (type: num
   }
 }
 
-draw(BUILDINGS, 'buildings', buildingArtFile);
-draw(TILE_DRAWINGS, 'tiles', tileArtFile);
+draw(BUILDINGS, ArtFolder.BUILDINGS, buildingArtFile);
+draw(TILE_DRAWINGS, ArtFolder.TILES, tileArtFile);
 
-if (!wanted.size || wanted.has('historic')) {
-  for (const level of HISTORIC_ART_LEVELS) save('tiles', historicArtFile(level), HISTORIC_DRAWINGS[level]);
+if (!wanted.size || wanted.has(HISTORIC)) {
+  for (const level of HISTORIC_ART_LEVELS) save(ArtFolder.TILES, historicArtFile(level), HISTORIC_DRAWINGS[level]);
   console.log(`drew tiles/historic (${HISTORIC_ART_LEVELS.length} levels)`);
 }
 
-if (!wanted.size || wanted.has('walls')) {
-  fs.mkdirSync(path.join(ASSETS, 'walls'), { recursive: true });
-  for (const { band } of ART_BANDS) for (const piece of WALL_PIECES) save('walls', wallArtFile(band, piece), () => WALL_DRAWINGS[piece](band));
+if (!wanted.size || wanted.has(ArtFolder.WALLS)) {
+  fs.mkdirSync(path.join(ASSETS, ArtFolder.WALLS), { recursive: true });
+  for (const { band } of ART_BANDS) for (const piece of WALL_PIECES) save(ArtFolder.WALLS, wallArtFile(band, piece), () => WALL_DRAWINGS[piece](band));
   console.log(`drew walls (${WALL_PIECES.length} pieces × ${ART_BANDS.length} bands)`);
 }
 
-fs.mkdirSync(path.join(ASSETS, 'units'), { recursive: true });
+fs.mkdirSync(path.join(ASSETS, ArtFolder.UNITS), { recursive: true });
 for (const [type, drawing] of Object.entries({ ...TROOP_DRAWINGS, ...FORT_DRAWINGS })) {
   const file = unitArtFile(Number(type));
   if (wanted.size && !wanted.has(file.replace(/\.png$/, ''))) continue;
-  fs.writeFileSync(path.join(ASSETS, 'units', file), drawing().png());
+  fs.writeFileSync(path.join(ASSETS, ArtFolder.UNITS, file), drawing().png());
   console.log(`drew units/${file}`);
 }
 
-fs.mkdirSync(path.join(ASSETS, 'resources'), { recursive: true });
+fs.mkdirSync(path.join(ASSETS, ArtFolder.RESOURCES), { recursive: true });
 for (const [key, drawing] of Object.entries(RESOURCE_DRAWINGS) as [ResourceKey, () => PixelCanvas][]) {
   if (wanted.size && !wanted.has(key)) continue;
-  fs.writeFileSync(path.join(ASSETS, 'resources', resourceArtFile(key)), drawing().png());
+  fs.writeFileSync(path.join(ASSETS, ArtFolder.RESOURCES, resourceArtFile(key)), drawing().png());
   console.log(`drew resources/${resourceArtFile(key)}`);
 }
 
-fs.mkdirSync(path.join(ASSETS, 'badges'), { recursive: true });
+fs.mkdirSync(path.join(ASSETS, ArtFolder.BADGES), { recursive: true });
 for (const [type, drawing] of Object.entries(BADGE_DRAWINGS)) {
   const file = troopBadgeFile(Number(type));
   if (wanted.size && !wanted.has(file.replace(/\.png$/, ''))) continue;
-  fs.writeFileSync(path.join(ASSETS, 'badges', file), drawing().png());
+  fs.writeFileSync(path.join(ASSETS, ArtFolder.BADGES, file), drawing().png());
   console.log(`drew badges/${file}`);
 }
 
-fs.mkdirSync(path.join(ASSETS, 'city'), { recursive: true });
+fs.mkdirSync(path.join(ASSETS, ArtFolder.CITY), { recursive: true });
 for (const [name, drawing] of Object.entries(CITY_GROUND_DRAWINGS) as [CityGround, () => IsoCanvas][]) {
-  if (wanted.size && !wanted.has(name) && !wanted.has('city')) continue;
-  save('city', cityGroundFile(name), drawing);
+  if (wanted.size && !wanted.has(name) && !wanted.has(ArtFolder.CITY)) continue;
+  save(ArtFolder.CITY, cityGroundFile(name), drawing);
   console.log(`drew city/${cityGroundFile(name)}`);
 }
-if (!wanted.size || wanted.has('city')) {
+if (!wanted.size || wanted.has(ArtFolder.CITY)) {
   for (const { band } of ART_BANDS)
     for (const [piece, drawing] of Object.entries(CITY_WALL_DRAWINGS) as [CityWallPiece, (band: WallBand) => IsoCanvas][])
-      save('city', cityWallFile(band, piece), () => drawing(band as WallBand));
+      save(ArtFolder.CITY, cityWallFile(band, piece), () => drawing(band as WallBand));
   console.log(`drew city walls (${Object.keys(CITY_WALL_DRAWINGS).length} pieces × ${ART_BANDS.length} bands)`);
-  for (const { band } of ART_BANDS) save('city', grandTownHallFile(band), grandTownHall[band]);
+  for (const { band } of ART_BANDS) save(ArtFolder.CITY, grandTownHallFile(band), grandTownHall[band]);
   console.log(`drew city/town-hall (${ART_BANDS.length} bands)`);
 }
 
-if (!wanted.size || wanted.has('gear')) {
-  fs.mkdirSync(path.join(ASSETS, 'gear'), { recursive: true });
-  for (const [piece, drawing] of Object.entries(GEAR_DRAWINGS))
-    for (const level of GEAR_ART_LEVELS) save('gear', gearArtFile(piece, level), () => drawing(level));
+if (!wanted.size || wanted.has(ArtFolder.GEAR)) {
+  fs.mkdirSync(path.join(ASSETS, ArtFolder.GEAR), { recursive: true });
+  for (const { piece, drawing } of GEAR_DRAWINGS) for (const level of GEAR_ART_LEVELS) save(ArtFolder.GEAR, gearArtFile(piece, level), () => drawing(level));
   // a piece whose part sways alone also gets its twins: without the part, and the part alone (no spots of their own)
-  for (const [piece, twin] of Object.entries(GEAR_TWINS))
+  for (const { piece, twin } of GEAR_TWINS)
     for (const level of GEAR_ART_LEVELS)
       if ((spots[`gear/${gearArtFile(piece, level)}`] ?? []).some((s) => s.k === SpotKind.SWAY))
-        for (const part of GEAR_TWIN_PARTS) fs.writeFileSync(path.join(ASSETS, 'gear', gearTwinFile(piece, level, part)), twin(level, part).png());
-  for (const level of GEAR_ART_LEVELS) save('gear', gearBackdropFile(level), () => GEAR_BACKDROP(level));
-  for (const kind of GEAR_STAR_KINDS) save('gear', gearStarFile(kind), () => GEAR_STAR(kind));
-  console.log(`drew gear (${Object.keys(GEAR_DRAWINGS).join(', ')} × ${GEAR_ART_LEVELS.length} levels, backdrops, stars)`);
+        for (const part of GEAR_TWIN_PARTS) fs.writeFileSync(path.join(ASSETS, ArtFolder.GEAR, gearTwinFile(piece, level, part)), twin(level, part).png());
+  for (const level of GEAR_ART_LEVELS) save(ArtFolder.GEAR, gearBackdropFile(level), () => GEAR_BACKDROP(level));
+  for (const kind of GEAR_STAR_KINDS) save(ArtFolder.GEAR, gearStarFile(kind), () => GEAR_STAR(kind));
+  console.log(`drew gear (${GEAR_DRAWINGS.map((d) => d.piece).join(', ')} × ${GEAR_ART_LEVELS.length} levels, backdrops, stars)`);
 }
 
-if (!wanted.size || wanted.has('figure')) {
-  fs.mkdirSync(path.join(ASSETS, 'figure'), { recursive: true });
+if (!wanted.size || wanted.has(ArtFolder.FIGURE)) {
+  fs.mkdirSync(path.join(ASSETS, ArtFolder.FIGURE), { recursive: true });
   const sexes = [Sex.MALE, Sex.FEMALE];
   for (const level of GEAR_ART_LEVELS) {
-    save('figure', figureCapeFile(level), () => FIGURE_GEAR.cape(level));
-    save('figure', figureHelmFile(level), () => FIGURE_GEAR.helm(level));
+    save(ArtFolder.FIGURE, figureCapeFile(level), () => FIGURE_GEAR.cape(level));
+    save(ArtFolder.FIGURE, figureHelmFile(level), () => FIGURE_GEAR.helm(level));
     for (const sex of sexes) {
-      save('figure', figureLegsFile(sex, level), () => FIGURE_GEAR.legs(sex, level));
-      save('figure', figureUpperFile(sex, level), () => FIGURE_GEAR.upper(sex, level));
+      save(ArtFolder.FIGURE, figureLegsFile(sex, level), () => FIGURE_GEAR.legs(sex, level));
+      save(ArtFolder.FIGURE, figureUpperFile(sex, level), () => FIGURE_GEAR.upper(sex, level));
     }
   }
   for (const sex of sexes) {
-    for (const tone of FIGURE_SKIN_TONES) save('figure', figureSkinFile(sex, tone), () => skin(sex, tone));
+    for (const tone of FIGURE_SKIN_TONES) save(ArtFolder.FIGURE, figureSkinFile(sex, tone), () => skin(sex, tone));
     for (const style of FIGURE_HAIR_STYLES[sex])
-      for (const colour of FIGURE_HAIR_COLOURS) save('figure', figureHairFile(style, colour), () => hair(style, colour));
+      for (const colour of FIGURE_HAIR_COLOURS) save(ArtFolder.FIGURE, figureHairFile(style, colour), () => hair(style, colour));
   }
   console.log(`drew figure (cape, helm, legs and upper body × ${GEAR_ART_LEVELS.length} levels, skin tones, hairstyles)`);
 }
 
-fs.mkdirSync(path.join(ASSETS, 'items'), { recursive: true });
+fs.mkdirSync(path.join(ASSETS, ArtFolder.ITEMS), { recursive: true });
 for (const [id, drawing] of Object.entries(ITEM_DRAWINGS)) {
   const file = itemArtFile(id);
   if (!file) throw new Error(`no file name for item ${id}`);
-  if (wanted.size && !wanted.has('items') && !wanted.has(file.replace(/\.png$/, ''))) continue;
-  fs.writeFileSync(path.join(ASSETS, 'items', file), drawing().png());
+  if (wanted.size && !wanted.has(ArtFolder.ITEMS) && !wanted.has(file.replace(/\.png$/, ''))) continue;
+  fs.writeFileSync(path.join(ASSETS, ArtFolder.ITEMS, file), drawing().png());
 }
-if (!wanted.size || wanted.has('items')) console.log(`drew items (${Object.keys(ITEM_DRAWINGS).length} icons)`);
+if (!wanted.size || wanted.has(ArtFolder.ITEMS)) console.log(`drew items (${Object.keys(ITEM_DRAWINGS).length} icons)`);
 
 fs.writeFileSync(SPOTS_FILE, JSON.stringify(Object.fromEntries(Object.entries(spots).sort(([a], [b]) => a.localeCompare(b)))) + '\n');
 console.log(`wrote spots.json (${Object.keys(spots).length} sprites)`);

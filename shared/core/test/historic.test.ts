@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { TroopKey } from '#/constants.ts';
 import {
   assertCanUpgrade,
   BALANCE,
@@ -141,10 +142,10 @@ describe(historicDay.name, () => {
 
 describe(historicGarrison.name, () => {
   it('holds the day’s troops beside the warriors and archers, and the same fortifications at every level', () => {
-    const g = historicGarrison(16, { foot: 'swordsmen', horse: 'heavyCavalry', siege: 'catapult' });
+    const g = historicGarrison(16, { foot: TroopKey.SWORDSMEN, horse: TroopKey.HEAVY_CAVALRY, siege: TroopKey.CATAPULT });
     expect(g.troops).toEqual({ militia: 7_000_000, swordsmen: 1_016_665, archer: 428_070, heavyCavalry: 677_777, catapult: 91_500 });
     expect(g.forts).toEqual(BALANCE.historic.forts);
-    expect(historicGarrison(12, { foot: 'pikemen', horse: 'lightCavalry', siege: 'batteringRam' }).forts).toEqual(g.forts);
+    expect(historicGarrison(12, { foot: TroopKey.PIKEMEN, horse: TroopKey.LIGHT_CAVALRY, siege: TroopKey.BATTERING_RAM }).forts).toEqual(g.forts);
   });
 });
 
@@ -363,7 +364,7 @@ describe(inSeatArea.name, () => {
 describe(draftTake.name, () => {
   it('takes a fifth of every troop type, rounded down', () => {
     expect(draftTake({ militia: 400_000, archer: 1_000, pikemen: 9 })).toEqual({ militia: 80_000, archer: 200, pikemen: 1 });
-    expect(draftTake(historicGarrison(14, { foot: 'swordsmen', horse: 'heavyCavalry', siege: 'catapult' }).troops)).toEqual({
+    expect(draftTake(historicGarrison(14, { foot: TroopKey.SWORDSMEN, horse: TroopKey.HEAVY_CAVALRY, siege: TroopKey.CATAPULT }).troops)).toEqual({
       militia: 560_000,
       swordsmen: 81_333,
       archer: 34_245,

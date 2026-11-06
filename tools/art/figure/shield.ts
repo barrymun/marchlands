@@ -3,6 +3,7 @@
 // (1), rimmed (2), rimmed in gold with a boss stone in the level's colour from 3, a cross from 5, spiked corners from 7,
 // gilded at 9 and crimson rimmed in silver at 10.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { fill, IRON, lit, look, type Shades, spike, STEEL, trimmed, WOOD } from '../gear/common.ts';
 import type { PixelCanvas, Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
@@ -15,7 +16,7 @@ export function shield(level: number): PixelCanvas {
     if (level === 0) {
       oval(c, 61, 41, 6.5, 9, lit(61, 41, 8, IRON));
       oval(c, 61, 41, 5, 7.5, lit(61, 41, 7, WOOD));
-      for (let y = 34; y <= 48; y++) c.set(59, y, 'plankR');
+      for (let y = 34; y <= 48; y++) c.set(59, y, Colour.PLANK_R);
       oval(c, 61.5, 41, 1.6, 1.8, lit(61, 41, 2, IRON));
       return;
     }
@@ -38,7 +39,7 @@ export function shield(level: number): PixelCanvas {
           [68, 37],
           [61.5, 55],
         ],
-        lit(64, 38, 8, ['steel', 'steelDark', 'hoodDark']),
+        lit(64, 38, 8, [Colour.STEEL, Colour.STEEL_DARK, Colour.HOOD_DARK]),
       );
     if (level >= 5) {
       const col = L.trim[1];

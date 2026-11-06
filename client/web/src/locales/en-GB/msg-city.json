@@ -23,5 +23,10 @@
   "draftedToday": "It has already drafted from this city today: each city once a day.",
   "abandonKeepRegular": "You must keep at least one regular city: a historic city can be captured.",
   "abandonAlready": "This city is already being abandoned.",
-  "abandonNotRunning": "This city isn't being abandoned."
+  "abandonNotRunning": "This city isn't being abandoned.",
+  "moveOutNotAbandoning": "A city can only be moved out while it is being abandoned.",
+  "moveOutUnderAttack": "An enemy army is on its way to this city, so it can't be moved out.",
+  "moveOutCooldown": "You kept a city you had moved out: you can move a city out again in {{time}}.",
+  "moveOutTarget": "Choose your other cities to move this one to, none of them being abandoned.",
+  "moveOutNothing": "There is nothing in this city to move out."
 }

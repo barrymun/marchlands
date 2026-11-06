@@ -16,9 +16,9 @@ describe(listQuery.name, () => {
       pageSize: 20,
       type: 1,
       q: '207,405',
-      kind: 'battles',
+      kind: ReportKind.BATTLES,
       unread: 'true',
-      order: 'oldest',
+      order: ReportOrder.OLDEST,
     });
   });
 

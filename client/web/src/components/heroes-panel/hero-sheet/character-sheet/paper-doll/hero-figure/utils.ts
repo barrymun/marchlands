@@ -18,10 +18,12 @@ import {
   FIGURE_HAIR_STYLES,
   FIGURE_SKIN_TONES,
   figureCapeFile,
+  FigureHairColour,
   figureHairFile,
   figureHelmFile,
   figureLegsFile,
   figureSkinFile,
+  FigureSkinTone,
   figureUpperFile,
 } from '@/lib/game-art';
 
@@ -39,9 +41,9 @@ export function figureBody(id: number, sex: Sex): FigureBody {
   const styles = FIGURE_HAIR_STYLES[sex];
   return {
     sex,
-    tone: FIGURE_SKIN_TONES[h % FIGURE_SKIN_TONES.length] ?? 'fair',
+    tone: FIGURE_SKIN_TONES[h % FIGURE_SKIN_TONES.length] ?? FigureSkinTone.FAIR,
     style: styles[(h >>> 4) % styles.length] ?? styles[0],
-    hair: FIGURE_HAIR_COLOURS[(h >>> 8) % FIGURE_HAIR_COLOURS.length] ?? 'brown',
+    hair: FIGURE_HAIR_COLOURS[(h >>> 8) % FIGURE_HAIR_COLOURS.length] ?? FigureHairColour.BROWN,
   };
 }
 

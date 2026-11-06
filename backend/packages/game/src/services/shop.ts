@@ -19,7 +19,10 @@ import {
   type Message,
   msg,
   ref,
+  ResourceKey,
   stateOf,
+  StatGroup,
+  statKey,
 } from '@marchlands/core';
 import { heroes, one } from '@marchlands/db';
 
@@ -81,7 +84,7 @@ export async function buyItemWithGold(ctx: Ctx, playerId: number, cityId: number
   const gold = price * amount;
   if (b.city.gold < gold) throw new GameError(msg('common.notEnoughGoldFor', { amount: gold }), -99);
   b.city.gold -= gold;
-  ctx.stat(b.player.id, b.city.id, { 'spent.items.gold': gold });
+  ctx.stat(b.player.id, b.city.id, { [statKey(StatGroup.SPENT_ITEMS, ResourceKey.GOLD)]: gold });
   addItem(ctx, b.player, itemId, amount);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);

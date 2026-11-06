@@ -1,3 +1,5 @@
+import { StatCounter, statKey } from '@marchlands/core';
+
 import { SPENDING } from '@/components/stats-panel/spending/constants';
 import type { Counters } from '@/components/stats-panel/types';
 import { RESOURCES } from '@/lib/format';
@@ -7,9 +9,9 @@ export function spendingRows(c: Counters) {
   return SPENDING.map(({ group, label }) => ({
     group,
     label,
-    amounts: RESOURCES.map((resource) => ({ resource, amount: c[`spent.${group}.${resource}`] ?? 0 })).filter((x) => x.amount > 0),
+    amounts: RESOURCES.map((resource) => ({ resource, amount: c[statKey(group, resource)] ?? 0 })).filter((x) => x.amount > 0),
   })).filter((row) => row.amounts.length > 0);
 }
 
 /** The honour healing cost, which no resource counts. */
-export const honorSpent = (c: Counters) => Math.max(0, c['spent.healing.honor'] ?? 0);
+export const honorSpent = (c: Counters) => Math.max(0, c[StatCounter.SPENT_HEALING_HONOR] ?? 0);

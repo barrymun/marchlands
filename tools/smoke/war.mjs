@@ -200,9 +200,10 @@ async function main() {
   check(blocked.ok === -13, 'cannot attack an alliance member');
 
   // ---- market ----
-  // an offer inside the computer merchant's spread beats the merchant, so the bid fills against it
-  const merchant = (await ok(a.token, 'GET', '/market/1')).merchant;
-  const ref = Math.round(merchant.reference * 1000) / 1000;
+  // an offer inside the merchant's spread, and the factions' when they trade, beats them both, so the bid fills against it
+  const book = await ok(a.token, 'GET', '/market/1');
+  const f = book.factions;
+  const ref = Math.round((f?.bid != null && f.ask != null ? (f.bid + f.ask) / 2 : book.merchant.reference) * 1000) / 1000;
   await ok(b.token, 'POST', `/cities/${b.city.id}/market/orders`, { resType: 1, side: 1, amount: 5000, price: ref });
   const fill = await ok(a.token, 'POST', `/cities/${a.city.id}/market/orders`, { resType: 1, side: 0, amount: 5000, price: ref });
   check(fill.filled === 5000 && fill.playerFilled === 5000, 'buy order filled against the offer');

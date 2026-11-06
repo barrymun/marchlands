@@ -3,13 +3,15 @@
 // (chanfron) and barding in the level's colour, a plume from 5, a horn from 7, gilded at 9 and at 10 a black horse in
 // crimson armour with glowing eyes and two horns.
 
-import { SpotKind } from '@marchlands/core';
-import type { Colour, PixelCanvas, Pt } from '../pixel.ts';
+import { GearPieceId, SpotKind } from '@marchlands/core';
+
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import type { PixelCanvas, Pt } from '../pixel.ts';
 import { canvas, fill, horn, look, plume, type Shades, shine, sweep, trimmed } from './common.ts';
 
-const CHESTNUT: Shades = ['horseHi', 'horse', 'horseDark'];
-const GREY: Shades = ['graniteL', 'stoneTop', 'stoneL'];
-const BLACK: Shades = ['hood', 'hoodDark', 'gear0'];
+const CHESTNUT: Shades = [Colour.HORSE_HI, Colour.HORSE, Colour.HORSE_DARK];
+const GREY: Shades = [Colour.GRANITE_L, Colour.STONE_TOP, Colour.STONE_L];
+const BLACK: Shades = [Colour.HOOD, Colour.HOOD_DARK, Colour.GEAR_0];
 
 const NECK: Pt[] = [
   [17, 31],
@@ -33,14 +35,14 @@ const FACE: Pt[] = [
 ];
 
 export function mount(level: number): PixelCanvas {
-  const c = canvas('mount', level);
+  const c = canvas(GearPieceId.MOUNT, level);
   const L = look(level);
   const coat: Shades = level === 2 || level === 9 ? GREY : level >= 10 ? BLACK : CHESTNUT;
-  const mane: Colour = level === 2 || level === 9 ? 'hood' : level >= 10 ? 'gear0Dark' : 'horseDark';
+  const mane: Colour = level === 2 || level === 9 ? Colour.HOOD : level >= 10 ? Colour.GEAR_0_DARK : Colour.HORSE_DARK;
   fill(c, NECK, coat);
   // barding over the neck: red-brown at 2, the level's colour from 3, crimson at 10
   if (level >= 2) {
-    const cloth: Shades = level === 2 ? ['barnHi', 'barnL', 'barnD'] : level >= 10 ? L.metal : L.accent;
+    const cloth: Shades = level === 2 ? [Colour.BARN_HI, Colour.BARN_L, Colour.BARN_D] : level >= 10 ? L.metal : L.accent;
     fill(
       c,
       [
@@ -63,9 +65,9 @@ export function mount(level: number): PixelCanvas {
     ],
     coat,
   );
-  if (level === 1) for (let y = 8; y < 21; y++) c.set(13 - Math.round((y - 8) * 0.55), y, 'wool');
+  if (level === 1) for (let y = 8; y < 21; y++) c.set(13 - Math.round((y - 8) * 0.55), y, Colour.WOOL);
   // the face plate: silver trimmed in crimson at 10, so it stands out from the crimson barding
-  if (level >= 3) trimmed(c, FACE, level >= 10 ? ['steelHi', 'steel', 'steelDark'] : L.metal, level >= 10 ? L.metal : L.trim, 1.6);
+  if (level >= 3) trimmed(c, FACE, level >= 10 ? [Colour.STEEL_HI, Colour.STEEL, Colour.STEEL_DARK] : L.metal, level >= 10 ? L.metal : L.trim, 1.6);
   if (level >= 5) plume(c, [17, 6], [24, 0], -1, 2.2, L.accent);
   if (L.spikes) horn(c, [11, 8], [3, 0], 7, L.trim);
   if (level >= 10) horn(c, [17, 8], [22, 0], 6, L.trim);
@@ -74,23 +76,23 @@ export function mount(level: number): PixelCanvas {
     c,
     (t) => [19 + t * 9, 6 + t * 22],
     () => 1.6,
-    (t) => (Math.floor(t * 7) % 2 ? mane : 'gear0Dark'),
+    (t) => (Math.floor(t * 7) % 2 ? mane : Colour.GEAR_0_DARK),
   );
   c.outline();
   // eye and nostril
   if (level >= 10) shine(c, 15, 11);
-  else c.set(15, 11, 'gear0Dark');
-  if (level >= 10) c.set(14, 11, 'gear10Hi');
-  c.set(6, 21, 'gear0Dark');
+  else c.set(15, 11, Colour.GEAR_0_DARK);
+  if (level >= 10) c.set(14, 11, Colour.GEAR_10_HI);
+  c.set(6, 21, Colour.GEAR_0_DARK);
   // halter, bridle and bit
   if (level === 0) {
-    c.line([5, 18], [12, 21], 'linen');
-    c.line([12, 21], [18, 10], 'linen');
+    c.line([5, 18], [12, 21], Colour.LINEN);
+    c.line([12, 21], [18, 10], Colour.LINEN);
   }
   if (level === 1) {
-    c.line([6, 17], [12, 20], 'leatherDark');
-    c.line([12, 20], [18, 9], 'leatherDark');
-    c.set(7, 22, 'steelHi');
+    c.line([6, 17], [12, 20], Colour.LEATHER_DARK);
+    c.line([12, 20], [18, 9], Colour.LEATHER_DARK);
+    c.set(7, 22, Colour.STEEL_HI);
   }
   if (level >= 3) for (let i = 0; i < 4; i++) c.set(14 - i * 2, 9 + i * 4, L.trim[0]);
   // the head nods from the top of the neck, the muzzle lifting most

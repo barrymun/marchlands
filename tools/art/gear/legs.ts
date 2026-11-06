@@ -2,7 +2,10 @@
 // marked with silver crosses (2), then from 3 cloth in the level's colour with knee plates trimmed in gold, plates on
 // the thighs from 6, knee spikes from 7, gilded plates at 9, and crimson armour trimmed in silver at 10.
 
-import { CLEAR, type PixelCanvas, type Pt } from '../pixel.ts';
+import { GearPieceId } from '@marchlands/core';
+
+import { Colour } from '../../../client/web/src/lib/palette.ts';
+import { type PixelCanvas, type Pt } from '../pixel.ts';
 import { oval } from '../shapes.ts';
 import { canvas, CLOTH, fill, lit, look, type Shades, spike } from './common.ts';
 
@@ -20,16 +23,24 @@ const RIGHT: Pt[] = [
 ];
 
 export function legs(level: number): PixelCanvas {
-  const c = canvas('legs', level);
+  const c = canvas(GearPieceId.LEGS, level);
   const L = look(level);
   const cloth: Shades =
-    level === 0 ? CLOTH : level === 1 ? ['flower', 'bannerHi', 'barnL'] : level === 2 ? ['hood', 'hoodDark', 'gear0'] : level >= 10 ? L.metal : L.accent;
+    level === 0
+      ? CLOTH
+      : level === 1
+        ? [Colour.FLOWER, Colour.BANNER_HI, Colour.BARN_L]
+        : level === 2
+          ? [Colour.HOOD, Colour.HOOD_DARK, Colour.GEAR_0]
+          : level >= 10
+            ? L.metal
+            : L.accent;
   fill(c, LEFT, cloth);
   fill(c, RIGHT, cloth);
   // the gap between the legs
-  for (let y = 14; y < 30; y++) c.set(16, y, CLEAR);
+  for (let y = 14; y < 30; y++) c.set(16, y, Colour.CLEAR);
   // the waist
-  const waist: Shades = level === 1 ? ['leather', 'leather', 'leatherDark'] : level >= 3 ? L.trim : cloth;
+  const waist: Shades = level === 1 ? [Colour.LEATHER, Colour.LEATHER, Colour.LEATHER_DARK] : level >= 3 ? L.trim : cloth;
   fill(
     c,
     [
@@ -43,8 +54,8 @@ export function legs(level: number): PixelCanvas {
   if (level === 2)
     for (const x of [12, 20])
       for (let i = -2; i <= 2; i++) {
-        c.set(x + i, 19 + i, 'steelHi');
-        c.set(x + i, 19 - i, 'steelHi');
+        c.set(x + i, 19 + i, Colour.STEEL_HI);
+        c.set(x + i, 19 - i, Colour.STEEL_HI);
       }
   if (level >= 6)
     // plates on the thighs
@@ -57,12 +68,12 @@ export function legs(level: number): PixelCanvas {
           [x + 3, 15],
           [x - 3, 15],
         ],
-        level >= 10 ? ['steelHi', 'steel', 'steelDark'] : L.metal,
+        level >= 10 ? [Colour.STEEL_HI, Colour.STEEL, Colour.STEEL_DARK] : L.metal,
       );
   if (level >= 3)
     for (const x of [12, 20]) {
       oval(c, x, 20, 3.2, 2.6, lit(x, 20, 3, L.trim));
-      oval(c, x, 20, 1.8, 1.4, lit(x, 20, 2, level >= 9 ? L.trim : ['steelHi', 'steel', 'steelDark']));
+      oval(c, x, 20, 1.8, 1.4, lit(x, 20, 2, level >= 9 ? L.trim : [Colour.STEEL_HI, Colour.STEEL, Colour.STEEL_DARK]));
     }
   c.outline();
   if (L.spikes) for (const x of [12, 20]) spike(c, [x, 18], [x, 14], L.trim);

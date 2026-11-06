@@ -29,21 +29,23 @@
     "saved": "Work rates saved"
   },
   "abandon": {
-    "warning": "Abandoning a city can't be undone. After {{time}} all of it is lost for good: its heroes, troops, resources and buildings, its armies wherever they are, research running there, its market orders and shipments. Nothing moves to another city and nothing is refunded. Its valleys are released.",
+    "warning": "Abandoning a city can't be undone. After {{time}} all of it is lost for good: its heroes, troops, resources and buildings, its armies wherever they are, research running there, its market orders and shipments. Nothing moves to another city by itself and nothing is refunded. Its valleys are released.",
     "keepRegular": "You must keep at least one regular city, as a historic city can be captured, so this one can't be abandoned.",
     "button": "Abandon this city",
     "started": "{{city}} will be abandoned in {{time}}",
     "confirmTitle": "Abandon {{city}}?",
-    "confirmDescription": "In {{time}} this city is gone for good, with everything listed here. Nothing moves to another city and nothing is refunded.",
+    "confirmDescription": "In {{time}} this city is gone for good, with everything listed here. Nothing moves to another city by itself and nothing is refunded.",
     "confirm": "Abandon city",
-    "road": "Move out anything you want to keep before you start: an army sent away during that time and still on the road when it ends is lost too.",
+    "road": "Once it has started you can move this city's troops, resources and any heroes you choose out at once. An army on the road when the hour ends is lost, with its hero.",
     "typeName": "Type the city's name, {{city}}, to confirm",
     "row": {
       "heroes": "Heroes",
       "research": "Research running here",
       "troops": "Troops at home",
+      "training": "Troops in training",
       "injured": "Injured troops",
       "fortifications": "Fortifications",
+      "fortsQueued": "Fortifications being built",
       "armies": "Armies out",
       "armyTroops": "Troops in those armies",
       "valleys": "Valleys released",
@@ -52,6 +54,8 @@
       "waves": "Unsent plan waves",
       "prestige": "Prestige taken back"
     },
-    "prestigeNote": "You captured this city recently: abandoning it before {{date}} takes back the {{prestige}} prestige that gave you."
+    "prestigeNote": "You captured this city recently: abandoning it before {{date}} takes back the {{prestige}} prestige that gave you.",
+    "moving": "A hero can move only to a city with a free Feasting Hall slot.",
+    "arriving": "No army can be sent to this city during that time, and any on the way turn back. This city's own armies coming home are lost with it unless moved out again."
   }
 }

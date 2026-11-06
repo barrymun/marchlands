@@ -1,7 +1,7 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { BALANCE, msg, stateBounds, stateOf, TileType } from '@marchlands/core';
+import { BALANCE, msg, stateBounds, stateOf, TileType, WorldStateKey } from '@marchlands/core';
 import { tiles, worldState } from '@marchlands/db';
 
 import { pickOpenFlat, refreshZoneStats } from '#/engine/world.ts';
@@ -27,7 +27,7 @@ describe(refreshZoneStats.name, () => {
         expect(s.settled).toBeGreaterThanOrEqual(0);
         expect(s.settled).toBeLessThanOrEqual(1);
       }
-      const [cached] = await g.tx.select().from(worldState).where(eq(worldState.key, 'zones'));
+      const [cached] = await g.tx.select().from(worldState).where(eq(worldState.key, WorldStateKey.ZONES));
       expect(cached!.value).toEqual(stats);
     }));
 

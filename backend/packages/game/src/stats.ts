@@ -4,10 +4,10 @@
 // the hot path never touches the database; a crash can lose the last few minutes of counters.
 //
 // Counter keys are `group.detail`, e.g. trained.archer, killed.trap, produced.food, wins.npc
-// (shared/core stats.ts lists them).
+// (StatGroup and StatCounter, shared/core stats.ts, name them).
 
 import { sql } from 'drizzle-orm';
-import type { SettleFlows, TroopCounts } from '@marchlands/core';
+import { type SettleFlows, StatCounter, StatGroup, type TroopCounts } from '@marchlands/core';
 import type { Db } from '@marchlands/db';
 
 export type StatCounters = Record<string, number>;
@@ -19,7 +19,7 @@ export function addCounters(into: StatCounters, add: StatCounters, mult = 1): St
 }
 
 /** `{ archer: 5 }` -> `{ 'trained.archer': 5 }`. */
-export function prefixed(group: string, counts: Partial<Record<string, number>> | null | undefined, mult = 1): StatCounters {
+export function prefixed(group: StatGroup, counts: Partial<Record<string, number>> | null | undefined, mult = 1): StatCounters {
   const out: StatCounters = {};
   for (const [k, v] of Object.entries(counts ?? {})) if (v) out[`${group}.${k}`] = v * mult;
   return out;
@@ -35,11 +35,11 @@ const settled = new WeakMap<object, StatCounters>();
 /** Remember what settling a city produced and paid, until the city row is saved (saveCity). */
 export function noteSettle(city: object, flows: SettleFlows, deserted: TroopCounts) {
   const c = settled.get(city) ?? {};
-  addCounters(c, prefixed('produced', flows.produced));
-  addCounters(c, prefixed('wasted', flows.wasted));
-  addCounters(c, prefixed('taxed', flows.taxed));
-  addCounters(c, { 'upkeep.food': flows.upkeep, 'salaries.gold': flows.salaries });
-  addCounters(c, prefixed('deserted', deserted));
+  addCounters(c, prefixed(StatGroup.PRODUCED, flows.produced));
+  addCounters(c, prefixed(StatGroup.WASTED, flows.wasted));
+  addCounters(c, prefixed(StatGroup.TAXED, flows.taxed));
+  addCounters(c, { [StatCounter.UPKEEP_FOOD]: flows.upkeep, [StatCounter.SALARIES_GOLD]: flows.salaries });
+  addCounters(c, prefixed(StatGroup.DESERTED, deserted));
   settled.set(city, c);
 }
 

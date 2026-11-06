@@ -2,6 +2,7 @@
 // each band after it is bigger and stronger: a kitchen with a smoking chimney, then a colonnade and a garden, then a
 // great hall between towers with banners round a courtyard fountain.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, PAVING, Roofing } from '../iso.ts';
 
 const SIZE = 64;
@@ -11,10 +12,10 @@ function band1(): IsoCanvas {
   c.grass(0, 0, 20, 20);
   c.ground(3, 11, 14, 6, PAVING);
   c.wall(3, 4, 0, 14, 6, 5);
-  c.windows([9, 10], 10, 0, 3, 'logDark');
+  c.windows([9, 10], 10, 0, 3, Colour.LOG_DARK);
   c.windows([5, 7, 13, 15], 10, 2, 1);
   c.roof(3, 4, 14, 6, 5, 4, Axis.X, { roofing: Roofing.GREEN });
-  c.box(6, 13, 0, 7, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
+  c.box(6, 13, 0, 7, 1, 1, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R });
   c.anchor();
   c.outline();
   return c;
@@ -25,7 +26,7 @@ function band2(): IsoCanvas {
   c.grass(0, 0, 24, 24);
   c.ground(2, 11, 18, 8, PAVING);
   c.wall(2, 3, 0, 16, 7, 6);
-  c.windows([9, 10], 10, 0, 4, 'logDark');
+  c.windows([9, 10], 10, 0, 4, Colour.LOG_DARK);
   c.windows([4, 6, 13, 15], 10, 2, 2);
   c.roof(2, 3, 16, 7, 6, 4, Axis.X, { roofing: Roofing.GREEN });
   // the kitchen
@@ -33,8 +34,8 @@ function band2(): IsoCanvas {
   c.hipRoof(19, 4, 4, 5, 4, 2, Axis.Y, Roofing.SLATE);
   c.stone(20, 5, 6, 1, 1, 3);
   c.smoke(c.p(20.5, 5.5, 9));
-  c.box(4, 14, 0, 8, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
-  c.box(4, 17, 0, 8, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
+  c.box(4, 14, 0, 8, 1, 1, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R });
+  c.box(4, 17, 0, 8, 1, 1, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R });
   c.anchor();
   c.outline();
   return c;
@@ -68,15 +69,15 @@ function band4(): IsoCanvas {
   c.crenels(1, 2, 13, 4, 4);
   c.wall(5, 3, 0, 18, 9, 9);
   c.colonnade(5, 12, 0, 18, 8);
-  c.roof(5, 3, 18, 9, 9, 6, Axis.X, { roofing: Roofing.GREEN, trim: 'gold' });
+  c.roof(5, 3, 18, 9, 9, 6, Axis.X, { roofing: Roofing.GREEN, trim: Colour.GOLD });
   c.stone(23, 2, 0, 4, 4, 13);
   c.crenels(23, 2, 13, 4, 4);
   c.banner(c.p(3, 4, 14), 5);
   c.banner(c.p(25, 4, 14), 5);
   c.stone(12, 18, 0, 6, 6, 1);
-  c.ground(13, 19, 4, 4, 'water');
-  c.box(4, 17, 0, 6, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
-  c.box(20, 17, 0, 6, 1, 1, { top: 'plankTop', left: 'plankL', right: 'plankR' });
+  c.ground(13, 19, 4, 4, Colour.WATER);
+  c.box(4, 17, 0, 6, 1, 1, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R });
+  c.box(20, 17, 0, 6, 1, 1, { top: Colour.PLANK_TOP, left: Colour.PLANK_L, right: Colour.PLANK_R });
   c.cypress(4, 26, 6);
   c.cypress(25, 26, 6);
   c.anchor();

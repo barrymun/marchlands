@@ -2,9 +2,10 @@
 // outlined like the troops: an ear of corn for food, stacked logs for lumber, a rock for stone, and stacked ingots of
 // iron and gold.
 
-import { type Colour, PixelCanvas } from './pixel.ts';
+import { PixelCanvas } from './pixel.ts';
 import { log } from './shapes.ts';
 import type { ResourceKey } from '../../client/web/src/lib/game-art.ts';
+import { Colour } from '../../client/web/src/lib/palette.ts';
 
 const SIZE = 16;
 
@@ -38,10 +39,10 @@ function ingot(c: PixelCanvas, x: number, y: number, len: number, top: Colour, f
     end,
   );
   // its edges, so stacked ingots stay apart
-  c.line([x, y + 5], [x + 1, y], 'outline');
-  c.line([x + 1, y], [x + len - 1, y], 'outline');
-  c.line([x + len - 1, y], [x + len, y + 5], 'outline');
-  c.line([x, y + 5], [x + len, y + 5], 'outline');
+  c.line([x, y + 5], [x + 1, y], Colour.OUTLINE);
+  c.line([x + 1, y], [x + len - 1, y], Colour.OUTLINE);
+  c.line([x + len - 1, y], [x + len, y + 5], Colour.OUTLINE);
+  c.line([x, y + 5], [x + len, y + 5], Colour.OUTLINE);
 }
 
 /** Three ingots stacked two and one. */
@@ -66,7 +67,7 @@ function food(): PixelCanvas {
       const u = (dx - dy) / Math.SQRT2;
       const v = (dx + dy) / Math.SQRT2;
       if ((u / a) ** 2 + (v / b) ** 2 > 1) continue;
-      c.set(x, y, v < -1.6 ? 'fireHi' : v > 1.4 ? 'wheatDark' : (x + y) % 2 ? 'wheat' : 'gold');
+      c.set(x, y, v < -1.6 ? Colour.FIRE_HI : v > 1.4 ? Colour.WHEAT_DARK : (x + y) % 2 ? Colour.WHEAT : Colour.GOLD);
     }
   // the husk wrapping its lower end, and the stalk
   c.poly(
@@ -76,7 +77,7 @@ function food(): PixelCanvas {
       [6, 9],
       [8, 13],
     ],
-    'greenL',
+    Colour.GREEN_L,
   );
   c.poly(
     [
@@ -85,7 +86,7 @@ function food(): PixelCanvas {
       [11, 11],
       [7, 14],
     ],
-    'greenD',
+    Colour.GREEN_D,
   );
   c.poly(
     [
@@ -93,10 +94,10 @@ function food(): PixelCanvas {
       [3, 7],
       [5, 10],
     ],
-    'greenHi',
+    Colour.GREEN_HI,
   );
   c.outline();
-  c.set(1, 15, 'greenEdge');
+  c.set(1, 15, Colour.GREEN_EDGE);
   return c;
 }
 
@@ -121,7 +122,7 @@ function stone(): PixelCanvas {
       [15, 5],
       [8, 8.5],
     ],
-    'graniteL',
+    Colour.GRANITE_L,
   );
   c.poly(
     [
@@ -130,7 +131,7 @@ function stone(): PixelCanvas {
       [8, 15],
       [1, 11.5],
     ],
-    'stoneTop',
+    Colour.STONE_TOP,
   );
   c.poly(
     [
@@ -139,21 +140,21 @@ function stone(): PixelCanvas {
       [15, 11.5],
       [8, 15],
     ],
-    'stoneR',
+    Colour.STONE_R,
   );
-  c.line([8, 9], [8, 14], 'stoneL');
-  c.line([3, 9], [5, 11], 'stoneL');
-  c.line([11, 10], [12, 12], 'shingleL');
-  c.line([6, 4], [9, 5], 'graniteHi');
+  c.line([8, 9], [8, 14], Colour.STONE_L);
+  c.line([3, 9], [5, 11], Colour.STONE_L);
+  c.line([11, 10], [12, 12], Colour.SHINGLE_L);
+  c.line([6, 4], [9, 5], Colour.GRANITE_HI);
   c.outline();
   return c;
 }
 
 /** The resources drawn in code, by resource key. */
 export const RESOURCE_DRAWINGS: Record<ResourceKey, () => PixelCanvas> = {
-  gold: () => ingots('gold', 'fireHi', 'gold', 'goldDark'),
+  gold: () => ingots('gold', Colour.FIRE_HI, Colour.GOLD, Colour.GOLD_DARK),
   food,
   wood,
   stone,
-  iron: () => ingots('iron', 'steel', 'steelDark', 'hood'),
+  iron: () => ingots('iron', Colour.STEEL, Colour.STEEL_DARK, Colour.HOOD),
 };

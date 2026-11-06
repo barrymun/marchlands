@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
+import { StatGroup, statPrefix } from '@marchlands/core';
+
 import { ItemIcon } from '@/components/item-icon/item-icon';
 import { Section } from '@/components/stats-panel/section/section';
 import type { Counters } from '@/components/stats-panel/types';
@@ -10,8 +12,8 @@ import { itemName } from '@/lib/game-data';
 export function ItemsUsed({ c, className }: { c: Counters; className?: string }) {
   const { t } = useTranslation(['stats-panel', 'common']);
   const used = Object.entries(c)
-    .filter(([k, v]) => k.startsWith('items.used.') && v > 0)
-    .map(([k, v]) => [k.slice('items.used.'.length), v] as const)
+    .filter(([k, v]) => k.startsWith(statPrefix(StatGroup.ITEMS_USED)) && v > 0)
+    .map(([k, v]) => [k.slice(statPrefix(StatGroup.ITEMS_USED).length), v] as const)
     .sort((a, b) => b[1] - a[1]);
   return (
     <Section className={className} title={t('itemsUsed.title')}>

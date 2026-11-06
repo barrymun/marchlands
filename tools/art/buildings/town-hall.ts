@@ -3,6 +3,7 @@
 // banners and a hall with gilded eaves on a podium. Each band is drawn twice: the 64-pixel sprite for slot cards, and a
 // grand one at twice the size on a 128-pixel canvas for the isometric town, where the Town Hall covers a 2×2 block.
 
+import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { Axis, IsoCanvas, PAVING } from '../iso.ts';
 
 const SIZE = 64;
@@ -14,7 +15,7 @@ function canvas(plot: number, grand: boolean): IsoCanvas {
 
 function band1(grand = false): IsoCanvas {
   const c = canvas(22, grand);
-  c.ground(0, 0, 22, 22, 'sand');
+  c.ground(0, 0, 22, 22, Colour.SAND);
   c.ground(5, 10, 13, 10, PAVING);
   // the wing, along the back left
   c.wall(1, 2, 0, 4, 12, 4);
@@ -34,7 +35,7 @@ function band1(grand = false): IsoCanvas {
 
 function band2(grand = false): IsoCanvas {
   const c = canvas(25, grand);
-  c.ground(0, 0, 25, 25, 'sand');
+  c.ground(0, 0, 25, 25, Colour.SAND);
   c.ground(6, 11, 15, 8, PAVING);
   c.wall(1, 2, 0, 4, 15, 5);
   c.windowsSe(5, [5, 8, 11, 14], 1, 2);
@@ -56,7 +57,7 @@ function band2(grand = false): IsoCanvas {
 
 function band3(grand = false): IsoCanvas {
   const c = canvas(28, grand);
-  c.ground(0, 0, 28, 28, 'sand');
+  c.ground(0, 0, 28, 28, Colour.SAND);
   c.ground(8, 13, 15, 9, PAVING);
   // the stone wall's back sides
   c.stone(0, 0, 0, 28, 1, 3);
@@ -72,7 +73,7 @@ function band3(grand = false): IsoCanvas {
   c.roof(12, 2, 14, 9, 7, 5, Axis.X);
   // a fountain
   c.stone(14, 15, 0, 5, 5, 1);
-  c.ground(15, 16, 3, 3, 'water');
+  c.ground(15, 16, 3, 3, Colour.WATER);
   c.wall(2, 21, 0, 13, 4, 4);
   c.windows([5, 8, 11], 25, 1, 2);
   c.roof(2, 21, 13, 4, 4, 4, Axis.X);
@@ -89,7 +90,7 @@ function band3(grand = false): IsoCanvas {
 
 function band4(grand = false): IsoCanvas {
   const c = canvas(31, grand);
-  c.ground(0, 0, 31, 31, 'sand');
+  c.ground(0, 0, 31, 31, Colour.SAND);
   c.ground(9, 15, 17, 10, PAVING);
   // the wall's back sides and the back tower
   c.stone(0, 0, 0, 31, 1, 4);
@@ -104,10 +105,10 @@ function band4(grand = false): IsoCanvas {
   c.wall(13, 3, 1, 15, 9, 7);
   c.colonnade(13, 12, 1, 15, 7);
   c.colonnadeSe(28, 3, 1, 9, 7);
-  c.roof(13, 3, 15, 9, 8, 6, Axis.X, { trim: 'gold' });
+  c.roof(13, 3, 15, 9, 8, 6, Axis.X, { trim: Colour.GOLD });
   c.stone(15, 17, 0, 6, 6, 1);
-  c.ground(16, 18, 4, 4, 'water');
-  c.set(...c.p(18, 20, 3), 'gold');
+  c.ground(16, 18, 4, 4, Colour.WATER);
+  c.set(...c.p(18, 20, 3), Colour.GOLD);
   c.wall(3, 24, 0, 14, 4, 5);
   c.windows([6, 9, 12, 15], 28, 1, 2);
   c.roof(3, 24, 14, 4, 5, 4, Axis.X);

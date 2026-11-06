@@ -24,6 +24,7 @@ import {
   gearStarCost,
   gearStarLimit,
   gearStarPoints,
+  type GearStat,
   gearTier,
   generateMap,
   healCost,
@@ -32,6 +33,7 @@ import {
   heroBuffDesc,
   heroGearBonus,
   heroGearBreakdown,
+  heroGearStat,
   heroItemGoldPrice,
   heroTimeMultiplier,
   injuredOf,
@@ -660,7 +662,7 @@ describe('level up all at once', () => {
 
 describe('hero gear', () => {
   const allStars = (n: number) => Object.fromEntries(GEAR_PIECES.map((p) => [p.id, n]));
-  const hero = (level: number, power: number, gearStat: string | null = null) => ({
+  const hero = (level: number, power: number, gearStat: GearStat | null = null) => ({
     level,
     power,
     management: 20,
@@ -706,6 +708,16 @@ describe('hero gear', () => {
     const h = hero(100, 79 + 100);
     syncHeroGear(h, { level: 10, stars: allStars(10) });
     expect(h.power + h.powerAdded).toBe(1_229);
+  });
+
+  it('picks the chosen attribute even when it is the weakest, else the strongest, power then management on a tie', () => {
+    const stats = (power: number, management: number, stratagem: number, gearStat: GearStat | null = null) => ({ power, management, stratagem, gearStat });
+    expect(heroGearStat(stats(90, 50, 10, HeroBuffId.STRATAGEM))).toBe(HeroBuffId.STRATAGEM);
+    expect(heroGearStat(stats(90, 50, 10))).toBe(HeroBuffId.POWER);
+    expect(heroGearStat(stats(10, 90, 50))).toBe(HeroBuffId.MANAGEMENT);
+    expect(heroGearStat(stats(10, 50, 90))).toBe(HeroBuffId.STRATAGEM);
+    expect(heroGearStat(stats(50, 50, 50))).toBe(HeroBuffId.POWER);
+    expect(heroGearStat(stats(10, 50, 50))).toBe(HeroBuffId.MANAGEMENT);
   });
 
   it('boosts the chosen attribute, else the strongest one; none without gear', () => {

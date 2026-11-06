@@ -7,6 +7,7 @@ import {
   ArmyDirection,
   armyLoad,
   BALANCE,
+  BattleResult,
   BattleTarget,
   freshNpcState,
   homeFaction,
@@ -44,7 +45,12 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
       const fresh = freshNpcState(1, g.now);
 
       expect(report).toMatchObject({ title: msg('report.title.attackSucceeded'), isAttack: true, armyType: Mission.ATTACK });
-      expect(b).toMatchObject({ result: 'attackerWon', captured: false, level: 1, defender: { player: '', wallLevel: 1, troops: { before: fresh.troops } } });
+      expect(b).toMatchObject({
+        result: BattleResult.ATTACKER_WON,
+        captured: false,
+        level: 1,
+        defender: { player: '', wallLevel: 1, troops: { before: fresh.troops } },
+      });
       const [lo, hi] = BALANCE.npcLoyaltyDamagePerAttack;
       expect(b.loyaltyDamage).toBeGreaterThanOrEqual(lo);
       expect(b.loyaltyDamage).toBeLessThanOrEqual(hi);
@@ -89,7 +95,12 @@ describe(`${processArmy.name}: attacking a barbarian city`, () => {
       const npc = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
       const { armyId, report, battle: b } = await attack(g, p, heroId, npc.id, 5);
       expect(report.title).toEqual(msg('report.title.attackFailed'));
-      expect(b).toMatchObject({ result: 'defenderWon', loyaltyDamage: 0, captured: false, plunder: { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 } });
+      expect(b).toMatchObject({
+        result: BattleResult.DEFENDER_WON,
+        loyaltyDamage: 0,
+        captured: false,
+        plunder: { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 },
+      });
       expect(b.loyaltyLeft).toBe(npcTemplate(1).loyalty);
       expect(await armyRow(g, armyId)).toBeUndefined();
       expect((await getTile(g, npc.id)).troops).toEqual(b.defender.troops.after);
@@ -201,7 +212,7 @@ describe(`${processArmy.name}: standing with the factions`, () => {
       const npc = await tileNear(g, p.cityId, TileType.NPC, { level: member });
       const home = homeFaction(npc.id);
       const { battle: b } = await attack(g, p, heroId, npc.id, 5);
-      expect(b.result).toBe('defenderWon');
+      expect(b.result).toBe(BattleResult.DEFENDER_WON);
       const change = -R.attackPerLevel * member;
       expect(b.standing).toEqual({ faction: home?.id, change, now: change });
       expect((await standingsOf(g, p.id))[home!.id]).toBeCloseTo(change);
@@ -212,7 +223,7 @@ describe(`${processArmy.name}: standing with the factions`, () => {
       const { p, heroId } = await warrior(g);
       const npc = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
       const { battle: b } = await attack(g, p, heroId, npc.id);
-      expect(b.result).toBe('attackerWon');
+      expect(b.result).toBe(BattleResult.ATTACKER_WON);
       expect(b.standing).toEqual({ faction: homeFaction(npc.id)?.id, change: R.banditPerLevel, now: R.banditPerLevel });
     }));
 
@@ -221,7 +232,7 @@ describe(`${processArmy.name}: standing with the factions`, () => {
       const { p, heroId } = await warrior(g);
       const npc = await tileNear(g, p.cityId, TileType.NPC, { level: 1 });
       const { battle: b } = await attack(g, p, heroId, npc.id, 5);
-      expect(b.result).toBe('defenderWon');
+      expect(b.result).toBe(BattleResult.DEFENDER_WON);
       expect(b.standing).toBeUndefined();
       expect(Object.values(await standingsOf(g, p.id)).every((s) => s === 0)).toBe(true);
     }));

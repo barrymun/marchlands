@@ -2,6 +2,7 @@
 // End-to-end smoke test against a running stack (run the worker with GAME_SPEED=50 or more).
 //   API=http://localhost:3100 node tools/smoke/smoke.mjs
 
+import { GEAR_PIECES, gearLevelPoints, gearStarCost, gearStarPoints, gearTier } from '@marchlands/core';
 import { signUpProof } from './proof.mjs';
 
 const API = process.env.API ?? 'http://localhost:3000';
@@ -304,18 +305,19 @@ async function main() {
     await ok(gm.token, 'PUT', '/admin/research', { playerName, techId: 21, level: 3 });
     check((await ok(a.token, 'GET', '/gear')).level === 3, 'Hero Enhancement 3 = gear level 3');
     const g1 = (await ok(a.token, 'GET', `/cities/${cid}`)).heros.find((x) => x.id === h2.id);
-    // gear tier: hero level ÷ 10 (none below 10, 10 at 100); each piece at level L adds 1 + … + L
-    const tier = Math.min(10, Math.floor(g1.level / 10));
-    const L = Math.min(3, tier);
-    const pts = (14 * L * (L + 1)) / 2;
+    // a hero uses gear levels and stars up to its tier (hero level ÷ 10); each piece adds its level's points
+    const tier = gearTier(g1.level);
+    const pts = GEAR_PIECES.length * gearLevelPoints(Math.min(3, tier));
     check(g1[`${g1.gearStat}Added`] === pts, `level ${g1.level} hero (tier ${tier}) gets +${pts} on ${g1.gearStat}`);
     const sw = await ok(a.token, 'PUT', `/heroes/${h2.id}/gear-stat`, { stat: 'stratagem' });
     check(sw.gearStat === 'stratagem' && sw.stratagemAdded === pts && sw.powerAdded === 0 && sw.managementAdded === 0, 'gear moved to intelligence');
     check((await call(a.token, 'POST', '/gear/weapon/star')).ok !== 1, 'star needs a medal');
-    await ok(gm.token, 'POST', '/admin/items', { playerName, items: { 'hero.loyalty.1': 1 } });
-    check((await ok(a.token, 'POST', '/gear/weapon/star')).stars.weapon === 1, 'weapon star 1 for a Cross Medal');
+    const { itemId, count: medals } = gearStarCost(1);
+    await ok(gm.token, 'POST', '/admin/items', { playerName, items: { [itemId]: medals } });
+    check((await ok(a.token, 'POST', '/gear/weapon/star')).stars.weapon === 1, `weapon star 1 for ${medals} medals`);
     const g2 = (await ok(a.token, 'GET', `/cities/${cid}`)).heros.find((x) => x.id === h2.id);
-    check(g2.stratagemAdded === pts + (tier >= 1 ? 3 : 0), 'star adds +3 to every hero with gear');
+    const starPts = tier >= 1 ? gearStarPoints(1) : 0;
+    check(g2.stratagemAdded === pts + starPts, `star adds +${starPts} to a hero of tier ${tier}`);
   }
 
   // ---- troops ----

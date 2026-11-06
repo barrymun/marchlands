@@ -53,6 +53,8 @@ export const ARMY_MESSAGES = {
   // why a march turned back (shown in a "Mission aborted" report)
   unknownMission: [],
   destinationNotFriendly: [],
+  /** refused when sent, and an army already on its way turns back */
+  destinationAbandoning: [],
   valleyNoLongerHeld: [],
   landNotFree: [],
   cityGone: [],

@@ -16,6 +16,7 @@ import {
   ResourceKey,
   setGameSpeed,
   TechType,
+  WorldStateKey,
 } from '@marchlands/core';
 import {
   allianceEvents,
@@ -85,9 +86,9 @@ describe(zonesJob.name, () => {
   it("stores every state's castle and open-flat counts for the map", () =>
     inTestTx(async (db) => {
       await arrange(db, (g) => createTestPlayer(g));
-      await db.delete(worldState).where(eq(worldState.key, 'zones'));
+      await db.delete(worldState).where(eq(worldState.key, WorldStateKey.ZONES));
       await zonesJob(db);
-      const [row] = await db.select().from(worldState).where(eq(worldState.key, 'zones'));
+      const [row] = await db.select().from(worldState).where(eq(worldState.key, WorldStateKey.ZONES));
       const zones = row!.value as ZoneStats[];
       expect(zones).toHaveLength(BALANCE.stateGrid ** 2);
       const { castles } = (await db.execute<{ castles: number }>(sql`select count(*)::int as castles from ${tiles} where city_id is not null`)).rows[0]!;
