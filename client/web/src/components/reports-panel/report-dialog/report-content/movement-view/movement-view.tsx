@@ -15,8 +15,8 @@ export function MovementView({ movement: m }: { movement: Extract<ReportBody, { 
       <Line label={t('labels.troops')}>
         <TroopList troops={m.troops} />
       </Line>
-      {'resources' in m && (
-        <Line label={'heroReturned' in m ? t('labels.resources') : t('labels.broughtHome')}>
+      {m.resources && (
+        <Line label={'from' in m ? t('labels.delivered') : 'heroReturned' in m ? t('labels.resources') : t('labels.broughtHome')}>
           <ResourceList res={m.resources} empty={t('common:nothing')} />
         </Line>
       )}

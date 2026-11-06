@@ -1,14 +1,36 @@
 import { describe, expect, it } from 'vitest';
 
 import type { CityBean } from '@marchlands/api-client';
-import { HeroStatus, Mission } from '@marchlands/core';
+import { BattleTarget, HeroStatus, Mission } from '@marchlands/core';
 
 import { NO_HERO } from '@/components/send-army-dialog/send-form/constants';
-import { bestIdleHero, capTroops, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
+import { bestIdleHero, capTroops, carriesResources, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
 
 type Hero = CityBean['heros'][number];
 
 const hero = (id: number, power: number, status: HeroStatus = HeroStatus.IDLE) => ({ id, status, power, powerAdded: 0, powerBuffAdded: 0 }) as Hero;
+
+describe(carriesResources.name, () => {
+  it('lets a transport and settlers carry goods, wherever they go', () => {
+    for (const kind of [BattleTarget.CITY, undefined]) {
+      expect(carriesResources(Mission.TRANSPORT, kind)).toBe(true);
+      expect(carriesResources(Mission.BUILD_CITY, kind)).toBe(true);
+    }
+  });
+
+  it('lets reinforcements carry goods to a city, whether or not the target says what it is', () => {
+    expect(carriesResources(Mission.REINFORCE, BattleTarget.CITY)).toBe(true);
+    expect(carriesResources(Mission.REINFORCE, undefined)).toBe(true);
+  });
+
+  it('keeps goods off a garrison going to a valley', () => {
+    expect(carriesResources(Mission.REINFORCE, BattleTarget.VALLEY)).toBe(false);
+  });
+
+  it('keeps goods off attacks and scouts', () => {
+    for (const mission of [Mission.ATTACK, Mission.SCOUT]) expect(carriesResources(mission, BattleTarget.CITY)).toBe(false);
+  });
+});
 
 describe(bestIdleHero.name, () => {
   it('is the idle hero with the highest Attack, counting added and item points', () => {

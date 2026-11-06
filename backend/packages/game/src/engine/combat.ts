@@ -384,7 +384,8 @@ async function arriveReinforce(ctx: Ctx, a: ArmyRow, sender: PlayerRow) {
     return;
   }
   // allied city: deliver the goods, then camp
-  if (totalResources(a.resources) > 0) {
+  const delivered = totalResources(a.resources) > 0 ? { resources: a.resources } : {};
+  if ('resources' in delivered) {
     gainResources(t.b.city, a.resources);
     await saveCity(ctx, t.b.city);
     pushResources(ctx, t.b);
@@ -397,7 +398,7 @@ async function arriveReinforce(ctx: Ctx, a: ArmyRow, sender: PlayerRow) {
     armyType: a.mission,
     startPos: a.startPosName,
     targetPos: a.targetPosName,
-    body: { kind: ReportBodyKind.MOVEMENT, movement: { from: sender.name, hero: heroSummary(hero), troops: a.troops } },
+    body: { kind: ReportBodyKind.MOVEMENT, movement: { from: sender.name, hero: heroSummary(hero), troops: a.troops, ...delivered } },
   });
   return station(ctx, a);
 }

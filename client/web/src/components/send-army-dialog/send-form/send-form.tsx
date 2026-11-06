@@ -41,7 +41,7 @@ import { Destination } from '@/components/send-army-dialog/send-form/destination
 import { TileSummary } from '@/components/send-army-dialog/send-form/destination/tile-summary/tile-summary';
 import { LandAt } from '@/components/send-army-dialog/send-form/land-at/land-at';
 import { ScoutNote } from '@/components/send-army-dialog/send-form/scout-note/scout-note';
-import { capTroops, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
+import { capTroops, carriesResources, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
 import type { PlanSlot, SendTarget } from '@/components/send-army-dialog/types';
 import { tileTarget } from '@/components/send-army-dialog/utils';
 import { TroopBadge } from '@/components/troop-badge/troop-badge';
@@ -145,6 +145,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
     setResources({ ...resources, [r]: String(Math.max(0, Math.min(inCity(r), capacity - others))) });
   };
 
+  const carries = carriesResources(Number(mission), dest.kind);
   const send = useCommand(
     async () => {
       const { data } = await postCitiesArmies({
@@ -153,7 +154,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
           targetTileId: toTile,
           mission: Number(mission),
           troops: troopBody,
-          resources: Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY ? resourceBody : undefined,
+          resources: carries ? resourceBody : undefined,
           heroId: heroId === NO_HERO ? null : Number(heroId),
           arriveAt: arriveAt ?? undefined,
         },
@@ -164,7 +165,6 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
     () => [getArmiesQueryKey(), getCitiesByCityIdQueryKey({ path: { cityId: city.id } })],
     t('form.dispatched'),
   );
-  const carriesResources = Number(mission) === Mission.TRANSPORT || Number(mission) === Mission.BUILD_CITY;
   // a plan's wave: when it must leave to land in its place, which its march may already have passed
   const serverNow = useServerNow();
   const leaves = slot && marchMs != null ? slot.landAt + slot.position - marchMs : null;
@@ -358,7 +358,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
             </p>
           )}
         </div>
-        {carriesResources && (
+        {carries && (
           <div className="grid gap-2">
             <div className="flex items-baseline justify-between gap-2">
               <Label>{t('form.resources')}</Label>
@@ -436,7 +436,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
               !toReady ||
               over ||
               !troopsValid ||
-              (carriesResources && overloaded) ||
+              (carries && overloaded) ||
               (landAt != null && arriveAt == null) ||
               send.isPending
             }

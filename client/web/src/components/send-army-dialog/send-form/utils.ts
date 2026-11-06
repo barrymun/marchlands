@@ -1,6 +1,13 @@
 import type { CityBean } from '@marchlands/api-client';
-import { heroPower, HeroStatus, Mission, type TroopKey } from '@marchlands/core';
+import { BattleTarget, heroPower, HeroStatus, Mission, type TroopKey } from '@marchlands/core';
 import { NO_HERO } from '@/components/send-army-dialog/send-form/constants';
+
+/**
+ * Whether goods can go with a mission: a transport, settlers, or reinforcements to a city, which move them in or deliver
+ * them. A garrison on a valley would only sit on them until it's called home.
+ */
+export const carriesResources = (mission: number, kind: BattleTarget | undefined) =>
+  mission === Mission.TRANSPORT || mission === Mission.BUILD_CITY || (mission === Mission.REINFORCE && kind !== BattleTarget.VALLEY);
 
 /** The strongest idle hero (by Attack) to lead the army, leaving out `exclude` (e.g. one just sent): its id, or 'none'. */
 export function bestIdleHero(heros: CityBean['heros'], exclude?: number): string {

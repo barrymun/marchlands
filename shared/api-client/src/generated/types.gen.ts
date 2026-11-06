@@ -2378,6 +2378,24 @@ export type ReportDetailInput = {
     } | {
         kind: 'movement';
         movement: {
+            from: string;
+            hero: {
+                id: number;
+                name: string;
+                level: number;
+                logoUrl: string;
+            } | null;
+            troops: {
+                [key: string]: number;
+            };
+            resources?: {
+                gold: number;
+                food: number;
+                wood: number;
+                stone: number;
+                iron: number;
+            };
+        } | {
             hero: {
                 id: number;
                 name: string;
@@ -2411,17 +2429,6 @@ export type ReportDetailInput = {
                 wood: number;
                 stone: number;
                 iron: number;
-            };
-        } | {
-            from: string;
-            hero: {
-                id: number;
-                name: string;
-                level: number;
-                logoUrl: string;
-            } | null;
-            troops: {
-                [key: string]: number;
             };
         };
     } | {
@@ -5986,6 +5993,24 @@ export type ReportDetail = {
     } | {
         kind: 'movement';
         movement: {
+            from: string;
+            hero: {
+                id: number;
+                name: string;
+                level: number;
+                logoUrl: string;
+            } | null;
+            troops: {
+                [key: string]: number;
+            };
+            resources?: {
+                gold: number;
+                food: number;
+                wood: number;
+                stone: number;
+                iron: number;
+            };
+        } | {
             hero: {
                 id: number;
                 name: string;
@@ -6019,17 +6044,6 @@ export type ReportDetail = {
                 wood: number;
                 stone: number;
                 iron: number;
-            };
-        } | {
-            from: string;
-            hero: {
-                id: number;
-                name: string;
-                level: number;
-                logoUrl: string;
-            } | null;
-            troops: {
-                [key: string]: number;
             };
         };
     } | {

@@ -8500,6 +8500,104 @@
                       {
                         "type": "object",
                         "properties": {
+                          "from": {
+                            "type": "string"
+                          },
+                          "hero": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "level": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "logoUrl": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "level",
+                                  "logoUrl"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "troops": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string",
+                              "enum": [
+                                "peasants",
+                                "militia",
+                                "scouter",
+                                "pikemen",
+                                "swordsmen",
+                                "archer",
+                                "carriage",
+                                "lightCavalry",
+                                "heavyCavalry",
+                                "ballista",
+                                "batteringRam",
+                                "catapult"
+                              ]
+                            },
+                            "additionalProperties": {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          },
+                          "resources": {
+                            "type": "object",
+                            "properties": {
+                              "gold": {
+                                "type": "number"
+                              },
+                              "food": {
+                                "type": "number"
+                              },
+                              "wood": {
+                                "type": "number"
+                              },
+                              "stone": {
+                                "type": "number"
+                              },
+                              "iron": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "gold",
+                              "food",
+                              "wood",
+                              "stone",
+                              "iron"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "from",
+                          "hero",
+                          "troops"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
                           "hero": {
                             "anyOf": [
                               {
@@ -8689,77 +8787,6 @@
                           "hero",
                           "troops",
                           "resources"
-                        ]
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "from": {
-                            "type": "string"
-                          },
-                          "hero": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "integer",
-                                    "minimum": -9007199254740991,
-                                    "maximum": 9007199254740991
-                                  },
-                                  "name": {
-                                    "type": "string"
-                                  },
-                                  "level": {
-                                    "type": "integer",
-                                    "minimum": -9007199254740991,
-                                    "maximum": 9007199254740991
-                                  },
-                                  "logoUrl": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "name",
-                                  "level",
-                                  "logoUrl"
-                                ]
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "troops": {
-                            "type": "object",
-                            "propertyNames": {
-                              "type": "string",
-                              "enum": [
-                                "peasants",
-                                "militia",
-                                "scouter",
-                                "pikemen",
-                                "swordsmen",
-                                "archer",
-                                "carriage",
-                                "lightCavalry",
-                                "heavyCavalry",
-                                "ballista",
-                                "batteringRam",
-                                "catapult"
-                              ]
-                            },
-                            "additionalProperties": {
-                              "type": "number",
-                              "minimum": 0
-                            }
-                          }
-                        },
-                        "required": [
-                          "from",
-                          "hero",
-                          "troops"
                         ]
                       }
                     ]
@@ -21070,6 +21097,107 @@
                       {
                         "type": "object",
                         "properties": {
+                          "from": {
+                            "type": "string"
+                          },
+                          "hero": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "level": {
+                                    "type": "integer",
+                                    "minimum": -9007199254740991,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "logoUrl": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "level",
+                                  "logoUrl"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "troops": {
+                            "type": "object",
+                            "propertyNames": {
+                              "type": "string",
+                              "enum": [
+                                "peasants",
+                                "militia",
+                                "scouter",
+                                "pikemen",
+                                "swordsmen",
+                                "archer",
+                                "carriage",
+                                "lightCavalry",
+                                "heavyCavalry",
+                                "ballista",
+                                "batteringRam",
+                                "catapult"
+                              ]
+                            },
+                            "additionalProperties": {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          },
+                          "resources": {
+                            "type": "object",
+                            "properties": {
+                              "gold": {
+                                "type": "number"
+                              },
+                              "food": {
+                                "type": "number"
+                              },
+                              "wood": {
+                                "type": "number"
+                              },
+                              "stone": {
+                                "type": "number"
+                              },
+                              "iron": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "gold",
+                              "food",
+                              "wood",
+                              "stone",
+                              "iron"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "from",
+                          "hero",
+                          "troops"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
                           "hero": {
                             "anyOf": [
                               {
@@ -21264,79 +21392,6 @@
                           "hero",
                           "troops",
                           "resources"
-                        ],
-                        "additionalProperties": false
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "from": {
-                            "type": "string"
-                          },
-                          "hero": {
-                            "anyOf": [
-                              {
-                                "type": "object",
-                                "properties": {
-                                  "id": {
-                                    "type": "integer",
-                                    "minimum": -9007199254740991,
-                                    "maximum": 9007199254740991
-                                  },
-                                  "name": {
-                                    "type": "string"
-                                  },
-                                  "level": {
-                                    "type": "integer",
-                                    "minimum": -9007199254740991,
-                                    "maximum": 9007199254740991
-                                  },
-                                  "logoUrl": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id",
-                                  "name",
-                                  "level",
-                                  "logoUrl"
-                                ],
-                                "additionalProperties": false
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "troops": {
-                            "type": "object",
-                            "propertyNames": {
-                              "type": "string",
-                              "enum": [
-                                "peasants",
-                                "militia",
-                                "scouter",
-                                "pikemen",
-                                "swordsmen",
-                                "archer",
-                                "carriage",
-                                "lightCavalry",
-                                "heavyCavalry",
-                                "ballista",
-                                "batteringRam",
-                                "catapult"
-                              ]
-                            },
-                            "additionalProperties": {
-                              "type": "number",
-                              "minimum": 0
-                            }
-                          }
-                        },
-                        "required": [
-                          "from",
-                          "hero",
-                          "troops"
                         ],
                         "additionalProperties": false
                       }

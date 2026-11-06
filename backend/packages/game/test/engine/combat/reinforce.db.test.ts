@@ -124,9 +124,25 @@ describe(`${processArmy.name}: reinforce`, () => {
       expect(report).toMatchObject({
         title: msg('report.title.reinforcementsFrom', { name: p.name }),
         typeId: ReportType.OTHER,
-        body: { kind: ReportBodyKind.MOVEMENT, movement: { from: p.name, hero: await heroSummaryOf(g, heroId), troops: { lightCavalry: 300 } } },
+        body: {
+          kind: ReportBodyKind.MOVEMENT,
+          movement: { from: p.name, hero: await heroSummaryOf(g, heroId), troops: { lightCavalry: 300 }, resources: { ...NO_RESOURCES, stone: 4000 } },
+        },
       });
       expect(await reportTitles(g, p.id)).toEqual([]);
+    }));
+
+  it('leaves goods out of the host’s report when it brought none', () =>
+    game(async (g) => {
+      const { p, heroId } = await warrior(g);
+      const { p: q } = await warrior(g);
+      await allies(g, p, q);
+      await interior.setCityFlags(g, q.id, q.cityId, { allowAlliance: true });
+      const bean = await send(g, p, { targetTileId: await cityTile(g, q.cityId), mission: Mission.REINFORCE, troops: { lightCavalry: 300 }, heroId });
+      await arrive(g, bean.armyId);
+      const report = await lastReport(g, q.id, 'report.title.reinforcementsFrom');
+      expect(report.body).toMatchObject({ movement: { from: p.name } });
+      expect(report.body).not.toHaveProperty('movement.resources');
     }));
 
   it('turns back when the city is no longer friendly', () =>

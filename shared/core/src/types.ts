@@ -374,12 +374,12 @@ export const ScoutReportSchema = z.union([
 export type ScoutReport = z.infer<typeof ScoutReportSchema>;
 
 export const MovementReportSchema = z.union([
+  /** an ally's reinforcements arrived, with any goods they delivered (first: the others would match it too, and drop `from`) */
+  z.object({ from: z.string(), hero: ReportHeroSchema.nullable(), troops: TroopCountsSchema, resources: ResourceSetSchema.optional() }),
   /** reinforcements reached one of the player's own cities (heroReturned: no free hero slot) */
   z.object({ hero: ReportHeroSchema.nullable(), troops: TroopCountsSchema, resources: ResourceSetSchema, heroReturned: z.boolean() }),
   /** an army returned home */
   z.object({ hero: ReportHeroSchema.nullable(), troops: TroopCountsSchema, resources: ResourceSetSchema }),
-  /** an ally's reinforcements arrived */
-  z.object({ from: z.string(), hero: ReportHeroSchema.nullable(), troops: TroopCountsSchema }),
 ]);
 export type MovementReport = z.infer<typeof MovementReportSchema>;
 
