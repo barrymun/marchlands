@@ -41,7 +41,7 @@ import { Destination } from '@/components/send-army-dialog/send-form/destination
 import { TileSummary } from '@/components/send-army-dialog/send-form/destination/tile-summary/tile-summary';
 import { LandAt } from '@/components/send-army-dialog/send-form/land-at/land-at';
 import { ScoutNote } from '@/components/send-army-dialog/send-form/scout-note/scout-note';
-import { capTroops, carriesResources, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
+import { capResourcesLeft, capTroops, carriesResources, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
 import type { PlanSlot, SendTarget } from '@/components/send-army-dialog/types';
 import { tileTarget } from '@/components/send-army-dialog/utils';
 import { TroopBadge } from '@/components/troop-badge/troop-badge';
@@ -181,11 +181,14 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
     t('form.added'),
   );
   // after a wave goes (sent, or added to the plan) the dialog stays open for the next: the hero just used is busy (an
-  // attack picks the next strongest), and the resources it carried are gone; troop amounts are capped to what is left
+  // attack picks the next strongest); troop amounts are capped to what is left, and resource amounts when it took some
   const nextWave = () => {
     setHeroId(defaultHero(Number(mission), heroes, heroId === NO_HERO ? undefined : Number(heroId)));
     setHeroPicked(false);
-    setResources({});
+  };
+  const nextArmy = () => {
+    nextWave();
+    if (carries) setResources(capResourcesLeft(resources, inCity));
   };
 
   return (
@@ -440,7 +443,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
               (landAt != null && arriveAt == null) ||
               send.isPending
             }
-            onClick={() => send.mutate(undefined, { onSuccess: nextWave })}
+            onClick={() => send.mutate(undefined, { onSuccess: nextArmy })}
           >
             {t('common:actions.send')}
           </Button>

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import type { CityBean } from '@marchlands/api-client';
-import { BattleTarget, HeroStatus, Mission } from '@marchlands/core';
+import { BattleTarget, HeroStatus, Mission, ResourceKey } from '@marchlands/core';
 
 import { NO_HERO } from '@/components/send-army-dialog/send-form/constants';
-import { bestIdleHero, capTroops, carriesResources, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
+import { bestIdleHero, capResourcesLeft, capTroops, carriesResources, defaultHero, freeTroops } from '@/components/send-army-dialog/send-form/utils';
 
 type Hero = CityBean['heros'][number];
 
@@ -76,6 +76,35 @@ describe(capTroops.name, () => {
 
   it('keeps an empty field empty', () => {
     expect(capTroops({ archer: '', militia: undefined }, { archer: 10 })).toEqual({ archer: '', militia: undefined });
+  });
+});
+
+describe(capResourcesLeft.name, () => {
+  const had = (amount: number) => () => amount;
+
+  it('keeps an amount the city can send again', () => {
+    expect(capResourcesLeft({ [ResourceKey.GOLD]: '100' }, had(1_000))).toEqual({ [ResourceKey.GOLD]: '100' });
+  });
+
+  it('caps an amount to what is left after sending it', () => {
+    expect(capResourcesLeft({ [ResourceKey.STONE]: '7000' }, had(10_000))).toEqual({ [ResourceKey.STONE]: '3000' });
+  });
+
+  it('comes down to 0 when all of it was sent, and never below', () => {
+    expect(capResourcesLeft({ [ResourceKey.FOOD]: '500' }, had(500))).toEqual({ [ResourceKey.FOOD]: '0' });
+    expect(capResourcesLeft({ [ResourceKey.FOOD]: '500' }, had(400))).toEqual({ [ResourceKey.FOOD]: '0' });
+  });
+
+  it('goes by each resource’s own amount', () => {
+    const inCity = (r: ResourceKey) => (r === ResourceKey.GOLD ? 1_000 : 10);
+    expect(capResourcesLeft({ [ResourceKey.GOLD]: '100', [ResourceKey.IRON]: '6' }, inCity)).toEqual({ [ResourceKey.GOLD]: '100', [ResourceKey.IRON]: '4' });
+  });
+
+  it('keeps an empty field empty', () => {
+    expect(capResourcesLeft({ [ResourceKey.GOLD]: '', [ResourceKey.WOOD]: undefined }, had(10))).toEqual({
+      [ResourceKey.GOLD]: '',
+      [ResourceKey.WOOD]: undefined,
+    });
   });
 });
 

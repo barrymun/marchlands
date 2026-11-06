@@ -1,5 +1,5 @@
 import type { CityBean } from '@marchlands/api-client';
-import { BattleTarget, heroPower, HeroStatus, Mission, type TroopKey } from '@marchlands/core';
+import { BattleTarget, heroPower, HeroStatus, Mission, type ResourceKey, type TroopKey } from '@marchlands/core';
 import { NO_HERO } from '@/components/send-army-dialog/send-form/constants';
 
 /**
@@ -24,6 +24,13 @@ export const defaultHero = (mission: number, heros: CityBean['heros'], exclude?:
 /** Troop amounts as entered, each capped to what the city has (an empty field stays empty). */
 export function capTroops(troops: Partial<Record<TroopKey, string>>, inCity: Partial<Record<TroopKey, number>>): Partial<Record<TroopKey, string>> {
   return Object.fromEntries(Object.entries(troops).map(([k, v]) => [k, v ? String(Math.min(Number(v), inCity[k as TroopKey] ?? 0)) : v]));
+}
+
+/** Resource amounts as entered, after they've been sent: kept for the next army, each capped to what the city has left (an empty field stays empty). */
+export function capResourcesLeft(sent: Partial<Record<ResourceKey, string>>, had: (r: ResourceKey) => number): Partial<Record<ResourceKey, string>> {
+  return Object.fromEntries(
+    (Object.entries(sent) as [ResourceKey, string | undefined][]).map(([r, v]) => [r, v ? String(Math.max(0, Math.min(Number(v), had(r) - Number(v)))) : v]),
+  );
 }
 
 /** Troops at home less those already set out in waves not yet sent (none below zero). */
