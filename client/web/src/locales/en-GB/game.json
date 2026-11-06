@@ -29,7 +29,7 @@
   "yourCities": "Your cities",
   "sendTo": "Send army to {{city}}",
   "citySettings": "City settings",
-  "playerStats": "Prestige {{prestige}} · Rank {{rank}} · Honour {{honor}}",
+  "playerStats": "Prestige <prestige>{{prestige}}</prestige> · Rank {{rank}} · Honour <honor>{{honor}}</honor>",
   "beginnerProtection": "Beginner protection",
   "titledName": "{{title}} {{name}}",
   "liveUpdates": {

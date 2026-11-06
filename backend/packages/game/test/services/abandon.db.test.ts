@@ -12,6 +12,9 @@ import {
   DAY,
   dur,
   FlowActionType,
+  FlowCities,
+  FlowStatus,
+  FlowWaitUntil,
   HeroStatus,
   HOUR,
   MarketSide,
@@ -22,7 +25,7 @@ import {
   TileType,
   TimedEventType,
 } from '@marchlands/core';
-import { armies as armyRows, cities, heroes as heroRows, timedEvents, warPlanWaves } from '@marchlands/db';
+import { armies as armyRows, cities, flows as flowRows, heroes as heroRows, timedEvents, warPlanWaves } from '@marchlands/db';
 
 import { completeAbandon } from '#/engine/abandon.ts';
 import { armiesNowAimAtCity } from '#/engine/armies.ts';
@@ -325,6 +328,55 @@ describe(completeAbandon.name, () => {
       expect(saved.actions).toEqual([expect.objectContaining({ targets: { [other]: [6] } })]);
       expect(g.pushes(PushCmd.FLOW_UPDATE).at(-1)?.data).toMatchObject({ flowId: f.id });
       await flows.saveFlow(g, p.id, { id: f.id, name: 'Farm', actions: saved.actions });
+    }));
+
+  it('takes it off the flows that chose it, leaving the rest and the last run’s report', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      await withHero(g, p, other);
+      const chosen = await newFlow(g, p, { name: 'Mayors', actions: [mayor], cities: [p.cityId, other] });
+      const everywhere = await newFlow(g, p, { name: 'Everywhere', actions: [mayor] });
+      await runFlowIn(g, p, chosen.id);
+      await abandonNow(g, p);
+      const saved = await flowOf(g, p, chosen.id);
+      expect(saved.cities).toEqual([other]);
+      expect(saved.lastRun?.cities.map((c) => c.cityId)).toEqual([p.cityId, other]);
+      expect((await flowOf(g, p, everywhere.id)).cities).toBe(FlowCities.ALL);
+      expect(g.pushes(PushCmd.FLOW_UPDATE).at(-1)?.data).toMatchObject({ flowId: chosen.id });
+    }));
+
+  it('takes it off a run under way, which carries on in the player’s other cities', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      await withHero(g, p, other);
+      const f = await newFlow(g, p, { name: 'Mayors', actions: [mayor, { type: FlowActionType.WAIT, until: FlowWaitUntil.TIME, minutes: 600 }, mayor] });
+      await runFlowIn(g, p, f.id, [p.cityId, other]);
+      await abandonNow(g, p);
+      const [row] = await g.tx.select().from(flowRows).where(eq(flowRows.id, f.id));
+      expect(row).toMatchObject({ status: FlowStatus.WAITING, cityOverride: [other], runCities: [other], armyIds: { [other]: [] } });
+    }));
+
+  it('leaves a flow that chose only that city with none, refusing to run until one is chosen', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      await withHero(g, p, other);
+      const f = await newFlow(g, p, { name: 'Mayors', actions: [mayor], cities: [p.cityId] });
+      await abandonNow(g, p);
+      expect((await flowOf(g, p, f.id)).cities).toEqual([]);
+      await expectRefused(runFlowIn(g, p, f.id), msg('flow.chooseCity'));
+      await flows.saveFlow(g, p.id, { id: f.id, name: 'Mayors', actions: [mayor], cities: [other] });
+      await runFlowIn(g, p, f.id);
+      expect((await flowOf(g, p, f.id)).lastRun?.cities.map((c) => c.cityId)).toEqual([other]);
+    }));
+
+  it('keeps it in the flows that chose it while the hour runs, and when it is called off', () =>
+    game(async (g) => {
+      const { p, other } = await withSecondCity(g);
+      const f = await newFlow(g, p, { name: 'Mayors', actions: [mayor], cities: [p.cityId, other] });
+      await abandon.abandonCity(g, p.id, p.cityId);
+      expect((await flowOf(g, p, f.id)).cities).toEqual([p.cityId, other]);
+      await abandon.cancelAbandon(g, p.id, p.cityId);
+      expect((await flowOf(g, p, f.id)).cities).toEqual([p.cityId, other]);
     }));
 
   it('tells friends sent home, and stops showing attackers bound for its valleys as coming for the player', () =>

@@ -1,9 +1,9 @@
 import { Crown } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Badge } from '@/components/ui/badge';
 import { usePlayer } from '@/hooks/use-game';
-import { fmt } from '@/lib/format';
+import { fmt, fmtExact } from '@/lib/format';
 import { seatTitleName, titleName } from '@/lib/game-data';
 
 /** The player at a glance: title and name, prestige, rank and honour, and beginner protection while it lasts. */
@@ -28,7 +28,12 @@ export function PlayerSummary() {
         )}
       </span>
       <span className="text-xs text-muted-foreground tabular-nums">
-        {t('playerStats', { prestige: fmt(info.prestige), rank: info.ranking || '—', honor: fmt(info.honor) })}
+        <Trans
+          t={t}
+          i18nKey="playerStats"
+          values={{ prestige: fmt(info.prestige), rank: info.ranking || '—', honor: fmt(info.honor) }}
+          components={{ prestige: <span title={fmtExact(info.prestige)} />, honor: <span title={fmtExact(info.honor)} /> }}
+        />
       </span>
     </div>
   );

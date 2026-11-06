@@ -330,6 +330,13 @@
       "when": 1793910744377,
       "tag": "0046_city_capture_prestige",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1793995800000,
+      "tag": "0047_flows_forget_lost_cities",
+      "breakpoints": true
     }
   ]
 }

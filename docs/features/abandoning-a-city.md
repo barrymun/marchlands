@@ -48,7 +48,7 @@
 | Unsent plan waves from it | deleted (`war_plan_waves` cascades) |
 | Market orders and shipments | deleted, the escrow and the goods on the road with them |
 | Valleys | go free, a fresh garrison (`troops` and `state` cleared), any of the player's troops stationed there lost with the armies |
-| Flows | a flow's chosen cities already skip one the player no longer owns and a run under way leaves it out (`planCities`, `runPart`, `engine/flows.ts`) |
+| Flows | it goes from every flow of the player's when the hour ends: its targets, the cities chosen, a run under way (`dropCityFromFlows`, `engine/flows.ts`). A flow that chose only that city stays, with none, and won't run until one is chosen. The last run's report keeps it. During the hour it stays in them, so calling it off changes nothing, and flows skip it (`planCities`, `runPart`) |
 
 **Not lost with the city:**
 
@@ -61,7 +61,7 @@
 - **No cooldown, but a quick abandon takes back the capture's prestige** (the maintainer, 2026-11-05). Capturing gives 1000 × the city's level in prestige, so capturing, abandoning to free the slot and capturing again would farm it, on a barbarian city after barbarian city and on a historic city over and over. Abandoning a city within 7 real days of capturing it (`BALANCE.abandon.prestigeBackMs`, `abandonPrestigeBack`) takes that back, never below 0; the settings and the confirmation say so, and the report. A cooldown on capturing was rejected: it would stop the very thing this is for, freeing a slot to capture Atlantis. The medals and the stock a capture gives aren't taken back, and each barbarian city captured and abandoned is still gone from the map.
 - **No item or gold to skip the hour.**
 - **Attackers on their way** turn back on arrival (`army.nothingToAttack`); on a seat they carry on against the unheld city.
-- **Prestige (but for the above), honour and title stay.** Population and rankings follow from the next rankings job. Flows act no more in a city being abandoned (`planCities`, `runPart`): a repeating farming list would otherwise lose armies with no warning. A city lost leaves the player's farming lists (`dropCityTargets`). A seat's tribute, state tribute and titles go with the city row. Reports and mail keep the city's name, as for a lost seat. **Beginner protection isn't reset:** starting again is what restarting is for.
+- **Prestige (but for the above), honour and title stay.** Population and rankings follow from the next rankings job. Flows act no more in a city being abandoned (`planCities`, `runPart`): a repeating farming list would otherwise lose armies with no warning. A city lost leaves the player's flows (`dropCityFromFlows`), a seat a rival takes too (`loseCityContents`). A seat's tribute, state tribute and titles go with the city row. Reports and mail keep the city's name, as for a lost seat. **Beginner protection isn't reset:** starting again is what restarting is for.
 - **Capture of a seat being abandoned** (`takeSeat`) cancels it: it's the winner's now, and nothing of it is deleted beyond what capture does. A restart deletes the city and its timed events, leaving nothing to do.
 
 ### The warning
@@ -125,7 +125,7 @@ Five went on 2026-11-05 with what caused them:
 
 ## What a review found, 2026-11-05
 
-An independent read of the code, all fixed then: the capture farm above; flows that couldn't be saved naming a city lost (`dropCityTargets`, and `saveFlow` forgets a city that's gone); a taken seat's queues stopping when its old holder restarted (their events pass to the winner in `takeSeat`); an attacker landing unseen on a city that appeared on the tile (`armiesNowAimAtCity`); a seat deleted mid-job failing that job; and screens left stale (friends' armies, market, plans, attackers bound for a released valley, a push missed while offline, dialogs carrying what was typed to another city).
+An independent read of the code, all fixed then: the capture farm above; flows that couldn't be saved naming a city lost (`dropCityFromFlows`, then `dropCityTargets`, and `saveFlow` forgets a city that's gone); a taken seat's queues stopping when its old holder restarted (their events pass to the winner in `takeSeat`); an attacker landing unseen on a city that appeared on the tile (`armiesNowAimAtCity`); a seat deleted mid-job failing that job; and screens left stale (friends' armies, market, plans, attackers bound for a released valley, a push missed while offline, dialogs carrying what was typed to another city).
 
 ## To watch
 

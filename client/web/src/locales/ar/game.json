@@ -29,7 +29,7 @@
   "yourCities": "مدنك",
   "sendTo": "إرسال جيش إلى {{city}}",
   "citySettings": "إعدادات المدينة",
-  "playerStats": "الهيبة {{prestige}} · الترتيب {{rank}} · الشرف {{honor}}",
+  "playerStats": "الهيبة <prestige>{{prestige}}</prestige> · الترتيب {{rank}} · الشرف <honor>{{honor}}</honor>",
   "beginnerProtection": "حماية المبتدئين",
   "titledName": "{{title}} {{name}}",
   "liveUpdates": {

@@ -27,6 +27,7 @@ import {
   flowActionMessage,
   FlowActionType,
   FlowCities,
+  type FlowCityChoice,
   type FlowCityResult,
   FlowHealWhen,
   type FlowSkippedCity,
@@ -402,15 +403,34 @@ export async function planCities(
 /** Why a run has no cities. */
 const noCitiesReason = (f: Pick<FlowRow, 'cities' | 'cityOverride'>) => msg(usesAllCities(f) ? 'flow.noHeroCities' : 'flow.noOwnCities');
 
-/** A player lost a city: its list of targets goes from their flows, or saving them would be refused for naming a city not theirs. */
-export async function dropCityTargets(ctx: Ctx, playerId: number, cityId: number) {
+/**
+ * A player lost a city: it goes from their flows, wherever they name it: its list of targets (saving them would be refused
+ * for naming a city not theirs), the cities chosen, for good or for this run, and the run under way. The last run's report
+ * keeps it, as that happened. A flow left with no city stays, and won't run until one is chosen.
+ */
+export async function dropCityFromFlows(ctx: Ctx, playerId: number, cityId: number) {
   const key = String(cityId);
+  const chose = (choice: FlowCityChoice | null) => choice != null && choice !== FlowCities.ALL && choice.includes(cityId);
+  const without = (choice: FlowCityChoice) => (choice === FlowCities.ALL ? choice : choice.filter((id) => id !== cityId));
   for (const f of await ctx.tx.select().from(flowsTable).where(eq(flowsTable.playerId, playerId)).for('update')) {
-    if (!f.actions.some((a) => a.type === FlowActionType.ATTACK_TARGETS && key in a.targets)) continue;
+    const targeted = f.actions.some((a) => a.type === FlowActionType.ATTACK_TARGETS && key in a.targets);
+    if (!targeted && !chose(f.cities) && !chose(f.cityOverride) && !f.runCities.includes(cityId) && !(key in f.armyIds)) continue;
     const actions = f.actions.map((a) =>
       a.type === FlowActionType.ATTACK_TARGETS ? { ...a, targets: Object.fromEntries(Object.entries(a.targets).filter(([city]) => city !== key)) } : a,
     );
-    await ctx.tx.update(flowsTable).set({ actions }).where(eq(flowsTable.id, f.id));
+    const { [key]: _gone, ...armyIds } = f.armyIds;
+    await ctx.tx
+      .update(flowsTable)
+      .set({
+        actions,
+        cities: without(f.cities),
+        cityOverride: f.cityOverride && without(f.cityOverride),
+        runCities: f.runCities.filter((id) => id !== cityId),
+        armyIds,
+        // a preview of other cities no longer shows what the flow would do
+        lastPreview: null,
+      })
+      .where(eq(flowsTable.id, f.id));
     ctx.push(playerId, PushCmd.FLOW_UPDATE, { flowId: f.id, status: f.status });
   }
 }

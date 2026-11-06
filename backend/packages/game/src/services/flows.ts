@@ -108,7 +108,7 @@ export async function saveFlow(
       }
     }
   }
-  // chosen cities must be the lord's own (cities lost later are skipped when the flow runs)
+  // chosen cities must be the lord's own (a city lost later is taken off, dropCityFromFlows)
   let cities: Flow['cities'] = FlowCities.ALL;
   if (Array.isArray(input.cities)) {
     const own = new Set((await citiesOf(ctx, playerId)).map((c) => c.id));

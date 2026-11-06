@@ -9,14 +9,14 @@ import { armies, heroes, marketOrders, marketShipments, tiles, warPlanWaves } fr
 
 import { type Ctx } from '#/context.ts';
 import { armyRef, departRef, homeMarchMs, notifyArmyParties, sendBack } from '#/engine/armies.ts';
-import { dropCityTargets } from '#/engine/flows.ts';
+import { dropCityFromFlows } from '#/engine/flows.ts';
 import { cancelCityResearch } from '#/engine/research.ts';
 import { armiesStationedAt, type CityRow, type PlayerRow, savePlayer } from '#/repo.ts';
 
 /**
  * All a player had in a city they're losing is lost, as nothing is moved to another city: heroes, armies wherever they
  * are, research running there, plan waves, market orders and shipments. Its valleys go free (other cities' troops there
- * head home), troops other cities have stationed in it go home, and it leaves the player's farming lists.
+ * head home), troops other cities have stationed in it go home, and it leaves the player's flows.
  */
 export async function loseCityContents(ctx: Ctx, city: CityRow, loser: PlayerRow) {
   const loserId = loser.id;
@@ -42,7 +42,7 @@ export async function loseCityContents(ctx: Ctx, city: CityRow, loser: PlayerRow
     .where(and(eq(marketShipments.cityId, city.id), eq(marketShipments.playerId, loserId)))
     .returning();
   for (const s of shipments) ctx.unschedule(`shipment:${s.id}`);
-  await dropCityTargets(ctx, loserId, city.id);
+  await dropCityFromFlows(ctx, loserId, city.id);
   const sentHome = new Set<number>();
   for (const v of await ctx.tx.select().from(tiles).where(eq(tiles.ownerCityId, city.id))) {
     for (const s of await armiesStationedAt(ctx, v.id, { lock: true })) {

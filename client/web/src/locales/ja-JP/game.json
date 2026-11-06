@@ -29,7 +29,7 @@
   "yourCities": "自分の都市",
   "sendTo": "{{city}}へ軍を派遣",
   "citySettings": "都市設定",
-  "playerStats": "名声 {{prestige}} · 順位 {{rank}} · 名誉 {{honor}}",
+  "playerStats": "名声 <prestige>{{prestige}}</prestige> · 順位 {{rank}} · 名誉 <honor>{{honor}}</honor>",
   "beginnerProtection": "初心者保護",
   "titledName": "{{title}} {{name}}",
   "liveUpdates": {

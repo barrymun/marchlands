@@ -40,6 +40,7 @@ import { getCity, getHero, getPlayer, getTile, saveCity, saveTile } from '#/repo
 import { arrive, battleOf, reportsOf, ScoutOf, scoutOf, send, tileNear, warrior } from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { addHero, createTestPlayer, reloadCity, setResources, type TestPlayer } from '#test/support/factories.ts';
+import { flowOf, mayor, newFlow } from '#test/support/flows.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 import { Res } from '#test/support/market.ts';
 import { withAcademy } from '#test/support/research.ts';
@@ -323,6 +324,7 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       await ship(g, { playerId: p.id, cityId, orderId: null, resType: Res.STONE, amount: 10, price: 1, ms: 60_000 });
       const plan = await plans.create(g, p.id, { name: 'Plan', targetTileId: target.id, landAt: g.now + DAY, shared: false });
       await plans.addWave(g, p.id, plan.id, { cityId, mission: Mission.ATTACK, troops: { archer: 1 } });
+      const flow = await newFlow(g, p, { name: 'Mayors', actions: [mayor], cities: [p.cityId, cityId] });
       const offers = () =>
         g.tx
           .select({ id: heroRows.id })
@@ -343,6 +345,7 @@ describe(`${processArmy.name}: taking a held historic city`, () => {
       expect(await market.myShipments(g, p.id)).toEqual([]);
       // the plan stays, without the wave: left on a city no longer theirs, the wave would refuse the whole list
       expect(await plans.list(g, p.id)).toMatchObject([{ id: plan.id, waves: [] }]);
+      expect((await flowOf(g, p, flow.id)).cities).toEqual([p.cityId]);
       // the Inn's offers stay with the city, and nothing of their other city goes
       expect(await offers()).toEqual(innOffers);
       expect((await getHero(g, home)).cityId).toBe(p.cityId);
