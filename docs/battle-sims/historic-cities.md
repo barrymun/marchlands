@@ -165,7 +165,7 @@ The Inn-hero runs used a one-off script giving the loyalty stage its own lord (`
 
 - **The engine waves die whole until about the fifth,** each killing a share of the garrison from out of its reach; then one wins. A catapult costs 19,200 resources to train and a ballista 7,300, against an archer's 950, so the siege takes 25 waves fewer for three to four times the resources (catapults) or twice (ballistae). With Medicine 10, half of what an attack loses comes home injured (`attackersGetInjured`), so the losses above are half dead.
 - **Engines go first, catapults before ballistae.** After 32 layered archer waves, 8 catapult waves from the held level 16 and 8 ballista waves from the held level 14 only finish what the archers nearly did (loyalty 0 on wave 63–66, 4.0M–4.3M lost); after 16, on wave 51. First, the catapults break the garrison on wave 4–5 and loyalty is 0 on wave 37–38, the ballistae behind them adding nothing; ballistae first, on wave 6–8 and 39–41. Scouts instead of the archers, with or without decoys, do worse (68–70): they hardly hurt the garrison.
-- **Mixing doesn't help** (the held level 16's waves): decoy layers in the engine waves change nothing, and half ballistae, half archers is worse than either (40–46 waves).
+- **Mixing:** half ballistae, half archers is worse than either (40–46 waves, the held level 16's waves). Foot layers in catapult waves change almost nothing, but a few ballistae, rams and horses change a lot (Layering catapult waves, below).
 - **What it takes in armies:** 38 waves are 4 cities' armies and heroes, against 6 or 7 for archers, and the engines have to be trained first: about 1.1 million catapults for the 6 waves of 187,500 it takes, or 1.5 million ballistae for 8.
 
 ```bash
@@ -175,6 +175,26 @@ npm run sim -- siege --plan one-second-catapults,one-second-layered --level 18 -
 With the simulator's lord and 125,000 a wave, `one-second-catapults` breaks the garrison with 7 catapult waves (9 on a day with cataphracts and rams) and takes 40 to 42 waves in all, losing 0.76M to 1.01M catapults (14.7 to 19.4 billion), against `one-second-layered`'s 64 to 71 waves (3.5 to 4.4 billion).
 
 Whether siege engines should be this good against historic cities is a balance question, not settled here: it follows from the decision to leave their Archery at 0.
+
+### Layering catapult waves
+
+*Simulated 2026-11-06 for Atlantis with the maintainer's own armies: research 10, the horn and the defence item running, the War Ensign, and each wave led by one of its city's heroes (about 1,225 Attack, the first of each city about 1,530 with Excalibur). One day's garrison only: swordsmen, light cavalry and rams. A one-off script fought the waves a millisecond apart as `attackHistoric` does, over 20 to 60 seeds, with 8 waves of 218,750 from a held level 16 and 8 from a held level 14, then archers. Not yet checked against a real siege.*
+
+**A few of the right troops in the first waves more than halve the cost.** Only the waves before the first win decide it, and all of those came from the held level 16. The 15,000-ram mix was carried by its first 3 waves only, the most its rams allowed:
+
+| Each wave carries, besides catapults | Garrison left after waves 1, 2, 3 | First win | Loyalty 0 on wave | Catapults lost | All losses (resources) |
+|---|---|---|---|---|---|
+| nothing | 14.68M, 8.20M, 1.28M | 4 | 37 | 672,704 | 12.9 billion |
+| 1,000 each of workers, warriors, scouts, swordsmen and pikemen | 14.72M, 8.31M, 2.26M | 4 | 37 | 657,704 | 12.6 billion |
+| 1,000 light cavalry, or 1,000 cataphracts, or 1,000 rams | about 14.69M, 8.2M, 1.3M to 2.1M | 4 | 37 | about 670,000 | 12.9 billion |
+| 100 to 4,500 ballistae | about 9.4M, 2.5M, 0 | 3 | 36 | 445,000–454,000 | 8.7 billion |
+| **15,000 rams and 1,000 each of ballistae, light cavalry and cataphracts** | **8.36M, 0** | **2** | **35** | **217,561** | **4.6 billion** |
+
+- **Ballistae work at any number:** 100 lengthen the first wave from 9 rounds to 13, and 4,500 do no better. The likely reason, not traced troop by troop: they stand in front of the catapults, and a group never passes an enemy group (Moving, [mechanics.md](mechanics.md#the-field)), so the garrison stops at them first.
+- **The wave 2 win is sharp in the horses:** with 12,000 to 17,000 rams it needs 1,000 of each horse type; 500, 1,500, 2,000 and 3,000 all fall back to wave 3. Why isn't understood. 8,000 rams with 2,000 of each horse also win on wave 2, but lose about 100,000 more catapults. These runs took 6 seeds a mix, with 100, 1,000 or 3,000 ballistae, which made little difference. A miss costs one more wave of about 200,000 catapults, since the next wave is the same mix.
+- **More isn't better:** 10,000 or 30,000 of either horse type with the rams and ballistae breaks on wave 3 at best, for 340,000 catapults or more.
+- **Later waves need no layers:** once the garrison is gone, plain catapults and archers alone win. Archers alone lose about 13,700 over the loyalty waves, against about 24,000 with five foot layers, to what's left of the fortifications.
+- **How far it holds:** the numbers are for this garrison, and the mix wasn't tried on the other daily garrisons, with 125,000-troop waves or at other levels. The next day's garrison (pikemen, cataphracts and catapults) took 5 breaking waves of plain catapults, with layered archers after them.
 
 **Refill inside one second: none.** The game refills a historic city in whole steps, 10% of the full garrison every `scaled(npcRegenMs)` (6 seconds at game speed 60, `historicState`), counted from its first battle of the day. So a siege landing within a second meets no refill, unless the city was attacked earlier that day and a step falls inside the siege: then 10% of the garrison comes back at once. The simulator spreads the refill evenly instead (`--refill`), about 230 warriors a millisecond at level 18 and game speed 60, which is enough to hide the layers' gain: model a siege in one landing second with `--refill 0`. The runs in One landing second above used `--refill 6`, a small error at level 12.
 
