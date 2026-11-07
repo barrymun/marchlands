@@ -229,7 +229,8 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
             })}
           </div>
           {orders.length > 0 && (
-            <div className="sticky bottom-2 z-10 grid gap-2 rounded-md border bg-card/95 p-3 shadow-md backdrop-blur">
+            // a surface of its own, solid: the cards scrolling under it are the colour of the panel it sits in
+            <div className="sticky bottom-2 z-10 grid gap-2 rounded-md border border-foreground/30 bg-secondary p-3 shadow-lg">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="grid gap-0.5 text-sm">
                   <span className="font-medium">
@@ -242,7 +243,7 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setCounts({})}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setCounts({})}>
                     {t('production.clear')}
                   </Button>
                   <Button type="submit" size="sm" disabled={!!overBudget || trainAll.isPending}>
