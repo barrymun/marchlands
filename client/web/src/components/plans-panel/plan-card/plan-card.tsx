@@ -33,8 +33,9 @@ import { cn } from '@/lib/utils';
 /**
  * One wave plan: its target and landing second, its waves in landing order with when each of the player's own must
  * leave, and what the player may do: add a wave of their own, send their own waves (one, or all still in time), change,
- * reorder and delete (its maker), take a wave out (its player or the maker). Collapsed, it shows only its heading and how
- * many of its waves are sent (remembered per plan).
+ * reorder and delete (its maker), take a wave out (its player or the maker). Collapsed, it shows only its heading, how
+ * many of its waves are sent (remembered per plan), and Edit and Delete, in the heading so a long list of waves never
+ * hides them; Edit opens a collapsed plan for as long as the form is up.
  */
 export function PlanCard({ plan, playerId }: { plan: PlanBean; playerId: number }) {
   const { t } = useTranslation(['plans-panel', 'common']);
@@ -42,9 +43,12 @@ export function PlanCard({ plan, playerId }: { plan: PlanBean; playerId: number 
   const maker = plan.playerId === playerId;
   const [editing, setEditing] = useState(false);
   const [collapsed, setCollapsed] = useState(() => readCollapsed(plan.id));
+  const open = !collapsed || editing;
+  // hiding a plan being edited leaves the form
   const toggle = () => {
-    storeCollapsed(plan.id, !collapsed);
-    setCollapsed(!collapsed);
+    storeCollapsed(plan.id, open);
+    setCollapsed(open);
+    if (open) setEditing(false);
   };
   const refresh = () => [getPlansQueryKey(), getArmiesQueryKey(), getPlayerQueryKey()];
   const send = useCommand(
@@ -69,6 +73,7 @@ export function PlanCard({ plan, playerId }: { plan: PlanBean; playerId: number 
     t('deleted'),
   );
   const ready = sendable(plan, playerId, now);
+  const canAdd = takesWaves(plan, now);
   const busy = send.isPending || move.isPending || drop.isPending;
   return (
     <Card size="sm">
@@ -86,19 +91,38 @@ export function PlanCard({ plan, playerId }: { plan: PlanBean; playerId: number 
           )}
         </CardDescription>
         {!maker && <CardDescription>{t('by', { player: plan.player })}</CardDescription>}
-        {collapsed && (
+        {!open && (
           <CardDescription className="tabular-nums">
             {plan.waves.length === 0 ? t('noWaves') : t('summary', { count: plan.waves.length, sent: plan.waves.filter((w) => w.armyId != null).length })}
           </CardDescription>
         )}
-        <CardAction>
-          <Button variant="ghost" size="xs" className="text-muted-foreground" aria-expanded={!collapsed} onClick={toggle}>
-            {collapsed ? t('show') : t('hide')}
-            {collapsed ? <ChevronDown /> : <ChevronUp />}
+        <CardAction className="flex flex-col items-end gap-1 sm:flex-row sm:items-center">
+          {maker && !editing && (
+            <div className="flex gap-1">
+              <Button size="xs" variant="outline" disabled={busy} onClick={() => setEditing(true)}>
+                {t('edit')}
+              </Button>
+              <ConfirmButton
+                size="xs"
+                variant="outline"
+                title={t('deleteTitle')}
+                description={t('deleteDescription')}
+                confirmLabel={t('delete')}
+                destructive
+                disabled={remove.isPending}
+                onConfirm={() => remove.mutate(undefined)}
+              >
+                {t('delete')}
+              </ConfirmButton>
+            </div>
+          )}
+          <Button variant="ghost" size="xs" className="text-muted-foreground" aria-expanded={open} onClick={toggle}>
+            {open ? t('hide') : t('show')}
+            {open ? <ChevronUp /> : <ChevronDown />}
           </Button>
         </CardAction>
       </CardHeader>
-      {!collapsed && (
+      {open && (
         <CardContent className="grid gap-3 text-sm">
           {editing ? (
             <PlanForm plan={plan} onDone={() => setEditing(false)} />
@@ -175,32 +199,13 @@ export function PlanCard({ plan, playerId }: { plan: PlanBean; playerId: number 
               })}
             </ol>
           )}
-          {!editing && (
+          {!editing && (canAdd || ready.length > 0) && (
             <div className="flex flex-wrap gap-2">
-              {takesWaves(plan, now) && <AddWave plan={plan} playerId={playerId} disabled={busy} />}
+              {canAdd && <AddWave plan={plan} playerId={playerId} disabled={busy} />}
               {ready.length > 0 && (
                 <Button size="sm" disabled={busy} onClick={() => send.mutate(ready.map((w) => w.id))}>
                   {t('sendMine', { count: ready.length })}
                 </Button>
-              )}
-              {maker && (
-                <Button size="sm" variant="outline" disabled={busy} onClick={() => setEditing(true)}>
-                  {t('edit')}
-                </Button>
-              )}
-              {maker && (
-                <ConfirmButton
-                  size="sm"
-                  variant="outline"
-                  title={t('deleteTitle')}
-                  description={t('deleteDescription')}
-                  confirmLabel={t('delete')}
-                  destructive
-                  disabled={remove.isPending}
-                  onConfirm={() => remove.mutate(undefined)}
-                >
-                  {t('delete')}
-                </ConfirmButton>
               )}
             </div>
           )}
