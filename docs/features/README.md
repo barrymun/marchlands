@@ -9,6 +9,7 @@ Design documents for large planned features, kept while they are worked out and 
 
 | Document | Feature | Status |
 |---|---|---|
+| [inactive-holders.md](inactive-holders.md) | With PvP off, a historic city stands again once its holder has been away too long: 14 real days for a capital or Atlantis, 30 for the rest | Proposed, waiting on the maintainer |
 | [abandoning-a-city.md](abandoning-a-city.md) | Giving up a city, above all to free a city slot: an hour's notice that can be cancelled, everything in it lost behind a very clear warning, its valleys released and the tile flat land again | Built |
 | [gear-animations.md](gear-animations.md) | Hero gear icons that move by level (glinting stones, pulsing glows, level 10's twinkling backdrop), five pieces that move by themselves (a cape, wings, a nodding mount, a plume, swinging pendants), and bursts when a star or a level is added | Built |
 | [item-art.md](item-art.md) | Item icons: one pixel-art icon per item, its steps showing as more or finer, shown wherever items are listed | Built |
