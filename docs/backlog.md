@@ -65,4 +65,7 @@ What's left as it is while `FEATURE_PVP` is off (docs/architecture.md, Feature f
 - **Alliance relations:** an alliance can still declare another an enemy (`setRelation`). It changes nothing but the name shown.
 - **Words that assume PvP:** the descriptions of a Warehouse ("Hides resources from plunder") and the Truce Agreement's own text, and the Statistics page's enemies list, which stays empty.
 - **A Truce Agreement a player already holds or wins** stays in their inventory, unusable; the Items panel hides it. An active truce (only if PvP was on earlier) still stops that player attacking anything until it ends, as it always has.
+- **Barbarian cities share their loyalty:** historic cities count it per alliance with PvP off (docs/deviations.md), but a barbarian city keeps one count (`attackNpc`, `engine/combat.ts`), so a rival can still land its last win and keep the city. Left because one falls in about 7 wins and there are 51,217 of them, so losing one costs far less than a historic city's siege. If players complain, the same per-side count would fit.
+- **Rivals can't see each other's sieges:** a report shows only a side's own loyalty, so nobody knows how close a rival is. The garrison they scout shows that someone is fighting there, but not how far they've got. Left as part of the race.
+- **A holder who stops playing** keeps a historic city for good while PvP is off, as nothing can take it from them. Nothing takes an inactive player's cities today. Worth a rule before the capitals and Atlantis are likely to be taken.
 

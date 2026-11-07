@@ -3,6 +3,7 @@
 
 import { BALANCE, scaled } from '#/balance.ts';
 import { TechType, TileType, TroopKey } from '#/constants.ts';
+import { Feature, isFeatureOn } from '#/features.ts';
 import { createGuardHero } from '#/heroes.ts';
 import { pick, seededRng } from '#/rng.ts';
 import { DAY } from '#/time.ts';
@@ -137,6 +138,46 @@ export const mapLevelOf = (type: number, digit: number) => (type === TileType.HI
 /** A historic city's stored state: a barbarian city's, plus the UTC day its garrison is for. */
 export interface HistoricState extends NpcState {
   day: number;
+  /**
+   * With PvP off, the loyalty each side has worn it down to (siegeSide), for the sides whose wins haven't all worn off.
+   * `loyalty` above is the one shared by all, used with PvP on; the two never mix.
+   */
+  sieges?: Record<string, { loyalty: number; loyaltyAt: number }>;
+}
+
+/** Who a siege's progress belongs to: a player's alliance, or the player without one. */
+type SiegeAttacker = { id: number; allianceId: number | null };
+const siegeSide = (p: SiegeAttacker) => (p.allianceId != null ? `alliance:${p.allianceId}` : `player:${p.id}`);
+
+/** A side's loyalty as of `at`, from the point when it starts counting back up (`seatLoyalty`); a side yet to win a battle faces it whole. */
+function sideLoyalty(state: HistoricState, side: string, at: number) {
+  const mine = state.sieges?.[side];
+  return mine ? seatLoyalty(mine.loyalty, mine.loyaltyAt, at) : { loyalty: BALANCE.historic.loyalty, loyaltyAt: at };
+}
+
+/**
+ * The loyalty an attacker has left to wear down on a historic city nobody holds. With PvP on it is one number for all,
+ * and a rival can land the last win. With PvP off a seat, once taken, can never be won back, so (docs/deviations.md) each
+ * alliance, and each player without one, counts its own: nobody captures on the strength of another side's wins.
+ */
+export const historicLoyalty = (state: HistoricState, attacker: SiegeAttacker, at: number) =>
+  isFeatureOn(Feature.PVP) ? state.loyalty : sideLoyalty(state, siegeSide(attacker), at).loyalty;
+
+/** A won attack on a historic city: its state with BALANCE.historic.loyaltyPerWin less loyalty, what was taken and what is left. */
+export function wearHistoricLoyalty(state: HistoricState, attacker: SiegeAttacker, at: number) {
+  const full = BALANCE.historic.loyalty;
+  if (isFeatureOn(Feature.PVP)) {
+    const damage = Math.min(state.loyalty, BALANCE.historic.loyaltyPerWin);
+    return { state: { ...state, loyalty: state.loyalty - damage }, damage, left: state.loyalty - damage };
+  }
+  const side = siegeSide(attacker);
+  const now = sideLoyalty(state, side, at);
+  const damage = Math.min(now.loyalty, BALANCE.historic.loyaltyPerWin);
+  const left = now.loyalty - damage;
+  // sides that have counted all the way back up leave nothing behind, so a much-attacked city's state stays small
+  const others = Object.entries(state.sieges ?? {}).filter(([s, v]) => s !== side && seatLoyalty(v.loyalty, v.loyaltyAt, at).loyalty < full);
+  const mine = { loyalty: left, loyaltyAt: now.loyalty >= full ? at : now.loyaltyAt };
+  return { state: { ...state, sieges: Object.fromEntries([...others, [side, mine]]) as NonNullable<HistoricState['sieges']> }, damage, left };
 }
 
 /**
@@ -156,7 +197,13 @@ export function historicState(
   if (!stored || stored.state.day !== day) {
     const base = freshNpcState(10, at);
     return {
-      state: { ...base.state, loyalty: stored ? stored.state.loyalty : BALANCE.historic.loyalty, heroSeed: stored?.state.heroSeed, day },
+      state: {
+        ...base.state,
+        loyalty: stored ? stored.state.loyalty : BALANCE.historic.loyalty,
+        heroSeed: stored?.state.heroSeed,
+        sieges: stored?.state.sieges,
+        day,
+      },
       troops: full.troops,
       forts: full.forts,
     };

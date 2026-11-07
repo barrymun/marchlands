@@ -235,6 +235,7 @@ export function TileCard({
           </div>
           {missions.includes(Mission.SCOUT) && scouts <= 0 && <p className="text-xs text-muted-foreground">{t('info.noScouts')}</p>}
           {!pvp && heldByAnotherPlayer(tile) && <p className="text-xs text-muted-foreground">{t('info.pvpOff')}</p>}
+          {!pvp && tile.type === TileType.HISTORIC && <p className="text-xs text-muted-foreground">{t('info.seatRace')}</p>}
         </>
       )}
     </section>

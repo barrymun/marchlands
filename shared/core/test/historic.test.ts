@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { TroopKey } from '#/constants.ts';
 import {
   assertCanUpgrade,
@@ -12,6 +12,7 @@ import {
   draftedToday,
   draftsUsed,
   draftTake,
+  Feature,
   fieldFactorAt,
   fullDemolishRefund,
   GameError,
@@ -23,6 +24,7 @@ import {
   historicGarrison,
   historicGuard,
   historicLevelAt,
+  historicLoyalty,
   historicNameAt,
   historicRallyBonus,
   historicResearch,
@@ -36,9 +38,11 @@ import {
   nextAutoDraftAt,
   seatLoyalty,
   seatTitle,
+  setFeatureFlags,
   stateTribute,
   TechType,
   TileType,
+  wearHistoricLoyalty,
 } from '#/index.ts';
 
 describe(historicNameAt.name, () => {
@@ -204,6 +208,107 @@ describe(historicState.name, () => {
     const low = { state: { ...fresh.state, loyalty: 98 }, troops: fresh.troops, forts: fresh.forts };
     expect(historicState(14, 99, low, at + 6 * 60_000).state.loyalty).toBe(99);
     expect(historicState(14, 99, low, at + 60 * 60_000).state.loyalty).toBe(BALANCE.historic.loyalty);
+  });
+});
+
+describe('a siege’s loyalty', () => {
+  const at = 20_000 * 86_400_000;
+  const SIX_MINUTES = 6 * 60_000;
+  const full = BALANCE.historic.loyalty;
+  const perWin = BALANCE.historic.loyaltyPerWin;
+  const fresh = () => historicState(12, 4567, null, at).state;
+  const asha = { id: 1, allianceId: null };
+  const ben = { id: 2, allianceId: null };
+  const member = { id: 3, allianceId: 9 };
+  const comrade = { id: 4, allianceId: 9 };
+
+  afterEach(() => setFeatureFlags({ [Feature.PVP]: false }));
+
+  describe(historicLoyalty.name, () => {
+    it('with PvP off, starts whole for a side that has won nothing, whatever others have done', () => {
+      const state = wearHistoricLoyalty(fresh(), asha, at).state;
+      expect(historicLoyalty(state, ben, at)).toBe(full);
+      expect(historicLoyalty(state, member, at)).toBe(full);
+    });
+
+    it('with PvP off, is shared within an alliance and not by a player who has left it', () => {
+      const state = wearHistoricLoyalty(fresh(), member, at).state;
+      expect(historicLoyalty(state, comrade, at)).toBe(full - perWin);
+      expect(historicLoyalty(state, { ...comrade, allianceId: null }, at)).toBe(full);
+    });
+
+    it('comes back a point every 6 real minutes, up to its full', () => {
+      const state = wearHistoricLoyalty(fresh(), asha, at).state;
+      expect(historicLoyalty(state, asha, at + SIX_MINUTES - 1)).toBe(full - perWin);
+      expect(historicLoyalty(state, asha, at + SIX_MINUTES)).toBe(full - perWin + 1);
+      expect(historicLoyalty(state, asha, at + 100 * SIX_MINUTES)).toBe(full);
+    });
+
+    it('with PvP on, is the one loyalty everybody shares', () => {
+      setFeatureFlags({ [Feature.PVP]: true });
+      const state = { ...fresh(), loyalty: 40 };
+      expect(historicLoyalty(state, asha, at)).toBe(40);
+      expect(historicLoyalty(state, member, at)).toBe(40);
+    });
+
+    it('survives the garrison changing at the start of a new day, and refilling within one', () => {
+      const state = wearHistoricLoyalty(fresh(), asha, at).state;
+      const garrison = historicState(12, 4567, null, at);
+      const stored = { state, troops: garrison.troops, forts: garrison.forts };
+      expect(historicLoyalty(historicState(12, 4567, stored, at + 1000).state, asha, at + 1000)).toBe(full - perWin);
+      // past a regeneration step, where the state is rebuilt
+      const later = at + SIX_MINUTES;
+      expect(historicLoyalty(historicState(12, 4567, stored, later).state, asha, later)).toBe(full - perWin + 1);
+      const tomorrow = at + 86_400_000;
+      expect(historicState(12, 4567, stored, tomorrow).state.sieges).toEqual(state.sieges);
+    });
+  });
+
+  describe(wearHistoricLoyalty.name, () => {
+    it('with PvP off, takes a win’s share off the side’s own count and leaves the shared one alone', () => {
+      const worn = wearHistoricLoyalty(fresh(), asha, at);
+      expect(worn).toMatchObject({ damage: perWin, left: full - perWin });
+      expect(worn.state.loyalty).toBe(full);
+    });
+
+    it('counts two sides apart, and an alliance’s members together', () => {
+      const one = wearHistoricLoyalty(fresh(), member, at);
+      const two = wearHistoricLoyalty(one.state, asha, at);
+      const three = wearHistoricLoyalty(two.state, comrade, at);
+      expect(two.left).toBe(full - perWin);
+      expect(three.left).toBe(full - 2 * perWin);
+    });
+
+    it('takes no more than is left, and stops at 0', () => {
+      const state = { ...fresh(), sieges: { 'player:1': { loyalty: 2, loyaltyAt: at } } };
+      expect(wearHistoricLoyalty(state, asha, at)).toMatchObject({ damage: 2, left: 0 });
+      const none = { ...fresh(), sieges: { 'player:1': { loyalty: 0, loyaltyAt: at } } };
+      expect(wearHistoricLoyalty(none, asha, at)).toMatchObject({ damage: 0, left: 0 });
+    });
+
+    it('counts what has come back before taking a win’s share, and starts a whole side’s clock at the win', () => {
+      const worn = wearHistoricLoyalty(fresh(), asha, at);
+      expect(worn.state.sieges?.['player:1']).toEqual({ loyalty: full - perWin, loyaltyAt: at });
+      const later = wearHistoricLoyalty(worn.state, asha, at + 2 * SIX_MINUTES);
+      expect(later.left).toBe(full - 2 * perWin + 2);
+      expect(later.state.sieges?.['player:1']?.loyaltyAt).toBe(at + 2 * SIX_MINUTES);
+    });
+
+    it('drops sides that have counted all the way back up, keeping those still worn down', () => {
+      const asha2 = wearHistoricLoyalty(fresh(), asha, at).state;
+      const later = at + perWin * SIX_MINUTES;
+      const worn = wearHistoricLoyalty({ ...asha2, sieges: { ...asha2.sieges, 'player:7': { loyalty: 50, loyaltyAt: at } } }, ben, later);
+      expect(Object.keys(worn.state.sieges ?? {}).sort()).toEqual(['player:2', 'player:7']);
+    });
+
+    it('with PvP on, takes it off the one loyalty everybody shares', () => {
+      setFeatureFlags({ [Feature.PVP]: true });
+      const one = wearHistoricLoyalty(fresh(), asha, at);
+      const two = wearHistoricLoyalty(one.state, ben, at);
+      expect(two).toMatchObject({ damage: perWin, left: full - 2 * perWin });
+      expect(two.state.loyalty).toBe(full - 2 * perWin);
+      expect(two.state.sieges).toBeUndefined();
+    });
   });
 });
 

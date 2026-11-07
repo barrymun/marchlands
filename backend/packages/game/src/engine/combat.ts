@@ -33,10 +33,11 @@ import {
   historicCityBuildings,
   historicGuard,
   type HistoricLevel,
+  historicLoyalty,
   historicNameAt,
   historicResearch,
-  historicState,
   type HistoricState,
+  historicState,
   injuredOf,
   isFeatureOn,
   ItemId,
@@ -83,6 +84,7 @@ import {
   TroopKey,
   valleyGarrison,
   WAR_ENSIGN_DESC,
+  wearHistoricLoyalty,
 } from '@marchlands/core';
 import { armies, cities, heroes, one, tiles } from '@marchlands/db';
 
@@ -582,7 +584,7 @@ async function arriveScout(ctx: Ctx, a: ArmyRow, scoutOwner: PlayerRow) {
           level,
           historic: true,
           success: true,
-          loyalty: Math.floor(hc.state.loyalty),
+          loyalty: Math.floor(historicLoyalty(hc.state, scoutOwner, a.reachTime)),
           population: hc.state.population,
           resources: {
             gold: Math.floor(hc.state.gold),
@@ -1181,9 +1183,10 @@ export function historicOf(tile: TileRow, at: number) {
 
 /**
  * An attack on a historic city (docs/features/historical-cities.md): its garrison, research and hero, its loot a level
- * 10's, and each win takes BALANCE.historic.loyaltyPerWin off its loyalty. The win that leaves it at 0 captures it,
- * when the attacker has a free city slot and holds fewer seats of its level than BALANCE.historic.holdLimit allows;
- * otherwise it stays at 0 for the next. No faction stands behind it yet.
+ * 10's, and each win takes BALANCE.historic.loyaltyPerWin off its loyalty (the attacker's side's own with PvP off,
+ * historicLoyalty). The win that leaves it at 0 captures it, when the attacker has a free city slot and holds fewer
+ * seats of its level than BALANCE.historic.holdLimit allows; otherwise it stays at 0 for the next. No faction stands
+ * behind it yet.
  */
 async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   const tile = await getTile(ctx, a.targetTileId, { lock: true });
@@ -1204,16 +1207,18 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
   );
   let loot: ResourceSet = { gold: 0, food: 0, wood: 0, stone: 0, iron: 0 };
   let loyaltyDamage = 0;
-  const state = { ...hc.state };
+  let state = { ...hc.state };
   if (r.attackerWon) {
     loot = plunder({ gold: state.gold, food: state.food, wood: state.wood, stone: state.stone, iron: state.iron }, lootCapacity(a, r.attacker.after, attacker));
     for (const k of Object.keys(loot) as (keyof ResourceSet)[]) state[k] -= loot[k];
-    loyaltyDamage = Math.min(state.loyalty, BALANCE.historic.loyaltyPerWin);
-    state.loyalty -= loyaltyDamage;
+    const worn = wearHistoricLoyalty(state, attacker, a.reachTime);
+    state = worn.state;
+    loyaltyDamage = worn.damage;
   }
+  const loyaltyLeft = historicLoyalty(state, attacker, a.reachTime);
   Object.assign(tile, { troops: r.defender.after, forts: r.forts.after, state, updatedAt: ctx.now });
   let captured = false;
-  if (r.attackerWon && state.loyalty <= 0 && (await canHoldHistoric(ctx, attacker, level))) {
+  if (r.attackerWon && loyaltyLeft <= 0 && (await canHoldHistoric(ctx, attacker, level))) {
     captured = true;
     await captureHistoric(ctx, attacker, tile, level, state);
   } else await saveTile(ctx, tile);
@@ -1244,7 +1249,7 @@ async function attackHistoric(ctx: Ctx, a: ArmyRow, attacker: PlayerRow) {
     {
       plunder: loot,
       loyaltyDamage,
-      loyaltyLeft: Math.floor(state.loyalty),
+      loyaltyLeft: Math.floor(loyaltyLeft),
       captured,
       level,
       historic: true,

@@ -59,10 +59,11 @@ export default [
   },
   {
     // a language other than English, loaded only when chosen. Raised to 40 kB (2026-11-01, at 35.02 kB): every screen's
-    // text grows it, the historic cities' holding rules the last; it loads only for players who choose Japanese
+    // text grows it, the historic cities' holding rules the last; it loads only for players who choose Japanese.
+    // Raised to 45 kB (2026-11-07, at 40.06 kB): the notes for playing with PvP off took it over
     name: 'Japanese',
     path: 'dist/assets/ja-JP-*.js',
-    limit: '40 kB',
+    limit: '45 kB',
     gzip: true,
   },
 ];

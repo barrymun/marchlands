@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // PvP switched off, end to end, played as players do against a stack with FEATURE_PVP=false: what another player holds
-// can't be attacked or scouted by any route, and the map's own cities and free valleys still can. Needs an operator
-// account (SMOKE_ADMIN listed in ADMIN_USERNAMES) and a fast GAME_SPEED (60 or more). It makes fx_pvp_… accounts and
-// deletes nothing: npm run delete-player afterwards.
+// can't be attacked or scouted by any route, the map's own cities and free valleys still can, and each side besieging a
+// historic city wears down its own loyalty. Needs an operator account (SMOKE_ADMIN listed in ADMIN_USERNAMES) and a fast
+// GAME_SPEED (60 or more). It makes fx_pvp_… accounts and deletes nothing: npm run delete-player afterwards. The siege
+// wears down a real level 12's garrison near its accounts, which refills within the hour.
 //   API=http://localhost:3100 SMOKE_ADMIN=fx_smoke_op node tools/smoke/pvp-off.mjs
 
 import { signUpProof } from './proof.mjs';
@@ -13,11 +14,18 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const FOREST = 1;
 const GRASS = 5;
 const NPC = 12;
+const HISTORIC = 13;
 const ATTACK = 5;
 const SCOUT = 3;
 const TRANSPORT = 1;
 const TRUCE = 'player.peace.1';
 const PVP_DISABLED = 'army.pvpDisabled';
+const RALLY_SPOT = 31;
+const FEASTING_HALL = 27;
+const WAVE = 100_000;
+const WAVES = 10;
+/** the research that helps an army of archers break a historic city's garrison */
+const WAR_TECHS = [8, 9, 10, 11, 12, 13, 14, 16, 18, 19];
 const suffix = Math.random().toString(36).slice(2, 7);
 let failures = 0;
 
@@ -82,6 +90,19 @@ async function ready(gm, p, troops) {
   await ok(gm, 'PUT', '/admin/players/flags', { playerName: p.name, beginner: false, title: 3 });
   const inn = await ok(p.token, 'GET', `/cities/${cid}/tavern`);
   p.hero = await ok(p.token, 'POST', `/cities/${cid}/tavern/${inn.heros[0].id}/hire`);
+}
+
+/** A player with everything one city can throw at a historic city: a full Rally Spot, research, and a hero for each wave. */
+async function besieger(gm, name) {
+  const b = await newPlayer(name);
+  await ready(gm, b, { archer: WAVES * WAVE });
+  await ok(gm, 'PUT', `/admin/cities/${b.city.id}/buildings`, { playerId: b.id, positionId: -1, typeId: RALLY_SPOT, level: 10 });
+  await ok(gm, 'PUT', `/admin/cities/${b.city.id}/buildings`, { playerId: b.id, positionId: 4, typeId: FEASTING_HALL, level: 10 });
+  await ok(gm, 'PUT', `/admin/cities/${b.city.id}/resources`, { playerId: b.id, gold: 2e8, food: 2e9, wood: 2e6, stone: 2e6, iron: 2e6 });
+  b.heroes = [b.hero.id];
+  while (b.heroes.length < WAVES) b.heroes.push(await ok(gm, 'POST', `/admin/cities/${b.city.id}/heroes`, { playerId: b.id }));
+  for (const techId of WAR_TECHS) await ok(gm, 'PUT', '/admin/research', { playerName: b.name, techId, level: 10 });
+  return b;
 }
 
 const near = async (p, type, level) => {
@@ -189,8 +210,42 @@ async function main() {
     'allies can still supply each other',
   );
 
+  // ---- a historic city: each side wears down its own loyalty ----
+  const [breakerA, breakerB, c, d] = [await besieger(gm, 'e'), await besieger(gm, 'f'), await besieger(gm, 'c'), await besieger(gm, 'd')];
+  const seat = await near(c, HISTORIC, 12);
+  const landing = Math.floor((Date.now() + 240_000) / 1000) * 1000;
+  const waves = async (b, n, arriveAt) => {
+    for (const heroId of b.heroes.slice(0, n))
+      await ok(b.token, 'POST', `/cities/${b.city.id}/armies`, { targetTileId: seat.id, mission: ATTACK, troops: { archer: WAVE }, heroId, arriveAt });
+  };
+  await waves(breakerA, WAVES, landing);
+  await waves(breakerB, WAVES, landing + 1000);
+  await waves(c, 3, landing + 2000);
+  await waves(d, 3, landing + 3000);
+  const battles = async (b, n) => {
+    const list = await until(
+      async () => {
+        const { reports } = await ok(b.token, 'GET', '/reports?type=1');
+        return reports.length >= n ? reports : null;
+      },
+      'a siege to land',
+      400_000,
+    );
+    const out = [];
+    for (const r of [...list].reverse()) out.push((await ok(b.token, 'GET', `/reports/${r.id}`)).content.battle);
+    return out;
+  };
+  const leftAfterWins = (list) => list.filter((b) => b.result === 'attackerWon').map((b) => b.loyaltyLeft);
+  const breakers = [...leftAfterWins(await battles(breakerA, WAVES)), ...leftAfterWins(await battles(breakerB, WAVES))];
+  check(breakers.length > 0 && Math.min(...breakers) < 91, `the breakers wore down their own loyalty: ${breakers.join(', ')}`);
+  for (const b of [c, d]) {
+    const left = leftAfterWins(await battles(b, 3)).join(', ');
+    check(left === '97, 94, 91', `a later side counts from full, whatever others have done: ${left}`);
+  }
+  check((await ok(c.token, 'GET', `/map/tiles/${seat.id}`)).type === HISTORIC, 'nobody has captured it by adding up the sides');
+
   console.log(failures ? `${failures} FAILED` : 'all ok');
-  console.log(`accounts: fx_pvp_a_${suffix} fx_pvp_b_${suffix}`);
+  console.log(`accounts: ${['a', 'b', 'e', 'f', 'c', 'd'].map((n) => `fx_pvp_${n}_${suffix}`).join(' ')}`);
   process.exit(failures ? 1 : 0);
 }
 

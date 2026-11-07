@@ -9,7 +9,9 @@ import {
   ArmyDirection,
   BALANCE,
   BattleTarget,
+  DAY,
   Feature,
+  type HistoricState,
   HOUR,
   ItemId,
   Mission,
@@ -22,8 +24,8 @@ import {
 import { mails } from '@marchlands/db';
 
 import { checkBeginner } from '#/engine/player.ts';
-import { interior, plans, player as players, shop, world } from '#/index.ts';
-import { getTile } from '#/repo.ts';
+import { admin, alliance, interior, plans, player as players, shop, world } from '#/index.ts';
+import { getTile, saveTile } from '#/repo.ts';
 import {
   allies,
   armyRow,
@@ -41,7 +43,7 @@ import {
   warrior,
 } from '#test/support/armies.ts';
 import { expectRefused } from '#test/support/expect.ts';
-import { addHero, createTestPlayer, giveItems, reloadCity, reloadPlayer, setCityStats } from '#test/support/factories.ts';
+import { addHero, createTestPlayer, giveItems, reloadCity, reloadPlayer, setCityStats, type TestPlayer } from '#test/support/factories.ts';
 import { game, type TestGame } from '#test/support/game.ts';
 import { makeSeat } from '#test/support/historic.ts';
 
@@ -57,6 +59,49 @@ async function whilePvpOn<T>(fn: () => Promise<T>): Promise<T> {
     pvp(false);
   }
 }
+
+/**
+ * A historic city with its garrison broken as of `at` and nothing regenerating: the sides' counts (`sieges`, as they
+ * stand if not given) and the shared loyalty as of then, so a test's marches take no time off them.
+ */
+async function breakSeat(g: TestGame, seatId: number, at: number, opts: { sieges?: Record<string, number>; loyalty?: number } = {}) {
+  const tile = await getTile(g, seatId);
+  const stored = tile.state as unknown as HistoricState | null;
+  const counts = opts.sieges ?? Object.fromEntries(Object.entries(stored?.sieges ?? {}).map(([side, v]) => [side, v.loyalty]));
+  const state: HistoricState = {
+    gold: 0,
+    food: 0,
+    wood: 0,
+    stone: 0,
+    iron: 0,
+    loyalty: opts.loyalty ?? stored?.loyalty ?? BALANCE.historic.loyalty,
+    population: 0,
+    regenAt: at,
+    loyaltyAt: at,
+    refillAt: at,
+    day: Math.floor(at / DAY),
+    sieges: Object.fromEntries(Object.entries(counts).map(([side, loyalty]) => [side, { loyalty, loyaltyAt: at }])),
+  };
+  await saveTile(g, { ...tile, troops: {}, forts: {}, state: state as unknown as typeof tile.state });
+}
+
+/** One winning wave of `p` on a broken historic city (breakSeat): the battle's report and the tile after it. */
+async function waveOnSeat(g: TestGame, p: TestPlayer, heroId: number, seatId: number, opts: Parameters<typeof breakSeat>[3] = {}) {
+  const bean = await send(g, p, { targetTileId: seatId, mission: Mission.ATTACK, troops: { archer: 60_000 }, heroId });
+  await breakSeat(g, seatId, bean.reachTime, opts);
+  await arrive(g, bean.armyId);
+  return { report: battleOf((await reportsOf(g, p.id)).at(-1)!, BattleTarget.NPC), tile: await getTile(g, seatId) };
+}
+
+/** A player with the archers and hero for a wave, allowed more than one city. */
+async function besieger(g: TestGame) {
+  const { p, heroId } = await warrior(g, { archer: 60_000, scouter: 10 });
+  await admin.setPlayerFlags(g, p.name, { title: 1 });
+  return { p, heroId };
+}
+
+const seatTile = (g: TestGame, p: TestPlayer) => tileNear(g, p.cityId, TileType.HISTORIC, { radius: 30 });
+const A_WIN = BALANCE.historic.loyaltyPerWin;
 
 /** Two players ready for war. */
 async function rivals(g: TestGame) {
@@ -327,5 +372,125 @@ describe('the end of beginner protection', () => {
       const row = await reloadPlayer(g, p);
       await whilePvpOn(() => checkBeginner(g, row, BALANCE.beginnerTownHallLevel));
       expect(await mailsOf(g, p.id)).toHaveLength(1);
+    }));
+});
+
+describe('besieging a historic city nobody holds', () => {
+  const FULL = BALANCE.historic.loyalty;
+
+  it('counts each player’s wins apart: a stranger’s wave starts from full', () =>
+    game(async (g) => {
+      const a = await besieger(g);
+      const b = await besieger(g);
+      const seat = await seatTile(g, a.p);
+      const first = await waveOnSeat(g, a.p, a.heroId, seat.id);
+      expect(first.report).toMatchObject({ loyaltyDamage: A_WIN, loyaltyLeft: FULL - A_WIN, captured: false });
+      const second = await waveOnSeat(g, b.p, b.heroId, seat.id);
+      expect(second.report).toMatchObject({ loyaltyDamage: A_WIN, loyaltyLeft: FULL - A_WIN, captured: false });
+    }));
+
+  it('a last wave can’t steal another side’s capture, however close they were', () =>
+    game(async (g) => {
+      const a = await besieger(g);
+      const b = await besieger(g);
+      const seat = await seatTile(g, a.p);
+      const { report, tile } = await waveOnSeat(g, b.p, b.heroId, seat.id, { sieges: { [`player:${a.p.id}`]: 0 } });
+      expect(report).toMatchObject({ captured: false, loyaltyLeft: FULL - A_WIN });
+      expect(tile.type).toBe(TileType.HISTORIC);
+    }));
+
+  it('the side that wears down its own loyalty captures it, and everyone else’s progress and armies go', () =>
+    game(async (g) => {
+      const a = await besieger(g);
+      const b = await besieger(g);
+      const seat = await seatTile(g, a.p);
+      // timed to land long after the capture
+      const late = await send(g, b.p, { targetTileId: seat.id, mission: Mission.SCOUT, troops: { scouter: 1 }, arriveAt: g.now + 23 * HOUR });
+      const sieges = { [`player:${a.p.id}`]: A_WIN, [`player:${b.p.id}`]: A_WIN };
+      const { report, tile } = await waveOnSeat(g, a.p, a.heroId, seat.id, { sieges });
+      expect(report).toMatchObject({ captured: true, loyaltyLeft: 0 });
+      expect(tile).toMatchObject({ type: TileType.CASTLE, ownerPlayerId: a.p.id, state: null });
+      await arrive(g, late.armyId);
+      await lastAborted(g, b.p.id);
+      await expectRefused(send(g, b.p, { targetTileId: seat.id, mission: Mission.ATTACK, troops: { archer: 100 }, heroId: b.heroId }), PVP_DISABLED);
+    }));
+
+  it('adds up the wins of an alliance’s members', () =>
+    game(async (g) => {
+      const a = await besieger(g);
+      const b = await besieger(g);
+      await allies(g, a.p, b.p);
+      const seat = await seatTile(g, a.p);
+      expect((await waveOnSeat(g, a.p, a.heroId, seat.id)).report.loyaltyLeft).toBe(FULL - A_WIN);
+      expect((await waveOnSeat(g, b.p, b.heroId, seat.id)).report.loyaltyLeft).toBe(FULL - 2 * A_WIN);
+    }));
+
+  it('lets any member of the alliance land the last win, and the city is theirs', () =>
+    game(async (g) => {
+      const a = await besieger(g);
+      const b = await besieger(g);
+      const allianceId = await allies(g, a.p, b.p);
+      const seat = await seatTile(g, a.p);
+      const { report, tile } = await waveOnSeat(g, b.p, b.heroId, seat.id, { sieges: { [`alliance:${allianceId}`]: A_WIN } });
+      expect(report).toMatchObject({ captured: true, loyaltyLeft: 0 });
+      expect(tile.ownerPlayerId).toBe(b.p.id);
+    }));
+
+  it('leaves the alliance’s count behind when a player leaves it', () =>
+    game(async (g) => {
+      const a = await besieger(g);
+      const b = await besieger(g);
+      const allianceId = await allies(g, a.p, b.p);
+      const seat = await seatTile(g, a.p);
+      await alliance.leaveAlliance(g, b.p.id);
+      const { report } = await waveOnSeat(g, b.p, b.heroId, seat.id, { sieges: { [`alliance:${allianceId}`]: A_WIN } });
+      expect(report).toMatchObject({ captured: false, loyaltyLeft: FULL - A_WIN });
+    }));
+
+  it('stays at 0 for the same side’s next win when the winner can’t hold it', () =>
+    game(async (g) => {
+      const a = await besieger(g);
+      const b = await besieger(g);
+      const allianceId = await allies(g, a.p, b.p);
+      await admin.setPlayerFlags(g, a.p.name, { title: 0 });
+      const seat = await seatTile(g, a.p);
+      const first = await waveOnSeat(g, a.p, a.heroId, seat.id, { sieges: { [`alliance:${allianceId}`]: A_WIN } });
+      expect(first.report).toMatchObject({ captured: false, loyaltyLeft: 0 });
+      const second = await waveOnSeat(g, b.p, b.heroId, seat.id);
+      expect(second.report).toMatchObject({ captured: true, loyaltyDamage: 0, loyaltyLeft: 0 });
+    }));
+
+  it('a scout reports the scouting side’s own loyalty, and leaves every side’s as it was', () =>
+    game(async (g) => {
+      const a = await besieger(g);
+      const b = await besieger(g);
+      const seat = await seatTile(g, a.p);
+      const sieges = { [`player:${a.p.id}`]: 40 };
+      for (const [who, loyalty] of [
+        [a, 40],
+        [b, FULL],
+      ] as const) {
+        const scout = await send(g, who.p, { targetTileId: seat.id, mission: Mission.SCOUT, troops: { scouter: 1 } });
+        await breakSeat(g, seat.id, scout.reachTime, { sieges });
+        await arrive(g, scout.armyId);
+        expect(scoutOf((await reportsOf(g, who.p.id)).at(-1)!, BattleTarget.NPC).loyalty).toBe(loyalty);
+        const after = (await getTile(g, seat.id)).state as unknown as HistoricState;
+        expect(after.sieges).toEqual({ [`player:${a.p.id}`]: { loyalty: 40, loyaltyAt: scout.reachTime } });
+      }
+    }));
+});
+
+describe('besieging a historic city with PvP on', () => {
+  it('still counts every side’s wins together, so a rival can land the last one', () =>
+    game(async (g) => {
+      pvp(true);
+      const a = await besieger(g);
+      const b = await besieger(g);
+      const seat = await seatTile(g, a.p);
+      const first = await waveOnSeat(g, a.p, a.heroId, seat.id);
+      expect(first.report).toMatchObject({ loyaltyLeft: BALANCE.historic.loyalty - A_WIN, captured: false });
+      const last = await waveOnSeat(g, b.p, b.heroId, seat.id, { loyalty: A_WIN });
+      expect(last.report).toMatchObject({ loyaltyLeft: 0, captured: true });
+      expect(last.tile.ownerPlayerId).toBe(b.p.id);
     }));
 });

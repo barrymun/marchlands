@@ -44,6 +44,7 @@
     "scout": "Scout",
     "noScouts": "No Scouts in this city: train some in Military.",
     "pvpOff": "Players can't attack or scout each other in this version of the game.",
+    "seatRace": "Each alliance, and each player without one, wears down this city's loyalty separately. The first to bring theirs to 0 captures it.",
     "upgraded": "Valley upgraded"
   },
   "faction": {
