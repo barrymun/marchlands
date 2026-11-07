@@ -17,8 +17,10 @@ export function HeroesPanel({ city, view, focusInn, onGear }: { city: CityBean; 
       {inn}
     </div>
   ) : (
-    <div className="grid items-start gap-4 lg:grid-cols-2">
-      <HeroList city={city} />
+    <div className="grid items-start gap-4 lg:grid-cols-2 xl:grid-cols-3">
+      <div className="xl:col-span-2">
+        <HeroList city={city} />
+      </div>
       {inn}
     </div>
   );

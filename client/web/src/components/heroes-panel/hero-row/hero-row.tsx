@@ -27,7 +27,8 @@ export function HeroRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-2 rounded-md border p-2">
+    // its actions keep to the bottom when the card is stretched to match a neighbour (the List's two columns)
+    <div className="flex flex-col justify-between gap-2 rounded-md border p-2">
       <div>
         <HeroName hero={hero} onRename={onRename} leading={leading} trailing={trailing} />
         <HeroAttributes hero={hero} />

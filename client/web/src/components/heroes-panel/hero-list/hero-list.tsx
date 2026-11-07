@@ -15,7 +15,8 @@ import { cn } from '@/lib/utils';
 
 /**
  * The Heroes tab as a list (List, and always on a narrow screen): the city's heroes in the player's order (drag a row
- * by its handle, or the arrows), each with what it would add as mayor and its actions (HeroActions), and rename.
+ * by its handle, or the arrows), in two columns from xl, read across then down, each with what it would add as mayor
+ * and its actions (HeroActions), and rename.
  */
 export function HeroList({ city }: { city: CityBean }) {
   const { t } = useTranslation(['heroes-panel', 'common']);
@@ -32,13 +33,14 @@ export function HeroList({ city }: { city: CityBean }) {
           <CardTitle className="text-sm">{t('heroes.title')}</CardTitle>
           <CardDescription>{t('heroes.description')}</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-2">
+        <CardContent className="grid gap-2 xl:grid-cols-2">
           {city.heros.length === 0 && <p className="text-sm text-muted-foreground">{t('heroes.empty')}</p>}
           {city.heros.map((h, i) => (
             <div
               key={h.id}
               {...order.row(h.id, i)}
-              className={cn('rounded-md transition-opacity', order.dragged(i) && 'opacity-50', order.target(i) && 'ring-2 ring-primary')}
+              // a grid, so the card fills the height of the row it shares with its neighbour
+              className={cn('grid rounded-md transition-opacity', order.dragged(i) && 'opacity-50', order.target(i) && 'ring-2 ring-primary')}
             >
               <HeroRow
                 hero={h}

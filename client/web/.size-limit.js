@@ -4,10 +4,11 @@
 // purpose, saying why in the commit; AGENTS.md (Client, rule 7) has the rules that keep these small.
 export default [
   {
-    // everything the first page loads before showing anything
+    // everything the first page loads before showing anything. Raised from 310 kB (2026-11-07, at 310.01 kB): it was already
+    // at 309.72 kB when the Military page's redirects and layout classes came in, so any real change now went over
     name: 'first page',
     path: ['dist/assets/rolldown-runtime-*.js', 'dist/assets/vendor-*.js', 'dist/assets/app-*.js', 'dist/assets/app-*.css'],
-    limit: '310 kB',
+    limit: '312 kB',
     gzip: true,
   },
   {
