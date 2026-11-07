@@ -10,6 +10,9 @@ import { param, type SearchSchema } from '@/lib/search-state';
 export const MilitaryTab = { TROOPS: 'troops', DEFENCES: 'defences', HEROES: 'heroes', GEAR: 'gear', INN: 'inn' } as const;
 export type MilitaryTab = (typeof MilitaryTab)[keyof typeof MilitaryTab];
 
+/** Whether a Military page tab has two columns that scroll apart from xl up, filling the viewport; the others scroll as a page. */
+export const hasScrollingPanes = (tab: MilitaryTab) => tab === MilitaryTab.TROOPS || tab === MilitaryTab.DEFENCES;
+
 /** The Reports page's tabs. */
 export const ReportTab = { ALL: 'all', ARMY: 'army', TRADE: 'trade', OTHER: 'other' } as const;
 export type ReportTab = (typeof ReportTab)[keyof typeof ReportTab];

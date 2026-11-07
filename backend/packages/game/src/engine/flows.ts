@@ -45,6 +45,7 @@ import {
   HeroStatus,
   heroStratagem,
   hiredHeroName,
+  levelOneValue,
   maxTrainableCount,
   type Message,
   Mission,
@@ -250,11 +251,16 @@ export async function runScheduledHeal(ctx: Ctx, playerId: number, cityId: numbe
   ctx.push(playerId, PushCmd.SYSTEM_INFO_MESSAGE, { alliance: false, tV: false, noSenderSystemInfo: false, msg: told });
 }
 
-const BASE_VALUE = { power: (h: HeroRow) => h.basePower, management: (h: HeroRow) => h.baseManagement, stratagem: (h: HeroRow) => h.baseStratagem } as const;
+/** What a hero counts as for a hire, by attribute: its level 1 value. */
+const HIRE_VALUE = {
+  power: (h: HeroRow) => levelOneValue(h.power, h),
+  management: (h: HeroRow) => levelOneValue(h.management, h),
+  stratagem: (h: HeroRow) => levelOneValue(h.stratagem, h),
+} as const;
 
 /**
- * Hire heroes born with at least `min` of an attribute from the city's Inn until the city has `count` of the player's
- * own heroes that good (the ones already there count): the best of its offers first, re-rolling it for gold until
+ * Hire heroes with a level 1 value (levelOneValue) of at least `min` of an attribute from the city's Inn until the city has
+ * `count` of the player's own heroes that good (the ones already there count): the best of its offers first, re-rolling it for gold until
  * enough are hired (or the Feasting Hall is full), the run's `maxGold` would be passed, the city is out of gold or it
  * has re-rolled BALANCE.flowHireMaxRerolls times. Each is named after what it was hired for (ATK - 76). Stopping short
  * isn't a failure: the step says why and the flow carries on, so a repeating flow goes on until every city has its count.
@@ -268,8 +274,8 @@ async function hireHeroes(
   const b = await openOwnCity(ctx, playerId, cityId);
   const inn = buildingLevel(b.city.buildings, BuildingType.INN);
   if (inn < 1) return { detail: msg('hero.needInn', { building: ref.building(BuildingType.INN) }), skipped: true };
-  const base = BASE_VALUE[a.stat];
-  const have = b.heroes.filter((h) => base(h) >= a.min).length;
+  const value = HIRE_VALUE[a.stat];
+  const have = b.heroes.filter((h) => value(h) >= a.min).length;
   if (have >= a.count) return { detail: msg('flow.step.hireTargetMet', { count: have, stat: ref.stat(a.stat), min: a.min }), skipped: true };
   const want = Math.min(a.count - have, heroSlots(b) - b.heroes.length);
   if (want < 1) return { detail: msg('flow.step.hallFull', { building: ref.building(BuildingType.FEASTING_HALL) }), skipped: true };
@@ -279,13 +285,13 @@ async function hireHeroes(
   let hired = 0;
   let stop: Message | null = null;
   for (;;) {
-    for (const h of offers.filter((o) => base(o) >= a.min).sort((x, y) => base(y) - base(x))) {
+    for (const h of offers.filter((o) => value(o) >= a.min).sort((x, y) => value(y) - value(x))) {
       if (hired >= want) break;
       const cost = heroHireCost(h.level);
       if (spent + cost > a.maxGold) stop = msg('flow.hireStop.cap', { gold: a.maxGold });
       else if (b.city.gold < cost) stop = msg('flow.hireStop.gold');
       else {
-        await hireOffer(ctx, b, h, hiredHeroName(a.stat, base(h)));
+        await hireOffer(ctx, b, h, hiredHeroName(a.stat, value(h)));
         spent += cost;
         hired++;
       }

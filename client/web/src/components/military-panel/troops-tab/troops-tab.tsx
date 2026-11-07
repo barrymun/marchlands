@@ -16,15 +16,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { fmtExact } from '@/lib/format';
 import { troopName } from '@/lib/game-data';
 
-/** The Military page's Troops tab: the city's garrison and its injured beside the training order. */
+/** The Military page's Troops tab: the city's garrison and its injured beside the training order, each scrolling by itself from xl up. */
 export function TroopsTab({ city }: { city: CityBean }) {
   const { t } = useTranslation(['military-panel', 'common']);
   const garrison = Object.entries(TROOP_KEYS).map(([id, key]) => ({ id: Number(id), count: city.troop[key] ?? 0, injured: city.injuredTroop[key] ?? 0 }));
   // the troop being dismissed
   const [dismissing, setDismissing] = useState<number | null>(null);
   return (
-    <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[26rem_minmax(0,1fr)]">
-      <div className="grid grid-cols-1 content-start gap-4">
+    <div className="grid grid-cols-1 items-start gap-4 xl:h-full xl:grid-cols-[26rem_minmax(0,1fr)] xl:grid-rows-[minmax(0,1fr)] xl:items-stretch">
+      {/* rows as tall as their cards: in a pane of fixed height a grid would otherwise squeeze a card to fit, rather than scroll */}
+      <div className="grid auto-rows-max grid-cols-1 content-start gap-4 xl:overflow-y-auto xl:[scrollbar-width:thin]">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">{t('garrison.title')}</CardTitle>
@@ -74,7 +75,9 @@ export function TroopsTab({ city }: { city: CityBean }) {
         <InjuredCard city={city} />
         <DismissDialog city={city} unitId={dismissing} onClose={() => setDismissing(null)} />
       </div>
-      <Production city={city} fort={false} />
+      <div className="xl:overflow-y-auto xl:[scrollbar-width:thin]">
+        <Production city={city} fort={false} />
+      </div>
     </div>
   );
 }

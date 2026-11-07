@@ -11,9 +11,11 @@ import { LordDialog } from '@/components/lord-dialog/lord-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
 import { useGameNav } from '@/hooks/use-game-nav';
+import { useSearchState } from '@/hooks/use-search-state';
 import { useSticky } from '@/hooks/use-sticky';
 import { errorMessage } from '@/lib/api';
 import { legacyHref, pageAsPanelHref, PageId, screenHref, VIEW_IDS, ViewId } from '@/lib/nav';
+import { hasScrollingPanes, MILITARY_SEARCH } from '@/lib/screen-search';
 import { cn } from '@/lib/utils';
 import { BottomBar } from '@/routes/game/bottom-bar/bottom-bar';
 import {
@@ -44,6 +46,7 @@ import { ownCityTarget } from '@/routes/game/utils';
  */
 export function GamePage() {
   const nav = useGameNav();
+  const [military] = useSearchState(MILITARY_SEARCH);
   const location = useLocation();
   const player = usePlayer();
   const city = useCity(nav.cityId);
@@ -67,9 +70,11 @@ export function GamePage() {
   if (first && !player.data?.castles.some((c) => c.id === nav.cityId)) return <Navigate to={screenHref(first.id, nav.screen)} replace />;
   // a view fills the viewport edge to edge (the town and fields scroll themselves when shown as cards); a page scrolls inside it;
   // the market is a trading terminal: on a wide screen it fills the viewport like a view, its panes scrolling themselves;
+  // the Military page's Troops and Defences tabs do the same, keeping a page's margins;
   // most pages keep a readable width, a few (FULL_WIDTH_PAGES) use the whole viewport
   const isView = (VIEW_IDS as readonly string[]).includes(nav.screen);
   const isTerminal = nav.screen === PageId.MARKET;
+  const hasPanes = nav.screen === PageId.MILITARY && hasScrollingPanes(military.tab);
   const isFullWidth = (FULL_WIDTH_PAGES as readonly string[]).includes(nav.screen);
 
   return (
@@ -77,14 +82,14 @@ export function GamePage() {
       <TopBar city={city.data} status={status} onDialog={setDialog} />
       {city.data && <AbandonNotice city={city.data} className="justify-center border-b bg-destructive/10 px-3 py-1.5" />}
       <div className="flex min-h-0 flex-1">
-        <main className={cn('min-w-0 flex-1', isView ? 'overflow-hidden' : isTerminal ? 'overflow-y-auto xl:overflow-hidden' : 'overflow-y-auto')}>
+        <main className={cn('min-w-0 flex-1', isView ? 'overflow-hidden' : isTerminal || hasPanes ? 'overflow-y-auto xl:overflow-hidden' : 'overflow-y-auto')}>
           <div
             className={
               isView
                 ? 'h-full'
                 : isTerminal
                   ? 'p-2 pb-24 sm:pb-24 lg:pb-2 xl:h-full'
-                  : cn('mx-auto p-3 pb-24 sm:p-4 sm:pb-24 lg:px-6 lg:pb-6', !isFullWidth && PAGE_WIDTH)
+                  : cn('mx-auto p-3 pb-24 sm:p-4 sm:pb-24 lg:px-6 lg:pb-6', !isFullWidth && PAGE_WIDTH, hasPanes && 'xl:h-full')
             }
           >
             {city.error && <p className="text-sm text-destructive">{errorMessage(city.error)}</p>}

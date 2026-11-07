@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { fmtExact } from '@/lib/format';
 import { troopName } from '@/lib/game-data';
 
-/** The Military page's Defences tab: the fortifications on the city's walls beside the building order. */
+/** The Military page's Defences tab: the fortifications on the city's walls beside the building order, each scrolling by itself from xl up. */
 export function DefencesTab({ city }: { city: CityBean }) {
   const { t } = useTranslation(['military-panel', 'common']);
   const forts = Object.entries(FORT_KEYS).map(([id, key]) => ({ id: Number(id), count: city.fortification[key] ?? 0 }));
@@ -24,54 +24,58 @@ export function DefencesTab({ city }: { city: CityBean }) {
   // the fortification being destroyed
   const [dismissing, setDismissing] = useState<number | null>(null);
   return (
-    <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[26rem_minmax(0,1fr)]">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-          <CardTitle className="text-sm">{t('defenses.title')}</CardTitle>
-          <span className="text-xs text-muted-foreground tabular-nums">{t('defenses.wallSpace', { used: fmtExact(wallUsed), cap: fmtExact(wallCap) })}</span>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('defenses.defense')}</TableHead>
-                <TableHead className="text-end">{t('defenses.built')}</TableHead>
-                <TableHead className="w-0">
-                  <span className="sr-only">{t('dismiss.actions')}</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {forts.map((f) => (
-                <TableRow key={f.id} className={f.count ? '' : 'text-muted-foreground'}>
-                  <TableCell className="py-1">
-                    <div className="flex items-center gap-2">
-                      <UnitIcon id={f.id} />
-                      <UnitName id={f.id} />
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-end tabular-nums">{fmtExact(f.count)}</TableCell>
-                  <TableCell className="py-0">
-                    {f.count > 0 && (
-                      <Button
-                        size="icon-xs"
-                        variant="ghost"
-                        aria-label={t('dismiss.titleForts', { unit: troopName(f.id) })}
-                        title={t('dismiss.destroyTip')}
-                        onClick={() => setDismissing(f.id)}
-                      >
-                        <Trash2 />
-                      </Button>
-                    )}
-                  </TableCell>
+    <div className="grid grid-cols-1 items-start gap-4 xl:h-full xl:grid-cols-[26rem_minmax(0,1fr)] xl:grid-rows-[minmax(0,1fr)] xl:items-stretch">
+      <div className="xl:overflow-y-auto xl:[scrollbar-width:thin]">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+            <CardTitle className="text-sm">{t('defenses.title')}</CardTitle>
+            <span className="text-xs text-muted-foreground tabular-nums">{t('defenses.wallSpace', { used: fmtExact(wallUsed), cap: fmtExact(wallCap) })}</span>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('defenses.defense')}</TableHead>
+                  <TableHead className="text-end">{t('defenses.built')}</TableHead>
+                  <TableHead className="w-0">
+                    <span className="sr-only">{t('dismiss.actions')}</span>
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {forts.map((f) => (
+                  <TableRow key={f.id} className={f.count ? '' : 'text-muted-foreground'}>
+                    <TableCell className="py-1">
+                      <div className="flex items-center gap-2">
+                        <UnitIcon id={f.id} />
+                        <UnitName id={f.id} />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-end tabular-nums">{fmtExact(f.count)}</TableCell>
+                    <TableCell className="py-0">
+                      {f.count > 0 && (
+                        <Button
+                          size="icon-xs"
+                          variant="ghost"
+                          aria-label={t('dismiss.titleForts', { unit: troopName(f.id) })}
+                          title={t('dismiss.destroyTip')}
+                          onClick={() => setDismissing(f.id)}
+                        >
+                          <Trash2 />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
       <DismissDialog city={city} unitId={dismissing} onClose={() => setDismissing(null)} />
-      <Production city={city} fort />
+      <div className="xl:overflow-y-auto xl:[scrollbar-width:thin]">
+        <Production city={city} fort />
+      </div>
     </div>
   );
 }

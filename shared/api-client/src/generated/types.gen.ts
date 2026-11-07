@@ -922,7 +922,7 @@ export type FlowActionInput = {
      */
     stat: 'power' | 'management' | 'stratagem';
     /**
-     * the least base value of that attribute (what the hero was born with)
+     * the least level 1 value of that attribute (levelOneValue: its value, plus unspent points, less one per level above 1)
      */
     min: number;
     /**
@@ -4537,7 +4537,7 @@ export type FlowAction = {
      */
     stat: 'power' | 'management' | 'stratagem';
     /**
-     * the least base value of that attribute (what the hero was born with)
+     * the least level 1 value of that attribute (levelOneValue: its value, plus unspent points, less one per level above 1)
      */
     min: number;
     /**

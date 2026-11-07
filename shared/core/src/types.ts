@@ -179,7 +179,12 @@ export const FlowActionSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal(FlowActionType.HIRE_HEROES),
     stat: z.enum(HERO_BUFF_IDS).describe('the attribute the heroes must have'),
-    min: z.number().int().min(1).max(HERO_BASE_STAT_MAX).describe('the least base value of that attribute (what the hero was born with)'),
+    min: z
+      .number()
+      .int()
+      .min(1)
+      .max(HERO_BASE_STAT_MAX)
+      .describe('the least level 1 value of that attribute (levelOneValue: its value, plus unspent points, less one per level above 1)'),
     count: z
       .number()
       .int()

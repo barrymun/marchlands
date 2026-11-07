@@ -41,6 +41,7 @@ import {
   innHeroMaxLevel,
   innOffers,
   ItemId,
+  levelOneValue,
   levelsReady,
   levelUpAll,
   lordGear,
@@ -896,6 +897,33 @@ describe('(marchlands) troop training discount', () => {
   it('counts a fraction of a resource the same without a discount', () => {
     const have = { gold: 1e9, food: 1e9, wood: 1e9, stone: 1e9, iron: 29.9 };
     expect(maxTrainableCount(TroopType.WORKER, have, 1e9)).toBe(2);
+  });
+});
+
+describe(levelOneValue.name, () => {
+  it('takes one off per level above 1, so a level 4 offer with 77 counts as 74', () => {
+    expect(levelOneValue(77, { level: 4, remainPoint: 0 })).toBe(74);
+    expect(levelOneValue(77, { level: 1, remainPoint: 0 })).toBe(77);
+  });
+
+  it('counts unspent points, which can still go in the attribute', () => {
+    expect(levelOneValue(78, { level: 86, remainPoint: 83 })).toBe(76);
+    expect(levelOneValue(78, { level: 100, remainPoint: 100 })).toBe(79);
+  });
+
+  it('is what the hero finishes on at level 100, less 99', () => {
+    expect(levelOneValue(177, { level: 100, remainPoint: 0 }) + 99).toBe(177);
+    expect(levelOneValue(77, { level: 4, remainPoint: 0 }) + 99).toBe(173);
+  });
+
+  it('never rates an offer above its Attack or Politics base, nor its Intelligence base by more than one', () => {
+    const rng = seededRng('level one');
+    for (let i = 0; i < 500; i++) {
+      const h = createRandomHero(10, rng, { state: 0 });
+      expect(levelOneValue(h.power, h)).toBeLessThanOrEqual(h.basePower);
+      expect(levelOneValue(h.management, h)).toBeLessThanOrEqual(h.baseManagement);
+      expect(levelOneValue(h.stratagem, h)).toBeLessThanOrEqual(h.baseStratagem + 1);
+    }
   });
 });
 

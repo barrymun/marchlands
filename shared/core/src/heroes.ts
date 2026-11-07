@@ -36,6 +36,13 @@ export const heroPower = (h: HeroStats) => h.power + h.powerAdded + h.powerBuffA
 export const heroManagement = (h: HeroStats) => h.management + h.managementAdded + h.managementBuffAdded;
 export const heroStratagem = (h: HeroStats) => h.stratagem + h.stratagemAdded + h.stratagemBuffAdded;
 
+/**
+ * (marchlands) What an attribute of a hero is worth as if the hero were level 1: its value now, plus its unspent points, less
+ * one per level above 1. Points an Inn offer already has in other attributes never come back, so this, not the stored base,
+ * says what it can reach: this + (level - 1) at any level, with every point from here on put in that attribute.
+ */
+export const levelOneValue = (value: number, h: { level: number; remainPoint: number }) => value + h.remainPoint - (h.level - 1);
+
 /** Experience for the next level: level² × 100 (level 99 → 980,100); (marchlands) none past BALANCE.heroMaxLevel. */
 export const upgradeExpFor = (level: number) => {
   const l = Math.min(level, BALANCE.heroMaxLevel);

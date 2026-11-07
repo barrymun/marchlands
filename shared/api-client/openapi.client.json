@@ -3307,7 +3307,7 @@
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 79,
-                "description": "the least base value of that attribute (what the hero was born with)"
+                "description": "the least level 1 value of that attribute (levelOneValue: its value, plus unspent points, less one per level above 1)"
               },
               "count": {
                 "type": "integer",
@@ -15768,7 +15768,7 @@
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 79,
-                "description": "the least base value of that attribute (what the hero was born with)"
+                "description": "the least level 1 value of that attribute (levelOneValue: its value, plus unspent points, less one per level above 1)"
               },
               "count": {
                 "type": "integer",

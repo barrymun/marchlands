@@ -80,9 +80,9 @@
     "hire": {
       "sentence": "Hire until the city has <count/> heroes with <stat/> of at least <min/> and spend at most <gold/> gold a city each run",
       "count": "Heroes the city should have",
-      "min": "Least base value",
+      "min": "Least level 1 value",
       "gold": "Most gold a city each run",
-      "hint": "Heroes already in the city count. Base values go up to {{max}}. The Inn's offers are re-rolled until enough are found; with Repeat on, the flow carries on each run until every city has its heroes. Each hero hired is named after its attribute and base value, like ATK - 76."
+      "hint": "A hero counts by its level 1 value: the attribute now, plus any unspent points, minus one for each level above 1. A level 4 offer with 77 counts as 74, as its other points are in other attributes for good. Heroes already in the city count the same way. The value goes up to {{max}}. The Inn's offers are re-rolled until enough are found; with Repeat on, the flow carries on each run until every city has its heroes. Each hero hired is named after its attribute and level 1 value, like ATK - 76."
     }
   },
   "runFlow": {

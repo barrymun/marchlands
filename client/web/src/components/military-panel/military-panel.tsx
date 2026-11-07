@@ -11,7 +11,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { useSearchState } from '@/hooks/use-search-state';
 import { PanelId } from '@/lib/nav';
-import { MILITARY_SEARCH, MilitaryTab } from '@/lib/screen-search';
+import { hasScrollingPanes, MILITARY_SEARCH, MilitaryTab } from '@/lib/screen-search';
+import { cn } from '@/lib/utils';
 
 /**
  * The Military page (docs/features/military-page.md), for the city in view: its troops, its defences, its heroes beside
@@ -27,7 +28,7 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
   const setTab = (v: string) => set({ tab: MILITARY_SEARCH.tab.read(v) });
   const heroView = useHeroView();
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div className={cn('grid grid-cols-1 gap-4', hasScrollingPanes(tab) && 'xl:h-full xl:grid-rows-[auto_minmax(0,1fr)]')}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList>

@@ -14,7 +14,7 @@ import {
   ViewId,
   viewOf,
 } from '@/lib/nav';
-import { MilitaryTab, ReportTab } from '@/lib/screen-search';
+import { hasScrollingPanes, MilitaryTab, ReportTab } from '@/lib/screen-search';
 
 describe(isScreen.name, () => {
   it('knows the views and the pages', () => {
@@ -84,6 +84,17 @@ describe(pageAsPanelHref.name, () => {
   it('takes the old Heroes panel to the Heroes tab', () => {
     // eslint-disable-next-line marchlands/no-string-value -- the word in an old address, which has no name outside lib/nav.ts
     expect(pageAsPanelHref(12, 'heroes')).toBe('/cities/12/military?tab=heroes');
+  });
+});
+
+describe(hasScrollingPanes.name, () => {
+  it('is the tabs with two columns of their own', () => {
+    expect(hasScrollingPanes(MilitaryTab.TROOPS)).toBe(true);
+    expect(hasScrollingPanes(MilitaryTab.DEFENCES)).toBe(true);
+  });
+
+  it('leaves the tabs that scroll as a page', () => {
+    for (const tab of [MilitaryTab.HEROES, MilitaryTab.GEAR, MilitaryTab.INN]) expect(hasScrollingPanes(tab)).toBe(false);
   });
 });
 
