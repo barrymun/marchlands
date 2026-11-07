@@ -159,13 +159,16 @@ export function researchCost(techId: number, targetLevel: number): Resources {
   return { ...cfg.cost };
 }
 
-/** (marchlands) Most units of a troop type the city can pay for now: resources and idle population. */
+/**
+ * (marchlands) Most units of a troop type the city can pay for now: resources and idle population. Whole resources
+ * only: trainCost rounds a discounted total up, so a fraction left in the city pays for nothing.
+ */
 export function maxTrainableCount(troopId: number, have: Partial<Resources>, idlePopulation: number, costShare = 1): number {
   const cfg = troopConfig(troopId);
   if (!cfg) return 0;
   let max = Infinity;
   for (const [k, cost] of Object.entries(cfg.cost) as [keyof Resources, number][])
-    if (cost > 0) max = Math.min(max, Math.floor((have[k] ?? 0) / (cost * costShare)));
+    if (cost > 0) max = Math.min(max, Math.floor(Math.floor(have[k] ?? 0) / (cost * costShare)));
   if (cfg.population > 0) max = Math.min(max, Math.floor(idlePopulation / cfg.population));
   return Number.isFinite(max) ? Math.max(0, max) : 0;
 }

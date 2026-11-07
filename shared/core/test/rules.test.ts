@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { BASIC_RESOURCES, HeroBuffId, RESOURCE_KEYS, ResourceKey } from '#/constants.ts';
+import { BASIC_RESOURCES, HeroBuffId, RESOURCE_KEYS, ResourceKey, TroopType } from '#/constants.ts';
 import {
   addHeroExp,
   BALANCE,
@@ -27,6 +27,7 @@ import {
   type GearStat,
   gearTier,
   generateMap,
+  hasResources,
   healCost,
   healHonorCost,
   heroBattleAttackBonus,
@@ -874,6 +875,27 @@ describe('(marchlands) troop training discount', () => {
     const have = { gold: 1e9, food: full.food, wood: 1e9, stone: 1e9, iron: 1e9 };
     expect(maxTrainableCount(3, have, 1e9)).toBe(3);
     expect(maxTrainableCount(3, have, 1e9, 0.75)).toBe(4);
+  });
+
+  it('never counts more than the rounded-up charge can pay', () => {
+    const plenty = { gold: 1e9, food: 1e9, wood: 1e9, stone: 1e9 };
+    const share = 1 - BALANCE.trainCostReduction;
+    // a worker's 10 iron is 7.5: 7.6 iron looks like one, but one is charged 8
+    expect(maxTrainableCount(TroopType.WORKER, { ...plenty, iron: 7.6 }, 1e9, share)).toBe(0);
+    expect(maxTrainableCount(TroopType.WORKER, { ...plenty, iron: 8 }, 1e9, share)).toBe(1);
+    // three are 22.5, charged 23; two are 15
+    expect(maxTrainableCount(TroopType.WORKER, { ...plenty, iron: 22.6 }, 1e9, share)).toBe(2);
+    for (let tenths = 0; tenths < 2_000; tenths++) {
+      const have = { ...plenty, iron: tenths / 10 };
+      const max = maxTrainableCount(TroopType.WORKER, have, 1e9, share);
+      expect(hasResources(have, trainCost(TroopType.WORKER, max, share))).toBe(true);
+      expect(hasResources(have, trainCost(TroopType.WORKER, max + 1, share))).toBe(false);
+    }
+  });
+
+  it('counts a fraction of a resource the same without a discount', () => {
+    const have = { gold: 1e9, food: 1e9, wood: 1e9, stone: 1e9, iron: 29.9 };
+    expect(maxTrainableCount(TroopType.WORKER, have, 1e9)).toBe(2);
   });
 });
 

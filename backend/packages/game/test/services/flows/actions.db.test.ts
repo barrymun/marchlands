@@ -16,6 +16,7 @@ import {
   heroManagement,
   heroPower,
   HeroStatus,
+  ItemId,
   Mission,
   msg,
   ref,
@@ -24,11 +25,12 @@ import {
   TroopType,
 } from '@marchlands/core';
 
-import { armies, flows, player as players } from '#/index.ts';
+import { armies, flows, player as players, shop } from '#/index.ts';
 import { heroesOfCity, type HeroRow } from '#/repo.ts';
 import {
   addCity,
   createTestPlayer,
+  giveItems,
   reloadCity,
   reloadPlayer,
   setBuildings,
@@ -162,6 +164,37 @@ describe(`${flows.runFlow.name}: trainTroops`, () => {
       expect(city.steps[0]).toMatchObject({ ok: true, skipped: true, detail: msg('flow.step.cannotAfford', { troop: warrior }) });
       expect(city.steps[1]!.detail.code).toBe('flow.step.mayor');
     }));
+
+  describe('with a discount on training', () => {
+    /** A warrior's 50 iron is 37.5 at the discount, and a total is charged rounded up. */
+    const discountedWithIron = async (g: TestGame, p: TestPlayer, iron: number) => {
+      await withBarracks(g, p);
+      await giveItems(g, p, { [ItemId.QUARTERMASTERS_SEAL]: 1 });
+      await shop.useItem(g, p.id, ItemId.QUARTERMASTERS_SEAL, null);
+      await setResources(g, p, { food: 1e6, wood: 1e6, iron });
+    };
+
+    it('skips, and carries on, when the charge rounds up past what the city has', () =>
+      game(async (g) => {
+        const p = await createTestPlayer(g);
+        await withHero(g, p);
+        await discountedWithIron(g, p, 37.6);
+        const city = await tryActions(g, p, [train(5), { type: FlowActionType.SET_MAYOR, stat: HeroBuffId.POWER }], false);
+        expect(city.ok).toBe(true);
+        expect(city.steps[0]).toMatchObject({ ok: true, skipped: true, detail: msg('flow.step.cannotAfford', { troop: warrior }) });
+        expect(city.steps[1]!.detail.code).toBe('flow.step.mayor');
+      }));
+
+    it('trains as many as the rounded-up charge can pay', () =>
+      game(async (g) => {
+        const p = await createTestPlayer(g);
+        await discountedWithIron(g, p, 112.6);
+        const city = await tryActions(g, p, [train(FLOW_TRAIN_MAX)], false);
+        expect(city.ok).toBe(true);
+        expect(city.steps[0]!.detail).toMatchObject({ code: 'flow.step.training', params: { amount: 2 } });
+        expect((await reloadCity(g, p.cityId)).iron).toBeCloseTo(37.6);
+      }));
+  });
 
   it('skips when every barracks queue is full', () =>
     game(async (g) => {
