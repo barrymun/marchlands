@@ -7,7 +7,7 @@
 
 import { sql } from 'drizzle-orm';
 
-import { BALANCE, setGameSpeed, WorldMapSource } from '@marchlands/core';
+import { BALANCE, featureFlagsFromEnv, getFeatureFlags, setFeatureFlags, setGameSpeed, WorldMapSource } from '@marchlands/core';
 import { connect, one, timedEvents } from '@marchlands/db';
 import {
   beginnerJob,
@@ -31,6 +31,7 @@ const BATCH = Number(process.env.WORKER_BATCH ?? 50);
 const IDLE_MS = Number(process.env.WORKER_IDLE_MS ?? 250);
 
 setGameSpeed(Number(process.env.GAME_SPEED ?? 1));
+setFeatureFlags(featureFlagsFromEnv(process.env));
 const { db, pool, close } = connect(process.env.DATABASE_URL, Number(process.env.DB_POOL_SIZE ?? 10));
 let stopping = false;
 const isStopping = () => stopping;
@@ -51,7 +52,7 @@ async function main() {
   // heroes waiting in an Inn under the old generator's names get new ones (docs/features/hero-names.md)
   log('info', 'inn heroes renamed', { heroes: await innNamesJob(db) });
   const { n } = one(await db.select({ n: sql<number>`count(*)` }).from(timedEvents));
-  log('info', 'worker started', { pendingEvents: Number(n), gameSpeed: Number(process.env.GAME_SPEED ?? 1) });
+  log('info', 'worker started', { pendingEvents: Number(n), gameSpeed: Number(process.env.GAME_SPEED ?? 1), features: getFeatureFlags() });
 
   every('rankings', 60_000, () => rankingsJob(db));
   every('zones', 60_000, () => zonesJob(db));

@@ -1,4 +1,4 @@
-import { setGameSpeed } from '@marchlands/core';
+import { featureFlagsFromEnv, setFeatureFlags, setGameSpeed } from '@marchlands/core';
 import { connect } from '@marchlands/db';
 import { startStatsFlusher } from '@marchlands/game';
 
@@ -8,6 +8,7 @@ import { PushGateway } from '#/ws/gateway.ts';
 
 const config = loadConfig();
 setGameSpeed(Number(process.env.GAME_SPEED ?? 1));
+setFeatureFlags(featureFlagsFromEnv(process.env));
 const { db, close } = connect(config.databaseUrl);
 
 const logger =

@@ -45,7 +45,7 @@ import { armyBean, troopBean } from '#/dto.ts';
 import { armyRef, cityPosition, departRef, homeMarchMs, isWaiting, notifyArmyParties, sendBack, tileOwner, tilePosition, turnHome } from '#/engine/armies.ts';
 import { pushHero } from '#/engine/heroes.ts';
 import { isProtected } from '#/engine/player.ts';
-import { isFriendly, relationBetween } from '#/engine/relations.ts';
+import { isFriendly, pvpForbids, relationBetween } from '#/engine/relations.ts';
 import { activeBuff, pushResources, spendResources } from '#/helpers.ts';
 import { getArmy, getCity, getPlayer, getTile, saveCity, saveHero } from '#/repo.ts';
 
@@ -113,6 +113,7 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
     case Mission.ATTACK: {
       if (mission === Mission.SCOUT && (troops.scouter ?? 0) <= 0) throw new GameError(msg('army.scoutsRequired', { troop: ref.troop(TroopType.SCOUT) }), -61);
       if (relation != null && isFriendly(relation)) throw new GameError(msg('army.invalidTarget'), -13);
+      if (pvpForbids(playerId, ownerId)) throw new GameError(msg('army.pvpDisabled'), -70);
       if (target.cityId != null && b.player.beginner) {
         throw new GameError(
           msg('army.beginnerProtection', {

@@ -90,6 +90,18 @@ Other packages are imported by name (`@marchlands/game`). Why two prefixes (weig
 - **Idempotent handlers.** Each handler re-reads the state and does nothing if the event is stale. For example, a building that was cancelled or already completed by a coin speed-up is skipped. When a delayed event is found early, the handler reschedules it.
 - **Game speed.** `GAME_SPEED` divides every duration through `scaled()`. Production and population ticks also scale, so a whole game can be compressed for testing.
 
+## Feature flags
+
+A part of the game a release leaves switched off is a flag in `shared/core/src/features.ts`: a `Feature` value, its default, and a setting `FEATURE_<NAME>` (`true` or `false`; anything else stops the service starting).
+
+- **Default off:** a default says what the release is, so a setting that goes missing can't turn on a part that isn't ready.
+- **Backend:** the API and the worker both call `setFeatureFlags(featureFlagsFromEnv(process.env))` at boot, so both need the setting (`docker-compose.yml`, `backend-env`); game code asks `isFeatureOn(Feature.PVP)`. Changing one takes a restart of both, not a rebuild.
+- **Client:** the flags come with the player's state and with the public `GET /config/static`. A component asks `useFeature(Feature.PVP)` (`hooks/use-game.ts`), which is off until the state has loaded. The client only shapes what's shown: the backend always enforces the rule itself.
+- **Tests:** the service tests run with everything on (`test/support/feature-flags.ts`, `vitest.db.config.ts`), since they test the whole game. A test of a part being off switches it off and back on afterwards (`services/pvp-off.db.test.ts`).
+- **A new flag:** add it to `Feature` and its default, to `FeatureFlags` in `shared/contracts/src/common.ts` (then `npm run gen:api`), to `backend-env` in `docker-compose.yml`, to the `.env` examples and the settings tables in README.md and docs/deployment.md.
+
+**PvP** (`Feature.PVP`, off for v0.5) is enforced where an army is sent (`sendArmy`) and again where it lands (`processArmy`: one that set out before it was switched off, or for a tile a player took while it marched, turns back with no battle). Everything else follows from those: flows skip such a target with the reason, wave plans refuse one. The map offers nothing against such a tile (`heldTilePermissions`), truces aren't sold or started, and the beginner protection badge and mail wait for it.
+
 ## Lazy economy
 
 Each city stores `resources_at` and its resource amounts. `settleCity()` integrates production from `resources_at` to now:

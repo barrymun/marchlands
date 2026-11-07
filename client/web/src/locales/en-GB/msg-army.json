@@ -43,6 +43,7 @@
   "upgradeHeld": "Only valleys nobody holds can be upgraded.",
   "valleyMaxLevel": "This valley is already level {{level}}, the highest.",
   "barbarianCityMaxLevel": "This barbarian city is already level {{level}}, the highest.",
+  "pvpDisabled": "Players can't attack or scout each other in this version of the game.",
   "planNotFound": "No such plan.",
   "planLimit_one": "You can keep at most {{count, number}} plan.",
   "planLimit_other": "You can keep at most {{count, number}} plans.",

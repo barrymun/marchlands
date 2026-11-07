@@ -184,6 +184,7 @@ npm ci
 | `JWT_SECRET` | `change-me-in-production` | token signing key (**change it**) |
 | `JWT_TTL` | 604800 | token lifetime, seconds |
 | `GAME_SPEED` | 1 | multiplies the speed of every timer and of production |
+| `FEATURE_PVP` | `false` | `true`: players can attack and scout each other (`docs/architecture.md`, Feature flags) |
 | `WORLD_MAP` | `generated` | `generated` (procedural) or `legacy` (original s2 layout) |
 | `WORLD_SEED` | `marchlands` | seed of the procedural map |
 | `ADMIN_USERNAMES` | – | comma-separated usernames that are operators |

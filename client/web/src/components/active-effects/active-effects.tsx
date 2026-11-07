@@ -14,7 +14,7 @@ import {
   postPlayerItemsUse,
   postPlayerItemsUseMutation,
 } from '@marchlands/api-client';
-import type { BuffId } from '@marchlands/core';
+import { BuffId, Feature } from '@marchlands/core';
 
 import { ExtensionKind, GROUPS, SLOT_BUFFS, STORE_KEY, WARN_MS } from '@/components/active-effects/constants';
 import { SlotCell } from '@/components/active-effects/slot-cell/slot-cell';
@@ -23,7 +23,7 @@ import { adds, extensionFor, readCollapsed } from '@/components/active-effects/u
 import { ConfirmDialog } from '@/components/confirm-dialog/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { useCommand } from '@/hooks/use-game';
+import { useCommand, useFeature } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { fmt, fmtExact, shortDuration } from '@/lib/format';
 import { itemName } from '@/lib/game-data';
@@ -45,6 +45,7 @@ export function ActiveEffects({
 }) {
   const { t } = useTranslation('active-effects');
   const now = useNow();
+  const pvp = useFeature(Feature.PVP);
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [buying, setBuying] = useState<{ slot: Slot; itemId: string; price: number } | null>(null);
   const running = buffs.filter((b) => b.endTime > now);
@@ -94,18 +95,20 @@ export function ActiveEffects({
           {GROUPS.map((g) => (
             <div key={g.label} className="grid grid-cols-2 items-center gap-1.5 sm:grid-cols-3 lg:grid-cols-[4.5rem_repeat(5,minmax(0,1fr))]">
               <span className="col-span-full text-xs text-muted-foreground lg:col-span-1">{g.label}</span>
-              {g.slots.map((slot) => (
-                <SlotCell
-                  key={slot.buff}
-                  slot={slot}
-                  active={bySlot.get(slot.buff)}
-                  now={now}
-                  extension={extensionFor(slot, bySlot.get(slot.buff), counts)}
-                  busy={use.isPending || buyAndUse.isPending}
-                  onExtend={extend}
-                  onFind={() => onFind(slot.buff)}
-                />
-              ))}
+              {g.slots
+                .filter((slot) => pvp || slot.buff !== BuffId.TRUCE)
+                .map((slot) => (
+                  <SlotCell
+                    key={slot.buff}
+                    slot={slot}
+                    active={bySlot.get(slot.buff)}
+                    now={now}
+                    extension={extensionFor(slot, bySlot.get(slot.buff), counts)}
+                    busy={use.isPending || buyAndUse.isPending}
+                    onExtend={extend}
+                    onFind={() => onFind(slot.buff)}
+                  />
+                ))}
             </div>
           ))}
           {others.length > 0 && (

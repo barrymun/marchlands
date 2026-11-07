@@ -13,6 +13,7 @@ import {
   type FlagColour,
   GameError,
   generateMap,
+  heldTilePermissions,
   historicCities,
   MAP_VIEW_MAX,
   mapLevelDigit,
@@ -223,7 +224,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
           state: c.pstatus,
           furlough: c.beginner,
           zoneId,
-          ...relationPermissions(relation),
+          ...heldTilePermissions(relation),
         });
       }
     } else {
@@ -311,7 +312,14 @@ export async function fieldInfo(ctx: Ctx, viewerId: number | null, tileId: numbe
   }
   const relation = owner && viewerId ? await relationBetween(ctx, viewerId, owner.playerId) : Relation.NO_RELATION;
   const upgradeCost = !owner && canUpgradeTile(t.type) ? valleyUpgradeCost(t.level) : null;
-  return { ...base, npc: t.type === TileType.NPC, owner: owner ?? null, relation, upgradeCost, ...relationPermissions(relation) };
+  return {
+    ...base,
+    npc: t.type === TileType.NPC,
+    owner: owner ?? null,
+    relation,
+    upgradeCost,
+    ...(owner ? heldTilePermissions(relation) : relationPermissions(relation)),
+  };
 }
 
 /** All tiles of a type/level in an area, used by the "search nearby" UI. */

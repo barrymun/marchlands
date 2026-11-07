@@ -43,6 +43,7 @@
     "sendArmy": "Send army",
     "scout": "Scout",
     "noScouts": "No Scouts in this city: train some in Military.",
+    "pvpOff": "Players can't attack or scout each other in this version of the game.",
     "upgraded": "Valley upgraded"
   },
   "faction": {

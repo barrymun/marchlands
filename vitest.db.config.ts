@@ -9,6 +9,7 @@ export default defineConfig({
     include: ['backend/**/test/**/*.db.test.ts'],
     environment: 'node',
     globalSetup: ['backend/packages/game/test/support/global-setup.ts'],
+    setupFiles: ['backend/packages/game/test/support/feature-flags.ts'],
     fileParallelism: false,
     testTimeout: 30_000,
     hookTimeout: 300_000,

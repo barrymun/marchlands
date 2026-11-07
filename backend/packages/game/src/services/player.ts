@@ -10,10 +10,13 @@ import {
   BuffId,
   type CastleSign,
   DAY,
+  Feature,
   type FlagColour,
   GameError,
+  getFeatureFlags,
   goldForCents,
   HOUR,
+  isFeatureOn,
   itemGoldPrice,
   ItemId,
   lordGear,
@@ -156,6 +159,7 @@ export async function playerState(ctx: Ctx, playerId: number) {
     mapSizeX: BALANCE.mapSize,
     mapSizeY: BALANCE.mapSize,
     gameSpeed: Number(process.env.GAME_SPEED ?? 1),
+    features: getFeatureFlags(),
     currentTime: ctx.now,
     tutorialStepId: player.misc.tutorialStep ?? 0,
     nextRenameAt: nextRenameAt(player, ctx.now),
@@ -305,6 +309,7 @@ export async function startTruce(ctx: Ctx, playerId: number, itemId: string, cit
   // without a Truce Agreement, one is bought with the city's gold
   const b = await openOwnCity(ctx, playerId, cityId);
   const p = b.player;
+  if (!isFeatureOn(Feature.PVP)) throw new GameError(msg('player.truce.pvpDisabled'), -99);
   if (activeBuff(p, BuffId.TRUCE_COOLDOWN, ctx.now)) throw new GameError(msg('player.truce.cooldown'), -99);
   if (itemId !== ItemId.TRUCE_AGREEMENT) throw new GameError(msg('common.invalidData'), -99);
   useItemOrGold(ctx, p, b.city, itemId, itemGoldPrice(itemId) ?? 0);

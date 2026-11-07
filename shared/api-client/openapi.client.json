@@ -464,6 +464,7 @@
               "player.holiday.invalidDays",
               "player.holiday.troopsOut",
               "player.truce.cooldown",
+              "player.truce.pvpDisabled",
               "player.protected.beginner",
               "player.protected.truce",
               "player.protected.holiday",
@@ -576,6 +577,7 @@
               "report.abandonCancelled",
               "report.seatRebelled",
               "report.cityFounded",
+              "army.pvpDisabled",
               "army.planNotFound",
               "army.planLimit",
               "army.planWaveLimit",
@@ -717,6 +719,17 @@
         "required": [
           "ok",
           "error"
+        ]
+      },
+      "FeatureFlagsInput": {
+        "type": "object",
+        "properties": {
+          "pvp": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pvp"
         ]
       },
       "ResourceAmountsInput": {
@@ -4091,6 +4104,9 @@
           "gameSpeed": {
             "type": "number"
           },
+          "features": {
+            "$ref": "#/components/schemas/FeatureFlagsInput"
+          },
           "currentTime": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -4133,6 +4149,7 @@
           "mapSizeX",
           "mapSizeY",
           "gameSpeed",
+          "features",
           "currentTime",
           "tutorialStepId",
           "nextRenameAt",
@@ -4287,6 +4304,9 @@
           "gameSpeed": {
             "type": "number"
           },
+          "features": {
+            "$ref": "#/components/schemas/FeatureFlagsInput"
+          },
           "currentTime": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -4333,6 +4353,7 @@
           "mapSizeX",
           "mapSizeY",
           "gameSpeed",
+          "features",
           "currentTime",
           "tutorialStepId",
           "nextRenameAt",
@@ -10913,6 +10934,9 @@
             "type": "number",
             "description": "timer multiplier (GAME_SPEED)"
           },
+          "features": {
+            "$ref": "#/components/schemas/FeatureFlagsInput"
+          },
           "mapSize": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -10962,6 +10986,7 @@
         },
         "required": [
           "gameSpeed",
+          "features",
           "mapSize",
           "buildings",
           "research",
@@ -12944,6 +12969,7 @@
               "player.holiday.invalidDays",
               "player.holiday.troopsOut",
               "player.truce.cooldown",
+              "player.truce.pvpDisabled",
               "player.protected.beginner",
               "player.protected.truce",
               "player.protected.holiday",
@@ -13056,6 +13082,7 @@
               "report.abandonCancelled",
               "report.seatRebelled",
               "report.cityFounded",
+              "army.pvpDisabled",
               "army.planNotFound",
               "army.planLimit",
               "army.planWaveLimit",
@@ -13199,6 +13226,18 @@
         "required": [
           "ok",
           "error"
+        ],
+        "additionalProperties": false
+      },
+      "FeatureFlags": {
+        "type": "object",
+        "properties": {
+          "pvp": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pvp"
         ],
         "additionalProperties": false
       },
@@ -16651,6 +16690,9 @@
           "gameSpeed": {
             "type": "number"
           },
+          "features": {
+            "$ref": "#/components/schemas/FeatureFlags"
+          },
           "currentTime": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -16693,6 +16735,7 @@
           "mapSizeX",
           "mapSizeY",
           "gameSpeed",
+          "features",
           "currentTime",
           "tutorialStepId",
           "nextRenameAt",
@@ -16849,6 +16892,9 @@
           "gameSpeed": {
             "type": "number"
           },
+          "features": {
+            "$ref": "#/components/schemas/FeatureFlags"
+          },
           "currentTime": {
             "type": "number",
             "description": "epoch milliseconds"
@@ -16895,6 +16941,7 @@
           "mapSizeX",
           "mapSizeY",
           "gameSpeed",
+          "features",
           "currentTime",
           "tutorialStepId",
           "nextRenameAt",
@@ -23640,6 +23687,9 @@
             "type": "number",
             "description": "timer multiplier (GAME_SPEED)"
           },
+          "features": {
+            "$ref": "#/components/schemas/FeatureFlags"
+          },
           "mapSize": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -23689,6 +23739,7 @@
         },
         "required": [
           "gameSpeed",
+          "features",
           "mapSize",
           "buildings",
           "research",

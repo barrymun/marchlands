@@ -16,6 +16,7 @@ x-backend: &backend
     WORLD_MAP: ${WORLD_MAP:-generated}
     WORLD_SEED: ${WORLD_SEED:-marchlands}
     GAME_SPEED: ${GAME_SPEED:-1}
+    FEATURE_PVP: ${FEATURE_PVP:-false}
     ADMIN_USERNAMES: ${ADMIN_USERNAMES:-}
   depends_on:
     migrate:

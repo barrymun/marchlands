@@ -10,6 +10,8 @@ import { BALANCE, dur, GameError, Mission, msg, sanitizeTroops, tileXY } from '@
 import { cities, heroes, one, players, warPlans, warPlanWaves } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
+import { tileOwner } from '#/engine/armies.ts';
+import { pvpForbids } from '#/engine/relations.ts';
 import { cleanName } from '#/helpers.ts';
 import { getCity, getPlayer, getTile } from '#/repo.ts';
 import { marchEstimate, sendArmy } from '#/services/armies.ts';
@@ -128,10 +130,15 @@ function landingSecond(ctx: Ctx, raw: number): number {
 }
 
 /** A plan's name, target and alliance (if shared) as the player gave them, checked. */
+/** A plan's waves attack or scout, so with PvP off its target can't be another player's (sendArmy would refuse them too). */
+async function refuseIfPvpForbids(ctx: Ctx, playerId: number, targetTileId: number) {
+  if (pvpForbids(playerId, await tileOwner(ctx, await getTile(ctx, targetTileId)))) throw new GameError(msg('army.pvpDisabled'), -70);
+}
+
 async function planFields(ctx: Ctx, playerId: number, body: Omit<CreatePlanBody, 'landAt'>) {
   const player = await getPlayer(ctx, playerId);
   const name = cleanName(body.name, 1, 40, msg('common.name'));
-  await getTile(ctx, body.targetTileId);
+  await refuseIfPvpForbids(ctx, playerId, body.targetTileId);
   if (body.shared && player.allianceId == null) throw new GameError(msg('army.planNoAlliance'), -99);
   return { name, targetTileId: body.targetTileId, allianceId: body.shared ? player.allianceId : null };
 }
@@ -184,6 +191,7 @@ export async function addWave(ctx: Ctx, playerId: number, planId: number, body: 
   const city = await getCity(ctx, body.cityId);
   if (city.playerId !== playerId) throw new GameError(msg('common.invalidCastle'), -99, 403);
   if (body.mission !== Mission.ATTACK && body.mission !== Mission.SCOUT) throw new GameError(msg('army.planMission'), -99);
+  await refuseIfPvpForbids(ctx, playerId, plan.targetTileId);
   const troops = sanitizeTroops(body.troops);
   const waves = await ctx.tx.select({ position: warPlanWaves.position }).from(warPlanWaves).where(eq(warPlanWaves.planId, plan.id));
   const position = Math.max(-1, ...waves.map((w) => w.position)) + 1;

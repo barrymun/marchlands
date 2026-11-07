@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { type CityBean, getCitiesByCityIdQueryKey, getPlayerQueryKey, postCitiesShopGoldMutation, postPlayerItemsUseMutation } from '@marchlands/api-client';
-import { ITEM_CATEGORY_IDS, ITEM_INFO, ItemUse } from '@marchlands/core';
+import { Feature, ITEM_CATEGORY_IDS, ITEM_INFO, ItemId, ItemUse } from '@marchlands/core';
 
 import { ActiveEffects } from '@/components/active-effects/active-effects';
 import { slotItems, slotOf } from '@/components/active-effects/utils';
@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCommand, usePlayer } from '@/hooks/use-game';
+import { useCommand, useFeature, usePlayer } from '@/hooks/use-game';
 import { useSearchState, useSearchText } from '@/hooks/use-search-state';
 import { fmt, fmtExact } from '@/lib/format';
 import { itemCategoryName, itemName } from '@/lib/game-data';
@@ -40,11 +40,14 @@ export function ItemsPanel({ city }: { city: CityBean }) {
   const effectSlot = s.effect ? slotOf(s.effect) : null;
   const effectFilter = effectSlot && { label: effectSlot.label, ids: slotItems(effectSlot) };
   const listRef = useRef<HTMLDivElement>(null);
+  const pvp = useFeature(Feature.PVP);
   const counts = useMemo(() => new Map((player.data?.items ?? []).map((i) => [i.id, i.count])), [player.data?.items]);
 
   const entries = useMemo(() => {
     const byKey = new Map<string, Entry>();
     for (const info of ITEM_INFO) {
+      // a truce protects from other players
+      if (!pvp && info.id === ItemId.TRUCE_AGREEMENT) continue;
       const key = `${itemName(info.id)}|${JSON.stringify(info.description)}`;
       const e = byKey.get(key) ?? { info, ids: [], owned: 0 };
       e.ids.push(info.id);
@@ -52,7 +55,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
       byKey.set(key, e);
     }
     return [...byKey.values()];
-  }, [counts]);
+  }, [counts, pvp]);
 
   const q = query.trim().toLowerCase();
   const nameOf = (e: Entry) => itemName(e.info.id);

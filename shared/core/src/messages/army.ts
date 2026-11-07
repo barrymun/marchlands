@@ -1,5 +1,7 @@
 // Sending and recalling armies, and why a march turned back (see index.ts).
 export const ARMY_MESSAGES = {
+  /** PvP is off (the Feature flag): an error, and the reason a march turns back */
+  pvpDisabled: [],
   /** wave plans (camp times): no such plan, or not one the player can see */
   planNotFound: [],
   /** the player already keeps BALANCE.warPlans.maxPlans plans */

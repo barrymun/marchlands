@@ -1,15 +1,18 @@
 import { Crown } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Feature } from '@marchlands/core';
+
 import { Badge } from '@/components/ui/badge';
-import { usePlayer } from '@/hooks/use-game';
+import { useFeature, usePlayer } from '@/hooks/use-game';
 import { fmt, fmtExact } from '@/lib/format';
 import { seatTitleName, titleName } from '@/lib/game-data';
 
-/** The player at a glance: title and name, prestige, rank and honour, and beginner protection while it lasts. */
+/** The player at a glance: title and name, prestige, rank and honour, and beginner protection while it lasts (it protects from other players, so only with PvP on). */
 export function PlayerSummary() {
   const { t } = useTranslation('game');
   const info = usePlayer().data?.playerInfo;
+  const pvp = useFeature(Feature.PVP);
   if (!info) return null;
   return (
     <div className="grid min-w-0 gap-0.5 text-sm">
@@ -21,7 +24,7 @@ export function PlayerSummary() {
             {seatTitleName(info.seatTitle)}
           </Badge>
         )}
-        {info.beginner && (
+        {pvp && info.beginner && (
           <Badge variant="secondary" className="shrink-0">
             {t('beginnerProtection')}
           </Badge>

@@ -8,6 +8,7 @@
 
 ## Where things stand
 
+- **With PvP off (v0.5, `FEATURE_PVP`, 2026-11-07):** a seat nobody holds can be attacked, scouted and captured as below, but a held one can't, so it stays with its holder until they give it up or leave the game ([deviations.md](../deviations.md), Switched off for now).
 - NPC cities go from level 1 to 10: 51,217 on the 800 × 800 map, 990 of them at level 10 (counted 2026-10-19; [market-and-factions.md](market-and-factions.md), Where things stand). One at full strength keeps nothing in the database (`tiles.troops`, `forts` and `state` stay null until it is touched).
 - A barbarian city loses 10 to 15 loyalty for each win against it and is captured at 0 if the attacker's title allows another city, keeping its buildings. Players' cities have no loyalty and can't be captured (*(design change)*, deviations.md).
 - The five NPC factions hold the 16 states (zones), from level 5 up, as fixed data (`shared/core/src/factions.ts`), and trade with each other and with players (market phases 2 and 3). Each player has a standing with each faction (reputation, market phase 4, 2026-10-31), which an attack on a member lowers.

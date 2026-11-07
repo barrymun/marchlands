@@ -15,7 +15,7 @@ import {
   TRADE_COUNTERPARTIES,
 } from '@marchlands/core';
 
-import { Ms, zId, zPaging, zResources } from '#/common.ts';
+import { FeatureFlags, Ms, zId, zPaging, zResources } from '#/common.ts';
 import { AllianceRow, CityRow, HeroRow, MarketOrderRow, MarketShipmentRow, PlayerRow, QuestProgressRow } from '#/rows.ts';
 
 const int = () => z.number().int();
@@ -201,6 +201,7 @@ export type ConfigBalance = z.infer<typeof ConfigBalance>;
 export const StaticConfig = z
   .object({
     gameSpeed: z.number().describe('timer multiplier (GAME_SPEED)'),
+    features: FeatureFlags,
     mapSize: int(),
     buildings: z.array(ConfigBuildingLevel).describe('one row per typeId and level'),
     research: z.array(ConfigResearchLevel).describe('one row per techId and level'),

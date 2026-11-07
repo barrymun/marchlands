@@ -19,7 +19,8 @@
     "troopsOut": "You must recall all of your troops first."
   },
   "truce": {
-    "cooldown": "Your truce is still cooling down."
+    "cooldown": "Your truce is still cooling down.",
+    "pvpDisabled": "A truce isn't needed in this version of the game: players can't attack each other."
   },
   "protected": {
     "beginner": "This player is under Beginner's Protection.",

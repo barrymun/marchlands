@@ -16,6 +16,7 @@ How to work in this repository. Read [README.md](README.md) for what Marchlands 
 - **A large feature gets a design document** in [docs/features/](docs/features/README.md), linked from its TODO item: where things stand, what's decided and why, open questions and phases. Record decisions there as they're made.
 - **Ideas and known quirks for later** go in [docs/backlog.md](docs/backlog.md): what happens now, where, and why it was left.
 - **Deviations are documented:** every rule that differs from the original Evony Age 1 server goes in [docs/deviations.md](docs/deviations.md), marked *(design change)*. Every tunable number lives in `shared/core/src/balance.ts` (`BALANCE`); don't hard-code game values elsewhere.
+- **Feature flags** switch off a part of the game for a release (`shared/core/src/features.ts`, `FEATURE_<NAME>`, off unless set): how they work and how to add one are in [docs/architecture.md](docs/architecture.md), Feature flags. The backend always enforces the rule; the client's `useFeature` only shapes what's shown.
 - **Don't change behaviour while restructuring.** A refactor moves code; a rule change is its own change, documented as above.
 
 ## Picking up where the last session left off
@@ -52,7 +53,7 @@ Run from the repo root.
 | `npm run art:placeholders [-- --force]` | write placeholder sprites for any building art that's missing (see Client, Game art); `--force` rewrites them all, real art included |
 | `npm run sim -- …` | battle simulations, see [docs/battle-sims](docs/battle-sims/README.md) |
 | `npm run delete-player -- <username>… [--yes]` | delete test accounts the way the game does (their valleys released, castles back to flat land); lists what it would delete until run with `--yes`. Never deletes admin accounts. |
-| `API=http://localhost:3100 node tools/smoke/smoke.mjs` (also `war.mjs`, `market.mjs`, `abandon.mjs`) | end-to-end checks against the running stack |
+| `API=http://localhost:3100 node tools/smoke/smoke.mjs` (also `war.mjs`, `market.mjs`, `abandon.mjs`, `pvp-off.mjs`) | end-to-end checks against the running stack. `war.mjs` needs `FEATURE_PVP=true` on the stack, `pvp-off.mjs` needs it off, and each says so and stops otherwise |
 | `API=http://localhost:3100 npm run load -- [--players 100] [--minutes 5] [--server-stats] [--cleanup]` | load test (`tools/smoke/load.mjs`): simulated players (`fx_load_NNN`, kept for the next run unless `--cleanup`) open screens and push sockets as the web client does; prints requests per second and latency per endpoint, the pushes, and with `--server-stats` the stack's CPU and Postgres transactions. The requests follow the client's: change it when the client's queries or push handlers change what they fetch |
 
 Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and `npm run format:check` all pass, and `npm run test:db` when the change touches the backend.

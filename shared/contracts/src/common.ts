@@ -1,7 +1,7 @@
 // Envelope and primitives shared by every endpoint.
 
 import { z } from 'zod';
-import { type FortKey, FortKeySchema, MessageSchema, type TroopKey, TroopKeySchema } from '@marchlands/core';
+import { Feature, type FortKey, FortKeySchema, MessageSchema, type TroopKey, TroopKeySchema } from '@marchlands/core';
 
 /** Every successful call answers `{ ok: 1, data }`. */
 export const Ok = <T extends z.ZodType>(data: T) => z.object({ ok: z.literal(1), data });
@@ -15,6 +15,9 @@ export const ErrorResponse = z
   })
   .meta({ id: 'ErrorResponse' });
 export type ErrorResponse = z.infer<typeof ErrorResponse>;
+
+/** What this server has switched on (core Feature; the API and worker read it from FEATURE_<NAME>). */
+export const FeatureFlags = z.object({ [Feature.PVP]: z.boolean() }).meta({ id: 'FeatureFlags' });
 
 /** Commands with nothing to return answer `data: null`. */
 export const Empty = z.null();

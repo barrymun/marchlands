@@ -24,6 +24,7 @@ import {
   createGuardHero,
   distributeLossesAmong,
   dur,
+  Feature,
   type FortCounts,
   freshNpcState,
   heroPower,
@@ -37,6 +38,7 @@ import {
   historicState,
   type HistoricState,
   injuredOf,
+  isFeatureOn,
   ItemId,
   maxArmyTroops,
   maxCitiesFor,
@@ -94,7 +96,7 @@ import { dropCapturedTarget } from '#/engine/flows.ts';
 import { heroSlots, pushHero } from '#/engine/heroes.ts';
 import { plunderNpc } from '#/engine/npc-economy.ts';
 import { initialCity, isProtected } from '#/engine/player.ts';
-import { isFriendly, relationBetween } from '#/engine/relations.ts';
+import { isFriendly, pvpForbids, relationBetween } from '#/engine/relations.ts';
 import { createReport } from '#/engine/reports.ts';
 import { addStanding } from '#/engine/reputation.ts';
 import { ruledZones } from '#/engine/seats.ts';
@@ -148,6 +150,8 @@ export async function processArmy(ctx: Ctx, armyId: number) {
   if (!a) return;
   if (a.direction === ArmyDirection.BACKWARD) return returnHome(ctx, a);
 
+  // with PvP off, an army that set out before it was switched off, or for a tile a player has taken since, turns back
+  if (await pvpStops(ctx, a)) return turnBack(ctx, a, msg('army.pvpDisabled'));
   const attacker = await getPlayer(ctx, a.playerId);
   switch (a.mission) {
     case Mission.TRANSPORT:
@@ -163,6 +167,12 @@ export async function processArmy(ctx: Ctx, armyId: number) {
     default:
       return turnBack(ctx, a, msg('army.unknownMission'));
   }
+}
+
+/** Whether PvP being off stops an army arriving, by who holds its target now (the tile locked, so a capture can't slip in first). */
+async function pvpStops(ctx: Ctx, a: ArmyRow) {
+  if (isFeatureOn(Feature.PVP) || (a.mission !== Mission.ATTACK && a.mission !== Mission.SCOUT)) return false;
+  return pvpForbids(a.playerId, await tileOwner(ctx, await getTile(ctx, a.targetTileId, { lock: true })));
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 
 import { and, eq, inArray } from 'drizzle-orm';
 
-import { Relation } from '@marchlands/core';
+import { Feature, isFeatureOn, Relation } from '@marchlands/core';
 import { allianceRelations, players } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
@@ -33,3 +33,6 @@ export async function relationBetween(ctx: Ctx, viewer: number, other: number): 
 
 /** Friendly players may not be attacked or scouted. */
 export const isFriendly = (r: number) => r === Relation.SELF || r === Relation.ALLIANCE || r === Relation.ALLY;
+
+/** Whether PvP being off stops `playerId` attacking or scouting a tile held by `ownerId` (null: nobody holds it). */
+export const pvpForbids = (playerId: number, ownerId: number | null) => !isFeatureOn(Feature.PVP) && ownerId != null && ownerId !== playerId;

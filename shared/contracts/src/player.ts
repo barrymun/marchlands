@@ -21,7 +21,7 @@ import {
 import { accounts } from '@marchlands/db/schema';
 
 import { ArmyBean, BuffBean, CityBean, HeroBean, ItemCount, PlayerInfo } from '#/beans.ts';
-import { Ms, zId } from '#/common.ts';
+import { FeatureFlags, Ms, zId } from '#/common.ts';
 import { LordGear } from '#/military.ts';
 import { CityRow, PlayerRow } from '#/rows.ts';
 
@@ -254,6 +254,7 @@ export const PlayerState = z
     mapSizeX: z.number().int(),
     mapSizeY: z.number().int(),
     gameSpeed: z.number(),
+    features: FeatureFlags,
     currentTime: Ms,
     tutorialStepId: z.number().int(),
     nextRenameAt: Ms.describe('(marchlands) when the lord may rename again (0: now)'),

@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { PlayerState, QuestBean, QuestGroupStatus, ShopCategory, StaticConfig } from '@marchlands/contracts';
-import { BALANCE, BUILDINGS, getGameSpeed, itemGoldPrice, ItemId, ITEMS } from '@marchlands/core';
+import { BALANCE, BUILDINGS, Feature, getGameSpeed, itemGoldPrice, ItemId, ITEMS, setFeatureFlags } from '@marchlands/core';
 import { admin } from '@marchlands/game';
 
 import { apiTest, type TestApi } from '#test/support/api.ts';
@@ -30,6 +30,20 @@ describe('authentication', () => {
 });
 
 describe('GET /config/static', () => {
+  it('answers which parts of the game this server has on, without a token, as the player state does', () =>
+    apiTest(async (api) => {
+      const p = await api.player();
+      setFeatureFlags({ [Feature.PVP]: false });
+      try {
+        expect((await api.ok<StaticConfig>('GET', 'config/static')).features).toEqual({ pvp: false });
+        expect((await state(api, p)).features).toEqual({ pvp: false });
+      } finally {
+        setFeatureFlags({ [Feature.PVP]: true });
+      }
+      expect((await api.ok<StaticConfig>('GET', 'config/static')).features).toEqual({ pvp: true });
+      expect((await state(api, p)).features).toEqual({ pvp: true });
+    }));
+
   it('answers the game data without a token, items without names or cent prices', () =>
     apiTest(async (api) => {
       const c = await api.ok<StaticConfig>('GET', 'config/static');

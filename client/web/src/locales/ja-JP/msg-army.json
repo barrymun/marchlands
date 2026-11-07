@@ -40,6 +40,7 @@
   "upgradeHeld": "アップグレードできるのは誰も占領していない領地だけです。",
   "valleyMaxLevel": "この領地はすでに最高のレベル{{level}}です。",
   "barbarianCityMaxLevel": "この蛮族の都市はすでに最高のレベル{{level}}です。",
+  "pvpDisabled": "このバージョンでは、プレイヤー同士で攻撃や偵察はできません。",
   "planNotFound": "その計画はありません。",
   "planLimit_other": "計画は最大{{count, number}}件までです。",
   "planWaveLimit_other": "1つの計画には最大{{count, number}}波までです。",

@@ -3,6 +3,7 @@
 
 import { BALANCE, scaled } from '#/balance.ts';
 import { BASIC_RESOURCES, BuildingStatus, Relation, RESOURCE_KEYS, TileType, TROOP_ID_BY_KEY, TroopKey } from '#/constants.ts';
+import { Feature, isFeatureOn } from '#/features.ts';
 import { randInt, type Rng, seededRng } from '#/rng.ts';
 import { unitExp } from '#/troops.ts';
 import { type BuildingState, type FortCounts, type ResourceSet, type TroopCounts } from '#/types.ts';
@@ -285,6 +286,12 @@ export function relationPermissions(relation: number) {
   }
   if (relation === Relation.ENEMY) return { canLoot: true, canOccupy: true, canScout: true, canSend: true, canTrans: true };
   return { canLoot: true, canOccupy: true, canScout: true, canSend: false, canTrans: false };
+}
+
+/** The same for a tile another player may hold: with PvP off, nothing there can be attacked or scouted. */
+export function heldTilePermissions(relation: number) {
+  const allowed = relationPermissions(relation);
+  return isFeatureOn(Feature.PVP) ? allowed : { ...allowed, canLoot: false, canOccupy: false, canScout: false };
 }
 
 /** The widest map view (tiles per side) a client may ask for. */

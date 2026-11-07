@@ -23,6 +23,7 @@ import {
   ChatChannel,
   FactionId,
   FactionTemperament,
+  Feature,
   FlagColour,
   FLOW_TRAIN_MAX,
   FlowActionType,
@@ -439,6 +440,7 @@ describe('stored values', () => {
     expect(HeroStatus).toEqual({ IDLE: 0, MAYOR: 1, ATTACK: 3, RETURN: 5 });
     expect(Sex).toEqual({ MALE: 0, FEMALE: 1 });
     expect(HeroBuffId).toEqual({ POWER: 'power', MANAGEMENT: 'management', STRATAGEM: 'stratagem' });
+    expect(Feature).toEqual({ PVP: 'pvp' });
     expect(FlagColour).toEqual({
       RED: 'red',
       ORANGE: 'orange',

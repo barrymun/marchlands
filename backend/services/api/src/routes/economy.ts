@@ -57,7 +57,21 @@ import {
   StateRuler,
   StaticConfig,
 } from '@marchlands/contracts';
-import { BALANCE, BUILDINGS, dur, getGameSpeed, itemGoldPrice, itemInfo, ITEMS, msg, QUESTS, RESEARCH, TITLES, TROOPS } from '@marchlands/core';
+import {
+  BALANCE,
+  BUILDINGS,
+  dur,
+  getFeatureFlags,
+  getGameSpeed,
+  itemGoldPrice,
+  itemInfo,
+  ITEMS,
+  msg,
+  QUESTS,
+  RESEARCH,
+  TITLES,
+  TROOPS,
+} from '@marchlands/core';
 import { admin, factions, market, quests, rankings, runGame, shop } from '@marchlands/game';
 
 import { anon, authenticate, claimsOf, type Data, doc, game, maybePlayerIdOf, requireAdmin, tags, type ZApp, zCityParams } from '#/http.ts';
@@ -92,6 +106,7 @@ export default async function economyRoutes(app: ZApp) {
       ok: 1 as const,
       data: {
         gameSpeed: getGameSpeed(),
+        features: getFeatureFlags(),
         mapSize: BALANCE.mapSize,
         buildings: BUILDINGS,
         research: RESEARCH,

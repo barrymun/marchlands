@@ -1,6 +1,6 @@
 // A new lord's first city and beginner protection.
 
-import { BALANCE, BuffId, type BuildingState, BuildingStatus, type Message, msg } from '@marchlands/core';
+import { BALANCE, BuffId, type BuildingState, BuildingStatus, Feature, isFeatureOn, type Message, msg } from '@marchlands/core';
 import { mails } from '@marchlands/db';
 
 import { type Ctx } from '#/context.ts';
@@ -45,15 +45,18 @@ export async function checkBeginner(ctx: Ctx, p: PlayerRow, townHallLevel?: numb
   if (expired || (townHallLevel ?? 0) >= BALANCE.beginnerTownHallLevel) {
     p.beginner = false;
     if (p.status === 3) p.status = 0;
-    await ctx.tx.insert(mails).values({
-      playerId: p.id,
-      type: 2,
-      title: '',
-      content: '',
-      system: { title: msg('player.mail.protectionExpired.title'), content: msg('player.mail.protectionExpired.content') },
-      sentAt: ctx.now,
-    });
-    await pushMailCounts(ctx, p.id);
+    // it tells the player that others can now attack them, so it waits for PvP
+    if (isFeatureOn(Feature.PVP)) {
+      await ctx.tx.insert(mails).values({
+        playerId: p.id,
+        type: 2,
+        title: '',
+        content: '',
+        system: { title: msg('player.mail.protectionExpired.title'), content: msg('player.mail.protectionExpired.content') },
+        sentAt: ctx.now,
+      });
+      await pushMailCounts(ctx, p.id);
+    }
     await pushPlayerInfo(ctx, p);
   }
 }

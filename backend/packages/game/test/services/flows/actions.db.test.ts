@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   BuildingType,
+  Feature,
   FLOW_TRAIN_MAX,
   FlowActionType,
   type FlowCityResult,
@@ -21,6 +22,7 @@ import {
   msg,
   ref,
   ResourceKey,
+  setFeatureFlags,
   TimedEventType,
   TroopType,
 } from '@marchlands/core';
@@ -338,6 +340,30 @@ describe(`${flows.runFlow.name}: attackTargets`, () => {
       ]);
       expect(g.events(TimedEventType.ARMY)).toHaveLength(2);
       expect((await reloadCity(g, p.cityId)).troops.militia).toBe(800);
+    }));
+
+  it("skips another player's city with PvP off, and goes on to the next target", () =>
+    game(async (g) => {
+      const p = await createTestPlayer(g);
+      await farmingCity(g, p);
+      const q = await createTestPlayer(g);
+      const theirs = (await reloadCity(g, q.cityId)).tileId;
+      const [valley] = await valleysNear(g, p.cityId);
+      const preset = await armyPreset(g, p, 'Farm', { militia: 100 });
+      setFeatureFlags({ [Feature.PVP]: false });
+      try {
+        const city = await tryActions(g, p, [attack(preset, { [p.cityId]: [theirs, valley] })], false);
+        expect(city.steps[0]!.detail).toEqual(msg('flow.step.sent', { sent: 1, total: 2, army: 'Farm' }));
+        expect(city.steps[0]!.items![0]).toMatchObject({
+          label: at(theirs),
+          ok: false,
+          detail: msg('flow.target.refused', { reason: msg('army.pvpDisabled') }),
+        });
+        expect(city.steps[0]!.items![1]).toMatchObject({ label: at(valley), ok: true });
+        expect(g.events(TimedEventType.ARMY)).toHaveLength(1);
+      } finally {
+        setFeatureFlags({ [Feature.PVP]: true });
+      }
     }));
 
   it('skips a target it cannot attack and lets its hero lead the next one', () =>

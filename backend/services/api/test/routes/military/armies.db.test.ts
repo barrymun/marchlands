@@ -5,7 +5,7 @@
 import { eq } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 
-import { ArmyDirection, BuildingType, HeroStatus, Mission, TileType } from '@marchlands/core';
+import { ArmyDirection, BuildingType, Feature, HeroStatus, Mission, setFeatureFlags, TileType } from '@marchlands/core';
 import { armies, cities, heroes, tiles } from '@marchlands/db';
 
 import { apiTest, type TestApi } from '#test/support/api.ts';
@@ -80,6 +80,28 @@ async function stationed(api: TestApi, a: Lord, b: Lord) {
   expect((await armyRow(api, army.armyId))!.direction).toBe(ArmyDirection.STAY);
   return army.armyId;
 }
+
+describe('PvP off', () => {
+  it("refuses an army at another player's city, and the map offers none", () =>
+    apiTest(async (api) => {
+      const [p, q] = await lords(api, 2);
+      const heroId = await warCity(api, p);
+      const target = (await cityRow(api, q.cityId))!.tileId;
+      setFeatureFlags({ [Feature.PVP]: false });
+      try {
+        for (const body of [
+          { targetTileId: target, mission: Mission.ATTACK, troops: { lightCavalry: 10 }, heroId },
+          { targetTileId: target, mission: Mission.SCOUT, troops: { scouter: 10 } },
+        ]) {
+          await api.refused('POST', `cities/${p.cityId}/armies`, 'army.pvpDisabled', { token: p.token, body });
+        }
+        const tile = await api.ok<{ canLoot: boolean; canOccupy: boolean; canScout: boolean }>('GET', `map/tiles/${target}`, { token: p.token });
+        expect(tile).toMatchObject({ canLoot: false, canOccupy: false, canScout: false });
+      } finally {
+        setFeatureFlags({ [Feature.PVP]: true });
+      }
+    }));
+});
 
 describe('GET /armies', () => {
   itNeedsPlayer('GET', 'armies');

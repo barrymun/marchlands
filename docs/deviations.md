@@ -21,6 +21,10 @@ The specs in `docs/spec/` describe what the C++ Spitfire server actually did, bu
 - **NPC cities.** The level 1–10 table, layout and regeneration (`max/80` resources every 6 min). Valley garrisons follow `ValleyData::Reset`. *(design change, 2026-11-01)* Troops and fortifications come back by the second rather than in 6-minute steps: a barbarian city's at `max/10` every 6 game minutes as before but a little each second (`refillCounts`, `regenerateNpc`, `refillAt` in the tile's state), and a free valley's whole again 6 game minutes after a battle, also by the second, a new garrison rolled only once the old one is whole and has stood 6 minutes (from a seed in the tile's state, `valleyDefenders`), where the original rolled a whole new one 6 minutes after the last. Resources and loyalty keep their steps. A gap between waves always lets some troops back, which is what makes landing waves together pay (docs/features/historical-cities.md). Every arrival is fought as of its landing time, so a busy worker doesn't give a garrison extra seconds.
 - **Other.** Comfort (blessing and population raising: costs, effects, 15-minute cooldown); the 4×4 state grid.
 
+## Switched off for now
+
+- *(design change, 2026-11-07, the maintainer)* **No PvP in v0.5** (`FEATURE_PVP`, off by default; docs/architecture.md, Feature flags). Players can't attack or scout anything another player holds: a city, a valley or a captured historic city. Attacks and scouts of barbarian cities, free valleys and unheld historic cities go on as before, and allies can still reinforce and supply each other. As a result, a historic city or valley stays with its holder until they give it up or leave the game. Truces aren't sold or started (a truce only protects from players), and the mail saying beginner protection has ended isn't sent. With the flag on, the rules below apply unchanged.
+
 ## Bugs fixed
 
 | Original behaviour | Marchlands |

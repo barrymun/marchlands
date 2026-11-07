@@ -12,7 +12,7 @@ import {
   postPlayerRenameMutation,
   postPlayerTruceMutation,
 } from '@marchlands/api-client';
-import { BuffId, itemGoldPrice } from '@marchlands/core';
+import { BuffId, Feature, itemGoldPrice } from '@marchlands/core';
 
 import { Countdown } from '@/components/countdown/countdown';
 import { TRUCE } from '@/components/lord-dialog/lord-form/constants';
@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { useCommand, usePlayer } from '@/hooks/use-game';
+import { useCommand, useFeature, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';
 import { fmt } from '@/lib/format';
@@ -54,6 +54,7 @@ export function LordForm({ city }: { city?: CityBean }) {
     t('toast.truce'),
   );
   const truceGold = itemGoldPrice(TRUCE) ?? 0;
+  const pvp = useFeature(Feature.PVP);
   const now = useNow();
   const nextRename = player.data?.nextRenameAt ?? 0;
   const renameWait = nextRename > now;
@@ -131,39 +132,43 @@ export function LordForm({ city }: { city?: CityBean }) {
           </div>
           <LanguageSelect />
         </div>
-        <Separator />
-        <div className="grid gap-2">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            {t('truce.title')}
-            {truceBuff && (
-              <Badge variant="secondary">
-                <Trans t={t} i18nKey="truce.active" components={{ countdown: <Countdown endTime={truceBuff.endTime} /> }} />
-              </Badge>
-            )}
-            {!truceBuff && truceCooldown && (
-              <Badge variant="outline">
-                <Trans t={t} i18nKey="truce.cooldown" components={{ countdown: <Countdown endTime={truceCooldown.endTime} /> }} />
-              </Badge>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">{t('truce.description')}</p>
-          <div className="flex flex-wrap gap-2">
-            {(() => {
-              const owned = inv.count(TRUCE);
-              return (
-                <Button
-                  size="sm"
-                  variant={owned > 0 ? 'default' : 'outline'}
-                  disabled={!city || !!truceBuff || !!truceCooldown || truce.isPending || (owned === 0 && city.resource.gold < truceGold)}
-                  title={owned > 0 ? undefined : city ? t('common:boughtWithCityGold', { city: city.name }) : t('truce.boughtWithAny')}
-                  onClick={() => city && truce.mutate({ body: { itemId: TRUCE, cityId: city.id } })}
-                >
-                  {itemName(TRUCE)} · {owned > 0 ? t('truce.owned', { n: owned }) : t('common:gold', { gold: fmt(truceGold) })}
-                </Button>
-              );
-            })()}
-          </div>
-        </div>
+        {pvp && (
+          <>
+            <Separator />
+            <div className="grid gap-2">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                {t('truce.title')}
+                {truceBuff && (
+                  <Badge variant="secondary">
+                    <Trans t={t} i18nKey="truce.active" components={{ countdown: <Countdown endTime={truceBuff.endTime} /> }} />
+                  </Badge>
+                )}
+                {!truceBuff && truceCooldown && (
+                  <Badge variant="outline">
+                    <Trans t={t} i18nKey="truce.cooldown" components={{ countdown: <Countdown endTime={truceCooldown.endTime} /> }} />
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">{t('truce.description')}</p>
+              <div className="flex flex-wrap gap-2">
+                {(() => {
+                  const owned = inv.count(TRUCE);
+                  return (
+                    <Button
+                      size="sm"
+                      variant={owned > 0 ? 'default' : 'outline'}
+                      disabled={!city || !!truceBuff || !!truceCooldown || truce.isPending || (owned === 0 && city.resource.gold < truceGold)}
+                      title={owned > 0 ? undefined : city ? t('common:boughtWithCityGold', { city: city.name }) : t('truce.boughtWithAny')}
+                      onClick={() => city && truce.mutate({ body: { itemId: TRUCE, cityId: city.id } })}
+                    >
+                      {itemName(TRUCE)} · {owned > 0 ? t('truce.owned', { n: owned }) : t('common:gold', { gold: fmt(truceGold) })}
+                    </Button>
+                  );
+                })()}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

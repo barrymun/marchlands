@@ -20,6 +20,8 @@ export const PLAYER_MESSAGES = {
   'holiday.invalidDays': ['max'],
   'holiday.troopsOut': [],
   'truce.cooldown': [],
+  /** a truce protects from other players, who can't attack with PvP off */
+  'truce.pvpDisabled': [],
   /** why another player can't be attacked (an error, and the reason a march turns back) */
   'protected.beginner': [],
   'protected.truce': [],

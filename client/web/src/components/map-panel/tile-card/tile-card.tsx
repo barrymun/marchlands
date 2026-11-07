@@ -10,6 +10,7 @@ import {
   canUpgradeTile,
   FACTION_IDS,
   factionOfZone,
+  Feature,
   isFactionLevel,
   Mission,
   tileDistance,
@@ -23,6 +24,7 @@ import { AddToFarmButton } from '@/components/flow-attack/add-to-farm-button/add
 import { MedalOdds } from '@/components/map-panel/medal-odds/medal-odds';
 import { SeatDraft } from '@/components/map-panel/tile-card/seat-draft/seat-draft';
 import { SeatStatus } from '@/components/map-panel/tile-card/seat-status/seat-status';
+import { heldByAnotherPlayer } from '@/components/map-panel/tile-card/utils';
 import { placeName } from '@/components/map-panel/utils';
 import { ValleyUpgrade } from '@/components/map-panel/valley-upgrade/valley-upgrade';
 import { ResourceIcon } from '@/components/resource-icon/resource-icon';
@@ -31,7 +33,7 @@ import { tileKind, tileMissions, tileTarget } from '@/components/send-army-dialo
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { usePlayer } from '@/hooks/use-game';
+import { useFeature, usePlayer } from '@/hooks/use-game';
 import { useStateRulers } from '@/hooks/use-state-rulers';
 import { copyText } from '@/lib/clipboard';
 import { FACTION_STYLE } from '@/lib/factions';
@@ -91,6 +93,7 @@ export function TileCard({
   const ruler = tile?.type === TileType.NPC && isFactionLevel(tile.level) ? rulers.get(tile.zoneId) : undefined;
   const side = tile?.type === TileType.NPC && !ruler ? (isFactionLevel(tile.level) ? factionOfZone(tile.zoneId) : null) : undefined;
   const missions = tile ? tileMissions(tile, city.fieldId) : [];
+  const pvp = useFeature(Feature.PVP);
 
   // the coordinates in the game's own notation, ready to paste into a chat, a mail or another tool
   const copyCoords = (x: number, y: number) => {
@@ -231,6 +234,7 @@ export function TileCard({
             </Button>
           </div>
           {missions.includes(Mission.SCOUT) && scouts <= 0 && <p className="text-xs text-muted-foreground">{t('info.noScouts')}</p>}
+          {!pvp && heldByAnotherPlayer(tile) && <p className="text-xs text-muted-foreground">{t('info.pvpOff')}</p>}
         </>
       )}
     </section>

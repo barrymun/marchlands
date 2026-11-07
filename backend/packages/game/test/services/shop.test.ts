@@ -1,8 +1,11 @@
-import { describe, expect, it } from 'vitest';
-import { itemConfig, itemGoldPrice, ITEMS } from '@marchlands/core';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { Feature, itemConfig, itemGoldPrice, ItemId, ITEMS, setFeatureFlags } from '@marchlands/core';
 import { catalogue } from '#/services/shop.ts';
 
 describe(catalogue.name, () => {
+  beforeEach(() => setFeatureFlags({ [Feature.PVP]: true }));
+  afterEach(() => setFeatureFlags({ [Feature.PVP]: false }));
+
   it('lists every item with a gold price once, at that price, under its type', () => {
     const groups = catalogue();
     const listed = groups.flatMap((g) => g.items.map((i) => ({ ...i, typeId: g.typeId })));
@@ -13,6 +16,13 @@ describe(catalogue.name, () => {
       expect(i.typeId).toBe(itemConfig(i.id)!.type);
       expect(i.dayLimit).toBe(itemConfig(i.id)!.dayLimit);
     }
+  });
+
+  it('leaves out the Truce Agreement alone with PvP off', () => {
+    const on = catalogue().flatMap((g) => g.items.map((i) => i.id));
+    setFeatureFlags({ [Feature.PVP]: false });
+    const off = catalogue().flatMap((g) => g.items.map((i) => i.id));
+    expect(on.filter((id) => !off.includes(id))).toEqual([ItemId.TRUCE_AGREEMENT]);
   });
 
   it('leaves out items that are not for sale, and sorts the groups by type', () => {

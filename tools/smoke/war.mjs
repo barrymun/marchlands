@@ -81,6 +81,11 @@ async function setup(gm, l, troops) {
 }
 
 async function main() {
+  const { data } = await fetch(`${base}/config/static`).then((r) => r.json());
+  if (!data.features.pvp) {
+    console.log('skipped: this scenario is players fighting, and this stack has PvP off (run it with FEATURE_PVP=true; pvp-off.mjs checks it off)');
+    return;
+  }
   const gm = await admin();
   const a = await lord('atk', 6);
   const b = await lord('def', 6);

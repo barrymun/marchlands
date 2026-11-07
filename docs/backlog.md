@@ -56,3 +56,13 @@ Design notes and known quirks to come back to. Each entry says what happens now,
 
 - **What happens:** while a seat's holder is in an alliance with others, their tribute is a quarter lower and the quarter is paid to the other members every whole real hour (`shareTribute`, `backend/packages/game/src/engine/seat-share.ts`). If the holder leaves the alliance, or the others leave, before the hour is up, what accrued since the last payout is paid to nobody.
 - **Why left:** at most an hour's share (500 gold at level 12, 15,000 at Atlantis), and paying it on leaving would mean hooking every way out of an alliance. Paying every minute instead would cost a city write per member per seat each minute.
+
+## With PvP off (v0.5)
+
+What's left as it is while `FEATURE_PVP` is off (docs/architecture.md, Feature flags), all of it working again when it's turned on. Left because none of it does harm, and hiding each one would add a flag check to screens that return in full with PvP:
+
+- **What only matters against players:** nothing attacks a player's city, so Walls, fortifications, Beacon Tower warnings, a Warehouse's protection and defending troops do nothing yet, though they can still be built and quests still ask for some of them. Holiday mode still protects from attacks that can't happen.
+- **Alliance relations:** an alliance can still declare another an enemy (`setRelation`). It changes nothing but the name shown.
+- **Words that assume PvP:** the descriptions of a Warehouse ("Hides resources from plunder") and the Truce Agreement's own text, and the Statistics page's enemies list, which stays empty.
+- **A Truce Agreement a player already holds or wins** stays in their inventory, unusable; the Items panel hides it. An active truce (only if PvP was on earlier) still stops that player attacking anything until it ends, as it always has.
+

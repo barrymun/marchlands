@@ -98,6 +98,7 @@ Setting `COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml` in `.env` (the
    - `POSTGRES_PASSWORD` and `JWT_SECRET`: the two generated values. Compose refuses to start without them.
      Put the same password into `DATABASE_URL` too (it is only used by the maintenance scripts).
    - `GAME_SPEED`: `1` is the original pace. The development stack usually runs faster (for example 60).
+   - `FEATURE_PVP`: `false` for this release, so players can't attack or scout each other. Check what's running with `curl https://<your-domain>/api/v1/config/static | jq .data.features`.
    - `ADMIN_USERNAMES`: your username, so your account is an operator. On an empty database the **first account
      ever registered** also becomes an operator, so register yours before anyone else can.
    - `WORLD_MAP` / `WORLD_SEED`: how the map is made on first boot. Ignored when you restore an existing game.
@@ -313,6 +314,7 @@ Settings come from `.env` (template: `.env.production.example`). After changing 
 | `POSTGRES_PORT` / `API_PORT` / `ADMINER_PORT` | `5432` / `3000` / `8080` | — | their ports on `127.0.0.1` |
 | `DATABASE_URL` | — | maintenance scripts | the database from the host (the containers build their own) |
 | `GAME_SPEED` | `1` | api, worker | multiplies the speed of every game timer |
+| `FEATURE_PVP` | `false` | api, worker | `true`: players can attack and scout each other. Anything but `true` or `false` stops the services starting. To change it, edit `.env` and run `docker compose up -d api worker`: no rebuild and no migration. Armies already marching at a player when it goes off turn back as they land |
 | `WORLD_MAP` | `generated` | worker | first boot only: `generated` (procedural) or `legacy` (the original layout) |
 | `WORLD_SEED` | `marchlands` | worker | first boot only: the seed of the generated map |
 | `ADMIN_USERNAMES` | — | api | usernames that are always operators (comma separated) |

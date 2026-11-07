@@ -7,13 +7,16 @@ import {
   BuildingType,
   civilCodePopulation,
   createBoxHero,
+  Feature,
   GameError,
   type GrantContents,
+  isFeatureOn,
   ItemCommand,
   itemConfig,
   itemEffect,
   ItemEffectKind,
   itemGoldPrice,
+  ItemId,
   ITEMS,
   ItemSpecialHandler,
   type Message,
@@ -34,12 +37,15 @@ import { settleAllCities } from '#/engine/research.ts';
 import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources, setBuff } from '#/helpers.ts';
 import { getPlayer, type PlayerRow, saveCity, savePlayer } from '#/repo.ts';
 
+/** A truce protects from other players, so it isn't sold while PvP is off. */
+const offSale = (itemId: string) => itemId === ItemId.TRUCE_AGREEMENT && !isFeatureOn(Feature.PVP);
+
 /** Shop catalogue (orig saleTypeBeans): items for sale grouped by type (item category id), priced in city gold; the client names both by id. */
 export function catalogue() {
   const groups = new Map<number, { typeId: number; items: { id: string; price: number; dayLimit: number }[] }>();
   for (const i of ITEMS) {
     const price = itemGoldPrice(i.id);
-    if (price == null) continue;
+    if (price == null || offSale(i.id)) continue;
     const g = groups.get(i.type) ?? { typeId: i.type, items: [] };
     g.items.push({ id: i.id, price, dayLimit: i.dayLimit });
     groups.set(i.type, g);
@@ -68,7 +74,7 @@ const today = (now: number) => new Date(now).toISOString().slice(0, 10);
 /** shop.buy: buy items with a city's gold (itemGoldPrice); they go to the lord's inventory. */
 export async function buyItemWithGold(ctx: Ctx, playerId: number, cityId: number, itemId: string, amount: number) {
   const price = itemGoldPrice(itemId);
-  if (price == null) throw new GameError(msg('item.notForSale'), -99);
+  if (price == null || offSale(itemId)) throw new GameError(msg('item.notForSale'), -99);
   if (!Number.isInteger(amount) || amount < 1 || amount > 1000) throw new GameError(msg('common.invalidAmount'), -28);
   const b = await openOwnCity(ctx, playerId, cityId);
   // dayLimit on items with a short validity is a per-day purchase cap (orig: unenforced)

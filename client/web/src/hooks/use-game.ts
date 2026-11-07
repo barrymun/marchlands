@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { getCitiesByCityIdOptions, getPlayer, getPlayerQueryKey, PushStatus } from '@marchlands/api-client';
-import { BALANCE, scaled, setGameSpeed } from '@marchlands/core';
+import { BALANCE, type Feature, scaled, setGameSpeed } from '@marchlands/core';
 
 import { errorMessage, push } from '@/lib/api';
 import { subscribePushHandlers } from '@/lib/push/handlers';
@@ -21,6 +21,11 @@ export function usePlayer() {
     },
     retry: false,
   });
+}
+
+/** Whether this server has a part of the game on; off until the player's state has loaded. */
+export function useFeature(feature: Feature): boolean {
+  return usePlayer().data?.features[feature] ?? false;
 }
 
 export function useCity(cityId: number | undefined) {
