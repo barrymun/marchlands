@@ -15,6 +15,7 @@ import {
   Workflow,
 } from 'lucide-react';
 
+import { LordForm } from '@/components/lord-dialog/constants';
 import { MayorPicker } from '@/components/mayor-picker/constants';
 import { i18n } from '@/lib/i18n';
 import { lazyComponent } from '@/lib/lazy';
@@ -93,6 +94,7 @@ export const LAZY_PANELS = [
   MapPanel,
   SendArmyDialog,
   MayorPicker,
+  LordForm,
 ];
 
 /** The dialogs the game page opens over every screen: the player's settings, the city's. */

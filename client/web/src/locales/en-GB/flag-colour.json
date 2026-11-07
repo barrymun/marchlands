@@ -1,0 +1,18 @@
+{
+  "label": "Flag colour",
+  "changed": "Flag colour changed",
+  "colours": {
+    "red": "Red",
+    "orange": "Orange",
+    "amber": "Amber",
+    "green": "Green",
+    "teal": "Teal",
+    "sky": "Sky blue",
+    "blue": "Blue",
+    "indigo": "Indigo",
+    "violet": "Violet",
+    "pink": "Pink",
+    "slate": "Slate",
+    "black": "Black"
+  }
+}

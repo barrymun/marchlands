@@ -23,6 +23,7 @@ import {
   ChatChannel,
   FactionId,
   FactionTemperament,
+  FlagColour,
   FLOW_TRAIN_MAX,
   FlowActionType,
   FlowCities,
@@ -438,6 +439,20 @@ describe('stored values', () => {
     expect(HeroStatus).toEqual({ IDLE: 0, MAYOR: 1, ATTACK: 3, RETURN: 5 });
     expect(Sex).toEqual({ MALE: 0, FEMALE: 1 });
     expect(HeroBuffId).toEqual({ POWER: 'power', MANAGEMENT: 'management', STRATAGEM: 'stratagem' });
+    expect(FlagColour).toEqual({
+      RED: 'red',
+      ORANGE: 'orange',
+      AMBER: 'amber',
+      GREEN: 'green',
+      TEAL: 'teal',
+      SKY: 'sky',
+      BLUE: 'blue',
+      INDIGO: 'indigo',
+      VIOLET: 'violet',
+      PINK: 'pink',
+      SLATE: 'slate',
+      BLACK: 'black',
+    });
     expect(BuffId).toEqual({
       FOOD_PRODUCTION: 'FoodProductionBuff',
       WOOD_PRODUCTION: 'WoodProductionBuff',

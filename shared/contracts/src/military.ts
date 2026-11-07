@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 
-import { HERO_BUFF_IDS, HeroItemPayment, TileType } from '@marchlands/core';
+import { FLAG_COLOURS, HERO_BUFF_IDS, HeroItemPayment, TileType } from '@marchlands/core';
 
 import { ArmyBean, HeroBean } from '#/beans.ts';
 import { zCityParams, zId, zIdValue, zResources, zTroops } from '#/common.ts';
@@ -133,6 +133,7 @@ export const MapCastle = z
     prestige: z.number().int().optional(),
     honor: z.number().int().optional(),
     flag: z.string().optional(),
+    flagColour: z.enum(FLAG_COLOURS).optional(),
     allianceName: z.string().optional(),
     playerLogoUrl: z.string().optional(),
     relation: relation.optional(),

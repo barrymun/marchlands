@@ -151,7 +151,7 @@ export const CityBean = z
   .meta({ id: 'CityBean' });
 export type CityBean = z.infer<typeof CityBean>;
 
-export const PlayerInfo = PlayerRow.pick({ id: true, sex: true, flag: true, faceUrl: true, beginner: true, status: true, allianceId: true })
+export const PlayerInfo = PlayerRow.pick({ id: true, sex: true, flag: true, flagColour: true, faceUrl: true, beginner: true, status: true, allianceId: true })
   .extend({
     userName: z.string(),
     prestige: z.number().int(),

@@ -10,6 +10,7 @@ import {
   BuffId,
   type CastleSign,
   DAY,
+  type FlagColour,
   GameError,
   goldForCents,
   HOUR,
@@ -188,6 +189,14 @@ export async function changeFlag(ctx: Ctx, playerId: number, flag: string) {
   const f = flag.trim();
   if (f.length < 1 || f.length > 5) throw new GameError(msg('player.invalidFlag'), -87);
   p.flag = f;
+  await savePlayer(ctx, p);
+  await pushPlayerInfo(ctx, p);
+}
+
+/** (marchlands) The colour behind the flag's text, free as the flag is. */
+export async function changeFlagColour(ctx: Ctx, playerId: number, colour: FlagColour) {
+  const p = await getPlayer(ctx, playerId, { lock: true });
+  p.flagColour = colour;
   await savePlayer(ctx, p);
   await pushPlayerInfo(ctx, p);
 }

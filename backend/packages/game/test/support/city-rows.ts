@@ -1,7 +1,7 @@
 // In-memory rows for the pure tests of city.ts and dto.ts (no database): every column with a plain default,
 // overridden by what a test cares about.
 
-import { BALANCE, HeroStatus, msg, TileType } from '@marchlands/core';
+import { BALANCE, FlagColour, HeroStatus, msg, TileType } from '@marchlands/core';
 import { type CityBundle } from '#/city.ts';
 import { type ArmyRow, type CityRow, type HeroRow, type PlayerRow, type TileRow } from '#/repo.ts';
 
@@ -15,6 +15,7 @@ export function playerRow(over: Partial<PlayerRow> = {}): PlayerRow {
     name: 'Lord',
     sex: 0,
     flag: 'L',
+    flagColour: FlagColour.RED,
     faceUrl: '',
     allianceId: null,
     allianceRank: 0,

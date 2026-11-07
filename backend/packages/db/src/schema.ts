@@ -34,6 +34,7 @@ import type {
   ChatChannel,
   CityMisc,
   FactionId,
+  FlagColour,
   FlowAction,
   FlowCityChoice,
   FlowPreviewLog,
@@ -93,6 +94,8 @@ export const players = pgTable(
     /** 0 = male (Lord), 1 = female (Lady) */
     sex: smallint('sex').notNull().default(0),
     flag: text('flag').notNull().default(''),
+    // eslint-disable-next-line marchlands/no-string-value -- this file imports only types from core, for drizzle-kit
+    flagColour: text('flag_colour').$type<FlagColour>().notNull().default('red'),
     faceUrl: text('face_url').notNull().default(''),
     allianceId: integer('alliance_id'),
     allianceRank: smallint('alliance_rank').notNull().default(0),

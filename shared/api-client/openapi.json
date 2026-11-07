@@ -1542,6 +1542,23 @@
           "flag": {
             "type": "string"
           },
+          "flagColour": {
+            "type": "string",
+            "enum": [
+              "red",
+              "orange",
+              "amber",
+              "green",
+              "teal",
+              "sky",
+              "blue",
+              "indigo",
+              "violet",
+              "pink",
+              "slate",
+              "black"
+            ]
+          },
           "faceUrl": {
             "type": "string"
           },
@@ -1659,6 +1676,7 @@
           "id",
           "sex",
           "flag",
+          "flagColour",
           "faceUrl",
           "beginner",
           "status",
@@ -2134,6 +2152,23 @@
           "flag": {
             "type": "string"
           },
+          "flagColour": {
+            "type": "string",
+            "enum": [
+              "red",
+              "orange",
+              "amber",
+              "green",
+              "teal",
+              "sky",
+              "blue",
+              "indigo",
+              "violet",
+              "pink",
+              "slate",
+              "black"
+            ]
+          },
           "allianceName": {
             "type": "string"
           },
@@ -2517,6 +2552,23 @@
           },
           "flag": {
             "type": "string"
+          },
+          "flagColour": {
+            "type": "string",
+            "enum": [
+              "red",
+              "orange",
+              "amber",
+              "green",
+              "teal",
+              "sky",
+              "blue",
+              "indigo",
+              "violet",
+              "pink",
+              "slate",
+              "black"
+            ]
           },
           "allianceName": {
             "type": "string"
@@ -4304,6 +4356,23 @@
           "flag": {
             "type": "string"
           },
+          "flagColour": {
+            "type": "string",
+            "enum": [
+              "red",
+              "orange",
+              "amber",
+              "green",
+              "teal",
+              "sky",
+              "blue",
+              "indigo",
+              "violet",
+              "pink",
+              "slate",
+              "black"
+            ]
+          },
           "faceUrl": {
             "type": "string"
           },
@@ -4466,6 +4535,7 @@
           "id",
           "sex",
           "flag",
+          "flagColour",
           "faceUrl",
           "beginner",
           "status",
@@ -13964,6 +14034,23 @@
           "flag": {
             "type": "string"
           },
+          "flagColour": {
+            "type": "string",
+            "enum": [
+              "red",
+              "orange",
+              "amber",
+              "green",
+              "teal",
+              "sky",
+              "blue",
+              "indigo",
+              "violet",
+              "pink",
+              "slate",
+              "black"
+            ]
+          },
           "faceUrl": {
             "type": "string"
           },
@@ -14082,6 +14169,7 @@
           "id",
           "sex",
           "flag",
+          "flagColour",
           "faceUrl",
           "beginner",
           "status",
@@ -14568,6 +14656,23 @@
           "flag": {
             "type": "string"
           },
+          "flagColour": {
+            "type": "string",
+            "enum": [
+              "red",
+              "orange",
+              "amber",
+              "green",
+              "teal",
+              "sky",
+              "blue",
+              "indigo",
+              "violet",
+              "pink",
+              "slate",
+              "black"
+            ]
+          },
           "allianceName": {
             "type": "string"
           },
@@ -14957,6 +15062,23 @@
           },
           "flag": {
             "type": "string"
+          },
+          "flagColour": {
+            "type": "string",
+            "enum": [
+              "red",
+              "orange",
+              "amber",
+              "green",
+              "teal",
+              "sky",
+              "blue",
+              "indigo",
+              "violet",
+              "pink",
+              "slate",
+              "black"
+            ]
           },
           "allianceName": {
             "type": "string"
@@ -16797,6 +16919,23 @@
           "flag": {
             "type": "string"
           },
+          "flagColour": {
+            "type": "string",
+            "enum": [
+              "red",
+              "orange",
+              "amber",
+              "green",
+              "teal",
+              "sky",
+              "blue",
+              "indigo",
+              "violet",
+              "pink",
+              "slate",
+              "black"
+            ]
+          },
           "faceUrl": {
             "type": "string"
           },
@@ -16961,6 +17100,7 @@
           "id",
           "sex",
           "flag",
+          "flagColour",
           "faceUrl",
           "beginner",
           "status",
@@ -25951,6 +26091,100 @@
                 },
                 "required": [
                   "flag"
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/player/flag-colour": {
+      "post": {
+        "operationId": "postPlayerFlagColour",
+        "summary": "Change the flag's colour, free",
+        "tags": [
+          "player"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "colour": {
+                    "type": "string",
+                    "enum": [
+                      "red",
+                      "orange",
+                      "amber",
+                      "green",
+                      "teal",
+                      "sky",
+                      "blue",
+                      "indigo",
+                      "violet",
+                      "pink",
+                      "slate",
+                      "black"
+                    ]
+                  }
+                },
+                "required": [
+                  "colour"
                 ]
               }
             }

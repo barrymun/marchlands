@@ -598,6 +598,24 @@ export type GearPieceId = (typeof GearPieceId)[keyof typeof GearPieceId];
 export const AllianceRequestKind = { APPLY: 'apply', INVITE: 'invite' } as const;
 export type AllianceRequestKind = (typeof AllianceRequestKind)[keyof typeof AllianceRequestKind];
 
+/** The colours a player's flag can have (players.flag_colour), each dark enough for its white text. */
+export const FlagColour = {
+  RED: 'red',
+  ORANGE: 'orange',
+  AMBER: 'amber',
+  GREEN: 'green',
+  TEAL: 'teal',
+  SKY: 'sky',
+  BLUE: 'blue',
+  INDIGO: 'indigo',
+  VIOLET: 'violet',
+  PINK: 'pink',
+  SLATE: 'slate',
+  BLACK: 'black',
+} as const;
+export type FlagColour = (typeof FlagColour)[keyof typeof FlagColour];
+export const FLAG_COLOURS = Object.values(FlagColour) as [FlagColour, ...FlagColour[]];
+
 /** The rows of world_state. */
 export const WorldStateKey = {
   WORLD: 'world',

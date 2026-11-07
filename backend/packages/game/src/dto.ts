@@ -197,6 +197,7 @@ export function playerInfo(
     userName: p.name,
     sex: p.sex,
     flag: p.flag,
+    flagColour: p.flagColour,
     faceUrl: p.faceUrl,
     prestige: Math.floor(p.prestige),
     honor: Math.floor(p.honor),

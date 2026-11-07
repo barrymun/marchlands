@@ -1,0 +1,1 @@
+ALTER TABLE "players" ADD COLUMN "flag_colour" text DEFAULT 'red' NOT NULL;

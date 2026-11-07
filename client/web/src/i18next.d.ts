@@ -26,6 +26,7 @@ import type dataTitles from '@/locales/en-GB/data-titles.json';
 import type dataTroops from '@/locales/en-GB/data-troops.json';
 import type dataZones from '@/locales/en-GB/data-zones.json';
 import type factionsPanel from '@/locales/en-GB/factions-panel.json';
+import type flagColour from '@/locales/en-GB/flag-colour.json';
 import type flowAttack from '@/locales/en-GB/flow-attack.json';
 import type flowsPanel from '@/locales/en-GB/flows-panel.json';
 import type fullPageMessage from '@/locales/en-GB/full-page-message.json';
@@ -134,6 +135,7 @@ declare module 'i18next' {
       'cost-list': typeof costList;
       'factions-panel': typeof factionsPanel;
       'flow-attack': typeof flowAttack;
+      'flag-colour': typeof flagColour;
       'flows-panel': typeof flowsPanel;
       'move-out': typeof moveOut;
       'full-page-message': typeof fullPageMessage;

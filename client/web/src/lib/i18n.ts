@@ -36,7 +36,7 @@ const files = import.meta.glob<Record<string, unknown>>(
   [
     '../locales/en-GB/*.json',
     '../locales/en-US/*.json',
-    '!../locales/*/{military-panel,flows-panel,map-panel,reports-panel,market-panel,send-army-dialog,stats-panel,heroes-panel,hero-gear,flow-attack,items-panel,plans-panel,factions-panel,research-panel,hero-items-dialog,move-out}.json',
+    '!../locales/*/{flag-colour,lord-dialog,military-panel,flows-panel,map-panel,reports-panel,market-panel,send-army-dialog,stats-panel,heroes-panel,hero-gear,flow-attack,items-panel,plans-panel,factions-panel,research-panel,hero-items-dialog,move-out}.json',
   ],
   { eager: true, import: 'default' },
 );
@@ -48,6 +48,8 @@ for (const [path, json] of Object.entries(files)) {
 
 /** The English namespaces of the screens that load on first use, loaded with them (the files left out above). */
 const LAZY_NAMESPACES = [
+  'flag-colour',
+  'lord-dialog',
   'military-panel',
   'flows-panel',
   'map-panel',
@@ -67,7 +69,7 @@ const LAZY_NAMESPACES = [
 ] as const;
 const lazyEnglish = import.meta.glob<Record<string, unknown>>(
   [
-    '../locales/{en-GB,en-US}/{military-panel,flows-panel,map-panel,reports-panel,market-panel,send-army-dialog,stats-panel,heroes-panel,hero-gear,flow-attack,items-panel,plans-panel,factions-panel,research-panel,hero-items-dialog,move-out}.json',
+    '../locales/{en-GB,en-US}/{flag-colour,lord-dialog,military-panel,flows-panel,map-panel,reports-panel,market-panel,send-army-dialog,stats-panel,heroes-panel,hero-gear,flow-attack,items-panel,plans-panel,factions-panel,research-panel,hero-items-dialog,move-out}.json',
   ],
   { import: 'default' },
 );

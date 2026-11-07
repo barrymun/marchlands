@@ -344,6 +344,13 @@
       "when": 1794007029879,
       "tag": "0048_armies_shorter_way_round",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1794052644163,
+      "tag": "0049_player_flag_colour",
+      "breakpoints": true
     }
   ]
 }

@@ -8,6 +8,7 @@ import {
   BuffId,
   BuildingType,
   DAY,
+  FlagColour,
   goldForCents,
   HeroStatus,
   HOUR,
@@ -284,6 +285,17 @@ describe(player.changeFace.name, () => {
       await expectRefused(player.changeFace(g, a.id, 'faces/1.png', 2), msg('player.invalidSetting'));
       expect((await reloadPlayer(g, a)).misc.changedFace).toBeUndefined();
       await player.changeFace(g, a.id, 'f'.repeat(100), 0);
+    }));
+});
+
+describe(player.changeFlagColour.name, () => {
+  it('starts red and sets the colour, telling the player', () =>
+    game(async (g) => {
+      const a = await createTestPlayer(g);
+      expect((await reloadPlayer(g, a)).flagColour).toBe(FlagColour.RED);
+      await player.changeFlagColour(g, a.id, FlagColour.TEAL);
+      expect((await reloadPlayer(g, a)).flagColour).toBe(FlagColour.TEAL);
+      expect(g.pushes(PushCmd.PLAYER_INFO_UPDATE).at(-1)).toMatchObject({ data: { playerInfo: { flagColour: FlagColour.TEAL } } });
     }));
 });
 

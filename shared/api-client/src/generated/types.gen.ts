@@ -335,6 +335,7 @@ export type PlayerInfoInput = {
     id: number;
     sex: number;
     flag: string;
+    flagColour: 'red' | 'orange' | 'amber' | 'green' | 'teal' | 'sky' | 'blue' | 'indigo' | 'violet' | 'pink' | 'slate' | 'black';
     faceUrl: string;
     beginner: boolean;
     status: number;
@@ -551,6 +552,7 @@ export type MapCastleInput = {
     prestige?: number;
     honor?: number;
     flag?: string;
+    flagColour?: 'red' | 'orange' | 'amber' | 'green' | 'teal' | 'sky' | 'blue' | 'indigo' | 'violet' | 'pink' | 'slate' | 'black';
     allianceName?: string;
     playerLogoUrl?: string;
     /**
@@ -682,6 +684,7 @@ export type MapFieldCastleInfoInput = {
     prestige?: number;
     honor?: number;
     flag?: string;
+    flagColour?: 'red' | 'orange' | 'amber' | 'green' | 'teal' | 'sky' | 'blue' | 'indigo' | 'violet' | 'pink' | 'slate' | 'black';
     allianceName?: string;
     playerLogoUrl?: string;
     /**
@@ -1276,6 +1279,7 @@ export type PublicPlayerInfoInput = {
     id: number;
     sex: number;
     flag: string;
+    flagColour: 'red' | 'orange' | 'amber' | 'green' | 'teal' | 'sky' | 'blue' | 'indigo' | 'violet' | 'pink' | 'slate' | 'black';
     faceUrl: string;
     beginner: boolean;
     status: number;
@@ -3950,6 +3954,7 @@ export type PlayerInfo = {
     id: number;
     sex: number;
     flag: string;
+    flagColour: 'red' | 'orange' | 'amber' | 'green' | 'teal' | 'sky' | 'blue' | 'indigo' | 'violet' | 'pink' | 'slate' | 'black';
     faceUrl: string;
     beginner: boolean;
     status: number;
@@ -4166,6 +4171,7 @@ export type MapCastle = {
     prestige?: number;
     honor?: number;
     flag?: string;
+    flagColour?: 'red' | 'orange' | 'amber' | 'green' | 'teal' | 'sky' | 'blue' | 'indigo' | 'violet' | 'pink' | 'slate' | 'black';
     allianceName?: string;
     playerLogoUrl?: string;
     /**
@@ -4297,6 +4303,7 @@ export type MapFieldCastleInfo = {
     prestige?: number;
     honor?: number;
     flag?: string;
+    flagColour?: 'red' | 'orange' | 'amber' | 'green' | 'teal' | 'sky' | 'blue' | 'indigo' | 'violet' | 'pink' | 'slate' | 'black';
     allianceName?: string;
     playerLogoUrl?: string;
     /**
@@ -4891,6 +4898,7 @@ export type PublicPlayerInfo = {
     id: number;
     sex: number;
     flag: string;
+    flagColour: 'red' | 'orange' | 'amber' | 'green' | 'teal' | 'sky' | 'blue' | 'indigo' | 'violet' | 'pink' | 'slate' | 'black';
     faceUrl: string;
     beginner: boolean;
     status: number;
@@ -7921,6 +7929,37 @@ export type PostPlayerFlagResponses = {
 };
 
 export type PostPlayerFlagResponse = PostPlayerFlagResponses[keyof PostPlayerFlagResponses];
+
+export type PostPlayerFlagColourData = {
+    body: {
+        colour: 'red' | 'orange' | 'amber' | 'green' | 'teal' | 'sky' | 'blue' | 'indigo' | 'violet' | 'pink' | 'slate' | 'black';
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/player/flag-colour';
+};
+
+export type PostPlayerFlagColourErrors = {
+    /**
+     * Default Response
+     */
+    '4XX': ErrorResponse;
+    /**
+     * Default Response
+     */
+    '5XX': ErrorResponse;
+};
+
+export type PostPlayerFlagColourError = PostPlayerFlagColourErrors[keyof PostPlayerFlagColourErrors];
+
+export type PostPlayerFlagColourResponses = {
+    /**
+     * Default Response
+     */
+    200: null;
+};
+
+export type PostPlayerFlagColourResponse = PostPlayerFlagColourResponses[keyof PostPlayerFlagColourResponses];
 
 export type PostPlayerRenameData = {
     body: {

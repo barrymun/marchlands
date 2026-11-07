@@ -1,0 +1,18 @@
+{
+  "label": "旗の色",
+  "changed": "旗の色を変更しました",
+  "colours": {
+    "red": "赤",
+    "orange": "橙",
+    "amber": "琥珀",
+    "green": "緑",
+    "teal": "青緑",
+    "sky": "空色",
+    "blue": "青",
+    "indigo": "藍",
+    "violet": "紫",
+    "pink": "桃",
+    "slate": "灰青",
+    "black": "黒"
+  }
+}

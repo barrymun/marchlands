@@ -212,6 +212,16 @@ describe('POST /player/flag', () => {
     }));
 });
 
+describe('POST /player/flag-colour', () => {
+  it('changes the colour, and only to one of the set', () =>
+    apiTest(async (api) => {
+      const p = await api.player();
+      expect(await api.ok('POST', 'player/flag-colour', { token: p.token, body: { colour: 'teal' } })).toBeNull();
+      expect((await playerRow(api, p))!.flagColour).toBe('teal');
+      await expectInvalid(api, p.token, [{ method: 'POST', url: 'player/flag-colour', body: { colour: 'chartreuse' } }]);
+    }));
+});
+
 describe('POST /player/rename', () => {
   it('renames the player, then not again for a while', () =>
     apiTest(async (api) => {

@@ -10,6 +10,7 @@ import {
   CastleSign,
   ChangeFaceBody,
   ChangeFlagBody,
+  ChangeFlagColourBody,
   ChangeGenderBody,
   CreatePlayerBody,
   Empty,
@@ -82,6 +83,9 @@ export default async function playerRoutes(app: ZApp) {
   );
   app.post('/player/flag', s('Change the flag, free (city.modifyFlag)', Empty, { body: ChangeFlagBody }), (req) =>
     game(req, (ctx, pid) => player.changeFlag(ctx, pid, req.body.flag)),
+  );
+  app.post('/player/flag-colour', s("Change the flag's colour, free", Empty, { body: ChangeFlagColourBody }), (req) =>
+    game(req, (ctx, pid) => player.changeFlagColour(ctx, pid, req.body.colour)),
   );
   app.post('/player/rename', s('Rename the lord: free, once a day, if the name is free (city.modifyUserName)', Empty, { body: RenamePlayerBody }), (req) =>
     game(req, (ctx, pid) => player.renamePlayer(ctx, pid, req.body.userName)),

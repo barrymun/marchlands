@@ -6,6 +6,7 @@ import { z } from 'zod';
 import {
   ArmyPresetSchema,
   CastleSignSchema,
+  FLAG_COLOURS,
   FLOW_STATUSES,
   FlowActionSchema,
   FlowCities,
@@ -123,6 +124,7 @@ export type CreatePlayerBody = z.infer<typeof CreatePlayerBody>;
 export const PlayerNameParams = z.object({ name: z.string() });
 export const ChangeFaceBody = z.object({ faceUrl: z.string(), sex: z.number().int() });
 export const ChangeFlagBody = z.object({ flag: z.string() });
+export const ChangeFlagColourBody = z.object({ colour: z.enum(FLAG_COLOURS) });
 export const RenamePlayerBody = z.object({ userName: z.string() });
 export const ChangeGenderBody = z.object({ sex: z.number().int().min(0).max(1).describe('0 male, 1 female') });
 export const TutorialStepBody = z.object({ step: z.number().int().min(0) });

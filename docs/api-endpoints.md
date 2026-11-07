@@ -28,6 +28,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | DELETE | `/api/v1/player/bookmarks/{tileId}` | Remove a bookmark |
 | PATCH | `/api/v1/player/face` | Set portrait and sex once (common.changeUserFace) |
 | POST | `/api/v1/player/flag` | Change the flag, free (city.modifyFlag) |
+| POST | `/api/v1/player/flag-colour` | Change the flag's colour, free |
 | GET | `/api/v1/player/flows` | Saved flows (series of actions run on cities) |
 | POST | `/api/v1/player/flows` | Create a flow, or replace one by id |
 | DELETE | `/api/v1/player/flows/{flowId}` | Delete a flow |

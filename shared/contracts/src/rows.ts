@@ -13,6 +13,7 @@ import {
   BuildingStateSchema,
   CastleSignSchema,
   CityMiscSchema,
+  FLAG_COLOURS,
   FortCountsSchema,
   FortQueueStateSchema,
   HeroBuffStateSchema,
@@ -44,6 +45,7 @@ import {
 } from '@marchlands/db/schema';
 
 export const PlayerRow = createSelectSchema(players, {
+  flagColour: z.enum(FLAG_COLOURS),
   research: ResearchStateSchema,
   items: ItemCountsSchema,
   buffs: z.array(BuffStateSchema),

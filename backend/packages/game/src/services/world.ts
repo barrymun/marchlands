@@ -10,6 +10,7 @@ import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import {
   BALANCE,
   canUpgradeTile,
+  type FlagColour,
   GameError,
   generateMap,
   historicCities,
@@ -128,6 +129,7 @@ interface MapCastle {
   prestige?: number;
   honor?: number;
   flag?: string;
+  flagColour?: FlagColour;
   allianceName?: string;
   playerLogoUrl?: string;
   relation?: number;
@@ -167,6 +169,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
           prestige: players.prestige,
           honor: players.honor,
           flag: players.flag,
+          flagColour: players.flagColour,
           faceUrl: players.faceUrl,
           allianceId: players.allianceId,
           beginner: players.beginner,
@@ -213,6 +216,7 @@ export async function mapView(ctx: Ctx, viewerId: number | null, x1: number, y1:
           prestige: Math.floor(c.prestige),
           honor: Math.floor(c.honor),
           flag: c.flag,
+          flagColour: c.flagColour,
           allianceName: c.allianceId ? (allianceNames.get(c.allianceId) ?? '') : '',
           playerLogoUrl: c.faceUrl,
           relation,

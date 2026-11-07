@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   BALANCE,
+  FlagColour,
   historicCities,
   MAP_VIEW_MAX,
   mapLevelDigit,
@@ -21,7 +22,7 @@ import {
 import { tiles, worldState } from '@marchlands/db';
 import { testDb } from '@marchlands/db/test/support/db.ts';
 
-import { alliance, world } from '#/index.ts';
+import { alliance, player, world } from '#/index.ts';
 import { getTile, saveTile } from '#/repo.ts';
 import { expectRefused } from '#test/support/expect.ts';
 import { createTestPlayer, reloadCity, setResources, setTownHall, type TestPlayer } from '#test/support/factories.ts';
@@ -152,6 +153,16 @@ describe(world.mapView.name, () => {
         const t = await getTile(g, npc.id);
         expect(npc).toEqual({ id: t.id, ...tileXY(t.id), npc: true, level: t.level, zoneId: stateOf(t.id), ...relationPermissions(Relation.NO_RELATION) });
       }
+    }));
+
+  it("shows a castle's flag in its player's colour, to anyone looking", () =>
+    game(async (g) => {
+      const owner = await createTestPlayer(g);
+      const viewer = await createTestPlayer(g);
+      const c = await cityTile(g, owner);
+      await player.changeFlagColour(g, owner.id, FlagColour.TEAL);
+      const [castle] = (await world.mapView(g, viewer.id, c.x, c.y, c.x, c.y)).castles;
+      expect(castle).toMatchObject({ playerId: owner.id, flag: expect.any(String) as string, flagColour: FlagColour.TEAL });
     }));
 
   it("shows the viewer's own castle with its player and the relation", () =>
