@@ -75,7 +75,7 @@ export function ReportFilters({
           {t('filters.order')}
         </Label>
         <Select value={value.order} onValueChange={(v) => onChange({ ...value, order: v as ReportOrder })}>
-          <SelectTrigger id="report-order" className="w-36">
+          <SelectTrigger id="report-order" className="min-w-36">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

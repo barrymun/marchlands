@@ -20,6 +20,16 @@
     "wait": "性別の変更は 1 日 1 回無料です: 次回まで <countdown />。",
     "free": "1 日 1 回無料。"
   },
+  "font": {
+    "label": "フォント",
+    "hint": "このブラウザに保存されます。",
+    "names": {
+      "classic": "クラシック",
+      "ledger": "台帳",
+      "terminal": "ターミナル",
+      "clear": "くっきり"
+    }
+  },
   "change": "変更",
   "truce": {
     "title": "休戦",

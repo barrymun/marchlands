@@ -17,6 +17,7 @@ import { BuffId, Feature, itemGoldPrice } from '@marchlands/core';
 import { Countdown } from '@/components/countdown/countdown';
 import { TRUCE } from '@/components/lord-dialog/lord-form/constants';
 import { FlagColourPicker } from '@/components/lord-dialog/lord-form/flag-colour-picker/flag-colour-picker';
+import { FontSelect } from '@/components/lord-dialog/lord-form/font-select/font-select';
 import { LanguageSelect } from '@/components/lord-dialog/lord-form/language-select/language-select';
 import { TitleSection } from '@/components/lord-dialog/lord-form/title-section/title-section';
 import { Badge } from '@/components/ui/badge';
@@ -131,6 +132,7 @@ export function LordForm({ city }: { city?: CityBean }) {
             </p>
           </div>
           <LanguageSelect />
+          <FontSelect />
         </div>
         {pvp && (
           <>

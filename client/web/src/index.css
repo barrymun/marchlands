@@ -1,7 +1,16 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource-variable/geist';
+/* Alegreya in the Latin alphabets only: every alphabet is a rule in the first page's CSS (Font styles, below). Titles
+   are medium (shadcn's font-heading font-medium), so Alegreya SC comes in that weight alone, 31 kB a weight */
+@import '@fontsource/alegreya-sans/latin-400.css';
+@import '@fontsource/alegreya-sans/latin-ext-400.css';
+@import '@fontsource/alegreya-sans/latin-500.css';
+@import '@fontsource/alegreya-sans/latin-ext-500.css';
+@import '@fontsource/alegreya-sans/latin-700.css';
+@import '@fontsource/alegreya-sans/latin-ext-700.css';
+@import '@fontsource/alegreya-sc/latin-500.css';
+@import '@fontsource/alegreya-sc/latin-ext-500.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -25,8 +34,9 @@
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
+  /* the player's font style, below */
+  --font-heading: var(--font-title);
+  --font-sans: var(--font-body);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -134,6 +144,55 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/*
+ * Font styles, chosen in Player settings (lib/font.ts sets data-font on <html>; an element may set its own, as the
+ * select's options do to show themselves). Fonts are self-hosted (Fontsource), and a browser fetches a font file only
+ * once something shows it. Only Classic's @font-face rules are in this file: each rule costs the first page about
+ * 250 bytes, so the other styles' are in lib/fonts/<style>.css, loaded when that style is shown (lib/font.ts) or the
+ * select is.
+ *
+ * Arabic's fonts (Noto Sans Arabic, and Amiri for Classic and Ledger's titles) load with its locale's file
+ * (src/locales/ar.ts), so other locales skip them. Japanese uses the system's fonts (Hiragino, Yu Gothic; Hiragino
+ * and Yu Mincho for those titles): the web fonts come in about 120 slices each, and their rules alone were 94 kB of
+ * CSS a Japanese player would wait for before the game started.
+ *
+ * Every style shows text at the same lowercase height (font-size-adjust: Geist's 0.53, the font before these), so
+ * sizes and layouts don't change with the style: Alegreya draws small for its size and Martian Mono large.
+ */
+
+:root {
+  --font-scripts: 'Noto Sans Arabic Variable', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', Meiryo, 'Noto Sans CJK JP';
+  --font-scripts-title: 'Amiri', 'Hiragino Mincho ProN', 'Yu Mincho', YuMincho, 'Noto Serif CJK JP';
+  font-size-adjust: 0.53;
+}
+
+/* Alegreya: a humanist sans for text and its small capitals for titles; lining figures, not its old-style default */
+:root,
+[data-font='classic'] {
+  --font-body: 'Alegreya Sans', var(--font-scripts), sans-serif;
+  --font-title: 'Alegreya SC', var(--font-scripts-title), var(--font-scripts), serif;
+  font-feature-settings: 'lnum';
+}
+
+[data-font='ledger'] {
+  --font-body: 'Ledger Figures', 'Alegreya Sans', var(--font-scripts), sans-serif;
+  --font-title: 'Ledger Figures', 'Alegreya SC', var(--font-scripts-title), var(--font-scripts), serif;
+  font-feature-settings: 'lnum';
+}
+
+[data-font='terminal'] {
+  --font-body: 'Martian Mono Variable', var(--font-scripts), monospace;
+  --font-title: var(--font-body);
+  font-feature-settings: normal;
+}
+
+/* Atkinson Hyperlegible: drawn for readers with low vision, its I, l and 1 and its O and 0 told apart */
+[data-font='clear'] {
+  --font-body: 'Atkinson Hyperlegible Next Variable', var(--font-scripts), sans-serif;
+  --font-title: var(--font-body);
+  font-feature-settings: normal;
 }
 
 @layer base {

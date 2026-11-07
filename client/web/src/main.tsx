@@ -8,6 +8,7 @@ import { App } from '@/app';
 import { LocaleRoot } from '@/components/locale-root/locale-root';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { startFontStyle } from '@/lib/font';
 import { i18nReady } from '@/lib/i18n';
 
 import '@/index.css';
@@ -18,8 +19,8 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, refetchOnWindowFocus: false } },
 });
 
-// the chosen locale's text first (a locale other than English is a separate file)
-await i18nReady;
+// the chosen locale's text first (a locale other than English is a separate file), in the chosen font
+await Promise.all([startFontStyle(), i18nReady]);
 
 const root = document.getElementById('root');
 if (!root) throw new Error('index.html has no #root');

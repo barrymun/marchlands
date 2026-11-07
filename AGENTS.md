@@ -390,3 +390,10 @@ The server never sends or stores English for players. Everything it tells a play
   - A screen other screens link to keeps its schema in `lib/screen-search.ts`, listed in `SCREEN_SEARCH` (`lib/nav.ts`), so `go` and `screenHref` are typed by it; any other screen keeps it in its own `constants.ts`. A panel names itself (`{ panel: PanelId.ITEMS }`), so its names are under its id and go when it closes.
   - A search box uses `useSearchText`. An address that no longer fits falls back quietly, never with an error, and only a refusal resets anything (`isRefusal`, `lib/errors.ts`; queries take `retry: retryUnlessRefused`).
 - **Remembered UI state** (a collapsed card, Scene or Grid) goes in `localStorage`, wrapped in try/catch, and the UI must still work without it.
+- **Fonts are the player's choice** (Player settings, `FontStyle` in `lib/font.ts`, kept in this browser like the locale): Classic (Alegreya Sans, titles in Alegreya SC; the default), Ledger (Classic with every digit in Martian Mono), Terminal (Martian Mono) and Clear (Atkinson Hyperlegible Next). Each is a `[data-font=…]` rule in `index.css` setting `--font-body` and `--font-title`, which `font-sans` and `font-heading` use, so components never name a font. How it's kept small:
+  - **Self-hosted** (Fontsource, pinned).
+  - **Only Classic's `@font-face` rules ship with the first page.** The others' are in `lib/fonts/<style>.css`, loaded when the style is chosen or the select opens.
+  - **Arabic's fonts load with its locale file** (`locales/ar.ts`). Japanese uses the system's fonts: the web fonts' CSS alone was 94 kB.
+  - **Same text height in every style:** `font-size-adjust` gives each the same lowercase height, so sizes and layouts don't move with the style.
+  - **Budgeted:** Classic's files count against the *Classic fonts* entry in `.size-limit.js`.
+  - **Adding a style:** add it to `FontStyle`, its loader to `STYLE_FONTS`, its rule to `index.css`, and its name in every locale (`lord-dialog:font.names`).

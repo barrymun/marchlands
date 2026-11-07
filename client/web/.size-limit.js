@@ -58,6 +58,15 @@ export default [
     brotli: false,
   },
   {
+    // Classic's fonts in Latin (src/index.css, Font styles): Alegreya Sans at three weights and Alegreya SC at one,
+    // what a player of the default style downloads once, cached for good after. woff2 is already compressed, so this
+    // counts the files as they are. The other styles' fonts load only when chosen (lib/fonts/)
+    name: 'Classic fonts',
+    path: 'dist/assets/alegreya-*-latin-[0-9]*-normal-*.woff2',
+    limit: '115 kB',
+    brotli: false,
+  },
+  {
     // a language other than English, loaded only when chosen. Raised to 40 kB (2026-11-01, at 35.02 kB): every screen's
     // text grows it, the historic cities' holding rules the last; it loads only for players who choose Japanese.
     // Raised to 45 kB (2026-11-07, at 40.06 kB): the notes for playing with PvP off took it over

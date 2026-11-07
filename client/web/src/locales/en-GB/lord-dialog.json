@@ -20,6 +20,16 @@
     "wait": "Changing gender is free once a day: next in <countdown />.",
     "free": "Free, once a day."
   },
+  "font": {
+    "label": "Font",
+    "hint": "Kept in this browser.",
+    "names": {
+      "classic": "Classic",
+      "ledger": "Ledger",
+      "terminal": "Terminal",
+      "clear": "Clear"
+    }
+  },
   "change": "Change",
   "truce": {
     "title": "Truce",

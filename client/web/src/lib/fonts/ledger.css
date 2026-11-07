@@ -1,0 +1,9 @@
+/* Ledger: the digits alone from Martian Mono, laid over Alegreya, so every number in the game is in it (index.css, Font styles) */
+@font-face {
+  font-family: 'Ledger Figures';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('@fontsource-variable/martian-mono/files/martian-mono-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0030-0039;
+}
