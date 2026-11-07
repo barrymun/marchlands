@@ -8,11 +8,11 @@ import { Button } from '@/components/ui/button';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { useNow } from '@/hooks/use-now';
 import { PageId } from '@/lib/nav';
-import { HeroTab } from '@/lib/screen-search';
+import { MilitaryTab } from '@/lib/screen-search';
 
 /**
- * The quick mayor swap under the mayor chip: the city's heroes at home (the mayor and the idle ones), each with its attributes, gear
- * bonus and boosts (HeroStats), what it adds or would add as mayor and a button to appoint it, and the way to the Heroes page (or its Inn, with none to pick).
+ * The quick mayor swap, under the mayor chip and the training hint: the city's heroes at home (the mayor and the idle ones), each with its attributes, gear
+ * bonus and boosts (HeroStats), what it adds or would add as mayor and a button to appoint it, and the way to the Military page's heroes (or its Inn, with none to pick).
  */
 export function MayorPicker({ city, onDone }: { city: CityBean; onDone: () => void }) {
   const { t } = useTranslation(['game', 'common']);
@@ -20,8 +20,8 @@ export function MayorPicker({ city, onDone }: { city: CityBean; onDone: () => vo
   const now = useNow();
   const heroes = city.heros.filter((h) => isMayor(h) || canAppoint(h));
   const idle = heroes.some(canAppoint);
-  const go = (tab?: HeroTab) => {
-    nav.go(PageId.HEROES, tab ? { tab } : undefined);
+  const go = (tab: MilitaryTab) => {
+    nav.go(PageId.MILITARY, { tab });
     onDone();
   };
   return (
@@ -37,11 +37,11 @@ export function MayorPicker({ city, onDone }: { city: CityBean; onDone: () => vo
       </ul>
       <div className="flex flex-wrap justify-end gap-1.5">
         {!idle && (
-          <Button size="xs" variant="outline" onClick={() => go(HeroTab.INN)}>
+          <Button size="xs" variant="outline" onClick={() => go(MilitaryTab.INN)}>
             {t('mayor.toInn')}
           </Button>
         )}
-        <Button size="xs" variant="ghost" onClick={() => go()}>
+        <Button size="xs" variant="ghost" onClick={() => go(MilitaryTab.HEROES)}>
           {t('mayor.allHeroes')}
         </Button>
       </div>

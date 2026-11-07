@@ -1,6 +1,6 @@
 # Screens in the address
 
-**Status:** built 2026-11-02 for the Reports, Heroes, Stats and Flows pages, the Town and Fields views' `building`, the map's place (`at`), and the Items and Military panels. Next: links to a report (below). This is the reference for how a screen keeps its place in the address; AGENTS.md (Client, UI conventions) gives the short rules and points here.
+**Status:** built 2026-11-02 for the Reports, Heroes, Stats and Flows pages, the Town and Fields views' `building`, the map's place (`at`), and the Items panel and the Military page. Next: links to a report (below). This is the reference for how a screen keeps its place in the address; AGENTS.md (Client, UI conventions) gives the short rules and points here.
 
 **The aim:** where the player is on a screen (its tab, filters, sort, page and the thing open) survives a reload, the back button works as expected, and a link (from another screen, or pasted) opens the screen in that state. A link that no longer fits never shows an error.
 
@@ -12,7 +12,7 @@
   | Screen | Parameters | Schema |
   |---|---|---|
   | Reports page | `tab`, `q`, `kind`, `unread`, `order`, `page`, `report` | `REPORT_SEARCH` (`lib/screen-search.ts`) |
-  | Heroes page | `tab` (or `inn`), `hero` | `HEROES_SEARCH` (`lib/screen-search.ts`) |
+  | Military page | `tab` (or `inn`), `hero` | `MILITARY_SEARCH` (`lib/screen-search.ts`) |
   | Town and Fields views | `building` (a position: opens its dialog once, then goes) | `BUILDING_SEARCH` (`lib/screen-search.ts`) |
   | Stats page | `city`, `period` | `STATS_SEARCH` (`components/stats-panel/constants.ts`) |
   | Flows page | `flow` | `FLOWS_SEARCH` (`components/flows-panel/constants.ts`) |

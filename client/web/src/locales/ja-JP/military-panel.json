@@ -1,4 +1,10 @@
 {
+  "tabs": {
+    "troops": "部隊",
+    "defences": "防衛",
+    "heroes": "英雄",
+    "gear": "装備"
+  },
   "garrison": {
     "title": "駐屯部隊",
     "ready": "待機中",
@@ -60,8 +66,6 @@
     "train": "訓練",
     "build": "建設",
     "inProgress": "進行中",
-    "nothingTraining": "現在訓練中のものはありません。",
-    "nothingBuilding": "現在建設中のものはありません。",
     "queueBarracks": "兵舎 {{slot}}",
     "boost": "{{item}} −30% · {{price}}",
     "waiting": "待機中",
@@ -98,7 +102,8 @@
     "noMayorTrain": "市長がいません: 「英雄」で{{stat}}の高い英雄を任命すると訓練が速くなります。",
     "noMayorBuild": "市長がいません: 「英雄」で{{stat}}の高い英雄を任命すると防衛施設の建設が速くなります。",
     "train": "時間には市長{{name}}の{{stat}} {{value}}が反映されています: −{{cut}}(新しいバッチ)。{{stat}}の高い市長ほど訓練が速くなります。",
-    "build": "時間には市長{{name}}の{{stat}} {{value}}が反映されています: −{{cut}}(新しいバッチ)。{{stat}}の高い市長ほど建設が速くなります。"
+    "build": "時間には市長{{name}}の{{stat}} {{value}}が反映されています: −{{cut}}(新しいバッチ)。{{stat}}の高い市長ほど建設が速くなります。",
+    "change": "市長を変更"
   },
   "trainDiscount": {
     "active": "訓練コスト −{{percent}}(補給係): 以下のコストに反映済みです。",

@@ -6,9 +6,9 @@
 import { isValidPosition, REPORT_KINDS, REPORT_ORDERS, REPORT_SEARCH_MAX, ReportOrder } from '@marchlands/core';
 import { param, type SearchSchema } from '@/lib/search-state';
 
-/** What the Heroes page's `tab` can name: its two tabs, and the Inn (the heroes, with the Inn brought into view). */
-export const HeroTab = { HEROES: 'heroes', GEAR: 'gear', INN: 'inn' } as const;
-export type HeroTab = (typeof HeroTab)[keyof typeof HeroTab];
+/** What the Military page's `tab` can name: its four tabs, and the Inn (the heroes, with the Inn brought into view). */
+export const MilitaryTab = { TROOPS: 'troops', DEFENCES: 'defences', HEROES: 'heroes', GEAR: 'gear', INN: 'inn' } as const;
+export type MilitaryTab = (typeof MilitaryTab)[keyof typeof MilitaryTab];
 
 /** The Reports page's tabs. */
 export const ReportTab = { ALL: 'all', ARMY: 'army', TRADE: 'trade', OTHER: 'other' } as const;
@@ -27,9 +27,9 @@ export const MAP_SEARCH = {
   at: param.point(),
 } satisfies SearchSchema;
 
-/** The Heroes page: the tab, or the Inn, and the hero on the sheet. */
-export const HEROES_SEARCH = {
-  tab: param.oneOf(Object.values(HeroTab), HeroTab.HEROES),
+/** The Military page: the tab, or the Inn, and the hero on the sheet. */
+export const MILITARY_SEARCH = {
+  tab: param.oneOf(Object.values(MilitaryTab), MilitaryTab.TROOPS),
   hero: param.id(),
 } satisfies SearchSchema;
 

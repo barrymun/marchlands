@@ -1,18 +1,17 @@
 import { Landmark } from 'lucide-react';
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { CityBean, HeroBean } from '@marchlands/api-client';
 
 import { HeroLevel } from '@/components/hero-level/hero-level';
+import { MayorPickerPopover } from '@/components/mayor-picker/mayor-picker-popover/mayor-picker-popover';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { heroAttributeValues } from '@/lib/hero-attributes';
 import { cn } from '@/lib/utils';
 import { DominantBadge } from '@/routes/game/dominant-badge/dominant-badge';
-import { MayorPicker } from '@/routes/game/mayor-chip/constants';
 
 /** The current city's mayor at a glance; a click opens the quick mayor swap under it (MayorPicker), the town staying in view. */
 export function MayorChip({ city, mayor }: { city: CityBean; mayor?: HeroBean }) {
@@ -53,22 +52,7 @@ export function MayorChip({ city, mayor }: { city: CityBean; mayor?: HeroBean })
           )}
         </TooltipContent>
       </Tooltip>
-      {/* as tall as the room below the chip allows (it follows the window's size); only the list of heroes scrolls. Focus
-          goes to the popover itself, not its first Make mayor, whose tooltip would open with it. */}
-      <PopoverContent
-        align="start"
-        collisionPadding={8}
-        tabIndex={-1}
-        onOpenAutoFocus={(e) => {
-          e.preventDefault();
-          (e.currentTarget as HTMLElement).focus();
-        }}
-        className="max-h-(--radix-popover-content-available-height) w-80 outline-none"
-      >
-        <Suspense fallback={<Skeleton className="h-24" />}>
-          <MayorPicker city={city} onDone={() => setOpen(false)} />
-        </Suspense>
-      </PopoverContent>
+      <MayorPickerPopover city={city} onDone={() => setOpen(false)} />
     </Popover>
   );
 }

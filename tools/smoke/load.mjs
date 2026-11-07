@@ -188,7 +188,7 @@ class Player {
         await this.query('/armies', true);
         break;
       case 'server.TroopQueueUpdate':
-        if (this.screen === 'military') await this.query(`/cities/${this.cityId}/troops/queues`, true);
+        if (this.screen === 'troops') await this.query(`/cities/${this.cityId}/troops/queues`, true);
         break;
       case 'server.NewReport':
         await this.query('/reports?type=1&pageNo=1&pageSize=10', true);
@@ -260,12 +260,17 @@ class Player {
       [12, 'map', () => this.map()],
       [8, 'research', () => this.query(`/cities/${this.cityId}/research`)],
       [
-        8,
-        'military',
+        7,
+        'troops',
+        () => Promise.all(['troops/trainable', 'troops/queues'].map((p) => this.query(`/cities/${this.cityId}/${p}`))).then(() => this.query('/player')),
+      ],
+      [
+        1,
+        'defences',
         () =>
-          Promise.all(
-            ['troops/trainable', 'troops/queues', 'fortifications/trainable', 'fortifications/queues'].map((p) => this.query(`/cities/${this.cityId}/${p}`)),
-          ).then(() => this.query('/player')),
+          Promise.all(['fortifications/trainable', 'fortifications/queues'].map((p) => this.query(`/cities/${this.cityId}/${p}`))).then(() =>
+            this.query('/player'),
+          ),
       ],
       [6, 'reports', () => Promise.all([this.query('/reports/unread'), this.query('/reports?pageNo=1&pageSize=20')])],
       [6, 'market', () => ((this.resType = Math.floor(Math.random() * 4)), this.market())],

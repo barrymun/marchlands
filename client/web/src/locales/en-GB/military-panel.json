@@ -1,4 +1,10 @@
 {
+  "tabs": {
+    "troops": "Troops",
+    "defences": "Defences",
+    "heroes": "Heroes",
+    "gear": "Gear"
+  },
   "garrison": {
     "title": "Garrison",
     "ready": "Ready",
@@ -65,8 +71,6 @@
     "train": "Train",
     "build": "Build",
     "inProgress": "In progress",
-    "nothingTraining": "Nothing in training right now.",
-    "nothingBuilding": "Nothing being built right now.",
     "queueBarracks": "Barracks {{slot}}",
     "boost": "{{item}} −30% · {{price}}",
     "waiting": "Waiting",
@@ -106,7 +110,8 @@
     "noMayorTrain": "No mayor: appoint one with high {{stat}} in Heroes to train faster.",
     "noMayorBuild": "No mayor: appoint one with high {{stat}} in Heroes to build fortifications faster.",
     "train": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}} (new batches). A mayor with higher {{stat}} trains faster.",
-    "build": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}} (new batches). A mayor with higher {{stat}} builds them faster."
+    "build": "Times include mayor {{name}}'s {{stat}} {{value}}: −{{cut}} (new batches). A mayor with higher {{stat}} builds them faster.",
+    "change": "Change mayor"
   },
   "trainDiscount": {
     "active": "Training cost −{{percent}} (Quartermaster): the costs below include it.",

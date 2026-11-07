@@ -1,5 +1,5 @@
 import { Suspense, useState } from 'react';
-import { Navigate } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 
 import { AbandonNotice } from '@/components/abandon-notice/abandon-notice';
 import { ActivityDock } from '@/components/activity-dock/activity-dock';
@@ -13,16 +13,16 @@ import { useCity, usePlayer, usePushSync } from '@/hooks/use-game';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { useSticky } from '@/hooks/use-sticky';
 import { errorMessage } from '@/lib/api';
-import { legacyTarget, PageId, screenHref, VIEW_IDS, ViewId } from '@/lib/nav';
+import { legacyHref, pageAsPanelHref, PageId, screenHref, VIEW_IDS, ViewId } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 import { BottomBar } from '@/routes/game/bottom-bar/bottom-bar';
 import {
   FlowsPanel,
   FULL_WIDTH_PAGES,
   GameDialog,
-  HeroesPanel,
   MapPanel,
   MarketPanel,
+  MilitaryPanel,
   PAGE_WIDTH,
   ReportsPanel,
   SendArmyDialog,
@@ -44,6 +44,7 @@ import { ownCityTarget } from '@/routes/game/utils';
  */
 export function GamePage() {
   const nav = useGameNav();
+  const location = useLocation();
   const player = usePlayer();
   const city = useCity(nav.cityId);
   const status = usePushSync(true);
@@ -57,11 +58,10 @@ export function GamePage() {
 
   // an address naming no view or page (the city's own, or one from before the views) goes where it now lives
   if (!nav.screen) {
-    const to = legacyTarget(nav.part);
-    return <Navigate to={screenHref(nav.cityId, to.screen, undefined, to.panel)} replace />;
+    return <Navigate to={legacyHref(nav.cityId, nav.part, location.search)} replace />;
   }
-  // a screen that was a panel before it became a page (heroes) goes to the page
-  if (nav.pageAsPanel) return <Navigate to={screenHref(nav.cityId, nav.pageAsPanel)} replace />;
+  // a screen that was a panel before it became a page (Military) goes to the page
+  if (nav.pageAsPanel) return <Navigate to={pageAsPanelHref(nav.cityId, nav.pageAsPanel)} replace />;
   // a city that's gone (abandoned, or a historic city taken from the player): the same screen in their first city
   const first = player.data?.castles[0];
   if (first && !player.data?.castles.some((c) => c.id === nav.cityId)) return <Navigate to={screenHref(first.id, nav.screen)} replace />;
@@ -95,7 +95,7 @@ export function GamePage() {
                 {nav.screen === ViewId.TOWN && <BuildingsPanel city={city.data} area={CityArea.INSIDE} />}
                 {nav.screen === ViewId.FIELDS && <BuildingsPanel city={city.data} area={CityArea.FIELDS} />}
                 {nav.screen === ViewId.MAP && <MapPanel city={city.data} mapSize={player.data?.mapSizeX ?? 800} />}
-                {nav.screen === PageId.HEROES && <HeroesPanel city={city.data} />}
+                {nav.screen === PageId.MILITARY && <MilitaryPanel city={city.data} />}
                 {nav.screen === PageId.REPORTS && <ReportsPanel />}
                 {nav.screen === PageId.MARKET && <MarketPanel city={city.data} />}
                 {nav.screen === PageId.FLOWS && <FlowsPanel city={city.data} />}

@@ -5,8 +5,6 @@ import { toast } from 'sonner';
 
 import {
   type CityBean,
-  deleteCitiesFortificationsQueuesByQueueIdMutation,
-  deleteCitiesTroopsQueuesByQueueIdMutation,
   getCitiesByCityIdQueryKey,
   getCitiesFortificationsQueuesOptions,
   getCitiesFortificationsQueuesQueryKey,
@@ -14,50 +12,31 @@ import {
   getCitiesTroopsQueuesOptions,
   getCitiesTroopsQueuesQueryKey,
   getCitiesTroopsTrainableOptions,
-  getPlayerQueryKey,
-  postCitiesFortificationsQueuesSpeedupMutation,
   postCitiesFortificationsTrainManyMutation,
-  postCitiesTroopsQueuesSpeedupMutation,
   postCitiesTroopsTrainManyMutation,
 } from '@marchlands/api-client';
-import {
-  BALANCE,
-  BuildingType,
-  itemGoldPrice,
-  ItemId,
-  researchLevel,
-  RESOURCE_KEYS,
-  ResourceKey,
-  TechType,
-  usedWallSpace,
-  wallCapacity,
-} from '@marchlands/core';
+import { BALANCE, BuildingType, researchLevel, RESOURCE_KEYS, ResourceKey, TechType, usedWallSpace, wallCapacity } from '@marchlands/core';
 
 import { CostList } from '@/components/cost-list/cost-list';
-import { MILITARY_SEARCH, ProductionTab, TrainLimit } from '@/components/military-panel/production/constants';
+import { TrainLimit } from '@/components/military-panel/production/constants';
 import { MayorExpHint } from '@/components/military-panel/production/mayor-exp-hint/mayor-exp-hint';
 import { MayorTrainingHint } from '@/components/military-panel/production/mayor-training-hint/mayor-training-hint';
+import { QueueList } from '@/components/military-panel/production/queue-list/queue-list';
 import { TrainDiscountHint } from '@/components/military-panel/production/train-discount-hint/train-discount-hint';
 import { TrainEstimate } from '@/components/military-panel/production/train-estimate/train-estimate';
 import { limitLabel, maxTrainable } from '@/components/military-panel/production/utils';
 import { UnitIcon } from '@/components/military-panel/unit-icon/unit-icon';
 import { Requirements } from '@/components/requirements/requirements';
-import { TimerBar } from '@/components/timer-bar/timer-bar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand, usePlayer } from '@/hooks/use-game';
-import { useInventory } from '@/hooks/use-inventory';
-import { useSearchState } from '@/hooks/use-search-state';
 import { fmt, fmtExact, realHourly } from '@/lib/format';
-import { itemName, troopName } from '@/lib/game-data';
+import { troopName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
-import { PanelId } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 
 export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
@@ -70,12 +49,6 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const [position, setPosition] = useState<string>('');
   const pos = Number(position || barracks[0]?.positionId || 0);
   const [counts, setCounts] = useState<Record<number, string>>({});
-  const [search, set] = useSearchState(MILITARY_SEARCH, { panel: PanelId.MILITARY });
-  const tab = fort ? search.forts : search.troops;
-  const setTab = (v: string) => {
-    const next = (fort ? MILITARY_SEARCH.forts : MILITARY_SEARCH.troops).read(v);
-    set(fort ? { forts: next } : { troops: next });
-  };
   // with several barracks, orders are split so every barracks trains a share in parallel
   const [split, setSplit] = useState(true);
   const splitting = !fort && split && barracks.length > 1;
@@ -86,19 +59,6 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const cityKey = getCitiesByCityIdQueryKey({ path });
   // every amount entered is ordered in one go, all or nothing; the amounts clear once it is queued
   const trainAll = useCommand(fort ? postCitiesFortificationsTrainManyMutation() : postCitiesTroopsTrainManyMutation(), () => [cityKey, queuesKey]);
-  const inv = useInventory();
-  const boostItem = fort ? ItemId.ARCHIMEDES_NOTE : ItemId.NAPOLEONS_DIARY;
-  const boostGold = itemGoldPrice(boostItem) ?? 0;
-  const boost = useCommand(
-    fort ? postCitiesFortificationsQueuesSpeedupMutation() : postCitiesTroopsQueuesSpeedupMutation(),
-    () => [cityKey, queuesKey, getPlayerQueryKey()],
-    t('production.boosted', { item: itemName(fort ? ItemId.ARCHIMEDES_NOTE : ItemId.NAPOLEONS_DIARY) }),
-  );
-  const cancel = useCommand(
-    fort ? deleteCitiesFortificationsQueuesByQueueIdMutation() : deleteCitiesTroopsQueuesByQueueIdMutation(),
-    () => [cityKey, queuesKey],
-    t('production.batchCancelled'),
-  );
 
   if (fort ? !walls : barracks.length === 0) {
     return (
@@ -191,73 +151,24 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
       <CardContent className="grid gap-3">
         <MayorTrainingHint city={city} fort={fort} />
         {!fort && units[0] && units[0].costShare < 1 && <TrainDiscountHint share={units[0].costShare} />}
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList>
-            <TabsTrigger value={ProductionTab.TRAIN}>{fort ? t('production.build') : t('production.train')}</TabsTrigger>
-            <TabsTrigger value={ProductionTab.QUEUE} className="gap-1.5">
-              {t('production.inProgress')}
-              {batches.length > 0 && (
-                <Badge variant="secondary" className="h-4 min-w-4 px-1 tabular-nums">
-                  {batches.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-        {tab === ProductionTab.QUEUE && batches.length === 0 && (
-          <p className="text-sm text-muted-foreground">{fort ? t('production.nothingBuilding') : t('production.nothingTraining')}</p>
-        )}
-        {tab === ProductionTab.QUEUE &&
-          batches.map((b) => (
-            <div key={`${b.positionId}-${b.queueId}`} className="grid gap-1 rounded-md border p-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span>
-                  {fmtExact(b.num)} × {troopName(b.type)}
-                  {splitting && <span className="text-xs text-muted-foreground"> · {t('production.queueBarracks', { slot: b.positionId })}</span>}
-                </span>
-                <div className="flex gap-1">
-                  {b.endTime > 0 && (
-                    <Button
-                      size="xs"
-                      variant="secondary"
-                      disabled={boost.isPending || (inv.count(boostItem) === 0 && city.resource.gold < boostGold)}
-                      onClick={() => boost.mutate({ path: { ...path, positionId: b.positionId, queueId: b.queueId } })}
-                    >
-                      {t('production.boost', {
-                        item: itemName(boostItem),
-                        price: inv.count(boostItem) > 0 ? `×${inv.count(boostItem)}` : t('common:gold', { gold: fmt(boostGold) }),
-                      })}
-                    </Button>
-                  )}
-                  <Button size="xs" variant="ghost" onClick={() => cancel.mutate({ path: { ...path, positionId: b.positionId, queueId: b.queueId } })}>
-                    {t('common:actions.cancel')}
-                  </Button>
-                </div>
-              </div>
-              {b.endTime > 0 ? (
-                <TimerBar startTime={b.startTime} endTime={b.endTime} />
-              ) : (
-                <span className="text-xs text-muted-foreground">{t('production.waiting')}</span>
-              )}
-            </div>
-          ))}
-        {tab === ProductionTab.TRAIN && (
-          <form
-            className="grid gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!orders.length || overBudget) return;
-              trainAll.mutate(
-                { path, body: { orders: orders.map((o) => ({ troopId: o.u.typeId, count: o.count })), split: splitting, positionId: fort ? undefined : pos } },
-                {
-                  onSuccess: (r) => {
-                    setCounts({});
-                    toast.success(t(fort ? 'production.queuedBuild' : 'production.queuedTrain', { units: fmtExact(r.units), count: r.orders }));
-                  },
+        <QueueList city={city} fort={fort} batches={batches} splitting={splitting} />
+        <form
+          className="grid gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!orders.length || overBudget) return;
+            trainAll.mutate(
+              { path, body: { orders: orders.map((o) => ({ troopId: o.u.typeId, count: o.count })), split: splitting, positionId: fort ? undefined : pos } },
+              {
+                onSuccess: (r) => {
+                  setCounts({});
+                  toast.success(t(fort ? 'production.queuedBuild' : 'production.queuedTrain', { units: fmtExact(r.units), count: r.orders }));
                 },
-              );
-            }}
-          >
+              },
+            );
+          }}
+        >
+          <div className="grid gap-2 2xl:grid-cols-2">
             {units.map((u) => {
               const count = countOf(u.typeId);
               const m = maxTrainable(u, leftFor(u.typeId), idleFor(u.typeId), fort ? wallFor(u.typeId) : Infinity, fort);
@@ -316,37 +227,35 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
                 </div>
               );
             })}
-            {orders.length > 0 && (
-              <div className="sticky bottom-2 z-10 grid gap-2 rounded-md border bg-card/95 p-3 shadow-md backdrop-blur">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="grid gap-0.5 text-sm">
-                    <span className="font-medium">
-                      {t('production.units', { count: ordered, n: fmtExact(ordered) })} ·{' '}
-                      {orders.map((o) => t('production.order', { n: fmtExact(o.count), unit: troopName(o.u.typeId) })).join(t('common:list.separator'))}
-                    </span>
-                    <CostList cost={total} have={have} />
-                    <span
-                      className={cn('text-xs tabular-nums', total.population > city.resource.idlePopulation ? 'text-destructive' : 'text-muted-foreground')}
-                    >
-                      {t('production.populationUsed', { used: fmt(total.population), idle: fmt(city.resource.idlePopulation) })}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button type="button" variant="ghost" size="sm" onClick={() => setCounts({})}>
-                      {t('production.clear')}
-                    </Button>
-                    <Button type="submit" size="sm" disabled={!!overBudget || trainAll.isPending}>
-                      {orders.length > 1
-                        ? t(fort ? 'production.buildAll' : 'production.trainAll', { n: orders.length })
-                        : t(fort ? 'production.build' : 'production.train')}
-                    </Button>
-                  </div>
+          </div>
+          {orders.length > 0 && (
+            <div className="sticky bottom-2 z-10 grid gap-2 rounded-md border bg-card/95 p-3 shadow-md backdrop-blur">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="grid gap-0.5 text-sm">
+                  <span className="font-medium">
+                    {t('production.units', { count: ordered, n: fmtExact(ordered) })} ·{' '}
+                    {orders.map((o) => t('production.order', { n: fmtExact(o.count), unit: troopName(o.u.typeId) })).join(t('common:list.separator'))}
+                  </span>
+                  <CostList cost={total} have={have} />
+                  <span className={cn('text-xs tabular-nums', total.population > city.resource.idlePopulation ? 'text-destructive' : 'text-muted-foreground')}>
+                    {t('production.populationUsed', { used: fmt(total.population), idle: fmt(city.resource.idlePopulation) })}
+                  </span>
                 </div>
-                {overBudget && <p className="text-xs text-destructive">{t('production.overBudget', { limit: limitLabel(overBudget) })}</p>}
+                <div className="flex gap-2">
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setCounts({})}>
+                    {t('production.clear')}
+                  </Button>
+                  <Button type="submit" size="sm" disabled={!!overBudget || trainAll.isPending}>
+                    {orders.length > 1
+                      ? t(fort ? 'production.buildAll' : 'production.trainAll', { n: orders.length })
+                      : t(fort ? 'production.build' : 'production.train')}
+                  </Button>
+                </div>
               </div>
-            )}
-          </form>
-        )}
+              {overBudget && <p className="text-xs text-destructive">{t('production.overBudget', { limit: limitLabel(overBudget) })}</p>}
+            </div>
+          )}
+        </form>
       </CardContent>
     </Card>
   );

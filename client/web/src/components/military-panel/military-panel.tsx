@@ -1,131 +1,53 @@
-import { Trash2, UserMinus } from 'lucide-react';
-import { useState } from 'react';
+import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { CityBean } from '@marchlands/api-client';
-import { FORT_KEYS, TROOP_KEYS, usedWallSpace, wallCapacity } from '@marchlands/core';
 
-import { DismissDialog } from '@/components/military-panel/dismiss-dialog/dismiss-dialog';
-import { InjuredCard } from '@/components/military-panel/injured-card/injured-card';
-import { Production } from '@/components/military-panel/production/production';
-import { UnitIcon } from '@/components/military-panel/unit-icon/unit-icon';
-import { UnitName } from '@/components/military-panel/unit-name/unit-name';
-import { TroopBadge } from '@/components/troop-badge/troop-badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { fmtExact } from '@/lib/format';
-import { troopName } from '@/lib/game-data';
+import { DefencesTab, GearCard, HeroesPanel, MILITARY_TABS, TroopsTab } from '@/components/military-panel/constants';
+import { HeroViewSwitch } from '@/components/military-panel/hero-view-switch/hero-view-switch';
+import { useHeroView } from '@/components/military-panel/hooks';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useGameNav } from '@/hooks/use-game-nav';
+import { useSearchState } from '@/hooks/use-search-state';
+import { PanelId } from '@/lib/nav';
+import { MILITARY_SEARCH, MilitaryTab } from '@/lib/screen-search';
 
+/**
+ * The Military page (docs/features/military-page.md), for the city in view: its troops, its defences, its heroes beside
+ * its Inn, and the player's gear. The tab is in the address (`?tab=gear`); `?tab=inn` (from the Inn's building or the
+ * mayor chip) shows the heroes and brings the Inn into view.
+ */
 export function MilitaryPanel({ city }: { city: CityBean }) {
-  const { t } = useTranslation(['military-panel', 'common']);
-  const garrison = Object.entries(TROOP_KEYS).map(([id, key]) => ({ id: Number(id), count: city.troop[key] ?? 0, injured: city.injuredTroop[key] ?? 0 }));
-  const forts = Object.entries(FORT_KEYS).map(([id, key]) => ({ id: Number(id), count: city.fortification[key] ?? 0 }));
-  const wallCap = wallCapacity(city.buildings);
-  const wallUsed = usedWallSpace(city.fortification, []);
-  // the troop or fortification being dismissed
-  const [dismissing, setDismissing] = useState<number | null>(null);
+  const { t } = useTranslation('military-panel');
+  const nav = useGameNav();
+  const [search, set] = useSearchState(MILITARY_SEARCH);
+  // the Inn sits beside the heroes
+  const tab = search.tab === MilitaryTab.INN ? MilitaryTab.HEROES : search.tab;
+  const setTab = (v: string) => set({ tab: MILITARY_SEARCH.tab.read(v) });
+  const heroView = useHeroView();
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <div className="grid content-start gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">{t('garrison.title')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('common:table.unit')}</TableHead>
-                  <TableHead className="text-end">{t('garrison.ready')}</TableHead>
-                  <TableHead className="text-end">{t('garrison.injured')}</TableHead>
-                  <TableHead className="w-0">
-                    <span className="sr-only">{t('dismiss.actions')}</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {garrison.map((u) => (
-                  <TableRow key={u.id} className={u.count || u.injured ? '' : 'text-muted-foreground'}>
-                    <TableCell className="py-1">
-                      <div className="flex items-center gap-2">
-                        <TroopBadge id={u.id} />
-                        <UnitName id={u.id} />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-end tabular-nums">{fmtExact(u.count)}</TableCell>
-                    <TableCell className="text-end tabular-nums">{u.injured ? fmtExact(u.injured) : '—'}</TableCell>
-                    <TableCell className="py-0">
-                      {u.count > 0 && (
-                        <Button
-                          size="icon-xs"
-                          variant="ghost"
-                          aria-label={t('dismiss.titleTroops', { unit: troopName(u.id) })}
-                          title={t('dismiss.dismissTip')}
-                          onClick={() => setDismissing(u.id)}
-                        >
-                          <UserMinus />
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-            <CardTitle className="text-sm">{t('defenses.title')}</CardTitle>
-            <span className="text-xs text-muted-foreground tabular-nums">{t('defenses.wallSpace', { used: fmtExact(wallUsed), cap: fmtExact(wallCap) })}</span>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('defenses.defense')}</TableHead>
-                  <TableHead className="text-end">{t('defenses.built')}</TableHead>
-                  <TableHead className="w-0">
-                    <span className="sr-only">{t('dismiss.actions')}</span>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {forts.map((f) => (
-                  <TableRow key={f.id} className={f.count ? '' : 'text-muted-foreground'}>
-                    <TableCell className="py-1">
-                      <div className="flex items-center gap-2">
-                        <UnitIcon id={f.id} />
-                        <UnitName id={f.id} />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-end tabular-nums">{fmtExact(f.count)}</TableCell>
-                    <TableCell className="py-0">
-                      {f.count > 0 && (
-                        <Button
-                          size="icon-xs"
-                          variant="ghost"
-                          aria-label={t('dismiss.titleForts', { unit: troopName(f.id) })}
-                          title={t('dismiss.destroyTip')}
-                          onClick={() => setDismissing(f.id)}
-                        >
-                          <Trash2 />
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        <InjuredCard city={city} />
-        <DismissDialog city={city} unitId={dismissing} onClose={() => setDismissing(null)} />
+    <div className="grid grid-cols-1 gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList>
+            {MILITARY_TABS.map((id) => (
+              <TabsTrigger key={id} value={id}>
+                {t(`tabs.${id}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+        {tab === MilitaryTab.HEROES && heroView.canChoose && <HeroViewSwitch view={heroView.view} onChoose={heroView.choose} />}
       </div>
-      <div className="grid content-start gap-4">
-        <Production city={city} fort={false} />
-        <Production city={city} fort />
-      </div>
+      <Suspense fallback={<Skeleton className="h-96" />}>
+        {tab === MilitaryTab.TROOPS && <TroopsTab city={city} />}
+        {tab === MilitaryTab.DEFENCES && <DefencesTab city={city} />}
+        {tab === MilitaryTab.HEROES && (
+          <HeroesPanel city={city} view={heroView.view} focusInn={search.tab === MilitaryTab.INN} onGear={() => set({ tab: MilitaryTab.GEAR })} />
+        )}
+        {tab === MilitaryTab.GEAR && <GearCard onResearch={() => nav.open(PanelId.RESEARCH)} />}
+      </Suspense>
     </div>
   );
 }

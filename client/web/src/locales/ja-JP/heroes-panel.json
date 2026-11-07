@@ -56,10 +56,6 @@
     "keep": "{{name}} を残す",
     "confirm": "解雇"
   },
-  "tabs": {
-    "heroes": "英雄",
-    "gear": "装備"
-  },
   "view": {
     "label": "英雄の表示",
     "sheet": "シート",

@@ -5,7 +5,7 @@ import { GAME_SEARCH, isPanel, isScreen, leavingPrefix, type PanelId, screenHref
 /**
  * The game's place (lib/nav.ts) and the moves between places: the city, the screen in the viewport (null when the
  * address names none, which the game page redirects), and the panel open over it. A page's own `tab` is in its
- * search parameters (`/cities/12/heroes?tab=gear`): go there with `go(PageId.HEROES, { tab: HeroTab.GEAR })`, typed by
+ * search parameters (`/cities/12/military?tab=gear`): go there with `go(PageId.MILITARY, { tab: MilitaryTab.GEAR })`, typed by
  * the page's own parameters (lib/screen-search.ts).
  */
 export function useGameNav() {
@@ -23,7 +23,7 @@ export function useGameNav() {
     part,
     screen,
     panel,
-    /** a page asked for as a panel (an old address: heroes were a panel), which the game page redirects */
+    /** a page asked for as a panel (an old address: Military was a panel), which the game page redirects */
     pageAsPanel: wanted && !isPanel(wanted) ? wanted : null,
     /** Show a view or a page (closing any panel), with its own search parameters (a building to open, a tab). */
     go: <S extends ScreenId>(to: S, params?: ScreenSearch<S>) => void navigate(screenHref(cityId, to, params)),

@@ -1,4 +1,7 @@
 {
+  "tabs": {
+    "defences": "Defenses"
+  },
   "production": {
     "batchCancelled": "Batch canceled"
   },

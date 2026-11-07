@@ -4,7 +4,7 @@
 // browser's back button closes a panel and every screen can be linked to.
 
 import { isOuterPosition } from '@marchlands/core';
-import { BUILDING_SEARCH, HEROES_SEARCH, MAP_SEARCH, REPORT_SEARCH } from '@/lib/screen-search';
+import { BUILDING_SEARCH, MAP_SEARCH, MILITARY_SEARCH, MilitaryTab, REPORT_SEARCH } from '@/lib/screen-search';
 import { param, type SearchSchema, type SearchValues, writeSearch } from '@/lib/search-state';
 
 /** The views of the viewport, in the order of the switch. */
@@ -13,16 +13,19 @@ export type ViewId = (typeof ViewId)[keyof typeof ViewId];
 export const VIEW_IDS = Object.values(ViewId);
 
 /** The heavier screens, each a page in the viewport's place. */
-export const PageId = { HEROES: 'heroes', REPORTS: 'reports', MARKET: 'market', FLOWS: 'flows', STATS: 'stats' } as const;
+export const PageId = { MILITARY: 'military', REPORTS: 'reports', MARKET: 'market', FLOWS: 'flows', STATS: 'stats' } as const;
 export type PageId = (typeof PageId)[keyof typeof PageId];
 const PAGE_IDS = Object.values(PageId);
 
 /** The lighter screens, each a panel over the view. */
-export const PanelId = { MILITARY: 'military', RESEARCH: 'research', ITEMS: 'items', ARMIES: 'armies', PLANS: 'plans', FACTIONS: 'factions' } as const;
+export const PanelId = { RESEARCH: 'research', ITEMS: 'items', ARMIES: 'armies', PLANS: 'plans', FACTIONS: 'factions' } as const;
 export type PanelId = (typeof PanelId)[keyof typeof PanelId];
 export const PANEL_IDS = Object.values(PanelId);
 
 export type ScreenId = ViewId | PageId;
+
+/** What the Military page's Heroes tab was called in the address when heroes were a page, and before that a panel, of their own. */
+const LEGACY_HEROES = 'heroes' as const;
 
 /** Whether an address part names a view or a page. */
 export function isScreen(s: string): s is ScreenId {
@@ -49,10 +52,10 @@ export function viewOf(positionId: number): ViewId {
 
 /**
  * The search parameters of every screen: the panel open over it. It may also name a page, in an address from before
- * that page was one (`?panel=heroes`), which the game page redirects.
+ * that page was one (`?panel=military`), which the game page redirects.
  */
 export const GAME_SEARCH = {
-  panel: param.maybe([...PANEL_IDS, ...PAGE_IDS]),
+  panel: param.maybe([...PANEL_IDS, ...PAGE_IDS, LEGACY_HEROES]),
 } satisfies SearchSchema;
 
 /** Where a panel's own search parameters are named (`items.q`), apart from the page under it. */
@@ -68,7 +71,7 @@ const SCREEN_SEARCH = {
   [ViewId.TOWN]: BUILDING_SEARCH,
   [ViewId.FIELDS]: BUILDING_SEARCH,
   [ViewId.MAP]: MAP_SEARCH,
-  [PageId.HEROES]: HEROES_SEARCH,
+  [PageId.MILITARY]: MILITARY_SEARCH,
   [PageId.REPORTS]: REPORT_SEARCH,
 } satisfies Partial<Record<ScreenId, SearchSchema>>;
 const SCREEN_SCHEMAS: Partial<Record<ScreenId, SearchSchema>> = SCREEN_SEARCH;
@@ -83,6 +86,25 @@ export type ScreenSearch<S extends ScreenId> = S extends keyof typeof SCREEN_SEA
 export function searchForCity(search: string): string {
   const q = writeSearch(MAP_SEARCH, new URLSearchParams(search), { at: null }).toString();
   return q ? `?${q}` : '';
+}
+
+/**
+ * Where an address that names no screen now lives: the Heroes page's own (`/cities/12/heroes?tab=gear&hero=3`) keeps its
+ * place on the Military page, with no tab there meaning the Heroes tab; anything else is legacyTarget's.
+ */
+export function legacyHref(cityId: number, part: string, search: string): string {
+  if (part !== LEGACY_HEROES) {
+    const to = legacyTarget(part);
+    return screenHref(cityId, to.screen, undefined, to.panel);
+  }
+  const old = new URLSearchParams(search);
+  const tab = old.has('tab') ? MILITARY_SEARCH.tab.read(old.get('tab')) : MilitaryTab.HEROES;
+  return screenHref(cityId, PageId.MILITARY, { tab, hero: MILITARY_SEARCH.hero.read(old.get('hero')) });
+}
+
+/** Where a page asked for as a panel, in an address from before it was a page, now lives. */
+export function pageAsPanelHref(cityId: number, page: PageId | typeof LEGACY_HEROES): string {
+  return page === LEGACY_HEROES ? legacyHref(cityId, page, '') : screenHref(cityId, page);
 }
 
 /** The address of a screen of a city, with its own search parameters (a tab, a building to open) and a panel over it. */

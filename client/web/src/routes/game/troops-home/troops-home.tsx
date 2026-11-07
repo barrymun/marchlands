@@ -7,7 +7,7 @@ import { TroopBadge } from '@/components/troop-badge/troop-badge';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { fmt } from '@/lib/format';
 import { troopName } from '@/lib/game-data';
-import { PanelId } from '@/lib/nav';
+import { PageId } from '@/lib/nav';
 import { cn } from '@/lib/utils';
 
 /** The troops at home in the city: every type with its badge and count, none dimmed; a click opens the Military panel. */
@@ -29,7 +29,7 @@ export function TroopsHome({ city, onPick }: { city: CityBean; onPick?: () => vo
             )}
             title={troopName(x.id)}
             onClick={() => {
-              nav.open(PanelId.MILITARY);
+              nav.go(PageId.MILITARY);
               onPick?.();
             }}
           >

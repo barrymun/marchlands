@@ -9,7 +9,8 @@ import { useGameNav } from '@/hooks/use-game-nav';
 import { fmtExact } from '@/lib/format';
 import { buildingName, techName, troopName } from '@/lib/game-data';
 import { i18n } from '@/lib/i18n';
-import { PanelId, viewOf } from '@/lib/nav';
+import { PageId, PanelId, viewOf } from '@/lib/nav';
+import { MilitaryTab } from '@/lib/screen-search';
 
 /** Everything running in the city: construction, research here, and the batch each barracks / the walls is producing. */
 export function useJobs(city: CityBean): Job[] {
@@ -45,7 +46,11 @@ export function useJobs(city: CityBean): Job[] {
       open: () => nav.open(PanelId.RESEARCH),
     });
   }
-  for (const q of [...(troops.data?.queues ?? []), ...(forts.data?.queues ?? [])]) {
+  const queues = [
+    ...(troops.data?.queues ?? []).map((q) => ({ q, tab: MilitaryTab.TROOPS })),
+    ...(forts.data?.queues ?? []).map((q) => ({ q, tab: MilitaryTab.DEFENCES })),
+  ];
+  for (const { q, tab } of queues) {
     const running = q.allProduceQueue.find((x) => x.startTime > 0 && x.endTime > 0);
     if (!running) continue;
     const waiting = q.allProduceQueue.length - 1;
@@ -56,7 +61,7 @@ export function useJobs(city: CityBean): Job[] {
       note: waiting > 0 ? i18n.t('activity-dock:job.queued', { n: waiting }) : undefined,
       startTime: running.startTime,
       endTime: running.endTime,
-      open: () => nav.open(PanelId.MILITARY),
+      open: () => nav.go(PageId.MILITARY, { tab }),
     });
   }
   return jobs.sort((a, b) => a.endTime - b.endTime);

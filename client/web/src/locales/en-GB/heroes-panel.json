@@ -58,10 +58,6 @@
     "keep": "Keep {{name}}",
     "confirm": "Dismiss"
   },
-  "tabs": {
-    "heroes": "Heroes",
-    "gear": "Gear"
-  },
   "view": {
     "label": "Show heroes as",
     "sheet": "Sheet",

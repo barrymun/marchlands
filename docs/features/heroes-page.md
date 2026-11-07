@@ -1,6 +1,6 @@
 # Heroes page
 
-**Status:** phase 1 built 2026-10-23 (the page with its tabs, the mayor popover, the Inn's button); phase 2 built 2026-10-24 (the roster and character sheet, with the figure wearing its gear, and the Sheet · List switch); the famous heroes next. TODO.md item: *A Heroes page*.
+**Status:** since 2026-11-07 this page is the Heroes and Gear tabs of the [Military page](military-page.md). Phase 1 built 2026-10-23 (the page with its tabs, the mayor popover, the Inn's button); phase 2 built 2026-10-24 (the roster and character sheet, with the figure wearing its gear, and the Sheet · List switch); the famous heroes next. TODO.md item: *A Heroes page*.
 
 **The aim:** give heroes a screen of their own, like Reports, Market and Flows, instead of the panel that slides over the town. Heroes are growing: 14 gear pieces with art, stars, generated names, and later famous historical heroes and perhaps portraits. A page has room for a roster and a full character sheet per hero.
 

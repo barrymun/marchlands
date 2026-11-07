@@ -11,15 +11,14 @@ import {
   Scale,
   ScrollText,
   Swords,
-  UsersRound,
   Wheat,
   Workflow,
 } from 'lucide-react';
 
+import { MayorPicker } from '@/components/mayor-picker/constants';
 import { i18n } from '@/lib/i18n';
 import { lazyComponent } from '@/lib/lazy';
 import { PageId, PanelId, ViewId } from '@/lib/nav';
-import { MayorPicker } from '@/routes/game/mayor-chip/constants';
 
 /** A place in the game's menus: its id (lib/nav.ts), its icon, and its name in the current locale. */
 const place = <const Id extends ViewId | PageId | PanelId>(id: Id, icon: LucideIcon) => ({
@@ -35,7 +34,6 @@ export const VIEWS = [place(ViewId.TOWN, Castle), place(ViewId.FIELDS, Wheat), p
 
 /** The panels that open over the view, in the order of the menu. */
 export const PANELS = [
-  place(PanelId.MILITARY, Swords),
   place(PanelId.RESEARCH, FlaskConical),
   place(PanelId.ITEMS, Backpack),
   place(PanelId.ARMIES, Flag),
@@ -45,7 +43,7 @@ export const PANELS = [
 
 /** The pages that take the viewport's place, in the order of the menu. */
 export const PAGES = [
-  place(PageId.HEROES, UsersRound),
+  place(PageId.MILITARY, Swords),
   place(PageId.REPORTS, ScrollText),
   place(PageId.MARKET, Scale),
   place(PageId.FLOWS, Workflow),
@@ -55,13 +53,20 @@ export const PAGES = [
 /** The width a page keeps: lines and tables stay readable on a big screen. Views use the whole viewport. */
 export const PAGE_WIDTH = 'max-w-7xl';
 
-/** Pages that use the viewport's whole width instead: the Heroes page, its heroes' rows and gear in columns; the Reports page, its places in columns; the Statistics page, its charts side by side; the Flows page, its list beside the flow chosen. */
-export const FULL_WIDTH_PAGES: readonly PageId[] = [PageId.HEROES, PageId.REPORTS, PageId.STATS, PageId.FLOWS];
+/** Pages that use the viewport's whole width instead: the Military page, its order forms beside the garrison, its heroes' rows and gear in columns; the Reports page, its places in columns; the Statistics page, its charts side by side; the Flows page, its list beside the flow chosen. */
+export const FULL_WIDTH_PAGES: readonly PageId[] = [PageId.MILITARY, PageId.REPORTS, PageId.STATS, PageId.FLOWS];
 
 // Every screen but the town and the fields (the one a visit starts on) loads its code on first use, as does the mayor
 // chip's quick swap; usePreloadPanels fetches them all once the page is up, so opening one normally finds it loaded.
-export const MilitaryPanel = lazyComponent(() => import('@/components/military-panel/military-panel').then((m) => m.MilitaryPanel));
-export const HeroesPanel = lazyComponent(() => import('@/components/heroes-panel/heroes-panel').then((m) => m.HeroesPanel));
+// its tabs load on their own, declared in its own code; they start loading with it, so opening one doesn't wait
+export const MilitaryPanel = lazyComponent(async () => {
+  const [{ MILITARY_TAB_CODE }, { MilitaryPanel }] = await Promise.all([
+    import('@/components/military-panel/constants'),
+    import('@/components/military-panel/military-panel'),
+  ]);
+  for (const tab of MILITARY_TAB_CODE) void tab.preload();
+  return MilitaryPanel;
+});
 export const ResearchPanel = lazyComponent(() => import('@/components/research-panel/research-panel').then((m) => m.ResearchPanel));
 export const ItemsPanel = lazyComponent(() => import('@/components/items-panel/items-panel').then((m) => m.ItemsPanel));
 export const MarketPanel = lazyComponent(() => import('@/components/market-panel/market-panel').then((m) => m.MarketPanel));
@@ -76,7 +81,6 @@ export const SendArmyDialog = lazyComponent(() => import('@/components/send-army
 
 export const LAZY_PANELS = [
   MilitaryPanel,
-  HeroesPanel,
   ResearchPanel,
   ItemsPanel,
   MarketPanel,
