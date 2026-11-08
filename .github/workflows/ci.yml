@@ -25,6 +25,10 @@ jobs:
     name: Typecheck, lint, test and build
     runs-on: ubuntu-latest
     container: node:24-bookworm
+    env:
+      # Type-aware ESLint peaks near 4 GB. On GitHub's 7-8 GB runner Node's own heap limit is about 2.2 GB (it takes a
+      # share of the machine's memory), so lint ran out of memory there while passing on bigger machines.
+      NODE_OPTIONS: --max-old-space-size=5120
     steps:
       - uses: actions/checkout@v7.0.1
       - run: npm ci
