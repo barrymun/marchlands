@@ -4,9 +4,9 @@
 
 A browser strategy game in the tradition of **Evony (Age 1)**: build a city, train an army, raise heroes, trade on the market and fight your way up the map to the historic cities, set in the Empire's borderlands around 950–1250.
 
-It started as a from-scratch TypeScript rewrite of the original game server and has since grown rules of its own (every one listed in [docs/deviations.md](docs/deviations.md)). It is based on the open-source C++ server *Spitfire* ([sonya75/evony-private-server](https://github.com/sonya75/evony-private-server)) and the Age 1 battle calculator ([sonya75/EvonyAge1BattleCalc](https://github.com/sonya75/EvonyAge1BattleCalc)). Every formula the original had is ported exactly, and the battle simulator matches all 36,567 regression cases of the original calculator. Where the original left something unbuilt (attacks, transport, reinforcement, the market, quests, friends, alliance permissions and more), Marchlands builds it, following Evony Age 1.
+It started as a from-scratch TypeScript rewrite of the original game server and has since grown rules of its own (every one listed in [docs/deviations.md](docs/deviations.md)). It is based on the C++ server *Spitfire* ([sonya75/evony-private-server](https://github.com/sonya75/evony-private-server)) and the Age 1 battle calculator ([sonya75/EvonyAge1BattleCalc](https://github.com/sonya75/EvonyAge1BattleCalc)). Every formula the original had is ported exactly, and the battle simulator matches all 36,567 regression cases of the original calculator. Where the original left something unbuilt (attacks, transport, reinforcement, the market, quests, friends, alliance permissions and more), Marchlands builds it, following Evony Age 1.
 
-**Status: v0.5, player versus environment.** Players fight barbarian cities, valleys and the historic cities, not each other: attacking and scouting other players is built but switched off (`FEATURE_PVP`, see [Configuration](#configuration)).
+**Status: player versus environment.** Players fight barbarian cities, valleys and the historic cities, not each other: attacking and scouting other players is built but switched off (`FEATURE_PVP`, see [Configuration](#configuration)).
 
 ![Marchlands in 28 seconds: the animated town, the world map, an army marching, the historic cities, a storm moving across the states and the town at night](docs/media/highlights.gif)
 
@@ -23,6 +23,7 @@ It started as a from-scratch TypeScript rewrite of the original game server and 
 - [More stacks and moving machines](#more-stacks-and-moving-machines)
 - [Documentation](#documentation)
 - [Credits](#credits)
+- [Licence](#licence)
 
 ## What's in the game
 
@@ -410,3 +411,9 @@ npm ci
 ## Credits
 
 The Market page's charts are drawn with [TradingView Lightweight Charts™](https://www.tradingview.com/lightweight-charts/) (Apache 2.0). Copyright © 2025 TradingView, Inc., [tradingview.com](https://www.tradingview.com/). The charts keep the library's own TradingView logo, and a line under the price chart links to TradingView, as its licence asks.
+
+## Licence
+
+Copyright © 2026 barrymun.
+
+Marchlands is free software under the [GNU Affero General Public License, version 3](LICENSE) (`AGPL-3.0-only`). You may use, change and share it, and host it for other players, for free or not. If you share it, or host a changed version that players reach over a network, you must offer them its full source code, changes included, under the same licence (section 13). The libraries it uses keep their own licences.

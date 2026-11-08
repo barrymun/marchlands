@@ -2,6 +2,12 @@
 
 Planned work for future updates. Ideas still being weighed and known quirks are in [docs/backlog.md](docs/backlog.md); once an item here changes a game rule, document it in [docs/deviations.md](docs/deviations.md) and keep its numbers in `BALANCE` (`shared/core/src/balance.ts`).
 
+## Release
+
+- [ ] **Release v0.5.** The first version players can try: player versus environment (`FEATURE_PVP` off). Not tagged yet.
+  - Before: settle *Inactive holders of historic cities* (Gameplay, below), and decide what to do about what came from the original server, which is All Rights Reserved: the data dump (`shared/core/src/data/legacy/*.json`) and [docs/spec/](docs/spec/). Marchlands' own code is under AGPL-3.0 (`LICENSE`).
+  - Then: tag `v0.5.0` on `main` and publish a GitHub release from it: what's in it (README.md, What's in the game), how to run it (README.md, Play it on your own computer) and the feature tour video as an asset (`marchlands-v0.5-tour.mp4`, 105 MB, kept outside the repository).
+
 ## Gameplay
 
 - [ ] **Rename the items.** Design: [docs/features/item-names.md](docs/features/item-names.md). Every item had the original game's name, many out of period (Napoleon's Diary, Penicillin, The Wealth of Nations). Decided 2026-11-08: the original's style (famous people's things and books for the best items, plain tools for the everyday ones, ladders in words whose order is plain) from the Empire's lands about 950–1250. Done 2026-11-08: the new names in every locale (Otto's Muster Roll, Joyeuse, King's Peace …; reference/items.md, Names in Marchlands), Bernini's Hammer at 1,000,000 gold, and the speed-up books Beginner to Senior, the experience books and the medal boxes out of the shop (`BALANCE.notInShop`). The code's names followed the same day (`ItemId.OTTOS_MUSTER_ROLL`, `ottos-muster-roll.png`). Next: redraw the icons that still show the old items (its Phase 5: Otto's Muster Roll, the Heavy Plough, the Water Saw, the Treadwheel Crane, the Hauberk, Elizabeth's Bread and Granary, the Oath of Fealty, Stratagems, and touches to ten more).
@@ -63,7 +69,7 @@ Phases 2 to 4 of the October 2026 tooling review; phase 1 (type-aware linting an
 - [ ] **Dependency updates with Renovate.**
   - Now: dependencies are updated by hand, and the two-week rule (AGENTS.md, Ground rules) is checked by hand.
   - Plan: Renovate with `minimumReleaseAge: "14 days"` and pinned versions (`rangeStrategy: "pin"`), grouped so updates come as a few pull requests.
-  - To decide first: CI stays off on GitHub for now, to save its cost (`workflow_dispatch` only in `.github/workflows/ci.yml`), and runs locally with act (`npm run ci:local`). So Renovate's pull requests aren't tested by themselves: each would be checked out and run through `npm run ci:local` before merging, or wait until CI runs on `pull_request`.
+  - CI runs on every pull request (`.github/workflows/ci.yml`), so Renovate's pull requests are tested by themselves. To decide: how often it opens them, given that each run spends GitHub Actions minutes while the repository is private.
 - [ ] **Browser tests with Playwright.**
   - Now: the client's tests are pure functions in plain Node; the only end-to-end checks are `tools/smoke/*.mjs`, against the API.
   - Plan: a small Playwright suite against the running stack (log in, build, train, send an army) with axe accessibility checks, using temporary `fx_…` accounts deleted afterwards (AGENTS.md, Running stack).
