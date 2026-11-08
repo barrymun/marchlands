@@ -252,6 +252,22 @@ describe('ItemId', () => {
   });
 });
 
+describe(itemGoldPrice.name, () => {
+  it('takes a set price over the cents price', () => {
+    expect(itemGoldPrice(ItemId.BERNINIS_HAMMER)).toBe(BALANCE.goldShop[ItemId.BERNINIS_HAMMER]);
+    expect(itemGoldPrice(ItemId.BERNINIS_HAMMER)).not.toBe(goldForCents(5));
+  });
+
+  it("prices an item with no set price at its cents' worth of gold", () => {
+    expect(itemGoldPrice(ItemId.WAR_HORN)).toBe(goldForCents(10));
+  });
+
+  it('sells neither medals nor the Welcome Package', () => {
+    expect(itemGoldPrice(ItemId.CROSS_MEDAL)).toBeNull();
+    expect(itemGoldPrice(ItemId.WELCOME_PACKAGE)).toBeNull();
+  });
+});
+
 describe('SpeedupId', () => {
   it('the half-time speed-up is in BALANCE.items.speedups but is not an item', () => {
     expect(items.speedups[SpeedupId.HALF_TIME]).toBeDefined();

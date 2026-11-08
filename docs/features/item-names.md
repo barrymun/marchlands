@@ -136,9 +136,9 @@ Military's two training notes say "(Marshal)" in place of "(Quartermaster)"; the
 | Now | Does | Proposed | Alternatives | Icon |
 |---|---|---|---|---|
 | Holy Water | resets a hero's points | **Holy Water** (kept: period and plain) | | keep |
-| Excalibur | +25% power, 7 days | **Joyeuse**: Charlemagne's sword (Charlemagne is Atlantis's guard in [famous-heroes.md](famous-heroes.md)) | Imperial Sword (the regalia's sword, about 1200); Durendal | keep |
-| The Art of War | +25% intelligence, 7 days | **Stratagems**: Frontinus' book of ruses of war, copied from the 9th century | Vegetius' Epitome | redraw: a book, not bamboo slips |
-| The Wealth of Nations | +25% politics, 7 days | **Mirror of Kings**: Godfrey of Viterbo's book of rule for the young Henry VI, about 1183 | Policraticus (John of Salisbury, 1159) | touch: a mirror on the cover |
+| Excalibur | +25% power, 1 day | **Joyeuse**: Charlemagne's sword (Charlemagne is Atlantis's guard in [famous-heroes.md](famous-heroes.md)) | Imperial Sword (the regalia's sword, about 1200); Durendal | keep |
+| The Art of War | +25% intelligence, 1 day | **Stratagems**: Frontinus' book of ruses of war, copied from the 9th century | Vegetius' Epitome | redraw: a book, not bamboo slips |
+| The Wealth of Nations | +25% politics, 1 day | **Mirror of Kings**: Godfrey of Viterbo's book of rule for the young Henry VI, about 1183 | Policraticus (John of Salisbury, 1159) | touch: a mirror on the cover |
 | Anabasis | +1,000 experience | **Waltharius**: a Latin epic of a hero's escape, 10th century | Deeds of the Saxons (Widukind, about 967) | keep |
 | Epitome of Military Science | +10,000 experience | **Epitome of Military Science** (kept: Vegetius was among the most copied books of the period) | | keep |
 | On War | +100,000 experience | **Nibelungenlied** (about 1200) | Deeds of Frederick (Otto of Freising, 1157–60) | keep |
@@ -174,6 +174,65 @@ Of 53 items, the recommendation renames 43 and keeps 10:
 - **Kept:** War Horn, Holy Water, Epitome of Military Science, and the medals Cross, Rose, Lion, Honour, Courage, Wisdom and Justice.
 - **Icons:** 9 redrawn and 10 touched. The rest still fit.
 
+## Items that don't earn their place
+
+An audit of every item (2026-11-08): how a player gets it, what it does, what it costs against the alternatives, and how much it was used. It matters to the rename, since an item merged or dropped needs no name.
+
+**How it was checked:**
+- **How items are got and priced:** from core (`itemGoldPrice`, `heroItemGoldPrice`, `speedupItemGold`, `goldForSpeedup`, `QUEST_CATALOGUE`, `BALANCE.items`, `BALANCE.goldShop`).
+- **How much they're used:** from the dev stack's statistics (`player_stats`: `items.used`, `items.gained`) and inventories, read only.
+- **How far to trust the usage:** the dev stack has one player (the maintainer's), at `GAME_SPEED=60` and with a lot of gold, so the usage is a hint. The price comparisons hold anywhere.
+
+**Every item can be got:**
+- **The shop:** 43 are sold for gold, every item but the Welcome Package and the 9 medals.
+- **Medals** come from battle, the medal boxes and two quests.
+- **Quests** also give Primary Guidelines, Plowshares and Civil Code.
+- **The Welcome Package** gives Beginner and Primary Guidelines.
+- **At the moment of use:** the speed-ups (Napoleon's Diary and Archimedes' Note included), the hero items, Holy Water and the Truce Agreement can be bought then.
+
+### Findings
+
+1. **The speed-up books in the shop cost what gold would.**
+   - Beginner to Senior Guidelines are priced to the gold exactly what finishing the same time at once costs: 40,000 for 15 minutes, 85,000 for an hour, 165,000 for 2½ hours, 415,000 for 8 hours (`speedupItemGold` against `goldForSpeedup`). Buying one is the same as pressing *finish for gold* later.
+   - Master Guidelines (665,000 for 10–30 hours) are cheaper than gold for the same time (about 1,165,000 for 20 hours).
+   - Ultimate Guidelines (1,000,000 for 30% of the whole time) pay only on a job of 60 hours or more.
+   - The player used none: 1.19 million gold went on finishing at once instead.
+   - As gifts (the Welcome Package, quests) they're worth having. As things to buy they add a step and nothing else.
+2. **The experience books overlap.**
+   - Bought at the moment of use, every book costs 1 gold per point of experience (`BALANCE.heroItemGold.perExp`). From the shop they always cost more, from 1.3 to 65 gold a point (On War is 835,000 for 100,000 to 640,000 experience).
+   - So no one should buy one in the shop. At the moment of use, On War, a whole level at least, does what the other two do in one press.
+   - The player used On War 1,268 times, Anabasis 3 and the Epitome never.
+3. **Bernini's Hammer was about ten times too cheap** (*fixed 2026-11-08:* 1,000,000 gold in `BALANCE.goldShop`). 40,000 gold bought a third building queue for 7 days: the original's 5 cents carried over (`goldForCents`), with no set price in `BALANCE.goldShop`. A day of +25% gold (Tax Policy) costs 375,000, and a day of 25% cheaper training 250,000.
+4. **Medals pile up, so the medal boxes have no use.**
+   - The player holds about 33,000 medals (2,600 to 5,300 of each kind) and has used about 60.
+   - Medals are spent in three places: hero loyalty (capped at 100), the gear (2 a star, 6 Nation Medals for the tenth: 336 for every piece at full stars, once) and titles (15 a promotion, 9 promotions). Captured heroes, which the original also persuaded with medals, are gone (deviations.md).
+   - Battle drops (`BALANCE.medalDrops`, up to 3 a won attack) far outrun that, so the medal boxes, 665,000 to 2,000,000 gold, buy what anyone attacking already has thousands of.
+   - This is a balance question in its own right: fewer drops, or a new use for medals.
+5. **The one-day boosts are rarely worth it.**
+   - Every seven-day boost costs about 6 to 6.4 times its one-day twin for 7 times the time (production 65,000 and 415,000; gold 375,000 and 2,335,000; attack and defence 85,000 and 500,000; upkeep 150,000 and 950,000; training 250,000 and 1,600,000).
+   - The player only ever used the seven-day ones. A one-day boost is still a cheaper way in, and the original had the same pairs, so this is the mildest finding.
+6. **Not usable for now, by design:** the Truce Agreement, while PvP is off (the Items panel hides it; docs/backlog.md).
+7. **Open elsewhere:**
+   - Penicillin heals a city's injured at once (1,000,000 gold), where the original cut losses for 7 days: [rules-check.md](../rules-check.md), finding 11.
+   - The Welcome Package now holds 5 Beginner and 3 Primary Guidelines and 50,000 of each resource (`BALANCE.items.welcomePackage`). deviations.md says it "keeps its other contents", and reference/items.md lists a far bigger starter set, so one of them is out of date.
+8. **Used little, but fit:**
+   - Napoleon's Diary, Archimedes' Note, The Art of War, Civil Code and the City Teleporter each have a clear job no other item does.
+   - Low use on a fast dev stack with one player says little. Intelligence matters (construction, research and battle), so The Art of War isn't redundant.
+
+### What could change
+
+Each change is a rule change: it goes in deviations.md with BALANCE numbers, separately from the rename, and is decided first, because it changes how many names are needed.
+
+| Finding | Options | Recommended |
+|---|---|---|
+| 1. Speed-up books | (a) keep as they are; (b) take Beginner to Senior out of the shop (gifts, quests and buying at the moment of use only); (c) sell them at a discount (say 80% of gold's price), so holding one is worth something | (b): fewer shop rows, no loss to anyone |
+| 2. Experience books | (a) keep three; (b) keep three as gifts, out of the shop; (c) one book, bought at the moment of use, giving a level (or a share of it) | (b) now; (c) if nothing gives the small ones away |
+| 3. Bernini's Hammer | a set price in `BALANCE.goldShop` near the other seven-day boosts | 1,000,000 for 7 days (done 2026-11-08) |
+| 4. Medals | (a) fewer drops (`BALANCE.medalDrops`); (b) a new use (the market, a faction's favour, items for medals); (c) take the medal boxes out of the shop | (c) now, and (a) or (b) as an item of its own in TODO.md |
+| 5. One-day boosts | (a) keep; (b) cut the seven-day discount; (c) drop the one-day ones | (a) |
+
+If all the recommendations are taken, the item list itself stays at 53 (nothing is removed, only taken out of the shop), so the rename's list stands. Option 2(c) would drop two items (Anabasis and the Epitome).
+
 ## Translation
 
 - Every new name goes into every locale in the same change (AGENTS.md, Translations). The famous names need a translator's care:
@@ -193,13 +252,15 @@ Of 53 items, the recommendation renames 43 and keeps 10:
 4. **The medals:** two renamed, or a whole new set?
 5. **The code:** rename `ItemId`'s names and the icons' files with the items (AGENTS.md keeps them "named after the item"), or keep the old ones in code? Recommended: rename them, as a separate change after the text, since a refactor doesn't change behaviour.
 6. **Old names for players of the original:** say nothing, or show "formerly …" in item descriptions for a while? Recommended: nothing, since the game hasn't been released.
+7. **The items themselves** (*Items that don't earn their place*, What could change): which changes to make, before or alongside the rename? Above all whether the experience books become one, which drops two names.
 
 ## Phases
 
-1. **Decide** the names (the open questions).
-2. **The text:** the new names in every locale, the four texts that name items, quest 28's name, and an *In Marchlands* name column in reference/items.md (the old name to the new). No rule changes, so nothing in deviations.md beyond its passing mentions.
-3. **The code:** `ItemId`'s names, `itemArtFile`'s file names and the PNGs, `tools/art/items.ts` and its drawings' names, the comments and test titles that name items, core's unused English `name` on the item rows. One rename, no behaviour change.
-4. **The icons** that no longer match their name (*Icon* above): redraw and touch, with `npm run art:draw -- items`, and item-art.md's step table updated.
+1. **Decide** the names and the item changes (the open questions).
+2. **The item changes,** if any, as their own change: BALANCE, deviations.md, tests. Bernini's Hammer's price went first (2026-11-08).
+3. **The text:** the new names in every locale, the four texts that name items, quest 28's name, and an *In Marchlands* name column in reference/items.md (the old name to the new). No rule changes, so nothing in deviations.md beyond its passing mentions.
+4. **The code:** `ItemId`'s names, `itemArtFile`'s file names and the PNGs, `tools/art/items.ts` and its drawings' names, the comments and test titles that name items, core's unused English `name` on the item rows. One rename, no behaviour change.
+5. **The icons** that no longer match their name (*Icon* above): redraw and touch, with `npm run art:draw -- items`, and item-art.md's step table updated.
 
 ## Research
 

@@ -487,6 +487,8 @@ export const BALANCE = {
   goldShop: {
     [ItemId.WAR_ENSIGN]: 250_000, // War Ensign (30 cents)
     [ItemId.CITY_TELEPORTER]: 750_000, // City Teleporter: picks the tile, like the original's Adv City Teleporter (90 cents)
+    // a third building queue for 7 days (5 cents, 40,000 gold: far below the other 7-day boosts, docs/features/item-names.md)
+    [ItemId.BERNINIS_HAMMER]: 1_000_000,
     // production boosts, +25% for 1 day (8 cents) / 7 days (50 cents)
     [ItemId.PLOWSHARES]: 65_000,
     [ItemId.IRON_RAKE]: 415_000,
