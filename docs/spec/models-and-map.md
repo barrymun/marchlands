@@ -1,5 +1,7 @@
 # Evony Age 1 Private Server: Models, City Economy and Map Specification
 
+Paths here are in the original server, [sonya75/evony-private-server](https://github.com/sonya75/evony-private-server) on GitHub.
+
 Source of truth: the C++ server at `evony-private-server/src`. This spec covers `Client`, `PlayerCity`, `City`, `NpcCity`, `Tile`, `ValleyData`, `Map` and `Utils`. Where they matter, it also covers the pieces of `structs.h`, `defines.h`, `spitfire.cpp` and `packets/*.cpp` that read or drive these models.
 
 Conventions in this document:

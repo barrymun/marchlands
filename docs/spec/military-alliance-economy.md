@@ -1,5 +1,7 @@
 # Spec: Military, Heroes, Alliances, Shop and Market
 
+Paths here are in the original server, [sonya75/evony-private-server](https://github.com/sonya75/evony-private-server) on GitHub.
+
 Source: `evony-private-server/src` (C++). Files covered completely:
 `packets/palliance.cpp`, `packets/parmy.cpp`, `packets/phero.cpp`, `packets/pfield.cpp`, `packets/pshop.cpp`, `packets/ptrade.cpp` (and their `.h`), `Alliance.cpp/.h`, `AllianceMgr.cpp/.h`, `Hero.cpp/.h`, `Market.cpp/.h`.
 Supporting code consulted: `spitfire.cpp` (CalcTroopSpeed, CreateRandomHero, RandomStat, AddTimedEvent, army timer processing, item/alliance/army/hero loading and saving), `structs.h`, `defines.h`, `Client.cpp/.h`, `PlayerCity.cpp`, `Map.cpp` (GetMapCastle), `Tile.cpp`, `request_handler.cpp`, `packets/packet.cpp`, `packets/punknown.cpp`, DB dumps in `DB/`.

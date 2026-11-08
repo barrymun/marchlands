@@ -227,7 +227,7 @@ GitHub Actions runs all of these ([`.github/workflows/ci.yml`](.github/workflows
 | Run end-to-end checks against a running stack | `API=http://localhost:3000 node tools/smoke/smoke.mjs` (also `war.mjs`, `market.mjs`, `abandon.mjs`, `pvp-off.mjs`) |
 | Load-test a running stack | `API=http://localhost:3000 npm run load -- --players 100 --minutes 5` |
 | Delete test accounts | `npm run delete-player -- <username>…` lists what it would delete; add `--yes` to delete |
-| Rebuild the game data from the original dumps | clone [evony-private-server](https://github.com/sonya75/evony-private-server) next to this repository, then `npm run legacy:convert -- ../evony-private-server/DB` |
+| Rebuild the game data from the original dumps | clone [sonya75/evony-private-server](https://github.com/sonya75/evony-private-server), then `npm run legacy:convert -- <your clone>/DB` |
 
 The smoke and load tests create players: name temporary accounts `fx_…` and delete them with `npm run delete-player` afterwards. Most smoke tests want `GAME_SPEED` of 50 or more and an operator (`ADMIN_USERNAMES=smoke_admin`).
 
@@ -346,7 +346,7 @@ The code comes from git. Three things don't, so copy them yourself:
 
 - **`.env`**: it's gitignored. It holds this machine's ports, `JWT_SECRET`, `GAME_SPEED` and `ADMIN_USERNAMES`. Copy it, or start again from `.env.example`. With the same `JWT_SECRET`, players stay logged in.
 - **The database**, as a dump (below). Players, cities and the map all live there.
-- **Optional:** the high-resolution art samples (AGENTS.md, Game art), and the sibling clones `../evony-private-server` and `../EvonyAge1BattleCalc`. Only `legacy:convert` needs `../evony-private-server`.
+- **Optional:** the high-resolution art samples (AGENTS.md, Game art).
 
 **On the old machine,** stop the services that change the game, dump the database to `backups/` (gitignored), then stop Postgres:
 
@@ -409,6 +409,11 @@ npm ci
 | [docs/backlog.md](docs/backlog.md) | ideas and known quirks left for later |
 
 ## Credits
+
+Marchlands is built on what these projects worked out about the original Evony Age 1:
+
+- [sonya75/evony-private-server](https://github.com/sonya75/evony-private-server): *Spitfire*, a C++ server for Evony Age 1, by Daisy. Its game data (buildings, research, troops, items, quests and the map) is the source of `shared/core/src/data/legacy/`, and its rules are described in [docs/spec/](docs/spec/).
+- [sonya75/EvonyAge1BattleCalc](https://github.com/sonya75/EvonyAge1BattleCalc): the Age 1 battle calculator. Marchlands' battle simulator is a port of it, checked against its 36,567 regression cases.
 
 The Market page's charts are drawn with [TradingView Lightweight Charts™](https://www.tradingview.com/lightweight-charts/) (Apache 2.0). Copyright © 2025 TradingView, Inc., [tradingview.com](https://www.tradingview.com/). The charts keep the library's own TradingView logo, and a line under the price chart links to TradingView, as its licence asks.
 

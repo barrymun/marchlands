@@ -3,6 +3,8 @@
 //
 //   node tools/legacy-import/convert.mjs <path-to-evony-private-server/DB>
 //
+// The DB folder is in a clone of https://github.com/sonya75/evony-private-server.
+//
 // Outputs:
 //   shared/core/src/data/legacy/{buildings,research,troops,items,quests}.json
 //   db/seed/legacy-map-800.bin.gz   (640000 * [type:u8, level:u8], index = tile id)
@@ -16,7 +18,11 @@ import { readInserts, toObjects } from './mysql-dump.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
-const dbDir = path.resolve(process.argv[2] ?? path.join(root, '../evony-private-server/DB'));
+if (!process.argv[2]) {
+  console.error('Usage: npm run legacy:convert -- <path to a clone of https://github.com/sonya75/evony-private-server>/DB');
+  process.exit(1);
+}
+const dbDir = path.resolve(process.argv[2]);
 const configDump = path.join(dbDir, 'evony (3).sql');
 const worldDump = path.join(dbDir, 's2 (1).sql');
 

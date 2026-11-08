@@ -1,5 +1,7 @@
 # Evony (Age 1) Private Server — Engine Specification
 
+Paths here are in the original server, [sonya75/evony-private-server](https://github.com/sonya75/evony-private-server) on GitHub.
+
 Source analysed: `evony-private-server/src` (C++, "spitfire" by Daisy, 2018), primarily `spitfire.cpp/.h`,
 `main.cpp`, `structs.h`, `defines.h`, `connection.cpp`, plus the engine-adjacent classes they call
 (`City`, `PlayerCity`, `NpcCity`, `Client`, `Hero`, `Map`, `Tile`, `Valley`, `BattleCalc`/`combatsimulator.h`,

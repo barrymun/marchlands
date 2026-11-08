@@ -1,5 +1,7 @@
 # City Management Spec (castle / city / interior / tech / troop / fortifications)
 
+Paths here are in the original server, [sonya75/evony-private-server](https://github.com/sonya75/evony-private-server) on GitHub.
+
 Source of truth: `evony-private-server/src/packets/{pcastle,pcity,pinterior,ptech,ptroop,pfortifications}.cpp`
 plus helpers in `PlayerCity.cpp`, `City.cpp`, `Client.cpp`, `spitfire.cpp` (timer thread + config loading),
 `defines.h`, `structs.h`, `spitfire.h`, `Utils.cpp`, and the seed data in `DB/evony (3).sql`.

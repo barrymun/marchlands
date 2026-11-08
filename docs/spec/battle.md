@@ -1,5 +1,7 @@
 # Evony Age 1 Private Server: Battle Mechanics Specification
 
+Paths here are in the original server, [sonya75/evony-private-server](https://github.com/sonya75/evony-private-server), and the battle calculator, [sonya75/EvonyAge1BattleCalc](https://github.com/sonya75/EvonyAge1BattleCalc), both on GitHub.
+
 Sources:
 - `evony-private-server/src/BattleCalc.cpp` and `src/combatsimulator.h`: the simulator embedded in the server.
 - `EvonyAge1BattleCalc/BattleCalc/BattleCalc.cpp`, `combatsimulator.h`, `BattleMechanics.md`: the standalone DLL version, plus the prose write-up.

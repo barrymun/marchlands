@@ -1,5 +1,7 @@
 # Spec: Accounts, Login, Player Bean, Chat, Mail, Reports, Rankings, Quests, Furlough
 
+Paths here are in the original server, [sonya75/evony-private-server](https://github.com/sonya75/evony-private-server) on GitHub.
+
 Source of truth: `evony-private-server/src` (C++). Files covered: `request_handler.cpp`,
 `packets/{packet,plogin,pcommon,pserver,pgameclient,punknown,pfurlough,pfriend,pmail,preport,prank,pquest}.cpp`,
 plus the helpers they call in `spitfire.cpp`, `Client.cpp`, `PlayerCity.cpp`, `City.cpp`, `Map.cpp`,
