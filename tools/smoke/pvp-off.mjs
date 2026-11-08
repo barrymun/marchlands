@@ -192,7 +192,7 @@ async function main() {
 
   // ---- truces ----
   const sold = (await ok(p.token, 'GET', '/shop')).flatMap((c) => c.items.map((i) => i.id));
-  check(!sold.includes(TRUCE), 'the shop sells no Truce Agreement');
+  check(!sold.includes(TRUCE), "the shop sells no King's Peace");
   const bought = await call(p.token, 'POST', `/cities/${p.city.id}/shop/gold`, { itemId: TRUCE, amount: 1 });
   check(bought.ok !== 1 && bought.error?.code === 'item.notForSale', 'buying one is refused');
   const truce = await call(p.token, 'POST', '/player/truce', { itemId: TRUCE, cityId: p.city.id });

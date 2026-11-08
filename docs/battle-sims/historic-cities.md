@@ -91,7 +91,7 @@ A siege lands 35 to 81 waves within a minute or so, each its own army with its o
 
 ## One landing second
 
-*Simulated 2026-11-01 against the game as built, for the level 12 at (207, 405) on the dev stack, with the maintainer's account (research 10, 16 heroes at about 1,220 Attack, the horn and the War Ensign running).*
+*Simulated 2026-11-01 against the game as built, for the level 12 at (207, 405) on the dev stack, with the maintainer's account (research 10, 16 heroes at about 1,220 Attack, the horn and the Imperial Banner running).*
 
 **At `GAME_SPEED` 60, as on the dev stack, the garrison refills 60 times as fast** as in the runs above: 10% every 6 real seconds (`historicState` refills by `scaled(npcRegenMs)`), so a gap of a few seconds costs what a few minutes do at speed 1 (`--refill 6` simulates it). Loyalty comes back by real time (a point every 6 real minutes) and doesn't matter within a siege.
 
@@ -148,7 +148,7 @@ The Inn-hero runs used a one-off script giving the loyalty stage its own lord (`
 - **Openers don't pay at level 18:** pikemen waves until the cataphracts are gone (`pikes-archers`, AeroAgg's advice) cost 5 to 7 more waves on a cataphract day (66 became 73), and one wave of 207,000 ballistae first saves 1.
 - **The day:** light cavalry days are the cheapest (loyalty 0 on wave 59–64, the cheapest with pikemen and catapults), cataphract days 64–66. There's no day this plan can't take.
 - **Loyalty waves can be tiny, but shouldn't be:** once the garrison and its towers are gone, 1,000 archers win as well as 125,000, and nothing is lost either way. But a plan is set before it lands: if the garrison holds a wave or two longer than planned, small waves meet what's left and die. In the simulator, with the waves switching to 5,000 archers as soon as the garrison's troops were gone, 2 of 5 daily garrisons left a few thousand arrow towers standing and every loyalty wave failed. Full waves throughout cost nothing more.
-- **More waves:** a held level 16 sends 218,750; with archers and level 100 heroes moved to it, its 10 waves save about 5 (with the farming army's shape). Excalibur on every hero saves 1 to 2, or 2 to 5 with the level 16's waves.
+- **More waves:** a held level 16 sends 218,750; with archers and level 100 heroes moved to it, its 10 waves save about 5 (with the farming army's shape). Joyeuse on every hero saves 1 to 2, or 2 to 5 with the level 16's waves.
 - **Capturing it** needs a free city slot: a player at Prince with 10 cities, the most any title allows, breaks Atlantis and leaves it at 0 loyalty but can't take it (TODO.md, Abandoning a city).
 
 **Siege engines first: far fewer waves, three to four times the resources.** The city's research leaves Archery at 0 (Tuning, above), so its archers, ballistae and catapults reach no further than they do untrained, while an attacker with Archery 10 shoots from further off: attacking catapults outrange the whole garrison, and ballistae nearly do. Engines in the first waves (the biggest armies), then the layered archers, every daily garrison:
@@ -178,7 +178,7 @@ Whether siege engines should be this good against historic cities is a balance q
 
 ### Layering catapult waves
 
-*Simulated 2026-11-06 for Atlantis with the maintainer's own armies: research 10, the horn and the defence item running, the War Ensign, and each wave led by one of its city's heroes (about 1,225 Attack, the first of each city about 1,530 with Excalibur). One day's garrison only: swordsmen, light cavalry and rams. A one-off script fought the waves a millisecond apart as `attackHistoric` does, over 20 to 60 seeds, with 8 waves of 218,750 from a held level 16 and 8 from a held level 14, then archers.*
+*Simulated 2026-11-06 for Atlantis with the maintainer's own armies: research 10, the horn and the defence item running, the Imperial Banner, and each wave led by one of its city's heroes (about 1,225 Attack, the first of each city about 1,530 with Excalibur). One day's garrison only: swordsmen, light cavalry and rams. A one-off script fought the waves a millisecond apart as `attackHistoric` does, over 20 to 60 seeds, with 8 waves of 218,750 from a held level 16 and 8 from a held level 14, then archers.*
 
 **Checked against the real siege:** the maintainer's 56 waves landed on 2026-11-06 with the 15,000-ram mix as below. As simulated, wave 1 left 8,357,143 of the garrison, wave 2 broke it and wave 35 captured it, with the same losses (217,561 catapults, 13,717 archers). The 21 waves after the capture turned back without fighting.
 

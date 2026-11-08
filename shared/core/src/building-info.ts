@@ -14,8 +14,8 @@ import { type Message, msg, ref, share } from '#/messages/index.ts';
 import { reliefMultiplier } from '#/troops.ts';
 
 const F = (l: number) => fieldFactorAt(l);
-/** the item that lets armies hold more troops (BALANCE.warEnsignTroopBonus) */
-const WAR_ENSIGN = ItemId.WAR_ENSIGN;
+/** the item that lets armies hold more troops (BALANCE.imperialBannerTroopBonus) */
+const IMPERIAL_BANNER = ItemId.IMPERIAL_BANNER;
 
 interface BuildingText {
   summary: () => Message;
@@ -90,8 +90,8 @@ const TEXT: Record<number, BuildingText> = {
       msg('buildingInfo.summary.rallySpot', {
         count: BALANCE.rallySpotArmiesPerLevel,
         troops: BALANCE.rallySpotTroopsPerLevel,
-        item: ref.item(WAR_ENSIGN),
-        percent: share(BALANCE.warEnsignTroopBonus),
+        item: ref.item(IMPERIAL_BANNER),
+        percent: share(BALANCE.imperialBannerTroopBonus),
       }),
     effect: (l) => msg('buildingInfo.effect.rallySpot', { count: l * BALANCE.rallySpotArmiesPerLevel, troops: l * BALANCE.rallySpotTroopsPerLevel }),
   },

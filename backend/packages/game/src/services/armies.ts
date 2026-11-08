@@ -84,7 +84,7 @@ export async function sendArmy(ctx: Ctx, playerId: number, cityId: number, input
   const { n: out } = one(await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId)));
   const armyCap = maxArmies(b.city.buildings);
   if (Number(out) >= armyCap) throw new GameError(msg('army.armyLimit', { building: ref.building(BuildingType.RALLY_SPOT), count: armyCap }), -51);
-  const troopCap = maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now), b.city.historicLevel);
+  const troopCap = maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.IMPERIAL_BANNER, ctx.now), b.city.historicLevel);
   if (totalTroops(troops) > troopCap) {
     const level = buildingLevel(b.city.buildings, BuildingType.RALLY_SPOT);
     throw new GameError(msg('army.troopLimit', { building: ref.building(BuildingType.RALLY_SPOT), level, count: troopCap }), -51);
@@ -244,7 +244,7 @@ export async function troopParams(ctx: Ctx, playerId: number, cityId: number) {
     driveSkillParam: researchLevel(r, TechType.HORSEBACK_RIDING) * BALANCE.horsebackSpeedPerLevel,
     transportStationParam: reliefMultiplier(b.city.buildings),
     maxArmies: maxArmies(b.city.buildings),
-    maxTroops: maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.WAR_ENSIGN, ctx.now), b.city.historicLevel),
+    maxTroops: maxArmyTroops(b.city.buildings, !!activeBuff(b.player, BuffId.IMPERIAL_BANNER, ctx.now), b.city.historicLevel),
   };
 }
 

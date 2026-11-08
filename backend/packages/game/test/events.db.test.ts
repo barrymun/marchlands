@@ -102,8 +102,8 @@ describe(`${dispatchEvent.name}: buff.expire`, () => {
     game(async (g) => {
       setGameSpeed(4);
       const p = await createTestPlayer(g);
-      await giveItems(g, p, { [ItemId.TRUCE_AGREEMENT]: 1 });
-      await players.startTruce(g, p.id, ItemId.TRUCE_AGREEMENT, p.cityId);
+      await giveItems(g, p, { [ItemId.KINGS_PEACE]: 1 });
+      await players.startTruce(g, p.id, ItemId.KINGS_PEACE, p.cityId);
       expect((await reloadPlayer(g, p)).status).toBe(PlayerStatus.TRUCE);
       const end = (await reloadPlayer(g, p)).buffs[0]!.endTime;
 
@@ -151,7 +151,7 @@ describe(`${dispatchEvent.name}: buff.expire`, () => {
 
   it('a production boost ending first banks what the cities made at the boosted rate', () =>
     game(async (g) => {
-      // two equal players with farms; only `boosted` uses Plowshares
+      // two equal players with farms; only `boosted` uses Ploughshare
       const make = async () => {
         const p = await createTestPlayer(g);
         await setBuildings(g, p, [[1000, BuildingType.FARM, 5]]);
@@ -160,8 +160,8 @@ describe(`${dispatchEvent.name}: buff.expire`, () => {
       };
       const boosted = await make();
       const plain = await make();
-      await giveItems(g, boosted, { [ItemId.PLOWSHARES]: 1 });
-      await shop.useItem(g, boosted.id, ItemId.PLOWSHARES, null);
+      await giveItems(g, boosted, { [ItemId.PLOUGHSHARE]: 1 });
+      await shop.useItem(g, boosted.id, ItemId.PLOUGHSHARE, null);
       const end = (await reloadPlayer(g, boosted)).buffs[0]!.endTime;
 
       await g.runDue(end);

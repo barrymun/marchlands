@@ -1,4 +1,4 @@
-// Named armies from docs/battle-sims. Each is 125,000 troops (Rally Spot 10 with a War Ensign).
+// Named armies from docs/battle-sims. Each is 125,000 troops (Rally Spot 10 with a Imperial Banner).
 
 import type { TroopCounts } from '@marchlands/core';
 

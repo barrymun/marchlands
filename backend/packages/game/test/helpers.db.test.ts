@@ -12,7 +12,7 @@ import { addCity, cityBundle, createTestPlayer, setResources } from '#test/suppo
 import { game } from '#test/support/game.ts';
 
 const HOUR = 3_600_000;
-const ITEM = ItemId.TRUCE_AGREEMENT;
+const ITEM = ItemId.KINGS_PEACE;
 
 describe(addItem.name, () => {
   it('adds to the count, pushes the new count and counts it as gained', () =>

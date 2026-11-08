@@ -115,17 +115,17 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
   const hasAny = listed.some(([, key]) => (free[key] ?? 0) > 0);
   const idleHeroes = heroes.filter((h) => h.status === HeroStatus.IDLE);
   const troopBody = typedAmounts(scouting ? { scouter: troops.scouter } : troops);
-  // troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)
+  // troops one army may hold (Rally Spot level x 10,000, +25% with a Imperial Banner)
   const player = usePlayer();
   const now = useNow();
-  const ensign = (player.data?.buffs ?? []).some((b) => b.id === BuffId.WAR_ENSIGN && b.endTime > now);
-  const cap = maxArmyTroops(city.buildings, ensign, city.historicLevel);
+  const banner = (player.data?.buffs ?? []).some((b) => b.id === BuffId.IMPERIAL_BANNER && b.endTime > now);
+  const cap = maxArmyTroops(city.buildings, banner, city.historicLevel);
   const rally = buildingLevel(city.buildings, BuildingType.RALLY_SPOT);
   const chosen = Object.values(troopBody).reduce<number>((t, n) => t + Number(n), 0);
   const over = chosen > cap;
   // each amount within what is home (blank is none)
   const troopsValid = listed.every(([, key]) => textInRange(troops[key] ?? '', { min: 0, max: free[key] ?? 0 }, { blank: true }));
-  // attack / defense items (Ivory Horn …) that will count in the battle
+  // attack / defense items (Olifant …) that will count in the battle
   const battleBuffs =
     Number(mission) === Mission.ATTACK ? (player.data?.buffs ?? []).filter((b) => (b.id === BuffId.ATTACK || b.id === BuffId.DEFENSE) && b.endTime > now) : [];
   const resourceBody = typedAmounts(resources);
@@ -291,10 +291,10 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
           <div className="flex items-baseline justify-between gap-2">
             <Label>{t('form.troops')}</Label>
             <span className={over ? 'text-xs font-medium text-destructive tabular-nums' : 'text-xs text-muted-foreground tabular-nums'}>
-              {ensign ? (
+              {banner ? (
                 <Trans
                   t={t}
-                  i18nKey="form.capacityEnsign"
+                  i18nKey="form.capacityBanner"
                   values={{ chosen: fmtExact(chosen), cap: fmtExact(cap), rally }}
                   components={{ b: <span className={over ? undefined : ITEM_BONUS_TEXT} /> }}
                 />

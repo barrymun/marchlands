@@ -18,7 +18,7 @@ describe(itemInfo.name, () => {
   });
 
   it('nests the buff description and the period', () => {
-    expect(itemInfo(ItemId.IRON_RAKE)!.description).toEqual({
+    expect(itemInfo(ItemId.HEAVY_PLOUGH)!.description).toEqual({
       code: 'itemInfo.buff',
       params: {
         effect: {
@@ -31,21 +31,21 @@ describe(itemInfo.name, () => {
   });
 
   it('derives speed-ups from what they cut', () => {
-    expect(itemInfo(ItemId.BEGINNER_GUIDELINES)!.description).toEqual({
+    expect(itemInfo(ItemId.NOVICES_NOTES)!.description).toEqual({
       code: 'itemInfo.speedup.time',
       params: { time: { code: 'itemInfo.period.minutes', params: { count: 15 } } },
     });
-    expect(itemInfo(ItemId.MASTER_GUIDELINES)!.description).toEqual({ code: 'itemInfo.speedup.hours', params: { min: 10, count: 30 } });
-    expect(itemInfo(ItemId.ULTIMATE_GUIDELINES)!.description).toEqual({ code: 'itemInfo.speedup.percent', params: { percent: { share: 0.3 } } });
-    expect(itemInfo(ItemId.NAPOLEONS_DIARY)!.description).toEqual({ code: 'itemInfo.speedup.troopBatch', params: { percent: { share: 0.3 } } });
+    expect(itemInfo(ItemId.GRANDMASTERS_NOTES)!.description).toEqual({ code: 'itemInfo.speedup.hours', params: { min: 10, count: 30 } });
+    expect(itemInfo(ItemId.VILLARDS_SKETCHBOOK)!.description).toEqual({ code: 'itemInfo.speedup.percent', params: { percent: { share: 0.3 } } });
+    expect(itemInfo(ItemId.OTTOS_MUSTER_ROLL)!.description).toEqual({ code: 'itemInfo.speedup.troopBatch', params: { percent: { share: 0.3 } } });
   });
 
   it('quotes cooldowns from BALANCE and refers to items by id', () => {
-    expect(itemInfo(ItemId.CITY_TELEPORTER)!.description.params?.period).toEqual({
+    expect(itemInfo(ItemId.LOCATORS_CHARTER)!.description.params?.period).toEqual({
       code: 'itemInfo.period.hours',
       params: { count: BALANCE.teleportCooldownMs / HOUR },
     });
-    expect(itemInfo(ItemId.MEDIUM_MEDAL_BOX)!.description.params?.medals).toEqual(
+    expect(itemInfo(ItemId.SILVER_COFFER)!.description.params?.medals).toEqual(
       [ItemId.HONOUR_MEDAL, ItemId.COURAGE_MEDAL, ItemId.WISDOM_MEDAL].map((id) => ({ ref: GameRefKind.ITEM, id })),
     );
   });
@@ -66,6 +66,9 @@ describe(medalSources.name, () => {
       expect(ITEMS.some((i) => i.id === c.id)).toBe(true);
       expect(c).not.toHaveProperty('name');
     }
-    expect(medalSources(1).containers.map((c) => c.id)).toContain(ItemId.JUNIOR_MEDAL_BOX);
+  });
+
+  it('lists only containers the shop sells, so not the medal boxes (BALANCE.notInShop)', () => {
+    for (let level = 1; level <= 9; level++) expect(medalSources(level).containers.map((c) => c.id)).not.toContain(ItemId.BRONZE_COFFER);
   });
 });

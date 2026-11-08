@@ -386,7 +386,7 @@ export const speedupCut = (eff: SpeedupEffect, totalMs: number, rng: () => numbe
   eff.byShare ? eff.reduce(totalMs, rng) : scaled(eff.reduce(totalMs, rng));
 
 /**
- * A training batch after Napoleon's Diary / Archimedes' Note: BALANCE.items.batchSpeedupShare of its full
+ * A training batch after Otto's Muster Roll / Henry's Castle Law: BALANCE.items.batchSpeedupShare of its full
  * time ((marchlands) orig: of the time left), so four finish any batch. The head of the queue ends sooner
  * (never before `now`), its start moving back by the time saved, so its progress bar jumps forward; a
  * waiting batch gets shorter.

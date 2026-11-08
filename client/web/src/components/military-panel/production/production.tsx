@@ -93,7 +93,7 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
 
   // the amounts entered, and what they cost together
   const countOf = (typeId: number) => Number(counts[typeId] ?? 0);
-  // costs per unit as paid now (costShare: a Quartermaster item's discount on troops)
+  // costs per unit as paid now (costShare: a Marshal's Seal or Charter's discount on troops)
   const units = (trainable.data ?? []).map((u) => ({ ...u, ...Object.fromEntries(RESOURCE_KEYS.map((k) => [k, u[k] * u.costShare])) }));
   const orders = units.filter((u) => u.permission && countOf(u.typeId) > 0).map((u) => ({ u, count: countOf(u.typeId) }));
   const ordered = orders.reduce((n, o) => n + o.count, 0);

@@ -9,7 +9,7 @@ export const CITY_MESSAGES = {
   notEnoughFood: [],
   invalidComfortType: [],
   invalidLogo: [],
-  /** item: the City Teleporter */
+  /** item: the Locator's Charter */
   teleportCooldown: ['item'],
   /** a captured historic city stays where it stands */
   historicCannotMove: [],

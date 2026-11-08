@@ -18,11 +18,11 @@ describe(catalogue.name, () => {
     }
   });
 
-  it('leaves out the Truce Agreement alone with PvP off', () => {
+  it("leaves out the King's Peace alone with PvP off", () => {
     const on = catalogue().flatMap((g) => g.items.map((i) => i.id));
     setFeatureFlags({ [Feature.PVP]: false });
     const off = catalogue().flatMap((g) => g.items.map((i) => i.id));
-    expect(on.filter((id) => !off.includes(id))).toEqual([ItemId.TRUCE_AGREEMENT]);
+    expect(on.filter((id) => !off.includes(id))).toEqual([ItemId.KINGS_PEACE]);
   });
 
   it('leaves out items that are not for sale, and sorts the groups by type', () => {

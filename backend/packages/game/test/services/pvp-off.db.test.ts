@@ -334,22 +334,22 @@ describe('truces', () => {
     game(async (g) => {
       const { p } = await rivals(g);
       const sold = shop.catalogue().flatMap((c) => c.items.map((i) => i.id));
-      expect(sold).not.toContain(ItemId.TRUCE_AGREEMENT);
+      expect(sold).not.toContain(ItemId.KINGS_PEACE);
       expect(sold).toContain(ItemId.WAR_HORN);
-      await expectRefused(shop.buyItemWithGold(g, p.id, p.cityId, ItemId.TRUCE_AGREEMENT, 1), msg('item.notForSale'));
-      await giveItems(g, p, { [ItemId.TRUCE_AGREEMENT]: 1 });
+      await expectRefused(shop.buyItemWithGold(g, p.id, p.cityId, ItemId.KINGS_PEACE, 1), msg('item.notForSale'));
+      await giveItems(g, p, { [ItemId.KINGS_PEACE]: 1 });
       const { gold } = await reloadCity(g, p.cityId);
-      await expectRefused(players.startTruce(g, p.id, ItemId.TRUCE_AGREEMENT, p.cityId), msg('player.truce.pvpDisabled'));
+      await expectRefused(players.startTruce(g, p.id, ItemId.KINGS_PEACE, p.cityId), msg('player.truce.pvpDisabled'));
       expect((await reloadCity(g, p.cityId)).gold).toBe(gold);
-      expect((await reloadPlayer(g, p)).items[ItemId.TRUCE_AGREEMENT]).toBe(1);
+      expect((await reloadPlayer(g, p)).items[ItemId.KINGS_PEACE]).toBe(1);
     }));
 
   it('are sold and started with PvP on', () =>
     game(async (g) => {
       const { p } = await rivals(g);
       await whilePvpOn(async () => {
-        expect(shop.catalogue().flatMap((c) => c.items.map((i) => i.id))).toContain(ItemId.TRUCE_AGREEMENT);
-        await players.startTruce(g, p.id, ItemId.TRUCE_AGREEMENT, p.cityId);
+        expect(shop.catalogue().flatMap((c) => c.items.map((i) => i.id))).toContain(ItemId.KINGS_PEACE);
+        await players.startTruce(g, p.id, ItemId.KINGS_PEACE, p.cityId);
       });
     }));
 });

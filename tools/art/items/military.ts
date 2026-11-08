@@ -1,6 +1,8 @@
-// Military boosts: a war horn and a gold-banded ivory horn (attack), a leather corselet and a steel one trimmed in gold
-// (defence), the War Ensign's banner, Bernini's Hammer on a block of marble (a second building queue), Vesta's flame
-// in a goblet and a grander jewelled one (upkeep), and the quartermaster's signet and his sealed charter (training cost).
+// Military boosts: the War Horn and the Olifant, a gold-banded ivory horn (attack), the Gambeson and the Hauberk, still
+// drawn as a leather corselet and a steel one trimmed in gold (defence), the Imperial Banner, Bernward's Hammer on a block
+// of marble (a second building queue), Elizabeth's Bread and Granary, still drawn as a flame in a goblet and a grander
+// jewelled one (upkeep), and the marshal's signet and his sealed charter (training cost). The icons still drawn as the
+// old items are redrawn in docs/features/item-names.md, phase 5.
 
 import { Colour } from '../../../client/web/src/lib/palette.ts';
 import { type PixelCanvas } from '../pixel.ts';
@@ -73,9 +75,9 @@ function corselet(seed: string, tone: Tone, trim?: Tone): () => PixelCanvas {
   };
 }
 
-/** War Ensign: a red war banner with a gold sun, swallow-tailed, on a spear-tipped pole. */
-function warEnsign(): PixelCanvas {
-  const c = canvas('war-ensign');
+/** Imperial Banner: a red war banner with a gold sun, swallow-tailed, on a spear-tipped pole. */
+function imperialBanner(): PixelCanvas {
+  const c = canvas('imperial-banner');
   rod(c, [8, 4], [8, 30], 2, Colour.WOOD);
   c.poly(
     [
@@ -102,9 +104,9 @@ function warEnsign(): PixelCanvas {
   return c;
 }
 
-/** Bernini's Hammer: a sculptor's hammer and chisel resting on a block of marble. */
-function berninisHammer(): PixelCanvas {
-  const c = canvas('berninis-hammer');
+/** Bernward's Hammer: a sculptor's hammer and chisel resting on a block of marble. */
+function bernwardsHammer(): PixelCanvas {
+  const c = canvas('bernwards-hammer');
   // the marble block, its top and two faces
   c.poly(
     [
@@ -162,8 +164,8 @@ function berninisHammer(): PixelCanvas {
   return c;
 }
 
-/** A goblet with Vesta's flame in it; the grand one is wider, set with red stones, its flame higher. */
-function vesta(seed: string, grand: boolean): () => PixelCanvas {
+/** A goblet with a flame in it; the grand one is wider, set with red stones, its flame higher. */
+function goblet(seed: string, grand: boolean): () => PixelCanvas {
   return () => {
     const c = canvas(seed);
     const cup = grand ? [8, 8, 7.5, 7, 6.5, 6, 5, 4, 3] : [7, 7, 6.5, 6, 5.5, 4.5, 3.5, 2.5];
@@ -198,9 +200,9 @@ function bigSeal(c: PixelCanvas, x: number, y: number, r: number) {
   c.set(x - r * 0.6, y - r * 0.5, RED.hi);
 }
 
-/** Quartermaster's Seal: a large red wax seal on two ribbons. */
-function quartermastersSeal(): PixelCanvas {
-  const c = canvas('quartermasters-seal');
+/** Marshal's Seal: a large red wax seal on two ribbons. */
+function marshalsSeal(): PixelCanvas {
+  const c = canvas('marshals-seal');
   c.poly(
     [
       [10, 14],
@@ -226,9 +228,9 @@ function quartermastersSeal(): PixelCanvas {
   return c;
 }
 
-/** Quartermaster's Charter: a written charter with a red seal hanging from it on cords. */
-function quartermastersCharter(): PixelCanvas {
-  const c = canvas('quartermasters-charter');
+/** Marshal's Charter: a written charter with a red seal hanging from it on cords. */
+function marshalsCharter(): PixelCanvas {
+  const c = canvas('marshals-charter');
   scroll(c, 7, 2, 24, 23);
   writing(c, 10, 21, 6, 16);
   c.line([14, 23], [15, 26], Colour.BLUE);
@@ -240,13 +242,13 @@ function quartermastersCharter(): PixelCanvas {
 
 export const MILITARY_DRAWINGS = {
   warHorn: horn('war-horn', { hi: Colour.WALL_TOP, mid: Colour.LINEN, dark: Colour.LINEN_DARK }, LEATHER, LEATHER),
-  ivoryHorn: horn('ivory-horn', { hi: Colour.SPARKLE, mid: Colour.WOOL, dark: Colour.LINEN }, GOLD, GOLD),
-  corselet: corselet('corselet', LEATHER),
-  ultraCorselet: corselet('ultra-corselet', STEEL, GOLD),
-  warEnsign,
-  berninisHammer,
-  vestasBlessing: vesta('vestas-blessing', false),
-  vestasGrandBlessing: vesta('vestas-grand-blessing', true),
-  quartermastersSeal,
-  quartermastersCharter,
+  olifant: horn('olifant', { hi: Colour.SPARKLE, mid: Colour.WOOL, dark: Colour.LINEN }, GOLD, GOLD),
+  gambeson: corselet('gambeson', LEATHER),
+  hauberk: corselet('hauberk', STEEL, GOLD),
+  imperialBanner,
+  bernwardsHammer,
+  elizabethsBread: goblet('elizabeths-bread', false),
+  elizabethsGranary: goblet('elizabeths-granary', true),
+  marshalsSeal,
+  marshalsCharter,
 };

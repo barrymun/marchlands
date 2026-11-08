@@ -7,9 +7,9 @@ import type { PixelCanvas } from '../pixel.ts';
 import { disc, oval, rect } from '../shapes.ts';
 import { canvas, coin, GOLD, LEATHER, rod, scroll, STEEL, STONE, waxSeal, writing } from './common.ts';
 
-/** Plowshares: a wooden plough handle driving an iron share into a furrow of soil. */
-function plowshares(): PixelCanvas {
-  const c = canvas('plowshares');
+/** Ploughshare: a wooden plough handle driving an iron share into a furrow of soil. */
+function ploughshare(): PixelCanvas {
+  const c = canvas('ploughshare');
   oval(c, 20, 27, 11, 3, Colour.SOIL);
   oval(c, 18, 26, 6, 1.5, Colour.DIRT);
   rod(c, [4, 5], [19, 21], 3, Colour.WOOD);
@@ -38,9 +38,9 @@ function plowshares(): PixelCanvas {
   return c;
 }
 
-/** Iron Rake: a long-handled rake with an iron head and teeth. */
-function ironRake(): PixelCanvas {
-  const c = canvas('iron-rake');
+/** Heavy Plough: a long-handled rake with an iron head and teeth. */
+function heavyPlough(): PixelCanvas {
+  const c = canvas('heavy-plough');
   rod(c, [28, 2], [9, 21], 2.5, Colour.WOOD);
   rod(c, [3, 17], [14, 28], 3, STEEL.dark);
   rod(c, [3, 16], [14, 27], 1.5, STEEL.mid);
@@ -53,9 +53,9 @@ function ironRake(): PixelCanvas {
   return c;
 }
 
-/** Arch Saw: a bow saw, its blade held taut under an arched wooden frame. */
-function archSaw(): PixelCanvas {
-  const c = canvas('arch-saw');
+/** Bow Saw: a bow saw, its blade held taut under an arched wooden frame. */
+function bowSaw(): PixelCanvas {
+  const c = canvas('bow-saw');
   for (let x = 5; x <= 27; x += 0.5) {
     const u = (x - 16) / 11;
     disc(c, x, 22 - 15 * (1 - u * u), 1.5, Colour.WOOD);
@@ -72,9 +72,9 @@ function archSaw(): PixelCanvas {
   return c;
 }
 
-/** Double Saw: a long two-man saw with a handle at each end. */
-function doubleSaw(): PixelCanvas {
-  const c = canvas('double-saw');
+/** Water Saw: a long two-man saw with a handle at each end. */
+function waterSaw(): PixelCanvas {
+  const c = canvas('water-saw');
   c.poly(
     [
       [5, 21],
@@ -125,9 +125,9 @@ function pick(c: PixelCanvas, x0: number, y0: number, x1: number, y1: number, ar
   rod(c, [x1 + px * 2 + dx, y1 + py * 2 + dy], [x1 - px * 2 + dx, y1 - py * 2 + dy], 2, STEEL.dark);
 }
 
-/** Quarrying Tools: a pickaxe. */
-function quarryingTools(): PixelCanvas {
-  const c = canvas('quarrying-tools');
+/** Mason's Pick: a pickaxe. */
+function masonsPick(): PixelCanvas {
+  const c = canvas('masons-pick');
   pick(c, 7, 30, 19, 8);
   c.outline();
   return c;
@@ -159,18 +159,18 @@ function sledge(c: PixelCanvas, x0: number, y0: number, x1: number, y1: number) 
   );
 }
 
-/** Adv Quarrying Tools: a pickaxe crossed with a sledgehammer. */
-function advQuarryingTools(): PixelCanvas {
-  const c = canvas('adv-quarrying-tools');
+/** Treadwheel Crane: a pickaxe crossed with a sledgehammer. */
+function treadwheelCrane(): PixelCanvas {
+  const c = canvas('treadwheel-crane');
   sledge(c, 25, 30, 8, 10);
   pick(c, 7, 30, 22, 10, 8);
   c.outline();
   return c;
 }
 
-/** Blower: a pair of bellows, leather pleated between two wooden boards narrowing to an iron nozzle. */
-function blower(): PixelCanvas {
-  const c = canvas('blower');
+/** Hand Bellows: a pair of bellows, leather pleated between two wooden boards narrowing to an iron nozzle. */
+function handBellows(): PixelCanvas {
+  const c = canvas('hand-bellows');
   rod(c, [7, 10], [2, 6], 2.5, Colour.WOOD);
   rod(c, [7, 23], [2, 27], 2.5, Colour.WOOD);
   c.poly(
@@ -216,9 +216,9 @@ function blower(): PixelCanvas {
   return c;
 }
 
-/** Blast Furnace: a tapering stone furnace, fire in its mouth and flames from its top. */
-function blastFurnace(): PixelCanvas {
-  const c = canvas('blast-furnace');
+/** Water Bellows: a tapering stone furnace, fire in its mouth and flames from its top. */
+function waterBellows(): PixelCanvas {
+  const c = canvas('water-bellows');
   c.poly(
     [
       [9, 9],
@@ -261,9 +261,9 @@ function blastFurnace(): PixelCanvas {
   return c;
 }
 
-/** Tax Policy: a decree with a gold coin pressed into it. */
-function taxPolicy(): PixelCanvas {
-  const c = canvas('tax-policy');
+/** Toll Right: a decree with a gold coin pressed into it. */
+function tollRight(): PixelCanvas {
+  const c = canvas('toll-right');
   scroll(c, 7, 3, 24, 28);
   writing(c, 10, 21, 7, 17);
   coin(c, 20, 22);
@@ -280,9 +280,9 @@ function coinStack(c: PixelCanvas, x: number, y: number, n: number) {
   oval(c, x - 1, y - 0.5, 2, 0.8, GOLD.hi);
 }
 
-/** Adv Tax Policy: the decree, sealed in red wax, with a stack of gold before it. */
-function advTaxPolicy(): PixelCanvas {
-  const c = canvas('adv-tax-policy');
+/** Mint Right: the decree, sealed in red wax, with a stack of gold before it. */
+function mintRight(): PixelCanvas {
+  const c = canvas('mint-right');
   scroll(c, 5, 2, 20, 26);
   writing(c, 8, 17, 6, 14);
   waxSeal(c, 10, 20);
@@ -293,14 +293,14 @@ function advTaxPolicy(): PixelCanvas {
 }
 
 export const PRODUCTION_DRAWINGS = {
-  plowshares,
-  ironRake,
-  archSaw,
-  doubleSaw,
-  quarryingTools,
-  advQuarryingTools,
-  blower,
-  blastFurnace,
-  taxPolicy,
-  advTaxPolicy,
+  ploughshare,
+  heavyPlough,
+  bowSaw,
+  waterSaw,
+  masonsPick,
+  treadwheelCrane,
+  handBellows,
+  waterBellows,
+  tollRight,
+  mintRight,
 };

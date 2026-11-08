@@ -106,8 +106,8 @@
     "change": "市長を変更"
   },
   "trainDiscount": {
-    "active": "訓練コスト −{{percent}}(補給係): 以下のコストに反映済みです。",
-    "timed": "訓練コスト −{{percent}}(補給係、残り{{time}}): 以下のコストに反映済みです。"
+    "active": "訓練コスト −{{percent}}(元帥): 以下のコストに反映済みです。",
+    "timed": "訓練コスト −{{percent}}(元帥、残り{{time}}): 以下のコストに反映済みです。"
   },
   "trainEstimate": {
     "instant": "即時",

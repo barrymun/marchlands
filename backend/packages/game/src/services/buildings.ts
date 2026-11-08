@@ -46,7 +46,7 @@ import { commit, pushBuilding, refKey, scheduleBuilding } from '#/engine/buildin
 import { activeBuff, gainResources, pushResources, spendGold, spendResources, useItemOrGold } from '#/helpers.ts';
 import { prefixed } from '#/stats.ts';
 
-/** How many constructions may run at once (Bernini's Hammer adds one more queue). */
+/** How many constructions may run at once (Bernward's Hammer adds one more queue). */
 function maxConcurrent(b: CityBundle, now: number) {
   return BALANCE.buildQueues + (activeBuff(b.player, BuffId.BUILDING_QUEUE, now) ? 1 : 0);
 }

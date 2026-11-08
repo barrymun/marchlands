@@ -189,13 +189,13 @@ async function main() {
       for (const b of [...q.allProduceQueue].reverse()) await ok(a.token, 'DELETE', `/cities/${cid}/troops/queues/${q.positionId}/${b.queueId}`);
   }
 
-  // ---- Quartermaster's Seal (bought with city gold): troop training cost -25% ----
+  // ---- Marshal's Seal (bought with city gold): troop training cost -25% ----
   {
     await ok(a.token, 'POST', `/cities/${cid}/shop/gold`, { itemId: 'player.reduce.troops.cost.1' });
     await ok(a.token, 'POST', '/player/items/player.reduce.troops.cost.1/use', {});
     const units = await ok(a.token, 'GET', `/cities/${cid}/troops/trainable`);
     const forts = await ok(a.token, 'GET', `/cities/${cid}/fortifications/trainable`);
-    check(units.every((u) => u.costShare === 0.75) && forts.every((u) => u.costShare === 1), 'Quartermaster discounts troops, not fortifications');
+    check(units.every((u) => u.costShare === 0.75) && forts.every((u) => u.costShare === 1), 'the Marshal discounts troops, not fortifications');
   }
 
   // ---- flows: a series of actions run on cities, each city all-or-nothing ----
@@ -383,7 +383,7 @@ async function main() {
   const bought = await ok(a.token, 'POST', `/cities/${cid}/shop/gold`, { itemId: 'player.resinc.1', amount: 2 });
   check(
     bought.gold > 0 && goldBefore - (await ok(a.token, 'GET', `/cities/${cid}`)).resource.gold >= bought.gold - 1000,
-    `items bought with city gold (${bought.gold} for 2 Plowshares)`,
+    `items bought with city gold (${bought.gold} for 2 Ploughshare)`,
   );
   // no gambling: the Amulet and its prizes are gone; the daily gift is a fixed bundle of resources
   const config = await ok(a.token, 'GET', '/config/static');

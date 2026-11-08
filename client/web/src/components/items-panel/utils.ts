@@ -29,7 +29,7 @@ export function describeGrant(g: {
   return parts.join(i18n.t('common:list.separator')) || i18n.t('common:nothing');
 }
 
-/** Medal level 1 (Cross) … 9 (Nation) of an entry, or null for other items. */
+/** Medal level 1 (Cross) … 9 (Crown) of an entry, or null for other items. */
 export function medalLevelOf(ids: string[]): number | null {
   for (const id of ids) {
     const m = /^hero\.loyalty\.([1-9])$/.exec(id);

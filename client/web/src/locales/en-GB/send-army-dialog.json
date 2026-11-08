@@ -20,7 +20,7 @@
     "heroOption": "{{name}} (Lv {{level}}, att {{attack}})",
     "troops": "Troops",
     "capacity": "{{chosen}} / {{cap}} (Rally Spot Lv {{rally}})",
-    "capacityEnsign": "{{chosen}} / {{cap}} (Rally Spot Lv {{rally}}<b>, War Ensign +25%</b>)",
+    "capacityBanner": "{{chosen}} / {{cap}} (Rally Spot Lv {{rally}}<b>, Imperial Banner +25%</b>)",
     "battleBuff": "{{desc}} in this battle · <timer/> left",
     "noScouts": "No Scouts in the city: train some in Military.",
     "noTroops": "No troops in the city.",

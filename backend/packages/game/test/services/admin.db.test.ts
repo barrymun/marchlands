@@ -28,18 +28,18 @@ describe(admin.grantItems.name, () => {
   it('adds items to what the player has, and takes them away with a negative count', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      await admin.grantItems(g, a.name, { [ItemId.TRUCE_AGREEMENT]: 3, [ItemId.CROSS_MEDAL]: 1 });
-      await admin.grantItems(g, a.name.toUpperCase(), { [ItemId.TRUCE_AGREEMENT]: -1 });
+      await admin.grantItems(g, a.name, { [ItemId.KINGS_PEACE]: 3, [ItemId.CROSS_MEDAL]: 1 });
+      await admin.grantItems(g, a.name.toUpperCase(), { [ItemId.KINGS_PEACE]: -1 });
       const p = await reloadPlayer(g, a);
-      expect(p.items).toMatchObject({ [ItemId.TRUCE_AGREEMENT]: 2, [ItemId.CROSS_MEDAL]: 1, [ItemId.WELCOME_PACKAGE]: 1 });
-      expect(g.pushes(PushCmd.ITEM_UPDATE).at(-1)).toMatchObject({ playerIds: [a.id], data: { items: [{ id: ItemId.TRUCE_AGREEMENT, count: 2 }] } });
+      expect(p.items).toMatchObject({ [ItemId.KINGS_PEACE]: 2, [ItemId.CROSS_MEDAL]: 1, [ItemId.FOUNDERS_GIFT]: 1 });
+      expect(g.pushes(PushCmd.ITEM_UPDATE).at(-1)).toMatchObject({ playerIds: [a.id], data: { items: [{ id: ItemId.KINGS_PEACE, count: 2 }] } });
     }));
 
   it('removing more than the player has leaves none', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      await admin.grantItems(g, a.name, { [ItemId.WELCOME_PACKAGE]: -5 });
-      expect((await reloadPlayer(g, a)).items).not.toHaveProperty(ItemId.WELCOME_PACKAGE);
+      await admin.grantItems(g, a.name, { [ItemId.FOUNDERS_GIFT]: -5 });
+      expect((await reloadPlayer(g, a)).items).not.toHaveProperty(ItemId.FOUNDERS_GIFT);
     }));
 
   it('rejects an unknown player, an unknown item and a zero or fractional count', () =>

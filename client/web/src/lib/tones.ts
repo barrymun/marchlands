@@ -10,7 +10,7 @@
 //   a hero at max level    gold with a trophy (MAX_LEVEL_TEXT, HeroLevel): the milestone of the hero's level itself
 //   a held historic city   its flags' colour by level, a solid HC badge with a castle, never plain text (HISTORIC_TONE, HistoricBadge)
 
-/** A running item bonus (production boosts, War Ensign, Vesta's, Quartermaster's …): badge background and text, light and dark. */
+/** A running item bonus (production boosts, Imperial Banner, Elizabeth's, the Marshal's …): badge background and text, light and dark. */
 export const ITEM_BONUS_TONE = 'bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300';
 
 /** The same bonus as plain text. */

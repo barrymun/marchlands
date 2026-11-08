@@ -47,14 +47,14 @@ export const ITEM_INFO_MESSAGES = {
   /** medal box: `min`–`max` of each of `medals` (items) (BALANCE.items.medalBoxes) */
   medalBox: ['min', 'max', 'medals'],
   randomBox: [],
-  /** Civil Code (BALANCE.items.civilCode): `percent` of the maximum population, at least `min` */
+  /** Magdeburg Rights (BALANCE.items.civilCode): `percent` of the maximum population, at least `min` */
   civilCode: ['percent', 'min'],
   cureInjured: [],
   /** hero box (BALANCE.items.heroBoxes): `level`, `minStat`, `building`: the Feasting Hall */
   heroBox: ['level', 'minStat', 'building'],
-  /** City Teleporter, `period`: BALANCE.teleportCooldownMs */
+  /** Locator's Charter, `period`: BALANCE.teleportCooldownMs */
   teleporter: ['period'],
-  /** Truce Agreement, `period`: BALANCE.truceDurationMs */
+  /** King's Peace, `period`: BALANCE.truceDurationMs */
   truce: ['period'],
   notUsable: [],
   noEffect: [],
@@ -69,6 +69,6 @@ export const ITEM_INFO_MESSAGES = {
   'howTo.cityTruce': [],
   /** a chest key, `chest` (item) */
   'howTo.key': ['chest'],
-  /** the Welcome Package */
+  /** the Founder's Gift */
   'howTo.welcome': [],
 } as const;

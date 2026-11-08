@@ -95,7 +95,7 @@ async function main() {
   await ok(gm, 'POST', '/admin/items', { playerName: b.name, items: { 'consume.move.1': 1 } });
   const moved = await ok(b.token, 'POST', `/cities/${b.city.id}/move`, { targetTileId: spot.id });
   const again = await call(b.token, 'POST', `/cities/${b.city.id}/move`, { targetTileId: spot.id });
-  check(again.ok !== 1 && again.error?.code === 'city.teleportCooldown', 'City Teleporter cools down after a move');
+  check(again.ok !== 1 && again.error?.code === 'city.teleportCooldown', "Locator's Charter cools down after a move");
   b.city = { ...b.city, ...moved };
   check(moved.fieldId === spot.id, `defender teleported next door (${moved.x},${moved.y})`);
 

@@ -130,8 +130,8 @@ export const ChangeGenderBody = z.object({ sex: z.number().int().min(0).max(1).d
 export const TutorialStepBody = z.object({ step: z.number().int().min(0) });
 export const FurloughBody = z.object({ days: z.number().int(), cityId: zId.describe('the city whose gold pays') });
 export const TruceBody = z.object({
-  itemId: z.string().default(ItemId.TRUCE_AGREEMENT),
-  cityId: zId.describe('the city whose gold pays when no Truce Agreement is owned'),
+  itemId: z.string().default(ItemId.KINGS_PEACE),
+  cityId: zId.describe("the city whose gold pays when no King's Peace is owned"),
 });
 export const BookmarkBody = z.object({ tileId: zId });
 export const ArmyPreset = ArmyPresetSchema.meta({ id: 'ArmyPreset' });

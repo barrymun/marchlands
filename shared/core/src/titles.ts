@@ -24,15 +24,15 @@ export const TITLES: [TitleDef, ...TitleDef[]] = [
   { id: 3, maxCities: 4, prestige: 4_000, gold: 60_000, medals: { [ItemId.LION_MEDAL]: 10, [ItemId.HONOUR_MEDAL]: 5 } },
   { id: 4, maxCities: 5, prestige: 8_000, gold: 80_000, medals: { [ItemId.HONOUR_MEDAL]: 10, [ItemId.COURAGE_MEDAL]: 5 } },
   { id: 5, maxCities: 6, prestige: 16_000, gold: 100_000, medals: { [ItemId.COURAGE_MEDAL]: 10, [ItemId.WISDOM_MEDAL]: 5 } },
-  { id: 6, maxCities: 7, prestige: 32_000, gold: 200_000, medals: { [ItemId.WISDOM_MEDAL]: 10, [ItemId.FREEDOM_MEDAL]: 5 } },
-  { id: 7, maxCities: 8, prestige: 64_000, gold: 300_000, medals: { [ItemId.FREEDOM_MEDAL]: 10, [ItemId.JUSTICE_MEDAL]: 5 } },
-  { id: 8, maxCities: 9, prestige: 128_000, gold: 400_000, medals: { [ItemId.JUSTICE_MEDAL]: 10, [ItemId.NATION_MEDAL]: 5 } },
+  { id: 6, maxCities: 7, prestige: 32_000, gold: 200_000, medals: { [ItemId.WISDOM_MEDAL]: 10, [ItemId.FIDELITY_MEDAL]: 5 } },
+  { id: 7, maxCities: 8, prestige: 64_000, gold: 300_000, medals: { [ItemId.FIDELITY_MEDAL]: 10, [ItemId.JUSTICE_MEDAL]: 5 } },
+  { id: 8, maxCities: 9, prestige: 128_000, gold: 400_000, medals: { [ItemId.JUSTICE_MEDAL]: 10, [ItemId.CROWN_MEDAL]: 5 } },
   {
     id: 9,
     maxCities: 10,
     prestige: 256_000,
     gold: 500_000,
-    medals: { [ItemId.CROSS_MEDAL]: 20, [ItemId.ROSE_MEDAL]: 15, [ItemId.LION_MEDAL]: 10, [ItemId.NATION_MEDAL]: 5 },
+    medals: { [ItemId.CROSS_MEDAL]: 20, [ItemId.ROSE_MEDAL]: 15, [ItemId.LION_MEDAL]: 10, [ItemId.CROWN_MEDAL]: 5 },
   },
 ];
 

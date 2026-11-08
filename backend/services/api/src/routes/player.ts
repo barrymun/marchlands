@@ -105,7 +105,7 @@ export default async function playerRoutes(app: ZApp) {
     game(req, (ctx, pid) => player.startFurlough(ctx, pid, req.body.days, req.body.cityId)),
   );
   app.delete('/player/furlough', s('End holiday mode (furlough.cancelFurlought)', Empty), (req) => game(req, (ctx, pid) => player.cancelFurlough(ctx, pid)));
-  app.post('/player/truce', s('Truce Agreement (city.setStopWarState)', Empty, { body: TruceBody }), (req) =>
+  app.post('/player/truce', s("King's Peace (city.setStopWarState)", Empty, { body: TruceBody }), (req) =>
     game(req, (ctx, pid) => player.startTruce(ctx, pid, req.body.itemId, req.body.cityId)),
   );
   app.post('/player/restart', s('Delete everything and start over (common.deleteUserAndRestart)', Empty), (req) =>

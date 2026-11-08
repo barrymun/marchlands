@@ -122,7 +122,7 @@ export const REMOVED_ITEMS: readonly string[] = [
   'consume.key.1',
   'consume.key.2',
   'consume.key.3',
-  // the same upkeep buff as Vesta's Blessing, from past events
+  // the same upkeep buff as Elizabeth's Bread, from past events
   'player.santa.stoptoopsupkeep',
   'player.newyear.stoptoopsupkeep',
   'player.running.shoes',
@@ -163,7 +163,7 @@ export const REMOVED_ITEMS: readonly string[] = [
   'alliance.ritual_of_pact.ultimate',
   'player.heart.1.a', // Speech Text
   'hero.reset.1.a', // Holy Water (5 pieces package)
-  'player.more.castle.1.a', // Adv City Teleporter: the City Teleporter now picks the tile
+  'player.more.castle.1.a', // Adv City Teleporter: the Locator's Charter (the original's City Teleporter) now picks the tile
   // Speakers (and their 10 / 100 packs): World chat is free
   'consume.1.a',
   'consume.1.b',
@@ -171,7 +171,7 @@ export const REMOVED_ITEMS: readonly string[] = [
 ];
 /**
  * (marchlands) legacy item families removed from this game: event, promotion and compensation packages
- * (every gift package but the Welcome Package each new lord gets), event keys and tokens, and the Amulet
+ * (every gift package but the Founder's Gift each new lord gets), event keys and tokens, and the Amulet
  * (a gamble) with every copy of it and its prizes (player.box.gambling.*)
  */
 const REMOVED_ITEM_PATTERNS: readonly RegExp[] = [
@@ -186,8 +186,8 @@ export const isRemovedItem = (id: string) => REMOVED_ITEMS.includes(id) || REMOV
 const EXTRA_ITEMS: ItemConfig[] = [
   {
     legacyId: 0,
-    id: ItemId.VESTAS_GRAND_BLESSING,
-    name: "Vesta's Grand Blessing",
+    id: ItemId.ELIZABETHS_GRANARY,
+    name: "Elizabeth's Granary",
     cost: 0,
     buyable: false,
     canGamble: false,
@@ -195,11 +195,11 @@ const EXTRA_ITEMS: ItemConfig[] = [
     dayLimit: 0,
     rarity: 0,
   },
-  { legacyId: 0, id: ItemId.QUARTERMASTERS_SEAL, name: "Quartermaster's Seal", cost: 0, buyable: false, canGamble: false, type: 4, dayLimit: 0, rarity: 0 },
+  { legacyId: 0, id: ItemId.MARSHALS_SEAL, name: "Marshal's Seal", cost: 0, buyable: false, canGamble: false, type: 4, dayLimit: 0, rarity: 0 },
   {
     legacyId: 0,
-    id: ItemId.QUARTERMASTERS_CHARTER,
-    name: "Quartermaster's Charter",
+    id: ItemId.MARSHALS_CHARTER,
+    name: "Marshal's Charter",
     cost: 0,
     buyable: false,
     canGamble: false,

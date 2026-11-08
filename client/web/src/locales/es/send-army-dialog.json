@@ -20,7 +20,7 @@
     "heroOption": "{{name}} (Nv. {{level}}, ata. {{attack}})",
     "troops": "Tropas",
     "capacity": "{{chosen}} / {{cap}} (Punto de reunión Nv. {{rally}})",
-    "capacityEnsign": "{{chosen}} / {{cap}} (Punto de reunión Nv. {{rally}}<b>, Estandarte de guerra +25%</b>)",
+    "capacityBanner": "{{chosen}} / {{cap}} (Punto de reunión Nv. {{rally}}<b>, Estandarte imperial +25%</b>)",
     "battleBuff": "{{desc}} en esta batalla · quedan <timer/>",
     "noScouts": "No hay Exploradores en la ciudad: entrena algunos en Militar.",
     "noTroops": "No hay tropas en la ciudad.",

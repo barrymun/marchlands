@@ -96,11 +96,11 @@ describe(training.trainableList.name, () => {
       expect(scout.requirements.filter((r) => !r.ok).map((r) => r.kind)).toEqual([RequirementKind.BUILDING, RequirementKind.TECH]);
     }));
 
-  it('troops show the Quartermaster discount; fortifications never do', () =>
+  it("troops show the Marshal's discount; fortifications never do", () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      await giveItems(g, p, { [ItemId.QUARTERMASTERS_SEAL]: 1 });
-      await shop.useItem(g, p.id, ItemId.QUARTERMASTERS_SEAL, null);
+      await giveItems(g, p, { [ItemId.MARSHALS_SEAL]: 1 });
+      await shop.useItem(g, p.id, ItemId.MARSHALS_SEAL, null);
       const troops = await training.trainableList(g, p.id, p.cityId, false);
       expect(new Set(troops.map((t) => t.costShare))).toEqual(new Set([1 - BALANCE.trainCostReduction]));
       const forts = await training.trainableList(g, p.id, p.cityId, true);
@@ -246,12 +246,12 @@ describe(training.train.name, () => {
       expect(g.events(TimedEventType.TRAIN)).toEqual([]);
     }));
 
-  it('pays the discounted cost while a Quartermaster buff runs, and remembers it', () =>
+  it("pays the discounted cost while a Marshal's buff runs, and remembers it", () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [1]);
-      await giveItems(g, p, { [ItemId.QUARTERMASTERS_SEAL]: 1 });
-      await shop.useItem(g, p.id, ItemId.QUARTERMASTERS_SEAL, null);
+      await giveItems(g, p, { [ItemId.MARSHALS_SEAL]: 1 });
+      await shop.useItem(g, p.id, ItemId.MARSHALS_SEAL, null);
       const before = await reloadCity(g, p.cityId);
       const share = 1 - BALANCE.trainCostReduction;
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
@@ -263,8 +263,8 @@ describe(training.train.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withWalls(g, p, 1);
-      await giveItems(g, p, { [ItemId.QUARTERMASTERS_SEAL]: 1 });
-      await shop.useItem(g, p.id, ItemId.QUARTERMASTERS_SEAL, null);
+      await giveItems(g, p, { [ItemId.MARSHALS_SEAL]: 1 });
+      await shop.useItem(g, p.id, ItemId.MARSHALS_SEAL, null);
       const before = await reloadCity(g, p.cityId);
       const q = await training.train(g, p.id, p.cityId, FortType.TRAP, 10, WALLS_QUEUE);
       expect(q).toMatchObject({ positionId: WALLS_QUEUE, allProduceQueue: [{ type: FortType.TRAP, num: 10 }] });
@@ -532,8 +532,8 @@ describe(training.cancelTraining.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [1]);
-      await giveItems(g, p, { [ItemId.QUARTERMASTERS_SEAL]: 1 });
-      await shop.useItem(g, p.id, ItemId.QUARTERMASTERS_SEAL, null);
+      await giveItems(g, p, { [ItemId.MARSHALS_SEAL]: 1 });
+      await shop.useItem(g, p.id, ItemId.MARSHALS_SEAL, null);
       const before = await reloadCity(g, p.cityId);
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
       await training.cancelTraining(g, p.id, p.cityId, 0, 1);
@@ -564,20 +564,20 @@ describe(training.cancelTraining.name, () => {
 });
 
 describe(training.speedupTraining.name, () => {
-  it("Napoleon's Diary cuts the batch in progress by a share of its full time", () =>
+  it("Otto's Muster Roll cuts the batch in progress by a share of its full time", () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [1]);
-      await giveItems(g, p, { [ItemId.NAPOLEONS_DIARY]: 2 });
+      await giveItems(g, p, { [ItemId.OTTOS_MUSTER_ROLL]: 2 });
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
       const [head] = await queueOf(g, p, 0);
       const cut = Math.floor((head!.endTime - head!.startTime) * BALANCE.items.batchSpeedupShare);
       await training.speedupTraining(g, p.id, p.cityId, 0, 1);
 
       expect((await queueOf(g, p, 0))[0]).toMatchObject({ startTime: head!.startTime - cut, endTime: head!.endTime - cut });
-      expect((await reloadPlayer(g, p)).items[ItemId.NAPOLEONS_DIARY]).toBe(1);
+      expect((await reloadPlayer(g, p)).items[ItemId.OTTOS_MUSTER_ROLL]).toBe(1);
       expect(g.events(TimedEventType.TRAIN)[0]!.dueAt).toBe(head!.endTime - cut);
-      expect(g.pushes(PushCmd.ITEM_UPDATE).at(-1)?.data).toEqual({ items: [{ id: ItemId.NAPOLEONS_DIARY, count: 1 }] });
+      expect(g.pushes(PushCmd.ITEM_UPDATE).at(-1)?.data).toEqual({ items: [{ id: ItemId.OTTOS_MUSTER_ROLL, count: 1 }] });
     }));
 
   it('without the item it is bought with the city gold, and refused without enough', () =>
@@ -585,7 +585,7 @@ describe(training.speedupTraining.name, () => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [1]);
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
-      const price = itemGoldPrice(ItemId.NAPOLEONS_DIARY)!;
+      const price = itemGoldPrice(ItemId.OTTOS_MUSTER_ROLL)!;
       await setResources(g, p, { gold: price });
       await training.speedupTraining(g, p.id, p.cityId, 0, 1);
       expect((await reloadCity(g, p.cityId)).gold).toBe(0);
@@ -596,7 +596,7 @@ describe(training.speedupTraining.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [1]);
-      await giveItems(g, p, { [ItemId.NAPOLEONS_DIARY]: 4 });
+      await giveItems(g, p, { [ItemId.OTTOS_MUSTER_ROLL]: 4 });
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
       for (let i = 0; i < 4; i++) await training.speedupTraining(g, p.id, p.cityId, 0, 1);
       expect((await queueOf(g, p, 0))[0]!.endTime).toBe(g.now);
@@ -608,7 +608,7 @@ describe(training.speedupTraining.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [2]);
-      await giveItems(g, p, { [ItemId.NAPOLEONS_DIARY]: 1 });
+      await giveItems(g, p, { [ItemId.OTTOS_MUSTER_ROLL]: 1 });
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
       await training.train(g, p.id, p.cityId, WARRIOR, 10, 0);
       const full = await batchMs(g, p, WARRIOR, 10);
@@ -621,16 +621,16 @@ describe(training.speedupTraining.name, () => {
       expect((await queueOf(g, p, 0))[0]).toMatchObject({ queueId: 2, startTime: end1 - cut, endTime: end1 + full - cut });
     }));
 
-  it("fortifications use Archimedes' Note", () =>
+  it("fortifications use Henry's Castle Law", () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withWalls(g, p, 1);
-      await giveItems(g, p, { [ItemId.ARCHIMEDES_NOTE]: 1, [ItemId.NAPOLEONS_DIARY]: 1 });
+      await giveItems(g, p, { [ItemId.HENRYS_CASTLE_LAW]: 1, [ItemId.OTTOS_MUSTER_ROLL]: 1 });
       await training.train(g, p.id, p.cityId, FortType.TRAP, 10, WALLS_QUEUE);
       await training.speedupTraining(g, p.id, p.cityId, WALLS_QUEUE, 1);
       const { items } = await reloadPlayer(g, p);
-      expect(items[ItemId.ARCHIMEDES_NOTE] ?? 0).toBe(0);
-      expect(items[ItemId.NAPOLEONS_DIARY]).toBe(1);
+      expect(items[ItemId.HENRYS_CASTLE_LAW] ?? 0).toBe(0);
+      expect(items[ItemId.OTTOS_MUSTER_ROLL]).toBe(1);
       expect(g.pushes(PushCmd.FORTIFICATIONS_QUEUE_UPDATE).length).toBeGreaterThan(1);
     }));
 
@@ -638,9 +638,9 @@ describe(training.speedupTraining.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [1]);
-      await giveItems(g, p, { [ItemId.NAPOLEONS_DIARY]: 1 });
+      await giveItems(g, p, { [ItemId.OTTOS_MUSTER_ROLL]: 1 });
       await expectRefused(training.speedupTraining(g, p.id, p.cityId, 0, 1), msg('training.batchNotFound'));
-      expect((await reloadPlayer(g, p)).items[ItemId.NAPOLEONS_DIARY]).toBe(1);
+      expect((await reloadPlayer(g, p)).items[ItemId.OTTOS_MUSTER_ROLL]).toBe(1);
     }));
 });
 
@@ -671,8 +671,8 @@ describe(training.disbandTroops.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withBarracks(g, p, [1]);
-      await giveItems(g, p, { [ItemId.QUARTERMASTERS_SEAL]: 1 });
-      await shop.useItem(g, p.id, ItemId.QUARTERMASTERS_SEAL, null);
+      await giveItems(g, p, { [ItemId.MARSHALS_SEAL]: 1 });
+      await shop.useItem(g, p.id, ItemId.MARSHALS_SEAL, null);
       const share = 1 - BALANCE.trainCostReduction;
       await training.train(g, p.id, p.cityId, WORKER, 10, 0);
       await g.runDue(g.events(TimedEventType.TRAIN)[0]!.dueAt);

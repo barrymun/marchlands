@@ -114,8 +114,8 @@
     "change": "Change mayor"
   },
   "trainDiscount": {
-    "active": "Training cost −{{percent}} (Quartermaster): the costs below include it.",
-    "timed": "Training cost −{{percent}} (Quartermaster) for {{time}}: the costs below include it."
+    "active": "Training cost −{{percent}} (Marshal): the costs below include it.",
+    "timed": "Training cost −{{percent}} (Marshal) for {{time}}: the costs below include it."
   },
   "trainEstimate": {
     "instant": "Instant",

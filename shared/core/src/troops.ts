@@ -154,12 +154,12 @@ export const historicRallyBonus = (level: number) => ((level - 10) / 2) * BALANC
 /**
  * Max troops in one army: BALANCE.rallySpotTroopsPerLevel per Rally Spot level; (marchlands) a held historic city's a
  * quarter more a level step above 10 (125,000 from a level 12 at Rally Spot 10, 200,000 from Atlantis); and a quarter
- * more again with a War Ensign.
+ * more again with a Imperial Banner.
  */
-export function maxArmyTroops(buildings: BuildingState[], warEnsign = false, historicLevel: number | null = null): number {
+export function maxArmyTroops(buildings: BuildingState[], imperialBanner = false, historicLevel: number | null = null): number {
   const base = buildingLevel(buildings, BuildingType.RALLY_SPOT) * BALANCE.rallySpotTroopsPerLevel;
   const seat = historicLevel ? 1 + historicRallyBonus(historicLevel) : 1;
-  return Math.floor(base * seat * (warEnsign ? 1 + BALANCE.warEnsignTroopBonus : 1));
+  return Math.floor(base * seat * (imperialBanner ? 1 + BALANCE.imperialBannerTroopBonus : 1));
 }
 
 /** Max simultaneous armies a city may have out (Rally Spot level). */

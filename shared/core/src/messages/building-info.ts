@@ -15,7 +15,7 @@ export const BUILDING_INFO_MESSAGES = {
   /** `gold`: BALANCE.tavernRefreshGoldPerInnLevel */
   'summary.inn': ['gold'],
   'summary.feastingHall': [],
-  /** `count`: BALANCE.rallySpotArmiesPerLevel, `troops`: BALANCE.rallySpotTroopsPerLevel, `item`: the War Ensign, `percent`: BALANCE.warEnsignTroopBonus */
+  /** `count`: BALANCE.rallySpotArmiesPerLevel, `troops`: BALANCE.rallySpotTroopsPerLevel, `item`: the Imperial Banner, `percent`: BALANCE.imperialBannerTroopBonus */
   'summary.rallySpot': ['count', 'troops', 'item', 'percent'],
   /** `count`: BALANCE.marketMaxOrdersPerLevel */
   'summary.marketplace': ['count'],

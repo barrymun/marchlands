@@ -5,7 +5,6 @@ import { PushCmd } from '@marchlands/contracts';
 import {
   addTroops,
   BuildingType,
-  civilCodePopulation,
   createBoxHero,
   Feature,
   GameError,
@@ -19,6 +18,7 @@ import {
   ItemId,
   ITEMS,
   ItemSpecialHandler,
+  magdeburgRightsPopulation,
   type Message,
   msg,
   ref,
@@ -38,7 +38,7 @@ import { addItem, consumeItem, gainResources, itemCount, pushCity, pushResources
 import { getPlayer, type PlayerRow, saveCity, savePlayer } from '#/repo.ts';
 
 /** A truce protects from other players, so it isn't sold while PvP is off. */
-const offSale = (itemId: string) => itemId === ItemId.TRUCE_AGREEMENT && !isFeatureOn(Feature.PVP);
+const offSale = (itemId: string) => itemId === ItemId.KINGS_PEACE && !isFeatureOn(Feature.PVP);
 
 /** Shop catalogue (orig saleTypeBeans): items for sale grouped by type (item category id), priced in city gold; the client names both by id. */
 export function catalogue() {
@@ -171,11 +171,11 @@ export async function useItem(ctx: Ctx, playerId: number, itemId: string, cityId
     }
     case ItemEffectKind.SPECIAL: {
       switch (effect.handler) {
-        case ItemSpecialHandler.CIVIL_CODE: {
+        case ItemSpecialHandler.MAGDEBURG_RIGHTS: {
           const city = needCity();
           consumeItem(ctx, p, itemId);
           const max = cityStats(city, ctx.now).maxPopulation;
-          city.city.population = civilCodePopulation(city.city.population, max);
+          city.city.population = magdeburgRightsPopulation(city.city.population, max);
           pushCity(ctx, city);
           break;
         }

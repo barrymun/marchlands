@@ -203,7 +203,7 @@ describe('resource icons', () => {
 
 describe(itemArtFile.name, () => {
   it('names the icon after the item', () => {
-    expect(itemArtFile(ItemId.NAPOLEONS_DIARY)).toBe('napoleons-diary.png');
+    expect(itemArtFile(ItemId.OTTOS_MUSTER_ROLL)).toBe('ottos-muster-roll.png');
     expect(itemArtFile(medalId(1))).toBe('cross-medal.png');
   });
 

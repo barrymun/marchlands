@@ -134,14 +134,14 @@ describe(buildings.construct.name, () => {
       expect(await buildingAt(g, p, 0)).toBeUndefined();
     }));
 
-  it('runs BALANCE.buildQueues constructions at once; Bernini’s Hammer adds one more', () =>
+  it('runs BALANCE.buildQueues constructions at once; Bernward’s Hammer adds one more', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       for (let i = 0; i < BALANCE.buildQueues; i++) await buildings.construct(g, p.id, p.cityId, COTTAGE, i);
       await expectRefused(buildings.construct(g, p.id, p.cityId, COTTAGE, 10), msg('building.queuesBusy'));
 
-      await giveItems(g, p, { [ItemId.BERNINIS_HAMMER]: 1 });
-      await shop.useItem(g, p.id, ItemId.BERNINIS_HAMMER, null);
+      await giveItems(g, p, { [ItemId.BERNWARDS_HAMMER]: 1 });
+      await shop.useItem(g, p.id, ItemId.BERNWARDS_HAMMER, null);
       await buildings.construct(g, p.id, p.cityId, COTTAGE, 10);
       await expectRefused(buildings.construct(g, p.id, p.cityId, COTTAGE, 11), msg('building.queuesBusy'));
     }));
@@ -346,18 +346,18 @@ describe(buildings.speedup.name, () => {
   it('an owned guideline is used up and cuts its time; the job keeps its length', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      await giveItems(g, p, { [ItemId.BEGINNER_GUIDELINES]: 1 });
-      const before = (await reloadPlayer(g, p)).items[ItemId.BEGINNER_GUIDELINES]!;
+      await giveItems(g, p, { [ItemId.NOVICES_NOTES]: 1 });
+      const before = (await reloadPlayer(g, p)).items[ItemId.NOVICES_NOTES]!;
       const built = await buildings.upgrade(g, p.id, p.cityId, -1);
-      const cut = BALANCE.items.speedups[ItemId.BEGINNER_GUIDELINES]!.cutMs!;
+      const cut = BALANCE.items.speedups[ItemId.NOVICES_NOTES]!.cutMs!;
       expect(built.endTime - built.startTime).toBeGreaterThan(cut);
       const gold = (await stock(g, p)).gold;
-      const bean = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.BEGINNER_GUIDELINES);
+      const bean = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.NOVICES_NOTES);
       expect(bean).toMatchObject({ startTime: built.startTime - cut, endTime: built.endTime - cut });
-      expect((await reloadPlayer(g, p)).items[ItemId.BEGINNER_GUIDELINES] ?? 0).toBe(before - 1);
+      expect((await reloadPlayer(g, p)).items[ItemId.NOVICES_NOTES] ?? 0).toBe(before - 1);
       expect((await stored(g, p)).gold).toBe(gold);
       expect(g.events(TimedEventType.BUILDING)).toMatchObject([{ dueAt: built.endTime - cut }]);
-      expect(g.pushes(PushCmd.ITEM_UPDATE).at(-1)?.data).toEqual({ items: [{ id: ItemId.BEGINNER_GUIDELINES, count: before - 1 }] });
+      expect(g.pushes(PushCmd.ITEM_UPDATE).at(-1)?.data).toEqual({ items: [{ id: ItemId.NOVICES_NOTES, count: before - 1 }] });
     }));
 
   it('an item the player lacks is bought with city gold', () =>
@@ -365,26 +365,26 @@ describe(buildings.speedup.name, () => {
       const p = await createTestPlayer(g);
       const built = await buildings.upgrade(g, p.id, p.cityId, -1);
       const before = await stock(g, p);
-      await buildings.speedup(g, p.id, p.cityId, -1, ItemId.BEGINNER_GUIDELINES);
-      expect((await stored(g, p)).gold).toBe(before.gold - speedupItemGold(ItemId.BEGINNER_GUIDELINES));
-      expect(await buildingAt(g, p, -1)).toMatchObject({ endTime: built.endTime - BALANCE.items.speedups[ItemId.BEGINNER_GUIDELINES]!.cutMs! });
+      await buildings.speedup(g, p.id, p.cityId, -1, ItemId.NOVICES_NOTES);
+      expect((await stored(g, p)).gold).toBe(before.gold - speedupItemGold(ItemId.NOVICES_NOTES));
+      expect(await buildingAt(g, p, -1)).toMatchObject({ endTime: built.endTime - BALANCE.items.speedups[ItemId.NOVICES_NOTES]!.cutMs! });
       await setResources(g, p, { gold: 0 });
       await expectRefused(
-        buildings.speedup(g, p.id, p.cityId, -1, ItemId.BEGINNER_GUIDELINES),
-        msg('common.notEnoughGoldFor', { amount: speedupItemGold(ItemId.BEGINNER_GUIDELINES) }),
+        buildings.speedup(g, p.id, p.cityId, -1, ItemId.NOVICES_NOTES),
+        msg('common.notEnoughGoldFor', { amount: speedupItemGold(ItemId.NOVICES_NOTES) }),
       );
     }));
 
   it('a share speed-up always cuts a share of the full time', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      await giveItems(g, p, { [ItemId.ULTIMATE_GUIDELINES]: 2 });
+      await giveItems(g, p, { [ItemId.VILLARDS_SKETCHBOOK]: 2 });
       const built = await buildings.upgrade(g, p.id, p.cityId, -1);
       const total = built.endTime - built.startTime;
-      const cut = total * BALANCE.items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!;
-      const once = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.ULTIMATE_GUIDELINES);
+      const cut = total * BALANCE.items.speedups[ItemId.VILLARDS_SKETCHBOOK]!.cutShare!;
+      const once = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.VILLARDS_SKETCHBOOK);
       expect(once).toMatchObject({ endTime: built.endTime - cut, startTime: built.startTime - cut });
-      const twice = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.ULTIMATE_GUIDELINES);
+      const twice = await buildings.speedup(g, p.id, p.cityId, -1, ItemId.VILLARDS_SKETCHBOOK);
       expect(twice).toMatchObject({ endTime: built.endTime - 2 * cut });
       expect(twice.endTime - twice.startTime).toBe(total);
     }));
@@ -392,9 +392,9 @@ describe(buildings.speedup.name, () => {
   it('never ends a job before now', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      await giveItems(g, p, { [ItemId.SENIOR_GUIDELINES]: 1 });
+      await giveItems(g, p, { [ItemId.MASTERS_NOTES]: 1 });
       const built = await buildings.construct(g, p.id, p.cityId, COTTAGE, 0);
-      const bean = await buildings.speedup(g, p.id, p.cityId, 0, ItemId.SENIOR_GUIDELINES);
+      const bean = await buildings.speedup(g, p.id, p.cityId, 0, ItemId.MASTERS_NOTES);
       expect(bean).toMatchObject({ endTime: g.now, startTime: built.startTime - (built.endTime - g.now) });
     }));
 

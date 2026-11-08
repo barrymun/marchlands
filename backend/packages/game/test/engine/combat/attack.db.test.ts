@@ -13,6 +13,7 @@ import {
   BuildingType,
   FortType,
   HeroStatus,
+  IMPERIAL_BANNER_DESC,
   injuredOf,
   ItemId,
   maxArmyTroops,
@@ -23,7 +24,6 @@ import {
   TechType,
   TimedEventType,
   totalResources,
-  WAR_ENSIGN_DESC,
 } from '@marchlands/core';
 
 import { processArmy } from '#/engine/combat.ts';
@@ -223,12 +223,12 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       expect((await getHero(g, allyHero)).status).toBe(HeroStatus.IDLE);
     }));
 
-  it('reports the item bonuses that counted, and a War Ensign that let the army march', () =>
+  it('reports the item bonuses that counted, and a Imperial Banner that let the army march', () =>
     game(async (g) => {
       const { p, go } = await battle(g, { lightCavalry: 12_000 }, { militia: 10 });
       await setBuildings(g, p, [[0, BuildingType.RALLY_SPOT, 1]]);
-      await giveItems(g, p, { [ItemId.WAR_ENSIGN]: 1, [ItemId.WAR_HORN]: 1 });
-      await shop.useItem(g, p.id, ItemId.WAR_ENSIGN, p.cityId);
+      await giveItems(g, p, { [ItemId.IMPERIAL_BANNER]: 1, [ItemId.WAR_HORN]: 1 });
+      await shop.useItem(g, p.id, ItemId.IMPERIAL_BANNER, p.cityId);
       await shop.useItem(g, p.id, ItemId.WAR_HORN, p.cityId);
       expect(12_000).toBeGreaterThan(maxArmyTroops((await reloadCity(g, p.cityId)).buildings));
       const horn = (await reloadPlayer(g, p)).buffs.find((x) => x.id === BuffId.ATTACK)!;
@@ -237,7 +237,7 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
       const b = battleOf(await lastReport(g, p.id, 'report.title.attackSucceeded'), BattleTarget.CITY);
       expect(b.attacker.bonuses).toEqual([
         { desc: horn.desc, itemId: ItemId.WAR_HORN },
-        { desc: WAR_ENSIGN_DESC, itemId: ItemId.WAR_ENSIGN },
+        { desc: IMPERIAL_BANNER_DESC, itemId: ItemId.IMPERIAL_BANNER },
       ]);
       expect(b.defender.bonuses).toBeUndefined();
     }));
@@ -258,8 +258,8 @@ describe(`${processArmy.name}: attacking a lord's city`, () => {
     game(async (g) => {
       const { p, q, go } = await battle(g, { lightCavalry: 100 }, { militia: 10 });
       const armyId = await go();
-      await giveItems(g, q, { [ItemId.TRUCE_AGREEMENT]: 1 });
-      await player.startTruce(g, q.id, ItemId.TRUCE_AGREEMENT, q.cityId);
+      await giveItems(g, q, { [ItemId.KINGS_PEACE]: 1 });
+      await player.startTruce(g, q.id, ItemId.KINGS_PEACE, q.cityId);
       await arrive(g, armyId);
       expect((await lastReport(g, p.id, 'report.title.missionAborted')).body).toEqual({ kind: ReportBodyKind.TEXT, text: msg('player.protected.truce') });
       expect((await reloadCity(g, q.cityId)).troops.militia).toBe(10);

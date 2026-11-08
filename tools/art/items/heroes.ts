@@ -1,6 +1,6 @@
-// Hero items: a vial of holy water (resetting a hero's points), Excalibur (attack), and books for the rest: The Wealth
-// of Nations with its gold (politics), The Art of War on bamboo slips (intelligence), and three books of experience
-// that grow with it, Anabasis plain, the Epitome of Military Science bound in gold, On War the grandest.
+// Hero items: a vial of holy water (resetting a hero's points), Joyeuse (attack), and books for the rest: The Wealth
+// of Nations with its gold (politics), Stratagems on bamboo slips (intelligence), and three books of experience
+// that grow with it, Deeds of the Saxons plain, the Epitome of Military Science bound in gold, the Nibelungenlied the grandest.
 
 import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas } from '../pixel.ts';
@@ -21,9 +21,9 @@ function holyWater(): PixelCanvas {
   return c;
 }
 
-/** Excalibur: a gleaming sword, point up and to the right, its gold hilt set with a blue stone. */
-function excalibur(): PixelCanvas {
-  const c = canvas('excalibur');
+/** Joyeuse: a gleaming sword, point up and to the right, its gold hilt set with a blue stone. */
+function joyeuse(): PixelCanvas {
+  const c = canvas('joyeuse');
   rod(c, [10, 22], [28, 4], 4, STEEL.mid);
   rod(c, [5, 17], [15, 27], 3, GOLD.mid);
   rod(c, [9, 23], [5, 27], 3, LEATHER.mid);
@@ -37,9 +37,9 @@ function excalibur(): PixelCanvas {
   return c;
 }
 
-/** The Wealth of Nations: a green book with a gold coin on its cover, more coins before it. */
-function wealthOfNations(): PixelCanvas {
-  const c = canvas('wealth-of-nations');
+/** Mirror of Kings: a green book with a gold coin on its cover, more coins before it. */
+function mirrorOfKings(): PixelCanvas {
+  const c = canvas('mirror-of-kings');
   tome(c, 6, 3, 22, 25, GREEN);
   corners(c, 6, 3, 22, 25);
   coin(c, 15, 13);
@@ -49,9 +49,9 @@ function wealthOfNations(): PixelCanvas {
   return c;
 }
 
-/** The Art of War: a scroll of bamboo slips, bound with cord, half rolled up. */
-function artOfWar(): PixelCanvas {
-  const c = canvas('art-of-war');
+/** Stratagems: a scroll of bamboo slips, bound with cord, half rolled up. */
+function stratagems(): PixelCanvas {
+  const c = canvas('stratagems');
   for (let x = 3; x <= 21; x += 2) {
     rect(c, x, 6, x, 26, x % 4 === 1 ? Colour.THATCH_HI : Colour.THATCH_L);
     rect(c, x + 1, 6, x + 1, 26, Colour.THATCH_D);
@@ -67,9 +67,9 @@ function artOfWar(): PixelCanvas {
   return c;
 }
 
-/** Anabasis: a plain leather book. */
-function anabasis(): PixelCanvas {
-  const c = canvas('anabasis');
+/** Deeds of the Saxons: a plain leather book. */
+function deedsOfTheSaxons(): PixelCanvas {
+  const c = canvas('deeds-of-the-saxons');
   tome(c, 8, 5, 22, 26, LEATHER);
   stamp(c, 13, 11, ['.ddd.', 'd...d', 'd...d', '.ddd.'], { d: LEATHER.dark });
   c.outline();
@@ -86,9 +86,9 @@ function epitome(): PixelCanvas {
   return c;
 }
 
-/** On War: a thick red book with gold corners, a clasp and crossed swords on its cover. */
-function onWar(): PixelCanvas {
-  const c = canvas('on-war');
+/** Nibelungenlied: a thick red book with gold corners, a clasp and crossed swords on its cover. */
+function nibelungenlied(): PixelCanvas {
+  const c = canvas('nibelungenlied');
   tome(c, 4, 2, 24, 28, RED);
   corners(c, 4, 2, 24, 28);
   stamp(c, 9, 8, ['g.......g', '.g.....g.', '..g...g..', '...g.g...', '....g....', '...g.g...', '.ddd.ddd.', '.d.....d.', 'd.......d'], {
@@ -102,4 +102,4 @@ function onWar(): PixelCanvas {
   return c;
 }
 
-export const HERO_DRAWINGS = { holyWater, excalibur, wealthOfNations, artOfWar, anabasis, epitome, onWar };
+export const HERO_DRAWINGS = { holyWater, joyeuse, mirrorOfKings, stratagems, deedsOfTheSaxons, epitome, nibelungenlied };

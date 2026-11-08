@@ -122,8 +122,8 @@
     "change": "Cambiar alcalde"
   },
   "trainDiscount": {
-    "active": "Coste de entrenamiento −{{percent}} (Intendente): los costes de abajo ya lo incluyen.",
-    "timed": "Coste de entrenamiento −{{percent}} (Intendente) durante {{time}}: los costes de abajo ya lo incluyen."
+    "active": "Coste de entrenamiento −{{percent}} (Mariscal): los costes de abajo ya lo incluyen.",
+    "timed": "Coste de entrenamiento −{{percent}} (Mariscal) durante {{time}}: los costes de abajo ya lo incluyen."
   },
   "trainEstimate": {
     "instant": "Instantáneo",

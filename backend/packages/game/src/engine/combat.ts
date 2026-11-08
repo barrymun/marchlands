@@ -36,8 +36,9 @@ import {
   historicLoyalty,
   historicNameAt,
   historicResearch,
-  type HistoricState,
   historicState,
+  type HistoricState,
+  IMPERIAL_BANNER_DESC,
   injuredOf,
   isFeatureOn,
   ItemId,
@@ -83,7 +84,6 @@ import {
   type TroopCounts,
   TroopKey,
   valleyGarrison,
-  WAR_ENSIGN_DESC,
   wearHistoricLoyalty,
 } from '@marchlands/core';
 import { armies, cities, heroes, one, tiles } from '@marchlands/db';
@@ -245,17 +245,17 @@ function battleBonuses(p: PlayerRow, now: number): { bonuses?: { desc: Message; 
   return list.length ? { bonuses: list } : {};
 }
 
-const WAR_ENSIGN = ItemId.WAR_ENSIGN;
+const IMPERIAL_BANNER = ItemId.IMPERIAL_BANNER;
 
 /**
- * (marchlands) The attacker's item bonuses for its report: battleBonuses, plus the War Ensign when the army is
- * larger than its home Rally Spot allows without one (the Ensign let it march that size).
+ * (marchlands) The attacker's item bonuses for its report: battleBonuses, plus the Imperial Banner when the army is
+ * larger than its home Rally Spot allows without one (the Banner let it march that size).
  */
 async function attackerBonuses(ctx: Ctx, p: PlayerRow, a: ArmyRow): Promise<{ bonuses?: { desc: Message; itemId?: string }[] }> {
   const list = battleBonuses(p, ctx.now).bonuses ?? [];
   const home = await findCity(ctx, a.cityId);
   if (home && totalTroops(a.troops) > maxArmyTroops(home.buildings, false, home.historicLevel)) {
-    list.push({ desc: WAR_ENSIGN_DESC, itemId: WAR_ENSIGN });
+    list.push({ desc: IMPERIAL_BANNER_DESC, itemId: IMPERIAL_BANNER });
   }
   return list.length ? { bonuses: list } : {};
 }

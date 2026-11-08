@@ -297,16 +297,16 @@ describe('DELETE /cities/{cityId}/fortifications/queues/{positionId}/{queueId}',
 describe('POST /cities/{cityId}/troops/queues/{positionId}/{queueId}/speedup', () => {
   itGuards('POST', (c) => `cities/${c}/troops/queues/${BARRACKS}/1/speedup`);
 
-  it("uses a Napoleon's Diary on the batch", () =>
+  it("uses a Otto's Muster Roll on the batch", () =>
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       await garrison(api, a);
-      await giveItems(api, a, { [ItemId.NAPOLEONS_DIARY]: 1 });
+      await giveItems(api, a, { [ItemId.OTTOS_MUSTER_ROLL]: 1 });
       const batch = (await train(api, a, TroopType.WARRIOR, 500)).allProduceQueue[0]!;
       expect(await api.ok('POST', `cities/${a.cityId}/troops/queues/${BARRACKS}/${batch.queueId}/speedup`, { token: a.token })).toBeNull();
       const after = (await cityRow(api, a.cityId))!.troopQueues.find((q) => q.positionId === BARRACKS)!.queue[0]!;
       expect(after.endTime).toBeLessThan(batch.endTime);
-      expect((await items(api, a))[ItemId.NAPOLEONS_DIARY]).toBeUndefined();
+      expect((await items(api, a))[ItemId.OTTOS_MUSTER_ROLL]).toBeUndefined();
     }));
 
   it('refuses an unknown batch', () =>
@@ -320,15 +320,15 @@ describe('POST /cities/{cityId}/troops/queues/{positionId}/{queueId}/speedup', (
 describe('POST /cities/{cityId}/fortifications/queues/{positionId}/{queueId}/speedup', () => {
   itGuards('POST', (c) => `cities/${c}/fortifications/queues/${WALLS}/1/speedup`);
 
-  it("uses an Archimedes' Note on the batch", () =>
+  it("uses an Henry's Castle Law on the batch", () =>
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       await garrison(api, a);
-      await giveItems(api, a, { [ItemId.ARCHIMEDES_NOTE]: 2 });
+      await giveItems(api, a, { [ItemId.HENRYS_CASTLE_LAW]: 2 });
       const batch = (await trainForts(api, a, 50)).allProduceQueue[0]!;
       expect(await api.ok('POST', `cities/${a.cityId}/fortifications/queues/${WALLS}/${batch.queueId}/speedup`, { token: a.token })).toBeNull();
       expect((await cityRow(api, a.cityId))!.fortQueue.queue[0]!.endTime).toBeLessThan(batch.endTime);
-      expect((await items(api, a))[ItemId.ARCHIMEDES_NOTE]).toBe(1);
+      expect((await items(api, a))[ItemId.HENRYS_CASTLE_LAW]).toBe(1);
     }));
 
   it('refuses an unknown batch', () =>

@@ -17,8 +17,8 @@ type RoundEvent = Extract<TraceEvent, { kind: 'round' }>;
 type KillEvent = Extract<TraceEvent, { kind: 'kill' }>;
 
 const RESEARCH_10: ResearchStats = { militaryTradition: 10, ironWorking: 10, medicine: 10, compass: 10, horsebackRiding: 10, archery: 10, machinery: 10 };
-/** the defence item's bonus (Corselet) */
-const CORSELET = 1 + BALANCE.battleBuffBonus;
+/** the defence item's bonus (Gambeson) */
+const GAMBESON = 1 + BALANCE.battleBuffBonus;
 /** one trap makes a field of 5200, and never fires: 5-9% of one trap rounds down to none */
 const ONE_TRAP: FortCounts = { trap: 1 };
 
@@ -198,13 +198,13 @@ describe(simulateBattle.name, () => {
   describe('the defence factor', () => {
     // A troop's defence factor is max(1 - Iron Working x (100 + Intelligence) / 100 x base defence x item / 1000, 0.5),
     // with Iron Working 1 + 5% a level. Archers have base defence 50, so Iron Working 10 gives 0.925, the
-    // Corselet (+20%) 0.91, and Intelligence 35 with it 0.8785. Read from a melee strike, which multiplies
+    // Gambeson (+20%) 0.91, and Intelligence 35 with it 0.8785. Read from a melee strike, which multiplies
     // by the factor: 100,000 cavalry (Horseback Riding 10, so they reach the archers in round 0) kill
     // 1.2 (cavalry vs archers) x 100,000 x 250 attack x factor / 250 archer life.
     it.each([
       ['Iron Working 10', 1, 0, 111_000],
-      ['Iron Working 10 and the Corselet', CORSELET, 0, 109_200],
-      ['Iron Working 10, the Corselet and Intelligence 35', CORSELET, 35, 105_420],
+      ['Iron Working 10 and the Gambeson', GAMBESON, 0, 109_200],
+      ['Iron Working 10, the Gambeson and Intelligence 35', GAMBESON, 35, 105_420],
     ])('of archers with %s', (_, defenceModifier, intel, killed) => {
       const { kills } = fight(
         { research: { ironWorking: 10 }, hero: { intel }, troops: { archer: 200_000 }, defenceModifier },

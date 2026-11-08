@@ -116,7 +116,7 @@ export const QUEST_CATALOGUE: QuestDef[] = [
     b(7, 1, 5),
     (t) => t.kind === QuestTargetKind.BUILDING && msg('questInfo.description.ownFields', { building: ref.building(t.typeId), count: t.count ?? 1 }),
     {
-      items: { [ItemId.PLOWSHARES]: 1 },
+      items: { [ItemId.PLOUGHSHARE]: 1 },
     },
   ), // Field Network
   // 6 Administration
@@ -126,7 +126,7 @@ export const QUEST_CATALOGUE: QuestDef[] = [
   }), // Fair Taxes
   // 8 Scientific Research
   q(8, { kind: QuestTargetKind.RESEARCH, techId: 1, level: 1 }, research, { resources: res(2000, 1000, 1000, 1000) }), // Agriculture
-  q(8, { kind: QuestTargetKind.RESEARCH, techId: 8, level: 1 }, research, { items: { [ItemId.PRIMARY_GUIDELINES]: 1 } }), // Military Science
+  q(8, { kind: QuestTargetKind.RESEARCH, techId: 8, level: 1 }, research, { items: { [ItemId.APPRENTICES_NOTES]: 1 } }), // Military Science
   // 9 Alliance
   q(9, b(28, 1), build('questInfo.description.embassy'), { resources: res(1000, 2000, 500, 300) }), // Embassy
   q(9, { kind: QuestTargetKind.ALLIANCE }, fixed(msg('questInfo.description.joinAlliance')), { resources: { gold: 50_000 } }), // Join an Alliance
@@ -160,7 +160,7 @@ export const QUEST_CATALOGUE: QuestDef[] = [
     { kind: QuestTargetKind.POPULATION, amount: 1000 },
     (t) => t.kind === QuestTargetKind.POPULATION && msg('questInfo.description.population', { amount: t.amount }),
     {
-      items: { [ItemId.CIVIL_CODE]: 1 },
+      items: { [ItemId.MAGDEBURG_RIGHTS]: 1 },
     },
   ), // Growing Town
   // 23 Prestige Building

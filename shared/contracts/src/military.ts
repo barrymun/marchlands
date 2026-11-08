@@ -98,7 +98,7 @@ export const TroopParams = z
     driveSkillParam: z.number().describe('Horseback Riding march speed bonus, a share'),
     transportStationParam: z.number().int().describe('Relief Station speed multiplier between own cities'),
     maxArmies: z.number().int(),
-    maxTroops: z.number().int().describe('troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)'),
+    maxTroops: z.number().int().describe('troops one army may hold (Rally Spot level x 10,000, +25% with a Imperial Banner)'),
   })
   .meta({ id: 'TroopParams' });
 export type TroopParams = z.infer<typeof TroopParams>;

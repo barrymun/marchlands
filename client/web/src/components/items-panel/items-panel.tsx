@@ -47,7 +47,7 @@ export function ItemsPanel({ city }: { city: CityBean }) {
     const byKey = new Map<string, Entry>();
     for (const info of ITEM_INFO) {
       // a truce protects from other players
-      if (!pvp && info.id === ItemId.TRUCE_AGREEMENT) continue;
+      if (!pvp && info.id === ItemId.KINGS_PEACE) continue;
       const key = `${itemName(info.id)}|${JSON.stringify(info.description)}`;
       const e = byKey.get(key) ?? { info, ids: [], owned: 0 };
       e.ids.push(info.id);

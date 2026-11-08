@@ -228,7 +228,7 @@ export const postPlayerFurlough = <ThrowOnError extends boolean = false>(options
 });
 
 /**
- * Truce Agreement (city.setStopWarState)
+ * King's Peace (city.setStopWarState)
  */
 export const postPlayerTruce = <ThrowOnError extends boolean = false>(options: Options<PostPlayerTruceData, ThrowOnError>): RequestResult<PostPlayerTruceResponses, PostPlayerTruceErrors, ThrowOnError> => (options.client ?? client).post<PostPlayerTruceResponses, PostPlayerTruceErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -483,7 +483,7 @@ export const getCitiesProduction = <ThrowOnError extends boolean = false>(option
 });
 
 /**
- * Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned)
+ * Teleport to a free flat with a Locator's Charter (bought with the city gold if none is owned)
  */
 export const postCitiesMove = <ThrowOnError extends boolean = false>(options: Options<PostCitiesMoveData, ThrowOnError>): RequestResult<PostCitiesMoveResponses, PostCitiesMoveErrors, ThrowOnError> => (options.client ?? client).post<PostCitiesMoveResponses, PostCitiesMoveErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -739,7 +739,7 @@ export const deleteCitiesTroopsQueuesByQueueId = <ThrowOnError extends boolean =
 });
 
 /**
- * Napoleon's Diary: -30% (troop.accTroopProduce)
+ * Otto's Muster Roll: -30% (troop.accTroopProduce)
  */
 export const postCitiesTroopsQueuesSpeedup = <ThrowOnError extends boolean = false>(options: Options<PostCitiesTroopsQueuesSpeedupData, ThrowOnError>): RequestResult<PostCitiesTroopsQueuesSpeedupResponses, PostCitiesTroopsQueuesSpeedupErrors, ThrowOnError> => (options.client ?? client).post<PostCitiesTroopsQueuesSpeedupResponses, PostCitiesTroopsQueuesSpeedupErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -801,7 +801,7 @@ export const deleteCitiesFortificationsQueuesByQueueId = <ThrowOnError extends b
 });
 
 /**
- * Archimedes' Note: -30% (fortifications.accTroopProduce)
+ * Henry's Castle Law: -30% (fortifications.accTroopProduce)
  */
 export const postCitiesFortificationsQueuesSpeedup = <ThrowOnError extends boolean = false>(options: Options<PostCitiesFortificationsQueuesSpeedupData, ThrowOnError>): RequestResult<PostCitiesFortificationsQueuesSpeedupResponses, PostCitiesFortificationsQueuesSpeedupErrors, ThrowOnError> => (options.client ?? client).post<PostCitiesFortificationsQueuesSpeedupResponses, PostCitiesFortificationsQueuesSpeedupErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

@@ -98,8 +98,8 @@ describe(expireHeroBuff.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       const id = await addHero(g, p);
-      await giveItems(g, p, { [ItemId.ART_OF_WAR]: 1 });
-      await heroes.useHeroItem(g, p.id, id, ItemId.ART_OF_WAR);
+      await giveItems(g, p, { [ItemId.STRATAGEMS]: 1 });
+      await heroes.useHeroItem(g, p.id, id, ItemId.STRATAGEMS);
       const end = (await getHero(g, id)).buffs[0]!.endTime;
       await expireHeroBuff(g, id, HeroBuffId.STRATAGEM);
       expect((await getHero(g, id)).buffs).toHaveLength(1);

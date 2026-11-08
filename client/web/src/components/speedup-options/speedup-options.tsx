@@ -9,27 +9,27 @@ import { duration, fmt, fmtExact } from '@/lib/format';
 import { itemName } from '@/lib/game-data';
 
 const ITEMS = [
-  ItemId.BEGINNER_GUIDELINES,
-  ItemId.PRIMARY_GUIDELINES,
-  ItemId.INTERMEDIATE_GUIDELINES,
-  ItemId.SENIOR_GUIDELINES,
-  ItemId.MASTER_GUIDELINES,
-  ItemId.ULTIMATE_GUIDELINES,
+  ItemId.NOVICES_NOTES,
+  ItemId.APPRENTICES_NOTES,
+  ItemId.JOURNEYMANS_NOTES,
+  ItemId.MASTERS_NOTES,
+  ItemId.GRANDMASTERS_NOTES,
+  ItemId.VILLARDS_SKETCHBOOK,
 ] as const;
 
 /** Each item's reduction, as its key under `effects` in the speedup-options locale files. */
 const EFFECT = {
-  [ItemId.BEGINNER_GUIDELINES]: 'minutes15',
-  [ItemId.PRIMARY_GUIDELINES]: 'hour1',
-  [ItemId.INTERMEDIATE_GUIDELINES]: 'hours2Half',
-  [ItemId.SENIOR_GUIDELINES]: 'hours8',
-  [ItemId.MASTER_GUIDELINES]: 'hours10To30',
-  [ItemId.ULTIMATE_GUIDELINES]: 'percent30',
+  [ItemId.NOVICES_NOTES]: 'minutes15',
+  [ItemId.APPRENTICES_NOTES]: 'hour1',
+  [ItemId.JOURNEYMANS_NOTES]: 'hours2Half',
+  [ItemId.MASTERS_NOTES]: 'hours8',
+  [ItemId.GRANDMASTERS_NOTES]: 'hours10To30',
+  [ItemId.VILLARDS_SKETCHBOOK]: 'percent30',
 } as const satisfies Record<(typeof ITEMS)[number], string>;
 
 /**
  * Speed-up choices for a running construction, demolition or research: free (last 5 minutes),
- * each Guidelines item (owned, else bought with the city's gold on use), and finishing at once for gold.
+ * each speed-up book (owned, else bought with the city's gold on use), and finishing at once for gold.
  * Item reductions are in game time, so at GAME_SPEED > 1 they shrink with the timers.
  */
 export function SpeedupOptions({

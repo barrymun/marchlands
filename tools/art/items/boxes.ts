@@ -1,5 +1,5 @@
-// Boxes: the three medal boxes are chests of wood bound in bronze, of iron bound in steel and of gold set with stones,
-// each with a medal on its lock; the Hero Package is a red pouch tied with gold cord; the Welcome Package a gift box.
+// Boxes: the three coffers of medals are chests of wood bound in bronze, of iron bound in steel and of gold set with stones,
+// each with a medal on its lock; the Oath of Fealty is, until redrawn, a red pouch tied with gold cord; the Founder's Gift a gift box.
 
 import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas } from '../pixel.ts';
@@ -43,9 +43,9 @@ function chest(seed: string, body: Tone, band: Tone, { gems = false } = {}): () 
   };
 }
 
-/** Hero Package: a red pouch, its neck tied with gold cord. */
-function heroPackage(): PixelCanvas {
-  const c = canvas('hero-package');
+/** Oath of Fealty: a red pouch, its neck tied with gold cord. */
+function oathOfFealty(): PixelCanvas {
+  const c = canvas('oath-of-fealty');
   lathe(c, 16, 4, [4, 5, 4, 3, 3, 4, 6, 8, 9.5, 10.5, 11, 11.5, 11.5, 11.5, 11.5, 11, 10.5, 10, 9, 8, 6.5, 4.5], RED);
   // the cord round its neck, with its ends hanging
   rect(c, 12, 8, 19, 9, GOLD.mid);
@@ -58,9 +58,9 @@ function heroPackage(): PixelCanvas {
   return c;
 }
 
-/** Welcome Package: a gift box tied with a red ribbon and a bow. */
-function welcomePackage(): PixelCanvas {
-  const c = canvas('welcome-package');
+/** Founder's Gift: a gift box tied with a red ribbon and a bow. */
+function foundersGift(): PixelCanvas {
+  const c = canvas('founders-gift');
   // the box: its top and two faces
   c.poly(
     [
@@ -120,9 +120,9 @@ function welcomePackage(): PixelCanvas {
 }
 
 export const BOX_DRAWINGS = {
-  juniorMedalBox: chest('junior-medal-box', WOOD, BRONZE),
-  mediumMedalBox: chest('medium-medal-box', { hi: Colour.SLATE_HI, mid: Colour.SLATE_L, dark: Colour.SLATE_D }, STEEL),
-  seniorMedalBox: chest('senior-medal-box', GOLD, { hi: Colour.SPARKLE, mid: Colour.FIRE_HI, dark: Colour.GOLD_DARK }, { gems: true }),
-  heroPackage,
-  welcomePackage,
+  bronzeCoffer: chest('bronze-coffer', WOOD, BRONZE),
+  silverCoffer: chest('silver-coffer', { hi: Colour.SLATE_HI, mid: Colour.SLATE_L, dark: Colour.SLATE_D }, STEEL),
+  goldCoffer: chest('gold-coffer', GOLD, { hi: Colour.SPARKLE, mid: Colour.FIRE_HI, dark: Colour.GOLD_DARK }, { gems: true }),
+  oathOfFealty,
+  foundersGift,
 };

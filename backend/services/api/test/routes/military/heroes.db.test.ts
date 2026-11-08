@@ -421,17 +421,17 @@ describe('POST /heroes/{heroId}/reward', () => {
 });
 
 describe('POST /heroes/{heroId}/items', () => {
-  itGuardsHero('POST', (h) => `heroes/${h}/items`, { body: { itemId: ItemId.ANABASIS } });
+  itGuardsHero('POST', (h) => `heroes/${h}/items`, { body: { itemId: ItemId.DEEDS_OF_THE_SAXONS } });
 
   it('uses an experience book on the hero', () =>
     apiTest(async (api) => {
       const [a] = await lords(api, 1);
       const id = await addHero(api, a);
       await patchHero(api, id, { experience: 0 });
-      await giveItems(api, a, { [ItemId.ANABASIS]: 1 });
-      const bean = await api.ok<Hero>('POST', `heroes/${id}/items`, { token: a.token, body: { itemId: ItemId.ANABASIS } });
+      await giveItems(api, a, { [ItemId.DEEDS_OF_THE_SAXONS]: 1 });
+      const bean = await api.ok<Hero>('POST', `heroes/${id}/items`, { token: a.token, body: { itemId: ItemId.DEEDS_OF_THE_SAXONS } });
       expect(bean.experience).toBeGreaterThan(0);
-      expect((await items(api, a))[ItemId.ANABASIS]).toBeUndefined();
+      expect((await items(api, a))[ItemId.DEEDS_OF_THE_SAXONS]).toBeUndefined();
     }));
 
   it('refuses a malformed body, an item that is not for heroes and a medal bought with gold', () =>
@@ -440,7 +440,7 @@ describe('POST /heroes/{heroId}/items', () => {
       const id = await addHero(api, a);
       await expectInvalid(api, a.token, [
         ['POST', `heroes/${id}/items`, { body: {} }],
-        ['POST', `heroes/${id}/items`, { body: { itemId: ItemId.ANABASIS, payWith: 'gems' } }],
+        ['POST', `heroes/${id}/items`, { body: { itemId: ItemId.DEEDS_OF_THE_SAXONS, payWith: 'gems' } }],
       ]);
       await api.refused('POST', `heroes/${id}/items`, 'hero.invalidItem', { token: a.token, body: { itemId: ItemId.HOLY_WATER }, status: 400 });
       await api.refused('POST', `heroes/${id}/items`, 'hero.itemNotForGold', { token: a.token, body: { itemId: medalId(1), payWith: 'gold' }, status: 400 });

@@ -171,8 +171,8 @@ describe(`${flows.runFlow.name}: trainTroops`, () => {
     /** A warrior's 50 iron is 37.5 at the discount, and a total is charged rounded up. */
     const discountedWithIron = async (g: TestGame, p: TestPlayer, iron: number) => {
       await withBarracks(g, p);
-      await giveItems(g, p, { [ItemId.QUARTERMASTERS_SEAL]: 1 });
-      await shop.useItem(g, p.id, ItemId.QUARTERMASTERS_SEAL, null);
+      await giveItems(g, p, { [ItemId.MARSHALS_SEAL]: 1 });
+      await shop.useItem(g, p.id, ItemId.MARSHALS_SEAL, null);
       await setResources(g, p, { food: 1e6, wood: 1e6, iron });
     };
 

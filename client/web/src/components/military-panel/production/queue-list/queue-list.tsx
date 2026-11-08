@@ -37,7 +37,7 @@ export function QueueList({ city, fort, batches, splitting }: { city: CityBean; 
   const cityKey = getCitiesByCityIdQueryKey({ path });
   const queuesKey = fort ? getCitiesFortificationsQueuesQueryKey({ path }) : getCitiesTroopsQueuesQueryKey({ path });
   const inv = useInventory();
-  const boostItem = fort ? ItemId.ARCHIMEDES_NOTE : ItemId.NAPOLEONS_DIARY;
+  const boostItem = fort ? ItemId.HENRYS_CASTLE_LAW : ItemId.OTTOS_MUSTER_ROLL;
   const boostGold = itemGoldPrice(boostItem) ?? 0;
   const boost = useCommand(
     fort ? postCitiesFortificationsQueuesSpeedupMutation() : postCitiesTroopsQueuesSpeedupMutation(),

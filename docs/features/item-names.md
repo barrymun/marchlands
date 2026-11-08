@@ -1,6 +1,6 @@
 # Item names
 
-**Status:** spike written 2026-11-08; nothing is built. The maintainer asked for a research spike on renaming every item (2026-11-08): this note sets out why, what "the game's style" means for item names, the options, and a full proposed list with alternatives, for the maintainer to choose from. TODO.md item: *Rename the items*.
+**Status:** spike written 2026-11-08, every question decided the same day (*Decided*). Phases 1–4 built 2026-11-08 (Bernini's Hammer's price, the shop changes, the new names in every locale, the code's names); the icons that still show the old items next (*Phases*). TODO.md item: *Rename the items*.
 
 **The aim:** item names of our own that keep the original's style (a famous person's possession or a famous book for the best items, a plain tool for the everyday ones) but belong to the Marchlands' world: the Holy Roman Empire's lands, about 950–1250 ([hero-names.md](hero-names.md), The world it should fit).
 
@@ -72,14 +72,14 @@ The current icons are piles of books, one more per step. A plain ladder of craft
 | Master Guidelines | 10–30 h off | **Grandmaster's Notes** | Builder's Notes V | keep |
 | Ultimate Guidelines | 30% off | **Villard's Sketchbook**: Villard de Honnecourt's portfolio of buildings and machines, about 1230 | Grandmaster's Codex; Codex Gigas (Bohemia, the largest medieval book, but nicknamed the Devil's Bible) | touch: an open sketchbook of arches |
 
-Quest 28, *Guidelines*, becomes *Notes* (or whatever the ladder's word is).
+Quest group 28 is also named *Guidelines*, but no quest uses it, so it's never shown and keeps its name.
 
 ### Troop and fortification speed-ups
 
 | Now | Does | Proposed | Alternatives | Icon |
 |---|---|---|---|---|
 | Napoleon's Diary | 30% off a troop batch | **Otto's Muster Roll**: Otto II's levy of armoured horsemen from his bishops and abbots, 981 | Indiculus Loricatorum (its Latin name) | redraw: a long scroll of names |
-| Archimedes' Note | 30% off a fortification batch | **Burgward Ordinance**: Henry I's order of 926 that every ninth man of the countryside garrison a fort | Henry's Castle Law | touch: a scroll with a plan of a fort |
+| Archimedes' Note | 30% off a fortification batch | **Henry's Castle Law**: Henry I's order of 926 that every ninth man of the countryside garrison a fort (chosen 2026-11-08) | Burgward Ordinance (the order's own name, but unfamiliar) | touch: a scroll with a plan of a fort |
 
 ### Production and gold
 
@@ -116,7 +116,7 @@ Military's two training notes say "(Marshal)" in place of "(Quartermaster)"; the
 
 | Now | Does | Proposed | Alternatives | Icon |
 |---|---|---|---|---|
-| Truce Agreement | 12 hours' peace | **Truce of God** (Treuga Dei): the Church's truce from 1027, in the Empire from the 1080s | King's Peace; Landfriede, the Empire's public peace (from 1103) | keep: a white flag |
+| Truce Agreement | 12 hours' peace | **King's Peace**: secular, plain and period (chosen 2026-11-08) | Truce of God (Treuga Dei), the Church's truce from 1027, in the Empire from the 1080s; Landfriede, the Empire's public peace (from 1103) | keep: a white flag |
 | City Teleporter | moves the city | **Locator's Charter**: the locator recruited settlers and laid out a new town under a charter | Charter of Foundation | touch: a charter with a seal over the map |
 | Civil Code | adds population | **Magdeburg Rights**: the town law that drew settlers to new towns (from about 1160; oldest charter 1188) | Sachsenspiegel (law book, about 1225) | keep: a tablet of laws (or a sealed charter) |
 | Penicillin | heals the city's injured | **Theriac**: the period's cure-all, made in Venice from the 12th century | Hildegard's Physica (her book of remedies, 1150s) | touch: a jar, not a modern flask |
@@ -139,7 +139,7 @@ Military's two training notes say "(Marshal)" in place of "(Quartermaster)"; the
 | Excalibur | +25% power, 1 day | **Joyeuse**: Charlemagne's sword (Charlemagne is Atlantis's guard in [famous-heroes.md](famous-heroes.md)) | Imperial Sword (the regalia's sword, about 1200); Durendal | keep |
 | The Art of War | +25% intelligence, 1 day | **Stratagems**: Frontinus' book of ruses of war, copied from the 9th century | Vegetius' Epitome | redraw: a book, not bamboo slips |
 | The Wealth of Nations | +25% politics, 1 day | **Mirror of Kings**: Godfrey of Viterbo's book of rule for the young Henry VI, about 1183 | Policraticus (John of Salisbury, 1159) | touch: a mirror on the cover |
-| Anabasis | +1,000 experience | **Waltharius**: a Latin epic of a hero's escape, 10th century | Deeds of the Saxons (Widukind, about 967) | keep |
+| Anabasis | +1,000 experience | **Deeds of the Saxons**: Widukind of Corvey's chronicle, about 967, set in Saxony (chosen 2026-11-08) | Waltharius (a 10th-century Latin epic, but obscure) | keep |
 | Epitome of Military Science | +10,000 experience | **Epitome of Military Science** (kept: Vegetius was among the most copied books of the period) | | keep |
 | On War | +100,000 experience | **Nibelungenlied** (about 1200) | Deeds of Frederick (Otto of Freising, 1157–60) | keep |
 
@@ -244,22 +244,38 @@ If all the recommendations are taken, the item list itself stays at 53 (nothing 
 
 ## Open questions
 
-1. **The option:** C as recommended, or D (plain ladders everywhere), B or keeping the old names?
-2. **The names:** the recommended list, or alternatives item by item? In particular:
-   - Unfamiliar ones: Theriac, Burgward Ordinance, Waltharius, Olifant.
-   - Religious ones: Truce of God, Elizabeth's Bread and Granary, Holy Water. Keep, or the secular alternatives (King's Peace, Barbarossa's Camp Law)?
-3. **The speed-ups' ladder:** craft ranks (Novice … Grandmaster) or numbered Builder's Notes I–V?
-4. **The medals:** two renamed, or a whole new set?
-5. **The code:** rename `ItemId`'s names and the icons' files with the items (AGENTS.md keeps them "named after the item"), or keep the old ones in code? Recommended: rename them, as a separate change after the text, since a refactor doesn't change behaviour.
-6. **Old names for players of the original:** say nothing, or show "formerly …" in item descriptions for a while? Recommended: nothing, since the game hasn't been released.
-7. **The items themselves** (*Items that don't earn their place*, What could change): which changes to make, before or alongside the rename? Above all whether the experience books become one, which drops two names.
+None for now.
+
+## Decided
+
+All by the maintainer, 2026-11-08:
+
+- **The approach: C.** The original's three kinds of name, from the Empire's lands about 950–1250 (*Options*, *Proposed rules*).
+- **The names:** the proposed list as it stands, but for three alternatives chosen in its place:
+  - Henry's Castle Law, not Burgward Ordinance (Archimedes' Note);
+  - Deeds of the Saxons, not Waltharius (Anabasis);
+  - King's Peace, not Truce of God (Truce Agreement).
+
+  Theriac, Olifant and Elizabeth's Bread and Granary stay as proposed.
+- **The speed-ups' ladder:** craft ranks, Novice's to Grandmaster's Notes, then Villard's Sketchbook.
+- **The medals:** Freedom becomes Fidelity and Nation becomes Crown; the other seven stay.
+- **The code:** `ItemId`'s names, the icons' files and the rest follow the new names, as a change of their own after the text.
+- **Old names:** players aren't told them. reference/items.md keeps the old name beside the new.
+- **The items themselves** (*What could change*):
+  - The speed-up books Beginner to Senior come out of the shop. They're still given and bought at the moment of use.
+  - The three experience books come out of the shop, kept as three.
+  - The medal boxes come out of the shop, and medals piling up becomes a TODO item of its own.
+  - The one-day boosts stay.
+  - Bernini's Hammer costs 1,000,000 gold.
 
 ## Phases
 
-1. **Decide** the names and the item changes (the open questions).
-2. **The item changes,** if any, as their own change: BALANCE, deviations.md, tests. Bernini's Hammer's price went first (2026-11-08).
-3. **The text:** the new names in every locale, the four texts that name items, quest 28's name, and an *In Marchlands* name column in reference/items.md (the old name to the new). No rule changes, so nothing in deviations.md beyond its passing mentions.
-4. **The code:** `ItemId`'s names, `itemArtFile`'s file names and the PNGs, `tools/art/items.ts` and its drawings' names, the comments and test titles that name items, core's unused English `name` on the item rows. One rename, no behaviour change.
+1. **Decide** the names and the item changes (done 2026-11-08, *Decided*).
+2. **The item changes** (built 2026-11-08): Bernini's Hammer's price, then the books and boxes out of the shop (`BALANCE.notInShop`), with deviations.md and tests.
+3. **The text** (built 2026-11-08): the new names in every locale, the texts that name an item (Military's training notes, the send-army dialog's capacity line), and *Names in Marchlands* in reference/items.md (the old name to the new). deviations.md and the other docs still use the old names in passing, until phase 4.
+4. **The code** (built 2026-11-08): `ItemId`'s names, the icons' files (each redrawn byte for byte the same under its new name), `tools/art/items.ts` and its drawings' names, the names in code taken from items (`BALANCE.imperialBannerTroopBonus`, `BALANCE.items.magdeburgRights` and `foundersGift`, `magdeburgRightsPopulation`, `IMPERIAL_BANNER_DESC`, the send-army dialog's `capacityBanner`), the comments and test titles, the English `name` of the items Marchlands added, and the docs that describe Marchlands (deviations.md's Marchlands column, AGENTS.md, item-art.md, the battle sims and others). No behaviour change.
+   - **Left as they are, being stored or sent:** the item ids, the buff `BuffId.IMPERIAL_BANNER` (`'WarEnsignBuff'`), the handler `ItemSpecialHandler.MAGDEBURG_RIGHTS` (`'civilCode'`) and the message code `itemInfo.civilCode`.
+   - **Left as the original's:** the item names in `data/legacy/items.json` (the original's data, which nothing shows), docs/reference/ and docs/spec/ (how the original worked), deviations.md's column for the original, the dated findings in rules-check.md, and TODO.md's Done entries.
 5. **The icons** that no longer match their name (*Icon* above): redraw and touch, with `npm run art:draw -- items`, and item-art.md's step table updated.
 
 ## Research

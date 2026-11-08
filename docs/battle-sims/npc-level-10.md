@@ -18,7 +18,7 @@ The city refills its troops and fortifications by 10% of full every 6 game minut
 
 ## The best army
 
-Army size is 125,000 (Rally Spot 10 with a War Ensign).
+Army size is 125,000 (Rally Spot 10 with an Imperial Banner).
 
 | Setup | Archers lost | Fodder lost | Value lost per hit | Dead (half) |
 |---|---|---|---|---|
@@ -32,9 +32,9 @@ Army size is 125,000 (Rally Spot 10 with a War Ensign).
 
 | Choice | Effect |
 |---|---|
-| War Ensign | **Keep it.** Without it the army has fewer archers and the battle lasts longer: 90k archers takes 10 rounds (6.4M lost), and 60k takes 11 rounds (7.4M). |
-| Attack item (Ivory Horn) | **No effect:** still 9 rounds. Save it for fights against other lords. |
-| Defense item (Ultra Corselet) | **Slightly worse:** +0.06M per hit (see [the defense factor](mechanics.md#the-defense-factor)). |
+| Imperial Banner | **Keep it.** Without it the army has fewer archers and the battle lasts longer: 90k archers takes 10 rounds (6.4M lost), and 60k takes 11 rounds (7.4M). |
+| Attack item (Olifant) | **No effect:** still 9 rounds. Save it for fights against other lords. |
+| Defense item (Hauberk) | **Slightly worse:** +0.06M per hit (see [the defense factor](mechanics.md#the-defense-factor)). |
 | Hero | **Send the lowest-Intelligence attack hero:** ATK - 70 in lol (Intelligence 18) or ATK - 68 (21). Intelligence 55 costs about 150 more archers per hit. It needs about 1,050 Attack: see [Hero gear](#hero-gear). |
 | Intelligence heroes | **Much worse:** too little attack, so 14 rounds and about 13k archers lost. |
 

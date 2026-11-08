@@ -2,7 +2,7 @@ import { ItemId } from '@marchlands/core';
 import { i18n } from '@/lib/i18n';
 import type { NumberRange } from '@/lib/ranges';
 
-export const TELEPORT = ItemId.CITY_TELEPORTER;
+export const TELEPORT = ItemId.LOCATORS_CHARTER;
 
 /** A rate typed as a whole percent, as the server takes it (the tax and work rates). */
 export const PERCENT_RANGE = { min: 0, max: 100 } as const satisfies NumberRange;

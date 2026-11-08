@@ -191,7 +191,7 @@ export const PALETTE = {
   WAIT: [246, 150, 30],
   WAIT_DARK: [170, 90, 10],
   SPARKLE: [255, 255, 255],
-  // items (tools/art/items.ts): bronze for the lowest medals and the Junior Medal Box
+  // items (tools/art/items.ts): bronze for the lowest medals and the Bronze Coffer
   BRONZE_HI: [226, 166, 104],
   BRONZE: [184, 116, 60],
   BRONZE_DARK: [118, 70, 34],

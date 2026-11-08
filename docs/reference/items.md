@@ -96,3 +96,56 @@ Nine levels of hero loyalty medal, all kept (`medalId(level)`): Cross, Rose, Lio
 ## Items Marchlands added
 
 Not in the original: Bernini's Hammer is in the Age 1 data but not on this page (a second building queue); Vesta's Grand Blessing (troop upkeep halved for 7 days), Quartermaster's Seal and Quartermaster's Charter (troop training 25% cheaper for a day or 7 days) are ours (deviations.md, Premium currency).
+
+## Names in Marchlands
+
+Every item has a name of its own since 2026-11-08 ([features/item-names.md](../features/item-names.md), which says why each was chosen). The ids stored in players' inventories didn't change. The medals not listed (Cross, Rose, Lion, Honour, Courage, Wisdom, Justice) kept their names.
+
+| Original name | Marchlands name | Id |
+|---|---|---|
+| Beginner Guidelines | Novice's Notes | `consume.2.a` |
+| Primary Guidelines | Apprentice's Notes | `consume.2.b` |
+| Intermediate Guidelines | Journeyman's Notes | `consume.2.b.1` |
+| Senior Guidelines | Master's Notes | `consume.2.c` |
+| Master Guidelines | Grandmaster's Notes | `consume.2.c.1` |
+| Ultimate Guidelines | Villard's Sketchbook | `consume.2.d` |
+| Napoleon's Diary | Otto's Muster Roll | `player.troop.1.b` |
+| Archimedes' Note | Henry's Castle Law | `player.fort.1.c` |
+| Plowshares | Ploughshare | `player.resinc.1` |
+| Iron Rake | Heavy Plough | `player.resinc.1.b` |
+| Arch Saw | Bow Saw | `player.resinc.2` |
+| Double Saw | Water Saw | `player.resinc.2.b` |
+| Quarrying Tools | Mason's Pick | `player.resinc.3` |
+| Adv Quarrying Tools | Treadwheel Crane | `player.resinc.3.b` |
+| Blower | Hand Bellows | `player.resinc.4` |
+| Blast Furnace | Water Bellows | `player.resinc.4.b` |
+| Tax Policy | Toll Right | `player.gold.1.a` |
+| Adv Tax Policy | Mint Right | `player.gold.1.b` |
+| War Horn | *(kept)* | `player.attackinc.1` |
+| Ivory Horn | Olifant | `player.attackinc.1.b` |
+| Corselet | Gambeson | `player.defendinc.1` |
+| Ultra Corselet | Hauberk | `player.defendinc.1.b` |
+| War Ensign | Imperial Banner | `player.troop.1.a` |
+| Bernini's Hammer | Bernward's Hammer | `player.queue.building` |
+| Vesta's Blessing | Elizabeth's Bread | `player.reduce.troops.upkeep.1` |
+| Vesta's Grand Blessing | Elizabeth's Granary | `player.reduce.troops.upkeep.7` |
+| Quartermaster's Seal | Marshal's Seal | `player.reduce.troops.cost.1` |
+| Quartermaster's Charter | Marshal's Charter | `player.reduce.troops.cost.7` |
+| Truce Agreement | King's Peace | `player.peace.1` |
+| City Teleporter | Locator's Charter | `consume.move.1` |
+| Civil Code | Magdeburg Rights | `player.pop.1.a` |
+| Penicillin | Theriac | `player.relive.1` |
+| Junior Medal Box | Bronze Coffer | `player.box.special.1` |
+| Medium Medal Box | Silver Coffer | `player.box.special.2` |
+| Senior Medal Box | Gold Coffer | `player.box.special.3` |
+| Hero Package | Oath of Fealty | `player.box.currently.1` |
+| Welcome Package | Founder's Gift | `player.box.present.2` |
+| Holy Water | *(kept)* | `hero.reset.1` |
+| Excalibur | Joyeuse | `hero.power.1` |
+| The Wealth of Nations | Mirror of Kings | `hero.management.1` |
+| The Art of War | Stratagems | `hero.intelligence.1` |
+| Anabasis | Deeds of the Saxons | `player.experience.1.a` |
+| Epitome of Military Science | *(kept)* | `player.experience.1.b` |
+| On War | Nibelungenlied | `player.experience.1.c` |
+| Freedom Medal | Fidelity Medal | `hero.loyalty.7` |
+| Nation Medal | Crown Medal | `hero.loyalty.9` |

@@ -20,7 +20,7 @@
     "heroOption": "{{name}}(Lv {{level}}、攻撃 {{attack}})",
     "troops": "兵",
     "capacity": "{{chosen}} / {{cap}}(集結地 Lv {{rally}})",
-    "capacityEnsign": "{{chosen}} / {{cap}}(集結地 Lv {{rally}}<b>、戦旗 +25%</b>)",
+    "capacityBanner": "{{chosen}} / {{cap}}(集結地 Lv {{rally}}<b>、帝国旗 +25%</b>)",
     "battleBuff": "この戦闘で{{desc}} · 残り<timer/>",
     "noScouts": "都市に斥候がいません: 「軍事」で訓練してください。",
     "noTroops": "都市に兵がいません。",

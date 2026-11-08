@@ -494,7 +494,7 @@ describe(heroes.buyGearStar.name, () => {
       expect(after[`${stat}Added`]).toBe(before[`${stat}Added`] + gearStarPoints(1));
     }));
 
-  it('charges several Nation Medals for the last star', () =>
+  it('charges several Crown Medals for the last star', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
       await setResearch(g, p, TechType.HERO_ENHANCEMENT, BALANCE.heroGear.maxLevel);
@@ -567,11 +567,11 @@ describe(heroes.useHeroItem.name, () => {
       const p = await createTestPlayer(g);
       const id = await addHero(g, p);
       const h = await patchHero(g, id, { experience: 0 });
-      await giveItems(g, p, { [ItemId.ANABASIS]: 1 });
+      await giveItems(g, p, { [ItemId.DEEDS_OF_THE_SAXONS]: 1 });
       const before = await gold(g, p);
-      const bean = await heroes.useHeroItem(g, p.id, id, ItemId.ANABASIS);
-      expect(bean.experience).toBe(experienceItemGain(ItemId.ANABASIS, h.upgradeExp));
-      expect((await reloadPlayer(g, p)).items[ItemId.ANABASIS]).toBeUndefined();
+      const bean = await heroes.useHeroItem(g, p.id, id, ItemId.DEEDS_OF_THE_SAXONS);
+      expect(bean.experience).toBe(experienceItemGain(ItemId.DEEDS_OF_THE_SAXONS, h.upgradeExp));
+      expect((await reloadPlayer(g, p)).items[ItemId.DEEDS_OF_THE_SAXONS]).toBeUndefined();
       expect(await gold(g, p)).toBe(before);
       expect(lastHeroPush(g)).toMatchObject({ data: { hero: { id }, updateType: 2 } });
     }));
@@ -602,8 +602,8 @@ describe(heroes.useHeroItem.name, () => {
       const p = await createTestPlayer(g);
       const id = await addHero(g, p);
       await patchHero(g, id, { level: BALANCE.heroMaxLevel, upgradeExp: upgradeExpFor(BALANCE.heroMaxLevel), experience: 0 });
-      await giveItems(g, p, { [ItemId.ON_WAR]: 1 });
-      await expectRefused(heroes.useHeroItem(g, p.id, id, ItemId.ON_WAR), msg('hero.maxLevelNoExperience', { level: BALANCE.heroMaxLevel }));
+      await giveItems(g, p, { [ItemId.NIBELUNGENLIED]: 1 });
+      await expectRefused(heroes.useHeroItem(g, p.id, id, ItemId.NIBELUNGENLIED), msg('hero.maxLevelNoExperience', { level: BALANCE.heroMaxLevel }));
     }));
 
   it('a medal adds its loyalty and cannot be bought', () =>
@@ -624,11 +624,11 @@ describe(heroes.useHeroItem.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       const id = await addHero(g, p);
-      await giveItems(g, p, { [ItemId.EXCALIBUR]: 2 });
+      await giveItems(g, p, { [ItemId.JOYEUSE]: 2 });
       const h = await getHero(g, id);
       const amount = heroBuffAmount(h.power + h.powerAdded);
       const start = g.now;
-      const bean = await heroes.useHeroItem(g, p.id, id, ItemId.EXCALIBUR);
+      const bean = await heroes.useHeroItem(g, p.id, id, ItemId.JOYEUSE);
       const end = heroAttributeBuffEnd(start);
       expect(bean.powerBuffAdded).toBe(amount);
       expect(bean.buffs).toEqual([{ id: HeroBuffId.POWER, desc: heroBuffDesc(HeroBuffId.POWER), endTime: end, param: amount }]);
@@ -637,7 +637,7 @@ describe(heroes.useHeroItem.name, () => {
       ]);
 
       g.advance(60_000);
-      await heroes.useHeroItem(g, p.id, id, ItemId.EXCALIBUR);
+      await heroes.useHeroItem(g, p.id, id, ItemId.JOYEUSE);
       const stacked = heroAttributeBuffEnd(g.now, end);
       expect((await getHero(g, id)).buffs).toMatchObject([{ id: HeroBuffId.POWER, endTime: stacked }]);
       expect(g.events(TimedEventType.HERO_BUFF)).toMatchObject([{ dueAt: stacked }]);
@@ -654,10 +654,10 @@ describe(heroes.useHeroItem.name, () => {
       const p = await createTestPlayer(g);
       const id = await addHero(g, p);
       await heroes.appointMayor(g, p.id, id);
-      const price = heroItemGoldPrice(ItemId.WEALTH_OF_NATIONS, 0)!;
+      const price = heroItemGoldPrice(ItemId.MIRROR_OF_KINGS, 0)!;
       await setResources(g, p, { gold: price });
       const pushes = g.pushes(PushCmd.RESOURCE_UPDATE).length;
-      const bean = await heroes.useHeroItem(g, p.id, id, ItemId.WEALTH_OF_NATIONS);
+      const bean = await heroes.useHeroItem(g, p.id, id, ItemId.MIRROR_OF_KINGS);
       expect(bean.managementBuffAdded).toBeGreaterThan(0);
       expect(await gold(g, p)).toBe(0);
       expect(g.pushes(PushCmd.RESOURCE_UPDATE)).toHaveLength(pushes + 1);
@@ -674,7 +674,7 @@ describe(heroes.useHeroItem.name, () => {
       await giveItems(g, a, { [ItemId.HOLY_WATER]: 1 });
       await expectRefused(heroes.useHeroItem(g, a.id, id, ItemId.HOLY_WATER), msg('hero.invalidItem'));
       await expectRefused(heroes.useHeroItem(g, a.id, id, 'no.such.item'), msg('hero.invalidItem'));
-      await expectRefused(heroes.useHeroItem(g, b.id, id, ItemId.ANABASIS), msg('common.heroNotFound'));
+      await expectRefused(heroes.useHeroItem(g, b.id, id, ItemId.DEEDS_OF_THE_SAXONS), msg('common.heroNotFound'));
     }));
 });
 

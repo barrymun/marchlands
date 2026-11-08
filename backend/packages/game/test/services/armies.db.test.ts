@@ -268,12 +268,12 @@ describe(armies.sendArmy.name, () => {
         );
       }));
 
-    it('a War Ensign raises the troop limit', () =>
+    it('a Imperial Banner raises the troop limit', () =>
       game(async (g) => {
         const { p, heroId } = await warrior(g, { lightCavalry: 20_000 });
         await setBuildings(g, p, [[0, BuildingType.RALLY_SPOT, 1]]);
-        await giveItems(g, p, { [ItemId.WAR_ENSIGN]: 1 });
-        await shop.useItem(g, p.id, ItemId.WAR_ENSIGN, p.cityId);
+        await giveItems(g, p, { [ItemId.IMPERIAL_BANNER]: 1 });
+        await shop.useItem(g, p.id, ItemId.IMPERIAL_BANNER, p.cityId);
         const b = await cityBundle(g, p);
         const cap = maxArmyTroops(b.city.buildings, true);
         expect(cap).toBeGreaterThan(maxArmyTroops(b.city.buildings));
@@ -377,8 +377,8 @@ describe(armies.sendArmy.name, () => {
         await admin.setPlayerFlags(g, r.name, { beginner: true });
         await expectRefused(send(g, p, { targetTileId: enemyCity.tileId, mission: Mission.SCOUT, troops: { scouter: 1 } }), msg('player.protected.beginner'));
         await admin.setPlayerFlags(g, r.name, { beginner: false });
-        await giveItems(g, r, { [ItemId.TRUCE_AGREEMENT]: 1 });
-        await player.startTruce(g, r.id, ItemId.TRUCE_AGREEMENT, r.cityId);
+        await giveItems(g, r, { [ItemId.KINGS_PEACE]: 1 });
+        await player.startTruce(g, r.id, ItemId.KINGS_PEACE, r.cityId);
         await expectRefused(
           send(g, p, { targetTileId: enemyCity.tileId, mission: Mission.ATTACK, troops: { lightCavalry: 1 }, heroId }),
           msg('player.protected.truce'),
@@ -403,8 +403,8 @@ describe(armies.sendArmy.name, () => {
         const npc = await tileNear(g, q.cityId, TileType.NPC);
         await send(g, q, { targetTileId: npc.id, mission: Mission.SCOUT, troops: { scouter: 1 } });
 
-        await giveItems(g, p, { [ItemId.TRUCE_AGREEMENT]: 1 });
-        await player.startTruce(g, p.id, ItemId.TRUCE_AGREEMENT, p.cityId);
+        await giveItems(g, p, { [ItemId.KINGS_PEACE]: 1 });
+        await player.startTruce(g, p.id, ItemId.KINGS_PEACE, p.cityId);
         const npc2 = await tileNear(g, p.cityId, TileType.NPC);
         await expectRefused(send(g, p, { targetTileId: npc2.id, mission: Mission.SCOUT, troops: { scouter: 1 } }), msg('army.truce'));
       }));
@@ -548,11 +548,11 @@ describe(armies.troopParams.name, () => {
       });
     }));
 
-  it('counts a running War Ensign in the troop limit', () =>
+  it('counts a running Imperial Banner in the troop limit', () =>
     game(async (g) => {
       const { p } = await warrior(g);
-      await giveItems(g, p, { [ItemId.WAR_ENSIGN]: 1 });
-      await shop.useItem(g, p.id, ItemId.WAR_ENSIGN, p.cityId);
+      await giveItems(g, p, { [ItemId.IMPERIAL_BANNER]: 1 });
+      await shop.useItem(g, p.id, ItemId.IMPERIAL_BANNER, p.cityId);
       const b = await cityBundle(g, p);
       expect((await armies.troopParams(g, p.id, p.cityId)).maxTroops).toBe(maxArmyTroops(b.city.buildings, true));
     }));

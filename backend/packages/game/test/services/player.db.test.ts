@@ -111,7 +111,7 @@ describe(player.createPlayer.name, () => {
         sex: 1,
         beginner: true,
         title: 0,
-        items: { [ItemId.WELCOME_PACKAGE]: 1 },
+        items: { [ItemId.FOUNDERS_GIFT]: 1 },
         createdAt: g.now,
         lastLoginAt: g.now,
       });
@@ -185,7 +185,7 @@ describe(player.playerState.name, () => {
       const s = await player.playerState(g, a.id);
       expect(s).toMatchObject({
         playerInfo: { id: a.id, userName: a.name, beginner: true, castleCount: 1 },
-        items: [{ id: ItemId.WELCOME_PACKAGE, count: 1 }],
+        items: [{ id: ItemId.FOUNDERS_GIFT, count: 1 }],
         buffs: [],
         research: {},
         selfArmys: [],
@@ -521,8 +521,8 @@ describe(player.cancelFurlough.name, () => {
   it('leaves another status alone when not on holiday', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      await giveItems(g, a, { [ItemId.TRUCE_AGREEMENT]: 1 });
-      await player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, a.cityId);
+      await giveItems(g, a, { [ItemId.KINGS_PEACE]: 1 });
+      await player.startTruce(g, a.id, ItemId.KINGS_PEACE, a.cityId);
       await player.cancelFurlough(g, a.id);
       const p = await reloadPlayer(g, a);
       expect(p.status).toBe(PlayerStatus.TRUCE);
@@ -531,15 +531,15 @@ describe(player.cancelFurlough.name, () => {
 });
 
 describe(player.startTruce.name, () => {
-  it('uses a Truce Agreement when the player has one', () =>
+  it("uses a King's Peace when the player has one", () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      await giveItems(g, a, { [ItemId.TRUCE_AGREEMENT]: 2 });
-      await player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, a.cityId);
+      await giveItems(g, a, { [ItemId.KINGS_PEACE]: 2 });
+      await player.startTruce(g, a.id, ItemId.KINGS_PEACE, a.cityId);
       const p = await reloadPlayer(g, a);
       expect(p.status).toBe(PlayerStatus.TRUCE);
-      expect(p.items[ItemId.TRUCE_AGREEMENT]).toBe(1);
-      expect(p.buffs).toEqual([{ id: BuffId.TRUCE, desc: msg('buff.truce'), endTime: g.now + BALANCE.truceDurationMs, itemId: ItemId.TRUCE_AGREEMENT }]);
+      expect(p.items[ItemId.KINGS_PEACE]).toBe(1);
+      expect(p.buffs).toEqual([{ id: BuffId.TRUCE, desc: msg('buff.truce'), endTime: g.now + BALANCE.truceDurationMs, itemId: ItemId.KINGS_PEACE }]);
       expect((await reloadCity(g, a.cityId)).gold).toBe(BALANCE.startingResources);
       expect(g.events(TimedEventType.BUFF_EXPIRE)).toEqual([
         expect.objectContaining({ dueAt: g.now + BALANCE.truceDurationMs, payload: { buffId: BuffId.TRUCE } }),
@@ -550,9 +550,9 @@ describe(player.startTruce.name, () => {
   it("buys one with the city's gold otherwise", () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      const price = itemGoldPrice(ItemId.TRUCE_AGREEMENT)!;
+      const price = itemGoldPrice(ItemId.KINGS_PEACE)!;
       await setResources(g, a, { gold: price + 7 });
-      await player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, a.cityId);
+      await player.startTruce(g, a.id, ItemId.KINGS_PEACE, a.cityId);
       expect((await reloadCity(g, a.cityId)).gold).toBe(7);
       expect(g.pushes(PushCmd.RESOURCE_UPDATE).at(-1)).toMatchObject({ data: { castleId: a.cityId } });
       expect((await reloadPlayer(g, a)).status).toBe(PlayerStatus.TRUCE);
@@ -561,13 +561,13 @@ describe(player.startTruce.name, () => {
   it('is refused without the item or its gold', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      const price = itemGoldPrice(ItemId.TRUCE_AGREEMENT)!;
+      const price = itemGoldPrice(ItemId.KINGS_PEACE)!;
       await setResources(g, a, { gold: price - 1 });
-      await expectRefused(player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, a.cityId), msg('common.notEnoughGoldFor', { amount: price }));
+      await expectRefused(player.startTruce(g, a.id, ItemId.KINGS_PEACE, a.cityId), msg('common.notEnoughGoldFor', { amount: price }));
       expect((await reloadPlayer(g, a)).status).toBe(PlayerStatus.NORMAL);
     }));
 
-  it('takes only a Truce Agreement', () =>
+  it("takes only a King's Peace", () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
       await giveItems(g, a, { [ItemId.CROSS_MEDAL]: 1 });
@@ -577,23 +577,23 @@ describe(player.startTruce.name, () => {
   it('is followed by a cooldown during which no new truce can start', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
-      await giveItems(g, a, { [ItemId.TRUCE_AGREEMENT]: 2 });
-      await player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, a.cityId);
+      await giveItems(g, a, { [ItemId.KINGS_PEACE]: 2 });
+      await player.startTruce(g, a.id, ItemId.KINGS_PEACE, a.cityId);
       await g.runDue(g.now + BALANCE.truceDurationMs);
       const p = await reloadPlayer(g, a);
       expect(p.status).toBe(PlayerStatus.NORMAL);
       expect(p.buffs).toEqual([expect.objectContaining({ id: BuffId.TRUCE_COOLDOWN, endTime: g.now + BALANCE.truceCooldownMs })]);
-      await expectRefused(player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, a.cityId), msg('player.truce.cooldown'));
+      await expectRefused(player.startTruce(g, a.id, ItemId.KINGS_PEACE, a.cityId), msg('player.truce.cooldown'));
       await g.runDue(g.now + BALANCE.truceCooldownMs);
-      await player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, a.cityId);
-      expect((await reloadPlayer(g, a)).items).not.toHaveProperty(ItemId.TRUCE_AGREEMENT);
+      await player.startTruce(g, a.id, ItemId.KINGS_PEACE, a.cityId);
+      expect((await reloadPlayer(g, a)).items).not.toHaveProperty(ItemId.KINGS_PEACE);
     }));
 
   it("refuses another player's city", () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
-      await expectRefused(player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, b.cityId), msg('common.invalidCastle'));
+      await expectRefused(player.startTruce(g, a.id, ItemId.KINGS_PEACE, b.cityId), msg('common.invalidCastle'));
     }));
 });
 

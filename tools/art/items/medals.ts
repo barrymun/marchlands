@@ -1,6 +1,6 @@
 // The nine loyalty medals (medalId(level)), each on its own striped ribbon with its own emblem: round bronze for levels
 // 1 to 3 (Cross, Rose, Lion), scalloped silver for 4 to 6 (Honour, Courage, Wisdom) and a gold star for 7 to 9
-// (Freedom, Justice, Nation), so a medal's level shows at a glance. The Lion Medal shows a lion's paw.
+// (Fidelity, Justice, Crown), so a medal's level shows at a glance. The Lion Medal shows a lion's paw.
 
 import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas } from '../pixel.ts';
@@ -100,7 +100,7 @@ export const MEDAL_DRAWINGS = {
   honour: medal('honour-medal', MedalShape.SCALLOPED, SILVER, [Colour.BLUE, Colour.WOOL], EMBLEMS.laurel),
   courage: medal('courage-medal', MedalShape.SCALLOPED, SILVER, [Colour.BANNER, Colour.WOOL], EMBLEMS.sword),
   wisdom: medal('wisdom-medal', MedalShape.SCALLOPED, SILVER, [Colour.TEAL_L, Colour.GOLD], EMBLEMS.lamp),
-  freedom: medal('freedom-medal', MedalShape.STAR, GOLD_MEDAL, [Colour.GREEN_L, Colour.GOLD], EMBLEMS.torch),
+  fidelity: medal('fidelity-medal', MedalShape.STAR, GOLD_MEDAL, [Colour.GREEN_L, Colour.GOLD], EMBLEMS.torch),
   justice: medal('justice-medal', MedalShape.STAR, GOLD_MEDAL, [Colour.BLUE, Colour.GOLD], EMBLEMS.scales),
-  nation: medal('nation-medal', MedalShape.STAR, GOLD_MEDAL, [Colour.BANNER, Colour.GOLD], EMBLEMS.crown),
+  crown: medal('crown-medal', MedalShape.STAR, GOLD_MEDAL, [Colour.BANNER, Colour.GOLD], EMBLEMS.crown),
 };

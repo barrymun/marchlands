@@ -1,5 +1,5 @@
-// Speed-ups: the six Guidelines are a pile of books that grows with the time they save, the top book finer at each
-// step; Napoleon's Diary is a strapped campaign notebook with a quill; Archimedes' Note a scroll of geometry under a
+// Speed-ups: the six speed-up books (Novice's Notes … Villard's Sketchbook) are a pile of books that grows with the time they save, the top book finer at each
+// step; Otto's Muster Roll is a strapped campaign notebook with a quill; Henry's Castle Law a scroll of geometry under a
 // pair of dividers.
 
 import { Colour } from '../../../client/web/src/lib/palette.ts';
@@ -18,10 +18,10 @@ function bookmark(c: PixelCanvas, x: number, y: number) {
 }
 
 /**
- * Guidelines: `books` books in a pile (each a little narrower and offset), the top one trimmed in gold from the fifth
+ * A speed-up book: `books` books in a pile (each a little narrower and offset), the top one trimmed in gold from the fifth
  * step (`fine`), with a gem and a glow at the last (`grand`).
  */
-function guidelines(seed: string, books: number, { fine = false, grand = false } = {}): () => PixelCanvas {
+function bookPile(seed: string, books: number, { fine = false, grand = false } = {}): () => PixelCanvas {
   return () => {
     const c = canvas(seed);
     const t = books === 1 ? 8 : books === 2 ? 7 : books === 3 ? 6 : 5;
@@ -59,9 +59,9 @@ function guidelines(seed: string, books: number, { fine = false, grand = false }
   };
 }
 
-/** Napoleon's Diary: a dark blue campaign notebook, held shut by a strap, with a quill across it. */
-function napoleonsDiary(): PixelCanvas {
-  const c = canvas('napoleons-diary');
+/** Otto's Muster Roll: a dark blue campaign notebook, held shut by a strap, with a quill across it. */
+function ottosMusterRoll(): PixelCanvas {
+  const c = canvas('ottos-muster-roll');
   const n = { hi: Colour.BLUE_HI, mid: Colour.BLUE_DARK, dark: Colour.BLUE_EDGE } as const;
   tome(c, 3, 5, 19, 27, n);
   corners(c, 3, 5, 19, 27);
@@ -78,9 +78,9 @@ function napoleonsDiary(): PixelCanvas {
   return c;
 }
 
-/** Archimedes' Note: a scroll of circles and triangles, with a pair of dividers lying across it. */
-function archimedesNote(): PixelCanvas {
-  const c = canvas('archimedes-note');
+/** Henry's Castle Law: a scroll of circles and triangles, with a pair of dividers lying across it. */
+function henrysCastleLaw(): PixelCanvas {
+  const c = canvas('henrys-castle-law');
   scroll(c, 6, 4, 23, 28);
   // a circle with a triangle drawn in it
   oval(c, 14.5, 15.5, 6, 6, Colour.BLUE_DARK);
@@ -99,12 +99,12 @@ function archimedesNote(): PixelCanvas {
 }
 
 export const SPEEDUP_DRAWINGS = {
-  beginner: guidelines('beginner-guidelines', 1),
-  primary: guidelines('primary-guidelines', 2),
-  intermediate: guidelines('intermediate-guidelines', 3),
-  senior: guidelines('senior-guidelines', 4),
-  master: guidelines('master-guidelines', 4, { fine: true }),
-  ultimate: guidelines('ultimate-guidelines', 4, { fine: true, grand: true }),
-  napoleonsDiary,
-  archimedesNote,
+  novicesNotes: bookPile('novices-notes', 1),
+  apprenticesNotes: bookPile('apprentices-notes', 2),
+  journeymansNotes: bookPile('journeymans-notes', 3),
+  mastersNotes: bookPile('masters-notes', 4),
+  grandmastersNotes: bookPile('grandmasters-notes', 4, { fine: true }),
+  villardsSketchbook: bookPile('villards-sketchbook', 4, { fine: true, grand: true }),
+  ottosMusterRoll,
+  henrysCastleLaw,
 };

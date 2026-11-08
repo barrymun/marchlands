@@ -20,7 +20,7 @@
     "heroOption": "{{name}} (مستوى {{level}}، هجوم {{attack}})",
     "troops": "القوات",
     "capacity": "{{chosen}} / {{cap}} (نقطة التجمع مستوى {{rally}})",
-    "capacityEnsign": "{{chosen}} / {{cap}} (نقطة التجمع مستوى {{rally}}<b>، راية الحرب +25%</b>)",
+    "capacityBanner": "{{chosen}} / {{cap}} (نقطة التجمع مستوى {{rally}}<b>، الراية الإمبراطورية +25%</b>)",
     "battleBuff": "{{desc}} في هذه المعركة · متبقٍّ <timer/>",
     "noScouts": "لا توجد كشافة في المدينة: درّب بعضها من القسم العسكري.",
     "noTroops": "لا توجد قوات في المدينة.",

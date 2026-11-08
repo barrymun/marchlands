@@ -507,7 +507,7 @@ export type TroopParamsInput = {
     transportStationParam: number;
     maxArmies: number;
     /**
-     * troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)
+     * troops one army may hold (Rally Spot level x 10,000, +25% with a Imperial Banner)
      */
     maxTroops: number;
 };
@@ -1775,7 +1775,7 @@ export type TrainableUnitInput = {
     stone: number;
     iron: number;
     /**
-     * (marchlands) share of the cost above actually paid (below 1 while a Quartermaster item runs)
+     * (marchlands) share of the cost above actually paid (below 1 while a Marshal's Seal or Charter runs)
      */
     costShare: number;
     /**
@@ -4133,7 +4133,7 @@ export type TroopParams = {
     transportStationParam: number;
     maxArmies: number;
     /**
-     * troops one army may hold (Rally Spot level x 10,000, +25% with a War Ensign)
+     * troops one army may hold (Rally Spot level x 10,000, +25% with a Imperial Banner)
      */
     maxTroops: number;
 };
@@ -5401,7 +5401,7 @@ export type TrainableUnit = {
     stone: number;
     iron: number;
     /**
-     * (marchlands) share of the cost above actually paid (below 1 while a Quartermaster item runs)
+     * (marchlands) share of the cost above actually paid (below 1 while a Marshal's Seal or Charter runs)
      */
     costShare: number;
     /**
@@ -8175,7 +8175,7 @@ export type PostPlayerTruceData = {
     body: {
         itemId?: string;
         /**
-         * the city whose gold pays when no Truce Agreement is owned
+         * the city whose gold pays when no King's Peace is owned
          */
         cityId: number;
     };

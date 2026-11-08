@@ -1,14 +1,14 @@
-// City items: a white flag of truce, a map with the city's new place marked (City Teleporter), a stone tablet of laws
-// (Civil Code) and a flask of green medicine (Penicillin).
+// City items: a white flag of truce, a map with the city's new place marked (Locator's Charter), a stone tablet of laws
+// (Magdeburg Rights) and a flask of green medicine (Theriac).
 
 import { Colour } from '../../../client/web/src/lib/palette.ts';
 import type { PixelCanvas } from '../pixel.ts';
 import { disc, oval, rect } from '../shapes.ts';
 import { canvas, GREEN, lathe, PARCHMENT, rod, sparkle, stamp, STONE } from './common.ts';
 
-/** Truce Agreement: a white flag of truce, waving from its pole. */
-function truceAgreement(): PixelCanvas {
-  const c = canvas('truce-agreement');
+/** King's Peace: a white flag of truce, waving from its pole. */
+function kingsPeace(): PixelCanvas {
+  const c = canvas('kings-peace');
   rod(c, [8, 3], [8, 30], 2, Colour.WOOD);
   for (let x = 9; x <= 27; x++) {
     const wave = Math.round(Math.sin((x - 9) / 3) * 1.5);
@@ -20,9 +20,9 @@ function truceAgreement(): PixelCanvas {
   return c;
 }
 
-/** City Teleporter: a map unrolled from its roller, a dotted road leading over land and water to a red cross. */
-function cityTeleporter(): PixelCanvas {
-  const c = canvas('city-teleporter');
+/** Locator's Charter: a map unrolled from its roller, a dotted road leading over land and water to a red cross. */
+function locatorsCharter(): PixelCanvas {
+  const c = canvas('locators-charter');
   rect(c, 8, 6, 28, 26, PARCHMENT.mid);
   rect(c, 8, 6, 28, 7, PARCHMENT.hi);
   rect(c, 8, 25, 28, 26, PARCHMENT.dark);
@@ -50,9 +50,9 @@ function cityTeleporter(): PixelCanvas {
   return c;
 }
 
-/** Civil Code: a stone tablet of laws, rounded at the top, its lines carved into it. */
-function civilCode(): PixelCanvas {
-  const c = canvas('civil-code');
+/** Magdeburg Rights: a stone tablet of laws, rounded at the top, its lines carved into it. */
+function magdeburgRights(): PixelCanvas {
+  const c = canvas('magdeburg-rights');
   lathe(c, 16, 2, [5, 8, 9.5, 10, 10.5, ...Array<number>(22).fill(11)], STONE);
   rect(c, 15, 4, 16, 27, Colour.STONE_L);
   for (let y = 8; y <= 25; y += 3)
@@ -66,9 +66,9 @@ function civilCode(): PixelCanvas {
   return c;
 }
 
-/** Penicillin: a round flask of green medicine, corked, with bubbles. */
-function penicillin(): PixelCanvas {
-  const c = canvas('penicillin');
+/** Theriac: a round flask of green medicine, corked, with bubbles. */
+function theriac(): PixelCanvas {
+  const c = canvas('theriac');
   lathe(c, 16, 2, [3, 3, 3], { hi: Colour.PLANK_TOP, mid: Colour.PLANK_L, dark: Colour.PLANK_R });
   lathe(c, 16, 5, [2.5, 2.5, 2.5, 2.5, 3, 3.5], { hi: Colour.SPARKLE, mid: Colour.WATER_LIGHT, dark: Colour.WATER });
   disc(c, 16, 20, 10, Colour.WATER_LIGHT, Colour.WATER);
@@ -91,4 +91,4 @@ function penicillin(): PixelCanvas {
   return c;
 }
 
-export const CITY_DRAWINGS = { truceAgreement, cityTeleporter, civilCode, penicillin };
+export const CITY_DRAWINGS = { kingsPeace, locatorsCharter, magdeburgRights, theriac };

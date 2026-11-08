@@ -329,12 +329,12 @@ describe('DELETE /player/furlough', () => {
 });
 
 describe('POST /player/truce', () => {
-  it("buys a Truce Agreement with the city's gold when none is owned", () =>
+  it("buys a King's Peace with the city's gold when none is owned", () =>
     apiTest(async (api) => {
       const p = await api.player();
       await giveGold(api, p);
       await api.ok('POST', 'player/truce', { token: p.token, body: { cityId: p.cityId } });
-      expect((await state(api, p)).buffs).toContainEqual(expect.objectContaining({ id: BuffId.TRUCE, itemId: ItemId.TRUCE_AGREEMENT }));
+      expect((await state(api, p)).buffs).toContainEqual(expect.objectContaining({ id: BuffId.TRUCE, itemId: ItemId.KINGS_PEACE }));
     }));
 
   it("refuses another player's city (403) and validates the body", () =>
@@ -342,7 +342,7 @@ describe('POST /player/truce', () => {
       const p = await api.player();
       const other = await api.player();
       await api.refused('POST', 'player/truce', 'common.invalidCastle', { token: p.token, body: { cityId: other.cityId }, status: 403 });
-      await expectInvalid(api, p.token, [{ method: 'POST', url: 'player/truce', body: { itemId: ItemId.TRUCE_AGREEMENT } }]);
+      await expectInvalid(api, p.token, [{ method: 'POST', url: 'player/truce', body: { itemId: ItemId.KINGS_PEACE } }]);
     }));
 });
 

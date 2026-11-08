@@ -84,11 +84,11 @@ export const GROUPS: { label: string; slots: Slot[] }[] = [
         boost: '-50%',
       },
       {
-        buff: BuffId.WAR_ENSIGN,
+        buff: BuffId.IMPERIAL_BANNER,
         get label() {
           return i18n.t('active-effects:slots.army');
         },
-        boost: `+${percent(BALANCE.warEnsignTroopBonus)}`,
+        boost: `+${percent(BALANCE.imperialBannerTroopBonus)}`,
       },
     ],
   },
@@ -113,7 +113,7 @@ export const GROUPS: { label: string; slots: Slot[] }[] = [
           return i18n.t('active-effects:on');
         },
         extend: false,
-        items: [ItemId.TRUCE_AGREEMENT],
+        items: [ItemId.KINGS_PEACE],
       },
     ],
   },

@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ItemEffectKind } from '#/constants.ts';
 import {
   BALANCE,
-  civilCodePopulation,
   createBoxHero,
   DAY,
   experienceItemGain,
@@ -10,6 +9,7 @@ import {
   heroAttributeBuffEnd,
   heroBoxQuality,
   heroBuffAmount,
+  heroItemGoldPrice,
   HOUR,
   isRemovedItem,
   ITEM_IDS,
@@ -19,6 +19,7 @@ import {
   itemInfo,
   ITEMS,
   loyaltyAfterMedal,
+  magdeburgRightsPopulation,
   medalId,
   MINUTE,
   seededRng,
@@ -43,13 +44,13 @@ describe('SPEEDUP_ITEMS', () => {
   });
 
   it('cuts a fixed time, whatever is left', () => {
-    expect(SPEEDUP_ITEMS[ItemId.BEGINNER_GUIDELINES]!.reduce(10 * HOUR, rng(0.5))).toBe(15 * MINUTE);
-    expect(SPEEDUP_ITEMS[ItemId.INTERMEDIATE_GUIDELINES]!.reduce(0, rng(0.5))).toBe(2.5 * HOUR);
+    expect(SPEEDUP_ITEMS[ItemId.NOVICES_NOTES]!.reduce(10 * HOUR, rng(0.5))).toBe(15 * MINUTE);
+    expect(SPEEDUP_ITEMS[ItemId.JOURNEYMANS_NOTES]!.reduce(0, rng(0.5))).toBe(2.5 * HOUR);
   });
 
   it('cuts a random whole number of hours in the cutHours range', () => {
-    const [min, max] = items.speedups[ItemId.MASTER_GUIDELINES]!.cutHours!;
-    const reduce = SPEEDUP_ITEMS[ItemId.MASTER_GUIDELINES]!.reduce;
+    const [min, max] = items.speedups[ItemId.GRANDMASTERS_NOTES]!.cutHours!;
+    const reduce = SPEEDUP_ITEMS[ItemId.GRANDMASTERS_NOTES]!.reduce;
     expect(reduce(0, rng(0))).toBe(min * HOUR);
     expect(reduce(0, rng(0.999_999))).toBe(max * HOUR);
     const r = seededRng('speedup');
@@ -60,7 +61,7 @@ describe('SPEEDUP_ITEMS', () => {
   });
 
   it('cuts a share of the total time', () => {
-    expect(SPEEDUP_ITEMS[ItemId.ULTIMATE_GUIDELINES]!.reduce(10 * HOUR, rng(0))).toBe(10 * HOUR * items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!);
+    expect(SPEEDUP_ITEMS[ItemId.VILLARDS_SKETCHBOOK]!.reduce(10 * HOUR, rng(0))).toBe(10 * HOUR * items.speedups[ItemId.VILLARDS_SKETCHBOOK]!.cutShare!);
     expect(SPEEDUP_ITEMS[SpeedupId.HALF_TIME]!.reduce(4 * HOUR, rng(0))).toBe(2 * HOUR);
   });
 
@@ -76,8 +77,8 @@ describe(speedupCut.name, () => {
     setGameSpeed(60);
     // a job of 10 real minutes (10 game hours at speed 60)
     const total = 10 * MINUTE;
-    expect(speedupCut(SPEEDUP_ITEMS[ItemId.ULTIMATE_GUIDELINES]!, total, () => 0)).toBe(total * items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!);
-    expect(speedupCut(SPEEDUP_ITEMS[ItemId.INTERMEDIATE_GUIDELINES]!, total, () => 0)).toBe((2.5 * HOUR) / 60);
+    expect(speedupCut(SPEEDUP_ITEMS[ItemId.VILLARDS_SKETCHBOOK]!, total, () => 0)).toBe(total * items.speedups[ItemId.VILLARDS_SKETCHBOOK]!.cutShare!);
+    expect(speedupCut(SPEEDUP_ITEMS[ItemId.JOURNEYMANS_NOTES]!, total, () => 0)).toBe((2.5 * HOUR) / 60);
   });
 });
 
@@ -88,7 +89,7 @@ describe(experienceItemGain.name, () => {
       expect(experienceItemGain(id, 10_000_000), id).toBe(Math.floor(10_000_000 * book.share));
     }
     expect(experienceItemGain(ItemId.EPITOME_OF_MILITARY_SCIENCE, 100_000)).toBe(30_000);
-    expect(experienceItemGain(ItemId.ON_WAR, 250_000)).toBe(250_000);
+    expect(experienceItemGain(ItemId.NIBELUNGENLIED, 250_000)).toBe(250_000);
   });
 
   it('is 0 for an item that is not an experience book', () => {
@@ -98,7 +99,7 @@ describe(experienceItemGain.name, () => {
 
 describe(heroBoxQuality.name, () => {
   it('reads a listed hero box, and the fallback for any other', () => {
-    expect(heroBoxQuality(ItemId.HERO_PACKAGE)).toEqual(items.heroBoxes[ItemId.HERO_PACKAGE]);
+    expect(heroBoxQuality(ItemId.OATH_OF_FEALTY)).toEqual(items.heroBoxes[ItemId.OATH_OF_FEALTY]);
     expect(heroBoxQuality('unknown.box')).toEqual(items.heroBoxFallback);
   });
 });
@@ -113,15 +114,15 @@ describe(heroBuffAmount.name, () => {
 
 describe(itemEffect.name, () => {
   it('lasts buffDurationMs.short for 1-day items and .long for 7-day ones', () => {
-    expect(itemEffect(ItemId.PLOWSHARES)).toMatchObject({ kind: ItemEffectKind.BUFF, durationMs: items.buffDurationMs.short });
-    expect(itemEffect(ItemId.IRON_RAKE)).toMatchObject({ kind: ItemEffectKind.BUFF, durationMs: items.buffDurationMs.long });
+    expect(itemEffect(ItemId.PLOUGHSHARE)).toMatchObject({ kind: ItemEffectKind.BUFF, durationMs: items.buffDurationMs.short });
+    expect(itemEffect(ItemId.HEAVY_PLOUGH)).toMatchObject({ kind: ItemEffectKind.BUFF, durationMs: items.buffDurationMs.long });
     expect(items.buffDurationMs).toEqual({ short: DAY, long: 7 * DAY });
   });
 
-  it('grants the Welcome Package from BALANCE, as a copy', () => {
-    const e = itemEffect(ItemId.WELCOME_PACKAGE);
-    expect(e).toEqual({ kind: ItemEffectKind.GRANT, items: items.welcomePackage.items, resources: items.welcomePackage.resources });
-    if (e?.kind === ItemEffectKind.GRANT) expect(e.items).not.toBe(items.welcomePackage.items);
+  it("grants the Founder's Gift from BALANCE, as a copy", () => {
+    const e = itemEffect(ItemId.FOUNDERS_GIFT);
+    expect(e).toEqual({ kind: ItemEffectKind.GRANT, items: items.foundersGift.items, resources: items.foundersGift.resources });
+    if (e?.kind === ItemEffectKind.GRANT) expect(e.items).not.toBe(items.foundersGift.items);
   });
 
   it('fills a medal box with medalBoxCount of each of its medal levels', () => {
@@ -140,13 +141,13 @@ describe(itemEffect.name, () => {
 
 describe('item descriptions', () => {
   it('quote the item numbers from BALANCE.items', () => {
-    expect(itemInfo(ItemId.CIVIL_CODE)!.description.params).toEqual({ percent: { share: items.civilCode.share }, min: items.civilCode.min });
-    expect(itemInfo(ItemId.NAPOLEONS_DIARY)!.description.params).toEqual({ percent: { share: items.batchSpeedupShare } });
-    expect(itemInfo(ItemId.FREEDOM_MEDAL)!.description.params).toEqual({ amount: items.medalLoyalty[ItemId.FREEDOM_MEDAL], max: BALANCE.heroMaxLoyalty });
-    expect(itemInfo(ItemId.EXCALIBUR)!.description.params).toMatchObject({ percent: { share: items.heroAttributeBuff.bonus } });
-    expect(itemInfo(ItemId.JUNIOR_MEDAL_BOX)!.description.params).toMatchObject({ min: items.medalBoxCount.min, max: items.medalBoxCount.max });
-    const box = items.heroBoxes[ItemId.HERO_PACKAGE]!;
-    expect(itemInfo(ItemId.HERO_PACKAGE)!.description.params).toMatchObject({ level: box.level, minStat: box.minStat });
+    expect(itemInfo(ItemId.MAGDEBURG_RIGHTS)!.description.params).toEqual({ percent: { share: items.civilCode.share }, min: items.civilCode.min });
+    expect(itemInfo(ItemId.OTTOS_MUSTER_ROLL)!.description.params).toEqual({ percent: { share: items.batchSpeedupShare } });
+    expect(itemInfo(ItemId.FIDELITY_MEDAL)!.description.params).toEqual({ amount: items.medalLoyalty[ItemId.FIDELITY_MEDAL], max: BALANCE.heroMaxLoyalty });
+    expect(itemInfo(ItemId.JOYEUSE)!.description.params).toMatchObject({ percent: { share: items.heroAttributeBuff.bonus } });
+    expect(itemInfo(ItemId.BRONZE_COFFER)!.description.params).toMatchObject({ min: items.medalBoxCount.min, max: items.medalBoxCount.max });
+    const box = items.heroBoxes[ItemId.OATH_OF_FEALTY]!;
+    expect(itemInfo(ItemId.OATH_OF_FEALTY)!.description.params).toMatchObject({ level: box.level, minStat: box.minStat });
     expect(itemInfo(ItemId.EPITOME_OF_MILITARY_SCIENCE)!.description.params).toEqual({
       percent: { share: items.experienceBooks[ItemId.EPITOME_OF_MILITARY_SCIENCE]!.share },
       min: items.experienceBooks[ItemId.EPITOME_OF_MILITARY_SCIENCE]!.min,
@@ -154,27 +155,27 @@ describe('item descriptions', () => {
   });
 });
 
-describe(civilCodePopulation.name, () => {
+describe(magdeburgRightsPopulation.name, () => {
   const { share, min } = items.civilCode;
   it('adds civilCode.share of the maximum population', () => {
-    expect(civilCodePopulation(1_000, 10_000)).toBe(1_000 + 10_000 * share);
+    expect(magdeburgRightsPopulation(1_000, 10_000)).toBe(1_000 + 10_000 * share);
   });
   it('adds at least civilCode.min people', () => {
-    expect(civilCodePopulation(10, 200)).toBe(10 + min);
+    expect(magdeburgRightsPopulation(10, 200)).toBe(10 + min);
   });
   it('never goes above the maximum', () => {
-    expect(civilCodePopulation(9_900, 10_000)).toBe(10_000);
-    expect(civilCodePopulation(10_000, 10_000)).toBe(10_000);
+    expect(magdeburgRightsPopulation(9_900, 10_000)).toBe(10_000);
+    expect(magdeburgRightsPopulation(10_000, 10_000)).toBe(10_000);
   });
 });
 
 describe(loyaltyAfterMedal.name, () => {
   it('adds the loyalty of the medal, up to BALANCE.heroMaxLoyalty', () => {
     expect(loyaltyAfterMedal(10, ItemId.LION_MEDAL)).toBe(10 + items.medalLoyalty[ItemId.LION_MEDAL]!);
-    expect(loyaltyAfterMedal(BALANCE.heroMaxLoyalty - 5, ItemId.NATION_MEDAL)).toBe(BALANCE.heroMaxLoyalty);
+    expect(loyaltyAfterMedal(BALANCE.heroMaxLoyalty - 5, ItemId.CROWN_MEDAL)).toBe(BALANCE.heroMaxLoyalty);
   });
   it('adds nothing for an item that is not a medal', () => {
-    expect(loyaltyAfterMedal(42, ItemId.EXCALIBUR)).toBe(42);
+    expect(loyaltyAfterMedal(42, ItemId.JOYEUSE)).toBe(42);
   });
 });
 
@@ -190,9 +191,9 @@ describe(heroAttributeBuffEnd.name, () => {
 describe(createBoxHero.name, () => {
   it('is a hero of the box level with full loyalty and its level in unspent points', () => {
     const rng = seededRng('box-hero');
-    const q = items.heroBoxes[ItemId.HERO_PACKAGE]!;
+    const q = items.heroBoxes[ItemId.OATH_OF_FEALTY]!;
     for (let i = 0; i < 100; i++) {
-      const h = createBoxHero(ItemId.HERO_PACKAGE, rng, { state: 0 });
+      const h = createBoxHero(ItemId.OATH_OF_FEALTY, rng, { state: 0 });
       expect(h).toMatchObject({ level: q.level, upgradeExp: upgradeExpFor(q.level), remainPoint: q.level, loyalty: BALANCE.heroMaxLoyalty, experience: 0 });
       for (const base of [h.basePower, h.baseManagement, h.baseStratagem]) expect(base).toBeGreaterThanOrEqual(q.minStat);
       expect([h.power, h.management, h.stratagem]).toEqual([h.basePower, h.baseManagement, h.baseStratagem]);
@@ -200,10 +201,10 @@ describe(createBoxHero.name, () => {
   });
   it('raises each low base attribute to minStat + 0 … heroBoxStatSpread', () => {
     const rng = seededRng('box-spread');
-    const q = items.heroBoxes[ItemId.HERO_PACKAGE]!;
+    const q = items.heroBoxes[ItemId.OATH_OF_FEALTY]!;
     const seen = new Set<number>();
     for (let i = 0; i < 2_000; i++) {
-      const h = createBoxHero(ItemId.HERO_PACKAGE, rng, { state: 0 });
+      const h = createBoxHero(ItemId.OATH_OF_FEALTY, rng, { state: 0 });
       for (const base of [h.basePower, h.baseManagement, h.baseStratagem]) if (base <= q.minStat + items.heroBoxStatSpread) seen.add(base - q.minStat);
     }
     expect([...seen].sort((a, b) => a - b)).toEqual(Array.from({ length: items.heroBoxStatSpread + 1 }, (_, i) => i));
@@ -254,17 +255,29 @@ describe('ItemId', () => {
 
 describe(itemGoldPrice.name, () => {
   it('takes a set price over the cents price', () => {
-    expect(itemGoldPrice(ItemId.BERNINIS_HAMMER)).toBe(BALANCE.goldShop[ItemId.BERNINIS_HAMMER]);
-    expect(itemGoldPrice(ItemId.BERNINIS_HAMMER)).not.toBe(goldForCents(5));
+    expect(itemGoldPrice(ItemId.BERNWARDS_HAMMER)).toBe(BALANCE.goldShop[ItemId.BERNWARDS_HAMMER]);
+    expect(itemGoldPrice(ItemId.BERNWARDS_HAMMER)).not.toBe(goldForCents(5));
   });
 
   it("prices an item with no set price at its cents' worth of gold", () => {
     expect(itemGoldPrice(ItemId.WAR_HORN)).toBe(goldForCents(10));
   });
 
-  it('sells neither medals nor the Welcome Package', () => {
+  it("sells neither medals nor the Founder's Gift", () => {
     expect(itemGoldPrice(ItemId.CROSS_MEDAL)).toBeNull();
-    expect(itemGoldPrice(ItemId.WELCOME_PACKAGE)).toBeNull();
+    expect(itemGoldPrice(ItemId.FOUNDERS_GIFT)).toBeNull();
+  });
+
+  it('sells nothing in BALANCE.notInShop, though the original did', () => {
+    for (const id of BALANCE.notInShop) {
+      expect(itemGoldPrice(id), id).toBeNull();
+      expect(ITEMS.find((i) => i.id === id)?.buyable, id).toBe(true);
+    }
+  });
+
+  it('still prices those speed-ups and experience books at the moment of use', () => {
+    expect(speedupItemGold(ItemId.NOVICES_NOTES)).toBe(goldForCents(items.speedups[ItemId.NOVICES_NOTES]!.cents));
+    expect(heroItemGoldPrice(ItemId.NIBELUNGENLIED, 0)).toBe(items.experienceBooks[ItemId.NIBELUNGENLIED]!.min * BALANCE.heroItemGold.perExp);
   });
 });
 

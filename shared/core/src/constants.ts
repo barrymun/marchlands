@@ -329,14 +329,14 @@ export const BuffId = {
   GOLD_PRODUCTION: 'GoldProductionBuff',
   ATTACK: 'AttackBuff',
   DEFENSE: 'DefenseBuff',
-  WAR_ENSIGN: 'WarEnsignBuff',
+  IMPERIAL_BANNER: 'WarEnsignBuff',
   BUILDING_QUEUE: 'BuildingQueueBuff',
   UPKEEP_REDUCE: 'UpkeepReduceBuff',
   TRAIN_COST_REDUCE: 'TrainCostReduceBuff',
-  /** Truce Agreement */
+  /** King's Peace */
   TRUCE: 'PlayerPeaceBuff',
   TRUCE_COOLDOWN: 'PlayerPeaceCoolDownBuff',
-  /** City Teleporter */
+  /** Locator's Charter */
   TELEPORT_COOLDOWN: 'MoveCastleCoolDownBuff',
   /** holiday mode */
   HOLIDAY: 'FurloughBuff',
@@ -358,7 +358,7 @@ export const ItemEffectKind = { BUFF: 'buff', GRANT: 'grant', CHEST: 'chest', BO
 export type ItemEffectKind = (typeof ItemEffectKind)[keyof typeof ItemEffectKind];
 
 /** The items the game service handles one by one (an `ItemEffectKind.SPECIAL` item's handler). */
-export const ItemSpecialHandler = { CIVIL_CODE: 'civilCode', CURE_INJURED: 'cureInjured', HERO_BOX: 'heroBox' } as const;
+export const ItemSpecialHandler = { MAGDEBURG_RIGHTS: 'civilCode', CURE_INJURED: 'cureInjured', HERO_BOX: 'heroBox' } as const;
 export type ItemSpecialHandler = (typeof ItemSpecialHandler)[keyof typeof ItemSpecialHandler];
 
 /** The action an item is used through (an `ItemEffectKind.COMMAND` item's command). */

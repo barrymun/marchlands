@@ -4,7 +4,7 @@ import { experienceItems, isLoyaltyFull, loyaltyMedals } from '@/components/hero
 
 describe(experienceItems.name, () => {
   it('lists every experience book, smallest first', () => {
-    expect(experienceItems()).toEqual([ItemId.ANABASIS, ItemId.EPITOME_OF_MILITARY_SCIENCE, ItemId.ON_WAR]);
+    expect(experienceItems()).toEqual([ItemId.DEEDS_OF_THE_SAXONS, ItemId.EPITOME_OF_MILITARY_SCIENCE, ItemId.NIBELUNGENLIED]);
     expect([...experienceItems()].sort()).toEqual(Object.keys(BALANCE.items.experienceBooks).sort());
     const gains = experienceItems().map((id) => experienceItemGain(id, 0));
     expect(gains).toEqual([...gains].sort((a, b) => a - b));

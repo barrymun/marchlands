@@ -8,7 +8,7 @@ import { duration, percent } from '@/lib/format';
 import { ITEM_BONUS_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
-/** A Quartermaster item's discount on troop training, while it runs. */
+/** A Marshal's Seal or Charter's discount on troop training, while it runs. */
 export function TrainDiscountHint({ share }: { share: number }) {
   const { t } = useTranslation('military-panel');
   const player = usePlayer();

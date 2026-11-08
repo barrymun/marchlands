@@ -540,9 +540,9 @@ describe('storage multiplier', () => {
 
 describe('hero items for gold', () => {
   it('price experience books by the experience they give, boosts at a flat price, medals not at all', () => {
-    expect(heroItemGoldPrice(ItemId.ANABASIS, 1600)).toBe(Math.ceil(1000 * BALANCE.heroItemGold.perExp));
-    expect(heroItemGoldPrice(ItemId.ON_WAR, 1_000_000)).toBe(Math.ceil(1_000_000 * BALANCE.heroItemGold.perExp));
-    expect(heroItemGoldPrice(ItemId.EXCALIBUR, 1600)).toBe(BALANCE.heroItemGold.attributeBoost);
+    expect(heroItemGoldPrice(ItemId.DEEDS_OF_THE_SAXONS, 1600)).toBe(Math.ceil(1000 * BALANCE.heroItemGold.perExp));
+    expect(heroItemGoldPrice(ItemId.NIBELUNGENLIED, 1_000_000)).toBe(Math.ceil(1_000_000 * BALANCE.heroItemGold.perExp));
+    expect(heroItemGoldPrice(ItemId.JOYEUSE, 1600)).toBe(BALANCE.heroItemGold.attributeBoost);
     expect(heroItemGoldPrice(ItemId.CROSS_MEDAL, 1600)).toBeNull();
   });
 });
@@ -588,7 +588,7 @@ describe('hero level experience', () => {
 
 describe('rally spot troop limit', () => {
   const rally = (level: number) => [{ positionId: 5, typeId: 29, level, status: 0 as const, startTime: 0, endTime: 0 }];
-  it('is 10,000 troops per level, +25% with a War Ensign', () => {
+  it('is 10,000 troops per level, +25% with a Imperial Banner', () => {
     expect(maxArmyTroops(rally(1))).toBe(10_000);
     expect(maxArmyTroops(rally(10))).toBe(100_000);
     expect(maxArmyTroops(rally(10), true)).toBe(125_000);
@@ -766,11 +766,11 @@ describe('hero gear', () => {
     expect(heroGearBonus(100, { level: 3, stars: { weapon: 10 } })).toBe(14 * 3 + gearStarPoints(3));
   });
 
-  it('prices stars 1-9 at two medals of that level and star 10 at six Nation Medals', () => {
+  it('prices stars 1-9 at two medals of that level and star 10 at six Crown Medals', () => {
     expect(gearStarCost(1)).toEqual({ itemId: ItemId.CROSS_MEDAL, count: 2 });
     expect(gearStarCost(6)).toEqual({ itemId: ItemId.WISDOM_MEDAL, count: 2 });
-    expect(gearStarCost(9)).toEqual({ itemId: ItemId.NATION_MEDAL, count: 2 });
-    expect(gearStarCost(10)).toEqual({ itemId: ItemId.NATION_MEDAL, count: 6 });
+    expect(gearStarCost(9)).toEqual({ itemId: ItemId.CROWN_MEDAL, count: 2 });
+    expect(gearStarCost(10)).toEqual({ itemId: ItemId.CROWN_MEDAL, count: 6 });
   });
 
   it('reads the lord gear from Hero Enhancement and the stars bought', () => {

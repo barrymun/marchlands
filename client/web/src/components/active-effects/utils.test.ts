@@ -96,8 +96,8 @@ describe(slotOf.name, () => {
 
 describe(slotItems.name, () => {
   it('returns every item giving the buff, longest first', () => {
-    expect(slotItems(food)).toEqual([ItemId.IRON_RAKE, ItemId.PLOWSHARES]);
-    expect(slotItems({ buff: BuffId.ATTACK, label: 'Attack', boost: '+20%' })).toEqual([ItemId.IVORY_HORN, ItemId.WAR_HORN]);
+    expect(slotItems(food)).toEqual([ItemId.HEAVY_PLOUGH, ItemId.PLOUGHSHARE]);
+    expect(slotItems({ buff: BuffId.ATTACK, label: 'Attack', boost: '+20%' })).toEqual([ItemId.OLIFANT, ItemId.WAR_HORN]);
   });
 
   it('matches what the game data says for every slot', () => {
@@ -118,7 +118,7 @@ describe(slotItems.name, () => {
   });
 
   it('uses the slot’s own item list when it has one', () => {
-    expect(slotItems(truce)).toEqual([ItemId.TRUCE_AGREEMENT]);
+    expect(slotItems(truce)).toEqual([ItemId.KINGS_PEACE]);
     expect(slotItems({ ...food, items: [] })).toEqual([]);
   });
 
@@ -129,8 +129,8 @@ describe(slotItems.name, () => {
 
 describe(adds.name, () => {
   it('says how many days a buff item adds', () => {
-    expect(adds(ItemId.PLOWSHARES)).toBe('1 day');
-    expect(adds(ItemId.IRON_RAKE)).toBe('7 days');
+    expect(adds(ItemId.PLOUGHSHARE)).toBe('1 day');
+    expect(adds(ItemId.HEAVY_PLOUGH)).toBe('7 days');
   });
 
   it('says hours for a buff shorter than a day', () => {
@@ -139,53 +139,57 @@ describe(adds.name, () => {
   });
 
   it('is empty for items that give no buff', () => {
-    expect(adds(ItemId.TRUCE_AGREEMENT)).toBe('');
+    expect(adds(ItemId.KINGS_PEACE)).toBe('');
     expect(adds('unknown.item')).toBe('');
   });
 });
 
 describe(extensionFor.name, () => {
   it('cannot extend a slot marked not extendable', () => {
-    expect(extensionFor(truce, undefined, new Map([[ItemId.TRUCE_AGREEMENT, 3]]))).toBeNull();
+    expect(extensionFor(truce, undefined, new Map([[ItemId.KINGS_PEACE, 3]]))).toBeNull();
   });
 
   it('uses an owned item, the longest first', () => {
     const counts = new Map([
-      [ItemId.PLOWSHARES, 2],
-      [ItemId.IRON_RAKE, 1],
+      [ItemId.PLOUGHSHARE, 2],
+      [ItemId.HEAVY_PLOUGH, 1],
     ]);
-    expect(extensionFor(food, undefined, counts)).toEqual({ kind: ExtensionKind.USE, itemId: ItemId.IRON_RAKE, owned: 1 });
+    expect(extensionFor(food, undefined, counts)).toEqual({ kind: ExtensionKind.USE, itemId: ItemId.HEAVY_PLOUGH, owned: 1 });
   });
 
   it('prefers the item that set the running bonus', () => {
     const counts = new Map([
-      [ItemId.PLOWSHARES, 2],
-      [ItemId.IRON_RAKE, 1],
+      [ItemId.PLOUGHSHARE, 2],
+      [ItemId.HEAVY_PLOUGH, 1],
     ]);
-    expect(extensionFor(food, buff(ItemId.PLOWSHARES), counts)).toEqual({ kind: ExtensionKind.USE, itemId: ItemId.PLOWSHARES, owned: 2 });
+    expect(extensionFor(food, buff(ItemId.PLOUGHSHARE), counts)).toEqual({ kind: ExtensionKind.USE, itemId: ItemId.PLOUGHSHARE, owned: 2 });
   });
 
   it('ignores a running item that does not belong to the slot, and items owned zero times', () => {
     const counts = new Map([
-      [ItemId.PLOWSHARES, 4],
-      [ItemId.IRON_RAKE, 0],
-      [ItemId.ARCH_SAW, 9],
+      [ItemId.PLOUGHSHARE, 4],
+      [ItemId.HEAVY_PLOUGH, 0],
+      [ItemId.BOW_SAW, 9],
     ]);
-    expect(extensionFor(food, buff(ItemId.ARCH_SAW), counts)).toEqual({ kind: ExtensionKind.USE, itemId: ItemId.PLOWSHARES, owned: 4 });
+    expect(extensionFor(food, buff(ItemId.BOW_SAW), counts)).toEqual({ kind: ExtensionKind.USE, itemId: ItemId.PLOUGHSHARE, owned: 4 });
   });
 
   it('buys one with gold when none is owned, in the same order', () => {
-    expect(extensionFor(food, undefined, new Map())).toEqual({ kind: ExtensionKind.BUY, itemId: ItemId.IRON_RAKE, price: itemGoldPrice(ItemId.IRON_RAKE) });
-    expect(extensionFor(food, buff(ItemId.PLOWSHARES), new Map())).toEqual({
+    expect(extensionFor(food, undefined, new Map())).toEqual({
       kind: ExtensionKind.BUY,
-      itemId: ItemId.PLOWSHARES,
-      price: itemGoldPrice(ItemId.PLOWSHARES),
+      itemId: ItemId.HEAVY_PLOUGH,
+      price: itemGoldPrice(ItemId.HEAVY_PLOUGH),
+    });
+    expect(extensionFor(food, buff(ItemId.PLOUGHSHARE), new Map())).toEqual({
+      kind: ExtensionKind.BUY,
+      itemId: ItemId.PLOUGHSHARE,
+      price: itemGoldPrice(ItemId.PLOUGHSHARE),
     });
   });
 
   it('skips items that are not for sale', () => {
-    const slot: Slot = { ...food, items: ['unknown.item', ItemId.PLOWSHARES] };
-    expect(extensionFor(slot, undefined, new Map())).toEqual({ kind: ExtensionKind.BUY, itemId: ItemId.PLOWSHARES, price: itemGoldPrice(ItemId.PLOWSHARES) });
+    const slot: Slot = { ...food, items: ['unknown.item', ItemId.PLOUGHSHARE] };
+    expect(extensionFor(slot, undefined, new Map())).toEqual({ kind: ExtensionKind.BUY, itemId: ItemId.PLOUGHSHARE, price: itemGoldPrice(ItemId.PLOUGHSHARE) });
   });
 
   it('cannot extend when nothing is owned or for sale', () => {

@@ -92,7 +92,7 @@ export async function createPlayer(ctx: Ctx, accountId: number, input: CreatePla
           flag,
           faceUrl,
           sex: input.sex,
-          items: { [ItemId.WELCOME_PACKAGE]: 1 },
+          items: { [ItemId.FOUNDERS_GIFT]: 1 },
           createdAt: ctx.now,
           lastLoginAt: ctx.now,
         })
@@ -304,14 +304,14 @@ export async function cancelFurlough(ctx: Ctx, playerId: number) {
   await pushPlayerInfo(ctx, p);
 }
 
-/** city.setStopWarState: Truce Agreement (12h) with a 12h cooldown afterwards. */
+/** city.setStopWarState: King's Peace (12h) with a 12h cooldown afterwards. */
 export async function startTruce(ctx: Ctx, playerId: number, itemId: string, cityId: number) {
-  // without a Truce Agreement, one is bought with the city's gold
+  // without a King's Peace, one is bought with the city's gold
   const b = await openOwnCity(ctx, playerId, cityId);
   const p = b.player;
   if (!isFeatureOn(Feature.PVP)) throw new GameError(msg('player.truce.pvpDisabled'), -99);
   if (activeBuff(p, BuffId.TRUCE_COOLDOWN, ctx.now)) throw new GameError(msg('player.truce.cooldown'), -99);
-  if (itemId !== ItemId.TRUCE_AGREEMENT) throw new GameError(msg('common.invalidData'), -99);
+  if (itemId !== ItemId.KINGS_PEACE) throw new GameError(msg('common.invalidData'), -99);
   useItemOrGold(ctx, p, b.city, itemId, itemGoldPrice(itemId) ?? 0);
   pushResources(ctx, b);
   await saveCity(ctx, b.city);

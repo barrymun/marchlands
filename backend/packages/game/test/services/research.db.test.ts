@@ -339,15 +339,15 @@ describe(research.speedupResearch.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withAcademy(g, p);
-      await giveItems(g, p, { [ItemId.BEGINNER_GUIDELINES]: 1 });
-      const owned = (await reloadPlayer(g, p)).items[ItemId.BEGINNER_GUIDELINES]!;
+      await giveItems(g, p, { [ItemId.NOVICES_NOTES]: 1 });
+      const owned = (await reloadPlayer(g, p)).items[ItemId.NOVICES_NOTES]!;
       const out = await research.startResearch(g, p.id, p.cityId, HERO_ENHANCEMENT);
-      const cut = BALANCE.items.speedups[ItemId.BEGINNER_GUIDELINES]!.cutMs!;
+      const cut = BALANCE.items.speedups[ItemId.NOVICES_NOTES]!.cutMs!;
       expect(out.endTime - out.startTime).toBeGreaterThan(cut);
       const gold = (await stock(g, p)).gold;
-      expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.BEGINNER_GUIDELINES)).toEqual({ endTime: out.endTime - cut });
+      expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.NOVICES_NOTES)).toEqual({ endTime: out.endTime - cut });
       expect(await researchOf(g, p, HERO_ENHANCEMENT)).toMatchObject({ startTime: out.startTime - cut, endTime: out.endTime - cut });
-      expect((await reloadPlayer(g, p)).items[ItemId.BEGINNER_GUIDELINES] ?? 0).toBe(owned - 1);
+      expect((await reloadPlayer(g, p)).items[ItemId.NOVICES_NOTES] ?? 0).toBe(owned - 1);
       expect((await stored(g, p.cityId)).gold).toBe(gold);
       expect(g.events(TimedEventType.RESEARCH)).toMatchObject([{ dueAt: out.endTime - cut }]);
     }));
@@ -358,13 +358,13 @@ describe(research.speedupResearch.name, () => {
       await withAcademy(g, p);
       const out = await research.startResearch(g, p.id, p.cityId, HERO_ENHANCEMENT);
       const before = await stock(g, p);
-      await research.speedupResearch(g, p.id, p.cityId, ItemId.BEGINNER_GUIDELINES);
-      expect((await stored(g, p.cityId)).gold).toBe(before.gold - speedupItemGold(ItemId.BEGINNER_GUIDELINES));
-      expect(await researchOf(g, p, HERO_ENHANCEMENT)).toMatchObject({ endTime: out.endTime - BALANCE.items.speedups[ItemId.BEGINNER_GUIDELINES]!.cutMs! });
+      await research.speedupResearch(g, p.id, p.cityId, ItemId.NOVICES_NOTES);
+      expect((await stored(g, p.cityId)).gold).toBe(before.gold - speedupItemGold(ItemId.NOVICES_NOTES));
+      expect(await researchOf(g, p, HERO_ENHANCEMENT)).toMatchObject({ endTime: out.endTime - BALANCE.items.speedups[ItemId.NOVICES_NOTES]!.cutMs! });
       await setResources(g, p, { gold: 0 });
       await expectRefused(
-        research.speedupResearch(g, p.id, p.cityId, ItemId.BEGINNER_GUIDELINES),
-        msg('common.notEnoughGoldFor', { amount: speedupItemGold(ItemId.BEGINNER_GUIDELINES) }),
+        research.speedupResearch(g, p.id, p.cityId, ItemId.NOVICES_NOTES),
+        msg('common.notEnoughGoldFor', { amount: speedupItemGold(ItemId.NOVICES_NOTES) }),
       );
     }));
 
@@ -372,13 +372,13 @@ describe(research.speedupResearch.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       await withAcademy(g, p);
-      await giveItems(g, p, { [ItemId.ULTIMATE_GUIDELINES]: 5 });
+      await giveItems(g, p, { [ItemId.VILLARDS_SKETCHBOOK]: 5 });
       const out = await research.startResearch(g, p.id, p.cityId, HERO_ENHANCEMENT);
-      const cut = (out.endTime - out.startTime) * BALANCE.items.speedups[ItemId.ULTIMATE_GUIDELINES]!.cutShare!;
-      expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.ULTIMATE_GUIDELINES)).toEqual({ endTime: out.endTime - cut });
-      expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.ULTIMATE_GUIDELINES)).toEqual({ endTime: out.endTime - 2 * cut });
-      for (let i = 0; i < 2; i++) await research.speedupResearch(g, p.id, p.cityId, ItemId.ULTIMATE_GUIDELINES);
-      expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.ULTIMATE_GUIDELINES)).toEqual({ endTime: g.now });
+      const cut = (out.endTime - out.startTime) * BALANCE.items.speedups[ItemId.VILLARDS_SKETCHBOOK]!.cutShare!;
+      expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.VILLARDS_SKETCHBOOK)).toEqual({ endTime: out.endTime - cut });
+      expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.VILLARDS_SKETCHBOOK)).toEqual({ endTime: out.endTime - 2 * cut });
+      for (let i = 0; i < 2; i++) await research.speedupResearch(g, p.id, p.cityId, ItemId.VILLARDS_SKETCHBOOK);
+      expect(await research.speedupResearch(g, p.id, p.cityId, ItemId.VILLARDS_SKETCHBOOK)).toEqual({ endTime: g.now });
       const r = (await researchOf(g, p, HERO_ENHANCEMENT))!;
       expect(r.endTime! - r.startTime!).toBe(out.endTime - out.startTime);
     }));

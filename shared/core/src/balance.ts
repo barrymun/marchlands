@@ -65,7 +65,7 @@ export const BALANCE = {
    * (marchlands) hero gear (Age II Hero Enhancement, gear.ts): piece levels follow the Hero Enhancement research,
    * each level adding levelPoints to a piece (10 at level 10); star N of a piece adds N points (55 for all 10).
    * The set bonus adds setBonus for every star level all 14 pieces have reached (140 at 10 stars each). Stars 1-9
-   * cost starMedals medals of that level, star 10 lastStarMedals Nation Medals
+   * cost starMedals medals of that level, star 10 lastStarMedals Crown Medals
    */
   heroGear: { maxLevel: 10, maxStars: 10, levelPoints: 1, setBonus: 14, starMedals: 2, lastStarMedals: 6 },
   /**
@@ -122,7 +122,7 @@ export const BALANCE = {
   disbandRefund: 0.9,
   outerSlotsBase: 10, // (orig intended) field slots = 10 + 3*TownHall
   outerSlotsPerTownHall: 3,
-  /** (marchlands) constructions a city may run at once (orig 1); Bernini's Hammer adds one more */
+  /** (marchlands) constructions a city may run at once (orig 1); Bernward's Hammer adds one more */
   buildQueues: 2,
   /** (marchlands) floor on a troop's training time per unit, in game seconds (orig 1); 0 lets a strong mayor train instantly */
   minTrainUnitSeconds: 0,
@@ -169,8 +169,8 @@ export const BALANCE = {
   rallySpotArmiesPerLevel: 1,
   /** (evony) troops one army may hold: 10,000 per Rally Spot level (100,000 at level 10) */
   rallySpotTroopsPerLevel: 10_000,
-  /** (evony) War Ensign raises that limit by 25% */
-  warEnsignTroopBonus: 0.25,
+  /** (evony) Imperial Banner raises that limit by 25% */
+  imperialBannerTroopBonus: 0.25,
   compassSpeedPerLevel: 0.1, // (orig) foot speed +10%/level
   horsebackSpeedPerLevel: 0.05, // (orig) mounted speed +5%/level
   logisticsLoadPerLevel: 0.1, // (evony) +10% load per level
@@ -411,12 +411,12 @@ export const BALANCE = {
     band: 5,
   },
   /**
-   * (marchlands) medals (hero.loyalty.1 Cross … .9 Nation) a won attack on a city can drop, by city
+   * (marchlands) medals (hero.loyalty.1 Cross … .9 Crown) a won attack on a city can drop, by city
    * level L (barbarian level / Town Hall level): one medal with chance base + perLevel x L, of level
    * L-3 … L-1 (1 … 9); from level 8 a second (and from 9 a third) low-mid medal of level 1 … ceil(L/2)
    */
   medalDrops: { base: 0.1, perLevel: 0.07, secondFrom: 8, secondPerLevel: 0.25, thirdFrom: 9, thirdPerLevel: 0.2 },
-  /** (marchlands) share of troop training cost saved while a Quartermaster item's buff runs (fortifications pay in full) */
+  /** (marchlands) share of troop training cost saved while a Marshal's Seal or Charter runs (fortifications pay in full) */
   trainCostReduction: 0.25,
   /** (evony) attack / defence items: the army's attack or defence +20% in battle */
   battleBuffBonus: 0.2,
@@ -432,44 +432,44 @@ export const BALANCE = {
      * or a share of the total time (`cutShare`)
      */
     speedups: {
-      [ItemId.BEGINNER_GUIDELINES]: { cents: 5, cutMs: 15 * MINUTE },
-      [ItemId.PRIMARY_GUIDELINES]: { cents: 10, cutMs: HOUR },
-      [ItemId.INTERMEDIATE_GUIDELINES]: { cents: 20, cutMs: 2.5 * HOUR },
-      [ItemId.SENIOR_GUIDELINES]: { cents: 50, cutMs: 8 * HOUR },
-      [ItemId.MASTER_GUIDELINES]: { cents: 80, cutHours: [10, 30] },
-      [ItemId.ULTIMATE_GUIDELINES]: { cents: 120, cutShare: 0.3 },
+      [ItemId.NOVICES_NOTES]: { cents: 5, cutMs: 15 * MINUTE },
+      [ItemId.APPRENTICES_NOTES]: { cents: 10, cutMs: HOUR },
+      [ItemId.JOURNEYMANS_NOTES]: { cents: 20, cutMs: 2.5 * HOUR },
+      [ItemId.MASTERS_NOTES]: { cents: 50, cutMs: 8 * HOUR },
+      [ItemId.GRANDMASTERS_NOTES]: { cents: 80, cutHours: [10, 30] },
+      [ItemId.VILLARDS_SKETCHBOOK]: { cents: 120, cutShare: 0.3 },
       [SpeedupId.HALF_TIME]: { cents: 175, cutShare: 0.5 },
     } as Record<string, { cents: number; cutMs?: number; cutHours?: readonly [number, number]; cutShare?: number }>,
-    /** (evony) Napoleon's Diary / Archimedes' Note: the share of a troop or fortification batch's total time they cut */
+    /** (evony) Otto's Muster Roll / Henry's Castle Law: the share of a troop or fortification batch's total time they cut */
     batchSpeedupShare: 0.3,
-    /** (evony) Civil Code: adds this share of the city's maximum population, at least `min` people (capped at the maximum) */
+    /** (evony) Magdeburg Rights: adds this share of the city's maximum population, at least `min` people (capped at the maximum) */
     civilCode: { share: 0.2, min: 100 },
     /** (evony) medal boxes: the medal levels each holds, `medalBoxCount.min`-`max` of each */
     medalBoxes: {
-      [ItemId.JUNIOR_MEDAL_BOX]: [1, 2, 3],
-      [ItemId.MEDIUM_MEDAL_BOX]: [4, 5, 6],
-      [ItemId.SENIOR_MEDAL_BOX]: [7, 8, 9],
+      [ItemId.BRONZE_COFFER]: [1, 2, 3],
+      [ItemId.SILVER_COFFER]: [4, 5, 6],
+      [ItemId.GOLD_COFFER]: [7, 8, 9],
     } as Record<string, readonly number[]>,
     medalBoxCount: { min: 2, max: 4 },
-    /** (evony) the Welcome Package every new player gets */
-    welcomePackage: {
-      items: { [ItemId.BEGINNER_GUIDELINES]: 5, [ItemId.PRIMARY_GUIDELINES]: 3 } as Record<string, number>,
+    /** (evony) the Founder's Gift every new player gets */
+    foundersGift: {
+      items: { [ItemId.NOVICES_NOTES]: 5, [ItemId.APPRENTICES_NOTES]: 3 } as Record<string, number>,
       resources: { food: 50_000, wood: 50_000, stone: 50_000, iron: 50_000 },
     },
-    /** (evony) hero attribute items (Excalibur etc.): +bonus of the attribute for durationMs */
+    /** (evony) hero attribute items (Joyeuse etc.): +bonus of the attribute for durationMs */
     heroAttributeBuff: { bonus: 0.25, durationMs: DAY },
     /** (evony) hero boxes: the level of the hero inside and its lowest base attribute (`fallback`: a box not listed) */
-    heroBoxes: { [ItemId.HERO_PACKAGE]: { level: 30, minStat: 55 } } as Record<string, { level: number; minStat: number }>,
+    heroBoxes: { [ItemId.OATH_OF_FEALTY]: { level: 30, minStat: 55 } } as Record<string, { level: number; minStat: number }>,
     heroBoxFallback: { level: 10, minStat: 40 },
     /** (marchlands) a hero box hero's base attributes are each at least minStat + 0 … this */
     heroBoxStatSpread: 10,
     /** (orig) experience books: `share` of the experience the hero's next level needs, at least `min` */
     experienceBooks: {
-      [ItemId.ANABASIS]: { share: 0.08, min: 1_000 },
+      [ItemId.DEEDS_OF_THE_SAXONS]: { share: 0.08, min: 1_000 },
       [ItemId.EPITOME_OF_MILITARY_SCIENCE]: { share: 0.3, min: 10_000 },
-      [ItemId.ON_WAR]: { share: 1, min: 100_000 },
+      [ItemId.NIBELUNGENLIED]: { share: 1, min: 100_000 },
     } as Record<string, { share: number; min: number }>,
-    /** (orig) loyalty each medal (hero.loyalty.1 Cross … .9 Nation) gives a hero */
+    /** (orig) loyalty each medal (hero.loyalty.1 Cross … .9 Crown) gives a hero */
     medalLoyalty: {
       [ItemId.CROSS_MEDAL]: 5,
       [ItemId.ROSE_MEDAL]: 10,
@@ -477,40 +477,58 @@ export const BALANCE = {
       [ItemId.HONOUR_MEDAL]: 20,
       [ItemId.COURAGE_MEDAL]: 25,
       [ItemId.WISDOM_MEDAL]: 30,
-      [ItemId.FREEDOM_MEDAL]: 40,
+      [ItemId.FIDELITY_MEDAL]: 40,
       [ItemId.JUSTICE_MEDAL]: 50,
-      [ItemId.NATION_MEDAL]: 60,
+      [ItemId.CROWN_MEDAL]: 60,
     } as Record<string, number>,
   },
   /** (marchlands) items that can be bought with city gold, and their price (item id -> gold each) */
   // set prices; every other item the original sold for cents costs goldForCents(its price) (itemGoldPrice)
   goldShop: {
-    [ItemId.WAR_ENSIGN]: 250_000, // War Ensign (30 cents)
-    [ItemId.CITY_TELEPORTER]: 750_000, // City Teleporter: picks the tile, like the original's Adv City Teleporter (90 cents)
+    [ItemId.IMPERIAL_BANNER]: 250_000, // Imperial Banner (30 cents)
+    [ItemId.LOCATORS_CHARTER]: 750_000, // Locator's Charter: picks the tile, like the original's Adv City Teleporter (90 cents)
     // a third building queue for 7 days (5 cents, 40,000 gold: far below the other 7-day boosts, docs/features/item-names.md)
-    [ItemId.BERNINIS_HAMMER]: 1_000_000,
+    [ItemId.BERNWARDS_HAMMER]: 1_000_000,
     // production boosts, +25% for 1 day (8 cents) / 7 days (50 cents)
-    [ItemId.PLOWSHARES]: 65_000,
-    [ItemId.IRON_RAKE]: 415_000,
-    [ItemId.ARCH_SAW]: 65_000,
-    [ItemId.DOUBLE_SAW]: 415_000,
-    [ItemId.QUARRYING_TOOLS]: 65_000,
-    [ItemId.ADV_QUARRYING_TOOLS]: 415_000,
-    [ItemId.BLOWER]: 65_000,
-    [ItemId.BLAST_FURNACE]: 415_000,
+    [ItemId.PLOUGHSHARE]: 65_000,
+    [ItemId.HEAVY_PLOUGH]: 415_000,
+    [ItemId.BOW_SAW]: 65_000,
+    [ItemId.WATER_SAW]: 415_000,
+    [ItemId.MASONS_PICK]: 65_000,
+    [ItemId.TREADWHEEL_CRANE]: 415_000,
+    [ItemId.HAND_BELLOWS]: 65_000,
+    [ItemId.WATER_BELLOWS]: 415_000,
     // gold income +25% for 1 day (45 cents) / 7 days (280 cents)
-    [ItemId.TAX_POLICY]: 375_000,
-    [ItemId.ADV_TAX_POLICY]: 2_335_000,
-    // troop upkeep -50% for 1 day (Vesta's Blessing) / 7 days (Vesta's Grand Blessing)
-    [ItemId.VESTAS_BLESSING]: 150_000,
-    [ItemId.VESTAS_GRAND_BLESSING]: 950_000,
-    // troop training cost -trainCostReduction for 1 day (Quartermaster's Seal) / 7 days (Quartermaster's Charter)
-    [ItemId.QUARTERMASTERS_SEAL]: 250_000,
-    [ItemId.QUARTERMASTERS_CHARTER]: 1_600_000,
+    [ItemId.TOLL_RIGHT]: 375_000,
+    [ItemId.MINT_RIGHT]: 2_335_000,
+    // troop upkeep -50% for 1 day (Elizabeth's Bread) / 7 days (Elizabeth's Granary)
+    [ItemId.ELIZABETHS_BREAD]: 150_000,
+    [ItemId.ELIZABETHS_GRANARY]: 950_000,
+    // troop training cost -trainCostReduction for 1 day (Marshal's Seal) / 7 days (Marshal's Charter)
+    [ItemId.MARSHALS_SEAL]: 250_000,
+    [ItemId.MARSHALS_CHARTER]: 1_600_000,
   } as Record<string, number>,
   /**
+   * (marchlands) items the original sold that the shop doesn't (itemGoldPrice: null), decided 2026-11-08
+   * (docs/features/item-names.md, Items that don't earn their place). The speed-up books cost what finishing the
+   * same time for gold does, and the experience books more than buying them at the moment of use: both can still
+   * be bought then, and given. The medal boxes held what battle already gives in thousands.
+   */
+  notInShop: [
+    ItemId.NOVICES_NOTES,
+    ItemId.APPRENTICES_NOTES,
+    ItemId.JOURNEYMANS_NOTES,
+    ItemId.MASTERS_NOTES,
+    ItemId.DEEDS_OF_THE_SAXONS,
+    ItemId.EPITOME_OF_MILITARY_SCIENCE,
+    ItemId.NIBELUNGENLIED,
+    ItemId.BRONZE_COFFER,
+    ItemId.SILVER_COFFER,
+    ItemId.GOLD_COFFER,
+  ] as readonly string[],
+  /**
    * (marchlands) there are no cents: everything the original sold for cents costs city gold at this rate
-   * (the War Ensign's: 30 cents = 250,000 gold), rounded to 5,000 (goldForCents)
+   * (the Imperial Banner's: 30 cents = 250,000 gold), rounded to 5,000 (goldForCents)
    */
   goldPerCent: 250_000 / 30,
 } as const;

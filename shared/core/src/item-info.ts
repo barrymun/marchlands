@@ -126,8 +126,8 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
     case ItemEffectKind.GRANT: {
       const toCity = !!(e.resources || e.troops);
       const description = msg(toCity ? 'itemInfo.grantCity' : 'itemInfo.grant', { contents: contents(e) });
-      // the Welcome Package is never sold or won: every new player gets one (player.createPlayer)
-      if (id === ItemId.WELCOME_PACKAGE) return { description, use: ItemUse.DIRECT, howTo: msg('itemInfo.howTo.welcome') };
+      // the Founder's Gift is never sold or won: every new player gets one (player.createPlayer)
+      if (id === ItemId.FOUNDERS_GIFT) return { description, use: ItemUse.DIRECT, howTo: msg('itemInfo.howTo.welcome') };
       return { description, use: ItemUse.DIRECT };
     }
     case ItemEffectKind.CHEST:
@@ -145,7 +145,7 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
       return { description: msg('itemInfo.randomBox'), use: ItemUse.DIRECT };
     case ItemEffectKind.SPECIAL:
       switch (e.handler) {
-        case ItemSpecialHandler.CIVIL_CODE:
+        case ItemSpecialHandler.MAGDEBURG_RIGHTS:
           return {
             description: msg('itemInfo.civilCode', { percent: pct(BALANCE.items.civilCode.share), min: BALANCE.items.civilCode.min }),
             use: ItemUse.DIRECT,
@@ -163,9 +163,9 @@ function describe(id: string): Pick<ItemInfo, 'description' | 'use' | 'howTo'> {
       break;
     case ItemEffectKind.COMMAND: {
       const text: Record<string, Message> = {
-        [ItemId.CITY_TELEPORTER]: msg('itemInfo.teleporter', { period: period(BALANCE.teleportCooldownMs) }),
+        [ItemId.LOCATORS_CHARTER]: msg('itemInfo.teleporter', { period: period(BALANCE.teleportCooldownMs) }),
         [ItemId.HOLY_WATER]: msg('itemInfo.holyWater'),
-        [ItemId.TRUCE_AGREEMENT]: msg('itemInfo.truce', { period: period(BALANCE.truceDurationMs) }),
+        [ItemId.KINGS_PEACE]: msg('itemInfo.truce', { period: period(BALANCE.truceDurationMs) }),
       };
       if (text[id]) return { description: text[id], use: ItemUse.ELSEWHERE, howTo: HOW_TO[e.command] };
       return { description: msg('itemInfo.notUsable'), use: ItemUse.NONE };

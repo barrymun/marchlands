@@ -5,23 +5,23 @@ export const BUFF_MESSAGES = {
   production: ['resource', 'percent'],
   /** gold income item, `percent`: BALANCE.resourceBuffBonus */
   goldIncome: ['percent'],
-  /** attack item (Ivory Horn), `percent`: the battle bonus (combat.ts buffBonus) */
+  /** attack item (Olifant), `percent`: the battle bonus (combat.ts buffBonus) */
   troopAttack: ['percent'],
   /** defence item, `percent`: the battle bonus (combat.ts buffBonus) */
   troopDefense: ['percent'],
-  /** War Ensign, `percent`: BALANCE.warEnsignTroopBonus */
+  /** Imperial Banner, `percent`: BALANCE.imperialBannerTroopBonus */
   armySize: ['percent'],
   /** extra construction queue item */
   buildingQueue: [],
   /** upkeep item, `percent`: the reduction (economy.ts) */
   upkeep: ['percent'],
-  /** Quartermaster item, `percent`: BALANCE.trainCostReduction */
+  /** Marshal's Seal or Charter, `percent`: BALANCE.trainCostReduction */
   trainingCost: ['percent'],
-  /** Truce Agreement running */
+  /** King's Peace running */
   truce: [],
-  /** a new Truce Agreement cannot be used yet */
+  /** a new King's Peace cannot be used yet */
   truceCooldown: [],
-  /** the City Teleporter cannot be used yet */
+  /** the Locator's Charter cannot be used yet */
   teleportCooldown: [],
   /** holiday mode */
   holiday: [],

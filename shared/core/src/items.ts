@@ -38,7 +38,7 @@ const BUFF_TEXT = {
   gold: msg('buff.goldIncome', { percent: pct(BALANCE.resourceBuffBonus) }),
   attack: msg('buff.troopAttack', { percent: BATTLE_BUFF_PERCENT }),
   defense: msg('buff.troopDefense', { percent: BATTLE_BUFF_PERCENT }),
-  ensign: msg('buff.armySize', { percent: pct(BALANCE.warEnsignTroopBonus) }),
+  banner: msg('buff.armySize', { percent: pct(BALANCE.imperialBannerTroopBonus) }),
   queue: msg('buff.buildingQueue'),
   upkeep: msg('buff.upkeep', { percent: UPKEEP_BUFF_PERCENT }),
   trainCost: msg('buff.trainingCost', { percent: pct(BALANCE.trainCostReduction) }),
@@ -50,66 +50,66 @@ const { buffDurationMs: BUFF_MS, medalBoxes: MEDAL_BOXES } = BALANCE.items;
 
 const EFFECTS: Record<string, ItemEffect> = {
   // ---- production buffs ----
-  [ItemId.PLOWSHARES]: buff(BuffId.FOOD_PRODUCTION, BUFF_TEXT.food, BUFF_MS.short),
-  [ItemId.IRON_RAKE]: buff(BuffId.FOOD_PRODUCTION, BUFF_TEXT.food, BUFF_MS.long),
-  [ItemId.ARCH_SAW]: buff(BuffId.WOOD_PRODUCTION, BUFF_TEXT.wood, BUFF_MS.short),
-  [ItemId.DOUBLE_SAW]: buff(BuffId.WOOD_PRODUCTION, BUFF_TEXT.wood, BUFF_MS.long),
-  [ItemId.QUARRYING_TOOLS]: buff(BuffId.STONE_PRODUCTION, BUFF_TEXT.stone, BUFF_MS.short),
-  [ItemId.ADV_QUARRYING_TOOLS]: buff(BuffId.STONE_PRODUCTION, BUFF_TEXT.stone, BUFF_MS.long),
-  [ItemId.BLOWER]: buff(BuffId.IRON_PRODUCTION, BUFF_TEXT.iron, BUFF_MS.short),
-  [ItemId.BLAST_FURNACE]: buff(BuffId.IRON_PRODUCTION, BUFF_TEXT.iron, BUFF_MS.long),
-  [ItemId.TAX_POLICY]: buff(BuffId.GOLD_PRODUCTION, BUFF_TEXT.gold, BUFF_MS.short),
-  [ItemId.ADV_TAX_POLICY]: buff(BuffId.GOLD_PRODUCTION, BUFF_TEXT.gold, BUFF_MS.long),
+  [ItemId.PLOUGHSHARE]: buff(BuffId.FOOD_PRODUCTION, BUFF_TEXT.food, BUFF_MS.short),
+  [ItemId.HEAVY_PLOUGH]: buff(BuffId.FOOD_PRODUCTION, BUFF_TEXT.food, BUFF_MS.long),
+  [ItemId.BOW_SAW]: buff(BuffId.WOOD_PRODUCTION, BUFF_TEXT.wood, BUFF_MS.short),
+  [ItemId.WATER_SAW]: buff(BuffId.WOOD_PRODUCTION, BUFF_TEXT.wood, BUFF_MS.long),
+  [ItemId.MASONS_PICK]: buff(BuffId.STONE_PRODUCTION, BUFF_TEXT.stone, BUFF_MS.short),
+  [ItemId.TREADWHEEL_CRANE]: buff(BuffId.STONE_PRODUCTION, BUFF_TEXT.stone, BUFF_MS.long),
+  [ItemId.HAND_BELLOWS]: buff(BuffId.IRON_PRODUCTION, BUFF_TEXT.iron, BUFF_MS.short),
+  [ItemId.WATER_BELLOWS]: buff(BuffId.IRON_PRODUCTION, BUFF_TEXT.iron, BUFF_MS.long),
+  [ItemId.TOLL_RIGHT]: buff(BuffId.GOLD_PRODUCTION, BUFF_TEXT.gold, BUFF_MS.short),
+  [ItemId.MINT_RIGHT]: buff(BuffId.GOLD_PRODUCTION, BUFF_TEXT.gold, BUFF_MS.long),
 
   // ---- military buffs ----
   [ItemId.WAR_HORN]: buff(BuffId.ATTACK, BUFF_TEXT.attack, BUFF_MS.short),
-  [ItemId.IVORY_HORN]: buff(BuffId.ATTACK, BUFF_TEXT.attack, BUFF_MS.long),
-  [ItemId.CORSELET]: buff(BuffId.DEFENSE, BUFF_TEXT.defense, BUFF_MS.short),
-  [ItemId.ULTRA_CORSELET]: buff(BuffId.DEFENSE, BUFF_TEXT.defense, BUFF_MS.long),
-  [ItemId.WAR_ENSIGN]: buff(BuffId.WAR_ENSIGN, BUFF_TEXT.ensign, BUFF_MS.short),
-  [ItemId.BERNINIS_HAMMER]: buff(BuffId.BUILDING_QUEUE, BUFF_TEXT.queue, BUFF_MS.long),
+  [ItemId.OLIFANT]: buff(BuffId.ATTACK, BUFF_TEXT.attack, BUFF_MS.long),
+  [ItemId.GAMBESON]: buff(BuffId.DEFENSE, BUFF_TEXT.defense, BUFF_MS.short),
+  [ItemId.HAUBERK]: buff(BuffId.DEFENSE, BUFF_TEXT.defense, BUFF_MS.long),
+  [ItemId.IMPERIAL_BANNER]: buff(BuffId.IMPERIAL_BANNER, BUFF_TEXT.banner, BUFF_MS.short),
+  [ItemId.BERNWARDS_HAMMER]: buff(BuffId.BUILDING_QUEUE, BUFF_TEXT.queue, BUFF_MS.long),
 
   // ---- upkeep ----
-  [ItemId.VESTAS_BLESSING]: buff(BuffId.UPKEEP_REDUCE, BUFF_TEXT.upkeep, BUFF_MS.short),
-  [ItemId.VESTAS_GRAND_BLESSING]: buff(BuffId.UPKEEP_REDUCE, BUFF_TEXT.upkeep, BUFF_MS.long),
-  [ItemId.QUARTERMASTERS_SEAL]: buff(BuffId.TRAIN_COST_REDUCE, BUFF_TEXT.trainCost, BUFF_MS.short),
-  [ItemId.QUARTERMASTERS_CHARTER]: buff(BuffId.TRAIN_COST_REDUCE, BUFF_TEXT.trainCost, BUFF_MS.long),
+  [ItemId.ELIZABETHS_BREAD]: buff(BuffId.UPKEEP_REDUCE, BUFF_TEXT.upkeep, BUFF_MS.short),
+  [ItemId.ELIZABETHS_GRANARY]: buff(BuffId.UPKEEP_REDUCE, BUFF_TEXT.upkeep, BUFF_MS.long),
+  [ItemId.MARSHALS_SEAL]: buff(BuffId.TRAIN_COST_REDUCE, BUFF_TEXT.trainCost, BUFF_MS.short),
+  [ItemId.MARSHALS_CHARTER]: buff(BuffId.TRAIN_COST_REDUCE, BUFF_TEXT.trainCost, BUFF_MS.long),
 
   // ---- protection ----
-  [ItemId.TRUCE_AGREEMENT]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.CITY_TRUCE },
+  [ItemId.KINGS_PEACE]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.CITY_TRUCE },
 
   // ---- city items ----
-  [ItemId.CIVIL_CODE]: { kind: ItemEffectKind.SPECIAL, handler: ItemSpecialHandler.CIVIL_CODE },
-  [ItemId.PENICILLIN]: { kind: ItemEffectKind.SPECIAL, handler: ItemSpecialHandler.CURE_INJURED },
+  [ItemId.MAGDEBURG_RIGHTS]: { kind: ItemEffectKind.SPECIAL, handler: ItemSpecialHandler.MAGDEBURG_RIGHTS },
+  [ItemId.THERIAC]: { kind: ItemEffectKind.SPECIAL, handler: ItemSpecialHandler.CURE_INJURED },
 
   // ---- boxes ----
-  [ItemId.JUNIOR_MEDAL_BOX]: { kind: ItemEffectKind.BOX, contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.JUNIOR_MEDAL_BOX]) },
-  [ItemId.MEDIUM_MEDAL_BOX]: { kind: ItemEffectKind.BOX, contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.MEDIUM_MEDAL_BOX]) },
-  [ItemId.SENIOR_MEDAL_BOX]: { kind: ItemEffectKind.BOX, contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.SENIOR_MEDAL_BOX]) },
-  [ItemId.HERO_PACKAGE]: { kind: ItemEffectKind.SPECIAL, handler: ItemSpecialHandler.HERO_BOX },
-  [ItemId.WELCOME_PACKAGE]: {
+  [ItemId.BRONZE_COFFER]: { kind: ItemEffectKind.BOX, contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.BRONZE_COFFER]) },
+  [ItemId.SILVER_COFFER]: { kind: ItemEffectKind.BOX, contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.SILVER_COFFER]) },
+  [ItemId.GOLD_COFFER]: { kind: ItemEffectKind.BOX, contents: (rng) => medals(rng, MEDAL_BOXES[ItemId.GOLD_COFFER]) },
+  [ItemId.OATH_OF_FEALTY]: { kind: ItemEffectKind.SPECIAL, handler: ItemSpecialHandler.HERO_BOX },
+  [ItemId.FOUNDERS_GIFT]: {
     kind: ItemEffectKind.GRANT,
-    items: { ...BALANCE.items.welcomePackage.items },
-    resources: { ...BALANCE.items.welcomePackage.resources },
+    items: { ...BALANCE.items.foundersGift.items },
+    resources: { ...BALANCE.items.foundersGift.resources },
   },
 
   // ---- used through dedicated commands ----
-  [ItemId.BEGINNER_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
-  [ItemId.PRIMARY_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
-  [ItemId.INTERMEDIATE_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
-  [ItemId.SENIOR_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
-  [ItemId.MASTER_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
-  [ItemId.ULTIMATE_GUIDELINES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
-  [ItemId.NAPOLEONS_DIARY]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.TROOPS_SPEEDUP },
-  [ItemId.ARCHIMEDES_NOTE]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.FORTIFICATIONS_SPEEDUP },
-  [ItemId.CITY_TELEPORTER]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.CITY_MOVE },
+  [ItemId.NOVICES_NOTES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.APPRENTICES_NOTES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.JOURNEYMANS_NOTES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.MASTERS_NOTES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.GRANDMASTERS_NOTES]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.VILLARDS_SKETCHBOOK]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.SPEEDUP },
+  [ItemId.OTTOS_MUSTER_ROLL]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.TROOPS_SPEEDUP },
+  [ItemId.HENRYS_CASTLE_LAW]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.FORTIFICATIONS_SPEEDUP },
+  [ItemId.LOCATORS_CHARTER]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.CITY_MOVE },
   [ItemId.HOLY_WATER]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_RESET },
-  [ItemId.EXCALIBUR]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
-  [ItemId.WEALTH_OF_NATIONS]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
-  [ItemId.ART_OF_WAR]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
-  [ItemId.ANABASIS]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.JOYEUSE]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.MIRROR_OF_KINGS]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.STRATAGEMS]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.DEEDS_OF_THE_SAXONS]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
   [ItemId.EPITOME_OF_MILITARY_SCIENCE]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
-  [ItemId.ON_WAR]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
+  [ItemId.NIBELUNGENLIED]: { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM },
 };
 for (const l of [1, 2, 3, 4, 5, 6, 7, 8, 9]) EFFECTS[medalId(l)] = { kind: ItemEffectKind.COMMAND, command: ItemCommand.HEROES_USE_ITEM };
 
@@ -125,16 +125,16 @@ export function itemEffect(itemId: string): ItemEffect | undefined {
   return EFFECTS[itemId];
 }
 
-/** Hero-attribute items (Excalibur etc.): +BALANCE.items.heroAttributeBuff.bonus of the attribute as a buff bonus. */
+/** Hero-attribute items (Joyeuse etc.): +BALANCE.items.heroAttributeBuff.bonus of the attribute as a buff bonus. */
 export const HERO_ATTRIBUTE_ITEMS: Record<string, HeroBuffId> = {
-  [ItemId.EXCALIBUR]: HeroBuffId.POWER,
-  [ItemId.WEALTH_OF_NATIONS]: HeroBuffId.MANAGEMENT,
-  [ItemId.ART_OF_WAR]: HeroBuffId.STRATAGEM,
+  [ItemId.JOYEUSE]: HeroBuffId.POWER,
+  [ItemId.MIRROR_OF_KINGS]: HeroBuffId.MANAGEMENT,
+  [ItemId.STRATAGEMS]: HeroBuffId.STRATAGEM,
 };
 /** What a hero attribute boost does (heroes.buffs[].desc). */
 export const heroBuffDesc = (attr: HeroBuffId) => msg('buff.heroStat', { stat: ref.stat(attr), percent: pct(BALANCE.items.heroAttributeBuff.bonus) });
-/** The army-size boost of the War Ensign (for battle reports). */
-export const WAR_ENSIGN_DESC = BUFF_TEXT.ensign;
+/** The army-size boost of the Imperial Banner (for battle reports). */
+export const IMPERIAL_BANNER_DESC = BUFF_TEXT.banner;
 
 /** The hero inside a hero box: its level and lowest base attribute (BALANCE.items.heroBoxes). */
 export const heroBoxQuality = (itemId: string) => BALANCE.items.heroBoxes[itemId] ?? BALANCE.items.heroBoxFallback;
@@ -165,8 +165,8 @@ export function createBoxHero(itemId: string, rng: Rng, city: { state: number; t
   };
 }
 
-/** A city's population after a Civil Code (BALANCE.items.civilCode), never above its maximum. */
-export function civilCodePopulation(population: number, maxPopulation: number): number {
+/** A city's population after a Magdeburg Rights (BALANCE.items.civilCode), never above its maximum. */
+export function magdeburgRightsPopulation(population: number, maxPopulation: number): number {
   const { share, min } = BALANCE.items.civilCode;
   return Math.min(maxPopulation, population + Math.max(min, Math.floor(maxPopulation * share)));
 }
@@ -224,7 +224,7 @@ export function syncHeroBuffs(h: BuffedHero): boolean {
   return changed;
 }
 
-/** Medal item id of a level 1 (Cross) … 9 (Nation). */
+/** Medal item id of a level 1 (Cross) … 9 (Crown). */
 export function medalId(level: number): string {
   return `hero.loyalty.${Math.min(9, Math.max(1, level))}`;
 }
@@ -271,9 +271,11 @@ export function rollMedalDrops(level: number, rng: Rng): Record<string, number> 
 
 /**
  * (marchlands) Gold price of an item in the shop (bought with a city's gold): its set price
- * (BALANCE.goldShop), or the original's cents price in gold (goldForCents); null when not for sale.
+ * (BALANCE.goldShop), or the original's cents price in gold (goldForCents); null when not for sale, as the
+ * items in BALANCE.notInShop aren't.
  */
 export function itemGoldPrice(itemId: string): number | null {
+  if (BALANCE.notInShop.includes(itemId)) return null;
   const set = BALANCE.goldShop[itemId];
   if (set != null) return set;
   const cfg = itemConfig(itemId);

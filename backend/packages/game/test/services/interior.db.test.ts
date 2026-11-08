@@ -316,7 +316,7 @@ describe(interior.moveCity.name, () => {
       setGameSpeed(4);
       try {
         const p = await createTestPlayer(g);
-        await giveItems(g, p, { [ItemId.CITY_TELEPORTER]: 1 });
+        await giveItems(g, p, { [ItemId.LOCATORS_CHARTER]: 1 });
         await interior.moveCity(g, p.id, p.cityId, await freeFlat(g, [(await reloadCity(g, p.cityId)).tileId]));
         const player = await reloadPlayer(g, p);
         expect(player.buffs).toContainEqual(expect.objectContaining({ id: BuffId.TELEPORT_COOLDOWN, endTime: g.now + BALANCE.teleportCooldownMs }));
@@ -325,10 +325,10 @@ describe(interior.moveCity.name, () => {
       }
     }));
 
-  it('moves the city to a free flat with a City Teleporter, then cools down', () =>
+  it("moves the city to a free flat with a Locator's Charter, then cools down", () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      await giveItems(g, p, { [ItemId.CITY_TELEPORTER]: 1 });
+      await giveItems(g, p, { [ItemId.LOCATORS_CHARTER]: 1 });
       const from = (await reloadCity(g, p.cityId)).tileId;
       const to = await freeFlat(g, [from]);
       const before = await reloadCity(g, p.cityId);
@@ -341,15 +341,15 @@ describe(interior.moveCity.name, () => {
       expect(await getTile(g, to)).toMatchObject({ type: TileType.CASTLE, cityId: p.cityId, ownerPlayerId: p.id, ownerCityId: null });
 
       const player = await reloadPlayer(g, p);
-      expect(player.items[ItemId.CITY_TELEPORTER] ?? 0).toBe(0);
+      expect(player.items[ItemId.LOCATORS_CHARTER] ?? 0).toBe(0);
       const end = g.now + BALANCE.teleportCooldownMs;
       expect(player.buffs).toContainEqual(expect.objectContaining({ id: BuffId.TELEPORT_COOLDOWN, endTime: end }));
       expect(g.events(TimedEventType.BUFF_EXPIRE)).toContainEqual(expect.objectContaining({ dueAt: end, refKey: `buff:${p.id}:${BuffId.TELEPORT_COOLDOWN}` }));
       expect(g.pushes(PushCmd.CASTLE_UPDATE).at(-1)?.data).toMatchObject({ castleBean: { fieldId: to } });
 
-      await giveItems(g, p, { [ItemId.CITY_TELEPORTER]: 1 });
+      await giveItems(g, p, { [ItemId.LOCATORS_CHARTER]: 1 });
       const again = await freeFlat(g, [from, to]);
-      await expectRefused(interior.moveCity(g, p.id, p.cityId, again), msg('city.teleportCooldown', { item: ref.item(ItemId.CITY_TELEPORTER) }));
+      await expectRefused(interior.moveCity(g, p.id, p.cityId, again), msg('city.teleportCooldown', { item: ref.item(ItemId.LOCATORS_CHARTER) }));
       g.advance(BALANCE.teleportCooldownMs);
       await interior.moveCity(g, p.id, p.cityId, again);
     }));
@@ -357,7 +357,7 @@ describe(interior.moveCity.name, () => {
   it('without a teleporter, buys one with the city gold', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      const price = itemGoldPrice(ItemId.CITY_TELEPORTER)!;
+      const price = itemGoldPrice(ItemId.LOCATORS_CHARTER)!;
       const from = (await reloadCity(g, p.cityId)).tileId;
       const to = await freeFlat(g, [from]);
       await setResources(g, p, { gold: price - 1 });
@@ -370,7 +370,7 @@ describe(interior.moveCity.name, () => {
   it('loses the valleys the city held', () =>
     game(async (g) => {
       const p = await createTestPlayer(g);
-      await giveItems(g, p, { [ItemId.CITY_TELEPORTER]: 1 });
+      await giveItems(g, p, { [ItemId.LOCATORS_CHARTER]: 1 });
       const valley = await freeValley(g);
       // no factory occupies a valley: hand it to the city directly
       await g.tx.update(tiles).set({ ownerCityId: p.cityId, ownerPlayerId: p.id }).where(eq(tiles.id, valley));
@@ -384,18 +384,18 @@ describe(interior.moveCity.name, () => {
     game(async (g) => {
       const p = await createTestPlayer(g);
       const other = await createTestPlayer(g);
-      await giveItems(g, p, { [ItemId.CITY_TELEPORTER]: 1 });
+      await giveItems(g, p, { [ItemId.LOCATORS_CHARTER]: 1 });
       const occupied = (await reloadCity(g, other.cityId)).tileId;
       for (const target of [occupied, await freeValley(g), -1]) await expectRefused(interior.moveCity(g, p.id, p.cityId, target), msg('city.notFreeFlat'));
-      expect((await reloadPlayer(g, p)).items[ItemId.CITY_TELEPORTER]).toBe(1);
+      expect((await reloadPlayer(g, p)).items[ItemId.LOCATORS_CHARTER]).toBe(1);
     }));
 
   it('needs every army home and no foreign troops on the way', () =>
     game(async (g) => {
       const a = await createTestPlayer(g);
       const b = await createTestPlayer(g);
-      await giveItems(g, a, { [ItemId.CITY_TELEPORTER]: 1 });
-      await giveItems(g, b, { [ItemId.CITY_TELEPORTER]: 1 });
+      await giveItems(g, a, { [ItemId.LOCATORS_CHARTER]: 1 });
+      await giveItems(g, b, { [ItemId.LOCATORS_CHARTER]: 1 });
       await scoutAt(g, a, b);
       const avoid = [(await reloadCity(g, a.cityId)).tileId, (await reloadCity(g, b.cityId)).tileId];
       await expectRefused(interior.moveCity(g, a.id, a.cityId, await freeFlat(g, avoid)), msg('city.recallTroopsFirst'));

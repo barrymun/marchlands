@@ -48,9 +48,9 @@ export interface Lord {
   gearStars: number;
   /** the attribute the gear boosts */
   gearStat: GearStat;
-  /** attack item (Ivory Horn / War Horn): +20% attack */
+  /** attack item (Olifant / War Horn): +20% attack */
   attackItem: boolean;
-  /** defense item (Ultra Corselet / Corselet): +20% defense */
+  /** defense item (Hauberk / Gambeson): +20% defense */
   defenseItem: boolean;
 }
 

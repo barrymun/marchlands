@@ -369,7 +369,7 @@ export const postPlayerFurloughMutation = (options?: Partial<Options<PostPlayerF
 };
 
 /**
- * Truce Agreement (city.setStopWarState)
+ * King's Peace (city.setStopWarState)
  */
 export const postPlayerTruceMutation = (options?: Partial<Options<PostPlayerTruceData>>): UseMutationOptions<PostPlayerTruceResponse, PostPlayerTruceError, Options<PostPlayerTruceData>> => {
     const mutationOptions: UseMutationOptions<PostPlayerTruceResponse, PostPlayerTruceError, Options<PostPlayerTruceData>> = {
@@ -766,7 +766,7 @@ export const getCitiesProductionOptions = (options: Options<GetCitiesProductionD
 });
 
 /**
- * Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned)
+ * Teleport to a free flat with a Locator's Charter (bought with the city gold if none is owned)
  */
 export const postCitiesMoveMutation = (options?: Partial<Options<PostCitiesMoveData>>): UseMutationOptions<PostCitiesMoveResponse, PostCitiesMoveError, Options<PostCitiesMoveData>> => {
     const mutationOptions: UseMutationOptions<PostCitiesMoveResponse, PostCitiesMoveError, Options<PostCitiesMoveData>> = {
@@ -1181,7 +1181,7 @@ export const deleteCitiesTroopsQueuesByQueueIdMutation = (options?: Partial<Opti
 };
 
 /**
- * Napoleon's Diary: -30% (troop.accTroopProduce)
+ * Otto's Muster Roll: -30% (troop.accTroopProduce)
  */
 export const postCitiesTroopsQueuesSpeedupMutation = (options?: Partial<Options<PostCitiesTroopsQueuesSpeedupData>>): UseMutationOptions<PostCitiesTroopsQueuesSpeedupResponse, PostCitiesTroopsQueuesSpeedupError, Options<PostCitiesTroopsQueuesSpeedupData>> => {
     const mutationOptions: UseMutationOptions<PostCitiesTroopsQueuesSpeedupResponse, PostCitiesTroopsQueuesSpeedupError, Options<PostCitiesTroopsQueuesSpeedupData>> = {
@@ -1285,7 +1285,7 @@ export const deleteCitiesFortificationsQueuesByQueueIdMutation = (options?: Part
 };
 
 /**
- * Archimedes' Note: -30% (fortifications.accTroopProduce)
+ * Henry's Castle Law: -30% (fortifications.accTroopProduce)
  */
 export const postCitiesFortificationsQueuesSpeedupMutation = (options?: Partial<Options<PostCitiesFortificationsQueuesSpeedupData>>): UseMutationOptions<PostCitiesFortificationsQueuesSpeedupResponse, PostCitiesFortificationsQueuesSpeedupError, Options<PostCitiesFortificationsQueuesSpeedupData>> => {
     const mutationOptions: UseMutationOptions<PostCitiesFortificationsQueuesSpeedupResponse, PostCitiesFortificationsQueuesSpeedupError, Options<PostCitiesFortificationsQueuesSpeedupData>> = {

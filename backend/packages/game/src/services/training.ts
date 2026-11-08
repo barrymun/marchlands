@@ -261,10 +261,10 @@ export async function cancelTraining(ctx: Ctx, playerId: number, cityId: number,
   await saveCity(ctx, b.city);
 }
 
-/** troop.accTroopProduce (Napoleon's Diary) / fortifications.accTroopProduce (Archimedes' Note): see speedUpTrainBatch. */
+/** troop.accTroopProduce (Otto's Muster Roll) / fortifications.accTroopProduce (Henry's Castle Law): see speedUpTrainBatch. */
 export async function speedupTraining(ctx: Ctx, playerId: number, cityId: number, positionId: number, queueId: number) {
   const fort = positionId === WALLS_QUEUE;
-  const itemId = fort ? ItemId.ARCHIMEDES_NOTE : ItemId.NAPOLEONS_DIARY;
+  const itemId = fort ? ItemId.HENRYS_CASTLE_LAW : ItemId.OTTOS_MUSTER_ROLL;
   const b = await openOwnCity(ctx, playerId, cityId);
   const { queue, nextQueueId } = queueOf(b, positionId);
   const idx = queue.findIndex((q) => q.queueId === queueId);

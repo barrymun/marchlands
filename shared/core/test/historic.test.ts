@@ -427,7 +427,7 @@ describe(`${buildingConfig.name} for a historic city’s fields`, () => {
 describe(maxArmyTroops.name, () => {
   const rally10 = [{ positionId: 0, typeId: BuildingType.RALLY_SPOT, level: 10, status: BuildingStatus.IDLE, startTime: 0, endTime: 0 }];
 
-  it('sends a quarter more a level step from a held historic city, and a War Ensign adds its quarter on top', () => {
+  it('sends a quarter more a level step from a held historic city, and a Imperial Banner adds its quarter on top', () => {
     expect(maxArmyTroops(rally10)).toBe(100_000);
     expect(maxArmyTroops(rally10, false, 12)).toBe(125_000);
     expect(maxArmyTroops(rally10, false, 18)).toBe(200_000);

@@ -249,7 +249,7 @@ export const TrainableUnit = z
     typeId: int(),
     key: z.union([TroopKeySchema, FortKeySchema]).optional(),
     ...costShape,
-    costShare: z.number().describe('(marchlands) share of the cost above actually paid (below 1 while a Quartermaster item runs)'),
+    costShare: z.number().describe("(marchlands) share of the cost above actually paid (below 1 while a Marshal's Seal or Charter runs)"),
     population: int().describe('per unit'),
     time: int().describe('seconds per unit'),
     requirements: z.array(RequirementCheck),

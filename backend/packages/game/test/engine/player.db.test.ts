@@ -18,8 +18,8 @@ describe(isProtected.name, () => {
       await admin.setPlayerFlags(g, a.name, { beginner: false });
       expect(isProtected(await reloadPlayer(g, a), g.now)).toBeNull();
 
-      await giveItems(g, a, { [ItemId.TRUCE_AGREEMENT]: 1 });
-      await player.startTruce(g, a.id, ItemId.TRUCE_AGREEMENT, a.cityId);
+      await giveItems(g, a, { [ItemId.KINGS_PEACE]: 1 });
+      await player.startTruce(g, a.id, ItemId.KINGS_PEACE, a.cityId);
       const inTruce = await reloadPlayer(g, a);
       expect(isProtected(inTruce, g.now)).toEqual(msg('player.protected.truce'));
       // a buff whose time is over protects no more, even before its expiry runs

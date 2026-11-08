@@ -173,10 +173,10 @@ export async function setCityFlags(ctx: Ctx, playerId: number, cityId: number, f
   await saveCity(ctx, b.city);
 }
 
-const TELEPORTER = ItemId.CITY_TELEPORTER;
+const CHARTER = ItemId.LOCATORS_CHARTER;
 
 /**
- * city.advMoveCastle: the City Teleporter moves the city to a free flat of the lord's choice, then
+ * city.advMoveCastle: the Locator's Charter moves the city to a free flat of the lord's choice, then
  * cools down (BALANCE.teleportCooldownMs); one not owned is bought with the city's gold on use.
  * (marchlands) the original's City Teleporter picked a random flat in a state; the Adv City Teleporter,
  * which chose the tile, is removed. All troops must be home.
@@ -184,7 +184,7 @@ const TELEPORTER = ItemId.CITY_TELEPORTER;
 export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targetTileId: number) {
   const b = await openOwnCity(ctx, playerId, cityId);
   if (b.city.historicLevel) throw new GameError(msg('city.historicCannotMove'), -90);
-  if (activeBuff(b.player, BuffId.TELEPORT_COOLDOWN, ctx.now)) throw new GameError(msg('city.teleportCooldown', { item: ref.item(TELEPORTER) }), -90);
+  if (activeBuff(b.player, BuffId.TELEPORT_COOLDOWN, ctx.now)) throw new GameError(msg('city.teleportCooldown', { item: ref.item(CHARTER) }), -90);
   const { n: out } = one(await ctx.tx.select({ n: count() }).from(armies).where(eq(armies.cityId, cityId)));
   if (Number(out) > 0) throw new GameError(msg('city.recallTroopsFirst'), -77);
   const { n: guests } = one(
@@ -198,7 +198,7 @@ export async function moveCity(ctx: Ctx, playerId: number, cityId: number, targe
   const target = targetTileId;
   const [t] = await ctx.tx.select().from(tiles).where(eq(tiles.id, target)).for('update');
   if (!t || t.type !== TileType.FLAT || t.cityId != null || t.ownerCityId != null) throw new GameError(msg('city.notFreeFlat'), -25);
-  useItemOrGold(ctx, b.player, b.city, TELEPORTER, itemGoldPrice(TELEPORTER) ?? 0);
+  useItemOrGold(ctx, b.player, b.city, CHARTER, itemGoldPrice(CHARTER) ?? 0);
   await ctx.tx.update(tiles).set({ cityId: null, type: TileType.FLAT, ownerPlayerId: null, updatedAt: ctx.now }).where(eq(tiles.id, b.city.tileId));
   await ctx.tx.update(tiles).set({ cityId, type: TileType.CASTLE, ownerPlayerId: playerId, ownerCityId: null, updatedAt: ctx.now }).where(eq(tiles.id, target));
   await armiesNowAimAtCity(ctx, target, playerId);

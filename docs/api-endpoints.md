@@ -43,7 +43,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/player/restart` | Delete everything and start over (common.deleteUserAndRestart) |
 | GET | `/api/v1/player/statistics` | The lord's statistics: all time, last 7 days and per city (a few minutes behind) |
 | POST | `/api/v1/player/title/promote` | Promote to the next nobility title: prestige, medals and a city's gold |
-| POST | `/api/v1/player/truce` | Truce Agreement (city.setStopWarState) |
+| POST | `/api/v1/player/truce` | King's Peace (city.setStopWarState) |
 | POST | `/api/v1/player/tutorial` | Store tutorial progress (common.step) |
 | GET | `/api/v1/players/{name}` | Public profile of a lord |
 
@@ -59,7 +59,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/cities/{cityId}/comfort` | Comfort: 3 blessing (gold for food), 4 population raising (food for people) (interior.pacifyPeople) |
 | POST | `/api/v1/cities/{cityId}/draft` | (marchlands) A held historic city drafts from a barbarian city in its area (the one given, or the one it would pick by itself), as one of its drafts today |
 | POST | `/api/v1/cities/{cityId}/draft/mode` | (marchlands) Let a held historic city draft by itself, or only when its holder chooses |
-| POST | `/api/v1/cities/{cityId}/move` | Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned) |
+| POST | `/api/v1/cities/{cityId}/move` | Teleport to a free flat with a Locator's Charter (bought with the city gold if none is owned) |
 | GET | `/api/v1/cities/{cityId}/production` | Production breakdown (interior.getResourceProduceData) |
 | PUT | `/api/v1/cities/{cityId}/store-percent` | Warehouse protection split, % (city.modifyStorePercent) |
 | PUT | `/api/v1/cities/{cityId}/tax` | Tax rate (interior.modifyTaxRate) |
@@ -95,7 +95,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/cities/{cityId}/fortifications/destroy` | Destroy fortifications (fortifications.destructWallProtect) |
 | GET | `/api/v1/cities/{cityId}/fortifications/queues` | Production queues (forti.getProduceQueue) |
 | DELETE | `/api/v1/cities/{cityId}/fortifications/queues/{positionId}/{queueId}` | Cancel a batch |
-| POST | `/api/v1/cities/{cityId}/fortifications/queues/{positionId}/{queueId}/speedup` | Archimedes' Note: -30% (fortifications.accTroopProduce) |
+| POST | `/api/v1/cities/{cityId}/fortifications/queues/{positionId}/{queueId}/speedup` | Henry's Castle Law: -30% (fortifications.accTroopProduce) |
 | POST | `/api/v1/cities/{cityId}/fortifications/train` | Build fortifications (fortifications.produceWallProtect) |
 | POST | `/api/v1/cities/{cityId}/fortifications/train-many` | Order several fortifications at once (one order per type), all or nothing |
 | GET | `/api/v1/cities/{cityId}/fortifications/trainable` | Trainable fortifications (fortifications.getFortificationsProduceList) |
@@ -104,7 +104,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | POST | `/api/v1/cities/{cityId}/troops/injured/disband` | Dismiss injured troops (army.disbandInjuredTroop) |
 | GET | `/api/v1/cities/{cityId}/troops/queues` | Production queues (troop.getProduceQueue) |
 | DELETE | `/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}` | Cancel a batch |
-| POST | `/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}/speedup` | Napoleon's Diary: -30% (troop.accTroopProduce) |
+| POST | `/api/v1/cities/{cityId}/troops/queues/{positionId}/{queueId}/speedup` | Otto's Muster Roll: -30% (troop.accTroopProduce) |
 | POST | `/api/v1/cities/{cityId}/troops/train` | Train troops at a barracks (troop.produceTroop) |
 | POST | `/api/v1/cities/{cityId}/troops/train-many` | Order several troops at once (one order per type), all or nothing |
 | POST | `/api/v1/cities/{cityId}/troops/train-split` | Train one order split over all barracks so the batches finish together |

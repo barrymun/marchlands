@@ -99,7 +99,7 @@ export default async function cityRoutes(app: ZApp) {
   );
   app.post(
     '/cities/:cityId/move',
-    s(tags.city, 'Teleport to a free flat with a City Teleporter (bought with the city gold if none is owned)', CityMoveResult, {
+    s(tags.city, "Teleport to a free flat with a Locator's Charter (bought with the city gold if none is owned)", CityMoveResult, {
       params: zCityParams,
       body: MoveCityBody,
     }),
@@ -268,7 +268,7 @@ export default async function cityRoutes(app: ZApp) {
     );
     app.post(
       `/cities/:cityId/${kind}/queues/:positionId/:queueId/speedup`,
-      s(tag, fort ? "Archimedes' Note: -30% (fortifications.accTroopProduce)" : "Napoleon's Diary: -30% (troop.accTroopProduce)", Empty, {
+      s(tag, fort ? "Henry's Castle Law: -30% (fortifications.accTroopProduce)" : "Otto's Muster Roll: -30% (troop.accTroopProduce)", Empty, {
         params: TrainingQueueParams,
       }),
       (req) =>

@@ -109,7 +109,7 @@ export function heroGearBreakdown(
 /** Total gear points for a hero of `heroLevel`. */
 export const heroGearBonus = (heroLevel: number, gear: LordGear) => heroGearBreakdown(heroLevel, gear).total;
 
-/** Medals for a piece's star `star` (1-10): stars 1-9 take starMedals medals of that level, star 10 lastStarMedals Nation Medals. */
+/** Medals for a piece's star `star` (1-10): stars 1-9 take starMedals medals of that level, star 10 lastStarMedals Crown Medals. */
 export function gearStarCost(star: number): { itemId: string; count: number } {
   const { maxStars, starMedals, lastStarMedals } = BALANCE.heroGear;
   if (star >= maxStars) return { itemId: medalId(9), count: lastStarMedals };
