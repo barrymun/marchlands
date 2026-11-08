@@ -1,5 +1,7 @@
 # Marchlands
 
+[![CI](https://github.com/barrymun/marchlands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/barrymun/marchlands/actions/workflows/ci.yml)
+
 A browser strategy game in the tradition of **Evony (Age 1)**: build a city, train an army, raise heroes, trade on the market and fight your way up the map to the historic cities, set in the Empire's borderlands around 950–1250.
 
 It started as a from-scratch TypeScript rewrite of the original game server and has since grown rules of its own (every one listed in [docs/deviations.md](docs/deviations.md)). It is based on the open-source C++ server *Spitfire* ([sonya75/evony-private-server](https://github.com/sonya75/evony-private-server)) and the Age 1 battle calculator ([sonya75/EvonyAge1BattleCalc](https://github.com/sonya75/EvonyAge1BattleCalc)). Every formula the original had is ported exactly, and the battle simulator matches all 36,567 regression cases of the original calculator. Where the original left something unbuilt (attacks, transport, reinforcement, the market, quests, friends, alliance permissions and more), Marchlands builds it, following Evony Age 1.
@@ -208,7 +210,7 @@ And when the change touches the backend, the service tests against a real Postgr
 npm run test:db
 ```
 
-`npm run ci:local` runs everything CI runs, in clean Linux containers (about 2 minutes, needs act and Docker).
+GitHub Actions runs all of these ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) on every push to `main` and every pull request; the badge at the top shows the last run on `main`. `npm run ci:local` runs the same workflow on your computer first, in clean Linux containers (about 2 minutes, needs act and Docker).
 
 ### Common tasks
 

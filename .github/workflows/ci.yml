@@ -1,8 +1,6 @@
-# CI: every check AGENTS.md asks for before a change is finished. Run it locally with act: npm run ci:local
-# (AGENTS.md, Local CI). Manual trigger only, so GitHub never runs it by itself (to save its cost for now); to turn on CI on GitHub, add
-#   push: { branches: [main] }
-#   pull_request:
-# under `on`.
+# CI: every check AGENTS.md asks for before a change is finished. GitHub runs it on every push to main and every pull
+# request (the README's badge shows the last run on main); run it locally with act: npm run ci:local (AGENTS.md, Local CI).
+# A newer push to the same branch or pull request cancels the run still going.
 #
 # Both jobs run inside the node:24 image rather than on the runner itself: act then only needs that image (not a
 # 1-2 GB runner image), and Postgres is reached by its service name (`postgres`) the same way under act and on GitHub.
@@ -10,7 +8,17 @@
 name: CI
 
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   checks:

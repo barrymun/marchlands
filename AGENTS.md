@@ -61,7 +61,7 @@ Before finishing any change: `npm run typecheck`, `npm run lint`, `npm test` and
 **Local CI** (`npm run ci:local`, needs act and Docker):
 
 - `.github/workflows/ci.yml` runs the checks above in two jobs: `checks` (`npm ci`, typecheck, lint with knip, format check, `npm test`, the client build with its size budget, the backend bundle) and `database` (`npm run test:db` against a Postgres 17 service, as in `docker-compose.yml`). Keep it in step with the list above.
-- **Manual trigger only** (`workflow_dispatch`): GitHub never runs it by itself, to save the cost of its runners for now; `npm run ci:local` is how CI runs. Don't turn it on unless the maintainer asks. To turn it on, add `push` / `pull_request` under `on` in the workflow.
+- **GitHub runs it** on every push to `main` and every pull request (and by hand, `workflow_dispatch`); a newer push to the same branch cancels the run still going (`concurrency`). The README's badge shows the last run on `main`. Run `npm run ci:local` before pushing, so a failure shows up on your machine first.
 - Both jobs run inside the `node:24-bookworm` image, so act only needs that image, and Postgres is reached as `postgres` under act and on GitHub alike.
 - act copies the working tree into the containers, uncommitted changes included and gitignored files (`node_modules`, `dist`, `.env`) left out, so the run checks what's on disk from a clean install.
 - `.actrc` maps `ubuntu-latest` to the node image (no first-run image prompt) and turns off act's own `.env` loading (`--env-file=/dev/null`): act would otherwise pass the stack's `.env` into every job and override the workflow's `DATABASE_URL`.
