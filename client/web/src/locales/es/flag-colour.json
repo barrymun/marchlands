@@ -1,0 +1,18 @@
+{
+  "label": "Color de la bandera",
+  "changed": "Color de la bandera cambiado",
+  "colours": {
+    "red": "Rojo",
+    "orange": "Naranja",
+    "amber": "Ámbar",
+    "green": "Verde",
+    "teal": "Verde azulado",
+    "sky": "Azul cielo",
+    "blue": "Azul",
+    "indigo": "Índigo",
+    "violet": "Violeta",
+    "pink": "Rosa",
+    "slate": "Pizarra",
+    "black": "Negro"
+  }
+}

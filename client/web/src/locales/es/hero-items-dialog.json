@@ -1,0 +1,27 @@
+{
+  "toast": {
+    "used": "Objeto usado",
+    "bought": "Comprado con oro y usado"
+  },
+  "notEnoughGold": "No hay suficiente oro en esta ciudad (se necesitan {{gold}})",
+  "title": "Objetos para {{name}}",
+  "maxLevel": "Nivel máximo",
+  "experienceProgress": "Experiencia {{exp}} / {{needed}}",
+  "summary": "{{progress}} · Lealtad {{loyalty}} · {{gold}} de oro en esta ciudad",
+  "experience": {
+    "title": "Experiencia",
+    "gain": "+{{amount}} de experiencia",
+    "atMax": "El nivel {{level}} es el máximo: no gana más experiencia"
+  },
+  "boosts": {
+    "title": "Bonificaciones de atributo",
+    "effect": "{{label}} +{{bonus}} (+{{amount}}, con el equipo) durante {{period}}",
+    "active": "Activa, quedan <countdown />; usar otra añade {{period}}",
+    "best": "La mejor para este héroe"
+  },
+  "loyalty": {
+    "title": "Medallas de lealtad",
+    "gain": "+{{amount}} de lealtad (máx. 100)",
+    "full": "La lealtad ya es 100"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "title": "Investigación",
+  "needsAcademy": "Construye una Academia para investigar tecnologías.",
+  "started": "Investigación iniciada",
+  "allDone": {
+    "title": "Toda la investigación completada",
+    "description": "Las {{total}} tecnologías están en su nivel máximo."
+  },
+  "academy": {
+    "title": "Academia · Investigando {{busy}}/{{slots}}",
+    "full": "Todas las plazas de investigación están ocupadas: espera a que termine una o acelérala.",
+    "slots_one": "Esta ciudad puede investigar {{count}} tecnología a la vez.",
+    "slots_many": "Esta ciudad puede investigar {{count}} tecnologías a la vez.",
+    "slots_other": "Esta ciudad puede investigar {{count}} tecnologías a la vez."
+  },
+  "job": {
+    "progress": "{{name}} → Nv. {{level}}",
+    "elsewhere": "(en otra ciudad)",
+    "cancelled": "Investigación de {{name}} cancelada"
+  },
+  "mayor": {
+    "hint": "Los tiempos de investigación incluyen la Inteligencia {{intelligence}} del alcalde {{name}}: −{{cut}}. Un alcalde con más Inteligencia investiga más rápido.",
+    "none": "Sin alcalde: nombra uno con mucha Inteligencia en Héroes para investigar más rápido."
+  },
+  "tech": {
+    "effective": "(efectivo {{level}})",
+    "research": "Investigar",
+    "capped": " (limitado por la Academia Nv. {{level}})",
+    "needsAcademy": " (necesita la Academia Nv. {{level}} para surtir efecto)"
+  }
+}

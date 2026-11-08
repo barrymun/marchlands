@@ -1,0 +1,38 @@
+{
+  "summary": {
+    "resource": "+{{pct}} de producción de {{resource}} por nivel (sobre la producción de los campos).",
+    "stockpile": "+{{pct}} de almacenamiento de comida, madera, piedra y hierro por nivel.",
+    "construction": "Tiempos de construcción, derribo y fortificación ×{{factor}} por nivel.",
+    "militaryScience": "Tiempo de entrenamiento de todas las tropas, salvo las unidades de asedio, ×{{factor}} por nivel.",
+    "metalCasting": "Tiempo de entrenamiento de las unidades de asedio ({{troops}}) ×{{factor}} por nivel.",
+    "heroEnhancement_one": "Sube un nivel la {{count, number}} pieza de equipo de cada héroe: cada nivel de una pieza añade +{{levelPoints, number}} al atributo de equipo del héroe. Los héroes usan niveles de equipo hasta su grado de equipo (ninguno en los niveles de héroe 1-9, 1 en 10-19, … 9 en 90-99, {{maxTier}} en el nivel {{heroMaxLevel}}).",
+    "heroEnhancement_many": "Sube un nivel las {{count, number}} piezas del equipo de cada héroe: cada nivel de una pieza añade +{{levelPoints, number}} al atributo de equipo del héroe. Los héroes usan niveles de equipo hasta su grado de equipo (ninguno en los niveles de héroe 1-9, 1 en 10-19, … 9 en 90-99, {{maxTier}} en el nivel {{heroMaxLevel}}).",
+    "heroEnhancement_other": "Sube un nivel las {{count, number}} piezas del equipo de cada héroe: cada nivel de una pieza añade +{{levelPoints, number}} al atributo de equipo del héroe. Los héroes usan niveles de equipo hasta su grado de equipo (ninguno en los niveles de héroe 1-9, 1 en 10-19, … 9 en 90-99, {{maxTier}} en el nivel {{heroMaxLevel}}).",
+    "militaryTradition": "Ataque de las tropas +{{pct}} por nivel en batalla.",
+    "ironWorking": "Las tropas y la {{tower}} reciben menos daño: defensa +{{pct}} por nivel en batalla.",
+    "medicine": "Vida de las tropas a pie (de {{from}} a {{to}}) y de la {{tower}} +{{pct}} por nivel en batalla. Por cada nivel, el {{injured}} de las tropas que pierdas (hasta el {{max}}), al defender tu ciudad o al atacar, sobrevive como tropas heridas que puedes curar con recursos u honor.",
+    "archery": "Alcance de {{troops}} +{{pct}} por nivel en batalla.",
+    "compass": "Las tropas a pie marchan un +{{march}} más rápido por nivel y se mueven un +{{battle}} más rápido por nivel en batalla.",
+    "horsebackRiding": "Las unidades montadas y de asedio marchan un +{{march}} más rápido por nivel y se mueven un +{{battle}} más rápido por nivel en batalla.",
+    "logistics": "Los ejércitos cargan un +{{pct}} más de recursos por nivel (botín y transporte).",
+    "informatics": "Mejor exploración de las ciudades de otros jugadores: el nivel {{heroes}} revela también sus héroes; el nivel {{buildings}}, también sus edificios.",
+    "none": "Aún no tiene efecto en este servidor."
+  },
+  "effect": {
+    "resource": "+{{pct}} de producción de {{resource}}",
+    "stockpile": "+{{pct}} de almacenamiento",
+    "construction": "−{{pct}} de tiempo de construcción, derribo y fortificación",
+    "militaryScience": "−{{pct}} de tiempo de entrenamiento de tropas",
+    "metalCasting": "−{{pct}} de tiempo de entrenamiento de asedio",
+    "heroEnhancement": "nivel de equipo {{level}}: hasta +{{points}} de atributo del héroe",
+    "militaryTradition": "+{{pct}} de ataque de las tropas",
+    "ironWorking": "+{{pct}} de defensa de las tropas",
+    "medicine": "+{{life}} de vida de las tropas a pie, el {{injured}} de las tropas caídas se recupera herido",
+    "archery": "+{{pct}} de alcance",
+    "compass": "+{{pct}} de velocidad de las tropas a pie",
+    "horsebackRiding": "+{{pct}} de velocidad de montadas y asedio",
+    "logistics": "+{{pct}} de capacidad de carga",
+    "informaticsHeroes": "los exploradores ven tropas, recursos y héroes",
+    "informaticsBuildings": "los exploradores ven tropas, recursos, héroes y edificios"
+  }
+}

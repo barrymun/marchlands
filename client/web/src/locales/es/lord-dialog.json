@@ -1,0 +1,61 @@
+{
+  "toast": {
+    "renamed": "Jugador renombrado",
+    "genderChanged": "Género cambiado",
+    "flagChanged": "Bandera cambiada",
+    "truce": "Tregua en vigor",
+    "promoted": "Ascenso conseguido"
+  },
+  "summary": "{{title}} · Bandera {{flag}}",
+  "name": {
+    "label": "Nuevo nombre",
+    "wait": "Cambiar de nombre es gratis una vez al día: el próximo en <countdown />.",
+    "free": "Gratis, una vez al día, si nadie más tiene ese nombre."
+  },
+  "flag": {
+    "label": "Nueva bandera"
+  },
+  "gender": {
+    "label": "Género",
+    "wait": "Cambiar de género es gratis una vez al día: el próximo en <countdown />.",
+    "free": "Gratis, una vez al día."
+  },
+  "font": {
+    "label": "Fuente",
+    "hint": "Se guarda en este navegador.",
+    "names": {
+      "classic": "Clásica",
+      "ledger": "Libro mayor",
+      "terminal": "Terminal",
+      "clear": "Nítida"
+    }
+  },
+  "change": "Cambiar",
+  "truce": {
+    "title": "Tregua",
+    "active": "activa · <countdown />",
+    "cooldown": "en espera · <countdown />",
+    "description": "Tus ciudades no pueden ser atacadas durante 12 horas, y tú tampoco puedes atacar. Después sigue un periodo de espera.",
+    "boughtWithAny": "Se compra con el oro de la ciudad",
+    "owned": "×{{n}}"
+  },
+  "title": {
+    "prestige": "{{amount}} de prestigio",
+    "medals": "{{n}} × {{name}}",
+    "current": "Título: {{name}}",
+    "cities_one": "{{cities}} / {{count}} ciudad",
+    "cities_many": "{{cities}} / {{count}} ciudades",
+    "cities_other": "{{cities}} / {{count}} ciudades",
+    "next": "{{name}} eleva tu límite de ciudades a {{max}}. Las medallas y el oro se gastan.",
+    "have": "(tienes {{have}})",
+    "promote": "Ascender a {{name}}",
+    "all": "Todos los títulos",
+    "highest_one": "El título más alto: hasta {{count}} ciudad.",
+    "highest_many": "El título más alto: hasta {{count}} ciudades.",
+    "highest_other": "El título más alto: hasta {{count}} ciudades.",
+    "maxCities_one": "{{count}} ciudad",
+    "maxCities_many": "{{count}} ciudades",
+    "maxCities_other": "{{count}} ciudades",
+    "haveIn": "(tienes {{have}} en {{city}})"
+  }
+}

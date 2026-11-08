@@ -1,0 +1,27 @@
+{
+  "toast": {
+    "assigned": "Puntos asignados",
+    "reset": "Puntos restablecidos"
+  },
+  "hints": {
+    "politics": "alcalde: producción y velocidad de construcción",
+    "attack": "ataque del ejército; alcalde: velocidad de entrenamiento",
+    "intelligence": "alcalde: velocidad de investigación"
+  },
+  "remove": "Quitar {{label}}",
+  "add": "Añadir {{label}}",
+  "asMayor": "Como alcalde: {{rate}} de producción (+{{pct}})",
+  "usesHolyWater": "usa 1 Agua bendita (tienes {{owned}})",
+  "holyWaterGold": "{{gold}} de oro por un Agua bendita",
+  "reset": "Restablecer",
+  "assignNone": "Asignar puntos",
+  "assign_one": "Asignar {{count}} punto",
+  "assign_many": "Asignar {{count}} puntos",
+  "assign_other": "Asignar {{count}} puntos",
+  "pointsLeft_one": "Quedan {{left}} de {{count}} punto por asignar. Los héroes ganan un punto por nivel.",
+  "pointsLeft_many": "Quedan {{left}} de {{count}} puntos por asignar. Los héroes ganan un punto por nivel.",
+  "pointsLeft_other": "Quedan {{left}} de {{count}} puntos por asignar. Los héroes ganan un punto por nivel.",
+  "resetInfo_one": "Restablecer {{count}} punto asignado · {{cost}}",
+  "resetInfo_many": "Restablecer los {{count}} puntos asignados · {{cost}}",
+  "resetInfo_other": "Restablecer los {{count}} puntos asignados · {{cost}}"
+}

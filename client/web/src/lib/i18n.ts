@@ -9,7 +9,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
 /** The locales, by the names their files have and the player's choice is remembered under, so a value never changes. */
-export const Locale = { EN_GB: 'en-GB', EN_US: 'en-US', JA_JP: 'ja-JP', AR: 'ar' } as const;
+export const Locale = { EN_GB: 'en-GB', EN_US: 'en-US', JA_JP: 'ja-JP', AR: 'ar', ES: 'es' } as const;
 export type Locale = (typeof Locale)[keyof typeof Locale];
 export const LOCALES = Object.values(Locale);
 export const DEFAULT_LOCALE: Locale = Locale.EN_GB;
@@ -18,7 +18,7 @@ export const OVERRIDE_LOCALES: readonly Locale[] = [Locale.EN_US];
 /** localStorage key of the chosen locale */
 const STORAGE_KEY = 'marchlands-locale';
 
-/** The supported locale for a browser language: exact ('en-US'), else by language ('en-AU' -> en-GB, 'ja' -> ja-JP, 'ar-EG' -> ar), else en-GB. */
+/** The supported locale for a browser language: exact ('en-US'), else by language ('en-AU' -> en-GB, 'ja' -> ja-JP, 'ar-EG' -> ar, 'es-MX' -> es), else en-GB. */
 export function matchLocale(lng: string | undefined): Locale {
   if (!lng) return DEFAULT_LOCALE;
   const exact = LOCALES.find((l) => l.toLowerCase() === lng.toLowerCase());

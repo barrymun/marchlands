@@ -1,0 +1,15 @@
+{
+  "title": "Funda tu ciudad",
+  "description": "Elige tu nombre, tu estandarte y dónde asentarte.",
+  "playerName": "Nombre de jugador",
+  "cityName": "Nombre de la ciudad",
+  "flag": "Bandera",
+  "flagPlaceholder": "p. ej. EV",
+  "gender": "Género",
+  "state": "Estado",
+  "leastCrowded": "Menos poblado (recomendado)",
+  "submit": "Fundar ciudad",
+  "zone_one": "{{name}} · {{count}} jugador · {{settled}} ocupado",
+  "zone_many": "{{name}} · {{count}} jugadores · {{settled}} ocupado",
+  "zone_other": "{{name}} · {{count}} jugadores · {{settled}} ocupado"
+}

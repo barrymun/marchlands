@@ -1,0 +1,22 @@
+{
+  "title": "Mudarlo todo ahora",
+  "description": "Las tropas en casa, las tropas heridas y los recursos de esta ciudad pueden ir ya a tus otras ciudades, repartidos por igual, junto con los héroes que elijas. Los ejércitos fuera, las colas y las fortificaciones se quedan.",
+  "noCities": "No tienes otra ciudad a la que mudarte.",
+  "table": {
+    "city": "Ciudad",
+    "troops": "Tropas",
+    "injured": "Heridas",
+    "goods": "Recursos"
+  },
+  "nothing": "No queda nada en esta ciudad que mudar.",
+  "underAttack": "Un ejército enemigo se dirige a esta ciudad, así que no se puede mudar.",
+  "cooldown": "Conservaste una ciudad que habías mudado: podrás volver a mudar una ciudad dentro de <countdown />.",
+  "button": "Mudarse",
+  "confirmTitle": "¿Mudar {{city}}?",
+  "confirmDescription": "Ocurre al instante y no se puede deshacer. Si después conservas {{city}}, lo que se mudó no vuelve, y no podrás mudar ninguna ciudad durante {{time}}.",
+  "done": "{{city}} se ha mudado",
+  "heroes": "Héroes",
+  "stays": "Se queda aquí",
+  "cityFree": "{{city}} ({{n}} libres)",
+  "noRoom": "Ninguna de tus otras ciudades tiene una plaza libre en el Salón de banquetes."
+}

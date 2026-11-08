@@ -1,0 +1,143 @@
+{
+  "title": "Mapa ({{x}}, {{y}})",
+  "toolbar": "Controles del mapa",
+  "goTo": {
+    "open": "Mapa en ({{x}}, {{y}}): ir a coordenadas",
+    "label": "Ir a coordenadas",
+    "placeholder": "x, y",
+    "go": "Ir",
+    "invalid": "Escribe dos números, como 300, 120."
+  },
+  "pan": {
+    "left": "Mover a la izquierda",
+    "up": "Mover arriba",
+    "down": "Mover abajo",
+    "right": "Mover a la derecha",
+    "home": "Volver a esta ciudad"
+  },
+  "aria": "Mapa del mundo: arrastra para mirar alrededor, flechas para moverte, + y - para acercar o alejar, Intro para seleccionar la casilla del centro",
+  "relations": {
+    "friend": "Alianza y aliados",
+    "enemy": "Enemigos",
+    "other": "Otros jugadores"
+  },
+  "relationsInline": {
+    "friend": "alianza y aliados",
+    "enemy": "enemigos",
+    "other": "otros jugadores"
+  },
+  "tile": {
+    "castle": "{{name}} ({{player}})",
+    "summary": "{{type}} Nv. {{level}} ({{x}},{{y}})",
+    "heldByYou": "En poder de tu ciudad {{city}}",
+    "heldBy": "En poder de {{city}} ({{player}})",
+    "heldByAlliance": "En poder de {{city}} ({{player}}, {{alliance}})",
+    "farmedBy": "En la lista de saqueo de {{cities}}",
+    "loading": "({{x}},{{y}}) cargando"
+  },
+  "info": {
+    "player": "Jugador {{player}} · Prestigio {{prestige}}",
+    "playerAlliance": "Jugador {{player}} de {{alliance}} · Prestigio {{prestige}}",
+    "heldBy": "En poder de {{city}} ({{player}})",
+    "moveCityHere": "Mover la ciudad aquí…",
+    "sendArmy": "Enviar ejército",
+    "scout": "Explorar",
+    "noScouts": "No hay Exploradores en esta ciudad: entrena algunos en Militar.",
+    "pvpOff": "En esta versión del juego, los jugadores no pueden atacarse ni explorarse entre sí.",
+    "seatRace": "Cada alianza, y cada jugador sin alianza, desgasta la lealtad de esta ciudad por separado. El primero en llevar la suya a 0 la conquista.",
+    "upgraded": "Valle mejorado"
+  },
+  "faction": {
+    "memberTitle": "Pertenece a la facción {{faction}}",
+    "bandits": "Bandidos",
+    "banditsTitle": "Por debajo del nivel {{level}}: bandidos, sin lealtad a ninguna facción",
+    "ruled": "Gobernada por {{player}}",
+    "ruledTitle": "Fuera de la facción {{faction}}: {{player}} posee la capital de este estado"
+  },
+  "release": {
+    "title": "¿Liberar este valle?",
+    "description": "Las tropas destinadas allí vuelven a casa y su bonificación de producción se detiene. Para recuperarlo tendrás que atacarlo de nuevo.",
+    "confirm": "Liberar valle",
+    "button": "Liberar valle",
+    "short": "Liberar",
+    "hint": "Las tropas destinadas vuelven a casa; la bonificación de producción se detiene.",
+    "success": "Valle liberado; las tropas destinadas allí vuelven a casa"
+  },
+  "copy": {
+    "label": "Copiar coordenadas",
+    "done": "Copiado {{coords}}",
+    "failed": "No se pudieron copiar las coordenadas"
+  },
+  "legend": {
+    "title": "Leyenda",
+    "thisCityValleys": "Valles de esta ciudad",
+    "otherCitiesValleys": "Valles de tus otras ciudades",
+    "thisCityFarms": "Objetivos de saqueo de esta ciudad",
+    "otherCitiesFarms": "Objetivos de saqueo de tus otras ciudades",
+    "thisCity": "Esta ciudad",
+    "relationValleys": "Valles ({{relation}})",
+    "factions": "Facciones",
+    "showFactions": "Colorear el terreno por facción"
+  },
+  "held": {
+    "title": "Valles en poder de {{city}}",
+    "none": "Ninguno todavía: ataca un valle para ocuparlo (hasta el nivel de tu Ayuntamiento).",
+    "row": "{{type}} Nv. {{level}}",
+    "bonus": "+{{bonus}} de {{resource}}"
+  },
+  "cities": {
+    "title": "Tus otras ciudades"
+  },
+  "farms": {
+    "title": "Listas de saqueo",
+    "cityHere": "{{city}} (esta ciudad)",
+    "none": "Aún no hay objetivos de saqueo: abre cualquier casilla que puedas atacar y elige Añadir a la lista de saqueo."
+  },
+  "medalOdds": {
+    "one": "Si ganas: {{chance}} de probabilidad de obtener una medalla ({{medal}}).",
+    "two": "Si ganas: {{chance}} de probabilidad de obtener una medalla ({{medal}}); después, {{second}} de una segunda ({{medals}}).",
+    "three": "Si ganas: {{chance}} de probabilidad de obtener una medalla ({{medal}}); después, {{second}} de una segunda ({{medals}}) y {{third}} de una tercera."
+  },
+  "valleyUpgrade": {
+    "maxNpc": "Nivel {{level}}: el máximo que puede alcanzar una ciudad bárbara.",
+    "maxValley": "Nivel {{level}}: el máximo que puede alcanzar un valle.",
+    "title": "¿Mejorar al nivel {{level}}?",
+    "description": "{{city}} paga {{gold}} de oro. Su guarnición, fortificaciones y recursos empiezan de cero en el nuevo nivel.",
+    "confirm": "Pagar {{gold}} de oro",
+    "button": "Mejorar a Nv. {{level}} · {{gold}} de oro",
+    "notEnoughGold": "No hay suficiente oro en {{city}}.",
+    "npcHint": "Sus tropas, fortificaciones, murallas, héroe y los recursos que puedes saquear crecen hasta el nivel {{level}}, y empieza de nuevo con todas sus fuerzas.",
+    "valleyHint": "Una vez ocupado: +{{from}} → +{{to}} de producción de {{resource}}. Sus defensores también se hacen más fuertes con el nivel.",
+    "flatHint": "La llanura no aumenta ninguna producción, ocupada o no."
+  },
+  "draft": {
+    "done": "Tropas reclutadas",
+    "auto": "Leva automática",
+    "used": "{{used}} de {{max}} levas hoy",
+    "next": "siguiente a las {{time}} UTC",
+    "button": "Reclutar para {{city}} ({{used}}/{{max}})",
+    "now": "Reclutar ahora",
+    "nowTitle": "Recluta ya de la ciudad que elegiría por sí misma: la de mayor nivel de su zona de la que no haya reclutado hoy, o la más fuerte si tiene un Explorador",
+    "doneToday": "{{city}} ya ha reclutado de aquí hoy: una vez al día por ciudad"
+  },
+  "seat": {
+    "loyalty": "Lealtad {{loyalty}} / {{max}}",
+    "truce": "En tregua: todavía no se puede atacar",
+    "shared": "Tu alianza recibe {{gold}} de oro por hora de su tributo",
+    "risk": "Si un rival la conquista, perderás tus héroes, ejércitos, investigaciones en curso, órdenes de mercado y envíos de aquí"
+  },
+  "valley": {
+    "boost": "+{{bonus}} de {{resource}}",
+    "boostTitle": "La ciudad que ocupa este valle produce {{bonus}} más de {{resource}}."
+  },
+  "distance": {
+    "away_one": "a {{n}} casilla",
+    "away_many": "a {{n}} casillas",
+    "away_other": "a {{n}} casillas",
+    "title": "Distancia en línea recta desde {{city}}, con la que se calcula el tiempo de marcha de un ejército."
+  },
+  "centre": {
+    "button": "Centrar aquí",
+    "title": "Centra el mapa en esta casilla; volverá a abrirse aquí tras recargar, hasta que vuelvas a tu ciudad"
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "actions": {
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "send": "Enviar",
+    "edit": "Editar",
+    "max": "Máx.",
+    "all": "Todo",
+    "none": "Nada",
+    "back": "Atrás",
+    "remove": "Quitar",
+    "use": "Usar",
+    "buy": "Comprar",
+    "rename": "Renombrar",
+    "logOut": "Cerrar sesión"
+  },
+  "resources": {
+    "gold": "Oro",
+    "food": "Comida",
+    "wood": "Madera",
+    "stone": "Piedra",
+    "iron": "Hierro"
+  },
+  "resourcesInline": {
+    "gold": "oro",
+    "food": "comida",
+    "wood": "madera",
+    "stone": "piedra",
+    "iron": "hierro",
+    "goods": "mercancías"
+  },
+  "units": {
+    "days": "{{value}} d",
+    "hours": "{{value}} h",
+    "minutes": "{{value}} min",
+    "seconds": "{{value}} s",
+    "perHour": "{{value}}/h"
+  },
+  "time": {
+    "justNow": "ahora mismo",
+    "ago": "hace {{time}}"
+  },
+  "fallback": {
+    "building": "Edificio {{id}}",
+    "unit": "Unidad {{id}}",
+    "tech": "Investigación {{id}}",
+    "tile": "Casilla {{id}}"
+  },
+  "genders": {
+    "male": "Masculino",
+    "female": "Femenino"
+  },
+  "heroAttributes": {
+    "politics": "Política",
+    "attack": "Ataque",
+    "intelligence": "Inteligencia",
+    "politicsShort": "Pol",
+    "attackShort": "Ata",
+    "intelligenceShort": "Int"
+  },
+  "push": {
+    "buildingComplete": "{{name}} alcanzó el nivel {{level}}",
+    "researchComplete": "{{name}} alcanzó el nivel {{level}}",
+    "hostileArmies_one": "Se acerca {{count}} ejército hostil",
+    "hostileArmies_many": "Se acercan {{count}} ejércitos hostiles",
+    "hostileArmies_other": "Se acercan {{count}} ejércitos hostiles",
+    "trade": "Operación: {{amount}} de {{resource}} a {{price}} de oro",
+    "delivery": "Entrega del mercado: han llegado {{amount}} de {{resource}}",
+    "newReport": "Nuevo informe",
+    "newReportHint": "Consulta los informes."
+  },
+  "language": {
+    "label": "Idioma",
+    "names": {
+      "en-GB": "English (UK)",
+      "en-US": "English (US)",
+      "ja-JP": "日本語",
+      "ar": "العربية",
+      "es": "Español"
+    }
+  },
+  "list": {
+    "separator": ", "
+  },
+  "level": {
+    "short": "Nv. {{level}}",
+    "ofMax": "Nv. {{level}}/{{max}}",
+    "max": "Nivel máximo",
+    "named": "{{name}} Nv. {{level}}",
+    "namedParens": "{{name}} (Nv. {{level}})",
+    "next": "Nv. {{level}}:",
+    "now": "Ahora:",
+    "unlocks": "Desbloquea: {{list}}",
+    "mayorExp": "El alcalde {{name}} gana {{exp}} de experiencia al terminar"
+  },
+  "gold": "{{gold}} de oro",
+  "amountOf": "{{amount}} de {{resource}}",
+  "nothing": "nada",
+  "savedName": "Guardado «{{name}}»",
+  "durations": {
+    "days_one": "{{count}} día",
+    "days_many": "{{count}} días",
+    "days_other": "{{count}} días",
+    "hours_one": "{{count}} hora",
+    "hours_many": "{{count}} horas",
+    "hours_other": "{{count}} horas"
+  },
+  "noMayor": "Sin alcalde",
+  "noHero": "sin héroe",
+  "table": {
+    "total": "Total",
+    "unit": "Unidad"
+  },
+  "boughtWithCityGold": "Se compra con el oro de {{city}}",
+  "nothingYet": "Nada todavía.",
+  "noneYet": "Ninguno todavía.",
+  "troops_one": "{{n}} tropa",
+  "troops_many": "{{n}} tropas",
+  "troops_other": "{{n}} tropas",
+  "errors": {
+    "network": "No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.",
+    "unexpected": "Algo ha ido mal. Inténtalo de nuevo."
+  },
+  "standing": {
+    "hostile": "Hostil",
+    "unfriendly": "Poco amistoso",
+    "neutral": "Neutral",
+    "friendly": "Amistoso",
+    "honoured": "Honrado"
+  },
+  "seatTitle": {
+    "ruler": "Soberano de {{state}}",
+    "atlantis": "Soberano de la Atlántida"
+  },
+  "historicCity": "Ciudad histórica de nivel {{level}}",
+  "historicCityShort": "CH",
+  "range": {
+    "between": "De {{min}} a {{max}}",
+    "atLeast": "Al menos {{min}}"
+  }
+}

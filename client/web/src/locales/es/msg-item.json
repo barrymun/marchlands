@@ -1,0 +1,12 @@
+{
+  "notForSale": "Este objeto no está a la venta.",
+  "dailyLimit": "Has alcanzado el límite diario de compras de este objeto.",
+  "cannotUse": "Este objeto no se puede usar aquí.",
+  "useFrom": {
+    "speedup": "Usa este objeto desde el botón de aceleración de una tarea en curso.",
+    "hero": "Usa este objeto en uno de tus héroes.",
+    "elsewhere": "Este objeto se usa desde su propia pantalla, no desde aquí."
+  },
+  "chooseCity": "Elige la ciudad en la que usar este objeto.",
+  "needKey": "Necesitas {{key}} para abrir esto."
+}

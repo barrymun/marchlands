@@ -1,0 +1,53 @@
+{
+  "addToFarm": {
+    "button": "Añadir a la lista de saqueo",
+    "needsHero": "Cada objetivo necesita un héroe libre en esta ciudad",
+    "defaultName": "Lista de saqueo",
+    "dialogTitle": "¿Añadir a la lista de saqueo?",
+    "willAttack": "{{city}} atacará {{tile}} como parte del flujo de abajo.",
+    "noFlow": "Aún no hay ningún flujo de saqueo: esto crea un flujo llamado «{{name}}» con {{tile}} como primer objetivo de {{city}}. Elige en Flujos el ejército guardado que se enviará.",
+    "flow": "Flujo: <b>{{name}}</b>",
+    "alreadyTarget": "{{tile}} ya es uno de los objetivos de {{city}} en este flujo.",
+    "addTarget": "Añadir objetivo",
+    "start": "Crear lista de saqueo",
+    "toasts": {
+      "alreadyIn": "{{tile}} ya está en «{{flow}}»",
+      "noIdleHero": "A {{city}} no le queda ningún héroe libre para otro objetivo en «{{flow}}»",
+      "added": "{{tile}} añadido a «{{flow}}» ({{city}}, objetivo {{n}})",
+      "started": "Se ha creado «{{name}}» con {{tile}}",
+      "startedHint": "Elige en Flujos el ejército guardado que se enviará."
+    },
+    "targetCount_one": "{{city}} tiene {{n}} de {{count}} objetivo (uno por héroe libre).",
+    "targetCount_many": "{{city}} tiene {{n}} de {{count}} objetivos (uno por héroe libre).",
+    "targetCount_other": "{{city}} tiene {{n}} de {{count}} objetivos (uno por héroe libre)."
+  },
+  "attackTargets": {
+    "attackWith": "Atacar con el ejército guardado",
+    "choose": "Elige un ejército guardado",
+    "noArmies": "No hay ejércitos guardados",
+    "newArmy": "+ Nuevo ejército",
+    "hint": "Cada ciudad ataca sus propios objetivos en orden; los dirigen sus héroes libres, primero el de más Ataque. Un objetivo se omite (y el flujo continúa) cuando a la ciudad le faltan tropas, un héroe o sitio en el Punto de reunión."
+  },
+  "cityTargets": {
+    "badFormat": "Escribe las coordenadas como x,y",
+    "outOfRange": "Las coordenadas van de 0 a {{max}}",
+    "duplicate": "Ya está en la lista",
+    "remove": "Quitar objetivo",
+    "placeholder": "x,y",
+    "addFor": "Añadir un objetivo para {{city}}",
+    "add": "Añadir",
+    "noIdle": "No hay héroes libres en esta ciudad: cada objetivo necesita un héroe.",
+    "full": "Un objetivo por héroe libre: esta ciudad está completa.",
+    "count_one": "{{n}} / {{count}} objetivo ({{heroes}})",
+    "count_many": "{{n}} / {{count}} objetivos ({{heroes}})",
+    "count_other": "{{n}} / {{count}} objetivos ({{heroes}})",
+    "idleHeroes_one": "{{count}} héroe libre",
+    "idleHeroes_many": "{{count}} héroes libres",
+    "idleHeroes_other": "{{count}} héroes libres"
+  },
+  "newArmy": {
+    "label": "Nuevo ejército guardado",
+    "placeholder": "Nombre, p. ej. Escalonado Nv10",
+    "save": "Guardar ejército"
+  }
+}

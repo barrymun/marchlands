@@ -14,6 +14,9 @@ describe(matchLocale.name, () => {
     expect(matchLocale('ja')).toBe(Locale.JA_JP);
     expect(matchLocale('ar-EG')).toBe(Locale.AR);
     expect(matchLocale('ar')).toBe(Locale.AR);
+    expect(matchLocale('es-MX')).toBe(Locale.ES);
+    expect(matchLocale('es-ES')).toBe(Locale.ES);
+    expect(matchLocale('es')).toBe(Locale.ES);
   });
 
   it('falls back to en-GB for an unsupported or missing language', () => {
@@ -30,6 +33,7 @@ describe('i18n', () => {
   it('translates into the requested locale', () => {
     expect(i18n.t('common:actions.cancel')).toBe('Cancel');
     expect(i18n.t('common:actions.cancel', { lng: Locale.JA_JP })).toBe('キャンセル');
+    expect(i18n.t('common:actions.cancel', { lng: Locale.ES })).toBe('Cancelar');
   });
 
   it('falls back to en-GB for a key another locale lacks (en-US holds only spelling differences)', () => {
@@ -46,5 +50,11 @@ describe('i18n', () => {
     expect(i18n.t('common:troops', { count: 1, n: '1' })).toBe('1 troop');
     expect(i18n.t('common:troops', { count: 12_500, n: '12,500' })).toBe('12,500 troops');
     expect(i18n.t('common:troops', { count: 12_500, n: '12,500', lng: Locale.JA_JP })).toBe('兵 12,500');
+  });
+
+  it('uses Spanish plurals, millions included (_many: "1 millón de tropas")', () => {
+    expect(i18n.t('common:troops', { count: 1, n: '1', lng: Locale.ES })).toBe('1 tropa');
+    expect(i18n.t('common:troops', { count: 12_500, n: '12.500', lng: Locale.ES })).toBe('12.500 tropas');
+    expect(i18n.t('common:troops', { count: 1_000_000, n: '1.000.000', lng: Locale.ES })).toBe('1.000.000 tropas');
   });
 });

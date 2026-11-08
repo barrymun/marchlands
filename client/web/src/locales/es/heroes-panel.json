@@ -1,0 +1,82 @@
+{
+  "toast": {
+    "hired": "Héroe contratado",
+    "rerolled": "Nuevos héroes en la Posada",
+    "renamed": "Héroe renombrado",
+    "dismissed": "Héroe despedido",
+    "levelUp": "{{name}} alcanzó el nivel {{level}}",
+    "levelUpMulti": "{{name}} alcanzó el nivel {{level}} (+{{levels}} niveles, +{{levels}} puntos)"
+  },
+  "heroes": {
+    "title": "Tus héroes",
+    "description": "Un Salón de banquetes aumenta cuántos héroes puede tener la ciudad.",
+    "empty": "Aún no tienes héroes. Contrata uno en la Posada.",
+    "moveUp": "Subir a {{name}}",
+    "moveDown": "Bajar a {{name}}",
+    "points": "Puntos",
+    "pointsCount": "Puntos ({{points}})",
+    "items": "Objetos",
+    "locked": "Bloqueado",
+    "lock": "Bloquear",
+    "levelUp": "Subir de nivel",
+    "levelUpMulti": "Subir de nivel ×{{times}} → Nv. {{level}}",
+    "dismiss": "Despedir",
+    "lockedHint": "Bloqueado: desbloquea el héroe para despedirlo"
+  },
+  "inn": {
+    "title": "Posada",
+    "noInn": "Construye una Posada para reclutar héroes.",
+    "newOffers": "Nuevas ofertas ({{gold}} de oro)",
+    "hire": "Contratar",
+    "freeSlots_one": "{{count}} plaza de héroe libre.",
+    "freeSlots_many": "{{count}} plazas de héroe libres.",
+    "freeSlots_other": "{{count}} plazas de héroe libres."
+  },
+  "heroRow": {
+    "nameLabel": "Nombre del héroe",
+    "saveName": "Guardar nombre",
+    "rename": "Renombrar a {{name}}"
+  },
+  "attributes": {
+    "strongest": "Atributo más fuerte: {{label}}",
+    "loyalty": "Lealtad {{loyalty}}",
+    "points_one": "{{count}} punto",
+    "points_many": "{{count}} puntos",
+    "points_other": "{{count}} puntos"
+  },
+  "expBar": {
+    "maxLevel": "Nivel máximo {{level}}: ahora crece con el equipo",
+    "label": "Experiencia",
+    "ready": "Listo para subir de nivel",
+    "readyMulti": "Listo para subir de nivel {{times}} veces",
+    "progress": "Exp. {{exp}} / {{needed}} · faltan {{left}} para Nv. {{next}}"
+  },
+  "buffs": {
+    "active": "{{label}} +{{amount}} · quedan {{time}}"
+  },
+  "dismissDialog": {
+    "title": "¿Despedir a {{name}}?",
+    "description": "{{name}} (Nv. {{level}}, Ata {{att}} · Pol {{pol}} · Int {{int}}) dejará tu ciudad para siempre. No se puede deshacer.",
+    "keep": "Conservar a {{name}}",
+    "confirm": "Despedir"
+  },
+  "view": {
+    "label": "Mostrar héroes como",
+    "sheet": "Ficha",
+    "list": "Lista"
+  },
+  "sheet": {
+    "figure": "{{name}} con equipo de nivel {{level}}",
+    "piece": "{{piece}}, nivel {{level}}: abrir el equipo",
+    "figure3d": "{{name}} con equipo de nivel {{level}}: arrástralo o usa las teclas de flecha para girarlo",
+    "figureMode": {
+      "label": "Dibujar el héroe en",
+      "2d": "2D",
+      "3d": "3D"
+    },
+    "figureLoading": "Dibujando al héroe…"
+  },
+  "roster": {
+    "drag": "Arrastra para reordenar (o Alt con ↑ / ↓)"
+  }
+}

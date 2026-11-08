@@ -1,0 +1,58 @@
+{
+  "filter": {
+    "label": "Filtrar edificios por tipo",
+    "showAll": "Mostrar todo",
+    "summary_one": "({{count}} edificio · niveles {{min}}–{{max}})",
+    "summary_many": "({{count}} edificios · niveles {{min}}–{{max}})",
+    "summary_other": "({{count}} edificios · niveles {{min}}–{{max}})"
+  },
+  "view": {
+    "label": "Mostrar edificios como",
+    "scene": "Escena",
+    "grid": "Cuadrícula"
+  },
+  "scene": {
+    "label": "{{area}}: arrastra para mirar alrededor, desplaza o pellizca para hacer zoom, flechas para moverte, + y - para hacer zoom"
+  },
+  "inside": {
+    "title": "Dentro de las murallas"
+  },
+  "fields": {
+    "title": "Campos",
+    "unlocked": "({{unlocked}} de {{total}} desbloqueados por el Ayuntamiento Nv. {{level}})"
+  },
+  "slot": {
+    "build": "Construir en la parcela {{pos}}",
+    "building": "{{name}}, nivel {{level}}"
+  },
+  "buildList": {
+    "title": "Construir",
+    "outside": "Campos de recursos fuera de las murallas.",
+    "inside": "Edificios dentro de las murallas.",
+    "build": "Construir",
+    "firstLevel": "Nv. 1:",
+    "nothing": "Ahora mismo no se puede construir nada aquí.",
+    "started": "Construcción iniciada"
+  },
+  "detail": {
+    "slot": "Parcela {{pos}}",
+    "upgrading": "Mejorando a nivel {{level}}",
+    "upgradeTo": "Mejorar a nivel {{level}}",
+    "upgrade": "Mejorar",
+    "maxLevel": "Nivel máximo alcanzado.",
+    "upgradeStarted": "Mejora iniciada",
+    "demolished": "Edificio derribado",
+    "cancelled": "Cancelado",
+    "demolishAll": "Derribar todo el edificio, al instante",
+    "returns": " · Devuelve {{refund}}",
+    "demolish": "Derribar",
+    "confirmAllTitle": "¿Derribar {{name}} (Nv. {{level}})?",
+    "confirmAll": "Todo el edificio desaparece de una vez. No se puede deshacer.",
+    "confirmAllRefund": "Todo el edificio desaparece de una vez y devuelve {{refund}}. No se puede deshacer.",
+    "innHeroes": "Contratar héroes"
+  },
+  "mayor": {
+    "none": "Sin alcalde: nombra uno con mucha Política en Héroes para construir más rápido.",
+    "hint": "Los tiempos incluyen la Política {{politics}} del alcalde {{name}}: −{{cut}}. Un alcalde con más Política construye más rápido."
+  }
+}

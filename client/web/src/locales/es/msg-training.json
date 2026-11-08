@@ -1,0 +1,24 @@
+{
+  "wallsNeeded": "Necesitas {{building}} para construir fortificaciones.",
+  "invalidBarracks": "Las tropas solo se pueden entrenar en un {{building}} construido.",
+  "queueFull": "Esta cola de entrenamiento está llena.",
+  "allQueuesFull": "Todas las colas de {{building}} están llenas.",
+  "wallSpaceFull": "No hay suficiente espacio en las murallas.",
+  "notEnoughPopulation": "No hay suficiente población ociosa.",
+  "orderLimit": "Encarga de 1 a {{max}} tipos de unidad a la vez.",
+  "duplicateOrder": "Cada tipo de unidad solo se puede encargar una vez.",
+  "fortsAtWalls": "Las fortificaciones se construyen en las murallas.",
+  "batchNotFound": "No se encontró el lote de entrenamiento.",
+  "invalidFort": "Tipo de fortificación no válido.",
+  "notEnoughUnits": "No tienes tantas unidades de {{unit}}.",
+  "notEnoughInjured": "No hay suficientes tropas heridas.",
+  "notEnoughHonor": "No tienes suficiente honor: se necesitan {{amount}}.",
+  "mail": {
+    "wallSpaceRefund": {
+      "title": "Fortificaciones reembolsadas",
+      "content_one": "Las fortificaciones ahora ocupan más espacio en las murallas, y las murallas de {{city}} ya no tenían sitio para todas las suyas. Se desmontó {{count, number}} fortificación y se devolvió su coste íntegro a la ciudad.",
+      "content_many": "Las fortificaciones ahora ocupan más espacio en las murallas, y las murallas de {{city}} ya no tenían sitio para todas las suyas. Se desmontaron {{count, number}} fortificaciones y se devolvió su coste íntegro a la ciudad.",
+      "content_other": "Las fortificaciones ahora ocupan más espacio en las murallas, y las murallas de {{city}} ya no tenían sitio para todas las suyas. Se desmontaron {{count, number}} fortificaciones y se devolvió su coste íntegro a la ciudad."
+    }
+  }
+}

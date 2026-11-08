@@ -1,0 +1,16 @@
+{
+  "weapon": "Armamento",
+  "shield": "Escudo",
+  "mount": "Montura",
+  "necklace": "Collar",
+  "charm": "Talismán",
+  "ring": "Anillo",
+  "head": "Yelmo",
+  "shoulder": "Hombreras",
+  "chest": "Coraza",
+  "back": "Capa",
+  "gauntlets": "Guanteletes",
+  "belt": "Cinturón",
+  "legs": "Grebas",
+  "feet": "Botas"
+}

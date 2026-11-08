@@ -1,0 +1,38 @@
+{
+  "title": "Efectos activos",
+  "active": "{{n}} activos",
+  "expiring": "{{n}} vencen en menos de 24 h",
+  "show": "Mostrar",
+  "hide": "Ocultar",
+  "extended": "Se amplió {{slot}} en {{adds}}",
+  "groups": {
+    "production": "Producción",
+    "military": "Militar",
+    "other": "Otros"
+  },
+  "slots": {
+    "attack": "Ataque",
+    "defense": "Defensa",
+    "training": "Entrenamiento",
+    "upkeep": "Mantenimiento",
+    "army": "Ejército",
+    "buildQueue": "Cola de construcción",
+    "truce": "Tregua"
+  },
+  "on": "Activo",
+  "buy": {
+    "title": "¿Ampliar {{slot}}?",
+    "description": "No tienes {{item}}. Cómpralo por {{price}} de oro de {{city}} y úsalo ahora para añadir {{adds}}.",
+    "confirm": "Comprar y usar · {{price}} de oro"
+  },
+  "slotCell": {
+    "off": "inactivo",
+    "find": "Buscar objetos",
+    "findDetail": "Mostrar los objetos que dan {{label}} {{boost}}",
+    "running": "{{desc}} · quedan {{time}}",
+    "runningItem": "{{item}}: {{desc}} · quedan {{time}}",
+    "extend": "Ampliar",
+    "useDetail": "Usar {{item}} (tienes ×{{owned}}): +{{adds}}",
+    "buyDetail": "Comprar {{item}} por {{price}} de oro y usarlo: +{{adds}}"
+  }
+}

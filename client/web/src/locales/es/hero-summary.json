@@ -1,0 +1,14 @@
+{
+  "strongest": "Atributo más fuerte: {{label}}",
+  "gear": "Equipo +{{total}} en {{label}} · grado {{tier}}/{{max}}",
+  "boost": "{{label}} +{{amount}} · quedan {{time}}",
+  "status": {
+    "idle": "Libre",
+    "mayor": "Alcalde",
+    "marching": "En marcha",
+    "returning": "Volviendo"
+  },
+  "unspent_one": "{{count}} punto de atributo por asignar",
+  "unspent_many": "{{count}} puntos de atributo por asignar",
+  "unspent_other": "{{count}} puntos de atributo por asignar"
+}

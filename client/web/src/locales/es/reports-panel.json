@@ -1,0 +1,155 @@
+{
+  "tabs": {
+    "all": "Todos",
+    "army": "Militares",
+    "trade": "Comercio",
+    "other": "Otros"
+  },
+  "markAllRead": "Marcar todo como leído",
+  "markedAllRead": "Todos los informes marcados como leídos",
+  "noReports": "Aún no hay informes. Aquí se informa de batallas, exploraciones, operaciones comerciales y ejércitos que vuelven a casa.",
+  "previousPage": "Página anterior",
+  "nextPage": "Página siguiente",
+  "keptFor": "Los informes se guardan 30 días.",
+  "unread": "sin leer",
+  "found_one": "{{n}} informe encontrado",
+  "found_many": "{{n}} informes encontrados",
+  "found_other": "{{n}} informes encontrados",
+  "noMatches": "Ningún informe coincide con estos filtros.",
+  "columns": {
+    "report": "Informe",
+    "time": "Hora"
+  },
+  "autoRead": {
+    "label": "Regresos ya leídos",
+    "hint": "Los informes de ejércitos que vuelven a casa llegan ya marcados como leídos"
+  },
+  "filters": {
+    "search": "Buscar",
+    "searchPlaceholder": "Coordenadas o un nombre, p. ej. 207,405",
+    "kind": "Tipo",
+    "order": "Orden",
+    "unread": "Solo sin leer",
+    "clear": "Borrar filtros"
+  },
+  "kinds": {
+    "any": "Cualquier tipo",
+    "battles": "Batallas",
+    "scouting": "Exploración",
+    "returns": "Regresos",
+    "movements": "Refuerzos y transportes",
+    "other": "Otros"
+  },
+  "orders": {
+    "newest": "Más recientes primero",
+    "oldest": "Más antiguos primero"
+  },
+  "dialog": {
+    "title": "Informe",
+    "deleted": "Informe eliminado"
+  },
+  "none": "ninguno",
+  "walls": "· Murallas Nv. {{level}}",
+  "labels": {
+    "from": "De",
+    "to": "A",
+    "hero": "Héroe",
+    "heroes": "Héroes",
+    "troops": "Tropas",
+    "resources": "Recursos",
+    "broughtHome": "Traído a casa",
+    "delivered": "Entregado",
+    "target": "Objetivo",
+    "guardHero": "Héroe de guardia",
+    "fortifications": "Fortificaciones",
+    "loyalty": "Lealtad",
+    "population": "Población",
+    "heldBy": "En manos de",
+    "defenders": "Defensores",
+    "scouts": "Exploradores",
+    "scoutedBy": "Explorado por",
+    "player": "Jugador",
+    "reinforcements": "Refuerzos",
+    "bought": "Comprado",
+    "sold": "Vendido",
+    "gold": "Oro",
+    "goods": "Mercancías",
+    "deserted": "Desertores",
+    "between": "Entre",
+    "food": "Comida",
+    "drafted": "Reclutados"
+  },
+  "battle": {
+    "victory": "Victoria",
+    "defeat": "Derrota",
+    "result": {
+      "attackerWon": "Ganó el atacante",
+      "defenderWon": "Ganó el defensor",
+      "draw": "Empate"
+    },
+    "rounds_one": "{{count}} ronda",
+    "rounds_many": "{{count}} rondas",
+    "rounds_other": "{{count}} rondas",
+    "valley": "{{name}} Nv. {{level}}: {{status}}",
+    "occupied": "ocupado",
+    "notOccupied": "no ocupado",
+    "notOccupiedReason": "no ocupado ({{reason}})",
+    "attacker": "Atacante",
+    "defender": "Defensor",
+    "valleyDefenders": "Defensores del valle"
+  },
+  "side": {
+    "title": "{{side}}: {{player}}",
+    "noTroops": "Sin tropas.",
+    "before": "Antes",
+    "lost": "Perdidas",
+    "after": "Después",
+    "injured": "Sobrevivieron heridas (Medicina): ",
+    "healHint": "· Cúralas en Militar",
+    "honor": "+{{value}} de honor",
+    "heroExp": "Héroe +{{value}} de exp.",
+    "walls": "Murallas Nv. {{level}}"
+  },
+  "loot": {
+    "title": "Botín",
+    "valleyNothing": "Nada: los valles no guardan recursos que llevarse.",
+    "valleyNothingOccupied": "Nada: los valles no guardan recursos que llevarse (ocuparlo aumenta tu producción).",
+    "taken": "Botín obtenido",
+    "lost": "Recursos perdidos ante el atacante",
+    "nothingWon": "Nada (no quedaba nada sin proteger o no había espacio para cargarlo).",
+    "nothingFailed": "Nada: el ataque fracasó.",
+    "medalsFound": "Medallas encontradas:",
+    "medalsAttackerFound": "Medallas que encontró el atacante:",
+    "loyalty": "Lealtad −{{damage}} (ahora {{left}})",
+    "captured": " · Ciudad conquistada",
+    "seatLost": "Se pierden los héroes, ejércitos, investigaciones en curso, órdenes de mercado y envíos que su anterior dueño tenía allí",
+    "standing": "Reputación con {{faction}} {{change}} (ahora {{standing}})"
+  },
+  "desertion": {
+    "intro": "{{city}} se quedó sin comida, así que hubo deserciones: un 10% de cada tipo de tropa por cada hora de juego sin pagar el mantenimiento (una hora de juego es {{gameHour}}).",
+    "gameHourReal": "una hora",
+    "gameHourScaled": "1/{{speed}} de hora real",
+    "between": "{{from}} y {{to}}",
+    "food": "producido {{produced}}, mantenimiento de tropas {{upkeep}}, <net>neto {{net}}</net>",
+    "stillRunningOut": "La comida se sigue agotando: compra comida en el Mercado, construye o mejora Granjas, ocupa valles de pradera o de lago, o mantén menos tropas."
+  },
+  "movement": {
+    "heroReturned": "No hay plaza libre en el Salón de banquetes: el héroe volvió a casa."
+  },
+  "scout": {
+    "nobody": "nadie",
+    "gotThrough": "pasaron",
+    "repelled": "fueron repelidos",
+    "fight": "{{outcome}} · Nuestros {{ourBefore}} → {{ourAfter}}, suyos {{theirBefore}} → {{theirAfter}}"
+  },
+  "trade": {
+    "order": "{{amount}} de {{resource}} a {{price}}"
+  },
+  "draft": {
+    "auto": "{{city}} reclutó por sí sola en la ciudad bárbara más fuerte de su área, elegida al azar entre iguales (no tenía explorador para compararlas).",
+    "autoScouted_one": "{{city}} reclutó por sí sola en la ciudad bárbara más fuerte de su área.",
+    "autoScouted_many": "{{city}} reclutó por sí sola: su explorador comparó las {{count, number}} ciudades bárbaras más fuertes de su área y reclutó en la que tenía más tropas.",
+    "autoScouted_other": "{{city}} reclutó por sí sola: su explorador comparó las {{count, number}} ciudades bárbaras más fuertes de su área y reclutó en la que tenía más tropas.",
+    "manual": "{{city}} reclutó en una ciudad bárbara de su área."
+  }
+}

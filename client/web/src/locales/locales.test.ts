@@ -77,11 +77,17 @@ describe('locale files', () => {
 
   for (const locale of full) {
     describe(locale, () => {
-      it('has every en-GB key, and no others', () => {
+      // the full list, not the names without their plural forms: a plain en-GB key written only in plural forms
+      // (`nothing_other` for `nothing`) would pass that, and i18next would never find it
+      it('has every en-GB key and no others: each plain key as it is, each plural key in its own forms', () => {
+        const forms = pluralForms(locale);
         for (const ns of namespaces) {
-          const want = [...new Set([...flatten(source[ns]!).keys()].map(base))].sort();
-          const have = [...new Set([...flatten(byLocale[locale]![ns]!).keys()].map(base))].sort();
-          expect(have, ns).toEqual(want);
+          const want = new Set<string>();
+          for (const key of flatten(source[ns]!).keys()) {
+            if (PLURAL.test(key)) for (const form of forms) want.add(`${base(key)}_${form}`);
+            else want.add(key);
+          }
+          expect([...flatten(byLocale[locale]![ns]!).keys()].sort(), ns).toEqual([...want].sort());
         }
       });
 

@@ -1,0 +1,20 @@
+{
+  "intro": "Cinco facciones dominan el territorio. Las ciudades bárbaras de nivel {{level}} o superior pertenecen a la facción que domina su zona; las de nivel inferior son bandidos, sin lealtad a nadie.",
+  "zones": "Domina {{zones}}",
+  "strong": "Fuerte en",
+  "short": "Escasa de",
+  "gold": "Oro",
+  "goldUsual": "{{gold}} (normalmente {{treasury}})",
+  "temperament": {
+    "trading": "Comerciante",
+    "warlike": "Belicosa",
+    "insular": "Aislacionista"
+  },
+  "standingIntro": "Atacar las ciudades de una facción reduce tu reputación con ella; la aumentan los ataques victoriosos contra bandidos en su territorio y comerciar con las facciones desde una ciudad en sus tierras. Con el tiempo, la reputación vuelve poco a poco a neutral.",
+  "standing": "Tu reputación",
+  "standingValue": "{{tier}} ({{standing}})",
+  "terms": "Tus ciudades en sus tierras comercian con las facciones con un diferencial de {{spread}}.",
+  "refuses": "No comercia con tus ciudades en sus tierras.",
+  "ruled": "El estado de {{state}} está gobernado por {{player}}: sus ciudades bárbaras quedan fuera de la facción y pagan {{tribute}} de oro por hora a la capital.",
+  "rulersIntro": "Un jugador que posee la capital de un estado gobierna ese estado: sus ciudades bárbaras abandonan su facción, dejan de comerciar y pagan al soberano. Atacarlas o reclutar de ellas no cuesta reputación."
+}

@@ -82,6 +82,14 @@ describe(fmt.name, () => {
     expect(fmt(1234.9)).toBe('1,234');
   });
 
+  it('writes Spanish its own way: no separator in 4 digits, a point from 5, a decimal comma', async () => {
+    await i18n.changeLanguage(Locale.ES);
+    expect(fmt(1234.9)).toBe('1234');
+    expect(fmt(12_345)).toBe('12.345');
+    expect(fmt(1_234_567)).toBe('1,2 M');
+    expect(fmt(250_000)).toBe('250 mil');
+  });
+
   it('writes Arabic with Western digits, as the coordinates in code are', async () => {
     await i18n.changeLanguage(Locale.AR);
     expect(fmt(1234.9)).toMatch(/^1.234$/);

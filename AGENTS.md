@@ -210,7 +210,7 @@ routes/
 hooks/                         app-wide hooks (use-game, use-now, use-inventory, …)
 lib/                           app-wide helpers (api, format, i18n, tones, genders, utils) and their tests
 locales/
-  <locale>/<namespace>.json    all text the client shows (en-GB, en-US, ja-JP), see Translations
+  <locale>/<namespace>.json    all text the client shows (en-GB, en-US, ja-JP, ar, es), see Translations
 i18next.d.ts                   types translation keys against en-GB
 ```
 
@@ -298,14 +298,15 @@ The client never writes player-facing text in code: every string comes from `src
   - `en-US` is an override locale (`OVERRIDE_LOCALES`): it holds only the keys whose spelling differs (honor, defense, canceled, labor).
   - `ja-JP` is a full translation: every en-GB key.
   - `ar` (Arabic, Modern Standard) is a full translation too, written right to left (below), with Western digits (0-9) in formatted numbers and dates, as in the coordinates and times the code writes (`lib/format.ts`).
+  - `es` (Spanish, neutral international: understood in Spain and Latin America, so any `es-*` browser gets it) is a full translation. It addresses the player as *tú*, uses the game data names in `es/data-*.json` everywhere, and numbers follow Spanish style through `Intl` (1234, 12.345, 1,2 M).
 - **No text in code:** `npm run lint` rejects words written in client JSX, in the attributes a player reads (`title`, `placeholder`, `aria-label`, `alt`, `label`, `description`), and in `toast(…)` and `useCommand(…)` messages (`eslint.config.js`). Strings with no letters, single letters and the game's name pass. Text built outside JSX (labels in `constants.ts`, sentences in `utils.ts`) isn't linted, so it relies on this section being followed.
 - **Keeping locales in step:** `src/locales/locales.test.ts` (part of `npm test`) fails when they drift. It checks that:
   - every locale has the same namespace files, each registered in `src/i18next.d.ts`;
-  - a full locale has exactly the en-GB keys, with the plural forms its language uses (from `Intl.PluralRules`: `_one` and `_other` for English, `_other` alone for Japanese);
+  - a full locale has exactly the en-GB keys, no more and no fewer: each plain key as it is, and each plural key in the forms its language uses (from `Intl.PluralRules`: `_one` and `_other` for English, `_other` alone for Japanese, `_one`, `_many` and `_other` for Spanish), so a plain key written in plural forms fails too;
   - an override locale holds only keys that exist in en-GB;
   - every translation keeps the en-GB `{{placeholders}}` and `<tags>`, and no text is empty.
 - **Changing text:**
-  1. **Add** a key to en-GB, then to every full locale (ja-JP), and to en-US if the spelling differs.
+  1. **Add** a key to en-GB, then to every full locale (ja-JP, ar, es), and to en-US if the spelling differs.
   2. **Reword** the en-GB text and update the translations to match. Don't leave an old translation that no longer says the same thing.
   3. **Remove** a key from every locale once no code uses it.
   4. **A new namespace** needs its file in every locale and an entry in `src/i18next.d.ts`.
@@ -318,7 +319,7 @@ The client never writes player-facing text in code: every string comes from `src
 - **English for the screens loaded on first use** loads with them, not with the first page (`LAZY_NAMESPACES` and the two file patterns beside it in `lib/i18n.ts`): their components read it with `useTranslation`, which waits for it inside the screen's Suspense boundary. A new lazy screen's namespace goes in that list, in both patterns. A namespace stays bundled if its text is read outside a component (`i18n.t` in `constants.ts`, `utils.ts` or a push handler can't wait for a file) or by anything on the first page; so `common`, every `msg-*` and `data-*` namespace, and shared ones like `armies-panel` (its mission names) stay.
 - **Namespaces:** one per top-level component folder or route, named after it (`flows-panel`, `login`), plus `common` for text that means the same everywhere: actions (Cancel, Save, Log out), resources, units and durations, levels (`level.short` is "Lv {{level}}"), "{{gold}} gold", troop counts, list separators, genders, hero attributes. Use a `common` key rather than repeating its text in a namespace; a word that only looks the same (the Research tab and the Research button) keeps its own key.
 - **Adding text:**
-  1. Add the key to the en-GB file of the namespace, then to `ja-JP` (and to `en-US` if the spelling differs).
+  1. Add the key to the en-GB file of the namespace, then to every full locale (`ja-JP`, `ar`, `es`; and to `en-US` if the spelling differs).
   2. A new namespace needs its file in each locale and an entry in `src/i18next.d.ts`.
   3. Keys are typed against en-GB, so a missing or misspelled key fails `npm run typecheck`.
 - **In a component:** `const { t } = useTranslation('<ns>')`, or `useTranslation(['<ns>', 'common'])` to also use `t('common:actions.cancel')`.
@@ -354,7 +355,7 @@ The server never sends or stores English for players. Everything it tells a play
 - **Client side:** `errorMessage(err)` and `translateMessage(m)` (`lib/messages.ts`) word any message. Show server text only through them.
 - **Adding a message:**
   1. Add the code to its area file (or `common.ts` when any area can send it; reuse an existing code with the same meaning).
-  2. Word it in `msg-<area>.json` for en-GB and ja-JP (and en-US if the spelling differs).
+  2. Word it in `msg-<area>.json` for en-GB and every full locale (ja-JP, ar, es; and en-US if the spelling differs).
   3. The locale test fails if a code has no text, if its placeholders don't match its params, or if text is left for a code that no longer exists.
 - **Positions** of armies and reports are messages too (`world.position.city`, `.tile`, `.place`).
 - **Stored data:** a stored message must keep meaning the same thing. If a code changes or is removed while rows still hold it, convert those rows in a migration.

@@ -1,0 +1,23 @@
+{
+  "recalled": "Ejército retirado",
+  "sections": {
+    "hostile": "Ejércitos hostiles",
+    "own": "Tus ejércitos",
+    "allied": "Ejércitos aliados"
+  },
+  "none": "Ninguno.",
+  "missions": {
+    "transport": "Transportar",
+    "reinforce": "Reforzar",
+    "scout": "Explorar",
+    "buildCity": "Construir ciudad",
+    "attack": "Atacar"
+  },
+  "row": {
+    "returning": "Volviendo",
+    "stationed": "Destinado",
+    "marching": "En marcha",
+    "recall": "Retirar",
+    "waiting": "En espera · sale dentro de <timer/>, llega a las {{time}} UTC"
+  }
+}

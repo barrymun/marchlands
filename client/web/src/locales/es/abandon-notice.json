@@ -1,0 +1,7 @@
+{
+  "leaving": "{{city}} se abandonará dentro de <countdown />, y se perderá todo lo que contiene",
+  "keep": "Conservar esta ciudad",
+  "kept": "Conservas {{city}}",
+  "keepMovedTitle": "¿Conservar {{city}}?",
+  "keepMovedDescription": "Lo que mudaste se queda donde fue, y no podrás mudar ninguna ciudad durante {{time}}."
+}

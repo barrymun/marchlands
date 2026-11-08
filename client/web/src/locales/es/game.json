@@ -1,0 +1,57 @@
+{
+  "loading": "Cargando tu partida…",
+  "loadError": "No se pudo cargar la partida",
+  "nav": {
+    "town": "Ciudad",
+    "fields": "Campos",
+    "map": "Mapa",
+    "military": "Militar",
+    "research": "Investigación",
+    "items": "Objetos",
+    "armies": "Ejércitos",
+    "plans": "Planes",
+    "factions": "Facciones",
+    "reports": "Informes",
+    "market": "Mercado",
+    "flows": "Flujos",
+    "stats": "Estadísticas"
+  },
+  "viewSwitch": "Vistas",
+  "mainMenu": "Menú del juego",
+  "menu": "Menú",
+  "sidebar": "Resumen de la ciudad",
+  "panel": "Se abre sobre la vista; ciérralo para volver.",
+  "troopsHome": {
+    "title": "Tropas en casa"
+  },
+  "cityFallback": "Ciudad",
+  "yourCities": "Tus ciudades",
+  "sendTo": "Enviar ejército a {{city}}",
+  "citySettings": "Ajustes de la ciudad",
+  "playerStats": "Prestigio <prestige>{{prestige}}</prestige> · Puesto {{rank}} · Honor <honor>{{honor}}</honor>",
+  "beginnerProtection": "Protección de principiante",
+  "titledName": "{{title}} {{name}}",
+  "liveUpdates": {
+    "aria": "actualizaciones en directo {{status}}",
+    "tooltip": "Actualizaciones en directo: {{status}}",
+    "status": {
+      "open": "activas",
+      "connecting": "conectando",
+      "closed": "cerradas"
+    }
+  },
+  "account": {
+    "label": "Cuenta",
+    "playerSettings": "Ajustes del jugador",
+    "apiDocs": "Documentación de la API"
+  },
+  "mayor": {
+    "label": "Alcalde",
+    "attributesHint": "Política: producción y velocidad de construcción · Ataque: entrenamiento · Inteligencia: investigación",
+    "appointHint": "Nombra un alcalde en Héroes para acelerar la producción, la construcción, el entrenamiento y la investigación.",
+    "pick": "Elige un alcalde",
+    "none": "No hay ningún héroe en casa para nombrarlo alcalde.",
+    "toInn": "Contratar en la Posada",
+    "allHeroes": "Todos los héroes"
+  }
+}

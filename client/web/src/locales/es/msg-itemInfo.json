@@ -1,0 +1,58 @@
+{
+  "period": {
+    "days_one": "{{count, number}} día",
+    "days_many": "{{count, number}} días",
+    "days_other": "{{count, number}} días",
+    "hours_one": "{{count, number}} hora",
+    "hours_many": "{{count, number}} horas",
+    "hours_other": "{{count, number}} horas",
+    "minutes_one": "{{count, number}} minuto",
+    "minutes_many": "{{count, number}} minutos",
+    "minutes_other": "{{count, number}} minutos"
+  },
+  "speedup": {
+    "time": "Reduce en {{time}} el tiempo de una construcción o investigación.",
+    "hours_one": "Reduce entre {{min}} y {{count, number}} hora (al azar) el tiempo de una construcción o investigación.",
+    "hours_many": "Reduce entre {{min}} y {{count, number}} horas (al azar) el tiempo de una construcción o investigación.",
+    "hours_other": "Reduce entre {{min}} y {{count, number}} horas (al azar) el tiempo de una construcción o investigación.",
+    "percent": "Reduce un {{percent}} del tiempo total de una construcción o investigación.",
+    "troopBatch": "Reduce un {{percent}} del tiempo total de un lote de entrenamiento de tropas.",
+    "fortBatch": "Reduce un {{percent}} del tiempo total de un lote de fortificaciones."
+  },
+  "loyalty": "Aumenta la lealtad de un héroe en {{amount}} (hasta {{max}}).",
+  "heroStat": "Aumenta un {{percent}} el atributo {{stat}} de un héroe durante {{period}}.",
+  "experience": {
+    "share": "Da experiencia a un héroe: el {{percent}} del siguiente nivel, como mínimo {{min}}.",
+    "level": "Da experiencia a un héroe: un nivel completo, como mínimo {{min}}."
+  },
+  "holyWater": "Libera todos los puntos asignados de un héroe para que puedan asignarse de nuevo.",
+  "buff": "{{effect}} durante {{period}}. Usar otro alarga el tiempo.",
+  "grant": "Da {{contents}}.",
+  "grantCity": "Da {{contents}} a la ciudad actual.",
+  "contents": {
+    "item": "{{amount}} × {{item}}",
+    "amount": "{{name}}: {{amount}}"
+  },
+  "chest": "Cofre cerrado: se abre con {{key}}. Contiene {{contents}}.",
+  "key": "Abre {{chest}}.",
+  "medalBox": "Contiene entre {{min}} y {{max}} de cada una de estas: {{medals}}.",
+  "randomBox": "Contiene objetos al azar.",
+  "civilCode": "Añade a la ciudad actual el {{percent}} de la población máxima (como mínimo {{min}}).",
+  "cureInjured": "Cura al instante todas las tropas heridas de la ciudad actual.",
+  "heroBox": "Recluta un héroe de nivel {{level}} con todos los atributos base de al menos {{minStat}}. Necesita una plaza libre en el {{building}}.",
+  "teleporter": "Traslada tu ciudad a la casilla de llanura libre que elijas; después tiene un tiempo de espera de {{period}}.",
+  "truce": "Tregua: tus ciudades no pueden ser atacadas durante {{period}}, pero tú tampoco puedes atacar.",
+  "notUsable": "Aún no se puede usar en este servidor.",
+  "noEffect": "Objeto de evento sin efecto en este servidor.",
+  "howTo": {
+    "speedup": "Úsalo desde una construcción (en Ciudad o Campos) o una investigación (en Investigación) en curso.",
+    "troopsSpeedup": "Úsalo en un lote de la cola de entrenamiento de Militar.",
+    "fortificationsSpeedup": "Úsalo en un lote de la cola de fortificaciones de Militar.",
+    "cityMove": "Úsalo con «Mover la ciudad aquí» en una casilla de llanura libre del Mapa.",
+    "heroesReset": "Úsalo desde el diálogo Puntos de un héroe, en Héroes.",
+    "heroesUseItem": "Úsalo desde el botón Objetos de un héroe, en Héroes.",
+    "cityTruce": "Úsalo desde Ajustes del jugador (menú de arriba a la derecha).",
+    "key": "Usa {{chest}}; la llave se gasta automáticamente.",
+    "welcome": "Todo jugador nuevo recibe uno al empezar; no se puede comprar."
+  }
+}

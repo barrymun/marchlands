@@ -1,0 +1,61 @@
+{
+  "cityForm": {
+    "renamed": "Ciudad renombrada",
+    "moved": "Ciudad trasladada",
+    "moveRules": "Para trasladarla, todos los ejércitos de esta ciudad deben estar en casa y no puede haber tropas ajenas en camino. Los valles ocupados se liberan.",
+    "teleportOwned": "{{item}} · ×{{owned}}: una llanura libre que tú eliges",
+    "teleportPrice": "{{item}} · {{price}} de oro: una llanura libre que tú eliges",
+    "teleport": "Teletransportar",
+    "cooldown": "En espera: próximo traslado en <countdown />.",
+    "keepsName": "{{name}} es una ciudad histórica y conserva su nombre: no se puede renombrar.",
+    "cannotMove": "{{name}} es una ciudad histórica y permanece donde está: no se puede trasladar."
+  },
+  "taxRate": {
+    "label": "Tasa de impuestos",
+    "description": "Esta parte de la comida, madera, piedra y hierro nuevos de cada hora se vende al mercader según se produce. Los recursos almacenados nunca se venden. El impuesto base ({{baseTax}} de oro) se paga con cualquier tasa.",
+    "descriptionFixed": "Esta parte de la comida, madera, piedra y hierro nuevos de cada hora se vende al mercader a {{price}} de oro cada unidad según se produce. Los recursos almacenados nunca se venden. El impuesto base ({{baseTax}} de oro) se paga con cualquier tasa.",
+    "save": "Guardar tasa",
+    "saved": "Tasa de impuestos guardada",
+    "preview": "Al {{rate}}%: {{sold}} de oro por la producción vendida.",
+    "previewFor": "Al {{rate}}%: {{sold}} de oro por la producción vendida de {{list}}."
+  },
+  "workRates": {
+    "label": "Ritmos de trabajo de la producción",
+    "description": "Baja un ritmo para liberar a los trabajadores de ese tipo de campo: pasan a ser población ociosa con la que puedes entrenar tropas. Al 0% los campos no producen nada. Ociosos ahora: {{idle}} · En los campos: {{workers}}.",
+    "field": "{{resource}} %",
+    "save": "Guardar ritmos",
+    "allIdle": "Todo al 0% (todos ociosos)",
+    "allFull": "Todo al 100%",
+    "saved": "Ritmos de trabajo guardados"
+  },
+  "abandon": {
+    "warning": "Abandonar una ciudad no se puede deshacer. Pasado {{time}} se pierde todo para siempre: sus héroes, tropas, recursos y edificios, sus ejércitos estén donde estén, la investigación en curso allí, sus órdenes de mercado y sus envíos. Nada pasa a otra ciudad por sí solo y no se reembolsa nada. Sus valles se liberan.",
+    "keepRegular": "Debes conservar al menos una ciudad normal, ya que una ciudad histórica puede ser capturada, así que esta no se puede abandonar.",
+    "button": "Abandonar esta ciudad",
+    "started": "{{city}} se abandonará en {{time}}",
+    "confirmTitle": "¿Abandonar {{city}}?",
+    "confirmDescription": "En {{time}} esta ciudad desaparece para siempre, con todo lo que aparece aquí. Nada pasa a otra ciudad por sí solo y no se reembolsa nada.",
+    "confirm": "Abandonar ciudad",
+    "road": "Una vez iniciado, puedes sacar de inmediato las tropas, los recursos y los héroes que elijas de esta ciudad. Un ejército que siga en camino cuando acabe la hora se pierde, con su héroe.",
+    "typeName": "Escribe el nombre de la ciudad, {{city}}, para confirmar",
+    "row": {
+      "heroes": "Héroes",
+      "research": "Investigación en curso aquí",
+      "troops": "Tropas en casa",
+      "training": "Tropas en entrenamiento",
+      "injured": "Tropas heridas",
+      "fortifications": "Fortificaciones",
+      "fortsQueued": "Fortificaciones en construcción",
+      "armies": "Ejércitos fuera",
+      "armyTroops": "Tropas en esos ejércitos",
+      "valleys": "Valles liberados",
+      "orders": "Órdenes de mercado",
+      "shipments": "Envíos en camino",
+      "waves": "Oleadas de planes sin enviar",
+      "prestige": "Prestigio retirado"
+    },
+    "prestigeNote": "Capturaste esta ciudad hace poco: abandonarla antes del {{date}} te retira los {{prestige}} de prestigio que te dio.",
+    "moving": "Un héroe solo puede trasladarse a una ciudad con una plaza libre en el Salón de banquetes.",
+    "arriving": "Durante ese tiempo no se puede enviar ningún ejército a esta ciudad, y los que vengan de camino se dan la vuelta. Los ejércitos propios de esta ciudad que regresen se pierden con ella, salvo que se saquen de nuevo."
+  }
+}

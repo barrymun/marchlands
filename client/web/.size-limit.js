@@ -75,4 +75,11 @@ export default [
     limit: '45 kB',
     gzip: true,
   },
+  {
+    // Spanish, loaded only when chosen; set (2026-11-07, at 40.05 kB) at the Japanese limit, as the two are the same size
+    name: 'Spanish',
+    path: 'dist/assets/es-*.js',
+    limit: '45 kB',
+    gzip: true,
+  },
 ];

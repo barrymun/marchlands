@@ -1,0 +1,12 @@
+{
+  "invalidResource": "Este recurso no se puede comerciar.",
+  "invalidSide": "Elige si quieres comprar o vender.",
+  "invalidPrice": "Este precio no es válido.",
+  "needMarketplace": "Necesitas un {{building}} para comerciar.",
+  "nothingToTrade": "Ahora mismo no hay nada que comerciar.",
+  "tooManyOrders": "Mejora tu {{building}} para colocar más órdenes.",
+  "notEnoughResource": "No tienes suficiente {{resource}}.",
+  "slowDown": "Estás colocando y cancelando órdenes demasiado rápido. Inténtalo de nuevo en {{wait}}.",
+  "orderNotFound": "Orden no encontrada.",
+  "shipmentNotFound": "Envío no encontrado."
+}

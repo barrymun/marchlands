@@ -1,0 +1,23 @@
+{
+  "worker_one": "Peones baratos y débiles; cada uno carga {{count, number}} recurso. Sirven para engrosar un ejército o acarrear el botín, no para luchar.",
+  "worker_many": "Peones baratos y débiles; cada uno carga {{count, number}} recursos. Sirven para engrosar un ejército o acarrear el botín, no para luchar.",
+  "worker_other": "Peones baratos y débiles; cada uno carga {{count, number}} recursos. Sirven para engrosar un ejército o acarrear el botín, no para luchar.",
+  "warrior": "Soldados de a pie básicos: tropas cuerpo a cuerpo baratas que luchan contra lo que tengan más cerca.",
+  "scout": "La unidad más rápida, necesaria para explorar (las batallas de exploración solo las libran exploradores). En batalla se quedan atrás mientras otras tropas siguen luchando.",
+  "pikeman": "Lanceros cuerpo a cuerpo hechos para frenar a los caballos: infligen ×{{multiplier}} de daño a las unidades de {{cavalry}} y {{cataphract}}.",
+  "swordsman": "Infantería cuerpo a cuerpo robusta con mucha defensa; infligen ×{{multiplier}} de daño a las unidades de {{target}}.",
+  "archer": "Tropas a pie a distancia y de largo alcance; disparan primero a las unidades a distancia enemigas ({{targets}}).",
+  "transporter_one": "Carros de suministros: cada uno carga {{count, number}} recurso, con mucho la mayor capacidad. Se mantienen fuera de la lucha mientras queden otras tropas, así que dales una escolta.",
+  "transporter_many": "Carros de suministros: cada uno carga {{count, number}} recursos, con mucho la mayor capacidad. Se mantienen fuera de la lucha mientras queden otras tropas, así que dales una escolta.",
+  "transporter_other": "Carros de suministros: cada uno carga {{count, number}} recursos, con mucho la mayor capacidad. Se mantienen fuera de la lucha mientras queden otras tropas, así que dales una escolta.",
+  "cavalry": "Tropas montadas rápidas; infligen ×{{multiplier}} de daño a las unidades de {{target}}. Vulnerables al {{abatis}} enemigo.",
+  "cataphract": "Caballería pesada acorazada: dura y contundente, inflige ×{{multiplier}} de daño a las unidades de {{target}}. Vulnerable al {{abatis}} enemigo.",
+  "ballista": "Máquina de asedio de largo alcance y mucho ataque; dispara primero a las unidades a distancia y castiga las murallas cuando no tiene nada más a su alcance.",
+  "batteringRam": "Máquina de asedio con muchísima vida (absorbe daño) que destroza las murallas; lenta.",
+  "catapult": "La máquina de asedio de mayor alcance y más golpe; devastadora contra murallas y unidades a distancia, pero lenta y frágil en el cuerpo a cuerpo.",
+  "trap": "Fosos ocultos: cuando los atacantes llegan al último tramo antes de las murallas, las trampas matan a parte de cada grupo que haya allí y se gastan. Ocupa {{space}} de espacio en las murallas.",
+  "abatis": "Barricadas de estacas que solo golpean a las unidades de {{cavalry}} y {{cataphract}} que se acercan a las murallas. Ocupa {{space}} de espacio en las murallas.",
+  "archerTower": "Arqueros en las murallas: disparan a los atacantes a distancia (el alcance crece con el nivel de las {{walls}}) y solo reciben el {{percent}} del daño. Las mejora la investigación: {{techs}}. Ocupa {{space}} de espacio en las murallas.",
+  "rollingLog": "Troncos que se hacen rodar sobre el grupo más fuerte de tropas a pie cerca de las murallas; se gastan. Ocupa {{space}} de espacio en las murallas.",
+  "trebuchet": "Lanza rocas contra el grupo atacante más fuerte dentro de su largo alcance; se gasta. Ocupa {{space}} de espacio en las murallas."
+}

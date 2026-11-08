@@ -1,0 +1,22 @@
+{
+  "invalidBuilding": "Edificio no válido.",
+  "notFound": "No se encontró el edificio.",
+  "invalidPosition": "Posición de edificio no válida.",
+  "cannotBuild": "Este edificio no se puede construir.",
+  "cannotBuildHere": "No se puede construir {{building}} aquí.",
+  "positionTaken": "Ya hay un edificio en esa posición.",
+  "limitReached": "Esta ciudad no admite más edificios de tipo {{building}}.",
+  "slotLocked": "Esa parcela aún no está desbloqueada.",
+  "queuesBusy": "Todas las colas de construcción están ocupadas.",
+  "requirementsNotMet": "No se cumplen los requisitos de este edificio.",
+  "statusChanged": "El estado de este edificio ha cambiado, quizá por un retraso de la red. Si este mensaje persiste, vuelve a cargar la página.",
+  "maxLevel": "Ya se ha alcanzado el nivel máximo de {{building}}.",
+  "busy": "Este edificio está ocupado.",
+  "nothingToDemolish": "Aquí no hay ningún edificio que derribar.",
+  "cannotDemolish": "No se puede derribar {{building}}.",
+  "notInProgress": "Aquí no se está construyendo ni derribando nada.",
+  "invalidTech": "Tecnología no válida.",
+  "academyNeeded": "Tienes que construir la {{building}} antes de poder investigar.",
+  "techRequirementsNotMet": "No se cumplen los requisitos de esta investigación.",
+  "troopRequirementsNotMet": "No se cumplen los requisitos de esta unidad."
+}

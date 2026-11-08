@@ -1,0 +1,46 @@
+{
+  "line": {
+    "summary": "Equipo <bonus>+{{total}}</bonus> · Grado {{tier}}/{{max}}",
+    "nextTier": "(grado {{tier}} en el nivel {{level}})",
+    "attributeGroup": "Atributo que potencia el equipo",
+    "boosts": "El equipo potencia {{label}}",
+    "putOn": "Aplicar el equipo a {{label}}",
+    "uses_one": "Usa el nivel de equipo {{level}} y hasta {{count}} estrella por pieza",
+    "uses_many": "Usa el nivel de equipo {{level}} y hasta {{count}} estrellas por pieza",
+    "uses_other": "Usa el nivel de equipo {{level}} y hasta {{count}} estrellas por pieza",
+    "setBonus_one": "Bonificación de conjunto +{{bonus}} (todas las piezas con {{count}} estrella o más).",
+    "setBonus_many": "Bonificación de conjunto +{{bonus}} (todas las piezas con {{count}} estrellas o más).",
+    "setBonus_other": "Bonificación de conjunto +{{bonus}} (todas las piezas con {{count}} estrellas o más)."
+  },
+  "card": {
+    "starAdded": "Estrella añadida",
+    "title": "Equipo del héroe",
+    "description": "Cada héroe lleva las {{pieces}} piezas. Su nivel es el de tu investigación Mejora de héroes ({{research}}/{{max}}, en la Academia); las estrellas se compran con medallas. Un héroe usa niveles de equipo y estrellas hasta su grado de equipo: ninguno en los niveles de héroe 1-9, 1 en 10-19, … 9 en 90-99, los {{max}} en el nivel {{heroMaxLevel}}. Cada nivel de una pieza añade +{{levelPoints}}, y su estrella N añade +N. Bonificación de conjunto: +{{setBonus}} por cada nivel de estrella que hayan alcanzado las {{pieces}} piezas.",
+    "setBonus_one": "Bonificación de conjunto <b>+{{bonus}}</b>: todas las piezas tienen {{count}} estrella o más.",
+    "setBonus_many": "Bonificación de conjunto <b>+{{bonus}}</b>: todas las piezas tienen {{count}} estrellas o más.",
+    "setBonus_other": "Bonificación de conjunto <b>+{{bonus}}</b>: todas las piezas tienen {{count}} estrellas o más.",
+    "setBonusNone": "Bonificación de conjunto: ninguna todavía. Da una estrella a cada pieza para obtener +{{bonus}}.",
+    "setBonusNext_one": "+{{bonus}} más cuando todas las piezas tengan {{count}} estrella.",
+    "setBonusNext_many": "+{{bonus}} más cuando todas las piezas tengan {{count}} estrellas.",
+    "setBonusNext_other": "+{{bonus}} más cuando todas las piezas tengan {{count}} estrellas.",
+    "levelZero": "Tu equipo es de nivel 0: solo cuentan las estrellas hasta que investigues Mejora de héroes en la Academia (el nivel N requiere la Academia de nivel N).",
+    "goToResearch": "Ir a Investigación",
+    "needsResearch": "Requiere investigación de nivel {{level}}",
+    "medalCost": "{{n}}× {{medal}}",
+    "starNeedsResearch": "La estrella {{star}} requiere Mejora de héroes de nivel {{star}} (ahora {{level}})",
+    "starCost_one": "Estrella {{star}}: {{count}} × {{medal}} (tienes {{owned}})",
+    "starCost_many": "Estrella {{star}}: {{count}} × {{medal}} (tienes {{owned}})",
+    "starCost_other": "Estrella {{star}}: {{count}} × {{medal}} (tienes {{owned}})",
+    "starsAboveHint": "Las estrellas por encima de tu nivel de Mejora de héroes cuentan una vez que lo investigues",
+    "starsCount": "cuentan {{used}} de {{stars}}",
+    "allStars": "Todas las estrellas",
+    "starNeedsResearchWaiting_one": "La estrella {{star}} requiere Mejora de héroes de nivel {{star}} (ahora {{level}}); hasta entonces solo cuentan {{used}} de {{count}} estrella",
+    "starNeedsResearchWaiting_many": "La estrella {{star}} requiere Mejora de héroes de nivel {{star}} (ahora {{level}}); hasta entonces solo cuentan {{used}} de {{count}} estrellas",
+    "starNeedsResearchWaiting_other": "La estrella {{star}} requiere Mejora de héroes de nivel {{star}} (ahora {{level}}); hasta entonces solo cuentan {{used}} de {{count}} estrellas"
+  },
+  "stars": {
+    "label_one": "{{n}} de {{count}} estrella",
+    "label_many": "{{n}} de {{count}} estrellas",
+    "label_other": "{{n}} de {{count}} estrellas"
+  }
+}

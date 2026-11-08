@@ -1,0 +1,32 @@
+{
+  "received": "{{item}}: has recibido {{grant}}",
+  "heroJoined": "{{hero}} (Nv. {{level}}) se ha unido a tu ciudad",
+  "used": "Se ha usado {{item}}",
+  "bought": "Has comprado {{item}}",
+  "search": "Buscar objetos",
+  "ownedOnly": "Solo los que tienes ({{n}})",
+  "itemsFor": "Objetos para {{label}}",
+  "showAll": "Mostrar todos los objetos",
+  "notEnoughGold": "No hay suficiente oro en {{city}} (se necesitan {{price}})",
+  "buyWithGold": "Comprar uno con el oro de {{city}}",
+  "buyFor": "Comprar · {{price}} de oro",
+  "noMatch": "Ningún objeto coincide.",
+  "grant": {
+    "amount": "{{amount}} × {{name}}"
+  },
+  "activeBonus": {
+    "runningHint": "Esta bonificación está activa; usar otro la prolonga",
+    "active": "Activa · <countdown/>",
+    "sameBonus": "La misma bonificación ya está activa (quedan <countdown/>); usar este añade {{adds}}.",
+    "sameBonusFrom": "La misma bonificación ya está activa por {{source}} (quedan <countdown/>); usar este añade {{adds}}."
+  },
+  "medals": {
+    "title": "Dónde conseguirla",
+    "attacks": "<hl>Ataques ganados</hl> contra ciudades bárbaras de estos niveles (la ciudad de un jugador cuenta el nivel de su Ayuntamiento), probabilidad por victoria:",
+    "attackChance": "Nv. {{level}} · {{chance}}",
+    "sometimes": "a veces {{range}}",
+    "container": "<hl>{{name}}</hl> ({{amount}}): {{price}} de oro en la tienda",
+    "containerKey": "<hl>{{name}}</hl> ({{amount}}): {{price}} de oro en la tienda (se abre con {{opener}})",
+    "quest": "<hl>Misión «{{name}}»</hl>: {{n}} (una vez)"
+  }
+}

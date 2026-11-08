@@ -1,0 +1,51 @@
+{
+  "accountExists": "Esta cuenta ya tiene una ciudad.",
+  "nameTaken": "Ese nombre de jugador ya está en uso.",
+  "sameName": "Ese ya es tu nombre.",
+  "renameCooldown_one": "Podrás cambiar de nombre de nuevo dentro de {{count, number}} hora.",
+  "renameCooldown_many": "Podrás cambiar de nombre de nuevo dentro de {{count, number}} horas.",
+  "renameCooldown_other": "Podrás cambiar de nombre de nuevo dentro de {{count, number}} horas.",
+  "sameGender": "Ese ya es tu género.",
+  "genderCooldown_one": "Podrás cambiar de género de nuevo dentro de {{count, number}} hora.",
+  "genderCooldown_many": "Podrás cambiar de género de nuevo dentro de {{count, number}} horas.",
+  "genderCooldown_other": "Podrás cambiar de género de nuevo dentro de {{count, number}} horas.",
+  "invalidSetting": "Ajuste no válido.",
+  "invalidFlag": "Bandera no válida.",
+  "title": {
+    "highest": "Ya tienes el título más alto.",
+    "prestigeRequired": "Se necesitan {{prestige}} de prestigio.",
+    "notEnoughMedals": "No tienes suficientes medallas."
+  },
+  "holiday": {
+    "invalidDays": "Unas vacaciones duran de 1 a {{max}} días.",
+    "troopsOut": "Primero debes retirar todas tus tropas."
+  },
+  "truce": {
+    "cooldown": "Tu tregua sigue en periodo de espera.",
+    "pvpDisabled": "En esta versión del juego no hace falta una tregua: los jugadores no pueden atacarse entre sí."
+  },
+  "protected": {
+    "beginner": "Este jugador está bajo protección de principiante.",
+    "truce": "Este jugador está en tregua.",
+    "holiday": "Este jugador está de vacaciones."
+  },
+  "bookmark": {
+    "tooMany_one": "Puedes guardar como máximo {{count, number}} marcador.",
+    "tooMany_many": "Puedes guardar como máximo {{count, number}} marcadores.",
+    "tooMany_other": "Puedes guardar como máximo {{count, number}} marcadores."
+  },
+  "preset": {
+    "nameLength_one": "Dale al preajuste un nombre de hasta {{count, number}} carácter.",
+    "nameLength_many": "Dale al preajuste un nombre de hasta {{count, number}} caracteres.",
+    "nameLength_other": "Dale al preajuste un nombre de hasta {{count, number}} caracteres.",
+    "tooMany_one": "Puedes guardar como máximo {{count, number}} preajuste.",
+    "tooMany_many": "Puedes guardar como máximo {{count, number}} preajustes.",
+    "tooMany_other": "Puedes guardar como máximo {{count, number}} preajustes."
+  },
+  "mail": {
+    "protectionExpired": {
+      "title": "Tu protección de principiante ha terminado",
+      "content": "Tu protección de principiante ha terminado. Ahora otros jugadores pueden atacar tus ciudades, y tú puedes atacar las suyas. Refuerza tus defensas y piensa en unirte a una alianza."
+    }
+  }
+}

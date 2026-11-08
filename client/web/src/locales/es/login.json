@@ -1,0 +1,17 @@
+{
+  "tagline": "Construye tu ciudad, alza un ejército, gobierna la tierra.",
+  "tabs": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse"
+  },
+  "form": {
+    "username": "Nombre de usuario",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "logIn": "Iniciar sesión",
+    "createAccount": "Crear cuenta",
+    "gettingReady": "Preparando…",
+    "notReady": "No se pudo preparar el registro. Comprueba tu conexión e inténtalo de nuevo.",
+    "tryAgain": "Reintentar"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "noOpenFlat": "No hay terreno libre para construir una ciudad.",
+  "invalidArea": "Esta zona del mapa no es válida.",
+  "areaTooLarge": "Esta zona del mapa es demasiado grande (como máximo {{max}} × {{max}}).",
+  "invalidTile": "Esta casilla no existe.",
+  "position": {
+    "city": "{{name}} ({{x}},{{y}})",
+    "tile": "{{tile}} Nv. {{level}} ({{x}},{{y}})",
+    "place": "{{tile}} ({{x}},{{y}})"
+  }
+}

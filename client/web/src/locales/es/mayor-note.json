@@ -1,0 +1,5 @@
+{
+  "bonus": "Bonificación de alcalde +{{pct}} de producción · {{rate}}",
+  "asMayor": "Como alcalde: +{{pct}} de producción · {{rate}}",
+  "versus": "({{diff}} frente a {{name}})"
+}

@@ -1,0 +1,138 @@
+{
+  "couldNotLoad": "No se pudieron cargar las estadísticas.",
+  "title": "Estadísticas",
+  "description": "Se guardan cada pocos minutos, así que tus últimas acciones pueden tardar unos minutos en aparecer.",
+  "descriptionSince": "Contadas desde el {{date}}. Se guardan cada pocos minutos, así que tus últimas acciones pueden tardar unos minutos en aparecer.",
+  "allCities": "Todas las ciudades",
+  "formerCity": "Antigua ciudad",
+  "allTime": "Desde siempre",
+  "last7Days": "Últimos 7 días",
+  "section": {
+    "showTable": "Mostrar tabla",
+    "showChart": "Mostrar gráfico"
+  },
+  "headline": {
+    "attacksWon": "Ataques ganados",
+    "attacksOf_one": "{{share}} de {{n}} ataque",
+    "attacksOf_many": "{{share}} de {{n}} ataques",
+    "attacksOf_other": "{{share}} de {{n}} ataques",
+    "defensesWon": "Defensas ganadas",
+    "defensesOf_one": "{{share}} de {{n}} defensa",
+    "defensesOf_many": "{{share}} de {{n}} defensas",
+    "defensesOf_other": "{{share}} de {{n}} defensas",
+    "honorGained": "Honor ganado",
+    "enemies": "Enemigos derrotados",
+    "enemiesMost": "Sobre todo {{unit}}",
+    "trained": "Tropas entrenadas",
+    "fell_one": "{{n}} caída para siempre",
+    "fell_many": "{{n}} caídas para siempre",
+    "fell_other": "{{n}} caídas para siempre",
+    "citiesCaptured": "Ciudades capturadas",
+    "valleys_one": "{{n}} valle ocupado",
+    "valleys_many": "{{n}} valles ocupados",
+    "valleys_other": "{{n}} valles ocupados",
+    "onDay": "{{date}}: {{value}}",
+    "trend_one": "Día a día durante el último {{count}} día",
+    "trend_many": "Día a día durante los últimos {{count}} días",
+    "trend_other": "Día a día durante los últimos {{count}} días"
+  },
+  "winsByLevel": {
+    "title": "Victorias por nivel",
+    "description": "Ciudades bárbaras y después ciudades históricas.",
+    "barbarian_one": "Ciudades bárbaras de nivel {{level}}: {{n}} victoria",
+    "barbarian_many": "Ciudades bárbaras de nivel {{level}}: {{n}} victorias",
+    "barbarian_other": "Ciudades bárbaras de nivel {{level}}: {{n}} victorias",
+    "historic_one": "Ciudades históricas de nivel {{level}}: {{n}} victoria",
+    "historic_many": "Ciudades históricas de nivel {{level}}: {{n}} victorias",
+    "historic_other": "Ciudades históricas de nivel {{level}}: {{n}} victorias"
+  },
+  "enemies": {
+    "title": "Enemigos derrotados",
+    "description": "Tropas y fortificaciones enemigas que destruyeron tus ejércitos y defensas.",
+    "more_one": "{{n}} tipo más",
+    "more_many": "{{n}} tipos más",
+    "more_other": "{{n}} tipos más"
+  },
+  "troops": {
+    "title": "Tus tropas",
+    "description": "Cuántas entrenaste de cada tipo y cuántas cayeron para siempre.",
+    "trained": "Entrenadas",
+    "fell": "Caídas para siempre"
+  },
+  "units": {
+    "title": "Tropas y fortificaciones",
+    "description": "Abatidas cuenta las unidades enemigas de ese tipo que destruyeron tus ejércitos y defensas. De tus propias bajas, Muertas no volvieron nunca y Heridas volvieron a casa para curarse.",
+    "columns": {
+      "trained": "Entrenadas",
+      "killed": "Abatidas (enemigas)",
+      "died": "Muertas",
+      "injured": "Heridas",
+      "healed": "Curadas",
+      "deserted": "Desertoras",
+      "disbanded": "Licenciadas"
+    }
+  },
+  "resourceFlows": {
+    "title": "De dónde vinieron y adónde fueron los recursos",
+    "description": "Ganancias en verde a un lado de la línea, pérdidas en rojo al otro, todos los recursos en la misma escala.",
+    "gained": "Ganado",
+    "lost": "Perdido",
+    "kinds": {
+      "produced": "Producido",
+      "plundered": "Saqueado",
+      "marketIn": "Del mercado",
+      "gift": "Regalo diario",
+      "upkeep": "Mantenimiento (comida de las tropas, paga de los héroes)",
+      "spent": "Gastado",
+      "wasted": "Desperdiciado (almacén lleno)",
+      "taxed": "Convertido en impuestos",
+      "marketOut": "Al mercado",
+      "stolen": "Perdido por saqueo"
+    }
+  },
+  "resources": {
+    "title": "Recursos",
+    "description": "Producido es la producción bruta (oro: impuestos). Las tropas comieron {{food}} de comida; los héroes cobraron {{salaries}} de oro. Mercado: {{paid}} de oro pagado, {{received}} de oro recibido.",
+    "resource": "Recurso",
+    "columns": {
+      "produced": "Producido",
+      "wasted": "Desperdiciado (almacén lleno)",
+      "taxed": "Vendido como impuestos",
+      "plundered": "Saqueado",
+      "stolen": "Perdido por saqueo",
+      "dailyGift": "Regalo diario",
+      "bought": "Comprado",
+      "sold": "Vendido"
+    }
+  },
+  "spending": {
+    "title": "Gastos",
+    "description": "Descontados los reembolsos de órdenes canceladas.",
+    "descriptionHonor": "Descontados los reembolsos de órdenes canceladas. Curar costó además {{honor}} de honor.",
+    "on": "En",
+    "groups": {
+      "building": "Edificios",
+      "research": "Investigación",
+      "training": "Tropas y fortificaciones",
+      "healing": "Curación",
+      "speedups": "Aceleradores",
+      "items": "Objetos",
+      "heroes": "Héroes (contratar, renovar, recompensar)",
+      "valleys": "Mejoras de valles",
+      "comfort": "Consuelo",
+      "other": "Otros (tregua, vacaciones, alianza)"
+    },
+    "amount": "{{resource}}: {{amount}}"
+  },
+  "growth": {
+    "title": "Crecimiento",
+    "buildingLevels": "Niveles de edificios",
+    "researchLevels": "Niveles de investigación",
+    "heroLevels": "Niveles de héroes",
+    "heroesHired": "Héroes contratados",
+    "itemsUsed": "Objetos usados"
+  },
+  "itemsUsed": {
+    "title": "Objetos usados"
+  }
+}

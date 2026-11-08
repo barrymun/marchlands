@@ -1,0 +1,15 @@
+{
+  "production": "+{{percent}} de producción de {{resource}}",
+  "goldIncome": "+{{percent}} de ingresos de oro",
+  "troopAttack": "+{{percent}} de ataque de las tropas",
+  "troopDefense": "+{{percent}} de defensa de las tropas",
+  "armySize": "Los ejércitos pueden llevar un {{percent}} más de tropas",
+  "buildingQueue": "Una cola de construcción adicional",
+  "upkeep": "-{{percent}} de mantenimiento de las tropas",
+  "trainingCost": "-{{percent}} de coste de entrenamiento de tropas",
+  "truce": "Tregua en vigor",
+  "truceCooldown": "Espera de la tregua",
+  "teleportCooldown": "Espera del teletransporte",
+  "holiday": "Modo vacaciones",
+  "heroStat": "+{{percent}} de {{stat}}"
+}

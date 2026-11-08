@@ -1,0 +1,27 @@
+{
+  "amount": "{{resource}}: {{amount}}",
+  "amountMax": "{{resource}}: {{amount}} / {{max}}",
+  "storageFull": "(almacén lleno: producción en pausa)",
+  "itemBonus": "Objetos +{{percent}}",
+  "population": "Población · {{idle}} ociosa · {{efficiency}} de eficiencia laboral",
+  "gold": {
+    "baseTax": "Impuesto base",
+    "taxSold": "Impuesto {{rate}}% (producción vendida)",
+    "heroSalaries": "Salarios de los héroes",
+    "tribute": "Tributo de ciudad histórica",
+    "stateTribute": "Tributo del estado"
+  },
+  "breakdown": {
+    "base": "Base",
+    "fields": "Campos",
+    "fieldsWorkRate": "Campos (ritmo de trabajo {{rate}}%)",
+    "technology": "Tecnología +{{percent}}",
+    "mayor": "Alcalde {{name}} +{{percent}}",
+    "valleys": "Valles +{{percent}}",
+    "upkeep": "Mantenimiento de tropas",
+    "tax": "Impuestos (vendido por oro)"
+  },
+  "rows": {
+    "perRealHour": "Por hora real (velocidad del juego {{speed}}×)"
+  }
+}

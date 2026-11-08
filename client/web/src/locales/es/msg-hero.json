@@ -1,0 +1,19 @@
+{
+  "needInn": "Los héroes se reclutan en la {{building}}: construye una primero.",
+  "noVacancy": "El {{building}} no tiene sitio para otro héroe.",
+  "notIdle": "Este héroe no está libre.",
+  "locked": "{{name}} está bloqueado: desbloquea el héroe antes de despedirlo.",
+  "noMayor": "Esta ciudad no tiene alcalde.",
+  "invalidPoints": "Puntos de atributo no válidos.",
+  "maxLevel": "Este héroe ya está en el nivel máximo ({{level}}).",
+  "maxLevelNoExperience": "Este héroe está en el nivel máximo ({{level}}) y ya no gana experiencia.",
+  "notEnoughExperience": "No hay suficiente experiencia.",
+  "invalidAttribute": "Atributo no válido.",
+  "invalidGearPiece": "Pieza de equipo no válida.",
+  "gearMaxStars": "Esta pieza ya tiene todas las estrellas.",
+  "gearStarLimit": "Las estrellas no pueden superar tu nivel de {{tech}} ({{limit}}): investiga primero el nivel {{level}}.",
+  "notEnoughMedals": "No tienes suficientes: se necesitan {{amount}} × {{item}}.",
+  "fullyLoyal": "Este héroe ya es completamente leal.",
+  "itemNotForGold": "Este objeto no se puede comprar con oro.",
+  "invalidItem": "Este objeto no se puede usar en un héroe."
+}

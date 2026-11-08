@@ -1,0 +1,143 @@
+{
+  "noMarketplace": {
+    "title": "Mercado",
+    "description": "Construye un Mercado en la ciudad para comerciar comida, madera, piedra y hierro a cambio de oro."
+  },
+  "side": {
+    "buy": "Comprar",
+    "sell": "Vender"
+  },
+  "columns": {
+    "order": "Orden",
+    "price": "Precio",
+    "filled": "Ejecutado",
+    "placed": "Colocada",
+    "amount": "Cantidad",
+    "from": "De",
+    "time": "Hora"
+  },
+  "myOrders": {
+    "title": "Mis órdenes en espera",
+    "cancelled": "Orden cancelada; se devolvieron los bienes o el oro retenidos",
+    "cancel": "Cancelar orden",
+    "none": "No hay órdenes en espera."
+  },
+  "myTrades": {
+    "title": "Mis operaciones",
+    "none": "Aún no hay operaciones.",
+    "bought": "Comprado",
+    "sold": "Vendido",
+    "gold": "Oro",
+    "with": "Con",
+    "counterparty": {
+      "player": "un jugador",
+      "factions": "las facciones",
+      "merchant": "el mercader"
+    }
+  },
+  "orderBook": {
+    "player": "jugador",
+    "unlimited": "ilimitado",
+    "merchant": "mercader",
+    "factions": "facciones",
+    "factionsDepth": "Cuánto comercian antes de que su precio llegue al del mercader",
+    "terms": "A través de {{faction}}: {{tier}} ({{standing}}), su diferencial {{spread}}",
+    "refused": "{{faction}} no comercia con esta ciudad: {{tier}} ({{standing}})",
+    "termsHint": "Una ciudad comercia con las facciones a través de la facción que controla su tierra, y tu reputación con ella fija su diferencial. Con {{refuse}} o menos no comerciará contigo; el mercader y los demás jugadores sí."
+  },
+  "priceHistory": {
+    "ranges": {
+      "hour": "1 hora",
+      "day": "1 día",
+      "week": "1 semana",
+      "month": "1 mes"
+    },
+    "merchantSells": "El mercader vende",
+    "merchantBuys": "El mercader compra",
+    "credit": "Gráficos de <link>TradingView Lightweight Charts™</link>",
+    "noTrades": "Aún no hay operaciones.",
+    "merchant": "mercader",
+    "players": "jugadores",
+    "factions": "facciones"
+  },
+  "depth": {
+    "empty": "No hay órdenes en el libro."
+  },
+  "ticker": {
+    "title": "Entre las facciones",
+    "seller": "Vendedor",
+    "buyer": "Comprador",
+    "trade": "Operación",
+    "amountAt": "{{amount}} de {{resource}} a {{price}}",
+    "group": "{{zone}} Nv. {{level}}",
+    "none": "Aún no hay operaciones entre las facciones."
+  },
+  "shipments": {
+    "title": "Mercancías en tránsito",
+    "delivered": "Entregado",
+    "arrivesIn": "llega en <countdown/>",
+    "deliverNow": "Entregar ya · {{gold}} de oro",
+    "none": "Nada en camino."
+  },
+  "tradeForm": {
+    "title": "Comerciar {{resource}}",
+    "description": "Las operaciones se liquidan al instante. Comisión de {{fee}} en las compras. Mercado Nv. {{level}}: {{open}}/{{cap}} órdenes en espera aquí.",
+    "instant": "Al instante",
+    "limit": "Fijar mi precio",
+    "amount": "Cantidad",
+    "highestPrice": "Precio máximo (oro por unidad)",
+    "lowestPrice": "Precio mínimo (oro por unidad)",
+    "enterAmount": "Introduce una cantidad para ver una cotización.",
+    "enterAmountAndPrice": "Introduce una cantidad y un precio para ver una cotización.",
+    "buyNowQuote": "Comprar {{amount}} ya · Media {{price}}",
+    "sellNowQuote": "Vender {{amount}} ya · Media {{price}}",
+    "goldSpent": "−{{gold}} de oro",
+    "goldEarned": "+{{gold}} de oro",
+    "nothingTrades": "Ahora mismo no se negocia nada a este precio.",
+    "withMerchant": "{{amount}} con el mercader",
+    "withPlayers": "{{amount}} con otros jugadores",
+    "inclFee": "comisión incl. {{fee}}",
+    "waits": "{{amount}} espera en el libro a {{price}}",
+    "holds": "retiene {{amount}} de {{resource}}",
+    "available": "{{resource}} disponible",
+    "limitReached": "Límite de órdenes en espera alcanzado: mejora el Mercado o cancela una orden.",
+    "bought": "Compraste {{amount}} de {{resource}} por {{gold}} de oro (media {{price}})",
+    "sold": "Vendiste {{amount}} de {{resource}} por {{gold}} de oro (media {{price}})",
+    "waiting": "{{amount}} en espera en el libro",
+    "buyNow": "Comprar ya",
+    "sellNow": "Vender ya",
+    "placeBuy": "Colocar orden de compra",
+    "placeSell": "Colocar orden de venta",
+    "withFactions": "{{amount}} con las facciones",
+    "sheetHint": "Compra o vende ya, o fija tu precio."
+  },
+  "bar": {
+    "markets": "Mercados",
+    "changeCaption": "Cambio 24 h",
+    "changeTitle": "Cambio desde hace 24 horas",
+    "high": "Máx. 24 h",
+    "low": "Mín. 24 h",
+    "volume": "Volumen 24 h",
+    "merchant": "El mercader compra / vende"
+  },
+  "chart": {
+    "views": "Gráfico",
+    "price": "Precio",
+    "depth": "Profundidad",
+    "ranges": "Periodo"
+  },
+  "book": {
+    "views": "Libro y operaciones",
+    "book": "Libro de órdenes",
+    "trades": "Operaciones",
+    "worldPrice": "Precio mundial",
+    "merchantPrice": "Precio del mercader",
+    "spread": "Diferencial {{spread}}"
+  },
+  "activity": {
+    "views": "Tu comercio"
+  },
+  "showMore_one": "Mostrar {{count}} más",
+  "showMore_many": "Mostrar {{count}} más",
+  "showMore_other": "Mostrar {{count}} más"
+}

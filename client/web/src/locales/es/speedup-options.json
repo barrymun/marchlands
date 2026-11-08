@@ -1,0 +1,14 @@
+{
+  "finishFree": "Terminar gratis",
+  "finishNow": "Terminar ya · {{gold}} de oro",
+  "freeIn": "Gratis en los últimos {{time}}.",
+  "boughtFor": "{{name}}: comprado por {{gold}} de oro",
+  "effects": {
+    "minutes15": "−15 min",
+    "hour1": "−1 h",
+    "hours2Half": "−2½ h",
+    "hours8": "−8 h",
+    "hours10To30": "−10–30 h",
+    "percent30": "−30%"
+  }
+}

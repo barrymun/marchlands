@@ -1,0 +1,154 @@
+{
+  "list": {
+    "title": "Flujos",
+    "description": "Una serie de acciones que ejecutas a la vez en cualquiera de tus ciudades.",
+    "new": "Nuevo flujo",
+    "empty": "Aún no hay flujos.",
+    "actions_one": "{{count}} acción",
+    "actions_many": "{{count}} acciones",
+    "actions_other": "{{count}} acciones",
+    "lastRun": "Ejecución {{run}} · {{ago}}",
+    "lastRunFailed": "Ejecución {{run}} fallida · {{ago}}",
+    "neverRun": "Nunca ejecutado",
+    "active": "Activo"
+  },
+  "detail": {
+    "deleteLabel": "Eliminar {{name}}",
+    "deleteTitle": "¿Eliminar el flujo «{{name}}»?",
+    "deleteDescription": "Se eliminan sus acciones y ajustes, y se detiene la ejecución en curso. No se puede deshacer.",
+    "deleteConfirm": "Eliminar flujo",
+    "runsOn": "Se ejecuta en",
+    "noArmy": "Elige un ejército guardado para el ataque (Editar): hasta entonces, sus objetivos se omiten.",
+    "changeCities": "Cambiar las ciudades de esta ejecución",
+    "changeCitiesHint": "Solo para esta ejecución: el flujo conserva sus propias ciudades (Editar para cambiarlas).",
+    "howRuns": "Cómo funcionan las ejecuciones"
+  },
+  "toasts": {
+    "deleted": "Flujo eliminado"
+  },
+  "cityChips": {
+    "all": "Todas las ciudades",
+    "none": "ninguna de tus ciudades actuales",
+    "more": "+{{n}} más"
+  },
+  "cityPicker": {
+    "label": "Ciudades",
+    "all": "Todas las ciudades",
+    "allHint": "({{cities}}, y las que consigas más adelante)",
+    "allHintSkipped": "({{cities}}, y las que consigas más adelante; se omiten {{skipped}} sin héroe)",
+    "here": "aquí",
+    "chooseOne": "Elige al menos una ciudad."
+  },
+  "flowEditor": {
+    "editTitle": "Editar flujo",
+    "newTitle": "Nuevo flujo",
+    "description": "Las acciones se ejecutan de arriba abajo en cada ciudad. Una espera pausa todo el flujo, en todas las ciudades a la vez. Arrastra las acciones (o usa las flechas) para reordenarlas.",
+    "locked": "Este flujo se está ejecutando: puedes cambiar sus ajustes (objetivos, cantidades, ciudades), pero detenlo para añadir, quitar o reordenar acciones.",
+    "name": "Nombre",
+    "namePlaceholder": "p. ej. Arqueros al instante",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "removeAction": "Quitar acción",
+    "add": {
+      "setMayor": "Nombrar alcalde",
+      "trainTroops": "Entrenar tropas",
+      "attackTargets": "Atacar objetivos",
+      "healTroops": "Curar tropas",
+      "hireHeroes": "Contratar héroes",
+      "wait": "Esperar"
+    }
+  },
+  "actionFields": {
+    "heal": {
+      "label": "Curar todas las tropas heridas con",
+      "resources": "Recursos",
+      "honor": "Honor",
+      "now": "de inmediato",
+      "armiesHome": "cuando vuelvan los ejércitos de la ciudad"
+    },
+    "wait": {
+      "label": "Esperar",
+      "armiesHome": "a que vuelvan los ejércitos enviados",
+      "time": "un tiempo fijo",
+      "minutesLabel": "Minutos",
+      "minutes": "minutos"
+    },
+    "setMayor": "Nombrar alcalde con más",
+    "train": {
+      "label": "Entrenar",
+      "amount": "Cantidad"
+    },
+    "hire": {
+      "sentence": "Contratar hasta que la ciudad tenga <count/> héroes con <stat/> de al menos <min/> y gastar como máximo <gold/> de oro por ciudad en cada ejecución",
+      "count": "Héroes que debe tener la ciudad",
+      "min": "Valor mínimo a nivel 1",
+      "gold": "Oro máximo por ciudad en cada ejecución",
+      "hint": "Un héroe cuenta por su valor a nivel 1: el atributo actual, más los puntos sin asignar, menos uno por cada nivel por encima del 1. Una oferta de nivel 4 con 77 cuenta como 74, ya que sus otros puntos están en otros atributos para siempre. Los héroes que ya están en la ciudad cuentan igual. El valor llega hasta {{max}}. Las ofertas de la Posada se renuevan hasta encontrar suficientes; con Repetir activado, el flujo sigue en cada ejecución hasta que todas las ciudades tengan sus héroes. Cada héroe contratado recibe el nombre de su atributo y su valor a nivel 1, como ATK - 76."
+    }
+  },
+  "runFlow": {
+    "description": "Cada ciudad ejecuta el flujo entre esperas como un todo: si una acción falla allí, se deshace lo que el flujo hizo en esa ciudad desde la última espera, y el flujo se detiene. Los flujos se turnan entre esperas, así que otros flujos se ejecutan mientras uno espera. La vista previa muestra lo que pasaría hasta la primera espera, sin cambiar nada.",
+    "repeat": "Repetir",
+    "repeatHint": "Se vuelve a ejecutar tras cada ejecución (como mucho una vez por minuto) en las ciudades del flujo, hasta que una ejecución falle o lo desactives.",
+    "preview": "Vista previa",
+    "run_one": "Ejecutar en {{count}} ciudad",
+    "run_many": "Ejecutar en {{count}} ciudades",
+    "run_other": "Ejecutar en {{count}} ciudades",
+    "stop": "Detener",
+    "toasts": {
+      "failed_one": "{{name}}: falló en {{count}} ciudad y se detuvo",
+      "failed_many": "{{name}}: falló en {{count}} ciudades y se detuvo",
+      "failed_other": "{{name}}: falló en {{count}} ciudades y se detuvo",
+      "waiting": "{{name}}: iniciado, ahora en espera",
+      "done_one": "{{name}}: terminado en {{count}} ciudad",
+      "done_many": "{{name}}: terminado en {{count}} ciudades",
+      "done_other": "{{name}}: terminado en {{count}} ciudades",
+      "repeatOn": "{{name}}: se repite hasta que una ejecución falle o lo desactives",
+      "repeatOff": "{{name}}: se detiene tras esta ejecución",
+      "stopped": "{{name}}: detenido"
+    },
+    "lastPreview": "Vista previa · {{ago}} (no se cambió nada)",
+    "lastRun": {
+      "inProgress": "Ejecución {{run}} · Iniciada {{started}} · En curso",
+      "ended": "Ejecución {{run}} · Iniciada {{started}} · Terminada {{ended}}"
+    },
+    "report": {
+      "wouldRun": "Se ejecutaría",
+      "ok": "Correcto",
+      "rolledBack": "Revertido",
+      "undone": "Se deshizo lo que el flujo hizo en esta ciudad desde la última espera.",
+      "wouldSkip": "Se omitiría",
+      "skipped": "Omitido",
+      "allItems": "Los {{n}}: {{detail}}",
+      "city": "Ciudad",
+      "result": "Resultado",
+      "what": "Qué hizo",
+      "details": "Mostrar cada paso"
+    }
+  },
+  "statusBadge": {
+    "repeats": "Se repite",
+    "running": "En ejecución",
+    "held": "Retenido hasta que vuelvan todos los héroes de sus ciudades",
+    "heroesOut": "Héroes fuera",
+    "waiting": "En espera",
+    "repeatsIn": "Se repite: {{time}}",
+    "queued": "En cola",
+    "stopped": "Detenido",
+    "due": "ya"
+  },
+  "statusLine": {
+    "running": "En ejecución.",
+    "held": "Esperando a que vuelvan todos los héroes de sus ciudades (y a los flujos retenidos antes que este); se volverá a comprobar en {{time}}.",
+    "waiting": "En espera: continúa en {{time}}.",
+    "nextRun": "Próxima ejecución en {{time}}.",
+    "starting": "Iniciando…",
+    "stopped": "Detenido. {{reason}} Se desactivó Repetir."
+  },
+  "header": {
+    "active_one": "{{count}} flujo en ejecución o en espera",
+    "active_many": "{{count}} flujos en ejecución o en espera",
+    "active_other": "{{count}} flujos en ejecución o en espera",
+    "next": "próximo paso en {{time}}"
+  }
+}

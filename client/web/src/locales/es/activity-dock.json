@@ -1,0 +1,17 @@
+{
+  "title": "En curso",
+  "summary": "{{jobs}} · Siguiente {{next}}",
+  "finishing": "terminando…",
+  "more": "+{{n}} más",
+  "nothing": "Nada en curso",
+  "groups": {
+    "building": "Construcción",
+    "research": "Investigación",
+    "training": "Entrenamiento"
+  },
+  "job": {
+    "level": "{{name}} → Nv. {{level}}",
+    "troops": "{{troop}} ×{{amount}}",
+    "queued": "+{{n}} en cola"
+  }
+}

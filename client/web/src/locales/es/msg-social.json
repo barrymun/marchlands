@@ -1,0 +1,9 @@
+{
+  "selfTarget": "No puedes elegirte a ti mismo.",
+  "emptyMessage": "Tu mensaje está vacío.",
+  "messageTooLong_one": "Los mensajes pueden tener como máximo {{count, number}} carácter.",
+  "messageTooLong_many": "Los mensajes pueden tener como máximo {{count, number}} caracteres.",
+  "messageTooLong_other": "Los mensajes pueden tener como máximo {{count, number}} caracteres.",
+  "muted": "Ahora mismo no puedes chatear.",
+  "notInAlliance": "Debes estar en una alianza para enviar mensajes de alianza."
+}

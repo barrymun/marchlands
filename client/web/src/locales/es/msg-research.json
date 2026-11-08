@@ -1,0 +1,9 @@
+{
+  "notResearching": "No se está investigando {{tech}} en esta ciudad.",
+  "noResearch": "No hay ninguna investigación en curso.",
+  "chooseResearch": "Se están investigando varias tecnologías: elige una.",
+  "queueFull_one": "Esta ciudad ya está investigando {{count, number}} tecnología.",
+  "queueFull_many": "Esta ciudad ya está investigando {{count, number}} tecnologías.",
+  "queueFull_other": "Esta ciudad ya está investigando {{count, number}} tecnologías.",
+  "alreadyResearching": "Ya se está investigando {{tech}} en otra ciudad."
+}
