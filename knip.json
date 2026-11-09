@@ -6,6 +6,12 @@
     ".": {
       "entry": ["tools/**/*.{ts,mjs}!"]
     },
+    "client/web": {
+      "entry": ["e2e/global-{setup,teardown}.ts"],
+      "playwright": {
+        "config": ["e2e/playwright.config.ts"]
+      }
+    },
     "backend/services/api": {
       "project": ["src/**/*.ts!", "test/**/*.ts"],
       "ignoreDependencies": ["pino-pretty", "@types/ws"]

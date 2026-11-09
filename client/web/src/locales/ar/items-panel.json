@@ -10,6 +10,11 @@
   "notEnoughGold": "لا يكفي الذهب في {{city}} (المطلوب {{price}})",
   "buyWithGold": "اشترِ واحدًا بذهب {{city}}",
   "buyFor": "شراء · {{price}} ذهب",
+  "buyConfirm": {
+    "title": "شراء {{item}}؟",
+    "description": "يكلّف {{gold}} ذهب من {{city}}.",
+    "confirm": "شراء"
+  },
   "noMatch": "لا توجد عناصر مطابقة.",
   "grant": {
     "amount": "{{amount}} {{name}}"

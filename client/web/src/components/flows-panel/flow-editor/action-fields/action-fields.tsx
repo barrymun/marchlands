@@ -1,4 +1,5 @@
 import { HeartPulse, Hourglass, UserPlus } from 'lucide-react';
+import { useId } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { FLOW_TRAIN_MAX, FLOW_TROOP_IDS, FlowActionType, FlowHealWhen, FlowWaitUntil, HealPayment, HERO_BASE_STAT_MAX } from '@marchlands/core';
@@ -17,6 +18,7 @@ import { numberText, textNumber } from '@/lib/ranges';
 /** The inputs of one action: which attribute for "set mayor"; troop type and amount (or max) for "train"; how many, how good and how much gold for "hire heroes". */
 export function ActionFields({ action, cities, onChange }: { action: Draft; cities: Targets; onChange: (a: Draft) => void }) {
   const { t } = useTranslation(['flows-panel', 'common']);
+  const labelId = useId();
   if (action.type === FlowActionType.ATTACK_TARGETS) {
     return <AttackTargetsFields action={action} cities={cities} onChange={(a) => onChange({ ...a, key: action.key })} />;
   }
@@ -24,9 +26,9 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
     return (
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <HeartPulse className="size-4 text-muted-foreground" />
-        <span>{t('actionFields.heal.label')}</span>
+        <span id={labelId}>{t('actionFields.heal.label')}</span>
         <Select value={action.payWith} onValueChange={(v) => onChange({ ...action, payWith: v as HealPayment })}>
-          <SelectTrigger size="sm" className="w-32">
+          <SelectTrigger size="sm" className="w-32" aria-labelledby={labelId}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -35,7 +37,7 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
           </SelectContent>
         </Select>
         <Select value={action.when} onValueChange={(v) => onChange({ ...action, when: v as FlowHealWhen })}>
-          <SelectTrigger size="sm" className="w-52">
+          <SelectTrigger size="sm" className="w-52" aria-label={t('actionFields.heal.when')}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -50,9 +52,9 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
     return (
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <Hourglass className="size-4 text-muted-foreground" />
-        <span>{t('actionFields.wait.label')}</span>
+        <span id={labelId}>{t('actionFields.wait.label')}</span>
         <Select value={action.until} onValueChange={(v) => onChange({ ...action, until: v as FlowWaitUntil })}>
-          <SelectTrigger size="sm" className="w-60">
+          <SelectTrigger size="sm" className="w-60" aria-labelledby={labelId}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -144,7 +146,7 @@ export function ActionFields({ action, cities, onChange }: { action: Draft; citi
         {t('common:actions.max')}
       </label>
       <Select value={String(action.troopId)} onValueChange={(v) => onChange({ ...action, troopId: Number(v) })}>
-        <SelectTrigger size="sm" className="w-40">
+        <SelectTrigger size="sm" className="w-40" aria-label={t('actionFields.train.troop')}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

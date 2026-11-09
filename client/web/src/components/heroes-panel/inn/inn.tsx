@@ -11,11 +11,11 @@ import {
   postCitiesTavernHireMutation,
   postCitiesTavernRefreshMutation,
 } from '@marchlands/api-client';
-import { BuildingType } from '@marchlands/core';
+import { BuildingType, heroHireCost } from '@marchlands/core';
 
 import { HeroRow } from '@/components/heroes-panel/hero-row/hero-row';
 import { MayorNote } from '@/components/mayor-note/mayor-note';
-import { Button } from '@/components/ui/button';
+import { SpendGoldButton } from '@/components/spend-gold-button/spend-gold-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCommand } from '@/hooks/use-game';
 import { fmt } from '@/lib/format';
@@ -48,22 +48,30 @@ export function Inn({ city, focus = false }: { city: CityBean; focus?: boolean }
         <CardContent className="grid gap-2">
           {tavern.data && (
             <div className="flex flex-wrap items-center gap-2">
-              <Button
+              <SpendGoldButton
                 size="sm"
                 variant="outline"
+                cost={tavern.data.refreshCost}
+                city={city}
                 disabled={reroll.isPending || city.resource.gold < tavern.data.refreshCost}
-                onClick={() => reroll.mutate(cityPath)}
+                onSpend={() => reroll.mutate(cityPath)}
               >
                 <RefreshCw /> {t('inn.newOffers', { gold: fmt(tavern.data.refreshCost) })}
-              </Button>
+              </SpendGoldButton>
             </div>
           )}
           {tavern.data?.heros.map((h) => (
             <HeroRow key={h.id} hero={h} note={<MayorNote city={city} hero={h} />}>
-              <span className="text-xs text-muted-foreground tabular-nums">{t('common:gold', { gold: fmt(h.level * 1000) })}</span>
-              <Button size="xs" disabled={hire.isPending} onClick={() => hire.mutate({ path: { cityId: city.id, heroId: h.id } })}>
+              <span className="text-xs text-muted-foreground tabular-nums">{t('common:gold', { gold: fmt(heroHireCost(h.level)) })}</span>
+              <SpendGoldButton
+                size="xs"
+                cost={heroHireCost(h.level)}
+                city={city}
+                disabled={hire.isPending}
+                onSpend={() => hire.mutate({ path: { cityId: city.id, heroId: h.id } })}
+              >
                 {t('inn.hire')}
-              </Button>
+              </SpendGoldButton>
             </HeroRow>
           ))}
         </CardContent>

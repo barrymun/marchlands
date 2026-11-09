@@ -34,6 +34,7 @@ const TYPED = [
   'tools/dev/**/*.ts',
   'client/web/src/**/*.{ts,tsx}',
   'client/web/vite.config.ts',
+  'client/web/e2e/**/*.ts',
 ];
 // test files, and the fixtures and support code beside them
 const TESTS = ['**/*.test.ts', '**/test/**/*.ts'];
@@ -47,7 +48,15 @@ const PHYSICAL_CLASS =
 
 export default tseslint.config(
   {
-    ignores: ['**/node_modules', '**/dist', 'shared/api-client/src/generated', 'backend/packages/db/migrations', 'db'],
+    ignores: [
+      '**/node_modules',
+      '**/dist',
+      '**/playwright-report',
+      '**/test-results',
+      'shared/api-client/src/generated',
+      'backend/packages/db/migrations',
+      'db',
+    ],
   },
   // an eslint-disable comment that no longer disables anything fails the lint
   { linterOptions: { reportUnusedDisableDirectives: 'error' } },
@@ -182,7 +191,9 @@ export default tseslint.config(
     rules: { 'no-restricted-imports': ['error', { paths: [TESTING_IMPORT] }] },
   },
   {
+    // the browser tests run in Node (Playwright), and a fixture's `use` isn't React's
     files: ['client/web/**/*.{ts,tsx}'],
+    ignores: ['client/web/e2e/**'],
     languageOptions: { globals: globals.browser },
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {

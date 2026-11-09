@@ -18,7 +18,7 @@ import { useCommand } from '@/hooks/use-game';
 import { fmtExact, percent } from '@/lib/format';
 import { techName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
-import { STATUS_DONE } from '@/lib/tones';
+import { GAIN_TEXT, STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 export function ResearchPanel({ city }: { city: CityBean }) {
@@ -97,7 +97,8 @@ export function ResearchPanel({ city }: { city: CityBean }) {
       )}
       <div className="grid gap-2 md:grid-cols-2">
         {list.data.techs.map((tech) => (
-          <div key={tech.typeId} className="grid gap-2 rounded-md border p-3">
+          // a group named after the technology, so its Research button says what it researches
+          <div key={tech.typeId} role="group" aria-label={techName(tech.typeId)} className="grid gap-2 rounded-md border p-3">
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium">
                 {techName(tech.typeId)} <Badge variant="secondary">{t('common:level.ofMax', { level: tech.level, max: tech.maxLevel })}</Badge>
@@ -123,7 +124,7 @@ export function ResearchPanel({ city }: { city: CityBean }) {
                 {tech.nextEffect && (
                   <span>
                     <span className="text-muted-foreground">{t('common:level.next', { level: tech.level + 1 })}</span>{' '}
-                    <span className="text-emerald-600 dark:text-emerald-400">{translateMessage(tech.nextEffect)}</span>
+                    <span className={GAIN_TEXT}>{translateMessage(tech.nextEffect)}</span>
                     {tech.level + 1 > list.data.academyLevel && (
                       <span className="text-muted-foreground">{t('tech.needsAcademy', { level: tech.level + 1 })}</span>
                     )}

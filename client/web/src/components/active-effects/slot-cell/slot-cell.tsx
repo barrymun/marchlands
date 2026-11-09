@@ -32,7 +32,12 @@ export function SlotCell({
   const { t } = useTranslation('active-effects');
   if (!active) {
     return (
-      <div className="flex min-w-0 items-center gap-1.5 rounded-md border border-dashed py-0.5 pe-0.5 ps-2 text-xs text-muted-foreground">
+      // a group named after the effect, so its Find items is heard with what it finds
+      <div
+        role="group"
+        aria-label={slot.label}
+        className="flex min-w-0 items-center gap-1.5 rounded-md border border-dashed py-0.5 pe-0.5 ps-2 text-xs text-muted-foreground"
+      >
         <span className="truncate">{slot.label}</span>
         <span className="ms-auto">{t('slotCell.off')}</span>
         <IconButton label={t('slotCell.find')} detail={t('slotCell.findDetail', { label: slot.label.toLowerCase(), boost: slot.boost })} onClick={onFind}>
@@ -43,7 +48,7 @@ export function SlotCell({
   }
   const left = active.endTime - now;
   return (
-    <div className="flex min-w-0 items-center gap-1.5 rounded-md border py-0.5 pe-0.5 ps-2 text-xs">
+    <div role="group" aria-label={slot.label} className="flex min-w-0 items-center gap-1.5 rounded-md border py-0.5 pe-0.5 ps-2 text-xs">
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="flex min-w-0 items-center gap-1.5">

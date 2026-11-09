@@ -109,6 +109,11 @@
     "unit": "ユニット"
   },
   "boughtWithCityGold": "{{city}} の金で購入",
+  "spendGold": {
+    "title": "金を{{gold}}使いますか？",
+    "description": "{{city}}の金は{{have}}で、残りは{{left}}になります。",
+    "confirm": "使う"
+  },
   "nothingYet": "まだ何もありません。",
   "noneYet": "まだありません。",
   "troops_other": "兵 {{n}}",

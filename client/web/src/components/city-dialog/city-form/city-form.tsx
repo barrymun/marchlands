@@ -18,6 +18,7 @@ import { TaxRate } from '@/components/city-dialog/city-form/tax-rate/tax-rate';
 import { WorkRates } from '@/components/city-dialog/city-form/work-rates/work-rates';
 import { Countdown } from '@/components/countdown/countdown';
 import { NumberField } from '@/components/number-field/number-field';
+import { SpendGoldButton } from '@/components/spend-gold-button/spend-gold-button';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -101,13 +102,16 @@ export function CityForm({ city, target, onDone }: { city: CityBean; target?: { 
                 {/* blank until typed; past the map's edge it shows as invalid with the range, and Teleport waits */}
                 <NumberField placeholder="x" range={{ min: 0, max: size - 1 }} blank value={x} onChange={setX} />
                 <NumberField placeholder="y" range={{ min: 0, max: size - 1 }} blank value={y} onChange={setY} />
-                <Button
+                {/* its item owned is used; none owned, one is bought with the city's gold */}
+                <SpendGoldButton
+                  cost={owned > 0 ? 0 : price}
+                  city={city}
                   disabled={!validXY || !!cooldown || move.isPending || (owned === 0 && city.resource.gold < price)}
-                  title={owned > 0 ? undefined : t('common:boughtWithCityGold', { city: city.name })}
-                  onClick={() => move.mutate({ path: { cityId: city.id }, body: { targetTileId: ty * size + tx } }, { onSuccess: onDone })}
+                  buttonTitle={owned > 0 ? undefined : t('common:boughtWithCityGold', { city: city.name })}
+                  onSpend={() => move.mutate({ path: { cityId: city.id }, body: { targetTileId: ty * size + tx } }, { onSuccess: onDone })}
                 >
                   {t('cityForm.teleport')}
-                </Button>
+                </SpendGoldButton>
               </div>
               {cooldown && (
                 <p className="text-xs text-muted-foreground">

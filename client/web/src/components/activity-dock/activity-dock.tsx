@@ -66,7 +66,8 @@ export function ActivityDock({ city, variant }: { city: CityBean; variant: DockV
   return (
     <aside
       aria-label={t('title')}
-      aria-hidden={!visible}
+      // out of sight and out of reach: inert takes its buttons out of the tab order too, which aria-hidden doesn't
+      inert={!visible}
       className={cn(
         'fixed inset-x-2 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-40 sm:inset-x-auto sm:start-4 sm:w-80',
         'rounded-xl border bg-background/65 shadow-lg backdrop-blur-md supports-[backdrop-filter]:bg-background/55',

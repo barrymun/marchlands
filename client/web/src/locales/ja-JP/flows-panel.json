@@ -62,7 +62,8 @@
       "resources": "資源",
       "honor": "名誉",
       "now": "すぐに",
-      "armiesHome": "都市の部隊が帰還したら"
+      "armiesHome": "都市の部隊が帰還したら",
+      "when": "治療のタイミング"
     },
     "wait": {
       "label": "待機",
@@ -72,9 +73,11 @@
       "minutes": "分"
     },
     "setMayor": "市長を任命：最も高い",
+    "stat": "英雄の能力",
     "train": {
       "label": "訓練",
-      "amount": "数量"
+      "amount": "数量",
+      "troop": "兵種"
     },
     "hire": {
       "sentence": "<stat/>が<min/>以上の英雄が都市に<count/>人になるまで雇う（1回の実行で1都市あたり最大<gold/>金）",

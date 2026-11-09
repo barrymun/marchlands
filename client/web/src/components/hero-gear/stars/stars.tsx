@@ -13,7 +13,8 @@ import { cn } from '@/lib/utils';
 export function Stars({ count, used, size = 18, fresh }: { count: number; used?: number; size?: 9 | 18; fresh?: { star: number; n: number } }) {
   const { t } = useTranslation('hero-gear');
   return (
-    <div className="grid w-fit grid-cols-5 gap-px" aria-label={t('stars.label', { n: count, count: maxStars })}>
+    // a picture of the stars, named by how many: a label on a plain div is one ARIA doesn't allow
+    <div role="img" className="grid w-fit grid-cols-5 gap-px" aria-label={t('stars.label', { n: count, count: maxStars })}>
       {Array.from({ length: maxStars }, (_, i) => (
         <img
           // a new key mounts the star afresh, so its twinkle plays from the start

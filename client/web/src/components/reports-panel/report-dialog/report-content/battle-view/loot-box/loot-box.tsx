@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { standingText } from '@/lib/factions';
 import { fmtExact, resourceLabel } from '@/lib/format';
 import { factionName, itemName } from '@/lib/game-data';
+import { GAIN_TEXT, LOSS_TEXT } from '@/lib/tones';
 
 /**
  * What the attacker took: per resource and in total (valleys hold nothing); against a barbarian city or a held historic
@@ -38,7 +39,7 @@ export function LootBox({ battle: b, me }: { battle: BattleReport; me?: string }
             .map(([k, n]) => (
               <Fragment key={k}>
                 <span className="text-muted-foreground">{resourceLabel(k)}</span>
-                <span className={mine ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}>
+                <span className={mine ? GAIN_TEXT : LOSS_TEXT}>
                   {mine ? '+' : '−'}
                   {fmtExact(n)}
                 </span>

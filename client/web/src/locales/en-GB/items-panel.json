@@ -10,6 +10,11 @@
   "notEnoughGold": "Not enough gold in {{city}} ({{price}} needed)",
   "buyWithGold": "Buy one with {{city}}'s gold",
   "buyFor": "Buy · {{price}} gold",
+  "buyConfirm": {
+    "title": "Buy {{item}}?",
+    "description": "It costs {{gold}} gold from {{city}}.",
+    "confirm": "Buy"
+  },
   "noMatch": "No items match.",
   "grant": {
     "amount": "{{amount}} {{name}}"

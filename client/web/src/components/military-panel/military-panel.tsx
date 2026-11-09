@@ -7,7 +7,7 @@ import { DefencesTab, GearCard, HeroesPanel, MILITARY_TABS, TroopsTab } from '@/
 import { HeroViewSwitch } from '@/components/military-panel/hero-view-switch/hero-view-switch';
 import { useHeroView } from '@/components/military-panel/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGameNav } from '@/hooks/use-game-nav';
 import { useSearchState } from '@/hooks/use-search-state';
 import { PanelId } from '@/lib/nav';
@@ -29,8 +29,9 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
   const heroView = useHeroView();
   return (
     <div className={cn('grid grid-cols-1 gap-4', hasScrollingPanes(tab) && 'xl:h-full xl:grid-rows-[auto_minmax(0,1fr)]')}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Tabs value={tab} onValueChange={setTab}>
+      {/* the root adds no box (contents), so the row of tabs and the tab's panel stay this grid's rows */}
+      <Tabs value={tab} onValueChange={setTab} className="contents">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <TabsList>
             {MILITARY_TABS.map((id) => (
               <TabsTrigger key={id} value={id}>
@@ -38,17 +39,19 @@ export function MilitaryPanel({ city }: { city: CityBean }) {
               </TabsTrigger>
             ))}
           </TabsList>
-        </Tabs>
-        {tab === MilitaryTab.HEROES && heroView.canChoose && <HeroViewSwitch view={heroView.view} onChoose={heroView.choose} />}
-      </div>
-      <Suspense fallback={<Skeleton className="h-96" />}>
-        {tab === MilitaryTab.TROOPS && <TroopsTab city={city} />}
-        {tab === MilitaryTab.DEFENCES && <DefencesTab city={city} />}
-        {tab === MilitaryTab.HEROES && (
-          <HeroesPanel city={city} view={heroView.view} focusInn={search.tab === MilitaryTab.INN} onGear={() => set({ tab: MilitaryTab.GEAR })} />
-        )}
-        {tab === MilitaryTab.GEAR && <GearCard onResearch={() => nav.open(PanelId.RESEARCH)} />}
-      </Suspense>
+          {tab === MilitaryTab.HEROES && heroView.canChoose && <HeroViewSwitch view={heroView.view} onChoose={heroView.choose} />}
+        </div>
+        <TabsContent value={tab} className={cn('min-h-0 flex-none text-[length:inherit]', hasScrollingPanes(tab) && 'xl:h-full')}>
+          <Suspense fallback={<Skeleton className="h-96" />}>
+            {tab === MilitaryTab.TROOPS && <TroopsTab city={city} />}
+            {tab === MilitaryTab.DEFENCES && <DefencesTab city={city} />}
+            {tab === MilitaryTab.HEROES && (
+              <HeroesPanel city={city} view={heroView.view} focusInn={search.tab === MilitaryTab.INN} onGear={() => set({ tab: MilitaryTab.GEAR })} />
+            )}
+            {tab === MilitaryTab.GEAR && <GearCard onResearch={() => nav.open(PanelId.RESEARCH)} />}
+          </Suspense>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

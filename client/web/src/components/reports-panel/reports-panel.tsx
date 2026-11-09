@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand } from '@/hooks/use-game';
 import { useSearchState, useSearchText } from '@/hooks/use-search-state';
 import { isRefusal, retryUnlessRefused } from '@/lib/errors';
@@ -90,9 +90,10 @@ export function ReportsPanel() {
 
   return (
     <Card>
-      <CardHeader className="grid gap-4 pb-2">
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <Tabs value={s.tab} onValueChange={(v) => set({ tab: REPORT_SEARCH.tab.read(v), page: 1 })}>
+      {/* the tabs show the reports below them: the root adds no box (contents), the list is its panel */}
+      <Tabs value={s.tab} onValueChange={(v) => set({ tab: REPORT_SEARCH.tab.read(v), page: 1 })} className="contents">
+        <CardHeader className="grid gap-4 pb-2">
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
             <TabsList>
               {TABS.map((tb) => (
                 <TabsTrigger key={tb.id} value={tb.id} className="gap-1.5">
@@ -101,66 +102,68 @@ export function ReportsPanel() {
                 </TabsTrigger>
               ))}
             </TabsList>
-          </Tabs>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-            <AutoReadSwitch />
-            <Button size="sm" variant="outline" disabled={!unread.data?.count || markAll.isPending} onClick={() => markAll.mutate({ body: {} })}>
-              {t('markAllRead')}
-            </Button>
-          </div>
-        </div>
-        <ReportFilters value={filter} kinds={current.kinds} filtered={filtered} onSearch={setQ} onChange={refilter} />
-      </CardHeader>
-      <CardContent className="grid gap-2">
-        {list.isPending && <Skeleton className="h-40" />}
-        {list.data && filtered && reports.length > 0 && (
-          <p className="text-xs text-muted-foreground" aria-live="polite">
-            {t('found', { count: total, n: fmtExact(total) })}
-          </p>
-        )}
-        {list.data && reports.length === 0 && (
-          <div className="grid justify-items-center gap-2 py-10 text-center text-sm text-muted-foreground" aria-live="polite">
-            <p>{filtered ? t('noMatches') : t('noReports')}</p>
-            {filtered && (
-              <Button size="sm" variant="outline" onClick={() => refilter(cleared(filter))}>
-                {t('filters.clear')}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <AutoReadSwitch />
+              <Button size="sm" variant="outline" disabled={!unread.data?.count || markAll.isPending} onClick={() => markAll.mutate({ body: {} })}>
+                {t('markAllRead')}
               </Button>
+            </div>
+          </div>
+          <ReportFilters value={filter} kinds={current.kinds} filtered={filtered} onSearch={setQ} onChange={refilter} />
+        </CardHeader>
+        <TabsContent value={s.tab} asChild className="flex-none text-[length:inherit]">
+          <CardContent className="grid gap-2">
+            {list.isPending && <Skeleton className="h-40" />}
+            {list.data && filtered && reports.length > 0 && (
+              <p className="text-xs text-muted-foreground" aria-live="polite">
+                {t('found', { count: total, n: fmtExact(total) })}
+              </p>
             )}
-          </div>
-        )}
-        {reports.length > 0 && (
-          <Table className={list.isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
-            <TableHeader className="hidden md:table-header-group">
-              <TableRow>
-                <TableHead className="w-4 pe-0" />
-                <TableHead>{t('columns.report')}</TableHead>
-                <TableHead>{t('labels.from')}</TableHead>
-                <TableHead>{t('labels.to')}</TableHead>
-                <TableHead className="text-end">{t('columns.time')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {reports.map((r) => (
-                <ReportRow key={r.id} report={r} onOpen={() => openReport(r.id)} />
-              ))}
-            </TableBody>
-          </Table>
-        )}
-        {totalPage > 1 && (
-          <div className="flex items-center justify-end gap-2 text-sm">
-            <Button size="icon-sm" variant="outline" disabled={page <= 1} onClick={() => set({ page: page - 1 })} aria-label={t('previousPage')}>
-              <ChevronLeft className="rtl:-scale-x-100" />
-            </Button>
-            <span className="tabular-nums text-muted-foreground">
-              {page} / {totalPage}
-            </span>
-            <Button size="icon-sm" variant="outline" disabled={page >= totalPage} onClick={() => set({ page: page + 1 })} aria-label={t('nextPage')}>
-              <ChevronRight className="rtl:-scale-x-100" />
-            </Button>
-          </div>
-        )}
-        <p className="text-xs text-muted-foreground">{t('keptFor')}</p>
-      </CardContent>
+            {list.data && reports.length === 0 && (
+              <div className="grid justify-items-center gap-2 py-10 text-center text-sm text-muted-foreground" aria-live="polite">
+                <p>{filtered ? t('noMatches') : t('noReports')}</p>
+                {filtered && (
+                  <Button size="sm" variant="outline" onClick={() => refilter(cleared(filter))}>
+                    {t('filters.clear')}
+                  </Button>
+                )}
+              </div>
+            )}
+            {reports.length > 0 && (
+              <Table className={list.isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
+                <TableHeader className="hidden md:table-header-group">
+                  <TableRow>
+                    <TableHead className="w-4 pe-0" />
+                    <TableHead>{t('columns.report')}</TableHead>
+                    <TableHead>{t('labels.from')}</TableHead>
+                    <TableHead>{t('labels.to')}</TableHead>
+                    <TableHead className="text-end">{t('columns.time')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {reports.map((r) => (
+                    <ReportRow key={r.id} report={r} onOpen={() => openReport(r.id)} />
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+            {totalPage > 1 && (
+              <div className="flex items-center justify-end gap-2 text-sm">
+                <Button size="icon-sm" variant="outline" disabled={page <= 1} onClick={() => set({ page: page - 1 })} aria-label={t('previousPage')}>
+                  <ChevronLeft className="rtl:-scale-x-100" />
+                </Button>
+                <span className="tabular-nums text-muted-foreground">
+                  {page} / {totalPage}
+                </span>
+                <Button size="icon-sm" variant="outline" disabled={page >= totalPage} onClick={() => set({ page: page + 1 })} aria-label={t('nextPage')}>
+                  <ChevronRight className="rtl:-scale-x-100" />
+                </Button>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">{t('keptFor')}</p>
+          </CardContent>
+        </TabsContent>
+      </Tabs>
       <ReportDialog reportId={s.report} onClose={closeReport} />
     </Card>
   );

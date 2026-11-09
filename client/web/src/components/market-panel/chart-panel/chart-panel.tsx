@@ -93,8 +93,9 @@ export function ChartPanel({
           t={t}
           i18nKey="priceHistory.credit"
           components={{
+            // not <link>: Trans's parser takes it for HTML's empty <link> element and leaves the text out of the anchor
             // eslint-disable-next-line jsx-a11y-x/anchor-has-content -- Trans fills the link with the translated text
-            link: <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer" className="underline underline-offset-2" />,
+            tv: <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer" className="underline underline-offset-2" />,
           }}
         />
       </p>

@@ -63,7 +63,8 @@
       "resources": "Resources",
       "honor": "Honour",
       "now": "right away",
-      "armiesHome": "when the city's armies are home"
+      "armiesHome": "when the city's armies are home",
+      "when": "When to heal"
     },
     "wait": {
       "label": "Wait",
@@ -73,9 +74,11 @@
       "minutes": "minutes"
     },
     "setMayor": "Set mayor: highest",
+    "stat": "Hero attribute",
     "train": {
       "label": "Train",
-      "amount": "Amount"
+      "amount": "Amount",
+      "troop": "Troop"
     },
     "hire": {
       "sentence": "Hire until the city has <count/> heroes with <stat/> of at least <min/> and spend at most <gold/> gold a city each run",

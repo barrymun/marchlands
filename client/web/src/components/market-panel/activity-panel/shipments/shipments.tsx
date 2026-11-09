@@ -12,7 +12,7 @@ import { goldForSpeedup } from '@marchlands/core';
 
 import { Countdown } from '@/components/countdown/countdown';
 import { resInline } from '@/components/market-panel/utils';
-import { Button } from '@/components/ui/button';
+import { SpendGoldButton } from '@/components/spend-gold-button/spend-gold-button';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { fmtExact } from '@/lib/format';
@@ -36,15 +36,23 @@ export function Shipments() {
     <div className="grid gap-2 p-2">
       {list.map((s) => {
         const gold = goldForSpeedup(Math.max(0, s.endTime - now));
-        const has = castles.find((c) => c.id === s.cityId)?.resource.gold ?? 0;
+        const payer = castles.find((c) => c.id === s.cityId);
+        const has = payer?.resource.gold ?? 0;
         return (
           <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border p-2 text-sm">
             <span className="tabular-nums">{t('common:amountOf', { amount: fmtExact(s.amount), resource: resInline(s.resType) })}</span>
             <span className="flex items-center gap-2 text-xs text-muted-foreground">
               <Trans t={t} i18nKey="shipments.arrivesIn" components={{ countdown: <Countdown endTime={s.endTime} /> }} />
-              <Button size="xs" variant="outline" disabled={rush.isPending || has < gold} onClick={() => rush.mutate({ path: { shipmentId: s.id } })}>
+              <SpendGoldButton
+                size="xs"
+                variant="outline"
+                cost={gold}
+                city={payer ?? { name: '', resource: { gold: 0 } }}
+                disabled={!payer || rush.isPending || has < gold}
+                onSpend={() => rush.mutate({ path: { shipmentId: s.id } })}
+              >
                 {t('shipments.deliverNow', { gold: fmtExact(gold) })}
-              </Button>
+              </SpendGoldButton>
             </span>
           </div>
         );

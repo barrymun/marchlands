@@ -5,7 +5,7 @@ import type { FlowRunReport } from '@marchlands/api-client';
 
 import { StepItems } from '@/components/flows-panel/flow-detail/run-report/city-steps/step-items/step-items';
 import { translateMessage } from '@/lib/messages';
-import { WARN_TEXT } from '@/lib/tones';
+import { GAIN_TEXT, WARN_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 /** What each step of a flow did in one city, with the targets of an attack. */
@@ -21,7 +21,7 @@ export function CitySteps({ city: c }: { city: FlowRunReport['cities'][number] }
             ) : s.skipped ? (
               <SkipForward className="mt-0.5 size-3 shrink-0" />
             ) : (
-              <Check className="mt-0.5 size-3 shrink-0 text-emerald-600" />
+              <Check className={cn('mt-0.5 size-3 shrink-0', GAIN_TEXT)} />
             )}
             <div className="grid min-w-0 gap-1">
               <span>

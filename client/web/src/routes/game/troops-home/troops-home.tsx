@@ -34,6 +34,8 @@ export function TroopsHome({ city, onPick }: { city: CityBean; onPick?: () => vo
             }}
           >
             <TroopBadge id={x.id} />
+            {/* named by the troop and the count shown: "Warrior 0" */}
+            <span className="sr-only">{`${troopName(x.id)} `}</span>
             <span className="font-medium tabular-nums">{fmt(x.count)}</span>
           </button>
         ))}

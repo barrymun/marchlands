@@ -64,7 +64,8 @@
       "resources": "Recursos",
       "honor": "Honor",
       "now": "de inmediato",
-      "armiesHome": "cuando vuelvan los ejércitos de la ciudad"
+      "armiesHome": "cuando vuelvan los ejércitos de la ciudad",
+      "when": "Cuándo curar"
     },
     "wait": {
       "label": "Esperar",
@@ -74,9 +75,11 @@
       "minutes": "minutos"
     },
     "setMayor": "Nombrar alcalde con más",
+    "stat": "Atributo del héroe",
     "train": {
       "label": "Entrenar",
-      "amount": "Cantidad"
+      "amount": "Cantidad",
+      "troop": "Tropa"
     },
     "hire": {
       "sentence": "Contratar hasta que la ciudad tenga <count/> héroes con <stat/> de al menos <min/> y gastar como máximo <gold/> de oro por ciudad en cada ejecución",

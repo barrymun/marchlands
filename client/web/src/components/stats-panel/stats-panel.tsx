@@ -19,7 +19,7 @@ import type { Counters } from '@/components/stats-panel/types';
 import { WinsByLevel } from '@/components/stats-panel/wins-by-level/wins-by-level';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchState } from '@/hooks/use-search-state';
 import { dateTime } from '@/lib/format';
 
@@ -44,49 +44,52 @@ export function StatsPanel() {
 
   return (
     <div className="grid gap-4">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div className="grid gap-0.5">
-          <h1 className="text-lg font-semibold">{t('title')}</h1>
-          <p className="text-xs text-muted-foreground">{data.since ? t('descriptionSince', { date: dateTime(data.since) }) : t('description')}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Select value={city ? String(city.cityId) : ALL_CITIES} onValueChange={(v) => set({ city: v === ALL_CITIES ? null : Number(v) })}>
-            <SelectTrigger className="w-56">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL_CITIES}>{t('allCities')}</SelectItem>
-              {data.cities.map((x) => (
-                <SelectItem key={x.cityId} value={String(x.cityId)}>
-                  {x.name ?? t('formerCity')}
-                  {!x.owned && ` (#${x.cityId})`}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Tabs value={period} onValueChange={(v) => set({ period: STATS_SEARCH.period.read(v) })}>
+      {/* the period's tabs show the statistics below them: the root adds no box (contents), the statistics are its panel */}
+      <Tabs value={period} onValueChange={(v) => set({ period: STATS_SEARCH.period.read(v) })} className="contents">
+        <header className="flex flex-wrap items-end justify-between gap-3">
+          <div className="grid gap-0.5">
+            <h1 className="text-lg font-semibold">{t('title')}</h1>
+            <p className="text-xs text-muted-foreground">{data.since ? t('descriptionSince', { date: dateTime(data.since) }) : t('description')}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={city ? String(city.cityId) : ALL_CITIES} onValueChange={(v) => set({ city: v === ALL_CITIES ? null : Number(v) })}>
+              <SelectTrigger className="w-56" aria-label={t('city')}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_CITIES}>{t('allCities')}</SelectItem>
+                {data.cities.map((x) => (
+                  <SelectItem key={x.cityId} value={String(x.cityId)}>
+                    {x.name ?? t('formerCity')}
+                    {!x.owned && ` (#${x.cityId})`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <TabsList>
               <TabsTrigger value={StatsPeriod.ALL_TIME}>{t('allTime')}</TabsTrigger>
               <TabsTrigger value={StatsPeriod.LAST_7_DAYS}>{t('last7Days')}</TabsTrigger>
             </TabsList>
-          </Tabs>
-        </div>
-      </header>
+          </div>
+        </header>
 
-      <Headline c={c} days={days} trend={trend} />
-      <div className="grid items-start gap-4 lg:grid-cols-2">
-        <WinsByLevel c={c} />
-        <Enemies c={c} />
-      </div>
-      <div className="grid items-start gap-4 xl:grid-cols-2">
-        <Troops c={c} />
-        <ResourceFlows c={c} />
-      </div>
-      <div className="grid items-start gap-4 lg:grid-cols-3">
-        <Spending c={c} className="lg:col-span-2" />
-        <Growth c={c} playerWide={!city} />
-        {!city && <ItemsUsed c={c} className="lg:col-span-3" />}
-      </div>
+        <TabsContent value={period} className="grid gap-4 flex-none text-[length:inherit]">
+          <Headline c={c} days={days} trend={trend} />
+          <div className="grid items-start gap-4 lg:grid-cols-2">
+            <WinsByLevel c={c} />
+            <Enemies c={c} />
+          </div>
+          <div className="grid items-start gap-4 xl:grid-cols-2">
+            <Troops c={c} />
+            <ResourceFlows c={c} />
+          </div>
+          <div className="grid items-start gap-4 lg:grid-cols-3">
+            <Spending c={c} className="lg:col-span-2" />
+            <Growth c={c} playerWide={!city} />
+            {!city && <ItemsUsed c={c} className="lg:col-span-3" />}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

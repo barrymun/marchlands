@@ -102,6 +102,7 @@ export function TopBar({ city, status, onDialog }: { city?: CityBean; status: Pu
           <Tooltip>
             <TooltipTrigger asChild>
               <span
+                role="img"
                 className={cn(
                   'size-2 rounded-full',
                   status === PushStatus.OPEN ? 'bg-emerald-500' : status === PushStatus.CONNECTING ? 'bg-amber-500' : 'bg-red-500',

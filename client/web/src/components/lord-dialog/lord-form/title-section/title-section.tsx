@@ -5,12 +5,14 @@ import { useTranslation } from 'react-i18next';
 import { type CityBean, getCitiesByCityIdQueryKey, getPlayerQueryKey, postPlayerTitlePromoteMutation } from '@marchlands/api-client';
 import { titleOf, TITLES } from '@marchlands/core';
 
+import { SpendGoldButton } from '@/components/spend-gold-button/spend-gold-button';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { useInventory } from '@/hooks/use-inventory';
 import { fmtExact } from '@/lib/format';
 import { itemName, titleName } from '@/lib/game-data';
+import { GAIN_TEXT } from '@/lib/tones';
+import { cn } from '@/lib/utils';
 
 /**
  * Nobility titles: each raises how many cities the lord may own (Civilian 1 … Prince 10) and needs prestige, medals
@@ -61,19 +63,21 @@ export function TitleSection({ city }: { city?: CityBean }) {
           <ul className="grid gap-1 text-sm">
             {req.map((r) => (
               <li key={r.label} className="flex items-center gap-1.5">
-                {r.ok ? <Check className="size-3.5 text-emerald-600" /> : <X className="size-3.5 text-destructive" />}
+                {r.ok ? <Check className={cn('size-3.5', GAIN_TEXT)} /> : <X className="size-3.5 text-destructive" />}
                 {r.label} <span className="text-xs text-muted-foreground">{r.have}</span>
               </li>
             ))}
           </ul>
-          <Button
+          <SpendGoldButton
             size="sm"
             className="justify-self-start"
+            cost={next.gold}
+            city={city ?? { name: '', resource: { gold: 0 } }}
             disabled={!city || !req.every((r) => r.ok) || promote.isPending}
-            onClick={() => city && promote.mutate({ body: { cityId: city.id } })}
+            onSpend={() => city && promote.mutate({ body: { cityId: city.id } })}
           >
             {t('title.promote', { name: titleName(next.id) })}
-          </Button>
+          </SpendGoldButton>
         </>
       ) : (
         <p className="text-xs text-muted-foreground">{t('title.highest', { count: current.maxCities })}</p>

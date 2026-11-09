@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -73,6 +73,7 @@ import { cn } from '@/lib/utils';
  */
 export function SendForm({ city, target, slot, onClose }: { city: CityBean; target: SendTarget; slot?: PlanSlot; onClose: () => void }) {
   const { t } = useTranslation(['send-army-dialog', 'common']);
+  const fieldId = useId();
   const nav = useGameNav();
   const [toTile, setToTile] = useState(target.tileId);
   // what's typed in the To field, until it becomes the destination
@@ -226,9 +227,9 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
         )}
         {slot && (
           <div className="grid gap-2">
-            <Label>{t('form.from')}</Label>
+            <Label htmlFor={`${fieldId}-from`}>{t('form.from')}</Label>
             <Select value={String(city.id)} onValueChange={(c) => slot.onCity(Number(c))}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${fieldId}-from`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -244,9 +245,9 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
         )}
         <div className="grid grid-cols-2 gap-3">
           <div className="grid gap-2">
-            <Label>{t('form.mission')}</Label>
+            <Label htmlFor={`${fieldId}-mission`}>{t('form.mission')}</Label>
             <Select value={mission} disabled={dest.missions.length === 0} onValueChange={setWanted}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${fieldId}-mission`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -264,7 +265,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
             )}
           </div>
           <div className="grid gap-2">
-            <Label>{t('form.hero')}</Label>
+            <Label htmlFor={`${fieldId}-hero`}>{t('form.hero')}</Label>
             <Select
               value={heroId}
               onValueChange={(h) => {
@@ -272,7 +273,7 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
                 setHeroPicked(true);
               }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`${fieldId}-hero`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -317,8 +318,9 @@ export function SendForm({ city, target, slot, onClose }: { city: CityBean; targ
               const have = free[key] ?? 0;
               return (
                 <div key={key} className={cn('flex items-center justify-between gap-2 text-sm', have === 0 && 'text-muted-foreground')}>
-                  <span className={cn('flex items-center gap-2', have === 0 && 'opacity-60')}>
-                    <TroopBadge id={Number(id)} />
+                  <span className="flex items-center gap-2">
+                    {/* none here: the picture fades, the words stay readable (muted, 4.7:1) */}
+                    <TroopBadge id={Number(id)} className={cn(have === 0 && 'opacity-60')} />
                     <span>
                       {troopName(Number(id))} <span className="text-muted-foreground">({fmtExact(have)})</span>
                     </span>

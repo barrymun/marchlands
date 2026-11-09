@@ -4,6 +4,7 @@
   "description": "Se guardan cada pocos minutos, así que tus últimas acciones pueden tardar unos minutos en aparecer.",
   "descriptionSince": "Contadas desde el {{date}}. Se guardan cada pocos minutos, así que tus últimas acciones pueden tardar unos minutos en aparecer.",
   "allCities": "Todas las ciudades",
+  "city": "Ciudad",
   "formerCity": "Antigua ciudad",
   "allTime": "Desde siempre",
   "last7Days": "Últimos 7 días",

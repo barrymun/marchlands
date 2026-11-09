@@ -18,6 +18,7 @@ import { ATTR_LABEL } from '@/components/hero-items-dialog/hero-items/constants'
 import { experienceItems, isLoyaltyFull, loyaltyMedals } from '@/components/hero-items-dialog/hero-items/utils';
 import { HeroLevel } from '@/components/hero-level/hero-level';
 import { ItemIcon } from '@/components/item-icon/item-icon';
+import { SpendGoldButton } from '@/components/spend-gold-button/spend-gold-button';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCity, useCommand } from '@/hooks/use-game';
@@ -42,7 +43,8 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
     const owned = inv.count(itemId);
     const price = heroItemGoldPrice(itemId, hero.upgradeExp);
     return (
-      <div key={itemId} className={cn('flex items-center gap-2 rounded-md border p-2 text-sm', extra.className)}>
+      // a group named after the item, so Use and its gold price say what they're for
+      <div key={itemId} role="group" aria-label={itemName(itemId)} className={cn('flex items-center gap-2 rounded-md border p-2 text-sm', extra.className)}>
         <ItemIcon id={itemId} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5 font-medium">
@@ -58,15 +60,17 @@ export function HeroItems({ hero, cityId }: { hero: HeroBean; cityId: number }) 
             </Button>
           )}
           {price != null && (
-            <Button
+            <SpendGoldButton
               size="xs"
               variant={owned > 0 ? 'outline' : 'default'}
+              cost={price}
+              city={city.data ?? { name: '', resource: { gold } }}
               disabled={gold < price || !!disabledReason || buy.isPending}
-              title={gold < price ? t('notEnoughGold', { gold: fmtExact(price) }) : undefined}
-              onClick={() => buy.mutate({ path: { heroId: hero.id }, body: { itemId, payWith: HeroItemPayment.GOLD } })}
+              buttonTitle={gold < price ? t('notEnoughGold', { gold: fmtExact(price) }) : undefined}
+              onSpend={() => buy.mutate({ path: { heroId: hero.id }, body: { itemId, payWith: HeroItemPayment.GOLD } })}
             >
               {t('common:gold', { gold: fmt(price) })}
-            </Button>
+            </SpendGoldButton>
           )}
           {owned <= 0 && price == null && (
             <Button size="xs" variant="outline" disabled>

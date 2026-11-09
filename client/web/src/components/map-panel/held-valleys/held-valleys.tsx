@@ -6,6 +6,7 @@ import { valleyBonus, valleyResource } from '@marchlands/core';
 import { ConfirmButton } from '@/components/confirm-button/confirm-button';
 import { percent } from '@/lib/format';
 import { tileName } from '@/lib/game-data';
+import { GAIN_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 /** The valleys this city holds, strongest first, each with its bonus; a click finds it on the map, Release gives it up. */
@@ -46,7 +47,7 @@ export function HeldValleys({
                   </span>
                 </span>
                 {res && (
-                  <span className="text-xs text-emerald-600 tabular-nums dark:text-emerald-400">
+                  <span className={cn('text-xs tabular-nums', GAIN_TEXT)}>
                     {t('held.bonus', { bonus: percent(valleyBonus(v.type, v.level)), resource: t(`common:resourcesInline.${res}`) })}
                   </span>
                 )}

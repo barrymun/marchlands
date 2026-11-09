@@ -4,6 +4,7 @@
   "description": "Saved every few minutes, so your latest actions can take a few minutes to show up.",
   "descriptionSince": "Counted since {{date}}. Saved every few minutes, so your latest actions can take a few minutes to show up.",
   "allCities": "All cities",
+  "city": "City",
   "formerCity": "Former city",
   "allTime": "All time",
   "last7Days": "Last 7 days",

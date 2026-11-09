@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type CityBean, getCitiesBuildingsAvailableOptions, getCitiesByCityIdQueryKey, postCitiesBuildingsMutation } from '@marchlands/api-client';
@@ -16,9 +17,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCommand } from '@/hooks/use-game';
 import { buildingName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
+import { GAIN_TEXT } from '@/lib/tones';
 
 export function BuildList({ city, positionId, onDone }: { city: CityBean; positionId: number; onDone: () => void }) {
   const { t } = useTranslation('buildings-panel');
+  const nameId = useId();
   const area = areaOf(positionId);
   const list = useQuery(getCitiesBuildingsAvailableOptions({ path: { cityId: city.id }, query: { area } }));
   const build = useCommand(postCitiesBuildingsMutation(), () => [getCitiesByCityIdQueryKey({ path: { cityId: city.id } })], t('buildList.started'));
@@ -40,9 +43,12 @@ export function BuildList({ city, positionId, onDone }: { city: CityBean; positi
       {list.isPending && <Skeleton className="h-32" />}
       <div className="grid items-start gap-2 md:grid-cols-2">
         {options.map((b) => (
-          <div key={b.typeId} className="grid gap-2 rounded-md border p-3">
+          // a group named after its building, so each Build button is heard with what it builds
+          <div key={b.typeId} role="group" aria-labelledby={`${nameId}-${b.typeId}`} className="grid gap-2 rounded-md border p-3">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium">{buildingName(b.typeId)}</span>
+              <span id={`${nameId}-${b.typeId}`} className="font-medium">
+                {buildingName(b.typeId)}
+              </span>
               <Button
                 size="sm"
                 disabled={!b.ok || build.isPending}
@@ -54,8 +60,7 @@ export function BuildList({ city, positionId, onDone }: { city: CityBean; positi
             {b.info.summary && <p className="text-sm text-muted-foreground">{translateMessage(b.info.summary)}</p>}
             {b.effect && (
               <p className="text-xs">
-                <span className="text-muted-foreground">{t('buildList.firstLevel')}</span>{' '}
-                <span className="text-emerald-600 dark:text-emerald-400">{translateMessage(b.effect)}</span>
+                <span className="text-muted-foreground">{t('buildList.firstLevel')}</span> <span className={GAIN_TEXT}>{translateMessage(b.effect)}</span>
               </p>
             )}
             <Unlocks list={b.info.unlocks} />

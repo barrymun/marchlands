@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Star, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -34,6 +34,7 @@ export function ArmyPresets({
   onLoad: (t: Partial<Record<TroopKey, string>>) => void;
 }) {
   const { t } = useTranslation(['send-army-dialog', 'common']);
+  const pickId = useId();
   const presets = useQuery(getPlayerArmyPresetsOptions());
   const [selected, setSelected] = useState('');
   const [name, setName] = useState('');
@@ -61,7 +62,9 @@ export function ArmyPresets({
   return (
     <div className="grid gap-2 rounded-md border p-2">
       <div className="flex items-center justify-between gap-2">
-        <Label className="text-xs">{t('presets.label')}</Label>
+        <Label htmlFor={pickId} className="text-xs">
+          {t('presets.label')}
+        </Label>
         {list.length > 0 && (
           <Button size="xs" variant="ghost" className="h-6 text-xs" onClick={() => setManaging(!managing)}>
             {managing ? t('presets.done') : t('presets.manage')}
@@ -104,7 +107,7 @@ export function ArmyPresets({
       )}
       <div className="flex gap-2">
         <Select value={selected} onValueChange={load} disabled={!list.length}>
-          <SelectTrigger className="w-full" size="sm">
+          <SelectTrigger id={pickId} className="w-full" size="sm">
             <SelectValue placeholder={list.length ? t('presets.loadPlaceholder') : t('presets.emptyPlaceholder')} />
           </SelectTrigger>
           <SelectContent>

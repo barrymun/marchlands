@@ -124,6 +124,11 @@
     "unit": "الوحدة"
   },
   "boughtWithCityGold": "اشتُري بذهب {{city}}",
+  "spendGold": {
+    "title": "إنفاق {{gold}} ذهب؟",
+    "description": "لدى {{city}} {{have}} ذهب، وسيبقى {{left}}.",
+    "confirm": "إنفاق"
+  },
   "nothingYet": "لا شيء بعد.",
   "noneYet": "لا شيء بعد.",
   "troops_zero": "{{n}} جندي",

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -35,12 +35,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { fmt, fmtExact, realHourly } from '@/lib/format';
-import { troopName } from '@/lib/game-data';
+import { buildingName, troopName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { cn } from '@/lib/utils';
 
 export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
   const { t } = useTranslation(['military-panel', 'common']);
+  const nameId = useId();
   const player = usePlayer();
   // carrying capacity per unit, with the Logistics bonus
   const loadFactor = 1 + BALANCE.logisticsLoadPerLevel * researchLevel(player.data?.research ?? {}, TechType.LOGISTICS);
@@ -135,7 +136,7 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
         )}
         {!fort && barracks.length > 1 && !splitting && (
           <Select value={String(pos)} onValueChange={setPosition}>
-            <SelectTrigger size="sm" className="w-44">
+            <SelectTrigger size="sm" className="w-44" aria-label={buildingName(BuildingType.BARRACKS)}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -173,12 +174,20 @@ export function Production({ city, fort }: { city: CityBean; fort: boolean }) {
               const count = countOf(u.typeId);
               const m = maxTrainable(u, leftFor(u.typeId), idleFor(u.typeId), fort ? wallFor(u.typeId) : Infinity, fort);
               return (
-                <div key={u.typeId} className={cn('grid gap-2 rounded-md border p-3', count > 0 && 'border-primary/60')}>
+                // a group named after its troop, so its Max button is heard with what it's for
+                <div
+                  key={u.typeId}
+                  role="group"
+                  aria-labelledby={`${nameId}-${u.typeId}`}
+                  className={cn('grid gap-2 rounded-md border p-3', count > 0 && 'border-primary/60')}
+                >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
                       <UnitIcon id={u.typeId} size={64} />
                       <div>
-                        <div className="font-medium">{troopName(u.typeId)}</div>
+                        <div id={`${nameId}-${u.typeId}`} className="font-medium">
+                          {troopName(u.typeId)}
+                        </div>
                         <div className="text-xs text-muted-foreground">
                           {[
                             t('production.stats', { attack: u.stats.attack, defense: u.stats.defense, life: u.stats.life }),

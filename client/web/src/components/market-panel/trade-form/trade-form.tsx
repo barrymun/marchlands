@@ -22,7 +22,7 @@ import { fmtPrice, resInline, resLabel } from '@/components/market-panel/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand } from '@/hooks/use-game';
 import { fmtExact, percent } from '@/lib/format';
 import { allMarketQueries } from '@/lib/query-keys';
@@ -115,39 +115,42 @@ export function TradeForm({
     >
       <p className="text-xs text-muted-foreground">{t('tradeForm.description', { fee: percent(BALANCE.marketFee, 1), level: market, open: openHere, cap })}</p>
       <div className="grid grid-cols-2 gap-2">
-        <Button variant={side === 0 ? 'default' : 'outline'} onClick={() => setSide(0)}>
+        <Button variant={side === 0 ? 'default' : 'outline'} aria-pressed={side === 0} onClick={() => setSide(0)}>
           {t('side.buy')}
         </Button>
-        <Button variant={side === 1 ? 'default' : 'outline'} onClick={() => setSide(1)}>
+        <Button variant={side === 1 ? 'default' : 'outline'} aria-pressed={side === 1} onClick={() => setSide(1)}>
           {t('side.sell')}
         </Button>
       </div>
-      <Tabs value={mode} onValueChange={(v) => setMode(v as MarketOrderType)}>
+      {/* the tabs show the amount and price fields under them: the root adds no box (contents), the fields are its panel */}
+      <Tabs value={mode} onValueChange={(v) => setMode(v as MarketOrderType)} className="contents">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value={MarketOrderType.MARKET}>{t('tradeForm.instant')}</TabsTrigger>
           <TabsTrigger value={MarketOrderType.LIMIT}>{t('tradeForm.limit')}</TabsTrigger>
         </TabsList>
+        <TabsContent value={mode} asChild className="flex-none text-[length:inherit]">
+          <div className={cn('grid gap-3', mode === MarketOrderType.LIMIT && 'grid-cols-2')}>
+            <div className="grid gap-1.5">
+              <Label htmlFor="mk-amount">{t('tradeForm.amount')}</Label>
+              <Input id="mk-amount" inputMode="numeric" value={amount} placeholder="0" onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} />
+              {/* a share of the most the city can trade now: its gold's worth to buy, its stock to sell */}
+              <div className="grid grid-cols-4 gap-1">
+                {AMOUNT_SHARES.map((share) => (
+                  <Button key={share} size="xs" variant="outline" disabled={maxQty < 1} onClick={() => setAmount(String(Math.floor(maxQty * share)))}>
+                    {percent(share)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {mode === MarketOrderType.LIMIT && (
+              <div className="grid gap-1.5">
+                <Label htmlFor="mk-price">{side === 0 ? t('tradeForm.highestPrice') : t('tradeForm.lowestPrice')}</Label>
+                <Input id="mk-price" inputMode="decimal" value={price} placeholder="0.000" onChange={(e) => setPrice(e.target.value.replace(/[^\d.]/g, ''))} />
+              </div>
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
-      <div className={cn('grid gap-3', mode === MarketOrderType.LIMIT && 'grid-cols-2')}>
-        <div className="grid gap-1.5">
-          <Label htmlFor="mk-amount">{t('tradeForm.amount')}</Label>
-          <Input id="mk-amount" inputMode="numeric" value={amount} placeholder="0" onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))} />
-          {/* a share of the most the city can trade now: its gold's worth to buy, its stock to sell */}
-          <div className="grid grid-cols-4 gap-1">
-            {AMOUNT_SHARES.map((share) => (
-              <Button key={share} size="xs" variant="outline" disabled={maxQty < 1} onClick={() => setAmount(String(Math.floor(maxQty * share)))}>
-                {percent(share)}
-              </Button>
-            ))}
-          </div>
-        </div>
-        {mode === MarketOrderType.LIMIT && (
-          <div className="grid gap-1.5">
-            <Label htmlFor="mk-price">{side === 0 ? t('tradeForm.highestPrice') : t('tradeForm.lowestPrice')}</Label>
-            <Input id="mk-price" inputMode="decimal" value={price} placeholder="0.000" onChange={(e) => setPrice(e.target.value.replace(/[^\d.]/g, ''))} />
-          </div>
-        )}
-      </div>
       <div className="grid gap-1 rounded-md bg-muted/50 p-3 text-sm tabular-nums">
         {!q ? (
           <span className="text-muted-foreground">{mode === MarketOrderType.LIMIT ? t('tradeForm.enterAmountAndPrice') : t('tradeForm.enterAmount')}</span>

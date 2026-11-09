@@ -27,8 +27,9 @@ export function HeroRow({
   children: React.ReactNode;
 }) {
   return (
-    // its actions keep to the bottom when the card is stretched to match a neighbour (the List's two columns)
-    <div className="flex flex-col justify-between gap-2 rounded-md border p-2">
+    // its actions keep to the bottom when the card is stretched to match a neighbour (the List's two columns); a group
+    // named after the hero, so its buttons (Hire, Make mayor) are heard with whom they're for
+    <div role="group" aria-label={hero.name} className="flex flex-col justify-between gap-2 rounded-md border p-2">
       <div>
         <HeroName hero={hero} onRename={onRename} leading={leading} trailing={trailing} />
         <HeroAttributes hero={hero} />

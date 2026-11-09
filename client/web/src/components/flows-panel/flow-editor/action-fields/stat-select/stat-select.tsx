@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { FLOW_STATS } from '@/components/flows-panel/flow-editor/action-fields/stat-select/constants';
 import type { Stat } from '@/components/flows-panel/flow-editor/action-fields/stat-select/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -6,9 +8,10 @@ import { cn } from '@/lib/utils';
 
 /** Which attribute an action goes by, in that attribute's colour. A component of its own so it can sit in a Trans (see AGENTS.md, Translations). */
 export function StatSelect({ value, onChange }: { value: Stat; onChange: (stat: Stat) => void }) {
+  const { t } = useTranslation('flows-panel');
   return (
     <Select value={value} onValueChange={(v) => onChange(v as Stat)}>
-      <SelectTrigger size="sm" className={cn('w-36 font-medium', attributeOfStat(value).tone)}>
+      <SelectTrigger size="sm" className={cn('w-36 font-medium', attributeOfStat(value).tone)} aria-label={t('actionFields.stat')}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

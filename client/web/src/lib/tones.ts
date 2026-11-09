@@ -19,8 +19,8 @@ export const ITEM_BONUS_TEXT = 'text-violet-700 dark:text-violet-400';
 /** Plain text inside a tooltip, whose colours are inverted (dark in light mode, light in dark mode). */
 export const ITEM_BONUS_TEXT_INVERTED = 'text-violet-300 dark:text-violet-700';
 
-/** A gain or a success, as text. @public (AGENTS.md, UI conventions) */
-export const GAIN_TEXT = 'text-emerald-600 dark:text-emerald-400';
+/** A gain or a success, as text. @public (AGENTS.md, UI conventions). emerald-700: 600 was 3.65:1 on white, under WCAG AA's 4.5:1 for small text. */
+export const GAIN_TEXT = 'text-emerald-700 dark:text-emerald-400';
 
 /** A loss, an error or a failure, as text. @public (AGENTS.md, UI conventions) */
 export const LOSS_TEXT = 'text-destructive';

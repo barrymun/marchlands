@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { BALANCE, ItemId, scaled, SpeedupId, speedupItemGold } from '@marchlands/core';
 
+import { SpendGoldButton } from '@/components/spend-gold-button/spend-gold-button';
 import { Button } from '@/components/ui/button';
 import { useInventory } from '@/hooks/use-inventory';
 import { useNow } from '@/hooks/use-now';
@@ -29,21 +30,22 @@ const EFFECT = {
 
 /**
  * Speed-up choices for a running construction, demolition or research: free (last 5 minutes),
- * each speed-up book (owned, else bought with the city's gold on use), and finishing at once for gold.
+ * each speed-up book (owned, else bought with the city's gold on use), and finishing at once for gold; a spend of a
+ * tenth of the city's gold or more asks first (SpendGoldButton).
  * Item reductions are in game time, so at GAME_SPEED > 1 they shrink with the timers.
  */
 export function SpeedupOptions({
   endTime,
   goldNeed,
-  gold,
+  city,
   pending,
   onUse,
 }: {
   endTime: number;
   /** gold to finish now */
   goldNeed?: number;
-  /** the city's gold, which pays */
-  gold: number;
+  /** the city, whose gold pays */
+  city: { name: string; resource: { gold: number } };
   pending: boolean;
   onUse: (itemId: string) => void;
 }) {
@@ -51,6 +53,7 @@ export function SpeedupOptions({
   const now = useNow();
   const inv = useInventory();
   const left = endTime - now;
+  const { gold } = city.resource;
   const free = left <= scaled(BALANCE.freeSpeedupMs);
   return (
     <div className="grid gap-2">
@@ -59,15 +62,17 @@ export function SpeedupOptions({
           {t('finishFree')}
         </Button>
         {goldNeed != null && (
-          <Button
+          <SpendGoldButton
             size="xs"
             variant="outline"
+            cost={goldNeed}
+            city={city}
             disabled={pending || gold < goldNeed}
-            title={t('common:gold', { gold: fmtExact(goldNeed) })}
-            onClick={() => onUse(SpeedupId.GOLD)}
+            buttonTitle={t('common:gold', { gold: fmtExact(goldNeed) })}
+            onSpend={() => onUse(SpeedupId.GOLD)}
           >
             {t('finishNow', { gold: fmt(goldNeed) })}
-          </Button>
+          </SpendGoldButton>
         )}
       </div>
       {!free && <p className="text-xs text-muted-foreground">{t('freeIn', { time: duration(scaled(BALANCE.freeSpeedupMs)) })}</p>}
@@ -76,16 +81,19 @@ export function SpeedupOptions({
           const owned = inv.count(id);
           const price = speedupItemGold(id);
           return (
-            <Button
+            // one owned is used; none owned, one is bought with the city's gold
+            <SpendGoldButton
               key={id}
               size="xs"
               variant={owned > 0 ? 'secondary' : 'outline'}
+              cost={owned > 0 ? 0 : price}
+              city={city}
               disabled={pending || (owned === 0 && gold < price)}
-              title={owned > 0 ? itemName(id) : t('boughtFor', { name: itemName(id), gold: fmtExact(price) })}
-              onClick={() => onUse(id)}
+              buttonTitle={owned > 0 ? itemName(id) : t('boughtFor', { name: itemName(id), gold: fmtExact(price) })}
+              onSpend={() => onUse(id)}
             >
               {itemName(id)} ({t(`effects.${EFFECT[id]}`)}) · {owned > 0 ? `×${owned}` : t('common:gold', { gold: fmt(price) })}
-            </Button>
+            </SpendGoldButton>
           );
         })}
       </div>

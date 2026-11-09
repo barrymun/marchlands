@@ -1,0 +1,84 @@
+# Browser tests (Playwright, client/web/e2e; docs/features/browser-tests.md) against a stack started in the job: Postgres
+# as a service, the API and worker from the bundles, the built client served by vite preview (which proxies /api as the
+# dev server does). GitHub runs it on every push to main and every pull request, beside CI (ci.yml), and by hand with a
+# choice of browsers; locally with act: npm run ci:browser.
+#
+# Like CI, the job runs inside the node:24 image, so act needs no other image; Playwright installs its browser and the
+# system libraries it needs (--with-deps) as a step.
+
+name: Browser tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      browsers:
+        description: 'chromium (the desktop, dark, mobile and languages projects), or all (Firefox and WebKit too)'
+        default: chromium
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    name: Browser tests (Playwright)
+    runs-on: ubuntu-latest
+    container: node:24-bookworm
+    services:
+      # the stack's Postgres (docker-compose.yml)
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: marchlands
+          POSTGRES_PASSWORD: marchlands
+          POSTGRES_DB: marchlands
+        options: >-
+          --health-cmd "pg_isready -U marchlands"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      DATABASE_URL: postgres://marchlands:marchlands@postgres:5432/marchlands
+      JWT_SECRET: browser-tests-only
+      # fast enough that a battle report's army lands within the test (content.spec.ts)
+      GAME_SPEED: 60
+      FEATURE_PVP: false
+      PORT: 3000
+      # an address, not localhost: vite preview listens on one of IPv4 and IPv6, and Node may try the other first
+      WEB: http://127.0.0.1:4173
+      E2E_BROWSERS: ${{ inputs.browsers || 'chromium' }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: npm ci
+      - run: npm run build:backend
+      - run: npm run build:web
+      - name: Install the browsers
+        run: |
+          if [ "$E2E_BROWSERS" = all ]; then npx playwright install --with-deps chromium firefox webkit; else npx playwright install --with-deps chromium; fi
+      - run: node dist/backend/bin/migrate.mjs
+      # one step: the servers started in the background live as long as the step that started them (each step is its
+      # own process under act), so the tests run in the same one
+      - name: Start the API, the worker and the client, then run the tests
+        run: |
+          # as in the backend image (backend/Dockerfile): the bundles log JSON, never through pino-pretty's thread
+          NODE_ENV=production nohup node dist/backend/bin/api.mjs > api.log 2>&1 &
+          NODE_ENV=production nohup node dist/backend/bin/worker.mjs > worker.log 2>&1 &
+          nohup npm run preview -w @marchlands/web -- --host 127.0.0.1 --port 4173 --strictPort > web.log 2>&1 &
+          # the worker seeds the world on its first start (the map sign-up needs), then logs that it started
+          ready=no
+          for i in $(seq 1 300); do
+            if curl -sf http://localhost:3000/health > /dev/null && curl -sf http://127.0.0.1:4173 > /dev/null && grep -q 'worker started' worker.log; then
+              ready=yes; echo "ready after ${i}s"; break
+            fi
+            sleep 1
+          done
+          status=1
+          if [ "$ready" = yes ]; then npm run e2e && status=0; else echo 'the stack did not come up'; fi
+          if [ "$status" != 0 ]; then tail -n 100 api.log worker.log web.log; fi
+          exit "$status"

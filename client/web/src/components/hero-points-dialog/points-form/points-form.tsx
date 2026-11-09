@@ -8,11 +8,14 @@ import { heroManagement, HeroStatus, itemGoldPrice, mayorProductionBonus } from 
 import { HeroLevel } from '@/components/hero-level/hero-level';
 import { HOLY_WATER, STATS } from '@/components/hero-points-dialog/points-form/constants';
 import type { StatKey } from '@/components/hero-points-dialog/points-form/types';
+import { SpendGoldButton } from '@/components/spend-gold-button/spend-gold-button';
 import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { useCommand, usePlayer } from '@/hooks/use-game';
 import { fmt, percent, signedRate } from '@/lib/format';
+import { GAIN_TEXT } from '@/lib/tones';
+import { cn } from '@/lib/utils';
 
 export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBean; cityId: number; fieldOutput: number; onDone: () => void }) {
   const { t } = useTranslation(['hero-points-dialog', 'common']);
@@ -27,7 +30,8 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
   const holyWater = player.data?.items.find((i) => i.id === HOLY_WATER)?.count ?? 0;
   // without Holy Water, one is bought with the hero's city gold
   const resetGold = itemGoldPrice(HOLY_WATER) ?? 0;
-  const cityGold = player.data?.castles.find((c) => c.id === cityId)?.resource.gold ?? 0;
+  const payer = player.data?.castles.find((c) => c.id === cityId);
+  const cityGold = payer?.resource.gold ?? 0;
   const canReset = holyWater > 0 || cityGold >= resetGold;
   const assigned = hero.level - hero.remainPoint;
   const isMayor = hero.status === HeroStatus.MAYOR;
@@ -66,7 +70,7 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
               </Button>
               <span className="w-16 text-center text-sm">
                 {total(s.key) + add[s.key]}
-                {add[s.key] > 0 && <span className="text-emerald-600 dark:text-emerald-400"> +{add[s.key]}</span>}
+                {add[s.key] > 0 && <span className={GAIN_TEXT}> +{add[s.key]}</span>}
               </span>
               <Button
                 size="icon-xs"
@@ -84,9 +88,7 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
           </div>
         ))}
         {isMayor && add.management > 0 && (
-          <p className="text-xs text-emerald-600 dark:text-emerald-400">
-            {t('asMayor', { rate: signedRate(mayorGain(add.management)), pct: percent(bonusGain(add.management)) })}
-          </p>
+          <p className={cn('text-xs', GAIN_TEXT)}>{t('asMayor', { rate: signedRate(mayorGain(add.management)), pct: percent(bonusGain(add.management)) })}</p>
         )}
         <Separator />
         <div className="flex items-center justify-between gap-2">
@@ -96,14 +98,16 @@ export function PointsForm({ hero, cityId, fieldOutput, onDone }: { hero: HeroBe
               cost: holyWater > 0 ? t('usesHolyWater', { owned: holyWater }) : t('holyWaterGold', { gold: fmt(resetGold) }),
             })}
           </span>
-          <Button
+          <SpendGoldButton
             size="xs"
             variant="outline"
+            cost={holyWater > 0 ? 0 : resetGold}
+            city={payer ?? { name: '', resource: { gold: cityGold } }}
             disabled={!canReset || assigned === 0 || reset.isPending}
-            onClick={() => reset.mutate({ path: { heroId: hero.id } })}
+            onSpend={() => reset.mutate({ path: { heroId: hero.id } })}
           >
             {t('reset')}
-          </Button>
+          </SpendGoldButton>
         </div>
       </div>
       <DialogFooter>

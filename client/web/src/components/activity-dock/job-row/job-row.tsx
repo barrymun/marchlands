@@ -22,7 +22,7 @@ export function JobRow({ job, now }: { job: Job; now: number }) {
         </span>
         <span className="shrink-0 text-muted-foreground tabular-nums">{left > 0 ? duration(left) : t('finishing')}</span>
       </span>
-      <Progress value={pct} className="h-1" />
+      <Progress value={pct} className="h-1" aria-label={job.label} />
     </button>
   );
 }

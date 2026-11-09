@@ -38,7 +38,7 @@ import { buildingName } from '@/lib/game-data';
 import { translateMessage } from '@/lib/messages';
 import { PageId } from '@/lib/nav';
 import { MilitaryTab } from '@/lib/screen-search';
-import { STATUS_DONE } from '@/lib/tones';
+import { GAIN_TEXT, STATUS_DONE } from '@/lib/tones';
 import { cn } from '@/lib/utils';
 
 export function BuildingDetail({ city, building, onDone }: { city: CityBean; building: BuildingBean; onDone: () => void }) {
@@ -97,7 +97,7 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
           <SpeedupOptions
             endTime={building.endTime}
             goldNeed={coins.data?.goldNeed}
-            gold={city.resource.gold}
+            city={city}
             pending={speedup.isPending}
             onUse={(itemId) => speedup.mutate({ path, body: { itemId } })}
           />
@@ -138,7 +138,7 @@ export function BuildingDetail({ city, building, onDone }: { city: CityBean; bui
               {next.effect && (
                 <p className="text-xs">
                   <span className="text-muted-foreground">{t('common:level.next', { level: next.level })}</span>{' '}
-                  <span className="text-emerald-600 dark:text-emerald-400">{translateMessage(next.effect)}</span>
+                  <span className={GAIN_TEXT}>{translateMessage(next.effect)}</span>
                 </p>
               )}
               <CostList cost={next} seconds={next.time} have={have} />

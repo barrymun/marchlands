@@ -62,7 +62,9 @@ export function CreateLordPage() {
       </div>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">{t('title')}</CardTitle>
+          <CardTitle className="text-2xl">
+            <h1>{t('title')}</h1>
+          </CardTitle>
           <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -81,9 +83,9 @@ export function CreateLordPage() {
                 <Input id="flag" name="flag" required maxLength={4} placeholder={t('flagPlaceholder')} />
               </div>
               <div className="grid gap-2">
-                <Label>{t('gender')}</Label>
+                <Label htmlFor="sex">{t('gender')}</Label>
                 <Select value={sex} onValueChange={setSex}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger id="sex" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -97,9 +99,9 @@ export function CreateLordPage() {
               </div>
             </div>
             <div className="grid gap-2">
-              <Label>{t('state')}</Label>
+              <Label htmlFor="zone">{t('state')}</Label>
               <Select value={zone} onValueChange={setZone}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="zone" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

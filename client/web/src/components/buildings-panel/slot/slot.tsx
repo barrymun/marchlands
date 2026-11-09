@@ -34,7 +34,8 @@ export function Slot({
       <button
         onClick={onClick}
         className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed p-1 text-center text-xs text-muted-foreground transition hover:bg-muted"
-        aria-label={t('slot.build', { pos })}
+        // a slot showing a name (the Walls) is called by it; an empty one says where it builds
+        aria-label={fixedName ? undefined : t('slot.build', { pos })}
       >
         {fixedName ?? <Plus className="size-4" />}
       </button>
@@ -48,14 +49,25 @@ export function Slot({
       <TooltipTrigger asChild>
         <button
           onClick={onClick}
-          aria-label={t('slot.building', { name, level: building.level })}
           className={cn(
             'relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-md border bg-muted/30 transition hover:bg-muted',
             busy && 'border-amber-500',
           )}
         >
+          {/* named by what it shows, the name first for screen readers: "Town Hall, Lv 1" (and its countdown while busy) */}
           {art ? (
-            <img src={art} alt="" width={32} height={32} loading="lazy" decoding="async" className="size-full object-contain p-1 [image-rendering:pixelated]" />
+            <>
+              <span className="sr-only">{`${name}, `}</span>
+              <img
+                src={art}
+                alt=""
+                width={32}
+                height={32}
+                loading="lazy"
+                decoding="async"
+                className="size-full object-contain p-1 [image-rendering:pixelated]"
+              />
+            </>
           ) : (
             <span className="line-clamp-2 px-1 text-xs font-medium">{name}</span>
           )}

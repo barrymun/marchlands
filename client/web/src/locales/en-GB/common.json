@@ -112,6 +112,11 @@
     "unit": "Unit"
   },
   "boughtWithCityGold": "Bought with {{city}}'s gold",
+  "spendGold": {
+    "title": "Spend {{gold}} gold?",
+    "description": "{{city}} has {{have}} gold, and will have {{left}} left.",
+    "confirm": "Spend"
+  },
   "nothingYet": "Nothing yet.",
   "noneYet": "None yet.",
   "troops_one": "{{n}} troop",

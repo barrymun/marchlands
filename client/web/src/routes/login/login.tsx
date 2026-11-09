@@ -17,7 +17,9 @@ export function LoginPage() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Marchlands</CardTitle>
+          <CardTitle className="text-2xl">
+            <h1>Marchlands</h1>
+          </CardTitle>
           <CardDescription>{t('tagline')}</CardDescription>
         </CardHeader>
         <CardContent>

@@ -115,6 +115,11 @@
     "unit": "Unidad"
   },
   "boughtWithCityGold": "Se compra con el oro de {{city}}",
+  "spendGold": {
+    "title": "¿Gastar {{gold}} de oro?",
+    "description": "{{city}} tiene {{have}} de oro y le quedarán {{left}}.",
+    "confirm": "Gastar"
+  },
   "nothingYet": "Nada todavía.",
   "noneYet": "Ninguno todavía.",
   "troops_one": "{{n}} tropa",

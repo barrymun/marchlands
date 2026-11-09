@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -37,6 +37,7 @@ import { allOf } from '@/lib/query-keys';
 
 export function LordForm({ city }: { city?: CityBean }) {
   const { t } = useTranslation(['lord-dialog', 'common']);
+  const genderId = useId();
   const player = usePlayer();
   const inv = useInventory();
   const info = player.data?.playerInfo;
@@ -106,10 +107,10 @@ export function LordForm({ city }: { city?: CityBean }) {
             <FlagColourPicker />
           </div>
           <div className="grid content-start gap-2">
-            <Label>{t('gender.label')}</Label>
+            <Label htmlFor={genderId}>{t('gender.label')}</Label>
             <div className="flex gap-2">
               <Select value={pickedGender} onValueChange={setGender}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger id={genderId} className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

@@ -7,6 +7,7 @@
     "willAttack": "{{city}} will attack {{tile}} as part of the flow below.",
     "noFlow": "No flow farms yet: this starts a flow called \"{{name}}\" with {{tile}} as {{city}}'s first target. Choose the saved army to send in Flows.",
     "flow": "Flow: <b>{{name}}</b>",
+    "flowLabel": "Flow",
     "alreadyTarget": "{{tile}} is already one of {{city}}'s targets in this flow.",
     "addTarget": "Add target",
     "start": "Start farming list",

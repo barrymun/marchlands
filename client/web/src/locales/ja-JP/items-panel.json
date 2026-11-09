@@ -10,6 +10,11 @@
   "notEnoughGold": "{{city}}の金が足りません（{{price}} 必要）",
   "buyWithGold": "{{city}}の金で1個購入",
   "buyFor": "購入 · {{price}} 金",
+  "buyConfirm": {
+    "title": "{{item}}を購入しますか？",
+    "description": "{{city}}の金を{{gold}}使います。",
+    "confirm": "購入"
+  },
   "noMatch": "該当するアイテムはありません。",
   "grant": {
     "amount": "{{name}} {{amount}}"

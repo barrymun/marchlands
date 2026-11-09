@@ -7,6 +7,7 @@
     "willAttack": "{{city}} atacará {{tile}} como parte del flujo de abajo.",
     "noFlow": "Aún no hay ningún flujo de saqueo: esto crea un flujo llamado «{{name}}» con {{tile}} como primer objetivo de {{city}}. Elige en Flujos el ejército guardado que se enviará.",
     "flow": "Flujo: <b>{{name}}</b>",
+    "flowLabel": "Flujo",
     "alreadyTarget": "{{tile}} ya es uno de los objetivos de {{city}} en este flujo.",
     "addTarget": "Añadir objetivo",
     "start": "Crear lista de saqueo",

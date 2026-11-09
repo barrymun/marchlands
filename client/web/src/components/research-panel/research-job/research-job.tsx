@@ -37,7 +37,7 @@ export function ResearchJob({ city, tech }: { city: CityBean; tech: Tech }) {
       <SpeedupOptions
         endTime={tech.endTime}
         goldNeed={coins.data?.goldNeed}
-        gold={city.resource.gold}
+        city={city}
         pending={speedup.isPending}
         onUse={(itemId) => speedup.mutate({ path, body: { itemId, techId } })}
       />

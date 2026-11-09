@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -17,6 +17,7 @@ import { itemGoldPrice, ItemId } from '@marchlands/core';
 
 import { QUEUE_OPEN_MAX } from '@/components/military-panel/production/constants';
 import type { QueueBatch } from '@/components/military-panel/production/types';
+import { SpendGoldButton } from '@/components/spend-gold-button/spend-gold-button';
 import { TimerBar } from '@/components/timer-bar/timer-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ import { itemName, troopName } from '@/lib/game-data';
  */
 export function QueueList({ city, fort, batches, splitting }: { city: CityBean; fort: boolean; batches: QueueBatch[]; splitting: boolean }) {
   const { t } = useTranslation(['military-panel', 'common']);
+  const nameId = useId();
   // what the player chose; until then it follows the number of batches
   const [chosen, setChosen] = useState<boolean | null>(null);
   const path = { cityId: city.id };
@@ -62,25 +64,34 @@ export function QueueList({ city, fort, batches, splitting }: { city: CityBean; 
       </Button>
       {open &&
         batches.map((b) => (
-          <div key={`${b.positionId}-${b.queueId}`} className="grid gap-1 rounded-md border p-2 text-sm">
+          // a group named after its batch, so its Cancel is heard with what it cancels
+          <div
+            key={`${b.positionId}-${b.queueId}`}
+            role="group"
+            aria-labelledby={`${nameId}-${b.positionId}-${b.queueId}`}
+            className="grid gap-1 rounded-md border p-2 text-sm"
+          >
             <div className="flex items-center justify-between">
-              <span>
+              <span id={`${nameId}-${b.positionId}-${b.queueId}`}>
                 {fmtExact(b.num)} × {troopName(b.type)}
                 {splitting && <span className="text-xs text-muted-foreground"> · {t('production.queueBarracks', { slot: b.positionId })}</span>}
               </span>
               <div className="flex gap-1">
                 {b.endTime > 0 && (
-                  <Button
+                  // one owned is used; none owned, one is bought with the city's gold
+                  <SpendGoldButton
                     size="xs"
                     variant="secondary"
+                    cost={inv.count(boostItem) > 0 ? 0 : boostGold}
+                    city={city}
                     disabled={boost.isPending || (inv.count(boostItem) === 0 && city.resource.gold < boostGold)}
-                    onClick={() => boost.mutate({ path: { ...path, positionId: b.positionId, queueId: b.queueId } })}
+                    onSpend={() => boost.mutate({ path: { ...path, positionId: b.positionId, queueId: b.queueId } })}
                   >
                     {t('production.boost', {
                       item: itemName(boostItem),
                       price: inv.count(boostItem) > 0 ? `×${inv.count(boostItem)}` : t('common:gold', { gold: fmt(boostGold) }),
                     })}
-                  </Button>
+                  </SpendGoldButton>
                 )}
                 <Button size="xs" variant="ghost" onClick={() => cancel.mutate({ path: { ...path, positionId: b.positionId, queueId: b.queueId } })}>
                   {t('common:actions.cancel')}

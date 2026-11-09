@@ -38,7 +38,13 @@ export function PanelSheet({ city }: { city: CityBean }) {
           </SheetTitle>
           <SheetDescription className="sr-only">{t('panel')}</SheetDescription>
         </SheetHeader>
-        <div ref={body} tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto p-4 outline-none">
+        <div
+          ref={body}
+          // in the tab order, so the keyboard can always come back to scroll a panel with nothing else to focus (Factions)
+          // eslint-disable-next-line jsx-a11y-x/no-noninteractive-tabindex -- a scroll area must be focusable when nothing in it is (axe, scrollable-region-focusable)
+          tabIndex={0}
+          className="min-h-0 flex-1 overflow-y-auto p-4 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
+        >
           <Suspense fallback={<Skeleton className="h-96" />}>
             {nav.panel === PanelId.RESEARCH && <ResearchPanel city={city} />}
             {nav.panel === PanelId.ITEMS && <ItemsPanel city={city} />}

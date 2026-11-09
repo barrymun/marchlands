@@ -112,7 +112,7 @@ export function AddToFarmButton({ city, tileId, tileName }: { city: CityBean; ti
             <div className="grid gap-2 text-sm">
               {farms.length > 1 ? (
                 <Select value={flow.id} onValueChange={setChosen}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full" aria-label={t('addToFarm.flowLabel')}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

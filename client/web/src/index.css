@@ -89,10 +89,12 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* darker than shadcn's 0.556 (4.3:1 on --muted), so small muted text keeps 4.5:1 on the muted greys and tinted rows too */
+  --muted-foreground: oklch(0.51 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* red-700, not shadcn's red-600: red text keeps 4.5:1 on its own pale tints (badges, the order book's sell rows) */
+  --destructive: oklch(0.505 0.213 27.518);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -193,6 +195,18 @@
   --font-body: 'Atkinson Hyperlegible Next Variable', var(--font-scripts), sans-serif;
   --font-title: var(--font-body);
   font-feature-settings: normal;
+}
+
+/*
+ * Toasts in the light theme (sonner's richColors, main.tsx): its own text colours are 2.9:1 (warning) to 4.5:1 on their
+ * pale backgrounds, under WCAG AA's 4.5:1 for their small text. Same hues, darker: about 5.8 to 6.9:1. :root outranks
+ * sonner's own [data-sonner-toaster][data-sonner-theme=light], which it injects after this file. Dark mode keeps sonner's.
+ */
+:root [data-sonner-toaster][data-sonner-theme='light'] {
+  --success-text: hsl(140, 100%, 20%);
+  --info-text: hsl(210, 92%, 35%);
+  --warning-text: hsl(31, 92%, 30%);
+  --error-text: hsl(360, 100%, 38%);
 }
 
 @layer base {

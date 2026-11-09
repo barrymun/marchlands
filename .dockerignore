@@ -5,3 +5,5 @@
 docs
 coverage
 backups
+# the browser tests run against the stack, never inside an image
+client/web/e2e

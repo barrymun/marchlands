@@ -27,6 +27,7 @@ import { useCommand, useFeature } from '@/hooks/use-game';
 import { useNow } from '@/hooks/use-now';
 import { fmt, fmtExact, shortDuration } from '@/lib/format';
 import { itemName } from '@/lib/game-data';
+import { asksFirst } from '@/lib/gold';
 import { translateMessage } from '@/lib/messages';
 import { WARN_TEXT } from '@/lib/tones';
 import { cn } from '@/lib/utils';
@@ -72,7 +73,11 @@ export function ActiveEffects({
   }, refresh);
 
   function extend(slot: Slot, ext: NonNullable<Extension>) {
-    if (ext.kind === ExtensionKind.BUY) return setBuying({ slot, itemId: ext.itemId, price: ext.price });
+    // a tenth of the city's gold or more asks first (lib/gold.ts, AGENTS.md, UI conventions); less is bought at a click
+    if (ext.kind === ExtensionKind.BUY) {
+      if (asksFirst(ext.price, city.resource.gold)) return setBuying({ slot, itemId: ext.itemId, price: ext.price });
+      return buyAndUse.mutate(ext.itemId, { onSuccess: () => toast.success(t('extended', { slot: slot.label, adds: adds(ext.itemId) })) });
+    }
     use.mutate(
       { path: { itemId: ext.itemId }, body: { cityId: city.id } },
       { onSuccess: () => toast.success(t('extended', { slot: slot.label, adds: adds(ext.itemId) })) },

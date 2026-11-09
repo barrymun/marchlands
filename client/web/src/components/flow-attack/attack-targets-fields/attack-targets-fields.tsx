@@ -2,7 +2,7 @@
 // typing x,y here or with "Add to farming list" on the Map tab.
 
 import { Swords } from 'lucide-react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { FlowCities, type FlowCityChoice, totalTroops, TROOP_KEYS } from '@marchlands/core';
@@ -28,6 +28,7 @@ export function AttackTargetsFields({
   cities: FlowCityChoice;
 }) {
   const { t } = useTranslation(['flow-attack', 'common']);
+  const withId = useId();
   const player = usePlayer();
   const presets = usePresets();
   const [creating, setCreating] = useState(false);
@@ -39,9 +40,9 @@ export function AttackTargetsFields({
     <div className="grid w-full gap-2 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <Swords className="size-4 text-muted-foreground" />
-        <span>{t('attackTargets.attackWith')}</span>
+        <span id={withId}>{t('attackTargets.attackWith')}</span>
         <Select value={action.presetId || undefined} onValueChange={(presetId) => onChange({ ...action, presetId })}>
-          <SelectTrigger size="sm" className="w-48">
+          <SelectTrigger size="sm" className="w-48" aria-labelledby={withId}>
             <SelectValue placeholder={presets.data?.length ? t('attackTargets.choose') : t('attackTargets.noArmies')} />
           </SelectTrigger>
           <SelectContent>

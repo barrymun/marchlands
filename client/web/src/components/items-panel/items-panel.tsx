@@ -14,12 +14,13 @@ import { ALL, ITEM_SEARCH_MAX, ITEMS_SEARCH } from '@/components/items-panel/con
 import { MedalSourcesInfo } from '@/components/items-panel/medal-sources-info/medal-sources-info';
 import type { Entry } from '@/components/items-panel/types';
 import { describeGrant, goldPriceOf, medalLevelOf } from '@/components/items-panel/utils';
+import { SpendGoldButton } from '@/components/spend-gold-button/spend-gold-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCommand, useFeature, usePlayer } from '@/hooks/use-game';
 import { useSearchState, useSearchText } from '@/hooks/use-search-state';
 import { fmt, fmtExact } from '@/lib/format';
@@ -90,19 +91,20 @@ export function ItemsPanel({ city }: { city: CityBean }) {
 
   return (
     <div className="grid gap-4">
-      <ActiveEffects
-        city={city}
-        buffs={buffs}
-        counts={counts}
-        onFind={(effect) => {
-          setQuery('');
-          set({ effect, category: null, q: '', owned: false });
-          listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }}
-      />
-      <div ref={listRef} className="flex min-w-0 scroll-mt-4 flex-wrap items-center gap-3">
-        <Tabs value={category} onValueChange={(v) => set({ category: v === ALL ? null : Number(v) })} className="max-w-full min-w-0">
-          <TabsList className="max-w-full justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* the categories show the items below them: the root adds no box (contents), the list is its panel */}
+      <Tabs value={category} onValueChange={(v) => set({ category: v === ALL ? null : Number(v) })} className="contents">
+        <ActiveEffects
+          city={city}
+          buffs={buffs}
+          counts={counts}
+          onFind={(effect) => {
+            setQuery('');
+            set({ effect, category: null, q: '', owned: false });
+            listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        />
+        <div ref={listRef} className="flex min-w-0 scroll-mt-4 flex-wrap items-center gap-3">
+          <TabsList className="max-w-full min-w-0 justify-start overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <TabsTrigger value={ALL}>{t('common:actions.all')}</TabsTrigger>
             {ITEM_CATEGORY_IDS.map((c) => (
               <TabsTrigger key={c} value={String(c)}>
@@ -110,85 +112,94 @@ export function ItemsPanel({ city }: { city: CityBean }) {
               </TabsTrigger>
             ))}
           </TabsList>
-        </Tabs>
-        <Input
-          className="h-8 min-w-0 flex-1 sm:w-48 sm:flex-none"
-          placeholder={t('search')}
-          value={query}
-          maxLength={ITEM_SEARCH_MAX}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <div className="flex items-center gap-2">
-          <Switch id="owned-only" checked={ownedOnly} onCheckedChange={(owned) => set({ owned })} />
-          <Label htmlFor="owned-only" className="text-sm font-normal">
-            {t('ownedOnly', { n: ownedTotal })}
-          </Label>
-        </div>
-        {effectFilter && (
-          <Badge variant="secondary" className="gap-1">
-            {t('itemsFor', { label: effectFilter.label })}
-            <button type="button" className="-me-1 rounded-sm opacity-70 hover:opacity-100" aria-label={t('showAll')} onClick={() => set({ effect: null })}>
-              <X className="size-3" />
-            </button>
-          </Badge>
-        )}
-      </div>
-      <div className="grid gap-2 md:grid-cols-2">
-        {shown.map((e) => (
-          <div key={e.ids[0]} className="flex gap-3 rounded-md border bg-card p-3">
-            <ItemIcon id={e.info.id} size={64} className={cn('size-8 sm:size-16', e.owned === 0 && 'opacity-60')} />
-            <div className="grid min-w-0 flex-1 gap-1.5">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* an item not owned shows it by its dimmed icon and outlined count: its text stays readable, and its buttons must not look disabled */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{nameOf(e)}</span>
-                    <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
-                      ×{fmtExact(e.owned)}
-                    </Badge>
-                    {category === ALL && <span className="text-xs text-muted-foreground">{itemCategoryName(e.info.category)}</span>}
-                  </div>
-                  <ActiveBonus ids={e.ids} buffs={player.data?.buffs ?? []} />
-                </div>
-                <div className="flex shrink-0 gap-1">
-                  {e.gold && (
-                    <Button
-                      size="xs"
-                      variant={e.owned === 0 ? 'default' : 'outline'}
-                      disabled={city.resource.gold < e.gold.price || buyGold.isPending}
-                      title={
-                        city.resource.gold < e.gold.price
-                          ? t('notEnoughGold', { city: city.name, price: fmtExact(e.gold.price) })
-                          : t('buyWithGold', { city: city.name })
-                      }
-                      onClick={() =>
-                        e.gold &&
-                        buyGold.mutate(
-                          { path: { cityId: city.id }, body: { itemId: e.gold.id, amount: 1 } },
-                          { onSuccess: () => toast.success(t('bought', { item: nameOf(e) })) },
-                        )
-                      }
-                    >
-                      {t('buyFor', { price: fmt(e.gold.price) })}
-                    </Button>
-                  )}
-                  {e.info.use === ItemUse.DIRECT && (
-                    <Button size="xs" disabled={e.owned === 0 || use.isPending} onClick={() => applyEntry(e)}>
-                      {t('common:actions.use')}
-                    </Button>
-                  )}
-                </div>
-              </div>
-              <div className="grid gap-1.5">
-                <p className="text-sm text-muted-foreground">{translateMessage(e.info.description)}</p>
-                {e.info.howTo && <p className="text-xs text-muted-foreground italic">{translateMessage(e.info.howTo)}</p>}
-                {e.medalLevel != null && <MedalSourcesInfo level={e.medalLevel} />}
-              </div>
-            </div>
+          <Input
+            className="h-8 min-w-0 flex-1 sm:w-48 sm:flex-none"
+            placeholder={t('search')}
+            value={query}
+            maxLength={ITEM_SEARCH_MAX}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <div className="flex items-center gap-2">
+            <Switch id="owned-only" checked={ownedOnly} onCheckedChange={(owned) => set({ owned })} />
+            <Label htmlFor="owned-only" className="text-sm font-normal">
+              {t('ownedOnly', { n: ownedTotal })}
+            </Label>
           </div>
-        ))}
-        {shown.length === 0 && <p className="text-sm text-muted-foreground">{t('noMatch')}</p>}
-      </div>
+          {effectFilter && (
+            <Badge variant="secondary" className="gap-1">
+              {t('itemsFor', { label: effectFilter.label })}
+              <button type="button" className="-me-1 rounded-sm opacity-70 hover:opacity-100" aria-label={t('showAll')} onClick={() => set({ effect: null })}>
+                <X className="size-3" />
+              </button>
+            </Badge>
+          )}
+        </div>
+        <TabsContent value={category} asChild className="flex-none text-[length:inherit]">
+          <div className="grid gap-2 md:grid-cols-2">
+            {shown.map((e) => (
+              // a group named after the item, so its Buy and Use are heard with what they buy and use
+              <div key={e.ids[0]} role="group" aria-label={nameOf(e)} className="flex gap-3 rounded-md border bg-card p-3">
+                <ItemIcon id={e.info.id} size={64} className={cn('size-8 sm:size-16', e.owned === 0 && 'opacity-60')} />
+                <div className="grid min-w-0 flex-1 gap-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* an item not owned shows it by its dimmed icon and outlined count: its text stays readable, and its buttons must not look disabled */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">{nameOf(e)}</span>
+                        <Badge variant={e.owned > 0 ? 'default' : 'outline'} className="tabular-nums">
+                          ×{fmtExact(e.owned)}
+                        </Badge>
+                        {category === ALL && <span className="text-xs text-muted-foreground">{itemCategoryName(e.info.category)}</span>}
+                      </div>
+                      <ActiveBonus ids={e.ids} buffs={player.data?.buffs ?? []} />
+                    </div>
+                    <div className="flex shrink-0 gap-1">
+                      {e.gold && (
+                        // a tenth of the city's gold or more asks first (SpendGoldButton, AGENTS.md, UI conventions)
+                        <SpendGoldButton
+                          size="xs"
+                          variant={e.owned === 0 ? 'default' : 'outline'}
+                          cost={e.gold.price}
+                          city={city}
+                          disabled={city.resource.gold < e.gold.price || buyGold.isPending}
+                          buttonTitle={
+                            city.resource.gold < e.gold.price
+                              ? t('notEnoughGold', { city: city.name, price: fmtExact(e.gold.price) })
+                              : t('buyWithGold', { city: city.name })
+                          }
+                          title={t('buyConfirm.title', { item: nameOf(e) })}
+                          description={t('buyConfirm.description', { gold: fmtExact(e.gold.price), city: city.name })}
+                          confirmLabel={t('buyConfirm.confirm')}
+                          onSpend={() =>
+                            e.gold &&
+                            buyGold.mutate(
+                              { path: { cityId: city.id }, body: { itemId: e.gold.id, amount: 1 } },
+                              { onSuccess: () => toast.success(t('bought', { item: nameOf(e) })) },
+                            )
+                          }
+                        >
+                          {t('buyFor', { price: fmt(e.gold.price) })}
+                        </SpendGoldButton>
+                      )}
+                      {e.info.use === ItemUse.DIRECT && (
+                        <Button size="xs" disabled={e.owned === 0 || use.isPending} onClick={() => applyEntry(e)}>
+                          {t('common:actions.use')}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid gap-1.5">
+                    <p className="text-sm text-muted-foreground">{translateMessage(e.info.description)}</p>
+                    {e.info.howTo && <p className="text-xs text-muted-foreground italic">{translateMessage(e.info.howTo)}</p>}
+                    {e.medalLevel != null && <MedalSourcesInfo level={e.medalLevel} />}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {shown.length === 0 && <p className="text-sm text-muted-foreground">{t('noMatch')}</p>}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
