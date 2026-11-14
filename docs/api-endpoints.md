@@ -13,6 +13,7 @@ All paths are relative to the server root. Names in parentheses are the original
 | GET | `/api/v1/auth/me` | Current account and its lord |
 | POST | `/api/v1/auth/refresh` | Issue a fresh token |
 | POST | `/api/v1/auth/register` | Create an account (with a solved GET /auth/challenge) *(public)* |
+| DELETE | `/api/v1/auth/sessions` | (marchlands) Log out everywhere: every token of the account stops working at once, this one included |
 
 ## player
 

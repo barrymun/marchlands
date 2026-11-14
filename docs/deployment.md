@@ -297,6 +297,8 @@ Test a restore now and then, for example on another machine: a backup is only pr
 - **Logs** are rotated by Docker: 5 files of 20 MB per container (`docker-compose.prod.yml`).
 - **Operators:** the accounts in `ADMIN_USERNAMES`, plus the first account ever registered, have the operator
   tools in the client. Changing `ADMIN_USERNAMES` needs `docker compose up -d api`.
+- **Ending logins:** a player ends every login of their own account in Player settings (Log out everywhere). To end
+  everyone's at once, change `JWT_SECRET`; a ban ends one account's at once and keeps it out.
 - **Changing a setting** in `.env`: `docker compose up -d` recreates the services whose settings changed.
 - **Never** run `docker compose down -v` unless you mean to delete the game: `-v` deletes the database volume.
 

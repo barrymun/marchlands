@@ -101,6 +101,24 @@ describe(PushGateway.name, () => {
     expect(gateway.isOnline(1)).toBe(true);
   });
 
+  it("drops a player's sockets with 4001, and nobody else's", () => {
+    const { db } = fakeDb();
+    const gateway = new PushGateway('unused', db, silent());
+    const [a1, a2, b] = [fakeSocket(), fakeSocket(), fakeSocket()];
+    gateway.add(1, a1.socket);
+    gateway.add(1, a2.socket);
+    gateway.add(2, b.socket);
+    gateway.drop(1);
+    gateway.drop(3);
+    expect(a1.closes).toEqual([[4001, 'unauthorized']]);
+    expect(a2.closes).toEqual([[4001, 'unauthorized']]);
+    expect(b.closes).toEqual([]);
+    // gone at once, and the socket's own close coming later changes nothing
+    expect(gateway.isOnline(1)).toBe(false);
+    gateway.remove(1, a1.socket);
+    expect(gateway.online()).toBe(1);
+  });
+
   it('closes every socket with 1001 when it stops', async () => {
     const { db } = fakeDb();
     const gateway = new PushGateway('unused', db, silent());

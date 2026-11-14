@@ -31,6 +31,13 @@
     }
   },
   "change": "Cambiar",
+  "sessions": {
+    "title": "Sesiones",
+    "description": "Cierra la sesión de esta cuenta en todos los dispositivos y navegadores, incluido este. Úsalo si iniciaste sesión en un lugar en el que ya no confías.",
+    "button": "Cerrar sesión en todas partes",
+    "confirmTitle": "¿Cerrar sesión en todas partes?",
+    "confirmDescription": "Todos los dispositivos y navegadores con sesión iniciada en esta cuenta tendrán que volver a iniciarla, incluido este."
+  },
   "truce": {
     "title": "Tregua",
     "active": "activa · <countdown />",

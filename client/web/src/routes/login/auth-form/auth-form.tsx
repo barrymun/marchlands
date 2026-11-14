@@ -3,7 +3,8 @@ import { type SubmitEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
-import { ApiError, postAuthLogin, postAuthRegister } from '@marchlands/api-client';
+import { postAuthLogin, postAuthRegister } from '@marchlands/api-client';
+import { PASSWORD_MIN_LENGTH } from '@marchlands/core';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -42,8 +43,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       void navigate(session.hasPlayer ? '/' : '/create', { replace: true });
     } catch (err) {
       setError(errorMessage(err));
-      // a proof is spent once it's checked, unless only the name was taken: solve a fresh one for the next try
-      if (mode === AuthMode.REGISTER && !(err instanceof ApiError && err.error?.code === 'auth.alreadyRegistered')) signUp.renew();
+      // a proof is spent once it's checked, a taken name included: solve a fresh one for the next try
+      if (mode === AuthMode.REGISTER) signUp.renew();
     } finally {
       setBusy(false);
     }
@@ -63,7 +64,24 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       )}
       <div className="grid gap-2">
         <Label htmlFor={`${mode}-password`}>{t('form.password')}</Label>
-        <Input id={`${mode}-password`} name="password" type="password" autoComplete={mode === AuthMode.LOGIN ? 'current-password' : 'new-password'} required />
+        {mode === AuthMode.LOGIN ? (
+          <Input id="login-password" name="password" type="password" autoComplete="current-password" required />
+        ) : (
+          <>
+            <Input
+              id="register-password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              minLength={PASSWORD_MIN_LENGTH}
+              aria-describedby="register-password-hint"
+              required
+            />
+            <p id="register-password-hint" className="text-xs text-muted-foreground">
+              {t('form.passwordHint', { count: PASSWORD_MIN_LENGTH })}
+            </p>
+          </>
+        )}
       </div>
       {error && (
         <Alert variant="destructive">

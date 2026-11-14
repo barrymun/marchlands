@@ -68,6 +68,24 @@ describe('the /ws socket', () => {
       });
     }));
 
+  it('closes the socket when the player logs out everywhere, and refuses the old token after', () =>
+    apiTest(async (api) => {
+      await api.operator();
+      const p = await api.player('Leaver');
+      await withGateway(api, async (app, gateway) => {
+        const ws = await openSocket(app, `/ws?token=${p.token}`);
+        expect((await ws.next()).cmd).toBe(PushCmd.CONNECTED);
+        const res = await app.inject({ method: 'DELETE', url: '/api/v1/auth/sessions', headers: { authorization: `Bearer ${p.token}` } });
+        expect(res.statusCode).toBe(200);
+        expect(await ws.closed).toEqual({ code: 4001, reason: 'unauthorized' });
+        await expect.poll(() => gateway.isOnline(p.playerId)).toBe(false);
+
+        const again = await openSocket(app, `/ws?token=${p.token}`);
+        expect(await again.next()).toEqual({ cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: { code: 'auth.notLoggedIn' } } });
+        expect((await again.closed).code).toBe(4001);
+      });
+    }));
+
   it('ignores malformed frames and other commands, and keeps the socket open', () =>
     apiTest(async (api) => {
       await api.operator();

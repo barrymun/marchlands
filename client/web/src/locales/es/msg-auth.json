@@ -4,6 +4,7 @@
   "wrongPassword": "Nombre de usuario o contraseña incorrectos.",
   "tooManyTries": "Demasiadas contraseñas incorrectas. Inténtalo de nuevo en {{wait}}.",
   "alreadyRegistered": "Ese nombre de usuario o correo electrónico ya está registrado.",
+  "weakPassword": "Esa contraseña es demasiado fácil de adivinar. Elige otra.",
   "signUpCheckFailed": "No pudimos confirmar el registro. Inténtalo de nuevo.",
   "signUpCheckExpired": "El formulario de registro estuvo abierto demasiado tiempo. Inténtalo de nuevo.",
   "accountNotFound": "Cuenta no encontrada.",

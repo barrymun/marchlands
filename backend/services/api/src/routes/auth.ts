@@ -3,12 +3,13 @@ import { randomBytes } from 'node:crypto';
 import { eq, sql } from 'drizzle-orm';
 import type { z } from 'zod';
 
-import { AuthAccount, AuthSession, ErrorResponse, LoginBody, Ok, RegisterBody, SignUpChallenge } from '@marchlands/contracts';
+import { AuthAccount, AuthSession, Empty, ErrorResponse, LoginBody, Ok, RegisterBody, SignUpChallenge } from '@marchlands/contracts';
 import { dur, GameError, msg } from '@marchlands/core';
 import { accounts, one, players } from '@marchlands/db';
 
 import { signToken } from '#/auth/jwt.ts';
 import { LoginBackoff } from '#/auth/login-backoff.ts';
+import { isWeakPassword } from '#/auth/password-rule.ts';
 import { hashPassword, verifyPassword } from '#/auth/password.ts';
 import { ProofCheck, SignUpProofs } from '#/auth/signup-proof.ts';
 import { authenticate, claimsOf, secured, tags, type ZApp } from '#/http.ts';
@@ -29,10 +30,10 @@ export default async function authRoutes(app: ZApp) {
     reply.header('cache-control', 'no-store');
   });
 
-  const issue = async (accountId: number, isAdmin: boolean) => {
+  const issue = async ({ id: accountId, sessionVersion }: { id: number; sessionVersion: number }, isAdmin: boolean) => {
     const [p] = await db.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
     return {
-      token: signToken({ sub: accountId, pid: p?.id, adm: isAdmin || undefined }, config.jwtSecret, config.jwtTtl),
+      token: signToken({ sub: accountId, pid: p?.id, adm: isAdmin || undefined, ver: sessionVersion }, config.jwtSecret, config.jwtTtl),
       accountId,
       playerId: p?.id ?? null,
       hasPlayer: !!p,
@@ -51,6 +52,8 @@ export default async function authRoutes(app: ZApp) {
     { schema: { tags: tags.auth, summary: 'Create an account (with a solved GET /auth/challenge)', body: RegisterBody, response: responses(AuthSession) } },
     async (req) => {
       const { username, password, email, proof } = req.body;
+      // before the puzzle is spent: the player picks another password and sends the same proof
+      if (isWeakPassword(password, { username, email })) throw new GameError(msg('auth.weakPassword'), -12, 400);
       const check = await proofs.check(proof);
       if (check === ProofCheck.EXPIRED) throw new GameError(msg('auth.signUpCheckExpired'), -12, 403);
       if (check !== ProofCheck.OK) throw new GameError(msg('auth.signUpCheckFailed'), -12, 403);
@@ -58,11 +61,8 @@ export default async function authRoutes(app: ZApp) {
         .select({ id: accounts.id })
         .from(accounts)
         .where(sql`lower(${accounts.username}) = lower(${username}) or lower(${accounts.email}) = lower(${email})`);
-      if (dupe) {
-        // the player picks another name and sends the same proof
-        proofs.release(proof);
-        throw new GameError(msg('auth.alreadyRegistered'), -12, 409);
-      }
+      // the puzzle stays spent: each name or email asked about costs its work again (the form solves a new one)
+      if (dupe) throw new GameError(msg('auth.alreadyRegistered'), -12, 409);
       // the very first account, and any listed in ADMIN_USERNAMES, are server operators
       const { n } = one(await db.select({ n: sql<number>`count(*)` }).from(accounts));
       const isAdmin = Number(n) === 0 || config.adminUsernames.includes(username.toLowerCase());
@@ -72,7 +72,7 @@ export default async function authRoutes(app: ZApp) {
           .values({ username, email, passwordHash: await hashPassword(password), isAdmin, createdAt: Date.now(), lastLoginAt: Date.now(), lastLoginIp: req.ip })
           .returning(),
       );
-      return { ok: 1 as const, data: await issue(row.id, row.isAdmin) };
+      return { ok: 1 as const, data: await issue(row, row.isAdmin) };
     },
   );
 
@@ -103,7 +103,7 @@ export default async function authRoutes(app: ZApp) {
       const isAdmin = acc.isAdmin || config.adminUsernames.includes(acc.username.toLowerCase());
       await db.update(accounts).set({ lastLoginAt: Date.now(), lastLoginIp: req.ip, isAdmin }).where(eq(accounts.id, acc.id));
       await db.update(players).set({ lastLoginAt: Date.now(), lastSeenAt: Date.now() }).where(eq(players.accountId, acc.id));
-      return { ok: 1 as const, data: await issue(acc.id, isAdmin) };
+      return { ok: 1 as const, data: await issue(acc, isAdmin) };
     },
   );
 
@@ -126,11 +126,34 @@ export default async function authRoutes(app: ZApp) {
     { onRequest: authenticate, schema: { tags: tags.auth, security: secured, summary: 'Issue a fresh token', response: responses(AuthSession) } },
     async (req) => {
       const [acc] = await db
-        .select({ id: accounts.id, isAdmin: accounts.isAdmin, status: accounts.status })
+        .select({ id: accounts.id, isAdmin: accounts.isAdmin, status: accounts.status, sessionVersion: accounts.sessionVersion })
         .from(accounts)
         .where(eq(accounts.id, claimsOf(req).sub));
       if (!acc || acc.status !== 0) throw new GameError(msg('auth.notLoggedIn'), -2, 401);
-      return { ok: 1 as const, data: await issue(acc.id, acc.isAdmin) };
+      return { ok: 1 as const, data: await issue(acc, acc.isAdmin) };
+    },
+  );
+
+  app.delete(
+    '/auth/sessions',
+    {
+      onRequest: authenticate,
+      schema: {
+        tags: tags.auth,
+        security: secured,
+        summary: '(marchlands) Log out everywhere: every token of the account stops working at once, this one included',
+        response: responses(Empty),
+      },
+    },
+    async (req) => {
+      const accountId = claimsOf(req).sub;
+      await db
+        .update(accounts)
+        .set({ sessionVersion: sql`${accounts.sessionVersion} + 1` })
+        .where(eq(accounts.id, accountId));
+      const [p] = await db.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
+      if (p) app.deps.dropSockets(p.id);
+      return { ok: 1 as const, data: null };
     },
   );
 }

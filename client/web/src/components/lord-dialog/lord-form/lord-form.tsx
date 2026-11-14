@@ -19,6 +19,7 @@ import { TRUCE } from '@/components/lord-dialog/lord-form/constants';
 import { FlagColourPicker } from '@/components/lord-dialog/lord-form/flag-colour-picker/flag-colour-picker';
 import { FontSelect } from '@/components/lord-dialog/lord-form/font-select/font-select';
 import { LanguageSelect } from '@/components/lord-dialog/lord-form/language-select/language-select';
+import { SessionsSection } from '@/components/lord-dialog/lord-form/sessions-section/sessions-section';
 import { TitleSection } from '@/components/lord-dialog/lord-form/title-section/title-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -135,6 +136,8 @@ export function LordForm({ city }: { city?: CityBean }) {
           <LanguageSelect />
           <FontSelect />
         </div>
+        <Separator />
+        <SessionsSection />
         {pvp && (
           <>
             <Separator />

@@ -4,6 +4,7 @@
   "wrongPassword": "ユーザー名またはパスワードが違います。",
   "tooManyTries": "パスワードの誤りが続いたため、{{wait}}後にもう一度お試しください。",
   "alreadyRegistered": "このユーザー名またはメールアドレスは登録済みです。",
+  "weakPassword": "このパスワードは推測されやすいため使えません。別のパスワードをお選びください。",
   "signUpCheckFailed": "登録を確認できませんでした。もう一度お試しください。",
   "signUpCheckExpired": "登録フォームを開いてから時間が経ちすぎました。もう一度お試しください。",
   "accountNotFound": "アカウントが見つかりません。",

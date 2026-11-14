@@ -14,6 +14,7 @@ import {
   GrantContentsSchema,
   ItemId,
   MessageSchema,
+  PASSWORD_MIN_LENGTH,
   ResearchStateSchema,
   TREND_KEYS,
   WORLD_MAP_SOURCES,
@@ -34,6 +35,7 @@ const Credentials = z.object({
     .min(3)
     .max(30)
     .regex(/^[\w.-]+$/, 'letters, digits, _ . - only'),
+  // logging in: the length accounts made before PASSWORD_MIN_LENGTH were held to
   password: z.string().min(6).max(200),
 });
 export const LoginBody = Credentials;
@@ -64,7 +66,11 @@ export const SignUpProof = z
   .meta({ id: 'SignUpProof' });
 export type SignUpProof = z.infer<typeof SignUpProof>;
 
-export const RegisterBody = Credentials.extend({ email: z.email().max(120), proof: SignUpProof });
+export const RegisterBody = Credentials.extend({
+  password: z.string().min(PASSWORD_MIN_LENGTH).max(200).describe('one easy to guess is refused (auth.weakPassword)'),
+  email: z.email().max(120),
+  proof: SignUpProof,
+});
 
 /** Not exported from rows.ts (it carries the password hash): only picked from here. */
 const AccountRow = createSelectSchema(accounts);

@@ -6,6 +6,7 @@ import { admin } from '@marchlands/game';
 
 import { buildApp } from '#/app.ts';
 import { signToken, verifyToken } from '#/auth/jwt.ts';
+import { hashPassword } from '#/auth/password.ts';
 import { apiTest, type Session, TEST_CONFIG, type TestApi } from '#test/support/api.ts';
 
 type AuthSession = Omit<Session, 'username'> & { hasPlayer: boolean };
@@ -98,17 +99,38 @@ describe('POST /auth/register', () => {
       await api.refused('POST', 'auth/register', 'auth.signUpCheckFailed', { body: { ...body, proof: easier }, status: 403 });
     }));
 
-  it('accepts each solved puzzle once, but again after the username was taken', () =>
+  it('accepts each solved puzzle once, a sign-up refused for a taken name having spent its own', () =>
     apiTest(async (api) => {
       await api.register('alice');
       const proof = await api.signUpProof();
       const taken = { username: 'alice', password: 'test-password', email: 'other@example.test', proof };
       await api.refused('POST', 'auth/register', 'auth.alreadyRegistered', { body: taken, status: 409 });
-      await api.ok('POST', 'auth/register', { body: { ...taken, username: 'alice2' } });
+      // asking about another name costs another puzzle
+      await api.refused('POST', 'auth/register', 'auth.signUpCheckFailed', { body: { ...taken, username: 'alice2' }, status: 403 });
+      const fresh = await api.signUpProof();
+      await api.ok('POST', 'auth/register', { body: { ...taken, username: 'alice2', proof: fresh } });
       await api.refused('POST', 'auth/register', 'auth.signUpCheckFailed', {
-        body: { ...taken, username: 'alice3', email: 'third@example.test' },
+        body: { ...taken, username: 'alice3', email: 'third@example.test', proof: fresh },
         status: 403,
       });
+    }));
+
+  it('refuses a password easy to guess (400 auth.weakPassword), the puzzle still good for the next try', () =>
+    apiTest(async (api) => {
+      const proof = await api.signUpProof();
+      const body = { username: 'walter_of_ulm', email: 'walter@example.test', proof };
+      for (const password of ['password123', 'QWERTYUIOP', 'aaaaaaaaaaaa', 'Walter_of_Ulm', 'walter@example.test']) {
+        await api.refused('POST', 'auth/register', 'auth.weakPassword', { body: { ...body, password }, status: 400 });
+      }
+      await api.ok('POST', 'auth/register', { body: { ...body, password: 'three-fields-of-rye' } });
+    }));
+
+  it('refuses a password under 10 characters as a malformed body', () =>
+    apiTest(async (api) => {
+      const body = { username: 'wendy', email: 'wendy@example.test', proof: await api.signUpProof() };
+      const short = await api.refused('POST', 'auth/register', 'common.invalidRequest', { body: { ...body, password: 'k7#mQ2xpZ' }, status: 400 });
+      expect(short.body.issues).toEqual([{ path: '/password', message: expect.any(String) }]);
+      await api.ok('POST', 'auth/register', { body: { ...body, password: 'k7#mQ2xpZw' } });
     }));
 
   it('refuses a puzzle solved after it expired (10 minutes)', () =>
@@ -182,6 +204,17 @@ describe('POST /auth/register', () => {
 });
 
 describe('POST /auth/login', () => {
+  it('still takes the shorter password of an account made before sign-up asked for 10 characters', () =>
+    apiTest(async (api) => {
+      const s = await api.register('ulrich');
+      await api.db
+        .update(accounts)
+        .set({ passwordHash: await hashPassword('old123') })
+        .where(eq(accounts.id, s.accountId));
+      const session = await api.ok<AuthSession>('POST', 'auth/login', { body: { username: 'ulrich', password: 'old123' } });
+      expect(session.accountId).toBe(s.accountId);
+    }));
+
   it('logs in by username, in any case, and records the login', () =>
     apiTest(async (api) => {
       const s = await api.register('frank');
@@ -287,6 +320,46 @@ describe('GET /auth/me', () => {
     apiTest(async (api) => {
       const token = signToken({ sub: 999_999 }, TEST_CONFIG.jwtSecret, 60);
       await api.refused('GET', 'auth/me', 'auth.accountNotFound', { token, status: 401 });
+    }));
+});
+
+describe('DELETE /auth/sessions', () => {
+  it('ends every session of the account at once: its tokens are refused, and a new login works', () =>
+    apiTest(async (api) => {
+      await api.operator();
+      const p = await api.player('Rowan');
+      const other = await api.player('Sasha');
+      const second = await api.ok<AuthSession>('POST', 'auth/login', { body: { username: p.username, password: 'test-password' } });
+      expect(claimsOf(p.token)).toMatchObject({ ver: 0 });
+
+      expect(await api.ok('DELETE', 'auth/sessions', { token: p.token })).toBeNull();
+      for (const token of [p.token, second.token]) {
+        await api.refused('GET', 'auth/me', 'auth.notLoggedIn', { token, status: 401 });
+        await api.refused('POST', 'auth/refresh', 'auth.notLoggedIn', { token, status: 401 });
+        await api.refused('GET', 'player', 'auth.notLoggedIn', { token, status: 401 });
+        await api.refused('DELETE', 'auth/sessions', 'auth.notLoggedIn', { token, status: 401 });
+      }
+      // nobody else is logged out
+      await api.ok('GET', 'auth/me', { token: other.token });
+
+      const again = await api.ok<AuthSession>('POST', 'auth/login', { body: { username: p.username, password: 'test-password' } });
+      expect(claimsOf(again.token)).toMatchObject({ sub: p.accountId, ver: 1 });
+      await api.ok('GET', 'auth/me', { token: again.token });
+      expect(claimsOf((await api.ok<AuthSession>('POST', 'auth/refresh', { token: again.token })).token)).toMatchObject({ ver: 1 });
+    }));
+
+  it('takes a token signed before sessions had a version as version 0', () =>
+    apiTest(async (api) => {
+      const s = await api.register('tobias');
+      const old = signToken({ sub: s.accountId }, TEST_CONFIG.jwtSecret, 60);
+      await api.ok('GET', 'auth/me', { token: old });
+      await api.ok('DELETE', 'auth/sessions', { token: old });
+      await api.refused('GET', 'auth/me', 'auth.notLoggedIn', { token: old, status: 401 });
+    }));
+
+  it('needs a token', () =>
+    apiTest(async (api) => {
+      await api.refused('DELETE', 'auth/sessions', 'auth.notLoggedIn', { status: 401 });
     }));
 });
 

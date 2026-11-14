@@ -30,8 +30,8 @@ async function makeApp() {
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
   // authenticate reads the account's status: every account here is active (the ban is tested in the API tests)
-  const db = { select: () => ({ from: () => ({ where: async () => [{ status: 0, banReason: '' }] }) }) } as unknown as Db;
-  app.decorate('deps', { db, config: CONFIG, online: () => 0 });
+  const db = { select: () => ({ from: () => ({ where: async () => [{ status: 0, banReason: '', sessionVersion: 0 }] }) }) } as unknown as Db;
+  app.decorate('deps', { db, config: CONFIG, online: () => 0, dropSockets: () => {} });
   installErrorHandler(app);
   app.get('/game-error', async () => {
     throw new GameError(msg('hero.locked', { name: 'Arthur' }), -17, 409);

@@ -8,6 +8,8 @@
     "username": "Username",
     "email": "Email",
     "password": "Password",
+    "passwordHint_one": "At least {{count}} character.",
+    "passwordHint_other": "At least {{count}} characters.",
     "logIn": "Log in",
     "createAccount": "Create account",
     "gettingReady": "Getting ready…",

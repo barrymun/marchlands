@@ -12,13 +12,12 @@
 
 import { execFileSync } from 'node:child_process';
 import { BALANCE, BuildingType, HeroStatus, Mission, TechType, TileType, TroopType } from '@marchlands/core';
-import { signUpProof } from './proof.mjs';
+import { logInOrSignUp, PASSWORD, signUpProof } from './proof.mjs';
 
 const API = process.env.API ?? 'http://localhost:3000';
 const base = `${API}/api/v1`;
 const REAL = process.argv.includes('--real');
 const PREPARE = process.argv.includes('--prepare');
-const PASSWORD = 'secret123';
 /** Titles by the cities they allow: this one allows the two the player will have, so the limit can be seen. */
 const TWO_CITIES = 1;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -53,9 +52,7 @@ async function until(fn, msg, timeout = 180_000) {
 
 async function admin() {
   const user = process.env.SMOKE_ADMIN ?? 'smoke_admin';
-  let r = await call(null, 'POST', '/auth/login', { username: user, password: PASSWORD });
-  if (r.ok !== 1)
-    r = await call(null, 'POST', '/auth/register', { username: user, email: `${user}@example.test`, password: PASSWORD, proof: await signUpProof(base) });
+  const r = await logInOrSignUp(base, user);
   if (!r.data?.isAdmin) throw new Error(`${user} must be an operator (ADMIN_USERNAMES)`);
   return r.data.token;
 }

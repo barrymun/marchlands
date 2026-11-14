@@ -351,6 +351,13 @@
       "when": 1794052644163,
       "tag": "0049_player_flag_colour",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1794662135752,
+      "tag": "0050_account_session_version",
+      "breakpoints": true
     }
   ]
 }

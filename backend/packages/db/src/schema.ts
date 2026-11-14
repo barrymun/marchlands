@@ -78,6 +78,8 @@ export const accounts = pgTable(
     createdAt: ms('created_at').notNull(),
     lastLoginAt: ms('last_login_at').notNull().default(0),
     lastLoginIp: text('last_login_ip').notNull().default(''),
+    /** raised to end every session of the account at once: a token carries the number it was signed under */
+    sessionVersion: integer('session_version').notNull().default(0),
   },
   (t) => [uniqueIndex('accounts_username_lower_idx').on(sql`lower(${t.username})`), uniqueIndex('accounts_email_lower_idx').on(sql`lower(${t.email})`)],
 );

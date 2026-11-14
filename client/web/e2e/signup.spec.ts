@@ -12,8 +12,15 @@ test('a new player signs up, the puzzle solved in the browser, and founds a city
   await page.getByRole('tab', { name: text('login:tabs.register') }).click();
   await page.getByLabel(text('login:form.username')).fill(username);
   await page.getByLabel(text('login:form.email')).fill(`${username}@example.test`);
-  await page.getByLabel(text('login:form.password')).fill(randomBytes(12).toString('base64url'));
+  await expect(page.getByText(text('login:form.passwordHint_other', { count: 10 }))).toBeVisible();
+  // a password anyone would guess is refused, and says so
+  await page.getByLabel(text('login:form.password')).fill('password123');
   // the button waits for the puzzle, solved by a Web Worker while the form is filled in
+  await page.getByRole('button', { name: text('login:form.createAccount') }).click();
+  await expect(page.getByRole('alert').filter({ hasText: text('msg-auth:weakPassword') })).toBeVisible();
+
+  // and again for the next try, with a new puzzle
+  await page.getByLabel(text('login:form.password')).fill(randomBytes(12).toString('base64url'));
   await page.getByRole('button', { name: text('login:form.createAccount') }).click();
 
   await expect(page.getByRole('heading', { level: 1, name: text('create-lord:title') })).toBeVisible();

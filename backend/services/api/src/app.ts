@@ -47,7 +47,7 @@ export async function buildApp({ db, config, gateway, logger = { level: config.l
   }).withTypeProvider<ZodTypeProvider>();
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
-  app.decorate('deps', { db, config, online: () => gateway?.online() ?? 0 });
+  app.decorate('deps', { db, config, online: () => gateway?.online() ?? 0, dropSockets: (playerId: number) => gateway?.drop(playerId) });
   installErrorHandler(app);
   // accept an empty body on JSON requests (many commands take no parameters)
   app.removeContentTypeParser('application/json');
@@ -104,7 +104,7 @@ export async function buildApp({ db, config, gateway, logger = { level: config.l
       socket.close(4001, 'unauthorized');
       return;
     }
-    const refusal = await accountRefusal(db, claims.sub);
+    const refusal = await accountRefusal(db, claims);
     if (refusal) {
       sendPush(socket, { cmd: PushCmd.CONNECTION_LOST, data: { reasonCode: 5, msg: refusal.error } });
       socket.close(4001, 'unauthorized');

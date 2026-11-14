@@ -3,7 +3,7 @@
 //   API=http://localhost:3100 node tools/smoke/smoke.mjs
 
 import { GEAR_PIECES, gearLevelPoints, gearStarCost, gearStarPoints, gearTier } from '@marchlands/core';
-import { signUpProof } from './proof.mjs';
+import { logInOrSignUp, PASSWORD, signUpProof } from './proof.mjs';
 
 const API = process.env.API ?? 'http://localhost:3000';
 const base = `${API}/api/v1`;
@@ -54,7 +54,7 @@ async function newLord(name) {
   const reg = await ok(null, 'POST', '/auth/register', {
     username: `${name}_${suffix}`,
     email: `${name}_${suffix}@example.test`,
-    password: 'secret123',
+    password: PASSWORD,
     proof: await signUpProof(base),
   });
   const created = await ok(reg.token, 'POST', '/player', { userName: `${name}${suffix}`, castleName: `${name} Hold`, flag: name.slice(0, 3), sex: 0, zone: 5 });
@@ -93,17 +93,8 @@ async function main() {
   // ADMIN_USERNAMES, or be the first account on the server
   const adminUser = process.env.SMOKE_ADMIN ?? 'smoke_admin';
   let gm = null;
-  const login = await call(null, 'POST', '/auth/login', { username: adminUser, password: 'secret123' });
-  if (login.ok === 1) gm = login.data;
-  else {
-    const reg = await call(null, 'POST', '/auth/register', {
-      username: adminUser,
-      email: `${adminUser}@example.test`,
-      password: 'secret123',
-      proof: await signUpProof(base),
-    });
-    if (reg.ok === 1) gm = reg.data;
-  }
+  const signedIn = await logInOrSignUp(base, adminUser);
+  if (signedIn.ok === 1) gm = signedIn.data;
   if (!gm?.isAdmin) throw new Error(`${adminUser} is not an operator: add it to ADMIN_USERNAMES`);
   {
     const pid = a.state.playerInfo.id;

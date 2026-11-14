@@ -142,6 +142,7 @@
               "auth.wrongPassword",
               "auth.tooManyTries",
               "auth.alreadyRegistered",
+              "auth.weakPassword",
               "auth.signUpCheckFailed",
               "auth.signUpCheckExpired",
               "auth.accountNotFound",
@@ -12647,6 +12648,7 @@
               "auth.wrongPassword",
               "auth.tooManyTries",
               "auth.alreadyRegistered",
+              "auth.weakPassword",
               "auth.signUpCheckFailed",
               "auth.signUpCheckExpired",
               "auth.accountNotFound",
@@ -25392,8 +25394,9 @@
                   },
                   "password": {
                     "type": "string",
-                    "minLength": 6,
-                    "maxLength": 200
+                    "minLength": 10,
+                    "maxLength": 200,
+                    "description": "one easy to guess is refused (auth.weakPassword)"
                   },
                   "email": {
                     "type": "string",
@@ -25639,6 +25642,68 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/AuthSession"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/sessions": {
+      "delete": {
+        "operationId": "deleteAuthSessions",
+        "summary": "(marchlands) Log out everywhere: every token of the account stops working at once, this one included",
+        "tags": [
+          "auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "data": {
+                      "type": "null"
                     }
                   },
                   "required": [

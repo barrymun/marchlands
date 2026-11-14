@@ -32,14 +32,6 @@ describe(SignUpProofs.name, () => {
     expect(await proofs.check(proof)).toBe(ProofCheck.USED);
   });
 
-  it('accepts it again once released (the sign-up failed for another reason)', async () => {
-    const proofs = new SignUpProofs(CONFIG, 'test-jwt-secret');
-    const proof = await solve(await proofs.challenge());
-    expect(await proofs.check(proof)).toBe(ProofCheck.OK);
-    proofs.release(proof);
-    expect(await proofs.check(proof)).toBe(ProofCheck.OK);
-  });
-
   it('refuses a wrong answer, and a malformed one', async () => {
     const proofs = new SignUpProofs(CONFIG, 'test-jwt-secret');
     const proof = await solve(await proofs.challenge());

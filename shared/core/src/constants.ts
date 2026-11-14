@@ -494,6 +494,9 @@ export type TimedEventType = (typeof TimedEventType)[keyof typeof TimedEventType
 /** Targets one city may attack in a flow action (a level 10 Rally Spot sends 10 armies). */
 export const FLOW_MAX_TARGETS_PER_CITY = 10;
 
+/** The shortest password a new account may choose. Logging in takes whatever an older account already has. */
+export const PASSWORD_MIN_LENGTH = 10;
+
 /** Longest a flow's "wait" action can wait (real time). */
 export const FLOW_MAX_WAIT_MINUTES = 7 * 24 * 60;
 

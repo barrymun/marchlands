@@ -6,6 +6,8 @@ export const AUTH_MESSAGES = {
   /** `wait`: a duration, until the next password is checked */
   tooManyTries: ['wait'],
   alreadyRegistered: [],
+  /** the password chosen on sign-up is one anyone would guess (a common one, or the account's own name) */
+  weakPassword: [],
   /** the sign-up's proof of work didn't hold (wrong, tampered with or already used) */
   signUpCheckFailed: [],
   /** the sign-up's proof of work expired before the form was sent */

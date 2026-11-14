@@ -20,6 +20,8 @@ interface AppDeps {
   db: Db;
   config: ApiConfig;
   online: () => number;
+  /** close a player's push sockets on this API instance (their sessions were ended) */
+  dropSockets: (playerId: number) => void;
 }
 
 declare module 'fastify' {
@@ -68,22 +70,28 @@ export function loggedUrl(url: string): string {
 
 /**
  * Route hook (onRequest, so it runs before the body is read and validated): a valid token of an account that
- * is not banned. A ban takes effect at once, not when the token expires.
+ * is not banned, signed since the account last ended its sessions. A ban and "log out everywhere" take effect at
+ * once, not when the token expires.
  */
 export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   const token = bearer(req);
   const claims = token ? verifyToken(token, req.server.deps.config.jwtSecret) : null;
   if (!claims) return reply.status(401).send({ ok: -2, error: msg('auth.notLoggedIn') });
-  const refusal = await accountRefusal(req.server.deps.db, claims.sub);
+  const refusal = await accountRefusal(req.server.deps.db, claims);
   if (refusal) return reply.status(refusal.status).send({ ok: refusal.ok, error: refusal.error });
   req.claims = claims;
 }
 
-/** Why an account may not play now (gone, or banned), or null. */
-export async function accountRefusal(db: Db, accountId: number) {
-  const [acc] = await db.select({ status: accounts.status, banReason: accounts.banReason }).from(accounts).where(eq(accounts.id, accountId));
+/** Why a token's account may not play now (gone, banned, or its sessions ended since the token was signed), or null. */
+export async function accountRefusal(db: Db, claims: Pick<TokenClaims, 'sub' | 'ver'>) {
+  const [acc] = await db
+    .select({ status: accounts.status, banReason: accounts.banReason, sessionVersion: accounts.sessionVersion })
+    .from(accounts)
+    .where(eq(accounts.id, claims.sub));
   if (!acc) return { status: 401, ok: -2, error: msg('auth.accountNotFound') };
   if (acc.status !== 0) return { status: 403, ok: -99, error: msg('auth.banned', { reason: acc.banReason }) };
+  // a token from before the column existed carries no version: it counts as 0, so nobody was logged out by the update
+  if ((claims.ver ?? 0) !== acc.sessionVersion) return { status: 401, ok: -2, error: msg('auth.notLoggedIn') };
   return null;
 }
 

@@ -8,6 +8,7 @@
     "username": "ユーザー名",
     "email": "メールアドレス",
     "password": "パスワード",
+    "passwordHint_other": "{{count}}文字以上。",
     "logIn": "ログイン",
     "createAccount": "アカウント作成",
     "gettingReady": "準備中…",

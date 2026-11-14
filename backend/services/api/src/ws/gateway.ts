@@ -146,6 +146,18 @@ export class PushGateway {
       .catch(() => {});
   }
 
+  /**
+   * Close a player's sockets on this replica: their sessions were ended (4001, as a socket refused at the door). They
+   * get no further push from this moment, without waiting for the close to be answered. A socket on another replica
+   * stays open until it next reconnects, which is then refused.
+   */
+  drop(playerId: number) {
+    const set = this.sockets.get(playerId);
+    if (!set) return;
+    this.sockets.delete(playerId);
+    for (const s of set) s.close(4001, 'unauthorized');
+  }
+
   /** Lords with at least one open socket on this replica. */
   online() {
     return this.sockets.size;

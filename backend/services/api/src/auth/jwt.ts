@@ -7,6 +7,8 @@ export interface TokenClaims {
   /** player id in this world (absent until a player is created) */
   pid?: number;
   adm?: boolean;
+  /** the account's session version when the token was signed (absent: 0); a token of an older version is refused */
+  ver?: number;
   iat: number;
   exp: number;
 }

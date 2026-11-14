@@ -6,7 +6,7 @@
 // wears down a real level 12's garrison near its accounts, which refills within the hour.
 //   API=http://localhost:3100 SMOKE_ADMIN=fx_smoke_op node tools/smoke/pvp-off.mjs
 
-import { signUpProof } from './proof.mjs';
+import { logInOrSignUp, PASSWORD, signUpProof } from './proof.mjs';
 
 const API = process.env.API ?? 'http://localhost:3000';
 const base = `${API}/api/v1`;
@@ -58,16 +58,14 @@ async function until(fn, msg, timeout = 180_000) {
 
 async function operator() {
   const user = process.env.SMOKE_ADMIN ?? 'fx_smoke_op';
-  let r = await call(null, 'POST', '/auth/login', { username: user, password: 'secret123' });
-  if (r.ok !== 1)
-    r = await call(null, 'POST', '/auth/register', { username: user, email: `${user}@example.test`, password: 'secret123', proof: await signUpProof(base) });
+  const r = await logInOrSignUp(base, user);
   if (!r.data?.isAdmin) throw new Error(`${user} must be an operator (ADMIN_USERNAMES)`);
   return r.data.token;
 }
 
 async function newPlayer(name) {
   const username = `fx_pvp_${name}_${suffix}`;
-  const reg = await ok(null, 'POST', '/auth/register', { username, email: `${username}@example.test`, password: 'secret123', proof: await signUpProof(base) });
+  const reg = await ok(null, 'POST', '/auth/register', { username, email: `${username}@example.test`, password: PASSWORD, proof: await signUpProof(base) });
   const c = await ok(reg.token, 'POST', '/player', { userName: `Fxpvp${name}${suffix}`, castleName: `Fen ${name}`, flag: 'FX', sex: 0, zone: 6 });
   return { token: c.token, id: c.playerInfo.id, name: c.playerInfo.userName, city: c.castles[0] };
 }

@@ -2,7 +2,8 @@
 // the hidden counter of a puzzle the server signed. Invisible to players (the sign-up form solves it while they type),
 // self-hosted, and no player data goes to a third party; it makes accounts made in bulk by a script cost something.
 // The work is PBKDF2/SHA-256, which browsers compute natively: about (counter + 1) × cost rounds. Each solved puzzle
-// is accepted once, remembered in memory until it expires (one API instance; a restart only forgets them).
+// is accepted once, remembered in memory until it expires (one API instance; a restart only forgets them). A sign-up
+// refused because the name or email is taken has spent its puzzle too: asking which names exist costs the work each time.
 
 import { createHmac } from 'node:crypto';
 
@@ -69,10 +70,5 @@ export class SignUpProofs {
     if (!result.verified) return ProofCheck.INVALID;
     // synchronous, so two sign-ups with the same proof can't both get past it
     return this.spent.setIfAbsent(proof.challenge.signature, true) ? ProofCheck.OK : ProofCheck.USED;
-  }
-
-  /** The sign-up failed for another reason (the username was taken): the player may send the same proof again. */
-  release(proof: SignUpProof): void {
-    this.spent.delete(proof.challenge.signature);
   }
 }
