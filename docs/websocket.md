@@ -1,6 +1,6 @@
 # WebSocket pushes
 
-Connect to `ws://<host>/ws?token=<JWT>` after the lord exists, i.e. after `POST /api/v1/player`.
+Connect to `ws://<host>/ws?token=<JWT>` after the lord exists, i.e. after `POST /api/v1/player`. The socket is the only place a token goes in the address (a browser can't set a WebSocket's headers); every HTTP call sends it as `Authorization: Bearer <JWT>`, and the servers log the socket's address without it.
 
 Every frame is `{ "cmd": string, "data": object }`, following the original `server.*` messages. Send `{"cmd":"ping"}` to get a `pong` back.
 

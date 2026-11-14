@@ -163,14 +163,37 @@ With a domain, Caddy terminates HTTPS and gets and renews a Let's Encrypt certif
    DOMAIN=game.example.com
    WEB_BIND=127.0.0.1
    WEB_PORT=8000
+   TRUSTED_PROXY=172.16.0.0/12
    ```
 
-   (Caddy takes ports 80 and 443, so `web` moves to `127.0.0.1:8000`.)
+   (Caddy takes ports 80 and 443, so `web` moves to `127.0.0.1:8000`. `TRUSTED_PROXY` is the network Caddy reaches
+   `web` from, so players are told apart by their own addresses and not Caddy's: `docker network inspect
+   marchlands_default` shows its `Subnet`, usually inside `172.16.0.0/12`.)
 3. `docker compose up -d`. The first request may take a few seconds while the certificate is issued
    (`docker compose logs caddy`). Plain `http://` is redirected to `https://`. Certificates live in the
    `marchlands_caddy-data` volume.
 
-The client calls the API on the same origin (`/api`, `/ws`), so nothing else changes for HTTPS.
+The client calls the API on the same origin (`/api`, `/ws`), so nothing else changes for HTTPS. Caddy adds
+`Strict-Transport-Security` (a year), so a browser that has been to the game once keeps to HTTPS.
+
+## What the web container guards
+
+nginx (`client/web/nginx.conf`) is the public entrance, and does four things beyond serving the client:
+
+- **Security headers on every answer:** a Content-Security-Policy that allows only the client's own scripts, workers,
+  fonts and images and the API on its own origin, `X-Content-Type-Options: nosniff`, `Referrer-Policy: same-origin`,
+  and no other site may frame the game (`frame-ancestors 'none'`, `X-Frame-Options: DENY`). A change to the client that
+  loads anything from another origin needs the policy changed with it; the browser tests fail on the console error a
+  blocked load makes.
+- **The address a request came from:** the one that reached nginx, passed to the API as the one address, so a client
+  can't make its own up with an `X-Forwarded-For` header. Behind a proxy that address is the proxy's for every player:
+  name the proxy's network in `TRUSTED_PROXY` and its `X-Forwarded-For` is believed. Without it behind Caddy, every
+  player shares one address, and so one login limit (next).
+- **A limit on logging in and signing up per address:** 20 at once, then one a second (`AUTH_BURST`, `AUTH_RATE`);
+  past it, `429`. The wait after wrong passwords for one username is the API's (`LOGIN_FREE_TRIES` and the settings
+  after it, below). A development stack allows 500 at once, as the browser tests sign up dozens of accounts in seconds.
+- **No token in its log:** the push socket is opened at `/ws?token=…`, so `/ws` is logged without its query string. The
+  API logs that address with the token left out, and takes a token in the address nowhere else.
 
 ## Checking that it works
 
@@ -308,9 +331,11 @@ Settings come from `.env` (template: `.env.production.example`). After changing 
 | `COMPOSE_PROFILES` | — | Compose | `https` to run Caddy |
 | `DOMAIN` | — | caddy | the domain Caddy serves and gets a certificate for |
 | `POSTGRES_PASSWORD` | required | postgres, backend | database password |
-| `JWT_SECRET` | required | api | signs login tokens (at least 8 characters; use 64 hex characters). Changing it logs everyone out |
+| `JWT_SECRET` | required | api | signs login tokens: whoever knows it can sign in as any account, the operator's included. At least 32 characters and never the development default (`change-me-in-production`), or the API refuses to start; use the 64 hex characters of `openssl rand -hex 32`. Changing it logs everyone out |
 | `POSTGRES_USER` / `POSTGRES_DB` | `marchlands` | postgres, backend | database user and name |
 | `WEB_BIND` / `WEB_PORT` | `0.0.0.0` / `80` | web | where the client is served (`127.0.0.1` / `8000` behind Caddy) |
+| `AUTH_BURST` / `AUTH_RATE` | `20` / `1r/s` | web | logins and sign-ups one address may make at once, and how fast after that (nginx's `limit_req`: `30r/m`, `2r/s`) |
+| `TRUSTED_PROXY` | `127.0.0.1` (none) | web | the address or network (CIDR) of a proxy in front of `web`, whose `X-Forwarded-For` nginx believes; behind Caddy, the Compose network (usually inside `172.16.0.0/12`) |
 | `POSTGRES_PORT` / `API_PORT` / `ADMINER_PORT` | `5432` / `3000` / `8080` | — | their ports on `127.0.0.1` |
 | `DATABASE_URL` | — | maintenance scripts | the database from the host (the containers build their own) |
 | `GAME_SPEED` | `1` | api, worker | multiplies the speed of every game timer |
@@ -326,12 +351,12 @@ Settings come from `.env` (template: `.env.production.example`). After changing 
 | `SIGNUP_POW_COST` | `1000` | api | PBKDF2 rounds per counter in the sign-up puzzle (`src/auth/signup-proof.ts`); the browser does about (counter + 1) × cost |
 | `SIGNUP_POW_COUNTER_MIN` / `SIGNUP_POW_COUNTER_MAX` | `5000` / `10000` | api | the range the hidden counter is picked from: about 0.5 s on a desktop, a few seconds on a slow phone |
 | `SIGNUP_POW_EXPIRES` | `600` | api | seconds a sign-up puzzle stays valid (10 minutes); the sign-up form fetches a new one before then |
-| `CORS_ORIGIN` | any | api | allowed browser origin for direct API calls; the client uses the same origin, so it rarely matters |
+| `CORS_ORIGIN` | any | api | allowed browser origin for direct API calls. The client uses the same origin and sends its token in a header, never a cookie, so another site can do nothing with a player's session; set it to the game's address to turn the others away all the same |
 | `DB_POOL_SIZE` | `20` (api), `10` (worker) | api, worker | database connections per process (Postgres allows 200) |
 | `WORKER_BATCH` / `WORKER_IDLE_MS` | `50` / `250` | worker | timed events claimed per round, and the pause when none are due |
 | `STATS_FLUSH_MS` | `300000` | api, worker | how often player statistics are written (5 minutes) |
 
-Set by the image, not in `.env`: `NODE_ENV=production` (JSON logs) and `WORLD_MAP_FILE` (the legacy map file).
+Set by the image, not in `.env`: `NODE_ENV=production` (JSON logs, and the `JWT_SECRET` check) and `WORLD_MAP_FILE` (the legacy map file). Set by the Compose files: `ALLOW_WEAK_JWT_SECRET`, `true` in `docker-compose.yml` so a development stack starts with the default secret, `false` in `docker-compose.prod.yml`.
 
 ## How the images are built
 
@@ -378,7 +403,7 @@ For errors you want to hear about without reading logs, see the error-tracking n
 
 ## Security checklist
 
-- [ ] `.env` has generated `POSTGRES_PASSWORD` and `JWT_SECRET`, and is `chmod 600`.
+- [ ] `.env` has generated `POSTGRES_PASSWORD` and `JWT_SECRET` (`openssl rand -hex 32` each), and is `chmod 600`.
 - [ ] `COMPOSE_FILE` includes `docker-compose.prod.yml` (`docker compose config | grep host_ip` shows
       `127.0.0.1` for postgres and api).
 - [ ] The firewall allows only SSH, 80 and 443.
@@ -394,7 +419,7 @@ For errors you want to hear about without reading logs, see the error-tracking n
 |---|---|
 | `docker compose` says `required variable … is missing a value` | `POSTGRES_PASSWORD` or `JWT_SECRET` is empty in `.env` |
 | `api` and `worker` never start | `docker compose logs migrate`: a failed migration stops them. Fix the cause, then `docker compose up -d` |
-| `api` stays unhealthy | `docker compose logs api` (for example `JWT_SECRET must be at least 8 characters`, or no database) |
+| `api` stays unhealthy | `docker compose logs api` (for example `JWT_SECRET must be at least 32 characters in production`, or no database) |
 | The site loads but every request fails | is `api` healthy? `web` proxies `/api` and `/ws` to it |
 | No HTTPS certificate | `docker compose logs caddy`: DNS must point at the machine and ports 80/443 be reachable |
 | Timers don't finish, no world | `docker compose logs worker` |

@@ -45,7 +45,8 @@ jobs:
           --health-retries 30
     env:
       DATABASE_URL: postgres://marchlands:marchlands@postgres:5432/marchlands
-      JWT_SECRET: browser-tests-only
+      # the API runs with NODE_ENV=production, which asks for at least 32 characters
+      JWT_SECRET: browser-tests-only-not-a-secret-anywhere-else
       # fast enough that a battle report's army lands within the test (content.spec.ts)
       GAME_SPEED: 60
       FEATURE_PVP: false

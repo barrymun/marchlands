@@ -40,6 +40,26 @@ describe('GET /auth/challenge', () => {
     }));
 });
 
+describe('the auth routes', () => {
+  it('answer with cache-control: no-store, so a token or an email is never kept by a browser or a proxy', () =>
+    apiTest(async (api) => {
+      const s = await api.register('alice');
+      const authorization = `Bearer ${s.token}`;
+      const answers = [
+        await api.app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { username: 'alice', password: 'test-password' } }),
+        await api.app.inject({ method: 'POST', url: '/api/v1/auth/login', payload: { username: 'alice', password: 'wrong-password' } }),
+        await api.app.inject({ method: 'GET', url: '/api/v1/auth/me', headers: { authorization } }),
+        await api.app.inject({ method: 'POST', url: '/api/v1/auth/refresh', headers: { authorization } }),
+        await api.app.inject({ method: 'GET', url: '/api/v1/auth/me' }),
+      ];
+      expect(answers.map((res) => res.statusCode)).toEqual([200, 401, 200, 200, 401]);
+      for (const res of answers) expect(res.headers['cache-control']).toBe('no-store');
+      // and only they: a game route says nothing about caching
+      const other = await api.app.inject({ method: 'GET', url: '/api/v1/player', headers: { authorization } });
+      expect(other.headers['cache-control']).toBeUndefined();
+    }));
+});
+
 describe('POST /auth/register', () => {
   it('creates an account and a session; the first account is the operator', () =>
     apiTest(async (api) => {

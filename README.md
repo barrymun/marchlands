@@ -14,7 +14,7 @@ It started as a from-scratch TypeScript rewrite of the original game server and 
 
 - [What's in the game](#whats-in-the-game)
 - [Play it on your own computer](#play-it-on-your-own-computer) (Docker only, about 10 minutes)
-- [Host it for other players](#host-it-for-other-players)
+- [Host it for other players](#host-it-for-other-players) (with the [settings you must change](#settings-you-must-change) first)
 - [Develop it](#develop-it) (Node, hot reload, tests)
 - [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
@@ -131,6 +131,30 @@ docker compose up -d --build       # .env makes Compose use docker-compose.prod.
 
 Register your own account before anyone else, so yours is the first operator.
 
+### Settings you must change
+
+The development settings (`.env.example`, and the defaults in `docker-compose.yml`) are public: anyone can read them in this repository. **Never put a server online with them.** Start from `.env.production.example`, and before the first `docker compose up` set these in `.env`:
+
+| Variable | Set it to | Why it must change |
+|---|---|---|
+| `JWT_SECRET` | the output of `openssl rand -hex 32` | It signs every login. Whoever knows it can sign in as any account, the operator's included. The API refuses to start with the development default (`change-me-in-production`) or with fewer than 32 characters |
+| `POSTGRES_PASSWORD` | another `openssl rand -hex 32` (not the same value) | The development password is `marchlands`. Put the same value in `DATABASE_URL`, in place of `CHANGE_ME` |
+| `COMPOSE_FILE` | `docker-compose.yml:docker-compose.prod.yml` (as in the template: leave it) | Without the production overrides the database and the API listen on every network interface, and the two checks above are off |
+| `ADMIN_USERNAMES` | your username | On an empty database the first account registered is an operator, whoever registers it. Name yours here, or register before the address is known to anyone |
+
+Compose refuses to start while `JWT_SECRET` or `POSTGRES_PASSWORD` is empty. Keep `.env` out of git and readable only by you (`chmod 600 .env`).
+
+If the game is reachable from the internet, turn on HTTPS as well: without it, passwords and logins cross the network in the clear. That takes five more lines ([docs/deployment.md, HTTPS](docs/deployment.md#https)):
+
+| Variable | Set it to |
+|---|---|
+| `COMPOSE_PROFILES` | `https` |
+| `DOMAIN` | the game's domain, its DNS pointing at the server |
+| `WEB_BIND` / `WEB_PORT` | `127.0.0.1` / `8000`, so only Caddy reaches the web container |
+| `TRUSTED_PROXY` | `172.16.0.0/12` (the network Caddy reaches the web container from), so players are told apart by their own addresses |
+
+Then go through the [security checklist](docs/deployment.md#security-checklist).
+
 ## Develop it
 
 ### What you need
@@ -235,14 +259,14 @@ The smoke and load tests create players: name temporary accounts `fx_…` and de
 
 ## Configuration
 
-Settings live in `.env` (template: [.env.example](.env.example)). After changing one, run `docker compose up -d`. The server's full list, with the production-only settings, is in [docs/deployment.md](docs/deployment.md#configuration).
+Settings live in `.env` (template: [.env.example](.env.example)). After changing one, run `docker compose up -d`. The server's full list, with the production-only settings, is in [docs/deployment.md](docs/deployment.md#configuration). The defaults below are for development only: on a server, change the ones listed under [Settings you must change](#settings-you-must-change).
 
 | Variable | Default | What it does |
 |---|---|---|
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `marchlands` | the database's credentials |
 | `POSTGRES_PORT`, `API_PORT`, `WEB_PORT` | 5432, 3000, 8000 | ports on your computer |
 | `DATABASE_URL` | – | the database, for what runs outside Docker (`dev:api`, `dev:worker`, `test:db`, the tools) |
-| `JWT_SECRET` | `change-me-in-production` | signs login tokens; changing it logs everyone out |
+| `JWT_SECRET` | `change-me-in-production` | signs login tokens; changing it logs everyone out. The default is for development only: with the production overrides the API refuses it, and anything under 32 characters |
 | `JWT_TTL` | 604800 | how long a login lasts, in seconds (7 days) |
 | `GAME_SPEED` | 1 | multiplies the speed of every timer, production and march; 1 is the original pace |
 | `FEATURE_PVP` | `false` | `true` lets players attack and scout each other ([docs/architecture.md](docs/architecture.md#feature-flags)); no rebuild needed, only `docker compose up -d api worker` |

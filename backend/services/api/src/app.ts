@@ -3,7 +3,7 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import websocket from '@fastify/websocket';
 import { sql } from 'drizzle-orm';
-import Fastify, { type FastifyServerOptions } from 'fastify';
+import Fastify, { type FastifyRequest, type FastifyServerOptions } from 'fastify';
 import { jsonSchemaTransform, jsonSchemaTransformObject, serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 
 import { ClientCmd, PushCmd } from '@marchlands/contracts';
@@ -12,7 +12,7 @@ import type { Db } from '@marchlands/db';
 
 import { verifyToken } from '#/auth/jwt.ts';
 import type { ApiConfig } from '#/config.ts';
-import { accountRefusal, installErrorHandler, playerIdOf } from '#/http.ts';
+import { accountRefusal, installErrorHandler, loggedUrl, playerIdOf } from '#/http.ts';
 import { operationIdOf } from '#/operation-id.ts';
 import authRoutes from '#/routes/auth.ts';
 import cityRoutes from '#/routes/cities.ts';
@@ -29,8 +29,22 @@ export interface BuildOptions {
   logger?: FastifyServerOptions['logger'];
 }
 
-export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
-  const app = Fastify({ logger: logger ?? { level: config.logLevel }, trustProxy: true, bodyLimit: 256 * 1024 }).withTypeProvider<ZodTypeProvider>();
+/** A request as Fastify logs it, but for its address: the push socket's token is left out (`loggedUrl`). */
+const logRequest = (req: FastifyRequest) => ({
+  method: req.method,
+  url: loggedUrl(req.url),
+  host: req.host,
+  remoteAddress: req.ip,
+  remotePort: req.socket.remotePort,
+});
+
+export async function buildApp({ db, config, gateway, logger = { level: config.logLevel } }: BuildOptions) {
+  const app = Fastify({
+    logger: typeof logger === 'object' ? { ...logger, serializers: { ...logger.serializers, req: logRequest } } : logger,
+    // behind nginx (client/web/nginx.conf), which sends the one address it found the request came from
+    trustProxy: true,
+    bodyLimit: 256 * 1024,
+  }).withTypeProvider<ZodTypeProvider>();
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
   app.decorate('deps', { db, config, online: () => gateway?.online() ?? 0 });
@@ -81,7 +95,7 @@ export async function buildApp({ db, config, gateway, logger }: BuildOptions) {
     return { ok: 1, status: 'up', online: app.deps.online() };
   });
 
-  // WebSocket: authenticate with ?token=, then receive pushes. Clients may send {cmd:"ping"}.
+  // WebSocket: authenticate with ?token= (a browser can't set a WebSocket's headers; logged without it), then receive pushes. Clients may send {cmd:"ping"}.
   app.get('/ws', { websocket: true, schema: { hide: true } }, async (socket, req) => {
     const token = (req.query as Record<string, string>).token;
     const claims = token ? verifyToken(token, config.jwtSecret) : null;

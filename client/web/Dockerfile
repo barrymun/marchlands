@@ -21,5 +21,10 @@ COPY tools/build/precompress.mjs tools/build/precompress.mjs
 RUN npm run build -w @marchlands/web && node tools/build/precompress.mjs client/web/dist
 
 FROM nginx:1.29-alpine
-COPY client/web/nginx.conf /etc/nginx/conf.d/default.conf
+# a template: the image's entrypoint writes it to conf.d/default.conf with these settings filled in (envsubst, which
+# only touches the environment's own variables, so nginx's $host and the like stay)
+ENV TRUSTED_PROXY=127.0.0.1
+ENV AUTH_RATE=1r/s
+ENV AUTH_BURST=20
+COPY client/web/nginx.conf /etc/nginx/templates/default.conf.template
 COPY --from=build /app/client/web/dist /usr/share/nginx/html

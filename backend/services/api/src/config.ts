@@ -18,11 +18,34 @@ export interface ApiConfig {
   signUpProof: SignUpProofConfig;
 }
 
+/** The secret docker-compose.yml and .env.example give a development stack: it's public, so it signs nothing in production. */
+const DEV_JWT_SECRET = 'change-me-in-production';
+/** The shortest secret a production server starts with: `openssl rand -hex 32` gives 64 characters. */
+const PRODUCTION_SECRET_LENGTH = 32;
+
+/**
+ * Refuses a JWT secret anyone could guess. Whoever knows the secret can sign a token for any account, the operator's
+ * included, so a production server (NODE_ENV, set by the backend image) needs a long one that isn't the development
+ * default. A development stack runs the same image: its compose file says so with ALLOW_WEAK_JWT_SECRET=true.
+ */
+function checkJwtSecret(secret: string, env: NodeJS.ProcessEnv): void {
+  if (secret.length < 8) throw new Error('JWT_SECRET must be at least 8 characters');
+  const allowWeak = env.ALLOW_WEAK_JWT_SECRET ?? 'false';
+  // eslint-disable-next-line marchlands/no-string-compare -- the setting's own spelling, read from the environment
+  if (allowWeak !== 'true' && allowWeak !== 'false') throw new Error(`ALLOW_WEAK_JWT_SECRET must be true or false, not ${allowWeak}`);
+  // eslint-disable-next-line marchlands/no-string-compare -- as above
+  if (env.NODE_ENV !== 'production' || allowWeak === 'true') return;
+  if (secret === DEV_JWT_SECRET) throw new Error('JWT_SECRET is the development default: generate one with openssl rand -hex 32');
+  if (secret.length < PRODUCTION_SECRET_LENGTH) {
+    throw new Error(`JWT_SECRET must be at least ${PRODUCTION_SECRET_LENGTH} characters in production: generate one with openssl rand -hex 32`);
+  }
+}
+
 export function loadConfig(env = process.env): ApiConfig {
   const databaseUrl = env.DATABASE_URL;
   if (!databaseUrl) throw new Error('DATABASE_URL is required');
   const jwtSecret = env.JWT_SECRET ?? '';
-  if (jwtSecret.length < 8) throw new Error('JWT_SECRET must be at least 8 characters');
+  checkJwtSecret(jwtSecret, env);
   return {
     port: Number(env.PORT ?? 3000),
     host: env.HOST ?? '0.0.0.0',

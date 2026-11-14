@@ -13,6 +13,8 @@ x-backend: &backend
     DATABASE_URL: postgres://${POSTGRES_USER:-marchlands}:${POSTGRES_PASSWORD:-marchlands}@postgres:5432/${POSTGRES_DB:-marchlands}
     LOG_LEVEL: ${LOG_LEVEL:-info}
     JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    # a development stack may sign tokens with the default above; docker-compose.prod.yml turns this off
+    ALLOW_WEAK_JWT_SECRET: 'true'
     WORLD_MAP: ${WORLD_MAP:-generated}
     WORLD_SEED: ${WORLD_SEED:-marchlands}
     GAME_SPEED: ${GAME_SPEED:-1}
@@ -79,6 +81,13 @@ services:
       dockerfile: client/web/Dockerfile
     image: ${COMPOSE_PROJECT_NAME:-marchlands}/web:dev
     restart: unless-stopped
+    environment:
+      # whose X-Forwarded-For nginx believes (client/web/nginx.conf): nobody's, unless a proxy stands in front
+      TRUSTED_PROXY: ${TRUSTED_PROXY:-127.0.0.1}
+      # logins and sign-ups per address: this many at once, then AUTH_RATE. Generous here, as the browser tests sign up
+      # dozens of accounts in seconds; docker-compose.prod.yml sets what a server allows
+      AUTH_RATE: ${AUTH_RATE:-1r/s}
+      AUTH_BURST: ${AUTH_BURST:-500}
     ports:
       - '${WEB_PORT:-8000}:80'
     depends_on:

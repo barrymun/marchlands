@@ -9,7 +9,7 @@ import type { Db } from '@marchlands/db';
 
 import { signToken } from '#/auth/jwt.ts';
 import type { ApiConfig } from '#/config.ts';
-import { authenticate, bearer, doc, installErrorHandler, secured, tags } from '#/http.ts';
+import { authenticate, bearer, doc, installErrorHandler, loggedUrl, secured, tags } from '#/http.ts';
 
 const CONFIG: ApiConfig = {
   port: 0,
@@ -120,13 +120,13 @@ describe(bearer.name, () => {
   it('reads the Authorization: Bearer header', () => {
     expect(bearer(req({ authorization: 'Bearer abc.def.ghi' }))).toBe('abc.def.ghi');
   });
-  it('falls back to ?token=, the header winning over it', () => {
-    expect(bearer(req({}, { token: 'from-query' }))).toBe('from-query');
+  it('never reads a token from the address', () => {
+    expect(bearer(req({}, { token: 'from-query' }))).toBeNull();
     expect(bearer(req({ authorization: 'Bearer from-header' }, { token: 'from-query' }))).toBe('from-header');
   });
   it('ignores other authorization schemes', () => {
     expect(bearer(req({ authorization: 'Basic dXNlcjpwdw==' }))).toBeNull();
-    expect(bearer(req({ authorization: 'Basic dXNlcjpwdw==' }, { token: 'from-query' }))).toBe('from-query');
+    expect(bearer(req({ authorization: 'Basic dXNlcjpwdw==' }, { token: 'from-query' }))).toBeNull();
   });
   it('is null without a token', () => {
     expect(bearer(req({}))).toBeNull();
@@ -134,14 +134,26 @@ describe(bearer.name, () => {
   });
 });
 
+describe(loggedUrl.name, () => {
+  it('hides a token in the address, wherever it stands', () => {
+    expect(loggedUrl('/ws?token=abc.def.ghi')).toBe('/ws?token=[redacted]');
+    expect(loggedUrl('/ws?x=1&token=abc.def.ghi&y=2')).toBe('/ws?x=1&token=[redacted]&y=2');
+    expect(loggedUrl('/ws?token=')).toBe('/ws?token=[redacted]');
+  });
+  it('leaves any other address as it is', () => {
+    expect(loggedUrl('/api/v1/cities/12?tokens=3')).toBe('/api/v1/cities/12?tokens=3');
+    expect(loggedUrl('/health')).toBe('/health');
+  });
+});
+
 describe(authenticate.name, () => {
-  it('sets the claims of a valid token, from the header or ?token=', async () => {
+  it('sets the claims of a valid token in the header, never of one in the address', async () => {
     const app = await makeApp();
     const token = signToken({ sub: 5, pid: 9 }, CONFIG.jwtSecret, 60);
     const viaHeader = await json(app, 'GET', '/whoami', { headers: { authorization: `Bearer ${token}` } });
     expect(viaHeader).toMatchObject({ status: 200, body: { ok: 1, data: { sub: 5, pid: 9 } } });
     const viaQuery = await json(app, 'GET', `/whoami?token=${token}`);
-    expect(viaQuery).toMatchObject({ status: 200, body: { ok: 1, data: { sub: 5, pid: 9 } } });
+    expect(viaQuery).toEqual({ status: 401, body: { ok: -2, error: { code: 'auth.notLoggedIn' } } });
   });
 
   it('answers 401 auth.notLoggedIn without a token, or with a bad one', async () => {

@@ -1,7 +1,8 @@
 # Production overrides for the dedicated host (docs/deployment.md). Used on top of docker-compose.yml:
 #   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml   (set in .env, so plain `docker compose …` uses both)
 #
-# - secrets are required: compose refuses to start without JWT_SECRET and POSTGRES_PASSWORD in .env
+# - secrets are required: compose refuses to start without JWT_SECRET and POSTGRES_PASSWORD in .env, and the API
+#   without a JWT_SECRET of at least 32 characters
 # - only the web entrance is public: Postgres, the API and Adminer listen on 127.0.0.1 (Docker's published ports
 #   bypass host firewalls such as ufw, so binding them to localhost is what keeps them private)
 # - container logs are rotated (Docker keeps them forever by default)
@@ -16,6 +17,8 @@ x-logging: &logging
 x-backend-env: &backend-env
   DATABASE_URL: postgres://${POSTGRES_USER:-marchlands}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-marchlands}
   JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+  # the API refuses to start with the development default or a secret under 32 characters
+  ALLOW_WEAK_JWT_SECRET: 'false'
 
 services:
   postgres:
@@ -41,6 +44,8 @@ services:
 
   # the public entrance: on every interface (WEB_BIND=0.0.0.0, port 80) without HTTPS, or on 127.0.0.1 behind Caddy
   web:
+    environment:
+      AUTH_BURST: ${AUTH_BURST:-20}
     ports: !override
       - '${WEB_BIND:-0.0.0.0}:${WEB_PORT:-80}:80'
     logging: *logging
@@ -60,7 +65,8 @@ services:
       - '443:443/udp'
     environment:
       DOMAIN: ${DOMAIN:-}
-    command: ['caddy', 'reverse-proxy', '--from', '${DOMAIN:-}', '--to', 'web:80']
+    # browsers that have been here once keep to HTTPS for a year (the header is only heeded over HTTPS)
+    command: ['caddy', 'reverse-proxy', '--from', '${DOMAIN:-}', '--to', 'web:80', '--header-down', 'Strict-Transport-Security: max-age=31536000']
     volumes:
       - caddy-data:/data
       - caddy-config:/config

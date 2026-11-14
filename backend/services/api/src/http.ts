@@ -51,12 +51,19 @@ export function installErrorHandler(app: FastifyInstance) {
   app.setNotFoundHandler((req, reply) => reply.status(404).send({ ok: -99, error: msg('common.routeNotFound', { method: req.method, url: req.url }) }));
 }
 
-/** @internal exported for its unit test */
+/**
+ * The token of a request: the Authorization header's, never one in the address, which ends up in logs, the browser's
+ * history and Referer headers. Only the push socket takes `?token=` (a browser can't set a WebSocket's headers).
+ * @internal exported for its unit test
+ */
 export function bearer(req: FastifyRequest): string | null {
   const h = req.headers.authorization;
-  if (h?.startsWith('Bearer ')) return h.slice(7);
-  const q = (req.query as Record<string, string> | undefined)?.token;
-  return q ?? null;
+  return h?.startsWith('Bearer ') ? h.slice(7) : null;
+}
+
+/** An address as it's logged: without the token the push socket is opened with (`/ws?token=…`). */
+export function loggedUrl(url: string): string {
+  return url.replace(/([?&]token=)[^&]*/g, '$1[redacted]');
 }
 
 /**

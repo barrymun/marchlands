@@ -1,5 +1,6 @@
 // The app's plumbing that answers without touching the database (the app gets no database here, like openapi.ts).
 
+import type { FastifyServerOptions } from 'fastify';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { PushCmd } from '@marchlands/contracts';
@@ -30,8 +31,8 @@ afterEach(async () => {
   app = undefined;
 });
 
-async function build(config: Partial<ApiConfig> = {}) {
-  app = await buildApp({ db: {} as Db, config: { ...CONFIG, ...config }, gateway: null, logger: false });
+async function build(config: Partial<ApiConfig> = {}, logger: FastifyServerOptions['logger'] = false) {
+  app = await buildApp({ db: {} as Db, config: { ...CONFIG, ...config }, gateway: null, logger });
   await app.ready();
   return app;
 }
@@ -139,6 +140,17 @@ describe('API docs', () => {
     expect(spec.paths['/api/v1/auth/login']!.post?.security).toBeUndefined();
     expect(spec.paths['/api/v1/auth/me']!.get?.security).toEqual([{ bearerAuth: [] }]);
     expect(spec.paths['/api/v1/player']!.get?.security).toEqual([{ bearerAuth: [] }]);
+  });
+});
+
+describe('the request log', () => {
+  it("leaves the push socket's token out of the address", async () => {
+    const lines: string[] = [];
+    const app = await build({}, { level: 'info', stream: { write: (line: string) => void lines.push(line) } });
+    await app.inject({ method: 'GET', url: '/ws?token=abc.def.ghi&x=1' });
+    const logged = lines.map((line) => JSON.parse(line) as { req?: { url: string; method: string } }).flatMap((line) => (line.req ? [line.req] : []));
+    expect(logged).toEqual([expect.objectContaining({ method: 'GET', url: '/ws?token=[redacted]&x=1' })]);
+    expect(lines.join('')).not.toContain('abc.def.ghi');
   });
 });
 

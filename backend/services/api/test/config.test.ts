@@ -15,6 +15,30 @@ describe(loadConfig.name, () => {
     expect(loadConfig({ ...BASE, JWT_SECRET: '12345678' }).jwtSecret).toBe('12345678');
   });
 
+  it('needs a JWT_SECRET of at least 32 characters in production, and never the development default', () => {
+    const production = { ...BASE, NODE_ENV: 'production' };
+    const strong = 'x'.repeat(32);
+    expect(() => loadConfig(production)).toThrow('JWT_SECRET must be at least 32 characters in production');
+    expect(() => loadConfig({ ...production, JWT_SECRET: 'x'.repeat(31) })).toThrow('JWT_SECRET must be at least 32 characters in production');
+    expect(() => loadConfig({ ...production, JWT_SECRET: 'change-me-in-production' })).toThrow('JWT_SECRET is the development default');
+    expect(loadConfig({ ...production, JWT_SECRET: strong }).jwtSecret).toBe(strong);
+    // said in so many words, as well as left out
+    expect(() => loadConfig({ ...production, ALLOW_WEAK_JWT_SECRET: 'false' })).toThrow('JWT_SECRET must be at least 32 characters in production');
+  });
+
+  it('lets a development stack keep a weak JWT_SECRET (ALLOW_WEAK_JWT_SECRET), though never under 8 characters', () => {
+    const dev = { ...BASE, NODE_ENV: 'production', ALLOW_WEAK_JWT_SECRET: 'true' };
+    expect(loadConfig(dev).jwtSecret).toBe(BASE.JWT_SECRET);
+    expect(loadConfig({ ...dev, JWT_SECRET: 'change-me-in-production' }).jwtSecret).toBe('change-me-in-production');
+    expect(() => loadConfig({ ...dev, JWT_SECRET: '1234567' })).toThrow('JWT_SECRET must be at least 8 characters');
+    // outside production (npm run dev:api) nothing more is asked
+    expect(loadConfig({ ...BASE, JWT_SECRET: 'change-me-in-production' }).jwtSecret).toBe('change-me-in-production');
+  });
+
+  it('refuses an ALLOW_WEAK_JWT_SECRET that is neither true nor false', () => {
+    expect(() => loadConfig({ ...BASE, ALLOW_WEAK_JWT_SECRET: 'yes' })).toThrow('ALLOW_WEAK_JWT_SECRET must be true or false, not yes');
+  });
+
   it('fills in the defaults', () => {
     expect(loadConfig(BASE)).toEqual({
       port: 3000,

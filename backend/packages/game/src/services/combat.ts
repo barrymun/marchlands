@@ -14,6 +14,8 @@ export async function abandonValley(ctx: Ctx, playerId: number, tileId: number) 
   if (peek.ownerPlayerId !== playerId || peek.ownerCityId == null) throw new GameError(msg('army.valleyNotHeld'), -99);
   const b = await openOwnCity(ctx, playerId, peek.ownerCityId);
   const tile = await getTile(ctx, tileId, { lock: true });
+  // checked again now that it's locked: an army landing between the two reads may have taken the valley
+  if (tile.ownerPlayerId !== playerId || tile.ownerCityId !== b.city.id) throw new GameError(msg('army.valleyNotHeld'), -99);
   for (const s of await armiesStationedAt(ctx, tileId, { lock: true })) await sendBack(ctx, s, await homeMarchMs(ctx, s, tileId));
   Object.assign(tile, { ownerCityId: null, ownerPlayerId: null, troops: null, state: null, updatedAt: ctx.now });
   await saveTile(ctx, tile);

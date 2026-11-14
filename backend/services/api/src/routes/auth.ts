@@ -1,3 +1,5 @@
+import { randomBytes } from 'node:crypto';
+
 import { eq, sql } from 'drizzle-orm';
 import type { z } from 'zod';
 
@@ -18,6 +20,14 @@ export default async function authRoutes(app: ZApp) {
   const { db, config } = app.deps;
   const backoff = new LoginBackoff(config.loginBackoff);
   const proofs = new SignUpProofs(config.signUpProof, config.jwtSecret);
+  // what a username with no account is checked against: the same scrypt as a real one, so how long a wrong
+  // password takes to refuse doesn't tell which usernames exist
+  const noAccountHash = hashPassword(randomBytes(32).toString('base64url'));
+
+  // these answers hold tokens, the account's email and one-time puzzles: no browser or proxy keeps a copy
+  app.addHook('onRequest', async (_req, reply) => {
+    reply.header('cache-control', 'no-store');
+  });
 
   const issue = async (accountId: number, isAdmin: boolean) => {
     const [p] = await db.select({ id: players.id }).from(players).where(eq(players.accountId, accountId));
@@ -33,10 +43,7 @@ export default async function authRoutes(app: ZApp) {
   app.get(
     '/auth/challenge',
     { schema: { tags: tags.auth, summary: 'A proof-of-work puzzle to solve before signing up', response: responses(SignUpChallenge) } },
-    async (_req, reply) => {
-      reply.header('cache-control', 'no-store');
-      return { ok: 1 as const, data: await proofs.challenge() };
-    },
+    async () => ({ ok: 1 as const, data: await proofs.challenge() }),
   );
 
   app.post(
@@ -86,7 +93,8 @@ export default async function authRoutes(app: ZApp) {
         .select()
         .from(accounts)
         .where(sql`lower(${accounts.username}) = lower(${username})`);
-      if (!acc || !(await verifyPassword(password, acc.passwordHash))) {
+      const right = await verifyPassword(password, acc?.passwordHash ?? (await noAccountHash));
+      if (!acc || !right) {
         backoff.failed(username);
         return reply.status(401).send({ ok: -2, error: msg('auth.wrongPassword') });
       }
