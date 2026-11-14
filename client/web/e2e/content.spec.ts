@@ -3,10 +3,11 @@
 import type { PlayerState, PostCitiesArmiesData, ReportList } from '@marchlands/api-client';
 import { BuildingType, Mission, ReportType } from '@marchlands/core';
 
+import { createAccount } from './support/accounts.ts';
 import { api, until } from './support/api.ts';
 import { expectAccessible } from './support/axe.ts';
 import { ensureBuilding, ensureHero, ensureMilitia, freeValleyNear } from './support/city.ts';
-import { expect, test } from './support/fixtures.ts';
+import { expect, logIn, test } from './support/fixtures.ts';
 import { loading, openScreen, PAGES, PANELS } from './support/screens.ts';
 import { text } from './support/text.ts';
 
@@ -88,8 +89,11 @@ test("the map with the city's own tile selected passes axe", async ({ account, l
   await expectAccessible(page, 'map own city');
 });
 
-test('a battle report passes axe', async ({ account, loggedIn: page }) => {
-  // the one test that waits for game time: an army has to land for there to be a report
+test('a battle report passes axe', async ({ page }) => {
+  // the one test that waits for game time: an army has to land for there to be a report. On an account of its own, as
+  // the worker's hero may be out on another test's army or be its city's mayor, and only an idle hero can lead one
+  const account = await createAccount(`${test.info().workerIndex}b`);
+  await logIn(page, account);
   const { gameSpeed } = await api<PlayerState>('GET', '/player', undefined, account.token);
   test.skip(gameSpeed < 30, `GAME_SPEED is ${gameSpeed}: an army would take minutes to land (30 or more for this test)`);
   const hero = await ensureHero(account);
