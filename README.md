@@ -424,6 +424,7 @@ npm ci
 | [TODO.md](TODO.md) | planned work, and what was done last |
 | [docs/architecture.md](docs/architecture.md) | how the pieces fit together: packages, a request's path, the game clock, feature flags, the data model |
 | [docs/deployment.md](docs/deployment.md) | hosting it on a server |
+| [SECURITY.md](SECURITY.md) | how to report a vulnerability, and what counts as one |
 | [docs/api-endpoints.md](docs/api-endpoints.md) | every endpoint, mapped to the original game's commands |
 | [docs/websocket.md](docs/websocket.md) | the live push messages |
 | [docs/deviations.md](docs/deviations.md) | every rule that differs from the original, and why |
